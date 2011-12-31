@@ -30,8 +30,11 @@ moses \- meta-optimizing semantic evolutionary search solver
 .br
 .\" The general command line
 .B moses
+.RB [ \-B 
+.IR knob_effort ]
 .RB [ \-c 
 .IR result_count ]
+.RB [ \-d1 ]
 .RB [ \-E 
 .IR reduct_effort ]
 .RB [ \-e 
@@ -54,6 +57,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-r
 .IR random_seed ]
 .RB [ \-S0 ]
+.RB [ \-s1 ]
 .RB [ \-t1 ]
 .RB [ \-V1 ]
 .RB [ \-W1 ]
@@ -104,12 +108,27 @@ the remote machines.
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
 .TP
+.BI \-B\  effort \fR,\ \fB\-\-reduct\-knob\-building\-effort= effort
+Effort allocated for reduction during the knob-building stage.
+Valid values are in the range 0-3, with 0 standing for minimum effort,
+and 3 for maximum effort. Larger efforts result in demes with fewer
+knobs, thus lowering the overall dimension of the problem. This can
+improve performance by effectively reducing the size of the problem.
+The default \fIeffort\fR is 2.
+.TP
+.BI \-d1\fR,\ \fB\-\-reduce\-all=1
+Reduce candidates before scoring evalutation. Otherwise, only dominating
+candidates are reduced, just before being added to the metapopulation.
+This flag may be useful if scoring function evaluation expense depends
+strongly one the structure of the candidate. It is particularly important
+to specify this flage when memoization is enabled (with \fB-s!\fR).
+.TP
 .BI \-E\  effort \fR,\ \fB\-\-reduct\-candidate\-effort= effort
 Effort allocated for reduction of candidates. Valid values are
 in the range 0-3, with 0 standing for minimum effort, and 3 
 for maximum effort. For certain very symmetric problems, such
-as th disjunct problem, greater reduction can lead to significantly
-faster solution-finding.
+as the disjunct problem, greater reduction can lead to significantly
+faster solution-finding.  The default \fIeffort\fR is 2.
 .TP
 .BI \-g\  num \fR,\ \fB\-\-max\-gens= num
 Create and optimize no more than \fInum\fR demes.  Negative numbers
@@ -122,6 +141,13 @@ Default value is 10000.
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
+.TP
+.BI \-s1\fR,\ \fB\-\-enable\-cache=1
+Enable memoization of candidate scores.  This allows the number of scoring
+function evaluations to be reduced, by maintaining a cache of recently
+scored candidates. If a new candidate is found in the cache, that score
+is used, instead of a scoring function evaluation.  The effectiveness of
+memoization is greatly increased by also using the \fB\-d1\fR flag.
 
 .\" ============================================================
 .SS "Output control options"
