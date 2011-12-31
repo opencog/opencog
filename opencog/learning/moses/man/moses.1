@@ -32,6 +32,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .B moses
 .RB [ \-c 
 .IR result_count ]
+.RB [ \-E 
+.IR reduct_effort ]
 .RB [ \-e 
 .IR exemplar ]
 .RB [ \-F ]
@@ -101,6 +103,13 @@ the remote machines.
 .\" ============================================================
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
+.TP
+.BI \-E\  effort \fR,\ \fB\-\-reduct\-candidate\-effort= effort
+Effort allocated for reduction of candidates. Valid values are
+in the range 0-3, with 0 standing for minimum effort, and 3 
+for maximum effort. For certain very symmetric problems, such
+as th disjunct problem, greater reduction can lead to significantly
+faster solution-finding.
 .TP
 .BI \-g\  num \fR,\ \fB\-\-max\-gens= num
 Create and optimize no more than \fInum\fR demes.  Negative numbers
