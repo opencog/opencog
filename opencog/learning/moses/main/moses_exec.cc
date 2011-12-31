@@ -382,16 +382,22 @@ int moses_exec(int argc, char** argv)
          "Maximum number of considered candidates to be added to the metapopulation after optimizing deme.\n")
         (opt_desc_str(reduce_all_opt).c_str(),
          value<bool>(&reduce_all)->default_value(true),
-         "Reduce all candidates before being evaluated, otherwise there are only reduced before being added to the metapopulation. This option can be valuable if the cache is enabled to not re-evaluate duplicates.\n")
+         "Reduce all candidates before being evaluated.  Otherwise "
+         "they are only reduced before being added to the "
+         "metapopulation. This option can be valuable if memoization "
+         "is enabled to avoid re-evaluate of duplicates.\n")
         (opt_desc_str(reduct_candidate_effort_opt).c_str(),
          value<int>(&reduct_candidate_effort)->default_value(2),
-         "Effort allocated for reduction of candidates, 0-3, 0 means minimum effort, 3 means maximum effort.\n")
+         "Effort allocated for reduction of candidates, in the range 0-3. "
+         "0 means minimum effort, 3 means maximum effort.\n")
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
         (opt_desc_str(enable_cache_opt).c_str(),
          value<bool>(&enable_cache)->default_value(true),
-         "Cache, so that identical candidates are not re-evaluated, the cache size is dynamically adjusted to fit in the RAM.\n")
+         "Memoize, that is, cache evaluation results, so that identical "
+         "candidates are not re-evaluated. The cache size is dynamically "
+         "adjusted to fit in the RAM.\n")
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
          str(format("Number of jobs allocated for deme optimization."
@@ -412,7 +418,9 @@ int moses_exec(int argc, char** argv)
              % jobs_opt.second % job_seperator).c_str())
         (opt_desc_str(weighted_accuracy_opt).c_str(),
          value<bool>(&weighted_accuracy)->default_value(false),
-         "This option is useful in case of unbalanced data as it weights the score so that each class weights equally regardless of their proportion in terms of sample size.\n")
+         "This option is useful in case of unbalanced data as it "
+         "weights the score so that each class weights equally "
+         "regardless of their proportion in terms of sample size.\n")
         (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(20),
          "The higher the more effort is spent on a deme.\n")
