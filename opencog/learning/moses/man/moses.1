@@ -36,6 +36,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR algo ]
 .RB [ \-B 
 .IR knob_effort ]
+.RB [ \-b 
+.IR nsamples ]
 .RB [ \-c 
 .IR result_count ]
 .RB [ \-d1 ]
@@ -48,6 +50,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR logfile ]
 .RB [ \-g
 .IR max_gens ]
+.RB [ \-i
+.IR filename ]
 .RB [ \-j
 .IR jobs ]
 .RB [ \-k
@@ -69,6 +73,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-S0 ]
 .RB [ \-s1 ]
 .RB [ \-t1 ]
+.RB [ \-u
+.IR target_feature ]
 .RB [ \-V1 ]
 .RB [ \-v1 ]
 .RB [ \-W1 ]
@@ -116,6 +122,54 @@ machine and is located in a directory included in the
 \fBPATH\fR environment variable. Beware that a lot of log
 files are going to be generated when using this option on
 the remote machines.
+
+.\" ============================================================
+.SS "Input specification options"
+These options control how input data is specified and interpreted.
+.PP
+XXX TODO explain how this really works...
+.TP
+.BI \-b\  num \fR,\ \fB\-\-nsamples= num
+The number of samples to be taken from the input file. Valid values 
+run between 1 and the number of rows in the data file; other values
+are ignored. If this option is absent, then all data rows are used.
+If this option is present, then the input table is sampled randomly 
+to reach this size.
+.TP
+.BI \-G\  num \fR,\ \fB\-\-weighted\-accuracy= num
+Huh ???
+.TP
+.BI \-H\  type \fR,\ \fB\-\-problem\-type= type
+A number of 
+.I type
+may be one of:
+.TS
+tab (@);
+l lx.
+\fBann-it\fR@T{
+Regression on an input table, using a neural network.
+T}
+\fBit\fR@T{
+Regression on an input table.
+T}
+\fBkl\fR@T{
+Regression on an input table, by maximizing the Kullback-Leibler 
+divergence between the distribution of the outputs.  That is, the
+output must still be well-scored, but it is assumed that there are
+many possible maxima. (XXX ???)
+T}
+.TE
+.TP
+.BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
+The \fIfilename\fR specifies the input data file. The input table
+must be in DSL format (XXX what's that), with acceptable delimiters
+being commas or whitespace. The number of samples is taken to be
+the number of rows.
+.TP
+.BI \-u\  label \fR,\ \fB\-\-target\-feature= label
+The \fIlabel\fR is used as the target feature to fit.  If none is
+specified, then the first column is used.
+
 
 .\" ============================================================
 .SS "Algorithm control options"
@@ -188,6 +242,9 @@ function evaluations to be reduced, by maintaining a cache of recently
 scored candidates. If a new candidate is found in the cache, that score
 is used, instead of a scoring function evaluation.  The effectiveness of
 memoization is greatly increased by also using the \fB\-d1\fR flag.
+.TP
+.BI \-T1\fR,\ \fB\-\-hc\-terminate\-if\-improvment=1
+Hill-climbing related. Huh ???
 
 .\" ============================================================
 .SS "Output control options"
@@ -293,6 +350,15 @@ Even parity problem.  The resulting combo program computes the parity of
 to false.
 The size of the problem may be specified with the \fB\-k\fR option.
 T}
+\fBsr\fR@T{
+Polynomial regression problem. Given the polynomial 
+\fIp(x)=x+x^2+x^3+...x^k\fR, this searches for the shortest program
+consisting of nested arithmetic operators to compute \fIp(x)\fR, 
+given \fIx\fR as a free variable. So, for example, using the 
+\fB\-k2\fR option to specify the order\-2 polynomial \fIx+x^2\fR,
+then the shortest combo program is \fI*(+(1 #1) #1)\fR (that is, 
+the solution is \fIp(x)=x(x+1)\fR in the usual arithmetical notation).
+T}
 .TE
 
 The size of the demonstration problem may be specified with the -k flag.
@@ -316,6 +382,13 @@ Other remarks ...
 .PP
 Etc...
 .RE
+.SH TODO
+Finish documenting these aglo flags:  -M -D -I -T
+.PP
+These input flags: -i -u -b -G
+.PP
+These operator/problem type flags: -p -N -n
+
 .SH SEE ALSO
 .br
 More information is available at
