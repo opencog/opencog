@@ -424,6 +424,9 @@ ENDIF (NOT DEFINED DATADIR)
 ADD_DEFINITIONS(-DCONFDIR=\\"${CONFDIR}\\")
 ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
 
+# (re?)define MAN_INSTALL_DIR
+SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/man/")
+
 # include custom opencog cmake macros
 INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogMacros.cmake")
 
