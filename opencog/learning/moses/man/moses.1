@@ -30,6 +30,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .br
 .\" The general command line
 .B moses
+.RB [ \-A
+.IR max_score ]
 .RB [ \-a
 .IR algo ]
 .RB [ \-B 
@@ -56,6 +58,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR max_evals ]
 .RB [ \-o
 .IR output_file ]
+.RB [ \-P
+.IR pop_size_ratio ]
 .RB [ \-q
 .IR min ]
 .RB [ \-R
@@ -117,6 +121,30 @@ the remote machines.
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
 .TP
+.BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
+Select the algorithm to apply to a single deme.  Available algorithms
+include:
+.TS
+tab (@);
+l lx.
+\fBhc\fR@T{
+Hillclimbing.
+T}
+\fBsa\fR@T{
+Simulated annealing.
+T}
+\fBun\fR@T{
+Univariate Bayesian dependency.
+T}
+.TE
+
+.TP
+.BI \-A\  score \fR,\ \fB\-\-max\-score= score
+Specifies the ideal score for a desired solution; used to terminate
+search.  If the maximum number of evaluations has not yet elasped
+(set with the \fB\-m\fR option), and a candidate solution is found
+that has at least this score, then search is terminated.
+.TP
 .BI \-B\  effort \fR,\ \fB\-\-reduct\-knob\-building\-effort= effort
 Effort allocated for reduction during the knob-building stage.
 Valid values are in the range 0-3, with 0 standing for minimum effort,
@@ -148,6 +176,9 @@ unlimited.
 Perform no more than \fInum\fR evaluations of the scoring function.
 Default value is 10000.
 .TP
+.BI \-P\  num \fR,\ \fB\-\-pop\-size-ratio= num
+Controls amount of time spent on a deme.
+.TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 .TP
@@ -157,24 +188,6 @@ function evaluations to be reduced, by maintaining a cache of recently
 scored candidates. If a new candidate is found in the cache, that score
 is used, instead of a scoring function evaluation.  The effectiveness of
 memoization is greatly increased by also using the \fB\-d1\fR flag.
-
-.\" ============================================================
-.SS "Contin options"
-Options that affect the usage of continuously-valued variables.
-.TP
-.BI \-q\  num \fR,\ \fB\-\-min\-rand\-input= num
-Minimum value for continuous variables. Default 0.0.
-.TP
-.BI \-R\  num \fR,\ \fB\-\-discretize\-threshold= num
-Split a continuous domain into two pieces. This option maybe be used
-multiple times to split a continuous domain into multiple peices:
-that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
-.TP
-.BI \-v1\fR,\ \fB\-\-stddev=1
-Assume that continuous variables are in the form of a gaussian.
-.TP
-.BI \-w\  num \fR,\ \fB\-\-max\-rand\-input= num
-Maximum value for continuous variables.  Default 1.0.
 
 .\" ============================================================
 .SS "Output control options"
@@ -222,6 +235,25 @@ contains labels in its header.
 .TP
 .BI \-x1\fR,\ \fB\-\-output\-complexity=1
 Print the complexity score.
+
+.\" ============================================================
+.SS "Contin options"
+Options that affect the usage of continuously-valued variables.
+.TP
+.BI \-q\  num \fR,\ \fB\-\-min\-rand\-input= num
+Minimum value for continuous variables. Default 0.0.
+.TP
+.BI \-R\  num \fR,\ \fB\-\-discretize\-threshold= num
+Split a continuous domain into two pieces. This option maybe be used
+multiple times to split a continuous domain into multiple peices:
+that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
+.TP
+.BI \-v1\fR,\ \fB\-\-stddev=1
+Assume that continuous variables are in the form of a gaussian.
+.TP
+.BI \-w\  num \fR,\ \fB\-\-max\-rand\-input= num
+Maximum value for continuous variables.  Default 1.0.
+
 .\" ============================================================
 .SS "Demo options"
 These options pertain to the varius built-in demo and example modes.
@@ -281,8 +313,8 @@ specifies that the two-input conjunction is to be learned.
 .PP
 Other remarks ...
 .TP
-.B moses \-j jobs
 .PP
+Etc...
 .RE
 .SH SEE ALSO
 .br
