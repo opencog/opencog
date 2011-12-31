@@ -30,6 +30,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .br
 .\" The general command line
 .B moses
+.RB [ \-a
+.IR algo ]
 .RB [ \-B 
 .IR knob_effort ]
 .RB [ \-c 
@@ -54,13 +56,20 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR max_evals ]
 .RB [ \-o
 .IR output_file ]
+.RB [ \-q
+.IR min ]
+.RB [ \-R
+.IR threshold ]
 .RB [ \-r
 .IR random_seed ]
 .RB [ \-S0 ]
 .RB [ \-s1 ]
 .RB [ \-t1 ]
 .RB [ \-V1 ]
+.RB [ \-v1 ]
 .RB [ \-W1 ]
+.RB [ \-w
+.IR max ]
 .RB [ \-x1 ]
 .RB [ \-y
 .IR combo_program ]
@@ -148,6 +157,24 @@ function evaluations to be reduced, by maintaining a cache of recently
 scored candidates. If a new candidate is found in the cache, that score
 is used, instead of a scoring function evaluation.  The effectiveness of
 memoization is greatly increased by also using the \fB\-d1\fR flag.
+
+.\" ============================================================
+.SS "Contin options"
+Options that affect the usage of continuously-valued variables.
+.TP
+.BI \-q\  num \fR,\ \fB\-\-min\-rand\-input= num
+Minimum value for continuous variables. Default 0.0.
+.TP
+.BI \-R\  num \fR,\ \fB\-\-discretize\-threshold= num
+Split a continuous domain into two pieces. This option maybe be used
+multiple times to split a continuous domain into multiple peices:
+that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
+.TP
+.BI \-v1\fR,\ \fB\-\-stddev=1
+Assume that continuous variables are in the form of a gaussian.
+.TP
+.BI \-w\  num \fR,\ \fB\-\-max\-rand\-input= num
+Maximum value for continuous variables.  Default 1.0.
 
 .\" ============================================================
 .SS "Output control options"
