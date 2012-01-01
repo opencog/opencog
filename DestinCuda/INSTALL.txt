@@ -46,3 +46,12 @@ CONFIGURATION
 CONFLICTS/KNOW ISSUES
 --------------------------
  * Cause of use 1.X compute capability Linear memory addres space is 32-bit
+
+ TROUBLESHOOTING TIPS
+-------------------------
+ * Update your OS. Works with Ubuntu 11.10
+ * Update your Nvidia Drivers. If multiple versions are available, try other recent version.
+ * Watch for warnings in the output of `cmake`, especially regarding possible library conflicts, and move the potential conflicts out of the way.
+ * If using OpenCV webcam support, get current source code for OpenCV and make sure the required files are in your gcc PATH. You can export CPLUS_INCLUDE_PATH for example.
+ * Delete CMakeCache.txt and re-run cmake after making changes to your system, such as dependency paths.
+ * Report issues to destin@opencog.org
