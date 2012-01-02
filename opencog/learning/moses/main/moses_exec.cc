@@ -333,7 +333,7 @@ int moses_exec(int argc, char** argv)
          "Max of an input value chosen randomly, only used when the problem takes continuous inputs.\n")
 
         (opt_desc_str(log_level_opt).c_str(),
-         value<string>(&log_level)->default_value("WARN"),
+         value<string>(&log_level)->default_value("INFO"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, "
          "DEBUG, FINE. Case does not matter.\n")
         (opt_desc_str(log_file_dep_opt_opt).c_str(),
