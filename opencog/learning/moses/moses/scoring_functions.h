@@ -30,79 +30,14 @@
 
 namespace opencog { namespace moses {
 
-// even_parity(x1, ..., xn) = true iff (int)x1 + ... + (int)xn is even
-// where n is the arity of even_parity
-struct even_parity {
-    // [from, to( corresponds to the sequence of inputs of the
-    // function, the result corresponds to its output
-    template<typename It>
-    bool operator()(It from,It to) const {
-        bool parity = true;
-        while (from != to)
-            parity ^= *from++;
-        return parity;
-    }
-};
-
-// disjunction(x1, ..., xn) = true iff there exists i such that xi is true
-struct disjunction {
-    // [from, to( corresponds to the sequence of inputs of the
-    // function, the result corresponds to its output
-    template<typename It>
-    bool operator()(It from,It to) const {
-        while (from != to)
-            if (*from++)
-                return true;
-        return false;
-    }
-};
-
-// multiplex(a1, ..., an, d1, ..., dm) = 1 iff m = 2^n and di = 1 if i
-// is the address of the string bit described by a1, ..., an.
-struct multiplex {
-    multiplex(unsigned int n) : arity(n) { }
-    unsigned int arity;
-    // [from, to( corresponds to the sequence of inputs of the
-    // function, the result corresponds to its output
-    template<typename It>
-    bool operator()(It from, It to) const {
-        // calculate address
-        unsigned int addr = 0;
-        for(unsigned int i = 0; i < arity; ++i)
-            if(*from++)
-                addr += pow2(i);
-        // return the input corresonding to that address
-        return *(from+addr);
-    }
-};
-
-
-// simple function : f(x)_o = sum_{i={1,o}} x^i
-// that is for instance:
-// f(x)_3 = x+x^2+x^3
-// f(x)_2 = x+x^2
-// f(x)_1 = x
-// f(x)_0 = 0
-struct simple_symbolic_regression {
-    simple_symbolic_regression(int o = 4) : order(o) { }
-    int order;
-    template<typename It>
-    contin_t operator()(It from, It to) const {
-        contin_t res = 0;
-        dorepeat(order)
-            res = (res + 1) * get_contin(*from);
-        return res;
-    }
-};
-
-
 // ///////////////////// Scoring for truth table data /////////////////////////
 
 struct ConfusionMatrix {
     int TP, FP, TN, FN;
 };
 
-struct CaseBasedBoolean : public unary_function<combo_tree, score_t> {
+struct CaseBasedBoolean : public unary_function<combo_tree, score_t>
+{
     CaseBasedBoolean() { }
 
     CaseBasedBoolean(istream& in) {
@@ -188,7 +123,8 @@ protected:
     CaseSeq _cases;
 };
 
-struct truth_table_data_score : public unary_function<combo_tree, score_t> {
+struct truth_table_data_score : public unary_function<combo_tree, score_t>
+{
     truth_table_data_score(const truth_table_data_score& score) : c(score.c) {}
     truth_table_data_score(struct CaseBasedBoolean& bc) {
         c = &bc;
@@ -202,7 +138,8 @@ private:
     struct CaseBasedBoolean *c;
 };
 
-struct truth_table_data_bscore : public unary_function<combo_tree, behavioral_score> {
+struct truth_table_data_bscore : public unary_function<combo_tree, behavioral_score>
+{
     truth_table_data_bscore(struct CaseBasedBoolean& bc) {
         c = &bc;
     }
@@ -223,10 +160,12 @@ private:
 
 // ////////////// End of scoring for truth table ///////////////
 
-struct interactive_score : public unary_function<combo_tree, score_t> {
+struct interactive_score : public unary_function<combo_tree, score_t>
+{
     interactive_score() {  }
 
-    score_t operator()(const combo_tree& tr) const {
+    score_t operator()(const combo_tree& tr) const
+    {
         cout << "Fitness Function of : " << tr << " enter the score :" << endl;
         score_t score = 0.0;
         cin >> score;
@@ -235,10 +174,12 @@ struct interactive_score : public unary_function<combo_tree, score_t> {
 };
 
 
-struct interactive_bscore : public unary_function<combo_tree, behavioral_score> {
+struct interactive_bscore : public unary_function<combo_tree, behavioral_score>
+{
     interactive_bscore() {  }
 
-    behavioral_score  operator()(const combo_tree& tr) const {
+    behavioral_score  operator()(const combo_tree& tr) const
+    {
         behavioral_score bs(0);
         return bs;
     }

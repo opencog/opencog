@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "moses_exec.h"
+#include "../example-progs/scoring_iterators.h"
 
 #include <boost/format.hpp>
 #include <opencog/util/numeric.h>
