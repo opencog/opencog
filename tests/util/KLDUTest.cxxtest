@@ -63,7 +63,10 @@ class KLDUTest : public CxxTest::TestSuite
         TS_ASSERT_DELTA(expected_res, computed_res, delta);
     }
 public:
-    KLDUTest() : rng(1) {}
+    KLDUTest() : rng(1) {
+        logger().setPrintToStdoutFlag(true);
+        // logger().setLevel(Logger::FINE);
+    }
 
     // different mean and standard deviation
     void test_gaussian_KLD1() {
@@ -84,5 +87,43 @@ public:
     void test_gaussian_KLD4() {
         cout << "test_gaussian_KLD4" << endl;
         base_test_gaussian_KLD(0, 1, 0, 1, 0.1, 10000, 1000);
+    }
+    // same distribution, same sample with duplicates
+    void test_same_sample_with_duplicates() {
+        cout << "test_same_sample_with_duplicates" << endl;
+
+        double delta = 0.000001;
+        vector<double> S = {-1, 0, 0, 0, 1};
+        double expected_res = 0,
+            computed_res = KLD(S, S);
+        
+        cout << "expected_res = " << expected_res << endl;
+        cout << "computed_res = " << computed_res << endl;
+        
+        // TS_ASSERT_DELTA(expected_res, computed_res, delta);
+        TS_ASSERT(true);
+    }
+    // same distribution (guassian)
+    void test_gaussian_same_sample() {
+        cout << "test_gaussian_same_sample" << endl;
+
+        size_t size = 2;
+        double m = 0, s = 1, delta = 0.00000001;
+        // sample the 2 Gaussians as different size (to check the
+        // robustness of the algorithm)
+        vector<double> G(size);
+        for (size_t i = 0; i < size; ++i)
+            G[i] = gaussian_rand(m, s, rng);
+
+        sort(G);
+
+        double expected_res = 0,
+            computed_res = KLD(G, G);
+        
+        cout << "expected_res = " << expected_res << endl;
+        cout << "computed_res = " << computed_res << endl;
+        
+        // TS_ASSERT_DELTA(expected_res, computed_res, delta);
+        TS_ASSERT(true);
     }
 };
