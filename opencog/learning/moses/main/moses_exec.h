@@ -1,4 +1,4 @@
-/** moses-exec.h --- 
+/** moses-exec.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -41,8 +41,8 @@
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
 
-// for operator>> to combo 
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h> 
+// for operator>> to combo
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 #include "../moses/moses.h"
 #include "../moses/distributed_moses.h"
@@ -94,7 +94,8 @@ int moses_exec(int argc, char** argv);
 int moses_exec(const vector<string>& argv);
 
 // set of parameters in common with all problems
-struct metapop_moses_results_parameters {
+struct metapop_moses_results_parameters
+{
     metapop_moses_results_parameters(const variables_map& _vm,
                                      long _result_count,
                                      bool _output_score,
@@ -108,8 +109,8 @@ struct metapop_moses_results_parameters {
                                      const string& _output_file,
                                      const jobs_t& _jobs,
                                      bool _only_local,
-                                     bool _hc_terminate_if_improvement) : 
-        vm(_vm), result_count(_result_count), output_score(_output_score), 
+                                     bool _hc_terminate_if_improvement) :
+        vm(_vm), result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
@@ -150,17 +151,20 @@ void metapop_moses_results(RandGen& rng,
                            const Optimization& opt,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
-                           const metapop_moses_results_parameters& pa) {
+                           const metapop_moses_results_parameters& pa)
+{
     // instantiate metapop
-    metapopulation<Score, BScore, Optimization> 
+    metapopulation<Score, BScore, Optimization>
         metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
 
-    // run moses
-    if(pa.only_local) {
+    // run moses, either on localhost, or distributed.
+    if (pa.only_local) {
         unsigned n_threads = pa.jobs.find(localhost)->second;
         setting_omp(n_threads);
         moses::moses(metapop, moses_params);
-    } else moses::distributed_moses(metapop, pa.vm, pa.jobs, moses_params);
+    }
+    else
+        moses::distributed_moses(metapop, pa.vm, pa.jobs, moses_params);
 
     // output result
     {
@@ -169,11 +173,11 @@ void metapop_moses_results(RandGen& rng,
                         pa.result_count, pa.output_score,
                         pa.output_complexity,
                         pa.output_bscore);
-        if(pa.output_eval_number)
+        if (pa.output_eval_number)
             ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
         string res = (pa.output_with_labels && !pa.labels.empty()?
                       ph2l(ss.str(), pa.labels) : ss.str());
-        if(pa.output_file.empty())
+        if (pa.output_file.empty())
             std::cout << res;
         else {
             ofstream of(pa.output_file.c_str());
@@ -181,6 +185,7 @@ void metapop_moses_results(RandGen& rng,
             of.close();
         }
     }
+
     // Log the best candidate
     {
         stringstream ss;
@@ -205,22 +210,26 @@ void metapop_moses_results(RandGen& rng,
                            const optim_parameters& opt_params,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
-                           const metapop_moses_results_parameters& pa) {    
-    if(pa.opt_algo == un) { // univariate
+                           const metapop_moses_results_parameters& pa)
+{
+    if (pa.opt_algo == un) { // univariate
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               univariate_optimization(rng, opt_params),
                               meta_params, moses_params, pa);
-    } else if(pa.opt_algo == sa) { // simulation annealing
+    }
+    else if (pa.opt_algo == sa) { // simulation annealing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               simulated_annealing(rng, opt_params),
                               meta_params, moses_params, pa);
-    } else if(pa.opt_algo == hc) { // hillclimbing
+    }
+    else if (pa.opt_algo == hc) { // hillclimbing
         hc_parameters hc_params(pa.hc_terminate_if_improvement);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               iterative_hillclimbing(rng, opt_params, hc_params),
                               meta_params, moses_params, pa);
-    } else {
-        std::cerr << "Unknown optimization algo " << pa.opt_algo 
+    }
+    else {
+        std::cerr << "Unknown optimization algo " << pa.opt_algo
                   << ". Supported algorithms are un (for univariate),"
                   << " sa (for simulation annealing) and hc (for hillclimbing)"
                   << std::endl;
@@ -229,7 +238,7 @@ void metapop_moses_results(RandGen& rng,
 }
 
 /**
- * like above but assumes that the score is bscore based
+ * like above, but assumes that the score is bscore based
  */
 template<typename BScore>
 void metapop_moses_results(RandGen& rng,
@@ -241,9 +250,10 @@ void metapop_moses_results(RandGen& rng,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
-                           const metapop_moses_results_parameters& pa) {
+                           const metapop_moses_results_parameters& pa)
+{
     bscore_based_score<BScore> bb_score(bsc);
-    
+
     // update terminate_if_gte and max_score criteria
     score_t bps = bb_score.best_possible_score(),
         target_score = std::min(moses_params.max_score, bps);
@@ -251,7 +261,7 @@ void metapop_moses_results(RandGen& rng,
     moses_params.max_score = target_score;
     logger().info("Target score = %f", target_score);
 
-    if(pa.enable_cache) {
+    if (pa.enable_cache) {
         static const unsigned initial_cache_size = 1000000;
 #ifdef ENABLE_BCACHE
         typedef prr_cache_threaded<BScore> BScoreCache;
@@ -272,11 +282,12 @@ void metapop_moses_results(RandGen& rng,
                               score_acache, BSCORE,
                               opt_params, meta_params, moses_params, pa);
         // log the number of cache failures
-        if(pa.only_local) { // do not print if using distributed moses
+        if (pa.only_local) { // do not print if using distributed moses
             logger().info("Number of cache failures for score = %u",
                           score_acache.get_failures());
-        }            
-    } else {
+        }
+    }
+    else {
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
                               opt_params, meta_params, moses_params, pa);
     }
