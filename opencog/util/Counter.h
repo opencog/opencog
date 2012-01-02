@@ -42,6 +42,7 @@ struct Counter : public std::map<T, CT> {
         while(from != to) {
             operator[](*from) += 1;  // we don't use ++ to put the
                                      // least assumption on on CT
+            ++from;
         }
     }
     Counter() {}
