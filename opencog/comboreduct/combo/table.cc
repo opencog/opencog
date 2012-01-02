@@ -231,7 +231,7 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
 
 double OTEntropy(const OTable& ot) {
     // Compute the probability distributions
-    Counter<vertex, unsigned> counter(ot.begin(), ot.end());
+    Counter<vertex, unsigned> counter(ot);
     std::vector<double> py(counter.size());
     double total = ot.size();
     transform(counter | map_values, py.begin(),

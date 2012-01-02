@@ -35,13 +35,23 @@ namespace opencog {
 template<typename T, typename CT>
 struct Counter : public std::map<T, CT> {
     typedef std::map<T, CT> super;
-    Counter() {}
+    // this will be replaced by C++11 constructor delegation instead
+    // of init
     template<typename IT>
-    Counter(IT from, IT to) {
+    void init(IT from, IT to) {
         while(from != to) {
             operator[](*from) += 1;  // we don't use ++ to put the
                                      // least assumption on on CT
         }
+    }
+    Counter() {}
+    template<typename IT>
+    Counter(IT from, IT to) {
+        init(from, to);
+    }
+    template<typename Container>
+    Counter(const Container& c) {
+        init(c.begin(), c.end());
     }
     /// @todo add method to add subtract, multiply, etc Counters, or
     /// scalar and Counter, etc...
