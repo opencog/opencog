@@ -1,4 +1,4 @@
-/** moses-exec.cc --- 
+/** moses_exec.cc ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -56,7 +56,7 @@ void unsupported_type_exit(type_node type) {
  * Display error message about ill formed combo tree and exit
  */
 void illformed_exit(const combo_tree& tr) {
-    std::cerr << "error: apparently the combo tree " 
+    std::cerr << "error: apparently the combo tree "
               << tr << "is not well formed" << std::endl;
     exit(1);
 }
@@ -65,7 +65,7 @@ void illformed_exit(const combo_tree& tr) {
  * Display error message about unsupported problem and exit
  */
 void unsupported_problem_exit(const string& problem) {
-    std::cerr << "error: problem " << problem 
+    std::cerr << "error: problem " << problem
               << " unsupported for the moment" << std::endl;
     exit(1);
 }
@@ -105,11 +105,11 @@ combo_tree ann_exemplar(combo::arity_t arity)
     combo_tree::iterator output_node =
         ann_tr.append_child(root_node, ann_type(1, id::ann_node));
     // input nodes
-    for (combo::arity_t i = 0; i <= arity; ++i) 
+    for (combo::arity_t i = 0; i <= arity; ++i)
         ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
     // input nodes' weights
     ann_tr.append_children(output_node, 0.0, arity + 1);
-    
+ 
     return ann_tr;
 }
 
@@ -540,12 +540,12 @@ int moses_exec(int argc, char** argv)
 
     // find the position of the target feature of the data file if any
     int target_pos = 0;
-    if(!target_feature.empty() && !input_data_file.empty())
+    if (!target_feature.empty() && !input_data_file.empty())
         target_pos = findTargetFeaturePosition(input_data_file, target_feature);
 
     // read labels on data file
     vector<string> labels;
-    if(output_with_labels && !input_data_file.empty())
+    if (output_with_labels && !input_data_file.empty())
         labels = readInputLabels(input_data_file, target_pos);
 
     // set metapop_moses_results_parameters
@@ -630,7 +630,7 @@ int moses_exec(int argc, char** argv)
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
-                                          mmr_pa);                
+                                          mmr_pa);
                 }
             } else {
                 unsupported_type_exit(output_type);
@@ -680,7 +680,9 @@ int moses_exec(int argc, char** argv)
         }
     }
 
-    // problem based on input table
+    // Demo/Example: Problem based on input combo program.
+    // Learn a program that should be identical to the specified input
+    // program.
     else if (combo_based_problem(problem))
     {
         combo_tree tr = str_to_combo_tree(combo_str);
@@ -690,11 +692,11 @@ int moses_exec(int argc, char** argv)
             type_tree tt = infer_type_tree(tr);
 
             type_node output_type = *type_tree_output_type_tree(tt).begin();
-            // if no exemplar has been provided in option use the default one
-            if(exemplars.empty()) {
+            // if no exemplar has been provided in option, use the default one
+            if (exemplars.empty()) {
                 exemplars.push_back(type_to_exemplar(output_type));
             }
-            if(output_type == id::boolean_type) {
+            if (output_type == id::boolean_type) {
                 // @todo: Occam's razor and nsamples is not taken into account
                 logical_bscore bscore(tr, arity);
                 metapop_moses_results(rng, exemplars, tt,
@@ -704,14 +706,14 @@ int moses_exec(int argc, char** argv)
             }
             else if (output_type == id::contin_type) {
                 // @todo: introduce some noise optionally
-                if(nsamples<=0)
+                if (nsamples <= 0)
                     nsamples = default_nsamples;
-                
+
                 ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
                 OTable ot(tr, it, rng);
-                
+
                 int as = alphabet_size(tt, ignore_ops);
-                
+
                 occam_contin_bscore bscore(ot, it, stdev, as, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduct, contin_reduct, bscore,
@@ -732,22 +734,26 @@ int moses_exec(int argc, char** argv)
             if (exemplars.empty()) {
                 exemplars.push_back(ann_exemplar(arity));
             }
-        
+ 
             // @todo: introduce some noise optionally
             if (nsamples <= 0)
                 nsamples = default_nsamples;
-        
+
             ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
             OTable ot(tr, it, rng);
-                
+ 
             occam_contin_bscore bscore(ot, it, stdev, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
         }
     }
+
+    // Demo/Example: learn a combo program that determines if the
+    // program inputs are even parity or not.  That is, the combo
+    // program will be a boolean circuit that computes parity.
     else if (problem == pa)
-    { // even parity
+    {
         even_parity func;
 
         // if no exemplar has been provided in option use the default
@@ -762,14 +768,18 @@ int moses_exec(int argc, char** argv)
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
     }
+
+    // Demo/example problem: learn the logical disjunction. That is,
+    // moses should learn the following program: or(#1 #2 ... #k) where
+    // k is the number of inputs specified by the -k option.
     else if (problem == dj)
-    { // disjunction
+    {
         // @todo: for the moment occam's razor and partial truth table are ignored
         disjunction func;
 
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (and)
-        if(exemplars.empty()) {            
+        if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
@@ -779,15 +789,20 @@ int moses_exec(int argc, char** argv)
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
     }
+
+    // Demo/example problem: multiplex. Learn the combo program that
+    // corresponds to the boolean (electrical) circuit that is a
+    // (de-)multiplexer.  That is, a k-bit binary address will specify
+    // one and exactly one wire out of 2^k wires.  Here, k==problem_size.
     else if (problem == mux)
-    { // multiplex
+    {
         // @todo: for the moment occam's razor and partial truth table are ignored
         // arity = problem_size + 1<<problem_size
         multiplex func(problem_size);
 
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (and)
-        if (exemplars.empty()) {            
+        if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
@@ -797,17 +812,25 @@ int moses_exec(int argc, char** argv)
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
     }
+
+    // Demo/Example problem: polynomial regression.  Given the polynomial
+    // p(x)=x+x^2+x^3+...x^k, this searches for the  shortest  program
+    // consisting  of  nested arithmetic operators to compute p(x),
+    // given x as a free variable.  So, for example the order-2 polynomial
+    // can be written as x+x^2, and the shortest combo program is
+    // *(+(1 #1) #1) (that is, the  solution is p(x)=x(x+1) in the usual
+    // arithmetical notation).
     else if (problem == sr)
     { // simple regression of f(x)_o = sum_{i={1,o}} x^i
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (+)
-        if(exemplars.empty()) {            
+        if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::contin_type));
         }
-        
+ 
         type_tree tt = gen_signature(id::contin_type, arity);
 
-        ITable it(tt, rng, (nsamples>0? nsamples : default_nsamples));
+        ITable it(tt, rng, (nsamples>0 ? nsamples : default_nsamples));
 
         int as = alphabet_size(tt, ignore_ops);
 
