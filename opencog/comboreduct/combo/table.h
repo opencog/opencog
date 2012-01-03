@@ -73,7 +73,8 @@ static const std::string default_input_label("i");
 /// that is the duplicated inputs are removed and the output is
 /// replaced by a counter of the false ones and the true ones
 /// respectively.
-class CTable : public std::map<vertex_seq, std::map<vertex, unsigned> > {
+class CTable : public std::map<vertex_seq, std::map<vertex, unsigned> >
+{
 public:
     typedef vertex_seq key_type;
     typedef std::map<vertex, unsigned> mapped_type;
@@ -99,7 +100,8 @@ public:
  * Columns represent input variables
  * Optionally a list of labels (input variable names)
  */
-class ITable : public std::vector<vertex_seq> {
+class ITable : public std::vector<vertex_seq>
+{
 public:
     typedef std::vector<vertex_seq > super;
     ITable();
@@ -108,10 +110,11 @@ public:
     /**
      * generate an input table according to the signature tt.
      *
-     * @param tt signature of the table to generate
-     * @param nsamples sample size, if negative then the sample size is automatically determined
-     * @param min_contin minimum contin value
-     * @param max_contin maximum contin value
+     * @param tt signature of the table to generate.
+     * @param nsamples sample size, if negative then the sample 
+              size is automatically determined.
+     * @param min_contin minimum contin value.
+     * @param max_contin maximum contin value.
      */
     // min_contin and max_contin are used in case tt has contin inputs
     ITable(const type_tree& tt, RandGen& rng, int nsamples = -1,
