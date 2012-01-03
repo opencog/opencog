@@ -44,7 +44,7 @@ using namespace boost::adaptors;
         
 ITable::ITable() {}
         
-ITable::ITable(const ITable::super& mat, std::vector<std::string> il)
+ITable::ITable(const ITable::super& mat, vector<string> il)
     : super(mat), labels(il) {}
 
 ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
@@ -78,23 +78,23 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
     }
 }
 
-void ITable::set_labels(std::vector<std::string> il) {
+void ITable::set_labels(vector<string> il) {
     labels = il;
 }
 
-const std::vector<std::string>& ITable::get_labels() const {
+const vector<string>& ITable::get_labels() const {
     if(labels.empty() and !super::empty()) { // return default labels
-        static const std::vector<std::string> dl(get_default_labels());
+        static const vector<string> dl(get_default_labels());
         return dl;
     } else return labels;
 }
 
-OTable::OTable(const std::string& ol) : label(ol) {}
+OTable::OTable(const string& ol) : label(ol) {}
         
-OTable::OTable(const super& ot, const std::string& ol) : super(ot), label(ol) {}
+OTable::OTable(const super& ot, const string& ol) : super(ot), label(ol) {}
         
 OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
-               const std::string& ol) : label(ol) {
+               const string& ol) : label(ol) {
     OC_ASSERT(!tr.empty());
     if(is_ann_type(*tr.begin())) { 
         // we treat ANN differently because they must be decoded
@@ -122,17 +122,17 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
-               const std::string& ol) : label(ol) {
+               const string& ol) : label(ol) {
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
             binding_map bmap = ctable.get_binding_map(vs);
             this->push_back(eval_throws_binding(rng, bmap, tr)); });
 }
 
-void OTable::set_label(const std::string& ol) {
+void OTable::set_label(const string& ol) {
     label = ol;
 }
 
-const std::string& OTable::get_label() const {
+const string& OTable::get_label() const {
     return label;
 }
         
@@ -232,7 +232,7 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
 double OTEntropy(const OTable& ot) {
     // Compute the probability distributions
     Counter<vertex, unsigned> counter(ot);
-    std::vector<double> py(counter.size());
+    vector<double> py(counter.size());
     double total = ot.size();
     transform(counter | map_values, py.begin(),
               [&](unsigned c) { return c/total; });
@@ -288,7 +288,7 @@ arity_t dataFileArity(const string& fileName) {
     return istreamArity(*in);
 }
 
-bool has_header(const std::string& dataFileName) {
+bool has_header(const string& dataFileName) {
     unique_ptr<ifstream> in(open_data_file(dataFileName));
     string line;
     getline(*in, line);    
@@ -356,7 +356,7 @@ type_tree infer_data_type_tree(const string& fileName, int pos)
 }
 
 boost::tokenizer<boost::char_separator<char>>
-get_row_tokenizer(std::string& line) {
+get_row_tokenizer(string& line) {
     typedef boost::char_separator<char> seperator;
     typedef boost::tokenizer<seperator> tokenizer;
     typedef tokenizer::const_iterator tokenizer_cit;
@@ -413,7 +413,7 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
 
 void istreamTable(const string& file_name, ITable& it, OTable& ot, int pos) {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
-    std::ifstream in(file_name.c_str());
+    ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
     istreamTable(in, it, ot, has_header(file_name),
                  infer_data_type_tree(file_name), pos);
@@ -430,19 +430,20 @@ ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot) {
     return ostreamlnContainer(out, it.get_labels(), ",");
 }
 
+string vertex_to_str(const vertex& v) {
+    stringstream ss;
+    if(is_boolean(v))
+        ss << vertex_to_bool(v);
+    else
+        ss << v;
+    return ss.str();
+}
+
 ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot) {
     // print header
     ostreamTableHeader(out, it, ot);
     // print data
     OC_ASSERT(it.size() == ot.size());
-    auto vertex_to_str = [](const vertex& v) {
-        stringstream ss;
-        if(is_boolean(v))
-            ss << vertex_to_bool(v);
-        else
-            ss << v;
-        return ss.str();
-    };
     for(size_t row = 0; row < it.size(); ++row) {
         // print output
         out << vertex_to_str(ot[row]) << ",";
@@ -514,6 +515,35 @@ void subsampleTable(ITable& it, unsigned int nsamples, RandGen& rng) {
             it.erase(it.begin()+ridx);
         }
     }
+}
+
+ostream& operator<<(ostream& out, const ITable& it)
+{
+    ostreamlnContainer(out, it.get_labels(), ",");
+    foreach(const vertex_seq& row, it) {
+        for(unsigned i = 0; i < row.size();) {
+            out << vertex_to_str(row[i]);
+            ++i;
+            if(i < row.size())
+                out << ",";
+        }
+        out << endl;
+    }
+    return out;
+}
+
+ostream& operator<<(ostream& out, const OTable& ot)
+{
+    if(!ot.get_label().empty())
+        out << ot.get_label() << endl;
+    foreach(const vertex& v, ot)
+        out << vertex_to_str(v) << endl;
+    return out;
+}
+
+ostream& operator<<(ostream& out, const complete_truth_table& tt)
+{
+    return ostreamContainer(out, tt);
 }
 
 }} // ~namespaces combo opencog

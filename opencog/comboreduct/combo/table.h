@@ -642,26 +642,11 @@ std::vector<std::string> readInputLabels(const std::string& file, int pos = 0);
 
 std::ifstream* open_data_file(const std::string& fileName);
 
-inline std::ostream& operator<<(std::ostream& out, const ITable& it)
-{
-    ostreamlnContainer(out, it.get_labels(), ",");
-    foreach(const vertex_seq& row, it)
-        ostreamlnContainer(out, row, ",");
-    return out;
-}
+std::ostream& operator<<(std::ostream& out, const ITable& it);
 
-inline std::ostream& operator<<(std::ostream& out, const OTable& ot)
-{
-    if(!ot.get_label().empty())
-        out << ot.get_label() << std::endl;
-    return ostreamContainer(out, ot, "\n");
-}
+std::ostream& operator<<(std::ostream& out, const OTable& ot);
 
-inline std::ostream& operator<<(std::ostream& out,
-                                const complete_truth_table& tt)
-{
-    return ostreamContainer(out, tt);
-}
+std::ostream& operator<<(std::ostream& out, const complete_truth_table& tt);
 
 }} // ~namespaces combo opencog
 
