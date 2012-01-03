@@ -126,12 +126,35 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     const BScore& bscore;
 };
 
-// /**
-//  * Bscore defined by multiple scoring functions. This is done
-//  * when the problem to solve is defined in terms of other
-//  * sub-problems */
-// template<Score>
-// struct multiscore_based_bscore()
+/**
+ * Bscore defined by multiple scoring functions. This is done when the
+ * problem to solve is defined in terms of multiple problems. For now
+ * the multiple scores have the same type as defined by the template
+ * argument Score. The template argument Transform is a unary function
+ * that transforms each sub-score before being recorded in the
+ * behavioral score.
+ */
+// template<typename Score, typename Transform = std::identity<score_t> >
+// struct multiscore_based_bscore : public bscore_base
+// {
+//     // ctors
+//     typedef std::vector<Score> ScoreSeq;
+//     multiscore_based_bscore(const ScoreSeq& scores_) : scores(scores_) {}
+//     template<typename It>
+//     multiscore_based_bscore(It from, It to) : scores(from, to) {}
+
+//     // main operator
+//     behavioral_score operator()(const combo_tree& tr) const {
+//         // TODO
+//     }
+
+//     behavioral_score best_possible_bscore() const {
+//         behavioral_score res(scores.size());
+//         best_possible_score()
+//     }
+    
+//     ScoreSeq scores;
+// };
 
 /**
  * Each feature corresponds to an input tuple, 0 if the output of the
