@@ -267,11 +267,14 @@ void removeNonASCII(string& str)
 // Return true if the character is one of the standard comment
 // delimiters.  Here, we define a 'standard delimiter' as one
 // of hash, bang or semicolon.
-bool is_comment(char c)
+bool is_comment(const char c)
 {
     if ('#' == c) return true;
     if (';' == c) return true;
     if ('!' == c) return true;
+    if ('\n' == c) return true;
+    if ('\r' == c) return true;
+    if (0 == c) return true;
     return false;
 }
 
