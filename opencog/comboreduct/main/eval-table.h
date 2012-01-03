@@ -45,8 +45,8 @@ static const pair<string, string> feature_opt("feature", "f");
 static const pair<string, string> features_file_opt("features-file", "F");
 static const pair<string, string> compute_MI_opt("compute-MI", "m");
 static const pair<string, string> display_output_table_opt("display-output-table", "d");
-static const pair<string, string> display_RMSE_opt("display-RMSE-opt", "R");
-static const pair<string, string> display_STD_opt("display-STD-opt", "S");
+static const pair<string, string> display_RMSE_opt("display-RMSE", "R");
+static const pair<string, string> display_STD_opt("display-STD", "S");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -71,9 +71,9 @@ struct evalTableParameters {
     string output_file;
 };
 
-template<typename Out, typename OT>
+template<typename Out>
 Out& output_results(Out& out, const evalTableParameters& pa,
-                    const OT& ot, const OT& ot_tr) {
+                    const OTable& ot, const OTable& ot_tr) {
     if(pa.display_output_table)
         out << ot_tr << endl; // print output table
     if(pa.display_RMSE)
@@ -85,9 +85,8 @@ Out& output_results(Out& out, const evalTableParameters& pa,
     return out;
 }
 
-template<typename OT>
 void output_results(const evalTableParameters& pa,
-                    const OT& ot, const OT& ot_tr) {
+                    const OTable& ot, const OTable& ot_tr) {
     if(pa.output_file.empty())
         output_results(cout, pa, ot, ot_tr);
     else {
@@ -97,13 +96,12 @@ void output_results(const evalTableParameters& pa,
     }
 }
 
-template<typename IT, typename OT>
 void eval_output_results(const evalTableParameters& pa,
                          const vector<combo_tree>& trs,
-                         IT& it, const OT& ot, opencog::RandGen& rng) {
+                         ITable& it, const OTable& ot, opencog::RandGen& rng) {
     foreach(const combo_tree& tr, trs) {
         // evaluated tr over input table
-        OT ot_tr(tr, it, rng);        
+        OTable ot_tr(tr, it, rng);        
         ot_tr.set_label(ot.get_label());
         // print results
         output_results(pa, ot, ot_tr);
@@ -113,7 +111,7 @@ void eval_output_results(const evalTableParameters& pa,
 void read_eval_output_results(const evalTableParameters& pa,
                               opencog::RandGen& rng) {
     // find the position of the target feature of the data file if any
-    int target_pos = -1;
+    int target_pos = 0;
     if(!pa.target_feature.empty() && !pa.input_table_file.empty())
         target_pos = findTargetFeaturePosition(pa.input_table_file,
                                                pa.target_feature);

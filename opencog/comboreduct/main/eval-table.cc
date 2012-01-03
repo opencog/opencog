@@ -81,7 +81,7 @@ int main(int argc,char** argv) {
          "Input table file in CSV format.\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature),
-         "Label of the target feature to fit. If none is given the last one is used.\n")
+         "Label of the target feature to fit. If none is given the first one is used.\n")
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string> >(&pa.combo_programs),
          "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
