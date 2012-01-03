@@ -1,0 +1,23 @@
+;
+; column-labels.csv
+;
+; Example data file illustrating table-based regression in MOSES.
+;
+; Data consists of four columns; the last column is the "result",
+; and the first three columns are the "data to fit".  In this case,
+; the last column is the boolen-or of the first three.
+; Thus, we expect MOSES to learn the combo program "or(#aaa #bbb #ccc)".
+; where the -W1 flag is used to print the column labels.
+;
+; To run, enter: "moses -H it -i column_labels.csv -W1 -u or_them_all
+
+aaa,bbb,ccc,or_them_all
+0,0,0,0
+0,0,1,1
+0,1,0,1
+0,1,1,1
+
+1,0,0,1
+1,0,1,1
+1,1,0,1
+1,1,1,1

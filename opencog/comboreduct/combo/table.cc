@@ -290,10 +290,10 @@ istream &get_data_line(istream& is, string& line)
 {
     while (1)
     {
-        istream &rv = getline(is, line);
-        if (!rv) return rv;
+        getline(is, line);
+        if (!is) return is;
         if (is_comment(line[0])) continue;
-        return rv;
+        return is;
     }
 }
 
@@ -362,12 +362,13 @@ int findTargetFeaturePosition(const string& fileName, const string& target)
     vector<string> labels = tokenizeRow<string>(line);
     unsigned pos = distance(labels.begin(), find(labels, target));
     OC_ASSERT(pos < labels.size(),
-              "There is no such target feature %s in data file %s",
+              "ERROR: There is no column labelled \"%s\" in data file %s",
               target.c_str(), fileName.c_str());
     return pos;
 }
 
-type_tree infer_row_type_tree(const pair<vector<string>, string>& row) {
+type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
+{
     type_tree tt(id::lambda_type);
     auto root = tt.begin();
 
