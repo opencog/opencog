@@ -107,9 +107,8 @@ struct CaseBasedBoolean : public unary_function<combo_tree, score_t>
         int i = 0;
         for (CaseSeq::const_iterator c = _cases.begin();
              c != _cases.end();++c, ++i)
-            bs[i] = (bool_evaluate(*c, tr) != (*c)[arity()]);
+            bs[i] = -score_t(bool_evaluate(*c, tr) != (*c)[arity()]);
     }
-
 
     int arity() const {
         return _cases.front().size() - 1;

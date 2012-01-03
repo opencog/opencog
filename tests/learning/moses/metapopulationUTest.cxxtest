@@ -58,35 +58,35 @@ public:
         // dummy (1, 2, ...) as only their bscore matter
         bscored_combo_tree_set bcs;
         // 1
-        behavioral_score bsc1 = {1, 0, 1, 0};
+        behavioral_score bsc1 = {-1, 0, -1, 0};
         composite_score csc1(-2, -1);
         composite_behavioral_score cbs1(bsc1, csc1);
         combo_tree tr1(1);
         bscored_combo_tree bct1(tr1, cbs1);
         bcs.insert(bct1);
         // 2
-        behavioral_score bsc2 = {1, 1, 1, 0};
+        behavioral_score bsc2 = {-1, -1, -1, 0};
         composite_score csc2(-3, -1);
         composite_behavioral_score cbs2(bsc2, csc2);
         combo_tree tr2(2);
         bscored_combo_tree bct2(tr2, cbs2);
         bcs.insert(bct2);
         // 3
-        behavioral_score bsc3 = {1, 0, 1, 0};
+        behavioral_score bsc3 = {-1, 0, -1, 0};
         composite_score csc3(-2, -1);
         composite_behavioral_score cbs3(bsc3, csc3);
         combo_tree tr3(3);
         bscored_combo_tree bct3(tr3, cbs3);
         bcs.insert(bct3);
         // 4
-        behavioral_score bsc4 = {0, 1, 0, 1};
+        behavioral_score bsc4 = {0, -1, 0, -1};
         composite_score csc4(-2, -1);
         composite_behavioral_score cbs4(bsc4, csc4);
         combo_tree tr4(4);
         bscored_combo_tree bct4(tr4, cbs4);
         bcs.insert(bct4);
         // 5
-        behavioral_score bsc5 = {0, 1, 1, 1};
+        behavioral_score bsc5 = {0, -1, -1, -1};
         composite_score csc5(-3, -1);
         composite_behavioral_score cbs5(bsc5, csc5);
         combo_tree tr5(5);
@@ -107,21 +107,21 @@ public:
         // dummy (1, 2, ...) as only their bscore matter
         bscored_combo_tree_set bcs1, bcs2;
         // 4
-        behavioral_score bsc4 = {0, 1, 0, 1};
+        behavioral_score bsc4 = {0, -1, 0, -1};
         composite_score csc4(-2, -1);
         composite_behavioral_score cbs4(bsc4, csc4);
         combo_tree tr4(4);
         bscored_combo_tree bct4(tr4, cbs4);
         bcs1.insert(bct4);
         // 5
-        behavioral_score bsc5 = {0, 1, 1, 1};
+        behavioral_score bsc5 = {0, -1, -1, -1};
         composite_score csc5(-3, -1);
         composite_behavioral_score cbs5(bsc5, csc5);
         combo_tree tr5(5);
         bscored_combo_tree bct5(tr5, cbs5);
         bcs2.insert(bct5);
         // 2
-        behavioral_score bsc2 = {1, 1, 1, 0};
+        behavioral_score bsc2 = {-1, -1, -1, 0};
         composite_score csc2(-3, -1);
         composite_behavioral_score cbs2(bsc2, csc2);
         combo_tree tr2(2);

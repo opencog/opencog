@@ -252,7 +252,7 @@ struct ann_pole2nv_bscore : public unary_function<combo_tree, behavioral_score> 
     
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(2);
-        bs[0] = -moses::ann_pole2nv_score()(tr);
+        bs[0] = moses::ann_pole2nv_score()(tr);
         bs[1] = tr.size();
         
         return bs;
@@ -272,7 +272,7 @@ struct ann_pole2_bscore : public unary_function<combo_tree, behavioral_score> {
 
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(2);
-        bs[0] = -moses::ann_pole2_score()(tr);
+        bs[0] = moses::ann_pole2_score()(tr);
         bs[1] = tr.size();
 
         return bs;
@@ -292,7 +292,7 @@ struct ann_pole_bscore : public unary_function<combo_tree, behavioral_score> {
 
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(2);
-        bs[0] = -moses::ann_pole_score()(tr);
+        bs[0] = moses::ann_pole_score()(tr);
         bs[1] = tr.size();
 
         return bs;

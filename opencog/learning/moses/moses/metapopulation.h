@@ -942,9 +942,7 @@ struct metapopulation : public bscored_combo_tree_set
      */
     static inline tribool dominates(const behavioral_score& x,
                                     const behavioral_score& y) {
-        // static size_t counter = 0;
-        // std::cout << "dominates counter = " << counter++ << std::endl;
-        //everything dominates an empty vector
+        // everything dominates an empty vector
         if (x.empty()) {
             if (y.empty())
                 return indeterminate;
@@ -956,13 +954,12 @@ struct metapopulation : public bscored_combo_tree_set
         tribool res = indeterminate;
         for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
              xit != x.end();++xit, ++yit) {
-            if (*xit < *yit) { //individual elements are assumed to
-                               //represent error
+            if (*xit > *yit) {
                 if (!res)
                     return indeterminate;
                 else
                     res = true;
-            } else if (*yit < *xit) {
+            } else if (*yit > *xit) {
                 if (res)
                     return indeterminate;
                 else

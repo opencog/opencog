@@ -92,7 +92,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     score_t operator()(const combo_tree& tr) const {
         try {
             behavioral_score bs = bscore(tr);
-            score_t res = -std::accumulate(bs.begin(), bs.end(), 0.0);
+            score_t res = std::accumulate(bs.begin(), bs.end(), 0.0);
             // Logger
             if(logger().getLevel() >= Logger::FINE) {
                 stringstream ss_tr;
@@ -194,9 +194,20 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score>
     RandGen& rng;
 };
 
+// used to define the complexity scoring component given that p is the
+// probability of having an observation being wrong (see the comment
+// regarding occam_ctruth_table_bscore for more information)
+score_t discrete_complexity_coef(unsigned alphabet_size, double p);
+
+// used to define the complexity scoring component given that stdev is
+// the standard deviation of the noise of the we're trying to predict
+// output (see the comment regarding occam_contin_bscore for more
+// information)
+score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
+        
 /**
  * Fitness function based on discretization of the output. If the
- * classes match the bscore element is 0, or 1 otherwise. If wa (for
+ * classes match the bscore element is 0, or -1 otherwise. If wa (for
  * weighted_average is true then each element of the bscore is
  * weighted so that each class overall as the same weight in the
  * scoring function.
@@ -281,7 +292,7 @@ struct occam_contin_bscore : public bscore_base
                         RandGen& _rng)
         : target(score, r), cti(r), rng(_rng) {
         occam = stdev > 0;
-        set_complexity_coef(stdev, alphabet_size);
+        set_complexity_coef(alphabet_size, stdev);
     }
 
     occam_contin_bscore(const OTable& t,
@@ -291,7 +302,7 @@ struct occam_contin_bscore : public bscore_base
                         RandGen& _rng)
         : target(t), cti(r), rng(_rng) {
         occam = stdev > 0;
-        set_complexity_coef(stdev, alphabet_size);
+        set_complexity_coef(alphabet_size, stdev);
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -308,7 +319,7 @@ struct occam_contin_bscore : public bscore_base
     RandGen& rng;
 
 private:
-    void set_complexity_coef(float stdev, float alphabet_size);
+    void set_complexity_coef(float alphabet_size, float stdev);
 };
 
 /**
@@ -371,7 +382,7 @@ struct occam_max_KLD_bscore : public bscore_base
     RandGen& rng;
 
 private:
-    void set_complexity_coef(float stdev, float alphabet_size);
+    void set_complexity_coef(float alphabet_size, float stdev);
 };
         
 // for testing only
