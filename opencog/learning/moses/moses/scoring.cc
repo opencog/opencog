@@ -275,8 +275,8 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
             // component
             boost::sort(f_output);
             KLDS<vector<contin_t> > klds(cot, f_output);
-            dorepeat(otable.size())
-                bs.push_back(klds.next());
+            dorepeat(klds.size())
+                bs.push_back(-klds.next());
     }
     // add the Occam's razor feature
     if(occam)

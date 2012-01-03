@@ -62,14 +62,23 @@ struct KLDS {
             // TODO
         }
 
+    // size of the pdf of p. This useful when one wants to know till
+    // when next can be used
+    size_t size() const {
+        return p_pdf.size();
+    }
+    
     // computes the components log(delta_p / delta_q) once at a
     // time. This is useful when one want to treat each component as a
     // seperate optimization of a multi-optimization problem.
     result_type next() {
+        OC_ASSERT(it_p != p_pdf.end());
         // compute delta P
         result_type p_x = it_p->first,
             delta_p_x = std::max(epsilon, p_x - p_x_pre),
             delta_p = (q_s * it_p->second) / delta_p_x;
+        
+        // logger().fine("p_x = %f, p_x_pre = %f, p_x - p_x_pre = %f", p_x, p_x_pre, p_x - p_x_pre);
 
         // compute delta Q
         result_type q_x = it_q == q_pdf.cend()? x_very_last : it_q->first;
@@ -83,8 +92,12 @@ struct KLDS {
             n_duplicates = it_q == q_pdf.cend()? 1.0 : it_q->second,
             delta_q = (p_s * n_duplicates) / delta_q_x;
         
+        // logger().fine("q_x = %f, q_x_pre = %f, q_x - q_x_pre = %f", q_x, q_x_pre, q_x - q_x_pre);
+
         p_x_pre = p_x;
         ++it_p;
+
+        // logger().fine("delta_p = %f, delat_q = %f, Q = %f", delta_p, delta_q, delta_p / delta_q);
         
         return std::log(delta_p / delta_q);
     }
