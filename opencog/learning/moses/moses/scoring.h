@@ -47,6 +47,30 @@ namespace opencog { namespace moses {
  
 typedef float fitness_t; /// @todo is that really useful?
 
+// Abstract scoring function class to implement
+struct score_base : public unary_function<combo_tree, score_t>
+{
+    // Evaluate the candidate tr
+    virtual score_t operator()(const combo_tree& tr) const = 0;
+    
+    // Return the best possible score achievable with that fitness
+    // function. This is useful in order to stop running MOSES when
+    // the best possible score is reached
+    virtual score_t best_possible_score() const = 0;
+};
+
+// Abstract bscoring function class to implement
+struct bscore_base : public unary_function<combo_tree, behavioral_score>
+{
+    // Evaluate the candidate tr
+    virtual behavioral_score operator()(const combo_tree& tr) const = 0;
+    
+    // Return the best possible bscore achievable with that fitness
+    // function. This is useful in order to stop running MOSES when
+    // the best possible score is reached
+    virtual behavioral_score best_possible_bscore() const = 0;
+};
+
 /**
  * score calculated based on the behavioral score. Useful to avoid
  * redundancy of code and computation in case there is a cache over
@@ -54,6 +78,13 @@ typedef float fitness_t; /// @todo is that really useful?
  * bscore over all features, that is:
  * score = - sum_f BScore(f),
  */
+/// @todo Inheriting that class from score_base raises a compile error
+/// because in moses_exec.h some code attempts to use BScore that is
+/// being cached (and does not contain best_possible_bscore). This
+/// error is normal however it does not appear when that class
+/// inherits from unary_function. Likely GCC only instantiates
+/// function class template that are ever being called (to save memory
+/// presumably).
 template<typename BScore>
 struct bscore_based_score : public unary_function<combo_tree, score_t>
 {
@@ -69,7 +100,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
                 logger().fine(ss_tr.str());
                 stringstream ss_sc;
                 ss_sc << "Scored: " << res;
-                logger().fine(ss_sc.str());                
+                logger().fine(ss_sc.str());
             }
             // ~Logger
             return res;
@@ -95,12 +126,20 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     const BScore& bscore;
 };
 
+// /**
+//  * Bscore defined by multiple scoring functions. This is done
+//  * when the problem to solve is defined in terms of other
+//  * sub-problems */
+// template<Score>
+// struct multiscore_based_bscore()
+
 /**
  * Each feature corresponds to an input tuple, 0 if the output of the
  * candidate matches the output of the intended function (lower is
  * better), 1 otherwise.
  */
-struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
+struct logical_bscore : public bscore_base
+{
     template<typename Func>
     logical_bscore(const Func& func, int a)
             : target(func, a), arity(a) {}
@@ -115,7 +154,9 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
     int arity;
 };
 
-struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
+/// @todo inherit from bscore_base or remove if useless
+struct contin_bscore : public unary_function<combo_tree, behavioral_score>
+{
     template<typename Func>
     contin_bscore(const Func& func, const ITable& r, RandGen& _rng)
         : target(func, r), cti(r), rng(_rng) {}
@@ -139,9 +180,8 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
  *
  * The Occam's razor function is identical to occam_ctruth_table_bscore
  */
-struct occam_discretize_contin_bscore : public unary_function<combo_tree,
-                                                              behavioral_score> {
-
+struct occam_discretize_contin_bscore : public bscore_base
+{
     occam_discretize_contin_bscore(const OTable& ot, const ITable& it,
                                    const vector<contin_t>& thres,
                                    bool wa, float p,
@@ -208,7 +248,8 @@ protected:
  *
  * |M|*log(|A|)*2*v corresponds to an additional feature when v > 0
  */
-struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score> {
+struct occam_contin_bscore : public bscore_base
+{
     template<typename Scoring>
     occam_contin_bscore(const Scoring& score,
                         const ITable& r,
@@ -261,8 +302,8 @@ private:
  * |M|*log|A|/log(p/(1-p)) - |D1|
  * with p<0.5 and |D1| the number of outputs that match
  */
-struct occam_ctruth_table_bscore 
-    : public unary_function<combo_tree, behavioral_score> {
+struct occam_ctruth_table_bscore : public bscore_base
+{
     occam_ctruth_table_bscore(const CTable& _ctt,
                               float p,
                               float alphabet_size,
@@ -285,8 +326,8 @@ struct occam_ctruth_table_bscore
 // the Kullback Leibler Divergence between the distribution output of
 // the dataset and the distribution over the output filtered by the
 // program (when the output is true)
-struct occam_max_KLD_bscore
-    : public unary_function<combo_tree, behavioral_score> {
+struct occam_max_KLD_bscore : public bscore_base
+{
     occam_max_KLD_bscore(const Table& table,
                          float stdev,
                          float alphabet_size,
