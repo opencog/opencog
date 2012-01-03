@@ -426,27 +426,29 @@ std::vector<T> tokenizeRow(std::string& line) {
         res.push_back(boost::lexical_cast<T>(t));
     return res;
 }
+
 // Like above but split the result into an vector (the inputs) and an
 // element (the output) given that the output is at position pos. If
 // pos < 0 then the position is the last. If pos >= 0 then the
 // position is as usual (0 is the first, 1 is the second, etc).
 // If pos is out of range then an assert is raised.
 template<typename T>
-std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0) {
+std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
+{
     boost::tokenizer<boost::char_separator<char> > tok = get_row_tokenizer(line);
     std::vector<T> inputs;
     T output;
     int i = 0;
-    foreach(const std::string& t, tok) {
+    foreach (const std::string& t, tok) {
         if(i++ != pos)
             inputs.push_back(boost::lexical_cast<T>(t));
         else output = boost::lexical_cast<T>(t);
     }
-    if(pos < 0) {
+    if (pos < 0) {
         output = inputs.back();
         inputs.pop_back();
     }
-    // the following assert is to garanty that the output has been filled
+    // The following assert is to guaranty that the output has been filled
     OC_ASSERT((int)inputs.size() == i-1);
     return {inputs, output};
 }

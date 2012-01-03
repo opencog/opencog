@@ -381,26 +381,33 @@ vertex token_to_vertex(const string& token) {
 }
 
 istream& istreamTable(istream& in, ITable& it, OTable& ot,
-                      bool has_header, const type_tree& tt, int pos) {
+                      bool has_header, const type_tree& tt, int pos)
+{
     string line;
     arity_t arity = type_tree_arity(tt);
-    if(has_header) {
+
+    if (has_header) {
         getline(in, line);
         pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, pos);
         it.set_labels(ioh.first);
         ot.set_label(ioh.second);
-        OC_ASSERT(arity == (arity_t)ioh.first.size());
+        OC_ASSERT(arity == (arity_t)ioh.first.size(),
+                  "ERROR: Input file header/data declaration mismatch: "
+                  "The header has %u columns while the first row has "
+                  "%d columns.\n",
+                  ioh.first.size(), arity);
     } 
 
-    while(getline(in, line)) {
+    while (getline(in, line)) {
         // tokenize the line and fill the input vector and output
         pair<vector<string>, string> io = tokenizeRowIO<string>(line, pos);
         
         // check arity
         OC_ASSERT(arity == (arity_t)io.first.size(),
-                  "The row %u has %u columns while the first row has %d"
-                  " columns, all rows should have the same number of"
-                  " columns", ot.size(), io.first.size(), arity);
+                  "ERROR: Input file inconsistent: the row %u has %u "
+                  "columns while the first row has %d columns.  All "
+                  "rows should have the same number of columns.\n",
+                  ot.size(), io.first.size(), arity);
         
         // fill table
         vertex_seq ivs(arity);
