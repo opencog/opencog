@@ -367,7 +367,7 @@ get_row_tokenizer(std::string& line) {
     removeCarriageReturn(line);
 
     // tokenize line
-    static const seperator sep(", \t");
+    static const seperator sep(",");
     return tokenizer(line, sep);
 }
 

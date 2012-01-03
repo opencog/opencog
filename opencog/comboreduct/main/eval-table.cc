@@ -78,7 +78,7 @@ int main(int argc,char** argv) {
          "Random seed.\n")
         (opt_desc_str(input_table_opt).c_str(),
          value<string>(&pa.input_table_file),
-         "Input table file in DSL format (where the delimiters are comma, whitespace and tabulation).\n")
+         "Input table file in CSV format.\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature),
          "Label of the target feature to fit. If none is given the last one is used.\n")
