@@ -353,7 +353,9 @@ T}
 Polynomial regression problem. Given the polynomial 
 \fIp(x)=x+x^2+x^3+...x^k\fR, this searches for the shortest program
 consisting of nested arithmetic operators to compute \fIp(x)\fR, 
-given \fIx\fR as a free variable. So, for example, using the 
+given \fIx\fR as a free variable. The arithmetic operators would be
+addition, subtraction, multiplication and division; exponentiation
+is not allowed in the solution.  So, for example, using the 
 \fB\-k2\fR option to specify the order\-2 polynomial \fIx+x^2\fR,
 then the shortest combo program is \fI*(+(1 #1) #1)\fR (that is, 
 the solution is \fIp(x)=x(x+1)\fR in the usual arithmetical notation).
