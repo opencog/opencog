@@ -90,11 +90,15 @@ moses \- meta-optimizing semantic evolutionary search solver
 .\" respectively.
 \fBmoses\fP is the command-line wrapper to the MOSES program learning
 library. It may be used to solve learning tasks specified with file
-inputs, or to run various demonstration problems.  Its primary use is
-meant to be for performing regression on an input table of values.
-The output is a \fBcombo\fP program that best fits the data.
+inputs, or to run various demonstration problems.  Given an input table
+of values, it will perform a regression, generating, as output,
+a \fBcombo\fP program that best fits the data. \fBmoses\fP is
+multi-threaded, and can be distrubited across multiple machines to
+improve run-time performance.
 .PP
-As an example, the input file
+.\" ============================================================
+.SH EXAMPLE
+As an example, the input file of comma-separated values:
 
 .nf
 \& a,b,out
@@ -105,8 +109,91 @@ As an example, the input file
 .fi
 
 when run with the flags \fI\-u\ out\ \-W1\fR will generate the combo
-program \fIand(#a\ #b)\fR, as the third column is the boolean-and
-for the first two.
+program \fIand(#a\ #b)\fR. This program indicates that the third column
+can be modelled as the boolean-and of the first two.  The \fI\-u\fR option
+specifies that it is the third column that should be modelled, and the
+\fI\-W1\fR flag indicates that column labels, rahter than column numbers,
+should be printed on output.
+
+.PP
+.\" ============================================================
+.SH OVERVIEW
+\fBmoses\fP implements program learning by using a meta-optimization
+algorithm. That is, it uses two optimization algorithms, one wrapped inside
+the other, to find solutions.  The outer optimization algorithm selects 
+candidate programs (called \fIexemplars\fP), and then creates similar
+programs by taking an exemplar and inserting variables (called
+\fIknobs\fP) in selected locations. The inner optimization algorithm
+then searches for the best possible 'knob settings', returning a set
+of programs (a \fIdeme\fP) that provide the best fit to the data. The
+outer optimization algorithm then selects new candidates, and performs
+a simplification step, reducing these to a normal form, to create new
+exemplars.  The process is then repeated until a perfect score is
+reached, a maximum number of cycles is performed, or forward progress
+is no longer being made.
+.PP
+Program reduction is performed at two distinct stages: after inserting new
+knobs, and when candidates are selected.  Reduction takes a program, and
+transforms it into a new form, the so-called \fIelegant normal form\fP,
+which, roughly speaking, expresses the program in the smallest, most
+compact form possible.  Reduction is an important step of the algorithm,
+as it prevents the evolved programs from turning into 'spaghetti code',
+avoiding needless complexity that can cost during program evaluation.
+.PP
+The operation of \fBmoses\fP can be modified by using a large variety of
+options to control different parts of the above meta-algorithm.
+The inner optimization step can be done using one of several different
+algorithms, including \fIhillclimbing\fP, \fIsimulated annealing\fP, 
+or \fIunivariate Bayesian optimization\fP.  The amount of effort 
+spent in the inner loop can be limited, as compared to how frequently
+new demes and exemplars are choosen. The total number of demes or 
+exemplars maintained in the population may be controlled.  The effort
+expended on program normalization at each of the two steps can be
+controlled.
+.PP
+In addition to controlling the operation of the algorithm, many 
+options are used to describe the format of the input data, and to
+control the printing of the output.
+.PP
+\fBmoses\fP also has a 'demo' mode: it has a number of built-in
+scoring functions for various 'well-known' optimization problems,
+such as parity, disjunction, and multipilex. Each of these typically
+presents a different set of challenges to the optimization algorithm,
+and are used to illustrate 'hard' optimization problems.  These demo
+problems are useful both for learning and undertanding the use of 
+\fBmoses\fP, and also for developers and maintainers of \fBmoses\fP 
+itself, when testing new features and enhancements.
+
+.PP
+.\" ============================================================
+.SH COMBO PROGRAMS
+This section provides a breif overview of the combo programming
+language.  Combo is not meant so much for general use by humans
+for practical programming, as it is to fit the needs of program
+learning.  As such, it is fairly minimal, while still being expressive
+enough so that all common programming constructs are simply represented
+in combo.  It is not difficult to convert combo programs into 
+other languages, or to evaluate them directly.
+.PP
+In combo, all programs are represented as program trees. That
+is, each internal node in the tree is an operation and leaves are
+either constants or variables. The set of all of the variables in
+a program are taken as the arguments to the program. The program
+is evaluated by supplying explicit values for the variables, 
+and then applying operations until the root node is reached.
+.PP
+By convention, variables are denoted by a hash-mark followed by
+a number, although they may also be named. Variables are not typed
+(they are only implicitly typed during program evaluation). Thus,
+for example, \fIor (#1 #2)\fP is a combo program that represents
+the boolean-or of two inputs, \fI#1\fP and \fI#2\fP.
+.PP
+Logical operators include and,or and not.  Arithmetic operators
+include +, - * and / for addtin, subtraction, multiplication and
+division.  Flow-of-control operators include ....
+.PP
+XXX finish writing this section, give more examples.
+Ints vs.floats.
 
 .PP
 .\" ============================================================
@@ -403,15 +490,6 @@ the \fB-H cp\fR option.  Thus, for example, \fB-H cp -y "and(#1 #2)"\fR
 specifies that the two-input conjunction is to be learned.
 .PP
 .\" ============================================================
-.SH USE
-.PP
-\fBmoses\fR will run demo problems or solve real problems from data files.
-.PP
-Other remarks ...
-.TP
-.PP
-Etc...
-.RE
 .SH TODO
 Finish documenting these aglo flags:  -M -D -I -T
 .PP
