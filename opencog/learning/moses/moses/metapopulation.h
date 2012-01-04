@@ -30,6 +30,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/min_element.hpp>
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
@@ -281,7 +282,7 @@ struct metapopulation : public bscored_combo_tree_set
         }
 
         complexity_t sum = 0;
-        complexity_t highest_comp = *min_element(probs.begin(), probs.end());
+        complexity_t highest_comp = *boost::min_element(probs);
         // convert complexities into (non-normalized) probabilities
         foreach(complexity_t& p, probs) {
             // in case p has the max complexity (already visited) then
@@ -292,12 +293,10 @@ struct metapopulation : public bscored_combo_tree_set
 
         OC_ASSERT(sum > 0, "There is an internal bug, please fix it");
 
-        const_iterator exemplar = begin();
-        advance(exemplar, distance(probs.begin(),
-                                   roulette_select(probs.begin(),
-                                                            probs.end(),
-                                                            sum, rng)));
-        return exemplar;
+        return std::next(begin(), distance(probs.begin(),
+                                           roulette_select(probs.begin(),
+                                                           probs.end(),
+                                                           sum, rng)));
     }
 
     // merge candidates in to the metapopulation. candidates might be
