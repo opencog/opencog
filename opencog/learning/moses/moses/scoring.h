@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <functional>
 
 #include <boost/range/numeric.hpp>
 
@@ -134,27 +135,38 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
  * that transforms each sub-score before being recorded in the
  * behavioral score.
  */
-// template<typename Score, typename Transform = std::identity<score_t> >
-// struct multiscore_based_bscore : public bscore_base
-// {
-//     // ctors
-//     typedef std::vector<Score> ScoreSeq;
-//     multiscore_based_bscore(const ScoreSeq& scores_) : scores(scores_) {}
-//     template<typename It>
-//     multiscore_based_bscore(It from, It to) : scores(from, to) {}
+template<typename Score>
+struct multiscore_based_bscore : public bscore_base
+{
+    // ctors
+    typedef std::vector<Score> ScoreSeq;
+    typedef std::unary_function<score_t, score_t> Transform;
+    multiscore_based_bscore(const ScoreSeq& scores_,
+                            Transform transform_ = std::identity<score_t>())
+        : scores(scores_), trans(transform_) {}
+    template<typename It>
+    multiscore_based_bscore(It from, It to,
+                            Transform transform_ = std::identity<score_t>())
+        : scores(from, to), trans(transform_) {}
 
-//     // main operator
-//     behavioral_score operator()(const combo_tree& tr) const {
-//         // TODO
-//     }
+    // main operator
+    behavioral_score operator()(const combo_tree& tr) const {
+        behavioral_score bs(scores.size());
+        boost::transform(scores, bs.begin(), [&](const Score& sc) {
+                return this->trans(sc(tr)); });
+        return bs;
+    }
 
-//     behavioral_score best_possible_bscore() const {
-//         behavioral_score res(scores.size());
-//         best_possible_score()
-//     }
+    behavioral_score best_possible_bscore() const {
+        behavioral_score bs(scores.size());
+        boost::transform(scores, bs.begin(), [&](const Score& sc) {
+                return this->trans(sc.best_possible_score()); });
+        return bs;
+    }
     
-//     ScoreSeq scores;
-// };
+    ScoreSeq scores;
+    Transform trans;
+};
 
 /**
  * Each feature corresponds to an input tuple, 0 if the output of the
