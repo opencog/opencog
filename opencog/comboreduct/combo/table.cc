@@ -244,9 +244,9 @@ double OTEntropy(const OTable& ot)
 bool checkCarriageReturn(istream& in)
 {
     char next_c = in.get();
-    if(next_c == '\r') // DOS format
+    if (next_c == '\r') // DOS format
         next_c = in.get();
-    if(next_c == '\n')
+    if (next_c == '\n')
         return true;
     return false;
 }
@@ -254,7 +254,7 @@ bool checkCarriageReturn(istream& in)
 void removeCarriageReturn(string& str)
 {
     size_t s = str.size();
-    if((s > 0) && (str[s-1] == '\r'))
+    if ((s > 0) && (str[s-1] == '\r'))
         str.resize(s-1);
 }
 
@@ -412,8 +412,8 @@ get_row_tokenizer(string& line)
     removeNonASCII(line);
     removeCarriageReturn(line);
 
-    // tokenize line
-    static const seperator sep(",");
+    // tokenize line; current allow tabs, commas, blanks.
+    static const seperator sep(",\t ");
     return tokenizer(line, sep);
 }
 
