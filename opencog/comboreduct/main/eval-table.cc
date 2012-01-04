@@ -35,7 +35,7 @@ using namespace opencog;
 
 /**
  * Program to output the result of a combo program given input data
- * described in CSV format. It has a few additional options to
+ * described in DSV format. It has a few additional options to
  * compute the mutual information, and more to add.
  */
 
@@ -78,7 +78,7 @@ int main(int argc,char** argv) {
          "Random seed.\n")
         (opt_desc_str(input_table_opt).c_str(),
          value<string>(&pa.input_table_file),
-         "Input table file in CSV format.\n")
+         "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")

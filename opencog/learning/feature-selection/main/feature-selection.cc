@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
          string("Feature selection algorithm. Supported algorithms are\n").append(un).append(" for univariate,\n").append(sa).append(" for simulated annealing,\n").append(hc).append(" for hillclimbing,\n").append(inc).append(" for incremental.\n").c_str())
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&fs_params.input_file),
-         "Input table file in CSV format.\n")
+         "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&fs_params.target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")

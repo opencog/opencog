@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
          "Random seed.\n")
         (opt_desc_str(header_opt).c_str(),
          value<bool>(&header)->default_value(true),
-         "If 1, the first row is the header of the CSV file.\n")
+         "If 1, the first row is the header of the DSV file (seperators are comma, withspace and tabulation).\n")
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          string("Combo program to generate the output.\n").c_str())

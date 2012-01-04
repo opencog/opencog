@@ -286,7 +286,7 @@ int moses_exec(int argc, char** argv)
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&input_data_file),
-         "Input table file in CSV format. Colums correspond to features and the number of samples is taken to be the number of rows.\n")
+         "Input table file in DSV format (with comma, whitespace and tabulation as seperator). Colums correspond to features and rows to observations.\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")

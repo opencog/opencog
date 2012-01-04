@@ -404,7 +404,7 @@ type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
 type_tree infer_data_type_tree(const std::string& dataFileName, int pos = 0);
 
 /**
- * return the position of the target in the CSV data file fileName. If
+ * return the position of the target in the DSV data file fileName. If
  * none raise an assert.
  */
 int findTargetFeaturePosition(const std::string& fileName,
@@ -457,7 +457,7 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
 }
 
 /**
- * Fill an input table and output table given a CSV
+ * Fill an input table and output table given a DSV
  * (delimiter-seperated values) file format, where delimiters are ',',
  * ' ' or '\t'.
  *
@@ -641,7 +641,7 @@ typedef contin_matrix::const_iterator const_cm_it;
 
 
 /**
- * if the CSV data file has a header with labels
+ * if the DSV data file has a header with labels
  */
 std::vector<std::string> readInputLabels(const std::string& file, int pos = 0);
 
