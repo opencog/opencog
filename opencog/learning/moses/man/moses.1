@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "December 29, 2011"
+.TH MOSES 1 "January 3, 2012"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -89,14 +89,33 @@ moses \- meta-optimizing semantic evolutionary search solver
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
 \fBmoses\fP is the command-line wrapper to the MOSES program learning
-library. It may be used to solve learning tasks specified with file inputs,
-or to run various demonstration problems.
+library. It may be used to solve learning tasks specified with file
+inputs, or to run various demonstration problems.  Its primary use is
+meant to be for performing regression on an input table of values.
+The output is a \fBcombo\fP program that best fits the data.
+.PP
+As an example, the input file
+
+.nf
+\& a,b,out
+\& 0,0,0
+\& 0,1,0
+\& 1,0,0
+\& 1,1,1
+.fi
+
+when run with the flags \fI\-u\ out\ \-W1\fR will generate the combo
+program \fIand(#a\ #b)\fR, as the third column is the boolean-and
+for the first two.
+
 .PP
 .\" ============================================================
 .SH OPTIONS
 .PP
-Options fall into two classes: those that are used to run \fBmoses\fP in
-demo mode, and those used for practical problem solving.
+Options fall into four classes: those for specifying inputs, 
+controlling operation, printing output, and running
+\fBmoses\fP in demo mode.
+
 .SS "General options"
 .TP
 .BI \-e\  exemplar
@@ -126,8 +145,18 @@ the remote machines.
 .\" ============================================================
 .SS "Input specification options"
 These options control how input data is specified and interpreted.
+In its primary mode of operation, \fBmoses\fR performs regression on a 
+a table of input data. One column is designated as the target, the
+remaining columns are taken as predictors.  The output of regression
+is a \fBcombo\fR program that is a function of the predictors, reproducing
+the target. 
 .PP
-XXX TODO explain how this really works...
+Input files should consist of ASCII data, separated by commas or
+whitespace.  The appearance of \fB# ;\fR or \fB!\fR in the first
+column denotes a comment. The first non-comment, non-numeric row in the
+file (if any) is taken to hold column labels. The target column may be
+specified using the \fB\-u\fR option with a column name. The printing of
+column names on output is controlled with the \fB\-W1\fR flag.
 .TP
 .BI \-b\  num \fR,\ \fB\-\-nsamples= num
 The number of samples to be taken from the input file. Valid values 
@@ -396,6 +425,6 @@ More information is available at
 .B http://wiki.opencog.org/w/MOSES
 .SH AUTHORS
 .nh
-moses was written by Moshe Looks, Nil Geisweiller, and many others.
+\fBmoses\fP was written by Moshe Looks, Nil Geisweiller, and many others.
 .PP
-This manual page is being written by Linas Vepstas. COMPLETELY INCOMPLETE.
+This manual page is being written by Linas Vepstas. INCOMPLETE.
