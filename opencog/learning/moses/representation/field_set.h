@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/field_set.h
+ * opencog/learning/moses/representation/field_set.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _EDA_FIELD_SET_H
-#define _EDA_FIELD_SET_H
+#ifndef _REP_FIELD_SET_H
+#define _REP_FIELD_SET_H
 
 #include <map>
 

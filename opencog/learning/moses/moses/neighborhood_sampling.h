@@ -414,12 +414,21 @@ Out vary_n_knobs(const field_set& fs,
     return out;
 }
 
-inline deme_size_t safe_binomial_coefficient(unsigned k, unsigned n) {
+/**
+ * safe_binomial_coefficient -- compute the binomial coefficient
+ *
+ * This is algo is "safe" in that it attempts to deal with numeric
+ * overflow in computing the binomial coefficient, so that overflows
+ * are clamped to max, instead of wrapping over, or throwing.
+ */
+inline deme_size_t
+safe_binomial_coefficient(unsigned k, unsigned n)
+{
     deme_size_t res;
-    double noi_db = binomial_coefficient<double>(k , n);
+    double noi_db = binomial_coefficient<double>(k, n);
     try {
         res = numeric_cast<deme_size_t>(noi_db);
-    } catch(positive_overflow&) {
+    } catch (positive_overflow&) {
         res = numeric_limits<deme_size_t>::max();
     }
     return res;

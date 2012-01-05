@@ -47,25 +47,43 @@
 
 namespace opencog { namespace moses {
 
-inline double information_theoretic_bits(const field_set& fs)
+/**
+ * information_theoretic_bits -- return information content of the field set.
+ *
+ * The information content of a single variable is defined as log base
+ * two of the number of possible values that the variable can take.
+ * Thus, for example, a single bit has two possible values, and an
+ * information content of exactly one.
+ *
+ * This routine sums the total information content in a field set,
+ * including that in contin and term fields, as well as the discrete
+ * and boolean fields.
+ */
+inline double 
+information_theoretic_bits(const field_set& fs)
 {
     double res = 0;
-    foreach(const field_set::disc_spec& d, fs.disc_and_bits())
+    foreach (const field_set::disc_spec& d, fs.disc_and_bits())
         res += log2<double>(d.multy);
-    foreach(const field_set::contin_spec& c, fs.contin()) {
+
+    foreach (const field_set::contin_spec& c, fs.contin())
+    {
         // number of possible contins with depth d is 2^(d+1)-1 because
         // after a Stop only Stop is allowed which is why it is not 3^d
         unsigned contin_count = pow2(c.depth + 1) - 1;
         res += log2<double>(contin_count);
     }
-    foreach(const field_set::term_spec& o, fs.term())
+
+    foreach (const field_set::term_spec& o, fs.term())
         res += log2<double>(o.branching) * double(o.depth);
+
     return res;
 }
 
 // Parameters used mostly for EDA algorithms but also possibly by
 // other algo
-struct optim_parameters {
+struct optim_parameters
+{
     optim_parameters(double _pop_size_ratio = 20,
                      score_t _terminate_if_gte = 0,
                      double _max_dist_ratio = 1) :
@@ -81,13 +99,14 @@ struct optim_parameters {
 
         max_dist_ratio(_max_dist_ratio) {}
 
-    //N=p.popsize_ratio*n^1.05
-    inline unsigned pop_size(const field_set& fs) {
+    // N = p.popsize_ratio*n^1.05
+    inline unsigned pop_size(const field_set& fs)
+    {
         return ceil((double(pop_size_ratio)*
                      pow(information_theoretic_bits(fs), 1.05)));
     }
 
-    //term_total*n
+    // term_total*n
     inline unsigned max_gens_total(const field_set& fs) {
         return ceil(term_total*information_theoretic_bits(fs));
     }
@@ -130,7 +149,8 @@ struct optim_parameters {
 };
 
 // Parameters specific to EDA optimization
-struct eda_parameters {
+struct eda_parameters
+{
     eda_parameters() :
         selection(2),          //if <=1, truncation selection ratio,
                                //if >1, tournament selection size (should be int)
@@ -156,7 +176,8 @@ struct eda_parameters {
     double model_complexity;
 };
 
-struct univariate_optimization {
+struct univariate_optimization
+{
     univariate_optimization(RandGen& _rng,
                             const optim_parameters& op = optim_parameters(),
                             const eda_parameters& ep = eda_parameters())
@@ -165,14 +186,15 @@ struct univariate_optimization {
     //return # of evaluations actually performed
     template<typename Scoring>
     unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals) {
+                        const Scoring& score, unsigned max_evals)
+    {
         unsigned pop_size = opt_params.pop_size(deme.fields());
         unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
         unsigned max_gens_improv = opt_params.max_gens_improv(deme.fields());
         unsigned n_select = double(pop_size) * eda_params.selection_ratio;
         unsigned n_generate = double(pop_size) * eda_params.replacement_ratio;
 
-        //adjust parameters based on the maximal # of evaluations allowed
+        // Adjust parameters based on the maximal # of evaluations allowed
         if (max_evals < pop_size) {
             pop_size = max_evals;
             max_gens_total = 0;
@@ -181,8 +203,8 @@ struct univariate_optimization {
                                  (max_evals - pop_size) / n_generate);
         }
 
-        //create the initial sample
-        //generate the initial sample to populate the deme
+        // Create the initial sample
+        // Generate the initial sample to populate the deme
         deme.resize(pop_size);
         generate_initial_sample(deme.fields(), pop_size, deme.begin(),
                                 deme.end(), rng);
@@ -223,7 +245,8 @@ struct univariate_optimization {
     eda_parameters eda_params;
 };
 
-struct hc_parameters {
+struct hc_parameters
+{
     hc_parameters(bool _terminate_if_improvement = true,
                   unsigned _fraction_of_remaining = 10)
         : terminate_if_improvement(_terminate_if_improvement),
@@ -235,7 +258,8 @@ struct hc_parameters {
                                     // search of a deme
 };
 
-struct iterative_hillclimbing {
+struct iterative_hillclimbing
+{
     iterative_hillclimbing(RandGen& _rng,
                            const optim_parameters& op = optim_parameters(),
                            const hc_parameters& hc = hc_parameters())
@@ -249,25 +273,28 @@ struct iterative_hillclimbing {
      * - the total number of neighbors at that distance is T
      */
     float prob_improvement(deme_size_t N, deme_size_t T, unsigned d,
-                           const field_set& fields) {
-        
-        // the following is based on the not always true assumption
-        // that there is an improvement in the neighborhood
+                           const field_set& fields)
+    {
+        // The following is based on the (not always true) assumption
+        // that there is an improvement in the neighborhood.
         static const deme_size_t NB = 10000; // number of better candidates in
                                              // the neighborhood at distance d
                                              // that number is a big lie!
 
-        // if the entire neighborhood is explored then the improvement
-        // is sure to be found
-        if(N >= T)
+        // If the entire neighborhood is explored then the improvement
+        // is sure to be found.
+        if (N >= T)
             return 1;
         
-        // approximation of the total number of candidates at distance
+        // Approximation of the total number of candidates at distance
         // d. This figure is lower than the reality because the
         // distance is not necessarily binary. If the field has only
         // binary knobs then it is correct. We use that because T is
         // not the actual number of neighbors but between N and the
-        // actually number of neighbors at distance d
+        // actually number of neighbors at distance d.
+        //
+        // information_theoretic_bits() counts the information content
+        // in the field set. (sum log_2 of all field sizes).
         deme_size_t bT =
             safe_binomial_coefficient(information_theoretic_bits(fields), d);
 
@@ -278,21 +305,26 @@ struct iterative_hillclimbing {
     }
     
     /**
-     * @param deme were to store the candidates searched. Typically
-     *             the deme is empty, if it is not empty it will be
-     *             overwritten
-     * @prama init_inst start the seach from this instance
-     * @param score the scoring function
-     * @param max_evals the maximum number of evaluations
-     * @param eval_best the actual number of evaluations to reach
-     *                  the best solution
-     * @return number of evaluations actually performed
+     * Perform one iteration of hill-climbing.
+     *
+     * @param deme     Where to store the candidates searched. The deme
+     *                 is assumed to be empty.  If it is not empty, it
+     *                 will be overwritten.
+     * @prama init_inst Start the seach from this instance.
+     * @param score the Scoring function.
+     * @param max_evals The maximum number of evaluations to eperform.
+     * @param eval_best returned: The number of evaluations performed
+     *                  to reach the best solution.
+     * @return number of evaluations actually performed. This will always
+     *         be equal or larger than the eval_best return, as not all
+     *         evaluations lead to the best solution.
      */
     template<typename Scoring>
     unsigned operator()(instance_set<composite_score>& deme,
                         const instance& init_inst,
                         const Scoring& score, unsigned max_evals,
-                        unsigned* eval_best = NULL) {
+                        unsigned* eval_best = NULL)
+    {
         // Logger
         logger(). debug("Iterative HillClimbing Optimization");
         // ~Logger
@@ -303,7 +335,7 @@ struct iterative_hillclimbing {
 
         deme_size_t current_number_of_instances = 0;
 
-        //adjust parameters based on the maximal # of evaluations allowed
+        // Adjust parameters based on the maximal # of evaluations allowed.
         deme_size_t max_number_of_instances =
             (deme_size_t)max_gens_total * (deme_size_t)pop_size;
         if (max_number_of_instances > max_evals)
@@ -311,7 +343,7 @@ struct iterative_hillclimbing {
 
         unsigned max_distance = opt_params.max_distance(fields);
 
-        // score the initial instance
+        // Score the initial instance.
         instance center_inst(init_inst);
         composite_score best_cscore = worst_composite_score;
 
@@ -337,7 +369,7 @@ struct iterative_hillclimbing {
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
 
-            // the number of all neighbours at the distance d (stops
+            // The number of all neighbours at the distance d (stops
             // counting when above number_of_new_instances)
             deme_size_t total_number_of_neighbours =
                 count_n_changed_knobs(deme.fields(), center_inst, distance,
@@ -351,7 +383,7 @@ struct iterative_hillclimbing {
             logger().debug("Estimated probability to find an improvement = %f",
                            p_improv);
 
-            if(p_improv < 0.01) {
+            if (p_improv < 0.01) {
                 logger().debug("The probability is too low to pursue the search",
                                p_improv);
                 break;
@@ -390,9 +422,9 @@ struct iterative_hillclimbing {
 
             current_number_of_instances += number_of_new_instances;
 
-            if(has_improved) {
+            if (has_improved) {
                 distance = 1;
-                if(eval_best)
+                if (eval_best)
                     *eval_best = current_number_of_instances;         
                 // Logger
                 {
@@ -415,10 +447,12 @@ struct iterative_hillclimbing {
         
         return current_number_of_instances;
     }
+
     // like above but assumes that init_inst is null (backward compatibility)
     template<typename Scoring>
     unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals) {
+                        const Scoring& score, unsigned max_evals)
+    {
         instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
     }
@@ -430,8 +464,15 @@ struct iterative_hillclimbing {
 
 // @todo: redo the code entriely from iterative_hillclimbing to take
 // the improvements into account. Ask Nil for help!
-struct sliced_iterative_hillclimbing {
-
+//
+// XXX is this actually useful? I mean, if we've got multi-threading,
+// then what is the point of doing this ??  Is this just un-needed
+// complexity?  Is this code stale?  The only place where its used
+// is in the ant hillclmbing demo, and that crashes anyway...
+// (bugzilla 911364)
+//
+struct sliced_iterative_hillclimbing
+{
     typedef enum {
         M_INIT,
         M_BUILD_CANDIDATES,
@@ -628,7 +669,8 @@ struct sliced_iterative_hillclimbing {
 /////////////////////////
 
 // Parameters specific for Simulated Annealing
-struct sa_parameters {
+struct sa_parameters
+{
     sa_parameters() :
         init_temp(30),
         min_temp(0),
@@ -643,8 +685,8 @@ struct sa_parameters {
     deme_size_t max_new_instances;
 };
 
-struct simulated_annealing {
-     
+struct simulated_annealing
+{
     typedef score_t energy_t;
  
     simulated_annealing(RandGen& _rng,
@@ -671,14 +713,12 @@ struct simulated_annealing {
     
     energy_t energy(score_t sc)
     {
-        // here let the energy be the reverse of the score, that
-        // because the better instance has the lower energy but higher
-        // score.
-        //
-        // NOTICE: it may use some other methods to present the
-        // energy.
+        // The energy is minus the score. This is because better scores
+        // are bigger numbers, whereas, in SA, better scores correspond
+        // to lower energies.
         return -sc;
     }
+
     energy_t energy(const scored_instance<composite_score>& inst)
     {
         return energy(get_score(inst.second));
@@ -701,8 +741,8 @@ struct simulated_annealing {
     template<typename Scoring>
     unsigned operator()(instance_set<composite_score>& deme,
                         const instance& init_inst,
-                        const Scoring& score, unsigned max_evals) {
-
+                        const Scoring& score, unsigned max_evals)
+    {
         const field_set& fields = deme.fields();
         max_distance = opt_params.max_distance(fields);
 
@@ -719,7 +759,7 @@ struct simulated_annealing {
 
         unsigned step = 1;
 
-        // score the initial instance
+        // Score the initial instance
         instance center_instance(init_inst);
         scored_instance<composite_score> scored_center_inst = 
             score_instance(center_instance, score);
@@ -798,10 +838,12 @@ struct simulated_annealing {
         
         return current_number_of_instances;
     }
+
     // like above but assumes that the initial instance is null
     template<typename Scoring>
     unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals) {
+                        const Scoring& score, unsigned max_evals)
+    {
         const instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
     }

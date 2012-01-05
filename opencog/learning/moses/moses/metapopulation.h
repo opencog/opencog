@@ -311,7 +311,7 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     /**
-     * expand do representation-building and create a deme first, and
+     * expand -- Do representation-building and create a deme first, and
      * then do some optimization according to the scoring function,
      * and add all unique non-dominated trees in the final deme as
      * potential exemplars for future demes.
@@ -327,8 +327,9 @@ struct metapopulation : public bscored_combo_tree_set
     bool expand(int max_evals,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
-                const combo_tree_ns_set* actions = NULL)  {
-        if(!create_deme(ignore_ops, perceptions, actions))
+                const combo_tree_ns_set* actions = NULL)
+    {
+        if (!create_deme(ignore_ops, perceptions, actions))
             return false;
 
         _n_evals += optimize_deme(max_evals);
@@ -342,7 +343,7 @@ struct metapopulation : public bscored_combo_tree_set
         log_best_candidates();
         // ~Logger
 
-        //this may happens for instance if the eval fails and throws an exception
+        // Might be empty, if the eval fails and throws an exception
         return !empty();
     }
 
@@ -444,12 +445,12 @@ struct metapopulation : public bscored_combo_tree_set
      *         return -1 if all available is evaluated.
      */
     int optimize_deme(int max_evals, int max_for_slice,
-                      score_t max_score) {
-
+                      score_t max_score)
+    {
         if (_rep == NULL || _deme == NULL)
             return -1;
 
-        //do some optimization according to the scoring function
+        // Do some optimization according to the scoring function
         optimize.set_evals_per_slice(max_for_slice);
         int n;
         complexity_based_scorer<Scoring> scorer =
@@ -484,7 +485,8 @@ struct metapopulation : public bscored_combo_tree_set
      *
      * @return return the number of evaluations actually performed,
      */
-    int optimize_deme(int max_evals) {
+    int optimize_deme(int max_evals)
+    {
         // Logger
         {
             logger().debug("Optimize deme");
@@ -506,7 +508,8 @@ struct metapopulation : public bscored_combo_tree_set
      * 2) merge non-dominated candidates in the metapopulation,
      * 3) delete the deme instance from memory.
      */
-    void close_deme() {
+    void close_deme()
+    {
         if (_rep == NULL || _deme == NULL)
             return;
 
@@ -582,7 +585,7 @@ struct metapopulation : public bscored_combo_tree_set
                     == this->_visited_exemplars.end();
 
                 // update the set of potential exemplars
-                if(already_visited && thread_safe_find_tr()) {
+                if (already_visited && thread_safe_find_tr()) {
                     // recompute the complexity if the candidate has
                     // not been previously reduced
                     composite_score csc = this->params.reduce_all?
