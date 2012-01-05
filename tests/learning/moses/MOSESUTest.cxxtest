@@ -22,8 +22,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include <opencog/learning/moses/main/moses_exec.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace opencog::moses;
+using namespace ant_combo;
 
 const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
 
@@ -31,26 +33,53 @@ const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/mose
  * MOSES test on toy problems
  */
 class MOSESUTest : public CxxTest::TestSuite {
-    void moses_test(vector<string> arguments, score_t expected_sc = 0) {
-        // build arguments
+    string build_arguments(vector<string>& arguments) {
         char tempfile[] = "/tmp/MOSESUTestXXXXXX";
         int tmp = mkstemp(tempfile);
-        std::cout << tmp << std::endl;
+        cout << tmp << endl;
         arguments.insert(arguments.begin(), "moses-exec");
         arguments.push_back(string("-o").append(tempfile).c_str());
+        return tempfile;
+    }
+
+    pair<score_t, combo_tree> parse_result(const string& tempfile) {
+        // open file
+        FILE* fp = fopen(tempfile.c_str(), "r");
+        __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
+        istream in(&pipe_buf);
+        // parse result
+        score_t score;
+        in >> score;
+        combo_tree tr;
+        in >> tr;
+        cout << score << " " << tr << endl;
+        // close file and return result
+        pclose(fp);
+        return {score, tr};
+    }
+    
+    void moses_test_score(vector<string> arguments, score_t expected_sc = 0) {
+        // build arguments
+        string tempfile = build_arguments(arguments);
         // run moses
         moses_exec(arguments);
         // parse the result
-        FILE* fp = fopen(tempfile, "r");
-        __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
-        istream sp(&pipe_buf);
-        string score;
-        sp >> score;
-        std::cout << "score = " << score << std::endl;
-        pclose(fp);
-        // check that the result is 0
-        TS_ASSERT(lexical_cast<int>(score) == expected_sc);
+        auto result = parse_result(tempfile);
+        // check that the result is the expected one
+        TS_ASSERT_EQUALS(result.first, expected_sc);
     }
+
+    void moses_test_combo(vector<string> arguments, combo_tree expected_tr) {
+        // build arguments
+        string tempfile = build_arguments(arguments);
+        // run moses
+        moses_exec(arguments);
+        // parse the result
+        auto result = parse_result(tempfile);
+        // check that the result is the expected one
+        TS_ASSERT_EQUALS(result.second, expected_tr);
+    }
+
 public:
     MOSESUTest() {
         // logger().setPrintToStdoutFlag(true);
@@ -58,35 +87,43 @@ public:
     }
 
     void test_2_parity() {
-        moses_test({"-Hpa", "-k2"});
+        moses_test_score({"-Hpa", "-k2"});
     }
     void test_2_parity_with_labels() {
-        moses_test({"-Hpa", "-k2", "-W1"});
+        moses_test_score({"-Hpa", "-k2", "-W1"});
     }
     void test_3_parity_multi_thread() {
-        moses_test({"-Hpa", "-k3", "-m100000", "-j4"});
+        moses_test_score({"-Hpa", "-k3", "-m100000", "-j4"});
     }
     void test_3_mux() {
-        moses_test({"-Hmux", "-k1"});
+        moses_test_score({"-Hmux", "-k1"});
     }
     void test_sa_2_parity() {
-        moses_test({"-Hpa", "-k2", "-asa"});
+        moses_test_score({"-Hpa", "-k2", "-asa"});
     }
     void test_sa_3_mux() {
-        moses_test({"-Hmux", "-k1", "-asa"});
+        moses_test_score({"-Hmux", "-k1", "-asa"});
     }
     void test_un_3_pa_multi_thread() {
-        moses_test({"-Hpa", "-k3", "-aun", "-m100000", "-j4"});
+        moses_test_score({"-Hpa", "-k3", "-aun", "-m100000", "-j4"});
     }
     void test_it() {
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
         string max_evals("-m1000");
-        moses_test({data_file_path, max_evals}, -3);
+        moses_test_score({data_file_path, max_evals}, -3);
     }
     void test_sr_3() {
-        moses_test({"-Hsr", "-k3", "-m100000"});
+        moses_test_score({"-Hsr", "-k3", "-m100000"});
     }
-    void test_cp() {
-        moses_test({"-Hcp", "-y or(and(#2 !#3) #1 !#4 #5)"});
+    void test_cp_combo() {
+        stringstream tr_ss("or(and(#2 !#3) #1 !#4 #5)");
+        combo_tree tr;
+        tr_ss >> tr;
+        string cp_opt("-y");
+        cp_opt += tr_ss.str();
+        moses_test_combo({"-Hcp", cp_opt}, tr);
     }
+    // void test_kl() {
+        
+    // }
 };
