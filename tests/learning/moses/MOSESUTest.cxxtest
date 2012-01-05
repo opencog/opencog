@@ -69,7 +69,7 @@ class MOSESUTest : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(result.first, expected_sc);
     }
 
-    void moses_test_combo(vector<string> arguments, combo_tree expected_tr) {
+    void moses_test_combo(vector<string> arguments, string expected_tr_str) {
         // build arguments
         string tempfile = build_arguments(arguments);
         // run moses
@@ -77,6 +77,9 @@ class MOSESUTest : public CxxTest::TestSuite {
         // parse the result
         auto result = parse_result(tempfile);
         // check that the result is the expected one
+        stringstream expected_tr_ss(expected_tr_str);
+        combo_tree expected_tr;
+        expected_tr_ss >> expected_tr;
         TS_ASSERT_EQUALS(result.second, expected_tr);
     }
 
@@ -115,15 +118,14 @@ public:
     void test_sr_3() {
         moses_test_score({"-Hsr", "-k3", "-m100000"});
     }
-    void test_cp_combo() {
-        stringstream tr_ss("or(and(#2 !#3) #1 !#4 #5)");
-        combo_tree tr;
-        tr_ss >> tr;
+    void test_cp() {
+        string tr_str("or(and(#2 !#3) #1 !#4 #5)");
         string cp_opt("-y");
-        cp_opt += tr_ss.str();
-        moses_test_combo({"-Hcp", cp_opt}, tr);
+        moses_test_combo({"-Hcp", cp_opt + tr_str}, tr_str);
     }
-    // void test_kl() {
-        
-    // }
+    void test_kl() {
+        string tr_str("and(or(!#1 !#2) or(#1 #2))");
+        string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
+        moses_test_combo({"-Hkl", data_file_path}, tr_str);        
+    }
 };
