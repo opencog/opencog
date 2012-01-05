@@ -33,8 +33,6 @@ using boost::str;
 
 static const unsigned int max_filename_size = 255;
 
-/// @todo replace all error displaying by logger().error instead
-        
 /**
  * Display error message about unspecified combo tree and exit
  */

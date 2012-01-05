@@ -86,4 +86,7 @@ public:
     void test_sr_3() {
         moses_test({"-Hsr", "-k3", "-m100000"});
     }
+    void test_cp() {
+        moses_test({"-Hcp", "-y or(and(#2 !#3) #1 !#4 #5)"});
+    }
 };
