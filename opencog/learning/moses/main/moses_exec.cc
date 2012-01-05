@@ -37,8 +37,8 @@ static const unsigned int max_filename_size = 255;
  * Display error message about unspecified combo tree and exit
  */
 void unspecified_combo_exit() {
-    std::cerr << "error: you must specify which combo tree to learn (option -y)"
-              << std::endl;
+    cerr << "error: you must specify which combo tree to learn (option -y)"
+         << endl;
     exit(1);
 }
 
@@ -46,7 +46,7 @@ void unspecified_combo_exit() {
  * Display error message about unsupported type and exit
  */
 void unsupported_type_exit(const type_tree& tt) {
-    std::cerr << "error: type " << tt << " currently not supported" << std::endl;
+    cerr << "error: type " << tt << " currently not supported" << endl;
     exit(1);
 }
 void unsupported_type_exit(type_node type) {
@@ -57,8 +57,8 @@ void unsupported_type_exit(type_node type) {
  * Display error message about ill formed combo tree and exit
  */
 void illformed_exit(const combo_tree& tr) {
-    std::cerr << "error: apparently the combo tree "
-              << tr << "is not well formed" << std::endl;
+    cerr << "error: apparently the combo tree "
+         << tr << "is not well formed" << endl;
     exit(1);
 }
 
@@ -66,8 +66,8 @@ void illformed_exit(const combo_tree& tr) {
  * Display error message about unsupported problem and exit
  */
 void unsupported_problem_exit(const string& problem) {
-    std::cerr << "error: problem " << problem
-              << " unsupported for the moment" << std::endl;
+    cerr << "error: problem " << problem
+         << " unsupported for the moment" << endl;
     exit(1);
 }
 
@@ -75,8 +75,8 @@ void unsupported_problem_exit(const string& problem) {
  * Display error message about missing input data file and exit
  */
 void no_input_datafile_exit() {
-    std::cerr << "No input data file has been specified (option -"
-              << input_data_file_opt.second << ")" << std::endl;
+    cerr << "No input data file has been specified (option -"
+         << input_data_file_opt.second << ")" << endl;
     exit(1);
 }
 
@@ -86,9 +86,9 @@ void no_input_datafile_exit() {
 void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
                              const string& input_data_file2, arity_t arity2)
 {
-    std::cerr << "Input file " << input_data_file1 << " has arity " << arity1
-              << "while input file " << input_data_file2 << "has_arity "
-              << arity2 << std::endl;
+    cerr << "Input file " << input_data_file1 << " has arity " << arity1
+         << "while input file " << input_data_file2 << "has_arity "
+         << arity2 << endl;
     exit(1);
 }
         
@@ -96,8 +96,8 @@ void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
  * Display error message about not recognized combo operator and exist
  */
 void not_recognized_combo_operator(const string& ops_str) {
-    std::cerr << "error: " << ops_str
-              << " is not recognized as combo operator" << std::endl;
+    cerr << "error: " << ops_str
+         << " is not recognized as combo operator" << endl;
     exit(1);
 }
 
@@ -109,8 +109,8 @@ combo_tree type_to_exemplar(type_node type) {
     case id::boolean_type: return combo_tree(id::logical_and);
     case id::contin_type: return combo_tree(id::plus);
     case id::ill_formed_type:
-        std::cerr << "The data type is incorrect, perhaps it has not been"
-                  << " possible to infer it from the input table." << std::endl;
+        cerr << "The data type is incorrect, perhaps it has not been"
+             << " possible to infer it from the input table." << endl;
         exit(1);
     default:
         unsupported_type_exit(type);
@@ -237,7 +237,7 @@ combo::arity_t infer_arity(const string& problem,
 int moses_exec(int argc, char** argv)
 {
     // for(int i = 0; i < argc; ++i)
-    //     std::cout << "arg = " << argv[i] << std::endl;
+    //     cout << "arg = " << argv[i] << endl;
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
@@ -494,10 +494,10 @@ int moses_exec(int argc, char** argv)
 
     // set log
     if(log_file_dep_opt) {
-        std::set<std::string> ignore_opt{log_file_dep_opt_opt.first};
+        set<string> ignore_opt{log_file_dep_opt_opt.first};
         log_file = determine_log_name(default_log_file_prefix,
                                       vm, ignore_opt,
-                                      std::string(".").append(default_log_file_suffix));
+                                      string(".").append(default_log_file_suffix));
     }
 
     // remove log_file
@@ -695,16 +695,26 @@ int moses_exec(int argc, char** argv)
             int as = alphabet_size(tt, ignore_ops);
 
             typedef occam_max_KLD_bscore BScore;
-            typedef bscore_based_score<BScore> Score;
-            boost::ptr_vector<Score> scores;
-            foreach(const Table& table, tables) {
-                std::unique_ptr<BScore> bsc_ptr(new BScore(table, stdev, as, rng));
-                scores.push_back(new Score(*bsc_ptr));
+            if (tables.size() > 1) {
+                typedef bscore_based_score<BScore> Score;
+                boost::ptr_vector<Score> scores;
+                foreach(const Table& table, tables) {
+                    unique_ptr<BScore> bsc_ptr(new BScore(table, stdev, as, rng));
+                    scores.push_back(new Score(*bsc_ptr));
+                }
+                multiscore_based_bscore<Score> bscore(scores);
+                metapop_moses_results(rng, exemplars, tt,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
             }
-            multiscore_based_bscore<Score> bscore(scores);
-            metapop_moses_results(rng, exemplars, tt,
-                                  bool_reduct, bool_reduct_rep, bscore,
-                                  opt_params, meta_params, moses_params, mmr_pa);
+            else {
+                BScore bscore(tables.front(), stdev, as, rng);
+                metapop_moses_results(rng, exemplars, tt,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
+            }
         }
         else if (problem == ann_it)
         { // regression based on input table using ann

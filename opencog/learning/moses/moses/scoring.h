@@ -76,9 +76,9 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
 /**
  * score calculated based on the behavioral score. Useful to avoid
  * redundancy of code and computation in case there is a cache over
- * bscore. The score is calculated as the minus of the sum of the
- * bscore over all features, that is:
- * score = - sum_f BScore(f),
+ * bscore. The score is calculated as the sum of the bscore over all
+ * features, that is:
+ * score = sum_f BScore(f),
  */
 /// @todo Inheriting that class from score_base raises a compile error
 /// because in moses_exec.h some code attempts to use BScore that is
@@ -123,7 +123,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     // returns the best score reachable for that problem. Used as
     // termination condition.
     score_t best_possible_score() const {
-        return -boost::accumulate(bscore.best_possible_bscore(), 0.0);
+        return boost::accumulate(bscore.best_possible_bscore(), 0.0);
     }
     const BScore& bscore;
 };
