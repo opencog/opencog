@@ -110,7 +110,8 @@ int main(int argc, char** argv)
 {
     // Tell the system logger to print detailed debugging messages to
     // stdout. This will let us watch what the optimizer is doing.
-    // Set to Logger::WARN to only show arnings and errors.
+    // Set to Logger::WARN to show only warnings and errors.
+    logger() = Logger("demo.log");
     logger().setLevel(Logger::FINE);
     logger().setPrintToStdoutFlag(true);
 
