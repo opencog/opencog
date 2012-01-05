@@ -32,6 +32,7 @@
 
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/functional.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/eval.h>
@@ -135,37 +136,41 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
  * that transforms each sub-score before being recorded in the
  * behavioral score.
  */
+// template<typename Score, typename Transform = std::identity<score_t> >
 template<typename Score>
 struct multiscore_based_bscore : public bscore_base
 {
     // ctors
-    typedef std::vector<Score> ScoreSeq;
-    typedef std::unary_function<score_t, score_t> Transform;
-    multiscore_based_bscore(const ScoreSeq& scores_,
-                            Transform transform_ = std::identity<score_t>())
-        : scores(scores_), trans(transform_) {}
-    template<typename It>
-    multiscore_based_bscore(It from, It to,
-                            Transform transform_ = std::identity<score_t>())
-        : scores(from, to), trans(transform_) {}
+    typedef boost::ptr_vector<Score> ScoreSeq;
+    // multiscore_based_bscore(const ScoreSeq& scores_,
+    //                         Transform transform_ = std::identity<score_t>())
+    multiscore_based_bscore(const ScoreSeq& scores_)
+        // : scores(scores_), trans(transform_) {}
+        : scores(scores_) {}
+    // template<typename It>
+    // multiscore_based_bscore(It from, It to,
+    //                         Transform transform_ = std::identity<score_t>())
+    //     : scores(from, to), trans(transform_) {}
 
     // main operator
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(scores.size());
         boost::transform(scores, bs.begin(), [&](const Score& sc) {
-                return this->trans(sc(tr)); });
+                // return this->trans(sc(tr)); });
+                return sc(tr); });
         return bs;
     }
 
     behavioral_score best_possible_bscore() const {
         behavioral_score bs(scores.size());
         boost::transform(scores, bs.begin(), [&](const Score& sc) {
-                return this->trans(sc.best_possible_score()); });
+                // return this->trans(sc.best_possible_score()); });
+                return sc.best_possible_score(); });
         return bs;
     }
     
     ScoreSeq scores;
-    Transform trans;
+    // Transform trans;
 };
 
 /**
@@ -374,9 +379,7 @@ struct occam_ctruth_table_bscore : public bscore_base
 // program (when the output is true)
 struct occam_max_KLD_bscore : public bscore_base
 {
-    occam_max_KLD_bscore(const Table& table,
-                         float stdev,
-                         float alphabet_size,
+    occam_max_KLD_bscore(const Table& table, float stdev, float alphabet_size,
                          RandGen& _rng);
     
     behavioral_score operator()(const combo_tree& tr) const;
