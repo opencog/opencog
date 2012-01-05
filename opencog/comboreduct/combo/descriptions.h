@@ -53,9 +53,13 @@ struct builtin_argument {
 };
 
 
-// For all builtins the arity must be given here; the ordering of the builtins is irrelevant.
-// This array is used for building an array with builtins as indeces, within the singleton
-// class builtin_properties. This array should not have any other usages.
+// For all builtins the arity must be given here; the ordering of the
+// builtins is irrelevant.  This array is used for building an array
+// with builtins as indicies, within the singleton class builtin_properties.
+// This array should not have any other usages.
+//
+// ToDo: would be nice to have a more Caml/Haskell style syntax here,
+// right?
 static const builtin_description bd[] = {
     //action                    type  
     { id::null_vertex,          "unknown" },
