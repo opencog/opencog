@@ -40,6 +40,7 @@ ADD_LIBRARY(util SHARED
 	tree
     oc_omp
     KLD
+    comprehension
 	${WIN32_GETOPT_FILES}
     ${APPLE_STRNDUP_FILES}
 )
@@ -89,6 +90,7 @@ INSTALL(FILES
     oc_omp.h
     Counter.h
     KLD.h
+    comprehension.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 
