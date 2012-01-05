@@ -33,6 +33,8 @@ using boost::str;
 
 static const unsigned int max_filename_size = 255;
 
+/// @todo replace all error displaying by logger().error instead
+        
 /**
  * Display error message about unspecified combo tree and exit
  */
@@ -71,6 +73,27 @@ void unsupported_problem_exit(const string& problem) {
     exit(1);
 }
 
+/**
+ * Display error message about missing input data file and exit
+ */
+void no_input_datafile_exit() {
+    std::cerr << "No input data file has been specified (option -"
+              << input_data_file_opt.second << ")" << std::endl;
+    exit(1);
+}
+
+/**
+  * Display error that not all data files have same arity and exit
+  */
+void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
+                             const string& input_data_file2, arity_t arity2)
+{
+    std::cerr << "Input file " << input_data_file1 << " has arity " << arity1
+              << "while input file " << input_data_file2 << "has_arity "
+              << arity2 << std::endl;
+    exit(1);
+}
+        
 /**
  * Display error message about not recognized combo operator and exist
  */
@@ -146,7 +169,7 @@ combo_tree str_to_combo_tree(const string& combo_str) {
 }
 
 // return true iff the problem is based on data file
-bool data_based_problem(const string& problem) {
+bool datafile_based_problem(const string& problem) {
     return problem == it || problem == ann_it || problem == kl;
 }
 
@@ -157,12 +180,29 @@ bool combo_based_problem(const string& problem) {
 
 // Infer the arity of the problem
 combo::arity_t infer_arity(const string& problem,
-                    unsigned int problem_size,
-                    const string& input_table_file,
-                    const string& combo_str)
+                           unsigned int problem_size,
+                           const vector<string>& input_table_files,
+                           const string& combo_str)
 {
-    if (data_based_problem(problem))
-        return dataFileArity(input_table_file);
+    if (datafile_based_problem(problem)) {
+        if (input_table_files.empty())
+            no_input_datafile_exit();
+
+        combo::arity_t arity = dataFileArity(input_table_files.front());
+        if (input_table_files.size() > 1) {
+            // check that all input data files have the same arity
+            combo::arity_t test_arity;
+            for (size_t i = 1; input_table_files.size(); ++i) {
+                test_arity = dataFileArity(input_table_files[i]);
+                if (test_arity != arity) {
+                    not_all_same_arity_exit(input_table_files[0], arity,
+                                            input_table_files[i], test_arity);
+                    return -1;
+                }
+            }
+        }
+        return arity;
+    }
     else if(combo_based_problem(problem))
     {
         if(combo_str.empty())
@@ -203,7 +243,7 @@ int moses_exec(int argc, char** argv)
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
-    string input_data_file;
+    vector<string> input_data_files;
     string target_feature;
     string problem;
     string combo_str;
@@ -285,8 +325,8 @@ int moses_exec(int argc, char** argv)
          value<int>(&max_gens)->default_value(-1),
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
         (opt_desc_str(input_data_file_opt).c_str(),
-         value<string>(&input_data_file),
-         "Input table file in DSV format (with comma, whitespace and tabulation as seperator). Colums correspond to features and rows to observations.\n")
+         value<vector<string> >(&input_data_files),
+         "Input table file in DSV format (with comma, whitespace and tabulation as seperator). Colums correspond to features and rows to observations. Can be used several times, in such a case each data file defines a fitness function that a candidate must satisfy all at once (multi-objective optimization if you will). Each file must have the same number of features (but necessarily the same number of inputs). And in case they have headers (names of the features), they must be identical (same names in same order).\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")
@@ -472,7 +512,8 @@ int moses_exec(int argc, char** argv)
     MT19937RandGen rng(rand_seed);
 
     // infer arity
-    combo::arity_t arity = infer_arity(problem, problem_size, input_data_file, combo_str);
+    combo::arity_t arity = infer_arity(problem, problem_size,
+                                       input_data_files, combo_str);
 
     // Convert include_only_ops_str to the set of actual operators to
     // ignore.
@@ -541,13 +582,14 @@ int moses_exec(int argc, char** argv)
 
     // find the position of the target feature of the data file if any
     int target_pos = 0;
-    if (!target_feature.empty() && !input_data_file.empty())
-        target_pos = findTargetFeaturePosition(input_data_file, target_feature);
+    if (!target_feature.empty() && !input_data_files.empty())
+        target_pos = findTargetFeaturePosition(input_data_files.front(),
+                                               target_feature);
 
     // read labels on data file
     vector<string> labels;
-    if (output_with_labels && !input_data_file.empty())
-        labels = readInputLabels(input_data_file, target_pos);
+    if (output_with_labels && !input_data_files.empty())
+        labels = readInputLabels(input_data_files.front(), target_pos);
 
     // set metapop_moses_results_parameters
     metapop_moses_results_parameters mmr_pa(vm, result_count,
@@ -569,17 +611,20 @@ int moses_exec(int argc, char** argv)
     const rule& bool_reduct_rep = logical_reduction(reduct_knob_building_effort);
 
     // Problem based on input table.
-    if (data_based_problem(problem)) {
+    if (datafile_based_problem(problem)) {
         // infer the signature based on the input table
-        type_tree table_tt = infer_data_type_tree(input_data_file);
+        type_tree table_tt = infer_data_type_tree(input_data_files.front());
 
-        // read input_data_file file
-        logger().debug("Read data file %s", input_data_file.c_str());
-        Table table = istreamTable(input_data_file, target_pos);
-
-        // possible subsample the table
-        if (nsamples > 0)
-            subsampleTable(table.itable, table.otable, nsamples, rng);
+        // read input data files
+        vector<Table> tables;
+        foreach(const string& idf, input_data_files) {
+            logger().debug("Read data file %s", idf.c_str());
+            Table table = istreamTable(idf, target_pos);
+            // possible subsample the table
+            if (nsamples > 0)
+                subsampleTable(table.itable, table.otable, nsamples, rng);
+            tables.push_back(table);
+        }
 
         if (problem == it) { // regression based on input table
  
@@ -593,20 +638,17 @@ int moses_exec(int argc, char** argv)
 
             type_node output_type = 
                 *(get_output_type_tree(*exemplars.begin()->begin()).begin());
-            if(output_type == id::unknown_type) {
+            if(output_type == id::unknown_type)
                 output_type = table_output_tn;
-            }
 
             OC_ASSERT(output_type == table_output_tn);
 
-            if(nsamples>0)
-                subsampleTable(table.itable, table.otable, nsamples, rng);
-        
             type_tree tt = gen_signature(output_type, arity);
             int as = alphabet_size(tt, ignore_ops);
         
             if(output_type == id::boolean_type) {
-                CTable ctable = table.compress();
+                /// @todo: support multiple input data files
+                CTable ctable = tables.front().compress();
                 occam_ctruth_table_bscore bscore(ctable, prob, as, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
@@ -615,15 +657,18 @@ int moses_exec(int argc, char** argv)
             }
             else if(output_type == id::contin_type) {
                 if(discretize_thresholds.empty()) {
-                    occam_contin_bscore bscore(table.otable, table.itable,
+                    /// @todo: support multiple input data files
+                    occam_contin_bscore bscore(tables.front().otable,
+                                               tables.front().itable,
                                                stdev, as, rng);
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
                 } else {
-                    occam_discretize_contin_bscore bscore(table.otable,
-                                                          table.itable,
+                    /// @todo: support multiple input data files
+                    occam_discretize_contin_bscore bscore(tables.front().otable,
+                                                          tables.front().itable,
                                                           discretize_thresholds,
                                                           weighted_accuracy,
                                                           prob, as,
@@ -653,28 +698,31 @@ int moses_exec(int argc, char** argv)
 
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_max_KLD_bscore bscore(table, stdev, as, rng);
+            typedef occam_max_KLD_bscore BScore;
+            typedef bscore_based_score<BScore> Score;
+            boost::ptr_vector<Score> scores;
+            foreach(const Table& table, tables) {
+                std::unique_ptr<BScore> bsc_ptr(new BScore(table, stdev, as, rng));
+                scores.push_back(new Score(*bsc_ptr));
+            }
+            multiscore_based_bscore<Score> bscore(scores);
             metapop_moses_results(rng, exemplars, tt,
                                   bool_reduct, bool_reduct_rep, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
         }
         else if (problem == ann_it)
         { // regression based on input table using ann
-            Table table = istreamTable(input_data_file, target_pos);
+
             // if no exemplar has been provided in option insert the default one
             if (exemplars.empty()) {
                 exemplars.push_back(ann_exemplar(arity));
             }
 
-            // subsample the table
-            if(nsamples>0)
-                subsampleTable(table.itable, table.otable, nsamples, rng);
-
             type_tree tt = gen_signature(id::ann_type, 0);
         
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_contin_bscore bscore(table.otable, table.itable, stdev, as, rng);
+            occam_contin_bscore bscore(tables.front().otable, tables.front().itable, stdev, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
