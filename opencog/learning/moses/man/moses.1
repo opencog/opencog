@@ -26,7 +26,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .SH SYNOPSIS
 .\" The help & version command line
 .B moses
-.RB \-h 
+.RB \-h
 .br
 .\" The general command line
 .B moses
@@ -34,19 +34,19 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR max_score ]
 .RB [ \-a
 .IR algo ]
-.RB [ \-B 
+.RB [ \-B
 .IR knob_effort ]
-.RB [ \-b 
+.RB [ \-b
 .IR nsamples ]
-.RB [ \-c 
+.RB [ \-c
 .IR result_count ]
 .RB [ \-d1 ]
-.RB [ \-E 
+.RB [ \-E
 .IR reduct_effort ]
-.RB [ \-e 
+.RB [ \-e
 .IR exemplar ]
 .RB [ \-F ]
-.RB [ \-f 
+.RB [ \-f
 .IR logfile ]
 .RB [ \-g
 .IR max_gens ]
@@ -60,6 +60,10 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR loglevel ]
 .RB [ \-m
 .IR max_evals ]
+.RB [ \-N
+.IR oper ]
+.RB [ \-n
+.IR oper ]
 .RB [ \-o
 .IR output_file ]
 .RB [ \-P
@@ -86,7 +90,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
-.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
 .\" respectively.
 \fBmoses\fP is the command-line wrapper to the MOSES program learning
 library. It may be used to solve learning tasks specified with file
@@ -120,7 +124,7 @@ should be printed on output.
 .SH OVERVIEW
 \fBmoses\fP implements program learning by using a meta-optimization
 algorithm. That is, it uses two optimization algorithms, one wrapped inside
-the other, to find solutions.  The outer optimization algorithm selects 
+the other, to find solutions.  The outer optimization algorithm selects
 candidate programs (called \fIexemplars\fP), and then creates similar
 programs by taking an exemplar and inserting variables (called
 \fIknobs\fP) in selected locations. The inner optimization algorithm
@@ -143,15 +147,15 @@ avoiding needless complexity that can cost during program evaluation.
 The operation of \fBmoses\fP can be modified by using a large variety of
 options to control different parts of the above meta-algorithm.
 The inner optimization step can be done using one of several different
-algorithms, including \fIhillclimbing\fP, \fIsimulated annealing\fP, 
-or \fIunivariate Bayesian optimization\fP.  The amount of effort 
+algorithms, including \fIhillclimbing\fP, \fIsimulated annealing\fP,
+or \fIunivariate Bayesian optimization\fP.  The amount of effort
 spent in the inner loop can be limited, as compared to how frequently
-new demes and exemplars are choosen. The total number of demes or 
+new demes and exemplars are choosen. The total number of demes or
 exemplars maintained in the population may be controlled.  The effort
 expended on program normalization at each of the two steps can be
 controlled.
 .PP
-In addition to controlling the operation of the algorithm, many 
+In addition to controlling the operation of the algorithm, many
 options are used to describe the format of the input data, and to
 control the printing of the output.
 .PP
@@ -160,8 +164,8 @@ scoring functions for various 'well-known' optimization problems,
 such as parity, disjunction, and multipilex. Each of these typically
 presents a different set of challenges to the optimization algorithm,
 and are used to illustrate 'hard' optimization problems.  These demo
-problems are useful both for learning and undertanding the use of 
-\fBmoses\fP, and also for developers and maintainers of \fBmoses\fP 
+problems are useful both for learning and undertanding the use of
+\fBmoses\fP, and also for developers and maintainers of \fBmoses\fP
 itself, when testing new features and enhancements.
 
 .PP
@@ -172,14 +176,14 @@ language.  Combo is not meant so much for general use by humans
 for practical programming, as it is to fit the needs of program
 learning.  As such, it is fairly minimal, while still being expressive
 enough so that all common programming constructs are simply represented
-in combo.  It is not difficult to convert combo programs into 
+in combo.  It is not difficult to convert combo programs into
 other languages, or to evaluate them directly.
 .PP
 In combo, all programs are represented as program trees. That
 is, each internal node in the tree is an operation and leaves are
 either constants or variables. The set of all of the variables in
 a program are taken as the arguments to the program. The program
-is evaluated by supplying explicit values for the variables, 
+is evaluated by supplying explicit values for the variables,
 and then applying operations until the root node is reached.
 .PP
 By convention, variables are denoted by a hash-mark followed by
@@ -199,7 +203,7 @@ Ints vs.floats.
 .\" ============================================================
 .SH OPTIONS
 .PP
-Options fall into four classes: those for specifying inputs, 
+Options fall into four classes: those for specifying inputs,
 controlling operation, printing output, and running
 \fBmoses\fP in demo mode.
 
@@ -232,11 +236,11 @@ the remote machines.
 .\" ============================================================
 .SS "Input specification options"
 These options control how input data is specified and interpreted.
-In its primary mode of operation, \fBmoses\fR performs regression on a 
+In its primary mode of operation, \fBmoses\fR performs regression on a
 a table of input data. One column is designated as the target, the
 remaining columns are taken as predictors.  The output of regression
-is a \fBcombo\fR program that is a function of the predictors, reproducing
-the target. 
+is a \fBcombo\fR program that is a function of the predictors,
+reproducing the target.
 .PP
 Input files should consist of ASCII data, separated by commas or
 whitespace.  The appearance of \fB# ;\fR or \fB!\fR in the first
@@ -246,17 +250,17 @@ specified using the \fB\-u\fR option with a column name. The printing of
 column names on output is controlled with the \fB\-W1\fR flag.
 .TP
 .BI \-b\  num \fR,\ \fB\-\-nsamples= num
-The number of samples to be taken from the input file. Valid values 
+The number of samples to be taken from the input file. Valid values
 run between 1 and the number of rows in the data file; other values
 are ignored. If this option is absent, then all data rows are used.
-If this option is present, then the input table is sampled randomly 
+If this option is present, then the input table is sampled randomly
 to reach this size.
 .TP
 .BI \-G\  num \fR,\ \fB\-\-weighted\-accuracy= num
 Huh ???
 .TP
 .BI \-H\  type \fR,\ \fB\-\-problem\-type= type
-A number of 
+A number of
 .I type
 may be one of:
 .TS
@@ -269,7 +273,7 @@ T}
 Regression on an input table.
 T}
 \fBkl\fR@T{
-Regression on an input table, by maximizing the Kullback-Leibler 
+Regression on an input table, by maximizing the Kullback-Leibler
 divergence between the distribution of the outputs.  That is, the
 output must still be well-scored, but it is assumed that there are
 many possible maxima. (XXX ???)
@@ -332,7 +336,7 @@ to specify this flage when memoization is enabled (with \fB-s!\fR).
 .TP
 .BI \-E\  effort \fR,\ \fB\-\-reduct\-candidate\-effort= effort
 Effort allocated for reduction of candidates. Valid values are
-in the range 0-3, with 0 standing for minimum effort, and 3 
+in the range 0-3, with 0 standing for minimum effort, and 3
 for maximum effort. For certain very symmetric problems, such
 as the disjunct problem, greater reduction can lead to significantly
 faster solution-finding.  The default \fIeffort\fR is 2.
@@ -346,7 +350,29 @@ unlimited.
 Perform no more than \fInum\fR evaluations of the scoring function.
 Default value is 10000.
 .TP
-.BI \-P\  num \fR,\ \fB\-\-pop\-size-ratio= num
+.BI \-N\  oper \fR,\ \fB\-\-include\-only\-operator= oper
+Include the operator \fIoper\fP, but exclude others, in the solution.
+This option may be used several times to specify multiple
+operators.  Currently, \fIoper\fP may be one of
+\fBplus\fP, \fBtimes\fP, \fBdiv\fP, \fBsin\fP,
+\fBexp\fP, \fBlog\fP or a variable \fB#\fP\fIn\fP.
+Note that variables and operators are treated separately, so
+that including only some operators will still include all
+variables, and including only some variables still include
+all operators).  You may need to put variables under double
+quotes.  This option does not work with ANN.
+.TP
+.BI \-n\  oper \fR,\ \fB\-\-ignore\-operator= oper
+Ignore the operator \fIoper\fP in the program solution. 
+This option may be used several times.  Currently, \fIoper\fP
+may be one of \fBdiv\fP, \fBsin\fP, \fBexp\fP, \fBlog\fP,
+or a variable \fB#\fP\fIn\fP.
+You may need to put variables under double quotes.
+This option has the priority over the \-N option.
+That is, if an operator is both be included and ignored,
+then it is ignored.  This option does not work with ANN.
+.TP
+.BI \-P\  num \fR,\ \fB\-\-pop\-size\-ratio= num
 Controls amount of time spent on a deme.
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
@@ -368,7 +394,7 @@ These options control the displayed output.
 .TP
 .BI \-c\  count \fR,\ \fB\-\-result\-count= count
 The number of non-dominated (best) results to return, ordered according
-to score. If negative, then all results are returned, including the 
+to score. If negative, then all results are returned, including the
 dominated results.
 .TP
 .BI \-f\  filename \fR,\ \fB\-\-log\-file= filename
@@ -383,7 +409,7 @@ of 255 characters.
 .BI \-l\  loglevel \fR,\ \fB\-\-log\-level= loglevel
 Specify the level of detail for debug loging. Possible
 values for \fIloglevel\fR are \fBNONE\fR, \fBERROR\fR, \fBWARN\fR,
-\fBINFO\fR, \fBDEBUG\fR, and \fBFINE\fR. Case does not matter. 
+\fBINFO\fR, \fBDEBUG\fR, and \fBFINE\fR. Case does not matter.
 Caution: excessive logging detail can lead to significant
 program slowdown.
 .TP
@@ -401,7 +427,7 @@ Print the behavioural score.
 Print the number of evaluations performed.
 .TP
 .BI \-W1\fR,\ \fB\-\-output\-with\-labels=1
-Use named labels instead of position placeholders when printing 
+Use named labels instead of position placeholders when printing
 candidates. For example, *("#temperature" "#entropy") instead
 of *(#3 #4). This option is effective only when the data file
 contains labels in its header.
@@ -432,7 +458,7 @@ Maximum value for continuous variables.  Default 1.0.
 These options pertain to the varius built-in demo and example modes.
 .TP
 .BI \-H\  type \fR,\ \fB\-\-problem\-type= type
-A number of demonstration problems are supported. In each case, the top 
+A number of demonstration problems are supported. In each case, the top
 results are printed to stdout, as a score, followed by a combo program.
 .I type
 may be one of:
@@ -442,7 +468,7 @@ l lx.
 \fBcp\fR@T{
 Combo program regression. The scoring function is based on the
 combo program specified with the \fB-y\fR flag. That is, the goal of
-the run is to deduce and learn the specified combo program. 
+the run is to deduce and learn the specified combo program.
 T}
 \fBdj\fR@T{
 Disjunction problem. The scoring function awards a result that is a
@@ -467,14 +493,14 @@ to false.
 The size of the problem may be specified with the \fB\-k\fR option.
 T}
 \fBsr\fR@T{
-Polynomial regression problem. Given the polynomial 
+Polynomial regression problem. Given the polynomial
 \fIp(x)=x+x^2+x^3+...x^k\fR, this searches for the shortest program
-consisting of nested arithmetic operators to compute \fIp(x)\fR, 
+consisting of nested arithmetic operators to compute \fIp(x)\fR,
 given \fIx\fR as a free variable. The arithmetic operators would be
 addition, subtraction, multiplication and division; exponentiation
-is not allowed in the solution.  So, for example, using the 
+is not allowed in the solution.  So, for example, using the
 \fB\-k2\fR option to specify the order\-2 polynomial \fIx+x^2\fR,
-then the shortest combo program is \fI*(+(1 #1) #1)\fR (that is, 
+then the shortest combo program is \fI*(+(1 #1) #1)\fR (that is,
 the solution is \fIp(x)=x(x+1)\fR in the usual arithmetical notation).
 T}
 .TE
@@ -496,7 +522,7 @@ Finish documenting these aglo flags:  -M -D -I -T
 .PP
 These input flags: -i -u -b -G
 .PP
-These operator/problem type flags: -p -N -n
+These operator/problem type flags: -p 
 
 .SH SEE ALSO
 .br

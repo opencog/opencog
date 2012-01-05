@@ -396,16 +396,24 @@ int moses_exec(int argc, char** argv)
          "In the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.\n")
         (opt_desc_str(include_only_ops_str_opt).c_str(),
          value<vector<string> >(&include_only_ops_str),
-         "Include only the operator in the solution, can be used several times, for the moment only plus, times, div, sin, exp, log and variables (#n) are supported. Note that variables and operators are decoralated (including only some operators still include all variables and including only some variables still include all operators). You may need to put variables under double quotes. This option does not work with ANN.\n")
+         "Include this operator, but exclude others, in the solution.  "
+         "This option may be used several times to specify multiple "
+         "operators.  Currently, only these operators are "
+         "supported: plus, times, div, sin, exp, log and variables (#n). "
+         "Note that variables and operators are treated separately, so "
+         "that including only some operators will still include all "
+         "variables, and including only some variables still include "
+         "all operators).  You may need to put variables under double "
+         "quotes.  This option does not work with ANN.\n")
         (opt_desc_str(ignore_ops_str_opt).c_str(),
          value<vector<string> >(&ignore_ops_str),
-         str(format("Ignore the following operator in the program solution,"
-                    " can be used several times, for the moment only div,"
-                    " sin, exp, log  and variables (#n) can be ignored."
-                    " You may need to put variables under double quotes."
-                    " This option has the priority over --%s."
-                    " That is if an operator is both be included and ignored,"
-                    " it is ignored. This option does not work with ANN.\n")
+         str(format("Ignore the following operator in the program solution.  "
+                    "This option may be used several times.  Currently, only div, "
+                    "sin, exp, log  and variables (#n) can be ignored.  "
+                    "You may need to put variables under double quotes.  "
+                    "This option has the priority over --%s.  "
+                    "That is, if an operator is both be included and ignored, "
+                    "then it is ignored.  This option does not work with ANN.\n")
              % include_only_ops_str_opt.first).c_str())
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
@@ -492,26 +500,35 @@ int moses_exec(int argc, char** argv)
         return 1;
     }
 
-    // set log
-    if(log_file_dep_opt) {
+    // Set log file.
+    if (log_file_dep_opt) {
         set<string> ignore_opt{log_file_dep_opt_opt.first};
         log_file = determine_log_name(default_log_file_prefix,
                                       vm, ignore_opt,
                                       string(".").append(default_log_file_suffix));
     }
 
-    // remove log_file
+    // Remove old log_file before setting the new one.
     remove(log_file.c_str());
     logger().setFilename(log_file);
     logger().setLevel(logger().getLevelFromString(log_level));
     logger().setBackTraceLevel(Logger::ERROR);
 
-    // init random generator
+    // Log command-line args
+    std::string cmdline = "Command line:";
+    for (int i = 0; i < argc; ++i) {
+         cmdline += " ";
+         cmdline += argv[i];
+    }
+    logger().info(cmdline);
+
+    // Init random generator.
     MT19937RandGen rng(rand_seed);
 
-    // infer arity
+    // Infer arity
     combo::arity_t arity = infer_arity(problem, problem_size,
                                        input_data_files, combo_str);
+    logger().info("Infered arity = %d", arity);
 
     // Convert include_only_ops_str to the set of actual operators to
     // ignore.
@@ -522,9 +539,9 @@ int moses_exec(int argc, char** argv)
         foreach (const string& s, include_only_ops_str) {
             vertex v;
             if (builtin_str_to_vertex(s, v)) {
-                if(!ignore_operators) {
-		  ignore_ops = {id::plus, id::times, id::div,
-				id::exp, id::log, id::sin};
+                if (!ignore_operators) {
+                    ignore_ops = {id::plus, id::times, id::div,
+                                  id::exp, id::log, id::sin};
                     ignore_operators = true;
                 }
                 ignore_ops.erase(v);
