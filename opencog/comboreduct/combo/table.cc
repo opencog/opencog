@@ -372,15 +372,15 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
     type_tree tt(id::lambda_type);
     auto root = tt.begin();
 
-    foreach(const string& s, row.first) {
+    foreach (const string& s, row.first) {
         type_node n = infer_type_from_token(s);
-        if(n == id::ill_formed_type)
+        if (n == id::ill_formed_type)
             return type_tree(id::ill_formed_type);
         else
             tt.append_child(root, n);
     }
     type_node n = infer_type_from_token(row.second);
-    if(n == id::ill_formed_type)
+    if (n == id::ill_formed_type)
         return type_tree(id::ill_formed_type);
     else
         tt.append_child(root, n);
@@ -395,7 +395,7 @@ type_tree infer_data_type_tree(const string& fileName, int pos)
     get_data_line(*in, line);
     if (has_header(fileName))
         get_data_line(*in, line);
-    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line));
+    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line, pos));
     OC_ASSERT(is_well_formed(res));
     return res;
 }
@@ -472,7 +472,7 @@ void istreamTable(const string& file_name, ITable& it, OTable& ot, int pos)
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
     istreamTable(in, it, ot, has_header(file_name),
-                 infer_data_type_tree(file_name), pos);
+                 infer_data_type_tree(file_name, pos), pos);
 }
 
 Table istreamTable(const string& file_name, int pos)

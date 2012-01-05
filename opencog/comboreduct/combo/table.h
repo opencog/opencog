@@ -411,30 +411,38 @@ int findTargetFeaturePosition(const std::string& fileName,
                               const std::string& target);
 
 /**
- * take a row, modify it to be Unix format compatible and return a
- * tokenizer of it using as sperator the characters ',', ' ' or '\t'.
+ * Take a row, strip away any nnon-ASCII chars and trailing carriage
+ * returns, and then return a tokenizer.  Tokenization uses the
+ * seperator characters comma, blank, tab (',', ' ' or '\t').
  */
 boost::tokenizer<boost::char_separator<char>> get_row_tokenizer(std::string& line);
 
 /**
- * take a line and return a vector containing the elements parsed.
- * Used by istreamTable. Please note that it may modify line to be
- * Unix compatible.
+ * Take a line and return a vector containing the elements parsed.
+ * Used by istreamTable. This will modify the line to remove leading
+ * non-ASCII characters, as well as stripping of any carriage-returns.
  */
 template<typename T>
-std::vector<T> tokenizeRow(std::string& line) {
+std::vector<T> tokenizeRow(std::string& line)
+{
     boost::tokenizer<boost::char_separator<char> > tok = get_row_tokenizer(line);
     std::vector<T> res;
-    foreach(const std::string& t, tok)
+    foreach (const std::string& t, tok)
         res.push_back(boost::lexical_cast<T>(t));
     return res;
 }
 
-// Like above but split the result into an vector (the inputs) and an
-// element (the output) given that the output is at position pos. If
-// pos < 0 then the position is the last. If pos >= 0 then the
-// position is as usual (0 is the first, 1 is the second, etc).
-// If pos is out of range then an assert is raised.
+/**
+ * Take a line and return an output and a vector of inputs.
+ *
+ * The pos variable indicates which token is taken as the output.
+ * If pos < 0 then the last token is assumed to be the output.
+ * If pos >=0 then that token is used (0 is the first, 1 is the 
+ * second, etc.)  If pos is out of range, an assert is raised.
+ *
+ * This will modify the line to remove leading non-ASCII characters,
+ * as well as stripping of any carriage-returns.
+ */
 template<typename T>
 std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
 {
@@ -443,7 +451,7 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
     T output;
     int i = 0;
     foreach (const std::string& t, tok) {
-        if(i++ != pos)
+        if (i++ != pos)
             inputs.push_back(boost::lexical_cast<T>(t));
         else output = boost::lexical_cast<T>(t);
     }
@@ -451,6 +459,7 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
         output = inputs.back();
         inputs.pop_back();
     }
+
     // The following assert is to guaranty that the output has been filled
     OC_ASSERT((int)inputs.size() == i-1);
     return {inputs, output};

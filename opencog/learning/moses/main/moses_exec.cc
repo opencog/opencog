@@ -575,7 +575,7 @@ int moses_exec(int argc, char** argv)
     bool only_local = true;
     foreach(const string& js, jobs_str) {
         size_t pos = js.find(job_seperator);
-        if(pos != string::npos) {
+        if (pos != string::npos) {
             unsigned int nj = boost::lexical_cast<unsigned int>(js.substr(0, pos));
             string host_name = js.substr(pos + 1);
             jobs[host_name] = nj;
@@ -585,28 +585,30 @@ int moses_exec(int argc, char** argv)
         }
     }
 
-    // set metapopulation parameters
+    // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,
                                    revisit, include_dominated, jobs[localhost]);
 
-    // set optim_parameters
+    // Set optim_parameters.
     optim_parameters opt_params(pop_size_ratio, max_score, max_dist_ratio);
 
-    // set moses_parameters
+    // Set moses_parameters.
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
 
-    // find the position of the target feature of the data file if any
-    int target_pos = 0;
+    // Find the column number of the target feature in the data file,
+    // if any.
+    int target_column = 0;
     if (!target_feature.empty() && !input_data_files.empty())
-        target_pos = findTargetFeaturePosition(input_data_files.front(),
+        target_column = findTargetFeaturePosition(input_data_files.front(),
                                                target_feature);
+    logger().info("Target column is %d\n", target_column);
 
-    // read labels on data file
+    // Read labels contained in the data file.
     vector<string> labels;
     if (output_with_labels && !input_data_files.empty())
-        labels = readInputLabels(input_data_files.front(), target_pos);
+        labels = readInputLabels(input_data_files.front(), target_column);
 
-    // set metapop_moses_results_parameters
+    // Set metapop_moses_results_parameters.
     metapop_moses_results_parameters mmr_pa(vm, result_count,
                                             output_score, output_complexity,
                                             output_bscore, output_eval_number,
@@ -627,14 +629,18 @@ int moses_exec(int argc, char** argv)
 
     // Problem based on input table.
     if (datafile_based_problem(problem)) {
-        // infer the signature based on the input table
-        type_tree table_tt = infer_data_type_tree(input_data_files.front());
 
-        // read input data files
+        // Infer the signature based on the input table.
+        type_tree table_tt = infer_data_type_tree(input_data_files.front(), target_column);
+        std::stringstream ss;
+        ss << "Inferred data signature: " << table_tt;
+        logger().debug(ss.str());
+
+        // Read input data files
         vector<Table> tables;
-        foreach(const string& idf, input_data_files) {
+        foreach (const string& idf, input_data_files) {
             logger().debug("Read data file %s", idf.c_str());
-            Table table = istreamTable(idf, target_pos);
+            Table table = istreamTable(idf, target_column);
             // possible subsample the table
             if (nsamples > 0)
                 subsampleTable(table, nsamples, rng);
@@ -643,25 +649,28 @@ int moses_exec(int argc, char** argv)
 
         if (problem == it) { // regression based on input table
  
-            // infer the type of the input table
+            // Infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
             type_node table_output_tn = *table_output_tt.begin();
 
-            // determine the default exemplar to start with
-            if(exemplars.empty())
+            // Determine the default exemplar to start with
+            if (exemplars.empty())
                 exemplars.push_back(type_to_exemplar(table_output_tn));
 
             type_node output_type = 
                 *(get_output_type_tree(*exemplars.begin()->begin()).begin());
-            if(output_type == id::unknown_type)
+            if (output_type == id::unknown_type)
                 output_type = table_output_tn;
 
+            std::stringstream so;
+            so << "Inferred output type: " << output_type;
+            logger().debug(so.str());
             OC_ASSERT(output_type == table_output_tn);
 
             type_tree tt = gen_signature(output_type, arity);
             int as = alphabet_size(tt, ignore_ops);
         
-            if(output_type == id::boolean_type) {
+            if (output_type == id::boolean_type) {
                 /// @todo: support multiple input data files
                 CTable ctable = tables.front().compress();
                 occam_ctruth_table_bscore bscore(ctable, prob, as, rng);
@@ -670,8 +679,10 @@ int moses_exec(int argc, char** argv)
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
             }
-            else if(output_type == id::contin_type) {
-                if(discretize_thresholds.empty()) {
+
+            else
+            if (output_type == id::contin_type) {
+                if (discretize_thresholds.empty()) {
                     /// @todo: support multiple input data files
                     occam_contin_bscore bscore(tables.front(), stdev, as, rng);
                     metapop_moses_results(rng, exemplars, tt,
@@ -694,7 +705,10 @@ int moses_exec(int argc, char** argv)
             } else {
                 unsupported_type_exit(output_type);
             }
-        } else if (problem == kl) { // find interesting patterns
+        }
+
+        // KL divergence -- find interesting patterns
+        else if (problem == kl) {
             // it assumes that the inputs are boolean and the output is contin
             type_tree ettt = gen_signature(id::boolean_type,
                                            id::contin_type, arity);
@@ -733,8 +747,10 @@ int moses_exec(int argc, char** argv)
                                       mmr_pa);
             }
         }
+
+        // regression based on input table using ann
         else if (problem == ann_it)
-        { // regression based on input table using ann
+        {
 
             // if no exemplar has been provided in option insert the default one
             if (exemplars.empty()) {
