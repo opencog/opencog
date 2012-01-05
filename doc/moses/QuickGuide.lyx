@@ -1828,33 +1828,23 @@ field_set
  member used to describe how the packed bits in the instance are to be unpacked.
 \end_layout
 
+\begin_layout Subsection
+The Optimize Template
+\end_layout
+
 \begin_layout Standard
-Optimization works on these, so in 
+These file 
 \family typewriter
 eda/optimize.h
 \family default
- we find a function template:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-template <...>
-\end_layout
-
-\begin_layout Plain Layout
-
-int optimize(instance_set<ScoreT>&, ...);
-\end_layout
-
-\end_inset
-
-This function template serves as a wrapper to define a generic evolutionary
- selection algorithm:
+ defines a function template that implements a generic evolutionary selection
+ algorithm.
+ Currently, this template is used to implement only one optimization algorithm,
+ the Bayesian univariate algorithm.
+ Although MOSES also implements hill-climbing and simulated annealing, neither
+ of the latter two make use of this template (although they probably should,
+ as otherwise there is a large amount of cut-n-paste code duplication, leading
+ to code bloat and making maintenance harder ...) 
 \begin_inset listings
 inline false
 status open
@@ -1901,7 +1891,7 @@ template <typename ScoreT,
 
 \begin_layout Plain Layout
 
-int optimize(...);
+int optimize(instance_set<ScoreT>&, ...);
 \end_layout
 
 \end_inset
@@ -2219,124 +2209,58 @@ The metapopulation is updated in iterations.
 \end_layout
 
 \begin_layout Subsection
+Metaoptimization
+\end_layout
+
+\begin_layout Standard
+The main metaoptimization step is carried out by the 
+\family typewriter
+metapopulation::expand()
+\family default
+ method.
+ This method implements three steps: 
+\family typewriter
+create_deme()
+\family default
+, followed by 
+\family typewriter
+optimize_deme()
+\family default
+, followed by
+\family typewriter
+ close_deme()
+\family default
+.
+ The 
+\family typewriter
+optimize_deme()
+\family default
+ step invokes the low-level optimizer for the deme (i.e.
+ invokes either 
+\family typewriter
+univariate_optimization()
+\family default
+, 
+\family typewriter
+simulated_annealing()
+\family default
+ or 
+\family typewriter
+iterative_hillclimbing()
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+XXX discuss domination.
+\end_layout
+
+\begin_layout Subsection
 TODO:
 \end_layout
 
 \begin_layout Standard
 Discuss role of tree_type in knobs.
-\end_layout
-
-\begin_layout Section
-Key Methods
-\end_layout
-
-\begin_layout Standard
-This section briefly discusses key MOSES's methods.
-\end_layout
-
-\begin_layout Subsection
-Optimization
-\end_layout
-
-\begin_layout Standard
-The role of optimization is to score elements of the deme, and to process
- them and to generate new promising instances.
- The optimization process works over sequences of numbers (i.e., over 
-\begin_inset Quotes eld
-\end_inset
-
-instances
-\begin_inset Quotes erd
-\end_inset
-
-).
- It is invoked in the main procedure, in each iteration of expanding (the
- method 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|metapopulation::expand|
-\end_layout
-
-\end_inset
-
-, implemented in the file 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|moses/moses.h|
-\end_layout
-
-\end_inset
-
-) the metapopulation.
- The result is a set of instances that are transformed to trees and then
- added to the metapopulation (if they are not dominated by existing elements).
-\end_layout
-
-\begin_layout Standard
-Currently, there are two optimization methods implemented (implemented in
- the file 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-verb|moses/optimization.h|
-\end_layout
-
-\end_inset
-
-): 
-\end_layout
-
-\begin_layout Description
-univariate optimization based on Bayesian optimization (see 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "6"
-
-\end_inset
-
-);
-\end_layout
-
-\begin_layout Description
-iterative hillclimbing based on a simple greedy iterative process, looking
- for a better than exemplar instance at distance 
-\begin_inset Formula $1,2,3,\ldots$
-\end_inset
-
-; 
-\end_layout
-
-\begin_layout Standard
-In addition, there is support for 
-\begin_inset Quotes eld
-\end_inset
-
-sliced iterative hillclimbing
-\begin_inset Quotes erd
-\end_inset
-
-, similar as the one as above, but using a time slicing, so it can be used
- in some wider context, without leaving other subtasks idle for too long.
-\end_layout
-
-\begin_layout Standard
-Optimization algorithms also have to take care of number of evaluations
- (number of calls to scoring functions) used.
- Basically, this number controls the resources given to the algorithm.
 \end_layout
 
 \begin_layout Section
@@ -2353,7 +2277,7 @@ The main moses method is trivial: it only expand the metapopulation in iteration
 s until the given number of evaluations or a perfect solution is reached.
  This method is implemented in 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -2373,7 +2297,7 @@ Typical usage of MOSES starts by providing scoring functions.
  For instance, for learning disjunction propositional formula one can use
  the following declaration (defined in 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -2389,7 +2313,7 @@ verb|moses/scoring_functions.h|
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
