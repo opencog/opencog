@@ -239,6 +239,14 @@ struct occam_discretize_contin_bscore : public bscore_base
                                    float alphabet_size,
                                    RandGen& _rng);
 
+    // @todo when switching to gcc 4.6 use constructor delagation to
+    // simplify that
+    // occam_discretize_contin_bscore(const Table& table,
+    //                                const vector<contin_t>& thres,
+    //                                bool wa, float p,
+    //                                float alphabet_size,
+    //                                RandGen& _rng);
+
     behavioral_score operator()(const combo_tree& tr) const;
 
     // for the best possible bscore is a vector of zeros. It's
@@ -312,12 +320,25 @@ struct occam_contin_bscore : public bscore_base
         set_complexity_coef(alphabet_size, stdev);
     }
 
+    // @todo when switching to gcc 4.6 use constructor delagation to
+    // simplify that
     occam_contin_bscore(const OTable& t,
                         const ITable& r,
                         float stdev,
                         float alphabet_size,
                         RandGen& _rng)
         : target(t), cti(r), rng(_rng) {
+        occam = stdev > 0;
+        set_complexity_coef(alphabet_size, stdev);
+    }
+
+    // @todo when switching to gcc 4.6 use constructor delagation to
+    // simplify that
+    occam_contin_bscore(const Table& table,
+                        float stdev,
+                        float alphabet_size,
+                        RandGen& _rng)
+        : target(table.otable), cti(table.itable), rng(_rng) {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
     }

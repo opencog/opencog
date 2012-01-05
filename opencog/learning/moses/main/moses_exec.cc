@@ -622,7 +622,7 @@ int moses_exec(int argc, char** argv)
             Table table = istreamTable(idf, target_pos);
             // possible subsample the table
             if (nsamples > 0)
-                subsampleTable(table.itable, table.otable, nsamples, rng);
+                subsampleTable(table, nsamples, rng);
             tables.push_back(table);
         }
 
@@ -658,9 +658,7 @@ int moses_exec(int argc, char** argv)
             else if(output_type == id::contin_type) {
                 if(discretize_thresholds.empty()) {
                     /// @todo: support multiple input data files
-                    occam_contin_bscore bscore(tables.front().otable,
-                                               tables.front().itable,
-                                               stdev, as, rng);
+                    occam_contin_bscore bscore(tables.front(), stdev, as, rng);
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
@@ -722,7 +720,7 @@ int moses_exec(int argc, char** argv)
         
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_contin_bscore bscore(tables.front().otable, tables.front().itable, stdev, as, rng);
+            occam_contin_bscore bscore(tables.front(), stdev, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);

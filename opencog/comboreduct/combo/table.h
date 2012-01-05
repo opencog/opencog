@@ -511,13 +511,17 @@ std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
  * template to subsample input and output tables, after subsampling
  * the table have size min(nsamples, *table.size())
  */
-void subsampleTable(ITable& it, OTable& ot,
-                    unsigned int nsamples, RandGen& rng);
+void subsampleTable(ITable& it, OTable& ot, unsigned nsamples, RandGen& rng);
+
+/**
+ * Like above on Table instead of ITable and OTable
+ */
+void subsampleTable(Table& table, unsigned nsamples, RandGen& rng);
 
 /**
  * like above but subsample only the input table
  */
-void subsampleTable(ITable& it, unsigned int nsamples, RandGen& rng);
+void subsampleTable(ITable& it, unsigned nsamples, RandGen& rng);
 
 /////////////////
 // Truth table //

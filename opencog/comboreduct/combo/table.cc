@@ -557,8 +557,7 @@ ostream& ostreamCTable(ostream& out, const CTable& ct) {
     return out;
 }
 
-void subsampleTable(ITable& it, OTable& ot,
-                    unsigned int nsamples, RandGen& rng)
+void subsampleTable(ITable& it, OTable& ot, unsigned nsamples, RandGen& rng)
 {
     OC_ASSERT(it.size() == ot.size());
     if(nsamples < ot.size()) {
@@ -570,7 +569,13 @@ void subsampleTable(ITable& it, OTable& ot,
         }
     }
 }
-void subsampleTable(ITable& it, unsigned int nsamples, RandGen& rng) {
+
+void subsampleTable(Table& table, unsigned nsamples, RandGen& rng)
+{
+    subsampleTable(table.itable, table.otable, nsamples, rng);
+}
+
+void subsampleTable(ITable& it, unsigned nsamples, RandGen& rng) {
     if(nsamples < it.size()) {
         unsigned int nremove = it.size() - nsamples;
         dorepeat(nremove) {
