@@ -608,7 +608,7 @@ int moses_exec(int argc, char** argv)
     if (!target_feature.empty() && !input_data_files.empty())
         target_column = findTargetFeaturePosition(input_data_files.front(),
                                                target_feature);
-    logger().info("Target column is %d\n", target_column);
+    logger().info("Target column is %d", target_column);
 
     // Read labels contained in the data file.
     vector<string> labels;
