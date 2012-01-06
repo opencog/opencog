@@ -85,11 +85,10 @@ build_knobs::build_knobs(RandGen& _rng,
     // is a logical-and of two predicates on contin_t expressions.
     bool predicate_type = false;
     if (output_type == id::boolean_type) {
-       type_tree_pre_it it = tt.begin();
+       type_tree_pre_it head = tt.begin();  // skip lambda
+       type_tree_sib_it it = head.begin();  // iterate over args.
 
-       // The first element will be lambda, almost always. skip it.
-       if (it != tt.end()) it++;
-       while (it != tt.end()) {
+       while (it != head.end()) {
          if (*it != id::boolean_type) {
               predicate_type = true;
               break;
@@ -98,6 +97,7 @@ build_knobs::build_knobs(RandGen& _rng,
        }
     }
 
+    // Add knobs, depending on the kind of tree we expect this to be.
     if (predicate_type) {
         // Exemplar consists of logic ops and predicates.
         // Make sure top node of exemplar is a logic op.
@@ -238,24 +238,27 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
  */
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
-    // All n literals can each be a subtree.
+    // All of the n literals can each be a "subtree" by themselves.
     foreach (int i, from_one(_arity)) {
         vertex arg = argument(i);
         if (permitted_op(arg))
             perms.push_back(combo_tree(arg));
     }
 
-    // and n random pairs out of the total
-    // 2 * choose(n,2) = n * (n - 1) of these
+    // Also create n random pairs op(#i #j) out of the total number
+    // 2 * choose(n,2) == n * (n-1) of possible pairs.
 
-    // TODO: should bias the selection of these (and possibly choose
-    // larger subtrees)
+    // TODO: should bias the selection of these, so that
+    // larger subtrees are preferred .. !? why?
     unsigned int max_pairs = _arity*(_arity - 1);
-    if(max_pairs > 0) {
+    if (max_pairs > 0) {
         lazy_random_selector select(max_pairs, rng);
+
+        // Actual number of pairs to create ...
         unsigned int n_pairs =
             _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
-        dorepeat(n_pairs) {
+        unsigned int count = 0;
+        while (count < n_pairs) {
             //while (!select.empty()) {
             combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
             int x = select();
@@ -277,6 +280,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
                     v.append_child(v.begin(), arg_b);
                 }
                 perms.push_back(v);
+                count ++;
             }
         }
     }
@@ -411,16 +415,23 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 
 void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 {
-    // sib_it sit = types.next_sibling(types.begin());
-    // type_tree argy = *it;
     // A literal argument can be a subtree if and only if it's boolean.
+    type_tree_sib_it sit = types.begin(types.begin());  // first child
     foreach (int i, from_one(_arity)) {
         vertex arg = argument(i);
-cout << "duuuude i="<<i<< " and arg=" << arg <<endl;
-        if (permitted_op(arg))
+        if ((*sit == id::boolean_type) && permitted_op(arg))
             perms.push_back(combo_tree(arg));
+        sit++;
     }
 
+// #ifdef DEBUG_INFO
+#if 1
+    cerr << "---------------------------------" << endl;
+    cerr << endl << "Perms: " << endl;
+    foreach (const combo_tree& tr, perms)
+        cerr << tr << endl;
+    cerr << "---------------------------------" << endl;
+#endif
 }
 
 void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
@@ -798,6 +809,9 @@ static int get_max_id(sib_it it, int max_id = 0)
 
     return max_id;
 }
+
+// ***********************************************************************
+// ANN stuff
 
 static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
 {
