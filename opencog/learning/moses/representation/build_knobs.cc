@@ -415,12 +415,25 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 
 void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 {
-    // A literal argument can be a subtree if and only if it's boolean.
+    // An argument can be a subtree if it's boolean.
+    // If its a contin, then wrap it with "greater_than_zero".
     type_tree_sib_it sit = types.begin(types.begin());  // first child
-    foreach (int i, from_one(_arity)) {
+    foreach (int i, from_one(_arity))
+    {
         vertex arg = argument(i);
-        if ((*sit == id::boolean_type) && permitted_op(arg))
-            perms.push_back(combo_tree(arg));
+        if (permitted_op(arg))
+        {
+            if (*sit == id::boolean_type)
+                perms.push_back(combo_tree(arg));
+
+            if (permitted_op(id::greater_than_zero) &&
+               (*sit == id::contin_type))
+            {
+                combo_tree v(id::greater_than_zero);
+                v.append_child(v.begin(), arg);
+                perms.push_back(v);
+            }
+        }
         sit++;
     }
 
