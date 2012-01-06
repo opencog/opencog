@@ -89,15 +89,18 @@ build_knobs::build_knobs(RandGen& _rng,
     bool predicate_type = false;
     if (output_type == boolean_type_tree) {
        type_tree_pre_it it = tt.begin();
-       while (!predicate_type) {
-         if (*it != id::boolean_type)
+
+       // The first element will be lambda, almost always. skip it.
+       if (it != tt.end()) it++;
+       while (it != tt.end()) {
+         if (*it != id::boolean_type) {
               predicate_type = true;
+              break;
+         }
          it ++;
        }
     }
 
-// stubbed out, for now.
-predicate_type = false;
     if (predicate_type) {
 // under construction. We will need to build knobs in a diferent kind of way for this.
 cout << "duuude type tree is " << _type << endl;
