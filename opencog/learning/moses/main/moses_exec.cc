@@ -197,7 +197,7 @@ combo::arity_t infer_arity(const string& problem,
         if (input_table_files.size() > 1) {
             // check that all input data files have the same arity
             combo::arity_t test_arity;
-            for (size_t i = 1; input_table_files.size(); ++i) {
+            for (size_t i = 1; i < input_table_files.size(); ++i) {
                 test_arity = dataFileArity(input_table_files[i]);
                 if (test_arity != arity) {
                     not_all_same_arity_exit(input_table_files[0], arity,
@@ -738,7 +738,9 @@ int moses_exec(int argc, char** argv)
                 typedef bscore_based_score<BScore> Score;
                 boost::ptr_vector<Score> scores;
                 foreach(const Table& table, tables) {
-                    unique_ptr<BScore> bsc_ptr(new BScore(table, stdev, as, rng));
+                    /// @todo should delete bsc_ptr after use but the
+                    /// program stops anyway
+                    BScore* bsc_ptr = new BScore(table, stdev, as, rng);
                     scores.push_back(new Score(*bsc_ptr));
                 }
                 multiscore_based_bscore<Score> bscore(scores);

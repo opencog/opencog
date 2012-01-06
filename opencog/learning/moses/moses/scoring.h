@@ -162,10 +162,11 @@ struct multiscore_based_bscore : public bscore_base
     }
 
     behavioral_score best_possible_bscore() const {
-        behavioral_score bs(scores.size());
-        boost::transform(scores, bs.begin(), [&](const Score& sc) {
-                // return this->trans(sc.best_possible_score()); });
-                return sc.best_possible_score(); });
+        behavioral_score bs;
+        foreach(const Score& sc, scores) {
+            // bs.push_back(trans(sc->best_possible_score()));
+            bs.push_back(sc.best_possible_score());
+        }
         return bs;
     }
     
