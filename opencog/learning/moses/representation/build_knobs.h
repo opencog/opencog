@@ -63,9 +63,14 @@ struct build_knobs : boost::noncopyable
 protected:
     RandGen& rng;
     combo_tree& _exemplar;
-    const type_tree _type;
     representation& _rep;
-    const combo::arity_t _arity; // number of arguments of the combo program
+
+    // Number of arguments of the combo program.
+    const combo::arity_t _arity;
+
+    // Types of each of the argument literals.
+    const type_tree types;
+
     contin_t _step_size, _expansion;
     field_set::width_t _depth;
 

@@ -55,28 +55,24 @@ build_knobs::build_knobs(RandGen& _rng,
                          contin_t step_size,
                          contin_t expansion,
                          field_set::width_t depth)
-    : rng(_rng), _exemplar(exemplar), _type(tt), _rep(rep),
-      _arity(tt.begin().number_of_children() - 1),
+    : rng(_rng), _exemplar(exemplar), _rep(rep),
+      _arity(tt.begin().number_of_children() - 1), types(tt), 
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
-    type_tree output_type = type_tree_output_type_tree(_type);
-
-    type_tree action_result_type_tree(id::action_result_type);
-    type_tree boolean_type_tree(id::boolean_type);
-    type_tree contin_type_tree(id::contin_type);
-    type_tree ann_type_tree(id::ann_type);
+    type_tree ot = type_tree_output_type_tree(types);
+    type_node output_type = *ot.begin();
 
     // If there are perceptions/actions, then output had better be
     // an action result.
     if ((perceptions != NULL || actions != NULL) &&
-        (output_type != action_result_type_tree))
+        (output_type != id::action_result_type))
     {
         stringstream ss;
         ss << output_type;
         stringstream art_ss;
-        art_ss << combo::id::action_result_type;
+        art_ss << id::action_result_type;
         OC_ASSERT(0, "ERROR: During representation building, "
                      "expected action type '%s', got '%s'",
                       art_ss.str().c_str(), ss.str().c_str());
@@ -88,7 +84,7 @@ build_knobs::build_knobs(RandGen& _rng,
     // and (greater_than_zero (#1) greater_than_zero(#2))
     // is a logical-and of two predicates on contin_t expressions.
     bool predicate_type = false;
-    if (output_type == boolean_type_tree) {
+    if (output_type == id::boolean_type) {
        type_tree_pre_it it = tt.begin();
 
        // The first element will be lambda, almost always. skip it.
@@ -108,7 +104,7 @@ build_knobs::build_knobs(RandGen& _rng,
         logical_canonize(_exemplar.begin());
         build_predicate(_exemplar.begin());
     }
-    else if (output_type == boolean_type_tree) {
+    else if (output_type == id::boolean_type) {
         // Exemplar consists purely of booleans, variables and 
         // logic ops. Thus, all knobs are purely boolean/logical.
         //
@@ -117,18 +113,18 @@ build_knobs::build_knobs(RandGen& _rng,
         build_logical(_exemplar.begin());
         logical_cleanup();
     }
-    else if (output_type == action_result_type_tree) {
+    else if (output_type == id::action_result_type) {
         // Petbrain
         action_canonize(_exemplar.begin());
         build_action(_exemplar.begin());
         action_cleanup();
     }
-    else if (output_type == ann_type_tree) {
+    else if (output_type == id::ann_type) {
         // ANN
         ann_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
     }
-    else if (output_type == contin_type_tree) {
+    else if (output_type == id::contin_type) {
         contin_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
     }
@@ -415,6 +411,8 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 
 void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 {
+    // sib_it sit = types.next_sibling(types.begin());
+    // type_tree argy = *it;
     // A literal argument can be a subtree if and only if it's boolean.
     foreach (int i, from_one(_arity)) {
         vertex arg = argument(i);
