@@ -102,10 +102,16 @@ build_knobs::build_knobs(RandGen& _rng,
     }
 
     if (predicate_type) {
-// under construction. We will need to build knobs in a diferent kind of way for this.
-cout << "duuude type tree is " << _type << endl;
+        // Exemplar consists of logic ops and predicates.
+        // Make sure top node of exemplar is a logic op.
+        logical_canonize(_exemplar.begin());
+        build_predicate(_exemplar.begin());
     }
     else if (output_type == boolean_type_tree) {
+        // Exemplar consists purely of booleans, variables and 
+        // logic ops. Thus, all knobs are purely boolean/logical.
+        //
+        // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
         build_logical(_exemplar.begin());
         logical_cleanup();
@@ -131,12 +137,38 @@ cout << "duuude type tree is " << _type << endl;
     }
 }
 
+// ***********************************************************************
+// Logic trees: mixture of logic ops, boolean values, and variables.
 
+/**
+ * Modify exemplar so that the top node is either a logical_and, a
+ * logical_or, or both.  (XXX why would both be needed ??)
+ *
+ * Appropriate both for pure-boolean expressions, and for predicates
+ * (mixtures of boolean ops and predicate terms).
+ */
+void build_knobs::logical_canonize(pre_it it)
+{
+    if (is_boolean(*it))
+        *it = id::logical_and;
+    else if (*it != id::logical_and && *it != id::logical_or)
+        it = _exemplar.insert_above(it, id::logical_and);
 
+    if (*it == id::logical_and)
+        _exemplar.insert_above(it, id::logical_or);
+    else
+        _exemplar.insert_above(it, id::logical_and);
+}
+
+/**
+ * build_logical -- add knobs to an exemplar that contains only boolean
+ * and logic terms, and no other kinds of terms.
+ */
 void build_knobs::build_logical(pre_it it)
 {
     OC_ASSERT(*it != id::logical_not,
-              "the tree is supposed to be in normal form thus have no logical_not");
+              "ERROR: the tree is supposed to be in normal form; "
+              "and thus must not contain logical_not nodes.");
 
     add_logical_knobs(it);
 
@@ -165,25 +197,6 @@ void build_knobs::build_logical(pre_it it)
     }
 }
 
-bool build_knobs::permit_ops(const vertex& v)
-{
-    return _ignore_ops.find(v) == _ignore_ops.end();
-}
-
-void build_knobs::logical_canonize(pre_it it)
-{
-    if(is_boolean(*it))
-        *it = id::logical_and;
-    else if (*it != id::logical_and && *it != id::logical_or)
-        it = _exemplar.insert_above(it, id::logical_and);
-
-    if (*it == id::logical_and)
-        _exemplar.insert_above(it, id::logical_or);
-    else
-        _exemplar.insert_above(it, id::logical_and);
-}
-
-
 void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 {
     vector<combo_tree> perms;
@@ -196,6 +209,19 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
         _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
+bool build_knobs::permit_ops(const vertex& v)
+{
+    return _ignore_ops.find(v) == _ignore_ops.end();
+}
+
+/**
+ * fill perms with a set of combinations (subtrees).
+ *
+ * For now the combinations (2*_arity) are all positive literals
+ * and _arity pairs of j(#i #j) where j is either 'and' or 'or'
+ * such that j != *it, #i is a positive literal choosen randomly
+ * and #j is a positive or negative literal choosen randomly.
+ */
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
     //all n literals
@@ -250,6 +276,16 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 #endif
 }
 
+/**
+ * @param exemplar reference to the exemplar to apply probe
+ * @param it       where in the exemplar
+ * @param from     begin iterator of perms (see sample_logical_perms)
+ * @param to       end iterator of perms (see sample_logical_perms)
+ * @param add_if_in_exemplar add the knob corresponding to perm
+ *                           (or negation) if it is already in exemplar
+ * @param n_jobs   number of threads to use for the computation
+ * @return a ptr_vector of the knobs
+ */
 template<typename It>
 ptr_vector<logical_subtree_knob>
 build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
@@ -356,7 +392,18 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
     }
 }
 
+// ***********************************************************************
+// Predicate (mixed) trees: mixture of logical and predicate terms.
 
+/**
+ * build_predicate -- add knobs to an exemplar that contains only boolean
+ * and logic terms, and no other kinds of terms.
+ */
+void build_knobs::build_predicate(pre_it it)
+{
+cout << "duuuuuuuuuuuude ola" << endl;
+// cout << "duuude type tree is " << _type << endl;
+}
 
 // ***********************************************************************
 // Actions

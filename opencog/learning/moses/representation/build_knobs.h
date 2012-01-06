@@ -56,8 +56,10 @@ struct build_knobs : boost::noncopyable
                 field_set::width_t depth = 4);
 
     void build_logical(combo_tree::iterator it);
+    void build_predicate(combo_tree::iterator it);
     void build_action(combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
+
 protected:
     RandGen& rng;
     combo_tree& _exemplar;
@@ -72,8 +74,10 @@ protected:
     // of literals, 1 means _arity positive literals and
     // _arity*(_arity-1) pairs of literals
     float _perm_ratio;
-    const operator_set& _ignore_ops; //the set of operators to ignore
-                                     //during representation building
+
+    // The set of operators to ignoreduring representation building.
+    const operator_set& _ignore_ops;
+
     const combo_tree_ns_set* _perceptions;
     const combo_tree_ns_set* _actions;
 
@@ -84,27 +88,9 @@ protected:
     void add_logical_knobs(combo_tree::iterator it,
                            bool add_if_in_exemplar = true);
 
-    /**
-     * fill perms with a set of combinations (subtrees).
-     *
-     * For now the combinations (2*_arity) are all positive literals
-     * and _arity pairs of j(#i #j) where j is either 'and' or 'or'
-     * such that j != *it, #i is a positive literal choosen randomly
-     * and #j is a positive or negative literal choosen randomly.
-     */
     void sample_logical_perms(combo_tree::iterator it,
                               vector<combo_tree>& perms);
 
-    /**
-     * @param exemplar reference to the exemplar to apply probe
-     * @param it       where in the exemplar
-     * @param from     begin iterator of perms (see sample_logical_perms)
-     * @param to       end iterator of perms (see sample_logical_perms)
-     * @param add_if_in_exemplar add the knob corresponding to perm
-     *                           (or negation) if it is already in exemplar
-     * @param n_jobs   number of threads to use for the computation
-     * @return a ptr_vector of the knobs
-     */
     template<typename It>
     ptr_vector<logical_subtree_knob> logical_probe_rec(combo_tree& exemplar,
                                                        combo_tree::iterator it,
