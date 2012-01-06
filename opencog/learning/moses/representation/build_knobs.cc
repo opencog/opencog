@@ -68,18 +68,19 @@ build_knobs::build_knobs(RandGen& _rng,
     type_tree contin_type_tree(id::contin_type);
     type_tree ann_type_tree(id::ann_type);
 
-    // Make sure that the output type is one that we can work with.
-    stringstream ss;
-    ss << output_type;
-    stringstream art_ss; //action_result_type
-    art_ss << combo::id::action_result_type;
-    OC_ASSERT((((perceptions != NULL || actions != NULL) &&
-                output_type == action_result_type_tree) ||
-               output_type == boolean_type_tree ||
-               output_type == contin_type_tree ||
-               output_type == ann_type_tree),
-              "Types differ. Expected '%s', got '%s'",
-              art_ss.str().c_str(), ss.str().c_str());
+    // If there are perceptions/actions, then output had better be
+    // an action result.
+    if ((perceptions != NULL || actions != NULL) &&
+        (output_type != action_result_type_tree))
+    {
+        stringstream ss;
+        ss << output_type;
+        stringstream art_ss;
+        art_ss << combo::id::action_result_type;
+        OC_ASSERT(0, "ERROR: During representation building, "
+                     "expected action type '%s', got '%s'",
+                      art_ss.str().c_str(), ss.str().c_str());
+    }
 
     // Determine if the tree is of 'predicate type'. A predicate type
     // tree is a lambda which outputs boolean, but is a mixture of
@@ -127,13 +128,17 @@ build_knobs::build_knobs(RandGen& _rng,
         ann_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
     }
-    else {
-        OC_ASSERT(output_type == contin_type_tree,
-                  "Types differ. Expected 'combo::id::contin_type', got '%s'",
-                  ss.str().c_str());
-
+    else if (output_type == contin_type_tree) {
         contin_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
+    }
+    else
+    {
+        stringstream ss;
+        ss << output_type;
+        OC_ASSERT(0, "Unsupported output type, got '%s'",
+                  ss.str().c_str());
+
     }
 }
 
@@ -237,10 +242,10 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
  */
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
-    //all n literals
-    foreach(int i, from_one(_arity)) {
+    // All n literals can each be a subtree.
+    foreach (int i, from_one(_arity)) {
         vertex arg = argument(i);
-        if(permitted_op(arg))
+        if (permitted_op(arg))
             perms.push_back(combo_tree(arg));
     }
 
@@ -410,6 +415,14 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 
 void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 {
+    // A literal argument can be a subtree if and only if it's boolean.
+    foreach (int i, from_one(_arity)) {
+        vertex arg = argument(i);
+cout << "duuuude i="<<i<< " and arg=" << arg <<endl;
+        if (permitted_op(arg))
+            perms.push_back(combo_tree(arg));
+    }
+
 }
 
 void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
