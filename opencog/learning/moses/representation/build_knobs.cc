@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/build_knobs.cc
+ * opencog/learning/moses/representation/build_knobs.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -61,28 +61,26 @@ build_knobs::build_knobs(RandGen& _rng,
       _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
-    type_tree output_type = combo::type_tree_output_type_tree(_type);
-    combo::type_tree action_result_type_tree =
-        combo::type_tree(combo::id::action_result_type);
-    combo::type_tree boolean_type_tree =
-        combo::type_tree(combo::id::boolean_type);
-    combo::type_tree contin_type_tree =
-        combo::type_tree(combo::id::contin_type);
-    combo::type_tree ann_type_tree =
-        combo::type_tree(combo::id::ann_type);
-    // OC_ASSERT
+    type_tree output_type = type_tree_output_type_tree(_type);
+
+    type_tree action_result_type_tree(id::action_result_type);
+    type_tree boolean_type_tree(id::boolean_type);
+    type_tree contin_type_tree(id::contin_type);
+    type_tree ann_type_tree(id::ann_type);
+
+    // Make sure that the output type is one that we can work with.
     stringstream ss;
     ss << output_type;
     stringstream art_ss; //action_result_type
     art_ss << combo::id::action_result_type;
-    OC_ASSERT((((perceptions != NULL || actions != NULL) && 
+    OC_ASSERT((((perceptions != NULL || actions != NULL) &&
                 output_type == action_result_type_tree) ||
                output_type == boolean_type_tree ||
                output_type == contin_type_tree ||
                output_type == ann_type_tree),
               "Types differ. Expected '%s', got '%s'",
               art_ss.str().c_str(), ss.str().c_str());
-    // ~OC_ASSERT
+
     if (output_type == boolean_type_tree) {
         logical_canonize(_exemplar.begin());
         build_logical(_exemplar.begin());
@@ -198,10 +196,10 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
             int b = x - a * (_arity - 1);
             if (b == a)
                 b = _arity - 1;
-            
+
             argument arg_b(1 + b);
             argument arg_a(1 + a);
-            
+
             if(permit_ops(arg_a) && permit_ops(arg_b)) {
                 if (b < a) {
                     v.append_child(v.begin(), arg_b);
@@ -250,7 +248,7 @@ build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
                   [&]() {return this->logical_probe_rec(exemplar, it, from, mid,
                                                         add_if_in_exemplar,
                                                         s_jobs.first);});
-                                                   
+
         // synchronous recursive call for [mid, to) on the copy
         ptr_vector<logical_subtree_knob> kb_copy_v =
             logical_probe_rec(exemplar_copy, it_copy, mid, to,
@@ -541,7 +539,7 @@ void build_knobs::contin_canonize(pre_it it)
             _exemplar.append_child(_exemplar.insert_above(it, id::div),
                                    contin_t(1));
             canonize_div(_exemplar.parent(it));
-        } else 
+        } else
             linear_canonize_times(it);
     } else {
         _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
@@ -591,7 +589,7 @@ pre_it build_knobs::canonize_times(pre_it it)
 {
     // get contin child of 'it', if 'it' == 'times' and such contin
     // child exists
-    sib_it sib = (*it != id::times ? 
+    sib_it sib = (*it != id::times ?
                   it.end() : find_if(it.begin(), it.end(), is_contin));
     if (sib == it.end()) {
         pre_it it_times = (*it == id::times?
@@ -679,16 +677,16 @@ pre_it build_knobs::mult_add(pre_it it, const vertex& v)
 static int get_max_id(sib_it it, int max_id = 0)
 {
     int temp;
-    
+
     if(!is_ann_type(*it))
         return max_id;
 
     if((temp=get_ann_type(*it).idx)>max_id)
         max_id=temp;
-    
-    for (sib_it sib = it.begin(); sib!=it.end(); ++sib) 
+
+    for (sib_it sib = it.begin(); sib!=it.end(); ++sib)
         max_id=get_max_id(sib,max_id);
-    
+
     return max_id;
 }
 
@@ -706,7 +704,7 @@ static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
             }
         if(!duplicate)
             nodes.push_back(get_ann_type(*it));
-    }    
+    }
     for(sib_it sib=it.begin();sib!=it.end();++sib)
     {
         enumerate_nodes(sib,nodes);
@@ -730,18 +728,18 @@ void build_knobs::ann_canonize(pre_it it) {
     /*
     cout << "Canonize called..." << endl;
     cout << _exemplar << endl;
-    
+
     if(get_ann_type(*it).id != id::ann) {
         cout << "root node should be ann" << endl;
     }
-    
+
     //find maximum id of all nodes in tree
     int max_id = get_max_id(it.begin());
     cout << "MAXID: " << max_id << endl;
 
     //now create a new node with a larger id
     combo_tree new_node(ann_type(max_id+1,id::ann_node));
-    
+
     //create connections to this new node from all
     //hidden and input nodes
 
@@ -764,13 +762,13 @@ void build_knobs::ann_canonize(pre_it it) {
     {
         new_node.append_child(new_node.begin(),0.0);
     }
- 
+
     cout << "Created node: " << new_node << endl;
 
     //now attach the subtree to the hidden nodes
     //FIXME: now just attaches to the first output
     sib_it first_hidden = it.begin();
-    
+
     _exemplar.insert_subtree(first_hidden.begin(),new_node.begin());
     _exemplar.insert_after(first_hidden.last_child(),0.0);
 

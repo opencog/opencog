@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/representation.cc
+ * opencog/learning/moses/representation/representation.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -69,31 +69,28 @@ representation::representation(const reduct::rule& simplify_candidate,
       _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
 {
-    // Logger
     {
         std::stringstream ss;
-        ss << "Representation building from exemplar: " << _exemplar;
+        ss << "Building representation from exemplar: " << _exemplar;
         logger().debug(ss.str());
     }
-    // ~Logger
 
-    //build the knobs
+    // Build the knobs.
     build_knobs(rng, _exemplar, tt, *this, ignore_ops,
                 perceptions, actions,
                 stepsize, expansion, depth);
 
-    // Logger
     {
         std::stringstream ss;
         ss << "Created prototype: ";
         ostream_prototype(ss);
         logger().debug(ss.str());
     }
-    // ~Logger
-    
-    //handle knob merging
 
-    //convert the knobs into a field specification
+    // Handle knob merging.
+    // Huh ?? where ?? XXX
+
+    // Convert the knobs into a field specification
     std::multiset<field_set::spec> tmp;
     foreach(const disc_v& v, disc)
         tmp.insert(v.first);
@@ -103,13 +100,11 @@ representation::representation(const reduct::rule& simplify_candidate,
 
     set_exemplar_inst();
 
-    // Logger
     {
         std::stringstream ss;
         ss << "Exemplar instance: " << _fields.stream(_exemplar_inst);
         logger().debug(ss.str());
     }
-    // ~Logger    
 }
 
 void representation::transform(const instance& inst)
@@ -165,15 +160,15 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
         // Logger
         if(logger().getLevel() >= Logger::FINE) {
             std::stringstream ss;
-            ss << "Reduce candidate: " 
+            ss << "Reduce candidate: "
                << tr;
             logger().fine(ss.str());
         }
         // ~Logger
         if(knob_building)
-            (*get_simplify_knob_building())(tr); 
+            (*get_simplify_knob_building())(tr);
         else
-            (*get_simplify_candidate())(tr); 
+            (*get_simplify_candidate())(tr);
     }
 
     return tr;

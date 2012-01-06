@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/representation.h
+ * opencog/learning/moses/representation/representation.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -78,6 +78,7 @@ struct representation : public knob_mapper, boost::noncopyable
      * @return returns a copy of _exemplar, cleaned and reduced
      */
     combo_tree get_clean_exemplar(bool reduce, bool knob_building = false) const;
+
     /**
      * Helper of get_clean_exemplar and get_candidate.
      *
@@ -109,7 +110,7 @@ struct representation : public knob_mapper, boost::noncopyable
     const combo_tree& exemplar() const {
         return _exemplar;
     }
-    
+
     const instance& exemplar_inst() const {
         return _exemplar_inst;
     }
@@ -129,16 +130,18 @@ struct representation : public knob_mapper, boost::noncopyable
             disc_map_cit d_cit = find_disc_knob(it);
             out << (d_cit == disc.end() ? *it : d_cit->second->toStr());
         }
+
         // if null_vertex then print its child instead
         if(*it == id::null_vertex) {
             OC_ASSERT(it.has_one_child());
             it = it.begin();
         }
-        // recursive call on children            
+
+        // recursive call on children
         if(!it.is_childless()) {
             out << "(";
             for(sib_it sib = it.begin(); sib != it.end();) {
-                ostream_prototype(out, sib);            
+                ostream_prototype(out, sib);
                 if(++sib != it.end()) out << " ";
             }
             out << ")";
