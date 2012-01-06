@@ -96,6 +96,8 @@ build_knobs::build_knobs(RandGen& _rng,
        }
     }
 
+// stubbed out, for now.
+predicate_type = false;
     if (predicate_type) {
 // under construction. We will need to build knobs in a diferent kind of way for this.
 cout << "duuude type tree is " << _type << endl;
