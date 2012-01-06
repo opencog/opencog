@@ -137,6 +137,17 @@ build_knobs::build_knobs(RandGen& _rng,
     }
 }
 
+/**
+ * permitted_op -- return true if the vertex is a permitted operator.
+ *
+ * An operator is permitted, if it is not one of those that we were
+ * told to ignore, i.e. that should be omitted from the tree.
+ */
+bool build_knobs::permitted_op(const vertex& v)
+{
+    return _ignore_ops.find(v) == _ignore_ops.end();
+}
+
 // ***********************************************************************
 // Logic trees: mixture of logic ops, boolean values, and variables.
 
@@ -209,25 +220,27 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
         _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
-bool build_knobs::permit_ops(const vertex& v)
-{
-    return _ignore_ops.find(v) == _ignore_ops.end();
-}
-
 /**
- * fill perms with a set of combinations (subtrees).
+ * Create a set of subtrees for the given node.
  *
- * For now the combinations (2*_arity) are all positive literals
- * and _arity pairs of j(#i #j) where j is either 'and' or 'or'
- * such that j != *it, #i is a positive literal choosen randomly
- * and #j is a positive or negative literal choosen randomly.
+ * Each subtree must be "permitted", i.e. a legal combination of 
+ * logical operators and literals. These are called "perms".
+ *
+ * Here, a "literal" is one of the input "variables" #i. A positive
+ * literal is just #i, and a negative literal is it's negation !#i.
+ *
+ * For now, there are 2*_arity combinations, consisting of all 
+ * positive literals, and _arity pairs of op(#i #j) where 'op' is one
+ * of the logic ops 'and' or 'or', such that op != *it, and #i is a
+ * positive literal choosen randomly and #j is a positive or negative
+ * literal choosen randomly.
  */
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
     //all n literals
     foreach(int i, from_one(_arity)) {
         vertex arg = argument(i);
-        if(permit_ops(arg))
+        if(permitted_op(arg))
             perms.push_back(combo_tree(arg));
     }
 
@@ -253,7 +266,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
             argument arg_b(1 + b);
             argument arg_a(1 + a);
 
-            if(permit_ops(arg_a) && permit_ops(arg_b)) {
+            if(permitted_op(arg_a) && permitted_op(arg_b)) {
                 if (b < a) {
                     v.append_child(v.begin(), arg_b);
                     v.append_child(v.begin(), arg_a);
@@ -395,14 +408,25 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 // ***********************************************************************
 // Predicate (mixed) trees: mixture of logical and predicate terms.
 
+void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
+{
+}
+
+void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
+{
+    vector<combo_tree> perms;
+    sample_predicate_perms(it, perms);
+}
+
 /**
  * build_predicate -- add knobs to an exemplar that contains only boolean
  * and logic terms, and no other kinds of terms.
  */
 void build_knobs::build_predicate(pre_it it)
 {
-cout << "duuuuuuuuuuuude ola" << endl;
-// cout << "duuude type tree is " << _type << endl;
+    add_predicate_knobs(it);
+
+    // XXX and more stuff to come ... 
 }
 
 // ***********************************************************************
@@ -609,7 +633,7 @@ void build_knobs::contin_canonize(pre_it it)
             canonize_div(_exemplar.move_after(it, pre_it(div++)));
         //handle the rest of the children
 
-        if(permit_ops(id::div)) {
+        if(permitted_op(id::div)) {
             _exemplar.append_child(_exemplar.insert_above(it, id::div),
                                    contin_t(1));
             canonize_div(_exemplar.parent(it));
@@ -617,7 +641,7 @@ void build_knobs::contin_canonize(pre_it it)
             linear_canonize_times(it);
     } else {
         _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
-        if(permit_ops(id::div)) {
+        if(permitted_op(id::div)) {
             _exemplar.append_child(_exemplar.insert_above(it, id::div),
                                    contin_t(1));
             canonize_div(_exemplar.parent(it));
@@ -711,11 +735,11 @@ void build_knobs::rec_canonize(pre_it it)
             }
         }
         //add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
-        if(permit_ops(id::sin))
+        if(permitted_op(id::sin))
             append_linear_combination(mult_add(it, id::sin));
-        if(permit_ops(id::log))
+        if(permitted_op(id::log))
             append_linear_combination(mult_add(it, id::log));
-        if(permit_ops(id::exp))
+        if(permitted_op(id::exp))
             append_linear_combination(mult_add(it, id::exp));
         append_linear_combination(it);
     } else if (*it == id::sin || *it == id::log || *it == id::exp) {
@@ -736,7 +760,7 @@ void build_knobs::append_linear_combination(pre_it it)
         it = _exemplar.append_child(it, id::plus);
     foreach(int idx, from_one(_arity)) {
         vertex arg = argument(idx);
-        if(permit_ops(arg))
+        if(permitted_op(arg))
             mult_add(it, arg);
     }
 }

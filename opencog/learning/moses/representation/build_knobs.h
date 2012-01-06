@@ -75,15 +75,17 @@ protected:
     // _arity*(_arity-1) pairs of literals
     float _perm_ratio;
 
-    // The set of operators to ignoreduring representation building.
+    // The set of operators to ignore during representation building.
     const operator_set& _ignore_ops;
 
     const combo_tree_ns_set* _perceptions;
     const combo_tree_ns_set* _actions;
 
-    // return true if the following operator is permitted for knob building
-    bool permit_ops(const vertex& v);
+    // Return true if the operator is allowed for knob building.
+    bool permitted_op(const vertex& v);
 
+    // ------------------------------------------------------
+    // logical knob building
     void logical_canonize(combo_tree::iterator);
     void add_logical_knobs(combo_tree::iterator it,
                            bool add_if_in_exemplar = true);
@@ -109,6 +111,16 @@ protected:
     // like the above but exemplar is _exemplar
     bool disc_probe(disc_knob_base& kb);
 
+    // ------------------------------------------------------
+    // predicate knob building
+    void add_predicate_knobs(combo_tree::iterator it,
+                           bool add_if_in_exemplar = true);
+
+    void sample_predicate_perms(combo_tree::iterator it,
+                              vector<combo_tree>& perms);
+
+    // ------------------------------------------------------
+    // action knob building
     void action_canonize(combo_tree::iterator);
     void add_action_knobs(combo_tree::iterator it,
                           bool add_if_in_exemplar = true);
