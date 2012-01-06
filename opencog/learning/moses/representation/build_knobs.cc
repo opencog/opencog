@@ -81,20 +81,42 @@ build_knobs::build_knobs(RandGen& _rng,
               "Types differ. Expected '%s', got '%s'",
               art_ss.str().c_str(), ss.str().c_str());
 
+    // Determine if the tree is of 'predicate type'. A predicate type
+    // tree is a lambda which outputs boolean, but is a mixture of
+    // other kinds of types as argumentss. So, for example, 
+    // and (greater_than_zero (#1) greater_than_zero(#2))
+    // is a logical-and of two predicates on contin_t expressions.
+    bool predicate_type = false;
     if (output_type == boolean_type_tree) {
+       type_tree_pre_it it = tt.begin();
+       while (!predicate_type) {
+         if (*it != id::boolean_type)
+              predicate_type = true;
+         it ++;
+       }
+    }
+
+    if (predicate_type) {
+// under construction. We will need to build knobs in a diferent kind of way for this.
+cout << "duuude type tree is " << _type << endl;
+    }
+    else if (output_type == boolean_type_tree) {
         logical_canonize(_exemplar.begin());
         build_logical(_exemplar.begin());
         logical_cleanup();
-    } else if (output_type == action_result_type_tree) {
+    }
+    else if (output_type == action_result_type_tree) {
         // Petbrain
         action_canonize(_exemplar.begin());
         build_action(_exemplar.begin());
         action_cleanup();
-    } else if (output_type == ann_type_tree) {
+    }
+    else if (output_type == ann_type_tree) {
         // ANN
         ann_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
-    } else {
+    }
+    else {
         OC_ASSERT(output_type == contin_type_tree,
                   "Types differ. Expected 'combo::id::contin_type', got '%s'",
                   ss.str().c_str());
