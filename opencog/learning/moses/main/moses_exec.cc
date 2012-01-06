@@ -104,7 +104,8 @@ void not_recognized_combo_operator(const string& ops_str) {
 /**
  * determine the initial exemplar of a given type
  */
-combo_tree type_to_exemplar(type_node type) {
+combo_tree type_to_exemplar(type_node type)
+{
     switch(type) {
     case id::boolean_type: return combo_tree(id::logical_and);
     case id::contin_type: return combo_tree(id::plus);
@@ -136,12 +137,15 @@ combo_tree ann_exemplar(combo::arity_t arity)
 }
 
 /**
- * determine the alphabet size given the type_tree of the problem and
- * the of operator that are ignored
+ * Determine the alphabet size given the type_tree of the problem and
+ * a list of operators to ignore.
  */
 int alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
 {
+    // arity will be zero for anything that isn't a lambda_type.
+    // However, all tables will be lambda_type ...
     combo::arity_t arity = type_tree_arity(tt);
+
     type_node output_type = *type_tree_output_type_tree(tt).begin();
     if (output_type == id::boolean_type) {
         return 3 + arity;
@@ -150,15 +154,16 @@ int alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
         // in contin formula, it will have to be adapted
         return 8 + arity - ignore_ops.size();
     } else if (output_type == id::ann_type) {
-        return 2 + arity*arity; // to account for hidden neurones, very roughly
+        return 2 + arity*arity; // to account for hidden neurons, very roughly
     } else {
         unsupported_type_exit(tt);
         return 0;
     }
 }
 
-// combo_tree
-combo_tree str_to_combo_tree(const string& combo_str) {
+//* Convert string to a combo_tree
+combo_tree str_to_combo_tree(const string& combo_str)
+{
     stringstream ss;
     combo_tree tr;
     ss << combo_str;
@@ -166,13 +171,15 @@ combo_tree str_to_combo_tree(const string& combo_str) {
     return tr;
 }
 
-// return true iff the problem is based on data file
-bool datafile_based_problem(const string& problem) {
+//* return true iff the problem is based on data file
+bool datafile_based_problem(const string& problem)
+{
     return problem == it || problem == ann_it || problem == kl;
 }
 
-// return true iff the problem is based on a combo tree
-bool combo_based_problem(const string& problem) {
+//* return true iff the problem is based on a combo tree
+bool combo_based_problem(const string& problem)
+{
     return problem == cp || problem == ann_cp;
 }
 
@@ -201,14 +208,14 @@ combo::arity_t infer_arity(const string& problem,
         }
         return arity;
     }
-    else if(combo_based_problem(problem))
+    else if (combo_based_problem(problem))
     {
-        if(combo_str.empty())
+        if (combo_str.empty())
             unspecified_combo_exit();
         // get the combo_tree and infer its type
         combo_tree tr = str_to_combo_tree(combo_str);
         type_tree tt = infer_type_tree(tr);
-        if(is_well_formed(tt)) {
+        if (is_well_formed(tt)) {
             return type_tree_arity(tt);
         } else {
             illformed_exit(tr);
@@ -633,8 +640,8 @@ int moses_exec(int argc, char** argv)
         // Infer the signature based on the input table.
         type_tree table_tt = infer_data_type_tree(input_data_files.front(), target_column);
         std::stringstream ss;
-        ss << "Inferred data signature: " << table_tt;
-        logger().debug(ss.str());
+        ss << "Inferred data signature " << table_tt;
+        logger().info(ss.str());
 
         // Read input data files
         vector<Table> tables;
@@ -648,7 +655,7 @@ int moses_exec(int argc, char** argv)
         }
 
         if (problem == it) { // regression based on input table
- 
+
             // Infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
             type_node table_output_tn = *table_output_tt.begin();
@@ -657,19 +664,20 @@ int moses_exec(int argc, char** argv)
             if (exemplars.empty())
                 exemplars.push_back(type_to_exemplar(table_output_tn));
 
-            type_node output_type = 
+
+            type_node output_type =
                 *(get_output_type_tree(*exemplars.begin()->begin()).begin());
             if (output_type == id::unknown_type)
                 output_type = table_output_tn;
 
             std::stringstream so;
             so << "Inferred output type: " << output_type;
-            logger().debug(so.str());
+            logger().info(so.str());
             OC_ASSERT(output_type == table_output_tn);
 
             type_tree tt = gen_signature(output_type, arity);
             int as = alphabet_size(tt, ignore_ops);
-        
+
             if (output_type == id::boolean_type) {
                 /// @todo: support multiple input data files
                 CTable ctable = tables.front().compress();
@@ -758,7 +766,7 @@ int moses_exec(int argc, char** argv)
             }
 
             type_tree tt = gen_signature(id::ann_type, 0);
-        
+
             int as = alphabet_size(tt, ignore_ops);
 
             occam_contin_bscore bscore(tables.front(), stdev, as, rng);
