@@ -370,30 +370,36 @@ struct metapopulation : public bscored_combo_tree_set
 
         do { // attempt to create a non-empty representation
             _exemplar = select_exemplar();
-            if(_exemplar == end()) {
-                // Logger
-                logger().info("There is no more exemplar in the"
-                              " metapopulation that has not been visited");
-                // ~Logger
+
+            // Should have found something by now.
+            if (_exemplar == end()) {
                 if(params.revisit) {
+
                     _visited_exemplars.clear();
-                    // Logger
-                    logger().info("All visited exemplar has been untagged"
-                                  " and can be visited again");
-                    // ~Logger
+
+                    logger().info(
+                        "All exemplars in the metapopulation have been "
+                        "visited, but it was impossible to build a "
+                        "representation for any of them.  All exemplars "
+                        "have been untagged and will be visited again");
+
                     continue;
+
                 } else {
-                    // Logger
-                    logger().info("To revisit already visited exemplar you may"
-                                " use option --revisit or -R");
-                    // ~Logger
+
+                    logger().warn(
+                        "WARNING: All exemplars in the metapopulation have "
+                        "been visited, but it was impossible to build a "
+                        "representation for any of them.  Perhaps the reduct "
+                        "effort for knob building is too high.  To revisit "
+                        "previously visited exemplars, use option --revisit or -R");
+
                     return false;
                 }
             }
 
             combo_tree tr(get_tree(*_exemplar));
 
-            // Logger
             {
                 stringstream ss;
                 ss << "Attempt to expand with exemplar: " << tr;
@@ -404,25 +410,24 @@ struct metapopulation : public bscored_combo_tree_set
                 ss << "Scored: " << score(tr);
                 logger().debug(ss.str());
             }
-            // ~Logger
 
-            //do representation-building and create a deme (initially empty)
+            // Do representation-building and create a deme (initially empty)
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
                                       _exemplar->first, type,
                                       rng, ignore_ops, perceptions, actions);
 
             // if the representation is empty try another exemplar
-            if(_rep->fields().empty()) {
+            if (_rep->fields().empty()) {
                 delete(_rep);
                 _rep = NULL;
                 _visited_exemplars.insert(get_tree(*_exemplar));
                 // Logger
-                logger().debug("The representation is empty, perhaps the reduct"
-                               " effort for knob building is too high");
+                logger().info("The representation is empty, perhaps the reduct "
+                               "effort for knob building is too high");
                 // ~Logger
             }
-        } while(!_rep);
+        } while (!_rep);
 
         // create an empty deme
         _deme = new deme_t(_rep->fields());
