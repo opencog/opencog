@@ -53,13 +53,16 @@ IF (CXXTEST_FOUND)
     ENDIF(HAVE_PLN)
 
 	ADD_SUBDIRECTORY (comboreduct)
+	ADD_SUBDIRECTORY (learning)
+
     IF(HAVE_SPATIAL)
        	ADD_SUBDIRECTORY (spatial)
     ENDIF(HAVE_SPATIAL)
 
+	# Embodiment requires that learning, reasoning, spatial, etc.
+	# all works fine. So run this last.
 	IF (HAVE_EMBODIMENT)
 		ADD_SUBDIRECTORY (embodiment)
 	ENDIF (HAVE_EMBODIMENT)
 
-	ADD_SUBDIRECTORY (learning)
 ENDIF (CXXTEST_FOUND)
