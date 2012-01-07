@@ -35,7 +35,8 @@ typedef combo_tree::iterator pre_it;
 
 //ensure that all arguments and or nodes have an and node as their parent.
 //this is important for other normalizations to be able to catch all cases
-void insert_ands::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void insert_ands::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if ((is_argument(*it) || *it==id::logical_or) &&
         (!tr.is_valid(tr.parent(it)) || *tr.parent(it)!=id::logical_and)) {
         tr.prepend_child(it,*it);
@@ -44,14 +45,16 @@ void insert_ands::operator()(combo_tree& tr,combo_tree::iterator it) const {
     }
 }
 
-void remove_unary_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void remove_unary_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if ((*it==id::logical_and || *it==id::logical_or) && it.has_one_child()) {
         *it=*it.begin();
         tr.erase(tr.flatten(it.begin()));
     }
 }
 
-void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     for(sib_it sib=it.begin();sib!=it.end();)
         if((*sib==id::logical_and || *sib==id::logical_or || *sib==id::logical_not)
            && sib.is_childless())
@@ -64,7 +67,8 @@ void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it
 //and(false X)->false, or(false X)->X
 //or(X)->X
 //and(or X) -> and(X), or(and X) -> or(X)
-void eval_logical_identities::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void eval_logical_identities::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if (*it==id::logical_and) {
         for (sib_it sib=it.begin();sib!=it.end();) {
             if ((*sib==id::logical_or && sib.is_childless()) ||
@@ -100,7 +104,8 @@ void eval_logical_identities::operator()(combo_tree& tr,combo_tree::iterator it)
 }
 
 //!!a->a,!(a&&b)->(!a||!b),!(a||b)->(!a&&!b),
-void reduce_nots::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_nots::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if (*it==id::logical_not) {
         if (*it.begin()==id::logical_not) {
             //!!a->!a
@@ -136,7 +141,8 @@ void reduce_nots::operator()(combo_tree& tr,combo_tree::iterator it) const {
 //reduce x_2 assuming x_1, x_3 ...
 //...
 //and choose the one that shorten the most the expression
-void reduce_and_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_and_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     int best_diff = 0;
     int best_index = -1;
     combo_tree best_tree;
@@ -173,7 +179,8 @@ void reduce_and_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) 
 
 //reduce or(x_1 x_2 x_3 ...) by reducing assuming not(and(not(x_1)...))
 //using the reduce_and_assumptions
-void reduce_or_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_or_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::logical_or) {
         OC_ASSERT(!it.is_childless(), "combo_tree node should not be childless");
         *it = id::logical_not;
@@ -195,7 +202,8 @@ void reduce_or_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) c
 // 2) for all pairs of conjuncts, including implications (in X)
 //    if X is a subset of (or equal to) Y, remove Y
 // Also, true||X -> true, false||X -> X
-void reduce_ors::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_ors::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if (*it!=id::logical_or)
         return;
 
@@ -244,7 +252,8 @@ void reduce_ors::operator()(combo_tree& tr,combo_tree::iterator it) const {
 // 2) for all pairs of conjuncts, including implications (in X)
 //    if X is a subset of (or equal to) Y, remove X
 // Also, true&&X -> X, false&&X -> false
-void reduce_ands::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_ands::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if (*it!=id::logical_and)
         return;
     
@@ -344,7 +353,8 @@ void reduce_ands::operator()(combo_tree& tr,combo_tree::iterator it) const {
     }
 }
 
-void subtree_to_enf::reduce_to_enf::operator()(sib_it it) {
+void subtree_to_enf::reduce_to_enf::operator()(sib_it it)
+{
     static const type_tree boolean_type_tree = type_tree(id::boolean_type);
     if (*it==id::logical_true || *it==id::logical_false)
         return;
@@ -375,41 +385,66 @@ void subtree_to_enf::reduce_to_enf::operator()(sib_it it) {
     }
 }
     
-bool subtree_to_enf::reduce_to_enf::consistent(const subtree_set& s) {
+bool subtree_to_enf::reduce_to_enf::consistent(const subtree_set& s)
+{
     return std::adjacent_find(make_indirect_iterator(s.begin()),
                               make_indirect_iterator(s.end()),
                               is_complement)==make_indirect_iterator(s.end());
 }
 
-bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child) {
-    bool adopted=false;
-    for (sib_it gchild=child.begin();gchild!=child.end();)
-        if (gchild.has_one_child()) {
-            if (*gchild.begin()==id::logical_or) {
+bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
+{
+    bool adopted = false;
+    for (sib_it gchild = child.begin(); gchild != child.end(); )
+    {
+        if (gchild.has_one_child())
+        {
+            if (*gchild.begin() == id::logical_or)
+            {
                 tr.erase(tr.flatten(gchild.begin()));
                 if (!adopted) //is child adopting a terminal 1-constrant AND, x?
                     for (sib_it x=gchild.begin();x!=gchild.end();++x)
                         if (x.has_one_child()) {
-                            adopted=true;
+                            adopted = true;
                             break;
                         }
-                gchild=tr.erase(tr.flatten(gchild));
-            } else {
-                OC_ASSERT(is_argument(*gchild.begin()),
-                          "gchild should be an argument.");
-                gchild=tr.erase(tr.flatten(gchild));
             }
-        } else {
+
+            // Ignore any predicates; ignore any arguments.
+            // XXX we are also ignoring logical_not here, and we
+            // probably should not. Seems that predicate-knob-building
+            // can put not's in, to reverse the sign of a comparison...
+            else if ((*gchild.begin() == id::greater_than_zero) ||
+                     (*gchild.begin() == id::logical_not) ||
+                     is_argument(*gchild.begin()))
+            {
+            }
+            else
+            {
+                std::stringstream ss;
+                ss << "Logical reduction: unexpected operator: ";
+                ss << *gchild.begin();
+                OC_ASSERT(0, ss.str());
+            }
+            gchild = tr.erase(tr.flatten(gchild));
+        }
+        else
+        {
             ++gchild;
         }
+    }
     return adopted;
 }
 
-void subtree_to_enf::reduce_to_enf::or_cut(sib_it current) {
+void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
+{
     for (sib_it child=current.begin();child!=current.end();)
-        if (child.has_one_child() && (*child==id::logical_and ||
-                                      *child==id::logical_or)) {
-            if (*child.begin()==id::logical_or) {
+    {
+        if (child.has_one_child() &&
+            (*child == id::logical_and || *child == id::logical_or))
+        {
+            if (*child.begin() == id::logical_or)
+            {
                 opencog::insert_set_complement
                     (tree_inserter(tr,current),
                      make_counting_iterator(current.begin()),
@@ -417,22 +452,33 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current) {
                      make_counting_iterator(child.begin().begin()),
                      make_counting_iterator(child.begin().end()),comp);
                 tr.erase(tr.flatten(child.begin()));
-                child=tr.erase(tr.flatten(child));
-            } else {
-                if (is_argument(*child.begin()))
-                    child=tr.erase(tr.flatten(child));
+                child = tr.erase(tr.flatten(child));
+            }
+            else
+            {
+                // If its a boolean-type literal (well, is_argument doesn't
+                // actually check the argument type, but it should ...)
+                // or if it is a boolean-valued term (i.e. a preduicate)
+                // then just ignore it.
+                if (is_argument(*child.begin()) ||
+                    (*child.begin() == id::greater_than_zero))
+                    child = tr.erase(tr.flatten(child));
                 else
-                    child=tr.erase(child);
+                    // XXX Is this really the correct thing to do here?
+                    // why ??  Shouldn't we check ?
+                    child = tr.erase(child);
             }
         } else {
             ++child;
         }
+    }
 }
       
 subtree_to_enf::reduce_to_enf::Result 
 subtree_to_enf::reduce_to_enf::reduce(sib_it current,
                                       const subtree_set& dominant,
-                                      const subtree_set& command) {
+                                      const subtree_set& command)
+{
     OC_ASSERT(opencog::is_sorted(dominant.begin(),dominant.end(),comp), 
               "dominant subtree_set should be sorted (reduce)");
 
@@ -467,7 +513,8 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
 subtree_to_enf::reduce_to_enf::Result 
 subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                                           const subtree_set& dominant,
-                                          const subtree_set& command) {
+                                          const subtree_set& command)
+{
     opencog::erase_set_intersection(tree_eraser(tr),
                                     make_counting_iterator(current.begin()),
                                     make_counting_iterator(current.end()),
@@ -611,8 +658,8 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
 subtree_to_enf::reduce_to_enf::Result 
 subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
                                          const subtree_set& dominant,
-                                         const subtree_set& command) {
-    
+                                         const subtree_set& command)
+{
     for (sib_it child=current.begin();child!=current.end();) {
         subtree_set child_command(command);
         for (sib_it sib=current.begin();sib!=current.end();++sib)
@@ -635,7 +682,8 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
 }
 
 void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
-                                                combo_tree::iterator it) const {
+                                                combo_tree::iterator it) const
+{
     complete_truth_table tr_tt(tr);
     for(pre_it pit = it.begin(); pit != it.end();) {
         pit = tr.insert_above(pit, id::null_vertex);

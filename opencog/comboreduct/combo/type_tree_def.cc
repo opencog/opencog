@@ -26,10 +26,13 @@
 
 namespace opencog { namespace combo {
 
-bool is_argument_type(type_node n) {
-    return (int)n>=id::argument_type;
+bool is_argument_type(type_node n)
+{
+    return ((int)n) >= id::argument_type;
 }
-unsigned int arg_to_idx(type_node n) {
+
+unsigned int arg_to_idx(type_node n)
+{
     OC_ASSERT(is_argument_type(n),
               "Cannot find the idx of a non-argument type");
     return (unsigned int)((int)n-(int)id::argument_type+1);
