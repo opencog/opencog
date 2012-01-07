@@ -77,6 +77,11 @@ const rule& clean_reduction();
 /**
  * reduce trees containing only logical operators, boolean constants
  * and boolean-typed literals.
+ *
+ * XXX Unclear: what if the tree also contains boolean-valued functions
+ * i.e. predicates? Clearly, one would not expect this to be able to
+ * reduce terms inside the predicate, as they would be a black box. But
+ * will this puke and assert, or cause bugs, if it enounters predicates?
  */
 inline void logical_reduce(int effort, combo_tree& tr, combo_tree::iterator it)
 {

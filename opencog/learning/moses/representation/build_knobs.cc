@@ -56,7 +56,7 @@ build_knobs::build_knobs(RandGen& _rng,
                          contin_t expansion,
                          field_set::width_t depth)
     : rng(_rng), _exemplar(exemplar), _rep(rep),
-      _arity(tt.begin().number_of_children() - 1), types(tt), 
+      _arity(tt.begin().number_of_children() - 1), types(tt),
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
@@ -80,7 +80,7 @@ build_knobs::build_knobs(RandGen& _rng,
 
     // Determine if the tree is of 'predicate type'. A predicate type
     // tree is a lambda which outputs boolean, but is a mixture of
-    // other kinds of types as argumentss. So, for example, 
+    // other kinds of types as argumentss. So, for example,
     // and (greater_than_zero (#1) greater_than_zero(#2))
     // is a logical-and of two predicates on contin_t expressions.
     bool predicate_type = false;
@@ -105,7 +105,7 @@ build_knobs::build_knobs(RandGen& _rng,
         build_predicate(_exemplar.begin());
     }
     else if (output_type == id::boolean_type) {
-        // Exemplar consists purely of booleans, variables and 
+        // Exemplar consists purely of booleans, variables and
         // logic ops. Thus, all knobs are purely boolean/logical.
         //
         // Make sure top node of exemplar is a logic op.
@@ -195,7 +195,8 @@ void build_knobs::build_logical(pre_it it)
             else
                 build_logical(sib);
         add_logical_knobs(_exemplar.append_child(it, id::logical_or));
-    } else if (*it == id::logical_or) {
+    }
+    else if (*it == id::logical_or) {
         for (combo_tree::sibling_iterator sib = it.begin();
              sib != it.end();++sib)
             if (is_argument(*sib))
@@ -224,13 +225,13 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 /**
  * Create a set of subtrees for the given node.
  *
- * Each subtree must be "permitted", i.e. a legal combination of 
+ * Each subtree must be "permitted", i.e. a legal combination of
  * logical operators and literals. These are called "perms".
  *
  * Here, a "literal" is one of the input "variables" #i. A positive
  * literal is just #i, and a negative literal is it's negation !#i.
  *
- * For now, there are 2*_arity combinations, consisting of all 
+ * For now, there are 2*_arity combinations, consisting of all
  * positive literals, and _arity pairs of op(#i #j) where 'op' is one
  * of the logic ops 'and' or 'or', such that op != *it, and #i is a
  * positive literal choosen randomly and #j is a positive or negative
@@ -309,14 +310,15 @@ ptr_vector<logical_subtree_knob>
 build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
                                It from, It to,
                                bool add_if_in_exemplar,
-                               unsigned n_jobs) const {
-    if(n_jobs > 1) {
+                               unsigned n_jobs) const
+{
+    if (n_jobs > 1) {
         auto s_jobs = split_jobs(n_jobs);
 
-        // define new range
+        // Define new range
         It mid = from + distance(from, to) / 2;
 
-        // copy exemplar and it for the second recursive call (this
+        // Copy exemplar and it for the second recursive call (this
         // has to be put before the asyncronous call to avoid
         // read/write conflicts)
         combo_tree exemplar_copy(exemplar);
@@ -337,13 +339,13 @@ build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
 
         // append kb_copy_v to kb_v
         auto kb_v = f_async.get();
-        foreach(const logical_subtree_knob& kb_copy, kb_copy_v) {
+        foreach (const logical_subtree_knob& kb_copy, kb_copy_v) {
             kb_v.push_back(new logical_subtree_knob(exemplar, it, kb_copy));
         }
         return kb_v;
     } else {
         ptr_vector<logical_subtree_knob> kb_v;
-        while(from != to) {
+        while (from != to) {
             auto kb = new logical_subtree_knob(exemplar, it, from->begin());
             if ((add_if_in_exemplar || !kb->in_exemplar())
                 && disc_probe(exemplar, *kb)) {
@@ -437,6 +439,11 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
         sit++;
     }
 
+    // XXX TODO ... just like sample_logical_perms, we could create
+    // pairs (conjunctions/disjunctions) of booleans and predicates.
+    // Should we do that here, or will things sort themselves out
+    // later?
+
 // #ifdef DEBUG_INFO
 #if 1
     cerr << "---------------------------------" << endl;
@@ -447,21 +454,71 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 #endif
 }
 
+/**
+ * Just like add_logical_knobs, except that we can sample inequalities.
+ * TODO: this can probably obsolete add_logical_knobs, and do so without
+ * damaging performance.
+ */
 void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
 {
     vector<combo_tree> perms;
     sample_predicate_perms(it, perms);
+
+    ptr_vector<logical_subtree_knob> kb_v =
+        logical_probe_rec(_exemplar, it, perms.begin(), perms.end(),
+                          add_if_in_exemplar, num_threads());
+
+    foreach(const logical_subtree_knob& kb, kb_v)
+        _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
 /**
  * build_predicate -- add knobs to an exemplar that contains only boolean
  * and logic terms, and no other kinds of terms.
+ *
+ * TODO: I think that this will soon be able to obsolete build_logical, 
+ * without causing any damage to performance ... 
+ * basically, its almost identical to what build_logical currently does, just with more
+ * features.  Just need to finish up and polish "add_predicate_knobs()"
  */
 void build_knobs::build_predicate(pre_it it)
 {
+    OC_ASSERT(*it != id::logical_not,
+              "ERROR: the tree is supposed to be in normal form; "
+              "and thus must not contain logical_not nodes.");
+
     add_predicate_knobs(it);
 
-    // XXX and more stuff to come ... 
+    if (*it == id::logical_and)
+    {
+        for (combo_tree::sibling_iterator sib = it.begin();
+             sib != it.end();++sib)
+        {
+            if (is_argument(*sib))
+                add_predicate_knobs(_exemplar.insert_above(sib, id::logical_or),
+                                  false);
+            else if (*sib == id::null_vertex)
+                break;
+            else
+                build_logical(sib);
+        }
+        add_predicate_knobs(_exemplar.append_child(it, id::logical_or));
+    }
+    else if (*it == id::logical_or)
+    {
+        for (combo_tree::sibling_iterator sib = it.begin();
+             sib != it.end();++sib)
+        {
+            if (is_argument(*sib))
+                add_predicate_knobs(_exemplar.insert_above(sib, id::logical_and),
+                                  false);
+            else if (*sib == id::null_vertex)
+                break;
+            else
+                build_logical(sib);
+        }
+        add_predicate_knobs(_exemplar.append_child(it, id::logical_and));
+    }
 }
 
 // ***********************************************************************

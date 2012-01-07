@@ -184,9 +184,11 @@ protected:
     }
 };
 
-// A unary function knob: this knob negates (or not) a boolean value
-// underneath it. Typically, the boolean value is a subtree underneath
-// this knob.
+// A unary function knob: this knob negates (or not) a boolean-valued
+// tree underneath it. 
+//
+// XXX This uses reduct::logical_reduction rules; it is not clear if those
+// rules tolerate predicates.
 //
 // XXX what is the difference between "present" and "absent" ??? A knob
 // that is "absent" from a logical "or" is the same as "present and false".
@@ -234,7 +236,7 @@ struct logical_subtree_knob : public discrete_knob<3>
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::pre_order_iterator pre_it;
 
-        //compute the negation of the subtree
+        // compute the negation of the subtree
         combo_tree negated_subtree(subtree);
         negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
         reduct::logical_reduce(1, negated_subtree);

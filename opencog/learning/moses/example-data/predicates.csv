@@ -11,7 +11,11 @@
 ; learned is 
 ;    and( greater_than_zero( plus(#x -1)) greater_than_zero(#y) #g)
 ;
-; To run, enter: "moses -H it -i predicates.csv -W1 -u pred
+; To run, enter: "moses -H it -i predicates.csv -W1 -u pred"
+;
+; To run, with an example exemplar to get things started:
+; moses -H it -i predicates.csv -W1 -u pred -e  \
+;          "or(greather_than_zero( #1) greater_than_zero( #2))"
 ;
 ; XXX this currently fails in MOSES; under construction.
 ;
