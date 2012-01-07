@@ -60,7 +60,7 @@ typedef float score_t;
 // the type used to hold the number of individuals in a deme can have
 // in principle
 typedef unsigned long long deme_size_t;
-        
+
 // score precision used for logging and outputting results, it is set
 // very high because that information may be used by other tools
 static const int io_score_precision = 32;
@@ -86,50 +86,73 @@ typedef tagged_item<combo::combo_tree,
                     composite_behavioral_score> bscored_combo_tree;
 
 //convenience accessors
-inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 
-    return st.first; 
+inline const combo::combo_tree& get_tree(const scored_combo_tree& st)
+{
+    return st.first;
 }
-inline const combo::combo_tree& get_tree(const bscored_combo_tree& bst) { 
+
+inline const combo::combo_tree& get_tree(const bscored_combo_tree& bst)
+{
     return bst.first;
 }
 
-inline const composite_score& get_composite_score(const composite_behavioral_score& ctbs) {
+inline const composite_score& get_composite_score(const composite_behavioral_score& ctbs)
+{
     return ctbs.second;
 }
-inline const composite_score& get_composite_score(const bscored_combo_tree& bsct) {
+
+inline const composite_score& get_composite_score(const bscored_combo_tree& bsct)
+{
     return get_composite_score(bsct.second);
 }
 
-inline complexity_t get_complexity(const composite_score& ts) { 
-    return ts.second; 
+inline complexity_t get_complexity(const composite_score& ts)
+{
+    return ts.second;
 }
-inline complexity_t get_complexity(const composite_behavioral_score& ts) { 
+
+inline complexity_t get_complexity(const composite_behavioral_score& ts)
+{
     return get_complexity(ts.second);
 }
-inline complexity_t get_complexity(const bscored_combo_tree& bst) { 
+
+inline complexity_t get_complexity(const bscored_combo_tree& bst)
+{
     return get_complexity(bst.second);
 }
-inline complexity_t get_complexity(const scored_combo_tree& st) { 
+
+inline complexity_t get_complexity(const scored_combo_tree& st)
+{
     return get_complexity(st.second);
 }
 
-inline score_t get_score(const composite_score& ts) { 
+inline score_t get_score(const composite_score& ts)
+{
     return ts.first;
 }
-inline score_t get_score(const composite_behavioral_score& ts) { 
+
+inline score_t get_score(const composite_behavioral_score& ts)
+{
     return get_score(ts.second);
 }
-inline score_t get_score(const bscored_combo_tree& bst) { 
+
+inline score_t get_score(const bscored_combo_tree& bst)
+{
     return get_score(bst.second);
 }
-inline score_t get_score(const scored_combo_tree& st) { 
+
+inline score_t get_score(const scored_combo_tree& st)
+{
     return get_score(st.second);
 }
 
-inline const behavioral_score& get_bscore(const composite_behavioral_score& ts) { 
+inline const behavioral_score& get_bscore(const composite_behavioral_score& ts)
+{
     return ts.first;
 }
-inline const behavioral_score& get_bscore(const bscored_combo_tree& bst) { 
+
+inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
+{
     return get_bscore(bst.second);
 }
 
@@ -142,13 +165,14 @@ inline const behavioral_score& get_bscore(const bscored_combo_tree& bst) {
  */
 struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                                                            bscored_combo_tree,
-                                                           bool> {
+                                                           bool>
+{
     bool operator()(const bscored_combo_tree& bs_tr1,
                     const bscored_combo_tree& bs_tr2) const {
         composite_score csc1 = get_composite_score(bs_tr1);
         composite_score csc2 = get_composite_score(bs_tr2);
         return csc1 > csc2
-            || (!(csc1 < csc2) && 
+            || (!(csc1 < csc2) &&
                 size_tree_order<vertex>()(get_tree(bs_tr1),
                                           get_tree(bs_tr2)));
     }
@@ -158,7 +182,7 @@ typedef std::set<bscored_combo_tree,
 typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
 typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 
-typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score, 
+typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score,
                              boost::hash<combo::combo_tree> > metapop_candidates;
 typedef metapop_candidates::value_type metapop_candidate;
 typedef metapop_candidates::iterator metapop_candidates_it;
@@ -166,7 +190,8 @@ typedef metapop_candidates::const_iterator metapop_candidates_cit;
 
 // ostream functions
 template<typename Out>
-Out& ostream_behavioral_score(Out& out, const behavioral_score& bs) {
+Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
+{
     return ostreamContainer(out, bs, " ", "[", "]");
 }
 
@@ -178,9 +203,10 @@ template<typename Out>
 Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
                                 bool output_score = true,
                                 bool output_complexity = false,
-                                bool output_bscore = false) {
+                                bool output_bscore = false)
+{
     if(output_score)
-        out << std::setprecision(io_score_precision) 
+        out << std::setprecision(io_score_precision)
             << get_score(candidate) << " ";
     if(output_complexity)
         out << get_complexity(candidate) << " ";
@@ -195,14 +221,17 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
 } // ~namespace moses
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses::composite_score& ts) {
-    return out << "[score=" 
-               << std::setprecision(moses::io_score_precision) 
-               << ts.first 
+                                const moses::composite_score& ts)
+{
+    return out << "[score="
+               << std::setprecision(moses::io_score_precision)
+               << ts.first
                << ", complexity=" << ts.second << "]";
 }
+
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses::composite_behavioral_score& s) {
+                                const moses::composite_behavioral_score& s)
+{
     moses::ostream_behavioral_score(out, s.first);
     out << ", " << s.second;
     return out;
