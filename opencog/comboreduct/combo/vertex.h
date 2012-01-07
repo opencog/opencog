@@ -646,6 +646,15 @@ inline contin_t get_contin(const vertex& v)
 {
     return (boost::get<contin_t>(v));
 }
+
+/**
+ * return true if the vertex is an argument. Note, however, that
+ * this does not take into account the type of the argument; thus,
+ * any code that uses this blindly runs the risk of accepting arguments
+ * of the wrong type (e.g. boolean instead of contin, oor v.v.).
+ *
+ * This should be fixed, but we don't have the infrastructure for this.
+ */
 inline bool is_argument(const vertex& v)
 {
     return (boost::get<argument>(&v));
