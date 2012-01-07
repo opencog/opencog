@@ -487,5 +487,13 @@ typedef based_variant <boost::variant<logical_subtree_knob,
 } //~namespace moses
 } //~namespace opencog
 
+// Without this helpter, the compiler gets confused and tries to cast
+// disc_knob_base to something strange.
+inline std::ostream& operator<<(std::ostream& out,
+                                const opencog::moses::disc_knob_base& s)
+{
+	return out << s.toStr();
+}
+
 #endif
 
