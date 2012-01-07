@@ -476,8 +476,8 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
  * build_predicate -- add knobs to an exemplar that contains only boolean
  * and logic terms, and no other kinds of terms.
  *
- * TODO: I think that this will soon be able to obsolete build_logical, 
- * without causing any damage to performance ... 
+ * TODO: I think that this will soon be able to obsolete build_logical,
+ * without causing any damage to performance ...
  * basically, its almost identical to what build_logical currently does, just with more
  * features.  Just need to finish up and polish "add_predicate_knobs()"
  */
@@ -492,7 +492,7 @@ void build_knobs::build_predicate(pre_it it)
     if (*it == id::logical_and)
     {
         for (combo_tree::sibling_iterator sib = it.begin();
-             sib != it.end();++sib)
+             sib != it.end(); ++sib)
         {
             if (is_argument(*sib))
                 add_predicate_knobs(_exemplar.insert_above(sib, id::logical_or),
@@ -500,14 +500,14 @@ void build_knobs::build_predicate(pre_it it)
             else if (*sib == id::null_vertex)
                 break;
             else
-                build_logical(sib);
+                build_predicate(sib);
         }
         add_predicate_knobs(_exemplar.append_child(it, id::logical_or));
     }
     else if (*it == id::logical_or)
     {
         for (combo_tree::sibling_iterator sib = it.begin();
-             sib != it.end();++sib)
+             sib != it.end(); ++sib)
         {
             if (is_argument(*sib))
                 add_predicate_knobs(_exemplar.insert_above(sib, id::logical_and),
@@ -515,7 +515,7 @@ void build_knobs::build_predicate(pre_it it)
             else if (*sib == id::null_vertex)
                 break;
             else
-                build_logical(sib);
+                build_predicate(sib);
         }
         add_predicate_knobs(_exemplar.append_child(it, id::logical_and));
     }
