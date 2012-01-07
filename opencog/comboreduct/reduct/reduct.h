@@ -74,64 +74,120 @@ const rule& perception_reduction();
 const rule& clean_reduction();
 //const rule& clean_and_full_reduction();
 
-inline void logical_reduce(int effort, combo_tree& tr,combo_tree::iterator it) {
-    logical_reduction(effort)(tr,it);
+/**
+ * reduce trees containing only logical operators, boolean constants
+ * and boolean-typed literals.
+ */
+inline void logical_reduce(int effort, combo_tree& tr, combo_tree::iterator it)
+{
+    logical_reduction(effort)(tr, it);
 }
-inline void logical_reduce(int effort, combo_tree& tr) {
+
+inline void logical_reduce(int effort, combo_tree& tr)
+{
     logical_reduction(effort)(tr);
 }
 
-inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, const vertex_set& ignore_ops, opencog::RandGen& rng) {
+/**
+ * reduce trees containing only arithmetic operators, float-point
+ * constants and contin-typed literals.
+ */
+inline void contin_reduce(combo_tree& tr, combo_tree::iterator it,
+                          const vertex_set& ignore_ops,
+                          opencog::RandGen& rng)
+{
     contin_reduction(ignore_ops, rng)(tr,it);
 }
+
 inline void contin_reduce(combo_tree& tr, const vertex_set& ignore_ops,
-                          opencog::RandGen& rng) {
+                          opencog::RandGen& rng)
+{
     contin_reduction(ignore_ops, rng)(tr); 
 }
-inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
-    mixed_reduction(rng)(tr,it);
-}
-inline void mixed_reduce(combo_tree& tr, opencog::RandGen& rng) { mixed_reduction(rng)(tr); }
 
-inline void full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
-    full_reduction(rng)(tr,it);
+inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it,
+                         opencog::RandGen& rng)
+{
+    mixed_reduction(rng)(tr, it);
 }
-inline void full_reduce(combo_tree& tr, opencog::RandGen& rng) { full_reduction(rng)(tr); }
 
-inline void ann_reduce(combo_tree& tr) {ann_reduction()(tr); }
+inline void mixed_reduce(combo_tree& tr, opencog::RandGen& rng)
+{
+    mixed_reduction(rng)(tr);
+}
+
+/**
+ * reduce trees containing mixtures of logical operators, boolean
+ * constants, boolean-valued predicates, boolean-valued literals, 
+ * arithmetic operators, contin-typed constants, and contin-valued
+ * literals.  (Elsewhere, we call these "predicate trees").
+ */
+inline void full_reduce(combo_tree& tr, combo_tree::iterator it,
+                        opencog::RandGen& rng)
+{
+    full_reduction(rng)(tr, it);
+}
+
+inline void full_reduce(combo_tree& tr, opencog::RandGen& rng)
+{
+    full_reduction(rng)(tr);
+}
+
+inline void ann_reduce(combo_tree& tr)
+{
+    ann_reduction()(tr);
+}
 
 /**
  * clean_reduce removes null vertices
  */
-inline void clean_reduce(combo_tree& tr,combo_tree::iterator it) {
-    clean_reduction()(tr,it);
+inline void clean_reduce(combo_tree& tr,combo_tree::iterator it)
+{
+    clean_reduction()(tr, it);
 }
-inline void clean_reduce(combo_tree& tr) { clean_reduction()(tr); }
 
-inline void clean_and_full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
-    //clean_and_full_reduction()(tr,it);
-    clean_reduce(tr,it);
-    full_reduce(tr,it,rng);
+inline void clean_reduce(combo_tree& tr)
+{
+    clean_reduction()(tr);
 }
-inline void clean_and_full_reduce(combo_tree& tr, opencog::RandGen& rng) { 
-    //clean_and_full_reduction()(tr,tr.begin()); 
+
+inline void clean_and_full_reduce(combo_tree& tr,
+                                  combo_tree::iterator it,
+                                  opencog::RandGen& rng)
+{
+    // clean_and_full_reduction()(tr,it);
+    clean_reduce(tr, it);
+    full_reduce(tr, it, rng);
+}
+
+inline void clean_and_full_reduce(combo_tree& tr, opencog::RandGen& rng)
+{ 
+    // clean_and_full_reduction()(tr,tr.begin()); 
     clean_reduce(tr);
-    full_reduce(tr,rng);
+    full_reduce(tr, rng);
 }
 
 //action
-inline void action_reduce(combo_tree& tr, combo_tree::iterator it) {
-    action_reduction()(tr,it);
+inline void action_reduce(combo_tree& tr, combo_tree::iterator it)
+{
+    action_reduction()(tr, it);
 }
 
-inline void action_reduce(combo_tree& tr) { action_reduction()(tr); }
+inline void action_reduce(combo_tree& tr)
+{
+    action_reduction()(tr);
+}
 
 //perception
-inline void perception_reduce(combo_tree& tr, combo_tree::iterator it) {
-    perception_reduction()(tr,it);
+inline void perception_reduce(combo_tree& tr, combo_tree::iterator it)
+{
+    perception_reduction()(tr, it);
 }
 
-inline void perception_reduce(combo_tree& tr) { perception_reduction()(tr); }
+inline void perception_reduce(combo_tree& tr)
+{
+    perception_reduction()(tr);
+}
 
 // helper to replace a subtree by another subtree (belonging to the
 // same or another tree without changing the iterator of the new tree,
@@ -141,9 +197,10 @@ inline void perception_reduce(combo_tree& tr) { perception_reduction()(tr); }
 // tr is the tree containing dst iterator
 inline void replace_without_changing_it(combo_tree& tr,
                                         combo_tree::iterator dst,
-                                        combo_tree::iterator src) {
+                                        combo_tree::iterator src)
+{
     *dst = *src;
-    if(src.is_childless())
+    if (src.is_childless())
         tr.erase_children(dst);
     else {
         // it is assumed (for now) that dst and src have the same

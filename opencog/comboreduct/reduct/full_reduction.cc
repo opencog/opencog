@@ -30,7 +30,8 @@
 
 namespace opencog { namespace reduct {
 
-const rule& full_reduction(opencog::RandGen& rng) {
+const rule& full_reduction(opencog::RandGen& rng)
+{
     static iterative r_without_reduce_gt_zero_prod;
 
     //This set of rule is defined to avoid infinit recursion of the rule
