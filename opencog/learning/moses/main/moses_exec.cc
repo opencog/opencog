@@ -664,7 +664,6 @@ int moses_exec(int argc, char** argv)
             if (exemplars.empty())
                 exemplars.push_back(type_to_exemplar(table_output_tn));
 
-
             type_node output_type =
                 *(get_output_type_tree(*exemplars.begin()->begin()).begin());
             if (output_type == id::unknown_type)
@@ -675,7 +674,10 @@ int moses_exec(int argc, char** argv)
             logger().info(so.str());
             OC_ASSERT(output_type == table_output_tn);
 
-            type_tree tt = gen_signature(output_type, arity);
+            // type_tree tt = gen_signature(output_type, arity);
+    // XXX fixme ... make above go away, make tt go away .. 
+    // fixme only when done with work on prdicate support.
+    type_tree tt = table_tt;
             int as = alphabet_size(tt, ignore_ops);
 
             if (output_type == id::boolean_type) {
@@ -693,6 +695,7 @@ int moses_exec(int argc, char** argv)
                 if (discretize_thresholds.empty()) {
                     /// @todo: support multiple input data files
                     occam_contin_bscore bscore(tables.front(), stdev, as, rng);
+
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
