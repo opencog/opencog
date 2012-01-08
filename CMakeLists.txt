@@ -45,13 +45,15 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
   IF (APPLE)
     SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
     SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+    SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
     # Vital to do this otherwise unresolved symbols everywhere:
     SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
     SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
   ELSE (APPLE)
     SET(CMAKE_C_FLAGS "-Wall -fPIC")
-    SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector -pg")
+    SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
+    SET(CMAKE_C_FLAGS_PROFILE "-g3 -fstack-protector -pg")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")
   ENDIF (APPLE)
 
@@ -65,6 +67,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++0x")
 
   SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+  SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
   SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 
   # Options for generating gcov code coverage output
@@ -75,8 +78,6 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
   LINK_LIBRARIES(gcov)
   ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
-  SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
-  SET(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_C_FLAGS_PROFILE}")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 IF (CYGWIN)
