@@ -461,6 +461,14 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
  */
 void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
 {
+    // If *it is not boolean (i.e. a boolean arg, or a logic op), then bail.
+    if ((*it != id::logical_and) &&
+        (*it != id::logical_or) &&
+        !is_argument(*it))
+    {
+       return;
+    }
+
     vector<combo_tree> perms;
     sample_predicate_perms(it, perms);
 
