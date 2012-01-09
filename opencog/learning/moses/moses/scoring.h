@@ -236,16 +236,16 @@ struct occam_discretize_contin_bscore : public bscore_base
 {
     occam_discretize_contin_bscore(const OTable& ot, const ITable& it,
                                    const vector<contin_t>& thres,
-                                   bool wa, float p,
-                                   float alphabet_size,
+                                   bool wa,
+                                   float alphabet_size, float p,
                                    RandGen& _rng);
 
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
     // occam_discretize_contin_bscore(const Table& table,
     //                                const vector<contin_t>& thres,
-    //                                bool wa, float p,
-    //                                float alphabet_size,
+    //                                bool wa,
+    //                                float alphabet_size, float p,
     //                                RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -313,8 +313,8 @@ struct occam_contin_bscore : public bscore_base
     template<typename Scoring>
     occam_contin_bscore(const Scoring& score,
                         const ITable& r,
-                        float stdev,
                         float alphabet_size,
+                        float stdev,
                         RandGen& _rng)
         : target(score, r), cti(r), rng(_rng) {
         occam = stdev > 0;
@@ -325,8 +325,8 @@ struct occam_contin_bscore : public bscore_base
     // simplify that
     occam_contin_bscore(const OTable& t,
                         const ITable& r,
-                        float stdev,
                         float alphabet_size,
+                        float stdev,
                         RandGen& _rng)
         : target(t), cti(r), rng(_rng) {
         occam = stdev > 0;
@@ -336,8 +336,8 @@ struct occam_contin_bscore : public bscore_base
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
     occam_contin_bscore(const Table& table,
-                        float stdev,
                         float alphabet_size,
+                        float stdev,
                         RandGen& _rng)
         : target(table.otable), cti(table.itable), rng(_rng) {
         occam = stdev > 0;
@@ -378,8 +378,8 @@ private:
 struct occam_ctruth_table_bscore : public bscore_base
 {
     occam_ctruth_table_bscore(const CTable& _ctt,
-                              float p,
                               float alphabet_size,
+                              float p,
                               RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -395,25 +395,24 @@ struct occam_ctruth_table_bscore : public bscore_base
     RandGen& rng;
 };
 
-// Bscore to find interesting patterns. Interestingness is measured as
-// the Kullback Leibler Divergence between the distribution output of
-// the dataset and the distribution over the output filtered by the
-// program (when the output is true)
+// Bscore to find interesting patterns (predicates). Interestingness
+// is measured as the Kullback Leibler divergence between the
+// distribution output of the dataset and the distribution over the
+// output filtered by the program (when the predicate is true).
 struct occam_max_KLD_bscore : public bscore_base
 {
-    occam_max_KLD_bscore(const Table& table, float stdev, float alphabet_size,
+    occam_max_KLD_bscore(const CTable& ctable,
+                         float alphabet_size, float stdev,
                          RandGen& _rng);
     
     behavioral_score operator()(const combo_tree& tr) const;
 
-    // for the best possible bscore is a vector of zeros. It's
-    // probably not true because there could be duplicated inputs but
-    // that's acceptable for now
+    // the KLD has no upper boundary so the best of possible score is
+    // the maximum value a behavioral_score can represent
     behavioral_score best_possible_bscore() const;
     
     std::vector<contin_t> cot;
-    OTable otable;
-    ITable itable;
+    CTable ctable;
     bool occam;
     score_t complexity_coef;
     RandGen& rng;

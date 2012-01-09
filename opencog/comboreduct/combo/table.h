@@ -71,13 +71,15 @@ static const std::string default_input_label("i");
 /// {0:1},1,1
 ///
 /// that is the duplicated inputs are removed and the output is
-/// replaced by a counter of the false ones and the true ones
-/// respectively.
-class CTable : public std::map<vertex_seq, std::map<vertex, unsigned> >
+/// replaced by a counter of the duplicated outputs.
+///
+/// Most scoring functions work on CTable as it avoids re-evaluating a
+/// combo program on the same inputs.
+class CTable : public std::map<vertex_seq, Counter<vertex, unsigned> >
 {
 public:
     typedef vertex_seq key_type;
-    typedef std::map<vertex, unsigned> mapped_type;
+    typedef Counter<vertex, unsigned> mapped_type;
     typedef std::map<key_type, mapped_type> super;
 
     std::string olabel;               // output label

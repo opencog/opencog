@@ -645,6 +645,7 @@ int moses_exec(int argc, char** argv)
 
         // Read input data files
         vector<Table> tables;
+        vector<CTable> ctables;
         foreach (const string& idf, input_data_files) {
             logger().debug("Read data file %s", idf.c_str());
             Table table = istreamTable(idf, target_column);
@@ -652,6 +653,7 @@ int moses_exec(int argc, char** argv)
             if (nsamples > 0)
                 subsampleTable(table, nsamples, rng);
             tables.push_back(table);
+            ctables.push_back(table.compress());
         }
 
         if (problem == it) { // regression based on input table
@@ -675,15 +677,15 @@ int moses_exec(int argc, char** argv)
             OC_ASSERT(output_type == table_output_tn);
 
             // type_tree tt = gen_signature(output_type, arity);
-    // XXX fixme ... make above go away, make tt go away .. 
-    // fixme only when done with work on prdicate support.
-    type_tree tt = table_tt;
+            // XXX fixme ... make above go away, make tt go away .. 
+            // fixme only when done with work on predicate support.
+            type_tree tt = table_tt;
             int as = alphabet_size(tt, ignore_ops);
 
             if (output_type == id::boolean_type) {
                 /// @todo: support multiple input data files
-                CTable ctable = tables.front().compress();
-                occam_ctruth_table_bscore bscore(ctable, prob, as, rng);
+                CTable ctable = ctables.front();
+                occam_ctruth_table_bscore bscore(ctable, as, prob, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
@@ -694,7 +696,7 @@ int moses_exec(int argc, char** argv)
             if (output_type == id::contin_type) {
                 if (discretize_thresholds.empty()) {
                     /// @todo: support multiple input data files
-                    occam_contin_bscore bscore(tables.front(), stdev, as, rng);
+                    occam_contin_bscore bscore(tables.front(), as, stdev, rng);
 
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
@@ -706,7 +708,7 @@ int moses_exec(int argc, char** argv)
                                                           tables.front().itable,
                                                           discretize_thresholds,
                                                           weighted_accuracy,
-                                                          prob, as,
+                                                          as, prob,
                                                           rng);
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
@@ -740,10 +742,10 @@ int moses_exec(int argc, char** argv)
             if (tables.size() > 1) {
                 typedef bscore_based_score<BScore> Score;
                 boost::ptr_vector<Score> scores;
-                foreach(const Table& table, tables) {
+                foreach(const CTable& ctable, ctables) {
                     /// @todo should delete bsc_ptr after use but the
                     /// program stops anyway
-                    BScore* bsc_ptr = new BScore(table, stdev, as, rng);
+                    BScore* bsc_ptr = new BScore(ctable, as, stdev, rng);
                     scores.push_back(new Score(*bsc_ptr));
                 }
                 multiscore_based_bscore<Score> bscore(scores);
@@ -753,7 +755,7 @@ int moses_exec(int argc, char** argv)
                                       mmr_pa);
             }
             else {
-                BScore bscore(tables.front(), stdev, as, rng);
+                BScore bscore(ctables.front(), as, stdev, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
@@ -774,7 +776,7 @@ int moses_exec(int argc, char** argv)
 
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_contin_bscore bscore(tables.front(), stdev, as, rng);
+            occam_contin_bscore bscore(tables.front(), as, stdev, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -815,7 +817,7 @@ int moses_exec(int argc, char** argv)
 
                 int as = alphabet_size(tt, ignore_ops);
 
-                occam_contin_bscore bscore(ot, it, stdev, as, rng);
+                occam_contin_bscore bscore(ot, it, as, stdev, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduct, contin_reduct, bscore,
                                       opt_params, meta_params, moses_params,
@@ -843,7 +845,7 @@ int moses_exec(int argc, char** argv)
             ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
             OTable ot(tr, it, rng);
  
-            occam_contin_bscore bscore(ot, it, stdev, as, rng);
+            occam_contin_bscore bscore(ot, it, as, stdev, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -936,7 +938,7 @@ int moses_exec(int argc, char** argv)
         int as = alphabet_size(tt, ignore_ops);
 
         occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
-                                   it, stdev, as, rng);
+                                   it, as, stdev, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduct, contin_reduct, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);

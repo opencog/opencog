@@ -35,6 +35,7 @@ namespace opencog { namespace moses {
 
 using namespace std;
 using boost::adaptors::map_values;
+using boost::adaptors::map_keys;
 using boost::adaptors::filtered;
 using boost::transform;
 
@@ -134,8 +135,8 @@ occam_discretize_contin_bscore::occam_discretize_contin_bscore
                                          const ITable& it,
                                          const vector<contin_t>& thres,
                                          bool wa,
-                                         float p,
                                          float alphabet_size,
+                                         float p,
                                          RandGen& _rng)
     : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa), rng(_rng),
       classes(ot.size()), weights(thresholds.size() + 1, 1) {
@@ -209,8 +210,8 @@ behavioral_score occam_discretize_contin_bscore::operator()(const combo_tree& tr
 ///////////////////////////////
         
 occam_ctruth_table_bscore::occam_ctruth_table_bscore(const CTable& _ctt,
-                                                     float p,
                                                      float alphabet_size,
+                                                     float p,
                                                      RandGen& _rng) 
     : ctt(_ctt), rng(_rng) {
     occam = p > 0 && p < 0.5;
@@ -248,43 +249,62 @@ behavioral_score occam_ctruth_table_bscore::best_possible_bscore() const {
 //////////////////////////
 // occam_max_KLD_bscore //
 //////////////////////////
-        
-occam_max_KLD_bscore::occam_max_KLD_bscore(const Table& table,
-                                           float stdev,
-                                           float alphabet_size,
+
+occam_max_KLD_bscore::occam_max_KLD_bscore(const CTable& ctable_,
+                                           float alphabet_size, float stdev,
                                            RandGen& _rng)
-    : cot(table.size()), otable(table.otable), itable(table.itable), rng(_rng)
+    : ctable(ctable_), rng(_rng)
 {
     occam = stdev > 0;
     set_complexity_coef(alphabet_size, stdev);
-    boost::transform(table.otable, cot.begin(),
-                     [](const vertex& v) { return get_contin(v); });
+    boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
+            boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
+                    cot.insert(cot.end(), v.second, get_contin(v.first)); }); });
     boost::sort(cot);
 }
 
 behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
 {
-    OTable tr_ot(tr, itable, rng);
+    static const double entropy_threshold = 0.1; /// @todo should be a parameter
+    
+    OTable pred_ot(tr, ctable, rng);
 
-    // filter the output according to tr
-    vector<contin_t> f_output;
-    auto ot_it = otable.cbegin(), tr_ot_it = tr_ot.cbegin();
-    for (; ot_it != otable.cend(); ++ot_it, ++tr_ot_it)
-        if (vertex_to_bool(*tr_ot_it))
-            f_output.push_back(get_contin(*ot_it));
+    // compute the entropy of the output of the predicate
+    vector<double> prob;
+    Counter<vertex, unsigned> counter;
+    auto ct_it = ctable.cbegin();
+    auto pred_it = pred_ot.cbegin();
+    for (; pred_it != pred_ot.cend(); ++ct_it, ++pred_it)
+        counter[*pred_it] = boost::accumulate(ct_it->second | map_values, 0);
+    double total = boost::accumulate(counter | map_values, 0);
+    transform(counter | map_values, back_inserter(prob),
+              [&](unsigned c) { return c/total; });
+    double pred_entropy = entropy(prob);
 
-    logger().fine("f_output.size() = %u", f_output.size());
+    logger().fine("pred_entropy = %f", pred_entropy);
 
     behavioral_score bs;
-    if (f_output.size() > (tr_ot.size() / 4)
-        && f_output.size() < ((3 * tr_ot.size()) / 4)) {
-            
-            // sort the filtered output and compute KLD(cot, f_output) per
-            // component
-            boost::sort(f_output);
-            KLDS<vector<contin_t> > klds(cot, f_output);
-            dorepeat(klds.size())
-                bs.push_back(klds.next());
+    if (pred_entropy > entropy_threshold) {
+        // filter the output according to tr
+        vector<contin_t> f_output;
+        ct_it = ctable.cbegin();
+        pred_it = pred_ot.cbegin();
+        for (; ct_it != ctable.cend(); ++ct_it, ++pred_it) {
+            if (vertex_to_bool(*pred_it)) {
+                foreach(const auto& mv, ct_it->second)
+                    f_output.insert(f_output.end(), mv.second,
+                                    get_contin(mv.first));
+            }
+        }
+
+        logger().fine("f_output.size() = %u", f_output.size());
+
+        // sort the filtered output and compute KLD(cot, f_output) per
+        // component
+        boost::sort(f_output);
+        KLDS<vector<contin_t> > klds(cot, f_output);
+        dorepeat(klds.size())
+            bs.push_back(klds.next());
     }
     // add the Occam's razor feature
     if(occam)

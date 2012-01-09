@@ -126,11 +126,11 @@ public:
     void test_kl() {
         string tr_str("and(or(!#1 !#2) or(#1 #2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hkl", data_file_path, "-m500"}, tr_str);
+        moses_test_combo({"-Hkl", data_file_path, "-m500", "-lfine"}, tr_str);
     }
     void test_multi_kl() {
         string tr_str("or(and(!#1 #2) and(#1 !#2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hkl", data_file_path,  data_file_path, "-m500", "-l debug"}, tr_str);
+        moses_test_combo({"-Hkl", data_file_path,  data_file_path, "-m500", "-l fine"}, tr_str);
     }
 };
