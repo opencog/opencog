@@ -42,10 +42,10 @@ namespace opencog { namespace moses {
 
 // A knob represents a single dimension of variation relative to an exemplar
 // program tree. This may be discrete or continuous. In the discrete case, the
-// various settings are accessible via turn(0),turn(1),...turn(multiplicity()-1). In
-// the continuous case, turn(contin_t) is used.
+// various settings are accessible via turn(0), turn(1),...turn(multiplicity()-1).
+// In the continuous case, turn(contin_t) is used.
 //
-//  For example, given the program tree fragment or(0<(*(#1,0.5)),#2), a
+// For example, given the program tree fragment or(0<(*(#1,0.5)),#2), a
 // continuous knob might be used to vary the numerical constant. So setting
 // this knob to 0.7 would transform the tree fragment to
 // or(0<(*(#1,0.7)),#2). A discrete knob with multiplicity()==3 might be used to
@@ -241,7 +241,7 @@ struct logical_subtree_knob : public discrete_knob<3>
         negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
         reduct::logical_reduce(1, negated_subtree);
 
-        for (sib_it sib = tgt.begin(); sib != tgt.end();++sib) {
+        for (sib_it sib = tgt.begin(); sib != tgt.end(); ++sib) {
             if (_tr.equal_subtree(pre_it(sib), subtree) ||
                 _tr.equal_subtree(pre_it(sib), negated_subtree.begin())) {
                 _loc = sib;
@@ -271,7 +271,7 @@ struct logical_subtree_knob : public discrete_knob<3>
         idx = map_idx(idx);
         OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 3.");
 
-        if (idx == _current) // already set, nothing to
+        if (idx == _current) // already set, nothing to do
             return;
 
         switch (idx) {
@@ -487,7 +487,7 @@ typedef based_variant <boost::variant<logical_subtree_knob,
 } //~namespace moses
 } //~namespace opencog
 
-// Without this helpter, the compiler gets confused and tries to cast
+// Without this helper, the compiler gets confused and tries to cast
 // disc_knob_base to something strange.
 inline std::ostream& operator<<(std::ostream& out,
                                 const opencog::moses::disc_knob_base& s)
