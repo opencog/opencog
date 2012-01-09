@@ -28,21 +28,24 @@
 namespace opencog { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 
-//flattens all associative functions: f(a,f(b,c)) -> f(a,b,c)
-//note that level is recursive that is f(a,f(b,f(c,d))) -> f(a,b,c,d)
-void level::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if (is_associative(*it))
-        for (sib_it sib=it.begin();sib!=it.end();)
-            if (*sib==*it)
-                sib=tr.erase(tr.flatten(sib));
+/// Flattens all associative functions: f(a,f(b,c)) -> f(a,b,c)
+/// Note that level is recursive that is f(a,f(b,f(c,d))) -> f(a,b,c,d)
+void level::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (is_associative(*it)) {
+        for (sib_it sib = it.begin(); sib != it.end(); )
+            if (*sib == *it)
+                sib = tr.erase(tr.flatten(sib));
             else
                 ++sib;
+    }
 }
 
-//evaluates sub-expressions when possible
-//if an operator is commutative, op(const,var,const) will become
-//op(op(const,const),var), e.g., +(2,x,1)->+(3,x)
-void eval_constants::operator()(combo_tree& tr,combo_tree::iterator it) const {
+/// Evaluates sub-expressions when possible.
+/// If an operator is commutative, op(const,var,const) will become
+/// op(op(const,const),var), e.g., +(2,x,1)->+(3,x)
+void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
     if (it.is_childless()) {
         if (is_indefinite_object(*it)) //not sure we want that when indefinite_object is random
             *it = eval_throws(rng, it, evaluator);

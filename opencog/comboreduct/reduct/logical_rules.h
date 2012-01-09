@@ -33,22 +33,26 @@
 #include <opencog/comboreduct/combo/type_tree.h>
 
 namespace opencog { namespace reduct {
-//ensure that all arguments and or nodes have an and node as their parent.
-//this is important for other normalizations to be able to catch all cases
-struct insert_ands : public crule<insert_ands> {
+
+/// Ensure that all arguments and 'or' nodes have an 'and' node as their parent.
+/// This is important so that other normalizations can catch all cases.
+struct insert_ands : public crule<insert_ands>
+{
     insert_ands() : crule<insert_ands>::crule("insert_ands") {}
-    void operator()(combo_tree& tr,combo_tree::iterator it) const;
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
-struct remove_unary_junctors : public crule<remove_unary_junctors> {
+struct remove_unary_junctors : public crule<remove_unary_junctors>
+{
     remove_unary_junctors() : crule<remove_unary_junctors>::crule("remove_unary_junctors") {}
-    void operator()(combo_tree& tr,combo_tree::iterator it) const;
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
-// remove operators 'and', 'or' and 'not' that have no argument. Note
-// that this rule does not preserve semantics it is used so that
-// logical formulae exibit more diversity
-struct remove_dangling_junctors : public crule<remove_dangling_junctors> {
+/// Remove operators 'and', 'or' and 'not' that have no argument. Note
+/// that this rule does not preserve semantics it is used so that
+/// logical formulae exibit more diversity
+struct remove_dangling_junctors : public crule<remove_dangling_junctors>
+{
     remove_dangling_junctors() : crule<remove_dangling_junctors>::crule("remove_dangling_junctors") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
@@ -106,20 +110,24 @@ struct reduce_ors : public crule<reduce_ors> {
 // 2) for all pairs of conjuncts, including implications (in X)
 //    if X is a subset of (or equal to) Y, remove X
 // Also, true&&X -> X, false&&X -> false
-struct reduce_ands : public crule<reduce_ands> { 
+struct reduce_ands : public crule<reduce_ands>
+{
     reduce_ands() : crule<reduce_ands>::crule("reduce_ands") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-// reduction to enf - note that reduce nots and
-// eval_logical_identities and level should be called first to ensure
-// proper reduction
-struct subtree_to_enf : public crule<subtree_to_enf> {
+/// Reduction to enf - reduce to elegant normal form.
+/// Note that reduce_nots() and eval_logical_identities() and level()
+/// should be called first to ensure proper reduction.
+//
+struct subtree_to_enf : public crule<subtree_to_enf>
+{
     subtree_to_enf() : crule<subtree_to_enf>::crule("subtree_to_enf") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const { reduce_to_enf(tr,it); }
 protected:
-    struct reduce_to_enf {
-        enum Result { Delete,Disconnect,Keep };
+    struct reduce_to_enf
+    {
+        enum Result { Delete, Disconnect, Keep };
         typedef vertex value_type;
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::upwards_iterator up_it;
@@ -129,7 +137,10 @@ protected:
         combo_tree& tr;
         Comp comp;
 
-        reduce_to_enf(combo_tree& tr_,combo_tree::iterator it) : tr(tr_) { (*this)(it); }
+        reduce_to_enf(combo_tree& tr_, combo_tree::iterator it) : tr(tr_)
+        {
+             (*this)(it);
+        }
 
         void operator()(sib_it it);
         bool consistent(const subtree_set& s);
@@ -143,7 +154,8 @@ protected:
                          const subtree_set& command);
         
         template<typename Out>
-        void build_subtree_sets_upwards(up_it up,Out dom_out,Out cmd_out) const {
+        void build_subtree_sets_upwards(up_it up,Out dom_out,Out cmd_out) const
+        {
             static const type_tree boolean_type_tree = type_tree(id::boolean_type);
             
             for (up_it p=tr.parent(up);
