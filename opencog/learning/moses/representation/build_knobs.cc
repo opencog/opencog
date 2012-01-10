@@ -103,6 +103,7 @@ build_knobs::build_knobs(RandGen& _rng,
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
         build_predicate(_exemplar.begin());
+        logical_cleanup();
     }
     else if (output_type == id::boolean_type) {
         // Exemplar consists purely of booleans, variables and
@@ -185,8 +186,7 @@ void build_knobs::build_logical(pre_it it)
     add_logical_knobs(it);
 
     if (*it == id::logical_and) {
-        for (combo_tree::sibling_iterator sib = it.begin();
-             sib != it.end();++sib)
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
             if (is_argument(*sib))
                 add_logical_knobs(_exemplar.insert_above(sib, id::logical_or),
                                   false);
@@ -197,8 +197,7 @@ void build_knobs::build_logical(pre_it it)
         add_logical_knobs(_exemplar.append_child(it, id::logical_or));
     }
     else if (*it == id::logical_or) {
-        for (combo_tree::sibling_iterator sib = it.begin();
-             sib != it.end();++sib)
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
             if (is_argument(*sib))
                 add_logical_knobs(_exemplar.insert_above(sib, id::logical_and),
                                   false);
@@ -361,7 +360,7 @@ void build_knobs::logical_cleanup()
 {
     combo_tree::post_order_iterator it = _exemplar.begin_post();
     while (it != _exemplar.end_post())
-        if(is_logical_operator(*it) && it.is_childless())
+        if (is_logical_operator(*it) && it.is_childless())
             _exemplar.erase(it++);
         else
             ++it;
@@ -461,13 +460,12 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
  */
 void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
 {
-    // If *it is not boolean (i.e. a boolean arg, or a logic op), then bail.
-    if ((*it != id::logical_and) &&
-        (*it != id::logical_or) &&
-        !is_argument(*it))
-    {
+    // If the node is not a logic op, then bail.  That is, we don't want
+    // to insert any kind of boolean knobs into other kinds of ops.
+// XXX is this correct ? don't we want knobs for args, and preicates?
+// TODO and fix as needed.  Or just be careful about who si calling us...
+    if (!is_logical_operator(*it))
        return;
-    }
 
     vector<combo_tree> perms;
     sample_predicate_perms(it, perms);
@@ -476,8 +474,9 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
         logical_probe_rec(_exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, num_threads());
 
-    foreach(const logical_subtree_knob& kb, kb_v)
+    foreach(const logical_subtree_knob& kb, kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
+    }
 }
 
 /**
@@ -491,20 +490,24 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
  */
 void build_knobs::build_predicate(pre_it it)
 {
-    OC_ASSERT(*it != id::logical_not,
+    if (*it == id::logical_not)
+    {
+// XXX for just right now, we allow not's but only if they
+// preceed a predicate... right!?  Not sure if this is correct.
+        OC_ASSERT((*it.child() == id::greater_than_zero),
               "ERROR: the tree is supposed to be in normal form; "
               "and thus must not contain logical_not nodes.");
 
-    add_predicate_knobs(it);
-
-    if (*it == id::logical_and)
+    }
+    else if (*it == id::logical_and)
     {
-        for (combo_tree::sibling_iterator sib = it.begin();
-             sib != it.end(); ++sib)
+        add_predicate_knobs(it);
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
-            if (is_argument(*sib))
+            if (is_argument(*sib)) {
                 add_predicate_knobs(_exemplar.insert_above(sib, id::logical_or),
                                   false);
+            }
             else if (*sib == id::null_vertex)
                 break;
             else
@@ -514,8 +517,8 @@ void build_knobs::build_predicate(pre_it it)
     }
     else if (*it == id::logical_or)
     {
-        for (combo_tree::sibling_iterator sib = it.begin();
-             sib != it.end(); ++sib)
+        add_predicate_knobs(it);
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
             if (is_argument(*sib))
                 add_predicate_knobs(_exemplar.insert_above(sib, id::logical_and),
@@ -560,8 +563,7 @@ void build_knobs::build_action(pre_it it)
         if (it.is_childless() || rng.randint(100) < p)
             add_action_knobs(it);
 
-        for (combo_tree::sibling_iterator sib = it.begin();
-             sib != it.end();++sib) {
+        for (sib_it sib = it.begin(); sib != it.end();++sib) {
             if (is_builtin_action(*sib)) {
 
                 if (rng.randint(100) > p)
@@ -581,8 +583,7 @@ void build_knobs::build_action(pre_it it)
             add_action_knobs(_exemplar.append_child(it, id::sequential_and),
                              false);
     } else if (*it == id::action_boolean_if) {
-        for (combo_tree::sibling_iterator sib = ++it.begin();
-             sib != it.end();++sib)
+        for (sib_it sib = ++it.begin(); sib != it.end();++sib)
             if (is_builtin_action(*sib)) {
                 add_action_knobs(sib = _exemplar.insert_above(sib, id::sequential_and), false);
             } else if (*sib == id::sequential_and) {
