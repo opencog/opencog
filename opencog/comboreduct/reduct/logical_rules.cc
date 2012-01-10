@@ -395,6 +395,19 @@ bool subtree_to_enf::reduce_to_enf::consistent(const subtree_set& s)
                               is_complement)==make_indirect_iterator(s.end());
 }
 
+/// Return true if the argument is a predicate node, or negated
+/// predicate node.
+///
+/// At this time, the only predicate in combo is greater_than_zero.
+//
+bool is_predicate(sib_it child)
+{
+    if (*child == id::greater_than_zero) return true;
+    if ((*child == id::logical_not) && 
+        (*child.begin() == id::greater_than_zero)) return true;
+    return false;
+}
+
 bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
 {
     bool adopted = false;
@@ -421,8 +434,9 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
                 continue;
             }
 
-            // Allow predicates, complain about anything else.
-            else if (*gchild.begin() != id::greater_than_zero)
+            // Allow predicates; allow negated predicates, complain
+            // about anything else.
+            else if (!is_predicate(gchild.begin()))
             {
                 std::stringstream ss;
                 ss << "Logical reduction: unexpected operator: ";
