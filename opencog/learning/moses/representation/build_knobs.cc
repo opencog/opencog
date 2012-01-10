@@ -494,7 +494,7 @@ void build_knobs::build_predicate(pre_it it)
     {
 // XXX for just right now, we allow not's but only if they
 // preceed a predicate... right!?  Not sure if this is correct.
-        OC_ASSERT((*it.child() == id::greater_than_zero),
+        OC_ASSERT((*it.begin() == id::greater_than_zero),
               "ERROR: the tree is supposed to be in normal form; "
               "and thus must not contain logical_not nodes.");
 
