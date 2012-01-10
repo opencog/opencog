@@ -259,8 +259,8 @@ occam_max_KLD_bscore::occam_max_KLD_bscore(const CTable& ctable_,
     set_complexity_coef(alphabet_size, stdev);
     boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
-                    cot.insert(cot.end(), v.second, get_contin(v.first)); }); });
-    boost::sort(cot);
+                    pdf[get_contin(v.first)] = v.second; }); });
+    klds.set_p_pdf(pdf);
 }
 
 behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
@@ -269,14 +269,27 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
     
     OTable pred_ot(tr, ctable, rng);
 
+    stringstream ss_ot;
+    ss_ot << pred_ot;
+    logger().fine("ss_ot =");
+    logger().fine(ss_ot.str());
+    
+    stringstream ss;
+    ss << "tr = " << tr;
+    logger().fine(ss.str());
+
     // compute the entropy of the output of the predicate
     vector<double> prob;
     Counter<vertex, unsigned> counter;
     auto ct_it = ctable.cbegin();
     auto pred_it = pred_ot.cbegin();
     for (; pred_it != pred_ot.cend(); ++ct_it, ++pred_it)
-        counter[*pred_it] = boost::accumulate(ct_it->second | map_values, 0);
+        counter[*pred_it] += boost::accumulate(ct_it->second | map_values, 0);
+    /// @todo precompute total
     double total = boost::accumulate(counter | map_values, 0);
+
+    logger().fine("total = %f", total);
+    
     transform(counter | map_values, back_inserter(prob),
               [&](unsigned c) { return c/total; });
     double pred_entropy = entropy(prob);
@@ -286,25 +299,20 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
     behavioral_score bs;
     if (pred_entropy > entropy_threshold) {
         // filter the output according to tr
-        vector<contin_t> f_output;
+        Counter<contin_t, contin_t> f_output;
         ct_it = ctable.cbegin();
         pred_it = pred_ot.cbegin();
         for (; ct_it != ctable.cend(); ++ct_it, ++pred_it) {
             if (vertex_to_bool(*pred_it)) {
                 foreach(const auto& mv, ct_it->second)
-                    f_output.insert(f_output.end(), mv.second,
-                                    get_contin(mv.first));
+                    f_output[get_contin(mv.first)] = mv.second;
             }
         }
 
         logger().fine("f_output.size() = %u", f_output.size());
 
-        // sort the filtered output and compute KLD(cot, f_output) per
-        // component
-        boost::sort(f_output);
-        KLDS<vector<contin_t> > klds(cot, f_output);
-        dorepeat(klds.size())
-            bs.push_back(klds.next());
+        // compute KLD(pdf, f_output) per component
+        klds(f_output, back_inserter(bs));
     }
     // add the Occam's razor feature
     if(occam)

@@ -24,9 +24,12 @@
 #ifndef _OPENCOG_KLD_H
 #define _OPENCOG_KLD_H
 
+#include <boost/range/adaptor/map.hpp>
+#include <boost/range/numeric.hpp>
+
 #include "dorepeat.h"
-#include <opencog/util/Logger.h>
-#include <opencog/util/Counter.h>
+#include "Logger.h"
+#include "Counter.h"
 
 /**
  * Functions to compute the Kullback-Leibler Divergence of discrete
@@ -34,6 +37,8 @@
  */
 
 namespace opencog {
+
+ using boost::adaptors::map_values;
 
 /**
  * Implementation of the algorithm described in the paper
@@ -44,23 +49,53 @@ namespace opencog {
  * for a fixed P and access to intermediary results. A function
  * returning the direct KLD is defined further below for convenience.
  */
-template<typename SortedSeq>
+template<typename FloatT>
 struct KLDS {
-    typedef typename SortedSeq::value_type result_type;
+    // map 1-dimensional inputs to their probability density
+    typedef std::map<FloatT, FloatT> pdf_t;
+    typedef typename pdf_t::iterator pdf_it;
+    typedef typename pdf_t::const_iterator pdf_cit;
+
+    /// set the distribution discribing Q to compute KL(P||Q)
+    void set_p_pdf(const pdf_t& p_pdf_, FloatT p_s_ = -1) {
+        p_pdf = p_pdf_;
+        p_s = p_s_ < 0 ? boost::accumulate(p_pdf | map_values, 0) : p_s_;
+        x_very_first = p_pdf.cbegin()->first - margin;
+        x_very_last = p_pdf.crbegin()->first + margin;
+        precompute_delta_p();
+    }
+    /// like above but takes a sequence of Float instead of a Counter
+    template<typename SortedSeq>
+    void set_p(const SortedSeq& p) {
+        set_p_pdf(Counter<FloatT, FloatT>(p), p.size());
+    }
+
+    // empty constructor, must use set_p (or set_p_pdf) and set_q (or
+    // set_q_pdf) to fill P and Q before computing KL(P||Q) via
+    // operator()
+    KLDS() : margin(1.0) {}
     
     // @param p sorted sequence of values representing the distribution of P
-    // @param q sorted sequence of values representing the distribution of Q
-    KLDS(const SortedSeq& p_, const SortedSeq& q_) :
-        p(p_), q(q_), p_s(p.size()), q_s(q.size()),
-        margin(1.0), epsilon(1e-16),
-        p_pdf(Counter<result_type, result_type>(p)),
-        q_pdf(Counter<result_type, result_type>(q)),
-        it_p(p_pdf.cbegin()), it_q(q_pdf.cbegin()),
-        x_very_first(p.front() - margin), x_very_last(p.back() + margin),
-        p_x_pre(x_very_first), q_x_pre(p_x_pre) {
-            // pre-compute the pdf of p and q
-            // TODO
-        }
+    //
+    // Q should be specified by set_q (or set_q_pdf)
+    template<typename SortedSeq>
+    KLDS(const SortedSeq& p) : margin(1.0) {
+        set_p(p);
+    }
+
+    
+    // @param p_pdf_ mapping between value and its number of
+    //               occurences sampled according to the distribution of P
+    // @param p_s_   total number of observations of p_pdf_
+    //
+    // If p_s_ is negative then it is automatically calculated. One
+    // might want to overwrite those default arguments in case one
+    // already knows their size and not waste time recomputing them.
+    //
+    // Q should be specified by set_q (or set_p_pdf)
+    KLDS(const pdf_t& p_pdf_, FloatT p_s_ = -1) : margin(1.0) {
+        set_p_pdf(p_pdf_, p_s_);
+    }
 
     // size of the pdf of p. This useful when one wants to know till
     // when next can be used
@@ -71,64 +106,78 @@ struct KLDS {
     // computes the components log(delta_p / delta_q) once at a
     // time. This is useful when one want to treat each component as a
     // seperate optimization of a multi-optimization problem.
-    result_type next() {
-        OC_ASSERT(it_p != p_pdf.end());
-        // compute delta P
-        result_type p_x = it_p->first,
-            delta_p_x = std::max(epsilon, p_x - p_x_pre),
-            delta_p = (q_s * it_p->second) / delta_p_x;
-        
-        // logger().fine("p_x = %f, p_x_pre = %f, p_x - p_x_pre = %f", p_x, p_x_pre, p_x - p_x_pre);
+    FloatT next(const pdf_t& q_pdf, FloatT q_s, FloatT& q_x_pre,
+                pdf_cit& cit_p, pdf_cit& cit_q) {
+        OC_ASSERT(cit_p != p_pdf.end());
 
         // compute delta Q
-        result_type q_x = it_q == q_pdf.cend()? x_very_last : it_q->first;
+        FloatT p_x = cit_p->first,
+            q_x = cit_q == q_pdf.cend()? x_very_last : cit_q->first;
         // search the points of q right before and after p_x
         while (q_x < p_x) {
             q_x_pre = q_x;
-            ++it_q;
-            q_x = it_q == q_pdf.cend()? x_very_last : it_q->first;
+            ++cit_q;
+            q_x = cit_q == q_pdf.cend()? x_very_last : cit_q->first;
         }
-        result_type delta_q_x = std::max(epsilon, q_x - q_x_pre),
-            n_duplicates = it_q == q_pdf.cend()? 1.0 : it_q->second,
-            delta_q = (p_s * n_duplicates) / delta_q_x;
-        
-        // logger().fine("q_x = %f, q_x_pre = %f, q_x - q_x_pre = %f", q_x, q_x_pre, q_x - q_x_pre);
+        FloatT delta_p = cit_p->second,
+            delta_q_x = q_x - q_x_pre,
+            n_duplicates = cit_q == q_pdf.cend()? 1.0 : cit_q->second,
+            delta_q = (p_s / q_s) * n_duplicates / delta_q_x;
 
-        p_x_pre = p_x;
-        ++it_p;
-
-        // logger().fine("delta_p = %f, delat_q = %f, Q = %f", delta_p, delta_q, delta_p / delta_q);
-        
+        ++cit_p;
         return std::log(delta_p / delta_q);
     }
-
+    
     // @return estimate of KL(P||Q)
-    result_type operator()() {
-        result_type res = 0;
+    template<typename SortedSeq>
+    FloatT operator()(const SortedSeq& q) {
+        pdf_t q_pdf = Counter<FloatT, FloatT>(q);
+        FloatT q_s = q.size(),
+            q_x_pre = x_very_first,
+            res = 0;
+        pdf_cit cit_p = p_pdf.begin();
+        pdf_cit cit_q = q_pdf.begin();
         dorepeat(p_pdf.size())
-            res += next();
+            res += next(q_pdf, q_s, q_x_pre, cit_p, cit_q);
         return res / p_s - 1; // I don't fully understand the -1
     }
 
+    template<typename Out>
+    void operator()(const pdf_t& q_pdf, Out out) {
+        FloatT q_s = boost::accumulate(q_pdf | map_values, 0),
+            q_x_pre = x_very_first;
+        pdf_cit cit_p = p_pdf.begin(),
+            cit_q = q_pdf.begin();
+        dorepeat(p_pdf.size())
+            *out++ = next(q_pdf, q_s, q_x_pre, cit_p, cit_q);
+    }
+
 private:
-    // map 1-dimensional inputs to their probability density
-    typedef std::map<result_type, result_type> pdf_t;
-    const SortedSeq &p, &q;
-    const result_type p_s, q_s,            // sizes of p and q used in
-                                           // the computation of LKD
-        margin,
-        epsilon;        // minimum distance between 2 values
-                        // (to avoid getting infinite delta)
-    pdf_t p_pdf, q_pdf;
-    typename pdf_t::const_iterator it_p, it_q;
-    result_type x_very_first, x_very_last, p_x_pre, q_x_pre;
+    /// replace the occurence count in p_pdf by delta_p
+    void precompute_delta_p() {
+        FloatT p_x_pre(x_very_first);
+        foreach(typename pdf_t::value_type& v, p_pdf) {
+            FloatT p_x = v.first,
+                delta_p_x = p_x - p_x_pre,
+                delta_p = v.second / delta_p_x;
+            v.second = delta_p;
+            p_x_pre = p_x;
+        }
+    }
+    
+    FloatT p_s,            // sizes of p used in
+                           // the computation of LKD
+        margin;
+
+    pdf_t p_pdf;
+    FloatT x_very_first, x_very_last;
 };
 
 // function helper
 template<typename SortedSeq>
 typename SortedSeq::value_type KLD(const SortedSeq& p, const SortedSeq& q) {
-    KLDS<SortedSeq> klds(p, q);
-    return klds();
+    KLDS<typename SortedSeq::value_type> klds(p);
+    return klds(q);
 }
     
 } // ~namespace opencog

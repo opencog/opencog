@@ -75,7 +75,7 @@ static const std::string default_input_label("i");
 ///
 /// Most scoring functions work on CTable as it avoids re-evaluating a
 /// combo program on the same inputs.
-class CTable : public std::map<vertex_seq, Counter<vertex, unsigned> >
+class CTable : public std::map<vertex_seq, Counter<vertex, unsigned>>
 {
 public:
     typedef vertex_seq key_type;

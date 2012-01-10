@@ -33,6 +33,7 @@
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/functional.h>
+#include <opencog/util/KLD.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/eval.h>
@@ -411,7 +412,8 @@ struct occam_max_KLD_bscore : public bscore_base
     // the maximum value a behavioral_score can represent
     behavioral_score best_possible_bscore() const;
     
-    std::vector<contin_t> cot;
+    Counter<contin_t, contin_t> pdf;
+    mutable KLDS<contin_t> klds;
     CTable ctable;
     bool occam;
     score_t complexity_coef;
