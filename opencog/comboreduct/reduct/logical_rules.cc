@@ -413,12 +413,11 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
     bool adopted = false;
     for (sib_it gchild = child.begin(); gchild != child.end(); )
     {
-        // The gchild must be boolean-typed, no matter what, which
-        // means it must be either a logic op, or a boolean-typed 
-        // argument, or a (possibly negated) predicate.  If its
-        // either of the later two, do nothing, and loop to next.
-        // But if gchild is a logic op, and that logic op has just
-        // one child, then flatten and pull it up to our level.
+        // OK. We expect each of the gchilds to be either a logic op,
+        // or an argument, or a (possibly negated) predicate.  If its
+        // either of the later two, do nothing, and look at the next
+        // gchild. But if gchild is a logic op, and that logic op has
+        // just one child, then flatten and pull it up to our level.
         if (is_logical_operator(*gchild))
         {
             if (gchild.has_one_child())
@@ -626,11 +625,12 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                 if (!opencog::is_sorted(make_counting_iterator(current.begin()),
                                         make_counting_iterator(current.end()),
                                         comp))
-                    tr.sort_on_subtrees(current.begin(),current.end(),comp);
+                    tr.sort_on_subtrees(current.begin(), current.end(), comp);
                 
                 OC_ASSERT(child.begin() != child.end(),
                           "child should have siblings"); //not sure if this is ok..
-                // make res the disjunction of child's children's guard sets
+
+                // Make res the disjunction of child's children's guard sets
                 // important: we use references to the last child because we are
                 // later going to iterate (left-to-right) removing these iterators
                 // from the tree - unless we have references *only* to the
@@ -648,17 +648,21 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                 
                 if (!res.empty()) {
                     opencog::insert_set_complement
-                        (tree_inserter(tr,current),
+                        (tree_inserter(tr, current),
                          make_counting_iterator(current.begin()),
                          make_counting_iterator(current.end()),
                          res.begin(), res.end(), comp);
                     
                     for (sib_it gchild = child.begin(); gchild != child.end(); ++gchild)
+                    {
+                        // Do NOT erase children of predicates!
+                        if (*gchild == id::greater_than_zero) continue;
                         opencog::erase_set_intersection
                             (tree_eraser(tr),
                              make_counting_iterator(gchild.begin()),
                              make_counting_iterator(gchild.end()),
-                             res.begin(),res.end(),comp);
+                             res.begin(), res.end(), comp);
+                    }
                     
                     // try to apply and-cut to child's children
                     and_cut(child);
