@@ -332,16 +332,15 @@ void reduce_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
                            std::negate<int>());
             *c=tmp;
         }
-        
+
         clause tmp;
         std::transform(intersect.begin(),intersect.end(),
                        std::inserter(tmp,tmp.begin()),std::negate<int>());
         intersect=tmp;
-        
+
         mapper.extract_cnf(f.begin(),f.end(),tr,it);
-        
     }
-    
+
     if (!intersect.empty()) {
         *it=id::logical_or;
         if (!it.is_childless()) {
@@ -387,7 +386,7 @@ void subtree_to_enf::reduce_to_enf::operator()(sib_it it)
         break;
     }
 }
-    
+
 bool subtree_to_enf::reduce_to_enf::consistent(const subtree_set& s)
 {
     return std::adjacent_find(make_indirect_iterator(s.begin()),
@@ -402,8 +401,9 @@ bool subtree_to_enf::reduce_to_enf::consistent(const subtree_set& s)
 //
 bool is_predicate(sib_it child)
 {
+
     if (*child == id::greater_than_zero) return true;
-    if ((*child == id::logical_not) && 
+    if ((*child == id::logical_not) &&
         (*child.begin() == id::greater_than_zero)) return true;
     return false;
 }
@@ -413,36 +413,50 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
     bool adopted = false;
     for (sib_it gchild = child.begin(); gchild != child.end(); )
     {
-        if (gchild.has_one_child())
+        // The gchild must be boolean-typed, no matter what, which
+        // means it must be either a logic op, or a boolean-typed 
+        // argument, or a (possibly negated) predicate.  If its
+        // either of the later two, do nothing, and loop to next.
+        // But if gchild is a logic op, and that logic op has just
+        // one child, then flatten and pull it up to our level.
+        if (is_logical_operator(*gchild))
         {
-            if (*gchild.begin() == id::logical_or)
+            if (gchild.has_one_child())
             {
-                tr.erase(tr.flatten(gchild.begin()));
-                if (!adopted) // is child adopting a terminal 1-constrant AND, x?
-                    for (sib_it x = gchild.begin(); x != gchild.end(); ++x)
-                        if (x.has_one_child()) {
-                            adopted = true;
-                            break;
-                        }
+                if (*gchild.begin() == id::logical_or)
+                {
+                    tr.erase(tr.flatten(gchild.begin()));
+                    if (!adopted) // is child adopting a terminal 1-constrant AND, x?
+                    {
+                        for (sib_it x = gchild.begin(); x != gchild.end(); ++x)
+                            if (x.has_one_child()) {
+                                adopted = true;
+                                break;
+                            }
+                    }
+                }
+
+                // Allow predicates; allow negated predicates, complain
+                // about anything else.
+                else if (!is_argument(*gchild.begin()) &&
+                         !is_predicate(gchild.begin()))
+                {
+                    std::stringstream ss;
+                    ss << "Logical reduction: unexpected operator: ";
+                    ss << *gchild.begin();
+                    OC_ASSERT(0, ss.str());
+                }
                 gchild = tr.erase(tr.flatten(gchild));
                 continue;
             }
-
-            else if (is_argument(*gchild.begin()))
-            {
-                gchild = tr.erase(tr.flatten(gchild));
-                continue;
-            }
-
-            // Allow predicates; allow negated predicates, complain
-            // about anything else.
-            else if (!is_predicate(gchild.begin()))
-            {
-                std::stringstream ss;
-                ss << "Logical reduction: unexpected operator: ";
-                ss << *gchild.begin();
-                OC_ASSERT(0, ss.str());
-            }
+        }
+        else if (!is_predicate(gchild) &&
+                 !is_argument(*gchild))
+        {
+            std::stringstream ss;
+            ss << "Logical reduction: unexpected operator: ";
+            ss << *gchild;
+            OC_ASSERT(0, ss.str());
         }
         ++gchild;
     }
@@ -486,14 +500,14 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
         }
     }
 }
-      
-subtree_to_enf::reduce_to_enf::Result 
+
+subtree_to_enf::reduce_to_enf::Result
 subtree_to_enf::reduce_to_enf::reduce(sib_it current,
                                       const subtree_set& dominant,
                                       const subtree_set& command)
 {
-    // XXX for performance, skip this check ... 
-    OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp), 
+    // XXX for performance, skip this check ...
+    OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
 
     // First remove duplicate children
@@ -509,17 +523,17 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
             }
         }
     }
-    
+ 
     OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
-    OC_ASSERT(opencog::is_sorted(command.begin(), command.end(), comp), 
+    OC_ASSERT(opencog::is_sorted(command.begin(), command.end(), comp),
               "command subtree_set should be sorted (reduce).");
 
     if (*current == id::logical_and)
         return reduce_and(current, dominant, command);
     if (*current == id::logical_or)
         return reduce_or(current, dominant, command);
-    
+ 
     // Should be an argument or something ... ??
     //OC_ASSERT(is_argument(*current));
     return Keep;
