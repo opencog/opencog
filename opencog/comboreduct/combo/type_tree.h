@@ -173,8 +173,8 @@ bool inherit_type_tree(const type_tree& ty1, type_tree_pre_it it1,
 
 // That reduction function performs the following reductions on type_tree :
 //
-// 1) reduce chains of application and astraction and so on
-//    fairly limited do not handle union between application and lambda
+// 1) reduce chains of application and abstraction and so on.
+//    Fairly limited, do not handle union between application and lambda
 //    and consider that the application is always complete
 //    that is if the function has 3 arguments then the application
 //    provides 3 elements (with the expection of arg_list where the number of
