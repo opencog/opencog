@@ -487,7 +487,7 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
                 // or if it is a boolean-valued term (i.e. a predicate)
                 // then just ignore it.
                 if (is_argument(*child.begin()) ||
-                    (*child.begin() == id::greater_than_zero))
+                    is_predicate(child.begin()))
                     child = tr.erase(tr.flatten(child));
                 else
                     // XXX Is this really the correct thing to do here?
@@ -509,12 +509,15 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
     OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
 
-    // First remove duplicate children
+    // First, remove duplicate children.  This loop assumes that
+    // current is in sorted order, and thus, duplicate children are
+    // next to each other. This allows a single O(n) loop instead
+    // of a nested O(N^2) loop.
     if (!current.is_childless()) {
         for (sib_it sib1 = current.begin(), sib2 = ++current.begin();
              sib2 != current.end(); )
         {
-            if (tr.equal_subtree(sib1,sib2)) {
+            if (tr.equal_subtree(sib1, sib2)) {
                 sib2 = tr.erase(sib2);
             } else {
                 sib1 = sib2;
@@ -546,12 +549,12 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
     opencog::erase_set_intersection(tree_eraser(tr),
                                     make_counting_iterator(current.begin()),
                                     make_counting_iterator(current.end()),
-                                    dominant.begin(),dominant.end(),comp);
+                                    dominant.begin(), dominant.end(), comp);
     
     
     std::vector<combo_tree> negated;
-    push_back_negated_arguments(command,negated);
-    std::sort(negated.begin(),negated.end(),comp);
+    push_back_negated_arguments(command, negated);
+    std::sort(negated.begin(), negated.end(), comp);
     
     opencog::erase_set_intersection(tree_eraser(tr),
                                     make_counting_iterator(current.begin()),
@@ -586,8 +589,9 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                        make_counting_iterator(current.end()),
                        inserter(handle_set, handle_set.begin()), comp);
         
-        if (!consistent(handle_set))
-            return Delete;
+        if (!consistent(handle_set)) {
+            return Delete; 
+        }
         
         for (sib_it child = current.begin(); child != current.end(); ) {
             if (child.is_childless() || (*child != id::logical_and && 
@@ -656,7 +660,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                     for (sib_it gchild = child.begin(); gchild != child.end(); ++gchild)
                     {
                         // Do NOT erase children of predicates!
-                        if (*gchild == id::greater_than_zero) continue;
+                        if (is_predicate(gchild)) continue;
                         opencog::erase_set_intersection
                             (tree_eraser(tr),
                              make_counting_iterator(gchild.begin()),
@@ -698,8 +702,12 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
     {
         subtree_set child_command(command);
         for (sib_it sib = current.begin(); sib != current.end(); ++sib)
-            if (sib != child && sib.has_one_child())
+        {
+            if (sib != child && !is_predicate(sib) && sib.has_one_child())
+            {
                 child_command.insert(sib.begin());
+            }
+        }
         switch(reduce(child, dominant, child_command))
         {
         case Delete:
