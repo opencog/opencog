@@ -115,7 +115,7 @@ void reduce_nots::operator()(combo_tree& tr,combo_tree::iterator it) const
             *it=*it.begin();
             tr.erase(tr.flatten(it.begin()));
             operator()(tr,it);
-        } else if (*it.begin()==id::logical_and || 
+        } else if (*it.begin()==id::logical_and ||
                    *it.begin()==id::logical_or) {
             //!(a&&b) -> (!a||!b), and !(a||b) -> (!a&&!b)
             //first transform to comp_op(a,b)
@@ -640,8 +640,18 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                 // from the tree - unless we have references *only* to the
                 // last-to-be-removed items, res may end up containing iterators
                 // pointing at tree nodes that already have been removed
-                subtree_set res(make_counting_iterator(child.last_child().begin()),
-                                make_counting_iterator(child.last_child().end()));
+
+                // The last_child won't have children if its an argument.
+                // Treat predicates as if they were arguments too: they're
+                // also effectively "childless". 
+                subtree_set res;
+                if (!is_predicate(child.last_child())) {
+                    for (sib_it pit = child.last_child().begin();
+                         pit != child.last_child().end(); pit++)
+                    {
+                        res.insert(pit);
+                    }
+                }
 
                 for (sib_it sib = child.begin(); sib != child.last_child(); ++sib)
                     opencog::erase_set_difference(subtree_set_eraser(res),
@@ -649,14 +659,15 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                                                   make_counting_iterator(sib.begin()),
                                                   make_counting_iterator(sib.end()),
                                                   comp);
-                
-                if (!res.empty()) {
+ 
+                if (!res.empty())
+                {
                     opencog::insert_set_complement
                         (tree_inserter(tr, current),
                          make_counting_iterator(current.begin()),
                          make_counting_iterator(current.end()),
                          res.begin(), res.end(), comp);
-                    
+ 
                     for (sib_it gchild = child.begin(); gchild != child.end(); ++gchild)
                     {
                         // Do NOT erase children of predicates!
@@ -667,21 +678,21 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                              make_counting_iterator(gchild.end()),
                              res.begin(), res.end(), comp);
                     }
-                    
-                    // try to apply and-cut to child's children
+ 
+                    // Try to apply and-cut to child's children.
                     and_cut(child);
-                    
+ 
                     // guard_set has been enlarged, so we need to reprocess all kids
                     child = current.begin();
                 } else {
-                    if (!and_cut(child)) //if child is adopting a terminal 
+                    if (!and_cut(child)) //if child is adopting a terminal
                         ++child;           //1-constrant AND, need to reprocess it
                 }
             }
             if (addIt)
                 handle_set.insert(tmp);
         }
-        
+ 
         // try to apply or-cut to current's children
         or_cut(current);
     } while (current.number_of_children() != prev_guard_set.size() ||
@@ -693,7 +704,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
     return Keep;
 }
 
-subtree_to_enf::reduce_to_enf::Result 
+subtree_to_enf::reduce_to_enf::Result
 subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
                                          const subtree_set& dominant,
                                          const subtree_set& command)
@@ -703,7 +714,7 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
         subtree_set child_command(command);
         for (sib_it sib = current.begin(); sib != current.end(); ++sib)
         {
-            if (sib != child && !is_predicate(sib) && sib.has_one_child())
+            if (sib != child && sib.has_one_child() && !is_predicate(sib))
             {
                 child_command.insert(sib.begin());
             }
@@ -713,7 +724,7 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
         case Delete:
             if (current.is_childless() || current.has_one_child())
                 return Delete;
-            else 	    
+            else
                 child = tr.erase(child);
             break;
         case Disconnect:
