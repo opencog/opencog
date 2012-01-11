@@ -42,7 +42,12 @@
 #include "../moses/moses.h"
 #include "../moses/neighborhood_sampling.h"
 
-#define MINIMUM_DEME_SIZE         50
+// we choose the number 100 because below that multithreading is
+// disabled and it leads to some massive slow down because then most
+// of the computational power is spent on successive representation
+// building
+#define MINIMUM_DEME_SIZE         100
+
 #define MAX_EVALS_PER_SLICE       10
 
 namespace opencog { namespace moses {
