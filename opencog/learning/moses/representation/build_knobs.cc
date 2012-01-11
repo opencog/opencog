@@ -462,8 +462,6 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
 {
     // If the node is not a logic op, then bail.  That is, we don't want
     // to insert any kind of boolean knobs into other kinds of ops.
-// XXX is this correct ? don't we want knobs for args, and preicates?
-// TODO and fix as needed.  Or just be careful about who si calling us...
     if (!is_logical_operator(*it))
        return;
 
@@ -490,45 +488,40 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
  */
 void build_knobs::build_predicate(pre_it it)
 {
+    id::builtin flip = id::null_vertex;
+
     if (*it == id::logical_not)
     {
-// XXX for just right now, we allow not's but only if they
-// preceed a predicate... right!?  Not sure if this is correct.
-        OC_ASSERT((*it.begin() == id::greater_than_zero),
+        // We allow not's, but only if they preceed a predicate. This
+        // is similar to the case with arguments: not's are allowed
+        // only if they immediate preceed a boolean-typed argument.
+        OC_ASSERT(is_predicate(it.begin()),
               "ERROR: the tree is supposed to be in normal form; "
               "and thus must not contain logical_not nodes.");
-
     }
     else if (*it == id::logical_and)
+    {
+        flip = id::logical_or;
+    }
+    else if (*it == id::logical_or)
+    {
+        flip = id::logical_and;
+    }
+
+    if (flip != id::null_vertex)
     {
         add_predicate_knobs(it);
         for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
-            if (is_argument(*sib)) {
-                add_predicate_knobs(_exemplar.insert_above(sib, id::logical_or),
-                                  false);
+            if (is_argument(*sib) || is_predicate(sib)) {
+                add_predicate_knobs(_exemplar.insert_above(sib, flip), false);
             }
             else if (*sib == id::null_vertex)
                 break;
             else
                 build_predicate(sib);
         }
-        add_predicate_knobs(_exemplar.append_child(it, id::logical_or));
-    }
-    else if (*it == id::logical_or)
-    {
-        add_predicate_knobs(it);
-        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-        {
-            if (is_argument(*sib))
-                add_predicate_knobs(_exemplar.insert_above(sib, id::logical_and),
-                                  false);
-            else if (*sib == id::null_vertex)
-                break;
-            else
-                build_predicate(sib);
-        }
-        add_predicate_knobs(_exemplar.append_child(it, id::logical_and));
+        add_predicate_knobs(_exemplar.append_child(it, flip));
     }
 }
 
