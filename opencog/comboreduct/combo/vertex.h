@@ -773,10 +773,24 @@ inline bool is_logical_operator(const T& v)
 {
     return (v == id::logical_and || v == id::logical_or || v == id::logical_not);
 }
+
 template<typename T>
 inline bool is_constant(const T& v)
 {
     return (is_boolean(v) || is_contin(v) || is_action_result(v));
+}
+
+/// Return true if the argument is a predicate node, or negated
+/// predicate node.
+///
+/// At this time, the only predicate in combo is greater_than_zero.
+//
+inline bool is_predicate(const combo_tree::iterator& it)
+{
+    if (*it == id::greater_than_zero) return true;
+    if ((*it == id::logical_not) &&
+        (*it.begin() == id::greater_than_zero)) return true;
+    return false;
 }
 
 //copy a combo_tree, ignoring subtrees rooted in null vertices
