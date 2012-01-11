@@ -443,8 +443,7 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
     // Should we do that here, or will things sort themselves out
     // later?
 
-// #ifdef DEBUG_INFO
-#if 1
+#ifdef DEBUG_INFO
     cerr << "---------------------------------" << endl;
     cerr << endl << "Perms: " << endl;
     foreach (const combo_tree& tr, perms)
@@ -472,7 +471,7 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
         logical_probe_rec(_exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, num_threads());
 
-    foreach(const logical_subtree_knob& kb, kb_v) {
+    foreach (const logical_subtree_knob& kb, kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
 }
@@ -513,8 +512,23 @@ void build_knobs::build_predicate(pre_it it)
         add_predicate_knobs(it);
         for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
-            if (is_argument(*sib) || is_predicate(sib)) {
+            if (is_argument(*sib)) {
                 add_predicate_knobs(_exemplar.insert_above(sib, flip), false);
+            }
+            else if (is_predicate(sib)) {
+                add_predicate_knobs(_exemplar.insert_above(sib, flip), false);
+                pre_it cit = sib.begin();
+                if (*cit == id::logical_not)
+                    cit = cit.begin();
+
+                // At this time, we assume that the only predicate is
+                // "greater_than_zero", and it has a single arg, which
+                // is either contin or an argument, or any function
+                // returning contin ....
+                OC_ASSERT((is_argument(*cit) || is_contin(*cit)),
+                    "Error: predicate term must be made of contin");
+                contin_canonize(cit);
+                build_contin(cit);
             }
             else if (*sib == id::null_vertex)
                 break;
