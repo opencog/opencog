@@ -259,7 +259,7 @@ occam_max_KLD_bscore::occam_max_KLD_bscore(const CTable& ctable_,
     set_complexity_coef(alphabet_size, stdev);
     boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
-                    pdf[get_contin(v.first)] = v.second; }); });
+                    pdf[get_contin(v.first)] += v.second; }); });
     klds.set_p_pdf(pdf);
 }
 
@@ -269,15 +269,6 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
     
     OTable pred_ot(tr, ctable, rng);
 
-    stringstream ss_ot;
-    ss_ot << pred_ot;
-    logger().fine("ss_ot =");
-    logger().fine(ss_ot.str());
-    
-    stringstream ss;
-    ss << "tr = " << tr;
-    logger().fine(ss.str());
-
     // compute the entropy of the output of the predicate
     vector<double> prob;
     Counter<vertex, unsigned> counter;
@@ -285,15 +276,10 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
     auto pred_it = pred_ot.cbegin();
     for (; pred_it != pred_ot.cend(); ++ct_it, ++pred_it)
         counter[*pred_it] += boost::accumulate(ct_it->second | map_values, 0);
-    /// @todo precompute total
-    double total = boost::accumulate(counter | map_values, 0);
-
-    logger().fine("total = %f", total);
-    
+    double total = klds.p_size();
     transform(counter | map_values, back_inserter(prob),
               [&](unsigned c) { return c/total; });
     double pred_entropy = entropy(prob);
-
     logger().fine("pred_entropy = %f", pred_entropy);
 
     behavioral_score bs;

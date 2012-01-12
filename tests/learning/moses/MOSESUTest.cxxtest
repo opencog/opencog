@@ -35,8 +35,7 @@ const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/mose
 class MOSESUTest : public CxxTest::TestSuite {
     string build_arguments(vector<string>& arguments) {
         char tempfile[] = "/tmp/MOSESUTestXXXXXX";
-        int tmp = mkstemp(tempfile);
-        cout << tmp << endl;
+        mkstemp(tempfile);
         arguments.insert(arguments.begin(), "moses-exec");
         arguments.push_back(string("-o").append(tempfile).c_str());
         return tempfile;
