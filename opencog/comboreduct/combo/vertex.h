@@ -780,6 +780,23 @@ inline bool is_constant(const T& v)
     return (is_boolean(v) || is_contin(v) || is_action_result(v));
 }
 
+/// Return true if v is part of a contin-typed expression.
+/// i.e. its contin istself, or is an arithmetic operator.
+/// (an operator returning contin)
+//
+template<typename T>
+inline bool is_contin_expr(const T& v)
+{
+    return (is_contin(v) ||
+            (v == id::div) ||
+            (v == id::exp) ||
+            (v == id::impulse) ||
+            (v == id::log) ||
+            (v == id::plus) ||
+            (v == id::rand) ||
+            (v == id::sin) ||
+            (v == id::times));
+}
 /// Return true if the argument is a predicate node, or negated
 /// predicate node.
 ///
