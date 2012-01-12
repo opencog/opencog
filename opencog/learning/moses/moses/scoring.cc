@@ -299,6 +299,14 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
 
         // compute KLD(pdf, f_output) per component
         klds(f_output, back_inserter(bs));
+
+        // add log entropy, this is completely heuristic, no
+        // justification except that the log of the entropy is gonna
+        // add a large penalty when the entropy tends to 0. Not sure
+        // here what we really need, a perhaps something like 1 -
+        // p-value, or some form of indefinite TV confidence on the
+        // calculation of KLD.
+        bs.push_back(log(pred_entropy));
     }
     // add the Occam's razor feature
     if(occam)
