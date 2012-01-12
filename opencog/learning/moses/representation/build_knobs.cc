@@ -874,9 +874,20 @@ void build_knobs::rec_canonize(pre_it it)
     }
 }
 
-/// Append a linear combination of *all* arguments of type contin.
+/// Append a linear combination of *all* arguments. That is, append
+/// the term +( *(0 #1) *(0 #2) *(0 #3) ...)  Later on, the zero
+/// constants will become knobs.
+///
 /// The appending happens at location it (which happens to always
-/// be in the exampler, in the current usage).
+/// be in the exampler, in the current usage). if *it isn't plus,
+/// then plus is inserted.
+///
+/// If the argument is of type contin, then it is directly inserted,
+/// as shown above.
+///
+/// If the argument is a boolean, then its run throught the impulse
+/// function (1.0 if T and 0.0 if F) and appended with multiplier.
+/// That is, its of the form +(... *(0 impulse(#n)) ...)
 //
 void build_knobs::append_linear_combination(pre_it it)
 {
@@ -890,8 +901,22 @@ void build_knobs::append_linear_combination(pre_it it)
     foreach(int idx, from_one(_arity))
     {
         vertex arg = argument(idx);
-        if ((*tit == id::contin_type) && permitted_op(arg))
-            mult_add(it, arg);
+        if (permitted_op(arg)) {
+            if (*tit == id::contin_type) {
+                mult_add(it, arg);
+            }
+            else if (*tit == id::boolean_type) {
+                if (permitted_op(id::impulse)) {
+                    pre_it imp = mult_add(it, id::impulse);
+                    _exemplar.append_child(imp, arg);
+                }
+            }
+            else {
+                OC_ASSERT(0,
+                    "Error: When building contin expressions, got "
+                     "unsupported argument type.");
+            }
+        }
         tit++;
     }
 }
