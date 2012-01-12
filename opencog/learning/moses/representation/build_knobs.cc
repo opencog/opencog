@@ -557,9 +557,10 @@ void build_knobs::build_predicate(pre_it it)
                 // is either contin or an argument, or any function
                 // returning contin ... So, go and insert contin knobs
                 // into that expression.
-                pre_it cit = sib.begin();
-                if (*cit == id::logical_not)
+                pre_it cit = sib;
+                if (*cit == id::logical_not)  // skip over the not.
                     cit = cit.begin();
+                cit = cit.begin();  // get the arg of predicate.
 
                 // XXX We could/should probably check that the argument
                 // is of contin type; we could do this by looking at the
@@ -915,7 +916,7 @@ void build_knobs::rec_canonize(pre_it it)
     else if (*it == id::sin || *it == id::log || *it == id::exp) {
         linear_canonize(it.begin());
     }
-    else if (*it == id::times) {
+    else if ((*it == id::times) || (*it == id::div)) {
         // @todo: think about that case...
         logger().warn("TODO: handle case where it = id::times in build_knobs::rec_canonize");
     }
