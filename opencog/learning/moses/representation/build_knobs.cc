@@ -161,18 +161,43 @@ bool build_knobs::permitted_op(const vertex& v)
  * a boolean-typed argument, or any boolean-valued function (this
  * includes predicates, which are functions that return boolean-typed
  * values).
+ *
+ * The canonization proceeds recursively if the top node is a predicate.
+ * That is, if its a predicate, its argument is canonized as well.
  */
 void build_knobs::logical_canonize(pre_it it)
 {
-    if (is_boolean(*it))
-        *it = id::logical_and;
-    else if (*it != id::logical_and && *it != id::logical_or)
-        it = _exemplar.insert_above(it, id::logical_and);
-
-    if (*it == id::logical_and)
+    if (*it == id::logical_and) {
         _exemplar.insert_above(it, id::logical_or);
-    else
+    }
+    else if (*it == id::logical_or) {
         _exemplar.insert_above(it, id::logical_and);
+    }
+    else if (is_boolean(*it)) {
+        *it = id::logical_and;
+        _exemplar.insert_above(it, id::logical_or);
+    }
+    else if (is_argument(*it)) {
+        it = _exemplar.insert_above(it, id::logical_and);
+        _exemplar.insert_above(it, id::logical_or);
+    }
+    else if (is_predicate(it)) {
+        pre_it cit = it;
+        if (*it == id::logical_not)   // skip over negation.
+            cit = cit.begin();
+
+        // At this time, we assume that all predicates are of type
+        // -> (contin boolean).  So, if they take something else, then
+        // the linear_canonize will obviously puke.
+        linear_canonize(cit.begin());  // get arg to predicate.
+
+        it = _exemplar.insert_above(it, id::logical_and);
+        _exemplar.insert_above(it, id::logical_or);
+    }
+    else {
+        OC_ASSERT(0, "Error: during logical_cannonize, got unexpected "
+             " type in logical expression.");
+    }
 }
 
 /**
