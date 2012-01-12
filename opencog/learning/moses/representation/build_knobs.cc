@@ -154,11 +154,13 @@ bool build_knobs::permitted_op(const vertex& v)
 // Logic trees: mixture of logic ops, boolean values, and variables.
 
 /**
- * Modify exemplar so that the top node is either a logical_and, a
- * logical_or, or both.  (XXX why would both be needed ??)
+ * Modify exemplar so that the top node is either a logical_and or a
+ * logical_or.
  *
- * Appropriate both for pure-boolean expressions, and for predicates
- * (mixtures of boolean ops and predicate terms).
+ * @it should point to an expression that is boolean-typed. It may be
+ * a boolean-typed argument, or any boolean-valued function (this
+ * includes predicates, which are functions that return boolean-typed
+ * values).
  */
 void build_knobs::logical_canonize(pre_it it)
 {
@@ -534,7 +536,10 @@ void build_knobs::build_predicate(pre_it it)
                 if (*cit == id::logical_not)
                     cit = cit.begin();
 
-                OC_ASSERT((is_argument(*cit) || is_contin(*cit)),
+                // XXX We could/should probably check that the argument
+                // is of contin type; we could do this by looking at the
+                // "types" type_tree.
+                OC_ASSERT((is_argument(*cit) || is_contin_expr(*cit)),
                     "Error: predicate term must be made of contin");
                 contin_canonize(cit);
                 build_contin(cit);
@@ -829,14 +834,31 @@ void build_knobs::linear_canonize_times(pre_it it)
     linear_canonize(canonize_times(it).begin());
 }
 
+/// linear_canonize: insert "pre-knobs" into an exemplar.
+/// @it: points into a term of type contin. By convention, this is
+///      always pointing into the exemplar.
+///
+/// This recursively adds "pre-knobs" to all child terms. Such
+/// "pre-knobs" are terms that will later be converted into knobs.
+/// So, for example, this will insert terms such as *(0 #n) (an arg
+/// multiplied by zero), and the zero will later be made a knob.  The
+/// "pre-knobs" are always inserted linearly (i.e. prepended by a plus,
+/// so that they forma linear combination). 
+///
+/// The recursive aspect of this is such that, if it encounters terms
+/// that are functions, it will canonize their arguments as well.  Thus,
+/// sin(), exp(), log() will all get their args cannonized.  Note that
+/// the function impulse() returns contin but take a boolean expr: in
+/// this case, we call logical_canonize on it's arg.
+//
 void build_knobs::linear_canonize(pre_it it)
 {
-    // Make it a plus
+    // If we're not appending to plus, then insert one.
     if (*it != id::plus)
         it = _exemplar.insert_above(it, id::plus);
     add_constant_child(it, 0);
 
-    // add the basic elements and recurse, if necessary
+    // Add the basic elements and recurse, if necessary.
     rec_canonize(it);
 }
 
@@ -854,20 +876,29 @@ void build_knobs::rec_canonize(pre_it it)
                 rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
             }
         }
-        //add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
-        if(permitted_op(id::sin))
+
+        // Add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
+        if (permitted_op(id::sin))
             append_linear_combination(mult_add(it, id::sin));
-        if(permitted_op(id::log))
+        if (permitted_op(id::log))
             append_linear_combination(mult_add(it, id::log));
-        if(permitted_op(id::exp))
+        if (permitted_op(id::exp))
             append_linear_combination(mult_add(it, id::exp));
         append_linear_combination(it);
-    } else if (*it == id::sin || *it == id::log || *it == id::exp) {
+    }
+    // functions that take a single contin arg: canonize the arg.
+    else if (*it == id::sin || *it == id::log || *it == id::exp) {
         linear_canonize(it.begin());
-    } else if (*it == id::times) {
+    }
+    else if (*it == id::times) {
         // @todo: think about that case...
         logger().warn("TODO: handle case where it = id::times in build_knobs::rec_canonize");
-    } else {
+    }
+    // functions that take a single boolean arg: canonize the arg.
+    else if (*it == id::impulse) {
+        logical_canonize(it.begin());
+    }
+    else {
         stringstream ss;
         ss << *it << " not a buitin, neither an argument";
         OC_ASSERT(is_argument(*it), ss.str());
@@ -894,11 +925,11 @@ void build_knobs::append_linear_combination(pre_it it)
     if (*it != id::plus)
         it = _exemplar.append_child(it, id::plus);
 
-    // The type treee holds a lambda and then list of types, i.e.
-    // it looks like ->(type type type ... otype)
-    // skip over the mabda "->"
+    // The type tree holds a lambda which encloses a list of types,
+    // i.e. it looks like ->(type type type ... otype)
+    // The two begin's skip over the lambda "->"
     type_tree_sib_it tit = types.begin().begin();
-    foreach(int idx, from_one(_arity))
+    foreach (int idx, from_one(_arity))
     {
         vertex arg = argument(idx);
         if (permitted_op(arg)) {
@@ -914,7 +945,7 @@ void build_knobs::append_linear_combination(pre_it it)
             else {
                 OC_ASSERT(0,
                     "Error: When building contin expressions, got "
-                     "unsupported argument type.");
+                    "unsupported argument type.");
             }
         }
         tit++;
