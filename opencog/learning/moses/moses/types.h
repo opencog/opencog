@@ -218,8 +218,6 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
     return out;
 }
 
-} // ~namespace moses
-
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_score& ts)
 {
@@ -237,6 +235,7 @@ inline std::ostream& operator<<(std::ostream& out,
     return out;
 }
 
+} // ~namespace moses
 } // ~namespace opencog
 
 #endif

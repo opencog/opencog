@@ -190,7 +190,8 @@ private:
         
 static const std::string default_output_label("output");
         
-class OTable : public vertex_seq {
+class OTable : public vertex_seq
+{
     typedef vertex_seq super;
 public:
     typedef vertex value_type;
@@ -220,7 +221,8 @@ private:
     std::string label; // output label
 };
 
-struct Table {
+struct Table
+{
     typedef vertex value_type;
 
     Table();
@@ -305,7 +307,8 @@ double mutualInformation(const Table& table, const FeatureSet& fs) {
  * content (by adding default value on missing keys).
  */
 template<typename FeatureSet>
-double mutualInformation(CTable& ctable, const FeatureSet& fs) {
+double mutualInformation(CTable& ctable, const FeatureSet& fs)
+{
     // the following mapping is used to keep track of the number
     // of inputs a given setting. For instance X1=false, X2=true,
     // X3=true is one possible setting. It is then used to compute

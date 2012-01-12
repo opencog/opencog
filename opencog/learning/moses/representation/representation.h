@@ -175,6 +175,13 @@ protected:
     mutable boost::mutex tranform_mutex;
 };
 
+// This helper seems to be needed to unconfuse the compiler.
+inline std::ostream& operator<<(std::ostream& out,
+                                const opencog::moses::representation& r)
+{
+    return r.ostream_prototype(out);
+}
+
 } //~namespace moses
 } //~namespace opencog
 

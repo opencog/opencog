@@ -71,6 +71,8 @@ struct knob_base
         return _loc;
     }
 
+    virtual std::string toStr() const = 0;
+
 protected:
     combo_tree& _tr;
     combo_tree::iterator _loc; // location of the knob in the combo_tree
@@ -97,8 +99,6 @@ struct disc_knob_base : public knob_base
     // Expected complexity based on whatever the knob is currently
     // turned to.
     virtual int complexity_bound() const = 0;
-
-    virtual std::string toStr() const = 0;
 };
 
 struct contin_knob : public knob_base
@@ -484,16 +484,17 @@ typedef based_variant <boost::variant<logical_subtree_knob,
                                       action_subtree_knob,
                                       simple_action_subtree_knob>,
                        disc_knob_base> disc_knob;
-} //~namespace moses
-} //~namespace opencog
 
 // Without this helper, the compiler gets confused and tries to cast
-// disc_knob_base to something strange.
+// knob_base to something strange.
 inline std::ostream& operator<<(std::ostream& out,
-                                const opencog::moses::disc_knob_base& s)
+                                const opencog::moses::knob_base& s)
 {
 	return out << s.toStr();
 }
+
+} //~namespace moses
+} //~namespace opencog
 
 #endif
 
