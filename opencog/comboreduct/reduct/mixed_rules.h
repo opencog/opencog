@@ -87,7 +87,7 @@ struct reduce_gt_zero_const_sum_sin : public crule<reduce_gt_zero_const_sum_sin>
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-//0<impulse(x) -> x
+// 0<impulse(x) -> x   (remember x is boolean)
 struct reduce_gt_zero_impulse : public crule<reduce_gt_zero_impulse> {
     reduce_gt_zero_impulse() : crule<reduce_gt_zero_impulse>::crule("reduce_gt_zero_impulse") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;

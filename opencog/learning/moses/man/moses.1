@@ -355,7 +355,8 @@ Include the operator \fIoper\fP, but exclude others, in the solution.
 This option may be used several times to specify multiple
 operators.  Currently, \fIoper\fP may be one of
 \fBplus\fP, \fBtimes\fP, \fBdiv\fP, \fBsin\fP,
-\fBexp\fP, \fBlog\fP or a variable \fB#\fP\fIn\fP.
+\fBexp\fP, \fBlog\fP, \fBimpulse\fP
+or a variable \fB#\fP\fIn\fP.
 Note that variables and operators are treated separately, so
 that including only some operators will still include all
 variables, and including only some variables still include
@@ -363,9 +364,10 @@ all operators).  You may need to put variables under double
 quotes.  This option does not work with ANN.
 .TP
 .BI \-n\  oper \fR,\ \fB\-\-ignore\-operator= oper
-Exclude the operator \fIoper\fP from the program solution. 
+Exclude the operator \fIoper\fP from the program solution.
 This option may be used several times.  Currently, \fIoper\fP
 may be one of \fBdiv\fP, \fBsin\fP, \fBexp\fP, \fBlog\fP,
+\fBimpulse\fP
 or a variable \fB#\fP\fIn\fP.
 You may need to put variables under double quotes.
 This option has the priority over the \-N option.
@@ -522,7 +524,7 @@ Finish documenting these aglo flags:  -M -D -I -T
 .PP
 These input flags: -i -u -b -G
 .PP
-These operator/problem type flags: -p 
+These operator/problem type flags: -p
 
 .SH SEE ALSO
 .br

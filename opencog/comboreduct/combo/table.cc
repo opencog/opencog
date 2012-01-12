@@ -48,10 +48,11 @@ ITable::ITable(const ITable::super& mat, vector<string> il)
     : super(mat), labels(il) {}
 
 ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
-               contin_t min_contin, contin_t max_contin) {
+               contin_t min_contin, contin_t max_contin)
+{
     arity_t barity = boolean_arity(tt), carity = contin_arity(tt);
 
-    if(nsamples < 0)
+    if (nsamples < 0)
         nsamples = std::max(pow2(barity), sample_count(carity));
 
     // in that case the boolean inputs are not picked randomly but
@@ -60,7 +61,7 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
 
     //populate the matrix
     auto root = tt.begin();
-    for(int i = 0; i < nsamples; ++i) {
+    for (int i = 0; i < nsamples; ++i) {
         size_t bidx = 0;
         vertex_seq vv;
         foreach(type_node n, make_pair(root.begin(), root.last_child()))
@@ -78,12 +79,14 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
     }
 }
 
-void ITable::set_labels(vector<string> il) {
+void ITable::set_labels(vector<string> il)
+{
     labels = il;
 }
 
-const vector<string>& ITable::get_labels() const {
-    if(labels.empty() and !super::empty()) { // return default labels
+const vector<string>& ITable::get_labels() const
+{
+    if (labels.empty() and !super::empty()) { // return default labels
         static const vector<string> dl(get_default_labels());
         return dl;
     } else return labels;
@@ -94,9 +97,10 @@ OTable::OTable(const string& ol) : label(ol) {}
 OTable::OTable(const super& ot, const string& ol) : super(ot), label(ol) {}
 
 OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
-               const string& ol) : label(ol) {
+               const string& ol) : label(ol)
+{
     OC_ASSERT(!tr.empty());
-    if(is_ann_type(*tr.begin())) {
+    if (is_ann_type(*tr.begin())) {
         // we treat ANN differently because they must be decoded
         // before being evaluated. Also note that if there are memory
         // neurones then the state of the network is evolving at each
@@ -122,17 +126,22 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
-               const string& ol) : label(ol) {
+               const string& ol) : label(ol)
+{
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
             binding_map bmap = ctable.get_binding_map(vs);
-            this->push_back(eval_throws_binding(rng, bmap, tr)); });
+            const vertex &v = eval_throws_binding(rng, bmap, tr);
+            this->push_back(v);
+    });
 }
 
-void OTable::set_label(const string& ol) {
+void OTable::set_label(const string& ol)
+{
     label = ol;
 }
 
-const string& OTable::get_label() const {
+const string& OTable::get_label() const
+{
     return label;
 }
 
@@ -166,8 +175,8 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
     return true;
 }
 
-CTable Table::compress() const {
-
+CTable Table::compress() const
+{
     // Logger
     logger().debug("Compress the dataset, current size is %d", itable.size());
     // ~Logger
@@ -186,7 +195,8 @@ CTable Table::compress() const {
     return res;
 }
 
-bool OTable::operator==(const OTable& rhs) const {
+bool OTable::operator==(const OTable& rhs) const
+{
     const static contin_t epsilon = 1e-12;
     for(auto lit = begin(), rit = rhs.begin(); lit != end(); ++lit, ++rit) {
         if(is_contin(*lit) && is_contin(*rit)) {
