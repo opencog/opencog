@@ -170,8 +170,8 @@ void print_binding_map(const binding_map& bmap) {
 vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
                            combo_tree::iterator it, Evaluator* pe)
     throw(EvalException, ComboException,
-          AssertionException, std::bad_exception) {
-
+          AssertionException, std::bad_exception)
+{
     // print_binding_map(bmap);
 
     // std::cout << "EVAL: " << combo_tree(it) << std::endl;
@@ -181,10 +181,11 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
 
     if (const argument* a = boost::get<argument>(&v)) {
         arity_t idx = a->idx;
-        //assumption : when idx is negative the argument is necessary boolean
+        // Assumption : when idx is negative, the argument is
+        // necessarily boolean, and must be negated.
         if (idx > 0) {
-            if (const vertex* v = boost::get<const vertex>(&bmap[idx]))
-                return * v;
+            if (const vertex* w = boost::get<const vertex>(&bmap[idx]))
+                return *w;
             else
                 return eval_throws_binding(rng, bmap,
                                    boost::get<combo_tree::iterator>(bmap[idx]),
