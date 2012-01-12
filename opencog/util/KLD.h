@@ -97,9 +97,15 @@ struct KLDS {
         set_p_pdf(p_pdf_, p_s_);
     }
 
-    // size of the pdf of p. This useful when one wants to know till
-    // when next can be used
-    size_t size() const {
+    // size of p (duplicted values are not ignored).
+    size_t p_size() const {
+        return p_s;
+    }
+
+    // size of the pdf of p (that is duplicate values are
+    // ignored). This useful when one wants to know till when next can
+    // be used
+    size_t p_pdf_size() const {
         return p_pdf.size();
     }
     
@@ -142,6 +148,8 @@ struct KLDS {
         return res / p_s - 1; // I don't fully understand the -1
     }
 
+    /// Fill the output iterator with the KLD component corresponding
+    /// to each data point
     template<typename Out>
     void operator()(const pdf_t& q_pdf, Out out) {
         FloatT q_s = boost::accumulate(q_pdf | map_values, 0),
@@ -149,7 +157,7 @@ struct KLDS {
         pdf_cit cit_p = p_pdf.begin(),
             cit_q = q_pdf.begin();
         dorepeat(p_pdf.size())
-            *out++ = next(q_pdf, q_s, q_x_pre, cit_p, cit_q);
+            *out++ = next(q_pdf, q_s, q_x_pre, cit_p, cit_q) / p_s;
     }
 
 private:
