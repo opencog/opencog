@@ -347,8 +347,14 @@ build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
         while (from != to) {
             auto kb = new logical_subtree_knob(exemplar, it, from->begin());
             if ((add_if_in_exemplar || !kb->in_exemplar())
-                && disc_probe(exemplar, *kb)) {
+                && disc_probe(exemplar, *kb))
+            {
                 kb_v.push_back(kb);
+            }
+            else
+            {
+                // gahh. Memory leak if not pushed back!
+                delete kb;
             }
             ++from;
         }
@@ -512,19 +518,22 @@ void build_knobs::build_predicate(pre_it it)
         add_predicate_knobs(it);
         for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
+            // Insert logical and/or knobs above arguments and predicates.
             if (is_argument(*sib)) {
                 add_predicate_knobs(_exemplar.insert_above(sib, flip), false);
             }
             else if (is_predicate(sib)) {
                 add_predicate_knobs(_exemplar.insert_above(sib, flip), false);
-                pre_it cit = sib.begin();
-                if (*cit == id::logical_not)
-                    cit = cit.begin();
 
                 // At this time, we assume that the only predicate is
                 // "greater_than_zero", and it has a single arg, which
                 // is either contin or an argument, or any function
-                // returning contin ....
+                // returning contin ... So, go and insert contin knobs
+                // into that expression.
+                pre_it cit = sib.begin();
+                if (*cit == id::logical_not)
+                    cit = cit.begin();
+
                 OC_ASSERT((is_argument(*cit) || is_contin(*cit)),
                     "Error: predicate term must be made of contin");
                 contin_canonize(cit);
@@ -768,11 +777,12 @@ void build_knobs::build_contin(pre_it it)
 {
     pre_it end = it;
     end.skip_children();
-    for (++end;it != end;++it)
+    for (++end; it != end; ++it) {
         if (is_contin(*it)) {
             contin_knob kb(_exemplar, it, _step_size, _expansion, _depth);
             _rep.contin.insert(make_pair(kb.spec(), kb));
         }
+    }
 }
 
 void build_knobs::canonize_div(pre_it it)
