@@ -55,26 +55,29 @@ using boost::adaptors::map_values;
 
 static const std::string default_input_label("i");
 
-/// Contain a compressed table, for instance if the following table
-/// is:
+/// CTable is a "compressed" table.  Compression is done by removing
+/// duplicated inputs, and the output column is replaced by a counter
+/// of the duplicated outputs.  That is, the output column is of the
+/// form {v1:c1, v2:c2, ...} where c1 is the number of times value v1
+/// was seen in the output, c2 the number of times v2 was observed, etc. 
 ///
-/// o,i1,i2
-/// 1,1,0
-/// 0,1,1
-/// 1,1,0
-/// 0,1,0
+/// For example, if one has the following table:
 ///
-/// the compressed table is
+///   output, input1, input2
+///   1,1,0
+///   0,1,1
+///   1,1,0
+///   0,1,0
 ///
-/// o,i1,i2
-/// {0:1,1:2},1,0
-/// {0:1},1,1
+/// Then the compressed table is
 ///
-/// that is the duplicated inputs are removed and the output is
-/// replaced by a counter of the duplicated outputs.
+///   output, input1, input2
+///   {0:1,1:2},1,0
+///   {0:1},1,1
 ///
-/// Most scoring functions work on CTable as it avoids re-evaluating a
+/// Most scoring functions work on CTable, as it avoids re-evaluating a
 /// combo program on the same inputs.
+//
 class CTable : public std::map<vertex_seq, Counter<vertex, unsigned>>
 {
 public:
@@ -89,7 +92,8 @@ public:
     CTable(const std::string& _olabel, const std::vector<std::string>& _ilabels)
         : olabel(_olabel), ilabels(_ilabels) {}
 
-    binding_map get_binding_map(const key_type& args) const {
+    binding_map get_binding_map(const key_type& args) const
+    {
         binding_map bmap;
         for(size_t i = 0; i < args.size(); ++i)
             bmap[i+1] = args[i];
@@ -98,10 +102,10 @@ public:
 };
 
 /**
- * Matrix of vertexes.
- * Rows represent samples.
- * Columns represent input variables
- * Optionally a list of labels (input variable names)
+ * Input table of vertexes.
+ * Rows represent data samples.
+ * Columns represent input variables.
+ * Optionally holds a list of column labels (input variable names)
  */
 class ITable : public std::vector<vertex_seq>
 {
@@ -122,36 +126,46 @@ public:
     // min_contin and max_contin are used in case tt has contin inputs
     ITable(const type_tree& tt, RandGen& rng, int nsamples = -1,
            contin_t min_contin = -1.0, contin_t max_contin = 1.0);
+
     // set input labels
     void set_labels(std::vector<std::string> il);
     const std::vector<std::string>& get_labels() const;
+
     // like get_labels but filter accordingly to a container of arity_t
     template<typename F>
-    std::vector<std::string> get_filtered_labels(const F& filter) {
+    std::vector<std::string> get_filtered_labels(const F& filter)
+    {
         std::vector<std::string> res;
         foreach(arity_t a, filter)
             res.push_back(get_labels()[a]);
         return res;
     }
+
     // get binding map prior calling the combo evaluation
-    binding_map get_binding_map(const vertex_seq& args) const {
+    binding_map get_binding_map(const vertex_seq& args) const
+    {
         binding_map bmap;
         for(arity_t i = 0; i < (arity_t)args.size(); ++i)
             bmap[i+1] = args[i];
         return bmap;
     }
+
     arity_t get_arity() const {
         return super::front().size();
     }
-    bool operator==(const ITable& rhs) const {
+
+    bool operator==(const ITable& rhs) const
+    {
         return 
             static_cast<const super&>(*this) == static_cast<const super&>(rhs)
             && get_labels() == rhs.get_labels();
     }
+
     /// return a copy of the input table filtered according to a given
     /// container of arity_t
     template<typename F>
-    ITable filter(const F& f) {
+    ITable filter(const F& f)
+    {
         ITable res;
         res.set_labels(get_filtered_labels(f));
         foreach(const value_type& row, *this) {
@@ -162,16 +176,20 @@ public:
         }
         return res;
     }
+
 protected:
     std::vector<std::string> labels; // list of input labels
+
 private:
-    std::vector<std::string> get_default_labels() const {
+    std::vector<std::string> get_default_labels() const
+    {
         std::vector<std::string> res;
         for(arity_t i = 1; i <= get_arity(); ++i)
             res.push_back(default_input_label 
                           + boost::lexical_cast<std::string>(i));
         return res;
     }
+
     /**
      * this function take an arity in input and returns in output the
      * number of samples that would be appropriate to check the semantics
@@ -191,6 +209,12 @@ private:
         
 static const std::string default_output_label("output");
         
+/**
+ * Output table of vertexes.
+ * Rows represent dependent data samples.
+ * There is only one column: a single output value for each row.
+ * Optionally holds a column label (output variable names)
+ */
 class OTable : public vertex_seq
 {
     typedef vertex_seq super;
@@ -222,6 +246,12 @@ private:
     std::string label; // output label
 };
 
+/**
+ * Typed data table.
+ * The table consists of an ITable of inputs (independent variables),
+ * an OTable holding the output (the dependent variable), and a type
+ * tree identifiying the types of the inputs and outputs.
+ */
 struct Table
 {
     typedef vertex value_type;
