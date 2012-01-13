@@ -235,6 +235,12 @@ inline std::ostream& operator<<(std::ostream& out,
     return out;
 }
 
+inline std::ostream& operator<<(std::ostream& out,
+                                const moses::behavioral_score& s)
+{
+    return moses::ostream_behavioral_score(out, s);
+}
+
 } // ~namespace moses
 } // ~namespace opencog
 
