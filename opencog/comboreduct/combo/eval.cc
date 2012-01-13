@@ -173,7 +173,6 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
           AssertionException, std::bad_exception)
 {
     // print_binding_map(bmap);
-
     // std::cout << "EVAL: " << combo_tree(it) << std::endl;
 
     typedef combo_tree::sibling_iterator sib_it;
@@ -355,8 +354,8 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
 }
 
 vertex eval_binding(RandGen& rng, binding_map& bmap, combo_tree::iterator it)
-     throw(ComboException,
-           AssertionException, std::bad_exception) {
+    throw (ComboException, AssertionException, std::bad_exception)
+{
     try {
         return eval_throws_binding(rng, bmap, it);
     } catch (EvalException e) {
@@ -365,13 +364,14 @@ vertex eval_binding(RandGen& rng, binding_map& bmap, combo_tree::iterator it)
 }
 
 vertex eval_binding(RandGen& rng, binding_map& bmap, const combo_tree& tr)
-    throw(StandardException, std::bad_exception) {
+    throw (StandardException, std::bad_exception)
+{
     return eval_binding(rng, bmap, tr.begin());
 }
 
 vertex eval_throws_binding(RandGen& rng, binding_map& bmap, const combo_tree& tr)
-     throw(EvalException, ComboException, AssertionException,
-           std::bad_exception) {
+    throw (EvalException, ComboException, AssertionException, std::bad_exception)
+{
     return eval_throws_binding(rng, bmap, tr.begin());
 }
 
