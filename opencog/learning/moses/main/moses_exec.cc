@@ -685,7 +685,7 @@ int moses_exec(int argc, char** argv)
             if (output_type == id::boolean_type) {
                 /// @todo: support multiple input data files
                 CTable ctable = ctables.front();
-                occam_ctruth_table_bscore bscore(ctable, as, prob, rng);
+                ctruth_table_bscore bscore(ctable, as, prob, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
@@ -696,7 +696,7 @@ int moses_exec(int argc, char** argv)
             if (output_type == id::contin_type) {
                 if (discretize_thresholds.empty()) {
                     /// @todo: support multiple input data files
-                    occam_contin_bscore bscore(tables.front(), as, stdev, rng);
+                    contin_bscore bscore(tables.front(), as, stdev, rng);
 
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
@@ -704,12 +704,12 @@ int moses_exec(int argc, char** argv)
                                           mmr_pa);
                 } else {
                     /// @todo: support multiple input data files
-                    occam_discretize_contin_bscore bscore(tables.front().otable,
-                                                          tables.front().itable,
-                                                          discretize_thresholds,
-                                                          weighted_accuracy,
-                                                          as, prob,
-                                                          rng);
+                    discretize_contin_bscore bscore(tables.front().otable,
+                                                    tables.front().itable,
+                                                    discretize_thresholds,
+                                                    weighted_accuracy,
+                                                    as, prob,
+                                                    rng);
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
@@ -738,7 +738,7 @@ int moses_exec(int argc, char** argv)
 
             int as = alphabet_size(tt, ignore_ops);
 
-            typedef occam_max_KLD_bscore BScore;
+            typedef interesting_predicate_bscore BScore;
             if (tables.size() > 1) {
                 typedef bscore_based_score<BScore> Score;
                 boost::ptr_vector<Score> scores;
@@ -776,7 +776,7 @@ int moses_exec(int argc, char** argv)
 
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_contin_bscore bscore(tables.front(), as, stdev, rng);
+            contin_bscore bscore(tables.front(), as, stdev, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -817,7 +817,7 @@ int moses_exec(int argc, char** argv)
 
                 int as = alphabet_size(tt, ignore_ops);
 
-                occam_contin_bscore bscore(ot, it, as, stdev, rng);
+                contin_bscore bscore(ot, it, as, stdev, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduct, contin_reduct, bscore,
                                       opt_params, meta_params, moses_params,
@@ -845,7 +845,7 @@ int moses_exec(int argc, char** argv)
             ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
             OTable ot(tr, it, rng);
  
-            occam_contin_bscore bscore(ot, it, as, stdev, rng);
+            contin_bscore bscore(ot, it, as, stdev, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -937,8 +937,8 @@ int moses_exec(int argc, char** argv)
 
         int as = alphabet_size(tt, ignore_ops);
 
-        occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
-                                   it, as, stdev, rng);
+        contin_bscore bscore(simple_symbolic_regression(problem_size),
+                             it, as, stdev, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduct, contin_reduct, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);

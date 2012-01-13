@@ -75,26 +75,12 @@ behavioral_score logical_bscore::best_possible_bscore() const {
 ///////////////////
 // contin_bscore //
 ///////////////////
-        
-behavioral_score contin_bscore::operator()(const combo_tree& tr) const
-{
-    OTable ct(tr, cti, rng);
-    behavioral_score bs(target.size());
-    boost::transform(ct, target, bs.begin(),
-                     [](const vertex& vl, const vertex& vr) {
-                         return -fabs(get_contin(vl) - get_contin(vr)); });
-    return bs;
-}
-
-/////////////////////////
-// occam_contin_bscore //
-/////////////////////////
 
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev) {
     return log(alphabet_size) * 2 * sq(stdev);
 }
 
-behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
+behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
     OTable ct(tr, cti, rng);
     behavioral_score bs(target.size() + (occam?1:0));
@@ -112,32 +98,31 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-behavioral_score occam_contin_bscore::best_possible_bscore() const {
+behavioral_score contin_bscore::best_possible_bscore() const {
     return behavioral_score(target.size() + (occam?1:0), 0);
 }
 
-void occam_contin_bscore::set_complexity_coef(float alphabet_size, float stdev)
+void contin_bscore::set_complexity_coef(float alphabet_size, float stdev)
 {
     if(occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
 }
 
-////////////////////////////////////
-// occam_discretize_contin_bscore //
-////////////////////////////////////
+//////////////////////////////
+// discretize_contin_bscore //
+//////////////////////////////
         
 score_t discrete_complexity_coef(unsigned alphabet_size, double p) {
     return -log((double)alphabet_size) / log(p/(1-p));
 }
 
-occam_discretize_contin_bscore::occam_discretize_contin_bscore
-                                        (const OTable& ot,
-                                         const ITable& it,
-                                         const vector<contin_t>& thres,
-                                         bool wa,
-                                         float alphabet_size,
-                                         float p,
-                                         RandGen& _rng)
+discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
+                                                   const ITable& it,
+                                                   const vector<contin_t>& thres,
+                                                   bool wa,
+                                                   float alphabet_size,
+                                                   float p,
+                                                   RandGen& _rng)
     : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa), rng(_rng),
       classes(ot.size()), weights(thresholds.size() + 1, 1) {
     // enforce that thresholds is sorted
@@ -158,11 +143,11 @@ occam_discretize_contin_bscore::occam_discretize_contin_bscore
         complexity_coef = discrete_complexity_coef(alphabet_size, p);    
 }
 
-behavioral_score occam_discretize_contin_bscore::best_possible_bscore() const {
+behavioral_score discretize_contin_bscore::best_possible_bscore() const {
     return behavioral_score(target.size(), 0);
 }
         
-size_t occam_discretize_contin_bscore::class_idx(contin_t v) const {
+size_t discretize_contin_bscore::class_idx(contin_t v) const {
     if(v < thresholds[0])
         return 0;
     size_t s = thresholds.size();
@@ -171,9 +156,9 @@ size_t occam_discretize_contin_bscore::class_idx(contin_t v) const {
     return class_idx_within(v, 1, s);
 }
 
-size_t occam_discretize_contin_bscore::class_idx_within(contin_t v,
-                                                        size_t l_idx,
-                                                        size_t u_idx) const
+size_t discretize_contin_bscore::class_idx_within(contin_t v,
+                                                  size_t l_idx,
+                                                  size_t u_idx) const
 {
     // base case
     if(u_idx - l_idx == 1)
@@ -187,7 +172,7 @@ size_t occam_discretize_contin_bscore::class_idx_within(contin_t v,
         return class_idx_within(v, m_idx, u_idx);
 }
 
-behavioral_score occam_discretize_contin_bscore::operator()(const combo_tree& tr) const
+behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
 {
     OTable ct(tr, cit, rng);
     behavioral_score bs(target.size() + (occam?1:0));
@@ -205,21 +190,21 @@ behavioral_score occam_discretize_contin_bscore::operator()(const combo_tree& tr
     return bs;    
 }
 
-///////////////////////////////
-// occam_ctruth_table_bscore //
-///////////////////////////////
+/////////////////////////
+// ctruth_table_bscore //
+/////////////////////////
         
-occam_ctruth_table_bscore::occam_ctruth_table_bscore(const CTable& _ctt,
-                                                     float alphabet_size,
-                                                     float p,
-                                                     RandGen& _rng) 
-    : ctt(_ctt), rng(_rng) {
+ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
+                                         float alphabet_size, float p,
+                                         RandGen& _rng) 
+    : ctt(_ctt), rng(_rng)
+{
     occam = p > 0 && p < 0.5;
     if(occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
 }
 
-behavioral_score occam_ctruth_table_bscore::operator()(const combo_tree& tr) const
+behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
     OTable ptt(tr, ctt, rng);
     behavioral_score bs(ctt.size() + (occam?1:0));
@@ -236,7 +221,7 @@ behavioral_score occam_ctruth_table_bscore::operator()(const combo_tree& tr) con
     return bs;
 }
 
-behavioral_score occam_ctruth_table_bscore::best_possible_bscore() const {
+behavioral_score ctruth_table_bscore::best_possible_bscore() const {
     behavioral_score bs(ctt.size() + (occam?1:0));
     transform(ctt | map_values, bs.begin(), [](CTable::mapped_type& vd) {
             return -score_t(min(vd[id::logical_true], vd[id::logical_false])); });
@@ -246,13 +231,14 @@ behavioral_score occam_ctruth_table_bscore::best_possible_bscore() const {
     return bs;
 }
 
-//////////////////////////
-// occam_max_KLD_bscore //
-//////////////////////////
+//////////////////////////////////
+// interesting_predicate_bscore //
+//////////////////////////////////
 
-occam_max_KLD_bscore::occam_max_KLD_bscore(const CTable& ctable_,
-                                           float alphabet_size, float stdev,
-                                           RandGen& _rng)
+interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_,
+                                                           float alphabet_size,
+                                                           float stdev,
+                                                           RandGen& _rng)
     : ctable(ctable_), rng(_rng)
 {
     occam = stdev > 0;
@@ -263,7 +249,7 @@ occam_max_KLD_bscore::occam_max_KLD_bscore(const CTable& ctable_,
     klds.set_p_pdf(pdf);
 }
 
-behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
+behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
     static const double entropy_threshold = 0.1; /// @todo should be a parameter
     
@@ -319,12 +305,13 @@ behavioral_score occam_max_KLD_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-behavioral_score occam_max_KLD_bscore::best_possible_bscore() const
+behavioral_score interesting_predicate_bscore::best_possible_bscore() const
 {
     return behavioral_score(1, best_score);
 }
 
-void occam_max_KLD_bscore::set_complexity_coef(float alphabet_size, float stdev)
+void interesting_predicate_bscore::set_complexity_coef(float alphabet_size,
+                                                       float stdev)
 {
     if(occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);

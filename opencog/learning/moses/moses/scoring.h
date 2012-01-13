@@ -29,6 +29,7 @@
 #include <functional>
 
 #include <boost/range/numeric.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
@@ -133,31 +134,20 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
  * Bscore defined by multiple scoring functions. This is done when the
  * problem to solve is defined in terms of multiple problems. For now
  * the multiple scores have the same type as defined by the template
- * argument Score. The template argument Transform is a unary function
- * that transforms each sub-score before being recorded in the
- * behavioral score.
+ * argument Score.
  */
-// template<typename Score, typename Transform = std::identity<score_t> >
 template<typename Score>
 struct multiscore_based_bscore : public bscore_base
 {
-    // ctors
     typedef boost::ptr_vector<Score> ScoreSeq;
-    // multiscore_based_bscore(const ScoreSeq& scores_,
-    //                         Transform transform_ = std::identity<score_t>())
-    multiscore_based_bscore(const ScoreSeq& scores_)
-        // : scores(scores_), trans(transform_) {}
-        : scores(scores_) {}
-    // template<typename It>
-    // multiscore_based_bscore(It from, It to,
-    //                         Transform transform_ = std::identity<score_t>())
-    //     : scores(from, to), trans(transform_) {}
+
+    // ctors
+    multiscore_based_bscore(const ScoreSeq& scores_) : scores(scores_) {}
 
     // main operator
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(scores.size());
         boost::transform(scores, bs.begin(), [&](const Score& sc) {
-                // return this->trans(sc(tr)); });
                 return sc(tr); });
         return bs;
     }
@@ -165,20 +155,50 @@ struct multiscore_based_bscore : public bscore_base
     behavioral_score best_possible_bscore() const {
         behavioral_score bs;
         foreach(const Score& sc, scores) {
-            // bs.push_back(trans(sc->best_possible_score()));
             bs.push_back(sc.best_possible_score());
         }
         return bs;
     }
     
     ScoreSeq scores;
-    // Transform trans;
+};
+
+/**
+ * Bscore defined by multiple behavioral scoring functions. This is
+ * done when the problem to solve is defined in terms of multiple
+ * problems. For now the multiple scores have the same type as defined
+ * by the template argument Score.
+ */
+template<typename BScore>
+struct multibscore_based_bscore : public bscore_base
+{
+    typedef boost::ptr_vector<BScore> BScoreSeq;
+
+    // ctors
+    multibscore_based_bscore(const BScoreSeq& bscores_) : bscores(bscores_) {}
+
+    // main operator
+    behavioral_score operator()(const combo_tree& tr) const {
+        behavioral_score bs;
+        foreach(const BScore& bsc, bscores)
+            boost::push_back(bs, bsc(tr));
+        return bs;
+    }
+
+    behavioral_score best_possible_bscore() const {
+        behavioral_score bs;
+        foreach(const BScore& bsc, bscores)
+            boost::push_back(bs, bsc.best_possible_bscore());
+        return bs;
+    }
+    
+    BScoreSeq bscores;
 };
 
 /**
  * Each feature corresponds to an input tuple, 0 if the output of the
- * candidate matches the output of the intended function (lower is
- * better), 1 otherwise.
+ * candidate matches the output of the intended function, -1
+ * otherwise.
  */
 struct logical_bscore : public bscore_base
 {
@@ -196,31 +216,14 @@ struct logical_bscore : public bscore_base
     int arity;
 };
 
-/// @todo inherit from bscore_base or remove if useless
-struct contin_bscore : public unary_function<combo_tree, behavioral_score>
-{
-    template<typename Func>
-    contin_bscore(const Func& func, const ITable& r, RandGen& _rng)
-        : target(func, r), cti(r), rng(_rng) {}
-
-    contin_bscore(const OTable& t, const ITable& r, RandGen& _rng)
-        : target(t), cti(r), rng(_rng) {}
-
-    behavioral_score operator()(const combo_tree& tr) const;
-
-    OTable target;
-    ITable cti;
-    RandGen& rng;
-};
-
 // used to define the complexity scoring component given that p is the
 // probability of having an observation being wrong (see the comment
-// regarding occam_ctruth_table_bscore for more information)
+// regarding ctruth_table_bscore for more information)
 score_t discrete_complexity_coef(unsigned alphabet_size, double p);
 
 // used to define the complexity scoring component given that stdev is
 // the standard deviation of the noise of the we're trying to predict
-// output (see the comment regarding occam_contin_bscore for more
+// output (see the comment regarding contin_bscore for more
 // information)
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
         
@@ -231,23 +234,23 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  * weighted so that each class overall as the same weight in the
  * scoring function.
  *
- * The Occam's razor function is identical to occam_ctruth_table_bscore
+ * The Occam's razor function is identical to ctruth_table_bscore
  */
-struct occam_discretize_contin_bscore : public bscore_base
+struct discretize_contin_bscore : public bscore_base
 {
-    occam_discretize_contin_bscore(const OTable& ot, const ITable& it,
-                                   const vector<contin_t>& thres,
-                                   bool wa,
-                                   float alphabet_size, float p,
-                                   RandGen& _rng);
+    discretize_contin_bscore(const OTable& ot, const ITable& it,
+                             const vector<contin_t>& thres,
+                             bool wa,
+                             float alphabet_size, float p,
+                             RandGen& _rng);
 
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
-    // occam_discretize_contin_bscore(const Table& table,
-    //                                const vector<contin_t>& thres,
-    //                                bool wa,
-    //                                float alphabet_size, float p,
-    //                                RandGen& _rng);
+    // discretize_contin_bscore(const Table& table,
+    //                          const vector<contin_t>& thres,
+    //                          bool wa,
+    //                          float alphabet_size, float p,
+    //                          RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -282,7 +285,14 @@ protected:
 };
 
 /**
- * the occam_contin_bscore is based on the following thread
+ * Behavioral scoring function minimizing residual errors.
+ *
+ * The first elements of the bscore correspond to the minus squared
+ * errors. The last element is optional and corresponds to an program
+ * size penalty.
+ *
+ * The math justifying the program size penalty equations is based on
+ * the following thread
  * http://groups.google.com/group/opencog-news/browse_thread/thread/b7704419e082c6f1
  *
  * Here's a summary:
@@ -309,14 +319,12 @@ protected:
  *
  * |M|*log(|A|)*2*v corresponds to an additional feature when v > 0
  */
-struct occam_contin_bscore : public bscore_base
+struct contin_bscore : public bscore_base
 {
     template<typename Scoring>
-    occam_contin_bscore(const Scoring& score,
-                        const ITable& r,
-                        float alphabet_size,
-                        float stdev,
-                        RandGen& _rng)
+    contin_bscore(const Scoring& score, const ITable& r,
+                  float alphabet_size, float stdev,
+                  RandGen& _rng)
         : target(score, r), cti(r), rng(_rng) {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
@@ -324,11 +332,9 @@ struct occam_contin_bscore : public bscore_base
 
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
-    occam_contin_bscore(const OTable& t,
-                        const ITable& r,
-                        float alphabet_size,
-                        float stdev,
-                        RandGen& _rng)
+    contin_bscore(const OTable& t, const ITable& r,
+                  float alphabet_size, float stdev,
+                  RandGen& _rng)
         : target(t), cti(r), rng(_rng) {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
@@ -336,10 +342,9 @@ struct occam_contin_bscore : public bscore_base
 
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
-    occam_contin_bscore(const Table& table,
-                        float alphabet_size,
-                        float stdev,
-                        RandGen& _rng)
+    contin_bscore(const Table& table,
+                  float alphabet_size, float stdev,
+                  RandGen& _rng)
         : target(table.otable), cti(table.itable), rng(_rng) {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
@@ -363,8 +368,15 @@ private:
 };
 
 /**
- * like occam_contin_bscore but for boolean, instead of considering a
- * variance the probability p that one datum is wrong is used.
+ * like contin_bscore but for boolean.
+ *
+ * The first elements correspond to the minus absolute errors (0 if
+ * the booleans fit, -1 if they don't). The last element is optional
+ * and corresponds to a program size penalty.
+ *
+ * Regarding the program size penalty, instead of considering a
+ * standard deviation of the output, the probability p that one datum
+ * is wrong is used.
  *
  * The details are in this thread
  * http://groups.google.com/group/opencog/browse_thread/thread/a4771ecf63d38df
@@ -376,12 +388,11 @@ private:
  * |M|*log|A|/log(p/(1-p)) - |D1|
  * with p<0.5 and |D1| the number of outputs that match
  */
-struct occam_ctruth_table_bscore : public bscore_base
+struct ctruth_table_bscore : public bscore_base
 {
-    occam_ctruth_table_bscore(const CTable& _ctt,
-                              float alphabet_size,
-                              float p,
-                              RandGen& _rng);
+    ctruth_table_bscore(const CTable& _ctt,
+                        float alphabet_size, float p,
+                        RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -396,15 +407,15 @@ struct occam_ctruth_table_bscore : public bscore_base
     RandGen& rng;
 };
 
-// Bscore to find interesting patterns (predicates). Interestingness
-// is measured as the Kullback Leibler divergence between the
-// distribution output of the dataset and the distribution over the
-// output filtered by the program (when the predicate is true).
-struct occam_max_KLD_bscore : public bscore_base
+// Bscore to find interesting predicates. Interestingness is measured
+// as the Kullback Leibler divergence between the distribution output
+// of the dataset and the distribution over the output filtered in by
+// the program (when the predicate is true).
+struct interesting_predicate_bscore : public bscore_base
 {
-    occam_max_KLD_bscore(const CTable& ctable,
-                         float alphabet_size, float stdev,
-                         RandGen& _rng);
+    interesting_predicate_bscore(const CTable& ctable,
+                                 float alphabet_size, float stdev,
+                                 RandGen& _rng);
     
     behavioral_score operator()(const combo_tree& tr) const;
 
