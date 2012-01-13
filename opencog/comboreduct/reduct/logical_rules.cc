@@ -725,10 +725,13 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
 void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
                                                 combo_tree::iterator it) const
 {
-    // Cannot evaluate truth tables of predicates, since arguments
-    // may range ovr contin values, and who knows where those might go.
-    if (is_predicate(tr.begin()))
-        return;
+    // Cannot construct complete truth tables of expressions containing
+    // predicates, since arguments of predicates may range over contin
+    // values, and who knows what those might be.
+    for (pre_it pit = tr.begin(); pit != tr.end(); pit++) {
+        if (is_predicate(pit))
+            return;
+    }
 
     complete_truth_table tr_tt(tr);
     for (pre_it pit = it.begin(); pit != it.end();) {
