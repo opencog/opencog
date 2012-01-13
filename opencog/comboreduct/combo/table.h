@@ -223,10 +223,19 @@ public:
 
     OTable(const std::string& ol = default_output_label);
     OTable(const super& ot, const std::string& ol = default_output_label);
+
+    /// Construct the OTable by evaluating the combo tree @tr for each
+    /// row in the input ITable. The @rng is not used here, but is
+    /// passed to the combo evaluator.
     OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
            const std::string& ol = default_output_label);
+
+    /// Construct the OTable by evaluating the combo tree @tr for each
+    /// row in the input CTable. The @rng is not used here, but is
+    /// passed to the combo evaluator.
     OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
            const std::string& ol = default_output_label);
+
     template<typename Func>
     OTable(const Func& f, const ITable& it,
            const std::string& ol = default_output_label)
