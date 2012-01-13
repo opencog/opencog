@@ -30,6 +30,7 @@
 
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
+#include <boost/range/algorithm/transform.hpp>
 
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
@@ -47,8 +48,6 @@
 
 namespace opencog { namespace moses {
 
-#define NEG_INFINITY INT_MIN
- 
 typedef float fitness_t; /// @todo is that really useful?
 
 // Abstract scoring function class to implement
@@ -147,8 +146,7 @@ struct multiscore_based_bscore : public bscore_base
     // main operator
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(scores.size());
-        boost::transform(scores, bs.begin(), [&](const Score& sc) {
-                return sc(tr); });
+        boost::transform(scores, bs.begin(), [&](const Score& sc){return sc(tr);});
         return bs;
     }
 

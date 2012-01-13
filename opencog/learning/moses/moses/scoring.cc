@@ -31,6 +31,8 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/KLD.h>
@@ -42,6 +44,8 @@ using boost::adaptors::map_values;
 using boost::adaptors::map_keys;
 using boost::adaptors::filtered;
 using boost::transform;
+using namespace boost::phoenix;
+using boost::phoenix::arg_names::arg1;
 
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_bscore(const combo_tree& tr,
@@ -267,8 +271,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
                     [&](const CTable::counter_t& c, const vertex& v) {
                         counter[v] += boost::accumulate(c | map_values, 0); });
     double total = klds.p_size();
-    transform(counter | map_values, back_inserter(prob),
-              [&](unsigned c) { return c/total; });
+    transform(counter | map_values, back_inserter(prob), arg1 / total);
     double pred_entropy = entropy(prob);
     logger().fine("pred_entropy = %f", pred_entropy);
 
