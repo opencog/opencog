@@ -415,8 +415,8 @@ struct interesting_predicate_bscore : public bscore_base
 {
     interesting_predicate_bscore(const CTable& ctable,
                                  float alphabet_size, float stdev,
-                                 RandGen& _rng);
-    
+                                 RandGen& _rng,
+                                 bool decompose_kld = false);
     behavioral_score operator()(const combo_tree& tr) const;
 
     // the KLD has no upper boundary so the best of possible score is
@@ -429,6 +429,11 @@ struct interesting_predicate_bscore : public bscore_base
     bool occam;
     score_t complexity_coef;
     RandGen& rng;
+
+    // If true then each component of the computation of KLD
+    // corresponds to an element of the bscore. Otherwise the whole
+    // KLD occupies just one bscore element
+    bool decompose_kld;
 
 private:
     void set_complexity_coef(float alphabet_size, float stdev);

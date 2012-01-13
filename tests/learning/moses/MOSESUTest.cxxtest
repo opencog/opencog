@@ -23,6 +23,7 @@
 #include <cxxtest/TestSuite.h>
 #include <opencog/learning/moses/main/moses_exec.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <boost/range/algorithm/find_if.hpp>
 
 using namespace opencog::moses;
 using namespace ant_combo;
@@ -68,18 +69,22 @@ class MOSESUTest : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(result.first, expected_sc);
     }
 
-    void moses_test_combo(vector<string> arguments, string expected_tr_str) {
+    // test that the first candidate is one of the expected combo tree
+    void moses_test_combo(vector<string> arguments,
+                          vector<string> expected_tr_strs) {
         // build arguments
         string tempfile = build_arguments(arguments);
         // run moses
         moses_exec(arguments);
         // parse the result
         auto result = parse_result(tempfile);
-        // check that the result is the expected one
-        stringstream expected_tr_ss(expected_tr_str);
-        combo_tree expected_tr;
-        expected_tr_ss >> expected_tr;
-        TS_ASSERT_EQUALS(result.second, expected_tr);
+        // check that the result is one of the expected ones
+        auto f_it = boost::find_if(expected_tr_strs,
+                                   [&](const string& tr_str) {
+                                       combo_tree tr;
+                                       stringstream(tr_str) >> tr;
+                                       return tr == result.second;});
+        TS_ASSERT(f_it != expected_tr_strs.end());
     }
 
 public:
@@ -120,16 +125,18 @@ public:
     void test_cp() {
         string tr_str("or(and(#2 !#3) #1 !#4 #5)");
         string cp_opt("-y");
-        moses_test_combo({"-Hcp", cp_opt + tr_str}, tr_str);
+        moses_test_combo({"-Hcp", cp_opt + tr_str}, {tr_str});
     }
     void test_kl() {
-        string tr_str("and(or(!#1 !#2) or(#1 #2))");
+        string tr1_str("or(and(!#1 #2) and(#1 !#2))");
+        string tr2_str("and(or(!#1 !#2) or(#1 #2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hkl", data_file_path, "-m500", "-lfine"}, tr_str);
+        moses_test_combo({"-Hkl", data_file_path, "-m500", "-lfine"}, {tr1_str, tr2_str});
     }
     void test_multi_kl() {
-        string tr_str("or(and(!#1 #2) and(#1 !#2))");
+        string tr1_str("or(and(!#1 #2) and(#1 !#2))");
+        string tr2_str("and(or(!#1 !#2) or(#1 #2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hkl", data_file_path,  data_file_path, "-m500", "-l fine"}, tr_str);
+        moses_test_combo({"-Hkl", data_file_path,  data_file_path, "-m500", "-l fine"}, {tr1_str, tr2_str});
     }
 };

@@ -79,8 +79,9 @@ class CTable : public std::map<vertex_seq, Counter<vertex, unsigned>>
 {
 public:
     typedef vertex_seq key_type;
-    typedef Counter<vertex, unsigned> mapped_type;
-    typedef std::map<key_type, mapped_type> super;
+    typedef Counter<vertex, unsigned> counter_t;
+    typedef std::map<key_type, counter_t> super;
+    typedef typename super::value_type value_type;
 
     std::string olabel;               // output label
     std::vector<std::string> ilabels; // list of input labels
@@ -153,7 +154,7 @@ public:
     ITable filter(const F& f) {
         ITable res;
         res.set_labels(get_filtered_labels(f));
-        foreach(const typename super::value_type& row, *this) {
+        foreach(const value_type& row, *this) {
             vertex_seq new_row;
             foreach(arity_t a, f)
                 new_row.push_back(row[a]);

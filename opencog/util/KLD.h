@@ -135,10 +135,8 @@ struct KLDS {
     }
     
     // @return estimate of KL(P||Q)
-    template<typename SortedSeq>
-    FloatT operator()(const SortedSeq& q) {
-        pdf_t q_pdf = Counter<FloatT, FloatT>(q);
-        FloatT q_s = q.size(),
+    FloatT operator()(const pdf_t& q_pdf) {
+        FloatT q_s = boost::accumulate(q_pdf | map_values, 0),
             q_x_pre = x_very_first,
             res = 0;
         pdf_cit cit_p = p_pdf.begin();
@@ -184,8 +182,9 @@ private:
 // function helper
 template<typename SortedSeq>
 typename SortedSeq::value_type KLD(const SortedSeq& p, const SortedSeq& q) {
-    KLDS<typename SortedSeq::value_type> klds(p);
-    return klds(q);
+    typedef typename SortedSeq::value_type FloatT;
+    KLDS<FloatT> klds(p);
+    return klds(Counter<FloatT, FloatT>(q));
 }
     
 } // ~namespace opencog

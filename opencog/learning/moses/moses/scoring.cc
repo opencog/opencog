@@ -22,14 +22,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "scoring.h"
-#include <opencog/util/numeric.h>
-#include <opencog/util/KLD.h>
+
+#include <cmath>
+
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/filtered.hpp>
-#include <cmath>
+
+#include <opencog/util/numeric.h>
+#include <opencog/util/KLD.h>
 
 namespace opencog { namespace moses {
 
@@ -238,8 +242,9 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const {
 interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_,
                                                            float alphabet_size,
                                                            float stdev,
-                                                           RandGen& _rng)
-    : ctable(ctable_), rng(_rng)
+                                                           RandGen& _rng,
+                                                           bool decompose_kld_)
+    : ctable(ctable_), rng(_rng), decompose_kld(decompose_kld_)
 {
     occam = stdev > 0;
     set_complexity_coef(alphabet_size, stdev);
@@ -258,10 +263,9 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     // compute the entropy of the output of the predicate
     vector<double> prob;
     Counter<vertex, unsigned> counter;
-    auto ct_it = ctable.cbegin();
-    auto pred_it = pred_ot.cbegin();
-    for (; pred_it != pred_ot.cend(); ++ct_it, ++pred_it)
-        counter[*pred_it] += boost::accumulate(ct_it->second | map_values, 0);
+    boost::for_each(ctable | map_values, pred_ot,
+                    [&](const CTable::counter_t& c, const vertex& v) {
+                        counter[v] += boost::accumulate(c | map_values, 0); });
     double total = klds.p_size();
     transform(counter | map_values, back_inserter(prob),
               [&](unsigned c) { return c/total; });
@@ -272,19 +276,20 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     if (pred_entropy > entropy_threshold) {
         // filter the output according to tr
         Counter<contin_t, contin_t> f_output;
-        ct_it = ctable.cbegin();
-        pred_it = pred_ot.cbegin();
-        for (; ct_it != ctable.cend(); ++ct_it, ++pred_it) {
-            if (vertex_to_bool(*pred_it)) {
-                foreach(const auto& mv, ct_it->second)
-                    f_output[get_contin(mv.first)] = mv.second;
-            }
-        }
+        boost::for_each(ctable | map_values, pred_ot,
+                        [&](const CTable::counter_t& c, const vertex& v) {
+                            if (vertex_to_bool(v)) {
+                                foreach(const auto& mv, c)
+                                    f_output[get_contin(mv.first)] = mv.second;
+                            }});
 
         logger().fine("f_output.size() = %u", f_output.size());
 
-        // compute KLD(pdf, f_output) per component
-        klds(f_output, back_inserter(bs));
+        if(decompose_kld)
+            // compute KLD(pdf, f_output) per component
+            klds(f_output, back_inserter(bs));
+        else
+            bs.push_back(klds(f_output));
 
         // add log entropy, this is completely heuristic, no
         // justification except that the log of the entropy is gonna
@@ -293,10 +298,11 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
         // p-value, or some form of indefinite TV confidence on the
         // calculation of KLD.
         bs.push_back(log(pred_entropy));
+
+        // add the Occam's razor feature
+        if(occam)
+            bs.push_back(complexity(tr) * complexity_coef);
     }
-    // add the Occam's razor feature
-    if(occam)
-        bs.push_back(complexity(tr) * complexity_coef);
 
     // Logger
     log_candidate_bscore(tr, bs);
