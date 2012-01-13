@@ -58,7 +58,7 @@ struct score_base : public unary_function<combo_tree, score_t>
     
     // Return the best possible score achievable with that fitness
     // function. This is useful in order to stop running MOSES when
-    // the best possible score is reached
+    // the best possible score is reached.
     virtual score_t best_possible_score() const = 0;
 };
 
@@ -82,17 +82,18 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
  * score = sum_f BScore(f),
  */
 /// @todo Inheriting that class from score_base raises a compile error
-/// because in moses_exec.h some code attempts to use BScore that is
-/// being cached (and does not contain best_possible_bscore). This
-/// error is normal however it does not appear when that class
-/// inherits from unary_function. Likely GCC only instantiates
-/// function class template that are ever being called (to save memory
-/// presumably).
+/// because in moses_exec.h some code attempts to use BScore that does
+/// does not contain best_possible_bscore(). Specifically, the 
+/// BScoreACache and ScoreACache typedefs do this. However, this begs
+/// a question: why do we need a base class anyway, if we're not going
+/// to need it? ??
+
 template<typename BScore>
 struct bscore_based_score : public unary_function<combo_tree, score_t>
 {
     bscore_based_score(const BScore& bs) : bscore(bs) {}
-    score_t operator()(const combo_tree& tr) const {
+    score_t operator()(const combo_tree& tr) const
+    {
         try {
             behavioral_score bs = bscore(tr);
             score_t res = std::accumulate(bs.begin(), bs.end(), 0.0);
@@ -107,7 +108,8 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             }
             // ~Logger
             return res;
-        } catch (EvalException& ee) {
+        }
+        catch (EvalException& ee) {
             // Logger
             stringstream ss1;
             ss1 << "The following candidate: " << tr;
@@ -121,9 +123,11 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             return get_score(worst_composite_score);
         }
     }
-    // returns the best score reachable for that problem. Used as
+
+    // Returns the best score reachable for that problem. Used as
     // termination condition.
-    score_t best_possible_score() const {
+    score_t best_possible_score() const
+    {
         return boost::accumulate(bscore.best_possible_bscore(), 0.0);
     }
     const BScore& bscore;
@@ -144,13 +148,15 @@ struct multiscore_based_bscore : public bscore_base
     multiscore_based_bscore(const ScoreSeq& scores_) : scores(scores_) {}
 
     // main operator
-    behavioral_score operator()(const combo_tree& tr) const {
+    behavioral_score operator()(const combo_tree& tr) const
+    {
         behavioral_score bs(scores.size());
         boost::transform(scores, bs.begin(), [&](const Score& sc){return sc(tr);});
         return bs;
     }
 
-    behavioral_score best_possible_bscore() const {
+    behavioral_score best_possible_bscore() const
+    {
         behavioral_score bs;
         foreach(const Score& sc, scores) {
             bs.push_back(sc.best_possible_score());
@@ -176,14 +182,16 @@ struct multibscore_based_bscore : public bscore_base
     multibscore_based_bscore(const BScoreSeq& bscores_) : bscores(bscores_) {}
 
     // main operator
-    behavioral_score operator()(const combo_tree& tr) const {
+    behavioral_score operator()(const combo_tree& tr) const
+    {
         behavioral_score bs;
         foreach(const BScore& bsc, bscores)
             boost::push_back(bs, bsc(tr));
         return bs;
     }
 
-    behavioral_score best_possible_bscore() const {
+    behavioral_score best_possible_bscore() const
+    {
         behavioral_score bs;
         foreach(const BScore& bsc, bscores)
             boost::push_back(bs, bsc.best_possible_bscore());
@@ -214,22 +222,22 @@ struct logical_bscore : public bscore_base
     int arity;
 };
 
-// used to define the complexity scoring component given that p is the
+// Used to define the complexity scoring component given that p is the
 // probability of having an observation being wrong (see the comment
-// regarding ctruth_table_bscore for more information)
+// regarding ctruth_table_bscore for more information).
 score_t discrete_complexity_coef(unsigned alphabet_size, double p);
 
-// used to define the complexity scoring component given that stdev is
+// Used to define the complexity scoring component given that stdev is
 // the standard deviation of the noise of the we're trying to predict
 // output (see the comment regarding contin_bscore for more
-// information)
+// information).
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
         
 /**
  * Fitness function based on discretization of the output. If the
- * classes match the bscore element is 0, or -1 otherwise. If wa (for
- * weighted_average is true then each element of the bscore is
- * weighted so that each class overall as the same weight in the
+ * classes match the bscore element is 0, or -1 otherwise. If
+ * @weighted_average is true then each element of the bscore is
+ * weighted so that each class overall has the same weight in the
  * scoring function.
  *
  * The Occam's razor function is identical to ctruth_table_bscore
@@ -238,7 +246,7 @@ struct discretize_contin_bscore : public bscore_base
 {
     discretize_contin_bscore(const OTable& ot, const ITable& it,
                              const vector<contin_t>& thres,
-                             bool wa,
+                             bool weighted_average,
                              float alphabet_size, float p,
                              RandGen& _rng);
 
@@ -246,37 +254,37 @@ struct discretize_contin_bscore : public bscore_base
     // simplify that
     // discretize_contin_bscore(const Table& table,
     //                          const vector<contin_t>& thres,
-    //                          bool wa,
+    //                          bool weighted_average,
     //                          float alphabet_size, float p,
     //                          RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    // for the best possible bscore is a vector of zeros. It's
-    // probably not true because there could be duplicated inputs but
-    // that's acceptable for now
+    // The best possible bscore is a vector of zeros. That's probably
+    // not quite true, because there could be duplicated inputs, but
+    // that's acceptable for now.
     behavioral_score best_possible_bscore() const;
     
     OTable target;
     ITable cit;
     vector<contin_t> thresholds;
-    bool weighted_accuracy;     // whether the bscore is weighted to
-                                // deal with unbalanced data
-    bool occam;                 // whether Occam's razor is enabled
+    bool weighted_accuracy;     // Whether the bscore is weighted to
+                                // deal with unbalanced data.
+    bool occam;                 // Whether Occam's razor is enabled
     score_t complexity_coef;
     RandGen& rng;
 
 protected:
-    // return the index of the class of value v
+    // Return the index of the class of value v.
     size_t class_idx(contin_t v) const;
-    // like class_idx but assume that the value v is within the class
+    // Like class_idx but assume that the value v is within the class
     // [l_idx, u_idx)
     size_t class_idx_within(contin_t v, size_t l_idx, size_t u_idx) const;
 
     vector<size_t> classes;       // classes of the output, alligned with target
 
-    // weight of each class so that each one weights as much as the
-    // others even in case of unbalance sampling. For specifically:
+    // Weight of each class, so that each one weighs as much as the
+    // others, even in case of unbalance sampling. Specifically:
     // weights[i] = s / (n * c_i) where s is the sample size, n the
     // number of classes and c_i the number of samples for class i.
     vector<score_t> weights;
@@ -310,7 +318,7 @@ protected:
  * P(M) = |A|^-|M|
  * where |A| is the alphabet size.
  *
- * After simplication we can get the following log-likelihood of dP(M|D)
+ * After simplification we can get the following log-likelihood of dP(M|D)
  * -|M|*log(|A|)*2*v - Sum_{x\in D} (M(x)-D(x))^2
  *
  * Each datum corresponds to a feature of the bscore.
@@ -323,7 +331,8 @@ struct contin_bscore : public bscore_base
     contin_bscore(const Scoring& score, const ITable& r,
                   float alphabet_size, float stdev,
                   RandGen& _rng)
-        : target(score, r), cti(r), rng(_rng) {
+        : target(score, r), cti(r), rng(_rng)
+    {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
     }
@@ -333,7 +342,8 @@ struct contin_bscore : public bscore_base
     contin_bscore(const OTable& t, const ITable& r,
                   float alphabet_size, float stdev,
                   RandGen& _rng)
-        : target(t), cti(r), rng(_rng) {
+        : target(t), cti(r), rng(_rng)
+    {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
     }
@@ -343,16 +353,17 @@ struct contin_bscore : public bscore_base
     contin_bscore(const Table& table,
                   float alphabet_size, float stdev,
                   RandGen& _rng)
-        : target(table.otable), cti(table.itable), rng(_rng) {
+        : target(table.otable), cti(table.itable), rng(_rng)
+    {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    // for the best possible bscore is a vector of zeros. It's
-    // probably not true because there could be duplicated inputs but
-    // that's acceptable for now
+    // The best possible bscore is a vector of zeros. That's probably
+    // not quite true, because there could be duplicated inputs, but
+    // that's acceptable for now.
     behavioral_score best_possible_bscore() const;
     
     OTable target;
@@ -366,7 +377,7 @@ private:
 };
 
 /**
- * like contin_bscore but for boolean.
+ * Like contin_bscore but for boolean.
  *
  * The first elements correspond to the minus absolute errors (0 if
  * the booleans fit, -1 if they don't). The last element is optional
@@ -394,13 +405,13 @@ struct ctruth_table_bscore : public bscore_base
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    // return the best possible bscore. Used as one of the
-    // terminations condition (when the best bscore is reached)
+    // Return the best possible bscore. Used as one of the
+    // termination conditions (when the best bscore is reached).
     behavioral_score best_possible_bscore() const;
     
     mutable CTable ctt;         // mutable because accessing a missing
-                                // element add it in the map
-    bool occam; // if true the Occam's razor is taken into account
+                                // element adds it in the map.
+    bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     RandGen& rng;
 };
@@ -437,27 +448,30 @@ private:
     void set_complexity_coef(float alphabet_size, float stdev);
 };
         
-// for testing only
-struct dummy_score : public unary_function<combo_tree, score_t> {
+// For testing only
+struct dummy_score : public unary_function<combo_tree, score_t>
+{
     score_t operator()(const combo_tree& tr) const {
         return score_t();
     }
 };
 
-// for testing only
-struct dummy_bscore : public unary_function<combo_tree, behavioral_score> {
+// For testing only
+struct dummy_bscore : public unary_function<combo_tree, behavioral_score>
+{
     behavioral_score operator()(const combo_tree& tr) const {
         return behavioral_score();
     }
 };
 
 /**
- * Mostly for testing the optimization algos, returns minus the
+ * Mostly for testing the optimization algos.  Returns minus the
  * hamming distance of the candidate to a given target instance and
  * constant null complexity.
  */
 struct distance_based_scorer : public unary_function<instance,
-                                                     composite_score> {
+                                                     composite_score>
+{
     distance_based_scorer(const field_set& _fs,
                           const instance& _target_inst)
         : fs(_fs), target_inst(_target_inst) {}
@@ -482,15 +496,17 @@ protected:
 
 template<typename Scoring>
 struct complexity_based_scorer : public unary_function<instance,
-                                                       composite_score> {
+                                                       composite_score>
+{
     complexity_based_scorer(const Scoring& s, representation& rep, bool reduce)
         : score(s), _rep(rep), _reduce(reduce) {}
 
-    composite_score operator()(const instance& inst) const {
+    composite_score operator()(const instance& inst) const
+    {
         using namespace reduct;
 
         // Logger
-        if(logger().getLevel() >= Logger::FINE) {
+        if (logger().getLevel() >= Logger::FINE) {
             stringstream ss;
             ss << "complexity_based_scorer - Evaluate instance: " 
                << _rep.fields().stream(inst);
