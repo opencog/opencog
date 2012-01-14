@@ -1,4 +1,4 @@
-/** table.h --- 
+/** table.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -59,7 +59,7 @@ static const std::string default_input_label("i");
 /// duplicated inputs, and the output column is replaced by a counter
 /// of the duplicated outputs.  That is, the output column is of the
 /// form {v1:c1, v2:c2, ...} where c1 is the number of times value v1
-/// was seen in the output, c2 the number of times v2 was observed, etc. 
+/// was seen in the output, c2 the number of times v2 was observed, etc.
 ///
 /// For example, if one has the following table:
 ///
@@ -95,7 +95,7 @@ public:
     binding_map get_binding_map(const key_type& args) const
     {
         binding_map bmap;
-        for(size_t i = 0; i < args.size(); ++i)
+        for (size_t i = 0; i < args.size(); ++i)
             bmap[i+1] = args[i];
         return bmap;
     }
@@ -118,7 +118,7 @@ public:
      * generate an input table according to the signature tt.
      *
      * @param tt signature of the table to generate.
-     * @param nsamples sample size, if negative then the sample 
+     * @param nsamples sample size, if negative then the sample
               size is automatically determined.
      * @param min_contin minimum contin value.
      * @param max_contin maximum contin value.
@@ -156,7 +156,7 @@ public:
 
     bool operator==(const ITable& rhs) const
     {
-        return 
+        return
             static_cast<const super&>(*this) == static_cast<const super&>(rhs)
             && get_labels() == rhs.get_labels();
     }
@@ -185,7 +185,7 @@ private:
     {
         std::vector<std::string> res;
         for(arity_t i = 1; i <= get_arity(); ++i)
-            res.push_back(default_input_label 
+            res.push_back(default_input_label
                           + boost::lexical_cast<std::string>(i));
         return res;
     }
@@ -206,9 +206,9 @@ private:
     }
 
 };
-        
+
 static const std::string default_output_label("output");
-        
+
 /**
  * Output table of vertexes.
  * Rows represent dependent data samples.
@@ -241,7 +241,7 @@ public:
            const std::string& ol = default_output_label)
         : label(ol) {
         foreach(const vertex_seq& vs, it)
-            push_back(f(vs.begin(), vs.end()));        
+            push_back(f(vs.begin(), vs.end()));
     }
 
     void set_label(const std::string& ol);
@@ -276,7 +276,7 @@ struct Table
         res.otable = otable;
         return res;
     }
-    /// return the corresponding compressed table 
+    /// return the corresponding compressed table
     CTable compress() const;
 
     type_tree tt;
@@ -410,7 +410,7 @@ void removeNonASCII(std::string& str);
  * (support UNIX and DOS format) and advance in of the checked chars.
  */
 bool checkCarriageReturn(std::istream& in);
- 
+
 /**
  * Return the arity of the table provided in istream (by counting the
  * number of elements of the first line).
@@ -482,7 +482,7 @@ std::vector<T> tokenizeRow(std::string& line)
  *
  * The pos variable indicates which token is taken as the output.
  * If pos < 0 then the last token is assumed to be the output.
- * If pos >=0 then that token is used (0 is the first, 1 is the 
+ * If pos >=0 then that token is used (0 is the first, 1 is the
  * second, etc.)  If pos is out of range, an assert is raised.
  *
  * This will modify the line to remove leading non-ASCII characters,
@@ -530,7 +530,7 @@ std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
 void istreamTable(const std::string& file_name,
                   ITable& it, OTable& ot, int pos = 0);
 /**
- * like above but return an object Table. 
+ * like above but return an object Table.
  */
 Table istreamTable(const std::string& file_name, int pos = 0);
 
@@ -560,7 +560,7 @@ std::ostream& ostreamCTableHeader(std::ostream& out, const CTable& ct);
 
 // output a compress table in pseudo CSV format
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
-        
+
 /**
  * template to subsample input and output tables, after subsampling
  * the table have size min(nsamples, *table.size())
@@ -584,7 +584,7 @@ void subsampleTable(ITable& it, unsigned nsamples, RandGen& rng);
 //////////////////////////////
 // probably soon deprecated //
 //////////////////////////////
- 
+
 // shorthands used by class contin_input_table and contin_output_table
 typedef std::vector<bool> bool_vector;
 typedef bool_vector::iterator bv_it;
@@ -620,11 +620,13 @@ public:
     complete_truth_table(It from, It to) : super(from, to), _rng(NULL) { }
     template<typename T>
     complete_truth_table(const tree<T>& tr, arity_t arity)
-        : super(pow2(arity)), _arity(arity), _rng(NULL) {
+        : super(pow2(arity)), _arity(arity), _rng(NULL)
+    {
         populate(tr);
     }
     template<typename T>
-    complete_truth_table(const tree<T>& tr) {
+    complete_truth_table(const tree<T>& tr)
+    {
         _arity = arity(tr);
         _rng = NULL;
         this->resize(pow2(_arity));
@@ -668,7 +670,8 @@ public:
     bool same_complete_truth_table(const combo_tree& tr) const;
 protected:
     template<typename T>
-    void populate(const tree<T>& tr) {
+    void populate(const tree<T>& tr)
+    {
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             for (int j = 0; j < _arity; ++j)
@@ -688,7 +691,7 @@ protected:
 //////////////////////////////
 // probably soon deprecated //
 //////////////////////////////
- 
+
 //shorthands used by class contin_input_table and contin_output_table
 typedef std::vector<contin_t> contin_vector;
 typedef contin_vector::iterator cv_it;
