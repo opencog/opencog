@@ -30,12 +30,15 @@
 // (uncomment META_RULE_DEBUG in meta_rules.cc)
 
 namespace opencog { namespace reduct {
+
 const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops, 
-                             opencog::RandGen& rng) {
-    // rules that do not involve factorizing or distributing
+                             opencog::RandGen& rng)
+{
+    // Rules that do not involve factorizing or distributing
     static sequential seq_without_factorize_distribute =
-        sequential(// these 2 ones below are added first because the
-                   // representation building puts lots of 0*#n
+        sequential(// These next two below are performed first, because
+                   // representation building puts in lots of 0*#n terms,
+                   // and getting rid of these early saves headaches later.
                    downwards(reduce_times_one_zero()), 
                    downwards(reduce_plus_zero()),
 
@@ -56,8 +59,9 @@ const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops,
                    when(downwards(reduce_exp_div()),
                         ignore_ops.find(id::exp) == ignore_ops.end()
                         && ignore_ops.find(id::div) == ignore_ops.end()),
-// the following rules is not valid if log has the semantics log(abs(x))
-// the macro ABS_LOG is defined in file vertex.h
+
+// The following rules is not valid if log has the semantics log(abs(x)).
+// The macro ABS_LOG is defined in file vertex.h
 #ifndef ABS_LOG
                    when(downwards(reduce_exp_log()),
                         ignore_ops.find(id::sin) == ignore_ops.end()

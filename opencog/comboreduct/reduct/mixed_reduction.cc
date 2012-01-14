@@ -33,25 +33,25 @@ namespace opencog { namespace reduct {
 const rule& mixed_reduction(opencog::RandGen& rng)
 {
     static sequential non_recursive = 
-        sequential(//general
+        sequential(// General
                    downwards(level()),
                    upwards(eval_constants(rng)),
                    
-                   //simple mixed
+                   // Simple mixed
 #ifndef ABS_LOG
                    downwards(reduce_gt_zero_log()),
 #endif
                    downwards(reduce_gt_zero_exp()),
                    downwards(reduce_gt_zero_minus_exp()),
-                   //downwards(reduce_gt_zero_times_const()),//deprecat
-                   //downwards(reduce_gt_zero_const_div()),//deprecat
-                   //downwards(reduce_gt_zero_prod_exp()),//deprecat
-                   //downwards(reduce_gt_zero_const_sum_sin()), //deprecat
+                   //downwards(reduce_gt_zero_times_const()),//deprecate
+                   //downwards(reduce_gt_zero_const_div()),//deprecate
+                   //downwards(reduce_gt_zero_prod_exp()),//deprecate
+                   //downwards(reduce_gt_zero_const_sum_sin()), //deprecate
                    downwards(reduce_gt_zero_impulse()),
                    downwards(reduce_impulse_sum()),
                    downwards(reduce_contin_if_to_impulse()),
 
-                   //complex mixed
+                   // Complex mixed
                    upwards(reorder_commutative()),
                    downwards(reduce_gt_zero_pair_power()),
                    downwards(reduce_impulse_power()),
@@ -65,12 +65,12 @@ const rule& mixed_reduction(opencog::RandGen& rng)
 
     static iterative r_without_reduce_gt_zero_prod;
 
-    // This set of rule is defined to avoid infinit recursion of the
+    // This set of rules is defined to avoid infinite recursion of the
     // rule reduce_gt_zero_prod
     r_without_reduce_gt_zero_prod =
         iterative(sequential(non_recursive,
 
-                             //very complex recursive mixed
+                             // Very complex recursive mixed
                              downwards(reduce_from_assumptions
                                        (r_without_reduce_gt_zero_prod)),
                              downwards(reduce_inequality_from_assumptions()),
@@ -78,8 +78,8 @@ const rule& mixed_reduction(opencog::RandGen& rng)
                                        (r_without_reduce_gt_zero_prod)),
                              downwards(reduce_gt_zero_sum
                                        (r_without_reduce_gt_zero_prod)),
-                             //commented to avoid infinit recursivity
-                             //downwards(reduce_gt_zero_prod(r)),
+                             // Commented out to avoid infinite recursion
+                             // downwards(reduce_gt_zero_prod(r)),
                              downwards(reduce_gt_zero_div
                                        (r_without_reduce_gt_zero_prod)),
                              downwards(reduce_gt_zero_sum_sin
@@ -88,17 +88,17 @@ const rule& mixed_reduction(opencog::RandGen& rng)
                                        (r_without_reduce_gt_zero_prod)),
                              downwards(reduce_and_assumptions
                                        (r_without_reduce_gt_zero_prod))//,
-                             //the following is commented because due to
-                             //the fact that there is no boolean rules here
-                             //the double negation cannot be reduced
-                             //and it leads to an infinit recursion
-                             //downwards(reduce_or_assumptions(r))
+                             // The following is commented because
+                             // there are no boolean rules here.
+                             // The double negation cannot be reduced
+                             // and it leads to infinite recursion.
+                             // downwards(reduce_or_assumptions(r))
                              ));
     
     static iterative r;
     r = iterative(sequential(non_recursive,
 
-                             //very complex mixed
+                             // Very complex mixed
                              downwards(reduce_from_assumptions(r)),
                              downwards(reduce_inequality_from_assumptions()),
                              downwards(reduce_contin_if_not(r)),
@@ -109,11 +109,11 @@ const rule& mixed_reduction(opencog::RandGen& rng)
                              downwards(reduce_gt_zero_sum_sin(r)),
                              downwards(reduce_gt_zero_sin(r)),
                              downwards(reduce_and_assumptions(r))//,
-                             //the following is commented because due to
-                             //the fact that there is no boolean rules here
-                             //the double negation cannot be reduced
-                             //and it leads to an infinit recursion
-                             //downwards(reduce_or_assumptions(r))
+                             // The following is commented because
+                             // there are no boolean rules here.
+                             // The double negation cannot be reduced
+                             // and it leads to infinite recursion.
+                             // downwards(reduce_or_assumptions(r))
                              ));
     return r;
 }
