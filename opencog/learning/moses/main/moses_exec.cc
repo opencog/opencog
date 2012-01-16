@@ -331,7 +331,7 @@ int moses_exec(int argc, char** argv)
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
         (opt_desc_str(input_data_file_opt).c_str(),
          value<vector<string> >(&input_data_files),
-         "Input table file in DSV format (with comma, whitespace and tabulation as seperator). Colums correspond to features and rows to observations. Can be used several times, in such a case each data file defines a fitness function that a candidate must satisfy all at once (multi-objective optimization if you will). Each file must have the same number of features (but necessarily the same number of inputs). And in case they have headers (names of the features), they must be identical (same names in same order).\n")
+         "Input table file in DSV format (with comma, whitespace and tabulation as seperator). Colums correspond to features and rows to observations. Can be used several times, in such a case the behavioral score of the whole problem is the concatenation of the behavioral scores of the sub-problems associated with the files. Each file must have the same number of features in the same order.\n")
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")
@@ -740,15 +740,11 @@ int moses_exec(int argc, char** argv)
 
             typedef interesting_predicate_bscore BScore;
             if (tables.size() > 1) {
-                typedef bscore_based_score<BScore> Score;
-                boost::ptr_vector<Score> scores;
+                boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables) {
-                    /// @todo should delete bsc_ptr after use but the
-                    /// program stops anyway
-                    BScore* bsc_ptr = new BScore(ctable, as, stdev, rng);
-                    scores.push_back(new Score(*bsc_ptr));
+                    bscores.push_back(new BScore(ctable, as, stdev, rng));
                 }
-                multiscore_based_bscore<Score> bscore(scores);
+                multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
