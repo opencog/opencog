@@ -97,29 +97,29 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
         try {
             behavioral_score bs = bscore(tr);
             score_t res = std::accumulate(bs.begin(), bs.end(), 0.0);
-            // Logger
-            if(logger().getLevel() >= Logger::FINE) {
-                stringstream ss_tr;
-                ss_tr << "bscore_based_score - Candidate: " << tr;
-                logger().fine(ss_tr.str());
-                stringstream ss_sc;
-                ss_sc << "Scored: " << res;
-                logger().fine(ss_sc.str());
+
+            if (logger().getLevel() < Logger::FINE) {
+                stringstream ss;
+                ss << "bscore_based_score: " << res;
+                ss << " for candidate: " << tr;
+                logger().fine(ss.str());
             }
-            // ~Logger
+
             return res;
         }
-        catch (EvalException& ee) {
-            // Logger
-            stringstream ss1;
-            ss1 << "The following candidate: " << tr;
-            logger().fine(ss1.str());
-            stringstream ss2;
-            ss2 << "has failed to be evaluated,"
-                << " raising the following exception: "
-                << ee.get_message() << " " << ee.get_vertex();
-            logger().fine(ss2.str());
-            // ~Logger
+        catch (EvalException& ee)
+        {
+            // XXX If we are taking an exception, then its probably
+            // a divide-by-zero... shouldn't we raise this as a warning
+            // or an error? Why should we semi-silently ignore these
+            // cases?
+            stringstream ss;
+            ss << "The following candidate: " << tr << "\n";
+            ss << "has failed to be evaluated, "
+               << "raising the following exception: "
+               << ee.get_message() << " " << ee.get_vertex();
+            logger().debug(ss.str());
+
             return get_score(worst_composite_score);
         }
     }
@@ -378,6 +378,12 @@ private:
 
 /**
  * Like contin_bscore but for boolean.
+ *
+ * The CTable ctt holds the "compressed" data table, consisting of
+ * rows of input (independent) variables, and a single output
+ * (dependent) variable. Scoring is performed by evaluating the
+ * combo tree for each input row, and comparing the evaluation results
+ * to the output column.
  *
  * The first elements correspond to the minus absolute errors (0 if
  * the booleans fit, -1 if they don't). The last element is optional

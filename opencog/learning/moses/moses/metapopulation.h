@@ -373,7 +373,7 @@ struct metapopulation : public bscored_combo_tree_set
 
             // Should have found something by now.
             if (_exemplar == end()) {
-                if(params.revisit) {
+                if (params.revisit) {
 
                     _visited_exemplars.clear();
 
@@ -571,8 +571,8 @@ struct metapopulation : public bscored_combo_tree_set
                 return pot_candidates.size(); }();
 
             // only add up to max_candidates
-            if(this->params.max_candidates < 0
-               || pot_candidates_size < this->params.max_candidates) {
+            if (this->params.max_candidates < 0
+                || pot_candidates_size < this->params.max_candidates) {
 
                 // get the combo_tree associated to inst, cleaned and reduced
                 //

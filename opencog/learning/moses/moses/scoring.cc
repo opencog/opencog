@@ -49,16 +49,15 @@ using boost::phoenix::arg_names::arg1;
 
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_bscore(const combo_tree& tr,
-                                 const behavioral_score& bs) {
-    if(logger().getLevel() >= Logger::FINE) {
-        stringstream ss_tr;
-        ss_tr << "Evaluate candidate: " << tr;
-        logger().fine(ss_tr.str());
-        stringstream ss_bsc;
-        ss_bsc << "BScored: ";
-        ostream_behavioral_score(ss_bsc, bs);
-        logger().fine(ss_bsc.str());
-    }
+                                 const behavioral_score& bs)
+{
+    if (logger().getLevel() < Logger::FINE)
+        return;
+
+    stringstream ss;
+    ss << "Evaluate candidate: " << tr << "\n";
+    ss << "\tBScored: " << bs;
+    logger().fine(ss.str());
 }
 
 ////////////////////
@@ -207,29 +206,36 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
                                          RandGen& _rng) 
     : ctt(_ctt), rng(_rng)
 {
-    occam = p > 0 && p < 0.5;
-    if(occam)
+    // XXX why is p==0.0 excluded here ??
+    // what does p>=0.5 got do do with it ???
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
 }
 
 behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
+    // The OTable constructor will take the combo tree tr and evaluate
+    // it for every row of input in ctt. (The rng is passed straight
+    // through to the combo evaluator).
     OTable ptt(tr, ctt, rng);
     behavioral_score bs(ctt.size() + (occam?1:0));
+
     transform(ptt, ctt | map_values, bs.begin(),
               [](const vertex& v, CTable::mapped_type& vd) {
                   return -score_t(vd[negate_vertex(v)]); });
-    // add the Occam's razor feature
-    if(occam)
+
+    // Add the Occam's razor feature
+    if (occam)
         bs.back() = complexity(tr) * complexity_coef;
 
-    // Logger
     log_candidate_bscore(tr, bs);
-    // ~Logger
+
     return bs;
 }
 
-behavioral_score ctruth_table_bscore::best_possible_bscore() const {
+behavioral_score ctruth_table_bscore::best_possible_bscore() const
+{
     behavioral_score bs(ctt.size() + (occam?1:0));
     transform(ctt | map_values, bs.begin(), [](CTable::mapped_type& vd) {
             return -score_t(min(vd[id::logical_true], vd[id::logical_false])); });
