@@ -142,13 +142,21 @@ struct reduce_ands : public crule<reduce_ands>
 //
 struct subtree_to_enf : public crule<subtree_to_enf>
 {
-    subtree_to_enf() : crule<subtree_to_enf>::crule("subtree_to_enf") {}
+    subtree_to_enf(const vertex_set& ignore_ops_, opencog::RandGen& rng_)
+        : crule<subtree_to_enf>::crule("subtree_to_enf"),
+        ignore_ops(ignore_ops_), rng(rng_)
+        {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const
     {
         reduce_to_enf(tr, it);
     }
 
 protected:
+    // ignore_ops and rng are needed for contin reduction inside of
+    // predicate terms.
+    const vertex_set& ignore_ops;
+    opencog::RandGen& rng;
+
     struct reduce_to_enf
     {
         enum Result { Delete, Disconnect, Keep };

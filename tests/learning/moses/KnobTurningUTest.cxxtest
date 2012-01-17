@@ -25,6 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include <sstream>
 #include <string>
+#include <opencog/util/mt19937ar.h>
 #include <opencog/learning/moses/representation/knobs.h>
 
 using namespace opencog;
@@ -34,26 +35,35 @@ using namespace combo;
 //using namespace util;
 using namespace std;
 
-class KnobTurningUTest : public CxxTest::TestSuite {
+class KnobTurningUTest : public CxxTest::TestSuite
+{
 public:
-    combo_tree totree(string str) {
+  combo_tree totree(string str)
+  {
     stringstream ss(str);
     combo_tree tr;
     ss >> tr;
     return tr;
   }
 
-  void check(combo_tree tr,string str) {
+  void check(combo_tree tr, string str)
+  {
+    MT19937RandGen rng(0);
+    vertex_set ignore_ops;
+
     clean_reduce(tr);
-    logical_reduce(2, tr);
+    logical_reduce(2, tr, ignore_ops, rng);
 
-    combo_tree xx=totree(str);
-    logical_reduce(2, xx);
+    combo_tree xx = totree(str);
+    logical_reduce(2, xx, ignore_ops, rng);
 
-    TS_ASSERT(tr==xx);
+    TS_ASSERT(tr == xx);
   }
 
-  void test_logical() {
+  void test_logical()
+  {
+    MT19937RandGen rng(0);
+    vertex_set ignore_ops;
     string 
       tree_str="and(#1 not(#2))",
 
@@ -70,7 +80,7 @@ public:
       res22="and(#1 not(#2) not(#3))";
     
     combo_tree tr=totree(tree_str);
-    reduct::logical_reduce(2, tr);
+    reduct::logical_reduce(2, tr, ignore_ops, rng);
 
     combo_tree t1(argument(1)),t2(argument(2)),t3(argument(3));
     logical_subtree_knob 

@@ -48,7 +48,8 @@ private:
 
     MT19937RandGen rng;
 public:
-    representationUTest() : rng(1) {
+    representationUTest() : rng(1)
+    {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::DEBUG);
     }
@@ -56,7 +57,8 @@ public:
     // these tests are just here to check that the representation
     // building does not crash, for now at least
 
-    void test_contin_rep() {
+    void test_contin_rep()
+    {
         string tr_str = "+(*(+(*(+(*(+(*(#1 1.75) 1.875) #1) 0.75) 0.75) 1.375) 0.75) -1.25)";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
@@ -68,51 +70,83 @@ public:
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
-    void test_boolean_rep1() {
+    void test_boolean_rep1()
+    {
         string tr_str = "and";
         combo_tree tr = totree(tr_str);
         type_tree tt = gen_signature(id::boolean_type, 3);
-        representation rep(logical_reduction(2), logical_reduction(3),
+
+        const vertex_set ignore_ops;
+        logical_reduction r(ignore_ops, rng);
+        const rule& r2 = r.operator()(2);
+        const rule& r3 = r.operator()(3);
+
+        representation rep(r2, r3,
                            tr, tt, rng, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
-    void test_boolean_rep2() {
+    void test_boolean_rep2()
+    {
         string tr_str = "or(and(or(#1 #2) or(#1 #3) or(#2 #3)) and(#1 #3))";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
-        representation rep(logical_reduction(2), logical_reduction(2), 
+
+        const vertex_set ignore_ops;
+        logical_reduction r(ignore_ops, rng);
+        const rule& r2 = r.operator()(2);
+
+        representation rep(r2, r2,
                            tr, tt, rng, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
-    void test_boolean_rep3() {
+    void test_boolean_rep3()
+    {
         string tr_str = "or(and(!#1 !#2 !#3) and(#1 #2) and(#1 #3) and(#2 #3))";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
-        representation rep(logical_reduction(2), logical_reduction(2), 
+
+        const vertex_set ignore_ops;
+        logical_reduction r(ignore_ops, rng);
+        const rule& r2 = r.operator()(2);
+
+        representation rep(r2, r2,
                            tr, tt, rng, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
-    void test_boolean_rep4() {
+    void test_boolean_rep4()
+    {
         string tr_str = "or(and(or(and(or(!#1 #3) !#2) #3) or(and(!#2 #3) !#1) or(#2 !#3)) and(or(#1 #2) #3) and(or(#1 #3) #2))";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
-        representation rep(logical_reduction(2), logical_reduction(2), 
+
+        const vertex_set ignore_ops;
+        logical_reduction r(ignore_ops, rng);
+        const rule& r2 = r.operator()(2);
+
+        representation rep(r2, r2,
                            tr, tt, rng, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
-    void test_boolean_rep5() {
+    void test_boolean_rep5()
+    {
         string tr_str = "or(and(!#2 !#3 or(#3 !#2) or(!#1 #3)) and(#3 #2) and(#3 #1) and(#1 #2 or(#3 #1)))";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
-        representation rep(logical_reduction(2), logical_reduction(0), 
+
+        const vertex_set ignore_ops;
+        logical_reduction r(ignore_ops, rng);
+        const rule& r2 = r.operator()(2);
+        const rule& r0 = r.operator()(0);
+
+        representation rep(r2, r0,
                            tr, tt, rng, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());

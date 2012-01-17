@@ -67,7 +67,23 @@ struct crule : public rule
 };
 
 const rule& ann_reduction();
-const rule& logical_reduction(int effort = 2);
+
+// @ignore_ops is the set of operators to ignore
+// logical_reduction doesn't use it itself, but does pass it
+// on to the contin_reduction step of any predicates encountered.
+// Reduction levels of 2 and higher must specify ignore_ops and rng.
+struct logical_reduction
+{
+    logical_reduction();
+    logical_reduction(const vertex_set& ignore_ops,
+                      opencog::RandGen& rng);
+    ~logical_reduction();
+
+    const rule& operator()(int effort = 2);
+private:
+    const rule *medium;
+    const rule *complexe;
+};
 
 // @ignore_ops is the set of operators to ignore
 const rule& contin_reduction(const vertex_set& ignore_ops, opencog::RandGen& rng);
@@ -81,22 +97,35 @@ const rule& clean_reduction();
 //const rule& clean_and_full_reduction();
 
 /**
- * reduce trees containing only logical operators, boolean constants
- * and boolean-typed literals.
+ * reduce trees containing logical operators, boolean constants
+ * and boolean-typed literals. 
  *
- * XXX Unclear: what if the tree also contains boolean-valued functions
- * i.e. predicates? Clearly, one would not expect this to be able to
- * reduce terms inside the predicate, as they would be a black box. But
- * will this puke and assert, or cause bugs, if it enounters predicates?
+ * For effort==2 and creater, this will also recurse down into
+ * predicates, and reduce those. Currently, only the greater-than-zero
+ * predicate is supported; when such a predicate is encountered,
+ * the contin terms inside of it are reduced.
  */
-inline void logical_reduce(int effort, combo_tree& tr, combo_tree::iterator it)
+inline void logical_reduce(int effort, combo_tree& tr,
+                           combo_tree::iterator it,
+                           const vertex_set& ignore_ops,
+                           opencog::RandGen& rng)
 {
-    logical_reduction(effort)(tr, it);
+    logical_reduction r(ignore_ops, rng);
+    r(effort)(tr, it);
+}
+
+inline void logical_reduce(int effort, combo_tree& tr,
+                           const vertex_set& ignore_ops,
+                           opencog::RandGen& rng)
+{
+    logical_reduction r(ignore_ops, rng);
+    r(effort)(tr);
 }
 
 inline void logical_reduce(int effort, combo_tree& tr)
 {
-    logical_reduction(effort)(tr);
+    logical_reduction r;
+    r(effort)(tr);
 }
 
 /**
@@ -116,7 +145,7 @@ inline void contin_reduce(combo_tree& tr, const vertex_set& ignore_ops,
     contin_reduction(ignore_ops, rng)(tr); 
 }
 
-inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it,
+inline void mixed_reduce(combo_tree& tr, combo_tree::iterator it,
                          opencog::RandGen& rng)
 {
     mixed_reduction(rng)(tr, it);

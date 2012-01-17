@@ -269,7 +269,7 @@ int moses_exec(int argc, char** argv)
     string log_file;
     bool log_file_dep_opt;
     float stdev;
-    float prob;
+    float probability;
     vector<string> include_only_ops_str;
     vector<string> ignore_ops_str;
     string opt_algo; //optimization algorithm
@@ -399,7 +399,7 @@ int moses_exec(int argc, char** argv)
          value<float>(&stdev)->default_value(0),
          "In the case of contin regression. standard deviation of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher the standard deviation the stronger the Occam's razor.\n")
         (opt_desc_str(prob_opt).c_str(),
-         value<float>(&prob)->default_value(0),
+         value<float>(&probability)->default_value(0),
          "In the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.\n")
         (opt_desc_str(include_only_ops_str_opt).c_str(),
          value<vector<string> >(&include_only_ops_str),
@@ -629,10 +629,11 @@ int moses_exec(int argc, char** argv)
     const rule& contin_reduct = contin_reduction(ignore_ops, rng);
 
     // Logical reduction rules used during search.
-    const rule& bool_reduct = logical_reduction(reduct_candidate_effort);
+    logical_reduction r(ignore_ops, rng);
+    const rule& bool_reduct = r(reduct_candidate_effort);
 
     // Logical reduction rules used during representation building.
-    const rule& bool_reduct_rep = logical_reduction(reduct_knob_building_effort);
+    const rule& bool_reduct_rep = r(reduct_knob_building_effort);
 
     // Problem based on input table.
     if (datafile_based_problem(problem)) {
@@ -685,7 +686,7 @@ int moses_exec(int argc, char** argv)
             if (output_type == id::boolean_type) {
                 /// @todo: support multiple input data files
                 CTable ctable = ctables.front();
-                ctruth_table_bscore bscore(ctable, as, prob, rng);
+                ctruth_table_bscore bscore(ctable, as, probability, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
@@ -708,7 +709,7 @@ int moses_exec(int argc, char** argv)
                                                     tables.front().itable,
                                                     discretize_thresholds,
                                                     weighted_accuracy,
-                                                    as, prob,
+                                                    as, probability,
                                                     rng);
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,

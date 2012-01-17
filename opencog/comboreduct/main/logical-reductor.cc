@@ -38,6 +38,9 @@ int main()
 {
     logger().setPrintErrorLevelStdout();
 
+    MT19937RandGen rng = MT19937RandGen(0);
+    opencog::combo::vertex_set ignore_ops;
+
     const int effort = 3; // effort allocated for reduction (3 is max)
 
     combo_tree tr;
@@ -47,7 +50,7 @@ int main()
             break;
         complete_truth_table tt1(tr);
         //cout << "AR" << endl;
-        logical_reduce(effort, tr);
+        logical_reduce(effort, tr, ignore_ops, rng);
         //cout << "RA" << endl;
         complete_truth_table tt2(tr, integer_log2(tt1.size()));
         cout << tr << endl;

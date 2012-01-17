@@ -164,12 +164,13 @@ complete_truth_table::hamming_distance(const complete_truth_table& other) const
     return res;
 }
 
-bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const {
+bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
+{
     const_iterator cit = begin();
     for (int i = 0; cit != end(); ++i, ++cit) {
         for (int j = 0; j < _arity; ++j)
             bmap[j + 1] = bool_to_vertex((i >> j) % 2);
-        if(*cit != vertex_to_bool(eval_binding(*_rng, bmap, tr)))
+        if (*cit != vertex_to_bool(eval_binding(*_rng, bmap, tr)))
             return false;
     }
     return true;

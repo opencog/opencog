@@ -49,8 +49,11 @@ typedef ref_rule_map::iterator ref_rule_map_it;
  * Select the rule given its reference string
  * Returns a null pointer if no valid rule_ref_str or 'h'
  */
-const rule* select_rule(string rule_ref_str) {
+const rule* select_rule(string rule_ref_str)
+{
     static MT19937RandGen rnd = MT19937RandGen(0);
+ 
+    static opencog::combo::vertex_set ignore_ops;
 
     const static ref_rule_map ref_rules = 
         map_list_of
@@ -69,7 +72,7 @@ const rule* select_rule(string rule_ref_str) {
                          "reduce_ors"))
         ("AND", make_pair(new downwards(reduce_ands()),
                          "reduce_ands"))
-        ("ENF", make_pair(new subtree_to_enf(),
+        ("ENF", make_pair(new subtree_to_enf(ignore_ops, rnd),
                           "subtree_to_enf"))
         //Contin rules
         ("PZ", make_pair(new downwards(reduce_plus_zero()),
@@ -123,7 +126,8 @@ const rule* select_rule(string rule_ref_str) {
     }
 }
 
-int main() {
+int main()
+{
     MT19937RandGen rng(1);
 
     combo_tree tr;
@@ -143,7 +147,7 @@ int main() {
         
         bool ct = is_well_formed(tt);
         
-        if(!ct) {
+        if (!ct) {
             cout << "Bad type" << endl;
             break;
         }
@@ -159,7 +163,7 @@ int main() {
             //returns a null pointer if no valid rule_ref_str or 'h'
             const rule* selected_rule = select_rule(rule_ref_str);
 
-            if(selected_rule) {
+            if (selected_rule) {
 
                 //produce random inputs
                 ITable cti(tt, rng);

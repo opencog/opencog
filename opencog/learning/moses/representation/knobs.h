@@ -239,7 +239,9 @@ struct logical_subtree_knob : public discrete_knob<3>
         // compute the negation of the subtree
         combo_tree negated_subtree(subtree);
         negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
-        reduct::logical_reduce(1, negated_subtree);
+
+        reduct::logical_reduction r;
+        r(1)(negated_subtree);
 
         for (sib_it sib = tgt.begin(); sib != tgt.end(); ++sib) {
             if (_tr.equal_subtree(pre_it(sib), subtree) ||

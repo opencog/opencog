@@ -42,18 +42,24 @@ class metapopulationUTest : public CxxTest::TestSuite {
     MT19937RandGen _rng;
     dummy_score _dsc;
     dummy_bscore _dbsc;
+    vertex_set ignore_ops;
+    logical_reduction lred;
     metapopulation_t _metapopulation;
 
 public:
     metapopulationUTest()
-        : _rng(1), _dsc(), _dbsc(),
+        : _rng(1), _dsc(), _dbsc(), ignore_ops(),
+          lred(ignore_ops, _rng),
           _metapopulation(_rng, combo_tree(), type_tree(),
-                          logical_reduction(), _dsc, _dbsc) {
+                          lred.operator()(2), _dsc, _dbsc)
+    {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE); 
     }
+
     // test metapopulation::remove_dominated
-    void test_remove_dominated() {
+    void test_remove_dominated()
+    {
         // a set of bscored_combo_tree, the combo_tree themselves are
         // dummy (1, 2, ...) as only their bscore matter
         bscored_combo_tree_set bcs;
@@ -102,7 +108,8 @@ public:
     }
 
     // test metapopulation::merge_nondominated_rec
-    void test_merge_nondominated_rec() {
+    void test_merge_nondominated_rec()
+    {
         // a set of bscored_combo_tree, the combo_tree themselves are
         // dummy (1, 2, ...) as only their bscore matter
         bscored_combo_tree_set bcs1, bcs2;

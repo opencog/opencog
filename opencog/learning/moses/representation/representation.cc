@@ -154,9 +154,10 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
 {
     using namespace reduct;
 
-    clean_reduce(tr); //remove null vertices
+    // Remove null vertices.
+    clean_reduce(tr);
 
-    if(reduce) { //reduce
+    if (reduce) { //reduce
         // Logger
         if(logger().getLevel() >= Logger::FINE) {
             std::stringstream ss;
@@ -165,7 +166,7 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
             logger().fine(ss.str());
         }
         // ~Logger
-        if(knob_building)
+        if (knob_building)
             (*get_simplify_knob_building())(tr);
         else
             (*get_simplify_candidate())(tr);

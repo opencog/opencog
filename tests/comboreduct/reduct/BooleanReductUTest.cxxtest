@@ -18,21 +18,24 @@ using namespace ant_combo;
 
 static opencog::MT19937RandGen rng(0);
 
-class BooleanReductUTest : public CxxTest::TestSuite {
-    void test_simplify_tree_str(const string& tr_str) {
+class BooleanReductUTest : public CxxTest::TestSuite
+{
+    void test_simplify_tree_str(const string& tr_str)
+    {
         stringstream ss(tr_str);
         combo_tree tr;
         int size_before, size_after;
         ss >> tr;
         
         complete_truth_table tt1(tr);
-        size_before=tr.size();
-        logical_reduce(3, tr);
-        size_after=tr.size();
+        size_before = tr.size();
+        vertex_set ignore_ops;
+        logical_reduce(3, tr, ignore_ops, rng);
+        size_after = tr.size();
         complete_truth_table tt2(tr, integer_log2(tt1.size()));
         
         TS_ASSERT_LESS_THAN(size_after, size_before);
-        TS_ASSERT_EQUALS(tt1,tt2);
+        TS_ASSERT_EQUALS(tt1, tt2);
     }
 
 public:
