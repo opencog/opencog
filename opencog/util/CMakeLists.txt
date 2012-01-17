@@ -42,6 +42,7 @@ ADD_LIBRARY(util SHARED
     KLD
     comprehension
     ranking
+    MannWhitneyU
 	${WIN32_GETOPT_FILES}
     ${APPLE_STRNDUP_FILES}
 )
@@ -93,6 +94,7 @@ INSTALL(FILES
     KLD.h
     comprehension.h
     ranking.h
+    MannWhitneyU.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 
