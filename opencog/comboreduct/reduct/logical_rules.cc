@@ -48,14 +48,12 @@ void insert_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
 
 void remove_unary_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-std::cout <<"duude enter unary "<<tr<<std::endl;
     if ((*it == id::logical_and || *it == id::logical_or)
         && it.has_one_child())
     {
         *it = *it.begin();
         tr.erase(tr.flatten(it.begin()));
     }
-std::cout <<"duude exit  unary "<<tr<<std::endl;
 }
 
 void remove_dangling_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
@@ -478,7 +476,7 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
 
 void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
 {
-    for (sib_it child=current.begin();child!=current.end();)
+    for (sib_it child = current.begin(); child != current.end(); )
     {
         if (child.has_one_child() &&
             (*child == id::logical_and || *child == id::logical_or))
@@ -494,21 +492,35 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
                 tr.erase(tr.flatten(child.begin()));
                 child = tr.erase(tr.flatten(child));
             }
-            else
-            {
-                // If its a boolean-type literal (well, is_argument doesn't
-                // actually check the argument type, but it should ...)
-                // or if it is a boolean-valued term (i.e. a predicate)
-                // then just ignore it.
-                if (is_argument(*child.begin()) ||
-                    is_predicate(child.begin()))
-                    child = tr.erase(tr.flatten(child));
-                else
-                    // XXX Is this really the correct thing to do here?
-                    // why ??  Shouldn't we check ?
-                    child = tr.erase(child);
+            // If its a boolean-type literal (well, is_argument doesn't
+            // actually check the argument type, but it should ...)
+            // or if it is a boolean-valued term (i.e. a predicate)
+            // then just pull it out from under the logic op.
+            else if (is_argument(*child.begin()) ||
+                    is_predicate(child.begin())) {
+                child = tr.erase(tr.flatten(child));
             }
-        } else {
+            else {
+                // No clue as to what this is about....
+                child = tr.erase(child);
+                OC_ASSERT(0, "Error: Unexpected term during or_cut.");
+            }
+        }
+        else if (is_predicate(child)) {
+            pre_it cit = child;
+            if (*cit == id::logical_not)
+                cit = cit.begin();
+
+            // cit now points to a the predicate, with not
+            // stripped off. cit.begin() points to the
+            // contin-valued expression.
+            cit = cit.begin();
+            if (!is_argument(*cit))
+                contin_reduce(tr, cit, parent.ignore_ops, parent.rng);
+
+            ++child;
+        }
+        else {
             ++child;
         }
     }
