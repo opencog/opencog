@@ -206,8 +206,9 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
                                          RandGen& _rng) 
     : ctt(_ctt), rng(_rng)
 {
-    // XXX why is p==0.0 excluded here ??
-    // what does p>=0.5 got do do with it ???
+    // Both p==0.0 and p==0.5 are singularity points in the Occam's
+    // razor formula for discrete outputs (see the explanation in the
+    // comment above ctruth_table_bscore)
     occam = p > 0.0f && p < 0.5f;
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
