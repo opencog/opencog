@@ -359,7 +359,7 @@ vertex eval_throws(RandGen& rng,
             contin_t res = log(get_contin(vx));
 #endif
             if (isnan(res) || isinf(res))
-	      throw EvalException(vertex(res));
+                throw EvalException(vertex(res));
             return res;
         }
         case id::exp : {
@@ -419,7 +419,7 @@ vertex eval_throws(RandGen& rng,
     // contin constant
     else if (const contin_t* c = boost::get<contin_t>(&v)) {
       if (isnan(*c) || isinf(*c))
-	throw EvalException(vertex(*c));
+          throw EvalException(vertex(*c));
       return v;
     }
     // action symbol

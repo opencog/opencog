@@ -109,16 +109,19 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
         }
         catch (EvalException& ee)
         {
-            // XXX If we are taking an exception, then its probably
-            // a divide-by-zero... shouldn't we raise this as a warning
-            // or an error? Why should we semi-silently ignore these
-            // cases?
+            // Exceptions are raised when operands are out of their
+            // valid domain (negative input log or division by zero),
+            // or outputs a value which is not representable (too
+            // large exp or log). The error is logged as level fine
+            // because its happens very often when learning continuous
+            // functions, and it gets too much in the way if logged at
+            // a lower level.
             stringstream ss;
             ss << "The following candidate: " << tr << "\n";
             ss << "has failed to be evaluated, "
                << "raising the following exception: "
                << ee.get_message() << " " << ee.get_vertex();
-            logger().debug(ss.str());
+            logger().fine(ss.str());
 
             return get_score(worst_composite_score);
         }
