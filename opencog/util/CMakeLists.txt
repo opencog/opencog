@@ -41,6 +41,7 @@ ADD_LIBRARY(util SHARED
     oc_omp
     KLD
     comprehension
+    ranking
 	${WIN32_GETOPT_FILES}
     ${APPLE_STRNDUP_FILES}
 )
@@ -91,6 +92,7 @@ INSTALL(FILES
     Counter.h
     KLD.h
     comprehension.h
+    ranking.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 
