@@ -440,7 +440,7 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
                    pre_it cit = gchild.begin();
                    if (*cit == id::logical_not)
                       cit = cit.begin();
-                   // contin_reduce(tr, cit, ignore_ops, rng);
+                   contin_reduce(tr, cit, parent.ignore_ops, parent.rng);
                 }
                 else if (!is_argument(*gchild.begin()))
                 {

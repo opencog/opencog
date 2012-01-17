@@ -148,7 +148,7 @@ struct subtree_to_enf : public crule<subtree_to_enf>
         {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const
     {
-        reduce_to_enf(tr, it);
+        reduce_to_enf(*this, tr, it);
     }
 
 protected:
@@ -168,8 +168,11 @@ protected:
 
         combo_tree& tr;
         Comp comp;
+        const subtree_to_enf &parent;
 
-        reduce_to_enf(combo_tree& tr_, combo_tree::iterator it) : tr(tr_)
+        reduce_to_enf(const subtree_to_enf &p,
+                      combo_tree& tr_, combo_tree::iterator it)
+            : tr(tr_), parent(p)
         {
              (*this)(it);
         }
