@@ -26,8 +26,7 @@
 
 #include "GeneralProcedure.h"
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 class RunningProcedureId
 {
@@ -52,7 +51,8 @@ private:
     ProcedureType type;
 
 }; // class
-}  // namespace
+
+}} // ~namespace opencog::Procedure
 
 #endif
 

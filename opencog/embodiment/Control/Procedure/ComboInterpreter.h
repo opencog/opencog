@@ -37,11 +37,10 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
-using namespace opencog::pai;
-using opencog::world::WorldWrapperBase;
+namespace opencog { namespace Procedure {
 
-namespace Procedure
-{
+using namespace pai;
+using world::WorldWrapperBase;
 
 typedef std::map<RunningProcedureId, RunningComboProcedure> Map;
 typedef std::vector<Map::iterator> Vec;
@@ -71,12 +70,12 @@ class ComboInterpreter : public boost::noncopyable
 {
 
 public:
-    ComboInterpreter(PAI& p, opencog::RandGen& rng);
-    ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng);
+    ComboInterpreter(PAI& p, RandGen& rng);
+    ComboInterpreter(VirtualWorldData::VirtualWorldState& v, RandGen& rng);
     virtual ~ComboInterpreter();
 
     //run executes a single action plan of some procedure (if any are ready)
-    void run(opencog::messaging::NetworkElement *ne);
+    void run(messaging::NetworkElement *ne);
 
     //add a procedure to be run by the interpreter
     RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments);
@@ -114,7 +113,7 @@ protected:
     typedef std::map<RunningProcedureId, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureId, combo::variable_unifier> UnifierResultMap;
 
-    opencog::RandGen& rng;
+    RandGen& rng;
 //    WorldWrapper::PAIWorldWrapper _ww;
     WorldWrapperBase * _ww;
     Map _map;
@@ -128,6 +127,6 @@ protected:
 }; // ComboInterpreter
 
 
-} //~namespace Procedure
+}} // ~namespace opencog::Procedure
 
 #endif

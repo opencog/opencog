@@ -33,8 +33,7 @@
 #include <map>
 #include <boost/noncopyable.hpp>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 typedef std::map<std::string, ComboSelectProcedure> Name2ProcedureMap;
 typedef std::map<std::string, ComboSelectProcedure>::const_iterator Name2ProcedureMapIterator;
@@ -82,6 +81,7 @@ private:
     ComboProcedureRepository& comboRepository;
 
 }; // class
-}  // namespace
+
+}} // ~namespace opencog::Procedure
 
 #endif

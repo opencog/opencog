@@ -30,8 +30,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 typedef unsigned long int RunningProcedureID;
 typedef boost::variant<RunningProcedureId, RunningBuiltInProcedure> RunningProcedure;
@@ -40,12 +39,12 @@ class ProcedureInterpreter : public boost::noncopyable
 {
 
 public:
-    ProcedureInterpreter(opencog::pai::PAI& p);
+    ProcedureInterpreter(pai::PAI& p);
 
     ~ProcedureInterpreter();
 
     //! call ComboInterpreter::run() method and execute pending running BuiltIn procedures.
-    void run(opencog::messaging::NetworkElement *ne);
+    void run(messaging::NetworkElement *ne);
 
     /** Add a procedure to be run by the interpreter
      * @param p The procedure to run.
@@ -94,7 +93,7 @@ protected:
     typedef std::map<RunningProcedureID, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureID, combo::variable_unifier> UnifierResultMap;
 
-    opencog::RandGen* rng;
+    RandGen* rng;
     ComboInterpreter* comboInterpreter;
     ComboSelectInterpreter* comboSelectInterpreter;
     Map _map;
@@ -102,11 +101,12 @@ protected:
     ResultMap _resultMap;
     UnifierResultMap _unifierResultMap;
 
-    opencog::pai::PAI* _pai;
+    pai::PAI* _pai;
 
     RunningProcedureID _next;
 };
 
-} //~namespace Procedure
+} // ~namespace Procedure
+} // ~namespace opencog
 
 #endif

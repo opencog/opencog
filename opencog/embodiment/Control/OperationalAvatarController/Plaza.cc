@@ -25,7 +25,7 @@
 #include "Plaza.h"
 #include <iostream>
 
-using namespace opencog::oac;
+namespace opencog { namespace oac {
 
 Plaza::Plaza (const std::string & ip, const std::string & publishPort) : ip(ip), publishPort(publishPort)
 {
@@ -89,4 +89,6 @@ bool Plaza::publishString (zmq::socket_t & socket, const std::string & str)
     return socket.send(message, 0);
 }
 
+} } // namespace opencog::oac
+        
 #endif // HAVE_ZMQ

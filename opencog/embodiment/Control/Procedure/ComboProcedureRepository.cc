@@ -32,8 +32,9 @@
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 using namespace PetCombo;
-using namespace Procedure;
 using namespace std;
+
+namespace opencog { namespace Procedure {
 
 ComboProcedureRepository::ComboProcedureRepository()
 {
@@ -44,7 +45,7 @@ ComboProcedureRepository::ComboProcedureRepository()
 unsigned int ComboProcedureRepository::loadFromStream(istream& in)
 {
 
-    bool tc = opencog::config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
+    bool tc = config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
 
     unsigned int n = 0;
 
@@ -139,7 +140,7 @@ void ComboProcedureRepository::saveRepository(FILE* dump) const
         fwrite(name.c_str(), sizeof(char), nameLength + 1, dump);
         int arity = itr->second->arity();
         fwrite(&arity, sizeof(int), 1, dump);
-        string treeStr = opencog::toString(itr->second->get_body());
+        string treeStr = toString(itr->second->get_body());
         logger().fine("name: %s\ntree: %s\n", name.c_str(), treeStr.c_str());
         int treeStrLength = treeStr.length();
         fwrite(&treeStrLength, sizeof(int), 1, dump);
@@ -152,7 +153,7 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
     logger().debug("Loading %s (%ld)\n", getId(), ftell(dump));
     char buffer[1<<16];
 
-    bool tc = opencog::config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
+    bool tc = config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
 
 
     int size;
@@ -197,3 +198,5 @@ void ComboProcedureRepository::clear()
 {
     procedure_repository::clear();
 }
+
+}} // namespace opencog::Procedure

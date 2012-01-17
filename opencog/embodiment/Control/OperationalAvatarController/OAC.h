@@ -45,18 +45,16 @@
 #include "PetMessageSender.h"
 #include "PVPActionPlanSender.h"
 #include "Plaza.h"
-
-#include <opencog/embodiment/Control/OperationalAvatarController/ProcedureInterpreterAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/ActionSelectionAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/ImportanceDecayAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
-
-#include <opencog/embodiment/Control/OperationalAvatarController/PsiModulatorUpdaterAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/PsiActionSelectionAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/PsiRelationUpdaterAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/PsiFeelingUpdaterAgent.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/StimulusUpdaterAgent.h>
+#include "ProcedureInterpreterAgent.h"
+#include "ActionSelectionAgent.h"
+#include "ImportanceDecayAgent.h"
+#include "EntityExperienceAgent.h"
+#include "PsiModulatorUpdaterAgent.h"
+#include "PsiDemandUpdaterAgent.h"
+#include "PsiActionSelectionAgent.h"
+#include "PsiRelationUpdaterAgent.h"
+#include "PsiFeelingUpdaterAgent.h"
+#include "StimulusUpdaterAgent.h"
 
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
@@ -117,7 +115,7 @@ private:
     /**
      * Component to deal with perceptions and actions from PVP proxy.
      */
-    opencog::pai::PAI * pai;
+    pai::PAI * pai;
 
     /**
      * Store metadata concerning a pet controlled by the OAC. Also implements
@@ -222,7 +220,7 @@ private:
 
 public:
 
-    static opencog::BaseServer* createInstance();
+    static BaseServer* createInstance();
 
     /**
      * Constructor and destructor
@@ -260,7 +258,7 @@ public:
      * @return The Percpetion/Action Interface object used to exchange
      *            (send and receive) data with virtual world.
      */
-    opencog::pai::PAI & getPAI();
+    pai::PAI & getPAI();
 
     /**
      * Return the pet's cognitive component. This component is responsible
@@ -309,7 +307,7 @@ public:
      * Method inherited from EmbodimentCogServer 
      * @return True if the server should exit.
      */
-    bool processNextMessage(opencog::messaging::Message *msg);
+    bool processNextMessage(messaging::Message *msg);
 
     /**
      * Method inherited from EmbodimentCogServer
@@ -358,7 +356,7 @@ public:
 
 }; // class
 
-} } // namespace opencog::oac
+}} // namespace opencog::oac
 
 #endif // OAC_H
 

@@ -26,17 +26,16 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
-using namespace Procedure;
+namespace opencog { namespace Procedure {
 
-ComboSelectInterpreter::ComboSelectInterpreter(
-        opencog::pai::PAI& pai, opencog::RandGen& rng)
+ComboSelectInterpreter::ComboSelectInterpreter(pai::PAI& pai, RandGen& rng)
 {
     this->comboInterpreter = new ComboInterpreter(pai, rng);
     this->next = 0;
 }
 
 ComboSelectInterpreter::ComboSelectInterpreter(
-        VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng)
+        VirtualWorldData::VirtualWorldState& v, RandGen& rng)
 {
     this->comboInterpreter = new ComboInterpreter(v, rng);
     this->next = 0;
@@ -48,7 +47,7 @@ ComboSelectInterpreter::~ComboSelectInterpreter()
     delete this->comboInterpreter;
 }
 
-void ComboSelectInterpreter::run(opencog::messaging::NetworkElement* ne)
+void ComboSelectInterpreter::run(messaging::NetworkElement* ne)
 {
     if (runningProc.empty()) return;
 
@@ -185,3 +184,5 @@ void ComboSelectInterpreter::stopProcedure(RunningProcedureId id)
     }
 
 }
+
+}} // ~namespace opencog::Procedure

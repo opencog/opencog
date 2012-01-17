@@ -33,12 +33,12 @@
 
 using namespace std;
 using namespace opencog;
-using namespace opencog::oac;
-using opencog::messaging::StringMessage;
+using namespace oac;
+using messaging::StringMessage;
 
 int main()
 {
-    config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
+    config(control::EmbodimentConfig::embodimentCreateInstance, true);
 
     StringMessage *msg = new StringMessage("", "", "");
     int length;

@@ -29,8 +29,8 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
-using namespace Procedure;
-using namespace opencog;
+namespace opencog { namespace Procedure {
+
 using namespace PetCombo;
 
 static combo_tree empty_procedure;
@@ -157,3 +157,4 @@ std::ostream& operator<<(std::ostream& out, const Procedure::ComboProcedure& pro
     return (out << proc.getName() << "(" << proc.getArity() << ") := " << proc.getComboTree());
 }
 
+}} // ~namespace opencog::Procedure

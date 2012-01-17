@@ -30,11 +30,12 @@
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/util/Config.h>
 
+namespace opencog { namespace oac {
+
 using namespace std;
-using namespace opencog;
-using namespace opencog::pai;
-using namespace opencog::oac;
-using opencog::messaging::StringMessage;
+using namespace pai;
+using namespace oac;
+using messaging::StringMessage;
 
 PVPActionPlanSender::PVPActionPlanSender(const std::string& petId, NetworkElement * ne)
 {
@@ -74,3 +75,6 @@ bool PVPActionPlanSender::sendEmotionalFeelings(const std::string& feelings)
     }
     return ne->sendMessage(msg);
 }
+
+} // ~namespace oac
+} // ~namespace opencog

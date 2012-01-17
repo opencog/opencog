@@ -35,8 +35,7 @@
 #include <iostream>
 #include <exception>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 /**
  * ComboSelectProcedure has two combo scripts within it. These scripts are
@@ -92,6 +91,6 @@ private:
     ComboProcedure secondScript;
 };
 
-}
+}} // ~namespace opencog::Procedure
 
 #endif /* COMBOSELECTPROCEDURE_H_ */

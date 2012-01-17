@@ -23,8 +23,9 @@
 
 #include "RunningBuiltInProcedure.h"
 
-using namespace Procedure;
-using namespace opencog::pai;
+namespace opencog { namespace Procedure {
+
+using namespace pai;
 
 RunningBuiltInProcedure::RunningBuiltInProcedure(const PAI& _pai, const BuiltInProcedure& _p, const std::vector<combo::vertex>& _arguments) : pai(_pai), p(_p), arguments(_arguments)
 {
@@ -71,3 +72,4 @@ combo::vertex RunningBuiltInProcedure::getResult() const
     return result;
 }
 
+}} // ~namespace opencog::Procedure

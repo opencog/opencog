@@ -23,7 +23,7 @@
 
 #include "RunningProcedureId.h"
 
-using namespace Procedure;
+namespace opencog { namespace Procedure {
 
 RunningProcedureId::RunningProcedureId()
 {
@@ -67,3 +67,4 @@ bool RunningProcedureId::operator< (const RunningProcedureId& rpId) const
     return (this->id < rpId.getId());
 }
 
+}} // ~namespace opencog::Procedure

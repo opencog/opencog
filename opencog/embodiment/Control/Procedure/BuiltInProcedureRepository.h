@@ -30,8 +30,7 @@
 #include "BuiltInProcedure.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 class BuiltInProcedureRepository
 {
@@ -43,7 +42,7 @@ private:
     void add(BuiltInProcedure* proc);
 
 public:
-    BuiltInProcedureRepository(opencog::pai::PAI&);
+    BuiltInProcedureRepository(pai::PAI&);
     ~BuiltInProcedureRepository();
 
     bool contains(const std::string& name) const;
@@ -53,6 +52,6 @@ public:
     bool update(AtomSpace& atomspace);
 };
 
-}
+}} // ~namespace opencog::Procedure
 
 #endif

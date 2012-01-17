@@ -30,8 +30,7 @@
  */
 #include <string>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 typedef enum {BUILT_IN, COMBO, COMBO_SELECT} ProcedureType;
 
@@ -46,6 +45,6 @@ public:
     virtual unsigned int getArity() const = 0;
 };
 
-}
+}} // ~namespace opencog::Procedure
 
 #endif /*PROCEDURE_H_*/

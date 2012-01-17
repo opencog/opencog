@@ -34,10 +34,8 @@
 #include <boost/noncopyable.hpp>
 #include <opencog/atomspace/HandleMap.h>
 
-using namespace opencog;
+namespace opencog { namespace Procedure {
 
-namespace Procedure
-{
 //noncopyable because combo_trees may point at procedures in the repository
 class ComboProcedureRepository : public combo::procedure_repository, public SavableRepository, public boost::noncopyable
 {
@@ -69,6 +67,6 @@ public:
     void clear();
 };
 
-}
+}} // ~namespace opencog::Procedure
 
 #endif

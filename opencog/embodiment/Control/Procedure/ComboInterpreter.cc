@@ -31,20 +31,20 @@
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <boost/lexical_cast.hpp>
 
-namespace Procedure
-{
-using namespace opencog::messaging;
+namespace opencog { namespace Procedure {
+
+using namespace messaging;
 using namespace boost;
 using namespace std;
 
-using opencog::world::PAIWorldWrapper;
-using opencog::world::RuleValidationWorldWrapper;
+using world::PAIWorldWrapper;
+using world::RuleValidationWorldWrapper;
 
-ComboInterpreter::ComboInterpreter(PAI& p, opencog::RandGen& _rng) : rng(_rng), _ww(new PAIWorldWrapper(p, _rng)), _next(0)
+ComboInterpreter::ComboInterpreter(PAI& p, RandGen& _rng) : rng(_rng), _ww(new PAIWorldWrapper(p, _rng)), _next(0)
 {
 }
 
-ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& _rng) : rng(_rng), _ww(new RuleValidationWorldWrapper(v)), _next(0)
+ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v, RandGen& _rng) : rng(_rng), _ww(new RuleValidationWorldWrapper(v)), _next(0)
 {
 }
 
@@ -52,7 +52,7 @@ ComboInterpreter::~ComboInterpreter()
 {
 }
 
-void ComboInterpreter::run(opencog::messaging::NetworkElement *ne)
+void ComboInterpreter::run(messaging::NetworkElement *ne)
 {
     if (_vec.empty())
         return;
@@ -60,13 +60,13 @@ void ComboInterpreter::run(opencog::messaging::NetworkElement *ne)
     std::set<RunningProcedureId> done;
 
 #if 0 // According to cpu time profiling, lazy_selector is taking too much time.
-    opencog::lazy_selector* sel;
-    if (!opencog::config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
+    lazy_selector* sel;
+    if (!config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         //loop in random order until we find a running procedure that's ready
         //along the way, get rid of done procedures
-        sel = new opencog::lazy_random_selector(_vec.size(), rng);
+        sel = new lazy_random_selector(_vec.size(), rng);
     } else {
-        sel = new opencog::lazy_normal_selector(_vec.size());
+        sel = new lazy_normal_selector(_vec.size());
     }
 
     while (!sel->empty()) {
@@ -116,7 +116,7 @@ void ComboInterpreter::run(opencog::messaging::NetworkElement *ne)
             logger().error("Not finished '%d' - adding to failed list",  ((RunningProcedureId&) (*it)->first).getId());
             if (ne) {
                 StringMessage msg(ne->getID(),
-                                  opencog::config().get("COMBO_SHELL_ID"),
+                                  config().get("COMBO_SHELL_ID"),
                                   "action_failure");
                 ne->sendMessage(msg);
             }
@@ -136,7 +136,7 @@ void ComboInterpreter::run(opencog::messaging::NetworkElement *ne)
                 if (rp.isFailed()) {
                     _failed.insert((*it)->first);
                     StringMessage msg(ne->getID(),
-                                      opencog::config().get("COMBO_SHELL_ID"),
+                                      config().get("COMBO_SHELL_ID"),
                                       "action_failure");
                     ne->sendMessage(msg);
 
@@ -146,7 +146,7 @@ void ComboInterpreter::run(opencog::messaging::NetworkElement *ne)
                     stringstream ss;
                     ss << rp.getResult();
                     StringMessage msg(ne->getID(),
-                                      opencog::config().get("COMBO_SHELL_ID"),
+                                      config().get("COMBO_SHELL_ID"),
                                       ss.str());
                     ne->sendMessage(msg);
                 }
@@ -249,4 +249,4 @@ void ComboInterpreter::stopProcedure(RunningProcedureId id)
     }
 }
 
-} //~namespace Procedure
+}} // ~namespace opencog::Procedure

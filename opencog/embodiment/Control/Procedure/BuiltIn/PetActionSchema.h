@@ -38,8 +38,7 @@
 
 #include <exception>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 class PetActionSchema : public BuiltInProcedure
 {
@@ -48,19 +47,19 @@ class PetActionSchema : public BuiltInProcedure
 
 protected:
 
-    opencog::pai::PAI& pai;
-    const opencog::pai::ActionType& actionType;
+    pai::PAI& pai;
+    const pai::ActionType& actionType;
 
 public:
 
-    PetActionSchema(opencog::pai::PAI& pai, const opencog::pai::ActionType& actionType);
+    PetActionSchema(pai::PAI& pai, const pai::ActionType& actionType);
     virtual ~PetActionSchema();
 
     const std::string& getName() const;
     bool isPetAction() const;
-    combo::vertex execute(const std::vector<combo::vertex>& arguments) const throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception);
+    combo::vertex execute(const std::vector<combo::vertex>& arguments) const throw (RuntimeException, InvalidParamException, std::bad_exception);
 };
 
-}
+}} // ~namespace opencog::Procedure
 
 #endif /*PET_ATION_SCHEMA_H_*/

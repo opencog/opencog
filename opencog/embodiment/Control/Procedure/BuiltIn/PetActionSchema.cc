@@ -27,12 +27,13 @@
 #include "PetActionSchema.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 
-using namespace Procedure;
-using namespace opencog::pai;
+namespace opencog { namespace Procedure {
+
+using namespace pai;
 
 PetActionSchema::PetActionSchema(PAI& _pai, const ActionType& _actionType) : pai(_pai), actionType(_actionType)
 {
-    name =  opencog::StringManipulator::toUpper(actionType.getName());
+    name =  StringManipulator::toUpper(actionType.getName());
 
     minArity = actionType.getMandatoryParamSize();
     optionalArity = actionType.getOptionalParamSize();
@@ -79,13 +80,13 @@ bool PetActionSchema::isPetAction() const
  *  heel                => void heel()
  *  random_step
  */
-combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (RuntimeException, InvalidParamException, std::bad_exception)
 {
     PetAction action(actionType);
 
     const ActionType::ParamTypes& mandatoryParamTypes = actionType.getMandatoryParamTypes();
     if (arguments.size() < minArity) {
-        throw opencog::InvalidParamException(TRACE_INFO,
+        throw InvalidParamException(TRACE_INFO,
                                              "PetActionSchema - Schema %s got insuficient no. of parameters: %u (expected at least %u).", actionType.getName().c_str(), arguments.size(), minArity);
     }
 
@@ -94,7 +95,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
     //const ActionType::ParamTypes& optionalParamTypes = actionType.getOptionalParamTypes();
     unsigned int maximalArity = minArity + optionalArity;
     if (arguments.size() > maximalArity) {
-        throw opencog::InvalidParamException(TRACE_INFO,
+        throw InvalidParamException(TRACE_INFO,
                                              "PetActionSchema - Schema %s exceeded no. of parameters: %u (expected at most %u).",
                                              actionType.getName().c_str(), arguments.size(), maximalArity);
     }
@@ -112,7 +113,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
             const combo::id::builtin* arg = boost::get<combo::id::builtin>(&(arguments[argIndex]));
             if (arg && (*arg == combo::id::logical_true || *arg == combo::id::logical_false)) {
                 bool value = (*arg == combo::id::logical_true);
-                ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, opencog::toString(value));
+                ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, toString(value));
                 action.addParameter(actionParam);
                 validArg = true;
             }
@@ -122,7 +123,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
             // TODO: Check this: it seems all numbers are double in combo (typedef double contin_t;)
             const combo::contin_t* arg = boost::get<combo::contin_t>(&(arguments[argIndex]));
             if (arg) {
-                ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, opencog::toString((int)*arg));
+                ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, toString((int)*arg));
                 action.addParameter(actionParam);
                 validArg = true;
             }
@@ -131,7 +132,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
             // TODO: Check this: it seems all numbers are double in combo (typedef double contin_t;)
             const combo::contin_t* arg = boost::get<combo::contin_t>(&(arguments[argIndex]));
             if (arg) {
-                ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, opencog::toString(*arg));
+                ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, toString(*arg));
                 action.addParameter(actionParam);
                 validArg = true;
             }
@@ -196,10 +197,10 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
         }
 
         if (!validArg) {
-            throw opencog::InvalidParamException(TRACE_INFO,
+            throw InvalidParamException(TRACE_INFO,
                                                  "PetActionSchema - Schema %s got invalid argument at %u: %s (expected an %s).",
                                                  actionType.getName().c_str(), argIndex,
-                                                 opencog::toString(arguments[0]).c_str(), paramType.getName().c_str());
+                                                 toString(arguments[0]).c_str(), paramType.getName().c_str());
         }
 
     }
@@ -216,3 +217,4 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
     return planId;
 }
 
+}} // ~namespace opencog::Procedure

@@ -30,9 +30,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/variable_unifier.h>
 
-
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 class RunningComboSelectProcedure
 {
@@ -74,6 +72,7 @@ private:
     bool secondScriptFailed;
 
 }; // class
-}  // namespace
+
+}} // ~namespace opencog::Procedure
 
 #endif

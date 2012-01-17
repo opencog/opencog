@@ -27,8 +27,9 @@
 #include <stdio.h>
 #include <opencog/comboreduct/combo/procedure_call.h>
 
+namespace opencog { namespace Procedure {
+
 using namespace PetCombo;
-using namespace Procedure;
 
 ComboSelectProcedureRepository::ComboSelectProcedureRepository(ComboProcedureRepository& _r) : comboRepository(_r)
 {
@@ -42,7 +43,7 @@ bool ComboSelectProcedureRepository::contains(const std::string& name) const
 const ComboSelectProcedure& ComboSelectProcedureRepository::get(const std::string& name)
 {
     if (!contains(name)) {
-        throw opencog::RuntimeException(TRACE_INFO, "ComboSelectProcedureRepository - No store procedure with name '%s'.", name.c_str());
+        throw RuntimeException(TRACE_INFO, "ComboSelectProcedureRepository - No store procedure with name '%s'.", name.c_str());
     }
     return this->procedureMap[name];
 }
@@ -239,13 +240,13 @@ void  ComboSelectProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom 
         std::string secondScriptName(buffer);
 
         if (!this->comboRepository.contains(firstScriptName)) {
-            throw opencog::RuntimeException(TRACE_INFO,
+            throw RuntimeException(TRACE_INFO,
                                             "ComboSelectProcedureRepository - No procedure for '%s' in ComboProcedureRepository.",
                                             firstScriptName.c_str());
         }
 
         if (!this->comboRepository.contains(secondScriptName)) {
-            throw opencog::RuntimeException(TRACE_INFO,
+            throw RuntimeException(TRACE_INFO,
                                             "ComboSelectProcedureRepository - No procedure for '%s' in ComboProcedureRepository.",
                                             secondScriptName.c_str());
         }
@@ -261,3 +262,4 @@ void  ComboSelectProcedureRepository::clear()
     this->procedureMap.clear();
 }
 
+}} // ~namespace opencog::Procedure

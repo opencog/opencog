@@ -23,7 +23,7 @@
 
 #include "RunningComboSelectProcedure.h"
 
-using namespace Procedure;
+namespace opencog { namespace Procedure {
 
 RunningComboSelectProcedure::RunningComboSelectProcedure(ComboInterpreter& i,
         const ComboProcedure& f,
@@ -226,3 +226,5 @@ combo::variable_unifier& RunningComboSelectProcedure::getUnifierResult()
 
     return unifier;
 }
+
+}} // ~namespace opencog::Procedure

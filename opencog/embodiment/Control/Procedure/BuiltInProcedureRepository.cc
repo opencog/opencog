@@ -27,8 +27,9 @@
 
 #include "BuiltInProcedureRepository.h"
 
-using namespace Procedure;
-using namespace opencog::pai;
+namespace opencog { namespace Procedure {
+
+using namespace pai;
 
 BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai)
 {
@@ -115,3 +116,5 @@ bool BuiltInProcedureRepository::update(AtomSpace& atomspace)
 
     return true;
 }
+
+}} // ~namespace opencog::Procedure

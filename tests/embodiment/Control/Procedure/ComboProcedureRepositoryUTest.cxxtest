@@ -29,11 +29,11 @@
 #include <sstream>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
+using namespace opencog;
 using namespace Procedure;
 using namespace PetCombo;
 using namespace std;
-using namespace opencog::control;
-using namespace opencog;
+using namespace control;
 
 #define NUMBER_OF_COMBO_TREES 2
 const char* names[NUMBER_OF_COMBO_TREES] = {"andSeq", "orSeq"};

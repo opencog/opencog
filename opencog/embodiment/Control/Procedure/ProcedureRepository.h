@@ -32,10 +32,7 @@
 #include <string>
 #include <map>
 
-using namespace opencog;
-
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 class ProcedureRepository : public SavableRepository
 {
@@ -46,7 +43,7 @@ private:
     ComboSelectProcedureRepository * comboSelectRepository;
 
 public:
-    ProcedureRepository(opencog::pai::PAI&);
+    ProcedureRepository(pai::PAI&);
     virtual ~ProcedureRepository();
     bool contains(const std::string& name) const;
     void remove(const std::string& name); //remove a combo procedure_call
@@ -69,7 +66,6 @@ public:
     void clear();
 };
 
-};
-
+}} // ~namespace opencog::Procedure
 
 #endif /*PROCEDUREREPOSITORY_H_*/

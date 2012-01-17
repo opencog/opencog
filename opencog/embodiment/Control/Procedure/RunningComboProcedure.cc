@@ -33,17 +33,15 @@
 
 #include <opencog/comboreduct/combo/eval.h>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 using namespace combo;
-using namespace opencog;
-using namespace opencog::spatial;
-using namespace opencog::pai;
+using namespace spatial;
+using namespace pai;
 
 RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         const combo::combo_tree& tr,
-        opencog::RandGen& rng,
+        RandGen& rng,
         const std::vector<combo::vertex>& arguments,
         bool dsdp, combo::variable_unifier& vu)
         : _ww(ww), _tr(tr), _it(_tr.begin()), _rng(rng), _hasBegun(false),
@@ -65,7 +63,7 @@ RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
         stream << "cannot copy a combo procedure (" << _tr
         << ") that has begun running!" << std::endl;
 
-        throw opencog::FatalErrorException(TRACE_INFO, "RunningComboProcedure - %s",
+        throw FatalErrorException(TRACE_INFO, "RunningComboProcedure - %s",
                                            stream.str().c_str());
     }
 
@@ -87,12 +85,12 @@ vertex RunningComboProcedure::eval_procedure(combo::combo_tree::iterator it, com
     return *it;
 }
 
-void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
+void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it) throw (ComboException, AssertionException, std::bad_exception)
 {
 
     // sanity checks
     if (!is_procedure_call(*it)) {
-        throw opencog::ComboException(TRACE_INFO,
+        throw ComboException(TRACE_INFO,
                                       "RunningComboProcedure - combo_tree node does not represent a combo procedure call.");
     }
     procedure_call pc = get_procedure_call(*it);
@@ -105,13 +103,13 @@ void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it
     //OC_ASSERT(ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
     if (fixed_arity) {
         if (ap_args != ar) {
-            throw opencog::ComboException(TRACE_INFO,
+            throw ComboException(TRACE_INFO,
                                           "RunningComboProcedure - %s arity differs from no. node's children. Arity: %d, number_of_chindren: %d",
                                           get_procedure_call(*it)->get_name().c_str(), ar, ap_args);
         }
     } else {
         if (ap_args < exp_arity) {
-            throw opencog::ComboException(TRACE_INFO,
+            throw ComboException(TRACE_INFO,
                                           "RunningComboProcedure - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_chindren: %d",
                                           get_procedure_call(*it)->get_name().c_str(), exp_arity, ap_args);
         }
@@ -152,7 +150,7 @@ vertex RunningComboProcedure::eval_indefinite_object(indefinite_object io, combo
 }
 
 void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
-        opencog::AssertionException,
+        AssertionException,
         std::bad_exception)
 {
     //debug log
@@ -229,7 +227,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                     stream << "Conditional should be true or false. Got '"
                     << res << "', failing" << std::endl;
 
-                    throw opencog::ComboException(TRACE_INFO,
+                    throw ComboException(TRACE_INFO,
                                                   "RunningComboProc - %s.",
                                                   stream.str().c_str());
                 }
@@ -369,7 +367,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 expand_procedure_call(_it);
                 continue;
 
-            } catch (opencog::ComboException& e) {
+            } catch (ComboException& e) {
                 logger().error("RunningComboProc - Exception catch when expanding procedure call.");
                 // failed, cancel execution
                 _failed = true;
@@ -475,7 +473,7 @@ bool RunningComboProcedure::beginCompound()
 
         // catch all exceptions here since the treatment will be the same for
         // them, i.e., action execution failed.
-    } catch (opencog::RuntimeException& e) {
+    } catch (RuntimeException& e) {
         logger().error("RunningComboProc - Runtime exception catch when sendSequential_and.");
         _planSent = false;
         _failed = true;
@@ -555,4 +553,4 @@ void RunningComboProcedure::init(const std::vector<vertex>& args)
     combo::set_bindings(_tr, args);
 }
 
-} //~namespace Procedure
+}} // ~namespace opencog::Procedure

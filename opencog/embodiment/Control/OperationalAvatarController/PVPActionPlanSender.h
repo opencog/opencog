@@ -34,9 +34,9 @@
 
 namespace opencog { namespace oac {
 
-using namespace opencog::messaging;
+using namespace messaging;
 
-class PVPActionPlanSender: public opencog::pai::ActionPlanSender
+class PVPActionPlanSender: public pai::ActionPlanSender
 {
 
 private:
@@ -72,7 +72,7 @@ public:
      *
      * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
      */
-    bool sendActionPlan(const opencog::pai::ActionPlan& actionPlan);
+    bool sendActionPlan(const pai::ActionPlan& actionPlan);
 
     /**
      * Sends a specific(atomic) action from plan to the target virtual world.
@@ -84,7 +84,7 @@ public:
      *
      * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
      */
-    bool sendSpecificActionFromPlan(const opencog::pai::ActionPlan& actionPlan,
+    bool sendSpecificActionFromPlan(const pai::ActionPlan& actionPlan,
             unsigned int actionSequenceNum);
 
     /**

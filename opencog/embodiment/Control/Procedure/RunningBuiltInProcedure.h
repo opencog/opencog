@@ -27,14 +27,13 @@
 #include "BuiltInProcedure.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 class RunningBuiltInProcedure
 {
 
 public:
-    RunningBuiltInProcedure(const opencog::pai::PAI& _pai, const BuiltInProcedure& _p, const std::vector<combo::vertex>& _arguments);
+    RunningBuiltInProcedure(const pai::PAI& _pai, const BuiltInProcedure& _p, const std::vector<combo::vertex>& _arguments);
     ~RunningBuiltInProcedure();
 
     void run();
@@ -45,7 +44,7 @@ public:
 
 protected:
 
-    const opencog::pai::PAI& pai;
+    const pai::PAI& pai;
     const BuiltInProcedure& p;
     bool finished;
     bool failed;
@@ -53,6 +52,6 @@ protected:
     std::vector<combo::vertex> arguments;
 };
 
-} //~namespace Procedure
+}} // ~namespace opencog::Procedure
 
 #endif

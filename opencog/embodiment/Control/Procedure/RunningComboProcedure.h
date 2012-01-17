@@ -49,10 +49,10 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapper.h>
 
-namespace Procedure {
+namespace opencog { namespace Procedure {
 
-using namespace opencog::pai;
-using namespace opencog::world;
+using namespace pai;
+using namespace world;
 
 struct RunningComboProcedure : public combo::Evaluator {
 
@@ -76,7 +76,7 @@ struct RunningComboProcedure : public combo::Evaluator {
 
     //construct an rp from a worldwrapper and a tree
     RunningComboProcedure(WorldWrapperBase& ww, const combo::combo_tree& tr,
-                          opencog::RandGen& rng,
+                          RandGen& rng,
                           const std::vector<combo::vertex>& arguments,
                           bool doesSendDefinitePlan = true,
                           combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
@@ -87,7 +87,7 @@ struct RunningComboProcedure : public combo::Evaluator {
     //each call to cycle executes a single action plan (if ready)
     //throws if execution of the action plan (PAI::sendActionPlan(ActionPlanID)) fails
     //TODO : above is not true anymore, find the equivalent
-    void cycle() throw(ActionPlanSendingFailure, opencog::AssertionException, std::bad_exception);
+    void cycle() throw(ActionPlanSendingFailure, AssertionException, std::bad_exception);
 
     //terminate - prevent future plans from being evaluated,
     //sets result to null_vertex - note that this is not the same as failure
@@ -160,7 +160,7 @@ protected:
      */
     sib_it _it;
 
-    opencog::RandGen& _rng;
+    RandGen& _rng;
 
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;
@@ -186,7 +186,7 @@ protected:
 
     /// for evaluating procedures inplace
     void expand_procedure_call(combo::combo_tree::iterator) throw
-        (opencog::ComboException, opencog::AssertionException, std::bad_exception);
+        (ComboException, AssertionException, std::bad_exception);
     void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
 
 private:
@@ -216,6 +216,6 @@ private:
     bool finished;
 };
 
-} //~namespace Procedure
+}} // ~namespace opencog::Procedure
 
 #endif

@@ -23,9 +23,9 @@
 
 #include "ProcedureRepository.h"
 
-using namespace Procedure;
+namespace opencog { namespace Procedure {
 
-ProcedureRepository::ProcedureRepository(opencog::pai::PAI& pai) :
+ProcedureRepository::ProcedureRepository(pai::PAI& pai) :
         builtInRepository(*(new BuiltInProcedureRepository(pai)))
 {
 
@@ -125,3 +125,5 @@ void ProcedureRepository::clear()
     comboRepository.clear();
     comboSelectRepository->clear();
 }
+
+}} // ~namespace opencog::Procedure

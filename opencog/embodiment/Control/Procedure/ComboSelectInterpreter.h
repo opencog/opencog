@@ -33,20 +33,19 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/variable_unifier.h>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
 class ComboSelectInterpreter
 {
 
 public:
 
-    ComboSelectInterpreter(opencog::pai::PAI& pai, opencog::RandGen& rng);
-    ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng);
+    ComboSelectInterpreter(pai::PAI& pai, RandGen& rng);
+    ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, RandGen& rng);
     ~ComboSelectInterpreter();
 
     // from idle task
-    void run(opencog::messaging::NetworkElement *ne);
+    void run(messaging::NetworkElement *ne);
 
     /**
      * add a ComboSelect procedure to be run by the interpreter.
@@ -114,6 +113,8 @@ private:
     ComboInterpreter * comboInterpreter;
 
 }; // class
-}  // namespace
 
+} // ~namespace Procedure
+} // ~namespace opencog
+        
 #endif

@@ -48,12 +48,12 @@
  */
 //#define DELETE_ATOMSPACE
 
+namespace opencog { namespace oac {
+
 using namespace Procedure;
 using namespace PetCombo;
-using namespace opencog;
-using namespace opencog::pai;
-using namespace opencog::oac;
-using opencog::learningserver::messages::SchemaMessage;
+using namespace pai;
+using learningserver::messages::SchemaMessage;
 
 BaseServer* OAC::createInstance()
 {
@@ -765,7 +765,7 @@ Pet & OAC::getPet()
 }
 
 // Static/Shared random number generator
-boost::shared_ptr<RandGen> OAC::rngPtr( new opencog::MT19937RandGen((unsigned long) time(NULL)) );
+boost::shared_ptr<RandGen> OAC::rngPtr( new MT19937RandGen((unsigned long) time(NULL)) );
 
 RandGen & OAC::getRandGen()
 {
@@ -787,7 +787,7 @@ PVPActionPlanSender & OAC::getPlanSender()
     return *planSender;
 }
 
-bool OAC::processNextMessage(opencog::messaging::Message *msg)
+bool OAC::processNextMessage(messaging::Message *msg)
 {
     using namespace combo;
 
@@ -825,7 +825,7 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
         // @note:
         // The message type RAW is used for unity environment to handle dialog.
 		// If you use multiverse, just ignore this.
-        if(msg->getType() == opencog::messaging::Message::RAW) {
+        if(msg->getType() == messaging::Message::RAW) {
 			// message from OC Avatar, forward it to RelEx server.
             StringMessage rawMessage( getID(),
                                       config().get("RELEX_SERVER_ID"), 
@@ -928,7 +928,7 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
         switch (sm->getType()) {
             // note: assuming arity==0 for now - Moshe
 
-        case opencog::messaging::Message::SCHEMA: {
+        case messaging::Message::SCHEMA: {
             // learning is finished, set pet to PLAYING state. This
             // design ensure that the learning info will not be lost
             // until a learned schema is received
@@ -942,7 +942,7 @@ bool OAC::processNextMessage(opencog::messaging::Message *msg)
         }
         break;
 
-        case opencog::messaging::Message::CANDIDATE_SCHEMA: {
+        case messaging::Message::CANDIDATE_SCHEMA: {
             // Add schema to RuleEngine learned schemata ...
 //            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
 
@@ -1001,3 +1001,5 @@ const std::string OAC::getPath(const std::string& petId, const std::string& file
 
     return path;
 }
+
+}} // ~namespace opencog::oac

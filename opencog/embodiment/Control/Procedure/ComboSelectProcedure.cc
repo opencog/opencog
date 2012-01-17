@@ -23,7 +23,7 @@
 
 #include "ComboSelectProcedure.h"
 
-using namespace Procedure;
+namespace opencog { namespace Procedure {
 
 ComboSelectProcedure::ComboSelectProcedure()
 {
@@ -87,3 +87,4 @@ const std::string& ComboSelectProcedure::getSecondScriptName() const
     return this->secondScriptName;
 }
 
+}} // ~namespace opencog::Procedure

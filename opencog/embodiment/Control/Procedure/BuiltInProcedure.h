@@ -32,9 +32,10 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <list>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
 
+using namespace combo;
+        
 class BuiltInProcedure : public GeneralProcedure
 {
 
@@ -46,7 +47,7 @@ protected:
 public:
     virtual ~BuiltInProcedure() {}
 
-    virtual opencog::combo::vertex execute(const std::vector<opencog::combo::vertex>& arguments) const = 0;
+    virtual vertex execute(const std::vector<vertex>& arguments) const = 0;
 
     ProcedureType getType() const {
         return BUILT_IN;
@@ -82,6 +83,6 @@ public:
     }
 };
 
-}
+}} // ~namespace opencog::Procedure
 
 #endif /*BUILTINPROCEDURE_H_*/

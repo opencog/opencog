@@ -30,11 +30,11 @@
 #include "RunningProcedureId.h"
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
-namespace Procedure
-{
+namespace opencog { namespace Procedure {
+
 using namespace boost;
-using namespace opencog::pai;
-using opencog::messaging::NetworkElement;
+using namespace pai;
+using messaging::NetworkElement;
 
 void ProcedureInterpreter::run(NetworkElement *ne)
 {
@@ -80,12 +80,12 @@ ProcedureInterpreter::ProcedureInterpreter(PAI& p) : _pai(&p)
 {
     //initialize the random generator
     unsigned long rand_seed;
-    if (opencog::config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
+    if (config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         rand_seed = 0;
     } else {
         rand_seed = time(NULL);
     }
-    rng = new opencog::MT19937RandGen(rand_seed);
+    rng = new MT19937RandGen(rand_seed);
     logger().info("Created random number generator (%p) for ComboInterpreter with seed %lu", rng, rand_seed);
     comboInterpreter = new ComboInterpreter(*_pai, *rng);
     comboSelectInterpreter = new ComboSelectInterpreter(*_pai, *rng);
@@ -287,7 +287,7 @@ ComboSelectInterpreter& ProcedureInterpreter::getComboSelectInterpreter() const
     return *comboSelectInterpreter;
 }
 
-
-} //~namespace Procedure
+} // ~namespace Procedure
+} // ~namespace opencog
 
 
