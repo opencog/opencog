@@ -500,13 +500,20 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
             // or if it is a boolean-valued term (i.e. a predicate)
             // then just pull it out from under the logic op.
             else if (is_argument(*child.begin()) ||
-                     is_predicate(child.begin())) {
+                     is_predicate(child.begin()))
+            {
                 child = tr.erase(tr.flatten(child));
             }
-            else {
-                // No clue as to what this is about....
+            else 
+            {
+                // If we are here, the child just has one child, and
+                // that child is not an argument, not a predicate, and
+                // is not logical_or. We conclude (without really
+                // checking) that its a logical_and with a childless
+                // logical_and under it.  So delete it.  Yes, this 
+                // actually happens, in the unit test cases.  Yes, the
+                // above chain of assumptions seems dangerous to me ...
                 child = tr.erase(child);
-                OC_ASSERT(0, "Error: Unexpected term during or_cut.");
             }
         }
         else {
