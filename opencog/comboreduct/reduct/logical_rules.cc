@@ -48,12 +48,14 @@ void insert_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
 
 void remove_unary_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
+std::cout <<"duude enter unary "<<tr<<std::endl;
     if ((*it == id::logical_and || *it == id::logical_or)
         && it.has_one_child())
     {
         *it = *it.begin();
         tr.erase(tr.flatten(it.begin()));
     }
+std::cout <<"duude exit  unary "<<tr<<std::endl;
 }
 
 void remove_dangling_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
@@ -434,15 +436,11 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
                     }
                 }
 
-                // Allow predicates; allow negated predicates, complain
-                // about anything else.
-                else if (is_predicate(gchild.begin())) {
-                   pre_it cit = gchild.begin();
-                   if (*cit == id::logical_not)
-                      cit = cit.begin();
-                   contin_reduce(tr, cit, parent.ignore_ops, parent.rng);
-                }
-                else if (!is_argument(*gchild.begin()))
+                // Allow predicates; allow arguments, complain about
+                // anything else. Predicates will be reduced below;
+                // we don't need to reduce them here.
+                else if (!is_predicate(gchild.begin()) && 
+                         !is_argument(*gchild.begin()))
                 {
                     std::stringstream ss;
                     ss << "Logical reduction: unexpected operator: ";
@@ -453,8 +451,20 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
                 continue;
             }
         }
-        else if (!is_predicate(gchild) &&
-                 !is_argument(*gchild))
+        else if (is_predicate(gchild))
+        {
+               pre_it cit = gchild;
+               if (*cit == id::logical_not)
+                  cit = cit.begin();
+
+               // cit now points to a the predicate, with not
+               // stripped off. cit.begin() points to the
+               // contin-valued expression.
+               cit = cit.begin();
+               if (!is_argument(*cit))
+                   contin_reduce(tr, cit, parent.ignore_ops, parent.rng);
+        }
+        else if (!is_argument(*gchild))
         {
             std::stringstream ss;
             ss << "Logical reduction: unexpected operator: ";
@@ -723,6 +733,7 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
                 child_command.insert(sib.begin());
             }
         }
+
         switch(reduce(child, dominant, child_command))
         {
         case Delete:
