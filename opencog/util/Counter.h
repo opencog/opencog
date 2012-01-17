@@ -81,6 +81,20 @@ struct Counter : public std::map<T, CT>,
     /// scalar and Counter, etc...
 };
 
+template<typename T, typename CT>
+std::ostream& operator<<(std::ostream& out, const Counter<T, CT>& c) {
+    typedef Counter<T, CT> counter_t;
+    out << "{";
+    for(typename counter_t::const_iterator it = c.begin(); it != c.end();) {
+        out << it->first << ": " << it->second;
+        ++it;
+        if(it != c.end())
+            out << ", ";
+    }
+    out << "}";
+    return out;
+}
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_COUNTER_H
