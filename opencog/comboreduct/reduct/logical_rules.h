@@ -42,10 +42,34 @@ struct insert_ands : public crule<insert_ands>
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
+/// Remove any logical operators that have only one child.
+/// (i.e. raise up the child in the tree).
 struct remove_unary_junctors : public crule<remove_unary_junctors>
 {
-    remove_unary_junctors() : crule<remove_unary_junctors>::crule("remove_unary_junctors") {}
+    remove_unary_junctors()
+        : crule<remove_unary_junctors>::crule("remove_unary_junctors") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
+};
+
+/// Simplify any predicate terms that are found in the tree.
+///
+/// Predicate terms are boolean-valued functions whose arguments
+/// are not boolen.  Currently, the only predicate we have is 
+/// greater_than_zero. This rule will simplify the contin-valued 
+/// arguments of all such predicates.
+///
+struct simplify_predicates : public crule<simplify_predicates>
+{
+    simplify_predicates(const vertex_set& ignore_ops_,
+                        opencog::RandGen& rng_)
+        : crule<simplify_predicates>::crule("simplify_predicates"),
+          ignore_ops(ignore_ops_), rng(rng_)
+    {}
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
+
+protected:
+    const vertex_set& ignore_ops;
+    opencog::RandGen& rng;
 };
 
 /// Remove operators 'and', 'or' and 'not' that have no argument. Note
@@ -142,21 +166,14 @@ struct reduce_ands : public crule<reduce_ands>
 //
 struct subtree_to_enf : public crule<subtree_to_enf>
 {
-    subtree_to_enf(const vertex_set& ignore_ops_, opencog::RandGen& rng_)
-        : crule<subtree_to_enf>::crule("subtree_to_enf"),
-        ignore_ops(ignore_ops_), rng(rng_)
-        {}
+    subtree_to_enf()
+        : crule<subtree_to_enf>::crule("subtree_to_enf") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const
     {
-        reduce_to_enf(*this, tr, it);
+        reduce_to_enf(tr, it);
     }
 
 protected:
-    // ignore_ops and rng are needed for contin reduction inside of
-    // predicate terms.
-    const vertex_set& ignore_ops;
-    opencog::RandGen& rng;
-
     struct reduce_to_enf
     {
         enum Result { Delete, Disconnect, Keep };
@@ -168,11 +185,9 @@ protected:
 
         combo_tree& tr;
         Comp comp;
-        const subtree_to_enf &parent;
 
-        reduce_to_enf(const subtree_to_enf &p,
-                      combo_tree& tr_, combo_tree::iterator it)
-            : tr(tr_), parent(p)
+        reduce_to_enf(combo_tree& tr_, combo_tree::iterator it)
+            : tr(tr_)
         {
              (*this)(it);
         }

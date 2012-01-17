@@ -59,10 +59,11 @@ logical_reduction::logical_reduction(const vertex_set& ignore_ops,
 
     // Can't be static, due to ignore_ops and rng arguments
     medium = new
-        sequential(downwards(reduce_nots(), id::boolean_type),
+        sequential(downwards(simplify_predicates(ignore_ops, rng), id::boolean_type),
+                   downwards(reduce_nots(), id::boolean_type),
                    
                    iterative(sequential(pre_subtree_to_enf,
-                                        subtree_to_enf(ignore_ops, rng),
+                                        subtree_to_enf(),
                                         post_subtree_to_enf)),
                    downwards(remove_unary_junctors(), id::boolean_type),
                    "medium");

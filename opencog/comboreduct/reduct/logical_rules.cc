@@ -46,6 +46,21 @@ void insert_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
     }
 }
 
+void simplify_predicates::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (!is_predicate(it)) return;
+
+    if (*it == id::logical_not)
+          it = it.begin();
+
+    // it now points to a the predicate, with any leading logical not
+    // stripped off. it.begin() points to the contin-valued expression.
+    it = it.begin();
+    if (is_argument(*it)) return;
+
+    contin_reduce(tr, it, ignore_ops, rng);
+}
+
 void remove_unary_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if ((*it == id::logical_and || *it == id::logical_or)
@@ -449,20 +464,8 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
                 continue;
             }
         }
-        else if (is_predicate(gchild))
-        {
-               pre_it cit = gchild;
-               if (*cit == id::logical_not)
-                  cit = cit.begin();
-
-               // cit now points to a the predicate, with not
-               // stripped off. cit.begin() points to the
-               // contin-valued expression.
-               cit = cit.begin();
-               if (!is_argument(*cit))
-                   contin_reduce(tr, cit, parent.ignore_ops, parent.rng);
-        }
-        else if (!is_argument(*gchild))
+        else if (!is_argument(*gchild) &&
+                 !is_predicate(gchild))
         {
             std::stringstream ss;
             ss << "Logical reduction: unexpected operator: ";
@@ -497,7 +500,7 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
             // or if it is a boolean-valued term (i.e. a predicate)
             // then just pull it out from under the logic op.
             else if (is_argument(*child.begin()) ||
-                    is_predicate(child.begin())) {
+                     is_predicate(child.begin())) {
                 child = tr.erase(tr.flatten(child));
             }
             else {
@@ -505,20 +508,6 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
                 child = tr.erase(child);
                 OC_ASSERT(0, "Error: Unexpected term during or_cut.");
             }
-        }
-        else if (is_predicate(child)) {
-            pre_it cit = child;
-            if (*cit == id::logical_not)
-                cit = cit.begin();
-
-            // cit now points to a the predicate, with not
-            // stripped off. cit.begin() points to the
-            // contin-valued expression.
-            cit = cit.begin();
-            if (!is_argument(*cit))
-                contin_reduce(tr, cit, parent.ignore_ops, parent.rng);
-
-            ++child;
         }
         else {
             ++child;

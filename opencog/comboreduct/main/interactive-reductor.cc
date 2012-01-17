@@ -52,12 +52,11 @@ typedef ref_rule_map::iterator ref_rule_map_it;
 const rule* select_rule(string rule_ref_str)
 {
     static MT19937RandGen rnd = MT19937RandGen(0);
- 
     static opencog::combo::vertex_set ignore_ops;
 
     const static ref_rule_map ref_rules = 
         map_list_of
-        //Logical rules
+        // Logical rules
         ("IA", make_pair((rule*)new downwards(insert_ands()),
                          "insert_ands"))
         ("RUJ", make_pair(new downwards(remove_unary_junctors()),
@@ -72,9 +71,13 @@ const rule* select_rule(string rule_ref_str)
                          "reduce_ors"))
         ("AND", make_pair(new downwards(reduce_ands()),
                          "reduce_ands"))
-        ("ENF", make_pair(new subtree_to_enf(ignore_ops, rnd),
+        ("ENF", make_pair(new subtree_to_enf(),
                           "subtree_to_enf"))
-        //Contin rules
+
+        // Contin buried in logical exprs.
+        ("PRD", make_pair(new simplify_predicates(ignore_ops, rnd),
+                          "simplify_predicates"))
+        // Contin rules
         ("PZ", make_pair(new downwards(reduce_plus_zero()),
                           "reduce_plus_zero"))
         ("TOZ", make_pair(new downwards(reduce_times_one_zero()),
@@ -101,7 +104,7 @@ const rule* select_rule(string rule_ref_str)
                          "reduce_exp_div"))
         ("SIN", make_pair(new downwards(reduce_sin()),
                           "reduce_sin"))
-        //General rules
+        // General rules
         ("LEV", make_pair(new downwards(level()),
                           "level"))
         ("EC", make_pair(new upwards(eval_constants(rnd)),
