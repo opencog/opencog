@@ -33,30 +33,33 @@ namespace opencog { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
-//ensure that all arguments and or nodes have an and node as their parent.
-//this is important for other normalizations to be able to catch all cases
-void insert_ands::operator()(combo_tree& tr,combo_tree::iterator it) const
+// Ensure that all arguments and 'or' nodes have an 'and' node as their
+// parent.  This is needed, so that other normalizations can catch all
+// cases.
+void insert_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if ((is_argument(*it) || *it==id::logical_or) &&
-        (!tr.is_valid(tr.parent(it)) || *tr.parent(it)!=id::logical_and)) {
-        tr.prepend_child(it,*it);
+    if ((is_argument(*it) || *it == id::logical_or) &&
+        (!tr.is_valid(tr.parent(it)) || *tr.parent(it) != id::logical_and)) {
+        tr.prepend_child(it, *it);
         *it=id::logical_and;
-        tr.reparent(it.begin(),++it.begin(),it.end());
+        tr.reparent(it.begin(), ++it.begin(), it.end());
     }
 }
 
-void remove_unary_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const
+void remove_unary_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if ((*it==id::logical_and || *it==id::logical_or) && it.has_one_child()) {
-        *it=*it.begin();
+    if ((*it == id::logical_and || *it == id::logical_or)
+        && it.has_one_child())
+    {
+        *it = *it.begin();
         tr.erase(tr.flatten(it.begin()));
     }
 }
 
-void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const
+void remove_dangling_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    for(sib_it sib=it.begin();sib!=it.end();)
-        if((*sib==id::logical_and || *sib==id::logical_or || *sib==id::logical_not)
+    for (sib_it sib = it.begin(); sib != it.end(); )
+        if ((*sib == id::logical_and || *sib == id::logical_or || *sib==id::logical_not)
            && sib.is_childless())
             tr.erase(sib++);
         else
@@ -69,33 +72,42 @@ void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it
 /// and(or X) -> and(X), or(and X) -> or(X)
 void eval_logical_identities::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if (*it==id::logical_and) {
-        for (sib_it sib=it.begin();sib!=it.end();) {
-            if ((*sib==id::logical_or && sib.is_childless()) ||
-                *sib==id::logical_true) {
-                sib=tr.erase(sib);
-            } else if (*sib==id::logical_false) {
-                *it=*sib;
+    if (*it == id::logical_and) {
+        for (sib_it sib = it.begin(); sib != it.end(); ) {
+            if ((*sib == id::logical_or && sib.is_childless())
+                || *sib == id::logical_true)
+            {
+                sib = tr.erase(sib);
+            }
+            else if (*sib == id::logical_false) {
+                *it = *sib;
                 tr.erase_children(it);
                 break;
             } else {
                 ++sib;
             }
         }
-    } else if (*it==id::logical_or) {
+    }
+    else if (*it == id::logical_or) {
         if (it.has_one_child()) {
-            *it=*it.begin();
+            *it = *it.begin();
             tr.erase(tr.flatten(it.begin()));
-        } else {
-            for (sib_it sib=it.begin();sib!=it.end();) {
-                if ((*sib==id::logical_and && sib.is_childless()) ||
-                    *sib==id::logical_false) {
-                    sib=tr.erase(sib);
-                } else if (*sib==id::logical_true) {
-                    *it=*sib;
+        }
+        else {
+            for (sib_it sib = it.begin(); sib != it.end(); ) {
+                if ((*sib == id::logical_and && sib.is_childless())
+                    || *sib == id::logical_false)
+                {
+                    sib = tr.erase(sib);
+                }
+                else if (*sib == id::logical_true)
+                {
+                    *it = *sib;
                     tr.erase_children(it);
                     break;
-                } else {
+                }
+                else
+                {
                     ++sib;
                 }
             }
@@ -255,51 +267,52 @@ void reduce_ors::operator()(combo_tree& tr, combo_tree::iterator it) const
 /// Also, true&&X -> X, false&&X -> false
 void reduce_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if (*it!=id::logical_and)
+    if (*it != id::logical_and)
         return;
     
-    //first construct a mapping between items and ints,
-    //and convert all conjunctions to this format
+    // First construct a mapping between items and ints,
+    // and convert all conjunctions to this format.
     nf_mapper<vertex> mapper;
-    nf f(mapper.add_cnf(tr.begin(it),tr.end(it)));
-    int sz=number_of_literals(f);
+    nf f(mapper.add_cnf(tr.begin(it), tr.end(it)));
+    int sz = number_of_literals(f);
     
-    //negate
-    for (nf::iterator c=f.begin();c!=f.end();++c) {
+    // negate
+    for (nf::iterator c = f.begin(); c != f.end(); ++c) {
         clause tmp;
-        std::transform(c->begin(),c->end(),std::inserter(tmp,tmp.begin()),
+        std::transform(c->begin(), c->end(), std::inserter(tmp, tmp.begin()),
                        std::negate<int>());
         *c=tmp;
     }
     
-    //before this method will work, need to eliminate A&&!A clauses
-    f.remove_if(bind(tautology,_1));
+    // Before this method will work, need to eliminate A&&!A clauses.
+    f.remove_if(bind(tautology, _1));
     
     if (f.empty()) { //tautological expression
         tr.erase_children(it);
-        *it=id::logical_true;
+        *it = id::logical_true;
         return;
     }
     
-    //remove clauses which are supersets of others
-    pairwise_erase_if(f,bind(subset_eq,_1,_2));
+    // Remove clauses which are supersets of others.
+    pairwise_erase_if(f, bind(subset_eq, _1, _2));
     
-    //create implications (and remove subsets)
-    for (nf::iterator c1=f.begin();c1!=f.end();++c1) {
-        for (nf::iterator c2=f.begin();c2!=c1;++c2) {
+    // Create implications (and remove subsets).
+    for (nf::iterator c1 = f.begin(); c1 != f.end(); ++c1) {
+        for (nf::iterator c2 = f.begin(); c2 != c1; ++c2) {
             nf impls;
-            implications(*c1,*c2,std::back_inserter(impls));
-            for (nf::const_iterator impl=impls.begin();
-                 impl!=impls.end();++impl) {
-                for (nf::iterator c=f.begin();c!=f.end();)
-                    if (c!=c1 && c!=c2 && subset_eq(*impl,*c))
-                        c=f.erase(c);
+            implications(*c1, *c2, std::back_inserter(impls));
+            for (nf::const_iterator impl = impls.begin();
+                 impl != impls.end(); ++impl)
+            {
+                for (nf::iterator c = f.begin(); c != f.end(); )
+                    if (c != c1 && c != c2 && subset_eq(*impl, *c))
+                        c = f.erase(c);
                     else
                         ++c;
-                if (subset(*impl,*c1))
-                    *c1=*impl;
-                if (subset(*impl,*c2))
-                    *c2=*impl;
+                if (subset(*impl, *c1))
+                    *c1 = *impl;
+                if (subset(*impl, *c2))
+                    *c2 = *impl;
             }
         }
     }
@@ -423,8 +436,13 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
 
                 // Allow predicates; allow negated predicates, complain
                 // about anything else.
-                else if (!is_argument(*gchild.begin()) &&
-                         !is_predicate(gchild.begin()))
+                else if (is_predicate(gchild.begin())) {
+                   pre_it cit = gchild.begin();
+                   if (*cit == id::logical_not)
+                      cit = cit.begin();
+                   // contin_reduce(tr, cit, ignore_ops, rng);
+                }
+                else if (!is_argument(*gchild.begin()))
                 {
                     std::stringstream ss;
                     ss << "Logical reduction: unexpected operator: ";
