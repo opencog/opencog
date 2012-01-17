@@ -29,10 +29,10 @@
 namespace opencog {
 
 /**
- * Modify a counter to be a rank. Ties ranks are averaged.
+ * Return a rank given a counter. Ties ranks are averaged.
  */
 template<typename Key, typename FloatT>
-Counter<Key, FloatT> ranking(Counter<Key, FloatT>& counter) {
+Counter<Key, FloatT> ranking(const Counter<Key, FloatT>& counter) {
     Counter<Key, FloatT> res;
     FloatT lrank = 1;
     foreach(const auto& v, counter) {
