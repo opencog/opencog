@@ -36,6 +36,7 @@
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/KLD.h>
+#include <opencog/util/MannWhitneyU.h>
 
 namespace opencog { namespace moses {
 
@@ -141,10 +142,8 @@ discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
     // precompute weights
     multiset<size_t> cs(classes.begin(), classes.end());
     if(weighted_accuracy)
-        for(size_t i = 0; i < weights.size(); ++i) {
+        for(size_t i = 0; i < weights.size(); ++i)
             weights[i] = classes.size() / (float)(weights.size() * cs.count(i));
-            // std::cout << "i = " << i << " weight = " << weights[i] << std::endl;
-        }
     // precompute Occam's razor coefficient
     occam = p > 0 && p < 0.5;
     if(occam)
@@ -255,8 +254,16 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
                                                            float alphabet_size,
                                                            float stdev,
                                                            RandGen& _rng,
+                                                           weight_t kld_w_,
+                                                           weight_t skewness_w_,
+                                                           weight_t stdU_w_,
+                                                           weight_t skew_U_w_,
+                                                           weight_t log_entropy_w_,
                                                            bool decompose_kld_)
-    : ctable(ctable_), rng(_rng), decompose_kld(decompose_kld_)
+    : ctable(ctable_), rng(_rng),
+      kld_w(kld_w_), skewness_w(skewness_w_), stdU_w(stdU_w_),
+      skew_U_w(skew_U_w_), log_entropy_w(log_entropy_w_),
+      decompose_kld(decompose_kld_)
 {
     // initialize Occam's razor
     occam = stdev > 0;
@@ -295,8 +302,8 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     behavioral_score bs;
     if (pred_entropy > entropy_threshold) {
         // filter the output according to tr
-        pdf_t pred_counter;     // map obvervation to occurence
-                                // conditioned by predicate truth
+        counter_t pred_counter;     // map obvervation to occurence
+                                    // conditioned by predicate truth
         boost::for_each(ctable | map_values, pred_ot,
                         [&](const CTable::counter_t& c, const vertex& v) {
                             if (vertex_to_bool(v)) {
@@ -307,11 +314,11 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
         logger().fine("pred_counter.size() = %u", pred_counter.size());
 
         // compute KLD
-        if(decompose_kld)
-            // compute KLD(pdf, f_output) per component
+        if(decompose_kld) {
             klds(pred_counter, back_inserter(bs));
-        else
-            bs.push_back(klds(pred_counter));
+            boost::transform(bs, bs.begin(), kld_w * arg1);
+        } else
+            bs.push_back(kld_w * klds(pred_counter));
 
         // gather statistics with a boost accumulator
         accumulator_t acc;
@@ -320,13 +327,17 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
         
         // push the absolute difference between the unconditioned
         // skewness and conditioned one
-        contin_t diff_skewness = weighted_skewness(acc) - skewness;
-        bs.push_back(abs(diff_skewness));
+        score_t diff_skewness = weighted_skewness(acc) - skewness;
+        bs.push_back(skewness_w * abs(diff_skewness));
 
-        // // push the product of the relative differences of the shift
-        // // and the skewness (so that if both go in the same direction
-        // // the value if positive, and negative otherwise)
-        // bs.push_back(diff_shift * diff_skewness);
+        // compute the standardized Mann–Whitney U
+        score_t stdU = standardizedMannWhitneyU(counter, pred_counter);
+        bs.push_back(stdU_w * stdU);
+        
+        // push the product of the relative differences of the shift
+        // (stdU) and the skewness (so that if both go in the same
+        // direction the value if positive, and negative otherwise)
+        bs.push_back(skew_U_w * stdU * diff_skewness);
         
         // add log entropy, this is completely heuristic, no
         // justification except that the log of the entropy is gonna
@@ -334,7 +345,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
         // here what we really need, a perhaps something like 1 -
         // p-value, or some form of indefinite TV confidence on the
         // calculation of KLD.
-        bs.push_back(log(pred_entropy));
+        bs.push_back(log_entropy_w * log(pred_entropy));
 
         // add the Occam's razor feature
         if(occam)

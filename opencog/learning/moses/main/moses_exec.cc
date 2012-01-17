@@ -174,7 +174,7 @@ combo_tree str_to_combo_tree(const string& combo_str)
 //* return true iff the problem is based on data file
 bool datafile_based_problem(const string& problem)
 {
-    return problem == it || problem == ann_it || problem == kl;
+    return problem == it || problem == ann_it || problem == ip;
 }
 
 //* return true iff the problem is based on a combo tree
@@ -288,10 +288,15 @@ int moses_exec(int argc, char** argv)
     double pop_size_ratio;
     score_t max_score;
     double max_dist_ratio;
-    // hc_param
-    bool hc_terminate_if_improvement;
     // continuous optimization
     vector<contin_t> discretize_thresholds;
+    double ip_kld_weight;
+    double ip_skewness_weight;
+    double ip_stdU_weight;
+    double ip_skew_U_weight;
+    double ip_log_entropy_weight;
+    // hc_param
+    bool hc_terminate_if_improvement;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
@@ -340,17 +345,20 @@ int moses_exec(int argc, char** argv)
          str(format("Problem to solve, supported problems are:\n"
                     "%s, regression based on input table\n"
                     "%s, search interesting patterns, where interestingness"
-                    " is defined in terms of maximizing the Kullback-Leibler"
+                    " is defined in terms of several features such as maximizing"
+                    " the Kullback-Leibler"
                     " divergence between the distribution of the outputs and"
                     " that same distribution in the context of the pattern"
-                    " being true.\n"
+                    " being true."
+                    " Or the difference of skewnesses between the 2 distributions"
+                    " and other things being experimented.\n"
                     "%s, regression based on input table using ann\n"
                     "%s, regression based on combo program\n"
                     "%s, even parity\n"
                     "%s, disjunction\n"
                     "%s, multiplex\n"
                     "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
-             % it % kl % ann_it % cp % pa % dj % mux % sr).c_str())
+             % it % ip % ann_it % cp % pa % dj % mux % sr).c_str())
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          str(format("Combo program to learn, used when the problem"
@@ -487,13 +495,28 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(include_dominated_opt).c_str(),
          value<bool>(&include_dominated)->default_value(false),
          "Include dominated candidates (according behavioral score) when merging candidates in the metapopulation. Faster merging but results in a very large metapopulation.\n")
-        (opt_desc_str(hc_terminate_if_improvement_opt).c_str(),
-         value<bool>(&hc_terminate_if_improvement)->default_value(true),
-         "Hillclimbing parameter. If 1 then deme search terminates when an improvement is found, if 0 it keeps searching until another termination condition is met.\n")
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t> >(&discretize_thresholds),
          "If the domain is continuous, discretize the target feature. A unique used of that option produces 2 classes, x < thresold and x >= threshold. The option can be used several times (n-1) to produce n classes and the thresholds are automatically sorted.\n")
-        ;
+        (opt_desc_str(hc_terminate_if_improvement_opt).c_str(),
+         value<bool>(&hc_terminate_if_improvement)->default_value(true),
+         str(format("Hillclimbing parameter (%s). If 1 then deme search terminates when an improvement is found, if 0 it keeps searching until another termination condition is met.\n") % hc).c_str())
+        (opt_desc_str(ip_kld_weight_opt).c_str(),
+         value<double>(&ip_kld_weight)->default_value(1.0),
+         str(format("Interesting patterns (%s). Weight of the KLD.\n") % ip).c_str())
+        (opt_desc_str(ip_skewness_weight_opt).c_str(),
+         value<double>(&ip_skewness_weight)->default_value(1.0),
+         str(format("Interesting patterns (%s). Weight of skewness.\n") % ip).c_str())
+        (opt_desc_str(ip_stdU_weight_opt).c_str(),
+         value<double>(&ip_stdU_weight)->default_value(1.0),
+         str(format("Interesting patterns (%s). Weight of stdU.\n") % ip).c_str())
+        (opt_desc_str(ip_skew_U_weight_opt).c_str(),
+         value<double>(&ip_skew_U_weight)->default_value(1.0),
+         str(format("Interesting patterns (%s). Weight of skew_U.\n") % ip).c_str()) 
+        (opt_desc_str(ip_log_entropy_weight_opt).c_str(),
+         value<double>(&ip_log_entropy_weight)->default_value(1.0),
+         str(format("Interesting patterns (%s). Weight of log entropy.\n") % ip).c_str())
+       ;
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -721,8 +744,8 @@ int moses_exec(int argc, char** argv)
             }
         }
 
-        // KL divergence -- find interesting patterns
-        else if (problem == kl) {
+        // Find interesting patterns
+        else if (problem == ip) {
             // it assumes that the inputs are boolean and the output is contin
             type_tree ettt = gen_signature(id::boolean_type,
                                            id::contin_type, arity);
@@ -743,7 +766,13 @@ int moses_exec(int argc, char** argv)
             if (tables.size() > 1) {
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables) {
-                    bscores.push_back(new BScore(ctable, as, stdev, rng));
+                    bscores.push_back(new BScore(ctable, as, stdev,
+                                                 rng,
+                                                 ip_kld_weight,
+                                                 ip_skewness_weight,
+                                                 ip_stdU_weight,
+                                                 ip_skew_U_weight,
+                                                 ip_log_entropy_weight));
                 }
                 multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(rng, exemplars, tt,
@@ -752,7 +781,10 @@ int moses_exec(int argc, char** argv)
                                       mmr_pa);
             }
             else {
-                BScore bscore(ctables.front(), as, stdev, rng);
+                BScore bscore(ctables.front(), as, stdev, rng,
+                              ip_kld_weight, ip_skewness_weight,
+                              ip_stdU_weight, ip_skew_U_weight,
+                              ip_log_entropy_weight);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,

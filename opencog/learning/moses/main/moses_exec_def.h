@@ -84,8 +84,17 @@ static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> max_dist_ratio_opt("max-dist-ratio", "D");
 static const pair<string, string> max_candidates_opt("max-candidates", "M");
 static const pair<string, string> include_dominated_opt("include-dominated", "I");
-static const pair<string, string> hc_terminate_if_improvement_opt("hc-terminate-if-improvement", "T");
 static const pair<string, string> discretize_threshold_opt("discretize-threshold", "R");
+
+// options specific to a particular fitness function
+static const pair<string, string> ip_kld_weight_opt("ip_kld_weight", "K");
+static const pair<string, string> ip_skewness_weight_opt("ip_skewness_weight", "J");
+static const pair<string, string> ip_stdU_weight_opt("ip_stdU_weight", "U");
+static const pair<string, string> ip_skew_U_weight_opt("ip_skew_U_weight", "X");
+static const pair<string, string> ip_log_entropy_weight_opt("ip_log_entropy_weight", "O");
+
+// options specific to a particular optimization algorithm
+static const pair<string, string> hc_terminate_if_improvement_opt("hc-terminate-if-improvement", "T");
 
 string opt_desc_str(const pair<string, string>& opt);
 

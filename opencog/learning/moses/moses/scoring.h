@@ -429,11 +429,19 @@ struct ctruth_table_bscore : public bscore_base
 };
 
 // Bscore to find interesting predicates. Interestingness is measured
-// as the Kullback Leibler divergence between the distribution output
-// of the dataset and the distribution over the output filtered in by
-// the program (when the predicate is true).
+// in terms of several features such as
+//
+//    1) the Kullback Leibler divergence between the distribution
+// output of the dataset and the distribution over the output filtered
+// in by the program (when the predicate is true).
+//    2) the difference in skewness the 2 distributions
+//    3) the standardized Mann-Whitney U statistic
+//    4) the product of #2 and #3
+//    5) the log of the entropy of the predicate
 struct interesting_predicate_bscore : public bscore_base
 {
+    typedef score_t weight_t;
+    typedef Counter<contin_t, contin_t> counter_t;
     typedef Counter<contin_t, contin_t> pdf_t;
     typedef boost::accumulators::accumulator_set<contin_t,
                                                  boost::accumulators::stats<
@@ -443,14 +451,19 @@ struct interesting_predicate_bscore : public bscore_base
     interesting_predicate_bscore(const CTable& ctable,
                                  float alphabet_size, float stdev,
                                  RandGen& _rng,
+                                 weight_t kld_weight = 1.0,
+                                 weight_t skewness_weight = 1.0,
+                                 weight_t stdU_weight = 1.0,
+                                 weight_t skew_U_weight = 1.0,
+                                 weight_t log_entropy_weight = 1.0,
                                  bool decompose_kld = false);
     behavioral_score operator()(const combo_tree& tr) const;
 
     // the KLD has no upper boundary so the best of possible score is
     // the maximum value a behavioral_score can represent
     behavioral_score best_possible_bscore() const;
-    
-    pdf_t counter; // counter of the unconditioned distribution
+
+    counter_t counter; // counter of the unconditioned distribution
     pdf_t pdf;     // pdf of the unconditioned distribution
     mutable KLDS<contin_t> klds;
     CTable ctable;
@@ -459,6 +472,12 @@ struct interesting_predicate_bscore : public bscore_base
     contin_t skewness;   // skewness of the unconditioned distribution
     RandGen& rng;
 
+    // weights of the various features
+    weight_t kld_w;
+    weight_t skewness_w;
+    weight_t stdU_w;
+    weight_t skew_U_w;
+    weight_t log_entropy_w;
     // If true then each component of the computation of KLD
     // corresponds to an element of the bscore. Otherwise the whole
     // KLD occupies just one bscore element
@@ -467,7 +486,7 @@ struct interesting_predicate_bscore : public bscore_base
 private:
     void set_complexity_coef(float alphabet_size, float stdev);
 };
-        
+
 // For testing only
 struct dummy_score : public unary_function<combo_tree, score_t>
 {

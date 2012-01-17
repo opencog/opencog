@@ -68,8 +68,7 @@ static const unsigned int default_nsamples = 20;
 
 // problems
 static const string it="it"; // regression based on input table
-static const string kl="kl"; // find interesting patterns by
-                             // maximizing Kullback Leibler divergence
+static const string ip="ip"; // find interesting patterns
 static const string cp="cp"; // regression based on combo program to fit
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
