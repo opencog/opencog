@@ -46,6 +46,7 @@ using boost::adaptors::filtered;
 using boost::transform;
 using namespace boost::phoenix;
 using boost::phoenix::arg_names::arg1;
+using namespace boost::accumulators;
 
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_bscore(const combo_tree& tr,
@@ -257,12 +258,21 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
                                                            bool decompose_kld_)
     : ctable(ctable_), rng(_rng), decompose_kld(decompose_kld_)
 {
+    // initialize Occam's razor
     occam = stdev > 0;
     set_complexity_coef(alphabet_size, stdev);
+    // define counter (mapping between observation and its number of occurences)
     boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
-                    pdf[get_contin(v.first)] += v.second; }); });
+                    counter[get_contin(v.first)] += v.second; }); });
+    // precompute pdf
+    pdf = counter;
     klds.set_p_pdf(pdf);
+    // compute the skewness of pdf
+    accumulator_t acc;
+    foreach(const auto& v, pdf)
+        acc(v.first, weight = v.second);
+    skewness = weighted_skewness(acc);    
 }
 
 behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
@@ -273,34 +283,51 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
 
     // compute the entropy of the output of the predicate
     vector<double> prob;
-    Counter<vertex, unsigned> counter;
+    Counter<vertex, unsigned> vc;
     boost::for_each(ctable | map_values, pred_ot,
                     [&](const CTable::counter_t& c, const vertex& v) {
-                        counter[v] += boost::accumulate(c | map_values, 0); });
+                        vc[v] += boost::accumulate(c | map_values, 0); });
     double total = klds.p_size();
-    transform(counter | map_values, back_inserter(prob), arg1 / total);
+    transform(vc | map_values, back_inserter(prob), arg1 / total);
     double pred_entropy = entropy(prob);
     logger().fine("pred_entropy = %f", pred_entropy);
 
     behavioral_score bs;
     if (pred_entropy > entropy_threshold) {
         // filter the output according to tr
-        Counter<contin_t, contin_t> f_output;
+        pdf_t pred_counter;     // map obvervation to occurence
+                                // conditioned by predicate truth
         boost::for_each(ctable | map_values, pred_ot,
                         [&](const CTable::counter_t& c, const vertex& v) {
                             if (vertex_to_bool(v)) {
                                 foreach(const auto& mv, c)
-                                    f_output[get_contin(mv.first)] = mv.second;
+                                    pred_counter[get_contin(mv.first)] = mv.second;
                             }});
 
-        logger().fine("f_output.size() = %u", f_output.size());
+        logger().fine("pred_counter.size() = %u", pred_counter.size());
 
+        // compute KLD
         if(decompose_kld)
             // compute KLD(pdf, f_output) per component
-            klds(f_output, back_inserter(bs));
+            klds(pred_counter, back_inserter(bs));
         else
-            bs.push_back(klds(f_output));
+            bs.push_back(klds(pred_counter));
 
+        // gather statistics with a boost accumulator
+        accumulator_t acc;
+        foreach(const auto& v, pred_counter)
+            acc(v.first, weight = v.second);
+        
+        // push the absolute difference between the unconditioned
+        // skewness and conditioned one
+        contin_t diff_skewness = weighted_skewness(acc) - skewness;
+        bs.push_back(abs(diff_skewness));
+
+        // // push the product of the relative differences of the shift
+        // // and the skewness (so that if both go in the same direction
+        // // the value if positive, and negative otherwise)
+        // bs.push_back(diff_shift * diff_skewness);
+        
         // add log entropy, this is completely heuristic, no
         // justification except that the log of the entropy is gonna
         // add a large penalty when the entropy tends to 0. Not sure

@@ -56,9 +56,10 @@ struct KLDS {
     typedef typename pdf_t::iterator pdf_it;
     typedef typename pdf_t::const_iterator pdf_cit;
 
-    /// set the distribution discribing Q to compute KL(P||Q)
-    void set_p_pdf(const pdf_t& p_pdf_, FloatT p_s_ = -1) {
-        p_pdf = p_pdf_;
+    /// set the density function of P given a counter of the number of
+    /// occurences of each observations of P
+    void set_p_pdf(const pdf_t& p_counter, FloatT p_s_ = -1) {
+        p_pdf = p_counter;
         p_s = p_s_ < 0 ? boost::accumulate(p_pdf | map_values, 0) : p_s_;
         x_very_first = p_pdf.cbegin()->first - margin;
         x_very_last = p_pdf.crbegin()->first + margin;
@@ -84,9 +85,9 @@ struct KLDS {
     }
 
     
-    // @param p_pdf_ mapping between value and its number of
-    //               occurences sampled according to the distribution of P
-    // @param p_s_   total number of observations of p_pdf_
+    // @param p_counter mapping between values and number of
+    //                  occurences (sampled according to P)
+    // @param p_s_      total number of observations of p_counter
     //
     // If p_s_ is negative then it is automatically calculated. One
     // might want to overwrite those default arguments in case one
@@ -112,22 +113,22 @@ struct KLDS {
     // computes the components log(delta_p / delta_q) once at a
     // time. This is useful when one want to treat each component as a
     // seperate optimization of a multi-optimization problem.
-    FloatT next(const pdf_t& q_pdf, FloatT q_s, FloatT& q_x_pre,
+    FloatT next(const pdf_t& q_counter, FloatT q_s, FloatT& q_x_pre,
                 pdf_cit& cit_p, pdf_cit& cit_q) {
         OC_ASSERT(cit_p != p_pdf.end());
 
         // compute delta Q
         FloatT p_x = cit_p->first,
-            q_x = cit_q == q_pdf.cend()? x_very_last : cit_q->first;
+            q_x = cit_q == q_counter.cend()? x_very_last : cit_q->first;
         // search the points of q right before and after p_x
         while (q_x < p_x) {
             q_x_pre = q_x;
             ++cit_q;
-            q_x = cit_q == q_pdf.cend()? x_very_last : cit_q->first;
+            q_x = cit_q == q_counter.cend()? x_very_last : cit_q->first;
         }
         FloatT delta_p = cit_p->second,
             delta_q_x = q_x - q_x_pre,
-            n_duplicates = cit_q == q_pdf.cend()? 1.0 : cit_q->second,
+            n_duplicates = cit_q == q_counter.cend()? 1.0 : cit_q->second,
             delta_q = (p_s / q_s) * n_duplicates / delta_q_x;
 
         ++cit_p;
@@ -135,27 +136,27 @@ struct KLDS {
     }
     
     // @return estimate of KL(P||Q)
-    FloatT operator()(const pdf_t& q_pdf) {
-        FloatT q_s = boost::accumulate(q_pdf | map_values, 0),
+    FloatT operator()(const pdf_t& q_counter) {
+        FloatT q_s = boost::accumulate(q_counter | map_values, 0),
             q_x_pre = x_very_first,
             res = 0;
         pdf_cit cit_p = p_pdf.begin();
-        pdf_cit cit_q = q_pdf.begin();
+        pdf_cit cit_q = q_counter.begin();
         dorepeat(p_pdf.size())
-            res += next(q_pdf, q_s, q_x_pre, cit_p, cit_q);
+            res += next(q_counter, q_s, q_x_pre, cit_p, cit_q);
         return res / p_s - 1; // I don't fully understand the -1
     }
 
     /// Fill the output iterator with the KLD component corresponding
     /// to each data point
     template<typename Out>
-    void operator()(const pdf_t& q_pdf, Out out) {
-        FloatT q_s = boost::accumulate(q_pdf | map_values, 0),
+    void operator()(const pdf_t& q_counter, Out out) {
+        FloatT q_s = boost::accumulate(q_counter | map_values, 0),
             q_x_pre = x_very_first;
         pdf_cit cit_p = p_pdf.begin(),
-            cit_q = q_pdf.begin();
+            cit_q = q_counter.begin();
         dorepeat(p_pdf.size())
-            *out++ = next(q_pdf, q_s, q_x_pre, cit_p, cit_q) / p_s;
+            *out++ = next(q_counter, q_s, q_x_pre, cit_p, cit_q) / p_s;
     }
 
 private:

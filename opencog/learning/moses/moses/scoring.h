@@ -31,6 +31,9 @@
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/weighted_skewness.hpp>
 
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
@@ -431,6 +434,12 @@ struct ctruth_table_bscore : public bscore_base
 // the program (when the predicate is true).
 struct interesting_predicate_bscore : public bscore_base
 {
+    typedef Counter<contin_t, contin_t> pdf_t;
+    typedef boost::accumulators::accumulator_set<contin_t,
+                                                 boost::accumulators::stats<
+                      boost::accumulators::tag::weighted_skewness
+                                                     >, contin_t> accumulator_t;
+
     interesting_predicate_bscore(const CTable& ctable,
                                  float alphabet_size, float stdev,
                                  RandGen& _rng,
@@ -441,11 +450,13 @@ struct interesting_predicate_bscore : public bscore_base
     // the maximum value a behavioral_score can represent
     behavioral_score best_possible_bscore() const;
     
-    Counter<contin_t, contin_t> pdf;
+    pdf_t counter; // counter of the unconditioned distribution
+    pdf_t pdf;     // pdf of the unconditioned distribution
     mutable KLDS<contin_t> klds;
     CTable ctable;
     bool occam;
     score_t complexity_coef;
+    contin_t skewness;   // skewness of the unconditioned distribution
     RandGen& rng;
 
     // If true then each component of the computation of KLD
