@@ -326,16 +326,19 @@ struct field_set
     size_t packed_width() const {
         return _fields.empty() ? 0 : _fields.back().major_offset + 1;
     }
+
     bool empty() const {
         return _fields.empty();
     }
+
     size_t raw_size() const {
         return _fields.size();
     }
+
     // Dimension size, number of actual knobs to consider, as term and
     // contin may take several raw knobs
     size_t dim_size() const {
-        return n_bits() + n_disc() + contin().size() + term().size();
+        return n_bits() + n_disc_fields() + contin().size() + term().size();
     }
 
     // counts the number of nonzero (raw) settings in an instance
@@ -432,27 +435,29 @@ struct field_set
     }
 
     //* number of discrete fields that are single bits
-    // (i.e. are booleans)
-    size_t n_bits() const {
+    //* (i.e. are booleans)
+    size_t n_bits() const
+    {
         return _nbool;
     }
 
     //* number of discrete fields, not counting the booleans
-    // i.e. not counting the 1-bit discrete fields.
-    size_t n_disc() const {
-        return distance(_disc_start, _fields.end()) - _nbool;
+    //* i.e. not counting the 1-bit discrete fields.
+    size_t n_disc_fields() const
+    {
+        return distance(begin_disc_fields(), end_disc_fields());
     }
 
     //* number of continuous fields.
-    size_t n_contin() const {
-        // Funny math because _contin_end is same as _disc_start.
-        return distance(_contin_start, _disc_start);
+    size_t n_contin_fields() const
+    {
+        return distance(begin_contin_fields(), end_contin_fields());
     }
 
     //* number of "term algebra" fields.
-    size_t n_term() const {
-        // The term fields come first in the vector.
-        return distance(_fields.begin(), _contin_start);
+    size_t n_term_fields() const
+    {
+        return distance(begin_term_fields(), end_term_fields());
     }
 
     size_t contin_to_raw_idx(size_t idx) const
@@ -470,8 +475,8 @@ struct field_set
     size_t raw_to_contin_idx(size_t idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
-        size_t begin_contin_idx = n_term();
-        size_t end_contin_idx = begin_contin_idx + n_contin();
+        size_t begin_contin_idx = n_term_fields();
+        size_t end_contin_idx = begin_contin_idx + n_contin_fields();
         OC_ASSERT(idx >= begin_contin_idx && idx < end_contin_idx);
         int contin_raw_idx = idx - begin_contin_idx;
         for(size_t i = 0; i < _contin.size(); ++i) {

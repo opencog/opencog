@@ -507,13 +507,13 @@ struct sliced_iterative_hillclimbing
         case M_INIT:  {
             current_number_of_instances = 0;
 
-            cout << "bits size: " << deme.fields().n_bits() << endl;
-            cout << "disc size: " << deme.fields().n_disc() << endl;
-            cout << "max evals : " << max_evals << endl << endl;
+            cout << "bit  fields: " << deme.fields().n_bits() << endl;
+            cout << "disc fields: " << deme.fields().n_disc_fields() << endl;
+            cout << "max  evals : " << max_evals << endl << endl;
 
             max_number_of_instances = max_evals;
 
-            number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
+            number_of_fields = deme.fields().n_bits() + deme.fields().n_disc_fields();
             exemplar = instance(deme.fields().packed_width());
 
             // set to 0 all fields (contin and term fields are

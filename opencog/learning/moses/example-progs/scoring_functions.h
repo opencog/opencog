@@ -113,7 +113,7 @@ struct contin_uniform : public unary_function<instance, contin_t>
 {
     contin_uniform(const field_set& fs, contin_t minval, contin_t maxval,
                    RandGen& rng)
-        : fields(fs), target(fs.n_contin())
+        : fields(fs), target(fs.n_contin_fields())
     {
         generate(target.begin(), target.end(),
                  bind(std::plus<contin_t>(),

@@ -187,7 +187,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
                 *itb = !(*itb);
                 i++;
             // modify disc
-            } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc()))) {
+            } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc_fields()))) {
                 itd += r - fs.n_bits();
                 disc_t temp = 1 + rng.randint(itd.multy() - 1);
                 if ( *itd == temp)
@@ -196,9 +196,9 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
                     *itd = temp;
                 i++;
             // modify contin
-            } else if ( r >= (fs.n_bits() + fs.n_disc())) {
+            } else if ( r >= (fs.n_bits() + fs.n_disc_fields())) {
                 //cout << "i = " << i << "  r = " << r << endl;
-                itc += r - fs.n_bits() - fs.n_disc();
+                itc += r - fs.n_bits() - fs.n_disc_fields();
                 // @todo: now the distance is 1, choose the distance
                 // of contin possibly different than 1
                 generate_contin_neighbor(fs, new_inst, itc, 1, rng);
@@ -326,13 +326,13 @@ Out vary_n_knobs(const field_set& fs,
     unsigned begin_contin_idx, begin_disc_idx, begin_bit_idx;
 
     // terms
-    if(starting_index < (begin_contin_idx = fs.n_term())) {
+    if (starting_index < (begin_contin_idx = fs.n_term_fields())) {
         // @todo: handle term algebras
         out = vary_n_knobs(fs, tmp_inst, n, starting_index + begin_contin_idx,
                            out, end);
     }
     // contins
-    else if(starting_index < (begin_disc_idx = begin_contin_idx + fs.n_contin())) {
+    else if (starting_index < (begin_disc_idx = begin_contin_idx + fs.n_contin_fields())) {
         // modify the contin disc pointed by itr and recursive call
         field_set::contin_iterator itc = fs.begin_contin(tmp_inst);
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
@@ -381,7 +381,7 @@ Out vary_n_knobs(const field_set& fs,
         }
     }
     // discs
-    else if(starting_index < (begin_bit_idx = begin_disc_idx + fs.n_disc())) {
+    else if(starting_index < (begin_bit_idx = begin_disc_idx + fs.n_disc_fields())) {
         field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
         itd += starting_index - begin_disc_idx;
         disc_t tmp_val = *itd;
@@ -460,9 +460,12 @@ count_n_changed_knobs_from_index(const field_set& fs,
 
     deme_size_t number_of_instances = 0;
 
-    unsigned begin_contin_idx = fs.n_term();
-    unsigned begin_disc_idx = begin_contin_idx + fs.n_contin();
-    unsigned begin_bit_idx = begin_disc_idx + fs.n_disc();
+    // XXX The below assumes a specific internal layout for the field set.
+    // It works right now, but would be fragile if the field set ever changed.
+    // XXX This should be fixed ... 
+    unsigned begin_contin_idx = fs.n_term_fields();
+    unsigned begin_disc_idx = begin_contin_idx + fs.n_contin_fields();
+    unsigned begin_bit_idx = begin_disc_idx + fs.n_disc_fields();
     unsigned end_bit_idx = begin_bit_idx + fs.n_bits();
 
     // terms

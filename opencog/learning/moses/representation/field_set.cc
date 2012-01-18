@@ -259,10 +259,10 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
     // Use a pseudo-json style printout.
     out << "field_set = {" << endl;
 
-    out << "n_term= " << n_term()
-        << "; n_contin= " << n_contin()
-        << "; n_disc= " << n_disc()
-        << "; n_bits= " << n_bits()
+    out << "n_term_fields= " << n_term_fields()
+        << "; n_contin_fields= " << n_contin_fields()
+        << "; n_disc_fields= " << n_disc_fields()
+        << "; n_bit_fields= " << n_bits()
         << ";" << endl;
 
     out << "fields = {" << endl;
