@@ -211,5 +211,82 @@ void field_set::build_term_spec(const term_spec& os, size_t n)
     _term.insert(_term.end(), n, os);
 }
 
+std::ostream& field_set::ostream_field(std::ostream& out, field_iterator fit) const
+{
+    if (fit < end_term_fields())
+    {
+       unsigned idx = fit - begin_term_fields();
+       const term_spec &s = _term[idx];
+       out << "{ type=term"
+           << "; idx=" << idx
+           << "; depth=" << s.depth
+           << "; branching=" << s.branching
+           << "; }";
+    }
+    else if (fit < end_contin_fields())
+    {
+       unsigned idx = fit - begin_contin_fields();
+       const contin_spec &s = _contin[idx];
+       out << "{ type=contin"
+           << "; idx=" << idx
+           << "; depth=" << s.depth
+           << "; mean=" << s.mean
+           << "; step_size=" << s.step_size
+           << "; expansion=" << s.expansion
+           << "; }";
+    }
+    else if (fit < end_disc_fields())
+    {
+       unsigned idx = fit - begin_disc_fields();
+       const disc_spec &s = _disc[idx];
+       out << "{ type=disc"
+           << "; idx=" << idx
+           << "; multiplicity=" << s.multy
+           << "; }";
+    }
+    else
+    {
+       out << "{ type=bit; }";
+    }
+
+    return out;
+}
+
+std::ostream& field_set::ostream_field_set(std::ostream& out) const
+{
+    using std::endl;
+
+    // Use a pseudo-json style printout.
+    out << "field_set = {" << endl;
+
+    out << "n_term= " << n_term()
+        << "; n_contin= " << n_contin()
+        << "; n_disc= " << n_disc()
+        << "; n_bits= " << n_bits()
+        << ";" << endl;
+
+    out << "fields = {" << endl;
+
+    field_iterator fit = _fields.begin();
+    unsigned idx = 0;
+    for (; fit != _fields.end(); fit++, idx++)
+    {
+        out << "{ idx=" << idx << "; ";
+
+        // print the raw field locations
+        const field &f = *fit;
+        out << "width=" << f.width
+            << "; major=" << f.major_offset
+            << "; minor=" << f.minor_offset
+            << "; field=";
+
+        ostream_field(out, fit);
+        out << "}," << endl;
+    }
+    out << "}; };" << endl;
+    return out;
+}
+
+
 } // ~namespace moses
 } // ~namespace opencog

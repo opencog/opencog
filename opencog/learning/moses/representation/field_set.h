@@ -460,7 +460,7 @@ struct field_set
         // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = distance(_fields.begin(), _contin_start);
         for (vector<contin_spec>::const_iterator it = _contin.begin();
-                it != _contin.begin() + idx;++it)
+                it != _contin.begin() + idx; ++it)
             raw_idx += it->depth;
         return raw_idx;
     }
@@ -487,7 +487,7 @@ struct field_set
         // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = 0;
         for (vector<term_spec>::const_iterator it = _term.begin();
-                it != _term.begin() + idx;++it)
+                it != _term.begin() + idx; ++it)
             raw_idx += it->depth;
         return raw_idx;
     }
@@ -1014,6 +1014,9 @@ public:
     disc_iterator end_raw(instance& inst) const {
         return disc_iterator(*this, _fields.size(), inst);
     }
+
+    std::ostream& ostream_field(std::ostream& out, field_iterator) const;
+    std::ostream& ostream_field_set(std::ostream& out) const;
 };
 
 template<>
@@ -1092,6 +1095,13 @@ Out field_set::pack(It from, Out out) const
         ++out;
     return out;
 }
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const field_set& fs)
+{
+    return fs.ostream_field_set(out);
+}
+
 
 } // ~namespace moses
 } // ~namespace opencog
