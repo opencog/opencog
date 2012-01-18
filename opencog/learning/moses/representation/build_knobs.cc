@@ -557,18 +557,19 @@ void build_knobs::build_predicate(pre_it it)
                 // is either contin or an argument, or any function
                 // returning contin ... So, go and insert contin knobs
                 // into that expression.
-                pre_it cit = sib;
-                if (*cit == id::logical_not)  // skip over the not.
-                    cit = cit.begin();
-                cit = cit.begin();  // get the arg of predicate.
+                pre_it pit = sib;
+                if (*pit == id::logical_not)  // skip over the not.
+                    pit = pit.begin();
+                pre_it cit = pit.begin();  // get the arg of predicate.
 
-                // XXX We could/should probably check that the argument
-                // is of contin type; we could do this by looking at the
-                // "types" type_tree.
                 OC_ASSERT((is_argument(*cit) || is_contin_expr(*cit)),
                     "Error: predicate term must be made of contin");
+
+                // contin_canonize() creates a big pre-knob expr at @it.
+                // build_contin() does the actual knob insertion into
+                // the field set.
                 contin_canonize(cit);
-                build_contin(cit);
+                build_contin(pit.begin());
             }
             else if (*sib == id::null_vertex)
                 break;
@@ -744,6 +745,9 @@ void build_knobs::action_cleanup()
 // ***********************************************************************
 // Contin
 
+// Given a pointer @it into the exemplar, the contin_cannonize() 
+// method will insert a "canonical form" above this pointer.
+//
 // The canonical form we want for a contin-valued term is a linear-
 // weighted fraction whose numerator and denominator are either
 // generalized polynomials or other contin-valued terms, i.e.:
@@ -806,6 +810,13 @@ void build_knobs::contin_canonize(pre_it it)
 
 }
 
+/// build contin -- given a contin expression, insert knobs for that
+/// expression into the field set.
+///
+/// This routine just loops over the children of @it, looking for any
+/// contin-valued constants.  These constants are turned into knobs,
+/// and added to the field set for the representation.
+//
 void build_knobs::build_contin(pre_it it)
 {
     pre_it end = it;
