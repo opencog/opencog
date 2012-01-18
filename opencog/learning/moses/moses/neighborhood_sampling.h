@@ -450,12 +450,12 @@ safe_binomial_coefficient(unsigned k, unsigned n)
 inline deme_size_t
 count_n_changed_knobs_from_index(const field_set& fs,
                                  const instance& inst,
-                                 unsigned n,
+                                 unsigned dist,
                                  unsigned starting_index,
                                  deme_size_t max_count
                                  = numeric_limits<deme_size_t>::max())
 {
-    if(n == 0)
+    if (dist == 0)
         return 1;
 
     deme_size_t number_of_instances = 0;
@@ -466,75 +466,90 @@ count_n_changed_knobs_from_index(const field_set& fs,
     unsigned end_bit_idx = begin_bit_idx + fs.n_bits();
 
     // terms
-    if(starting_index < begin_contin_idx) {
+    if (starting_index < begin_contin_idx) {
         // @todo: handle term algebras
         number_of_instances = 
-            count_n_changed_knobs_from_index(fs, inst, n,
+            count_n_changed_knobs_from_index(fs, inst, dist,
                                              starting_index + begin_contin_idx,
                                              max_count);
     }
+
     // contins
-    else if(starting_index < begin_disc_idx) {
+    else if (starting_index < begin_disc_idx) {
+
         field_set::const_contin_iterator itc = fs.begin_contin(inst);
+
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
+        OC_ASSERT(starting_index - fs.contin_to_raw_idx(contin_idx) == 0);
+
         itc += contin_idx;
         int depth = fs.contin()[itc.idx()].depth;
         int num = fs.count_n_before_stop(inst, contin_idx);
-        // it restricts the starting_index to be at the start of each
-        // contin, otherwise should not be needed anyway
-        OC_ASSERT(starting_index - fs.contin_to_raw_idx(contin_idx) == 0);
-        // calculate number_of_instances for each possible distance i
-        // of the current contin
-        for(int i = 0; i <= min((int)n, depth); ++i) {
-            // number of instances for that contin, at distance i
+
+        // Calculate number_of_instances for each possible distance i
+        // of the current contin.
+        for (int i = 0; i <= min((int)dist, depth); ++i) {
+
+            // Number of instances for this contin, at distance i.
             unsigned cni = 0;
-            // count combinations when Left or Right are switched and
+
+            // Count combinations when Left or Right are switched and
             // added after Stop, where j represents the number of
-            // Left or Right added after Stop
-            for(int j = max(0, i-num); j <= min(i, depth-num); ++j)
-                cni += (unsigned)binomial_coefficient<double>(num, i-j)
+            // Left or Right added after Stop.
+            for (int j = max(0, i-num); j <= min(i, depth-num); ++j)
+                cni += (unsigned) binomial_coefficient<double>(num, i-j)
                     * pow2(j);
-            // count combinations when Left or Right are switched and
+
+            // Count combinations when Left or Right are switched and
             // removed before Stop, where j represents the number of
-            // removed Left or Right before Stop
-            if(i <= num)
-                for(int j = 1; j <= min(i, num); ++j)
-                    cni += (unsigned)binomial_coefficient<double>(num-j, i-j);
-            // recursive call
+            // removed Left or Right before Stop.
+            if (i <= num)
+                for (int j = 1; j <= min(i, num); ++j)
+                    cni += (unsigned) binomial_coefficient<double>(num-j, i-j);
+
+            // Recursive call.
             number_of_instances +=
-                cni * count_n_changed_knobs_from_index(fs, inst, n-i,
+                cni * count_n_changed_knobs_from_index(fs, inst, dist-i,
                                                        starting_index + depth,
                                                        max_count);
-            // stop prematurely if above max_count
-            if(number_of_instances > max_count)
+            // Stop prematurely if above max_count.
+            if (number_of_instances > max_count)
                 return number_of_instances;
         }
     }
+
     // discs
-    else if(starting_index < begin_bit_idx) {
+    else if (starting_index < begin_bit_idx) {
+
+        // Recursive call, moved for one position.
+        number_of_instances = 
+            count_n_changed_knobs_from_index(fs, inst, dist, 
+                                             starting_index + 1, max_count);
+
+        // stop prematurely if above max_count
+        if (number_of_instances > max_count)
+            return number_of_instances;
+
+        // count all legal values of the knob
         field_set::const_disc_iterator itd = fs.begin_disc(inst);
         itd += starting_index - begin_disc_idx;
-        // recursive call, moved for one position
-        number_of_instances = 
-            count_n_changed_knobs_from_index(fs, inst, n, 
-                                             starting_index + 1, max_count);
-        // stop prematurely if above max_count
-        if(number_of_instances > max_count)
-            return number_of_instances;
-        // count all legal values of the knob
+
         number_of_instances += 
             (itd.multy() - 1) 
-            * count_n_changed_knobs_from_index(fs, inst, n - 1,
+            * count_n_changed_knobs_from_index(fs, inst, dist - 1,
                                                starting_index + 1, max_count);
     }
+
     // bits
-    else if(starting_index < end_bit_idx) {
-        // since bits have the same arity (2) and are the last there
-        // is no need for recursive call
+    else if (starting_index < end_bit_idx) {
+
+        // Since bits all have the same multiplicity (viz. 2), and are
+        // the last in the field set, there is no need for recursive call.
         unsigned rb = end_bit_idx - starting_index;
-        if(n <= rb)
-            number_of_instances = safe_binomial_coefficient(rb, n);
+        if (dist <= rb)
+            number_of_instances = safe_binomial_coefficient(rb, dist);
     }
+
     return number_of_instances;
 }
 
@@ -545,26 +560,27 @@ count_n_changed_knobs_from_index(const field_set& fs,
  * 
  * @param fs              deme
  * @param inst            initial instance
- * @param n               distance
+ * @param dist            distance
  * @param max_count       stop counting when above this value, that is
  *                        because this function can be computationally expensive.
  */
 inline deme_size_t count_n_changed_knobs(const field_set& fs,
                                          const instance& inst,
-                                         unsigned n,
+                                         unsigned dist,
                                          deme_size_t max_count 
                                          = numeric_limits<deme_size_t>::max())
 {
-    return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
+    return count_n_changed_knobs_from_index(fs, inst, dist, 0, max_count);
 }
-// for backward compatibility, like above but with null instance
+
+// For backward compatibility, like above but with null instance
 inline deme_size_t count_n_changed_knobs(const field_set& fs,
-                                         unsigned n,
+                                         unsigned dist,
                                          deme_size_t max_count
                                          = numeric_limits<deme_size_t>::max())
 {
     instance inst(fs.packed_width());
-    return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
+    return count_n_changed_knobs_from_index(fs, inst, dist, 0, max_count);
 }
 
 /// fill the deme with at max number_of_new_instances, at distance
@@ -577,7 +593,8 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
                      const instance& center_inst,
                      instance_set<composite_score>& deme,
                      unsigned dist,
-                     RandGen& rng) {
+                     RandGen& rng)
+{
     if (number_of_new_instances < total_number_of_neighbours) {
         //resize the deme so it can take new instances
         deme.resize(current_number_of_instances + number_of_new_instances);
