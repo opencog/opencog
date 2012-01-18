@@ -332,7 +332,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
 
         // compute the standardized Mann–Whitney U
         score_t stdU = standardizedMannWhitneyU(counter, pred_counter);
-        bs.push_back(stdU_w * stdU);
+        bs.push_back(stdU_w * abs(stdU));
         
         // push the product of the relative differences of the shift
         // (stdU) and the skewness (so that if both go in the same
