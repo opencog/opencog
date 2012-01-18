@@ -380,7 +380,7 @@ struct iterative_hillclimbing
                 count_n_changed_knobs(deme.fields(), center_inst, distance,
                                       number_of_new_instances);
 
-            // Estimate the probability of an impovement and halts if too low
+            // Estimate the probability of an improvement and halt if too low
             float p_improv = prob_improvement(number_of_new_instances,
                                               total_number_of_neighbours,
                                               distance, fields);
