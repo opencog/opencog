@@ -85,7 +85,7 @@ Predrag Janicic, Revised by Linas Vepstas
 \end_layout
 
 \begin_layout Date
-3 November 2008, revised 21 December 2011
+3 November 2008, revised 18 January 2012
 \end_layout
 
 \begin_layout Abstract
@@ -384,7 +384,12 @@ Program.
 \emph on
 program
 \emph default
-, in MOSES, is represented as a tree of operators, variables and values.
+, in MOSES, is a 
+\emph on
+combo program
+\emph default
+.
+ A combo program is represented as a tree of operators, variables and values.
  Nodes in the tree may be constants (bits, integers, real numbers, 
 \emph on
 etc.
@@ -582,12 +587,49 @@ Knobs do not have to be defined as running over all possible values; it
 \end_layout
 
 \begin_layout Description
-XXX provide hint that knobs and fields and variables are same thing.
- XXX
+Field
+\begin_inset space ~
+\end_inset
+
+set.
+ A collection of knobs is encoded as an array of 
+\emph on
+fields
+\emph default
+.
+ The 
+\emph on
+field set
+\emph default
+ describes each field in the array: whether it is discrete or continuous,
+ how many settings it may have, 
+\emph on
+etc
+\emph default
+.
+ The field set is divorced from the representation or any combo program:
+ it is merely a listing of possible knobs, but does not indicate where those
+ knobs are located in the representation.
 \end_layout
 
 \begin_layout Description
-XXX
+Instance.
+ An 
+\emph on
+instance
+\emph default
+ is an array of particular knob settings.
+ The field set describes the contents of this array: 
+\emph on
+viz.
+\emph default
+, the type of knob,
+\emph on
+ etc.
+
+\emph default
+ During optimization, an evolutionary algorithm will pick and choose among
+ many different instances; a single field set describes them all.
 \end_layout
 
 \begin_layout Description
@@ -1110,6 +1152,11 @@ n of knobs used to create the representation.
 This class, however, does not maintain the set of possible knob settings;
  these are the deme, and are held elsewhere.
  
+\end_layout
+
+\begin_layout Standard
+XXX mention that the knobs are encoded as a field_set.
+ Explain the operator<< algo for printing the rep.
 \end_layout
 
 \begin_layout Subsection
