@@ -305,15 +305,17 @@ struct field_set
     {
         typedef std::map<spec, size_t> spec_map;
 
-        // identical specs are merged and there are sorted (by the map)
-        // The sorting seems to follows the order of the spec boost::variant.
-        // Also, since disc_spec::operator< is sorting by descending arity,
-        // it is ensured that bit_spec are at the end.
+        // Adding spec's to the map will cause identical specs to be
+        // merged (and the count incremented for each).  Non-identical
+        // specs are sorted. The sorting seems to follow the order of
+        // the spec boost::variant.  Also, since disc_spec::operator<
+        // compares by descending multiplicity, it is ensured that the
+        // single-bit bit_spec's are at the end.
         spec_map spec_counts;
         while (from != to)
             ++spec_counts[*from++];
 
-        foreach(const spec_map::value_type& v, spec_counts) //build them
+        foreach (const spec_map::value_type& v, spec_counts) //build them
             build_spec(v.first, v.second);
 
         compute_starts();                 //compute iterator positions
@@ -373,6 +375,7 @@ struct field_set
     // returns a reference of the term at idx, idx is relative to
     // term_iterator
     const term_t& get_term(const instance& inst, size_t idx) const;
+
     // returns the contin at idx, idx is relative to contin_iterator
     contin_t get_contin(const instance& inst, size_t idx) const;
     void set_contin(instance& inst, size_t idx, contin_t v) const;
@@ -1020,7 +1023,6 @@ public:
         return disc_iterator(*this, _fields.size(), inst);
     }
 
-    std::ostream& ostream_field(std::ostream& out, field_iterator) const;
     std::ostream& ostream_field_set(std::ostream& out) const;
 };
 

@@ -184,9 +184,12 @@ void field_set::build_contin_spec(const contin_spec& cs, size_t n)
     OC_ASSERT(cs.depth == next_power_of_two(cs.depth),
               "depth must be a power of 2 and it is %d",
               cs.depth);
-    //all have arity of 3 (left, right, or stop) and hence are 2 wide
-    size_t base = back_offset(), width = 2;
-    dorepeat (n*cs.depth) {
+
+    // All contin fields have a multiplicity of 3 (left, right, or stop)
+    // and hence are 2 bits wide
+    size_t width = 2;
+    size_t base = back_offset();
+    dorepeat (n * cs.depth) {
         _fields.push_back(field(width, base / bits_per_packed_t,
                                 base % bits_per_packed_t));
         base += width;
@@ -211,47 +214,6 @@ void field_set::build_term_spec(const term_spec& os, size_t n)
     _term.insert(_term.end(), n, os);
 }
 
-std::ostream& field_set::ostream_field(std::ostream& out, field_iterator fit) const
-{
-    if (fit < end_term_fields())
-    {
-       unsigned idx = fit - begin_term_fields();
-       const term_spec &s = _term[idx];
-       out << "{ type=term"
-           << "; idx=" << idx
-           << "; depth=" << s.depth
-           << "; branching=" << s.branching
-           << "; }";
-    }
-    else if (fit < end_contin_fields())
-    {
-       unsigned idx = fit - begin_contin_fields();
-       const contin_spec &s = _contin[idx];
-       out << "{ type=contin"
-           << "; idx=" << idx
-           << "; depth=" << s.depth
-           << "; mean=" << s.mean
-           << "; step_size=" << s.step_size
-           << "; expansion=" << s.expansion
-           << "; }";
-    }
-    else if (fit < end_disc_fields())
-    {
-       unsigned idx = fit - begin_disc_fields();
-       const disc_spec &s = _disc[idx];
-       out << "{ type=disc"
-           << "; idx=" << idx
-           << "; multiplicity=" << s.multy
-           << "; }";
-    }
-    else
-    {
-       out << "{ type=bit; }";
-    }
-
-    return out;
-}
-
 std::ostream& field_set::ostream_field_set(std::ostream& out) const
 {
     using std::endl;
@@ -259,29 +221,57 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
     // Use a pseudo-json style printout.
     out << "field_set = {" << endl;
 
-    out << "n_term_fields= " << n_term_fields()
+    out << "n_term_specs= " << term().size()
+        << "; n_term_fields= " << n_term_fields()
+        << "\n; n_contin_specs= " << contin().size()
         << "; n_contin_fields= " << n_contin_fields()
-        << "; n_disc_fields= " << n_disc_fields()
-        << "; n_bit_fields= " << n_bits()
+        << "\n; n_disc_fields= " << n_disc_fields()
+        << "\n; n_bit_fields= " << n_bits()
         << ";" << endl;
 
+    unsigned idx = 0;
     out << "fields = {" << endl;
 
-    field_iterator fit = _fields.begin();
-    unsigned idx = 0;
-    for (; fit != _fields.end(); fit++, idx++)
+    vector<term_spec>::const_iterator tit = term().begin();
+    vector<term_spec>::const_iterator tend = term().end();
+    for (; tit != tend; tit++, idx++)
     {
-        out << "{ idx=" << idx << "; ";
+        out << "\t{ idx=" << idx
+            << "; type=term"
+            << "; depth=" << tit->depth
+            << "; branching=" << tit->branching
+            << "; }," << endl;
+    }
 
-        // print the raw field locations
-        const field &f = *fit;
-        out << "width=" << f.width
-            << "; major=" << f.major_offset
-            << "; minor=" << f.minor_offset
-            << "; field=";
+    vector<contin_spec>::const_iterator cit = contin().begin();
+    vector<contin_spec>::const_iterator cend = contin().end();
+    for (; cit != cend; cit++, idx++)
+    {
+        out << "\t{ idx=" << idx
+            << "; type=contin"
+            << "; depth=" << cit->depth
+            << "; mean=" << cit->mean
+            << "; step_size=" << cit->step_size
+            << "; expansion=" << cit->expansion
+            << "; }," << endl;
+    }
 
-        ostream_field(out, fit);
-        out << "}," << endl;
+    vector<disc_spec>::const_iterator dit = disc_and_bits().begin();
+    vector<disc_spec>::const_iterator dend = disc_and_bits().end();
+    for (; dit != dend; dit++, idx++)
+    {
+        if (2 < dit->multy)
+        {
+            out << "\t{ idx=" << idx
+                << "; type=disc"
+                << "; multiplicity=" << dit->multy
+                << "; }," << endl;
+        }
+        else
+        {
+            out << "\t{ idx=" << idx
+                << "; type=bit; }," << endl;
+        }
     }
     out << "}; };" << endl;
     return out;
