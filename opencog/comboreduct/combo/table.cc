@@ -130,6 +130,7 @@ OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
 {
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
             binding_map bmap = ctable.get_binding_map(vs);
+            // print_binding_map(bmap);
             const vertex &v = eval_throws_binding(rng, bmap, tr);
             this->push_back(v);
     });
