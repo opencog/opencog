@@ -7,8 +7,8 @@
 ; These can be joined together using boolean operators.
 ;
 ; In this example, the dataset reflects the predicate
-; (x > 1.0) AND (y > 0.0) AND g and so the combo program that should be 
-; learned is 
+; (x > 1.0) AND (y > 0.0) AND g and so the combo program that should be
+; learned is
 ;    and( greater_than_zero( plus(#x -1)) greater_than_zero(#y) #g)
 ;
 ; To run, enter: "moses -H it -i predicates.csv -W1 -u pred"

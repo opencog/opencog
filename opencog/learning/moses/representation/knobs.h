@@ -67,7 +67,8 @@ struct knob_base
     // (deleting any null vertices if present).
     virtual void clear_exemplar() = 0;
 
-    combo_tree::iterator get_loc() const {
+    combo_tree::iterator get_loc() const
+    {
         return _loc;
     }
 
@@ -109,23 +110,29 @@ struct contin_knob : public knob_base
         : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
                                     step_size, expansion, depth) { }
 
-    bool in_exemplar() const {
+    bool in_exemplar() const
+    {
         return true;
     }
 
     // @todo: it does not go back to the initiale state
     void clear_exemplar() { }
 
-    void turn(contin_t x) {
+    void turn(contin_t x)
+    {
         *_loc = x;
     }
 
-    //create a spec describing the space spanned by the knob
-    const field_set::contin_spec& spec() const {
+    // Return the spec describing the space spanned by the knob
+    // Note that this spec is *not* a part of the field set that is
+    // being used by the representation! 
+    const field_set::contin_spec& spec() const
+    {
         return _spec;
     }
 
-    std::string toStr() const {
+    std::string toStr() const
+    {
         std::stringstream ss;
         ss << "[" << *_loc << "]";
         return ss.str();

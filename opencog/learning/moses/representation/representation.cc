@@ -106,28 +106,29 @@ representation::representation(const reduct::rule& simplify_candidate,
 
 void representation::transform(const instance& inst)
 {
+    // XXX TODO need to add support for "term algebra" knobs
+
     contin_map_it ckb = contin.begin();
     for (field_set::const_contin_iterator ci = _fields.begin_contin(inst);
-            ci != _fields.end_contin(inst);++ci, ++ckb) {
+            ci != _fields.end_contin(inst); ++ci, ++ckb) {
         ckb->second.turn(*ci);
         //_exemplar.validate();
     }
 
-    //need to add first term & then contin
-    //cout << _fields.stream(inst) << endl;
+    // cout << _fields.stream(inst) << endl;
     disc_map_it dkb = disc.begin();
     for (field_set::const_disc_iterator di = _fields.begin_disc(inst);
-            di != _fields.end_disc(inst);++di, ++dkb) {
+            di != _fields.end_disc(inst); ++di, ++dkb) {
         dkb->second->turn(*di);
         //_exemplar.validate();
     }
+
     for (field_set::const_bit_iterator bi = _fields.begin_bits(inst);
-            bi != _fields.end_bits(inst);++bi, ++dkb) {
+            bi != _fields.end_bits(inst); ++bi, ++dkb) {
         dkb->second->turn(*bi);
     }
     //cout << _exemplar << endl;
     // std::cout << "New exemplar (after build): " << _exemplar << std::endl;
-
 }
 
 void representation::clear_exemplar()
@@ -156,7 +157,7 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
 
     if (reduce) { //reduce
         // Logger
-        if(logger().getLevel() >= Logger::FINE) {
+        if (logger().getLevel() >= Logger::FINE) {
             std::stringstream ss;
             ss << "Reduce candidate: "
                << tr;
