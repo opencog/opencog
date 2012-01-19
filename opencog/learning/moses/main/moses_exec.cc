@@ -705,11 +705,7 @@ int moses_exec(int argc, char** argv)
             logger().info(so.str());
             OC_ASSERT(output_type == table_output_tn);
 
-            // type_tree tt = gen_signature(output_type, arity);
-            // XXX fixme ... make above go away, make tt go away .. 
-            // fixme only when done with work on predicate support.
-            type_tree tt = table_tt;
-            int as = alphabet_size(tt, ignore_ops);
+            int as = alphabet_size(table_tt, ignore_ops);
 
             if (output_type == id::boolean_type) {
                 typedef ctruth_table_bscore BScore;
@@ -717,7 +713,7 @@ int moses_exec(int argc, char** argv)
                 foreach(const CTable& ctable, ctables)
                     bscores.push_back(new BScore(ctable, as, noise, rng));
                 multibscore_based_bscore<BScore> bscore(bscores);
-                metapop_moses_results(rng, exemplars, tt,
+                metapop_moses_results(rng, exemplars, table_tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
@@ -729,7 +725,7 @@ int moses_exec(int argc, char** argv)
                     foreach(const Table& table, tables)
                         bscores.push_back(new BScore(table, as, noise, rng));
                     multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(rng, exemplars, tt,
+                    metapop_moses_results(rng, exemplars, table_tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
@@ -742,7 +738,7 @@ int moses_exec(int argc, char** argv)
                                                      weighted_accuracy,
                                                      as, noise, rng));
                     multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(rng, exemplars, tt,
+                    metapop_moses_results(rng, exemplars, table_tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
@@ -754,7 +750,7 @@ int moses_exec(int argc, char** argv)
 
         // Find interesting patterns
         else if (problem == ip) {
-            // it assumes that the inputs are boolean and the output is contin
+            // ip assumes that the inputs are boolean and the output is contin
             type_tree ettt = gen_signature(id::boolean_type,
                                            id::contin_type, arity);
             OC_ASSERT(ettt == table_tt,
