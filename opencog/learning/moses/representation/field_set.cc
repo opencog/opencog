@@ -223,10 +223,10 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
 
     out << "n_term_specs= " << term().size()
         << "; n_term_fields= " << n_term_fields()
-        << "\n; n_contin_specs= " << contin().size()
+        << ";\nn_contin_specs= " << contin().size()
         << "; n_contin_fields= " << n_contin_fields()
-        << "\n; n_disc_fields= " << n_disc_fields()
-        << "\n; n_bit_fields= " << n_bits()
+        << ";\nn_disc_fields= " << n_disc_fields()
+        << ";\nn_bit_fields= " << n_bits()
         << ";" << endl;
 
     unsigned idx = 0;

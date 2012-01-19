@@ -39,10 +39,10 @@ namespace moses {
   * A field set describes a compact encoding of a set of continuous,
   * discrete and 'term algebra' variables.  The field set does not
   * itself hold the values of these variables; it simply describes
-  * how they are packed into a bit-string. The field set provides
-  * a collection of iterators for walking over such bit strings, which
-  * may then be used to extract values from the bit string (or to
-  * change them).
+  * how they are packed into a bit-string (the 'instance'). The field
+  * set provides a collection of iterators for walking over the fields
+  * in an instance; the iterators can also be used to extract values
+  * from the instance (or to change them).
   *
   * Some terminology:
   * 'Discrete' variables, or discs, are just variables that range over
@@ -70,15 +70,22 @@ namespace moses {
   * (presuming that they have n children).  The labels on nodes are
   * strings.  Note that atoms (in the general sense, not the opencog
   * sense) are terms with truth values (predicates);  however no atoms or
-  * truth values are used here.  See for example, Baader & Nipkow, 
+  * truth values are used here.  See for example, Baader & Nipkow,
   * 'Term Rewriting and All That', for more information. Or wikipedia.
   *
-  * The variable values are packed into bit strings, which are chunked
+  * Variables are described in terms of 'specs'; there's a disc_spec,
+  * a contin_spec, etc.  Variables are stored in th bit string in terms
+  * of 'raw' fields.  A single disc_spec corresponds to exactly one
+  * 'raw' field; however, a single contin_spec or a single term_spec
+  * may consist of many 'raw' fields.  Thus, raw fields and field specs
+  * are NOT in 1-1 correspondance.
+  *
+  * The raw fields are packed into bit strings, which are chunked
   * as vector arrays of 32 or 64-bit unsigned ints, depending on the
   * C library execution environment. Thus, instead of having a single
   * offset, two are used: a "major offset", pointing to the appropriate
   * 32/64-bit int, and a "minor offset", ranging over 0-31/63. The
-  * "width" is the width of the field, in bits.
+  * "width" is the width of the raw field, in bits.
   */
 struct field_set
 {
@@ -106,17 +113,16 @@ struct field_set
 
     /**
      * The field struct provides the information needed to get/set the
-     * value of some variable(of any type) in an instance (i.e. a packed/vector)
+     * value of a 'raw' field in an instance (i.e. in the array of ints).
      *
-     * The major_offset is the index of the element in the instance where the
-     * value of the field is stored in. But since there may be values of many
-     * different variables stored in the same packed_t value of the instance,
-     * this is not enough. We need minor_offset to tell us where inside the
-     * packed_t value instance[major_offset] the value is stored. And we need
-     * width to tell us how many bits (starting at this position) are used to
-     * encode the value.
+     * The raw fields are packed into bit strings, which are chunked
+     * as vector arrays of 32 or 64-bit unsigned ints, depending on the
+     * C library execution environment. Thus, instead of having a single
+     * bit offset, two are used: the "major_offset", pointing to the
+     * appropriate 32/64-bit int, and the "minor_offset", ranging over
+     * 0-31/63. The "width" is the width of the raw field, in bits.
      *
-     * There is a wiki page about the field_set in the opencog, you could find it on
+     * See also the wiki page
      * http://www.opencog.org/wiki/Field_set_struct_in_MOSES
      */
     struct field
@@ -129,6 +135,10 @@ struct field_set
     };
     typedef std::vector<field>::const_iterator field_iterator;
 
+    /**
+     * Specification for a discrete variable.
+     * These are in 1-1 correspondence with raw fields.
+     */
     struct disc_spec
     {
         disc_spec(multiplicity_t a) : multy(a) { }
@@ -150,8 +160,13 @@ struct field_set
      * value in the range (-1,1) with a uniform prior)
      *
      * There is a paper about the how to represent continous
-     * quantities , you could find it on
+     * quantities , you can find it on
      * http://code.google.com/p/moses/wiki/ModelingAtomSpaces
+     *
+     * Note that a single contin_spec requires multiple raw fields
+     * to store a value. The number of raw fields needed is given by
+     * the 'depth' member.  Each raw field of a contin spec occupies
+     * two bits, and stores one of three values: L, R or STOP.
      */
     struct contin_spec
     {
@@ -251,6 +266,13 @@ struct field_set
         contin_t _step_size;
     };
 
+    /**
+     * Specify a term-algebra-valued variable.
+     *
+     * Note that a single term_spec requires multiple raw fields
+     * to store a value. The number of raw fields needed is given by
+     * the 'branching' member (?? err, not sure about that...).
+     */
     struct term_spec
     {
         term_spec(const term_tree& t)
@@ -343,21 +365,25 @@ struct field_set
         return n_bits() + n_disc_fields() + contin().size() + term().size();
     }
 
-    // counts the number of nonzero (raw) settings in an instance
-    size_t count(const instance& inst) const {
+    // Counts the number of nonzero (raw) settings in an instance.
+    size_t count(const instance& inst) const
+    {
         return raw_size() - std::count(begin_raw(inst), end_raw(inst), 0);
     }
 
     // Return vector of discrete specs. This vector includes the single
-    // bit (boolean) specs, which are at the end of the array. thus the
+    // bit (boolean) specs, which are at the end of the array, thus the
     // name "disc and bits".
-    const vector<disc_spec>& disc_and_bits() const {
+    const vector<disc_spec>& disc_and_bits() const
+    {
         return _disc;
     }
-    const vector<contin_spec>& contin() const {
+    const vector<contin_spec>& contin() const
+    {
         return _contin;
     }
-    const vector<term_spec>& term() const {
+    const vector<term_spec>& term() const
+    {
         return _term;
     }
 
@@ -401,7 +427,11 @@ struct field_set
     // fields. These are then followed by the 1-bit (boolean)
     // discrete fields, tacked on at the very end. Thus, the
     // start/end values below reflect this structure.
-
+    //
+    // Note that the field spec iterates over the 'raw' fields.
+    // Multiple raw fields are needed to describe a single contin_spec
+    // or term_spec.  By contrast, disc_specs and raw fields are in
+    // one-to-one correspondance.
     field_iterator begin_term_fields() const {
         return _fields.begin();
     }
@@ -451,45 +481,57 @@ struct field_set
         return distance(begin_disc_fields(), end_disc_fields());
     }
 
-    //* number of continuous fields.
+    //* number of raw contin fields.  There are more of these
+    //* than there are contin_specs.
     size_t n_contin_fields() const
     {
         return distance(begin_contin_fields(), end_contin_fields());
     }
 
-    //* number of "term algebra" fields.
+    //* number of raw "term algebra" fields.  There are more of
+    //* these than there are term_specs.
     size_t n_term_fields() const
     {
         return distance(begin_term_fields(), end_term_fields());
     }
 
-    size_t contin_to_raw_idx(size_t idx) const
+    /// Given an index into the contin_spec array, this returns an
+    /// index into the (raw) field array.
+    ///
+    /// Recall that one single contin spec corresponds to many raw
+    /// fields (specificaly, to contin_spec->depth fields).
+    size_t contin_to_raw_idx(size_t spec_idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
-        size_t raw_idx = distance(_fields.begin(), _contin_start);
+        size_t raw_idx = n_term_fields();
         for (vector<contin_spec>::const_iterator it = _contin.begin();
-                it != _contin.begin() + idx; ++it)
+                it != _contin.begin() + spec_idx; ++it)
             raw_idx += it->depth;
         return raw_idx;
     }
 
-    // It is the exact reverse of contin_to_raw_idx, if the idx does
-    // not correspond to any contin then an OC_ASSERT is raised.
-    size_t raw_to_contin_idx(size_t idx) const
+    /// Given an index into the 'raw' field array, this returns an
+    /// index into the corresponding contin_spec array.  As such, this
+    /// is the inverse of the contin_to_raw_idx() method.  If the
+    /// @raw_idx does not correspond to any contin_spec, then an
+    /// OC_ASSERT is raised.
+    size_t raw_to_contin_idx(size_t raw_idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
         size_t begin_contin_idx = n_term_fields();
         size_t end_contin_idx = begin_contin_idx + n_contin_fields();
-        OC_ASSERT(idx >= begin_contin_idx && idx < end_contin_idx);
-        int contin_raw_idx = idx - begin_contin_idx;
-        for(size_t i = 0; i < _contin.size(); ++i) {
+        OC_ASSERT(raw_idx >= begin_contin_idx && raw_idx < end_contin_idx);
+        int contin_raw_idx = raw_idx - begin_contin_idx;
+        for (size_t i = 0; i < _contin.size(); ++i) {
             contin_raw_idx -= _contin[i].depth;
-            if(contin_raw_idx < 0) return i;
+            if (contin_raw_idx < 0) return i;
         }
         OC_ASSERT(false, "Impossible case");
         return size_t(); // to make the compiler quiet
     }
 
+    /// Given an index into the term_spec array, this returns an
+    /// index into the (raw) field array.
     size_t term_to_raw_idx(size_t idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
@@ -498,6 +540,22 @@ struct field_set
                 it != _term.begin() + idx; ++it)
             raw_idx += it->depth;
         return raw_idx;
+    }
+
+    /// Given an index into the 'raw' field array, this returns an
+    /// index into the corresponding disc_spec array.
+    ///
+    /// If the @raw_idx does not correspond to any disc_spec, then an
+    /// OC_ASSERT is raised.
+    size_t raw_to_disc_idx(size_t raw_idx) const
+    {
+        // @todo: compute at the start in _fields - could be faster..
+        size_t begin_disc_idx = n_term_fields() + n_contin_fields();
+        size_t end_disc_idx = begin_disc_idx + n_disc_fields() + n_bits();
+        OC_ASSERT(raw_idx >= begin_disc_idx && raw_idx < end_disc_idx);
+
+        // There's exactly one disc_spec per disc field.
+        return raw_idx - begin_disc_idx;
     }
 
     /**
@@ -527,7 +585,7 @@ struct field_set
 
 protected:
 
-    // _fields holds all of the different field types in one array.
+    // _fields holds all of the raw fields in one array.
     // They are arranged in order, so that the "term algebra" fields
     // come first, followed by the continuous fields, then the
     // (multi-bit) discrete fields (i.e. the discrete fields that
@@ -542,7 +600,7 @@ protected:
     vector<field> _fields;
     vector<term_spec> _term;
     vector<contin_spec> _contin;
-    vector<disc_spec> _disc; // included bits
+    vector<disc_spec> _disc; // Includes bits.
     size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
 
     // Cached values for start location of the continuous and discrete
@@ -551,11 +609,11 @@ protected:
     // of the booleans is just _nbool back from the end of the array,
     // so we don't cache that either. These can be computed from
     // scratch (below, with compute_starts()) and are cached here for
-    // performance resons.
+    // performance reasons.
     field_iterator _contin_start, _disc_start;
 
     // Figure out where, in the field array, the varous different
-    // field types start. Cache these, as they're handy to have around.
+    // raw field types start. Cache these, as they're handy to have around.
     void compute_starts()
     {
         _contin_start = _fields.begin();
@@ -837,24 +895,28 @@ public:
     {
         friend struct field_set;
         friend struct reference;
+        friend class const_disc_iterator;
 
-        reference operator*() const {
+        reference operator*() const
+        {
             return reference(this, _idx);
         }
-        friend class const_disc_iterator;
 
         disc_iterator() : _inst(NULL) { }
 
-        // for convenience, but will only work over discrete & boolean
-        multiplicity_t multy() const {
-            return
-                _idx < _fs->term().size() ? _fs->term()[_idx].branching :
-                _idx < _fs->term().size() + _fs->contin().size() ? 3 :
-                _fs->disc_and_bits()[_idx-_fs->term().size()-_fs->contin().size()].multy;
+        // For convenience.
+        multiplicity_t multy() const
+        {
+            // The _idx is raw; we want the index into the disc_spec.
+            size_t spec_idx = _fs->raw_to_disc_idx(_idx);
+            return _fs->disc_and_bits()[spec_idx].multy;
         }
-        void randomize(RandGen& rng) {
+
+        void randomize(RandGen& rng)
+        {
             _fs->set_raw(*_inst, _idx, rng.randint(multy()));
         }
+
     protected:
         disc_iterator(const field_set& fs, size_t idx, instance& inst)
             : iterator_base<disc_iterator, disc_t>(fs, idx), _inst(&inst) { }
@@ -865,20 +927,25 @@ public:
         : public iterator_base<const_disc_iterator, disc_t>
     {
         friend class field_set;
-        disc_t operator*() const {
+        disc_t operator*() const
+        {
             return _fs->get_raw(*_inst, _idx);
         }
+
         const_disc_iterator(const disc_iterator& bi) :
             iterator_base<const_disc_iterator, disc_t>(*bi._fs, bi._idx),
             _inst(bi._inst) { }
+
         const_disc_iterator() : _inst(NULL) { }
-        // for convenience, but will only work over disc & bool
-        multiplicity_t multy() const {
-            return
-                _idx < _fs->term().size() ? _fs->term()[_idx].branching :
-                _idx < _fs->term().size() + _fs->contin().size() ? 3 :
-                _fs->disc_and_bits()[_idx-_fs->term().size()-_fs->contin().size()].multy;
+
+        // For convenience.
+        multiplicity_t multy() const
+        {
+            // The _idx is raw; we want the index into the disc_spec.
+            size_t spec_idx = _fs->raw_to_disc_idx(_idx);
+            return _fs->disc_and_bits()[spec_idx].multy;
         }
+
     protected:
         const_disc_iterator(const field_set& fs, size_t idx, const instance& inst)
             : iterator_base<const_disc_iterator, disc_t>(fs, idx), _inst(&inst) { }
@@ -889,13 +956,15 @@ public:
     {
         friend struct field_set;
         friend struct reference;
-
-        reference operator*() const {
-            return reference(this, _idx);
-        }
         friend class const_contin_iterator;
 
+        reference operator*() const
+        {
+            return reference(this, _idx);
+        }
+
         contin_iterator() : _inst(NULL) { }
+
     protected:
         contin_iterator(const field_set& fs, size_t idx, instance& inst)
             : iterator_base<contin_iterator, contin_t>(fs, idx), _inst(&inst)
@@ -907,13 +976,18 @@ public:
         : public iterator_base<const_contin_iterator, contin_t>
     {
         friend class field_set;
-        contin_t operator*() const {
+
+        contin_t operator*() const
+        {
             return _fs->get_contin(*_inst, _idx);
         }
+
         const_contin_iterator(const contin_iterator& bi)
             : iterator_base<const_contin_iterator, contin_t>(*bi._fs, bi._idx),
               _inst(bi._inst) { }
+
         const_contin_iterator() : _inst(NULL) { }
+
     protected:
         const_contin_iterator(const field_set& fs, size_t idx,
                               const instance& inst)
@@ -926,10 +1000,14 @@ public:
         : public iterator_base<const_term_iterator, term_t>
     {
         friend class field_set;
-        const term_t& operator*() {
+
+        const term_t& operator*()
+        {
             return _fs->get_term(*_inst, _idx);
         }
+
         const_term_iterator() : _inst(NULL) { }
+
     protected:
         const_term_iterator(const field_set& fs, size_t idx,
                             const instance& inst)
