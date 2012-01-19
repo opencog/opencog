@@ -1159,6 +1159,10 @@ XXX mention that the knobs are encoded as a field_set.
  Explain the operator<< algo for printing the rep.
 \end_layout
 
+\begin_layout Standard
+XXX explain that it inherits from knob_mapper ...
+\end_layout
+
 \begin_layout Subsection
 Knobs
 \end_layout

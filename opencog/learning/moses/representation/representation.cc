@@ -87,14 +87,11 @@ representation::representation(const reduct::rule& simplify_candidate,
         logger().debug(ss.str());
     }
 
-    // Handle knob merging.
-    // Huh ?? where ?? XXX
-
-    // Convert the knobs into a field specification
+    // Convert the knobs into a field set.
     std::multiset<field_set::spec> tmp;
-    foreach(const disc_v& v, disc)
+    foreach (const disc_v& v, disc)
         tmp.insert(v.first);
-    foreach(const contin_v& v, contin)
+    foreach (const contin_v& v, contin)
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 

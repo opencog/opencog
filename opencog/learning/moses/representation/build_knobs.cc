@@ -823,6 +823,11 @@ void build_knobs::build_contin(pre_it it)
     end.skip_children();
     for (++end; it != end; ++it) {
         if (is_contin(*it)) {
+            // This creates a knob at a particular location in the
+            // exemplar inside the representation, and it creates a
+            // field spec for the knob. This field spec is not yet
+            // yet a part of any field set; this happens later, when
+            // the representation is built.
             contin_knob kb(_exemplar, it, _step_size, _expansion, _depth);
             _rep.contin.insert(make_pair(kb.spec(), kb));
         }
