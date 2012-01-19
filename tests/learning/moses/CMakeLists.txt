@@ -38,6 +38,14 @@ TARGET_LINK_LIBRARIES(MOSESUTest
     util        
 )
 
+ADD_CXXTEST(mixedUTest)
+TARGET_LINK_LIBRARIES(mixedUTest
+    moses_exec
+    moses
+    comboreduct
+    util        
+)
+
 ADD_CXXTEST(optimizationUTest)
 TARGET_LINK_LIBRARIES(optimizationUTest
   moses

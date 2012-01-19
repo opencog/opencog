@@ -1,0 +1,65 @@
+/** mixedUTest.cxxtest ---
+ *
+ * Copyright (C) 2012 OpenCog Foundation
+ *
+ * Author: Linas Vepstas <linasveptas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include "moses-framework.h"
+
+using namespace opencog::moses;
+using namespace ant_combo;
+
+const string mixedUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
+/**
+ * Test learning of problems that require a mixture of boolean
+ * and predicate terms.
+ */
+class mixedUTest : public CxxTest::TestSuite
+{
+public:
+    mixedUTest()
+    {
+        // logger().setPrintToStdoutFlag(true);
+        // to control the log level use option -l
+    }
+
+    // A simple predicate learning test case, should learn this:
+    //   and(0<(+(-1 #x)) 0<(#y) #g) 
+    void test_predicates()
+    {
+        string data_file_path("-i" + mixedUTest_dir + "predicates.csv");
+        // We expect a score of zero, no matter what.
+        moses_test_score({"-Hit", 
+                          "-upred",
+                          data_file_path,
+                          });
+
+#if 0
+        // Depending on the random number generator, moses might
+        // find other solutions, any of which are passable.
+        moses_test_combo({"-Hit", 
+                          "-upred", "-W1", 
+                          data_file_path,
+                          },
+                          {"and(0<(+(-1 #x)) 0<(#y) #g)"});
+#endif
+    }
+};
