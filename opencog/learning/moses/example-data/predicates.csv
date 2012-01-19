@@ -19,8 +19,6 @@
 ;
 ; The -n option excludes those operators from the solution set.
 ;
-; XXX this currently fails in MOSES; under construction.
-;
 x	y	g	pred
 2.0	1.1	1	1
 1.1	1.1	1	1
