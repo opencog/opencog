@@ -30,10 +30,11 @@ namespace opencog { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
-//0<c*x -> 0<x if c>0
-//0<c*x -> 0<-1*x if c<0
+// 0<c*x -> 0<x if c>0
+// 0<c*x -> 0<-1*x if c<0
 //WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
-void reduce_gt_zero_times_const::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_gt_zero_times_const::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(), 
                   "combo_tree node should have exactly one child (reduce_gt_zero_times_const).");
@@ -73,9 +74,10 @@ void reduce_gt_zero_times_const::operator()(combo_tree& tr,combo_tree::iterator 
     }
 }
 
-//0<c*x*x -> false if c<0
-//or more generally 0<c*x^p_x*y^p_y*exp(... where p_x, p_y... are divisible by 2
-void reduce_gt_zero_pair_power::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// 0<c*x*x -> false if c<0
+// or more generally 0<c*x^p_x*y^p_y*exp(... where p_x, p_y... are divisible by 2
+void reduce_gt_zero_pair_power::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     //associate for each subtree its parity
     typedef std::map<pre_it, bool,
                      opencog::lexicographic_subtree_order<vertex> > subtree_parity;
@@ -121,10 +123,11 @@ void reduce_gt_zero_pair_power::operator()(combo_tree& tr,combo_tree::iterator i
     }
 }
 
-//0<c/x -> 0<x if c>0
-//0<c/x -> 0<-1*x if c<0
+// 0<c/x -> 0<x if c>0
+// 0<c/x -> 0<-1*x if c<0
 //WARNING : this rule is deprecated, use reduce_gt_zero_div instead
-void reduce_gt_zero_const_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_gt_zero_const_div::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(), 
                   "combo_tree node should have exactly one child (reduce_gt_zero_const_div)."); 
@@ -155,8 +158,9 @@ void reduce_gt_zero_const_div::operator()(combo_tree& tr,combo_tree::iterator it
 }
 
 #ifndef ABS_LOG
-//0<log(x) -> 0<-1+x  
-void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// 0<log(x) -> 0<-1+x  
+void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),             
                   "combo_tree node should have exactly one child (reduce_gt_zero_log)."); 
@@ -172,7 +176,8 @@ void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) cons
 #endif
 
 // 0<exp(x) -> true
-void reduce_gt_zero_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_gt_zero_exp::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_exp)."); 
@@ -186,10 +191,11 @@ void reduce_gt_zero_exp::operator()(combo_tree& tr,combo_tree::iterator it) cons
     }
 }
         
-//0<-1*exp(x) -> false
-//WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
-void reduce_gt_zero_minus_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::greater_than_zero) {
+// 0<-1*exp(x) -> false
+// WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
+void reduce_gt_zero_minus_exp::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_minus_exp).");
         pre_it it_child = it.begin();
@@ -211,9 +217,10 @@ void reduce_gt_zero_minus_exp::operator()(combo_tree& tr,combo_tree::iterator it
     }
 }
 
-//0<y*exp(x) -> 0<y
-//WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
-void reduce_gt_zero_prod_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// 0<y*exp(x) -> 0<y
+// WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
+void reduce_gt_zero_prod_exp::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(), 
                   "combo_tree node should have exactly one child.");
@@ -233,10 +240,11 @@ void reduce_gt_zero_prod_exp::operator()(combo_tree& tr,combo_tree::iterator it)
     }
 }
 
-//0<c+sin(x) -> true if c>1
-//0<c+sin(x) -> false if c<=1
-//WARNING : this rule is deprecated, use reduce_gt_zero_sum_sin instead
-void reduce_gt_zero_const_sum_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// 0<c+sin(x) -> true if c>1
+// 0<c+sin(x) -> false if c<=1
+// WARNING : this rule is deprecated, use reduce_gt_zero_sum_sin instead
+void reduce_gt_zero_const_sum_sin::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(), 
                   "combo_tree node should have exactly one child (reduce_gt_zero_const_sum_sin).");
@@ -265,9 +273,10 @@ void reduce_gt_zero_const_sum_sin::operator()(combo_tree& tr,combo_tree::iterato
     }
 }
 
-//0<impulse(x) -> x
-void reduce_gt_zero_impulse::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::greater_than_zero) {
+// 0<impulse(x) -> x
+void reduce_gt_zero_impulse::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_impulse).");
         pre_it it_child = it.begin();
@@ -282,8 +291,9 @@ void reduce_gt_zero_impulse::operator()(combo_tree& tr,combo_tree::iterator it) 
     }
 }
 
-//prod impulse(x_i)^p_i -> prod impulse(x_i)
-void reduce_impulse_power::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// prod impulse(x_i)^p_i -> prod impulse(x_i)
+void reduce_impulse_power::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     typedef std::set<pre_it, opencog::lexicographic_subtree_order<vertex>
                      > subtree_quotient;
         if(*it==id::times) {
@@ -309,9 +319,10 @@ void reduce_impulse_power::operator()(combo_tree& tr,combo_tree::iterator it) co
         }
 }
 
-//prod impulse(x_i) * z -> impulse(and x_i) * z
-void reduce_impulse_prod::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::times) {
+// prod impulse(x_i) * z -> impulse(and x_i) * z
+void reduce_impulse_prod::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it==id::times) {
         pre_it fic; //child of the first impulse
         pre_it new_and;
         for(sib_it sib = it.begin(); sib != it.end();) {
@@ -338,9 +349,10 @@ void reduce_impulse_prod::operator()(combo_tree& tr,combo_tree::iterator it) con
     }
 }
 
-//0<(sum impulse(x_i)) -> or x_i
-void reduce_impulse_sum::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::greater_than_zero) {
+// 0<(sum impulse(x_i)) -> or x_i
+void reduce_impulse_sum::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree sibling node should have exactly one child (reduce_impulse_sum).");
         pre_it it_child = it.begin();
@@ -359,7 +371,8 @@ void reduce_impulse_sum::operator()(combo_tree& tr,combo_tree::iterator it) cons
 
 // if(x 1 0) -> impulse(x)
 // if(x 0 1) -> impulse(NOT(x))
-void reduce_contin_if_to_impulse::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_contin_if_to_impulse::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::contin_if) {
         OC_ASSERT(tr.number_of_children(it)==3,
                   "combo_tree node should have exactly three children (reduce_contin_if_to_impulse).");
@@ -384,12 +397,13 @@ void reduce_contin_if_to_impulse::operator()(combo_tree& tr,combo_tree::iterator
     }
 }
 
-//if(true x y) -> x
-//if(false x y) -> y
-//if(x if(x y z) w) -> if(x y w)
-//if(x y if(x z w)) -> if(x y w)
-void reduce_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::contin_if) {
+// if(true x y) -> x
+// if(false x y) -> y
+// if(x if(x y z) w) -> if(x y w)
+// if(x y if(x z w)) -> if(x y w)
+void reduce_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it==id::contin_if) {
         OC_ASSERT(tr.number_of_children(it)==3,
                   "combo_tree node should have exactly three children (reduce_contin_if).");
         pre_it cond = tr.child(it, 0);
@@ -433,7 +447,8 @@ void reduce_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const 
 }
   
 // op(if(x y1 z1) if(x y2 z2)) -> if(x op(y1 y2) op(z1 z2))
-void reduce_op_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_op_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     typedef std::set<pre_it, opencog::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::iterator subtree_quotient_it;
     typedef subtree_quotient::const_iterator subtree_quotient_const_it;
@@ -498,9 +513,10 @@ void reduce_op_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) con
     }
 }
 
-//contin_if(x y y) -> y
+// contin_if(x y y) -> y
 void reduce_contin_if_equal_branch::operator()(combo_tree& tr,
-                                               combo_tree::iterator it) const {
+                                               combo_tree::iterator it) const
+{
     if(*it==id::contin_if) {
         OC_ASSERT(tr.number_of_children(it)==3,
                   "combo_tree node should have exactly two children (reduce_op_contin_if).");
@@ -516,9 +532,10 @@ void reduce_contin_if_equal_branch::operator()(combo_tree& tr,
     }
 }
 
-//contin_if(x op(y z) op(y w)) -> op(y contin_if(x z w))
-//op in {+, *, /}. If op is / the order of argument is respected
-void reduce_contin_if_inner_op::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// contin_if(x op(y z) op(y w)) -> op(y contin_if(x z w))
+// op in {+, *, /}. If op is / the order of argument is respected
+void reduce_contin_if_inner_op::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     typedef std::multiset<pre_it, opencog::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::iterator subtree_quotient_it;
     typedef subtree_quotient::const_iterator subtree_quotient_const_it;
@@ -594,10 +611,11 @@ void reduce_contin_if_inner_op::operator()(combo_tree& tr,combo_tree::iterator i
     }
 }
 
-//contin_if(x exp1[x] exp2[x]) -> if(x exp1[true] exp2[false])
+// contin_if(x exp1[x] exp2[x]) -> if(x exp1[true] exp2[false])
 void reduce_contin_if_substitute_cond::operator()(combo_tree& tr,
-                                                  combo_tree::iterator it) const {
-    if(*it==id::contin_if) {
+                                                  combo_tree::iterator it) const
+{
+    if (*it==id::contin_if) {
         OC_ASSERT(tr.number_of_children(it)==3,
                   "combo_tree node should have exactly three children (reduce_contin_if_substitute_cond).");
         pre_it cond = tr.child(it, 0);
@@ -626,23 +644,24 @@ void reduce_contin_if_substitute_cond::operator()(combo_tree& tr,
     }
 }
         
-//0<x+c1 and 0<x+c2 -> 0<x+min(c1, c2)
-//or more generally
-//0<sum x_i +c1 and 0<sum x_i +c2 and 0<sum x_i +c3...
-//->sum x_i + min(c1, c2, c3, ...)
+// 0<x+c1 and 0<x+c2 -> 0<x+min(c1, c2)
+// or more generally
+// 0<sum x_i +c1 and 0<sum x_i +c2 and 0<sum x_i +c3...
+// ->sum x_i + min(c1, c2, c3, ...)
 //
-//and
+// and
 //
-//0<x+c1 or 0<x+c2 -> 0<x+max(c1, c2)
-//or more generally
-//0<sum x_i +c1 and 0<sum x_i +c2 and 0<sum x_i +c3...
-//->sum x_i + max(c1, c2, c3, ...)
+// 0<x+c1 or 0<x+c2 -> 0<x+max(c1, c2)
+// or more generally
+// 0<sum x_i +c1 and 0<sum x_i +c2 and 0<sum x_i +c3...
+// ->sum x_i + max(c1, c2, c3, ...)
 void reduce_junction_gt_zero_sum_constant::operator()(combo_tree& tr,
-                                                      combo_tree::iterator it) const {
-    //the first pre_it is the root of the subtree s obtained from
-    //0<s+c
-    //such that s is a sum of non-constant term and c is a constant
-    //the second argument, contin_t, is c
+                                                      combo_tree::iterator it) const
+{
+    // the first pre_it is the root of the subtree s obtained from
+    // 0<s+c
+    // such that s is a sum of non-constant term and c is a constant
+    // the second argument, contin_t, is c
     typedef std::map<pre_it, contin_t, opencog::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::iterator subtree_quotient_it;
     typedef subtree_quotient::const_iterator subtree_quotient_const_it;
@@ -699,9 +718,10 @@ void reduce_junction_gt_zero_sum_constant::operator()(combo_tree& tr,
 // implies y==3<z
 bool reduce_from_assumptions::implies(const combo_tree& tr,
                                       combo_tree::iterator it1,
-                                      combo_tree::iterator it2) const {
+                                      combo_tree::iterator it2) const
+{
     // if there are syntactly equal clearly it1 implies it2
-    if(tr.equal_subtree(it1, it2))
+    if (tr.equal_subtree(it1, it2))
         return true;
     // otherwise deal with inequalities
     else {
@@ -887,7 +907,8 @@ bool reduce_from_assumptions::implies(const combo_tree& tr,
         
 // look up the assumptions and replace by true if present or false
 // if not(assum) present
-void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if((get_output_type_tree(*it)==type_tree(id::boolean_type)
         && *it!=id::logical_true && *it!=id::logical_false)
        || is_argument(*it)) {
@@ -925,8 +946,9 @@ void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it)
     }
 }
 
-//if(x y z) -> if(NOT(x) z y)  if |NOT(x)|<|x|
-void reduce_contin_if_not::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// if(x y z) -> if(NOT(x) z y)  if |NOT(x)|<|x|
+void reduce_contin_if_not::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::contin_if) {
         OC_ASSERT(tr.number_of_children(it)==3,
                   "combo_tree node should have exactly three children (reduce_contin_if_not).");
@@ -954,11 +976,12 @@ void reduce_contin_if_not::operator()(combo_tree& tr,combo_tree::iterator it) co
     }
 }
         
-//0<sum x_i -> true    if 0<x_i -> true forall i
-//0<sum x_i -> false   if 0<x_i -> false forall i
-//maybe TODO : 0<sum x_i -> true if exist i 0<x_i->true and forall other i 0<=x_i
-void reduce_gt_zero_sum::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::greater_than_zero) {
+// 0<sum x_i -> true    if 0<x_i -> true forall i
+// 0<sum x_i -> false   if 0<x_i -> false forall i
+// maybe TODO : 0<sum x_i -> true if exist i 0<x_i->true and forall other i 0<=x_i
+void reduce_gt_zero_sum::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_sum).");
         pre_it it_child = it.begin();
@@ -994,7 +1017,8 @@ void reduce_gt_zero_sum::operator()(combo_tree& tr,combo_tree::iterator it) cons
 //                             with x_i=-1 if 0<-x_i -> true
 // 0<prod x_i -> false     if exist x_i==0, 
 //                            that is 0<x_i -> false and 0<-1*x_i -> false
-void reduce_gt_zero_prod::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_gt_zero_prod::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_prod).");
@@ -1046,12 +1070,13 @@ void reduce_gt_zero_prod::operator()(combo_tree& tr,combo_tree::iterator it) con
     }
 }
 
-//0<x/y -> 0<x    if 0<y -> true
-//0<x/y -> 0<y    if 0<x -> true
-//0<x/y -> 0<-1*y if 0<-1*x -> true
-//0<x/y -> 0<-1*x if 0<-1*y -> true
-//0<x/y -> false  if x==0, that is not(0<x) -> true and not(0<-x) -> true
-void reduce_gt_zero_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// 0<x/y -> 0<x    if 0<y -> true
+// 0<x/y -> 0<y    if 0<x -> true
+// 0<x/y -> 0<-1*y if 0<-1*x -> true
+// 0<x/y -> 0<-1*x if 0<-1*y -> true
+// 0<x/y -> false  if x==0, that is not(0<x) -> true and not(0<-x) -> true
+void reduce_gt_zero_div::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_div).");
@@ -1131,10 +1156,11 @@ void reduce_gt_zero_div::operator()(combo_tree& tr,combo_tree::iterator it) cons
     }
 }
 
-//0<x+sin(y) -> true  if 0<x-1 -> true
-//0<x+sin(y) -> false if 0<x+1 -> false
-void reduce_gt_zero_sum_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::greater_than_zero) {
+// 0<x+sin(y) -> true  if 0<x-1 -> true
+// 0<x+sin(y) -> false if 0<x+1 -> false
+void reduce_gt_zero_sum_sin::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_sum_sin).");
         pre_it it_child = it.begin();
@@ -1180,9 +1206,10 @@ void reduce_gt_zero_sum_sin::operator()(combo_tree& tr,combo_tree::iterator it) 
     }
 }
 
-//0<sin(y) -> true  if 0<y -> true and 0<pi-y -> true
-//0<sin(y) -> false if 0<y -> false and 0<-(y+pi) -> false
-void reduce_gt_zero_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// 0<sin(y) -> true  if 0<y -> true and 0<pi-y -> true
+// 0<sin(y) -> false if 0<y -> false and 0<-(y+pi) -> false
+void reduce_gt_zero_sin::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_sin).");
@@ -1242,7 +1269,8 @@ void reduce_gt_zero_sin::operator()(combo_tree& tr,combo_tree::iterator it) cons
 }
 
   
-contin_t reduce_inequality_from_assumptions::splitCoefExpression(combo_tree& tr, combo_tree::iterator& it) const {
+contin_t reduce_inequality_from_assumptions::splitCoefExpression(combo_tree& tr, combo_tree::iterator& it) const
+{
     contin_t coef = 1.0;
     if(*it==id::times) {
         for(sib_it sib = it.begin(); sib != it.end();) {
@@ -1267,7 +1295,8 @@ contin_t reduce_inequality_from_assumptions::splitCoefExpression(combo_tree& tr,
     return coef;
 }
 
-bool reduce_inequality_from_assumptions::gaussJordanElimination(double_matrix& dm, double eps) const {
+bool reduce_inequality_from_assumptions::gaussJordanElimination(double_matrix& dm, double eps) const
+{
     unsigned int h = dm.size(); //number of rows
     OC_ASSERT(h>0, "Number of rows should be greater than 0 (gaussJordanElimitation)");
     unsigned int w = dm[h-1].size(); //number of columns
@@ -1303,7 +1332,8 @@ bool reduce_inequality_from_assumptions::gaussJordanElimination(double_matrix& d
     return true;
 }
 
-void reduce_inequality_from_assumptions::gaussianElimination(double_matrix& dm) const {
+void reduce_inequality_from_assumptions::gaussianElimination(double_matrix& dm) const
+{
     unsigned int m = dm.size(); //number of rows
     OC_ASSERT(m>0, "Number of rows should be greater than 0 (gaussianElimitation)");
     unsigned int n = dm[m-1].size(); //number of columns
@@ -1332,7 +1362,8 @@ void reduce_inequality_from_assumptions::gaussianElimination(double_matrix& dm) 
     }
 }
 
-bool reduce_inequality_from_assumptions::gaussianElimination2(double_matrix& dm, double eps) const {
+bool reduce_inequality_from_assumptions::gaussianElimination2(double_matrix& dm, double eps) const
+{
     int m = dm.size(); //number of rows
     OC_ASSERT(m>0, "Number of rows should be greater than 0 (gaussianElimitation2)");
     int n = dm[m-1].size(); //number of columns
@@ -1363,7 +1394,8 @@ bool reduce_inequality_from_assumptions::gaussianElimination2(double_matrix& dm,
     return true;
 }
 
-bool reduce_inequality_from_assumptions::backSubstitution(double_matrix& dm, std::vector<double>& solution, double eps) const {
+bool reduce_inequality_from_assumptions::backSubstitution(double_matrix& dm, std::vector<double>& solution, double eps) const
+{
     OC_ASSERT(solution.empty(), "There should not be any previous solution (backSubstitution)");
     int m = dm.size(); //number of rows
     OC_ASSERT(m>0, "Number of rows should be greater than 0 (backSubstitution)");
@@ -1392,12 +1424,13 @@ bool reduce_inequality_from_assumptions::backSubstitution(double_matrix& dm, std
 }
 
 void reduce_inequality_from_assumptions::operator()
-    (combo_tree& tr,combo_tree::iterator it) const {
-    //std::cout << "LINEAR BEFORE : " << tr << " IT : " << *it << std::endl;
-    //associate a subtree and row in the matrix to solve
-    //the size of a row is |assumptions|+1
-    //the last column of the matrix contains the coef associated with its
-    //expression
+    (combo_tree& tr,combo_tree::iterator it) const
+{
+    // std::cout << "LINEAR BEFORE : " << tr << " IT : " << *it << std::endl;
+    // associate a subtree and row in the matrix to solve
+    // the size of a row is |assumptions|+1
+    // the last column of the matrix contains the coef associated with its
+    // expression
     typedef std::map<pre_it, std::vector<contin_t>, opencog::lexicographic_subtree_order<vertex> > subtree_row;
     typedef subtree_row::iterator subtree_row_it;
     typedef subtree_row::const_iterator subtree_row_const_it;
