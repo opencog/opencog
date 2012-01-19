@@ -52,14 +52,13 @@ public:
                           data_file_path,
                           });
 
-#if 0
         // Depending on the random number generator, moses might
-        // find other solutions, any of which are passable.
+        // find several acceptable solutions...
         moses_test_combo({"-Hit", 
-                          "-upred", "-W1", 
+                          "-upred",
                           data_file_path,
                           },
-                          {"and(0<(+(-1 #x)) 0<(#y) #g)"});
-#endif
+                          {"and(0<(+(-1 #1)) 0<(#2) #3)",
+                           "and(0<(+(*(-1 impulse(#3)) #1)) 0<(#2) #3)"});
     }
 };
