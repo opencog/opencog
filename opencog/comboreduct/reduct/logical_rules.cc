@@ -46,6 +46,9 @@ void insert_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
     }
 }
 
+// If a predicate is found, then simplify it.
+// At this time, there is only one predicate: gt_zero, whose
+// argument is a contin. Thus, simplify the contin.
 void simplify_predicates::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (!is_predicate(it)) return;
@@ -55,10 +58,15 @@ void simplify_predicates::operator()(combo_tree& tr, combo_tree::iterator it) co
 
     // it now points to a the predicate, with any leading logical not
     // stripped off. it.begin() points to the contin-valued expression.
-    it = it.begin();
-    if (is_argument(*it)) return;
+    combo_tree::iterator cit = it.begin();
+    if (is_argument(*cit)) return;
 
-    contin_reduce(tr, it, ignore_ops, rng);
+    contin_reduce(tr, cit, ignore_ops, rng);
+
+    // After the above step, we can still have some pathological 
+    // expressions, such as 0<(1) which can be reduced to true,
+    // or 0<(/(1 #1))  which can be reduced to 0(#1) .. so do these. 
+    mixed_reduce(tr, it, rng);
 }
 
 void remove_unary_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
