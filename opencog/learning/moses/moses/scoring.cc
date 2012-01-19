@@ -279,7 +279,8 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
     accumulator_t acc;
     foreach(const auto& v, pdf)
         acc(v.first, weight = v.second);
-    skewness = weighted_skewness(acc);    
+    skewness = weighted_skewness(acc);
+    logger().fine("skewness = %f", skewness);
 }
 
 behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
@@ -311,45 +312,57 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
                                     pred_counter[get_contin(mv.first)] = mv.second;
                             }});
 
+        logger().fine("pred_ot.size() = %u", pred_ot.size());
         logger().fine("pred_counter.size() = %u", pred_counter.size());
 
-        // compute KLD
-        if(decompose_kld) {
-            klds(pred_counter, back_inserter(bs));
-            boost::transform(bs, bs.begin(), kld_w * arg1);
-        } else
-            bs.push_back(kld_w * klds(pred_counter));
+        if (pred_counter.size() > 1) { // otherwise the statistics are
+                                       // messed up (for instance
+                                       // pred_skewness can be inf)
+            // compute KLD
+            if(decompose_kld) {
+                klds(pred_counter, back_inserter(bs));
+                boost::transform(bs, bs.begin(), kld_w * arg1);
+            } else {
+                score_t pred_klds = klds(pred_counter);
+                logger().fine("klds = %f", pred_klds);
+                bs.push_back(kld_w * pred_klds);
+            }
 
-        // gather statistics with a boost accumulator
-        accumulator_t acc;
-        foreach(const auto& v, pred_counter)
-            acc(v.first, weight = v.second);
+            // gather statistics with a boost accumulator
+            accumulator_t acc;
+            foreach(const auto& v, pred_counter)
+                acc(v.first, weight = v.second);
         
-        // push the absolute difference between the unconditioned
-        // skewness and conditioned one
-        score_t diff_skewness = weighted_skewness(acc) - skewness;
-        bs.push_back(skewness_w * abs(diff_skewness));
+            // push the absolute difference between the unconditioned
+            // skewness and conditioned one
+            score_t pred_skewness = weighted_skewness(acc),
+            diff_skewness = pred_skewness - skewness;
+            logger().fine("pred_skewness = %f", pred_skewness);
+            bs.push_back(skewness_w * abs(diff_skewness));
 
-        // compute the standardized Mann–Whitney U
-        score_t stdU = standardizedMannWhitneyU(counter, pred_counter);
-        bs.push_back(stdU_w * abs(stdU));
+            // compute the standardized Mann–Whitney U
+            score_t stdU = standardizedMannWhitneyU(counter, pred_counter);
+            logger().fine("stdU = %f", stdU);
+            bs.push_back(stdU_w * abs(stdU));
+            
+            // push the product of the relative differences of the shift
+            // (stdU) and the skewness (so that if both go in the same
+            // direction the value if positive, and negative otherwise)
+            bs.push_back(skew_U_w * stdU * diff_skewness);
         
-        // push the product of the relative differences of the shift
-        // (stdU) and the skewness (so that if both go in the same
-        // direction the value if positive, and negative otherwise)
-        bs.push_back(skew_U_w * stdU * diff_skewness);
-        
-        // add log entropy, this is completely heuristic, no
-        // justification except that the log of the entropy is gonna
-        // add a large penalty when the entropy tends to 0. Not sure
-        // here what we really need, a perhaps something like 1 -
-        // p-value, or some form of indefinite TV confidence on the
-        // calculation of KLD.
-        bs.push_back(log_entropy_w * log(pred_entropy));
+            // add log entropy, this is completely heuristic, no
+            // justification except that the log of the entropy is gonna
+            // add a large penalty when the entropy tends to 0. Not sure
+            // here what we really need, a perhaps something like 1 -
+            // p-value, or some form of indefinite TV confidence on the
+            // calculation of KLD.
+            logger().fine("log(pred_entropy) = %f", log(pred_entropy));
+            bs.push_back(log_entropy_w * log(pred_entropy));
 
-        // add the Occam's razor feature
-        if(occam)
-            bs.push_back(complexity(tr) * complexity_coef);
+            // add the Occam's razor feature
+            if(occam)
+                bs.push_back(complexity(tr) * complexity_coef);
+        }
     }
 
     // Logger
