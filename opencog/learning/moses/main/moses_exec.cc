@@ -268,8 +268,7 @@ int moses_exec(int argc, char** argv)
     string log_level;
     string log_file;
     bool log_file_dep_opt;
-    float stdev;
-    float probability;
+    float noise;
     vector<string> include_only_ops_str;
     vector<string> ignore_ops_str;
     string opt_algo; //optimization algorithm
@@ -403,12 +402,9 @@ int moses_exec(int argc, char** argv)
          str(format("File name where to write the log."
                     " This option is overwritten by %s.\n")
              % log_file_dep_opt_opt.first).c_str())
-        (opt_desc_str(stdev_opt).c_str(),
-         value<float>(&stdev)->default_value(0),
-         "In the case of contin regression. standard deviation of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher the standard deviation the stronger the Occam's razor.\n")
-        (opt_desc_str(prob_opt).c_str(),
-         value<float>(&probability)->default_value(0),
-         "In the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.\n")
+        (opt_desc_str(noise_opt).c_str(),
+         value<float>(&noise)->default_value(0),
+         "Assume that the data are noisy. This is a way to control the Occam's razor, the noisier the data the stronger the model complexity penalty. If the target feature is discrete, it corresponds to the probability p that an output datum is wrong (returns false while it should return true or the other way around), only values 0 < p < 0.5 are meaningful. If the target feature is continuous, it corresponds to the standard deviation of the (Gaussian) noise centered around each candidate's output, 0 or negative means no Occam's razor.\n")
         (opt_desc_str(include_only_ops_str_opt).c_str(),
          value<vector<string> >(&include_only_ops_str),
          "Include this operator, but exclude others, in the solution.  "
@@ -707,33 +703,36 @@ int moses_exec(int argc, char** argv)
             int as = alphabet_size(tt, ignore_ops);
 
             if (output_type == id::boolean_type) {
-                /// @todo: support multiple input data files
-                CTable ctable = ctables.front();
-                ctruth_table_bscore bscore(ctable, as, probability, rng);
+                typedef ctruth_table_bscore BScore;
+                boost::ptr_vector<BScore> bscores;
+                foreach(const CTable& ctable, ctables)
+                    bscores.push_back(new BScore(ctable, as, noise, rng));
+                multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(rng, exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
             }
-
-            else
-            if (output_type == id::contin_type) {
+            else if (output_type == id::contin_type) {
                 if (discretize_thresholds.empty()) {
-                    /// @todo: support multiple input data files
-                    contin_bscore bscore(tables.front(), as, stdev, rng);
-
+                    typedef contin_bscore BScore;
+                    boost::ptr_vector<BScore> bscores;
+                    foreach(const Table& table, tables)
+                        bscores.push_back(new BScore(table, as, noise, rng));
+                    multibscore_based_bscore<BScore> bscore(bscores);
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
                 } else {
-                    /// @todo: support multiple input data files
-                    discretize_contin_bscore bscore(tables.front().otable,
-                                                    tables.front().itable,
-                                                    discretize_thresholds,
-                                                    weighted_accuracy,
-                                                    as, probability,
-                                                    rng);
+                    typedef discretize_contin_bscore BScore;
+                    boost::ptr_vector<BScore> bscores;
+                    foreach(const Table& table, tables)
+                        bscores.push_back(new BScore(table.otable, table.itable,
+                                                     discretize_thresholds,
+                                                     weighted_accuracy,
+                                                     as, noise, rng));
+                    multibscore_based_bscore<BScore> bscore(bscores);
                     metapop_moses_results(rng, exemplars, tt,
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
@@ -763,33 +762,21 @@ int moses_exec(int argc, char** argv)
             int as = alphabet_size(tt, ignore_ops);
 
             typedef interesting_predicate_bscore BScore;
-            if (tables.size() > 1) {
-                boost::ptr_vector<BScore> bscores;
-                foreach(const CTable& ctable, ctables) {
-                    bscores.push_back(new BScore(ctable, as, stdev,
-                                                 rng,
-                                                 ip_kld_weight,
-                                                 ip_skewness_weight,
-                                                 ip_stdU_weight,
-                                                 ip_skew_U_weight,
-                                                 ip_log_entropy_weight));
-                }
-                multibscore_based_bscore<BScore> bscore(bscores);
-                metapop_moses_results(rng, exemplars, tt,
-                                      bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
-                                      mmr_pa);
+            boost::ptr_vector<BScore> bscores;
+            foreach(const CTable& ctable, ctables) {
+                bscores.push_back(new BScore(ctable, as, noise,
+                                             rng,
+                                             ip_kld_weight,
+                                             ip_skewness_weight,
+                                             ip_stdU_weight,
+                                             ip_skew_U_weight,
+                                             ip_log_entropy_weight));
             }
-            else {
-                BScore bscore(ctables.front(), as, stdev, rng,
-                              ip_kld_weight, ip_skewness_weight,
-                              ip_stdU_weight, ip_skew_U_weight,
-                              ip_log_entropy_weight);
-                metapop_moses_results(rng, exemplars, tt,
-                                      bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
-                                      mmr_pa);
-            }
+            multibscore_based_bscore<BScore> bscore(bscores);
+            metapop_moses_results(rng, exemplars, tt,
+                                  bool_reduct, bool_reduct_rep, bscore,
+                                  opt_params, meta_params, moses_params,
+                                  mmr_pa);
         }
 
         // regression based on input table using ann
@@ -805,7 +792,7 @@ int moses_exec(int argc, char** argv)
 
             int as = alphabet_size(tt, ignore_ops);
 
-            contin_bscore bscore(tables.front(), as, stdev, rng);
+            contin_bscore bscore(tables.front(), as, noise, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -846,7 +833,7 @@ int moses_exec(int argc, char** argv)
 
                 int as = alphabet_size(tt, ignore_ops);
 
-                contin_bscore bscore(ot, it, as, stdev, rng);
+                contin_bscore bscore(ot, it, as, noise, rng);
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduct, contin_reduct, bscore,
                                       opt_params, meta_params, moses_params,
@@ -874,7 +861,7 @@ int moses_exec(int argc, char** argv)
             ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
             OTable ot(tr, it, rng);
  
-            contin_bscore bscore(ot, it, as, stdev, rng);
+            contin_bscore bscore(ot, it, as, noise, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -967,7 +954,7 @@ int moses_exec(int argc, char** argv)
         int as = alphabet_size(tt, ignore_ops);
 
         contin_bscore bscore(simple_symbolic_regression(problem_size),
-                             it, as, stdev, rng);
+                             it, as, noise, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduct, contin_reduct, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
