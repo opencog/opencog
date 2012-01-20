@@ -55,7 +55,7 @@ struct build_knobs : boost::noncopyable
                 contin_t step_size = 1.0, contin_t expansion = 1.0,
                 field_set::width_t depth = 4);
 
-    void build_predicate(combo_tree::iterator it);
+    void build_logical(combo_tree::iterator it);
     void build_action(combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
 
@@ -100,6 +100,16 @@ protected:
                                                        unsigned n_jobs = 1) const;
     void logical_cleanup();
 
+    void add_logical_knobs(combo_tree::iterator it,
+                           bool add_if_in_exemplar = true);
+
+    void sample_logical_perms(combo_tree::iterator it,
+                              vector<combo_tree>& perms);
+
+    void insert_typed_arg(combo_tree &tr,
+                          type_tree_sib_it arg_type, argument &arg);
+
+    // ------------------------------------------------------
     /**
      * Disallow settings of kb that result in a shorter candidate if
      * reduced.
@@ -109,17 +119,6 @@ protected:
     bool disc_probe(combo_tree& exemplar, disc_knob_base& kb) const;
     // like the above but exemplar is _exemplar
     bool disc_probe(disc_knob_base& kb);
-
-    // ------------------------------------------------------
-    // predicate knob building
-    void add_predicate_knobs(combo_tree::iterator it,
-                           bool add_if_in_exemplar = true);
-
-    void sample_predicate_perms(combo_tree::iterator it,
-                              vector<combo_tree>& perms);
-
-    void insert_typed_arg(combo_tree &tr,
-                          type_tree_sib_it arg_type, argument &arg);
 
     // ------------------------------------------------------
     // action knob building

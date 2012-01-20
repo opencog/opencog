@@ -79,12 +79,15 @@ build_knobs::build_knobs(RandGen& _rng,
     }
 
     if (output_type == id::boolean_type) {
-        // Exemplar consists purely of booleans, variables and
-        // logic ops. Thus, all knobs are purely boolean/logical.
+        // Exemplar may consist of a mix of boolean and contin-typed
+        // variables and functions, but we want the end result to be
+        // typed boolean.  Thus, any representation will consist of a
+        // tree of logic ops, with anything else contin-valued wrapped
+        // up in a predicate (i.e. wrapped by greter_than_zero).
         //
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
-        build_predicate(_exemplar.begin());
+        build_logical(_exemplar.begin());
         logical_cleanup();
     }
     else if (output_type == id::action_result_type) {
@@ -336,7 +339,7 @@ void build_knobs::insert_typed_arg(combo_tree &tr,
  * positive literal choosen randomly and #j is a positive or negative
  * literal choosen randomly.
  */
-void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
+void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
     // An argument can be a subtree if it's boolean.
     // If its a contin, then wrap it with "greater_than_zero".
@@ -439,7 +442,7 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
  * arguments, and knobs for predicates (which are functions that return
  * a boolean value).
  */
-void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
+void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 {
     // If the node is not a logic op, then bail.  That is, we don't want
     // to insert any kind of boolean knobs into other kinds of ops.
@@ -447,7 +450,7 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
        return;
 
     vector<combo_tree> perms;
-    sample_predicate_perms(it, perms);
+    sample_logical_perms(it, perms);
 
     ptr_vector<logical_subtree_knob> kb_v =
         logical_probe_rec(_exemplar, it, perms.begin(), perms.end(),
@@ -459,10 +462,10 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
 }
 
 /**
- * build_predicate -- add knobs to an exemplar that contains only boolean
+ * build_logical -- add knobs to an exemplar that contains only boolean
  * and logic terms, and no other kinds of terms.
  */
-void build_knobs::build_predicate(pre_it it)
+void build_knobs::build_logical(pre_it it)
 {
     id::builtin flip = id::null_vertex;
 
@@ -486,15 +489,15 @@ void build_knobs::build_predicate(pre_it it)
 
     if (flip != id::null_vertex)
     {
-        add_predicate_knobs(it);
+        add_logical_knobs(it);
         for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
             // Insert logical and/or knobs above arguments and predicates.
             if (is_argument(*sib)) {
-                add_predicate_knobs(_exemplar.insert_above(sib, flip), false);
+                add_logical_knobs(_exemplar.insert_above(sib, flip), false);
             }
             else if (is_predicate(sib)) {
-                add_predicate_knobs(_exemplar.insert_above(sib, flip), false);
+                add_logical_knobs(_exemplar.insert_above(sib, flip), false);
 
                 // At this time, we assume that the only predicate is
                 // "greater_than_zero", and it has a single arg, which
@@ -518,9 +521,9 @@ void build_knobs::build_predicate(pre_it it)
             else if (*sib == id::null_vertex)
                 break;
             else
-                build_predicate(sib);
+                build_logical(sib);
         }
-        add_predicate_knobs(_exemplar.append_child(it, flip));
+        add_logical_knobs(_exemplar.append_child(it, flip));
     }
 }
 
