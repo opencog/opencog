@@ -75,7 +75,7 @@ template<typename Out>
 Out& output_results(Out& out, const evalTableParameters& pa,
                     const OTable& ot, const OTable& ot_tr) {
     if(pa.display_output_table)
-        out << ot_tr << endl; // print output table
+        out << ot_tr; // print output table
     if(pa.display_RMSE)
         out << "Root mean square error = "
             << ot.root_mean_square_error(ot_tr) << endl;
