@@ -124,6 +124,9 @@ protected:
     void sample_predicate_perms(combo_tree::iterator it,
                               vector<combo_tree>& perms);
 
+    void insert_typed_arg(combo_tree &tr,
+                          type_tree_sib_it arg_type, argument &arg);
+
     // ------------------------------------------------------
     // action knob building
     void action_canonize(combo_tree::iterator);

@@ -78,6 +78,7 @@ build_knobs::build_knobs(RandGen& _rng,
                       art_ss.str().c_str(), ss.str().c_str());
     }
 
+#if 1
     // Determine if the tree is of 'predicate type'. A predicate type
     // tree is a lambda which outputs boolean, but is a mixture of
     // other kinds of types as argumentss. So, for example,
@@ -105,13 +106,16 @@ build_knobs::build_knobs(RandGen& _rng,
         build_predicate(_exemplar.begin());
         logical_cleanup();
     }
-    else if (output_type == id::boolean_type) {
+    else 
+#endif
+    if (output_type == id::boolean_type) {
         // Exemplar consists purely of booleans, variables and
         // logic ops. Thus, all knobs are purely boolean/logical.
         //
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
         build_logical(_exemplar.begin());
+        // build_predicate(_exemplar.begin());
         logical_cleanup();
     }
     else if (output_type == id::action_result_type) {
@@ -447,34 +451,109 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 // ***********************************************************************
 // Predicate (mixed) trees: mixture of logical and predicate terms.
 
+/**
+ * Helper function for inserting arguments into a tree of logical
+ * operators.  If the argument is of boolean type, then just insert it.
+ * If it is of contin type, wrap it up into a predicate, and insert that.
+ */
+void build_knobs::insert_typed_arg(combo_tree &tr,
+                                   type_tree_sib_it arg_type, 
+                                   argument &arg)
+{
+    if (*arg_type == id::boolean_type)
+    {
+        tr.append_child(tr.begin(), arg);
+    }
+    else if (permitted_op(id::greater_than_zero) &&
+         (*arg_type == id::contin_type))
+    {
+        pre_it gt = tr.append_child(tr.begin(), id::greater_than_zero);
+        tr.append_child(gt, arg);
+    }
+}
+
 void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 {
     // An argument can be a subtree if it's boolean.
     // If its a contin, then wrap it with "greater_than_zero".
-    type_tree_sib_it sit = types.begin(types.begin());  // first child
+    type_tree_sib_it arg_type = types.begin(types.begin());  // first child
     foreach (int i, from_one(_arity))
     {
         vertex arg = argument(i);
         if (permitted_op(arg))
         {
-            if (*sit == id::boolean_type)
+            if (*arg_type == id::boolean_type)
                 perms.push_back(combo_tree(arg));
 
-            if (permitted_op(id::greater_than_zero) &&
-               (*sit == id::contin_type))
+            else if (permitted_op(id::greater_than_zero) &&
+               (*arg_type == id::contin_type))
             {
                 combo_tree v(id::greater_than_zero);
                 v.append_child(v.begin(), arg);
                 perms.push_back(v);
             }
         }
-        sit++;
+        arg_type++;
     }
 
-    // XXX TODO ... just like sample_logical_perms, we could create
-    // pairs (conjunctions/disjunctions) of booleans and predicates.
-    // Should we do that here, or will things sort themselves out
-    // later?
+    // Also create n random pairs op(#i #j) out of the total number
+    // 2 * choose(n,2) == n * (n-1) of possible pairs.
+
+    // TODO: should bias the selection of these, so that
+    // larger subtrees are preferred .. !? why?
+    unsigned int max_pairs = _arity * (_arity - 1);
+    if (max_pairs > 0) {
+        type_tree_sib_it arg_types = types.begin(types.begin());  // first child
+        lazy_random_selector select(max_pairs, rng);
+
+        // Actual number of pairs to create ...
+        unsigned int n_pairs =
+            _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
+        unsigned int count = 0;
+        while (count < n_pairs) {
+            //while (!select.empty()) {
+            combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
+            int x = select();
+            int a = x / (_arity - 1);
+            int b = x - a * (_arity - 1);
+            if (b == a)
+                b = _arity - 1;
+
+            argument arg_b(1 + b);
+            argument arg_a(1 + a);
+            // Why doesn't the below just work?
+            // type_tree_sib_it type_a = arg_types + a;
+            // type_tree_sib_it type_b = arg_types + b;
+            type_tree_sib_it type_a = arg_types;
+            type_tree_sib_it type_b = arg_types;
+            type_a += a;
+            type_b += b;
+
+            if (permitted_op(arg_a) && permitted_op(arg_b)) {
+                if (b < a) {
+                    insert_typed_arg(v, type_b, arg_b);
+                    insert_typed_arg(v, type_a, arg_a);
+
+                } else {
+                    if (*type_a == id::boolean_type)
+                    {
+                        arg_a.negate();
+                        v.append_child(v.begin(), arg_a);
+                    }
+                    else if (permitted_op(id::greater_than_zero) &&
+                         (*type_a == id::contin_type))
+                    {
+                        pre_it nt = v.append_child(v.begin(), id::logical_not);
+                        pre_it gt = v.append_child(nt, id::greater_than_zero);
+                        v.append_child(gt, arg_a);
+                    }
+                    insert_typed_arg(v, type_b, arg_b);
+                }
+                perms.push_back(v);
+                count ++;
+            }
+        }
+    }
 
 #ifdef DEBUG_INFO
     cerr << "---------------------------------" << endl;
