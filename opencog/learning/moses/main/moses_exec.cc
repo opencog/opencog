@@ -691,7 +691,7 @@ int moses_exec(int argc, char** argv)
             if (output_type == id::unknown_type)
                 output_type = table_output_tn;
 
-            std::stringstream so;
+            stringstream so;
             so << "Inferred output type: " << output_type;
             logger().info(so.str());
             OC_ASSERT(output_type == table_output_tn);

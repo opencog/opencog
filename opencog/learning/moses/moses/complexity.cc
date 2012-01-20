@@ -37,15 +37,16 @@ complexity_t complexity(combo_tree::iterator it) {
     if (*it==id::logical_true || *it==id::logical_false || *it==id::null_vertex)
         return 0;
 
-    if (is_argument(*it) || is_builtin_action(*it) || is_ann_type(*it))
+    if (is_argument(*it) || is_builtin_action(*it) || is_ann_type(*it)
+        || is_constant(*it))
         return -1;
 
     // recursive cases
     if (*it==id::logical_not)
         return complexity(it.begin());
 
-    // div and trigonometric functions have complexity 1
-    int c = *it==id::div || *it==id::exp || *it==id::log || *it==id::sin;
+    // div and trigonometric functions have complexity -1
+    int c = -int(*it==id::div || *it==id::exp || *it==id::log || *it==id::sin);
     for (combo_tree::sibling_iterator sib = it.begin(); sib != it.end(); ++sib)
         c += complexity(sib);
     return c;
