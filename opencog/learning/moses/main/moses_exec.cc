@@ -23,12 +23,14 @@
 #include "../example-progs/scoring_iterators.h"
 
 #include <boost/format.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
 
 namespace opencog { namespace moses {
 
 using boost::format;
+using boost::trim;
 using boost::str;
 
 static const unsigned int max_filename_size = 255;
@@ -537,7 +539,14 @@ int moses_exec(int argc, char** argv)
     // Remove old log_file before setting the new one.
     remove(log_file.c_str());
     logger().setFilename(log_file);
-    logger().setLevel(logger().getLevelFromString(log_level));
+    trim(log_level);
+    Logger::Level level = logger().getLevelFromString(log_level);
+    if (level !=Logger::BAD_LEVEL)
+        logger().setLevel(logger().getLevelFromString(log_level));
+    else {
+        cerr << "Log level " << log_level << " is incorrect (see --help)." << endl;
+        exit(1);
+    }
     logger().setBackTraceLevel(Logger::ERROR);
 
     // Log command-line args
