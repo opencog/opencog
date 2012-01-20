@@ -78,44 +78,13 @@ build_knobs::build_knobs(RandGen& _rng,
                       art_ss.str().c_str(), ss.str().c_str());
     }
 
-#if 1
-    // Determine if the tree is of 'predicate type'. A predicate type
-    // tree is a lambda which outputs boolean, but is a mixture of
-    // other kinds of types as argumentss. So, for example,
-    // and (greater_than_zero (#1) greater_than_zero(#2))
-    // is a logical-and of two predicates on contin_t expressions.
-    bool predicate_type = false;
-    if (output_type == id::boolean_type) {
-       type_tree_pre_it head = tt.begin();  // skip lambda
-       type_tree_sib_it it = head.begin();  // iterate over args.
-
-       while (it != head.end()) {
-         if (*it != id::boolean_type) {
-              predicate_type = true;
-              break;
-         }
-         it ++;
-       }
-    }
-
-    // Add knobs, depending on the kind of tree we expect this to be.
-    if (predicate_type) {
-        // Exemplar consists of logic ops and predicates.
-        // Make sure top node of exemplar is a logic op.
-        logical_canonize(_exemplar.begin());
-        build_predicate(_exemplar.begin());
-        logical_cleanup();
-    }
-    else 
-#endif
     if (output_type == id::boolean_type) {
         // Exemplar consists purely of booleans, variables and
         // logic ops. Thus, all knobs are purely boolean/logical.
         //
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
-        build_logical(_exemplar.begin());
-        // build_predicate(_exemplar.begin());
+        build_predicate(_exemplar.begin());
         logical_cleanup();
     }
     else if (output_type == id::action_result_type) {
@@ -204,126 +173,6 @@ void build_knobs::logical_canonize(pre_it it)
     }
 }
 
-/**
- * build_logical -- add knobs to an exemplar that contains only boolean
- * and logic terms, and no other kinds of terms.
- */
-void build_knobs::build_logical(pre_it it)
-{
-    OC_ASSERT(*it != id::logical_not,
-              "ERROR: the tree is supposed to be in normal form; "
-              "and thus must not contain logical_not nodes.");
-
-    add_logical_knobs(it);
-
-    if (*it == id::logical_and) {
-        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-            if (is_argument(*sib))
-                add_logical_knobs(_exemplar.insert_above(sib, id::logical_or),
-                                  false);
-            else if (*sib == id::null_vertex)
-                break;
-            else
-                build_logical(sib);
-        add_logical_knobs(_exemplar.append_child(it, id::logical_or));
-    }
-    else if (*it == id::logical_or) {
-        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-            if (is_argument(*sib))
-                add_logical_knobs(_exemplar.insert_above(sib, id::logical_and),
-                                  false);
-            else if (*sib == id::null_vertex)
-                break;
-            else
-                build_logical(sib);
-        add_logical_knobs(_exemplar.append_child(it, id::logical_and));
-    }
-}
-
-void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
-{
-    vector<combo_tree> perms;
-    sample_logical_perms(it, perms);
-
-    ptr_vector<logical_subtree_knob> kb_v =
-        logical_probe_rec(_exemplar, it, perms.begin(), perms.end(),
-                          add_if_in_exemplar, num_threads());
-    foreach(const logical_subtree_knob& kb, kb_v)
-        _rep.disc.insert(make_pair(kb.spec(), kb));
-}
-
-/**
- * Create a set of subtrees for the given node.
- *
- * Each subtree must be "permitted", i.e. a legal combination of
- * logical operators and literals. These are called "perms".
- *
- * Here, a "literal" is one of the input "variables" #i. A positive
- * literal is just #i, and a negative literal is it's negation !#i.
- *
- * For now, there are 2*_arity combinations, consisting of all
- * positive literals, and _arity pairs of op(#i #j) where 'op' is one
- * of the logic ops 'and' or 'or', such that op != *it, and #i is a
- * positive literal choosen randomly and #j is a positive or negative
- * literal choosen randomly.
- */
-void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
-{
-    // All of the n literals can each be a "subtree" by themselves.
-    foreach (int i, from_one(_arity)) {
-        vertex arg = argument(i);
-        if (permitted_op(arg))
-            perms.push_back(combo_tree(arg));
-    }
-
-    // Also create n random pairs op(#i #j) out of the total number
-    // 2 * choose(n,2) == n * (n-1) of possible pairs.
-
-    // TODO: should bias the selection of these, so that
-    // larger subtrees are preferred .. !? why?
-    unsigned int max_pairs = _arity*(_arity - 1);
-    if (max_pairs > 0) {
-        lazy_random_selector select(max_pairs, rng);
-
-        // Actual number of pairs to create ...
-        unsigned int n_pairs =
-            _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
-        unsigned int count = 0;
-        while (count < n_pairs) {
-            //while (!select.empty()) {
-            combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
-            int x = select();
-            int a = x / (_arity - 1);
-            int b = x - a * (_arity - 1);
-            if (b == a)
-                b = _arity - 1;
-
-            argument arg_b(1 + b);
-            argument arg_a(1 + a);
-
-            if(permitted_op(arg_a) && permitted_op(arg_b)) {
-                if (b < a) {
-                    v.append_child(v.begin(), arg_b);
-                    v.append_child(v.begin(), arg_a);
-                } else {
-                    arg_a.negate();
-                    v.append_child(v.begin(), arg_a);
-                    v.append_child(v.begin(), arg_b);
-                }
-                perms.push_back(v);
-                count ++;
-            }
-        }
-    }
-
-#ifdef DEBUG_INFO
-    cerr << "---------------------------------" << endl;
-    cerr << endl << "Perms: " << endl;
-    foreach(const combo_tree& tr, perms)
-        cerr << tr << endl;
-    cerr << "---------------------------------" << endl;
-#endif
-}
 
 /**
  * @param exemplar reference to the exemplar to apply probe
@@ -472,6 +321,21 @@ void build_knobs::insert_typed_arg(combo_tree &tr,
     }
 }
 
+/**
+ * Create a set of subtrees for the given node.
+ *
+ * Each subtree must be "permitted", i.e. a legal combination of
+ * logical operators, literals and predicates. These are called "perms".
+ *
+ * Here, a "literal" is one of the input "variables" #i. A positive
+ * literal is just #i, and a negative literal is it's negation !#i.
+ *
+ * For now, there are 2*_arity combinations, consisting of all
+ * positive literals, and _arity pairs of op(#i #j) where 'op' is one
+ * of the logic ops 'and' or 'or', such that op != *it, and #i is a
+ * positive literal choosen randomly and #j is a positive or negative
+ * literal choosen randomly.
+ */
 void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 {
     // An argument can be a subtree if it's boolean.
@@ -521,6 +385,8 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 
             argument arg_b(1 + b);
             argument arg_a(1 + a);
+
+            // Get the types of arguments a and b.
             // Why doesn't the below just work?
             // type_tree_sib_it type_a = arg_types + a;
             // type_tree_sib_it type_b = arg_types + b;
@@ -535,6 +401,9 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
                     insert_typed_arg(v, type_a, arg_a);
 
                 } else {
+                    // As above, but negate arg_a first. So we just
+                    // inline-expand insert_typed_arg and put a logical
+                    // not in front of it.
                     if (*type_a == id::boolean_type)
                     {
                         arg_a.negate();
@@ -565,9 +434,10 @@ void build_knobs::sample_predicate_perms(pre_it it, vector<combo_tree>& perms)
 }
 
 /**
- * Just like add_logical_knobs, except that we can sample inequalities.
- * TODO: this can probably obsolete add_logical_knobs, and do so without
- * damaging performance.
+ * Add logical and predicate knobs.  The knobs are all boolean valued,
+ * and so include knobs for logical operators, knobs for boolean-typed
+ * arguments, and knobs for predicates (which are functions that return
+ * a boolean value).
  */
 void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
 {
@@ -591,11 +461,6 @@ void build_knobs::add_predicate_knobs(pre_it it, bool add_if_in_exemplar)
 /**
  * build_predicate -- add knobs to an exemplar that contains only boolean
  * and logic terms, and no other kinds of terms.
- *
- * TODO: I think that this will soon be able to obsolete build_logical,
- * without causing any damage to performance ...
- * basically, its almost identical to what build_logical currently does, just with more
- * features.  Just need to finish up and polish "add_predicate_knobs()"
  */
 void build_knobs::build_predicate(pre_it it)
 {

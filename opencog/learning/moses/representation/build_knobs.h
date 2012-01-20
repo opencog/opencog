@@ -55,7 +55,6 @@ struct build_knobs : boost::noncopyable
                 contin_t step_size = 1.0, contin_t expansion = 1.0,
                 field_set::width_t depth = 4);
 
-    void build_logical(combo_tree::iterator it);
     void build_predicate(combo_tree::iterator it);
     void build_action(combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
@@ -92,11 +91,6 @@ protected:
     // ------------------------------------------------------
     // logical knob building
     void logical_canonize(combo_tree::iterator);
-    void add_logical_knobs(combo_tree::iterator it,
-                           bool add_if_in_exemplar = true);
-
-    void sample_logical_perms(combo_tree::iterator it,
-                              vector<combo_tree>& perms);
 
     template<typename It>
     ptr_vector<logical_subtree_knob> logical_probe_rec(combo_tree& exemplar,
