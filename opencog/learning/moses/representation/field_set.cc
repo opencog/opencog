@@ -83,14 +83,15 @@ contin_t field_set::get_contin(const instance& inst, size_t idx) const
     contin_stepper stepper(c);
     for (size_t i = 0; i < c.depth; ++i) {
         disc_t direction = get_raw(inst, raw_idx + i);
-        if (direction == contin_spec::Stop) {
-            break;
-        } else if (direction == contin_spec::Left) {
+
+        if (direction == contin_spec::Left) {
             stepper.left();
-        } else { //direction==contin_spec::Right
-            OC_ASSERT(direction == contin_spec::Right,
-                             "direction should be set to contin_spec::Right (get_contin).");
+        } else if (direction==contin_spec::Right) {
             stepper.right();
+        } else if (direction == contin_spec::Stop) {
+            break;
+        } else {
+            OC_ASSERT(0, "Error: unknown direction in contin spec.");
         }
     }
     return stepper.value;

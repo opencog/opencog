@@ -74,11 +74,13 @@ namespace moses {
   * 'Term Rewriting and All That', for more information. Or wikipedia.
   *
   * Variables are described in terms of 'specs'; there's a disc_spec,
-  * a contin_spec, etc.  Variables are stored in th bit string in terms
-  * of 'raw' fields.  A single disc_spec corresponds to exactly one
+  * a contin_spec, etc.  All variables are stored in the bit string as
+  * 'raw' fields.  A single disc_spec corresponds to exactly one
   * 'raw' field; however, a single contin_spec or a single term_spec
-  * may consist of many 'raw' fields.  Thus, raw fields and field specs
-  * are NOT in 1-1 correspondance.
+  * usually consists of many 'raw' fields.  Thus, raw fields and field
+  * specs are NOT in 1-1 correspondance.  Note that all raw fields may
+  * be treated as disc fields: the raw field iterator is essentially
+  * the same as the disc field iterator, just ranging over a larger set.
   *
   * The raw fields are packed into bit strings, which are chunked
   * as vector arrays of 32 or 64-bit unsigned ints, depending on the
@@ -387,7 +389,9 @@ struct field_set
         return _term;
     }
 
-    disc_t get_raw(const instance& inst, size_t idx) const { //nth encoded var
+    // Return the 'idx'th raw field value in the instance.
+    disc_t get_raw(const instance& inst, size_t idx) const
+    {
         const field& f = _fields[idx];
         return (inst[f.major_offset] >> f.minor_offset)&packed_t((1 << f.width) - 1);
     }
@@ -834,6 +838,7 @@ protected:
         size_t _idx;
     };
 public:
+    // --------------------------------------------------------
     struct bit_iterator
         : public bit_iterator_base<bit_iterator, instance::iterator>
     {
@@ -923,6 +928,7 @@ public:
                                   instance::const_iterator > (it, offset) { }
     };
 
+    // --------------------------------------------------------
     struct disc_iterator : public iterator_base<disc_iterator, disc_t>
     {
         friend struct field_set;
@@ -984,6 +990,7 @@ public:
         const instance* _inst;
     };
 
+    // --------------------------------------------------------
     struct contin_iterator : public iterator_base<contin_iterator, contin_t>
     {
         friend struct field_set;
@@ -1028,15 +1035,43 @@ public:
         const instance* _inst;
     };
 
+    // --------------------------------------------------------
+    struct term_iterator
+        : public iterator_base<term_iterator, term_t>
+    {
+        friend class field_set;
+        friend struct reference;
+        friend class const_term_iterator;
+
+
+        reference operator*() const
+        {
+            return reference(this, _idx);
+        }
+
+        term_iterator() : _inst(NULL) { }
+
+    protected:
+        term_iterator(const field_set& fs, size_t idx, instance& inst)
+            : iterator_base<term_iterator, term_t>(fs, idx),
+              _inst(&inst) { }
+
+        instance* _inst;
+    };
+
     struct const_term_iterator
         : public iterator_base<const_term_iterator, term_t>
     {
         friend class field_set;
 
-        const term_t& operator*()
+        const term_t& operator*() const
         {
             return _fs->get_term(*_inst, _idx);
         }
+
+        const_term_iterator(const term_iterator& bi) :
+            iterator_base<const_term_iterator, term_t>(*bi._fs, bi._idx),
+            _inst(bi._inst) { }
 
         const_term_iterator() : _inst(NULL) { }
 
@@ -1048,6 +1083,8 @@ public:
         const instance* _inst;
     };
 
+    // --------------------------------------------------------
+    // Get the begin, end iterators for the bit fields.
     const_bit_iterator begin_bits(const instance& inst) const
     {
         return (begin_bit_fields() == _fields.end() ? const_bit_iterator() :
@@ -1074,28 +1111,28 @@ public:
                 ++bit_iterator(--inst.end(), _fields.back().minor_offset));
     }
 
+    // ------------------------------------------------
+    // Get the begin, end iterators for the disc fields.
     const_disc_iterator begin_disc(const instance& inst) const
     {
-        return const_disc_iterator(*this, distance(_fields.begin(),
-                                                   begin_disc_fields()), inst);
+        return const_disc_iterator(*this, begin_disc_raw_idx(), inst);
     }
 
     const_disc_iterator end_disc(const instance& inst) const
     {
-        return const_disc_iterator(*this, distance(_fields.begin(),
-                                                   end_disc_fields()), inst);
+        return const_disc_iterator(*this, end_disc_raw_idx(), inst);
     }
 
     disc_iterator begin_disc(instance& inst) const {
-        return disc_iterator(*this, distance(_fields.begin(),
-                                             begin_disc_fields()), inst);
+        return disc_iterator(*this, begin_disc_raw_idx(), inst);
     }
 
     disc_iterator end_disc(instance& inst) const {
-        return disc_iterator(*this, distance(_fields.begin(),
-                                             end_disc_fields()), inst);
+        return disc_iterator(*this, end_disc_raw_idx(), inst);
     }
 
+    // --------------------------------------------------
+    // Get the begin, end iterators for the contin fields.
     const_contin_iterator begin_contin(const instance& inst) const {
         return const_contin_iterator(*this, 0, inst);
     }
@@ -1112,6 +1149,8 @@ public:
         return contin_iterator(*this, _contin.size(), inst);
     }
 
+    // ------------------------------------------------
+    // Get the begin, end iterators for the term fields.
     const_term_iterator begin_term(const instance& inst) const {
         return const_term_iterator(*this, 0, inst);
     }
@@ -1120,6 +1159,16 @@ public:
         return const_term_iterator(*this, _term.size(), inst);
     }
 
+    term_iterator begin_term(instance& inst) const {
+        return term_iterator(*this, 0, inst);
+    }
+
+    term_iterator end_term(instance& inst) const {
+        return term_iterator(*this, _term.size(), inst);
+    }
+
+    // ------------------------------------------------
+    // Get the begin, end iterators for all of the raw fields.
     const_disc_iterator begin_raw(const instance& inst) const {
         return const_disc_iterator(*this, 0, inst);
     }
@@ -1133,6 +1182,7 @@ public:
         return disc_iterator(*this, _fields.size(), inst);
     }
 
+    // Help print out the field set.
     std::ostream& ostream_field_set(std::ostream& out) const;
 };
 

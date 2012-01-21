@@ -651,7 +651,7 @@ deme
  simulated annealing, or the Bayesian optimization algorithm is used to
  work with the population, locating the best possible knob settings for
  the given representation.
- 
+ In the actual implementation, a deme is just a set of instances.
 \end_layout
 
 \begin_layout Description
