@@ -323,17 +323,21 @@ Out vary_n_knobs(const field_set& fs,
     }
 
     instance tmp_inst = inst;
-    unsigned begin_contin_idx, begin_disc_idx, begin_bit_idx;
 
-    // XXX Whoa! above are used uninitialzied!!
     // terms
-    if (starting_index < (begin_contin_idx = fs.n_term_fields())) {
-        // @todo: handle term algebras
-        out = vary_n_knobs(fs, tmp_inst, dist, starting_index + begin_contin_idx,
+    if ((fs.begin_term_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_term_raw_idx()))
+    {
+        // @todo: handle term algebras XXX
+        out = vary_n_knobs(fs, tmp_inst, dist,
+                           starting_index + fs.end_term_raw_idx(),
                            out, end);
     }
     // contins
-    else if (starting_index < (begin_disc_idx = begin_contin_idx + fs.n_contin_fields())) {
+    else 
+    if ((fs.begin_contin_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_contin_raw_idx()))
+    {
         // modify the contin disc pointed by itr and recursive call
         field_set::contin_iterator itc = fs.begin_contin(tmp_inst);
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
@@ -344,7 +348,7 @@ Out vary_n_knobs(const field_set& fs,
         itr += starting_index;
         size_t relative_raw_idx = starting_index - fs.contin_to_raw_idx(contin_idx);
         // case tmp_inst at itr is Stop
-        if(*itr == field_set::contin_spec::Stop) {
+        if (*itr == field_set::contin_spec::Stop) {
             // Assumption [1]: within the same contin, it is the first Stop
             // recursive call, moved to the next contin (or disc if no more contin)
             out = vary_n_knobs(fs, tmp_inst, dist,
@@ -358,8 +362,9 @@ Out vary_n_knobs(const field_set& fs,
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
         } 
         // case tmp_inst at itr is Left or Right
-        else {
-            // recursive call, moved for one position
+        else
+        {
+            // Recursive call, moved for one position
             out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
             // Left<->Right
             *itr = field_set::contin_spec::switchLR(*itr);
@@ -382,9 +387,12 @@ Out vary_n_knobs(const field_set& fs,
         }
     }
     // discs
-    else if (starting_index < (begin_bit_idx = begin_disc_idx + fs.n_disc_fields())) {
+    else
+    if ((fs.begin_disc_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_disc_raw_idx()))
+    {
         field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
-        itd += starting_index - begin_disc_idx;
+        itd += fs.raw_to_disc_idx(starting_index);
         disc_t tmp_val = *itd;
         // recursive call, moved for one position
         out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
@@ -400,9 +408,12 @@ Out vary_n_knobs(const field_set& fs,
         }
     }
     // bits
-    else if(starting_index < begin_bit_idx + fs.n_bits()) {
+    else
+    if ((fs.begin_bit_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_bit_raw_idx()))
+    {
         field_set::bit_iterator itb = fs.begin_bits(tmp_inst);
-        itb += starting_index - begin_bit_idx;
+        itb += starting_index - fs.begin_bit_raw_idx();
 
         // recursive call, moved for one position
         out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
@@ -411,6 +422,15 @@ Out vary_n_knobs(const field_set& fs,
 
         // recursive call, moved for one position
         out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
+    }
+    else
+    {
+        // Odd, a bunch of test cases hit this assert.  I can't figure
+        // out if this is normal or a bug ... XXX investigate and fix.
+        // OC_ASSERT(0, "field index out of bounds (got %d max is %d)",
+        //          starting_index, fs.end_bit_raw_idx());
+        // std::cout << "Oh no Mr. Billll! idx=" << starting_index
+        //          << " max=" << fs.end_bit_raw_idx() << std::endl;
     }
     return out;
 }
