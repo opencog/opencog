@@ -467,6 +467,36 @@ struct field_set
         return _fields.end();
     }
 
+    // Same as above, but instead gives the upper and lower bounds
+    // for the raw field index.
+    size_t begin_term_raw_idx() const {
+        return 0;
+    }
+    size_t end_term_raw_idx() const {
+        return distance(_fields.begin(), end_term_fields());
+    }
+
+    size_t begin_contin_raw_idx() const {
+        return distance(_fields.begin(), begin_contin_fields());
+    }
+    size_t end_contin_raw_idx() const {
+        return distance(_fields.begin(), end_contin_fields());
+    }
+
+    size_t begin_disc_raw_idx() const {
+        return distance(_fields.begin(), begin_disc_fields());
+    }
+    size_t end_disc_raw_idx() const {
+        return distance(_fields.begin(), end_disc_fields());
+    }
+
+    size_t begin_bit_raw_idx() const {
+        return distance(_fields.begin(), begin_bit_fields());
+    }
+    size_t end_bit_raw_idx() const {
+        return distance(_fields.begin(), end_bit_fields());
+    }
+
     //* number of discrete fields that are single bits
     //* (i.e. are booleans)
     size_t n_bits() const
@@ -503,7 +533,7 @@ struct field_set
     size_t contin_to_raw_idx(size_t spec_idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
-        size_t raw_idx = n_term_fields();
+        size_t raw_idx = begin_contin_raw_idx();
         for (vector<contin_spec>::const_iterator it = _contin.begin();
                 it != _contin.begin() + spec_idx; ++it)
             raw_idx += it->depth;
@@ -518,13 +548,13 @@ struct field_set
     size_t raw_to_contin_idx(size_t raw_idx) const
     {
         // @todo: compute at the start in _fields - could be faster..
-        size_t begin_contin_idx = n_term_fields();
-        size_t end_contin_idx = begin_contin_idx + n_contin_fields();
+        size_t begin_contin_idx = begin_contin_raw_idx();
+        size_t end_contin_idx = end_contin_raw_idx();
         OC_ASSERT(raw_idx >= begin_contin_idx && raw_idx < end_contin_idx);
-        int contin_raw_idx = raw_idx - begin_contin_idx;
+        int contin_offset = raw_idx - begin_contin_idx;
         for (size_t i = 0; i < _contin.size(); ++i) {
-            contin_raw_idx -= _contin[i].depth;
-            if (contin_raw_idx < 0) return i;
+            contin_offset -= _contin[i].depth;
+            if (contin_offset < 0) return i;
         }
         OC_ASSERT(false, "Impossible case");
         return size_t(); // to make the compiler quiet
@@ -549,10 +579,12 @@ struct field_set
     /// OC_ASSERT is raised.
     size_t raw_to_disc_idx(size_t raw_idx) const
     {
+        size_t begin_disc_idx = begin_disc_raw_idx();
+        size_t end_disc_idx = end_disc_raw_idx();
+
         // @todo: compute at the start in _fields - could be faster..
-        size_t begin_disc_idx = n_term_fields() + n_contin_fields();
-        size_t end_disc_idx = begin_disc_idx + n_disc_fields() + n_bits();
-        OC_ASSERT(raw_idx >= begin_disc_idx && raw_idx < end_disc_idx);
+        OC_ASSERT(raw_idx >= begin_disc_idx && 
+                  raw_idx < end_disc_idx);
 
         // There's exactly one disc_spec per disc field.
         return raw_idx - begin_disc_idx;
