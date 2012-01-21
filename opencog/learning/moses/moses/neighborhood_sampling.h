@@ -291,11 +291,22 @@ void generate_all_in_neighborhood(const field_set& fs,
 }
 
 /**
- * Used by the function generate_all_in_neighborhood (only) for
- * generating instances at distance 'dist' from a given instance considered
- * as center. It varies all possible n knobs in all possible ways. It
- * varies one instance field (at the changing position starting_index
- * and calls itself for the remaining fields).
+ * vary_n_knobs -- Generate all possible instances, centered on 'inst',
+ * up to a distance 'dist' from 'inst'.  This will vary all knobs that
+ * have a raw index equal or greater than the 'starting_index', in
+ * all possible ways.  
+ *
+ * The current algorithm is recursive: it explores all possible settings
+ * by recursing on 'dist' and on the field 'starting_index'.  Recursion
+ * terminates when 'dist' drops to zero, and when 'starting_index' moves
+ * past the maximum number of fields.
+ *
+ * The deme must be large enough to hold all generated instances.
+ *
+ * This function is the main work-horse for generate_all_in_neighborhood().
+ *
+ * XXX TODO: the current algo could be speeded up a fair bit, cutting
+ * out some of the if tests, and the final recursive call.
  *
  * @todo: term algebra is ignored for the moment.
  *
@@ -304,9 +315,9 @@ void generate_all_in_neighborhood(const field_set& fs,
  * @param dist            distance
  * @param starting_index  position of a field to be varied
  * @param out             deme iterator (where to store the instances)
- * @param end             deme iterator, containing the end iterator,
- *                        necessary to check that 'out' does not go out
- *                        of the deme if it does so then an assert is raised
+ * @param end             deme iterator, containing the end iterator.
+ *                        This is used to verify that the write to the deme
+ *                        does not go out of bounds.
  * @return the out iterator pointing to the element after the last insertion
  */
 template<typename Out>
@@ -316,6 +327,7 @@ Out vary_n_knobs(const field_set& fs,
                  unsigned starting_index,
                  Out out, Out end)
 {
+    // Record the current instance.
     if (dist == 0) {
         OC_ASSERT(out != end);  // to avoid invalid memory write
         *out++ = inst;
@@ -324,7 +336,7 @@ Out vary_n_knobs(const field_set& fs,
 
     instance tmp_inst = inst;
 
-    // terms
+    // term knobs.
     if ((fs.begin_term_raw_idx() <= starting_index) &&
         (starting_index < fs.end_term_raw_idx()))
     {
@@ -333,24 +345,27 @@ Out vary_n_knobs(const field_set& fs,
                            starting_index + fs.end_term_raw_idx(),
                            out, end);
     }
-    // contins
+    // contin knobs
     else 
     if ((fs.begin_contin_raw_idx() <= starting_index) &&
         (starting_index < fs.end_contin_raw_idx()))
     {
-        // modify the contin disc pointed by itr and recursive call
+        // Modify the contin knob pointed by itr, then recursive call.
         field_set::contin_iterator itc = fs.begin_contin(tmp_inst);
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
         itc += contin_idx;
+
         size_t depth = fs.contin()[itc.idx()].depth;
         size_t num = fs.count_n_before_stop(tmp_inst, contin_idx);
+
         field_set::disc_iterator itr = fs.begin_raw(tmp_inst);        
         itr += starting_index;
         size_t relative_raw_idx = starting_index - fs.contin_to_raw_idx(contin_idx);
+
         // case tmp_inst at itr is Stop
         if (*itr == field_set::contin_spec::Stop) {
             // Assumption [1]: within the same contin, it is the first Stop
-            // recursive call, moved to the next contin (or disc if no more contin)
+            // recursive call, move to the next contin.
             out = vary_n_knobs(fs, tmp_inst, dist,
                                // below is to fulfill Assumption [1]
                                starting_index + depth - relative_raw_idx,
@@ -386,7 +401,8 @@ Out vary_n_knobs(const field_set& fs,
             }
         }
     }
-    // discs
+
+    // Discrete knobs
     else
     if ((fs.begin_disc_raw_idx() <= starting_index) &&
         (starting_index < fs.end_disc_raw_idx()))
@@ -394,20 +410,22 @@ Out vary_n_knobs(const field_set& fs,
         field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
         itd += fs.raw_to_disc_idx(starting_index);
         disc_t tmp_val = *itd;
-        // recursive call, moved for one position
+
+        // Recursive call, moved for one position.
         out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
+
         // modify the disc and recursive call, moved for one position
-        for(unsigned i = 1; i <= itd.multy() - 1; ++i) {
-            // vary all legal values, the neighborhood should 
-            // not equals to itself, so if it is same, set it to 0.
-            if(tmp_val == i)
+        for (unsigned i = 1; i <= itd.multy() - 1; ++i) {
+            // Vary to all legal values.  The neighborhood should 
+            // not equal to itself, so if it is same, set it to 0.
+            if (tmp_val == i)
                 *itd = 0;
             else
                 *itd = i;
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
         }
     }
-    // bits
+    // Single-bit knobs
     else
     if ((fs.begin_bit_raw_idx() <= starting_index) &&
         (starting_index < fs.end_bit_raw_idx()))
@@ -415,22 +433,21 @@ Out vary_n_knobs(const field_set& fs,
         field_set::bit_iterator itb = fs.begin_bits(tmp_inst);
         itb += starting_index - fs.begin_bit_raw_idx();
 
-        // recursive call, moved for one position
+        // Recursive call, moved for one position.
         out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
-        // modify tmp_inst at itb, changed to the opposite value
+
+        // Modify tmp_inst at itb, change to the opposite value.
         *itb = !(*itb);
 
-        // recursive call, moved for one position
+        // Recursive call, moved for one position.
         out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
     }
     else
     {
-        // Odd, a bunch of test cases hit this assert.  I can't figure
-        // out if this is normal or a bug ... XXX investigate and fix.
-        // OC_ASSERT(0, "field index out of bounds (got %d max is %d)",
-        //          starting_index, fs.end_bit_raw_idx());
-        // std::cout << "Oh no Mr. Billll! idx=" << starting_index
-        //          << " max=" << fs.end_bit_raw_idx() << std::endl;
+        // The current recursive algo used here will over-run the end
+        // of the array by one. This is normal. Do nothing. If 'dist'
+        // was zero, the very first statement at top takes care of
+        // things for us.
     }
     return out;
 }
