@@ -245,13 +245,13 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
 
 
 /**
- * Generates instances at distance n from an instance considered as
- * center (often the exemplar but not necessarily).
+ * Generates instances at distance 'dist' from an instance considered
+ * as center (often the exemplar but not necessarily).
  * It calls a recursive function vary_n_knobs which varies
  * instance fields one by one (in all possible ways)
  *
  * @param fs            deme
- * @param n             distance
+ * @param dist          distance
  * @param out           deme (where to store the instances)
  * @param end           deme iterator, containing the end iterator,
  *                      necessary to check that 'out' does not go out
@@ -259,24 +259,24 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
  * @param center_inst   the center instance 
  */
 template<typename Out>
-void generate_all_in_neighborhood(const field_set& fs, unsigned n,
+void generate_all_in_neighborhood(const field_set& fs, unsigned dist,
                                   Out out, Out end,
-                                  const instance& center_inst )
+                                  const instance& center_inst)
 {
     OC_ASSERT(center_inst.size() == fs.packed_width(),
               "the size of center_instance should be equal to the width of fs");
-    vary_n_knobs(fs, center_inst, n, 0, out, end);
+    vary_n_knobs(fs, center_inst, dist, 0, out, end);
 }
 
 
 /**
- * Generates instances at distance n from the exemplar
+ * Generates instances at distance 'dist' from the exemplar
  * (i.e., with n elements changed from 0 from the exemplar)
  * It calls a recursive function vary_n_knobs which varies
  * instance fields one by one (in all possible ways)
  *
  * @param fs   deme
- * @param n    distance
+ * @param dist distance
  * @param out  deme (where to store the instances)
  * @param end  deme iterator, containing the end iterator,
  *             necessary to check that 'out' does not go out
@@ -284,15 +284,15 @@ void generate_all_in_neighborhood(const field_set& fs, unsigned n,
  */
 template<typename Out>
 void generate_all_in_neighborhood(const field_set& fs,
-                                  unsigned n, Out out, Out end)
+                                  unsigned dist, Out out, Out end)
 {
     instance inst(fs.packed_width());
-    generate_all_in_neighborhood(fs, n, out, end, inst);
+    generate_all_in_neighborhood(fs, dist, out, end, inst);
 }
 
 /**
  * Used by the function generate_all_in_neighborhood (only) for
- * generating instances at distance n from a given instance considered
+ * generating instances at distance 'dist' from a given instance considered
  * as center. It varies all possible n knobs in all possible ways. It
  * varies one instance field (at the changing position starting_index
  * and calls itself for the remaining fields).
@@ -301,7 +301,7 @@ void generate_all_in_neighborhood(const field_set& fs,
  *
  * @param fs              deme
  * @param inst            exemplar
- * @param n               distance
+ * @param dist            distance
  * @param starting_index  position of a field to be varied
  * @param out             deme iterator (where to store the instances)
  * @param end             deme iterator, containing the end iterator,
@@ -312,11 +312,11 @@ void generate_all_in_neighborhood(const field_set& fs,
 template<typename Out>
 Out vary_n_knobs(const field_set& fs,
                  const instance& inst,
-                 unsigned n,
+                 unsigned dist,
                  unsigned starting_index,
                  Out out, Out end)
 {
-    if(n == 0) {
+    if (dist == 0) {
         OC_ASSERT(out != end);  // to avoid invalid memory write
         *out++ = inst;
         return out;
@@ -325,10 +325,11 @@ Out vary_n_knobs(const field_set& fs,
     instance tmp_inst = inst;
     unsigned begin_contin_idx, begin_disc_idx, begin_bit_idx;
 
+    // XXX Whoa! above are used uninitialzied!!
     // terms
     if (starting_index < (begin_contin_idx = fs.n_term_fields())) {
         // @todo: handle term algebras
-        out = vary_n_knobs(fs, tmp_inst, n, starting_index + begin_contin_idx,
+        out = vary_n_knobs(fs, tmp_inst, dist, starting_index + begin_contin_idx,
                            out, end);
     }
     // contins
@@ -346,34 +347,34 @@ Out vary_n_knobs(const field_set& fs,
         if(*itr == field_set::contin_spec::Stop) {
             // Assumption [1]: within the same contin, it is the first Stop
             // recursive call, moved to the next contin (or disc if no more contin)
-            out = vary_n_knobs(fs, tmp_inst, n,
+            out = vary_n_knobs(fs, tmp_inst, dist,
                                // below is to fulfill Assumption [1]
                                starting_index + depth - relative_raw_idx,
                                out, end);
             // modify with Left or Right
             *itr = field_set::contin_spec::Left;
-            out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
+            out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
             *itr = field_set::contin_spec::Right;
-            out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
+            out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
         } 
         // case tmp_inst at itr is Left or Right
         else {
             // recursive call, moved for one position
-            out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
+            out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
             // Left<->Right
             *itr = field_set::contin_spec::switchLR(*itr);
-            out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
+            out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
             // if the next Stop is not further from itr than the distance n
             // then turn the remaining discs to Stop
             unsigned remRLs = num - relative_raw_idx; // remaining non-Stop
                                                       // discs including
                                                       // the current one
-            if(remRLs <= n) {
+            if (remRLs <= dist) {
                 for(; relative_raw_idx < num; --num, ++itr) {
                     // Stop
                     *itr = field_set::contin_spec::Stop;
                 }
-                out = vary_n_knobs(fs, tmp_inst, n - remRLs,
+                out = vary_n_knobs(fs, tmp_inst, dist - remRLs,
                                    // below is to fulfill Assumption [1]
                                    starting_index + depth - relative_raw_idx,
                                    out, end);
@@ -381,12 +382,12 @@ Out vary_n_knobs(const field_set& fs,
         }
     }
     // discs
-    else if(starting_index < (begin_bit_idx = begin_disc_idx + fs.n_disc_fields())) {
+    else if (starting_index < (begin_bit_idx = begin_disc_idx + fs.n_disc_fields())) {
         field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
         itd += starting_index - begin_disc_idx;
         disc_t tmp_val = *itd;
         // recursive call, moved for one position
-        out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
+        out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
         // modify the disc and recursive call, moved for one position
         for(unsigned i = 1; i <= itd.multy() - 1; ++i) {
             // vary all legal values, the neighborhood should 
@@ -395,7 +396,7 @@ Out vary_n_knobs(const field_set& fs,
                 *itd = 0;
             else
                 *itd = i;
-            out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
+            out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
         }
     }
     // bits
@@ -404,12 +405,12 @@ Out vary_n_knobs(const field_set& fs,
         itb += starting_index - begin_bit_idx;
 
         // recursive call, moved for one position
-        out = vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out, end);
+        out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
         // modify tmp_inst at itb, changed to the opposite value
         *itb = !(*itb);
 
         // recursive call, moved for one position
-        out = vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out, end);
+        out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
     }
     return out;
 }
@@ -586,9 +587,9 @@ inline deme_size_t count_n_changed_knobs(const field_set& fs,
     return count_n_changed_knobs_from_index(fs, inst, dist, 0, max_count);
 }
 
-/// fill the deme with at max number_of_new_instances, at distance
-/// dist and return the actual number of new instances (bounded by the
-/// possible neighbors at distance dist)
+/// Fill the deme with at most number_of_new_instances, at distance
+/// dist.  Return the actual number of new instances created (this 
+/// number is bounded by the possible neighbors at distance dist).
 inline deme_size_t
 sample_new_instances(deme_size_t total_number_of_neighbours,
                      deme_size_t number_of_new_instances,
@@ -599,10 +600,10 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
                      RandGen& rng)
 {
     if (number_of_new_instances < total_number_of_neighbours) {
-        //resize the deme so it can take new instances
+        // Resize the deme so it can take new instances.
         deme.resize(current_number_of_instances + number_of_new_instances);
-        // sample number_of_new_instances instances at
-        // distance 'distance' from the exemplar
+        // Sample number_of_new_instances instances at
+        // distance 'distance' from the exemplar.
         sample_from_neighborhood(deme.fields(), dist,
                                  number_of_new_instances,
                                  deme.begin() + current_number_of_instances,
@@ -610,10 +611,10 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
                                  center_inst);
     } else {
         number_of_new_instances = total_number_of_neighbours;
-        //resize the deme so it can take new instances
+        // Resize the deme so it can take new instances
         deme.resize(current_number_of_instances + number_of_new_instances);
-        //add all instances on the distance dist from
-        //the initial instance
+        // Add all instances on the distance dist from
+        // the initial instance.
         generate_all_in_neighborhood(deme.fields(), dist,
                                      deme.begin() + current_number_of_instances,
                                      deme.end(),
@@ -621,17 +622,20 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
     }
     return number_of_new_instances;
 }
-/// like above but doesn't compute total_number_of_neighbours instead
-/// of taking it argument
+
+/// Just like the above, but computes total_number_of_neighbours
+/// instead of taking it argument.
+//
 inline deme_size_t
 sample_new_instances(deme_size_t number_of_new_instances,
                      deme_size_t current_number_of_instances,
                      const instance& center_inst,
                      instance_set<composite_score>& deme,
                      unsigned dist,
-                     RandGen& rng) {
-    // the number of all neighbours at the distance d (stops
-    // counting when above number_of_new_instances)
+                     RandGen& rng)
+{
+    // The number of all neighbours at the distance d (stops
+    // counting when above number_of_new_instances).
     deme_size_t total_number_of_neighbours =
         count_n_changed_knobs(deme.fields(), center_inst, dist,
                               number_of_new_instances);
