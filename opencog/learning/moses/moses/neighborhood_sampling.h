@@ -81,13 +81,17 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
 }
 
 /**
- * It generates the contin neighbor with the haming distance from
- * the given instance. For examples, if the contin[it.idx()] is encoded
- * with depth = 4,like (L R S S), so the neighbors with distance = 1 of it
- * are (R R S S), (L L S S),(L R L S),(L S S S) and (L R R S). And we
- * randomly chose one of them to return.
+ * This routine modifies the instance 'inst' so that the new instance
+ * lies at a Hamming distance from the input instance.  The Hamming
+ * distance here is taken as the number of raw fields changed to encode
+ * the contin.
  *
- * @todo: in order to increase syntactic vs semantics correlation one
+ * For example, if the contin[it.idx()] is encoded with depth = 4,
+ * as (L R S S), then the neighbors at distance = 1 are (R R S S),
+ * (L L S S), (L R L S), (L S S S) and (L R R S).  This routine will
+ * randomly chose one of these.
+ *
+ * @todo: in order to increase syntactic vs semantic correlation, one
  * may want to not consider contin neighbors which encodes to contin
  * with too alrge difference from the given instance. So for example
  * in the example given above we would ignore (R R S S).
@@ -96,13 +100,13 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
  * @param inst the instance will be modified is contin encoded with distance
  *             equal to n
  * @param it   the contin iterator of the instance
- * @param n    the haming distance contin encode will be modified
+ * @param dist the Hamming distance by which the contin will be modified.
  * @param rng  the random generator
  */
 inline void generate_contin_neighbor(const field_set& fs,
                                      instance& inst,
                                      field_set::contin_iterator it,
-                                     unsigned n, RandGen& rng)
+                                     unsigned dist, RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
     size_t length = fs.contin_length(inst, it.idx());
@@ -112,7 +116,7 @@ inline void generate_contin_neighbor(const field_set& fs,
     // there is no Stop, the last disc (i.e. either Left or Right)
     lazy_random_selector select(std::min(length + 1, depth), rng);
 
-    for (unsigned i = n; i > 0; i--) {
+    for (unsigned i = dist; i > 0; i--) {
         size_t r = select();
         field_set::disc_iterator itr = fs.begin_raw(inst);
         itr += begin + r;
