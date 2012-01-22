@@ -1,4 +1,4 @@
-/** neighborhood_sampling.h --- 
+/** neighborhood_sampling.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -81,10 +81,10 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
 }
 
 /**
- * It generates the contin neighbor with the haming distance from 
+ * It generates the contin neighbor with the haming distance from
  * the given instance. For examples, if the contin[it.idx()] is encoded
  * with depth = 4,like (L R S S), so the neighbors with distance = 1 of it
- * are (R R S S), (L L S S),(L R L S),(L S S S) and (L R R S). And we 
+ * are (R R S S), (L L S S),(L R L S),(L S S S) and (L R R S). And we
  * randomly chose one of them to return.
  *
  * @todo: in order to increase syntactic vs semantics correlation one
@@ -94,14 +94,14 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
  *
  * @param fs   deme
  * @param inst the instance will be modified is contin encoded with distance
- *             equal to n 
+ *             equal to n
  * @param it   the contin iterator of the instance
  * @param n    the haming distance contin encode will be modified
  * @param rng  the random generator
  */
 inline void generate_contin_neighbor(const field_set& fs,
-                                     instance& inst, 
-                                     field_set::contin_iterator it, 
+                                     instance& inst,
+                                     field_set::contin_iterator it,
                                      unsigned n, RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
@@ -114,7 +114,7 @@ inline void generate_contin_neighbor(const field_set& fs,
 
     for (unsigned i = n; i > 0; i--) {
         size_t r = select();
-        field_set::disc_iterator itr = fs.begin_raw(inst);        
+        field_set::disc_iterator itr = fs.begin_raw(inst);
         itr += begin + r;
         // case inst at itr is Stop
         if (*itr == field_set::contin_spec::Stop) {
@@ -123,7 +123,7 @@ inline void generate_contin_neighbor(const field_set& fs,
                 field_set::contin_spec::Right;
             length++;
             select.reset_range(std::min(length + 1, depth));
-        } 
+        }
         // case inst at itr is Left or Right
         else {
             // whether r corresponds to the last Left or Right disc
@@ -133,7 +133,7 @@ inline void generate_contin_neighbor(const field_set& fs,
             if (before_stop && can_be_stop && rng.randbool()) {
                 *itr = field_set::contin_spec::Stop;
                 select.reset_range(--length);
-            } else 
+            } else
                 *itr = field_set::contin_spec::switchLR(*itr);
         }
     }
@@ -141,7 +141,7 @@ inline void generate_contin_neighbor(const field_set& fs,
 
 /**
  * This procedure samples sample_size instances at distance n from an
- * instance considered as center (for instance the exemplar). 
+ * instance considered as center (for instance the exemplar).
  *
  * @todo: term algebra fields are ignored for now
  *
@@ -256,7 +256,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
  * @param end           deme iterator, containing the end iterator,
  *                      necessary to check that 'out' does not go out
  *                      of the deme if it does so then an assert is raised
- * @param center_inst   the center instance 
+ * @param center_inst   the center instance
  */
 template<typename Out>
 void generate_all_in_neighborhood(const field_set& fs, unsigned dist,
@@ -294,7 +294,7 @@ void generate_all_in_neighborhood(const field_set& fs,
  * vary_n_knobs -- Generate all possible instances, centered on 'inst',
  * up to a distance 'dist' from 'inst'.  This will vary all knobs that
  * have a raw index equal or greater than the 'starting_index', in
- * all possible ways.  
+ * all possible ways.
  *
  * The current algorithm is recursive: it explores all possible settings
  * by recursing on 'dist' and on the field 'starting_index'.  Recursion
@@ -346,36 +346,37 @@ Out vary_n_knobs(const field_set& fs,
                            out, end);
     }
     // contin knobs
-    else 
+    else
     if ((fs.begin_contin_raw_idx() <= starting_index) &&
         (starting_index < fs.end_contin_raw_idx()))
     {
-        // Modify the contin knob pointed by itr, then recursive call.
+        // Modify the contin knob pointed by itr, then recurse on
+        // starting_index and dist.
         field_set::contin_iterator itc = fs.begin_contin(tmp_inst);
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
         itc += contin_idx;
 
+        // The 'depth' is the max possible size of this contin field,
+        // while length is the actual size, for this instance.
         size_t depth = fs.contin()[itc.idx()].depth;
         size_t length = fs.contin_length(tmp_inst, contin_idx);
 
-        field_set::disc_iterator itr = fs.begin_raw(tmp_inst);        
+        field_set::disc_iterator itr = fs.begin_raw(tmp_inst);
         itr += starting_index;
         size_t relative_raw_idx = starting_index - fs.contin_to_raw_idx(contin_idx);
 
         // case tmp_inst at itr is Stop
         if (*itr == field_set::contin_spec::Stop) {
-            // Assumption [1]: within the same contin, it is the first Stop
-            // recursive call, move to the next contin.
-            out = vary_n_knobs(fs, tmp_inst, dist,
-                               // below is to fulfill Assumption [1]
-                               starting_index + depth - relative_raw_idx,
-                               out, end);
+            // Assume that this is the first stop encountered for this
+            // contin field.  Skip straight to the next contin field.
+            size_t next_contin = starting_index + depth - relative_raw_idx;
+            out = vary_n_knobs(fs, tmp_inst, dist, next_contin, out, end);
             // modify with Left or Right
             *itr = field_set::contin_spec::Left;
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
             *itr = field_set::contin_spec::Right;
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
-        } 
+        }
         // case tmp_inst at itr is Left or Right
         else
         {
@@ -416,7 +417,7 @@ Out vary_n_knobs(const field_set& fs,
 
         // modify the disc and recursive call, moved for one position
         for (unsigned i = 1; i <= itd.multy() - 1; ++i) {
-            // Vary to all legal values.  The neighborhood should 
+            // Vary to all legal values.  The neighborhood should
             // not equal to itself, so if it is same, set it to 0.
             if (tmp_val == i)
                 *itd = 0;
@@ -473,20 +474,26 @@ safe_binomial_coefficient(unsigned k, unsigned n)
 }
 
 /**
- * Used by the function count_n_changed_knobs (only) for counting
- * instances at distance n from an instance considered as center
- * (inst). It counts all possible n knobs changed in all possible
- * ways.
- * 
+ * Count the number of neighbors surrounding instance 'inst', at a
+ * distance of 'dist' or less, starting with knob 'starting_index'.
+ *
+ * Given an instance 'inst', the 'neighborhood at distance one' is the
+ * set of all instances with one changed knob setting.  The set with
+ * two changed knob settings is the neighborhood at distance two, etc.
+ *
+ * This routine is implemented with a recursive algorithm, and so
+ * counting starts with knobs numbered with 'starting_index' or higher.
+ * To avoid wasting cpu cycles, counting is stopped when 'max_count'
+ * is exceeded.
+ *
  * @param fs              deme
- * @param inst            instance to consider the distance from
- * @param n               distance
+ * @param inst            centeral instance
+ * @param dist            distance
  * @param starting_index  position of a field to be varied
- * @param max_count       stop counting when above this value, that is
- *                        because this function can be computationally expensive.
+ * @param max_count       stop counting once this value is reached.
  */
 inline deme_size_t
-count_n_changed_knobs_from_index(const field_set& fs,
+count_neighborhood_size_from_index(const field_set& fs,
                                  const instance& inst,
                                  unsigned dist,
                                  unsigned starting_index,
@@ -498,26 +505,22 @@ count_n_changed_knobs_from_index(const field_set& fs,
 
     deme_size_t number_of_instances = 0;
 
-    // XXX The below assumes a specific internal layout for the field set.
-    // It works right now, but would be fragile if the field set ever changed.
-    // XXX This should be fixed ... 
-    unsigned begin_contin_idx = fs.n_term_fields();
-    unsigned begin_disc_idx = begin_contin_idx + fs.n_contin_fields();
-    unsigned begin_bit_idx = begin_disc_idx + fs.n_disc_fields();
-    unsigned end_bit_idx = begin_bit_idx + fs.n_bits();
-
     // terms
-    if (starting_index < begin_contin_idx) {
+    if ((fs.begin_term_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_term_raw_idx()))
+    {
         // @todo: handle term algebras
-        number_of_instances = 
-            count_n_changed_knobs_from_index(fs, inst, dist,
-                                             starting_index + begin_contin_idx,
+        number_of_instances =
+            count_neighborhood_size_from_index(fs, inst, dist,
+                                             starting_index + fs.end_term_raw_idx(),
                                              max_count);
     }
 
     // contins
-    else if (starting_index < begin_disc_idx) {
-
+    else
+    if ((fs.begin_contin_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_contin_raw_idx()))
+    {
         field_set::const_contin_iterator itc = fs.begin_contin(inst);
 
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
@@ -550,7 +553,7 @@ count_n_changed_knobs_from_index(const field_set& fs,
 
             // Recursive call.
             number_of_instances +=
-                cni * count_n_changed_knobs_from_index(fs, inst, dist-i,
+                cni * count_neighborhood_size_from_index(fs, inst, dist-i,
                                                        starting_index + depth,
                                                        max_count);
             // Stop prematurely if above max_count.
@@ -560,11 +563,13 @@ count_n_changed_knobs_from_index(const field_set& fs,
     }
 
     // discs
-    else if (starting_index < begin_bit_idx) {
-
+    else
+    if ((fs.begin_disc_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_disc_raw_idx()))
+    {
         // Recursive call, moved for one position.
-        number_of_instances = 
-            count_n_changed_knobs_from_index(fs, inst, dist, 
+        number_of_instances =
+            count_neighborhood_size_from_index(fs, inst, dist,
                                              starting_index + 1, max_count);
 
         // stop prematurely if above max_count
@@ -573,59 +578,73 @@ count_n_changed_knobs_from_index(const field_set& fs,
 
         // count all legal values of the knob
         field_set::const_disc_iterator itd = fs.begin_disc(inst);
-        itd += starting_index - begin_disc_idx;
+        itd += starting_index - fs.begin_disc_raw_idx();
 
-        number_of_instances += 
-            (itd.multy() - 1) 
-            * count_n_changed_knobs_from_index(fs, inst, dist - 1,
+        number_of_instances +=
+            (itd.multy() - 1)
+            * count_neighborhood_size_from_index(fs, inst, dist - 1,
                                                starting_index + 1, max_count);
     }
 
     // bits
-    else if (starting_index < end_bit_idx) {
+    else
+    if ((fs.begin_bit_raw_idx() <= starting_index) &&
+        (starting_index < fs.end_bit_raw_idx()))
+    {
 
         // Since bits all have the same multiplicity (viz. 2), and are
         // the last in the field set, there is no need for recursive call.
-        unsigned rb = end_bit_idx - starting_index;
+        unsigned rb = fs.end_bit_raw_idx() - starting_index;
         if (dist <= rb)
             number_of_instances = safe_binomial_coefficient(rb, dist);
+    }
+    else
+    {
+        // Harmless; this recursive algo is desgined to over-run by
+        // exactly one.
     }
 
     return number_of_instances;
 }
 
 /**
- * Counts instances at distance n from the initial instance
- * (i.e., with n elements changed from the initial instance)
- * It calls a recursive function count_n_changed_knobs_from_index
- * 
+ * Count the number of neighbors surrounding instance 'inst', at a
+ * distance of 'dist' or less.
+ *
+ * Given an instance 'inst', the 'neighborhood at distance one' is the
+ * set of all instances with one changed knob setting.  The set with
+ * two changed knob settings is the neighborhood at distance two, etc.
+ *
+ * To avoid wasting cpu cycles, counting is stopped when 'max_count'
+ * is exceeded.
+ *
  * @param fs              deme
- * @param inst            initial instance
+ * @param inst            central instance
  * @param dist            distance
- * @param max_count       stop counting when above this value, that is
- *                        because this function can be computationally expensive.
+ * @param max_count       stop counting when the count exceeds this value.
+ * @return                the size of the nieghborhood.
  */
-inline deme_size_t count_n_changed_knobs(const field_set& fs,
+inline deme_size_t count_neighborhood_size(const field_set& fs,
                                          const instance& inst,
                                          unsigned dist,
-                                         deme_size_t max_count 
+                                         deme_size_t max_count
                                          = numeric_limits<deme_size_t>::max())
 {
-    return count_n_changed_knobs_from_index(fs, inst, dist, 0, max_count);
+    return count_neighborhood_size_from_index(fs, inst, dist, 0, max_count);
 }
 
 // For backward compatibility, like above but with null instance
-inline deme_size_t count_n_changed_knobs(const field_set& fs,
+inline deme_size_t count_neighborhood_size(const field_set& fs,
                                          unsigned dist,
                                          deme_size_t max_count
                                          = numeric_limits<deme_size_t>::max())
 {
     instance inst(fs.packed_width());
-    return count_n_changed_knobs_from_index(fs, inst, dist, 0, max_count);
+    return count_neighborhood_size_from_index(fs, inst, dist, 0, max_count);
 }
 
 /// Fill the deme with at most number_of_new_instances, at distance
-/// dist.  Return the actual number of new instances created (this 
+/// dist.  Return the actual number of new instances created (this
 /// number is bounded by the possible neighbors at distance dist).
 inline deme_size_t
 sample_new_instances(deme_size_t total_number_of_neighbours,
@@ -674,8 +693,8 @@ sample_new_instances(deme_size_t number_of_new_instances,
     // The number of all neighbours at the distance d (stops
     // counting when above number_of_new_instances).
     deme_size_t total_number_of_neighbours =
-        count_n_changed_knobs(deme.fields(), center_inst, dist,
-                              number_of_new_instances);
+        count_neighborhood_size(deme.fields(), center_inst, dist,
+                                number_of_new_instances);
     return sample_new_instances(total_number_of_neighbours,
                                 number_of_new_instances,
                                 current_number_of_instances,

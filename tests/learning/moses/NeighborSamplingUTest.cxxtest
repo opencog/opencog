@@ -221,7 +221,7 @@ private:
         // cout << generated_size << " " << generated_max_distance
         //  << " " << generated_min_distance <<endl;
 
-        size_t total_size = count_n_changed_knobs(fs, inst, distance);
+        size_t total_size = count_neighborhood_size(fs, inst, distance);
         // cout << "total_size :" << total_size <<endl;
 
         TS_ASSERT_EQUALS(generated_size, total_size);

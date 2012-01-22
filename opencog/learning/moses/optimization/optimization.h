@@ -377,7 +377,7 @@ struct iterative_hillclimbing
             // The number of all neighbours at the distance d (stops
             // counting when above number_of_new_instances)
             deme_size_t total_number_of_neighbours =
-                count_n_changed_knobs(deme.fields(), center_inst, distance,
+                count_neighborhood_size(deme.fields(), center_inst, distance,
                                       number_of_new_instances);
 
             // Estimate the probability of an improvement and halt if too low
@@ -561,7 +561,7 @@ struct sliced_iterative_hillclimbing
             cout << "Distance in this iteration:" << distance << endl;
 
             // the number of all neighbours at the distance d
-            deme_size_t total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
+            deme_size_t total_number_of_neighbours = count_neighborhood_size(deme.fields(), distance);
             cout << "Number of possible instances:" << total_number_of_neighbours << endl;
 
             if (total_number_of_neighbours == 0) {
@@ -569,7 +569,7 @@ struct sliced_iterative_hillclimbing
                 return EVALUATED_ALL_AVAILABLE; // This is ugly, see the note in moses.h
             }
 
-#define FRACTION_OF_REMAINING 10 
+#define FRACTION_OF_REMAINING 10
 
             number_of_new_instances = (max_number_of_instances - current_number_of_instances) / FRACTION_OF_REMAINING;
             if (number_of_new_instances < MINIMUM_DEME_SIZE)
@@ -693,13 +693,13 @@ struct sa_parameters
 struct simulated_annealing
 {
     typedef score_t energy_t;
- 
+
     simulated_annealing(RandGen& _rng,
                         const optim_parameters& op = optim_parameters(),
                         const sa_parameters& sa = sa_parameters())
-        : rng(_rng), 
+        : rng(_rng),
           opt_params(op), sa_params(sa) {}
-      
+ 
     double accept_probability(energy_t energy_new, energy_t energy_old,
                               double temperature)
     {
