@@ -97,8 +97,14 @@ public:
         cout << "after generate:" << fs.stream_raw(new_inst) << endl;
         
         int new_dist = fs.hamming_distance(inst, new_inst);
+        cout << "new distance: " << new_dist << endl;
         
-        TS_ASSERT(distance == new_dist);        
+        // The new contin may differ from the old one by any hamming
+        // distance of between 0 and 3.  Basically, tweeaking the 
+        // least signficant bits can add/remove stop bits, etc.
+        // And there is a one in 4^3 ==  1-in-64 chance
+        // that the new routine will fail to generate a new contin.
+        TS_ASSERT((0 <= new_dist) && (new_dist <= distance));   
     }
 
     void test_sample_from_neighborhood() 
@@ -190,17 +196,26 @@ public:
                                      deme.begin(), deme.end(),
                                      rng, center_inst);
 
-            get_sample_size_and_distance(deme,sampled_size,
+            get_sample_size_and_distance(deme, sampled_size,
                                          sampled_max_distance,
                                          sampled_min_distance,
                                          center_inst);
             
-            //  cout << endl << "sample_size:" << sampled_size << "  max_distance:" << 
-            //   sampled_max_distance <<" min_distance :"<< sampled_min_distance <<endl;
+            cout << endl << "sample_size:" << sample_size
+                 << " sampled_size:" << sampled_size
+                 << " max_distance:" << sampled_max_distance
+                 << " min_distance:"<< sampled_min_distance <<endl;
             
-            TS_ASSERT(sample_size == sampled_size);
-            TS_ASSERT(distance == sampled_max_distance);
-            TS_ASSERT(distance == sampled_min_distance);
+            // The new contin sampling routine has a non-zero chance
+            // of returning zero-distance variants.  But this is no
+            // worse than returning duplicates...
+            // TS_ASSERT(sample_size == sampled_size);
+            TS_ASSERT(sample_size*3 <= 4*sampled_size);
+            TS_ASSERT(sampled_min_distance <= sampled_max_distance);
+            TS_ASSERT((1 <= sampled_min_distance) &&
+                      (sampled_min_distance <= distance));
+            TS_ASSERT((1 <= sampled_max_distance) &&
+                      (sampled_max_distance <= distance));
         }
      }
 
@@ -222,9 +237,14 @@ private:
         //  << " " << generated_min_distance <<endl;
 
         size_t total_size = count_neighborhood_size(fs, inst, distance);
-        // cout << "total_size :" << total_size <<endl;
+        cout << "total_size :" << total_size <<endl;
+        cout << "generated_size :" << generated_size <<endl;
 
-        TS_ASSERT_EQUALS(generated_size, total_size);
+        // The new contin sampling routine has a non-zero chance
+        // of returning zero-distance variants.  But this is no
+        // worse than returning duplicates...
+        // TS_ASSERT_EQUALS(generated_size, total_size);
+        TS_ASSERT(total_size*3 <= 4*generated_size);
         TS_ASSERT_EQUALS(generated_max_distance, distance);
         TS_ASSERT_EQUALS(generated_min_distance, distance);
     }

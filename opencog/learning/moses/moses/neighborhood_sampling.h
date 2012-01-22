@@ -80,6 +80,13 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
     }
 }
 
+#if 0
+Deprecated code -- this algo doesnt really make sense.
+
+ * XXX Doing this to a contin really doesnt make sense: when altering
+ * a contin, we want to take bigger or smaller steps, and not just
+ * twiddle random bits in the contin.
+
 /**
  * This routine modifies the instance 'inst' so that the new instance
  * lies at a Hamming distance from the input instance.  The Hamming
@@ -91,11 +98,6 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
  * (L L S S), (L R L S), (L S S S) and (L R R S).  This routine will
  * randomly chose one of these.
  *
- * @todo: in order to increase syntactic vs semantic correlation, one
- * may want to not consider contin neighbors which encodes to contin
- * with too alrge difference from the given instance. So for example
- * in the example given above we would ignore (R R S S).
- *
  * @param fs   deme
  * @param inst the instance will be modified is contin encoded with distance
  *             equal to n
@@ -103,7 +105,7 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
  * @param dist the Hamming distance by which the contin will be modified.
  * @param rng  the random generator
  */
-inline void generate_contin_neighbor(const field_set& fs,
+inline void hamming_contin_neighbor(const field_set& fs,
                                      instance& inst,
                                      field_set::contin_iterator it,
                                      unsigned dist, RandGen& rng)
@@ -140,6 +142,101 @@ inline void generate_contin_neighbor(const field_set& fs,
             } else
                 *itr = field_set::contin_spec::switchLR(*itr);
         }
+    }
+}
+#endif
+
+// Twiddle one contin bit only.
+// Only two choices available: change it to stop, or flip it.
+// @itr points to a (pseudo-) bit in the contin (as a raw field).
+inline void twiddle_contin_bit(field_set::disc_iterator itr,
+                               RandGen& rng)
+{
+    if (rng.randbool())
+    {
+        *itr = field_set::contin_spec::Stop;
+    }
+    else
+    {
+        // Switch left and right.
+        bool is_left = (*itr == field_set::contin_spec::Left);
+        *itr = is_left ?
+            field_set::contin_spec::Right:
+            field_set::contin_spec::Left;
+    }
+}
+
+/**
+ * This routine modifies the instance 'inst' so that the new instance
+ * has the n'th-from-last significant bit changed.
+ *
+ * For example, if the contin[it.idx()] is encoded with depth = 4,
+ * as [L R S S], then the neighbors worth considering are [L S S S],
+ * (a decrease of significant bits), [L L S S] (same number of bits,
+ * but direction changed), [L R L S], and [L R R S] (increase the
+ * number of significant bits).  This routine will randomly chose one
+ * of these four possibiliities.
+ *
+ * @todo: in order to better approximate the real-number metric, we
+ * should also consider the neighbor [LRRRRR..] of [RLLLLL...]
+ *
+ * @param fs   deme
+ * @param inst the instance to be modified
+ * @param it   the contin iterator pointing into the instance
+ * @param dist the distance to consider.
+ * @param rng  the random generator
+ */
+inline void generate_contin_neighbor(const field_set& fs,
+                                     instance& inst,
+                                     field_set::contin_iterator it,
+                                     unsigned dist, RandGen& rng)
+{
+    size_t begin = fs.contin_to_raw_idx(it.idx());
+    size_t length = fs.contin_length(inst, it.idx());
+    size_t depth = fs.contin()[it.idx()].depth;
+
+    // If length is depth, then no unused pseudo-bits; twiddle the
+    // last bit only.
+    if (depth == length)
+    {
+        field_set::disc_iterator itr = fs.begin_raw(inst);
+        itr += begin + length;
+        twiddle_contin_bit(itr, rng);
+    }
+    else
+    {
+        // If length is not equal to depth, then its less than depth,
+        // and there is room at the end of the contin to change a less
+        // significant bit.
+        field_set::disc_iterator itr = fs.begin_raw(inst);
+        if (rng.randbool())
+        {
+            itr += begin + length;
+            twiddle_contin_bit(itr, rng);
+        }
+        else
+        {
+            // There is a stop bit here. Change it to L or R.
+            itr += begin + length + 1;
+            if (rng.randbool())
+            {
+               *itr = field_set::contin_spec::Right;
+            }
+            else
+            {
+               *itr = field_set::contin_spec::Left;
+            }
+        }
+    }
+
+    // Recurse, if need be.
+    // Note that there is some risk that the old instance will be
+    // re-created by this, and so there will be no effective change.
+    // However, the extra cpu cycles needed to avoid this does not
+    // seem to be worth the effort, right?
+    if (1 < dist)
+    {
+        generate_contin_neighbor(fs, inst, it, dist-1, rng);
     }
 }
 
@@ -220,7 +317,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
 
 /**
  * Sample 'sample_size' instances from the neighborhood of the zero
- * instance, at a distance 'dist' from zero.. That is, sample 
+ * instance, at a distance 'dist' from zero.. That is, sample
  * 'sample_size' instances which have 'dist' different knobs set to
  * non-zero values.
  *
