@@ -176,18 +176,9 @@ void field_set::build_disc_spec(const disc_spec& ds, size_t n)
 
 void field_set::build_contin_spec(const contin_spec& cs, size_t n)
 {
-    // Depth must be a power of 2
-    // XXX Really??? Why?? Elswhere we seem to treat "depth" as
-    // the depth of the tree (see e.g. use of "best_depth" which
-    // increments by one. Yet here, its used as the breadth of
-    // the tree, not the dpeth. See, for example, epsilon()
-    // where depth is used as a shift...
-    OC_ASSERT(cs.depth == next_power_of_two(cs.depth),
-              "depth must be a power of 2 and it is %d",
-              cs.depth);
-
-    // All contin fields have a multiplicity of 3 (left, right, or stop)
-    // and hence are 2 bits wide
+    // All raw contin fields have a multiplicity of 3 (left, right, or
+    // stop) and hence are 2 bits wide.  One 'cooked' contin field
+    // consists of contin_spec::depth raw fields.
     size_t width = 2;
     size_t base = back_offset();
     dorepeat (n * cs.depth) {
