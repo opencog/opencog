@@ -196,15 +196,14 @@ struct field_set
                     depth == rhs.depth);
         }
 
-        // half the smallest possible difference between two values represented
+        // Half the smallest possible difference between two values represented
         // according to the spec
-        // XXX This uses depth as depth of tree, but in other places,
-        // its used as breadth, e.g. in build_contin_spec. So which is it ???
         contin_t epsilon() const
         {
             return step_size / contin_t(1UL << depth);
         }
 
+        // XXX should be enum ... 
         static const disc_t Stop;  // 0
         static const disc_t Left;  // 1
         static const disc_t Right; // 2
@@ -213,9 +212,9 @@ struct field_set
         // otherwise is raises an assert
         static disc_t switchLR(disc_t lr)
         {
-            if(lr == Left)
+            if (lr == Left)
                 return Right;
-            else if(lr == Right)
+            else if (lr == Right)
                 return Left;
             else {
                 OC_ASSERT(false);

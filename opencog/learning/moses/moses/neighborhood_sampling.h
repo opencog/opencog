@@ -45,7 +45,7 @@ using boost::numeric::positive_overflow;
 using std::numeric_limits;
 
 /**
- * This procedure generate the initial deme randomly
+ * This procedure generates the initial deme randomly
  *
  * @param fs  the deme
  * @param n   the size of deme
@@ -64,13 +64,13 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
 
         randomize(fs, inst, rng);
 
-        //bias towards the exemplar instance
+        // Bias towards the exemplar instance
         for (field_set::bit_iterator it = fs.begin_bits(inst);
-             it != fs.end_bits(inst);++it)
+             it != fs.end_bits(inst); ++it)
             if (rng.randbool())
                 *it = false;
         for (field_set::disc_iterator it = fs.begin_disc(inst);
-             it != fs.end_disc(inst);++it)
+             it != fs.end_disc(inst); ++it)
             if (rng.randbool())
                 *it = 0;
 
@@ -108,7 +108,7 @@ inline void generate_contin_neighbor(const field_set& fs,
     size_t length = fs.contin_length(inst, it.idx());
     size_t depth = fs.contin()[it.idx()].depth;
     // a random_selector is used not to pick up twice the same idx.
-    // The max idx coresponds either to the first Stop, or, in case
+    // The max idx corresponds either to the first Stop, or, in case
     // there is no Stop, the last disc (i.e. either Left or Right)
     lazy_random_selector select(std::min(length + 1, depth), rng);
 
@@ -140,13 +140,15 @@ inline void generate_contin_neighbor(const field_set& fs,
 }
 
 /**
- * This procedure samples sample_size instances at distance n from an
- * instance considered as center (for instance the exemplar).
+ * Sample 'sample_size' instances from the neighborhood that surrounds
+ * the central instance, at a distance 'dist' from the center. That is,
+ * sample 'sample_size' instances which have 'dist' different knob
+ * settings than the given instance.
  *
  * @todo: term algebra fields are ignored for now
  *
  * @param fs            deme
- * @param n             distance
+ * @param dist          distance
  * @param sample_size   number of instances to be generated
  * @param out           deme where to store the instances
  * @param end           deme iterator, containing the end iterator,
@@ -156,10 +158,10 @@ inline void generate_contin_neighbor(const field_set& fs,
  * @param center_inst   the center instance
  */
 template<typename Out>
-void sample_from_neighborhood(const field_set& fs, unsigned n,
+void sample_from_neighborhood(const field_set& fs, unsigned dist,
                               unsigned sample_size, Out out, Out end,
                               RandGen& rng,
-                              const instance & center_inst )
+                              const instance & center_inst)
 {
     OC_ASSERT(center_inst.size() == fs.packed_width(),
               "Please make sure that the center_inst"
@@ -167,16 +169,16 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
 
     unsigned dim = fs.dim_size();
 
-    OC_ASSERT(n <= dim,
+    OC_ASSERT(dist <= dim,
               "the sampling distance %u"
-              " cannot be greater than the field dimension %u", n, dim);
+              " cannot be greater than the field dimension %u", dist, dim);
 
     dorepeat(sample_size) {
 
         instance new_inst(center_inst);
         lazy_random_selector select(dim, rng);
 
-        for (unsigned i = 1;i <= n;) {
+        for (unsigned i = 1; i <= dist; ) {
             size_t r = select();
             field_set::bit_iterator itb = fs.begin_bits(new_inst);
             field_set::disc_iterator itd = fs.begin_disc(new_inst);
@@ -213,11 +215,13 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
 
 
 /**
- * This procedure samples sample_size instances at distance n from the exemplar
- * (i.e., with n non-zero elements in the sequence)
+ * Sample 'sample_size' instances from the neighborhood of the zero
+ * instance, at a distance 'dist' from zero.. That is, sample 
+ * 'sample_size' instances which have 'dist' different knobs set to
+ * non-zero values.
  *
  * @param fs            deme
- * @param n             distance
+ * @param dist          distance
  * @param sample_size   number of instances to be generated
  * @param out           deme iterator (where to store the instances)
  * @param end           deme iterator, containing the end iterator,
@@ -225,13 +229,15 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
  *                      of the deme if it does so then an assert is raised
  */
 template<typename Out>
-void sample_from_neighborhood(const field_set& fs, unsigned n,
+void sample_from_neighborhood(const field_set& fs, unsigned dist,
                               unsigned sample_size, Out out, Out end,
                               RandGen& rng)
 {
     instance inst(fs.packed_width());
 
-    // reset all fields (contin and term algebra fields are ignored)
+    // Reset all fields (zero them out).
+    // contin and term algebra fields are ignored. XXX Why?
+    // Don't we want to start with all-zero contins ??? XXX fixme...
     for (field_set::bit_iterator it = fs.begin_bits(inst);
             it != fs.end_bits(inst); ++it)
         *it = false;
@@ -240,7 +246,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned n,
             it != fs.end_disc(inst); ++it)
         *it = 0;
 
-    sample_from_neighborhood(fs, n, sample_size, out, end, rng, inst);
+    sample_from_neighborhood(fs, dist, sample_size, out, end, rng, inst);
 }
 
 
@@ -371,7 +377,9 @@ Out vary_n_knobs(const field_set& fs,
             // contin field.  Skip straight to the next contin field.
             size_t next_contin = starting_index + depth - relative_raw_idx;
             out = vary_n_knobs(fs, tmp_inst, dist, next_contin, out, end);
-            // modify with Left or Right
+
+            // Turn this stop pseudo-bit to Left, and Right, and recurse
+            // to next.
             *itr = field_set::contin_spec::Left;
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
             *itr = field_set::contin_spec::Right;
@@ -385,19 +393,19 @@ Out vary_n_knobs(const field_set& fs,
             // Left<->Right
             *itr = field_set::contin_spec::switchLR(*itr);
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
-            // if the next Stop is not further from itr than the distance n
-            // then turn the remaining discs to Stop
-            unsigned remRLs = length - relative_raw_idx; // remaining non-Stop
-                                                      // discs including
-                                                      // the current one
+
+            // Set all remaining 'pseudo-bits' in this contin field to Stop,
+            // remRLs is the number of remaining non-Stop pseudo-bits,
+            // including this one.
+            unsigned remRLs = length - relative_raw_idx;
             if (remRLs <= dist) {
                 for(; relative_raw_idx < length; --length, ++itr) {
                     // Stop
                     *itr = field_set::contin_spec::Stop;
                 }
-                out = vary_n_knobs(fs, tmp_inst, dist - remRLs,
-                                   // below is to fulfill Assumption [1]
-                                   starting_index + depth - relative_raw_idx,
+                // Skip straight to the next contin field.
+                size_t next_contin = starting_index + depth - relative_raw_idx;
+                out = vary_n_knobs(fs, tmp_inst, dist - remRLs, next_contin,
                                    out, end);
             }
         }
