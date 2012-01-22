@@ -46,30 +46,34 @@ struct reduce_gt_zero_pair_power : public crule<reduce_gt_zero_pair_power> {
 //0<c/x -> 0<x if c>0
 //0<c/x -> 0<-1*x if c<0
 //WARNING : this rule is deprecated, use reduce_gt_zero_div instead
-struct reduce_gt_zero_const_div : public crule<reduce_gt_zero_const_div> {
+struct reduce_gt_zero_const_div : public crule<reduce_gt_zero_const_div>
+{
     reduce_gt_zero_const_div() : crule<reduce_gt_zero_const_div>::crule("reduce_gt_zero_const_div") {}
         void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
 #ifndef ABS_LOG
-//0<log(x) -> 0<-1+x
-struct reduce_gt_zero_log : public crule<reduce_gt_zero_log> {
+// 0<log(x) -> 0<-1+x
+struct reduce_gt_zero_log : public crule<reduce_gt_zero_log>
+{
     reduce_gt_zero_log() : crule<reduce_gt_zero_log>::crule("reduce_gt_zero_log") {}
-    void operator()(combo_tree& tr,combo_tree::iterator it) const;
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 #endif
 
-//0<exp(x) -> true
-struct reduce_gt_zero_exp : public crule<reduce_gt_zero_exp> {
+// 0<exp(x) -> true
+struct reduce_gt_zero_exp : public crule<reduce_gt_zero_exp>
+{
     reduce_gt_zero_exp() : crule<reduce_gt_zero_exp>::crule("reduce_gt_zero_exp") {}
-    void operator()(combo_tree& tr,combo_tree::iterator it) const;
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //0<-1*exp(x) -> false
 //WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
-struct reduce_gt_zero_minus_exp : public crule<reduce_gt_zero_minus_exp> {
+struct reduce_gt_zero_minus_exp : public crule<reduce_gt_zero_minus_exp>
+{
     reduce_gt_zero_minus_exp() : crule<reduce_gt_zero_minus_exp>::crule("reduce_gt_zero_minus_exp") {}
-    void operator()(combo_tree& tr,combo_tree::iterator it) const;
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //0<y*exp(x) -> 0<y

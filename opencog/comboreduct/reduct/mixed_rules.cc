@@ -176,13 +176,13 @@ void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) cons
 #endif
 
 // 0<exp(x) -> true
-void reduce_gt_zero_exp::operator()(combo_tree& tr,combo_tree::iterator it) const
+void reduce_gt_zero_exp::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if(*it==id::greater_than_zero) {
+    if (*it == id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_exp)."); 
         pre_it it_child = it.begin();
-        if(*it_child==id::exp) {
+        if (*it_child == id::exp) {
             OC_ASSERT(it_child.has_one_child(),
                       "combo_tree child node should have exactly one child (reduce_gt_zero_exp).");
             tr.erase_children(it);
@@ -190,26 +190,26 @@ void reduce_gt_zero_exp::operator()(combo_tree& tr,combo_tree::iterator it) cons
         }
     }
 }
-        
+
 // 0<-1*exp(x) -> false
 // WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
-void reduce_gt_zero_minus_exp::operator()(combo_tree& tr,combo_tree::iterator it) const
+void reduce_gt_zero_minus_exp::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if (*it==id::greater_than_zero) {
+    if (*it == id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_minus_exp).");
         pre_it it_child = it.begin();
-        if(*it_child==id::times) {
+        if (*it_child == id::times) {
             bool is_neg_const = false;
-            for(sib_it sib = it_child.begin(); sib != it_child.end(); ++sib) {
-                if(is_contin(*sib)) {
-                    if(get_contin(*sib) < 0)
+            for (sib_it sib = it_child.begin(); sib != it_child.end(); ++sib) {
+                if (is_contin(*sib)) {
+                    if (get_contin(*sib) < 0)
                         is_neg_const = !is_neg_const;
                 }
-                else if(*sib!=id::exp)
+                else if (*sib!=id::exp)
                     return;
             }
-            if(is_neg_const) {
+            if (is_neg_const) {
                 tr.erase_children(it);
                 *it = id::logical_false;
             }

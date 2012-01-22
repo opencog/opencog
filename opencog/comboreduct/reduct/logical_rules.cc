@@ -140,43 +140,55 @@ void eval_logical_identities::operator()(combo_tree& tr, combo_tree::iterator it
 
 //* reduce nots: apply distributive law to push not to children.
 //* !!a->a,   !(a&&b)->(!a||!b),   !(a||b)->(!a&&!b),
-void reduce_nots::operator()(combo_tree& tr,combo_tree::iterator it) const
+void reduce_nots::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if (*it==id::logical_not) {
-        if (*it.begin()==id::logical_not) {
+    if (*it == id::logical_not) {
+        if (*it.begin() == id::logical_not) {
             //!!a->!a
             tr.erase(tr.flatten(it.begin()));
             //!a->a
-            *it=*it.begin();
+            *it = *it.begin();
             tr.erase(tr.flatten(it.begin()));
             operator()(tr,it);
-        } else if (*it.begin()==id::logical_and ||
-                   *it.begin()==id::logical_or) {
-            //!(a&&b) -> (!a||!b), and !(a||b) -> (!a&&!b)
-            //first transform to comp_op(a,b)
+        }
+        else if (*it.begin() == id::logical_and ||
+                   *it.begin() == id::logical_or) {
+            // !(a&&b) -> (!a||!b), and !(a||b) -> (!a&&!b)
+            // first transform to comp_op(a,b)
             tr.flatten(it.begin());
-            *it=(*it.begin()==id::logical_and ? 
+            *it = (*it.begin() == id::logical_and ? 
                  id::logical_or : 
                  id::logical_and);
             tr.erase(it.begin());
-            //now to comp_op(!a,!b)
-            for (sib_it sib=it.begin();
-                 sib!=it.end();++sib)
+            // now to comp_op(!a,!b)
+            for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 sib=tr.insert_above(sib,id::logical_not);
-        } else if (is_argument(*it.begin())) {
-            *it=*it.begin();
+        }
+        else if (is_argument(*it.begin())) {
+            *it = *it.begin();
             tr.erase_children(it);
             get_argument(*it).negate();
         }
+        // These two never occur in ordinary logical expressions, but
+        // do show up when reducing mixed predicates (i.e. when the
+        // predicate has reduced to a simple true/false).
+        else if (*it.begin() == id::logical_true) {
+            tr.erase_children(it);
+            *it = id::logical_false;
+        } 
+        else if (*it.begin() == id::logical_false) {
+            tr.erase_children(it);
+            *it = id::logical_true;
+        } 
     }
 }
 
   
-//and(x_1 x_2 x_3 ...)
-//reduce x_1 assuming x_2, x_3 ...
-//reduce x_2 assuming x_1, x_3 ...
-//...
-//and choose the one that shorten the most the expression
+// and(x_1 x_2 x_3 ...)
+// reduce x_1 assuming x_2, x_3 ...
+// reduce x_2 assuming x_1, x_3 ...
+// ...
+// and choose the one that shortens the expression the most.
 void reduce_and_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
     int best_diff = 0;
