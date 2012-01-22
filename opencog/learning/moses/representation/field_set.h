@@ -595,23 +595,31 @@ struct field_set
     }
 
     /**
-     *  Get number of non-stop in the contin encode at the idx-th
-     *  contin. For instance, the inst is {LRSSRLLS} of two
-     *  contin_spec with the depth 4. So if the idx = 1, then it will
-     *  return 3 since there are one 'R' and 2 'L's before the
-     *  'S'(stop). if the idx = 0, then, 2 will be returned.
+     * Get length, in terms of 'raw fields', of an instance of a 
+     * contin.  A contin variable consists of at most
+     * contin_spec::depth() 'raw fields' or 'pseudo-bits'.  Each
+     * pseudo-bit can take one of three values: L, R or S, which
+     * stand for "move left", "move right" or "stop". The left/right
+     * moves encode the contin value; the stop-bit just terminatees the
+     * string of L's and R's.  This routine simply counts the number of
+     * LR pseudo-bits in the contin string.
+     *
+     * So, for example, consider two contin fields of depth 4. If the
+     * inst holds {LRSSRLLS} then the first contin field (idx=0) is of
+     * length 2 (L followed by R), while the second field is of length
+     * 3 (three letters before the S psuedobit).
      *
      * @param inst the instance to look at
      * @param idx the index of the contin to look at, idx is relative
      *            to contin_iterator
      */
-    size_t count_n_before_stop(const instance& inst, size_t idx) const
+    size_t contin_length(const instance& inst, size_t idx) const
     {
         size_t raw_begin = contin_to_raw_idx(idx);
         size_t raw_end = raw_begin + _contin[idx].depth;
         size_t current = raw_begin;
-        // get the number of raw code for contin before the first *Stop*
-        while(current != raw_end) {
+        // Count the number raw fields, up to depth.
+        while (current != raw_end) {
             if (get_raw(inst, current) != contin_spec::Stop)
                 ++current;
             else break;

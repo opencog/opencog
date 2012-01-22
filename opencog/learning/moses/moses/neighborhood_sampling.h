@@ -105,34 +105,34 @@ inline void generate_contin_neighbor(const field_set& fs,
                                      unsigned n, RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
-    size_t num = fs.count_n_before_stop(inst, it.idx());
+    size_t length = fs.contin_length(inst, it.idx());
     size_t depth = fs.contin()[it.idx()].depth;
     // a random_selector is used not to pick up twice the same idx.
     // The max idx coresponds either to the first Stop, or, in case
     // there is no Stop, the last disc (i.e. either Left or Right)
-    lazy_random_selector select(std::min(num + 1, depth), rng);
+    lazy_random_selector select(std::min(length + 1, depth), rng);
 
-    for(unsigned i = n; i > 0; i--) {
+    for (unsigned i = n; i > 0; i--) {
         size_t r = select();
         field_set::disc_iterator itr = fs.begin_raw(inst);        
         itr += begin + r;
         // case inst at itr is Stop
-        if(*itr == field_set::contin_spec::Stop) {
+        if (*itr == field_set::contin_spec::Stop) {
             *itr = rng.randbool() ?
                 field_set::contin_spec::Left:
                 field_set::contin_spec::Right;
-            num++;
-            select.reset_range(std::min(num + 1, depth));
+            length++;
+            select.reset_range(std::min(length + 1, depth));
         } 
         // case inst at itr is Left or Right
         else {
             // whether r corresponds to the last Left or Right disc
-            bool before_stop = r + 1 == num;
+            bool before_stop = r + 1 == length;
             // whether we allow to turn it to stop
             bool can_be_stop = i <= select.count_n_free();
-            if(before_stop && can_be_stop && rng.randbool()) {
+            if (before_stop && can_be_stop && rng.randbool()) {
                 *itr = field_set::contin_spec::Stop;
-                select.reset_range(--num);
+                select.reset_range(--length);
             } else 
                 *itr = field_set::contin_spec::switchLR(*itr);
         }
@@ -356,7 +356,7 @@ Out vary_n_knobs(const field_set& fs,
         itc += contin_idx;
 
         size_t depth = fs.contin()[itc.idx()].depth;
-        size_t num = fs.count_n_before_stop(tmp_inst, contin_idx);
+        size_t length = fs.contin_length(tmp_inst, contin_idx);
 
         field_set::disc_iterator itr = fs.begin_raw(tmp_inst);        
         itr += starting_index;
@@ -386,11 +386,11 @@ Out vary_n_knobs(const field_set& fs,
             out = vary_n_knobs(fs, tmp_inst, dist - 1, starting_index + 1, out, end);
             // if the next Stop is not further from itr than the distance n
             // then turn the remaining discs to Stop
-            unsigned remRLs = num - relative_raw_idx; // remaining non-Stop
+            unsigned remRLs = length - relative_raw_idx; // remaining non-Stop
                                                       // discs including
                                                       // the current one
             if (remRLs <= dist) {
-                for(; relative_raw_idx < num; --num, ++itr) {
+                for(; relative_raw_idx < length; --length, ++itr) {
                     // Stop
                     *itr = field_set::contin_spec::Stop;
                 }
@@ -525,7 +525,7 @@ count_n_changed_knobs_from_index(const field_set& fs,
 
         itc += contin_idx;
         int depth = fs.contin()[itc.idx()].depth;
-        int num = fs.count_n_before_stop(inst, contin_idx);
+        int length = fs.contin_length(inst, contin_idx);
 
         // Calculate number_of_instances for each possible distance i
         // of the current contin.
@@ -537,16 +537,16 @@ count_n_changed_knobs_from_index(const field_set& fs,
             // Count combinations when Left or Right are switched and
             // added after Stop, where j represents the number of
             // Left or Right added after Stop.
-            for (int j = max(0, i-num); j <= min(i, depth-num); ++j)
-                cni += (unsigned) binomial_coefficient<double>(num, i-j)
+            for (int j = max(0, i-length); j <= min(i, depth-length); ++j)
+                cni += (unsigned) binomial_coefficient<double>(length, i-j)
                     * pow2(j);
 
             // Count combinations when Left or Right are switched and
             // removed before Stop, where j represents the number of
             // removed Left or Right before Stop.
-            if (i <= num)
-                for (int j = 1; j <= min(i, num); ++j)
-                    cni += (unsigned) binomial_coefficient<double>(num-j, i-j);
+            if (i <= length)
+                for (int j = 1; j <= min(i, length); ++j)
+                    cni += (unsigned) binomial_coefficient<double>(length-j, i-j);
 
             // Recursive call.
             number_of_instances +=

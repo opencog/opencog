@@ -38,9 +38,14 @@
 
 namespace opencog { namespace moses {
 
+// Stepsize should be roughly the standard-deviation of the expected
+// distribution of the contin variables.
 static contin_t stepsize = 1.0;
-static contin_t expansion = 1.0;
-static int depth = 4;
+
+// Expansion factor should be 1 or greater; it should never be less
+// than one. Optimal values are probably 1.5 to 2.0.
+static contin_t expansion = 2.0;
+static int depth = 3;
 
 void set_stepsize(double new_ss)
 {
