@@ -45,7 +45,17 @@ static contin_t stepsize = 1.0;
 // Expansion factor should be 1 or greater; it should never be less
 // than one. Optimal values are probably 1.5 to 2.0.
 static contin_t expansion = 2.0;
-static int depth = 3;
+
+// By default, contin knobs will have 5 "pseudo-bits" of binary
+// precision. Roughly speaking, they can hold 2^5 = 32 different
+// values, or just a little better than one decimal place of precision.
+//
+// XXX TODO: It's really the job of knob-building to fine-tune this,
+// to add more decimal places of precision, as needed. But this is not
+// currently done.  Knob-building could/should increase depth, as we
+// get closer to a "good" solution, alternately, one could narrow the
+// stepsize (above) to hone in on a value.
+static int depth = 5;
 
 void set_stepsize(double new_ss)
 {
