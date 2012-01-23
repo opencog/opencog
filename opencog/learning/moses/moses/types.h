@@ -66,11 +66,11 @@ typedef unsigned long long deme_size_t;
 static const int io_score_precision = 32;
 
 static const score_t best_score = std::numeric_limits<score_t>::max();
+// below we use 1 - best score and not
+// std::numeric_limits<score_t>::min, please recall that in the STL
+// standard min when applied to a floating type returns the smallest
+// possible representable value
 static const score_t worst_score = score_t(1) - best_score;
-    // for some weird reasons what is below leads to bugs
-    // std::numeric_limits<score_t>::min(),
-    // so does this!!!
-    // std::numeric_limits<score_t>::min()+1,
 
 typedef std::pair<score_t, complexity_t> composite_score;
 extern const composite_score worst_composite_score;
