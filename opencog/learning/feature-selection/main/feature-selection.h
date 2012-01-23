@@ -26,6 +26,8 @@
 
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/sort.hpp>
+#include <boost/range/irange.hpp>
 
 #include <opencog/util/oc_omp.h>
 #include <opencog/learning/moses/representation/field_set.h>
@@ -41,7 +43,7 @@ using namespace opencog;
 using namespace moses;
 using namespace combo;
 using namespace boost::assign; // bring 'operator+=()' into scope
-using boost::counting_iterator;
+// using boost::counting_iterator;
 
 // feature selection algorithms
 static const string un="un"; // moses based univariate
@@ -130,10 +132,10 @@ void moses_feature_selection(Table& table,
     unsigned ae; // actual number of evaluations to reached the best candidate
     unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
     // get the best one
-    std::sort(deme.begin(), deme.end(),
-              std::greater<scored_instance<composite_score> >());
-    instance best_inst = *deme.begin_instances();
-    composite_score best_score = *deme.begin_scores();
+    boost::sort(deme, std::greater<scored_instance<composite_score> >());
+    instance best_inst = evals > 0 ? *deme.begin_instances() : init_inst;
+    composite_score best_score =
+        evals > 0 ? *deme.begin_scores() : worst_composite_score;
     // get the best feature set
     std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
     Table ftable = table.filter(best_fs);
@@ -142,7 +144,11 @@ void moses_feature_selection(Table& table,
     {
         // log its score
         stringstream ss;
-        ss << "with composite score: " << best_score;
+        ss << "with composite score: ";
+        if (evals > 0)
+            ss << best_score;
+        else
+            ss << "Unknown";
         logger().info(ss.str());
     }
     {
@@ -228,8 +234,8 @@ void incremental_feature_selection(Table& table,
         CTable ctable = table.compress();
         typedef MutualInformation<std::set<arity_t> > FeatureScorer;
         FeatureScorer fsc(ctable);
-        std::set<arity_t> features(counting_iterator<arity_t>(0),
-                                   counting_iterator<arity_t>(table.get_arity()));
+        auto ir = boost::irange(0, table.get_arity());
+        std::set<arity_t> features(ir.begin(), ir.end());
         std::set<arity_t> selected_features = 
             fs_params.inc_target_size > 0?
             cached_adaptive_incremental_selection(features, fsc,

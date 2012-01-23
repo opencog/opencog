@@ -329,10 +329,14 @@ struct iterative_hillclimbing
                         const instance& init_inst,
                         const Scoring& score, unsigned max_evals,
                         unsigned* eval_best = NULL)
-    {
+    {        
         // Logger
         logger(). debug("Iterative HillClimbing Optimization");
         // ~Logger
+
+        // initial eval_best in case no search is performed
+        if(eval_best)
+            *eval_best = 0;
 
         const field_set& fields = deme.fields();
         unsigned pop_size = opt_params.pop_size(fields);
@@ -362,7 +366,7 @@ struct iterative_hillclimbing
 
             // Logger
             {
-                logger().debug("Interation: %u", iteration++);
+                logger().debug("Iteration: %u", iteration++);
             }
             // ~Logger
 
