@@ -69,7 +69,7 @@ struct moses_based_scorer : public unary_function<instance, composite_score> {
         if(logger().getLevel() >= Logger::FINE) {
             stringstream ss;
             ss << "moses_based_scorer - Evaluate instance: " 
-               << _fields.stream(inst) << " " << csc << std::endl;
+               << _fields.stream(inst) << " " << csc;
             logger().fine(ss.str());
         }
         // ~Logger
