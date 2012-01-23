@@ -75,7 +75,8 @@ struct MICScorer : public std::unary_function<FeatureSet, double> {
      */
     double operator()(const FeatureSet& fs) const {
         double MI = mutualInformation(_it, _ot, fs);
-        double confidence = _it.size()/(_it.size() + _confi*fs.size());
+        // double confidence = _it.size()/(_it.size() + _confi*fs.size());
+        double confidence = _it.size()/(_it.size() + exp(_confi*fs.size()));
         return MI * confidence;
     }
 
@@ -98,7 +99,10 @@ struct MICScorerTable : public std::unary_function<FeatureSet, double> {
      */
     double operator()(const FeatureSet& fs) const {
         double MI = mutualInformation(_ctable, fs);
-        double confidence = _table.size()/(_table.size() + _confi*fs.size());
+        logger().fine("MI = %e", MI);
+        // double confidence = _table.size()/(_table.size() + _confi*fs.size());
+        double confidence = _table.size()/(_table.size() + exp(_confi*fs.size()));
+        logger().fine("confidence = %e", confidence);
         return MI * confidence;
     }
 
