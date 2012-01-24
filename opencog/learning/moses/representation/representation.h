@@ -66,7 +66,6 @@ struct representation : public knob_mapper, boost::noncopyable
      * settings as those in the 'instance' argument.
      */
     void transform(const instance&);
-    void clear_exemplar();
 
     /**
      * Returns a clean and reduced version of the current exemplar
@@ -111,9 +110,12 @@ struct representation : public knob_mapper, boost::noncopyable
         return _exemplar;
     }
 
+#ifdef EXEMPLAR_INST_IS_UNDEAD
     const instance& exemplar_inst() const {
         return _exemplar_inst;
     }
+    void clear_exemplar();
+#endif
 
     /**
      * Output the prototype of the exemplar (works correctly only when
@@ -157,15 +159,17 @@ struct representation : public knob_mapper, boost::noncopyable
     }
 
 protected:
-    void set_exemplar_inst();
-
     combo_tree _exemplar;     // contains the prototype of the
                               // exemplar used to generate the deme
 
+#ifdef EXEMPLAR_INST_IS_UNDEAD
+    void set_exemplar_inst();
     instance _exemplar_inst; // instance corresponding to the exemplar
                              // @todo: it is not sure whether we need
                              // that because it is assumed that the
                              // instance of the exemplar is null
+#endif
+
     field_set _fields;
     RandGen& rng;
     const reduct::rule* _simplify_candidate; // used to simplify candidates

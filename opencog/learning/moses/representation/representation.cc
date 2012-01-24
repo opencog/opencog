@@ -143,6 +143,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
+#ifdef EXEMPLAR_INST_IS_UNDEAD
     set_exemplar_inst();
 
     {
@@ -150,8 +151,11 @@ representation::representation(const reduct::rule& simplify_candidate,
         ss << "Exemplar instance: " << _fields.stream(_exemplar_inst);
         logger().debug(ss.str());
     }
+#endif // EXEMPLAR_INST_IS_UNDEAD
 }
 
+/// Turn the knobs on the representation, so thaat the knob settings match
+/// the instance supplied as the argument.
 void representation::transform(const instance& inst)
 {
     // XXX TODO need to add support for "term algebra" knobs
@@ -178,15 +182,6 @@ void representation::transform(const instance& inst)
     //cout << _exemplar << endl;
     // std::cout << "New exemplar (after build): " << _exemplar << std::endl;
 }
-
-void representation::clear_exemplar()
-{
-    foreach(disc_v& v, disc)
-        v.second->clear_exemplar();
-    foreach(contin_v& v, contin)
-        v.second.clear_exemplar();
-}
-
 
 combo_tree representation::get_clean_exemplar(bool reduce,
                                               bool knob_building) const
@@ -221,6 +216,13 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
     return tr;
 }
 
+/// Create a combo tree that corresponds to the instance inst.
+///
+/// This is done by twiddling the knobs on the representation so that
+/// it matches the supplied inst, copying the rep to an equivalent,
+/// but knob-less combo tree, and returning that.  Optionally, if the
+/// 'reduce' flag is set, then the tree is reduced.
+// 
 combo_tree representation::get_candidate(const instance& inst, bool reduce)
 {
     // thread safe transform. If that turns out to be a bottle neck,
@@ -234,6 +236,28 @@ combo_tree representation::get_candidate(const instance& inst, bool reduce)
     return get_clean_combo_tree(tr, reduce);
 }
 
+#ifdef EXEMPLAR_INST_IS_UNDEAD
+// XXX This is dead code, no one uses it, and looking at the below, it
+// looks inconsistent to me. I'm going to leave it here for a while, but
+// it should be removed by 2013 or 2014 if not sooner...
+
+// XXX why are we clearing this, instead of setting it back to the 
+// _exemplar_inst ??? XXX is this broken??
+//
+// XXX Note that the clear_exemplar() methods on the knobs are probably
+//  not needed either!?
+void representation::clear_exemplar()
+{
+    foreach(disc_v& v, disc)
+        v.second->clear_exemplar();
+    foreach(contin_v& v, contin)
+        v.second.clear_exemplar();
+}
+
+// What is this doing ? seems to be clearing things out, why do we need this?
+// XXX that, and contin seems to be handled inconsistently with disc...
+// I mean, shouldn't we be setting the exemplar_inst fields so that
+// they match the exmplar?  Do we even need the exemplar_inst for anything?
 void representation::set_exemplar_inst()
 {
     OC_ASSERT(_exemplar_inst.empty(),
@@ -260,6 +284,7 @@ void representation::set_exemplar_inst()
         *it = get_contin(*c_cit->second.get_loc());
     }
 }
+#endif // EXEMPLAR_INST_IS_UNDEAD
 
 } // ~namespace moses
 } // ~namespace opencog
