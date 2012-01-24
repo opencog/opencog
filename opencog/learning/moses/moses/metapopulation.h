@@ -240,9 +240,11 @@ struct metapopulation : public bscored_combo_tree_set
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
      */
-    const_iterator select_exemplar() const {
+    const_iterator select_exemplar() const
+    {
         OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
 
+// ostream(cout, begin(), end(), -1, true, true, true);
         //compute the probs for all candidates with best score
         score_t score = get_score(*begin());
         complexity_t cmin = get_complexity(*begin());
@@ -252,11 +254,11 @@ struct metapopulation : public bscored_combo_tree_set
         // found
         bool exist_exemplar = false;
 
-        for(const_iterator it = begin(); it != end(); ++it) {
+        for (const_iterator it = begin(); it != end(); ++it) {
             // if no exemplar has been found for that score then look
             // at the next lower score
-            if(get_score(*it) != score) {
-                if(!exist_exemplar) {
+            if (get_score(*it) != score) {
+                if (!exist_exemplar) {
                     score = get_score(*it);
                     cmin = get_complexity(*it);
                 }
@@ -269,7 +271,7 @@ struct metapopulation : public bscored_combo_tree_set
             if (cmin - c > params.selection_max_range)
                 break;
             const combo_tree& tr = get_tree(*it);
-            if(_visited_exemplars.find(tr) == _visited_exemplars.end()) {
+            if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
                 probs.push_back(c);
                 exist_exemplar = true;
             } else // hack: if the tree is visited then put a positive
@@ -277,14 +279,14 @@ struct metapopulation : public bscored_combo_tree_set
                 probs.push_back(1);
         }
 
-        if(!exist_exemplar) {
+        if (!exist_exemplar) {
             return end(); // there is no exemplar to select
         }
 
         complexity_t sum = 0;
         complexity_t highest_comp = *boost::min_element(probs);
         // convert complexities into (non-normalized) probabilities
-        foreach(complexity_t& p, probs) {
+        foreach (complexity_t& p, probs) {
             // in case p has the max complexity (already visited) then
             // the probability is set to null
             p = (p > 0? 0 : pow2(p - highest_comp));
@@ -302,8 +304,9 @@ struct metapopulation : public bscored_combo_tree_set
     // merge candidates in to the metapopulation. candidates might be
     // changed (dominated candidates removed after the merging)
     template<typename Candidates>
-    void merge_candidates(Candidates& candidates) {
-        if(params.include_dominated)
+    void merge_candidates(Candidates& candidates)
+    {
+        if (params.include_dominated)
             insert(candidates.begin(), candidates.end());
         else
             // merge_nondominated_any(candidates);
@@ -373,6 +376,9 @@ struct metapopulation : public bscored_combo_tree_set
 
             // Should have found something by now.
             if (_exemplar == end()) {
+
+                // XXX There is currently no way to set the revisit flag
+                // using the command-line options...
                 if (params.revisit) {
 
                     _visited_exemplars.clear();
@@ -381,7 +387,7 @@ struct metapopulation : public bscored_combo_tree_set
                         "All exemplars in the metapopulation have been "
                         "visited, but it was impossible to build a "
                         "representation for any of them.  All exemplars "
-                        "have been untagged and will be visited again");
+                        "have been untagged and will be visited again.");
 
                     continue;
 
@@ -391,9 +397,7 @@ struct metapopulation : public bscored_combo_tree_set
                         "WARNING: All exemplars in the metapopulation have "
                         "been visited, but it was impossible to build a "
                         "representation for any of them.  Perhaps the reduct "
-                        "effort for knob building is too high.  To revisit "
-                        "previously visited exemplars, use option --revisit or -R");
-
+                        "effort for knob building is too high.");
                     return false;
                 }
             }
@@ -1017,13 +1021,15 @@ struct metapopulation : public bscored_combo_tree_set
     Out& ostream(Out& out, In from, In to, long n = -1,
                  bool output_score = true,
                  bool output_complexity = false,
-                 bool output_bscore = false) {
+                 bool output_bscore = false)
+    {
         for(; from != to && n != 0; from++, n--) {
             ostream_bscored_combo_tree(out, *from, output_score,
                                        output_complexity, output_bscore);
         }
         return out;
     }
+
     // like above but assumes that from = begin() and to = end()
     template<typename Out>
     Out& ostream(Out& out, long n = -1,
