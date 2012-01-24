@@ -304,6 +304,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     logger().fine("pred_entropy = %f", pred_entropy);
 
     behavioral_score bs;
+    auto push_worst = [&bs](){ bs.push_back(worst_score); };
     if (pred_entropy > entropy_threshold) {
         // filter the output according to tr
         counter_t pred_counter;     // map obvervation to occurence
@@ -383,6 +384,11 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
             if(occam)
                 bs.push_back(complexity(tr) * complexity_coef);
         }
+        else {
+            push_worst();
+        }
+    } else {
+        push_worst();
     }
 
     // Logger
