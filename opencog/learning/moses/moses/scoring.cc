@@ -267,14 +267,17 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
 {
     // initialize Occam's razor
     occam = stdev > 0;
-    set_complexity_coef(alphabet_size, stdev);
+    if (occam)
+        set_complexity_coef(alphabet_size, stdev);
     // define counter (mapping between observation and its number of occurences)
     boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
                     counter[get_contin(v.first)] += v.second; }); });
     // precompute pdf
-    pdf = counter;
-    klds.set_p_pdf(pdf);
+    if (kld_w > 0) {
+        pdf = counter;
+        klds.set_p_pdf(pdf);
+    }
     // compute the skewness of pdf
     accumulator_t acc;
     foreach(const auto& v, pdf)
@@ -319,45 +322,62 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
                                        // messed up (for instance
                                        // pred_skewness can be inf)
             // compute KLD
-            if(decompose_kld) {
-                klds(pred_counter, back_inserter(bs));
-                boost::transform(bs, bs.begin(), kld_w * arg1);
-            } else {
-                score_t pred_klds = klds(pred_counter);
-                logger().fine("klds = %f", pred_klds);
-                bs.push_back(kld_w * pred_klds);
+            if (kld_w > 0) {
+                if(decompose_kld) {
+                    klds(pred_counter, back_inserter(bs));
+                    boost::transform(bs, bs.begin(), kld_w * arg1);
+                } else {
+                    score_t pred_klds = klds(pred_counter);
+                    logger().fine("klds = %f", pred_klds);
+                    bs.push_back(kld_w * pred_klds);
+                }
             }
 
-            // gather statistics with a boost accumulator
-            accumulator_t acc;
-            foreach(const auto& v, pred_counter)
-                acc(v.first, weight = v.second);
-        
-            // push the absolute difference between the unconditioned
-            // skewness and conditioned one
-            score_t pred_skewness = weighted_skewness(acc),
-            diff_skewness = pred_skewness - skewness;
-            logger().fine("pred_skewness = %f", pred_skewness);
-            bs.push_back(skewness_w * abs(diff_skewness));
-
-            // compute the standardized Mann–Whitney U
-            score_t stdU = standardizedMannWhitneyU(counter, pred_counter);
-            logger().fine("stdU = %f", stdU);
-            bs.push_back(stdU_w * abs(stdU));
+            if (skewness_w > 0 || stdU_w > 0 || skew_U_w > 0) {
             
-            // push the product of the relative differences of the shift
-            // (stdU) and the skewness (so that if both go in the same
-            // direction the value if positive, and negative otherwise)
-            bs.push_back(skew_U_w * stdU * diff_skewness);
-        
+                // gather statistics with a boost accumulator
+                accumulator_t acc;
+                foreach(const auto& v, pred_counter)
+                    acc(v.first, weight = v.second);
+
+                score_t diff_skewness = 0;
+                if (skewness_w > 0 || skew_U_w > 0) {
+                    // push the absolute difference between the
+                    // unconditioned skewness and conditioned one
+                    score_t pred_skewness = weighted_skewness(acc);
+                    diff_skewness = pred_skewness - skewness;
+                    logger().fine("pred_skewness = %f", pred_skewness);
+                    if (skewness_w > 0)
+                        bs.push_back(skewness_w * abs(diff_skewness));
+                }
+
+                score_t stdU = 0;
+                if (stdU_w > 0 || skew_U_w > 0) {
+
+                    // compute the standardized Mann–Whitney U
+                    stdU = standardizedMannWhitneyU(counter, pred_counter);
+                    logger().fine("stdU = %f", stdU);
+                    if (stdU_w > 0)
+                        bs.push_back(stdU_w * abs(stdU));
+                }
+                
+                // push the product of the relative differences of the
+                // shift (stdU) and the skewness (so that if both go
+                // in the same direction the value if positive, and
+                // negative otherwise)
+                if (skew_U_w > 0)
+                    bs.push_back(skew_U_w * stdU * diff_skewness);
+            }
+            
             // add log entropy, this is completely heuristic, no
-            // justification except that the log of the entropy is gonna
-            // add a large penalty when the entropy tends to 0. Not sure
-            // here what we really need, a perhaps something like 1 -
-            // p-value, or some form of indefinite TV confidence on the
-            // calculation of KLD.
+            // justification except that the log of the entropy is
+            // gonna add a large penalty when the entropy tends to
+            // 0. Not sure here what we really need, a perhaps
+            // something like 1 - p-value, or some form of indefinite
+            // TV confidence on the calculation of KLD.
             logger().fine("log(pred_entropy) = %f", log(pred_entropy));
-            bs.push_back(log_entropy_w * log(pred_entropy));
+            if (log_entropy_w)
+                bs.push_back(log_entropy_w * log(pred_entropy));
 
             // add the Occam's razor feature
             if(occam)

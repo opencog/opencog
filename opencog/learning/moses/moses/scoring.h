@@ -438,6 +438,9 @@ struct ctruth_table_bscore : public bscore_base
 //    3) the standardized Mann-Whitney U statistic
 //    4) the product of #2 and #3
 //    5) the log of the entropy of the predicate
+//
+// All those features are weighted, any one with null weight is
+// disabled (it isn't computed and isn't pushed in the bscore).
 struct interesting_predicate_bscore : public bscore_base
 {
     typedef score_t weight_t;
