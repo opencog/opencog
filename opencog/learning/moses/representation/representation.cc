@@ -40,6 +40,13 @@ namespace opencog { namespace moses {
 
 // Stepsize should be roughly the standard-deviation of the expected
 // distribution of the contin variables.
+//
+// XXX TODO: One might think that varying the stepsize, i.e. shrinking
+// it, as the optimizers tune into a specific value, would be a good
+// thing (so that the optimizer could tune to a more precise value).
+// Unfortunately, a simple experiment in tuning (see below, surrounded
+// by "#if 0") didn't work; it didn't find better answers, and it
+// lengthened running time.
 static contin_t stepsize = 1.0;
 
 // Expansion factor should be 1 or greater; it should never be less
@@ -49,12 +56,6 @@ static contin_t expansion = 2.0;
 // By default, contin knobs will have 5 "pseudo-bits" of binary
 // precision. Roughly speaking, they can hold 2^5 = 32 different
 // values, or just a little better than one decimal place of precision.
-//
-// XXX TODO: It's really the job of knob-building to fine-tune this,
-// to add more decimal places of precision, as needed. But this is not
-// currently done.  Knob-building could/should increase depth, as we
-// get closer to a "good" solution, alternately, one could narrow the
-// stepsize (above) to hone in on a value.
 static int depth = 5;
 
 void set_stepsize(double new_ss)
@@ -101,6 +102,38 @@ representation::representation(const reduct::rule& simplify_candidate,
         ostream_prototype(ss);
         logger().debug(ss.str());
     }
+
+#if 0
+    // Attempt to adjust the contin spec step size to a value that is
+    // "most likely to be useful" for exploring the neighborhood of an
+    // exemplar. Basically, we try to guess what step size we were last
+    // at when we modified this contin; we do this by lopping off
+    // factors of two until we've matched the previous pecision.
+    // This way, when exploring in a deme, we explore values near the
+    // old value, with appropriate step sizes.
+    //
+    // Unfortunately, experiments seem to discredit this idea: it often
+    // slows down the search, and rarely/never seems to provide better
+    // answers.  Leaving this commented out for now.
+    contin_map new_cmap;
+    foreach (contin_v& v, contin)
+    {
+        field_set::contin_spec cspec = v.first;
+        contin_t remain = fabs(cspec.mean);
+        remain -= floor(remain + 0.01f);
+        contin_t new_step = remain;
+        if (remain < 0.01f) new_step = stepsize;
+        else remain -= new_step;
+        while (0.01f < remain)
+        {
+            new_step *= 0.5f;
+            if (new_step < remain + 0.01f) remain -= new_step;
+        }
+        cspec.step_size = new_step;
+        new_cmap.insert(make_pair(cspec, v.second));
+    }
+    contin = new_cmap;
+#endif
 
     // Convert the knobs into a field set.
     std::multiset<field_set::spec> tmp;
