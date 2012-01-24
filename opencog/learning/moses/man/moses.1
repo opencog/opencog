@@ -1,13 +1,13 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
 .\" Man page for moses-exec
 .\"
-.\" Copyright (C) 2011 Linas Vepstas
+.\" Copyright (C) 2011,2012 Linas Vepstas
 .\"
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "January 5, 2012"
+.TH MOSES 1 "January 23, 2012"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -193,7 +193,7 @@ for example, \fIor (#1 #2)\fP is a combo program that represents
 the boolean-or of two inputs, \fI#1\fP and \fI#2\fP.
 .PP
 Logical operators include and,or and not.  Arithmetic operators
-include +, - * and / for addtin, subtraction, multiplication and
+include +, - * and / for addtion, subtraction, multiplication and
 division.  Flow-of-control operators include ....
 .PP
 XXX finish writing this section, give more examples.
@@ -282,14 +282,20 @@ T}
 .TP
 .BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
 The \fIfilename\fR specifies the input data file. The input table must
-be in DSV format, valid seperators are comma (like in the CSV format),
-whitespace and tabulation. Colums correspond to features and the
-number of samples is taken to be the number of rows.
+be in 'delimiter-separated value' (DSV) format.  Valid seperators 
+are comma (CSV, or comma-separated values), blanks and tabs 
+(whitespace). Columns correspond to features; there is one sample per
+(non-blank) row. Comment characters are hash, bang and semicolon (#!;)
+lines starting with a comment are ignored.
+The \fB-i\fR flag may be specified multiple times, to indicate multiple
+input files. All files must have the same number of columns.
 .TP
 .BI \-u\  label \fR,\ \fB\-\-target\-feature= label
 The \fIlabel\fR is used as the target feature to fit.  If none is
-specified, then the first column is used.
-
+specified, then the first column is used.  The very first row of the
+input file, if it contains non-numeric, non-boolean values, is 
+interpreted as column labels, as is the common practice for 
+CSV/DSV file formats.
 
 .\" ============================================================
 .SS "Algorithm control options"
@@ -522,7 +528,7 @@ specifies that the two-input conjunction is to be learned.
 .SH TODO
 Finish documenting these aglo flags:  -M -D -I -T
 .PP
-These input flags: -i -u -b -G
+These input flags: -b -G
 .PP
 These operator/problem type flags: -p
 
@@ -534,4 +540,4 @@ More information is available at
 .nh
 \fBmoses\fP was written by Moshe Looks, Nil Geisweiller, and many others.
 .PP
-This manual page is being written by Linas Vepstas. INCOMPLETE.
+This manual page is being written by Linas Vepstas. It is INCOMPLETE.
