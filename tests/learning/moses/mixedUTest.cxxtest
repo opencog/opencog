@@ -55,7 +55,7 @@ public:
         // Depending on the random number generator, moses might
         // find several acceptable solutions...
         moses_test_combo({"-Hit", 
-                          "-upred", "-nimpulse",
+                          "-upred", "-nimpulse", "-lDEBUG",
                           data_file_path,
                           },
                           {"and(0<(+(-1 #1)) 0<(#2) #3)"});

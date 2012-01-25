@@ -298,7 +298,7 @@ int moses_exec(int argc, char** argv)
     double ip_log_entropy_weight;
     score_t alpha;              // experimental: precision instead of accuracy
     // hc_param
-    bool hc_terminate_if_improvement;
+    bool hc_widen_search;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
@@ -497,9 +497,14 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t> >(&discretize_thresholds),
          "If the domain is continuous, discretize the target feature. A unique used of that option produces 2 classes, x < thresold and x >= threshold. The option can be used several times (n-1) to produce n classes and the thresholds are automatically sorted.\n")
-        (opt_desc_str(hc_terminate_if_improvement_opt).c_str(),
-         value<bool>(&hc_terminate_if_improvement)->default_value(true),
-         str(format("Hillclimbing parameter (%s). If 1 then deme search terminates when an improvement is found, if 0 it keeps searching until another termination condition is met.\n") % hc).c_str())
+
+        (opt_desc_str(hc_widen_search_opt).c_str(),
+         value<bool>(&hc_widen_search)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If false, then deme search "
+                    "terminates when a local hilltop is found. If true, "
+                    "then the search radius is progressively widened, "
+                    "until another termination condition is met.\n") % hc).c_str())
+
         (opt_desc_str(ip_kld_weight_opt).c_str(),
          value<double>(&ip_kld_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of the KLD.\n") % ip).c_str())
@@ -654,7 +659,7 @@ int moses_exec(int argc, char** argv)
                                             output_with_labels, opt_algo,
                                             enable_cache, labels,
                                             output_file, jobs, only_local,
-                                            hc_terminate_if_improvement);
+                                            hc_widen_search);
 
     // Continuous reduction rules used during search and representation
     // building.

@@ -273,11 +273,11 @@ struct univariate_optimization
 
 struct hc_parameters
 {
-    hc_parameters(bool _terminate_if_improvement = true,
+    hc_parameters(bool widen = false,
                   double _fraction_of_remaining = 0.1)
-        : terminate_if_improvement(_terminate_if_improvement),
+        : widen_search(widen),
           fraction_of_remaining(_fraction_of_remaining) {}
-    bool terminate_if_improvement;
+    bool widen_search;
 
     // Things work better if the pop_size_ratio is used to control
     // the allocation of resources.
@@ -415,10 +415,13 @@ struct local_search
 
         unsigned max_distance = opt_params.max_distance(fields);
 
-        // Score the initial instance.
+        // center_inst is the current location on the hill.
         instance center_inst(init_inst);
         composite_score best_cscore = worst_composite_score;
 
+        // Initial distance is zero, so that the first time through
+        // the loop, we handle just one instance, the initial instance.
+        // (which is at distance zero from itself, of course).
         unsigned distance = 0;
         unsigned iteration = 0;
 
@@ -510,7 +513,7 @@ struct local_search
                 // Logger
                 {
                     std::stringstream ss;
-                    ss << "Center instance: " << fields.stream(center_inst)
+                    ss << "Best instance: " << fields.stream(center_inst)
                        << " " << best_cscore;
                     logger().debug(ss.str());
                 }
@@ -519,12 +522,26 @@ struct local_search
             else
                 distance++;
 
-        } while ((!hc_params.terminate_if_improvement ||
-                  !has_improved ||
-                  current_number_of_instances == 1) &&
-                 distance <= max_distance &&
-                 current_number_of_instances < max_number_of_instances &&
-                 get_score(best_cscore) < opt_params.terminate_if_gte);
+        /* Loop termination conditions, explained:
+         *
+         * If we found a better instance (has_improved==true) then we
+         * must not be at the top of the hill, yet, so loop around, to
+         * see if we can go yet higher.
+         * 
+         * If we have not found a better instance (has_improved==false)
+         * then we must be at the top of the hill. We exit the loop,
+         * unless we are told to broaden the search past this local
+         * hilltop. 
+         *
+         * If we're broadning, then stop once we've gone past the max
+         * Hamming distance, or if we've exceeded the max alowed iterations.
+         * (or if we've already gotten the best possible score).
+         */
+        } while ((has_improved ||
+                  (!has_improved && hc_params.widen_search))
+                 && current_number_of_instances < max_number_of_instances
+                 && distance <= max_distance
+                 && get_score(best_cscore) < opt_params.terminate_if_gte);
 
         return current_number_of_instances;
     }

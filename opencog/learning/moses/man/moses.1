@@ -393,8 +393,11 @@ scored candidates. If a new candidate is found in the cache, that score
 is used, instead of a scoring function evaluation.  The effectiveness of
 memoization is greatly increased by also using the \fB\-d1\fR flag.
 .TP
-.BI \-T1\fR,\ \fB\-\-hc\-terminate\-if\-improvment=1
-Hill-climbing related. Huh ???
+.BI \-T0\fR,\ \fB\-\-hc\-widen\-search=0
+Controls hill-climbing algorithm behaviour.  If false, then deme search
+terminates when a local hilltop is found. If true, then the search
+radius is progressively widened, until another termination condition
+is met.
 
 .\" ============================================================
 .SS "Output control options"

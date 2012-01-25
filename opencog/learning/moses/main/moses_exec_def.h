@@ -95,7 +95,7 @@ static const pair<string, string> ip_log_entropy_weight_opt("ip_log_entropy_weig
 static const pair<string, string> it_alpha_opt("it_alpha", "Q");
 
 // options specific to a particular optimization algorithm
-static const pair<string, string> hc_terminate_if_improvement_opt("hc-terminate-if-improvement", "T");
+static const pair<string, string> hc_widen_search_opt("hc-widen-search", "T");
 
 string opt_desc_str(const pair<string, string>& opt);
 
