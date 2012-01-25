@@ -408,12 +408,16 @@ private:
  * one gets the following log-likelihood
  * |M|*log|A|/log(p/(1-p)) - |D1|
  * with p<0.5 and |D1| the number of outputs that match
+ *
+ * The alhpa argument is here to experiment with using precision
+ * instead of accuracy.
  */
 struct ctruth_table_bscore : public bscore_base
 {
     ctruth_table_bscore(const CTable& _ctt,
                         float alphabet_size, float p,
-                        RandGen& _rng);
+                        RandGen& _rng,
+                        score_t alpha = -1);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -426,6 +430,16 @@ struct ctruth_table_bscore : public bscore_base
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     RandGen& rng;
+    score_t alpha;
+
+private:
+    // function to apply at each [compressed] row of the table, the
+    // vertex being the output of the candidate, the
+    // CTable::mapped_type being the distribution of outputs of a
+    // given row.
+    std::function<score_t(const vertex&, CTable::mapped_type&)> func;
+    // as above but for computing the best possible bscore
+    std::function<score_t(CTable::mapped_type&)> best_func;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured

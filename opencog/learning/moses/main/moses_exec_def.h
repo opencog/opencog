@@ -92,6 +92,8 @@ static const pair<string, string> ip_stdU_weight_opt("ip_stdU_weight", "U");
 static const pair<string, string> ip_skew_U_weight_opt("ip_skew_U_weight", "X");
 static const pair<string, string> ip_log_entropy_weight_opt("ip_log_entropy_weight", "O");
 
+static const pair<string, string> it_alpha_opt("it_alpha", "Q");
+
 // options specific to a particular optimization algorithm
 static const pair<string, string> hc_terminate_if_improvement_opt("hc-terminate-if-improvement", "T");
 

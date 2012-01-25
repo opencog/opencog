@@ -296,6 +296,7 @@ int moses_exec(int argc, char** argv)
     double ip_stdU_weight;
     double ip_skew_U_weight;
     double ip_log_entropy_weight;
+    score_t alpha;              // experimental: precision instead of accuracy
     // hc_param
     bool hc_terminate_if_improvement;
 
@@ -514,6 +515,9 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(ip_log_entropy_weight_opt).c_str(),
          value<double>(&ip_log_entropy_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of log entropy.\n") % ip).c_str())
+        (opt_desc_str(it_alpha_opt).c_str(),
+         value<score_t>(&alpha)->default_value(-1.0),
+         "Experimental: if positive, then we use precision (sort of) instead of accuracy as fitness function for regression.\n")
        ;
 
     variables_map vm;
@@ -711,7 +715,7 @@ int moses_exec(int argc, char** argv)
                 typedef ctruth_table_bscore BScore;
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables)
-                    bscores.push_back(new BScore(ctable, as, noise, rng));
+                    bscores.push_back(new BScore(ctable, as, noise, rng, alpha));
                 multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(rng, exemplars, table_tt,
                                       bool_reduct, bool_reduct_rep, bscore,

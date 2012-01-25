@@ -203,8 +203,8 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
         
 ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
                                          float alphabet_size, float p,
-                                         RandGen& _rng) 
-    : ctt(_ctt), rng(_rng)
+                                         RandGen& _rng, score_t alpha_)
+    : ctt(_ctt), rng(_rng), alpha(alpha_)
 {
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
@@ -212,6 +212,36 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
     occam = p > 0.0f && p < 0.5f;
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
+
+    // define func
+    if (alpha >= 0) {
+        // experiment with precision instead of accuracy
+        func = [this](const vertex& v, CTable::mapped_type& vd) {
+            if (v == id::logical_true)
+                return -score_t(vd[id::logical_false]);
+            else
+                return -alpha * boost::accumulate(vd | map_values, 0); };
+    }
+    else {
+        // traditional accuracy
+        func = [](const vertex& v, CTable::mapped_type& vd) {
+            return -score_t(vd[negate_vertex(v)]); };
+    }
+
+    // define best_func
+    if (alpha >= 0) {
+        // experiment with precision instead of accuracy
+        best_func = [this](CTable::mapped_type& vd) {
+            return -score_t(min((score_t)min(vd[id::logical_true],
+                                             vd[id::logical_false]),
+                                alpha * boost::accumulate(vd | map_values, 0)));
+        };
+    }
+    else {
+        // traditional accuracy
+        best_func = [](CTable::mapped_type& vd) {
+            return -score_t(min(vd[id::logical_true], vd[id::logical_false])); };
+    }    
 }
 
 behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
@@ -220,15 +250,14 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
     // it for every row of input in ctt. (The rng is passed straight
     // through to the combo evaluator).
     OTable ptt(tr, ctt, rng);
-    behavioral_score bs(ctt.size() + (occam?1:0));
+    behavioral_score bs;
 
-    transform(ptt, ctt | map_values, bs.begin(),
-              [](const vertex& v, CTable::mapped_type& vd) {
-                  return -score_t(vd[negate_vertex(v)]); });
+    // Evaluate the bscore components for all rows of the ctable
+    transform(ptt, ctt | map_values, back_inserter(bs), func);
 
     // Add the Occam's razor feature
     if (occam)
-        bs.back() = complexity(tr) * complexity_coef;
+        bs.push_back(complexity(tr) * complexity_coef);
 
     log_candidate_bscore(tr, bs);
 
@@ -237,12 +266,12 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score ctruth_table_bscore::best_possible_bscore() const
 {
-    behavioral_score bs(ctt.size() + (occam?1:0));
-    transform(ctt | map_values, bs.begin(), [](CTable::mapped_type& vd) {
-            return -score_t(min(vd[id::logical_true], vd[id::logical_false])); });
+    behavioral_score bs;
+    transform(ctt | map_values, back_inserter(bs), best_func);
+
     // add the Occam's razor feature
     if(occam)
-        bs.back() = 0;
+        bs.push_back(0);
     return bs;
 }
 
