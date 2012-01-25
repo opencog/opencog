@@ -48,8 +48,6 @@
 // building
 #define MINIMUM_DEME_SIZE         100
 
-#define MAX_EVALS_PER_SLICE       10
-
 namespace opencog { namespace moses {
 
 /**
@@ -60,24 +58,38 @@ namespace opencog { namespace moses {
  * Thus, for example, a single bit has two possible values, and an
  * information content of exactly one.
  *
+ * The information-theoretic content of a contin variable is log_2(5).
+ * This is because there are five ways to alter a contin: twiddle the
+ * least-significant pseudo-bit (2 choices: L,R), erase the least
+ * significant bit (1 choice), add a new least-significant bit
+ * (2 choices: L,R).
+ *
  * This routine sums the total information content in a field set,
  * including that in contin and term fields, as well as the discrete
  * and boolean fields.
+ *
+ * This is usually a very good estimate for the total number of nearest
+ * neighbors of an instance, rarely differing by more than a few percent.
+ * This is because the nearest neighbors of an instance are those that
+ * differ by a Hamming distance of one, and the total length of the
+ * instance is approximately equal to info-theo-bits!
  */
 inline double
 information_theoretic_bits(const field_set& fs)
 {
-    double res = 0;
-    foreach (const field_set::disc_spec& d, fs.disc_and_bits())
-        res += log2<double>(d.multy);
+    static double log_five = log2<double>(5.0);
 
-    foreach (const field_set::contin_spec& c, fs.contin())
-    {
-        // number of possible contins with depth d is 2^(d+1)-1 because
-        // after a Stop only Stop is allowed which is why it is not 3^d
-        unsigned contin_count = pow2(c.depth + 1) - 1;
-        res += log2<double>(contin_count);
+    double res = 0;
+
+    size_t n_disc_fields = fs.n_disc_fields();
+    vector<field_set::disc_spec>::const_iterator it = fs.disc_and_bits().begin();
+    for (size_t cnt=0; cnt < n_disc_fields; cnt++, it++) {
+        const field_set::disc_spec& d = *it;
+        res += log2<double>(d.multy);
     }
+
+    res += fs.n_bits();  // log_2(2)==1
+    res += fs.contin().size() * log_five;
 
     foreach (const field_set::term_spec& o, fs.term())
         res += log2<double>(o.branching) * double(o.depth);
@@ -255,6 +267,10 @@ struct univariate_optimization
     eda_parameters eda_params;
 };
 
+//////////////////
+// Local Search //
+//////////////////
+
 struct hc_parameters
 {
     hc_parameters(bool _terminate_if_improvement = true,
@@ -279,7 +295,7 @@ struct hc_parameters
  * increased, by incrementing the Hamming distance defining the
  * neighborhood.
  *
- * If the local neighborhood is too large, i.e. if it exceeds the 
+ * If the local neighborhood is too large, i.e. if it exceeds the
  * number of allowed scoring-function evaluations, then this algo
  * samples just a part of it, but then exhaustively searches this
  * sub-sample.
@@ -393,7 +409,7 @@ struct local_search
         // evaluations early, when its easy to find improvement, and
         // thus having very few evals left over when the going gets
         // tough.  XXX This needs to be fixed. XXX
-        // 
+        //
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
@@ -513,7 +529,9 @@ struct local_search
         return current_number_of_instances;
     }
 
-    // like above but assumes that init_inst is null (backward compatibility)
+    // Like above but assumes that init_inst is null (backward compatibility)
+    // XXX In fact, all of the current code uses this entry point, no one
+    // bothers to supply an initial instance.
     template<typename Scoring>
     unsigned operator()(instance_set<composite_score>& deme,
                         const Scoring& score, unsigned max_evals)
@@ -526,7 +544,6 @@ struct local_search
     optim_parameters opt_params;
     hc_parameters hc_params;
 };
-
 
 ////////////////////////////
 // Star-shaped Set Search //
