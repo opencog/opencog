@@ -64,7 +64,7 @@ namespace opencog { namespace moses {
  * including that in contin and term fields, as well as the discrete
  * and boolean fields.
  */
-inline double 
+inline double
 information_theoretic_bits(const field_set& fs)
 {
     double res = 0;
@@ -92,32 +92,34 @@ struct optim_parameters
     optim_parameters(double _pop_size_ratio = 20,
                      score_t _terminate_if_gte = 0,
                      double _max_dist_ratio = 1) :
-        term_total(1),
-        term_improv(1),
+        term_total(1.0),
+        term_improv(1.0),
 
         window_size_pop(0.05), //window size for RTR is
         window_size_len(1),    //min(windowsize_pop*N,windowsize_len*n)
-        
+
         pop_size_ratio(_pop_size_ratio),
-
         terminate_if_gte(_terminate_if_gte),
-
         max_dist_ratio(_max_dist_ratio) {}
 
-    // N = p.popsize_ratio*n^1.05
+    // N = p.popsize_ratio * n^1.05
+    // XXX Why n^1.05 ??? This is going to have a significant effect
+    // (as compared to n^1.00) only when n is many thousands or bigger...
     inline unsigned pop_size(const field_set& fs)
     {
-        return ceil((double(pop_size_ratio)*
-                     pow(information_theoretic_bits(fs), 1.05)));
+        return ceil(pop_size_ratio *
+                     pow(information_theoretic_bits(fs), 1.05));
     }
 
-    // term_total*n
-    inline unsigned max_gens_total(const field_set& fs) {
-        return ceil(term_total*information_theoretic_bits(fs));
+    // term_total * n
+    inline unsigned max_gens_total(const field_set& fs)
+    {
+        return ceil(term_total * information_theoretic_bits(fs));
     }
 
-    //term_improv*sqrt(n/w)
-    inline unsigned max_gens_improv(const field_set& fs) {
+    // term_improv*sqrt(n/w)
+    inline unsigned max_gens_improv(const field_set& fs)
+    {
         return ceil(term_improv*
                     sqrt(information_theoretic_bits(fs) /
                          rtr_window_size(fs)));
@@ -145,9 +147,9 @@ struct optim_parameters
 
     double window_size_pop;
     double window_size_len;
- 
+
     // Populations are sized at N = popsize_ratio*n^1.05 where n is
-    // problem size in info-t bits
+    // problem size in info-theoretic bits.  (XXX Why 1.05 ???)
     double pop_size_ratio;
 
     // Optimization is terminated if best score is >= terminate_if_gte
@@ -165,12 +167,10 @@ struct eda_parameters
         selection(2),          //if <=1, truncation selection ratio,
                                //if >1, tournament selection size (should be int)
         selection_ratio(1),    //ratio of population size selected for modeling
-        
+
         replacement_ratio(0.5),//ratio of population size sampled and integrated
-        
-        
-        model_complexity(1)    //model parsimony term log(N)*model_complexity     
-        
+
+        model_complexity(1)    //model parsimony term log(N)*model_complexity
     {}
 
     bool is_tournament_selection() {
@@ -179,7 +179,7 @@ struct eda_parameters
     bool is_truncation_selection() {
         return selection <= 1;
     }
-    
+
     double selection;
     double selection_ratio;
     double replacement_ratio;
@@ -258,18 +258,19 @@ struct univariate_optimization
 struct hc_parameters
 {
     hc_parameters(bool _terminate_if_improvement = true,
-                  unsigned _fraction_of_remaining = 10)
+                  double _fraction_of_remaining = 0.1)
         : terminate_if_improvement(_terminate_if_improvement),
           fraction_of_remaining(_fraction_of_remaining) {}
     bool terminate_if_improvement;
-    unsigned fraction_of_remaining; // better vary the optim_parameter
-                                    // pop_size_ratio to control the
-                                    // allocation of resources in the
-                                    // search of a deme
+
+    // Things work better if the pop_size_ratio is used to control
+    // the allocation of resources.
+    // XXX So we should probably remove this!?
+    double fraction_of_remaining;
 };
 
 /**
- * Although this class is called "hillclimbing" that is not the 
+ * Although this class is called "hillclimbing" that is not the
  * algorithm that it actually implements.  What it actually does is to
  * perform an exhaustive search of the local neighborhood. If no
  * improvement is found, then it broadens the size of the neighborhood,
@@ -279,7 +280,7 @@ struct hc_parameters
  *
  * In call cases, the neighborhood searched is 'spherical', in the sense
  * that only the instances that are equi-distant from the exemplar are
- * explored (i.e. equal Hamming distance).  Contrast this with the 
+ * explored (i.e. equal Hamming distance).  Contrast this with the
  * 'simulated annealing' class below, which searches a star-shaped set
  * (exhaustively).
  */
@@ -310,13 +311,13 @@ struct iterative_hillclimbing
         // is sure to be found.
         if (N >= T)
             return 1;
-        
+
         // Approximation of the total number of candidates at distance
-        // d. This figure is lower than the reality because the
-        // distance is not necessarily binary. If the field has only
-        // binary knobs then it is correct. We use that because T is
-        // not the actual number of neighbors but between N and the
-        // actually number of neighbors at distance d.
+        // d. This figure is lower than the true value because the
+        // knobs are not all binary. If the field set has only binary
+        // knobs, then the binomial would be exactly correct.  We can
+        // use this approximation because T is not the actual number of
+        // neighbors either, but is also a bit smaller.
         //
         // information_theoretic_bits() counts the information content
         // in the field set. (sum log_2 of all field sizes).
@@ -325,10 +326,10 @@ struct iterative_hillclimbing
 
         // proportion of good candidates in the neighborhood
         double B = std::min(1.0, (double)NB/(double)std::max(T, bT));
-                                      
+
         return 1 - pow(1 - B, double(N));
     }
-    
+
     /**
      * Perform one iteration of hill-climbing.
      *
@@ -349,25 +350,42 @@ struct iterative_hillclimbing
                         const instance& init_inst,
                         const Scoring& score, unsigned max_evals,
                         unsigned* eval_best = NULL)
-    {        
+    {
         // Logger
         logger(). debug("Iterative HillClimbing Optimization");
         // ~Logger
 
-        // initial eval_best in case no search is performed
-        if(eval_best)
+        // Initial eval_best in case nothing is found.
+        if (eval_best)
             *eval_best = 0;
 
         const field_set& fields = deme.fields();
+
+        // pop_size == 20 * number of info-theoretic-bits in the field.
+        // max_gens_total == number of info-theoretic-bits in the field.
         unsigned pop_size = opt_params.pop_size(fields);
         unsigned max_gens_total = opt_params.max_gens_total(fields);
 
         deme_size_t current_number_of_instances = 0;
 
-        // Adjust parameters based on the maximal # of evaluations allowed.
-// XXX why is max_number_of_instances scaled ??? 
+        // max_number_of_instances == 20 * info-theo-bits squared.
         deme_size_t max_number_of_instances =
             (deme_size_t)max_gens_total * (deme_size_t)pop_size;
+
+        // Clamp to the maximal # of evaluations allowed.
+        // Note that for most short-running problems, that max_evals
+        // will be *much* smaller than the product above, and so will
+        // always be clamped.  Note also that 'max_evals' is actually
+        // 'number of evals remaining', and so is constantly shrinking.
+        // Later, in the loop below, we multiply this number by 1/10th
+        // so that we explore only 1/10th of 'number evals remaining'
+        // in this go-around.
+        //
+        // This has the perverse effect of wasting a lot of the
+        // evaluations early, when its easy to find improvement, and
+        // thus having very few evals left over when the going gets
+        // tough.  XXX This needs to be fixed. XXX
+        // 
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
@@ -380,7 +398,7 @@ struct iterative_hillclimbing
         unsigned distance = 0;
         unsigned iteration = 0;
 
-        // whether the score has improved during an iteration
+        // Whether the score has improved during an iteration
         bool has_improved;
         do {
             has_improved = false;
@@ -391,21 +409,28 @@ struct iterative_hillclimbing
             }
             // ~Logger
 
+            // Number of instances to try, this go-around.
+            // fraction_of_remaining is 1/10th
             deme_size_t number_of_new_instances =
                 (max_number_of_instances - current_number_of_instances)
-                / hc_params.fraction_of_remaining;
+                * hc_params.fraction_of_remaining;
 
             if (number_of_new_instances < MINIMUM_DEME_SIZE)
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
 
-            // The number of all neighbours at the distance d (stops
-            // counting when above number_of_new_instances)
+            // The number of all neighbours at the distance d. Stops
+            // counting when above number_of_new_instances. Thus we have
+            // two cases:
+            // if (total_number_of_neighbours < number_of_new_instances)
+            //    then total_number_of_neighbours is an exact count
+            //    else its incorrect but slightly larger.
             deme_size_t total_number_of_neighbours =
                 count_neighborhood_size(deme.fields(), center_inst, distance,
                                       number_of_new_instances);
 
             // Estimate the probability of an improvement and halt if too low
+            // XXX This estimate is pretty hokey....
             float p_improv = prob_improvement(number_of_new_instances,
                                               total_number_of_neighbours,
                                               distance, fields);
@@ -418,13 +443,15 @@ struct iterative_hillclimbing
                                p_improv);
                 break;
             }
-            
+
+            // The current_number_of_instances arg is needed only to
+            // be able to manage the size of the deme appropriately.
             number_of_new_instances =
                 sample_new_instances(total_number_of_neighbours,
                                      number_of_new_instances,
                                      current_number_of_instances,
                                      center_inst, deme, distance, rng);
-            
+
             // Logger
             logger().debug("Evaluate %u neighbors at distance %u",
                            number_of_new_instances, distance);
@@ -433,7 +460,7 @@ struct iterative_hillclimbing
             // score all new instances in the deme
             OMP_ALGO::transform
                 (deme.begin() + current_number_of_instances, deme.end(),
-                 deme.begin_scores() + current_number_of_instances, 
+                 deme.begin_scores() + current_number_of_instances,
                  // using bind cref so that score is passed by
                  // ref instead of by copy
                  boost::bind(boost::cref(score), _1));
@@ -455,7 +482,7 @@ struct iterative_hillclimbing
             if (has_improved) {
                 distance = 1;
                 if (eval_best)
-                    *eval_best = current_number_of_instances;         
+                    *eval_best = current_number_of_instances;
                 // Logger
                 {
                     std::stringstream ss;
@@ -467,14 +494,14 @@ struct iterative_hillclimbing
             }
             else
                 distance++;
-            
+
         } while ((!hc_params.terminate_if_improvement ||
                   !has_improved ||
                   current_number_of_instances == 1) &&
                  distance <= max_distance &&
                  current_number_of_instances < max_number_of_instances &&
                  get_score(best_cscore) < opt_params.terminate_if_gte);
-        
+
         return current_number_of_instances;
     }
 
@@ -517,7 +544,7 @@ struct sa_parameters
 /**
  * Although this class is called 'simulated annealing', it does not
  * actually implement the classical simulated annealing algorithm.
- * Instead, it samples a star-shaped set around the exemplar, and 
+ * Instead, it samples a star-shaped set around the exemplar, and
  * then exhaustively explores that set.  The pointiness of the star
  * is temperature dependent; the hiogher the temp, the pointer the
  * star.
@@ -537,7 +564,7 @@ struct simulated_annealing
                         const sa_parameters& sa = sa_parameters())
         : rng(_rng),
           opt_params(op), sa_params(sa) {}
- 
+
     double accept_probability(energy_t energy_new, energy_t energy_old,
                               double temperature)
     {
@@ -548,12 +575,12 @@ struct simulated_annealing
     }
 
     double cooling_schedule(double t)
-    { 
+    {
         OC_ASSERT(t > 0, "t should greater than 0");
-        //return (double) init_temp / std::log(1.0 + t); 
+        //return (double) init_temp / std::log(1.0 + t);
         return (double) sa_params.init_temp / (1.0 + t);
     }
-    
+
     energy_t energy(score_t sc)
     {
         // The energy is minus the score. This is because better scores
@@ -566,7 +593,7 @@ struct simulated_annealing
     {
         return energy(get_score(inst.second));
     }
-    
+
     /**
      * This method calculate the distance of the jump according to the
      * temperature. The higher the temperature the higher the
@@ -604,7 +631,7 @@ struct simulated_annealing
 
         // Score the initial instance
         instance center_instance(init_inst);
-        scored_instance<composite_score> scored_center_inst = 
+        scored_instance<composite_score> scored_center_inst =
             score_instance(center_instance, score);
         energy_t center_instance_energy = energy(scored_center_inst);
         double current_temp = sa_params.init_temp;
@@ -634,28 +661,28 @@ struct simulated_annealing
                                      current_number_of_instances,
                                      center_instance, deme,
                                      current_distance, rng);
-                    
+
             // score all new instances in the deme
             OMP_ALGO::transform(deme.begin() + current_number_of_instances,
                                 deme.end(),
                                 deme.begin_scores() + current_number_of_instances,
                                 boost::bind(boost::cref(score), _1));
-            
+
             // get the best instance
-            scored_instance<composite_score>& best_scored_instance = 
+            scored_instance<composite_score>& best_scored_instance =
                 *OMP_ALGO::max_element(deme.begin()
                                        + current_number_of_instances,
                                        deme.end());
 
             instance& best_instance = best_scored_instance.first;
             energy_t best_instance_energy = energy(best_scored_instance);
-                                          
+
             // check if the current instance in the deme is better than
-            // the center_instance                                        
+            // the center_instance
             double actual_accept_prob = sa_params.accept_prob_temp_intensity *
                 accept_probability(best_instance_energy,
                                    best_instance_energy, current_temp);
-                      
+
             if (actual_accept_prob >= rng.randdouble()) {
                 center_instance_energy = best_instance_energy;
                 center_instance = best_instance;
@@ -678,7 +705,7 @@ struct simulated_annealing
         } while(current_number_of_instances < max_number_of_instances &&
                 current_temp >= sa_params.min_temp &&
                 center_instance_energy > energy(opt_params.terminate_if_gte));
-        
+
         return current_number_of_instances;
     }
 
@@ -690,7 +717,7 @@ struct simulated_annealing
         const instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
     }
-      
+
     RandGen& rng;
     optim_parameters opt_params;
     sa_parameters sa_params;

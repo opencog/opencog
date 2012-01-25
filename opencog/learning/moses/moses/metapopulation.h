@@ -479,9 +479,8 @@ struct metapopulation : public bscored_combo_tree_set
     {
         // Logger
         {
-            logger().debug("Optimize deme");
             stringstream ss;
-            ss << "Maximum evaluations during that expansion: "
+            ss << "Optimize deme; max evaluations allowed: "
                << max_evals;
             logger().debug(ss.str());
         }
