@@ -111,7 +111,7 @@ private:
 
     const score_t max_score;
 
-    typedef metapopulation<petaverse_score, petaverse_bscore, iterative_hillclimbing> metapop_t;
+    typedef metapopulation<petaverse_score, petaverse_bscore, local_search> metapop_t;
     metapop_t *metapop;
 };
 

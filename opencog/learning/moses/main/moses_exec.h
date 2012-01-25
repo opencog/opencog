@@ -82,8 +82,8 @@ static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
 // optimization algorithms
 static const string un="un"; // univariate
-static const string sa="sa"; // simulation annealing
-static const string hc="hc"; // hillclimbing
+static const string sa="sa"; // star-shaped search
+static const string hc="hc"; // local search
 
 // used by the main function, it is included in the library for its
 // convenience
@@ -216,21 +216,21 @@ void metapop_moses_results(RandGen& rng,
                               univariate_optimization(rng, opt_params),
                               meta_params, moses_params, pa);
     }
-    else if (pa.opt_algo == sa) { // simulation annealing
+    else if (pa.opt_algo == sa) { // star-shaped neighborhood search
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              simulated_annealing(rng, opt_params),
+                              star_search(rng, opt_params),
                               meta_params, moses_params, pa);
     }
-    else if (pa.opt_algo == hc) { // hillclimbing
+    else if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hc_parameters hc_params(pa.hc_terminate_if_improvement);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              iterative_hillclimbing(rng, opt_params, hc_params),
+                              local_search(rng, opt_params, hc_params),
                               meta_params, moses_params, pa);
     }
     else {
         std::cerr << "Unknown optimization algo " << pa.opt_algo
                   << ". Supported algorithms are un (for univariate),"
-                  << " sa (for simulation annealing) and hc (for hillclimbing)"
+                  << " sa (for star-shaped search) and hc (for local search)"
                   << std::endl;
         exit(1);
     }

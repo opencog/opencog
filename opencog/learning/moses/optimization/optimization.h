@@ -270,23 +270,29 @@ struct hc_parameters
 };
 
 /**
- * Although this class is called "hillclimbing" that is not the
- * algorithm that it actually implements.  What it actually does is to
- * perform an exhaustive search of the local neighborhood. If no
- * improvement is found, then it broadens the size of the neighborhood,
- * looking at instances with progressively larger Hamming distances.
- * If the local neighborhood is too large, then it samples just a part
- * of it, but then exhaustively searches this sub-sample.
+ * local_search: search the local neighborhood of an instance.
  *
- * In call cases, the neighborhood searched is 'spherical', in the sense
- * that only the instances that are equi-distant from the exemplar are
- * explored (i.e. equal Hamming distance).  Contrast this with the
- * 'simulated annealing' class below, which searches a star-shaped set
+ * This optimizatin algo performs an exhaustive search of the local
+ * neighborhood centered upon a specific instance. Search begins with
+ * the neighborhood at Hamming distance=1 from the central instance.
+ * If no improvement is found, then the size of the neighborhood is
+ * increased, by incrementing the Hamming distance defining the
+ * neighborhood.
+ *
+ * If the local neighborhood is too large, i.e. if it exceeds the 
+ * number of allowed scoring-function evaluations, then this algo
+ * samples just a part of it, but then exhaustively searches this
+ * sub-sample.
+ *
+ * In call cases, the neighborhood searched is 'spherical'; that is,
+ * only the instances that are equi-distant from the exemplar are
+ * explored (i.e. at the same Hamming distance).  Contrast this with
+ * the 'star_search' class below, which searches a star-shaped set
  * (exhaustively).
  */
-struct iterative_hillclimbing
+struct local_search
 {
-    iterative_hillclimbing(RandGen& _rng,
+    local_search(RandGen& _rng,
                            const optim_parameters& op = optim_parameters(),
                            const hc_parameters& hc = hc_parameters())
         : rng(_rng), opt_params(op), hc_params(hc) {}
@@ -331,7 +337,9 @@ struct iterative_hillclimbing
     }
 
     /**
-     * Perform one iteration of hill-climbing.
+     * Perform search of the local neighborhood of an instance.  The
+     * search is exhaustive if the local neighborhood is small; else
+     * the local neighborhood is randomly sampled.
      *
      * @param deme     Where to store the candidates searched. The deme
      *                 is assumed to be empty.  If it is not empty, it
@@ -352,7 +360,7 @@ struct iterative_hillclimbing
                         unsigned* eval_best = NULL)
     {
         // Logger
-        logger(). debug("Iterative HillClimbing Optimization");
+        logger(). debug("Local Search Optimization");
         // ~Logger
 
         // Initial eval_best in case nothing is found.
@@ -520,11 +528,11 @@ struct iterative_hillclimbing
 };
 
 
-/////////////////////////
-// Simulated Annealing //
-/////////////////////////
+////////////////////////////
+// Star-shaped Set Search //
+////////////////////////////
 
-// Parameters specific for Simulated Annealing
+// Parameters specific for Star-shaped set search
 struct sa_parameters
 {
     sa_parameters() :
@@ -542,26 +550,27 @@ struct sa_parameters
 };
 
 /**
- * Although this class is called 'simulated annealing', it does not
- * actually implement the classical simulated annealing algorithm.
- * Instead, it samples a star-shaped set around the exemplar, and
- * then exhaustively explores that set.  The pointiness of the star
- * is temperature dependent; the hiogher the temp, the pointer the
- * star.
+ * star_search: search a star-shaped set around the center instance.
  *
- * By 'star-shaped set', it is meant a neighborhood of the exemplar
- * with instances at a variety of different (Hamming) distances from
- * the center, some near, some far.  Compare this to the 'hillclimbing'
- * class, above, which explores a set of point all equidistant from the
- * center.
+ * A 'star-shaped set' is a neighborhood of the exemplar with instances
+ * at a variety of different (Hamming) distances from the center, with
+ * some near, and some far.  The fraction of 'distant' instances is
+ * controlled by a 'temperature'; the higher the temperature, the
+ * greater the fraction of distant instances.  At zero temperature,
+ * only the closest instances are explored, and this algo reduces to
+ * the local search algo, above.  The higher the temperature, the
+ * 'pointier' the star.
+ *
+ * The total number of instances investigated is controlled by parameters
+ * passed in.
  */
-struct simulated_annealing
+struct star_search
 {
     typedef score_t energy_t;
 
-    simulated_annealing(RandGen& _rng,
-                        const optim_parameters& op = optim_parameters(),
-                        const sa_parameters& sa = sa_parameters())
+    star_search(RandGen& _rng,
+                const optim_parameters& op = optim_parameters(),
+                const sa_parameters& sa = sa_parameters())
         : rng(_rng),
           opt_params(op), sa_params(sa) {}
 
@@ -639,7 +648,7 @@ struct simulated_annealing
         // Logger
         {
             std::stringstream ss;
-            ss << "SA initial instance: " << fields.stream(center_instance);
+            ss << "Star search initial instance: " << fields.stream(center_instance);
             logger().debug(ss.str());
             logger().debug("Energy = %f", center_instance_energy);
         }

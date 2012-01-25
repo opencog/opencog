@@ -275,7 +275,7 @@ void feature_selection(Table& table,
     } else if(fs_params.algorithm == hc) {
         hc_parameters hc_param(false, // do not terminate if improvement
                                fs_params.hc_fraction_of_remaining);
-        iterative_hillclimbing hc(rng, op_param, hc_param);
+        local_search hc(rng, op_param, hc_param);
         moses_feature_selection(table, hc, fs_params);            
     } else if(fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);

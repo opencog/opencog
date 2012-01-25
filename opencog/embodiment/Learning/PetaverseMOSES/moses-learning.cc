@@ -108,7 +108,7 @@ void moses_learning::operator()()
 
         sleep(1);
         break;
-        // ------------------------------------------------------------------------
+        // ------------------------------------------------------------------
 
     case HC_REWARD:
 
@@ -145,9 +145,9 @@ void moses_learning::operator()()
             delete metapop;
 
         metapop = new metapopulation<petaverse_score, petaverse_bscore,
-                                     iterative_hillclimbing>
+                                     local_search>
             (_rng, _center, tt, action_reduction(),
-             *score, *bscore, iterative_hillclimbing(_rng));
+             *score, *bscore, local_search(_rng));
 
         _hcState = HC_BUILD_CANDIDATES;
         break;
