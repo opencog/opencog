@@ -915,6 +915,34 @@ XXX todo: Above algorithm is not quite correct.
  In particular, the normalization step is omitted.
 \end_layout
 
+\begin_layout Standard
+-- maintain list of scored exemplars, in class metapopulation.
+ metapopulation::select_exemplar() chooses one, the one with the highest
+ score and least complexity, that hasn't already been previously choosen.
+\end_layout
+
+\begin_layout Standard
+-- then build rep by: adding knobs, creating a field set to go with the
+ knobs, and having a knob mapper to map field_set areas to knobs.
+\end_layout
+
+\begin_layout Standard
+-- create an empty deme_t, which is ...
+ just a set of scored instances.
+\end_layout
+
+\begin_layout Standard
+-- optimize deme ...
+ done by exploring part or all of a neighborhood, and scoring each and every
+ one...
+ this is hillclimbing; simulated annealing explores the neighborhood differently.
+ Both are mis-named.
+\end_layout
+
+\begin_layout Standard
+-- close deme ...
+\end_layout
+
 \begin_layout Section
 Source Files and Folders
 \end_layout
