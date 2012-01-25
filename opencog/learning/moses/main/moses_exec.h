@@ -108,7 +108,8 @@ struct metapop_moses_results_parameters
                                      const string& _output_file,
                                      const jobs_t& _jobs,
                                      bool _only_local,
-                                     bool _hc_widen_search) :
+                                     bool _hc_widen_search,
+                                     bool _hc_single_step) :
         vm(_vm), result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
@@ -117,7 +118,9 @@ struct metapop_moses_results_parameters
         enable_cache(_enable_cache), labels(_labels),
         output_file(_output_file),
         jobs(_jobs), only_local(_only_local),
-        hc_widen_search(_hc_widen_search) {}
+        hc_widen_search(_hc_widen_search),
+        hc_single_step(_hc_single_step) {}
+
     const variables_map& vm;
     long result_count;
     bool output_score;
@@ -131,7 +134,10 @@ struct metapop_moses_results_parameters
     string output_file;
     const jobs_t& jobs;
     bool only_local;
+
+    // Not really results, but we have nowhere else to put these...
     bool hc_widen_search;
+    bool hc_single_step;
 };
 
 /**
@@ -222,7 +228,7 @@ void metapop_moses_results(RandGen& rng,
                               meta_params, moses_params, pa);
     }
     else if (pa.opt_algo == hc) { // exhaustive neighborhood search
-        hc_parameters hc_params(pa.hc_widen_search);
+        hc_parameters hc_params(pa.hc_widen_search, pa.hc_single_step);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
                               local_search(rng, opt_params, hc_params),
                               meta_params, moses_params, pa);

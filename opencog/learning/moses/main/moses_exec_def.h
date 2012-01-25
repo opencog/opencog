@@ -96,6 +96,7 @@ static const pair<string, string> it_alpha_opt("it_alpha", "Q");
 
 // options specific to a particular optimization algorithm
 static const pair<string, string> hc_widen_search_opt("hc-widen-search", "T");
+static const pair<string, string> hc_single_step_opt("hc-single-step", "L");
 
 string opt_desc_str(const pair<string, string>& opt);
 

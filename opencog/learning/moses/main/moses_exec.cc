@@ -299,6 +299,7 @@ int moses_exec(int argc, char** argv)
     score_t alpha;              // experimental: precision instead of accuracy
     // hc_param
     bool hc_widen_search;
+    bool hc_single_step;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
@@ -488,9 +489,11 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(max_score_opt).c_str(),
          value<score_t>(&max_score)->default_value(best_score),
          "The max score to reach, once reached MOSES halts. MOSES is sometimes able to calculate the max score that can be reached for a particular problem, in such case the max_score is automatically reset of the minimum between MOSES's calculation and the user's option.\n")
+
         (opt_desc_str(max_dist_ratio_opt).c_str(),
          value<double>(&max_dist_ratio)->default_value(1),
          "The max distance from the exemplar to explore a deme is determined by that value * log2(information_theoretic_bits(deme)).\n")
+
         (opt_desc_str(include_dominated_opt).c_str(),
          value<bool>(&include_dominated)->default_value(false),
          "Include dominated candidates (according behavioral score) when merging candidates in the metapopulation. Faster merging but results in a very large metapopulation.\n")
@@ -504,6 +507,15 @@ int moses_exec(int argc, char** argv)
                     "terminates when a local hilltop is found. If true, "
                     "then the search radius is progressively widened, "
                     "until another termination condition is met.\n") % hc).c_str())
+
+        (opt_desc_str(hc_single_step_opt).c_str(),
+         value<bool>(&hc_single_step)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If false, then the normal "
+                    "hillclimbing algorithm is used.  If true, then only one "
+                    "step is taken towards the hilltop, and the results are "
+                    "promptly folded back into the metapopulation. If this "
+                    "flag is set, then consider using the widen-search flag "
+                    "as well, so as to make forward progress.\n") % hc).c_str())
 
         (opt_desc_str(ip_kld_weight_opt).c_str(),
          value<double>(&ip_kld_weight)->default_value(1.0),
@@ -659,7 +671,7 @@ int moses_exec(int argc, char** argv)
                                             output_with_labels, opt_algo,
                                             enable_cache, labels,
                                             output_file, jobs, only_local,
-                                            hc_widen_search);
+                                            hc_widen_search, hc_single_step);
 
     // Continuous reduction rules used during search and representation
     // building.

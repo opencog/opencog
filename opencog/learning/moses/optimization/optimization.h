@@ -274,10 +274,14 @@ struct univariate_optimization
 struct hc_parameters
 {
     hc_parameters(bool widen = false,
+                  bool step = false,
                   double _fraction_of_remaining = 0.1)
         : widen_search(widen),
+          single_step(step),
           fraction_of_remaining(_fraction_of_remaining) {}
+
     bool widen_search;
+    bool single_step;
 
     // Things work better if the pop_size_ratio is used to control
     // the allocation of resources.
@@ -426,9 +430,8 @@ struct local_search
         unsigned iteration = 0;
 
         // Whether the score has improved during an iteration
-        bool has_improved;
-        do {
-            has_improved = false;
+        while (true) {
+            bool has_improved = false;
 
             // Logger
             {
@@ -522,26 +525,25 @@ struct local_search
             else
                 distance++;
 
-        /* Loop termination conditions, explained:
-         *
-         * If we found a better instance (has_improved==true) then we
-         * must not be at the top of the hill, yet, so loop around, to
-         * see if we can go yet higher.
-         * 
-         * If we have not found a better instance (has_improved==false)
-         * then we must be at the top of the hill. We exit the loop,
-         * unless we are told to broaden the search past this local
-         * hilltop. 
-         *
-         * If we're broadning, then stop once we've gone past the max
-         * Hamming distance, or if we've exceeded the max alowed iterations.
-         * (or if we've already gotten the best possible score).
-         */
-        } while ((has_improved ||
-                  (!has_improved && hc_params.widen_search))
-                 && current_number_of_instances < max_number_of_instances
-                 && distance <= max_distance
-                 && get_score(best_cscore) < opt_params.terminate_if_gte);
+            /* If we're in single-step mode, then exit the loop as soon
+             * as we find improvement. */
+            if (hc_params.single_step && has_improved) break;
+
+            /* If we've aleady gotten the best possible score, we are done. */
+            if (opt_params.terminate_if_gte <= get_score(best_cscore)) break;
+
+            /* If we've blown our budget for evaluating the scorer,
+             * then we are done. */
+            if (max_number_of_instances <= current_number_of_instances) break;
+
+            /* If things haven't improved, we must be at the top of the hill.
+             * Terminate, unless we've been asked to widen the search.
+             * (i.e. to search for other nearby hills) */
+            if (!has_improved && !hc_params.widen_search) break;
+
+            /* If we've widened the search out to the max distance, we're done. */
+            if (max_distance < distance) break;
+        }
 
         return current_number_of_instances;
     }
