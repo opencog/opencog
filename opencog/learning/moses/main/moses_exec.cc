@@ -516,8 +516,8 @@ int moses_exec(int argc, char** argv)
          value<double>(&ip_log_entropy_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of log entropy.\n") % ip).c_str())
         (opt_desc_str(it_alpha_opt).c_str(),
-         value<score_t>(&alpha)->default_value(-1.0),
-         "Experimental: if positive, then we use precision (sort of) instead of accuracy as fitness function for regression.\n")
+         value<score_t>(&alpha)->default_value(0.0),
+         "Experimental: if non-null, then we use precision (if positive, or negative predictive value if negative) instead of accuracy as fitness function for regression. The higher abs(alpha) the more important activation.\n")
        ;
 
     variables_map vm;

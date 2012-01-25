@@ -214,34 +214,34 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
 
     // define func
-    if (alpha >= 0) {
-        // experiment with precision instead of accuracy
+    if (alpha > 0) { // experiment with precision
         func = [this](const vertex& v, CTable::mapped_type& vd) {
             if (v == id::logical_true)
                 return -score_t(vd[id::logical_false]);
             else
-                return -alpha * boost::accumulate(vd | map_values, 0); };
-    }
-    else {
-        // traditional accuracy
-        func = [](const vertex& v, CTable::mapped_type& vd) {
-            return -score_t(vd[negate_vertex(v)]); };
-    }
-
-    // define best_func
-    if (alpha >= 0) {
-        // experiment with precision instead of accuracy
+                return -alpha * boost::accumulate(vd | map_values, 0);};
         best_func = [this](CTable::mapped_type& vd) {
             return -score_t(min((score_t)min(vd[id::logical_true],
                                              vd[id::logical_false]),
-                                alpha * boost::accumulate(vd | map_values, 0)));
-        };
+                                alpha * boost::accumulate(vd | map_values, 0)));};
     }
-    else {
-        // traditional accuracy
+    if (alpha < 0) { // experiment with negative predictive value
+        func = [this](const vertex& v, CTable::mapped_type& vd) {
+            if (v == id::logical_false)
+                return -score_t(vd[id::logical_true]);
+            else
+                return alpha * boost::accumulate(vd | map_values, 0); };
+        best_func = [this](CTable::mapped_type& vd) {
+            return -score_t(min((score_t)min(vd[id::logical_true],
+                                             vd[id::logical_false]),
+                                -alpha * boost::accumulate(vd | map_values, 0)));};
+    }
+    else { // accuracy
+        func = [](const vertex& v, CTable::mapped_type& vd) {
+            return -score_t(vd[negate_vertex(v)]); };
         best_func = [](CTable::mapped_type& vd) {
             return -score_t(min(vd[id::logical_true], vd[id::logical_false])); };
-    }    
+    }
 }
 
 behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const

@@ -410,14 +410,30 @@ private:
  * with p<0.5 and |D1| the number of outputs that match
  *
  * The alhpa argument is here to experiment with using precision
- * instead of accuracy.
+ * instead of accuracy. If alpha is null this is disabled (so the
+ * fitness function is maximizing accuracy). If alpha is positive then
+ * the fitness function tries to maximize the positive predictive
+ * value (precision). If alpha is negative then the fitness function
+ * tries to maximize the negative predictive value. The higher
+ * abs(alpha) the more importance is given to the activation.
+ *
+ * Fiddling with the math one can see that
+ *
+ * score / N + alpha = activation * (precision + alpha -1))
+ *
+ * where score is the sum of the bscore when alpha is non-null (or
+ * rather positive since we speak of precision), and N is the number
+ * of observations. Therefore maximizing the fitness function amounts
+ * to maximizing:
+ *
+ * activation * (precision + alpha -1))
  */
 struct ctruth_table_bscore : public bscore_base
 {
     ctruth_table_bscore(const CTable& _ctt,
                         float alphabet_size, float p,
                         RandGen& _rng,
-                        score_t alpha = -1);
+                        score_t alpha = 0);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
