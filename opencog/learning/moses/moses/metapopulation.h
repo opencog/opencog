@@ -181,53 +181,67 @@ struct metapopulation : public bscored_combo_tree_set
         init(bases);
     }
 
-    ~metapopulation() {
-        delete _rep;
-        delete _deme;
+    ~metapopulation()
+    {
+        if (_rep) delete _rep;
+        if (_deme) delete _deme;
     }
 
     /**
-     * return the n_evals
+     * Return reference to the number of evaluations.
+     * Its a reference, because distributed moses increments it directly.
      */
-    const int& n_evals() const {
+    const int& n_evals() const
+    {
         return _n_evals;
     }
-    int& n_evals() {
+    int& n_evals()
+    {
         return _n_evals;
     }
 
     /**
      * Return the best composite score.
      */
-    const composite_score& best_composite_score() const {
+    const composite_score& best_composite_score() const
+    {
         return _best_score;
     }
 
     /**
      * return the best score
      */
-    score_t best_score() const {
+    score_t best_score() const
+    {
         return get_score(_best_score);
     }
 
     /**
      * return the best candidates (with _best_score)
      */
-    const metapop_candidates& best_candidates() const {
+    const metapop_candidates& best_candidates() const
+    {
         return _best_candidates;
     }
 
     /**
      * return the best combo tree (shortest best candidate)
      */
-    const combo_tree& best_tree() const {
+    const combo_tree& best_tree() const
+    {
         return _best_candidates.begin()->first;
     }
 
-    const combo_tree_hash_set& visited() const {
+    /**
+     * List of exemplars that we've already tried to build reps
+     * and demes for. 
+     */
+    const combo_tree_hash_set& visited() const
+    {
         return _visited_exemplars;
     }
-    combo_tree_hash_set& visited() {
+    combo_tree_hash_set& visited()
+    {
         return _visited_exemplars;
     }
 
@@ -237,6 +251,13 @@ struct metapopulation : public bscored_combo_tree_set
      * a Solomonoff-like distribution (2^{-complexity}) and the
      * exemplar is selected accordingly.
      *
+     * XXX Doing the above, i.e. extracting a list of candidates whose
+     * score are tied, and then playing roulette with them requires a
+     * fair amount of code, below, to implement. There's a performance
+     * hit of some sort, for doing this. Is this worth the effort?  Why
+     * not just choose the one with the best score?  Is there any
+     * experimental evidence that this more complex algo is better?
+     *
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
      */
@@ -244,21 +265,22 @@ struct metapopulation : public bscored_combo_tree_set
     {
         OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
 
-// ostream(cout, begin(), end(), -1, true, true, true);
-        //compute the probs for all candidates with best score
+        // Start at the begining: look at the highest scorer.
         score_t score = get_score(*begin());
         complexity_t cmin = get_complexity(*begin());
 
         vector<complexity_t> probs;
-        // set to true when a potential exemplar to be selected is
-        // found
-        bool exist_exemplar = false;
 
+        // Set flag to true, when a suitable exemplar is found.
+        bool found_exemplar = false;
+
+        // The exemplars are stored in order from best score to worst;
+        // the iterator follows this order.
         for (const_iterator it = begin(); it != end(); ++it) {
-            // if no exemplar has been found for that score then look
-            // at the next lower score
+            // If no exemplar has been found for highest score, then look
+            // for one at the next best score.
             if (get_score(*it) != score) {
-                if (!exist_exemplar) {
+                if (!found_exemplar) {
                     score = get_score(*it);
                     cmin = get_complexity(*it);
                 }
@@ -267,22 +289,28 @@ struct metapopulation : public bscored_combo_tree_set
 
             complexity_t c = get_complexity(*it);
 
-            // this to not consider too complex exemplar
+            // Avoid considering excessively complex exemplars.
             if (cmin - c > params.selection_max_range)
                 break;
+
+            // Skip any exemplars we've already used in the past.
             const combo_tree& tr = get_tree(*it);
             if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
                 probs.push_back(c);
-                exist_exemplar = true;
+                found_exemplar = true;
             } else // hack: if the tree is visited then put a positive
                    // complexity so we know it must be ignored
                 probs.push_back(1);
         }
 
-        if (!exist_exemplar) {
-            return end(); // there is no exemplar to select
+        // Nothing found, we've already tried them all.
+        if (!found_exemplar) {
+            return end();
         }
 
+        // Compute the probability normalization, needed for the
+        // roullete choice of exemplars with equal scores, but
+        // differing complexities.
         complexity_t sum = 0;
         complexity_t highest_comp = *boost::min_element(probs);
         // convert complexities into (non-normalized) probabilities
@@ -301,8 +329,9 @@ struct metapopulation : public bscored_combo_tree_set
                                                            sum, rng)));
     }
 
-    // merge candidates in to the metapopulation. candidates might be
-    // changed (dominated candidates removed after the merging)
+    /// Merge candidates in to the metapopulation. The set of
+    /// candidates might be changed during merge, with the dominated
+    /// candidates removed during the merge.
     template<typename Candidates>
     void merge_candidates(Candidates& candidates)
     {
@@ -371,7 +400,9 @@ struct metapopulation : public bscored_combo_tree_set
         if (empty())
             return false;
 
-        do { // attempt to create a non-empty representation
+        // Attempt to create a non-empty representation, by looping
+        // over exemplars until we find one that expands.
+        do {
             _exemplar = select_exemplar();
 
             // Should have found something by now.
@@ -401,27 +432,23 @@ struct metapopulation : public bscored_combo_tree_set
                     return false;
                 }
             }
-
-            combo_tree tr(get_tree(*_exemplar));
-
             {
+                combo_tree tr(get_tree(*_exemplar));
                 stringstream ss;
-                ss << "Attempt to expand with exemplar: " << tr;
-                logger().debug(ss.str());
-            }
-            {
-                stringstream ss;
-                ss << "Scored: " << score(tr);
+                ss << "Attempt to build rep from exemplar: " << tr;
+                ss << "\nScored: " << score(tr);
                 logger().debug(ss.str());
             }
 
-            // Do representation-building and create a deme (initially empty)
+            // Build a representation by adding knobs to the exemplar,
+            // creating a field set, and a mapping from field set to knobs.
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
                                       _exemplar->first, type,
                                       rng, ignore_ops, perceptions, actions);
 
-            // if the representation is empty try another exemplar
+            // If the representation is empty, try the next
+            // best-scoring exemplar.
             if (_rep->fields().empty()) {
                 delete(_rep);
                 _rep = NULL;
@@ -433,7 +460,7 @@ struct metapopulation : public bscored_combo_tree_set
             }
         } while (!_rep);
 
-        // create an empty deme
+        // Create an empty deme.
         _deme = new deme_t(_rep->fields());
 
         _evals_before_this_deme = n_evals();
@@ -443,52 +470,6 @@ struct metapopulation : public bscored_combo_tree_set
 
     /**
      * Do some optimization according to the scoring function.
-     *
-     * sliced version.
-     *
-     * @param max_evals the max evals
-     * @param max_for_slice the max for slice
-     * @param max_score the max score
-     *
-     * @return return the number of evaluations actually performed,
-     *         return -1 if all available is evaluated.
-     */
-    int optimize_deme(int max_evals, int max_for_slice,
-                      score_t max_score)
-    {
-        if (_rep == NULL || _deme == NULL)
-            return -1;
-
-        // Do some optimization according to the scoring function
-        optimize.set_evals_per_slice(max_for_slice);
-        int n;
-        complexity_based_scorer<Scoring> scorer =
-            complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
-        n = optimize(*_deme, scorer, max_evals);
-
-        // This is very ugly, but saves the old MOSES' architecture
-        // The only return value of the operator is used for two
-        // sorts of information - how many new evaluations were made
-        // and if the building should be restarted (PJ)
-        if (n == EVALUATED_ALL_AVAILABLE)
-            return -1;
-
-        if (n < 0)
-            _n_evals += -n;
-        else
-            _n_evals += n;
-
-        return n;
-    }
-
-    /**
-     * Do some optimization according to the scoring function.
-     *
-     * non-sliced version.
-     *
-     * @todo: there should be no sliced or non-sliced version, instead
-     * the optimization API should be simple and allow slice for any
-     * optimizer
      *
      * @param max_evals the max evals
      *
@@ -563,7 +544,8 @@ struct metapopulation : public bscored_combo_tree_set
         mutex pot_cnd_mutex; // mutex for pot_candidates
 
         auto select_candidates =
-            [&, this](const scored_instance<composite_score>& inst) {
+            [&, this](const scored_instance<composite_score>& inst)
+        {
             const composite_score& inst_csc = inst.second;
 
             // if it's really bad stops
@@ -578,11 +560,11 @@ struct metapopulation : public bscored_combo_tree_set
             if (this->params.max_candidates < 0
                 || pot_candidates_size < this->params.max_candidates) {
 
-                // get the combo_tree associated to inst, cleaned and reduced
+                // Get the combo_tree associated to inst, cleaned and reduced.
                 //
-                // @todo: here the candidate is possibly reduced for the
-                // second time this could probability be avoid with some
-                // clever cache or something
+                // @todo: below, the candidate is reduced possibly for the
+                // second time.  This second reduction could probably be
+                // avoided with some clever cache or something. (or a flag?)
                 combo_tree tr = this->_rep->get_candidate(inst, true);
 
                 auto thread_safe_find_tr = [&]() {
@@ -609,6 +591,7 @@ struct metapopulation : public bscored_combo_tree_set
                 }
             }
         };
+
         // the range of the deme to merge goes up to
         // eval_during_this_deme in case the deme is closed before the
         // entire deme (or rather the current sample of it) has been

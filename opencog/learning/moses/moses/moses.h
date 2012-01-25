@@ -78,7 +78,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++)) {
         // Logger
-        logger().info("Deme expansion: %i", gen_idx);
+        logger().info("Deme generation: %i", gen_idx);
         // ~Logger
 
         //run a generation
@@ -95,48 +95,6 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     logger().info("MOSES ends");
     // ~Logger
 }
-
-
-/**
- * @brief The sliced version of moses
- *
- * It is only used for testing
- * 
- * @todo should be removed once slice and non-slice MOSES are totally
- * factorized
- *
- * Lists of relevant operators, perceptions, and actions may or may not be
- * provided. The initial design assumed fixed lists, this version
- * has a constructor including these parameters, specific for actions
- * 
- * @param mp the metapopulation
- * @param pa the parameters to run moses
- */
-template<typename Scoring, typename Domination, typename Optimization>
-void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
-                  const moses_parameters& pa)
-{
-    int o;
-    int max_for_slice = 20;
-
-    while (mp.n_evals() < pa.max_evals) {
-        o = 0;
-        if (mp.create_deme(pa.ignore_ops, pa.perceptions, pa.actions)) {
-            while (o >= 0)
-                o = mp.optimize_deme(pa.max_evals, max_for_slice, pa.max_score);
-
-            mp.close_deme();
-
-        } else
-            break;
-    }
-
-    // print the best solution
-    std::cout << "sampled " << mp.n_evals()
-              << " best " << mp.best_score() << endl
-              << mp.best_tree() << std::endl;
-}
-
 
 } // ~namespace moses
 } // ~namespace opencog

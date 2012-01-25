@@ -128,8 +128,11 @@ struct optim_parameters
                         window_size_len*information_theoretic_bits(fs)));
     }
 
-    // log(max_dist_log_ratio*information_theoretic_bits(fs))
-    inline unsigned max_distance(const field_set& fs) {
+    // return max_dist_log_ratio * log2(information_theoretic_bits(fs))
+    // XXX why is log2 a good idea here? Is this just a pragmatic choice?
+    // or is there a theoretical reason?
+    inline unsigned max_distance(const field_set& fs)
+    {
         double md = max_dist_ratio*log2(information_theoretic_bits(fs));
         return max(1U, numeric_cast<unsigned>(md));
     }
@@ -143,12 +146,14 @@ struct optim_parameters
     double window_size_pop;
     double window_size_len;
  
-    // populations are sized at N = popsize_ratio*n^1.05 where n is
+    // Populations are sized at N = popsize_ratio*n^1.05 where n is
     // problem size in info-t bits
     double pop_size_ratio;
-    // optimization is terminated if best score is >= terminate_if_gte
+
+    // Optimization is terminated if best score is >= terminate_if_gte
     score_t terminate_if_gte;
-    // defines the max distance to search during one iteration (used
+
+    // Defines the max distance to search during one iteration (used
     // in method max_distance)
     double max_dist_ratio;
 };
@@ -263,6 +268,21 @@ struct hc_parameters
                                     // search of a deme
 };
 
+/**
+ * Although this class is called "hillclimbing" that is not the 
+ * algorithm that it actually implements.  What it actually does is to
+ * perform an exhaustive search of the local neighborhood. If no
+ * improvement is found, then it broadens the size of the neighborhood,
+ * looking at instances with progressively larger Hamming distances.
+ * If the local neighborhood is too large, then it samples just a part
+ * of it, but then exhaustively searches this sub-sample.
+ *
+ * In call cases, the neighborhood searched is 'spherical', in the sense
+ * that only the instances that are equi-distant from the exemplar are
+ * explored (i.e. equal Hamming distance).  Contrast this with the 
+ * 'simulated annealing' class below, which searches a star-shaped set
+ * (exhaustively).
+ */
 struct iterative_hillclimbing
 {
     iterative_hillclimbing(RandGen& _rng,
@@ -345,6 +365,7 @@ struct iterative_hillclimbing
         deme_size_t current_number_of_instances = 0;
 
         // Adjust parameters based on the maximal # of evaluations allowed.
+// XXX why is max_number_of_instances scaled ??? 
         deme_size_t max_number_of_instances =
             (deme_size_t)max_gens_total * (deme_size_t)pop_size;
         if (max_number_of_instances > max_evals)
@@ -471,207 +492,6 @@ struct iterative_hillclimbing
     hc_parameters hc_params;
 };
 
-// @todo: redo the code entriely from iterative_hillclimbing to take
-// the improvements into account. Ask Nil for help!
-//
-// XXX is this actually useful? I mean, if we've got multi-threading,
-// then what is the point of doing this ??  Is this just un-needed
-// complexity?  Is this code stale?  The only place where its used
-// is in the ant hillclmbing demo, and that crashes anyway...
-// (bugzilla 911364)
-//
-struct sliced_iterative_hillclimbing
-{
-    typedef enum {
-        M_INIT,
-        M_BUILD_CANDIDATES,
-        M_EVALUATE_CANDIDATES
-    } MState;
-
-
-    sliced_iterative_hillclimbing(RandGen& _rng,
-                                  const optim_parameters& p = optim_parameters())
-        : rng(_rng), opt_params(p), m_state(M_INIT),
-          _evals_per_slice(MAX_EVALS_PER_SLICE) {}
-
-    void set_evals_per_slice(int evals_per_slice) {
-        _evals_per_slice = evals_per_slice;
-    }
-
-    //return # of evaluations actually performed
-    //WARNING: if an improvement has been made it returns
-    // -number_of_eval
-    //it is rather ugly and it is a temporary hack till the API of MOSES
-    //is better
-    template<typename Scoring>
-    int operator()(instance_set<composite_score>& deme,
-                   const Scoring& score, int max_evals) {
-        switch (m_state) {
-
-        case M_INIT:  {
-            current_number_of_instances = 0;
-
-            cout << "bit  fields: " << deme.fields().n_bits() << endl;
-            cout << "disc fields: " << deme.fields().n_disc_fields() << endl;
-            cout << "max  evals : " << max_evals << endl << endl;
-
-            max_number_of_instances = max_evals;
-
-            number_of_fields = deme.fields().n_bits() + deme.fields().n_disc_fields();
-            exemplar = instance(deme.fields().packed_width());
-
-            // set to 0 all fields (contin and term fields are
-            // ignored) to represent the exemplar
-            for (field_set::bit_iterator it = deme.fields().begin_bits(exemplar);
-                    it != deme.fields().end_bits(exemplar); ++it)
-                *it = false;
-            for (field_set::disc_iterator it = deme.fields().begin_disc(exemplar);
-                    it != deme.fields().end_disc(exemplar); ++it)
-                *it = 0;
-
-            scored_instance<composite_score> scored_exemplar = exemplar;
-            exemplar_score = score(scored_exemplar).first;
-            // cout << "Exemplar:" <<deme.fields().stream(scored_exemplar) << " Score:" << exemplar_score << endl;
-
-            distance = 1;
-
-            // more precisely, instead of 0 there should be max_score, but this value is not passed as an argument
-            if (exemplar_score == 0) {
-                // found a perfect solution
-                deme.resize(1);
-                *(deme.begin()++) = exemplar;
-                m_state = M_INIT;
-            } else
-                m_state = M_BUILD_CANDIDATES;
-
-            break;
-        }
-        // --------------------------------------------------------------------------
-
-        case M_BUILD_CANDIDATES:  {
-
-            if (current_number_of_instances >= max_number_of_instances) {
-                m_state = M_INIT;
-                return EVALUATED_ALL_AVAILABLE; // This is ugly, see the note in moses.h
-            }
-
-#define MAX_DISTANCE_FROM_EXEMPLAR 5
-
-            if (distance > MAX_DISTANCE_FROM_EXEMPLAR || distance > number_of_fields) {
-                m_state = M_INIT;
-                return EVALUATED_ALL_AVAILABLE; // This is ugly, see the note in moses.h
-            }
-
-            cout << "Distance in this iteration:" << distance << endl;
-
-            // the number of all neighbours at the distance d
-            deme_size_t total_number_of_neighbours = count_neighborhood_size(deme.fields(), distance);
-            cout << "Number of possible instances:" << total_number_of_neighbours << endl;
-
-            if (total_number_of_neighbours == 0) {
-                m_state = M_INIT;
-                return EVALUATED_ALL_AVAILABLE; // This is ugly, see the note in moses.h
-            }
-
-#define FRACTION_OF_REMAINING 10
-
-            number_of_new_instances = (max_number_of_instances - current_number_of_instances) / FRACTION_OF_REMAINING;
-            if (number_of_new_instances < MINIMUM_DEME_SIZE)
-                number_of_new_instances = (max_number_of_instances - current_number_of_instances);
-
-            if (number_of_new_instances < total_number_of_neighbours) {
-                //resize the deme so it can take new instances
-                deme.resize(current_number_of_instances + number_of_new_instances);
-                //sample 'number_of_new_instances' instances on the
-                //distance 'distance' from the exemplar
-                sample_from_neighborhood(deme.fields(), distance, number_of_new_instances, deme.begin() + current_number_of_instances, deme.end(), rng);
-            } else {
-                number_of_new_instances = total_number_of_neighbours;
-                //resize the deme so it can take new instances
-                deme.resize(current_number_of_instances + number_of_new_instances);
-                //add all instances on the distance 'distance' from the exemplar
-                generate_all_in_neighborhood(deme.fields(), distance, deme.begin() + current_number_of_instances, deme.end());
-            }
-
-            target_size = current_number_of_instances + number_of_new_instances;
-            cout << "New target size:" << target_size << endl;
-
-            m_state = M_EVALUATE_CANDIDATES;
-
-            break;
-        }
-        // --------------------------------------------------------------------------
-
-        case M_EVALUATE_CANDIDATES: {
-
-            bool has_improved = false;
-            int n = 0; // number of evaluations in this chunk
-
-            score_t best_score = exemplar_score;
-
-            // cout << " _evals_per_slice " << _evals_per_slice << endl;
-
-            // check if there is an instance in the deme better than the exemplar
-            for (int i = 0; deme.begin() + current_number_of_instances != deme.end() &&
-                    i < _evals_per_slice && !has_improved; ++i) {
-
-                *(deme.begin_scores() + current_number_of_instances) = score(*(deme.begin() + current_number_of_instances));
-
-                const scored_instance<composite_score>& inst = deme[current_number_of_instances];
-
-                if (get_score(inst.second) > best_score) {
-
-                    best_score = get_score(inst.second);
-                    has_improved = true;
-
-                    cout << endl << "Improvement, new best score:" << endl;
-                    cout << inst.second << "(distance: " << distance << ", old score: " << exemplar_score << ")" << endl;
-                    cout << "Found instance:" << deme.fields().stream(inst) << endl;
-                    cout << "Score:" << get_score(inst.second) << endl;
-                    cout << "--------------------------------------" << endl;
-                }
-
-                current_number_of_instances++;
-                n++;
-            }
-
-            if (has_improved) {
-                m_state = M_INIT;
-                return -n;
-            } else if (deme.begin() + current_number_of_instances < deme.end())  {
-                m_state = M_EVALUATE_CANDIDATES;
-            } else {
-                m_state = M_BUILD_CANDIDATES;
-                distance++;
-            }
-
-            return n;
-            break;
-        }
-        // --------------------------------------------------------------------------
-
-        default:
-            break;
-        }
-
-        return 0;
-    }
-
-    unsigned distance;
-    deme_size_t number_of_new_instances;
-    unsigned number_of_fields;
-    instance exemplar;
-    int max_number_of_instances;
-    score_t exemplar_score;
-    int current_number_of_instances;
-    int target_size;
-
-    RandGen& rng;
-    optim_parameters opt_params;
-    MState m_state;
-    int _evals_per_slice;
-};
-
 
 /////////////////////////
 // Simulated Annealing //
@@ -694,6 +514,20 @@ struct sa_parameters
     deme_size_t max_new_instances;
 };
 
+/**
+ * Although this class is called 'simulated annealing', it does not
+ * actually implement the classical simulated annealing algorithm.
+ * Instead, it samples a star-shaped set around the exemplar, and 
+ * then exhaustively explores that set.  The pointiness of the star
+ * is temperature dependent; the hiogher the temp, the pointer the
+ * star.
+ *
+ * By 'star-shaped set', it is meant a neighborhood of the exemplar
+ * with instances at a variety of different (Hamming) distances from
+ * the center, some near, some far.  Compare this to the 'hillclimbing'
+ * class, above, which explores a set of point all equidistant from the
+ * center.
+ */
 struct simulated_annealing
 {
     typedef score_t energy_t;
