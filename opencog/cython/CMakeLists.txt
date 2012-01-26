@@ -122,6 +122,8 @@ ADD_LIBRARY(logic_wrapper SHARED
 )
 
 TARGET_LINK_LIBRARIES(logic_wrapper
+    pln
+    atomspace
 )
 
 ADD_DEPENDENCIES(logic_wrapper atomspace_cython)

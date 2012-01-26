@@ -64,6 +64,13 @@ public:
         config().set("ENTITY_EXPERIENCE_ENABLED", "false"); 
         config().set("FISHGRAM_ENABLED", "false");
         config().set("MONITOR_CHANGES_ENABLED", "false"); 
+        config().set("STIMULUS_UPDATER_ENABLED", "false"); 
+        config().set("FORGETTING_ENABLED", "false"); 
+        config().set("HEBBIAN_UPDATING_ENABLED", "false");
+        config().set("IMPORTANCE_SPREADING_ENABLED", "false");
+        config().set("IMPORTANCE_UPDATING_ENABLED", "false");
+        config().set("STI_DECAYING_ENABLED", "false");
+        config().set("IMPORTANCE_SPREADING_ENABLED", "false");
 
         oacMock.createOAC(); 
 
@@ -139,6 +146,7 @@ public:
         OAC & oac = oacMock.getOAC(); 
         AtomSpace & atomSpace = * ( oac.getAtomSpace() );
 
+        /*
         SchemeEval & evaluator = SchemeEval::instance();    
         std::string scheme_expression, scheme_return_value;
 
@@ -147,7 +155,11 @@ public:
         // Run the Procedure that do planning
         scheme_return_value = evaluator.eval(scheme_expression);
         TS_ASSERT( !evaluator.eval_error() ); 
+        */
 
+        // give it an agent first.
+        //oac.
+        
         // Get the plan stored in AtomSpace
         oac.psiActionSelectionAgent->plan_action_list.clear(); 
         oac.psiActionSelectionAgent->temp_action_list.clear(); 

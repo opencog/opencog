@@ -51,11 +51,73 @@ class Chainer:
         global _line
         _line = 1
 
+    def do_planning(self):
+        try:
+            target_PredicateNodes = [x for x in self.space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
+
+            for atom in target_PredicateNodes:
+                # Here be DRAGONS!
+                #target = Tree('EvaluationLink', atom, Tree('ListLink'))
+                target = Tree('EvaluationLink', atom)
+
+            a = self.space
+
+            rl = Tree('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+            atom_from_tree(rl, a)
+            
+            # hack
+            print 'target'
+            target_a = atom_from_tree(target, a)
+            print target_a
+            print target_a.tv
+            target_a.tv = TruthValue(0,  0)
+            print target_a
+            # Reset the rules list so the EvaluationLink in it won't have a TV!
+            self.setup_rules(a)
+
+            self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
+            print self.rules
+
+            result_atoms = self.bc(target)
+            
+            print "planning result: ",  result_atoms
+            
+            if result_atoms:
+                res_Handle = result_atoms[0]
+                res = tree_from_atom(Atom(res_Handle, a))
+                
+                trail = self.trail(res)
+                actions = self.extract_plan(trail)
+                
+                # set plan_success
+                ps = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), Tree('ListLink'))
+                # set plan_action_list
+                pal = Tree('ReferenceLink',
+                            a.add_node(t.ConceptNode, 'plan_action_list'),
+                            Tree('ListLink', actions))
+                
+                ps_a  = atom_from_tree(ps, a)
+                pal_a = atom_from_tree(pal, a)
+                
+                print ps
+                print pal
+                ps_a.tv = TruthValue(1, 9001)
+                
+                print ps_a.tv
+
+        except Exception, e:
+            print e
+
+
     #@profile
     def bc(self, target):
         #import prof3d; prof3d.profile_me()
         
         try:
+            tvs = self.get_tvs(target)
+            print "target truth values:", map(str, tvs)
+            assert not tvs
+            
             #save_trees([target], 'target')
             #save_trees([tree_from_atom(a) for a in self.space.get_atoms_by_type(t.Atom) if a.tv.count > 0], 'as')
             if Chainer._convert_atoms:
@@ -95,8 +157,12 @@ class Chainer:
 #                
 #                self.print_tree(bit)
 
-#            for res in self.results:
-#                self.print_tree(self.trail(res))
+            for res in self.results:
+                print 'Inference trail:'
+                trail = self.trail(res)
+                self.print_tree(trail)
+                print 'Action plan (if applicable):'
+                print self.extract_plan(trail)
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
             return [atom_from_tree(result, self.space).h for result in self.results]
@@ -417,6 +483,16 @@ class Chainer:
     def add_rule(self, rule):        
         self.rules.append(rule)
 
+    def extract_plan(self, trail):
+        def is_action(proofnode):
+            target = proofnode.op
+            return target.op == 'ExecutionLink'
+        # Extract all the targets in best-first order
+        proofnodes = trail.flatten()
+        proofnodes.reverse()
+        actions = [pn.op for pn in proofnodes if is_action(pn)]
+        return actions
+
     def trail(self, target):
         def filter_with_tv(tr):
             args = []
@@ -557,7 +633,8 @@ class Chainer:
 
         # All existing Atoms
         for obj in a.get_atoms_by_type(t.Atom):
-            if obj.tv.count > 0:
+            # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+            if obj.tv.count > 0 and obj.tv.mean > 0:
                 tr = tree_from_atom(obj)
                 # A variable with a TV could just prove anything; that's evil!
                 if not tr.is_variable():
@@ -671,10 +748,10 @@ class Chainer:
 #        r.tv = True
 #        self.add_rule(r)
 
-        for atom in a.get_atoms_by_type(t.ForAllLink):
+        for atom in a.get_atoms_by_type(t.AverageLink):
             # out[0] is the ListLink of VariableNodes, out[1] is the expression
             tr = tree_from_atom(atom.out[1])
-            r = Rule(tr, [], name='ForAll')
+            r = Rule(tr, [], name='Average')
             r.tv = atom.tv
             self.add_rule(r)
 

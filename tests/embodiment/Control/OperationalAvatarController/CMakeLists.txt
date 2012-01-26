@@ -73,7 +73,8 @@ IF (TCL_TCLSH)
 		OACMock
 	)
 
-	TARGET_LINK_LIBRARIES(oacmock
+	SET(OAC_MOCK_LINK_LIBS
+        oacmock
 		oac
 		Procedure
 		behavior
@@ -87,9 +88,13 @@ IF (TCL_TCLSH)
 		${XERCESC_LIBRARIES}
 		${PROJECT_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
+        
 	)
-	ADD_DEPENDENCIES(oacmock DistributeOACStuff)
 
+    TARGET_LINK_LIBRARIES(${OAC_MOCK_LINK_LIBS})
+    
+	ADD_DEPENDENCIES(oacmock DistributeOACStuff)
+    
 	ADD_CXXTEST(PsiDemandUpdaterAgentUTest)
 	TARGET_LINK_LIBRARIES(PsiDemandUpdaterAgentUTest
 		oacmock
@@ -105,9 +110,23 @@ IF (TCL_TCLSH)
 		oacmock
 	)
 
-	ADD_CXXTEST(PsiActionSelectionAgentUTest)
+	ADD_CXXTEST(PsiActionSelectionAgentUTest)    
+
+    SET(PASA_TEST_LINK_LIBS oacmock)
+    IF (HAVE_CYTHON)
+        SET(PASA_TEST_LINK_LIBS
+            ${PASA_TEST_LINK_LIBS}
+            PythonEval
+		    PythonModule
+            logic_wrapper
+            pln
+            atomspace
+            util
+		    ${PYTHON_LIBRARIES})
+    ENDIF (HAVE_CYTHON)
+
 	TARGET_LINK_LIBRARIES(PsiActionSelectionAgentUTest
-		oacmock
+		${PASA_TEST_LINK_LIBS}
 	)
 ELSE (TCL_TCLSH)
 	SUMMARY_ADD("Psi*AgentUTest" "Requires TCL shell to load test data" 0)

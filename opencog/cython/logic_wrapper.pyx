@@ -2,13 +2,13 @@ from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
 from cython.operator cimport dereference as deref, preincrement as inc
 
-## basic wrapping for std::string conversion
-#cdef extern from "<string>" namespace "std":
-#    cdef cppclass string:
-#        string()
-#        string(char *)
-#        char * c_str()
-#        int size()
+# basic wrapping for std::string conversion
+cdef extern from "<string>" namespace "std":
+    cdef cppclass string:
+        string()
+        string(char *)
+        char * c_str()
+        int size()
 
 # Automatically compile .pyx modules. util.py, tree.py and logic.py all work, but I'm not sure it's actually faster.
 #import pyximport; pyximport.install()
@@ -53,7 +53,23 @@ cdef api cHandle python_pln_bc(cAtomSpace* c_space, cHandle c_target) with gil:
         return cHandle(-1)
 
     cdef Handle result = result_Handle_list[0]
-    
+
     cdef cHandle c_result = deref(result.h)
-    
+
     return c_result
+
+cdef api python_pln_plan(cAtomSpace* c_space) with gil:
+#cdef api python_pln_plan() with gil:
+    space = AtomSpace_factory(c_space)
+    print "well if you can call it you mustn't be doing too badly."
+    
+#    target_Handle = Handle
+#    target_Handle = Handle(c_goal.value())
+#    target_Atom = Atom(target_Handle, space)
+#    
+#    target = tree_from_atom(target_Atom)
+    c = Chainer(space)
+    
+    c.do_planning()
+
+    return
