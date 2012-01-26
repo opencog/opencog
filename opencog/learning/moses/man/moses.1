@@ -40,6 +40,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR nsamples ]
 .RB [ \-c
 .IR result_count ]
+.RB [ \-D
+.IR max_dist ]
 .RB [ \-d1 ]
 .RB [ \-E
 .IR reduct_effort ]
@@ -56,6 +58,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR jobs ]
 .RB [ \-k
 .IR problem_size ]
+.RB [ \-L1 ]
 .RB [ \-l
 .IR loglevel ]
 .RB [ \-m
@@ -77,6 +80,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-S0 ]
 .RB [ \-s1 ]
 .RB [ \-t1 ]
+.RB [ \-T1 ]
 .RB [ \-u
 .IR target_feature ]
 .RB [ \-V1 ]
@@ -333,6 +337,10 @@ knobs, thus lowering the overall dimension of the problem. This can
 improve performance by effectively reducing the size of the problem.
 The default \fIeffort\fR is 2.
 .TP
+.BI \-D dist \fR,\ \fB\-\-max\-dist= dist
+The maximum radius of the neighborhood around the exemplar to explore.
+The default value is 20.
+.TP
 .BI \-d1\fR,\ \fB\-\-reduce\-all=1
 Reduce candidates before scoring evalutation. Otherwise, only dominating
 candidates are reduced, just before being added to the metapopulation.
@@ -351,6 +359,17 @@ faster solution-finding.  The default \fIeffort\fR is 2.
 Create and optimize no more than \fInum\fR demes.  Negative numbers
 are interpreted as "unlimited". By default, the number of demes is
 unlimited.
+.TP
+.BI \-L1\fR,\ \fB\-\-hc\-single\-step=1
+Single-step, instead of hill-climbing to the top of a hill. That is,
+a single uphill step is taken, and the resulting best demes are folded
+back into the metapopulation.  Solving then continues as usual. By
+default, the hillclimbing algorithm does not single-step; it instead
+continues to the top of the local hill, before folding the resulting
+demes back into the metapopulation.  If using this flag, condiser
+usig the \fB\-T1\fR flag to allow the search to be widened, so that
+if the initial exemplar is already at the top of a local hill, a search
+is made for a different (taller) hill.
 .TP
 .BI \-m\  num \fR,\ \fB\-\-max\-evals= num
 Perform no more than \fInum\fR evaluations of the scoring function.
@@ -393,11 +412,12 @@ scored candidates. If a new candidate is found in the cache, that score
 is used, instead of a scoring function evaluation.  The effectiveness of
 memoization is greatly increased by also using the \fB\-d1\fR flag.
 .TP
-.BI \-T0\fR,\ \fB\-\-hc\-widen\-search=0
-Controls hill-climbing algorithm behaviour.  If false, then deme search
-terminates when a local hilltop is found. If true, then the search
-radius is progressively widened, until another termination condition
-is met.
+.BI \-T1\fR,\ \fB\-\-hc\-widen\-search=1
+Controls hill-climbing algorithm behaviour.  If false (the default),
+then deme search terminates when a local hilltop is found. If true,
+then the search radius is progressively widened, until another
+termination condition is met.  Consider using the \fB\-D\fR flag to
+set the maximum search radius.
 
 .\" ============================================================
 .SS "Output control options"

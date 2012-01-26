@@ -288,7 +288,7 @@ int moses_exec(int argc, char** argv)
     // optim_param
     double pop_size_ratio;
     score_t max_score;
-    double max_dist_ratio;
+    size_t max_dist;
     // continuous optimization
     vector<contin_t> discretize_thresholds;
     double ip_kld_weight;
@@ -490,9 +490,10 @@ int moses_exec(int argc, char** argv)
          value<score_t>(&max_score)->default_value(best_score),
          "The max score to reach, once reached MOSES halts. MOSES is sometimes able to calculate the max score that can be reached for a particular problem, in such case the max_score is automatically reset of the minimum between MOSES's calculation and the user's option.\n")
 
-        (opt_desc_str(max_dist_ratio_opt).c_str(),
-         value<double>(&max_dist_ratio)->default_value(1),
-         "The max distance from the exemplar to explore a deme is determined by that value * log2(information_theoretic_bits(deme)).\n")
+        (opt_desc_str(max_dist_opt).c_str(),
+         value<size_t>(&max_dist)->default_value(4),
+         "The maximum radius of the neighborhood around the "
+         "exemplar to explore.\n")
 
         (opt_desc_str(include_dominated_opt).c_str(),
          value<bool>(&include_dominated)->default_value(false),
@@ -646,7 +647,7 @@ int moses_exec(int argc, char** argv)
                                    revisit, include_dominated, jobs[localhost]);
 
     // Set optim_parameters.
-    optim_parameters opt_params(pop_size_ratio, max_score, max_dist_ratio);
+    optim_parameters opt_params(pop_size_ratio, max_score, max_dist);
 
     // Set moses_parameters.
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);

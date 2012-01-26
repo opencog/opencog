@@ -103,7 +103,7 @@ struct optim_parameters
 {
     optim_parameters(double _pop_size_ratio = 20,
                      score_t _terminate_if_gte = 0,
-                     double _max_dist_ratio = 1) :
+                     size_t _max_dist = 4) :
         term_total(1.0),
         term_improv(1.0),
 
@@ -112,7 +112,7 @@ struct optim_parameters
 
         pop_size_ratio(_pop_size_ratio),
         terminate_if_gte(_terminate_if_gte),
-        max_dist_ratio(_max_dist_ratio) {}
+        max_dist(_max_dist) {}
 
     // N = p.popsize_ratio * n^1.05
     // XXX Why n^1.05 ??? This is going to have a significant effect
@@ -142,13 +142,9 @@ struct optim_parameters
                         window_size_len*information_theoretic_bits(fs)));
     }
 
-    // return max_dist_log_ratio * log2(information_theoretic_bits(fs))
-    // XXX why is log2 a good idea here? Is this just a pragmatic choice?
-    // or is there a theoretical reason?
     inline unsigned max_distance(const field_set& fs)
     {
-        double md = max_dist_ratio*log2(information_theoretic_bits(fs));
-        return max(1U, numeric_cast<unsigned>(md));
+        return max_dist;
     }
 
     // optimization is terminated after term_total*n generations, or
@@ -169,7 +165,7 @@ struct optim_parameters
 
     // Defines the max distance to search during one iteration (used
     // in method max_distance)
-    double max_dist_ratio;
+    size_t max_dist;
 };
 
 // Parameters specific to EDA optimization
@@ -693,13 +689,8 @@ struct star_search
         do {
             unsigned current_distance = dist_temp(current_temp);
 
-            // Logger
-            {
-                logger().debug("Step: %u", step);
-                logger().debug("Distance = %u, Temperature = %f",
-                               current_distance, current_temp);
-            }
-            // ~Logger
+            logger().debug("Step: %u  Distance = %u, Temperature = %f",
+                           step, current_distance, current_temp);
 
             deme_size_t number_of_new_instances =
                 sample_new_instances(sa_params.max_new_instances,
