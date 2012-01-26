@@ -315,7 +315,11 @@ l lx.
 Hillclimbing.
 T}
 \fBsa\fR@T{
-Simulated annealing.
+Simulated annealing.  The \fB\-D\fR flag controls the size of the
+neighborhood that is searched during the early, "high-temperature"
+phase.  It has a significant effect on the run-time performance of the
+algorithm. Using \fB\-D2\fR or \fB\-D3\fR is likely to provide the best
+performance.
 T}
 \fBun\fR@T{
 Univariate Bayesian dependency.
@@ -339,7 +343,7 @@ The default \fIeffort\fR is 2.
 .TP
 .BI \-D dist \fR,\ \fB\-\-max\-dist= dist
 The maximum radius of the neighborhood around the exemplar to explore.
-The default value is 20.
+The default value is 4.
 .TP
 .BI \-d1\fR,\ \fB\-\-reduce\-all=1
 Reduce candidates before scoring evalutation. Otherwise, only dominating
