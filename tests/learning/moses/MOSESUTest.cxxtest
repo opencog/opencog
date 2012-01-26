@@ -65,8 +65,13 @@ public:
         string max_evals("-m1000");
         moses_test_score({data_file_path, max_evals}, -3);
     }
+
+    /* SR is polynomial regression; it has a very deceptive scoring
+     * function, and hill-climbing will utterly fail on it. Use the
+     * -L1 flag to perform an exhaustive local search.
+     */
     void test_sr_3() {
-        moses_test_score({"-Hsr", "-k3", "-m100000"});
+        moses_test_score({"-Hsr", "-k3", "-m100000", "-L1"});
     }
     void test_cp() {
         string tr_str("or(and(#2 !#3) #1 !#4 #5)");
