@@ -698,6 +698,16 @@ struct star_search
                                      center_instance, deme,
                                      current_distance, rng);
 
+            // If the temperature is too high, then the distance will
+            // be too large, and no instances will be found at that
+            // distance.
+            if (0 == number_of_new_instances) {
+                current_temp = cooling_schedule((double)step
+                                                * sa_params.temp_step_size);
+                step++;
+                continue;
+             }
+
             // score all new instances in the deme
             OMP_ALGO::transform(deme.begin() + current_number_of_instances,
                                 deme.end(),
