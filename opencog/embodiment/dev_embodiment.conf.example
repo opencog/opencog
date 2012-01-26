@@ -114,7 +114,7 @@ ATOM_SPACE_DUMP = atomSpace.dump
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-PSI_DEMANDS = Energy, Integrity, Certainty, Competence, Affiliation
+PSI_DEMANDS = Energy #, Integrity, Certainty, Competence, Affiliation
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
@@ -405,6 +405,11 @@ MODULES               = libquery.so, libbuiltinreqs.so,
 
 # scheme script files that will be loaded during the system startup
 SCM_PRELOAD           = scm/type_constructors.scm, scm/utilities.scm, scm/file-utils.scm, scm/debug.scm, scm/embodiment/type_constructors.scm, scm/embodiment/predicates-frames.scm, scm/embodiment/language-comprehension.scm, scm/embodiment/reference-resolution-rules.scm, scm/embodiment/command-resolution-rules.scm, scm/embodiment/question-answering.scm, psi_util.scm, rules_core.scm, action_selection.scm, feeling_updaters.scm, demand_updaters.scm, modulator_updaters.scm, stimulus_updaters.scm
+
+PYTHON_EXTENSION_DIRS  = /home/jaredw/workspace/planning/opencog/python
+
+# Run these python modules on start up
+PYTHON_PRELOAD = pyshell
 
 # PLN settings (needed by OpenPsi among other components)
 PLN_RECORD_TRAILS        = true
