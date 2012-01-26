@@ -521,6 +521,12 @@ struct local_search
             else
                 distance++;
 
+            /* If this is the first time through the loop, then distance
+             * was zero, there was only one instance at dist=0, and we
+             * just scored it. Be sure to go around and do at least the
+             * distance = 1 exploration. */
+            if (1 == number_of_new_instances) continue;
+
             /* If we're in single-step mode, then exit the loop as soon
              * as we find improvement. */
             if (hc_params.single_step && has_improved) break;
