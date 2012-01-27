@@ -43,7 +43,7 @@ public:
         logger().setLevel(Logger::FINE);
     }
     /**
-     * test local_search optimization in standalone. The
+     * test hll_climbing optimization in standalone. The
      * field set is a bit string and the scoring function returns
      * minus the number of bits that differs from some target.
      */
@@ -65,7 +65,7 @@ public:
         // Local search optimization
         optim_parameters op_param(20, 1);
         hc_parameters hc_param(false); // do not terminate if improvement
-        local_search hc(rng, op_param, hc_param);
+        hill_climbing hc(rng, op_param, hc_param);
         // empty deme
         instance_set<composite_score> deme(fs);
         // perform the search

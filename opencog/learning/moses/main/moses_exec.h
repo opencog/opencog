@@ -222,15 +222,15 @@ void metapop_moses_results(RandGen& rng,
                               univariate_optimization(rng, opt_params),
                               meta_params, moses_params, pa);
     }
-    else if (pa.opt_algo == sa) { // star-shaped neighborhood search
+    else if (pa.opt_algo == sa) { // simulated annealing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              star_search(rng, opt_params),
+                              simulated_annealing(rng, opt_params),
                               meta_params, moses_params, pa);
     }
     else if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hc_parameters hc_params(pa.hc_widen_search, pa.hc_single_step);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              local_search(rng, opt_params, hc_params),
+                              hill_climbing(rng, opt_params, hc_params),
                               meta_params, moses_params, pa);
     }
     else {

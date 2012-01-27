@@ -104,9 +104,9 @@ int main(int argc,char** argv) {
 */
 
 
-  metapopulation<ant_score, ant_bscore, local_search> 
+  metapopulation<ant_score, ant_bscore, hill_climbing> 
       metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
-              scorer, bscorer, local_search(rng));
+              scorer, bscorer, hill_climbing(rng));
   
   moses_parameters moses_param(max_evals, -1, 0,
                                ignore_ops, &perceptions, &actions);

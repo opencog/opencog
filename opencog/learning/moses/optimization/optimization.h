@@ -263,9 +263,9 @@ struct univariate_optimization
     eda_parameters eda_params;
 };
 
-//////////////////
-// Local Search //
-//////////////////
+///////////////////
+// Hill Climbing //
+///////////////////
 
 struct hc_parameters
 {
@@ -286,31 +286,45 @@ struct hc_parameters
 };
 
 /**
- * local_search: search the local neighborhood of an instance.
+ * Hill Climbing: search the local neighborhood of an instance for the
+ * highest score, move to that spot, and repeat until no further 
+ * improvment is possible.
  *
  * This optimizatin algo performs an exhaustive search of the local
- * neighborhood centered upon a specific instance. Search begins with
- * the neighborhood at Hamming distance=1 from the central instance.
- * If no improvement is found, then the size of the neighborhood is
- * increased, by incrementing the Hamming distance defining the
- * neighborhood.
+ * neighborhood centered upon a specific instance. The search is
+ * normally limited to the neighborhood at Hamming distance=1 from the
+ * central instance. The point with the best score (the "highest point")
+ * is declared the new center, and the exhaustive search of the nearest
+ * neighbors is repeated.  This loop is repeated until no further
+ * improvement is possible.
  *
- * If the local neighborhood is too large, i.e. if it exceeds the
- * number of allowed scoring-function evaluations, then this algo
- * samples just a part of it, but then exhaustively searches this
- * sub-sample.
+ * The number of nearest neighbors is roughly equal to the number of
+ * knobs in the exemplar, and, more precisely, to the information-
+ * theoretic bit length of the field set.
+ *
+ * The operation of this algorithm is modified in several important
+ * ways. If the number of nearest neighbors exceeeds a significant 
+ * fraction of the max-allowed scoring function evaluations, then the
+ * nearest neighborhood is sub-sampled, instead of being exhaustively
+ * searched.
+ *
+ * If the single_step flag is set, then the search will terminate if
+ * a higher-scoring instance is found.  Since the search is made only
+ * to distance=1, using this flag is silly, unless the widen_search
+ * flag is also used, which will cause the algo to search increasingly
+ * larger neighborhoods.  In this case, the algo stops when improvement
+ * is seen, or all neighborhoods up to the maximum distance have been
+ * explored.
  *
  * In call cases, the neighborhood searched is 'spherical'; that is,
  * only the instances that are equi-distant from the exemplar are
- * explored (i.e. at the same Hamming distance).  Contrast this with
- * the 'star_search' class below, which searches a star-shaped set
- * (exhaustively).
+ * explored (i.e. at the same Hamming distance).
  */
-struct local_search
+struct hill_climbing
 {
-    local_search(RandGen& _rng,
-                           const optim_parameters& op = optim_parameters(),
-                           const hc_parameters& hc = hc_parameters())
+    hill_climbing(RandGen& _rng,
+                  const optim_parameters& op = optim_parameters(),
+                  const hc_parameters& hc = hc_parameters())
         : rng(_rng), opt_params(op), hc_params(hc) {}
 
     /**
@@ -566,9 +580,9 @@ struct local_search
     hc_parameters hc_params;
 };
 
-////////////////////////////
-// Star-shaped Set Search //
-////////////////////////////
+/////////////////////////
+// Simulated Annealing //
+/////////////////////////
 
 // Parameters specific for Star-shaped set search
 struct sa_parameters
@@ -588,25 +602,13 @@ struct sa_parameters
 };
 
 /**
- * star_search: search a star-shaped set around the center instance.
- *
- * A 'star-shaped set' is a neighborhood of the exemplar with instances
- * at a variety of different (Hamming) distances from the center, with
- * some near, and some far.  The fraction of 'distant' instances is
- * controlled by a 'temperature'; the higher the temperature, the
- * greater the fraction of distant instances.  At zero temperature,
- * only the closest instances are explored, and this algo reduces to
- * the local search algo, above.  The higher the temperature, the
- * 'pointier' the star.
- *
- * The total number of instances investigated is controlled by parameters
- * passed in.
+ * simulated_annealing: Apply a modified smulated annealing-style search.
  */
-struct star_search
+struct simulated_annealing
 {
     typedef score_t energy_t;
 
-    star_search(RandGen& _rng,
+    simulated_annealing(RandGen& _rng,
                 const optim_parameters& op = optim_parameters(),
                 const sa_parameters& sa = sa_parameters())
         : rng(_rng),
