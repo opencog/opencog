@@ -273,7 +273,8 @@ void feature_selection(Table& table,
     } else if(fs_params.algorithm == sa) {
         OC_ASSERT(false, "TODO");        
     } else if(fs_params.algorithm == hc) {
-        hc_parameters hc_param(false, // do not terminate if improvement
+        hc_parameters hc_param(true, // widen distance if no improvement
+                               false,
                                fs_params.hc_fraction_of_remaining);
         hill_climbing hc(rng, op_param, hc_param);
         moses_feature_selection(table, hc, fs_params);            
