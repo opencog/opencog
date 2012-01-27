@@ -21,15 +21,19 @@
  */
 
 #include <opencog/util/comprehension.h>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 
 using namespace opencog;
+using namespace boost::phoenix;
+using boost::phoenix::arg_names::arg1;
 
 class comprehensionUTest : public CxxTest::TestSuite
 {
 public:
     comprehensionUTest() {}
 
-    void test_vector_comp() {
+    void test_vector_comp_function_object() {
         std::vector<int> ivec = {1,2,3,4};
         struct Func : public std::unary_function<int, int> {
             int operator()(int i) {
@@ -41,4 +45,17 @@ public:
         std::vector<int> evec = {2,3,4,5};
         TS_ASSERT_EQUALS(ovec, evec);
     }
+    // void test_vector_comp_phoenix() {
+    //     std::vector<int> ivec = {1,2,3,4};
+    //     auto f = arg1 + 1;
+    //     auto ovec = list_comp(ivec, arg1);
+    //     std::vector<int> evec = {2,3,4,5};
+    //     TS_ASSERT_EQUALS(ovec, evec);
+    // }
+    // void test_vector_comp_lambda() {
+    //     std::vector<int> ivec = {1,2,3,4};
+    //     auto ovec = vector_comp(ivec, [](int x) { return x + 1; });
+    //     std::vector<int> evec = {2,3,4,5};
+    //     TS_ASSERT_EQUALS(ovec, evec);
+    // }
 };
