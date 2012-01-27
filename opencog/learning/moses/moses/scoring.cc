@@ -225,7 +225,7 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
                                              vd[id::logical_false]),
                                 alpha * boost::accumulate(vd | map_values, 0)));};
     }
-    if (alpha < 0) { // experiment with negative predictive value
+    else if (alpha < 0) { // experiment with negative predictive value
         func = [this](const vertex& v, CTable::mapped_type& vd) {
             if (v == id::logical_false)
                 return -score_t(vd[id::logical_true]);
