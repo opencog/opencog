@@ -126,9 +126,7 @@ void field_set::set_contin(instance& inst, size_t idx, contin_t target) const
         set_raw(inst, raw_idx + i, contin_spec::Stop);
 }
 
-//note to self (Moshe): changed this on 4/23 - its confusing that
-//stream and stream_raw give different orderings among the various
-//types of vars - what was I thinking?
+
 std::string field_set::stream(const instance& inst) const
 {
     std::stringstream ss;

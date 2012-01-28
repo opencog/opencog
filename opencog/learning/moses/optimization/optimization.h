@@ -68,11 +68,11 @@ namespace opencog { namespace moses {
  * including that in contin and term fields, as well as the discrete
  * and boolean fields.
  *
- * This is usually a very good estimate for the total number of nearest
- * neighbors of an instance, rarely differing by more than a few percent.
- * This is because the nearest neighbors of an instance are those that
- * differ by a Hamming distance of one, and the total length of the
- * instance is approximately equal to info-theo-bits!
+ * This is usually a good estimate for the total number of nearest
+ * neighbors of an instance, rarely differing by more than twenty
+ * percent. This is because the nearest neighbors of an instance are
+ * those that differ by a Hamming distance of one, and the total
+ * length of the instance is approximately equal to info-theo-bits!
  */
 inline double
 information_theoretic_bits(const field_set& fs)
@@ -136,8 +136,10 @@ struct optim_parameters
                     sqrt(information_theoretic_bits(fs) /
                          rtr_window_size(fs)));
     }
-    //min(windowsize_pop*N,windowsize_len*n)
-    inline unsigned rtr_window_size(const field_set& fs) {
+
+    // min(windowsize_pop*N,windowsize_len*n)
+    inline unsigned rtr_window_size(const field_set& fs)
+    {
         return ceil(min(window_size_pop*pop_size(fs),
                         window_size_len*information_theoretic_bits(fs)));
     }
@@ -348,20 +350,15 @@ struct hill_climbing
         if (N >= T)
             return 1;
 
-        // Approximation of the total number of candidates at distance
-        // d. This figure is lower than the true value because the
-        // knobs are not all binary. If the field set has only binary
-        // knobs, then the binomial would be exactly correct.  We can
-        // use this approximation because T is not the actual number of
-        // neighbors either, but is also a bit smaller.
+        // Approximate number of candidates at distance d.
         //
         // information_theoretic_bits() counts the information content
-        // in the field set. (sum log_2 of all field sizes).
+        // in the field set. (Roughly, sum log_2 of all field sizes).
         deme_size_t bT =
             safe_binomial_coefficient(information_theoretic_bits(fields), d);
 
         // proportion of good candidates in the neighborhood
-        double B = std::min(1.0, (double)NB/(double)std::max(T, bT));
+        double B = std::min(1.0, (double)NB / (double)std::max(T, bT));
 
         return 1 - pow(1 - B, double(N));
     }
@@ -465,6 +462,10 @@ struct hill_climbing
             // if (total_number_of_neighbours < number_of_new_instances)
             //    then total_number_of_neighbours is an exact count
             //    else its incorrect but slightly larger.
+            // Note that we need the exact count here, and not an
+            // estimate, as otherwise, sample_new_instances() below
+            // will mis-allocate the array size, concluding with an
+            // assert.  Which is unfortunate.
             deme_size_t total_number_of_neighbours =
                 count_neighborhood_size(deme.fields(), center_inst, distance,
                                       number_of_new_instances);
