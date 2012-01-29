@@ -97,15 +97,6 @@ information_theoretic_bits(const field_set& fs)
     return res;
 }
 
-inline double
-information_theoretic_hood_size(const field_set& fs, int distance)
-{
-    if (0 == distance) return 1.0;
-    if (1 == distance) return information_theoretic_bits(fs);
-    double nn = information_theoretic_bits(fs);
-    return safe_binomial_coefficient(nn, distance);
-}
-
 // Parameters used mostly for EDA algorithms but also possibly by
 // other algo
 struct optim_parameters
@@ -398,6 +389,12 @@ struct hill_climbing
 
         const field_set& fields = deme.fields();
 
+        // Estimate the number of nearest neighbors.
+        deme_size_t nn_estimate =
+                information_theoretic_bits(deme.fields());
+
+        // XXX The two functions below recompute nn_estimate, twice,
+        // again.  This is wasteful, and should be fixed ... 
         // pop_size == 20 * number of info-theoretic-bits in the field.
         // max_gens_total == number of info-theoretic-bits in the field.
         unsigned pop_size = opt_params.pop_size(fields);
@@ -459,9 +456,9 @@ struct hill_climbing
                     (max_number_of_instances - current_number_of_instances);
 
             // Estimate the number of neighbours at the distance d.
-            // This is supposed to be faster than actually counting.
+            // This is faster than actually counting.
             deme_size_t total_number_of_neighbours =
-                information_theoretic_hood_size(deme.fields(), distance);
+                safe_binomial_coefficient(nn_estimate, distance);
 
             // Estimate the probability of an improvement and halt if too low
             // XXX This estimate is pretty hokey....
