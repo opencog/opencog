@@ -97,6 +97,15 @@ information_theoretic_bits(const field_set& fs)
     return res;
 }
 
+inline double
+information_theoretic_hood_size(const field_set& fs, int distance)
+{
+    if (0 == distance) return 1.0;
+    if (1 == distance) return information_theoretic_bits(fs);
+    double nn = information_theoretic_bits(fs);
+    return safe_binomial_coefficient(nn, distance);
+}
+
 // Parameters used mostly for EDA algorithms but also possibly by
 // other algo
 struct optim_parameters
@@ -350,15 +359,8 @@ struct hill_climbing
         if (N >= T)
             return 1;
 
-        // Approximate number of candidates at distance d.
-        //
-        // information_theoretic_bits() counts the information content
-        // in the field set. (Roughly, sum log_2 of all field sizes).
-        deme_size_t bT =
-            safe_binomial_coefficient(information_theoretic_bits(fields), d);
-
         // proportion of good candidates in the neighborhood
-        double B = std::min(1.0, (double)NB / (double)std::max(T, bT));
+        double B = std::min(1.0, (double) NB / (double) T);
 
         return 1 - pow(1 - B, double(N));
     }
@@ -456,19 +458,10 @@ struct hill_climbing
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
 
-            // The number of all neighbours at the distance d. Stops
-            // counting when above number_of_new_instances. Thus we have
-            // two cases:
-            // if (total_number_of_neighbours < number_of_new_instances)
-            //    then total_number_of_neighbours is an exact count
-            //    else its incorrect but slightly larger.
-            // Note that we need the exact count here, and not an
-            // estimate, as otherwise, sample_new_instances() below
-            // will mis-allocate the array size, concluding with an
-            // assert.  Which is unfortunate.
+            // Estimate the number of neighbours at the distance d.
+            // This is supposed to be faster than actually counting.
             deme_size_t total_number_of_neighbours =
-                count_neighborhood_size(deme.fields(), center_inst, distance,
-                                      number_of_new_instances);
+                information_theoretic_hood_size(deme.fields(), distance);
 
             // Estimate the probability of an improvement and halt if too low
             // XXX This estimate is pretty hokey....

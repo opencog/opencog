@@ -764,6 +764,17 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
                      unsigned dist,
                      RandGen& rng)
 {
+    // We assume that the total number of neighbors was just an estimate.
+    // If the number of requested new instances is even close to the
+    // estimate, then we need an accurate count of the total. We need
+    // an accurate count for the case of generating the entire
+    // neighborhood (as otherwise, the deme.resize will be bad).
+    if (2 * number_of_new_instances > total_number_of_neighbours) {
+        total_number_of_neighbours =
+                count_neighborhood_size(deme.fields(), center_inst, dist,
+                                      number_of_new_instances);
+    }
+
     if (number_of_new_instances < total_number_of_neighbours) {
         // Resize the deme so it can take new instances.
         deme.resize(current_number_of_instances + number_of_new_instances);
