@@ -58,6 +58,7 @@ using std::numeric_limits;
 using boost::math::isnan;
 using boost::math::isfinite;
 using boost::math::isinf;
+using boost::math::isnormal;
 
 #ifndef WIN32
 // This needs to be changed for non-gcc. Note however that so far it
