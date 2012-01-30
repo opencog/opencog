@@ -25,6 +25,8 @@ void measure(vector<string> arguments)
 
     int nreps = 10;
 
+    printf("Will run %d repetitions with different random seeds\n", nreps);
+
     for (int i=0; i<nreps; i++)
     {
         // Each run gets a new random seed (use the -r option for this).
@@ -36,25 +38,22 @@ void measure(vector<string> arguments)
         // Run and measure.
         struct timeval start, stop, elapsed;
         gettimeofday(&start, NULL);
-        moses_exec(arguments);
+        moses_exec(args);
         gettimeofday(&stop, NULL);
         timersub(&stop, &start, &elapsed);
 
         timeradd(&total, &elapsed, &total);
-        cout << "Run "<< i << " Time: "
-             << elapsed.tv_sec <<" " << elapsed.tv_usec << endl;
+        printf("Run %d Time %ld.%06ld seconds\n", i, elapsed.tv_sec, elapsed.tv_usec);
     }
-    cout << "Total time: "
-         << total.tv_sec <<" secs " << total.tv_usec << " usecs" << endl;
+    printf("Total time %ld.%06ld seconds\n", total.tv_sec, total.tv_usec);
 
-    time_t avg_secs = total.tv_sec / nreps;
-    suseconds_t avg_usecs = total.tv_sec - nreps * avg_secs;
-    avg_usecs *= 1000000;
-    avg_usecs += total.tv_usec;
-    avg_usecs /= nreps;
+    time_t avg_sec = total.tv_sec / nreps;
+    suseconds_t avg_usec = total.tv_sec - nreps * avg_sec;
+    avg_usec *= 1000000;
+    avg_usec += total.tv_usec;
+    avg_usec /= nreps;
 
-    cout << "Average time: "
-         << avg_secs <<" secs " << avg_usecs << " usecs" << endl;
+    printf("Average time %ld.%06ld seconds\n", avg_sec, avg_usec);
 }
 
 int main(int argc, char *argv[])
