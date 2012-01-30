@@ -176,7 +176,7 @@ combo_tree str_to_combo_tree(const string& combo_str)
 //* return true iff the problem is based on data file
 bool datafile_based_problem(const string& problem)
 {
-    return problem == it || problem == ann_it || problem == ip;
+    return problem == it || problem == pre || problem == ann_it || problem == ip;
 }
 
 //* return true iff the problem is based on a combo tree
@@ -347,6 +347,7 @@ int moses_exec(int argc, char** argv)
          value<string>(&problem)->default_value(it),
          str(format("Problem to solve, supported problems are:\n"
                     "%s, regression based on input table\n"
+                    "%s, regression based on input table but maximizing precision instead of accuracy\n"
                     "%s, search interesting patterns, where interestingness"
                     " is defined in terms of several features such as maximizing"
                     " the Kullback-Leibler"
@@ -361,7 +362,7 @@ int moses_exec(int argc, char** argv)
                     "%s, disjunction\n"
                     "%s, multiplex\n"
                     "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
-             % it % ip % ann_it % cp % pa % dj % mux % sr).c_str())
+             % it % pre % ip % ann_it % cp % pa % dj % mux % sr).c_str())
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          str(format("Combo program to learn, used when the problem"
@@ -384,11 +385,10 @@ int moses_exec(int argc, char** argv)
          "target size.\n")
         (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0),
-         "Min of an input value chosen randomly, only used when the problem takes continuous inputs.\n")
+         "Min of an input value chosen randomly, only used when the problem takes continuous inputs. Temporary hack: if the problem is pre then this is used to determine the min activation.\n")
         (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1),
-         "Max of an input value chosen randomly, only used when the problem takes continuous inputs.\n")
-
+         "Max of an input value chosen randomly, only used when the problem takes continuous inputs. Temporary hack: if the problem is pre then this is used to determine the max activation.\n")
         (opt_desc_str(log_level_opt).c_str(),
          value<string>(&log_level)->default_value("INFO"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, "
@@ -535,7 +535,7 @@ int moses_exec(int argc, char** argv)
          str(format("Interesting patterns (%s). Weight of log entropy.\n") % ip).c_str())
         (opt_desc_str(it_alpha_opt).c_str(),
          value<score_t>(&alpha)->default_value(0.0),
-         "Experimental: if non-null, then we use precision (if positive, or negative predictive value if negative) instead of accuracy as fitness function for regression. The higher abs(alpha) the more important activation.\n")
+         "Experimental: if non-null, then we use precision (if positive, or negative predictive value if negative) instead of accuracy as fitness function for regression. The higher abs(alpha) the more important activation. Temporary hack: if problem pre is used then if alpha is negative (any negative value), precision is replaced by negative predictive value.\n")
        ;
 
     variables_map vm;
@@ -707,7 +707,13 @@ int moses_exec(int argc, char** argv)
             ctables.push_back(table.compress());
         }
 
-        if (problem == it) { // regression based on input table
+        if (problem == it || problem == pre) { // regression based on
+                                               // input table, if pre
+                                               // then try to maximize
+                                               // precision (or
+                                               // negative predictive
+                                               // value) instead of
+                                               // accuracy
 
             // Infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
@@ -730,15 +736,29 @@ int moses_exec(int argc, char** argv)
             int as = alphabet_size(table_tt, ignore_ops);
 
             if (output_type == id::boolean_type) {
-                typedef ctruth_table_bscore BScore;
-                boost::ptr_vector<BScore> bscores;
-                foreach(const CTable& ctable, ctables)
-                    bscores.push_back(new BScore(ctable, as, noise, rng, alpha));
-                multibscore_based_bscore<BScore> bscore(bscores);
-                metapop_moses_results(rng, exemplars, table_tt,
-                                      bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
-                                      mmr_pa);
+                if (problem == it) {
+                    typedef ctruth_table_bscore BScore;
+                    boost::ptr_vector<BScore> bscores;
+                    foreach(const CTable& ctable, ctables)
+                        bscores.push_back(new BScore(ctable, as, noise, rng, alpha));
+                    multibscore_based_bscore<BScore> bscore(bscores);
+                    metapop_moses_results(rng, exemplars, table_tt,
+                                          bool_reduct, bool_reduct_rep, bscore,
+                                          opt_params, meta_params, moses_params,
+                                          mmr_pa);
+                } else { // problem == pre
+                    typedef precision_bscore BScore;
+                    boost::ptr_vector<BScore> bscores;
+                    foreach(const CTable& ctable, ctables)
+                        bscores.push_back(new BScore(ctable, as, noise,
+                                                     min_rand_input, max_rand_input,
+                                                     rng, alpha >= 0));
+                    multibscore_based_bscore<BScore> bscore(bscores);
+                    metapop_moses_results(rng, exemplars, table_tt,
+                                          bool_reduct, bool_reduct_rep, bscore,
+                                          opt_params, meta_params, moses_params,
+                                          mmr_pa);
+                }
             }
             else if (output_type == id::contin_type) {
                 if (discretize_thresholds.empty()) {
@@ -769,7 +789,7 @@ int moses_exec(int argc, char** argv)
                 unsupported_type_exit(output_type);
             }
         }
-
+        
         // Find interesting patterns
         else if (problem == ip) {
             // ip assumes that the inputs are boolean and the output is contin

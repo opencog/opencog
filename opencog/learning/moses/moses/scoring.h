@@ -99,7 +99,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     {
         try {
             behavioral_score bs = bscore(tr);
-            score_t res = std::accumulate(bs.begin(), bs.end(), 0.0);
+            score_t res = boost::accumulate(bs, 0.0);
 
             if (logger().getLevel() < Logger::FINE) {
                 stringstream ss;
@@ -238,6 +238,39 @@ score_t discrete_complexity_coef(unsigned alphabet_size, double p);
 // output (see the comment regarding contin_bscore for more
 // information).
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
+
+/**
+ * Fitness function based on binary precision
+ * http://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
+ *
+ * This bscore has just 2 components the precision (or the negative
+ * predictive value if positive is false), and possibly the occam's
+ * razor. In addition there's the constraint that the activation must
+ * be within the interval activation_int. If the constraint is not met
+ * then the worst score is used instead of the precision.
+ */
+struct precision_bscore : public bscore_base
+{
+    precision_bscore(const CTable& _ctable,
+                     float alphabet_size, float p,
+                     float min_activation, float max_activation,
+                     RandGen& _rng, bool positive = true);
+
+    behavioral_score operator()(const combo_tree& tr) const;
+
+    // Return the best possible bscore. Used as one of the
+    // termination conditions (when the best bscore is reached).
+    behavioral_score best_possible_bscore() const;
+    
+    mutable CTable ctable;         // mutable because accessing a missing
+                                   // element adds it in the map.
+    unsigned ctable_usize;                  // uncompressed size of ctable
+    bool occam; // If true, then Occam's razor is taken into account.
+    score_t complexity_coef;
+    float min_activation, max_activation;
+    RandGen& rng;
+    bool positive;
+};
         
 /**
  * Fitness function based on discretization of the output. If the

@@ -117,6 +117,72 @@ void contin_bscore::set_complexity_coef(float alphabet_size, float stdev)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
 }
 
+//////////////////////
+// precision_bscore //
+//////////////////////
+
+precision_bscore::precision_bscore(const CTable& _ctable,
+                                   float alphabet_size, float p,
+                                   float min_activation_, float max_activation_,
+                                   RandGen& _rng, bool positive_)
+    : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
+      min_activation(min_activation_), max_activation(max_activation_),
+      rng(_rng), positive(positive_)
+{
+    // Both p==0.0 and p==0.5 are singularity points in the Occam's
+    // razor formula for discrete outputs (see the explanation in the
+    // comment above ctruth_table_bscore)
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
+        complexity_coef = discrete_complexity_coef(alphabet_size, p);
+}
+
+behavioral_score precision_bscore::operator()(const combo_tree& tr) const
+{
+    // The OTable constructor takes the combo tree tr and evaluate it
+    // for every row of input in ctt. (The rng is passed straight
+    // through to the combo evaluator).
+    OTable ot(tr, ctable, rng);
+    behavioral_score bs;
+    
+    vertex target = bool_to_vertex(positive);
+    unsigned total = 0, // total number of positive (or negative if
+                        // positive is false)
+        correct = 0;      // number of correct predictions
+    boost::for_each(ctable | map_values, ot,
+                    [&](CTable::counter_t& c, const vertex& v) {
+                        if (v == target) {
+                            correct += c[target];
+                            total += c.total_count();
+                        }});
+
+    // check that activation is within the acceptable range
+    if (isWithin(min_activation, max_activation, total / (float)ctable_usize))
+        bs.push_back(correct / (score_t)total);
+    else
+        bs.push_back(worst_score);
+    
+    // Add the Occam's razor feature
+    if (occam)
+        bs.push_back(complexity(tr) * complexity_coef);
+
+    log_candidate_bscore(tr, bs);
+
+    return bs;
+}
+
+behavioral_score precision_bscore::best_possible_bscore() const
+{
+    // the best possible precision is 1
+    behavioral_score bs(1, 1);
+
+    // add the Occam's razor feature
+    if(occam)
+        bs.push_back(0);
+    return bs;
+}
+
+
 //////////////////////////////
 // discretize_contin_bscore //
 //////////////////////////////
@@ -215,32 +281,32 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
 
     // define func
     if (alpha > 0) { // experiment with precision
-        func = [this](const vertex& v, CTable::mapped_type& vd) {
+        func = [this](const vertex& v, CTable::counter_t& c) {
             if (v == id::logical_true)
-                return -score_t(vd[id::logical_false]);
+                return -score_t(c[id::logical_false]);
             else
-                return -alpha * boost::accumulate(vd | map_values, 0);};
-        best_func = [this](CTable::mapped_type& vd) {
-            return -score_t(min((score_t)min(vd[id::logical_true],
-                                             vd[id::logical_false]),
-                                alpha * boost::accumulate(vd | map_values, 0)));};
+                return -alpha * c.total_count();};
+        best_func = [this](CTable::counter_t& c) {
+            return -score_t(min((score_t)min(c[id::logical_true],
+                                             c[id::logical_false]),
+                                alpha * c.total_count()));};
     }
     else if (alpha < 0) { // experiment with negative predictive value
-        func = [this](const vertex& v, CTable::mapped_type& vd) {
+        func = [this](const vertex& v, CTable::counter_t& c) {
             if (v == id::logical_false)
-                return -score_t(vd[id::logical_true]);
+                return -score_t(c[id::logical_true]);
             else
-                return alpha * boost::accumulate(vd | map_values, 0); };
-        best_func = [this](CTable::mapped_type& vd) {
-            return -score_t(min((score_t)min(vd[id::logical_true],
-                                             vd[id::logical_false]),
-                                -alpha * boost::accumulate(vd | map_values, 0)));};
+                return alpha * c.total_count();};
+        best_func = [this](CTable::counter_t& c) {
+            return -score_t(min((score_t)min(c[id::logical_true],
+                                             c[id::logical_false]),
+                                -alpha * c.total_count()));};
     }
     else { // accuracy
-        func = [](const vertex& v, CTable::mapped_type& vd) {
-            return -score_t(vd[negate_vertex(v)]); };
-        best_func = [](CTable::mapped_type& vd) {
-            return -score_t(min(vd[id::logical_true], vd[id::logical_false])); };
+        func = [](const vertex& v, CTable::counter_t& c) {
+            return -score_t(c[negate_vertex(v)]); };
+        best_func = [](CTable::counter_t& c) {
+            return -score_t(min(c[id::logical_true], c[id::logical_false]));};
     }
 }
 
@@ -326,7 +392,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     Counter<vertex, unsigned> vc;
     boost::for_each(ctable | map_values, pred_ot,
                     [&](const CTable::counter_t& c, const vertex& v) {
-                        vc[v] += boost::accumulate(c | map_values, 0); });
+                        vc[v] += c.total_count(); });
     double total = klds.p_size();
     transform(vc | map_values, back_inserter(prob), arg1 / total);
     double pred_entropy = entropy(prob);

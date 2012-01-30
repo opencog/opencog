@@ -68,6 +68,9 @@ static const unsigned int default_nsamples = 20;
 
 // problems
 static const string it="it"; // regression based on input table
+static const string pre="pre"; // regression based on input table by
+                               // maximizing precision (or negative
+                               // predictive value)
 static const string ip="ip"; // find interesting patterns
 static const string cp="cp"; // regression based on combo program to fit
 static const string pa="pa"; // even parity
