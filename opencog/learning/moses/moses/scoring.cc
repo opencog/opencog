@@ -156,9 +156,16 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
                             total += c.total_count();
                         }});
 
+    float precision = correct / (score_t)total,
+        activation = total / (float)ctable_usize;
+
+    logger().fine("precision = %e", precision);
+
+    logger().fine("activation = %e", activation);
+
     // check that activation is within the acceptable range
-    if (isWithin(min_activation, max_activation, total / (float)ctable_usize))
-        bs.push_back(correct / (score_t)total);
+    if (min_activation <= activation && max_activation >= activation)
+        bs.push_back(precision);
     else
         bs.push_back(worst_score);
     
