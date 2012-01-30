@@ -191,18 +191,34 @@ is evaluated by supplying explicit values for the variables,
 and then applying operations until the root node is reached.
 .PP
 By convention, variables are denoted by a hash-mark followed by
-a number, although they may also be named. Variables are not typed
-(they are only implicitly typed during program evaluation). Thus,
-for example, \fIor (#1 #2)\fP is a combo program that represents
-the boolean-or of two inputs, \fI#1\fP and \fI#2\fP.
+a number, although they may also be named. Variables are not 
+explicitly typed; they are only implicitly typed during program
+evaluation. Thus, for example, \fIor (#1 #2)\fP is a combo
+program that represents the boolean-or of two inputs,
+\fI#1\fP and \fI#2\fP.
 .PP
-Logical operators include and,or and not.  Arithmetic operators
-include +, - * and / for addtion, subtraction, multiplication and
-division.  Flow-of-control operators include ....
+Logical operators include \fIand\fR, \fIor\fR and \fInot\fR.
+The boolean \fIif\fR operator takes three arguments: if the first
+argument evaluates to true, then the \fIif\fR evalues to the second
+argument, else it evaluates to the third.
+Arithmetic operators include +, - * and / for addition, subtraction,
+multiplication and division. Additional arithmetic operators
+include \fIsin\fR, \fIlog\fR, \fIexp\fR and \fIrand\fR. The \fIrand\fR
+operator returns a value in the range from 0.0 to 1.0.  The predicate 
+operator \fI0<\fR (greater than zero) takes a single continuous-valued
+expression, and returns a boolean. The operator \fIimpulse\fR does 
+the opposite: it takes a single boolean-valued expression, and returns
+0.0 or 1.0, depending on whether the argument evaluates to false or true.
+The continuous-valued \fIif\fR operator functions analogously to the
+boolean \fIif\fR, but takes continuous-valued arguements.
 .PP
-XXX finish writing this section, give more examples.
-Ints vs.floats.
-
+Thus, as an example, the expression \fIand( 0<( +(#x 3))  0<(#y))\fR
+evaluates to \fItrue\fR if \fI#x\fR is greater than -3 and \fI#y\fR
+is greater than zero.
+.PP
+The above operators are built-in; combo may also be extended with
+custom-defined operators, although C++ programming and recompilation
+is required for this.
 .PP
 .\" ============================================================
 .SH OPTIONS
@@ -306,14 +322,42 @@ CSV/DSV file formats.
 These options provide overall control over the algorithm execution.
 .TP
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
-Select the algorithm to apply to a single deme.  Available algorithms
-include:
+Select the algorithm to apply to a single deme.  This is the algorithm
+used in the 'inner loop': given a single exemplar decorated with tunable
+\fIknobs\fR, this algorithm searches for the best possible knob settings.
+Once these are found (or a timeout, or other terminatation condition is
+reached), control is returned to the outer optimization loop.
+Available algorithms include:
 .TS
 tab (@);
 l lx.
 \fBhc\fR@T{
-Hillclimbing.
+Hillclimbing. There are two primary modes of operation; each has
+strengths and weaknesses for different problem types.
+In the default mode, one begins with an initial collection of 
+knob settings, called an \fIinstance\fR. The settings of each knob is
+then varied, in turn, until one setting is found that most improves
+the score. This setting then becomes the new instance, and the 
+process is repeated, until no further improvement is seen. The 
+resulting instance is a local maximum; it is returned to
+the outer loop.
+
+The alternate mode of operation is triggered by using the
+\fB\-L1\fR flag (usualy with the \fB\-T1\fR flag). In this
+case, as before, all knob settings are explored, one knob at a time.
+After finding the one knob that most improves the score, the
+algo is done, and the resulting instance is returned to the outer
+loop. If no knob settings improved the score, then all possible
+settings of two knobs are explored, and then three, etc. until
+improvement is found (or the alloted iterations are exceeded).
+In this alternate mode, the local hill is \fBnot\fR climbed to
+the top; instead, any improvement is immediately handed back to the
+outer loop, for another round of exemplar selection and knob-building.
+For certain types of problems, including maximally misleading problems,
+this can arrive at better solutions, more quickly, than the 
+traditional hill-climbing algorithm described above.
 T}
+
 \fBsa\fR@T{
 Simulated annealing.  The \fB\-D\fR flag controls the size of the
 neighborhood that is searched during the early, "high-temperature"
@@ -321,6 +365,7 @@ phase.  It has a significant effect on the run-time performance of the
 algorithm. Using \fB\-D2\fR or \fB\-D3\fR is likely to provide the best
 performance.
 T}
+
 \fBun\fR@T{
 Univariate Bayesian dependency.
 T}
@@ -553,7 +598,7 @@ specifies that the two-input conjunction is to be learned.
 .PP
 .\" ============================================================
 .SH TODO
-Finish documenting these aglo flags:  -M -D -I -T
+Finish documenting these aglo flags:  -M -I 
 .PP
 These input flags: -b -G
 .PP
