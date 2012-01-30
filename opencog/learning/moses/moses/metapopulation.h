@@ -546,9 +546,10 @@ struct metapopulation : public bscored_combo_tree_set
             [&, this](const scored_instance<composite_score>& inst)
         {
             const composite_score& inst_csc = inst.second;
+            score_t inst_sc = get_score(inst_csc);
 
             // if it's really bad stops
-            if (get_score(inst_csc) == get_score(worst_composite_score))
+            if (inst_sc <= worst_score || !isfinite(inst_sc))
                 return;
 
             int pot_candidates_size = [&]() {
@@ -579,8 +580,7 @@ struct metapopulation : public bscored_combo_tree_set
                     // recompute the complexity if the candidate has
                     // not been previously reduced
                     composite_score csc = this->params.reduce_all?
-                        inst_csc : make_pair(get_score(inst_csc),
-                                             complexity(tr));
+                        inst_csc : make_pair(inst_sc, complexity(tr));
                     behavioral_score bsc; // empty bscore till it gets computed
                     composite_behavioral_score cbsc(bsc, csc);
                     {
