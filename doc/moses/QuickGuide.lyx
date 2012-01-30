@@ -85,7 +85,7 @@ Predrag Janicic, Revised by Linas Vepstas
 \end_layout
 
 \begin_layout Date
-3 November 2008, revised 18 January 2012
+3 November 2008, revised 30 January 2012
 \end_layout
 
 \begin_layout Abstract
@@ -633,6 +633,25 @@ viz.
 \end_layout
 
 \begin_layout Description
+Neighborhood.
+ The nearest neighbors of an instance are those other instances that differ
+ by exactly one knob setting.
+ This is called the 
+\emph on
+neighborhood at distance one
+\emph default
+.
+ With distance understood as the Hamming distance, one can then consider
+ progressively larger neighborhoods: those that differ by just two knob
+ settings, or three, 
+\emph on
+etc
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Description
 Representation-building.
  The step in the MOSES algorithm where an exemplar is chosen, and a representati
 on is constructed from it.
@@ -698,16 +717,29 @@ etc.
 
 \begin_layout Description
 Domination.
- One deme is considered to 
+ One program instance is considered to 
 \emph on
 dominate
 \emph default
  another if it is better in every way.
- During learning, demes typically do not dominate one-another: some are
- better at some parts of the scoring function, while others are better at
- other aspects.
- Thus, both are kept around and further evolved.
- Demes that are completely dominated are (usually) discarded.
+ The concept of domination requies a scoring function that issues not just
+ one grand-total score, but an array of scores.
+ For example, for regression problems, a program instance may be judged
+ on how accurately it provides an output given an input.
+ To test this, one typically priovides a table of N input rows, with each
+ row indicating a desired output.
+ The program can then be tested on each row, with the result compared to
+ the desired output value.
+ One program is said to 
+\emph on
+dominate
+\emph default
+ another only if it has a better score on each of the N tests.
+ Typically, two different programs do not dominate one-another: one is better
+ for some input rows, while the other is better at others.
+ In MOSES, both are kept around and further evolved, with the goal of eventually
+ finding a program that dominates all.
+ Programs that are completely dominated are (usually) discarded.
 \end_layout
 
 \begin_layout Description
@@ -777,53 +809,130 @@ MOSES Algorithm
 \end_layout
 
 \begin_layout Standard
-The basic MOSES algorithm can be described as follows:
+The MOSES algorithm consists of two nested optimizatin loops.
+ The outer loop maintains a population of scored program trees, the so-called
+ '
+\emph on
+metapopulation
+\emph default
+'.
+ The inner loop explores a local neighborhood of a given program tree, the
+ so-called '
+\emph on
+exemplar
+\emph default
+'.
+ When the inner loop finds a resonable set of candidates, these are returned
+ to the outer loop, and merged back into the metapopulation.
+ More precisly, the steps are as follows:
 \end_layout
 
 \begin_layout Enumerate
-Choose one or more exemplars, expressed as program trees.
- Initially, this may be the empty program.
+Choose one exemplar from the metapopulation.
+ Initially, this will be the empty program, unless the user specified an
+ initial exemplar.
+ The choice is made by considering the entire metapopulation, and picking
+ the program tree with the highest score, that has not been previously explored
+ (There is little point in re-exploring the neighborhood of a previously
+ explored program tree, as all improvements are likely to have already been
+ found).
+ This selection is done by 
+\family typewriter
+metapopulation::select_exemplar()
+\family default
+.
 \end_layout
 
 \begin_layout Enumerate
 Representation-building step.
- For each exemplar, construct a representation; that is, a set of knobs
- based on the chosen exemplar.
- Generate a random sampling of knob values, i.e.
- of programs based on the representation.
- This is a deme; add this deme to the metapopulation, possibly displacing
- a less promising deme.
+ Given an exemplar, construct a representation; that is, take the exemplar
+ and decorate it with knobs.
+ Build a field set and a knob mapper that will act as a mapping between
+ a linear bit string, and specific knob settings in the representation.
+ The field set describes the layout of the bit-string; the knob mapper associate
+s fields with knobs.
+ Create an initial instance; that is, a bit string that can be interpreted
+ as a collection of knob settings, via the field set mapping.
+ 
 \end_layout
 
 \begin_layout Enumerate
-Select a deme from the metapopulation and iteratively update its sample,
- as follows:
+Given a representation, a field set, and an initial instance, invoke the
+ inner optimization loop.
+ One of several different inner optimization loops are possible; they all
+ have the steps below in common.
+ Typically, a collection of scored instances is maintained; this collection
+ is called a '
+\emph on
+deme
+\emph default
+', and thus the first step is to '
+\emph on
+open a new deme
+\emph default
+'.
 \end_layout
 
 \begin_deeper
 \begin_layout Enumerate
-Select some promising programs from the deme’s existing sample to use for
- modeling, according to the scoring function.
- Ties in the scoring function are broken by preferring smaller programs.
+Score the initial instance: that is, evaluate the combo program that results
+ from these specific knob settings, and see how well this program reflects
+ the desired regression output.
 \end_layout
 
 \begin_layout Enumerate
-Considering the promising programs as collections of knob settings, generate
- new collections of knob settings by applying some (competent) optimization
- algorithm.
-\end_layout
-
-\begin_layout Enumerate
-Convert the new collections of knob settings into their corresponding programs,
- evaluate their scores, and integrate them into the deme’s sample, replacing
- less promising programs.
+Generate new instances via some algorithm (e.g.
+ hill-climbing, simulated annealing, 
+\emph on
+etc.
+\emph default
+) and score these instances in turn.
+ Maintain a collection of scored instances; these are refered to as the
  
+\emph on
+deme
+\emph default
+.
+ New instances are typically nearest neighbors of the initial instance:
+ they differ from the initial instance by just one knob setting.
+\end_layout
+
+\begin_layout Enumerate
+Terminate the search via some exit criteria: lack of improvement, number
+ of allowed evaluations exceeded, maximal neighborhood explored, 
+\emph on
+etc
+\emph default
+.
 \end_layout
 
 \end_deeper
 \begin_layout Enumerate
-For each new program that meets the criteria for creating a new deme, go
- to step 2.
+Accept a list of best-possible instances found in the previous step, and
+ go through a process refered to as '
+\emph on
+closing the deme
+\emph default
+'.
+ That is, convert these back into ordinary program trees (
+\emph on
+i.e.
+
+\emph default
+ by fixing knob settings at a set position, thus 'removing' the knobs).
+ Normalize these programs, by converting them into 'elagent normal form'.
+ Merge the resulting programs into the metapopulation, ranking them by score.
+ Merging is performed by considering domination; dominated programs are
+ discarded; non-dominated ones are added to the metapopulation.
+\end_layout
+
+\begin_layout Enumerate
+Go to step 1, repeating until termination criteria are met, such as acheiving
+ perfect score, or exceeding the maximal number of evaluations, 
+\emph on
+etc
+\emph default
+.
 \end_layout
 
 \begin_layout Standard
@@ -908,39 +1017,6 @@ step forward
  Other types of reduction, e.g.
  SAT-based or satisfiability-modulo-theory (SMT) may be possible but remains
  unexplored.
-\end_layout
-
-\begin_layout Standard
-XXX todo: Above algorithm is not quite correct.
- In particular, the normalization step is omitted.
-\end_layout
-
-\begin_layout Standard
--- maintain list of scored exemplars, in class metapopulation.
- metapopulation::select_exemplar() chooses one, the one with the highest
- score and least complexity, that hasn't already been previously choosen.
-\end_layout
-
-\begin_layout Standard
--- then build rep by: adding knobs, creating a field set to go with the
- knobs, and having a knob mapper to map field_set areas to knobs.
-\end_layout
-
-\begin_layout Standard
--- create an empty deme_t, which is ...
- just a set of scored instances.
-\end_layout
-
-\begin_layout Standard
--- optimize deme ...
- done by exploring part or all of a neighborhood, and scoring each and every
- one...
- this is hillclimbing; simulated annealing explores the neighborhood differently.
- Both are mis-named.
-\end_layout
-
-\begin_layout Standard
--- close deme ...
 \end_layout
 
 \begin_layout Section
