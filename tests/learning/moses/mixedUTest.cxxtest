@@ -60,4 +60,15 @@ public:
                           },
                           {"and(0<(+(-1 #1)) 0<(#2) #3)"});
     }
+
+    void test_fraction_predicates()
+    {
+        string data_file_path("-i" + mixedUTest_dir + "predicates-1.3.csv");
+        // We expect a score of zero, no matter what.
+        moses_test_score({"-Hit", 
+                          "-upred", "-nimpulse", "-r4",
+                          data_file_path,
+                          });
+
+    }
 };
