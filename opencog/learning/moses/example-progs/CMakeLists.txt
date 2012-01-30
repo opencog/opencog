@@ -63,3 +63,10 @@ TARGET_LINK_LIBRARIES (trap-uni
 	moses
 	util
 )
+
+ADD_EXECUTABLE (moses-perf moses-perf)
+TARGET_LINK_LIBRARIES (moses-perf
+   moses_exec
+	moses
+	util
+)
