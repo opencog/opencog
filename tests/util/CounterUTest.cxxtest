@@ -33,6 +33,11 @@ public:
         // logger().setLevel(Logger::FINE);
     }
 
+    void test_total_count() {
+        Counter<string, unsigned> c = {{"a", 2}, {"b", 3}};
+        TS_ASSERT_EQUALS(c.total_count(), 5);
+    }
+    
     void test_addition() {
         Counter<string, unsigned>
             c1 = {{"a", 1}, {"b", 1}},

@@ -27,9 +27,13 @@
 #include <map>
 #include <initializer_list>
 #include <boost/operators.hpp>
+#include <boost/range/numeric.hpp>
+#include <boost/range/adaptor/map.hpp>
 #include <opencog/util/foreach.h>
 
 namespace opencog {
+
+using boost::adaptors::map_values;
 
 /**
  * Class that mimics python Counter container
@@ -65,6 +69,11 @@ struct Counter : public std::map<T, CT>,
             operator[](v.first) = v.second;
     }
 
+    // return the total of all counted elements
+    CT total_count() const {
+        return boost::accumulate(*this | map_values, 0);
+    }
+    
     // add 2 counters, for example
     // c1 = {'a':1, 'b':1}
     // c2 = {'b':1, 'c':3}
