@@ -124,10 +124,11 @@ void contin_bscore::set_complexity_coef(float alphabet_size, float stdev)
 precision_bscore::precision_bscore(const CTable& _ctable,
                                    float alphabet_size, float p,
                                    float min_activation_, float max_activation_,
+                                   float penalty_,
                                    RandGen& _rng, bool positive_)
     : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
-      rng(_rng), positive(positive_)
+      penalty(penalty_), rng(_rng), positive(positive_)
 {
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
@@ -156,20 +157,18 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
                             total += c.total_count();
                         }});
 
-    float precision = correct / (score_t)total,
-        activation = total / (float)ctable_usize;
-
-    logger().fine("precision = %e", precision);
-
-    logger().fine("activation = %e", activation);
-
-    // check that activation is within the acceptable range
-    if (min_activation <= activation && max_activation >= activation)
-        bs.push_back(precision);
-    else
-        bs.push_back(worst_score);
+    // add precision component
+    score_t precision = correct / (score_t)total,
+        activation = total / (score_t)ctable_usize;
+    logger().fine("precision = %f", precision);
+    bs.push_back(precision);
     
-    // Add the Occam's razor feature
+    // add activation_penalty component
+    score_t activation_penalty = get_accuracy_penalty(activation);
+    logger().fine("activation = %f", activation);
+    logger().fine("activation penalty = %e", activation_penalty);
+    
+    // Add the Occam's razor component
     if (occam)                  // we divide by the number of
                                 // observation to normalize the
                                 // Occam's razor as well (this the
@@ -183,8 +182,8 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_bscore::best_possible_bscore() const
 {
-    // the best possible precision is 1
-    behavioral_score bs(1, 1);
+    // the best possible precision is 1 with no activation penalty
+    behavioral_score bs = {1, 0};
 
     // add the Occam's razor feature
     if(occam)
@@ -192,7 +191,14 @@ behavioral_score precision_bscore::best_possible_bscore() const
     return bs;
 }
 
+score_t precision_bscore::get_accuracy_penalty(score_t activation) const
+{
+    score_t dst = max(min(min_activation - activation, score_t(0)) / min_activation,
+                      min(activation - max_activation, score_t(0)) / (1 - max_activation));
+    return log(pow((1 - dst), penalty));
+}
 
+        
 //////////////////////////////
 // discretize_contin_bscore //
 //////////////////////////////

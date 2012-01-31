@@ -243,17 +243,30 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  * Fitness function based on binary precision
  * http://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
  *
- * This bscore has just 2 components the precision (or the negative
- * predictive value if positive is false), and possibly the occam's
- * razor. In addition there's the constraint that the activation must
- * be within the interval activation_int. If the constraint is not met
- * then the worst score is used instead of the precision.
+ * This bscore has 3 components:
+ *
+ * 1) the precision (or the negative predictive value if positive is
+ * false),
+ *
+ * 2) a penalty depending on whether the constraint explained below is
+ * met,
+ *
+ * 3) and possibly the occam's razor.
+ *
+ * There's a constraint that the activation must be within the
+ * interval [min_activation, max_activation]. If the constraint is not
+ * met and penality is non null then the second component of the
+ * bscore takes the value:
+ * log( (1 - dst(activation, [min_activation, max_activation])) ^ penalty )
+ * where dst(x, I) is defined as
+ * dst(x, I) = max(min(I.min - x, 0) / I.min, min(x - I.max,0)/(1 - I.max))
  */
 struct precision_bscore : public bscore_base
 {
     precision_bscore(const CTable& _ctable,
                      float alphabet_size, float p,
                      float min_activation, float max_activation,
+                     float penalty,
                      RandGen& _rng, bool positive = true);
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -267,9 +280,13 @@ struct precision_bscore : public bscore_base
     unsigned ctable_usize;                  // uncompressed size of ctable
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
-    float min_activation, max_activation;
+    score_t min_activation, max_activation;
+    score_t penalty;
     RandGen& rng;
     bool positive;
+
+private:
+    score_t get_accuracy_penalty(score_t activation) const;
 };
         
 /**
