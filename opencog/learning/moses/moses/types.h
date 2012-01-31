@@ -162,6 +162,12 @@ inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
  * itself. This is done (formerly replacing
  * std::greater<bscored_combo_tree>) so that candidates of same score
  * and same complexity can be added in the metapopulation.
+ *
+ * @todo That function makes the unusual assumption that anything is
+ * greater than nan. it's not sure that assumption is really the right
+ * one but it is set not to pollute the metapopulation. Also, it might
+ * be better to redefine composite_score greater function and put the
+ * isnan hack into it.
  */
 struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                                                            bscored_combo_tree,
@@ -169,12 +175,19 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
 {
     bool operator()(const bscored_combo_tree& bs_tr1,
                     const bscored_combo_tree& bs_tr2) const {
-        composite_score csc1 = get_composite_score(bs_tr1);
-        composite_score csc2 = get_composite_score(bs_tr2);
-        return csc1 > csc2
-            || (!(csc1 < csc2) &&
-                size_tree_order<vertex>()(get_tree(bs_tr1),
-                                          get_tree(bs_tr2)));
+        composite_score csc1 = get_composite_score(bs_tr1),
+            csc2 = get_composite_score(bs_tr2);
+        bool isnan1 = isnan(get_score(csc1)),
+            isnan2 = isnan(get_score(csc2));
+        if (!isnan1 && !isnan2)
+            return csc1 > csc2
+                || (!(csc1 < csc2) &&
+                    size_tree_order<vertex>()(get_tree(bs_tr1),
+                                              get_tree(bs_tr2)));
+        else if (isnan1)
+            return false;
+        else if (isnan2)
+            return true;
     }
 };
 typedef std::set<bscored_combo_tree,

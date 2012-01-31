@@ -105,9 +105,7 @@ struct metapop_parameters
  * metapopulation)
  *
  * NOTE:
- *   BScoring = behavioral scoring function (output behaviors), we use
- *   std::greater because we are maximizing.
- *
+ *   BScoring = behavioral scoring function (output behaviors)
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 struct metapopulation : public bscored_combo_tree_set
@@ -159,7 +157,7 @@ struct metapopulation : public bscored_combo_tree_set
         rng(_rng), type(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
-        _best_score(worst_composite_score), _rep(NULL), _deme(NULL)
+        _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
     }
@@ -175,7 +173,7 @@ struct metapopulation : public bscored_combo_tree_set
         rng(_rng), type(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
-        _best_score(worst_composite_score), _rep(NULL), _deme(NULL)
+        _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases);
@@ -205,7 +203,7 @@ struct metapopulation : public bscored_combo_tree_set
      */
     const composite_score& best_composite_score() const
     {
-        return _best_score;
+        return _best_cscore;
     }
 
     /**
@@ -213,11 +211,11 @@ struct metapopulation : public bscored_combo_tree_set
      */
     score_t best_score() const
     {
-        return get_score(_best_score);
+        return get_score(_best_cscore);
     }
 
     /**
-     * return the best candidates (with _best_score)
+     * return the best candidates (with _best_cscore)
      */
     const metapop_candidates& best_candidates() const
     {
@@ -966,10 +964,26 @@ struct metapopulation : public bscored_combo_tree_set
     void update_best_candidates(const bscored_combo_tree_set& candidates) {
         if(!candidates.empty()) {
             const bscored_combo_tree& candidate = *candidates.begin();
-            const composite_score& sc = get_composite_score(candidate);
-            if (sc >= _best_score) {
-                if (sc > _best_score) {
-                    _best_score = sc;
+            const composite_score& csc = get_composite_score(candidate);
+            score_t sc = get_score(csc);
+            {
+                std::stringstream ss;
+                ss << "best composite score = " << _best_cscore;
+                logger().fine(ss.str());
+            }
+            {
+                std::stringstream ss;
+                ss << "candidate composite score = " << sc;
+                logger().fine(ss.str());
+            }
+            // I need to check whether the score is nan because
+            // actually the default >= operator won't do that on pairs
+            // (i.e. composite scores)
+            if (!isnan(sc) && csc >= _best_cscore) {
+                logger().fine("Apparently that candidate score is better or equal to the best score");
+                if (csc > _best_cscore) {
+                    logger().fine("Apparently that candidate score is just better");
+                    _best_cscore = csc;
                     _best_candidates.clear();
                 }
                 _best_candidates.insert(candidate);
@@ -1043,9 +1057,9 @@ protected:
     int _evals_before_this_deme;
 
     // the best score ever
-    composite_score _best_score;
+    composite_score _best_cscore;
 
-    // trees with score _best_score
+    // trees with composite score _best_cscore
     metapop_candidates _best_candidates;
 
     // contains the exemplars of demes that have been searched so far
