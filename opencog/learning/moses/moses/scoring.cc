@@ -170,8 +170,11 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
         bs.push_back(worst_score);
     
     // Add the Occam's razor feature
-    if (occam)
-        bs.push_back(complexity(tr) * complexity_coef);
+    if (occam)                  // we divide by the number of
+                                // observation to normalize the
+                                // Occam's razor as well (this the
+                                // precision is normalized by total)
+        bs.push_back(complexity(tr) * complexity_coef / total);
 
     log_candidate_bscore(tr, bs);
 
