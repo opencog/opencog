@@ -3,10 +3,12 @@
  *
  * Measure moses performance.
  *
- * This program measures performance by repeating a caluclation multiple times,
+ * This program measures performance by repeating a calculation multiple times,
  * but with different random seeds, and then computes the aveage runtime.
  *
  * This program takes the same arguments as the moses-exec executable.
+ *
+ * Caveat: this measures elapsed wall-clock time, and not cpu time.
  *
  * Linas Vepstas January 2012
  */
@@ -23,9 +25,12 @@ void measure(vector<string> arguments)
     total.tv_sec = 0;
     total.tv_usec = 0;
 
+    double tsq = 0.0; // for computing variance
+
     int nreps = 10;
 
     printf("Will run %d repetitions with different random seeds\n", nreps);
+    fflush (stdout);
 
     for (int i=0; i<nreps; i++)
     {
@@ -44,6 +49,12 @@ void measure(vector<string> arguments)
 
         timeradd(&total, &elapsed, &total);
         printf("Run %d Time %ld.%06ld seconds\n", i, elapsed.tv_sec, elapsed.tv_usec);
+        fflush (stdout);
+
+        // We also want the variance...
+        tsq += elapsed.tv_sec * elapsed.tv_sec;
+        tsq += 1.0e-6 * ((double) 2 * elapsed.tv_sec * elapsed.tv_usec);
+        tsq += 1.0e-12 * ((double) elapsed.tv_usec * elapsed.tv_usec);
     }
     printf("Total time %ld.%06ld seconds\n", total.tv_sec, total.tv_usec);
 
@@ -54,6 +65,14 @@ void measure(vector<string> arguments)
     avg_usec /= nreps;
 
     printf("Average time %ld.%06ld seconds\n", avg_sec, avg_usec);
+
+    // Now compute the rms.
+    double avg = avg_sec + 1.0e-6 *((double) avg_usec);
+    tsq /= nreps;
+    tsq -= avg*avg;
+    tsq = sqrt(tsq);
+
+    printf("RMS time: %f seconds\n", tsq);
 }
 
 int main(int argc, char *argv[])
