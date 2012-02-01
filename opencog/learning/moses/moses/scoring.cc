@@ -167,6 +167,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     score_t activation_penalty = get_accuracy_penalty(activation);
     logger().fine("activation = %f", activation);
     logger().fine("activation penalty = %e", activation_penalty);
+    bs.push_back(activation_penalty);
     
     // Add the Occam's razor component
     if (occam)                  // we divide by the number of
@@ -193,8 +194,9 @@ behavioral_score precision_bscore::best_possible_bscore() const
 
 score_t precision_bscore::get_accuracy_penalty(score_t activation) const
 {
-    score_t dst = max(min(min_activation - activation, score_t(0)) / min_activation,
-                      min(activation - max_activation, score_t(0)) / (1 - max_activation));
+    score_t dst = max(max(min_activation - activation, score_t(0)) / min_activation,
+                      max(activation - max_activation, score_t(0)) / (1 - max_activation));
+    logger().fine("dst = %f", dst);
     return log(pow((1 - dst), penalty));
 }
 
