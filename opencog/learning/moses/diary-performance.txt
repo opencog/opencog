@@ -1,0 +1,236 @@
+
+Diary of performance measurements and tuning for MOSES
+------------------------------------------------------
+
+Maintained by Linas Vepstas. The contents below are not going to be
+explained in terribly great detail; this is for my personal use, and
+not a tutorial for the general public.  If you are a moses hacker,
+maybe this data will be interesting.  I'm only checking this into bzr
+so that I don't accidentally loose this data.  
+
+Timing measurements are very specific for my own computer; your results
+will be different.  Results will change as algorithms are modified; the
+below is being used to help me get baseline performance numbers, to
+understand how modifications affect performance, and to help make sure
+there are no regressions.
+
+Diary started in January 2012
+
+Opencog revision 6386:
+----------------------
+-Hpa -k3 -m50000    (3-parity)
+-r0: 0m15.051s
+-r1: 0m1.406s
+-r2: 0m15.265s
+-r3: 0m3.281s
+-r4: 0m17.628s
+-r5: 0m3.876s
+-r6: 0m5.590s
+-r7: 0m22.319s
+-r8: 0m19.817s
+-r9: 0m3.958s
+
+
+-Hpa -k4 -m50000
+(no r flag):  0m52.547s (best is -1)
+-r1: 0m51.907s  (also -1, as are result unless otherwise indicated)
+-r2: 1m26.161s
+-r3: 1m1.008s  (best is -2)
+-r4: 1m26.425s
+-r5: 1m15.517s
+-r6: 1m24.877s
+-r7: 0m53.119s (best is -2)
+-r8: 1m4.888s
+-r9: 1m20.561s (best is -2)
+
+To get the above in later versions, need to use -L1 -T1 flags.
+
+circa revision 6541:
+--------------------
+time opencog/learning/moses/main/moses -Hpa -k3 -m50000
+(no -r flag): 0m0.892s
+-r0: 0m0.535s
+-r1: 0m0.796s
+-r2: 0m7.317s
+-r3: 0m1.334s
+-r4: 0m0.895s
+-r5: 0m8.400s
+-r6: 0m2.420s
+-r7: 0m10.862s
+-r8: 0m2.026s
+-r9: 0m7.471s
+
+avg: 4.19 (approx)
+
+Again, Now with -L1 -T1:
+-r0: 0m9.078s
+-r1: 0m1.556s
+-r2: 0m23.966s
+-r3: 0m3.546s
+-r4: 0m5.201s
+-r5: 0m4.385s
+-r6: 0m9.747s
+-r7: 0m9.991s
+-r8: 0m19.364s
+-r9: 0m9.968s
+
+avg: 9.68 (approx)
+
+So the 'true hillclimbing' is 2.3x faster thanold stuff, for this.
+
+Now try 4-parity...
+-Hpa -k4 -m50000
+-r0: 158 secs, -1 score
+-r1: 2m23.313s  (a -1 solution)
+-r2: 2m30.541s  (also -1, as are rest, unless indicated).
+-r3: 1m40.566s  (bravo perfect score!)
+-r4: 1m39.910s (best is -2)
+-r5: 2m4.012s
+-r6: 2m39.442s
+-r7: 0m42.020s (perfect score)
+-r8: 1m42.506s (-2)
+-r9: 2m9.784s (-2)
+
+so recap: -Hpa -k4 -m50000
+perfect score: 2
+-1 score: 5
+-2 score: 3
+
+So -m50K is not enough.
+
+try again -m150K
+-Hpa -k4 -m150000
+-r0: 278.223783 secs perfect score
+-r1: -1
+-r2: 180.539163 secs perfect score
+-r3: 97.197070 secs perfect score
+-r4: -2
+-r5: 142.639202
+-r6: -1
+-r7: 42.500166
+-r8: -1
+-r9: -2
+
+Note: perfect runtimes almost unchanged, and fewer loosers.
+
+so recap: -Hpa -k4 -m150000
+perfect score: 5
+-1 score: 3
+-2 score: 2
+
+try again -m450K
+-r0: 279.876706
+-r1: -1
+-r2: 185.149519
+-r3: 97.226776
+-r4: -1
+-r5: 145.637475
+-r6: -1
+-r7: 43.974498
+-r8: 709.072294
+-r9: -1
+
+so recap: -Hpa -k4 -m450000
+perfect score: 6
+-1 score: 4
+-2 score: 0
+
+try again -m1.6M
+-r0: 286.623444  secs
+-r1: -1
+-r2: 196.127073
+-r3: 100.873139
+-r4: 1690.134350
+-r5: 148.591779
+-r6: 9752.876748
+-r7: 51.243247
+-r8: 731.033613
+-r9: 2367.365400
+
+Comments on above:
+I've started trying to understand how hill-climbing actually works. Recall, we now have two
+styles of hill-climbing, and each behaves differently.  The "new style" does this:
+
+-- construct representation by adding knobs
+-- twiddle one knob at a time, till one knob causing greatest improvement is found.
+-- repeat above step until no more improvement.
+-- go back to step 1.
+
+I ran above on 4-parity, with ten different random seeds (-r0 through -r9)  The time to
+solution (perfect score) depends *very strongly* on the random seed. In one case, a solution
+is found in less than a minute; a few more cases find a solution in 2-3-4 minutes anothr in
+12 minutes, another in 25 minutes, another in 45 minutes, another in 3 hours. In one case, no
+perfect score found after more than 3.5 hours search.  
+
+
+I've graphed these (see attachment) in order of discovery.  I am trying to understand why
+this is happening, and what to do about it.  No clear ideas, yet.  
+
+I'm also trying to measure 4-parity using the "old-style" algo. Before I describe this, one
+salient remark:  the above timings are independent of the "max iterations" flag. That is, for
+"moses -Hpa -k4 -r2 -mNNN"  (4-parity, rand-seed=2, max-iter=NNN)  then, if NNN is large
+enough, a perfect score is obtained after 196 seconds, always, independent of NNN. 
+ And if NNN is too small, no solution is found.  I mention this, because it is very different
+than the "old-style" behaviour.
+
+=======================================
+
+The "old-style" algorithm is this: (-L1 -T1)
+-- step 1. construct representation by adding knobs
+-- twiddle one knob at a time, till one knob causing greatest improvement is found.
+-- if there's improvement, go to step 1.
+-- if no improvement, twiddle two knobs simultaneously, and either go to step 1 or try 3
+knobs. 
+-- try up to five knobs, then go to step 1.
+
+Now, all over again but with -L1 -T1
+-Hpa -k4 -L1 -T1 -m50000
+-r0: -1
+-r1: -3
+-r2: 70.442446
+-r3: -1
+-r4: -2
+-r5: -4
+-r6: -1
+-r7: -2
+-r8: -2
+-r9: -3
+
+-Hpa -k4 -L1 -T1 -m150000
+-r0: 80.953417
+-r1: -1
+-r2: -1
+-r3: -2
+-r4: -2
+-r5: -2
+-r6: -2
+-r7: -1
+-r8: -2
+-r9: 138.244841
+
+-Hpa -k4 -L1 -T1 -m450000
+-r0: 419.329227
+-r1: 476.257538
+-r2: -1
+-r3: -1
+-r4: -1
+-r5: -2
+-r6: 585.746513
+-r7: 963.175023
+-r8: -2
+-r9: 413.799492
+
+
+Here, the behaviour is very different.  If NNN is small, then only one of ten random seeds
+result in a solution, in about a minute. The other 9 are wayy off.  If NNN is larger, two
+solutions are found, in about 2 minutes each, the other 8 are way off, but not as bad as
+before.  There is no solution in 1 minute!. The -r seed value that had previously found a
+soln now finds no soln.
+
+This pattern continues: for larger NNN, five solutions found, out of ten. The fastest one
+found takes 8 minutes; the slowest took 15 minutes.  
+That is, raising the max-iteration bound destroys the ability to find solutions quickly for some
+random seeds, while improving  number of seeds that do lead to solutions.  Very strange.
+
+=======================================
+
