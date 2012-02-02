@@ -27,6 +27,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
@@ -49,6 +50,7 @@ using namespace combo;
 
 using namespace boost::program_options;
 using boost::lexical_cast;
+using boost::trim;
 
 const static unsigned max_filename_size = 255;
 
@@ -163,9 +165,24 @@ int main(int argc, char** argv) {
     // remove log_file
     remove(log_file.c_str());
     logger().setFilename(log_file);
-    logger().setLevel(logger().getLevelFromString(log_level));
+    trim(log_level);
+    Logger::Level level = logger().getLevelFromString(log_level);
+    if (level !=Logger::BAD_LEVEL)
+        logger().setLevel(level);
+    else {
+        cerr << "Log level " << log_level << " is incorrect (see --help)." << endl;
+        exit(1);
+    }
     logger().setBackTraceLevel(Logger::ERROR);
 
+    // Log command-line args
+    string cmdline = "Command line:";
+    for (int i = 0; i < argc; ++i) {
+         cmdline += " ";
+         cmdline += argv[i];
+    }
+    logger().info(cmdline);
+    
     // init random generator
     MT19937RandGen rng(rand_seed);
 
