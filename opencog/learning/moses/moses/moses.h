@@ -81,13 +81,26 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info("Deme generation: %i", gen_idx);
         // ~Logger
 
-        //run a generation
+        // Run a generation
         if (mp.expand(pa.max_evals - mp.n_evals(), pa.ignore_ops,
                       pa.perceptions, pa.actions)) {
         } else // In iterative hillclimbing it is possible (but not
                // likely) that the metapop gets empty and expand
                // return false
             break;
+
+
+        // Print stats in a way that makes them easy to graph.
+        if (logger().getLevel() >= Logger::INFO) {
+            stringstream ss;
+            ss << "Stats: " << gen_idx;
+            ss << "\t" << mp.n_evals();    // number of evaluations so far
+            ss << "\t" << mp.size();       // size of the metapopulation
+            ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
+            ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+            logger().info(ss.str());
+        }
+
         if (mp.best_score() >= pa.max_score || mp.empty())
             break;
     }    

@@ -366,12 +366,12 @@ struct metapopulation : public bscored_combo_tree_set
 
         close_deme();
 
-        // Logger
-        stringstream ss;
-        ss << "Total number of evaluations so far: " << _n_evals;
-        logger().info(ss.str());
-        log_best_candidates();
-        // ~Logger
+        if (logger().getLevel() >= Logger::INFO) {
+            stringstream ss;
+            ss << "Total number of evaluations so far: " << _n_evals;
+            logger().info(ss.str());
+            log_best_candidates();
+        }
 
         // Might be empty, if the eval fails and throws an exception
         return !empty();
@@ -654,11 +654,13 @@ struct metapopulation : public bscored_combo_tree_set
         merge_candidates(candidates);
 
         //Logger
-        logger().debug("Metapopulation size is %u", size());
-        if(logger().getLevel() >= Logger::FINE) {
-            stringstream ss;
-            ss << "Metapopulation after merging:" << std::endl;
-            logger().fine(ostream(ss, -1, true, true).str());
+        if (logger().getLevel() >= Logger::DEBUG) {
+            logger().debug("Metapopulation size is %u", size());
+            if (logger().getLevel() >= Logger::FINE) {
+                stringstream ss;
+                ss << "Metapopulation after merging:" << std::endl;
+                logger().fine(ostream(ss, -1, true, true).str());
+            }
         }
         // ~Logger
 
@@ -992,8 +994,12 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     // log the best candidates
-    void log_best_candidates() const {
-        if(best_candidates().empty())
+    void log_best_candidates() const
+    {
+        if (logger().getLevel() < Logger::INFO)
+            return;
+
+        if (best_candidates().empty())
             logger().info("Only worst scored candidates");
         else {
             stringstream ss;

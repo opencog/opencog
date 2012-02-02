@@ -148,29 +148,33 @@ try again -m1.6M
 -r9: 2367.365400
 
 Comments on above:
-I've started trying to understand how hill-climbing actually works. Recall, we now have two
-styles of hill-climbing, and each behaves differently.  The "new style" does this:
+I've started trying to understand how hill-climbing actually works. Recall,
+we now have two styles of hill-climbing, and each behaves differently.  The
+"new style" does this:
 
 -- construct representation by adding knobs
 -- twiddle one knob at a time, till one knob causing greatest improvement is found.
 -- repeat above step until no more improvement.
 -- go back to step 1.
 
-I ran above on 4-parity, with ten different random seeds (-r0 through -r9)  The time to
-solution (perfect score) depends *very strongly* on the random seed. In one case, a solution
-is found in less than a minute; a few more cases find a solution in 2-3-4 minutes anothr in
-12 minutes, another in 25 minutes, another in 45 minutes, another in 3 hours. In one case, no
-perfect score found after more than 3.5 hours search.  
+I ran above on 4-parity, with ten different random seeds (-r0 through -r9)
+The time to solution (perfect score) depends *very strongly* on the random
+seed. In one case, a solution is found in less than a minute; a few more
+cases find a solution in 2-3-4 minutes anothr in 12 minutes, another in 25
+minutes, another in 45 minutes, another in 3 hours. In one case, no perfect
+score found after more than 3.5 hours search.
 
 
-I've graphed these (see attachment) in order of discovery.  I am trying to understand why
-this is happening, and what to do about it.  No clear ideas, yet.  
+I've graphed these (see attachment) in order of discovery.  I am trying to
+understand why this is happening, and what to do about it.  No clear ideas,
+yet. 
 
-I'm also trying to measure 4-parity using the "old-style" algo. Before I describe this, one
-salient remark:  the above timings are independent of the "max iterations" flag. That is, for
-"moses -Hpa -k4 -r2 -mNNN"  (4-parity, rand-seed=2, max-iter=NNN)  then, if NNN is large
-enough, a perfect score is obtained after 196 seconds, always, independent of NNN. 
- And if NNN is too small, no solution is found.  I mention this, because it is very different
+I'm also trying to measure 4-parity using the "old-style" algo. Before I
+describe this, one salient remark:  the above timings are independent of the
+"max iterations" flag. That is, for "moses -Hpa -k4 -r2 -mNNN"  (4-parity,
+rand-seed=2, max-iter=NNN)  then, if NNN is large enough, a perfect score is
+obtained after 196 seconds, always, independent of NNN.  And if NNN is too
+small, no solution is found.  I mention this, because it is very different
 than the "old-style" behaviour.
 
 =======================================
@@ -220,17 +224,70 @@ Now, all over again but with -L1 -T1
 -r8: -2
 -r9: 413.799492
 
+-Hpa -k4 -L1 -T1 -m1600000
+-r0: 413.346996
+-r1: 490.218301
+-r2: 2844.111736
+-r3: 1144.400860
+-r4: 1110.296915
+-r5: 1973.547115
+-r6: 1012.321808
+-r7: fail OOM 5.5 gigs virt, 3.7g RSS
 
-Here, the behaviour is very different.  If NNN is small, then only one of ten random seeds
-result in a solution, in about a minute. The other 9 are wayy off.  If NNN is larger, two
-solutions are found, in about 2 minutes each, the other 8 are way off, but not as bad as
-before.  There is no solution in 1 minute!. The -r seed value that had previously found a
-soln now finds no soln.
+Here, the behaviour is very different.  If NNN is small, then only one of
+ten random seeds result in a solution, in about a minute. The other 9 are
+wayy off.  If NNN is larger, two solutions are found, in about 2 minutes
+each, the other 8 are way off, but not as bad as before.  There is no
+solution in 1 minute!. The -r seed value that had previously found a soln
+now finds no soln.
 
-This pattern continues: for larger NNN, five solutions found, out of ten. The fastest one
-found takes 8 minutes; the slowest took 15 minutes.  
-That is, raising the max-iteration bound destroys the ability to find solutions quickly for some
-random seeds, while improving  number of seeds that do lead to solutions.  Very strange.
+This pattern continues: for larger NNN, five solutions found, out of ten.
+The fastest one found takes 8 minutes; the slowest took 15 minutes.  That
+is, raising the max-iteration bound destroys the ability to find solutions
+quickly for some random seeds, while improving  number of seeds that do lead
+to solutions.  Very strange.
 
 =======================================
 
+Hypothesis: to answer question "why do some random seeds take so long w/
+hill-climbing"?  Highest ranked exemplars, no matter how they are festooned
+with knobs, have no knob settngs that improve the score. However, they have
+many, many settings that provide an equivalent score, and none of these
+dominate: thus the metapopulation keeps growing w/o bound. Thus, more and
+more exemplars get explored, going down the list, until one gets deep into
+the not-very-fit section of the metapopulation. Then, at last, an exemplar
+is found that, when properly decorated, does have knob settings that result
+in a solution.
+
+Propose: instead of exploring metapopulation from highest score to lowest,
+instead explore from lowest complexity to highest.  Problem: the correct
+parity solution is going to have a high complexity...
+
+Maybe weighted sum of complexity, score ...
+
+plot:
+deme generation, metapop size, score, complexity, evaluations.
+
+cat moses.log | grep Stats | cut -d" " -f5
+
+OK, so graphing the above states clearly indicates that the metapop grows
+without bound.  up until point when an improved score is found, and then the
+metapop is cut down to almost nothing at all.  Meanwhile, both score and
+complexity are held constant for very long periods of time.  (err. best
+score, and complexity of highest-ranked exemplar).
+
+  -M [ --max-candidates ] arg (=-1)     Maximum number of considered candidates
+                                        to be added to the metapopulation after
+                                        optimizing deme.
+                                        
+
+graph: time to next discovery.
+graph: eval time to num evals...
+experiment: limit max metapop size.
+
+-r0: 410 gens 79883 evals   286 secs
+-r4: 1325 gens 486915 evals   1690 secs   0.78 gens/sec  288 evals/sec
+-r7: 130 gens 20432 evals  51 secs   2.5 gens/sec   400 evals/sec
+
+experiment: keep non-dominated exemplars only if they have a large hamming
+distance between one-another.
