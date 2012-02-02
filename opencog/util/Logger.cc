@@ -202,6 +202,7 @@ void Logger::writeMsg(std::string &msg)
 }
 
 Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
+    : debug(*this), fine(*this)
 {
     this->fileName.assign(fname);
     this->currentLevel = level;
@@ -220,6 +221,7 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
 }
 
 Logger::Logger(const Logger& log)
+    : debug(*this), fine(*this)
 {
     pthread_mutex_init(&lock, NULL);
     set(log);
@@ -377,13 +379,13 @@ void Logger::info (const std::string &txt)
 {
     log(INFO,  txt);
 }
-void Logger::debug(const std::string &txt)
+void Logger::Debug::operator()(const std::string &txt)
 {
-    log(DEBUG, txt);
+    logger.log(DEBUG, txt);
 }
-void Logger::fine (const std::string &txt)
+void Logger::Fine::operator()(const std::string &txt)
 {
-    log(FINE,  txt);
+    logger.log(FINE,  txt);
 }
 
 void Logger::logva(Logger::Level level, const char *fmt, va_list args)
@@ -412,13 +414,13 @@ void Logger::info (const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logva(INFO,  fmt, args); va_end(args);
 }
-void Logger::debug(const char *fmt, ...)
+void Logger::Debug::operator()(const char *fmt, ...)
 {
-    va_list args; va_start(args, fmt); logva(DEBUG, fmt, args); va_end(args);
+    va_list args; va_start(args, fmt); logger.logva(DEBUG, fmt, args); va_end(args);
 }
-void Logger::fine (const char *fmt, ...)
+void Logger::Fine::operator()(const char *fmt, ...)
 {
-    va_list args; va_start(args, fmt); logva(FINE,  fmt, args); va_end(args);
+    va_list args; va_start(args, fmt); logger.logva(FINE,  fmt, args); va_end(args);
 }
 
 bool Logger::isEnabled(Level level) const

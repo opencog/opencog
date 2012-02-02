@@ -143,8 +143,8 @@ public:
     void error(const std::string &txt);
     void warn (const std::string &txt);
     void info (const std::string &txt);
-    void debug(const std::string &txt);
-    void fine (const std::string &txt);
+    // void debug(const std::string &txt);
+    // void fine (const std::string &txt);
 
     /**
      * Log a message (printf style) into log file (passed in constructor)
@@ -159,8 +159,61 @@ public:
     void error(const char *, ...);
     void warn (const char *, ...);
     void info (const char *, ...);
-    void debug(const char *, ...);
-    void fine (const char *, ...);
+    // void debug(const char *, ...);
+    // void fine (const char *, ...);
+
+    class Base
+    {
+    public:
+        Base(const Base& b) : logger(b.logger), lvl(b.lvl) {}
+        std::stringstream& operator<<(const std::string& s)
+        {
+            ss << s;
+            return ss;
+        }
+        std::stringstream& operator<<(const char *s)
+        {
+            ss << s;
+            return ss;
+        }
+        ~Base()
+        {
+            if (0 < ss.str().length())
+                logger.log(lvl, ss.str());
+        }
+    protected:
+        friend class Logger;
+        Base(Logger& l, Level v) : logger(l), lvl(v) {}
+    private:
+        Logger& logger;
+        std::stringstream ss;
+        Level lvl;
+    };
+
+    class Debug : public Base
+    {
+    public:
+        void operator()(const std::string &txt);
+        void operator()(const char *, ...);
+        Base operator()() { return *this; }
+    protected:
+        friend class Logger;
+        Debug(Logger& l) : Base(l, FINE) {}
+    };
+    Debug debug;
+
+    class Fine : public Base
+    {
+    public:
+        void operator()(const std::string &txt);
+        void operator()(const char *, ...);
+        Base operator()() { return *this; }
+    protected:
+        friend class Logger;
+        Fine(Logger& l) : Base(l, FINE) {}
+    };
+
+    Fine fine;
 
 public:
     /** 
@@ -219,6 +272,7 @@ private:
 
 // singleton instance (following meyer's design pattern)
 Logger& logger();
+
 
 }  // namespace opencog
 
