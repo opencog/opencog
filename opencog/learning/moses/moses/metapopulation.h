@@ -867,52 +867,58 @@ struct metapopulation : public bscored_combo_tree_set
 
     // merge nondominated candidate to the metapopulation assuming
     // that bcs contains no dominated candidates within itself
-    void merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
+    void merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs = 1)
+    {
         bscored_combo_tree_ptr_vec bcv_mp = random_access_view(*this),
             bcv = random_access_view(bcs);
         bscored_combo_tree_ptr_vec_pair bcv_p =
             get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
         // remove the nondominates ones from the metapopulation
-        boost::sort(bcv_mp); boost::sort(bcv_p.second);
+        boost::sort(bcv_mp);
+        boost::sort(bcv_p.second);
         bscored_combo_tree_ptr_vec diff_bcv_mp =
             set_difference(bcv_mp, bcv_p.second);
-        foreach(const bscored_combo_tree* cnd, diff_bcv_mp)
+
+        foreach (const bscored_combo_tree* cnd, diff_bcv_mp)
             erase(*cnd);
+
         // add the non dominates ones from bsc
-        foreach(const bscored_combo_tree* cnd, bcv_p.first)
+        foreach (const bscored_combo_tree* cnd, bcv_p.first)
             insert(*cnd);
     }
 
     // Iterative version of merge_nondominated
-    void merge_nondominated_iter(bscored_combo_tree_set& bcs) {
-        for(bscored_combo_tree_set_it it1 = bcs.begin(); it1 != bcs.end();) {
+    void merge_nondominated_iter(bscored_combo_tree_set& bcs)
+    {
+        for (bscored_combo_tree_set_it it1 = bcs.begin(); it1 != bcs.end();) {
             bscored_combo_tree_set_it it2 = begin();
-            if(it2 == end())
+            if (it2 == end())
                 break;
-            for(; it2 != end();) {
+            for (; it2 != end();) {
                 tribool dom = dominates(it1->second, it2->second);
-                if(dom)
+                if (dom)
                     erase(it2++);
-                else if(!dom) {
+                else if (!dom) {
                     bcs.erase(it1++);
                     it2 = end();
                 } else
                     ++it2;
-                if(it2 == end())
+                if (it2 == end())
                     ++it1;
             }
         }
         // insert the nondominated candidates from bcs
-        insert(bcs.begin(), bcs.end());
+        insert (bcs.begin(), bcs.end());
     }
 
     // like merge_nondominated_iter but doesn't make any assumption on
     // bcs
-    void merge_nondominated_any(const bscored_combo_tree_set& bcs) {
+    void merge_nondominated_any(const bscored_combo_tree_set& bcs)
+    {
         bscored_combo_tree_set_cit from = bcs.begin(), to = bcs.end();
-        for(;from != to;++from) {
+        for (;from != to;++from) {
             bool nondominated = true;
-            for(iterator it = begin(); it != end();) {
+            for (iterator it = begin(); it != end();) {
                 tribool dom = dominates(from->second, it->second);
                 if (dom) {
                     erase(it++);
@@ -934,7 +940,8 @@ struct metapopulation : public bscored_combo_tree_set
      *        indeterminate otherwise
      */
     static inline tribool dominates(const behavioral_score& x,
-                                    const behavioral_score& y) {
+                                    const behavioral_score& y)
+    {
         // everything dominates an empty vector
         if (x.empty()) {
             if (y.empty())
@@ -946,7 +953,8 @@ struct metapopulation : public bscored_combo_tree_set
 
         tribool res = indeterminate;
         for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
-             xit != x.end();++xit, ++yit) {
+             xit != x.end();++xit, ++yit)
+        {
             if (*xit > *yit) {
                 if (!res)
                     return indeterminate;
@@ -963,28 +971,39 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     // update the record of the best-seen score & trees
-    void update_best_candidates(const bscored_combo_tree_set& candidates) {
-        if(!candidates.empty()) {
+    void update_best_candidates(const bscored_combo_tree_set& candidates)
+    {
+        if (!candidates.empty()) {
             const bscored_combo_tree& candidate = *candidates.begin();
             const composite_score& csc = get_composite_score(candidate);
             score_t sc = get_score(csc);
-            {
-                std::stringstream ss;
-                ss << "best composite score = " << _best_cscore;
-                logger().fine(ss.str());
+
+            // Log stuff.
+            if (logger().getLevel() >= Logger::FINE) {
+                {
+                    std::stringstream ss;
+                    ss << "best composite score = " << _best_cscore;
+                    logger().fine(ss.str());
+                }
+                {
+                    std::stringstream ss;
+                    ss << "candidate composite score = " << sc;
+                    logger().fine(ss.str());
+                }
+
+                if (cscore_ge(csc, _best_cscore)) {
+                    logger().fine("Apparently that candidate score is better or equal to the best score");
+                    if (cscore_gt(csc, _best_cscore)) {
+                        logger().fine("Apparently that candidate score is just better");
+                    }
+                }
             }
-            {
-                std::stringstream ss;
-                ss << "candidate composite score = " << sc;
-                logger().fine(ss.str());
-            }
+
             // I need to check whether the score is nan because
             // actually the default >= operator won't do that on pairs
             // (i.e. composite scores)
             if (cscore_ge(csc, _best_cscore)) {
-                logger().fine("Apparently that candidate score is better or equal to the best score");
                 if (cscore_gt(csc, _best_cscore)) {
-                    logger().fine("Apparently that candidate score is just better");
                     _best_cscore = csc;
                     _best_candidates.clear();
                 }
