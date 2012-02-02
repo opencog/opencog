@@ -367,9 +367,8 @@ struct metapopulation : public bscored_combo_tree_set
         close_deme();
 
         if (logger().isInfoEnabled()) {
-            stringstream ss;
-            ss << "Total number of evaluations so far: " << _n_evals;
-            logger().info(ss.str());
+            logger().info()
+               << "Total number of evaluations so far: " << _n_evals;
             log_best_candidates();
         }
 
@@ -430,12 +429,11 @@ struct metapopulation : public bscored_combo_tree_set
                     return false;
                 }
             }
-            {
+            if (logger().isDebugEnabled()) {
                 combo_tree tr(get_tree(*_exemplar));
-                stringstream ss;
-                ss << "Attempt to build rep from exemplar: " << tr;
-                ss << "\nScored: " << score(tr);
-                logger().debug(ss.str());
+                logger().debug() 
+                    << "Attempt to build rep from exemplar: " << tr
+                    << "\nScored: " << score(tr);
             }
 
             // Build a representation by adding knobs to the exemplar,
@@ -475,14 +473,11 @@ struct metapopulation : public bscored_combo_tree_set
      */
     int optimize_deme(int max_evals)
     {
-        // Logger
-        {
-            stringstream ss;
-            ss << "Optimize deme; max evaluations allowed: "
+        if (logger().isDebugEnabled()) {
+            logger().debug()
+               << "Optimize deme; max evaluations allowed: "
                << max_evals;
-            logger().debug(ss.str());
         }
-        // ~Logger
 
         complexity_based_scorer<Scoring> scorer =
             complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
@@ -976,16 +971,8 @@ struct metapopulation : public bscored_combo_tree_set
 
             // Log stuff.
             if (logger().isFineEnabled()) {
-                {
-                    std::stringstream ss;
-                    ss << "best composite score = " << _best_cscore;
-                    logger().fine(ss.str());
-                }
-                {
-                    std::stringstream ss;
-                    ss << "candidate composite score = " << sc;
-                    logger().fine(ss.str());
-                }
+                logger().fine() << "best composite score = " << _best_cscore;
+                logger().fine() << "candidate composite score = " << sc;
 
                 if (cscore_ge(csc, _best_cscore)) {
                     logger().fine("Apparently that candidate score is better or equal to the best score");
@@ -1017,14 +1004,11 @@ struct metapopulation : public bscored_combo_tree_set
         if (best_candidates().empty())
             logger().info("Only worst scored candidates");
         else {
-            stringstream ss;
-            ss << "The following candidate(s) have the best score "
+            logger().info()
+               << "The following candidate(s) have the best score "
                << best_score();
-            logger().info(ss.str());
             foreach(const bscored_combo_tree& cand, best_candidates()) {
-                stringstream ss_tr;
-                ss_tr << get_tree(cand);
-                logger().info(ss_tr.str());
+                logger().info() << "" << get_tree(cand);
             }
         }
     }
