@@ -564,7 +564,7 @@ int moses_exec(int argc, char** argv)
     trim(log_level);
     Logger::Level level = logger().getLevelFromString(log_level);
     if (level !=Logger::BAD_LEVEL)
-        logger().setLevel(logger().getLevelFromString(log_level));
+        logger().setLevel(level);
     else {
         cerr << "Log level " << log_level << " is incorrect (see --help)." << endl;
         exit(1);
@@ -572,7 +572,7 @@ int moses_exec(int argc, char** argv)
     logger().setBackTraceLevel(Logger::ERROR);
 
     // Log command-line args
-    std::string cmdline = "Command line:";
+    string cmdline = "Command line:";
     for (int i = 0; i < argc; ++i) {
          cmdline += " ";
          cmdline += argv[i];
@@ -690,7 +690,7 @@ int moses_exec(int argc, char** argv)
 
         // Infer the signature based on the input table.
         type_tree table_tt = infer_data_type_tree(input_data_files.front(), target_column);
-        std::stringstream ss;
+        stringstream ss;
         ss << "Inferred data signature " << table_tt;
         logger().info(ss.str());
 
