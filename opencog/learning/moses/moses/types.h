@@ -179,7 +179,8 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                                                            bool>
 {
     bool operator()(const bscored_combo_tree& bs_tr1,
-                    const bscored_combo_tree& bs_tr2) const {
+                    const bscored_combo_tree& bs_tr2) const
+    {
         composite_score csc1 = get_composite_score(bs_tr1),
             csc2 = get_composite_score(bs_tr2);
         return cscore_gt(csc1, csc2)
