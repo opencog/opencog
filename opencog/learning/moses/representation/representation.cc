@@ -200,7 +200,7 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
 
     if (reduce) { //reduce
         // Logger
-        if (logger().getLevel() >= Logger::FINE) {
+        if (logger().isFineEnabled()) {
             std::stringstream ss;
             ss << "Reduce candidate: "
                << tr;

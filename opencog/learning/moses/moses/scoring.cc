@@ -53,7 +53,7 @@ using namespace boost::accumulators;
 inline void log_candidate_bscore(const combo_tree& tr,
                                  const behavioral_score& bs)
 {
-    if (logger().getLevel() < Logger::FINE)
+    if (!logger().isFineEnabled())
         return;
 
     stringstream ss;

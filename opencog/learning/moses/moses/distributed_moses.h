@@ -207,7 +207,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     // Logger
                     logger().info("Merge %u candidates with the metapopulation",
                                   candidates.size());
-                    if(logger().getLevel() >= Logger::FINE) {
+                    if (logger().isFineEnabled()) {
                         logger().fine("Candidates with their bscores to merge with"
                                       " the metapopulation:");
                         stringstream ss;
@@ -226,7 +226,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                     // Logger
                     logger().info("Metapopulation size is %u", mp.size());
-                    if(logger().getLevel() >= Logger::FINE) {
+                    if (logger().isFineEnabled()) {
                         stringstream ss;
                         ss << "Metapopulation after merging: " << std::endl;
                         logger().fine(mp.ostream(ss, -1, true, true).str());

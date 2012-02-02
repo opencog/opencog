@@ -521,7 +521,7 @@ struct hill_climbing
                 if (eval_best)
                     *eval_best = current_number_of_instances;
                 // Logger
-                if (logger().getLevel() >= Logger::DEBUG) {
+                if (logger().isDebugEnabled()) {
                     std::stringstream ss;
                     ss << "Best instance: " << fields.stream(center_inst)
                        << " " << best_cscore;

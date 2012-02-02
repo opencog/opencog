@@ -101,7 +101,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             behavioral_score bs = bscore(tr);
             score_t res = boost::accumulate(bs, 0.0);
 
-            if (logger().getLevel() < Logger::FINE) {
+            if (logger().isFineEnabled()) {
                 stringstream ss;
                 ss << "bscore_based_score: " << res;
                 ss << " for candidate: " << tr;
@@ -601,7 +601,7 @@ struct distance_based_scorer : public unary_function<instance,
     composite_score operator()(const instance& inst) const {
         score_t sc = -fs.hamming_distance(target_inst, inst);
         // Logger
-        if(logger().getLevel() >= Logger::FINE) {
+        if(logger().isFineEnabled()) {
             stringstream ss;
             ss << "distance_based_scorer - Evaluate instance: " 
                << fs.stream(inst) << std::endl << "Score = " << sc << std::endl;
@@ -628,7 +628,7 @@ struct complexity_based_scorer : public unary_function<instance,
         using namespace reduct;
 
         // Logger
-        if (logger().getLevel() >= Logger::FINE) {
+        if (logger().isFineEnabled()) {
             stringstream ss;
             ss << "complexity_based_scorer - Evaluate instance: " 
                << _rep.fields().stream(inst);

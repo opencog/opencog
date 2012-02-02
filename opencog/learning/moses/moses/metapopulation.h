@@ -366,7 +366,7 @@ struct metapopulation : public bscored_combo_tree_set
 
         close_deme();
 
-        if (logger().getLevel() >= Logger::INFO) {
+        if (logger().isInfoEnabled()) {
             stringstream ss;
             ss << "Total number of evaluations so far: " << _n_evals;
             logger().info(ss.str());
@@ -503,13 +503,9 @@ struct metapopulation : public bscored_combo_tree_set
         int eval_during_this_deme = std::min(n_evals() - _evals_before_this_deme,
                                              (int)_deme->size());
 
-        // Logger
-        {
-            logger().debug("Close deme");
-            logger().debug("Actual number of evaluations during that expansion: %d",
+        logger().debug("Close deme");
+        logger().debug("Actual number of evaluations during that expansion: %d",
                            eval_during_this_deme);
-        }
-        // ~Logger
 
         //mark the exemplar so we won't expand it again
         _visited_exemplars.insert(get_tree(*_exemplar));
@@ -613,7 +609,7 @@ struct metapopulation : public bscored_combo_tree_set
         if(!params.include_dominated) {
             // Logger
             logger().debug("Remove dominated candidates");
-            if(logger().getLevel() >= Logger::FINE) {
+            if (logger().isFineEnabled()) {
                 logger().fine("Candidates with their bscores before"
                               " removing the dominated candidates");
                 stringstream ss;
@@ -626,7 +622,7 @@ struct metapopulation : public bscored_combo_tree_set
             // Logger
             logger().debug("Removed %u dominated candidates out of %u",
                            old_size - candidates.size(), old_size);
-            if(logger().getLevel() >= Logger::FINE) {
+            if (logger().isFineEnabled()) {
                 logger().fine("Candidates with their bscores after"
                               " removing the dominated candidates");
                 stringstream ss;
@@ -642,7 +638,7 @@ struct metapopulation : public bscored_combo_tree_set
         //Logger
         logger().debug("Merge %u candidates with the metapopulation",
                        candidates.size());
-        if(logger().getLevel() >= Logger::FINE) {
+        if (logger().isFineEnabled()) {
             logger().fine("Candidates with their bscores to merge with"
                           " the metapopulation:");
             stringstream ss;
@@ -654,9 +650,9 @@ struct metapopulation : public bscored_combo_tree_set
         merge_candidates(candidates);
 
         //Logger
-        if (logger().getLevel() >= Logger::DEBUG) {
+        if (logger().isDebugEnabled()) {
             logger().debug("Metapopulation size is %u", size());
-            if (logger().getLevel() >= Logger::FINE) {
+            if (logger().isFineEnabled()) {
                 stringstream ss;
                 ss << "Metapopulation after merging:" << std::endl;
                 logger().fine(ostream(ss, -1, true, true).str());
@@ -979,7 +975,7 @@ struct metapopulation : public bscored_combo_tree_set
             score_t sc = get_score(csc);
 
             // Log stuff.
-            if (logger().getLevel() >= Logger::FINE) {
+            if (logger().isFineEnabled()) {
                 {
                     std::stringstream ss;
                     ss << "best composite score = " << _best_cscore;
@@ -1015,7 +1011,7 @@ struct metapopulation : public bscored_combo_tree_set
     // log the best candidates
     void log_best_candidates() const
     {
-        if (logger().getLevel() < Logger::INFO)
+        if (!logger().isInfoEnabled())
             return;
 
         if (best_candidates().empty())

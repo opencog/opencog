@@ -220,7 +220,7 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
                 make_pair(tr, make_pair(bscore, make_pair(score, complexity)));
             candidates.insert(candidate);
             // Logger
-            if(logger().getLevel() >= Logger::FINE) {
+            if (logger().isFineEnabled()) {
                 logger().fine("Parsed candidate:");
                 stringstream ss;
                 logger().fine(ostream_bscored_combo_tree(ss, candidate,

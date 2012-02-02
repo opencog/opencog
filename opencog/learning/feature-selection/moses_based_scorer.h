@@ -66,7 +66,7 @@ struct moses_based_scorer : public unary_function<instance, composite_score> {
         std::set<arity_t> fs = get_feature_set(_fields, inst);
         composite_score csc(_fs_scorer(fs), -fs.size());
         // Logger
-        if(logger().getLevel() >= Logger::FINE) {
+        if (logger().isFineEnabled()) {
             stringstream ss;
             ss << "moses_based_scorer - Evaluate instance: " 
                << _fields.stream(inst) << " " << csc;

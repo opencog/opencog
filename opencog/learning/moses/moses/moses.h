@@ -91,7 +91,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
 
         // Print stats in a way that makes them easy to graph.
-        if (logger().getLevel() >= Logger::INFO) {
+        if (logger().isInfoEnabled()) {
             stringstream ss;
             ss << "Stats: " << gen_idx;
             ss << "\t" << mp.n_evals();    // number of evaluations so far
