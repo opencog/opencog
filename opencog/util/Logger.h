@@ -140,9 +140,9 @@ public:
      * of this Logger instance.
      */
     void log  (Level level, const std::string &txt);
-    void error(const std::string &txt);
-    void warn (const std::string &txt);
-    void info (const std::string &txt);
+    // void error(const std::string &txt);
+    // void warn (const std::string &txt);
+    // void info (const std::string &txt);
     // void debug(const std::string &txt);
     // void fine (const std::string &txt);
 
@@ -156,9 +156,9 @@ public:
      */
     void logva(Level level, const char *, va_list args);
     void log  (Level level, const char *, ...);
-    void error(const char *, ...);
-    void warn (const char *, ...);
-    void info (const char *, ...);
+    // void error(const char *, ...);
+    // void warn (const char *, ...);
+    // void info (const char *, ...);
     // void debug(const char *, ...);
     // void fine (const char *, ...);
 
@@ -190,22 +190,58 @@ public:
         Level lvl;
     };
 
-    class Debug : public Base
+    class Error : public Base
     {
     public:
-        void operator()(const std::string &txt);
+        void operator()(const std::string &txt) { logger.log(ERROR, txt); }
         void operator()(const char *, ...);
         Base operator()() { return *this; }
     protected:
         friend class Logger;
-        Debug(Logger& l) : Base(l, FINE) {}
+        Error(Logger& l) : Base(l, ERROR) {}
+    };
+    Error error;
+
+    class Warn : public Base
+    {
+    public:
+        void operator()(const std::string &txt) { logger.log(WARN, txt); }
+        void operator()(const char *, ...);
+        Base operator()() { return *this; }
+    protected:
+        friend class Logger;
+        Warn(Logger& l) : Base(l, WARN) {}
+    };
+    Warn warn;
+
+    class Info : public Base
+    {
+    public:
+        void operator()(const std::string &txt) { logger.log(INFO, txt); }
+        void operator()(const char *, ...);
+        Base operator()() { return *this; }
+    protected:
+        friend class Logger;
+        Info(Logger& l) : Base(l, INFO) {}
+    };
+    Info info;
+
+    class Debug : public Base
+    {
+    public:
+        void operator()(const std::string &txt) { logger.log(DEBUG, txt); }
+        void operator()(const char *, ...);
+        Base operator()() { return *this; }
+    protected:
+        friend class Logger;
+        Debug(Logger& l) : Base(l, DEBUG) {}
     };
     Debug debug;
 
     class Fine : public Base
     {
     public:
-        void operator()(const std::string &txt);
+        void operator()(const std::string &txt) { logger.log(FINE, txt); }
         void operator()(const char *, ...);
         Base operator()() { return *this; }
     protected:

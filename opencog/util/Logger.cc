@@ -202,7 +202,7 @@ void Logger::writeMsg(std::string &msg)
 }
 
 Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
-    : debug(*this), fine(*this)
+    : error(*this), warn(*this), info(*this), debug(*this), fine(*this)
 {
     this->fileName.assign(fname);
     this->currentLevel = level;
@@ -221,7 +221,7 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
 }
 
 Logger::Logger(const Logger& log)
-    : debug(*this), fine(*this)
+    : error(*this), warn(*this), info(*this), debug(*this), fine(*this)
 {
     pthread_mutex_init(&lock, NULL);
     set(log);
@@ -367,27 +367,6 @@ void Logger::log(Logger::Level level, const std::string &txt)
 #endif
 }
 
-void Logger::error(const std::string &txt)
-{
-    log(ERROR, txt);
-}
-void Logger::warn (const std::string &txt)
-{
-    log(WARN,  txt);
-}
-void Logger::info (const std::string &txt)
-{
-    log(INFO,  txt);
-}
-void Logger::Debug::operator()(const std::string &txt)
-{
-    logger.log(DEBUG, txt);
-}
-void Logger::Fine::operator()(const std::string &txt)
-{
-    logger.log(FINE,  txt);
-}
-
 void Logger::logva(Logger::Level level, const char *fmt, va_list args)
 {
     if (level <= currentLevel) {
@@ -402,17 +381,17 @@ void Logger::log(Logger::Level level, const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logva(level, fmt, args); va_end(args);
 }
-void Logger::error(const char *fmt, ...)
+void Logger::Error::operator()(const char *fmt, ...)
 {
-    va_list args; va_start(args, fmt); logva(ERROR, fmt, args); va_end(args);
+    va_list args; va_start(args, fmt); logger.logva(ERROR, fmt, args); va_end(args);
 }
-void Logger::warn (const char *fmt, ...)
+void Logger::Warn::operator()(const char *fmt, ...)
 {
-    va_list args; va_start(args, fmt); logva(WARN,  fmt, args); va_end(args);
+    va_list args; va_start(args, fmt); logger.logva(WARN,  fmt, args); va_end(args);
 }
-void Logger::info (const char *fmt, ...)
+void Logger::Info::operator()(const char *fmt, ...)
 {
-    va_list args; va_start(args, fmt); logva(INFO,  fmt, args); va_end(args);
+    va_list args; va_start(args, fmt); logger.logva(INFO,  fmt, args); va_end(args);
 }
 void Logger::Debug::operator()(const char *fmt, ...)
 {
