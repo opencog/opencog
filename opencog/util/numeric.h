@@ -242,6 +242,11 @@ FloatT logsum(size_t n)
     return sums[n];
 }
 
+// returns true iff x >= min and x <= max
+template<typename FloatT> bool isBetween(FloatT x, FloatT min, FloatT max) {
+    return x >= min && x <= max;
+}
+
 // returns true iff abs(x - y) <= epsilon
 template<typename FloatT> bool isWithin(FloatT x, FloatT y, FloatT epsilon) {
     return std::abs(x - y) <= epsilon;
