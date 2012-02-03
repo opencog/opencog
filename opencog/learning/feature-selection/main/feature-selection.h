@@ -113,7 +113,7 @@ struct feature_selection_parameters {
     double confi; //  confidence intensity
     double max_score;
     unsigned jobs;
-    unsigned hc_fraction_of_remaining;
+    double hc_fraction_of_remaining;
     double inc_intensity;
     unsigned inc_target_size;
     double inc_target_size_epsilon;

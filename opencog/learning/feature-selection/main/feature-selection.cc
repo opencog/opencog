@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
          value<unsigned>(&fs_params.jobs)->default_value(1),
          string("Number of jobs allocated.\n").c_str())
         (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
-         value<unsigned>(&fs_params.hc_fraction_of_remaining)->default_value(10),
+         value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.1),
          "Hillclimbing parameter. Determine the fraction of the remaining number of eval to use for the current iteration.\n")
         (opt_desc_str(inc_intensity_opt).c_str(),
          value<double>(&fs_params.inc_intensity)->default_value(0),
