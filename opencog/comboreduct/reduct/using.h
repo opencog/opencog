@@ -28,7 +28,6 @@
 //#include <boost/bind.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <opencog/comboreduct/combo/vertex.h>
@@ -46,11 +45,11 @@ using boost::static_visitor;
 using boost::make_counting_iterator;
 using boost::make_indirect_iterator;
 using boost::apply_visitor;
-using boost::shared_ptr;
 using boost::ptr_vector;
 using std::find_if;
 using std::distance;
 using std::make_pair;  
+using std::shared_ptr;
 
 } // ~namespace reduct
 } // ~namespace opencog
