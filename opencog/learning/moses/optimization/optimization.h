@@ -276,7 +276,9 @@ struct hc_parameters
                   double _fraction_of_remaining = 0.1)
         : widen_search(widen),
           single_step(step),
-          fraction_of_remaining(_fraction_of_remaining) {}
+          fraction_of_remaining(_fraction_of_remaining) {
+        OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
+    }
 
     bool widen_search;
     bool single_step;
@@ -451,6 +453,10 @@ struct hill_climbing
                 (max_number_of_instances - current_number_of_instances)
                 * hc_params.fraction_of_remaining;
 
+            
+
+            // this is to lower the cost of deme management
+            // (especially representation building)
             if (number_of_new_instances < MINIMUM_DEME_SIZE)
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
