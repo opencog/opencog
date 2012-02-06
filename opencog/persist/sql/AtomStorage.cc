@@ -77,6 +77,13 @@ class AtomStorage::Response
 		const char *outlist;
 		int height;
 
+		Response()
+		{
+			tname = "";
+			itype = 0;
+			intval = 0;
+		}
+
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("%s = %s\n", colname, colvalue);
