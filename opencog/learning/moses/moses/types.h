@@ -157,17 +157,22 @@ inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
 }
 
 /**
+ * Non standard definition of greater than between 2 composite scores.
+ * In that definition nan on the score is never greater than anything.
+ */
+bool cscore_gt(const composite_score& l_csc, const composite_score& r_csc);
+bool cscore_ge(const composite_score& l_csc, const composite_score& r_csc);
+
+/**
  * greater_than operator for bscored_combo_tree.  The order is as
  * follow 1 the score matter, then complexity, then the combo_tree
  * itself. This is done (formerly replacing
  * std::greater<bscored_combo_tree>) so that candidates of same score
  * and same complexity can be added in the metapopulation.
  *
- * @todo That function makes the unusual assumption that anything is
- * greater than nan. it's not sure that assumption is really the right
- * one but it is set not to pollute the metapopulation. Also, it might
- * be better to redefine composite_score greater function and put the
- * isnan hack into it.
+ * That function makes the non standard assumption that anything is
+ * greater than nan. It is set so not to pollute the metapopulation or
+ * the deme with undefined scored (usually very bad) candidates.
  */
 struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                                                            bscored_combo_tree,
@@ -177,17 +182,10 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                     const bscored_combo_tree& bs_tr2) const {
         composite_score csc1 = get_composite_score(bs_tr1),
             csc2 = get_composite_score(bs_tr2);
-        bool isnan1 = isnan(get_score(csc1)),
-            isnan2 = isnan(get_score(csc2));
-        if (!isnan1 && !isnan2)
-            return csc1 > csc2
-                || (!(csc1 < csc2) &&
-                    size_tree_order<vertex>()(get_tree(bs_tr1),
-                                              get_tree(bs_tr2)));
-        else if (isnan1)
-            return false;
-        else if (isnan2)
-            return true;
+        return cscore_gt(csc1, csc2)
+            || (!cscore_gt(csc2, csc1) &&
+                size_tree_order<vertex>()(get_tree(bs_tr1),
+                                          get_tree(bs_tr2)));
     }
 };
 typedef std::set<bscored_combo_tree,

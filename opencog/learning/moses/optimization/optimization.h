@@ -507,7 +507,7 @@ struct hill_climbing
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
                 composite_score inst_cscore = deme[i].second;
-                if (inst_cscore > best_cscore) {
+                if (cscore_gt(inst_cscore, best_cscore)) {
                     best_cscore = inst_cscore;
                     center_inst = deme[i].first;
                     has_improved = true;
