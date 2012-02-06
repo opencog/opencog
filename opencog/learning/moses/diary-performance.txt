@@ -285,9 +285,131 @@ graph: time to next discovery.
 graph: eval time to num evals...
 experiment: limit max metapop size.
 
--r0: 410 gens 79883 evals   286 secs
--r4: 1325 gens 486915 evals   1690 secs   0.78 gens/sec  288 evals/sec
--r7: 130 gens 20432 evals  51 secs   2.5 gens/sec   400 evals/sec
+Here's the old, uncapped, unlimited data:
+with revised timings, due to code restructuring (stubbing out logger calls)
+-r0: 410 gens 79883 evals   286 secs (262 secs revised)
+-r1: -1
+-r2: 196.127073 (revised 172 secs)
+-r3: 100.873139 (revised 93 secs)
+-r4: 1325 gens 486915 evals   1690 secs (revised 1560)  0.78 gens/sec  288 evals/sec
+-r5: 148.591779 (revised 134)
+-r6: 9752.876748
+-r7: 130 gens 20432 evals  51 secs (revised 39 secs)  2.5 gens/sec   400 evals/sec
+-r8: 510 gens 234820 evals 731.033613 (revised at 665 secs)
+-r9: 2367.365400 (revised 2150 secs)
+
 
 experiment: keep non-dominated exemplars only if they have a large hamming
 distance between one-another.
+
+Sucess! (kind of).... when limiting pool size to 1000 the -Hpa -k4 -r0 was solved in 98 secs
+instead of 260 secs.  However, smaller limits did not work...
+ Does sorting time make a big diff ?
+
+-r0-capped: 217 gens, 38338 evals 98 secs
+-r4-capped: 872 gens, 262530 evals 782 secs
+-r7 capped: 507 gens, 97009 evals 310 secs   XXXX so this gets worse!!
+-r8 capped: 788 gens, 265462 evals 698 secs   XXX this got worse ...
+
+do r8, then r9 then r6
+
+without the cap, get a population of over 6K towards the end.
+-- propose: remove anything that's been tried already.
+   tried that quickly, didn't seem to go well.  I don't like this idea...
+
+idea:
+-- limit the pool size to function of complexity:
+   e.g. 20 bit complexity requires 2^20 = 10^6 for exhaustive enumeration.
+   limit pool to 2^(complex/2) or 2^(2*complex/3) ... 
+
+------
+idea: select_exemplar() has a probability of selection that is SA-like.
+try hotter temperatures. Origianlly have T=1
+
+p = (p > 0 ? 0 : pow2((p - highest_comp)/T));
+
+-1 means timoeut at 450K
+
+        T=1     T=2    T=3
+-r0:     262       8      4
+-r1:  >19261      14    514   
+-r2:     172    5371    444
+-r3:      93    1168   5520
+-r4:    1560    1131     58
+-r5:     134     220   2106
+-r6:    9752.x   502     53
+-r7:      39      43   2566 
+-r8:     665     324   6867
+-r9:    2150     628    143        
+-r10:     30     522    158
+-r11:     15      67     77
+-r12:    360    1656    700
+-r13:    292     568    140
+-r14:    961      20    931
+-r15:   1972      83    306
+-r16:     34     916   1547
+-r17:   7138     187     90
+-r18: >31836    2991     22  (-m1.1M)
+-r19:    172     549    808
+
+450K == 1/2 hour
+
+re-sorting first ten by runtime:
+
+# first column: original data
+# second column: a 10% performance speedbump due to logging.
+# third column: broaden the complexity chooser (by 2)
+#
+1  51.243247   39 8
+2  100.873139  93 14
+3  148.591779  134   43
+4  196.127073  172   220
+5  286.623444  262   324
+6  731.033613  665   502
+7  1690.134350 1560  628
+8  2367.365400 2150  1134
+9  9752.876748 9752  1168
+
+restorting the first 20 by rutime:
+
+#
+# moses performance data, runtime in seconds
+# using default hillclimbing.
+# -Hpa -k4 in order of runtime
+#
+# first column: original data
+# second column: a 10% performance speedbump due to logging.
+# third column: broaden the complexity chooser (by 2)
+# fourth column: broaden the complexity chooser (by 3)
+#
+# in select_exemplar():
+# p = (p > 0 ? 0 : pow2((p - highest_comp)/T));
+#
+#   orig       T=1    T=2    T=3
+1   15          15      8      4
+2   30          30     14     22
+3   34          34     20     53
+4   51.24       39     43     58
+5   100.87      93     67     77
+6   148.59     134     83     90
+7   172        172    187    140
+8   196.12     172    220    143
+9   286.62     262    324    158
+10  292        292    502    306
+11  360        360    522    444
+12  731.03     665    549    514
+13  961        961    568    700
+14  1690.13   1560    628    808
+15  1972      1972    916    931
+16  2367.36   2150   1131   1547
+17  7138      7138   1168   2106
+18  9752.87   9752   1656   2566
+# 19 >19261 at -m1 for T=1
+19  9999     19261   2991   5520
+# 20  >31836 at -m1.1M for T=1
+20  9999      31836  5371   6867
+
+
+
+
+

@@ -27,7 +27,7 @@ void measure(vector<string> arguments)
 
     double tsq = 0.0; // for computing variance
 
-    int nreps = 10;
+    int nreps = 20;
 
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);
@@ -64,6 +64,7 @@ void measure(vector<string> arguments)
     avg_usec += total.tv_usec;
     avg_usec /= nreps;
 
+    printf("Caution: average and variance are meaningless if time is log distributed!\n");
     printf("Average time %ld.%06ld seconds\n", avg_sec, avg_usec);
 
     // Now compute the rms.

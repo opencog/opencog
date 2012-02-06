@@ -246,15 +246,12 @@ struct metapopulation : public bscored_combo_tree_set
     /**
      * Select the exemplar from the population. All candidates with
      * the best score (if more that one) are distributed according to
-     * a Solomonoff-like distribution (2^{-complexity}) and the
-     * exemplar is selected accordingly.
+     * a Solomonoff-like distribution (2^{-complexity/temperature})
+     * and the exemplar is selected accordingly.
      *
-     * XXX Doing the above, i.e. extracting a list of candidates whose
-     * score are tied, and then playing roulette with them requires a
-     * fair amount of code, below, to implement. There's a performance
-     * hit of some sort, for doing this. Is this worth the effort?  Why
-     * not just choose the one with the best score?  Is there any
-     * experimental evidence that this more complex algo is better?
+     * Current experimental evidence seems to show that a temperature
+     * of 2 works best for the 4-parity problem. Both T=1 and T=3 perform
+     * considerably slower.
      *
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
@@ -308,14 +305,16 @@ struct metapopulation : public bscored_combo_tree_set
 
         // Compute the probability normalization, needed for the
         // roullete choice of exemplars with equal scores, but
-        // differing complexities.
+        // differing complexities. Empirical work on 4-parity suggests
+        // that a temperature of 2 or 3 works best.
+        complexity_t temperature = 1;
         complexity_t sum = 0;
         complexity_t highest_comp = *boost::min_element(probs);
-        // convert complexities into (non-normalized) probabilities
+        // Convert complexities into (non-normalized) probabilities
         foreach (complexity_t& p, probs) {
-            // in case p has the max complexity (already visited) then
+            // In case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p > 0? 0 : pow2(p - highest_comp));
+            p = (p > 0 ? 0 : pow2((p - highest_comp)/temperature));
             sum += p;
         }
 
@@ -338,6 +337,30 @@ struct metapopulation : public bscored_combo_tree_set
         else
             // merge_nondominated_any(candidates);
             merge_nondominated(candidates, params.jobs);
+
+#if 1
+        // Clamp the metapopulation size to something reasonable.
+        // Large metapops are almost never sampled for exemplars, use
+        // up lots of RAM, and are slow to maintain in sorted order.
+        // Nor do they dominate much of anything. So keep them trim.
+        //
+        // The 2/3'rs of complexity is a heuristic: it allows for a
+        // sample of all possible exmplars that is fairly big, but far
+        // from exhaustive.
+        complexity_t c = -get_complexity(*begin());  // why is complexity negative ???
+        c = (2*c) / 3;
+        if (c < 7) c = 7;    // Allow a population of at least 128.
+        if (24 < c) c = 24;  // cap at metapop size of 16 million 
+        size_t max_metapop_size = 1 << c;
+        if (size() < max_metapop_size) return;
+
+        iterator it = std::next(begin(), max_metapop_size);
+        while (it != end()) {
+            iterator p = it;
+            it++;
+            erase(p);
+        }
+#endif
     }
 
     /**
@@ -691,7 +714,8 @@ struct metapopulation : public bscored_combo_tree_set
         return res;
     }
 
-    void remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs = 1) {
+    void remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs = 1)
+    {
         // get the nondominated candidates
         bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
         bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv, jobs);
@@ -704,7 +728,8 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     static bscored_combo_tree_set
-    get_nondominated_iter(const bscored_combo_tree_set& bcs) {
+    get_nondominated_iter(const bscored_combo_tree_set& bcs)
+    {
         typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
         typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
         bscored_combo_tree_list mcl(bcs.begin(), bcs.end());
