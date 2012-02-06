@@ -722,6 +722,40 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(const AtomSpace& atomSpace,
 
     return selectedHandle;
 }
+std::vector<Handle> AtomSpaceUtil::getInheritanceLinks(AtomSpace & atomSpace, Handle hFirstOutgoing)
+{
+    // Create BindLink used by pattern matcher
+    std::vector<Handle> inheritanceLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
+
+    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
+
+    inheritanceLinkOutgoings.push_back(hFirstOutgoing);
+    inheritanceLinkOutgoings.push_back(hVariableNode);
+    Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK, inheritanceLinkOutgoings);
+
+    implicationLinkOutgoings.push_back(hinheritanceLink);
+    implicationLinkOutgoings.push_back(hinheritanceLink);
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+
+    bindLinkOutgoings.push_back(hVariableNode);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+
+    // Run pattern matcher
+    PatternMatch pm;
+    pm.set_atomspace(&atomSpace);
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
+    //       may fail to remove the inheritanceLink when necessary.
+    //       Because the inheritanceLink would have an incoming (i.e. hResultListLink here),
+    //       which would make cog-delete scheme function fail.
+    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
+    atomSpace.removeAtom(hResultListLink);
+
+    return resultSet;
+}
 
 Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgoing) 
 {

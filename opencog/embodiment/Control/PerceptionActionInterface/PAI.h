@@ -207,6 +207,8 @@ private:
      */
     bool logPVPMessage;
 
+    bool enableCollectActions;
+
 public:
 
     /**

@@ -128,6 +128,8 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     this->languageTool = new LanguageComprehension(_avatarInterface);
 
     logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
+
+    enableCollectActions = config().get_bool("ENABLE_ACTION_COLLECT");
 }
 
 PAI::~PAI()
@@ -855,7 +857,12 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,const std::stri
         logger().debug("PAI - Got Entity: id = %s (%s), type = %s", entityId, internalEntityId.c_str(), entityType);
 
         resultHandle = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType), internalEntityId.c_str());
-
+        if (atomSpace.getType(resultHandle) == OBJECT_NODE)
+        {
+            std::vector<Handle> inheritanceResults = AtomSpaceUtil::getInheritanceLinks(atomSpace,resultHandle);
+            if (inheritanceResults.size() != 0)
+                actionConcernedHandles.insert(actionConcernedHandles.end(),inheritanceResults.begin(),inheritanceResults.end());
+        }
         XMLString::release(&entityId);
         XMLString::release(&entityType);
         // XMLString::release(&entityOwnerId);
@@ -1032,6 +1039,7 @@ Handle PAI::processActionAvailability(DOMElement* signal)
     return evalLinkHandle;
 }
 
+
 /*
   This function will store an action observed in the AtomSpace, as the following structure:
   For example: Opencog observing the player successfully kicking football1342 with force 300:
@@ -1077,6 +1085,12 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     // All the handle this action concerned , for event detector
     std::vector<Handle> actionConcernedHandles;
 
+    if (atomSpace.getType(agentNode) == OBJECT_NODE)
+    {
+        std::vector<Handle> inheritanceResults = AtomSpaceUtil::getInheritanceLinks(atomSpace,agentNode);
+        if (inheritanceResults.size() != 0)
+            actionConcernedHandles.insert(actionConcernedHandles.end(),inheritanceResults.begin(),inheritanceResults.end());
+    }
     // Add the action node into AtomSpace
     Handle actionNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, nameStr.c_str());
     actionConcernedHandles.push_back(actionNode);
@@ -1203,6 +1217,13 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
             actionHandles.push_back(evalLink2);
 
+            if (targetTypeCode == OBJECT_NODE)
+            {
+                std::vector<Handle> inheritanceResults = AtomSpaceUtil::getInheritanceLinks(atomSpace,targetNode);
+                if (inheritanceResults.size() != 0)
+                    actionConcernedHandles.insert(actionConcernedHandles.end(),inheritanceResults.begin(),inheritanceResults.end());
+            }
+
             // if the action is grab or drop created/update isHoldingSomething
             // and isHolding predicates
             if (nameStr == "grab") {
@@ -1313,7 +1334,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     }
 
     // call the event detector
-    EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
+    if (enableCollectActions)
+        EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
 
     // call the event responser
     EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles, tsValue);

@@ -36,6 +36,11 @@ using namespace opencog::pai;
 using namespace opencog::control;
 using namespace opencog;
 
+void ActionInfo::addPara(string paraName, Handle paraVal)
+{
+    this->paraMap[paraName] = paraVal;
+}
+
 EventDetector* EventDetector::instance = NULL;
 
 EventDetector* EventDetector::getInstance()
@@ -64,7 +69,8 @@ EventDetector::~EventDetector()
 
 void EventDetector::destroy()
 {
-    exportActionConcernedNodesToSCM();
+    if (config().get_bool("ENABLE_ACTION_COLLECT"))
+        exportActionConcernedNodesToSCM();
 
     if (EventDetector::instance != NULL)
         delete EventDetector::instance;
@@ -85,6 +91,8 @@ void EventDetector::insertNodeToScmMap(Handle node)
 {
     if( allNodesForScmActions.find(node.value()) ==  allNodesForScmActions.end())
         allNodesForScmActions.insert(map<UUID, Handle>::value_type(node.value(),node));
+
+
 }
 
 void EventDetector::exportActionConcernedNodesToSCM()
@@ -101,3 +109,4 @@ void EventDetector::exportActionConcernedNodesToSCM()
     }
     fscm.close();
 }
+

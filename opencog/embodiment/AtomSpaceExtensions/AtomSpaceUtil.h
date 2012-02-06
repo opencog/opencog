@@ -145,6 +145,15 @@ public:
      */
     static Handle getReference(AtomSpace & atomSpace, Handle hFirstOutgoing); 
 
+    /**
+     * Return the InheritanceLink list given its first outgoing
+     *
+     * InheritanceLink
+     *     firstOutgoing
+     *     secondOutgoing
+     */
+    static std::vector<Handle> getInheritanceLinks(AtomSpace & atomSpace, Handle hFirstOutgoing);
+
    /**
      * Returns the current level of the given feeling name.
      * If the feeling does not exists on AtomSpace or some problem occurs when invoked,

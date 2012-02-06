@@ -451,3 +451,6 @@ ALICEBOT_SERVER_PORT	= 7002
 RAMONA_SERVER_HOST	= localhost
 RAMONA_SERVER_PORT	= 7003
 
+# Whether to collect action corpus for event detection
+ENABLE_ACTION_COLLECT   = false
+
