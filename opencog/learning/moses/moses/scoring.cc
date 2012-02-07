@@ -175,7 +175,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     bs.push_back(precision);
     
     // add activation_penalty component
-    score_t activation_penalty = get_accuracy_penalty(activation);
+    score_t activation_penalty = get_activation_penalty(activation);
     logger().fine("activation = %f", activation);
     logger().fine("activation penalty = %e", activation_penalty);
     bs.push_back(activation_penalty);
@@ -203,10 +203,12 @@ behavioral_score precision_bscore::best_possible_bscore() const
     return bs;
 }
 
-score_t precision_bscore::get_accuracy_penalty(score_t activation) const
+score_t precision_bscore::get_activation_penalty(score_t activation) const
 {
-    score_t dst = max(max(min_activation - activation, score_t(0)) / min_activation,
-                      max(activation - max_activation, score_t(0)) / (1 - max_activation));
+    score_t dst = max(max(min_activation - activation, score_t(0))
+                      / min_activation,
+                      max(activation - max_activation, score_t(0))
+                      / (1 - max_activation));
     logger().fine("dst = %f", dst);
     return log(pow((1 - dst), penalty));
 }
@@ -298,8 +300,8 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
         
 ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
                                          float alphabet_size, float p,
-                                         RandGen& _rng, score_t alpha_)
-    : ctt(_ctt), rng(_rng), alpha(alpha_)
+                                         RandGen& _rng)
+    : ctt(_ctt), rng(_rng)
 {
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
@@ -309,34 +311,12 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
 
     // define func
-    if (alpha > 0) { // experiment with precision
-        func = [this](const vertex& v, CTable::counter_t& c) {
-            if (v == id::logical_true)
-                return -score_t(c[id::logical_false]);
-            else
-                return -alpha * c.total_count();};
-        best_func = [this](CTable::counter_t& c) {
-            return -score_t(min((score_t)min(c[id::logical_true],
-                                             c[id::logical_false]),
-                                alpha * c.total_count()));};
-    }
-    else if (alpha < 0) { // experiment with negative predictive value
-        func = [this](const vertex& v, CTable::counter_t& c) {
-            if (v == id::logical_false)
-                return -score_t(c[id::logical_true]);
-            else
-                return alpha * c.total_count();};
-        best_func = [this](CTable::counter_t& c) {
-            return -score_t(min((score_t)min(c[id::logical_true],
-                                             c[id::logical_false]),
-                                -alpha * c.total_count()));};
-    }
-    else { // accuracy
-        func = [](const vertex& v, CTable::counter_t& c) {
-            return -score_t(c[negate_vertex(v)]); };
-        best_func = [](CTable::counter_t& c) {
-            return -score_t(min(c[id::logical_true], c[id::logical_false]));};
-    }
+    func = [](const vertex& v, CTable::counter_t& c) {
+        return -score_t(c[negate_vertex(v)]); };
+
+    // define best_func
+    best_func = [](CTable::counter_t& c) {
+        return -score_t(min(c[id::logical_true], c[id::logical_false]));};
 }
 
 behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
@@ -382,11 +362,16 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
                                                            weight_t skewness_w_,
                                                            weight_t stdU_w_,
                                                            weight_t skew_U_w_,
-                                                           weight_t log_entropy_w_,
+                                                           score_t min_activation_,
+                                                           score_t max_activation_,
+                                                           score_t penalty_,
+                                                           bool positive_,
+                                                           bool abs_skewness_,
                                                            bool decompose_kld_)
     : ctable(ctable_), rng(_rng),
-      kld_w(kld_w_), skewness_w(skewness_w_), stdU_w(stdU_w_),
-      skew_U_w(skew_U_w_), log_entropy_w(log_entropy_w_),
+      kld_w(kld_w_), skewness_w(skewness_w_), abs_skewness(abs_skewness_),
+      stdU_w(stdU_w_), skew_U_w(skew_U_w_), min_activation(min_activation_),
+      max_activation(max_activation_), penalty(penalty_), positive(positive_),
       decompose_kld(decompose_kld_)
 {
     // initialize Occam's razor
@@ -412,107 +397,105 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
 
 behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
-    static const double entropy_threshold = 0.1; /// @todo should be a parameter
-    
     OTable pred_ot(tr, ctable, rng);
 
-    // compute the entropy of the output of the predicate
-    vector<double> prob;
-    Counter<vertex, unsigned> vc;
+    vertex target = bool_to_vertex(positive);
+    
+    unsigned total = 0, // total number of observations (could be optimized)
+        actives = 0; // total number of positive (or negative if
+                     // positive is false) predicate values
     boost::for_each(ctable | map_values, pred_ot,
                     [&](const CTable::counter_t& c, const vertex& v) {
-                        vc[v] += c.total_count(); });
-    double total = klds.p_size();
-    transform(vc | map_values, back_inserter(prob), arg1 / total);
-    double pred_entropy = entropy(prob);
-    logger().fine("pred_entropy = %f", pred_entropy);
+                        unsigned tc = c.total_count();
+                        if (v == target)
+                            actives += tc;
+                        total += tc;
+                    });
+
+    logger().fine("total = %u", total);
+    logger().fine("actives = %u", actives);
 
     behavioral_score bs;
-    auto push_worst = [&bs](){ bs.push_back(worst_score); };
-    if (pred_entropy > entropy_threshold) {
-        // filter the output according to tr
-        counter_t pred_counter;     // map obvervation to occurence
-                                    // conditioned by predicate truth
-        boost::for_each(ctable | map_values, pred_ot,
-                        [&](const CTable::counter_t& c, const vertex& v) {
-                            if (vertex_to_bool(v)) {
-                                foreach(const auto& mv, c)
-                                    pred_counter[get_contin(mv.first)] = mv.second;
-                            }});
 
-        logger().fine("pred_ot.size() = %u", pred_ot.size());
-        logger().fine("pred_counter.size() = %u", pred_counter.size());
+    // filter the output according to pred_ot
+    counter_t pred_counter;     // map obvervation to occurence
+                                // conditioned by predicate truth
+    boost::for_each(ctable | map_values, pred_ot,
+                    [&](const CTable::counter_t& c, const vertex& v) {
+                        if (v == target) {
+                            foreach(const auto& mv, c)
+                                pred_counter[get_contin(mv.first)] = mv.second;
+                        }});
 
-        if (pred_counter.size() > 1) { // otherwise the statistics are
-                                       // messed up (for instance
-                                       // pred_skewness can be inf)
-            // compute KLD
-            if (kld_w > 0) {
-                if(decompose_kld) {
-                    klds(pred_counter, back_inserter(bs));
-                    boost::transform(bs, bs.begin(), kld_w * arg1);
-                } else {
-                    score_t pred_klds = klds(pred_counter);
-                    logger().fine("klds = %f", pred_klds);
-                    bs.push_back(kld_w * pred_klds);
-                }
+    logger().fine("pred_ot.size() = %u", pred_ot.size());
+    logger().fine("pred_counter.size() = %u", pred_counter.size());
+
+    if (pred_counter.size() > 1) { // otherwise the statistics are
+                                   // messed up (for instance
+                                   // pred_skewness can be inf)
+        // compute KLD
+        if (kld_w > 0) {
+            if(decompose_kld) {
+                klds(pred_counter, back_inserter(bs));
+                boost::transform(bs, bs.begin(), kld_w * arg1);
+            } else {
+                score_t pred_klds = klds(pred_counter);
+                logger().fine("klds = %f", pred_klds);
+                bs.push_back(kld_w * pred_klds);
+            }
+        }
+
+        if (skewness_w > 0 || stdU_w > 0 || skew_U_w > 0) {
+            
+            // gather statistics with a boost accumulator
+            accumulator_t acc;
+            foreach(const auto& v, pred_counter)
+                acc(v.first, weight = v.second);
+
+            score_t diff_skewness = 0;
+            if (skewness_w > 0 || skew_U_w > 0) {
+                // push the absolute difference between the
+                // unconditioned skewness and conditioned one
+                score_t pred_skewness = weighted_skewness(acc);
+                diff_skewness = pred_skewness - skewness;
+                score_t val_skewness = (abs_skewness?
+                                        abs(diff_skewness):
+                                        diff_skewness);
+                logger().fine("pred_skewness = %f", pred_skewness);
+                if (skewness_w > 0)
+                    bs.push_back(skewness_w * val_skewness);
             }
 
-            if (skewness_w > 0 || stdU_w > 0 || skew_U_w > 0) {
-            
-                // gather statistics with a boost accumulator
-                accumulator_t acc;
-                foreach(const auto& v, pred_counter)
-                    acc(v.first, weight = v.second);
+            score_t stdU = 0;
+            if (stdU_w > 0 || skew_U_w > 0) {
 
-                score_t diff_skewness = 0;
-                if (skewness_w > 0 || skew_U_w > 0) {
-                    // push the absolute difference between the
-                    // unconditioned skewness and conditioned one
-                    score_t pred_skewness = weighted_skewness(acc);
-                    diff_skewness = pred_skewness - skewness;
-                    logger().fine("pred_skewness = %f", pred_skewness);
-                    if (skewness_w > 0)
-                        bs.push_back(skewness_w * abs(diff_skewness));
-                }
-
-                score_t stdU = 0;
-                if (stdU_w > 0 || skew_U_w > 0) {
-
-                    // compute the standardized Mann–Whitney U
-                    stdU = standardizedMannWhitneyU(counter, pred_counter);
-                    logger().fine("stdU = %f", stdU);
-                    if (stdU_w > 0)
-                        bs.push_back(stdU_w * abs(stdU));
-                }
+                // compute the standardized Mann–Whitney U
+                stdU = standardizedMannWhitneyU(counter, pred_counter);
+                logger().fine("stdU = %f", stdU);
+                if (stdU_w > 0)
+                    bs.push_back(stdU_w * abs(stdU));
+            }
                 
-                // push the product of the relative differences of the
-                // shift (stdU) and the skewness (so that if both go
-                // in the same direction the value if positive, and
-                // negative otherwise)
-                if (skew_U_w > 0)
-                    bs.push_back(skew_U_w * stdU * diff_skewness);
-            }
+            // push the product of the relative differences of the
+            // shift (stdU) and the skewness (so that if both go
+            // in the same direction the value if positive, and
+            // negative otherwise)
+            if (skew_U_w > 0)
+                bs.push_back(skew_U_w * stdU * diff_skewness);
+        }
             
-            // add log entropy, this is completely heuristic, no
-            // justification except that the log of the entropy is
-            // gonna add a large penalty when the entropy tends to
-            // 0. Not sure here what we really need, a perhaps
-            // something like 1 - p-value, or some form of indefinite
-            // TV confidence on the calculation of KLD.
-            logger().fine("log(pred_entropy) = %f", log(pred_entropy));
-            if (log_entropy_w)
-                bs.push_back(log_entropy_w * log(pred_entropy));
-
-            // add the Occam's razor feature
-            if(occam)
-                bs.push_back(complexity(tr) * complexity_coef);
-        }
-        else {
-            push_worst();
-        }
+        // add activation_penalty component
+        score_t activation = actives / (score_t) total,
+            activation_penalty = get_activation_penalty(activation);
+        logger().fine("activation = %f", activation);
+        logger().fine("activation penalty = %e", activation_penalty);
+        bs.push_back(activation_penalty);
+        
+        // add the Occam's razor feature
+        if(occam)
+            bs.push_back(complexity(tr) * complexity_coef);
     } else {
-        push_worst();
+        bs.push_back(worst_score);
     }
 
     // Logger
@@ -532,6 +515,16 @@ void interesting_predicate_bscore::set_complexity_coef(float alphabet_size,
 {
     if(occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
+}
+
+score_t interesting_predicate_bscore::get_activation_penalty(score_t activation) const
+{
+    score_t dst = max(max(min_activation - activation, score_t(0))
+                      / min_activation,
+                      max(activation - max_activation, score_t(0))
+                      / (1 - max_activation));
+    logger().fine("dst = %f", dst);
+    return log(pow((1 - dst), penalty));
 }
 
 } // ~namespace moses

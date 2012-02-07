@@ -93,9 +93,8 @@ static const pair<string, string> ip_kld_weight_opt("ip_kld_weight", "K");
 static const pair<string, string> ip_skewness_weight_opt("ip_skewness_weight", "J");
 static const pair<string, string> ip_stdU_weight_opt("ip_stdU_weight", "U");
 static const pair<string, string> ip_skew_U_weight_opt("ip_skew_U_weight", "X");
-static const pair<string, string> ip_log_entropy_weight_opt("ip_log_entropy_weight", "O");
 
-static const pair<string, string> it_alpha_opt("it_alpha", "Q");
+static const pair<string, string> alpha_opt("alpha", "Q");
 
 // options specific to a particular optimization algorithm
 static const pair<string, string> hc_widen_search_opt("hc-widen-search", "T");

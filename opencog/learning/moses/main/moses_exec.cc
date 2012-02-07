@@ -298,8 +298,8 @@ int moses_exec(int argc, char** argv)
     double ip_skewness_weight;
     double ip_stdU_weight;
     double ip_skew_U_weight;
-    double ip_log_entropy_weight;
-    score_t alpha;              // experimental: precision instead of accuracy
+    score_t alpha;              // weight of the activation range
+                                // constraint for problem pre
     // hc_param
     bool hc_widen_search;
     bool hc_single_step;
@@ -562,12 +562,9 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(ip_skew_U_weight_opt).c_str(),
          value<double>(&ip_skew_U_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of skew_U.\n") % ip).c_str()) 
-        (opt_desc_str(ip_log_entropy_weight_opt).c_str(),
-         value<double>(&ip_log_entropy_weight)->default_value(1.0),
-         str(format("Interesting patterns (%s). Weight of log entropy.\n") % ip).c_str())
-        (opt_desc_str(it_alpha_opt).c_str(),
+        (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&alpha)->default_value(0.0),
-         "Experimental: if non-null, then we use precision (if positive, or negative predictive value if negative) instead of accuracy as fitness function for regression. The higher abs(alpha) the more important activation. Temporary hack: if problem pre is used then if alpha is negative (any negative value), precision is replaced by negative predictive value. And then alpha plays the role of the activation constrain penalty from 0 to inf, 0 being no activation penalty at all, inf meaning hard constraint penalty (that is if the candidate is not in the range it has -inf activation penalty.)\n")
+         "If problem pre is used then if alpha is negative (any negative value), precision is replaced by negative predictive value. And then alpha plays the role of the activation constrain penalty from 0 to inf, 0 being no activation penalty at all, inf meaning hard constraint penalty (that is if the candidate is not in the range it has -inf activation penalty.)\n")
        ;
 
     variables_map vm;
@@ -777,7 +774,7 @@ int moses_exec(int argc, char** argv)
                     typedef ctruth_table_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
                     foreach(const CTable& ctable, ctables)
-                        bscores.push_back(new BScore(ctable, as, noise, rng, alpha));
+                        bscores.push_back(new BScore(ctable, as, noise, rng));
                     multibscore_based_bscore<BScore> bscore(bscores);
                     metapop_moses_results(rng, exemplars, table_tt,
                                           bool_reduct, bool_reduct_rep, bscore,
@@ -788,7 +785,8 @@ int moses_exec(int argc, char** argv)
                     boost::ptr_vector<BScore> bscores;
                     foreach(const CTable& ctable, ctables)
                         bscores.push_back(new BScore(ctable, as, noise,
-                                                     min_rand_input, max_rand_input,
+                                                     min_rand_input,
+                                                     max_rand_input,
                                                      abs(alpha), rng, alpha >= 0));
                     multibscore_based_bscore<BScore> bscore(bscores);
                     metapop_moses_results(rng, exemplars, table_tt,
@@ -854,7 +852,9 @@ int moses_exec(int argc, char** argv)
                                              ip_skewness_weight,
                                              ip_stdU_weight,
                                              ip_skew_U_weight,
-                                             ip_log_entropy_weight));
+                                             min_rand_input,
+                                             max_rand_input,
+                                             alpha, alpha >= 0));
             }
             multibscore_based_bscore<BScore> bscore(bscores);
             metapop_moses_results(rng, exemplars, tt,

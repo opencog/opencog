@@ -286,7 +286,7 @@ struct precision_bscore : public bscore_base
     bool positive;
 
 private:
-    score_t get_accuracy_penalty(score_t activation) const;
+    score_t get_activation_penalty(score_t activation) const;
 };
         
 /**
@@ -458,32 +458,11 @@ private:
  * one gets the following log-likelihood
  * |M|*log|A|/log(p/(1-p)) - |D1|
  * with p<0.5 and |D1| the number of outputs that match
- *
- * The alhpa argument is here to experiment with using precision
- * instead of accuracy. If alpha is null this is disabled (so the
- * fitness function is maximizing accuracy). If alpha is positive then
- * the fitness function tries to maximize the positive predictive
- * value (precision). If alpha is negative then the fitness function
- * tries to maximize the negative predictive value. The higher
- * abs(alpha) the more importance is given to the activation.
- *
- * Fiddling with the math one can see that
- *
- * score / N + alpha = activation * (precision + alpha -1))
- *
- * where score is the sum of the bscore when alpha is non-null (or
- * rather positive since we speak of precision), and N is the number
- * of observations. Therefore maximizing the fitness function amounts
- * to maximizing:
- *
- * activation * (precision + alpha -1))
  */
 struct ctruth_table_bscore : public bscore_base
 {
     ctruth_table_bscore(const CTable& _ctt,
-                        float alphabet_size, float p,
-                        RandGen& _rng,
-                        score_t alpha = 0);
+                        float alphabet_size, float p, RandGen& _rng);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -496,7 +475,6 @@ struct ctruth_table_bscore : public bscore_base
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     RandGen& rng;
-    score_t alpha;
 
 private:
     // function to apply at each [compressed] row of the table, the
@@ -514,13 +492,17 @@ private:
 //    1) the Kullback Leibler divergence between the distribution
 // output of the dataset and the distribution over the output filtered
 // in by the program (when the predicate is true).
-//    2) the difference in skewness the 2 distributions
+//    2) the (absolute or relative) difference in skewness of the 2 distributions
 //    3) the standardized Mann-Whitney U statistic
 //    4) the product of #2 and #3
-//    5) the log of the entropy of the predicate
+//    5) the whether the activation is with a desired range
 //
 // All those features are weighted, any one with null weight is
 // disabled (it isn't computed and isn't pushed in the bscore).
+//
+// the predicate can be positive (we retain the outputs when the
+// predicate is true), or negative (we retain the outputs when the
+// predicate is false).
 struct interesting_predicate_bscore : public bscore_base
 {
     typedef score_t weight_t;
@@ -538,7 +520,11 @@ struct interesting_predicate_bscore : public bscore_base
                                  weight_t skewness_weight = 1.0,
                                  weight_t stdU_weight = 1.0,
                                  weight_t skew_U_weight = 1.0,
-                                 weight_t log_entropy_weight = 1.0,
+                                 score_t min_activation = 0.0,
+                                 score_t max_activation = 1.0,
+                                 score_t penalty = 1.0,
+                                 bool positive = true,
+                                 bool abs_skewness = false,
                                  bool decompose_kld = false);
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -558,9 +544,12 @@ struct interesting_predicate_bscore : public bscore_base
     // weights of the various features
     weight_t kld_w;
     weight_t skewness_w;
+    bool abs_skewness;
     weight_t stdU_w;
     weight_t skew_U_w;
-    weight_t log_entropy_w;
+    score_t min_activation, max_activation;
+    score_t penalty;
+    bool positive;
     // If true then each component of the computation of KLD
     // corresponds to an element of the bscore. Otherwise the whole
     // KLD occupies just one bscore element
@@ -568,6 +557,7 @@ struct interesting_predicate_bscore : public bscore_base
 
 private:
     void set_complexity_coef(float alphabet_size, float stdev);
+    score_t get_activation_penalty(score_t activation) const;
 };
 
 // For testing only
