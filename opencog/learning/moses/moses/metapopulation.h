@@ -585,16 +585,18 @@ struct metapopulation : public bscored_combo_tree_set
                 // avoided with some clever cache or something. (or a flag?)
                 combo_tree tr = this->_rep->get_candidate(inst, true);
 
-                auto thread_safe_find_tr = [&]() {
+                // Look for tr in the list of potential candidates.
+                // Return true if not found.
+                auto thread_safe_tr_not_found = [&]() {
                     shared_lock lock(pot_cnd_mutex);
                     return pot_candidates.find(tr) == pot_candidates.end();
                 };
 
-                bool already_visited = this->_visited_exemplars.find(tr)
+                bool not_already_visited = this->_visited_exemplars.find(tr)
                     == this->_visited_exemplars.end();
 
                 // update the set of potential exemplars
-                if (already_visited && thread_safe_find_tr()) {
+                if (not_already_visited && thread_safe_tr_not_found()) {
                     // recompute the complexity if the candidate has
                     // not been previously reduced
                     composite_score csc = this->params.reduce_all?
@@ -690,10 +692,11 @@ struct metapopulation : public bscored_combo_tree_set
         _rep = NULL;
     }
 
-    // return the set of candidates not present in the metapopulation
-    // this makes merging faster because it decreases the number of
-    // calls of dominates
-    bscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs) {
+    // Return the set of candidates not present in the metapopulation.
+    // This makes merging faster because it decreases the number of
+    // calls of dominates.
+    bscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs)
+    {
         bscored_combo_tree_set res;
         foreach(bscored_combo_tree cnd, mcs)
             if(find(cnd) == end())
