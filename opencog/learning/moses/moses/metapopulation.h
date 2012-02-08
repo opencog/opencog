@@ -307,7 +307,7 @@ struct metapopulation : public bscored_combo_tree_set
         // roullete choice of exemplars with equal scores, but
         // differing complexities. Empirical work on 4-parity suggests
         // that a temperature of 2 or 3 works best.
-        complexity_t temperature = 1;
+        complexity_t temperature = 2;
         complexity_t sum = 0;
         complexity_t highest_comp = *boost::min_element(probs);
         // Convert complexities into (non-normalized) probabilities

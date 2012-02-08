@@ -410,6 +410,181 @@ restorting the first 20 by rutime:
 20  9999      31836  5371   6867
 
 
+Email 6 Feb 2012:
+As mentioned before, the run-time performance of MOSES in finding a
+perfect solution to certain problems can sometimes take an exponentially
+long time, dependeing on the initial random seed.  I sent a graph
+before, and attached is a new one. As before, I've been focusing on the 
+4-parity problem.
+
+For those runs that tak huge amounts of time to solve, what appears to
+be happening is that the algo quickly finds a fairly good solution,
+matching all but one of the posible outputs, and then gets hung up. It
+examines huge numbers of exemplars, attaching knobs to each, twiddling
+these, finding plenty of new, non-dominated solutions. But it just can't
+find a fitter solution.  So, it occurred to me, perhaps it is failing to
+look at a diverse-enough set of initial exemplars.  I assumed that the
+algo was selecting the fittest possible exemplar, with the lowest
+possible complexity, and trying to mutate that. I figured that,
+perhaps, it would work faster if it occasionally attempted mutating
+some high-complexity exemplar.  (This was directly inspired by the other
+chain of emails).
+
+This is done in select_exemplar(). Turns out, the code was already doing
+the above. That is, even the so-called "hill-climbing" code doesn't
+hill-climb when picking an exemplar; instead it implements a 
+simulated-annealing-style algo. It didn't always pick the
+lowest-complexity exemplar to mutate, it sometimes did pick something
+more complex.  The problem is that the temperature was set too low.
+It didn't try the high-complexity exemplars often enough.  So I
+twiddled, and got the graph below.
+
+The label "pow2(-complexity/T)" refers to the line of code in
+select_exemplar().  I tried T=1,2,3. (T is the tmerpature; this is the
+Bolzmann distribution).  The original code had a hard-coded T=1 in it.
+
+-- Runtime improves by a factor of 2x or better for T=2, usually.
+   (The green line) Sort-of. Almost 10x better for the high-runtime
+   cases, but worse on the medium runtime cases.
+-- The exponential behavriour does not go away.  The overall slope
+   is unchanged.  The slope is bad: The fastest case takes 4 seconds.
+   Half the time, a perfect solution is found in under 300 seconds.
+   Half the time, a perfect solution requires much much much more than
+   that: sometimes many many hours.
+
+I'd like to try other temperatures, and a larger dataset, but this
+all requires a lot of cpu time.  Working on it ... 
+
+I've checked in code for this, but its not in final form yet.
+
+---------------------------------------------------
+
+As above, but for T=2 in select_exemplar() temperature, comparing
+capped and uncapped metapop size.
+
+       uncapped   capped
+-r0:        8        8
+-r1:       14       14
+-r2:     5371    >5957
+-r3:     1168      358
+-r4:     1131      680
+-r5:      220     1082
+-r6:      502      371
+-r7:       43       41
+-r8:      324       59
+-r9:      628       67
+-r10:     522       35
+-r11:      67      161
+-r12:    1656      548
+-r13:     568    >5553
+-r14:      20      104
+-r15:      83     1299
+-r16:     916       94
+-r17:     187      459
+-r18:    2991     1211
+-r19:     549       43
+
+Wow! a clear winner!
+Temp=2 clamped, avg time== 913 secs
+
+And again for temp=1
+
+                clamped
+        T=1       T=1
+-r0:     262      494
+-r1:  >19261      226
+-r2:     172      834
+-r3:      93      108
+-r4:    1560       72
+-r5:     134      398
+-r6:    9752.x   4559
+-r7:      39      135
+-r8:     665      212
+-r9:    2150      927
+-r10:     30      770
+-r11:     15     2225
+-r12:    360      646
+-r13:    292     3522
+-r14:    961      871
+-r15:   1972       68
+-r16:     34       70
+-r17:   7138    >5948
+-r18: >31836      235
+-r19:    172     2028
+
+Temp=1 clamped, avg time== 1221 secs
+Wow .. a clear looser!
+
+         T=3    clamped
+-r0:        4      4
+-r1:      514   1047
+-r2:      444    118
+-r3:     5520    855
+-r4:       58     60
+-r5:     2106    192
+-r6:       53     46
+-r7:     2566   2074
+-r8:     6867    235
+-r9:      143    138 
+-r10:     158    936
+-r11:      77    114
+-r12:     700   1268
+-r13:     140     35
+-r14:     931    128
+-r15:     306   1260
+-r16:    1547     34
+-r17:      90    722
+-r18:      22     39
+-r19:     808    860
 
 
+avg clamped == 508 -- wow this is the best yet ... 
+There's no long-running outliers to pull the thing way out ... 
+graph shows that T=2 is still the best, so use that in the code.
+
+Current consolidated dataset:
+
+#
+# moses performance data, runtime in seconds
+# using default hillclimbing.
+# -Hpa -k4 in order of runtime
+#
+# first column: original data
+# second column: a 10% performance speedbump due to logging.
+# third column: broaden the complexity chooser (by 2)
+# fourth column: broaden the complexity chooser (by 3)
+# fifth col: T=2 and clamped metapop size.
+#
+# in select_exemplar():
+# p = (p > 0 ? 0 : pow2((p - highest_comp)/T));
+#
+#                                 clamp  clamp  clamp 
+#   orig       T=1    T=2    T=3   T=2    T=1    T=3
+1   15          15      8      4     8     68      4
+2   30          30     14     22    14     70     34
+3   34          34     20     53    35     72     35
+4   51.24       39     43     58    41    108     39
+5   100.87      93     67     77    43    135     46
+6   148.59     134     83     90    59    212     60
+7   172        172    187    140    67    226    114
+8   196.12     172    220    143    94    235    118
+9   286.62     262    324    158   104    398    128
+10  292        292    502    306   161    494    138
+11  360        360    522    444   359    646    192
+12  731.03     665    549    514   371    770    235
+13  961        961    568    700   358    834    722
+14  1690.13   1560    628    808   459    871    835
+15  1972      1972    916    931   548    927    855
+16  2367.36   2150   1131   1547   680   2028    860
+17  7138      7138   1168   2106  1082   2225   1047
+18  9752.87   9752   1656   2566  1211   3522   1260
+# 19 >19261 at -m1.1M for T=1,  >6666 at -m1.6M
+19  9999     19261   2991   5520  6666   4559   1268
+# 20  >31836 at -m1.1M for T=1  the 6666 7777 values are bogus
+20  9999      31836  5371   6867  7777   6666   2074
+
+
+See http://blog.opencog.org/2012/02/07/tuning-moses/ for written
+explanation.
+==================================================================
 

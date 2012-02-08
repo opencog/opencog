@@ -58,7 +58,7 @@ public:
         moses_test_score({"-Hmux", "-k1", "-asa"});
     }
     void test_un_3_pa_multi_thread() {
-        moses_test_score({"-Hpa", "-k3", "-aun", "-m100000", "-j4"});
+        moses_test_score({"-Hpa", "-k3", "-aun", "-m500000", "-j4"});
     }
     void test_it() {
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
@@ -76,7 +76,14 @@ public:
     void test_cp() {
         string tr_str("or(and(#2 !#3) #1 !#4 #5)");
         string cp_opt("-y");
-        moses_test_combo({"-Hcp", cp_opt + tr_str}, {tr_str});
+        // Note: This test is very sensitive to algorithmic details;
+        // examples of perfect score solutions are:
+        // or(and(or(!#3 #4) #1) and(#2 !#3) !#4 #5)
+        // or(and(or(and(#4 #5) #2 #3) #1) and(or(#1 #2) !#3) !#4 #5)
+        // or(and(or(!#2 #4) #1) and(#2 !#3) !#4 #5) 
+        // or(and(or(#1 #2) !#3) and(or(!#2 #4 !#5) #1) !#4 #5)
+        // ... and many many more.  Need the -E3 flag to shrink it down.
+        moses_test_combo({"-Hcp", cp_opt + tr_str, "-E3"}, {tr_str});
     }
     void test_kl() {
         string tr1_str("or(and(!#1 #2) and(#1 !#2))");
