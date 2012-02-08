@@ -51,7 +51,7 @@ private:
 public:
     ComboProcedureRepositoryUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
-
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
             stringstream ss(bodies[i]);
             // ss >> trees[i];

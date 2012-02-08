@@ -60,6 +60,7 @@ private:
 
 public:
     PAIUTest() {
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
     }
 
     ~PAIUTest() {
@@ -92,6 +93,7 @@ public:
 
     void testConstructor() {
         config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -113,6 +115,7 @@ public:
     void testCreateActionPlan() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
@@ -138,6 +141,7 @@ public:
     void testSendActionPlan() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
@@ -179,6 +183,7 @@ public:
         printf("testAddAction\n");
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
@@ -220,6 +225,7 @@ public:
         printf("testProcessPVPMessage\n");
         HandleSeq toUpdateHandles;
         config(EmbodimentConfig::embodimentCreateInstance, true);
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
@@ -1323,7 +1329,8 @@ public:
 #endif
 
         config(EmbodimentConfig::embodimentCreateInstance, true);
-
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
+	
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());
         }
@@ -1386,6 +1393,7 @@ public:
         printf("testProcessPVPMessageWithScheme\n");
         HandleSeq toUpdateHandles;
         config(EmbodimentConfig::embodimentCreateInstance, true);
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
 
         if (fileExists(config().get("CONFIG_FILE").c_str())) {
             config().load(config().get("CONFIG_FILE").c_str());

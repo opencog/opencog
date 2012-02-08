@@ -68,6 +68,7 @@ public:
     }
 
     void testGetName() {
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         FailureActionPlanSender ap;
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
@@ -77,6 +78,7 @@ public:
     }
 
     void testExecuteOk() {
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         std::list<ActionPlan> plans;
         OKActionPlanSender ap(plans);
         AvatarInterfaceMock pi;
@@ -93,6 +95,7 @@ public:
     }
 
     void testExecuteFailure() {
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         FailureActionPlanSender ap;
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);

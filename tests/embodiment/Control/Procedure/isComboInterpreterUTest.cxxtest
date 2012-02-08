@@ -47,6 +47,7 @@ private:
 public :
 
     isComboInterpreterUTest() {
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         rng = new opencog::MT19937RandGen(0);
         combo_loaded = false;
     }

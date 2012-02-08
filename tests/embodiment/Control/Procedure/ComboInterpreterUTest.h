@@ -68,12 +68,14 @@ public:
 
     ComboInterpreterUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         init(string("pvpMsg1.xml"), PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"));
 //      init(string("pvpMsg1.xml"), string("Fido"));
     }
 
     ComboInterpreterUTest(std::string _xmlFileName, std::string petName) {
         config(EmbodimentConfig::embodimentCreateInstance, true);
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         init(_xmlFileName, petName);
     }
 

@@ -67,7 +67,7 @@ public:
     ProcedureRepositoryUTest() {
         
         config(EmbodimentConfig::embodimentCreateInstance, true);
-
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
         atomSpace = new AtomSpace();
 
         //set flag to print only cassert and other ERROR level logs on stdout

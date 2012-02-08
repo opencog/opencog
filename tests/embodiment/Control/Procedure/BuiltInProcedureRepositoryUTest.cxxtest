@@ -39,6 +39,7 @@ class BuiltInProcedureRepositoryUTest :  public CxxTest::TestSuite
 public:
     BuiltInProcedureRepositoryUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
     }
 
     ~BuiltInProcedureRepositoryUTest() {

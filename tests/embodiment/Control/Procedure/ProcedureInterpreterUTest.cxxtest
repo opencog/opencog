@@ -42,6 +42,7 @@ private:
 public:
     ProcedureInterpreterUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
+	config().set("ENABLE_ACTION_COLLECT", "false"); 
     }
 
     ~ProcedureInterpreterUTest() {

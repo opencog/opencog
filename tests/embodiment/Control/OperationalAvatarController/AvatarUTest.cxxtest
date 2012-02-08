@@ -67,7 +67,7 @@ public:
 
     AvatarUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
-
+	config().set("ENABLE_ACTION_COLLECT", "false");
         atomSpace = new AtomSpace();
         sender = new LSMessageSenderMock();
         timestamp2 = PAITestUtil::getCurrentTimestamp();
