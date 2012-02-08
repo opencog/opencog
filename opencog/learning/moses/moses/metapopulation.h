@@ -347,6 +347,12 @@ struct metapopulation : public bscored_combo_tree_set
         // The 2/3'rs of complexity is a heuristic: it allows for a
         // sample of all possible exmplars that is fairly big, but far
         // from exhaustive.
+        //
+        // XXX FIXME: the max allowed complexity should be equal to 
+        // lowest_complexity + 6*complexity_temperature, from the
+        // select_examplar() routine above. The reason for this is
+        // that select_exemplar() is unlikely to ever choose anything
+        // more complex than that.
         complexity_t c = -get_complexity(*begin());  // why is complexity negative ???
         c = (2*c) / 3;
         if (c < 7) c = 7;    // Allow a population of at least 128.

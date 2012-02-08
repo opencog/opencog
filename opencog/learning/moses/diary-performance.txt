@@ -588,3 +588,39 @@ See http://blog.opencog.org/2012/02/07/tuning-moses/ for written
 explanation.
 ==================================================================
 
+Try again with -I1 .. what will this do??
+
+As above, for T=2 in select_exemplar() temperature, comparing
+capped and uncapped metapop size.  Third column is with -I1 spec'ed,
+so that metapop includes dominated exemplars.
+
+       uncapped   capped   domin
+-r0:        8        8       8
+-r1:       14       14      15
+-r2:     5371    >5957  > 1453
+-r3:     1168      358     344
+-r4:     1131      680     662
+-r5:      220     1082    1022
+-r6:      502      371     374
+-r7:       43       41      44
+-r8:      324       59      62
+-r9:      628       67      69
+-r10:     522       35      36
+-r11:      67      161     160
+-r12:    1656      548     543
+-r13:     568    >5553   >1355
+-r14:      20      104     108
+-r15:      83     1299    1290
+-r16:     916       94      92
+-r17:     187      459
+-r18:    2991     1211
+-r19:     549       43
+
+
+Looks like a tie to me... 
+Upshot: using the -I1 flag to keep dominated exemplars in the population
+does not seem to affect runtime. I'm guessing that this is because the
+dominated exemplars are never selected.
+
+
+todo: try -P pos_size_ratio
