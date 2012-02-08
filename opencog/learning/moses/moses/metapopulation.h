@@ -767,7 +767,8 @@ struct metapopulation : public bscored_combo_tree_set
 
     // split in 2 of equal size
     static bscored_combo_tree_ptr_vec_pair
-    inline split(const bscored_combo_tree_ptr_vec& bcv) {
+    inline split(const bscored_combo_tree_ptr_vec& bcv)
+    {
         bscored_combo_tree_ptr_vec_cit middle = bcv.begin() + bcv.size() / 2;
         return make_pair(bscored_combo_tree_ptr_vec(bcv.begin(), middle),
                          bscored_combo_tree_ptr_vec(middle, bcv.end()));
@@ -775,18 +776,19 @@ struct metapopulation : public bscored_combo_tree_set
 
     bscored_combo_tree_ptr_vec
     get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv,
-                         unsigned jobs = 1) {
+                         unsigned jobs = 1)
+    {
         ///////////////
         // base case //
         ///////////////
-        if(bcv.size() < 2) {
+        if (bcv.size() < 2) {
             return bcv;
         }
         //////////////
         // rec case //
         //////////////
         bscored_combo_tree_ptr_vec_pair bcv_p = split(bcv);
-        if(jobs > 1) { // multi-threaded
+        if (jobs > 1) { // multi-threaded
             auto s_jobs = split_jobs(jobs); // pair
             // recursive calls
             std::future<bscored_combo_tree_ptr_vec> task =
@@ -823,38 +825,41 @@ struct metapopulation : public bscored_combo_tree_set
     bscored_combo_tree_set_pair
     get_nondominated_disjoint(const bscored_combo_tree_set& bcs1,
                               const bscored_combo_tree_set& bcs2,
-                              unsigned jobs = 1) {
+                              unsigned jobs = 1)
+    {
         bscored_combo_tree_ptr_vec_pair res_p =
             get_nondominated_disjoint_rec(random_access_view(bcs1),
                                           random_access_view(bcs2),
                                           jobs);
         return make_pair(to_set(res_p.first), to_set(res_p.second));
     }
+
     bscored_combo_tree_ptr_vec_pair
     get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& bcv1,
                                   const bscored_combo_tree_ptr_vec& bcv2,
-                                  unsigned jobs = 1) {
+                                  unsigned jobs = 1)
+    {
         ///////////////
         // base case //
         ///////////////
-        if(bcv1.empty() || bcv2.empty())
+        if (bcv1.empty() || bcv2.empty())
             return make_pair(bcv1, bcv2);
-        else if(bcv1.size() == 1) {
+        else if (bcv1.size() == 1) {
             bscored_combo_tree_ptr_vec bcv_res1, bcv_res2;
             bscored_combo_tree_ptr_vec_cit it1 = bcv1.begin(),
                 it2 = bcv2.begin();
             bool it1_insert = true; // whether *it1 is to be inserted
                                     // in bcv_res1
-            for(; it2 != bcv2.end(); ++it2) {
+            for (; it2 != bcv2.end(); ++it2) {
                 tribool dom = dominates(get_bscore(**it1), get_bscore(**it2));
-                if(!dom) {
+                if (!dom) {
                     it1_insert = false;
                     bcv_res2.insert(bcv_res2.end(), it2, bcv2.end());
                     break;
-                } else if(indeterminate(dom))
+                } else if (indeterminate(dom))
                     bcv_res2.push_back(*it2);
             }
-            if(it1_insert)
+            if (it1_insert)
                 bcv_res1.push_back(*it1);
             return make_pair(bcv_res1, bcv_res2);
         }

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/optimization.h
+ * opencog/learning/moses/optimization/optimization.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -124,6 +124,9 @@ struct optim_parameters
     }
 
     // term_total * n
+    // XXX term_total always seems to be 1.0, its cruft, remove it.
+    // XXX I don't understand what number of info theo bits  has to do with
+    // "max_gens" ?? what is "max_gens" ???
     inline unsigned max_gens_total(const field_set& fs)
     {
         return ceil(term_total * information_theoretic_bits(fs));
