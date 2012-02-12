@@ -232,7 +232,7 @@ struct metapopulation : public bscored_combo_tree_set
 
     /**
      * List of exemplars that we've already tried to build reps
-     * and demes for. 
+     * and demes for.
      */
     const combo_tree_hash_set& visited() const
     {
@@ -358,12 +358,12 @@ struct metapopulation : public bscored_combo_tree_set
         c = (2*c) / 3;
 // XXX leave this badly indendeted untilt the above is fixed.
 // Bad indentation  == reminder to fix!
-c = composite_score::weight*get_complexity(*begin()) + get_score(*begin()); 
+c = composite_score::weight*get_complexity(*begin()) + get_score(*begin());
 c = -c / (composite_score::weight + 1);
 c += 10;
 
         if (c < 7) c = 7;    // Allow a population of at least 128.
-        if (24 < c) c = 24;  // cap at metapop size of 16 million 
+        if (24 < c) c = 24;  // cap at metapop size of 16 million
         size_t max_metapop_size = 1 << c;
         if (size() < max_metapop_size) return;
 
@@ -467,7 +467,7 @@ c += 10;
             }
             if (logger().isDebugEnabled()) {
                 combo_tree tr(get_tree(*_exemplar));
-                logger().debug() 
+                logger().debug()
                     << "Attempt to build rep from exemplar: " << tr
                     << "\nScored: " << score(tr);
             }
@@ -641,7 +641,7 @@ c += 10;
                            compute_bscore);
 
         bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
-        if(!params.include_dominated) {
+        if (!params.include_dominated) {
             // Logger
             logger().debug("Remove dominated candidates");
             if (logger().isFineEnabled()) {
@@ -684,7 +684,7 @@ c += 10;
 
         merge_candidates(candidates);
 
-        //Logger
+        // Logger
         if (logger().isDebugEnabled()) {
             logger().debug("Metapopulation size is %u", size());
             if (logger().isFineEnabled()) {
@@ -1062,19 +1062,43 @@ c += 10;
     }
 
     /**
-     * stream out the n best non dominated candidates along with their
-     * scores (optionally complexity and bscore), if n is negative
-     * stream them all out.
+     * stream out the n best candidates along with their scores
+     * (optionally complexity and bscore).  If n is negative, then
+     * stream them all out.  Note that the default sort order for the
+     * metapop is a wieghted linear combo of the best scores and the
+     * smallest complexities, so that the best-ranked candidates are
+     * not necessarily those with the best raw score.
      */
     template<typename Out, typename In>
     Out& ostream(Out& out, In from, In to, long n = -1,
                  bool output_score = true,
                  bool output_complexity = false,
-                 bool output_bscore = false)
+                 bool output_bscore = false,
+                 bool output_top_score_only = true)
     {
-        for(; from != to && n != 0; from++, n--) {
-            ostream_bscored_combo_tree(out, *from, output_score,
-                                       output_complexity, output_bscore);
+        if (!output_top_score_only) {
+            for (; from != to && n != 0; from++, n--) {
+                ostream_bscored_combo_tree(out, *from, output_score,
+                                           output_complexity, output_bscore);
+            }
+            return out;
+        }
+
+        // Else, search for the top score...
+        score_t best_score = worst_score;
+
+        for (In f = from; f != to; f++) {
+            const bscored_combo_tree& bt = *f;
+            score_t sc = get_score(bt);
+            if (best_score < sc) best_score = sc;
+        }
+
+        // And print only the top scorers.
+        for (In f = from; f != to && n != 0; f++, n--) {
+            const bscored_combo_tree& bt = *f;
+            if (best_score <= get_score(bt))
+                ostream_bscored_combo_tree(out, *f, output_score,
+                                           output_complexity, output_bscore);
         }
         return out;
     }
@@ -1084,15 +1108,18 @@ c += 10;
     Out& ostream(Out& out, long n = -1,
                  bool output_score = true,
                  bool output_complexity = false,
-                 bool output_bscore = false) {
+                 bool output_bscore = false)
+    {
         return ostream(out, begin(), end(),
                        n, output_score, output_complexity, output_bscore);
     }
+
     // like above but using std::cout
     void print(long n = -1,
                bool output_score = true,
                bool output_complexity = false,
-                bool output_bscore = false) {
+               bool output_bscore = false)
+    {
         ostream(std::cout, n, output_score, output_complexity, output_bscore);
     }
 

@@ -83,6 +83,7 @@ struct composite_score: public std::pair<score_t, complexity_t>
     composite_score () { first = worst_score; second = worst_complexity; }
     composite_score& operator=(const composite_score &r) { first = r.first; second = r.second; return *this; }
 
+    // Not implemented right now.... because not used anywhere...
     bool operator<(const composite_score &r);
     bool operator<=(const composite_score &r);
     inline bool operator>(const composite_score &r)
@@ -108,6 +109,7 @@ inline bool operator<(const composite_score &l, const composite_score &r)
    return (composite_score::weight*l.first + l.second) < (composite_score::weight*r.first + r.second);
 }
 
+// Not implemented right now.... because not used anywhere...
 bool operator<=(const composite_score &l, const composite_score &r);
 bool operator>=(const composite_score &l, const composite_score &r);
 
