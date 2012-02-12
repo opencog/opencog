@@ -38,6 +38,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR knob_effort ]
 .RB [ \-b
 .IR nsamples ]
+.RB [ \-C1 ]
 .RB [ \-c
 .IR result_count ]
 .RB [ \-D
@@ -471,6 +472,10 @@ set the maximum search radius.
 .\" ============================================================
 .SS "Output control options"
 These options control the displayed output.
+.TP
+.BI \-C1\fR,\ \fB\-\-output\-dominated=1
+Print all of the final metapopulation, and not just the highest-scoring
+candidates.
 .TP
 .BI \-c\  count \fR,\ \fB\-\-result\-count= count
 The number of non-dominated (best) results to return, ordered according

@@ -103,6 +103,7 @@ struct metapop_moses_results_parameters
                                      bool _output_score,
                                      bool _output_complexity,
                                      bool _output_bscore,
+                                     bool _output_dominated,
                                      bool _output_eval_number,
                                      bool _output_with_labels,
                                      const string& _opt_algo,
@@ -115,7 +116,9 @@ struct metapop_moses_results_parameters
                                      bool _hc_single_step) :
         vm(_vm), result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
-        output_bscore(_output_bscore), output_eval_number(_output_eval_number),
+        output_bscore(_output_bscore),
+        output_dominated(_output_dominated),
+        output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
         opt_algo(_opt_algo),
         enable_cache(_enable_cache), labels(_labels),
@@ -129,6 +132,7 @@ struct metapop_moses_results_parameters
     bool output_score;
     bool output_complexity;
     bool output_bscore;
+    bool output_dominated;
     bool output_eval_number;
     bool output_with_labels;
     string opt_algo;
@@ -180,7 +184,8 @@ void metapop_moses_results(RandGen& rng,
         metapop.ostream(ss,
                         pa.result_count, pa.output_score,
                         pa.output_complexity,
-                        pa.output_bscore);
+                        pa.output_bscore,
+                        pa.output_dominated);
         if (pa.output_eval_number)
             ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
         string res = (pa.output_with_labels && !pa.labels.empty()?

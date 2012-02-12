@@ -263,6 +263,7 @@ int moses_exec(int argc, char** argv)
     bool output_score;
     bool output_complexity;
     bool output_bscore;
+    bool output_dominated = false;
     bool output_eval_number;
     bool output_with_labels;
     string output_file;
@@ -318,22 +319,30 @@ int moses_exec(int argc, char** argv)
          "ordered according to score. If negative, then return all results.\n")
         (opt_desc_str(output_score_opt).c_str(),
          value<bool>(&output_score)->default_value(true),
-         "If 1, outputs the score before each candidate (at the left of the complexity).\n")
+         "If 1, output the score before each candidate (at the left of the complexity).\n")
         (opt_desc_str(output_complexity_opt).c_str(),
          value<bool>(&output_complexity)->default_value(false),
-         "If 1, outputs the complexity before each candidate (at the right of the score).\n")
+         "If 1, output the complexity before each candidate (at the right of the score).\n")
         (opt_desc_str(output_bscore_opt).c_str(),
          value<bool>(&output_bscore)->default_value(false),
-         "If 1, outputs the bscore below each candidate.\n")
+         "If 1, output the bscore below each candidate.\n")
+        (opt_desc_str(output_dominated_opt).c_str(),
+         value<bool>(&output_dominated)->default_value(false),
+         "If 1, print the the entire metapopulation, and not just the "
+         "highest scoring candidates.\n")
         (opt_desc_str(output_eval_number_opt).c_str(),
          value<bool>(&output_eval_number)->default_value(false),
-         "If 1, outputs the actual number of evaluations.\n")
+         "If 1, output the actual number of evaluations.\n")
         (opt_desc_str(output_with_labels_opt).c_str(),
          value<bool>(&output_with_labels)->default_value(false),
-         "If 1, outputs the candidates with their labels instead of place holders. for instance *(\"#price\" \"#temprature\") instead of *(#1 #2). This only works for data fitting problems where the data file contains labels in its header\n")
+         "If 1, output the candidates with using the argument labels "
+         "instead of argument numbers. For instance "
+         "*(\"#price\" \"#temprature\") instead of *(#1 #2). This only "
+         "works for data fitting problems where the data file contains "
+         "labels in its header\n")
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&output_file)->default_value(""),
-         "File where to save the results. If empty then it outputs on the stdout.\n")
+         "File where to place the output. If empty, then output to stdout.\n")
         (opt_desc_str(max_gens_opt).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
@@ -668,7 +677,9 @@ int moses_exec(int argc, char** argv)
     // Set metapop_moses_results_parameters.
     metapop_moses_results_parameters mmr_pa(vm, result_count,
                                             output_score, output_complexity,
-                                            output_bscore, output_eval_number,
+                                            output_bscore,
+                                            output_dominated,
+                                            output_eval_number,
                                             output_with_labels, opt_algo,
                                             enable_cache, labels,
                                             output_file, jobs, only_local,

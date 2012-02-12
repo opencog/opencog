@@ -1074,9 +1074,9 @@ c += 10;
                  bool output_score = true,
                  bool output_complexity = false,
                  bool output_bscore = false,
-                 bool output_top_score_only = true)
+                 bool output_dominated = false)
     {
-        if (!output_top_score_only) {
+        if (output_dominated) {
             for (; from != to && n != 0; from++, n--) {
                 ostream_bscored_combo_tree(out, *from, output_score,
                                            output_complexity, output_bscore);
@@ -1094,6 +1094,9 @@ c += 10;
         }
 
         // And print only the top scorers.
+        // The problem here is that the highest scorers are not
+        // necessarily ranked highest, as the ranking is a linear combo
+        // of both score and complexity.
         for (In f = from; f != to && n != 0; f++, n--) {
             const bscored_combo_tree& bt = *f;
             if (best_score <= get_score(bt))
@@ -1103,24 +1106,28 @@ c += 10;
         return out;
     }
 
-    // like above but assumes that from = begin() and to = end()
+    // Like above, but assumes that from = begin() and to = end().
     template<typename Out>
     Out& ostream(Out& out, long n = -1,
                  bool output_score = true,
                  bool output_complexity = false,
-                 bool output_bscore = false)
+                 bool output_bscore = false,
+                 bool output_dominated = false)
     {
         return ostream(out, begin(), end(),
-                       n, output_score, output_complexity, output_bscore);
+                       n, output_score, output_complexity,
+                       output_bscore, output_dominated);
     }
 
-    // like above but using std::cout
+    // Like above, but using std::cout.
     void print(long n = -1,
                bool output_score = true,
                bool output_complexity = false,
-               bool output_bscore = false)
+               bool output_bscore = false,
+               bool output_dominated = false)
     {
-        ostream(std::cout, n, output_score, output_complexity, output_bscore);
+        ostream(std::cout, n, output_score, output_complexity,
+                output_bscore, output_dominated);
     }
 
     RandGen& rng;

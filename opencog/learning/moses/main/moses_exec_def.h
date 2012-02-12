@@ -55,6 +55,7 @@ static const pair<string, string> result_count_opt("result-count", "c");
 static const pair<string, string> output_score_opt("output-score", "S");
 static const pair<string, string> output_complexity_opt("output-complexity", "x");
 static const pair<string, string> output_bscore_opt("output-bscore", "t");
+static const pair<string, string> output_dominated_opt("output-dominated", "C");
 static const pair<string, string> output_eval_number_opt("output-eval-number", "V");
 static const pair<string, string> output_with_labels_opt("output-with-labels", "W");
 static const pair<string, string> output_file_opt("output-file", "o");
