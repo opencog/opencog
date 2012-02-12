@@ -61,7 +61,7 @@ void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
     // parse the result
     auto result = parse_result(tempfile);
     // check that the result is the expected one
-    TS_ASSERT_EQUALS(result.first, expected_sc);
+    TS_ASSERT_LESS_THAN(fabs(result.first - expected_sc), 1.0e-8);
 }
 
 // test that the first candidate is one of the expected combo tree

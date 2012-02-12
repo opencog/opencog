@@ -315,8 +315,9 @@ int moses_exec(int argc, char** argv)
          "Maximum number of fitness function evaluations.\n")
         (opt_desc_str(result_count_opt).c_str(),
          value<long>(&result_count)->default_value(10),
-         "The number of non-dominated results to return, "
-         "ordered according to score. If negative, then return all results.\n")
+         "The number of results to return, ordered according to "
+         "a linear combination of score and complexity. If negative, "
+         "then return all results.\n")
         (opt_desc_str(output_score_opt).c_str(),
          value<bool>(&output_score)->default_value(true),
          "If 1, output the score before each candidate (at the left of the complexity).\n")
@@ -505,8 +506,10 @@ int moses_exec(int argc, char** argv)
          "exemplar to explore.\n")
 
         (opt_desc_str(include_dominated_opt).c_str(),
-         value<bool>(&include_dominated)->default_value(false),
-         "Include dominated candidates (according behavioral score) when merging candidates in the metapopulation. Faster merging but results in a very large metapopulation.\n")
+         value<bool>(&include_dominated)->default_value(true),
+         "Include dominated candidates (according behavioral score) "
+         "when merging candidates in the metapopulation. Disabling "
+         "this may lead to poorer performance.\n")
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t> >(&discretize_thresholds),
          "If the domain is continuous, discretize the target feature. A unique used of that option produces 2 classes, x < thresold and x >= threshold. The option can be used several times (n-1) to produce n classes and the thresholds are automatically sorted.\n")
