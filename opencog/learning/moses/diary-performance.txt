@@ -589,32 +589,38 @@ explanation.
 ==================================================================
 
 Try again with -I1 .. what will this do??
+Also explore -P pos_size_ratio
 
 As above, for T=2 in select_exemplar() temperature, comparing
-capped and uncapped metapop size.  Third column is with -I1 spec'ed,
-so that metapop includes dominated exemplars.
+capped and uncapped metapop size.  (capped is done via the auto-capping
+mechanism that is the current default.)
 
-       uncapped   capped   domin
--r0:        8        8       8
--r1:       14       14      15
--r2:     5371    >5957  > 1453
--r3:     1168      358     344
--r4:     1131      680     662
--r5:      220     1082    1022
--r6:      502      371     374
--r7:       43       41      44
--r8:      324       59      62
--r9:      628       67      69
--r10:     522       35      36
--r11:      67      161     160
--r12:    1656      548     543
--r13:     568    >5553   >1355
--r14:      20      104     108
--r15:      83     1299    1290
--r16:     916       94      92
--r17:     187      459
--r18:    2991     1211
--r19:     549       43
+Third column is with -I1 spec'ed, so that metapop includes dominated
+exemplars.
+
+forth column: -P40 -- pop-size-ratio = 40
+
+       uncapped   capped   domin   P40    P10
+-r0:        8        8       8      9      8
+-r1:       14       14      15     15     15
+-r2:     5371    >5957   >1453  >1574  >1623
+-r3:     1168      358     344    356    358
+-r4:     1131      680     662    698    718
+-r5:      220     1082    1022   1090   1136
+-r6:      502      371     374    374    407
+-r7:       43       41      44     43     44
+-r8:      324       59      62     61     63
+-r9:      628       67      69     68     69
+-r10:     522       35      36     35     36
+-r11:      67      161     160    159    163
+-r12:    1656      548     543           567
+-r13:     568    >5553   >1355         >1496
+-r14:      20      104     108           109
+-r15:      83     1299    1290          1351
+-r16:     916       94      92            93
+-r17:     187      459     502           477
+-r18:    2991     1211   >1147         >1185
+-r19:     549       43      45            45
 
 
 Looks like a tie to me... 
@@ -622,5 +628,57 @@ Upshot: using the -I1 flag to keep dominated exemplars in the population
 does not seem to affect runtime. I'm guessing that this is because the
 dominated exemplars are never selected.
 
+==================================================================
 
-todo: try -P pos_size_ratio
+Modified sort order:
+bool composite_score::operator>(const composite_score &r)
+{
+   return (3*first + second) > (3*r.first + r.second);
+}
+
+This results in the metapop being kept in a different order, for
+example, the first 12 entries might be this:
+
+metap 0 score=-5 complex=-8
+metap 1 score=-5 complex=-8
+metap 2 score=-8 complex=0
+metap 3 score=-6 complex=-6
+metap 4 score=-6 complex=-6
+metap 5 score=-6 complex=-6
+metap 6 score=-6 complex=-6
+metap 7 score=-5 complex=-9
+metap 8 score=-5 complex=-9
+metap 9 score=-5 complex=-9
+metap 10 score=-8 complex=-1
+metap 11 score=-8 complex=-1
+
+OK, so 3 (plus auto-clamping) fails, no solutions found at all.
+Disable autoclamping.  Gahh .. seems to run forever ... 
+Redesign clamping ... 
+
+Below, for different mixing weights W
+
+         capped  W=4    W=5    W=6    W=8    W=3    W=2
+-r0:        8     40      2     11     71    144   >516
+-r1:       14    121     79    122     50  >1004   >536
+-r2:    >5957     77     84    202  >1448    103   >543
+-r3:      358    471     16     99    521     69   >556
+-r4:      680     76     35     74  >1247    150   >503 
+-r5:     1082    280     44     46     88    404   >524
+-r6:      371     95    785    100     83    382   >541
+-r7:       41    125    425     53    153     53   >510
+-r8:       59     86  >1236  >1148    898     38   >525
+-r9:       67     48     31  >1365  >1401     95   >551
+-r10:      35     34     94     40     50    192   >528
+-r11:     161    319    761   1060   1230    197   >552
+-r12:     548     42    786    176  >1348     44   >545
+-r13:   >5553    154     49    251  >1323     47   >508
+-r14:     104     69    451    211     29     21   >545
+-r15:    1299    287   1483    105    169    140   >551
+-r16:      94  >1907     82     51    103    266   >509
+-r17:     459    141    196    165    900    127   >508
+-r18:    1211     87  >1095  >1123    402     93   >558
+-r19:      43     73     72    630    392    188   >557
+
+
+W=4 avg == 227

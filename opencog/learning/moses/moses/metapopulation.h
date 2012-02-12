@@ -348,13 +348,20 @@ struct metapopulation : public bscored_combo_tree_set
         // sample of all possible exmplars that is fairly big, but far
         // from exhaustive.
         //
-        // XXX FIXME: the max allowed complexity should be equal to 
-        // lowest_complexity + 6*complexity_temperature, from the
+        // XXX FIXME: These calculations should probably be done in floating point?
+        // XXX FIXME: The max allowed complexity should be equal to about
+        // lowest_complexity + 5*complexity_temperature, from the
         // select_examplar() routine above. The reason for this is
         // that select_exemplar() is unlikely to ever choose anything
         // more complex than that.
         complexity_t c = -get_complexity(*begin());  // why is complexity negative ???
         c = (2*c) / 3;
+// XXX leave this badly indendeted untilt the above is fixed.
+// Bad indentation  == reminder to fix!
+c = composite_score::weight*get_complexity(*begin()) + get_score(*begin()); 
+c = -c / (composite_score::weight + 1);
+c += 10;
+
         if (c < 7) c = 7;    // Allow a population of at least 128.
         if (24 < c) c = 24;  // cap at metapop size of 16 million 
         size_t max_metapop_size = 1 << c;
@@ -599,8 +606,10 @@ struct metapopulation : public bscored_combo_tree_set
                 if (not_already_visited && thread_safe_tr_not_found()) {
                     // recompute the complexity if the candidate has
                     // not been previously reduced
-                    composite_score csc = this->params.reduce_all?
-                        inst_csc : make_pair(inst_sc, complexity(tr));
+                    // composite_score csc = this->params.reduce_all?
+                    //    inst_csc : make_pair(inst_sc, complexity(tr));
+                    composite_score csc = inst_csc;
+                    if (!params.reduce_all) csc = make_pair(inst_sc, complexity(tr));
                     behavioral_score bsc; // empty bscore till it gets computed
                     composite_behavioral_score cbsc(bsc, csc);
                     {

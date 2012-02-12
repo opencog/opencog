@@ -66,13 +66,51 @@ typedef unsigned long long deme_size_t;
 static const int io_score_precision = 32;
 
 static const score_t best_score = std::numeric_limits<score_t>::max();
+
 // below we use 1 - best score and not
 // std::numeric_limits<score_t>::min, please recall that in the STL
 // standard min when applied to a floating type returns the smallest
 // possible representable value
 static const score_t worst_score = score_t(1) - best_score;
 
-typedef std::pair<score_t, complexity_t> composite_score;
+// Define composite_score as a pair:
+// typedef std::pair<score_t, complexity_t> composite_score;
+// But modify the default sort ordering for these objects.
+struct composite_score: public std::pair<score_t, complexity_t>
+{
+    composite_score (score_t s, complexity_t c) { first = s; second = c; }
+    composite_score (const std::pair<score_t, complexity_t> &p) { first = p.first; second = p.second; }
+    composite_score () { first = worst_score; second = worst_complexity; }
+    composite_score& operator=(const composite_score &r) { first = r.first; second = r.second; return *this; }
+
+    bool operator<(const composite_score &r);
+    bool operator<=(const composite_score &r);
+    inline bool operator>(const composite_score &r)
+    {
+       return (weight*first + second) > (weight*r.first + r.second);
+    }
+
+    inline bool operator>=(const composite_score &r)
+    {
+       return (weight*first + second) >= (weight*r.first + r.second);
+    }
+
+    static int weight;
+};
+
+inline bool operator>(const composite_score &l, const composite_score &r)
+{
+   return (composite_score::weight*l.first + l.second) > (composite_score::weight*r.first + r.second);
+}
+
+inline bool operator<(const composite_score &l, const composite_score &r)
+{
+   return (composite_score::weight*l.first + l.second) < (composite_score::weight*r.first + r.second);
+}
+
+bool operator<=(const composite_score &l, const composite_score &r);
+bool operator>=(const composite_score &l, const composite_score &r);
+
 extern const composite_score worst_composite_score;
 
 typedef tagged_item<combo::combo_tree,
