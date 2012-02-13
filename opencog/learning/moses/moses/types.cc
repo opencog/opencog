@@ -40,8 +40,7 @@ bool cscore_ge(const composite_score& l_csc, const composite_score& r_csc) {
     return cscore_gt(l_csc, r_csc) || l_csc == r_csc;
 }
 
-// XXX TODO: Expose this as a user-settable flag.
-int composite_score::weight = 4;
+score_t composite_score::weight = 4.0f;
 
 } // ~namespace moses
 } // ~namespace opencog

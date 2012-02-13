@@ -95,7 +95,7 @@ int moses_exec(int argc, char** argv);
 // the name of the supposed executable
 int moses_exec(const vector<string>& argv);
 
-// set of parameters in common with all problems
+// Parameters controlling output printing and display.
 struct metapop_moses_results_parameters
 {
     metapop_moses_results_parameters(const variables_map& _vm,

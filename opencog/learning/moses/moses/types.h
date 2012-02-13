@@ -96,7 +96,7 @@ struct composite_score: public std::pair<score_t, complexity_t>
        return (weight*first + second) >= (weight*r.first + r.second);
     }
 
-    static int weight;
+    static float weight;
 };
 
 inline bool operator>(const composite_score &l, const composite_score &r)
@@ -125,7 +125,13 @@ typedef tagged_item<behavioral_score,
 typedef tagged_item<combo::combo_tree,
                     composite_behavioral_score> bscored_combo_tree;
 
-//convenience accessors
+// convenience accessors
+inline score_t get_weighted_score(const composite_score &sc)
+{
+   score_t w = composite_score::weight;
+   return (w*sc.first + sc.second) / (w + 1.0f);
+}
+
 inline const combo::combo_tree& get_tree(const scored_combo_tree& st)
 {
     return st.first;
@@ -144,6 +150,11 @@ inline const composite_score& get_composite_score(const composite_behavioral_sco
 inline const composite_score& get_composite_score(const bscored_combo_tree& bsct)
 {
     return get_composite_score(bsct.second);
+}
+
+inline score_t get_weighted_score(const bscored_combo_tree& bsct)
+{
+    return get_weighted_score(get_composite_score(bsct));
 }
 
 inline complexity_t get_complexity(const composite_score& ts)

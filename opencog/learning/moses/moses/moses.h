@@ -36,7 +36,8 @@ static const operator_set empty_ignore_ops = operator_set();
 /**
  * parameters to decide how to run moses
  */
-struct moses_parameters {
+struct moses_parameters
+{
     moses_parameters(int _max_evals = 10000,
                      int _max_gens = -1,
                      score_t _max_score = 0,
