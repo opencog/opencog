@@ -286,6 +286,8 @@ int moses_exec(int argc, char** argv)
     bool reduce_all;
     bool revisit = false;
     bool include_dominated;
+    score_t complexity_temperature = 4.0f;
+    score_t complexity_ratio = 3.0f;
     // optim_param
     double pop_size_ratio;
     score_t max_score;
@@ -510,6 +512,25 @@ int moses_exec(int argc, char** argv)
          "Include dominated candidates (according behavioral score) "
          "when merging candidates in the metapopulation. Disabling "
          "this may lead to poorer performance.\n")
+
+        (opt_desc_str(complexity_temperature_opt).c_str(),
+         value<score_t>(&complexity_temperature)->default_value(4.0),
+         "Set the \"temperature\" of the Boltzmann-like distribution "
+         "used to select the next exemplar out of the metapopulaton. "
+         "The higher the temperature, the more likely that poor "
+         "exemplars will be choosen for exploration. Too low a "
+         "temperature can result in poor performance, as the algorithm "
+         "may get stuck in a local maximum.\n")
+
+        (opt_desc_str(complexity_ratio_opt).c_str(),
+         value<score_t>(&complexity_ratio)->default_value(3.0),
+         "Fix the ratio of raw score to complexity, when ranking the "
+         "metapopulation for fitness.  Setting this ratio too low causes "
+         "the complexity to dominate ranking, possibly trapping the "
+         "algorithm in a local amximum.  Setting this ratio too high "
+         "will add too much noise to the metapopulation, preventing "
+         "a solution from being found.\n")
+
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t> >(&discretize_thresholds),
          "If the domain is continuous, discretize the target feature. A unique used of that option produces 2 classes, x < thresold and x >= threshold. The option can be used several times (n-1) to produce n classes and the thresholds are automatically sorted.\n")
@@ -656,7 +677,10 @@ int moses_exec(int argc, char** argv)
 
     // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,
-                                   revisit, include_dominated, jobs[localhost]);
+                                   revisit, include_dominated, 
+                                   complexity_temperature,
+                                   complexity_ratio,
+                                   jobs[localhost]);
 
     // Set optim_parameters.
     optim_parameters opt_params(pop_size_ratio, max_score, max_dist);

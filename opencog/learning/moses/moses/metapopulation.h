@@ -25,12 +25,11 @@
 #define _OPENCOG_METAPOPULATION_H
 
 #include <future>
+#include <math.h>
 
 #include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/range/algorithm/sort.hpp>
-#include <boost/range/algorithm/min_element.hpp>
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
@@ -65,29 +64,36 @@ struct metapop_parameters
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
                        bool _revisit = false,
-                       bool _include_dominated = false,
+                       bool _include_dominated = true,
+                       score_t _complexity_temperature = 3.0f,
+                       score_t _complexity_ratio = 4.0f,
                        unsigned _jobs = 1) :
-        selection_max_range(28),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         revisit(_revisit),
         include_dominated(_include_dominated),
+        complexity_temperature(_complexity_temperature),
+        complexity_ratio(_complexity_ratio),
         jobs(_jobs) {}
 
-    // When doing selection of examplars according to 2^-n, where n is
-    // complexity, only examplars with p>=2^-selection_max_range will
-    // be considered.
-    double selection_max_range;
     // The max number of candidates considered to be added to the
     // metapopulation, if negative then all candidates are considered.
     int max_candidates;
+
     // If true then all candidates are reduced before evaluation.
     bool reduce_all;
+
     // When true then visited exemplars can be revisited.
     bool revisit;
+
     // Ignore behavioral score domination when merging candidates in
-    // the metapopulation.
+    // the metapopulation.  Keeping dominated candidates improves
+    // performance by avoiding local maxima.
     bool include_dominated;
+
+    score_t complexity_temperature;
+    score_t complexity_ratio;
+
     // Number of jobs for metapopulation maintenance such as merging
     // candidates to the metapopulation.
     unsigned jobs;
@@ -260,42 +266,27 @@ struct metapopulation : public bscored_combo_tree_set
     {
         OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
 
-        // Start at the begining: look at the highest scorer.
-        score_t score = get_score(*begin());
-        complexity_t cmin = get_complexity(*begin());
-
-        vector<complexity_t> probs;
+        vector<score_t> probs;
 
         // Set flag to true, when a suitable exemplar is found.
         bool found_exemplar = false;
+        score_t highest_score = -1.0e37;
 
         // The exemplars are stored in order from best score to worst;
         // the iterator follows this order.
         for (const_iterator it = begin(); it != end(); ++it) {
-            // If no exemplar has been found for highest score, then look
-            // for one at the next best score.
-            if (get_score(*it) != score) {
-                if (!found_exemplar) {
-                    score = get_score(*it);
-                    cmin = get_complexity(*it);
-                }
-                else break;
-            }
 
-            complexity_t c = get_complexity(*it);
-
-            // Avoid considering excessively complex exemplars.
-            if (cmin - c > params.selection_max_range)
-                break;
+            score_t sc = get_weighted_score(*it);
 
             // Skip any exemplars we've already used in the past.
             const combo_tree& tr = get_tree(*it);
             if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
-                probs.push_back(c);
+                probs.push_back(sc);
                 found_exemplar = true;
+                if (highest_score < sc) highest_score = sc;
             } else // hack: if the tree is visited then put a positive
                    // complexity so we know it must be ignored
-                probs.push_back(1);
+                probs.push_back(1.0e37);
         }
 
         // Nothing found, we've already tried them all.
@@ -306,24 +297,25 @@ struct metapopulation : public bscored_combo_tree_set
         // Compute the probability normalization, needed for the
         // roullete choice of exemplars with equal scores, but
         // differing complexities. Empirical work on 4-parity suggests
-        // that a temperature of 2 or 3 works best.
-        complexity_t temperature = 2;
-        complexity_t sum = 0;
-        complexity_t highest_comp = *boost::min_element(probs);
-        // Convert complexities into (non-normalized) probabilities
-        foreach (complexity_t& p, probs) {
+        // that a temperature of 3 or 4 works best.
+        score_t inv_temp = 100.0f / params.complexity_temperature;
+        score_t sum = 0.0f;
+        // Convert scores into (non-normalized) probabilities
+        foreach (score_t& p, probs) {
             // In case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p > 0 ? 0 : pow2((p - highest_comp)/temperature));
+            p = (p > 1.0e30 ? 0.0f : expf((p - highest_score) * inv_temp));
             sum += p;
         }
 
-        OC_ASSERT(sum > 0, "There is an internal bug, please fix it");
+        OC_ASSERT(sum > 0.0f, "There is an internal bug, please fix it");
 
-        return std::next(begin(), distance(probs.begin(),
-                                           roulette_select(probs.begin(),
+        size_t fwd = distance(probs.begin(), roulette_select(probs.begin(),
                                                            probs.end(),
-                                                           sum, rng)));
+                                                           sum, rng));
+        // cout << "select_exemplar(): sum=" << sum << " fwd =" << fwd
+        // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
+        return std::next(begin(), fwd);
     }
 
     /// Merge candidates in to the metapopulation. The set of
@@ -338,42 +330,40 @@ struct metapopulation : public bscored_combo_tree_set
             // merge_nondominated_any(candidates);
             merge_nondominated(candidates, params.jobs);
 
-#if 1
         // Clamp the metapopulation size to something reasonable.
-        // Large metapops are almost never sampled for exemplars, use
-        // up lots of RAM, and are slow to maintain in sorted order.
-        // Nor do they dominate much of anything. So keep them trim.
+        // In an excessively large metapop, any given exemplar will
+        // almost never be choosen.  Large metapops use up lots of RAM,
+        // and are slow to maintain in sorted order.  So keep them trim.
         //
         // The 2/3'rs of complexity is a heuristic: it allows for a
         // sample of all possible exmplars that is fairly big, but far
         // from exhaustive.
         //
-        // XXX FIXME: These calculations should probably be done in floating point?
-        // XXX FIXME: The max allowed complexity should be equal to about
-        // lowest_complexity + 5*complexity_temperature, from the
-        // select_examplar() routine above. The reason for this is
-        // that select_exemplar() is unlikely to ever choose anything
-        // more complex than that.
-        complexity_t c = -get_complexity(*begin());  // why is complexity negative ???
-        c = (2*c) / 3;
-// XXX leave this badly indendeted untilt the above is fixed.
-// Bad indentation  == reminder to fix!
-c = composite_score::weight*get_complexity(*begin()) + get_score(*begin());
-c = -c / (composite_score::weight + 1);
-c += 10;
+        // The max allowed score should be equal to about
+        // (2/3)*ln2*best_complexity + 10*complexity_temperature.  The
+        // reason for this is that we want to maintain a decent variety
+        // of candidates, while realizing that select_exemplar() is
+        // unlikely to ever choose anything that scores poorer than that.
+        // Note that (2/3)*ln2==0.5 and the best weights results in 
+        // scores tht are about 0.5*complexity, so just use the weighted 
+        // score... Note ln(1e4)==9.2  ln(1e6)==13.8
+        score_t sc = -get_weighted_score(*begin());
+        sc += params.complexity_temperature * 13.8 / 100.0;
+        sc += 2;  // heuristic hack... exp(2)==7 .. some inexpensive(?) elbow room.
+        size_t max_metapop_size = floor(expf(sc));
 
-        if (c < 7) c = 7;    // Allow a population of at least 128.
-        if (24 < c) c = 24;  // cap at metapop size of 16 million
-        size_t max_metapop_size = 1 << c;
+        // Allow a population of at least 250, but no more than 1.1 million.
+        if (max_metapop_size < 250) max_metapop_size = 250;
+        if (1123123 < max_metapop_size) max_metapop_size = 1123123;
         if (size() < max_metapop_size) return;
 
+        // Erase all the lowest scores.
         iterator it = std::next(begin(), max_metapop_size);
         while (it != end()) {
             iterator p = it;
             it++;
             erase(p);
         }
-#endif
     }
 
     /**
@@ -395,6 +385,10 @@ c += 10;
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL)
     {
+        // Ranking of exemplars in the deme will be controlled by the
+        // ratio of raw score to complexity.
+        composite_score::weight = params.complexity_ratio;
+
         if (!create_deme(ignore_ops, perceptions, actions))
             return false;
 
