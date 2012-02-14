@@ -508,24 +508,24 @@
 (define GetFoodGoal
     (AndLink 
         (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-        (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+;        (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
     )
 )
 
-(AverageLink (cog-new-av 1 1 1)
+(AverageLink (stv 1 1)
     (ListLink
         (VariableNode "$var_food") 
     ) 
 
-    (add_rule (stv 1.0 1.0) EnergyDemandGoal 
+    (add_rule (stv 0 0) EnergyDemandGoal 
         (SequentialAndLink
             (add_action (GroundedSchemaNode "goto_obj") (VariableNode "$var_food") (NumberNode "2") )
             (add_action (GroundedSchemaNode "grab") (VariableNode "$var_food") )
             (add_action (GroundedSchemaNode "eat") (VariableNode "$var_food") )
-        )    
+        )
         GetFoodGoal
     )
-)    
+)
 
 ;------------------------------------------------------------------------------
 ;

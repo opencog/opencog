@@ -76,7 +76,6 @@ class Chainer:
             self.setup_rules(a)
 
             self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
-            print self.rules
 
             result_atoms = self.bc(target)
             
@@ -484,13 +483,26 @@ class Chainer:
         self.rules.append(rule)
 
     def extract_plan(self, trail):
-        def is_action(proofnode):
+#        def is_action(proofnode):
+#            target = proofnode.op
+#            return target.op == 'ExecutionLink'
+#        # Extract all the targets in best-first order
+#        proofnodes = trail.flatten()
+#        proofnodes.reverse()
+#        actions = [pn.op for pn in proofnodes if is_action(pn)]
+#        return actions
+        # The list of actions in an ImplicationLink. Sometimes there are none,
+        # sometimes one; if there is a SequentialAndLink then it can be more than one.
+        def actions(proofnode):
             target = proofnode.op
-            return target.op == 'ExecutionLink'
+            if target.op in ['ExecutionLink',  'SequentialAndLink']:
+                return [pn.op]
+            else:
+                return []
         # Extract all the targets in best-first order
         proofnodes = trail.flatten()
         proofnodes.reverse()
-        actions = [pn.op for pn in proofnodes if is_action(pn)]
+        actions = concat_lists([actions(pn) for pn in proofnodes])
         return actions
 
     def trail(self, target):
