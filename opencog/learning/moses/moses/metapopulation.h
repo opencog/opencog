@@ -266,11 +266,19 @@ struct metapopulation : public bscored_combo_tree_set
     {
         OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
 
-        vector<score_t> probs;
+        // Shortcut for special case, as sometimes, the very first time
+        // through, the score is invalid.
+        if (size() == 1) {
+            const combo_tree& tr = get_tree(*begin());
+            if (_visited_exemplars.find(tr) == _visited_exemplars.end())
+                return begin();
+        }
 
+        vector<score_t> probs;
         // Set flag to true, when a suitable exemplar is found.
         bool found_exemplar = false;
-        score_t highest_score = -1.0e37;
+#define UNEVALUATED_SCORE -1.0e37
+        score_t highest_score = UNEVALUATED_SCORE;
 
         // The exemplars are stored in order from best score to worst;
         // the iterator follows this order.
@@ -286,7 +294,7 @@ struct metapopulation : public bscored_combo_tree_set
                 if (highest_score < sc) highest_score = sc;
             } else // hack: if the tree is visited then put a positive
                    // complexity so we know it must be ignored
-                probs.push_back(1.0e37);
+                probs.push_back(1.0e38);
         }
 
         // Nothing found, we've already tried them all.
@@ -304,7 +312,7 @@ struct metapopulation : public bscored_combo_tree_set
         foreach (score_t& p, probs) {
             // In case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p > 1.0e30 ? 0.0f : expf((p - highest_score) * inv_temp));
+            p = (p > 1.0e35 ? 0.0f : expf((p - highest_score) * inv_temp));
             sum += p;
         }
 
