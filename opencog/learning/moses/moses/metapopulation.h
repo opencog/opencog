@@ -1097,11 +1097,13 @@ c += 10;
         // The problem here is that the highest scorers are not
         // necessarily ranked highest, as the ranking is a linear combo
         // of both score and complexity.
-        for (In f = from; f != to && n != 0; f++, n--) {
+        for (In f = from; f != to && n != 0; f++) {
             const bscored_combo_tree& bt = *f;
-            if (best_score <= get_score(bt))
+            if (best_score <= get_score(bt)) {
                 ostream_bscored_combo_tree(out, *f, output_score,
                                            output_complexity, output_bscore);
+                n--;
+            }
         }
         return out;
     }
