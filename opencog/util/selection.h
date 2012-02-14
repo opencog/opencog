@@ -73,7 +73,7 @@ struct tournament_selection
  * of these iterators (the higher the ScoreT the higher the
  * probability of being selected).
  *
- * Of course to work well the following assumption must hold
+ * To work effectively, the following assumption must hold
  * sum = sum_{x in [from, to(} *x
  */
 template<typename It, typename ScoreT>
@@ -82,7 +82,12 @@ It roulette_select(It from, It to, ScoreT sum, RandGen& rng)
     sum = ScoreT(double(sum) * rng.randdouble());
     do {
         sum -= *from++;
-    } while (sum >= 0);
+    } while ((sum > 0) && (from != to));
+
+    // Do not use sum >=0 in the above. For integer-avlued arrays,
+    // it can happen that *from are all zero just at the point where
+    // sum == 0, which causes the above to increment to the end of
+    // the array.
     return --from;
 }
 
