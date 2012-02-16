@@ -690,7 +690,11 @@ Arghhhh Move to floats, revamp, all changes
 set weight to very large to regain old behaviour (i.e. rank first by
 score, next by complexity).
 
+As above -Hpa -k4 ...
 -z12 -v1 -m50000  (90 seconds, when no solution)
+
+negative numbers indicate no solution, and how many wrong the best
+guess had.
 
 z:    -z12  -z12   -z12   -z12   -z12   -z12    -z4    -z4   -z4    -z4
 temp: -v100 -v50   -v20   -v10    -v5    -v2    -v5    -v2   -v1    -v3
@@ -716,6 +720,8 @@ temp: -v100 -v50   -v20   -v10    -v5    -v2    -v5    -v2   -v1    -v3
 -r19:  41     91     -1     -2     -2     -1    113     -1    -1     -1
 
 tot:    5      7      8      7      8      8     13      9     9
+
+The tot bove is how many had perfect score, out of the 20.
 
 Again, but this time with longer tun-times, for the graphs:
 -m45000
@@ -745,4 +751,41 @@ temp:     -v5     -v2
 
 avg:      161
 
+==================================================================
+Above may bre non-reprodubile, due to changes in the max-pop-size logic.
+So restart data collection.
 
+As above -Hpa -k4 ...
+
+z:      -z3   -z3   -z3   -z4   -z4   -z4   -z2   -z2 -z3.5 -z3.5 -z3.5
+temp:   -v3   -v5   -v7   -v5   -v3   -v7   -v3   -v5   -v5   -v4   -v6
+-r0:    308    19    24   711    42   631    -4    -4    24    59    33
+-r1:    156   239    49   760   100   106    -4    -3    61   117   104
+-r2:     72   230    76   103   802   136    -4         227    30    95
+-r3:     84   349    83    73   296    48               207    41   101
+-r4:    254    35   203   232    41    82                47   375    54
+-r5:     85    94   168    19   109   337                22   110    23
+-r6:    396    98   114    62   504   113               129    42   124
+-r7:    182   715    17   586    43    88               222    66    28
+-r8:     34    59   140   137    72   161               234   617    75
+-r9:    819    73    71    25    14   132               125    24    61
+-r10:   173   170   120   260   579  1166                34    19    27
+-r11:    52    96    40    90   118   650               135    92    38
+-r12:   188    16   716    70   701   670                21   241    23
+-r13:   379    76   141   378   416   220               140    83    31
+-r14:   136   518   502   230   242   560                88    52    51
+-r15:   361    44    82    71   975    22                85   135   172
+-r16:   250   258    74   261  1123   111                55    54     6
+-r17:    34   387  1047   187   762   710               132   142    87
+-r18:    11   168   516   183   183    85               114    33    15
+-r19:    13     9    49   806    20   411                 5    10    52
+
+avg:    199   183  211    262   357   322               105   117    60
+120avg:       179                     (average over 120)
+240avg:                                                             109
+
+Holy cow, that last one is smokin!
+But a run over 240 different random seeds averaged out to only 109
+seconds, not 60 seconds, so the smaller run just was not realistic.
+
+==================================================================

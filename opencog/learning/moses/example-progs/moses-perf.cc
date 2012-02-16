@@ -27,7 +27,7 @@ void measure(vector<string> arguments)
 
     double tsq = 0.0; // for computing variance
 
-    int nreps = 20;
+    int nreps = 240;
 
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);
@@ -39,6 +39,10 @@ void measure(vector<string> arguments)
         stringstream ss;
         ss << "-r" << i;
         args.push_back(ss.str());
+
+        stringstream fss;
+        fss << "-f moses-perf-r" << i << ".log";
+        args.push_back(fss.str());
 
         // Run and measure.
         struct timeval start, stop, elapsed;
