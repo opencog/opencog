@@ -287,7 +287,7 @@ int moses_exec(int argc, char** argv)
     bool revisit = false;
     bool include_dominated;
     score_t complexity_temperature = 4.0f;
-    score_t complexity_ratio = 3.0f;
+    score_t complexity_ratio = 3.5f;
     // optim_param
     double pop_size_ratio;
     score_t max_score;
@@ -517,17 +517,16 @@ int moses_exec(int argc, char** argv)
          value<score_t>(&complexity_temperature)->default_value(4.0),
          "Set the \"temperature\" of the Boltzmann-like distribution "
          "used to select the next exemplar out of the metapopulaton. "
-         "The higher the temperature, the more likely that poor "
-         "exemplars will be choosen for exploration. Too low a "
-         "temperature can result in poor performance, as the algorithm "
-         "may get stuck in a local maximum.\n")
+         "A temperature that is too high or too low will make it likely "
+         "that poor exemplars will be chosen for exploration, thus "
+         "resulting in excessively long search times.\n")
 
         (opt_desc_str(complexity_ratio_opt).c_str(),
-         value<score_t>(&complexity_ratio)->default_value(3.0),
+         value<score_t>(&complexity_ratio)->default_value(3.5),
          "Fix the ratio of raw score to complexity, when ranking the "
          "metapopulation for fitness.  Setting this ratio too low causes "
          "the complexity to dominate ranking, possibly trapping the "
-         "algorithm in a local amximum.  Setting this ratio too high "
+         "algorithm in a local maximum.  Setting this ratio too high "
          "will add too much noise to the metapopulation, preventing "
          "a solution from being found.\n")
 

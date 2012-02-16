@@ -86,13 +86,16 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-u
 .IR target_feature ]
 .RB [ \-V1 ]
-.RB [ \-v1 ]
+.RB [ \-v
+.IR temperature ]
 .RB [ \-W1 ]
 .RB [ \-w
 .IR max ]
 .RB [ \-x1 ]
 .RB [ \-y
 .IR combo_program ]
+.RB [ \-z
+.IR complexity_ratio ]
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
@@ -322,6 +325,8 @@ CSV/DSV file formats.
 .\" ============================================================
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
+The most important of these, for controlling behaviour, are the 
+\fB\-a\fR, \fB\-m\fR, \fB\-r\fR \fB\-v\fR and \fB\-z\fR flags.
 .TP
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
 Select the algorithm to apply to a single deme.  This is the algorithm
@@ -478,6 +483,21 @@ then deme search terminates when a local hilltop is found. If true,
 then the search radius is progressively widened, until another
 termination condition is met.  Consider using the \fB\-D\fR flag to
 set the maximum search radius.
+.TP
+.BI \-v\  temperature \fR,\ \fB\-\-complexity\-temperature= temperature
+Set the "temperature" of the Boltzmann-like distribution used to 
+select the next exemplar out of the metapopulaton. A temperature that
+is too high or too low will make it likely that poor exemplars will be
+chosen for exploration, thus resulting in excessively long search times.
+Recommended values lie in the range of 1 to 10, with a default of 4.
+.TP
+.BI \-z\  ratio \fR,\ \fB\-\-complexity\-ratio= ratio
+Fix the ratio of raw score to complexity, when ranking the 
+metapopulation for fitness.  Setting this ratio too low causes the 
+complexity to dominate ranking, possibly trapping the algorithm in a 
+local maximum.  Setting this ratio too high will add too much noise to the 
+metapopulation, preventing a solution from being found.  Recommended
+values would be in the range from 1 to 5; with 3.5 as the default.
 
 .\" ============================================================
 .SS "Output control options"
@@ -541,9 +561,6 @@ Minimum value for continuous variables. Default 0.0.
 Split a continuous domain into two pieces. This option maybe be used
 multiple times to split a continuous domain into multiple peices:
 that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
-.TP
-.BI \-v1\fR,\ \fB\-\-stddev=1
-Assume that continuous variables are in the form of a gaussian.
 .TP
 .BI \-w\  num \fR,\ \fB\-\-max\-rand\-input= num
 Maximum value for continuous variables.  Default 1.0.
