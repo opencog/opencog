@@ -113,6 +113,9 @@ class FishgramTest(TestCase):
         premises = (action, seq_and)
         conclusion = result
         
+        print 'premises, conclusion:'
+        print premises
+        print conclusion
         premises2, conclusion2 = self.fishgram.make_psi_rule(premises, conclusion)
         print premises2, conclusion2
         

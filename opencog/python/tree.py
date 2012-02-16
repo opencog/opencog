@@ -436,12 +436,14 @@ def new_var():
 _new_var_counter = 10**6
 
 def unify_conj(xs, ys, s):
-    if isinstance(xs, tuple) and isinstance(ys, tuple) and len(xs) == len(ys):
+    assert isinstance(xs, tuple) and isinstance(ys, tuple)
+    if len(xs) == len(ys):
         for perm in permutations(xs):
             s2 = unify(list(perm), list(ys), s)
             if s2 != None:
                 return s2
-    return None
+    else:
+        return None
 
 def isomorphic_conjunctions(xs, ys):
     if isinstance(xs, tuple) and isinstance(ys, tuple) and len(xs) == len(ys):

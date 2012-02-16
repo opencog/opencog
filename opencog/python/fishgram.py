@@ -1,3 +1,6 @@
+# You can test at the cogserver shell, using
+# import adaptors; reload(adaptors); import fishgram; reload(fishgram);from fishgram import *; fish = FishgramMindAgent(); fish.run(a)
+
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, types as t
 import opencog.cogserver
 from tree import *
@@ -30,11 +33,12 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 2
+        self.min_embeddings = 3
+        self.max_embeddings = 150
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 1e9 # 10 # 1e35 # 600
+        self.max_per_layer = 12
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -87,8 +91,8 @@ class Fishgram:
         start = time.time()
         for layer in self.closed_bfs_layers():
             
-            for conj, embs in layer:
-                print pp(conj), len(embs) #, pp(embs)
+#            for conj, embs in layer:
+#                print pp(conj), len(embs) #, pp(embs)
             
             layers.append(layer)
             if len(layers) >= 2:
@@ -114,8 +118,8 @@ class Fishgram:
         #return self.prune_frequency(next_layer_iter)
         #self.viz.outputTreeNode(target=[], parent=None, index=0)
         
-        #for (conj, embs) in self.prune_frequency(next_layer_iter):
-        for (conj, embs) in self.prune_surprise(next_layer_iter):
+        for (conj, embs) in self.prune_frequency(next_layer_iter):
+        #for (conj, embs) in self.prune_surprise(next_layer_iter):
             #print '***************', conj, len(embs)
             #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
             #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
@@ -139,10 +143,17 @@ class Fishgram:
             new_layer = [conj_embs for conj_embs in self.closed_bfs_extend_layer(prev_layer)]
             
             if len(new_layer):
+                
+                del new_layer[self.max_per_layer+1:]                
+                
                 #conj_length = len(new_layer[0][0])
                 conj_length = set(len(ce[0]) for ce in new_layer)
                 #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
                 print '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m'
+
+                for conj, embs in new_layer:
+                    print pp(conj), len(embs) #, pp(embs)
+
                 yield new_layer
             
             prev_layer = new_layer
@@ -249,6 +260,8 @@ class Fishgram:
                 continue
             
             entry=conj2emblist[conj]
+            if not len(entry):
+                print '+', conj
             if s not in entry:
                 entry.append(s)
 
@@ -447,9 +460,9 @@ class Fishgram:
             num_variables = len(get_varlist(conj))*1.0
             
             normalized_frequency =  count / num_possible_objects ** num_variables
-            if len(embeddings) >= self.min_embeddings:
+            if len(embeddings) >= self.min_embeddings and len(embeddings) <= self.max_embeddings:
             #if normalized_frequency > self.min_frequency:
-                #print pp(conj), normalized_frequency                
+                #print pp(conj), normalized_frequency
                 yield (conj, embeddings)
 
     def prune_surprise(self, layer):
@@ -501,16 +514,13 @@ class Fishgram:
         return surprise
     
     def count_actual_objs(self, atoms):
+        def filter_actual_objs(self, atoms):
+            actual_objs = [obj for obj in atoms if obj.t != t.TimeNode]
+            #print len(actual_objs), len(all_substs)
+            return actual_objs
+
         return len(self.filter_actual_objs(atoms))
     
-    def filter_actual_objs(self, atoms):
-        actual_objs = [obj for obj in atoms if obj.t != t.TimeNode]
-        #print len(actual_objs), len(all_substs)
-        return actual_objs
-    
-    def conjunction_to_string(self,  conjunction):
-        return str(tuple([str(tree) for tree in conjunction]))
-
     def outputConceptNodes(self, layers):
         id = 1001
         
@@ -677,10 +687,12 @@ class Fishgram:
             ideal_premises = template.pattern[:-1]
             ideal_conclusion = template.pattern[-1]
 
+            print 'template:', template
+
             s2 = unify_conj(ideal_premises, premises, {})
-            #print 'make_psi_rule: s2=%s' % (s2,)
-            s3 = unify_conj(ideal_conclusion, conclusion, s2)
-            #print 'make_psi_rule: s3=%s' % (s3,)
+            print 'make_psi_rule: s2=%s' % (s2,)
+            s3 = unify_conj((ideal_conclusion,), (conclusion,), s2)
+            print 'make_psi_rule: s3=%s' % (s3,)
             
             if s3 != None:
                 #premises2 = [x for x in premises if not unify (seq_and_template, x, {})]
@@ -806,16 +818,16 @@ class Fishgram:
             if (len(get_varlist(normal)) == len(get_varlist(premises+after_links))):
                 yield (premises+after_links, conclusion)
 
-    def replace(self, pattern, example, var):
-        '''A simple function to replace one thing with another using unification. Not currently used.'''
-        s = unify(pattern, example, {})
-        if s != None:
-            return s[Tree(var)]
-        else:
-            return example
-    
-    def none_filter(self, list):
-        return [x for x in list if x != None]
+#    def replace(self, pattern, example, var):
+#        '''A simple function to replace one thing with another using unification. Not currently used.'''
+#        s = unify(pattern, example, {})
+#        if s != None:
+#            return s[Tree(var)]
+#        else:
+#            return example
+#    
+#    def none_filter(self, list):
+#        return [x for x in list if x != None]
 
     def find_exists_embeddings(self, embs):
         if not len(embs):

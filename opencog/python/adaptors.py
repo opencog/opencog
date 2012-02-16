@@ -71,7 +71,8 @@ class ForestExtractor:
     def extractForest(self):
 
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
-        for link in [x for x in self.a.get_atoms_by_type(t.Link) if x.tv.mean > 0.5 and x.tv.confidence > 0]:
+        for link in [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)
+                     or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
             if not self.include_tree(link): continue
             
             objects = []            
@@ -139,7 +140,13 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self,  atom):
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) # haxx!
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) or self.is_action_instance(atom)# or self.is_action_element(atom)
+        
+    def is_action_instance(self, atom):        
+        return len(atom.name) and atom.name[-1].isdigit()
+        
+#    def is_action_element(self, atom):
+#        return ':' in atom.name
     
     def is_important_atom(self, atom):
         return atom.name in ['actionFailed', 'actionDone'] or "DemandGoal" in atom.name
