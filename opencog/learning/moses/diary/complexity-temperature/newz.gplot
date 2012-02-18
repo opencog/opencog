@@ -1,0 +1,56 @@
+
+set term png size 1024,768
+set term png size 640,480
+set out 'newz.png'
+
+# set style data points
+# set style data lines
+set style data linespoints
+
+set title "4-parity (moses -Hpa -k4)"
+
+
+
+# =================================================
+set out 'newz.png'
+set ylabel "runtime (seconds)"
+set xlabel "probability that not yet done"
+set logscale x
+set key left
+set yrange [1:500]
+set xrange [1:0.06]
+plot "newz.data" using (1-$1/20):3 title "W=1/4", \
+     "newz.data" using (1-$1/20):4 title "v=0.05", \
+     "newz.data" using (1-$1/20):6 title "-z3 v=5", \
+     "newz.data" using (1-$1/20):9 title "-z3.5 v=5", \
+     (-log(x)*150) title "exp(-t/150)", \
+     (-log(x)*100) title "exp(-t/100)"
+     
+# =================================================
+set out 'final.png'
+set ylabel "runtime (seconds)"
+set xlabel "probability that not yet done"
+set logscale x
+set key left
+set yrange [1:1000]
+set xrange [1:0.005]
+plot "k4-bigger.data" using (1-$1/20):3 title "original", \
+     "final-z3-v5-120.data" using (1-$1/120):2 title "z=3 v=5", \
+     "final-z3.5-v6-240.data" using (1-$1/240):2 title "z=3.5 v=6", \
+     (-log(x)*150) title "exp(-t/150)", \
+     (-log(x)*100) title "exp(-t/100)"
+     
+# =================================================
+set out 'final-more.png'
+set ylabel "runtime (seconds)"
+set xlabel "probability that not yet done"
+set logscale x
+set key left
+set yrange [1:1000]
+set xrange [1:0.005]
+plot "final-z3-v5-120.data" using (1-$1/120):2 title "z=3 v=5", \
+     "final-z3.5-v6-240.data" using (1-$1/240):2 title "z=3.5 v=6", \
+     "final-z3.5-v5-120.data" using (1-$1/120):2 title "z=3.5 v=5", \
+     (-log(x)*150) title "exp(-t/150)", \
+     (-log(x)*100) title "exp(-t/100)"
+     

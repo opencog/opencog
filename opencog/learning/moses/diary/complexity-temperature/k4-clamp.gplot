@@ -1,0 +1,28 @@
+
+set term png size 1024,768
+set term png size 640,480
+
+set style data linespoints
+set logscale y
+set key left
+
+set xlabel "order sequence of discovery"
+set ylabel "runtime, seconds"
+set title "4-parity (moses -Hpa -k4)"
+
+# set out 'k4-clamp-2.png'
+# plot "k4-bigger.data" using 1:4 title "T=2, unbounded", \
+i#     "k4-bigger.data" using 1:6 title "T=2, population clamped"
+
+# set out 'k4-clamp-1.png'
+# plot "k4-bigger.data" using 1:3 title "T=1, unbounded", \
+#      "k4-bigger.data" using 1:7 title "T=1, population clamped"
+
+set out 'k4-clamp.png'
+plot "k4-bigger.data" using 1:3 title "T=1, unbounded", \
+     "k4-bigger.data" using 1:7 title "T=1, population clamped", \
+     "k4-bigger.data" using 1:4 title "T=2, unbounded", \
+     "k4-bigger.data" using 1:6 title "T=2, population clamped", \
+     "k4-bigger.data" using 1:5 title "T=3, unbounded", \
+     "k4-bigger.data" using 1:8 title "T=3, population clamped"
+

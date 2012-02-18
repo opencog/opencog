@@ -1,0 +1,76 @@
+
+set term png size 1024,768
+set term png size 640,480
+set out 'log-bound.png'
+
+# set style data points
+# set style data lines
+set style data linespoints
+
+set title "4-parity (moses -Hpa -k4)"
+
+
+
+# =================================================
+# Same as below, but the x-y axis reversed.
+# set xlabel "runtime"
+# set ylabel "prob"
+# set logscale y
+# set key right
+# set xrange [1:1000]
+# set yrange [0.05:1]
+# plot "weight.data" using 2:(1-$1/20) title "W=infty", \
+#      "weight.data" using 3:(1-$1/20) title "W=4", \
+#      "weight.data" using 4:(1-$1/20) title "W=5", \
+#      exp(-x/150) title "exp(-t/150)", \
+#      exp(-x/200) title "exp(-t/200)", \
+#      exp(-x/300) title "exp(-t/300)"
+     
+
+# =================================================
+set out 'log-bound-weighted.png'
+set ylabel "runtime (seconds)"
+set xlabel "probability that not yet done"
+set logscale x
+set key left
+set yrange [1:1000]
+set xrange [1:0.06]
+plot "weight.data" using (1-$1/20):2 title "W=0", \
+     "weight.data" using (1-$1/20):3 title "W=1/3", \
+     "weight.data" using (1-$1/20):4 title "W=1/4", \
+     "weight.data" using (1-$1/20):5 title "W=1/5", \
+     "weight.data" using (1-$1/20):6 title "W=1/6", \
+     (-log(x)*150) title "exp(-t/150)", \
+     (-log(x)*300) title "exp(-t/300)"
+     
+
+# =================================================
+set out 'log-bound-clamped.png'
+set ylabel "runtime (seconds)"
+set xlabel "probability that not yet done"
+set logscale x
+set key left
+set yrange [1:2000]
+set xrange [1:0.06]
+plot "k4-bigger.data" using (1-$1/20):7 title "temp=1 clamp", \
+     "k4-bigger.data" using (1-$1/20):6 title "temp=2 clamp", \
+     "k4-bigger.data" using (1-$1/20):8 title "temp=3 clamp", \
+     (-log(x)*250) title "exp(-t/250)", \
+     (-log(x)*500) title "exp(-t/500)"
+     
+
+# =================================================
+set out 'log-bound-unclamped.png'
+set ylabel "runtime (seconds)"
+set xlabel "probability that not yet done"
+set logscale x
+set key left
+set yrange [1:4000]
+set xrange [1:0.06]
+plot "k4-bigger.data" using (1-$1/20):3 title "temp=1", \
+     "k4-bigger.data" using (1-$1/20):4 title "temp=2", \
+     "k4-bigger.data" using (1-$1/20):5 title "temp=3", \
+     (-log(x)*500) title "exp(-t/500)"
+ 
+
+

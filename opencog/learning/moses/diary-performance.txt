@@ -781,11 +781,46 @@ temp:   -v3   -v5   -v7   -v5   -v3   -v7   -v3   -v5   -v5   -v4   -v6
 -r19:    13     9    49   806    20   411                 5    10    52
 
 avg:    199   183  211    262   357   322               105   117    60
-120avg:       179                     (average over 120)
+120avg:       179                                       115
 240avg:                                                             109
+
+setting:  avg:   avg-over-what:
+z3.5-v9   132    120 iter
+z3.5-v7   110    120 iter
+z3.5-v6   109    240 iter
+z3.5-v5   115    120
+z3.5-v4   131    120
 
 Holy cow, that last one is smokin!
 But a run over 240 different random seeds averaged out to only 109
 seconds, not 60 seconds, so the smaller run just was not realistic.
 
 ==================================================================
+
+-k5 results
+
+     -z4v6 -z5v6 -z6v6
+-r0    -8    -6    -6
+-r1    -6    -8
+-r2    -8    -9
+-r3    -9    -6
+-r4    -6    -6
+-r5   -11    -8
+-r6    -6    -6
+-r7    -6    -9
+-r8    -4    -5
+-r9    -8    -7
+-r10   -7    -8
+-r11   -6    -6
+-r12   -9    -6
+-r13   -9    -7
+-r14   -7    -7
+-r15   -7    -8
+-r16  -10    -5
+-r17  -10    -5
+-r18   -5   -10
+-r19   -8    -6
+
+best: -4x1   
+      -5x1 -5x3
+      -6x5 -6x7

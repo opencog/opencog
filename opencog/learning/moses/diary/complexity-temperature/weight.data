@@ -1,0 +1,33 @@
+#
+# moses performance data, runtime in seconds
+# using default hillclimbing.
+# -Hpa -k4 in order of runtime
+#
+# first column: clamped Temp=2 data
+# remaining columns: same temp, same clamping, but different weights
+# The weights affect ranking by using W*score+complexity. to rank.
+#
+#     clamp  
+#      T=2   W=3   W=4   W=5   W=6   W=8  
+1        8    21    34     2    11    29 
+2       14    38    40    16    40    50  
+3       35    44    42    31    46    50  
+4       41    47    48    35    51    71  
+5       43    53    69    44    53    83  
+6       59    69    73    49    74    88  
+7       67    93    76    72    99   103  
+8       94    95    77    79   100   153  
+9      104   103    86    82   105   169  
+10     161   127    87    84   122   392  
+11     359   140    95    94   165   402  
+12     371   144   121   196   176   521  
+13     358   150   125   425   202   898  
+14     459   188   141   451   211   900  
+15     548   192   154   761   251  1230  
+16     680   197   280   785   630  
+17    1082   266   287   786  1060
+18    1211   382   319  1483
+# 19 >6666 at -m1.6M
+19    6666   404   471
+# 20  >7777 >1907 value are bogus
+# 20    7777 >1004       1907

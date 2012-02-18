@@ -1,0 +1,52 @@
+
+set term png size 1024,768
+set term png size 640,480
+
+# set term postscript eps color
+# set out 'k4.eps'
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key left
+
+# col 1 is generation
+# col 2 is num_evals
+# col 3 is metapop_size
+# col 4 is best_score
+# col 5 is complexity
+set xlabel "generation"
+set title "4-parity (moses -Hpa -k4)"
+# plot "stats-r7.data" using 1:($4) title "score", \
+#     "stats-r7.data" using 1:(-$5) title "complexity" 
+
+# ------------------------------------------------
+set out 'stats-k5-r1.png'
+set ylabel ""
+set title "5-parity (moses -Hpa -k5 -r1)"
+set xrange [0:1000]
+plot "stats-k5-r1.data" using 1:($3/10000) title "(metapop size)/10k", \
+     "stats-k5-r1.data" using 1:(-$4) title "minus score" , \
+     "stats-k5-r1.data" using 1:(-$5) title "complexity" 
+
+# ------------------------------------------------
+# set out 'stats-r7.png'
+# set ylabel ""
+# set title "4-parity (moses -Hpa -k4 -r7)"
+# plot "stats-r7.data" using 1:($3/50) title "(metapop size)/50", \
+#      "stats-r7.data" using 1:(-$4) title "minus score" , \
+#      "stats-r7.data" using 1:(-$5) title "complexity" 
+# 
+# ------------------------------------------------
+# set out 'popsize-r0.png'
+# set title "4-parity (moses -Hpa -k4 -r0)"
+# set ylabel "metapopulation size"
+# plot "stats-r0.data" using 1:3 title "metapop size" ,\
+#      "stats-r0-cap.data" using 1:3 title "capped size"
+# ------------------------------------------------
+# 
+# set out 'popsize-r8.png'
+# set title "4-parity (moses -Hpa -k4 -r8)"
+# set ylabel "metapopulation size"
+# plot "stats-r8.data" using 1:3 title "metapop size" ,\
+#      "stats-r8-cap.data" using 1:3 title "capped size"

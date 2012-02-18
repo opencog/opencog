@@ -1,0 +1,38 @@
+#
+# moses performance data, runtime in seconds
+# using default hillclimbing.
+# -Hpa -k4 in order of runtime
+#
+# first column: original data
+# second column: a 10% performance speedbump due to logging.
+# third column: broaden the complexity chooser (by 2)
+# fourth column: broaden the complexity chooser (by 3)
+# fifth col: T=2 and clamped metapop size.
+#
+# in select_exemplar():
+# p = (p > 0 ? 0 : pow2((p - highest_comp)/T));
+#
+#                                 clamp  clamp  clamp 
+#   orig       T=1    T=2    T=3   T=2    T=1    T=3
+1   15          15      8      4     8     68      4
+2   30          30     14     22    14     70     34
+3   34          34     20     53    35     72     35
+4   51.24       39     43     58    41    108     39
+5   100.87      93     67     77    43    135     46
+6   148.59     134     83     90    59    212     60
+7   172        172    187    140    67    226    114
+8   196.12     172    220    143    94    235    118
+9   286.62     262    324    158   104    398    128
+10  292        292    502    306   161    494    138
+11  360        360    522    444   359    646    192
+12  731.03     665    549    514   371    770    235
+13  961        961    568    700   358    834    722
+14  1690.13   1560    628    808   459    871    835
+15  1972      1972    916    931   548    927    855
+16  2367.36   2150   1131   1547   680   2028    860
+17  7138      7138   1168   2106  1082   2225   1047
+18  9752.87   9752   1656   2566  1211   3522   1260
+# 19 >19261 at -m1.1M for T=1,  >6666 at -m1.6M
+19  9999     19261   2991   5520  6666   4559   1268
+# 20  >31836 at -m1.1M for T=1  the 6666 7777 values are bogus
+20  9999      31836  5371   6867  7777   6666   2074

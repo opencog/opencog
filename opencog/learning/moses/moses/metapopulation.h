@@ -611,7 +611,7 @@ struct metapopulation : public bscored_combo_tree_set
                     // composite_score csc = this->params.reduce_all?
                     //    inst_csc : make_pair(inst_sc, complexity(tr));
                     composite_score csc = inst_csc;
-                    if (!params.reduce_all) csc = make_pair(inst_sc, complexity(tr));
+                    if (!params.reduce_all) csc = composite_score(inst_sc, complexity(tr));
                     behavioral_score bsc; // empty bscore till it gets computed
                     composite_behavioral_score cbsc(bsc, csc);
                     {

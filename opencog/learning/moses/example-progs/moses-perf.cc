@@ -27,7 +27,7 @@ void measure(vector<string> arguments)
 
     double tsq = 0.0; // for computing variance
 
-    int nreps = 120;
+    int nreps = 20;
 
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);

@@ -1,0 +1,22 @@
+#
+# moses performance data, runtime in seconds
+# using default hillclimbing.
+# -Hpa -k4 in order of runtime
+#
+# first column: original data
+# second column: a 10% performance speedbump due to logging.
+# third column: broaden the complexity chooser (by 2)
+#
+# in select_exemplar():
+# p = (p > 0 ? 0 : pow2((p - highest_comp)/T));
+#
+#   orig       T=1    T=2    T=3
+1   51.24       39      8      4
+2   100.87      93     14     53
+3   148.59     134     43     60
+4   196.12     172    220    143
+5   286.62     262    324    444
+6   731.03     665    502    514
+7   1690.13   1560    628   2222
+8   2367.36   2150   1134  
+9   9752.87   9752   1168  

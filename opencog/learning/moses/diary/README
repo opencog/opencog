@@ -1,0 +1,10 @@
+
+    Research Diary, Raw Data, Semi-Digested Notes, Graphs, Figures.
+    ---------------------------------------------------------------
+
+Subdirectories contain assorted notes and data used to make coding
+and design decisions.
+
+-- directory complexity-temperature:
+   Graphs for understanding/changing the way select_exemplar() works,
+   circa January/February 2012, bzr revisions 6530-6580 or so.

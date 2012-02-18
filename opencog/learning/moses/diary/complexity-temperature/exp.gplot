@@ -1,0 +1,14 @@
+
+set term png size 1024,768
+set term png size 640,480
+
+set style data lines
+# set logscale y
+set key left
+
+set xrange [0:10]
+set out 'exp.png'
+
+N=1005
+plot (N*exp(-x/N) - exp(-x)) title "ahh"
+

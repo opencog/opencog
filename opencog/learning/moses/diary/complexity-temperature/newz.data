@@ -1,0 +1,34 @@
+#
+# moses performance data, runtime in seconds
+# using default hillclimbing.
+# -Hpa -k4 in order of runtime
+# This is with the new, restructured select_exemplar(), viz float pt values.
+#
+# first two columns: old, clamped Temp=2 data, weights=3,4
+# third column: -z and -v  flags as indicated, but older/brokener pop clamping.
+# -v==temperature  -z==weight
+#
+# 4th and later columns: fixed clamping.
+#
+#                 -z4  -z3   -z3   -z3   -z4 -z3.5
+#     W=3   W=4   -v5  -v3   -v5   -v7   -v3   -v5
+1      21    34    21   11     9    17    19     5
+2      38    40    21   13    16    24    25    21
+3      44    42    34   34    19    40    62    22
+4      47    48    34   34    35    49    70    24
+5      53    69    39   52    44    49    71    34
+6      69    73    67   72    59    71    73    47
+7      93    76    69   84    73    74    90    55
+8      95    77    72   85    76    76   103    61
+9     103    86    75  136    94    82   137    85
+10    127    87    81  156    96    83   183    88
+11    140    95    91  173    98   114   187   114
+12    144   121   113  182   168   120   230   125
+13    150   125   152  188   170   140   232   129
+14    188   141   208  250   230   141   260   132
+15    192   154   243  254   239   168   261   135
+16    197   280   276  308   258   203   378   140
+17    266   287   279  361   349   502   586   207
+18    382   319   282  379   387   516   711   222
+19    404   471   284  396   518   716   760   227
+20   1004  1111   661  819   715  1047   806   234

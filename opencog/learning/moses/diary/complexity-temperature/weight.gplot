@@ -1,0 +1,21 @@
+
+set term png size 1024,768
+set term png size 640,480
+set out 'weight.png'
+
+# set style data points
+# set style data lines
+set style data linespoints
+set logscale y
+set key left
+
+set xlabel "order sequence of discovery"
+set ylabel "runtime, seconds"
+set title "4-parity (moses -Hpa -k4)"
+
+plot "weight.data" using 1:2 title "W=infty", \
+     "weight.data" using 1:3 title "W=4", \
+     "weight.data" using 1:4 title "W=5"
+     
+
+
