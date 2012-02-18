@@ -569,6 +569,10 @@ struct metapopulation : public bscored_combo_tree_set
 
         mutex pot_cnd_mutex; // mutex for pot_candidates
 
+        // NB, this is an anonymous function. In particular, some
+        // compilers require that members be explicitly referenced 
+        // with this-> as otherwise we get compile fails:
+        // https://bugs.launchpad.net/bugs/933906
         auto select_candidates =
             [&, this](const scored_instance<composite_score>& inst)
         {
@@ -611,7 +615,7 @@ struct metapopulation : public bscored_combo_tree_set
                     // composite_score csc = this->params.reduce_all?
                     //    inst_csc : make_pair(inst_sc, complexity(tr));
                     composite_score csc = inst_csc;
-                    if (!params.reduce_all) csc = composite_score(inst_sc, complexity(tr));
+                    if (!this->params.reduce_all) csc = composite_score(inst_sc, complexity(tr));
                     behavioral_score bsc; // empty bscore till it gets computed
                     composite_behavioral_score cbsc(bsc, csc);
                     {
