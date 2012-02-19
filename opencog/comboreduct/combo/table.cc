@@ -270,9 +270,10 @@ void removeCarriageReturn(string& str)
         str.resize(s-1);
 }
 
+//* Remove non-ascii characters at the bigining of the line, only.
 void removeNonASCII(string& str)
 {
-    while(str.size() && (unsigned char)str[0] > 127)
+    while (str.size() && (unsigned char)str[0] > 127)
         str = str.substr(1);
 }
 
@@ -400,32 +401,36 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
     return tt;
 }
 
-type_tree infer_data_type_tree(const string& fileName, int pos)
+/// Create a type tree describing the types of the input columns
+/// and the output column.  "output_col_num" is the column we expect
+/// to use as the output (the dependent variable).
+type_tree infer_data_type_tree(const string& fileName, int output_col_num)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
     get_data_line(*in, line);
     if (has_header(fileName))
         get_data_line(*in, line);
-    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line, pos));
-    OC_ASSERT(is_well_formed(res));
+    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line, output_col_num));
+    OC_ASSERT(is_well_formed(res), 
+              "Cannot deduce data types of some columns in line=%s\n",
+              line.c_str());
     return res;
 }
 
-boost::tokenizer<boost::char_separator<char>>
-get_row_tokenizer(string& line)
+table_tokenizer get_row_tokenizer(string& line)
 {
-    typedef boost::char_separator<char> seperator;
-    typedef boost::tokenizer<seperator> tokenizer;
+    typedef boost::escaped_list_separator<char> separator;
+    typedef boost::tokenizer<separator> tokenizer;
     typedef tokenizer::const_iterator tokenizer_cit;
 
-    // remove weird symbols at the start of the line and carriage
-    // return symbol (for DOS files)
+    // Remove weird symbols at the start of the line (only).
     removeNonASCII(line);
+    // Remove carriage return at end of line (for DOS files).
     removeCarriageReturn(line);
 
-    // tokenize line; current allow tabs, commas, blanks.
-    static const seperator sep(",\t ");
+    // Tokenize line; current allow tabs, commas, blanks.
+    static const separator sep("\\", ",\t ", "\"");
     return tokenizer(line, sep);
 }
 

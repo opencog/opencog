@@ -470,7 +470,8 @@ int findTargetFeaturePosition(const std::string& fileName,
  * returns, and then return a tokenizer.  Tokenization uses the
  * seperator characters comma, blank, tab (',', ' ' or '\t').
  */
-boost::tokenizer<boost::char_separator<char>> get_row_tokenizer(std::string& line);
+typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
+table_tokenizer get_row_tokenizer(std::string& line);
 
 /**
  * Take a line and return a vector containing the elements parsed.
@@ -480,7 +481,7 @@ boost::tokenizer<boost::char_separator<char>> get_row_tokenizer(std::string& lin
 template<typename T>
 std::vector<T> tokenizeRow(std::string& line)
 {
-    boost::tokenizer<boost::char_separator<char> > tok = get_row_tokenizer(line);
+    table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
     foreach (const std::string& t, tok)
         res.push_back(boost::lexical_cast<T>(t));
@@ -501,7 +502,7 @@ std::vector<T> tokenizeRow(std::string& line)
 template<typename T>
 std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
 {
-    boost::tokenizer<boost::char_separator<char> > tok = get_row_tokenizer(line);
+    table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> inputs;
     T output;
     int i = 0;
