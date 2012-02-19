@@ -85,19 +85,29 @@ behavioral_score logical_bscore::best_possible_bscore() const {
 // contin_bscore //
 ///////////////////
 
-score_t contin_complexity_coef(unsigned alphabet_size, double stdev) {
+score_t contin_complexity_coef(unsigned alphabet_size, double stdev)
+{
     return log(alphabet_size) * 2 * sq(stdev);
 }
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
+    // cti == ITable of inputs.
+    // OTable ct will contain evaluation of tree tr on the inputs cti.
     OTable ct(tr, cti, rng);
+
+    // OTable target is the table of output we want to get.
     behavioral_score bs(target.size() + (occam?1:0));
+
+    // boost/range/algorithm/transform.
+    // take two arrays ct, target, feed the elts to anon funtion[]
+    // (which just computes square of teh difference) and put the
+    // results into bs.
     boost::transform(ct, target, bs.begin(),
                      [](const vertex& vl, const vertex& vr) {
                          return -sq(get_contin(vl) - get_contin(vr)); });
     // add the Occam's razor feature
-    if(occam)
+    if (occam)
         bs.back() = complexity(tr) * complexity_coef;
 
     // Logger
@@ -107,7 +117,8 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-behavioral_score contin_bscore::best_possible_bscore() const {
+behavioral_score contin_bscore::best_possible_bscore() const
+{
     return behavioral_score(target.size() + (occam?1:0), 0);
 }
 

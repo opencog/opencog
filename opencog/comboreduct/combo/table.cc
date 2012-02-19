@@ -412,7 +412,7 @@ type_tree infer_data_type_tree(const string& fileName, int output_col_num)
     if (has_header(fileName))
         get_data_line(*in, line);
     type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line, output_col_num));
-    OC_ASSERT(is_well_formed(res), 
+    OC_ASSERT(is_well_formed(res),
               "Cannot deduce data types of some columns in line=%s\n",
               line.c_str());
     return res;
@@ -434,14 +434,31 @@ table_tokenizer get_row_tokenizer(string& line)
     return tokenizer(line, sep);
 }
 
-vertex token_to_vertex(const string& token)
+/// cast string "token" to a vertex of type "tipe"
+vertex token_to_vertex(const type_node &tipe, const string& token)
 {
-    if(token == "0")
-        return id::logical_false;
-    else if(token == "1")
-        return id::logical_true;
-    else
+    switch (tipe) {
+
+    case id::boolean_type:
+        if (token == "0")
+            return id::logical_false;
+        else if (token == "1")
+            return id::logical_true;
+        else
+            OC_ASSERT(0, "Expecting boolean value, got %s\n", token.c_str());
+        break;
+
+    case id::contin_type:
         return lexical_cast<contin_t>(token);
+
+    default:
+        stringstream ss;
+        ss << "Unable to handle input type=" << tipe << endl;
+        OC_ASSERT(0, ss.str().c_str());
+    }
+
+    // unreachable
+    return id::null_vertex;
 }
 
 istream& istreamTable(istream& in, ITable& it, OTable& ot,
@@ -462,8 +479,22 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
                   ioh.first.size(), arity);
     }
 
-    while (get_data_line(in, line)) {
+    // Copy the input types to a vector; we need this to pass as an
+    // argument to boost::transform, below.  The output type comes last;
+    // make sure it is *not* placed in the array.
+    vector<type_node> vin_types;   // vector of input types
+    type_node out_type;            // dependent column type
+    type_tree_pre_it pit = tt.begin();
+    pit++;  // skip over lambda
+    out_type = *pit;
+    pit++;
+    for (;pit != tt.end(); pit++) {
+        vin_types.push_back (out_type);
+        out_type = *pit;
+    }
 
+    while (get_data_line(in, line))
+    {
         // tokenize the line and fill the input vector and output
         pair<vector<string>, string> io = tokenizeRowIO<string>(line, pos);
 
@@ -474,11 +505,11 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
                   "rows should have the same number of columns.\n",
                   ot.size(), io.first.size(), arity);
 
-        // fill table
+        // fill table, based on the types passed in the type-tree
         vertex_seq ivs(arity);
-        transform(io.first, ivs.begin(), token_to_vertex);
+        transform(vin_types, io.first, ivs.begin(), token_to_vertex);
         it.push_back(ivs);
-        ot.push_back(token_to_vertex(io.second));
+        ot.push_back(token_to_vertex(out_type, io.second));
     }
     return in;
 }
