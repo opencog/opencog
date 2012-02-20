@@ -59,12 +59,13 @@ public:
 
     void test_contin_rep()
     {
+        int reduct_effort = 2;
         string tr_str = "+(*(+(*(+(*(+(*(#1 1.75) 1.875) #1) 0.75) 0.75) 1.375) 0.75) -1.25)";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
         vertex_set ignore_ops{id::div, id::exp, id::log, id::sin};
-        representation rep(contin_reduction(ignore_ops, rng),
-                           contin_reduction(ignore_ops, rng), tr, tt,
+        representation rep(contin_reduction(reduct_effort, ignore_ops, rng),
+                           contin_reduction(reduct_effort, ignore_ops, rng), tr, tt,
                            rng, ignore_ops);
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());

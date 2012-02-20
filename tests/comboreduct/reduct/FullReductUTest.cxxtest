@@ -150,4 +150,14 @@ public:
         base_test(tree_str);
     }
 
+    // test_simplifyd
+    // multiple predicates need simplification, mixed with booleans.
+    // 0<( +(1 impulse(and(or(#1 and(#1))))))   ->
+    //           ... ->  0<( +(1 impulse(#1))
+    void test_simplifyd()
+    {
+        string tree_str="0<( +(1 impulse(and(or(#1 and(#1))))))";
+        base_test(tree_str);
+    }
+
 };

@@ -86,7 +86,9 @@ private:
 };
 
 // @ignore_ops is the set of operators to ignore
-const rule& contin_reduction(const vertex_set& ignore_ops, opencog::RandGen& rng);
+const rule& contin_reduction(int reduct_effort, 
+                             const vertex_set& ignore_ops,
+                             opencog::RandGen& rng);
 
 const rule& mixed_reduction(opencog::RandGen& rng);
 const rule& full_reduction(opencog::RandGen& rng);
@@ -133,16 +135,19 @@ inline void logical_reduce(int effort, combo_tree& tr)
  * constants and contin-typed literals.
  */
 inline void contin_reduce(combo_tree& tr, combo_tree::iterator it,
+                          int reduct_effort, 
                           const vertex_set& ignore_ops,
                           opencog::RandGen& rng)
 {
-    contin_reduction(ignore_ops, rng)(tr, it);
+    contin_reduction(reduct_effort, ignore_ops, rng)(tr, it);
 }
 
-inline void contin_reduce(combo_tree& tr, const vertex_set& ignore_ops,
+inline void contin_reduce(combo_tree& tr, 
+                          int reduct_effort,
+                          const vertex_set& ignore_ops,
                           opencog::RandGen& rng)
 {
-    contin_reduction(ignore_ops, rng)(tr); 
+    contin_reduction(reduct_effort, ignore_ops, rng)(tr); 
 }
 
 inline void mixed_reduce(combo_tree& tr, combo_tree::iterator it,

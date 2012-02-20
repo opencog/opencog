@@ -53,6 +53,7 @@ const rule* select_rule(string rule_ref_str)
 {
     static MT19937RandGen rnd = MT19937RandGen(0);
     static opencog::combo::vertex_set ignore_ops;
+    int reduct_effort = 2;
 
     const static ref_rule_map ref_rules = 
         map_list_of
@@ -75,7 +76,7 @@ const rule* select_rule(string rule_ref_str)
                           "subtree_to_enf"))
 
         // Contin buried in logical exprs.
-        ("PRD", make_pair(new simplify_predicates(ignore_ops, rnd),
+        ("PRD", make_pair(new simplify_predicates(reduct_effort, ignore_ops, rnd),
                           "simplify_predicates"))
         // Contin rules
         ("PZ", make_pair(new downwards(reduce_plus_zero()),

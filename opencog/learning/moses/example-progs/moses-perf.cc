@@ -13,6 +13,7 @@
  * Linas Vepstas January 2012
  */
 
+#include <math.h>
 #include <sys/time.h>
 #include "../main/moses_exec.h"
 
@@ -32,12 +33,16 @@ void measure(vector<string> arguments)
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);
 
+int nrep = 10000;
+float step = sqrt(2.0);
     for (int i=0; i<nreps; i++)
     {
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
         stringstream ss;
-        ss << "-r" << i;
+        // ss << "-r" << i;
+nrep = 10000*(1<<i);
+        ss << "-m" << nrep;
         args.push_back(ss.str());
 
 #if 0

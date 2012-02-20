@@ -57,9 +57,12 @@ logical_reduction::logical_reduction(const vertex_set& ignore_ops,
         sequential(downwards(reduce_ands(), id::boolean_type),
                    downwards(reduce_ors(), id::boolean_type));
 
+    // Arghh .. XXX should use reduct_effort==3 for the complexe rule.
+    int reduct_effort = 2;
+
     // Can't be static, due to ignore_ops and rng arguments
     medium = new
-        sequential(downwards(simplify_predicates(ignore_ops, rng), id::boolean_type),
+        sequential(downwards(simplify_predicates(reduct_effort, ignore_ops, rng), id::boolean_type),
                    downwards(reduce_nots(), id::boolean_type),
                    
                    iterative(sequential(pre_subtree_to_enf,

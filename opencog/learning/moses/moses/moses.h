@@ -43,7 +43,7 @@ struct moses_parameters
                      score_t _max_score = 0,
                      const operator_set& _ignore_ops = empty_ignore_ops,
                      const combo_tree_ns_set* _perceptions = NULL,
-                     const combo_tree_ns_set* _actions = NULL) 
+                     const combo_tree_ns_set* _actions = NULL)
         : max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score),
           ignore_ops(_ignore_ops), perceptions(_perceptions),
           actions(_actions) {}
@@ -65,7 +65,7 @@ struct moses_parameters
 /**
  * the main function of MOSES
  *
- * @param mp the metapopulation 
+ * @param mp the metapopulation
  * @param pa the parameters to run moses
  */
 template<typename Scoring, typename BScoring, typename Optimization>
@@ -76,6 +76,10 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     logger().info("MOSES starts");
     // ~Logger
     int gen_idx = 0;
+
+    // Print legend for the columns of the stats.
+    logger().info("Stats:# generation\tnum_evals\tmetapop_size\t"
+                  "best_score\tcomplexity\n");
 
     while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++)) {
         // Logger
@@ -92,6 +96,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
 
         // Print stats in a way that makes them easy to graph.
+        // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
             stringstream ss;
             ss << "Stats: " << gen_idx;
@@ -104,7 +109,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
         if (mp.best_score() >= pa.max_score || mp.empty())
             break;
-    }    
+    }
     // Logger
     logger().info("MOSES ends");
     // ~Logger

@@ -808,7 +808,7 @@ seconds, not 60 seconds, so the smaller run just was not realistic.
 -r4    -6    -6    -9    -9    -9    -6     -1
 -r5   -11    -8    -6    -7    -5    -6     -4
 -r6    -6    -6    -6    -8    -6    -2   6881
--r7    -6    -9    -6   -10   -10    -2
+-r7    -6    -9    -6   -10   -10    -2   3078
 -r8    -4    -5    -7    -6    -8    -5
 -r9    -8    -7    -7    -6    -6    -4
 -r10   -7    -8    -6    -7    -7    -6
@@ -830,4 +830,16 @@ best: -4x1       -4x1
 bank.dat:
 moses -Hit -uQ3 -i bank.dat -W1
 
--m10K: -361
+        score   time
+-m10K:  -361     128
+-m20K:  -278     487
+-m40K:  -215    1808
+-m80K:
+
+XXX above failed to reduce the argument of impulse...
+
+        score   time
+-m10K:  -361     176
+-m20K:  -258     511
+-m40K:  -210    2496
+-m80K:

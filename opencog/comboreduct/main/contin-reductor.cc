@@ -36,7 +36,7 @@ using namespace reduct;
 int main()
 {
     MT19937RandGen rng(1);
-
+    int reduct_effort = 2;
     combo_tree tr;
 
     while (cin.good()) {
@@ -61,7 +61,7 @@ int main()
             //print the tree before reduction, for debugging
             cout << "Before : " << tr << endl;
 
-            contin_reduce(tr, vertex_set(), rng);
+            contin_reduce(tr, reduct_effort, vertex_set(), rng);
 
             //evaluate tr over cti and fill ct2
             OTable ct2(tr, cti, rng);

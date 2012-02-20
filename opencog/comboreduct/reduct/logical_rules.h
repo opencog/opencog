@@ -60,14 +60,16 @@ struct remove_unary_junctors : public crule<remove_unary_junctors>
 ///
 struct simplify_predicates : public crule<simplify_predicates>
 {
-    simplify_predicates(const vertex_set& ignore_ops_,
+    simplify_predicates(int effort,
+                        const vertex_set& ignore_ops_,
                         opencog::RandGen& rng_)
         : crule<simplify_predicates>::crule("simplify_predicates"),
-          ignore_ops(ignore_ops_), rng(rng_)
+          reduct_effort(effort), ignore_ops(ignore_ops_), rng(rng_)
     {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 
 protected:
+    int reduct_effort;
     const vertex_set& ignore_ops;
     opencog::RandGen& rng;
 };

@@ -173,6 +173,19 @@ struct reduce_sin : public crule<reduce_sin> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
+// Apply boolean reduction to the argument of impulse.
+struct reduce_impulse_arg : public crule<reduce_impulse_arg>
+{
+    int reduct_effort;
+    const vertex_set &ignore_ops;
+    opencog::RandGen& rng;
+    reduce_impulse_arg(int effort, const vertex_set &igop,
+                       opencog::RandGen& _rng)
+        : crule<reduce_impulse_arg>::crule("reduce_impulse_arg"),
+          reduct_effort(effort), ignore_ops(igop), rng(_rng) {}
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
+};
+
 } // ~namespace reduct
 } // ~namespace opencog
 

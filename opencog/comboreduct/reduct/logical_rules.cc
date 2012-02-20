@@ -61,11 +61,11 @@ void simplify_predicates::operator()(combo_tree& tr, combo_tree::iterator it) co
     combo_tree::iterator cit = it.begin();
     if (is_argument(*cit)) return;
 
-    contin_reduce(tr, cit, ignore_ops, rng);
+    contin_reduce(tr, cit, reduct_effort, ignore_ops, rng);
 
-    // After the above step, we can still have some pathological 
-    // expressions, such as 0<(1) which can be reduced to true,
-    // or 0<(/(1 #1))  which can be reduced to 0(#1) .. so do these. 
+    // After the above step, we can still have some pathological
+    // expressions, such as "0<(1)" which can be reduced to true,
+    // or "0<(/(1 #1))",  which can be reduced to "0<(#1)" .. so do these.
     mixed_reduce(tr, it, rng);
 }
 
@@ -156,8 +156,8 @@ void reduce_nots::operator()(combo_tree& tr, combo_tree::iterator it) const
             // !(a&&b) -> (!a||!b), and !(a||b) -> (!a&&!b)
             // first transform to comp_op(a,b)
             tr.flatten(it.begin());
-            *it = (*it.begin() == id::logical_and ? 
-                 id::logical_or : 
+            *it = (*it.begin() == id::logical_and ?
+                 id::logical_or :
                  id::logical_and);
             tr.erase(it.begin());
             // now to comp_op(!a,!b)
@@ -175,15 +175,15 @@ void reduce_nots::operator()(combo_tree& tr, combo_tree::iterator it) const
         else if (*it.begin() == id::logical_true) {
             tr.erase_children(it);
             *it = id::logical_false;
-        } 
+        }
         else if (*it.begin() == id::logical_false) {
             tr.erase_children(it);
             *it = id::logical_true;
-        } 
+        }
     }
 }
 
-  
+
 // and(x_1 x_2 x_3 ...)
 // reduce x_1 assuming x_2, x_3 ...
 // reduce x_2 assuming x_1, x_3 ...
@@ -263,7 +263,7 @@ void reduce_ors::operator()(combo_tree& tr, combo_tree::iterator it) const
 
     //before this method will work, need to eliminate A&&!A clauses
     f.remove_if(bind(tautology,_1));
-      
+
     //remove clauses which are subsets of others
     pairwise_erase_if(f,bind(subset_eq,_1,_2));
 
@@ -275,7 +275,7 @@ void reduce_ors::operator()(combo_tree& tr, combo_tree::iterator it) const
         for (nf::iterator c2=f.begin();c2!=c1;++c2) {
             nf impls;
             implications(*c1,*c2,std::back_inserter(impls));
-            
+
             for (nf::const_iterator impl=impls.begin();
                  impl!=impls.end();++impl) {
                 for (nf::iterator c=f.begin();c!=f.end();)
@@ -290,11 +290,11 @@ void reduce_ors::operator()(combo_tree& tr, combo_tree::iterator it) const
             }
         }
     }
-    
+
     if (sz!=number_of_literals(f))
         mapper.extract_dnf(f.begin(),f.end(),tr,it);
 }
-    
+
 /// heuristic reduction of ANDs based on complementary pairs:
 /// 1) pairwise implications of conjuncts (X||a)&&((Y||!a) impl (X||Y)
 /// 2) for all pairs of conjuncts, including implications (in X)
@@ -304,13 +304,13 @@ void reduce_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it != id::logical_and)
         return;
-    
+
     // First construct a mapping between items and ints,
     // and convert all conjunctions to this format.
     nf_mapper<vertex> mapper;
     nf f(mapper.add_cnf(tr.begin(it), tr.end(it)));
     int sz = number_of_literals(f);
-    
+
     // negate
     for (nf::iterator c = f.begin(); c != f.end(); ++c) {
         clause tmp;
@@ -318,19 +318,19 @@ void reduce_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
                        std::negate<int>());
         *c=tmp;
     }
-    
+
     // Before this method will work, need to eliminate A&&!A clauses.
     f.remove_if(bind(tautology, _1));
-    
+
     if (f.empty()) { //tautological expression
         tr.erase_children(it);
         *it = id::logical_true;
         return;
     }
-    
+
     // Remove clauses which are supersets of others.
     pairwise_erase_if(f, bind(subset_eq, _1, _2));
-    
+
     // Create implications (and remove subsets).
     for (nf::iterator c1 = f.begin(); c1 != f.end(); ++c1) {
         for (nf::iterator c2 = f.begin(); c2 != c1; ++c2) {
@@ -351,7 +351,7 @@ void reduce_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
             }
         }
     }
-    
+
     clause intersect;
     if (f.size()>1 && f.front().size()>1) {
         intersect=f.front();
@@ -368,13 +368,13 @@ void reduce_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
             intersect=tmp;
         }
     }
-    
+
     if (sz!=number_of_literals(f) || !intersect.empty()) {
         for (nf::iterator c=f.begin();c!=f.end();++c) {
             for (clause::const_iterator it=intersect.begin();
                  it!=intersect.end();++it)
                 c->erase(*it);
-            
+
             clause tmp;
             std::transform(c->begin(),c->end(),std::inserter(tmp,tmp.begin()),
                            std::negate<int>());
@@ -472,7 +472,7 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
                 // Allow predicates; allow arguments, complain about
                 // anything else. Predicates will be reduced below;
                 // we don't need to reduce them here.
-                else if (!is_predicate(gchild.begin()) && 
+                else if (!is_predicate(gchild.begin()) &&
                          !is_argument(*gchild.begin()))
                 {
                     std::stringstream ss;
@@ -524,13 +524,13 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
             {
                 child = tr.erase(tr.flatten(child));
             }
-            else 
+            else
             {
                 // If we are here, the child just has one child, and
                 // that child is not an argument, not a predicate, and
                 // is not logical_or. We conclude (without really
                 // checking) that its a logical_and with a childless
-                // logical_and under it.  So delete it.  Yes, this 
+                // logical_and under it.  So delete it.  Yes, this
                 // actually happens, in the unit test cases.  Yes, the
                 // above chain of assumptions seems dangerous to me ...
                 child = tr.erase(child);
@@ -567,7 +567,7 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
             }
         }
     }
- 
+
     OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
     OC_ASSERT(opencog::is_sorted(command.begin(), command.end(), comp),
@@ -577,13 +577,13 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
         return reduce_and(current, dominant, command);
     if (*current == id::logical_or)
         return reduce_or(current, dominant, command);
- 
+
     // Should be an argument or something ... ??
     //OC_ASSERT(is_argument(*current));
     return Keep;
 }
 
-subtree_to_enf::reduce_to_enf::Result 
+subtree_to_enf::reduce_to_enf::Result
 subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                                           const subtree_set& dominant,
                                           const subtree_set& command)
@@ -592,59 +592,59 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                                     make_counting_iterator(current.begin()),
                                     make_counting_iterator(current.end()),
                                     dominant.begin(), dominant.end(), comp);
-    
-    
+
+
     std::vector<combo_tree> negated;
     push_back_negated_arguments(command, negated);
     std::sort(negated.begin(), negated.end(), comp);
-    
+
     opencog::erase_set_intersection(tree_eraser(tr),
                                     make_counting_iterator(current.begin()),
                                     make_counting_iterator(current.end()),
                                     negated.begin(),negated.end(),comp);
-    
+
     if (current.is_childless())
         return Disconnect; //0subsume
-	
+
     if (!opencog::has_empty_intersection
         (make_counting_iterator(current.begin()),
          make_counting_iterator(current.end()),
          command.begin(),command.end(),comp))
         return Delete;     //1subsume
-    
+
     std::list<sib_it> prev_guard_set;
     do {
         prev_guard_set=
             std::list<sib_it>(make_counting_iterator(current.begin()),
                               make_counting_iterator(current.end()));
-        
+
         OC_ASSERT(opencog::is_sorted(dominant.begin(),dominant.end(), comp),
                   "dominant subtree_set should be sorted (reduce_and)");
-        
+
         if (!opencog::is_sorted(make_counting_iterator(current.begin()),
                                 make_counting_iterator(current.end()), comp))
             tr.sort_on_subtrees(current.begin(), current.end(), comp);
-        
+
         subtree_set handle_set; //broom handle
         std::set_union(dominant.begin(),dominant.end(),
                        make_counting_iterator(current.begin()),
                        make_counting_iterator(current.end()),
                        inserter(handle_set, handle_set.begin()), comp);
-        
+
         if (!consistent(handle_set)) {
-            return Delete; 
+            return Delete;
         }
-        
+
         for (sib_it child = current.begin(); child != current.end(); ) {
-            if (child.is_childless() || (*child != id::logical_and && 
+            if (child.is_childless() || (*child != id::logical_and &&
                                          *child != id::logical_or)) {
                 ++child;
                 continue;
             }
-            
+
             tr.validate(child);
             tr.validate();
-            
+
             OC_ASSERT(opencog::is_sorted(command.begin(),command.end(),comp),
                       "command subtree_set should be sorted (reduce_and)");
             OC_ASSERT(opencog::is_sorted(handle_set.begin(),handle_set.end(),comp),
@@ -658,7 +658,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
             } else {
                 addIt = false;
             }
-	    
+
             switch(reduce(child, handle_set, command)) {
             case Delete:
                 return Delete; //since current is in all selections with child
@@ -667,12 +667,12 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                 addIt = false;
                 break;
             case Keep:
-                
+
                 if (!opencog::is_sorted(make_counting_iterator(current.begin()),
                                         make_counting_iterator(current.end()),
                                         comp))
                     tr.sort_on_subtrees(current.begin(), current.end(), comp);
-                
+
                 OC_ASSERT(child.begin() != child.end(),
                           "child should have siblings"); //not sure if this is ok..
 
@@ -685,7 +685,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
 
                 // The last_child won't have children if its an argument.
                 // Treat predicates as if they were arguments too: they're
-                // also effectively "childless". 
+                // also effectively "childless".
                 subtree_set res;
                 if (!is_predicate(child.last_child())) {
                     for (sib_it pit = child.last_child().begin();
@@ -701,7 +701,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                                                   make_counting_iterator(sib.begin()),
                                                   make_counting_iterator(sib.end()),
                                                   comp);
- 
+
                 if (!res.empty())
                 {
                     opencog::insert_set_complement
@@ -709,7 +709,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                          make_counting_iterator(current.begin()),
                          make_counting_iterator(current.end()),
                          res.begin(), res.end(), comp);
- 
+
                     for (sib_it gchild = child.begin(); gchild != child.end(); ++gchild)
                     {
                         // Do NOT erase children of predicates!
@@ -720,10 +720,10 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                              make_counting_iterator(gchild.end()),
                              res.begin(), res.end(), comp);
                     }
- 
+
                     // Try to apply and-cut to child's children.
                     and_cut(child);
- 
+
                     // guard_set has been enlarged, so we need to reprocess all kids
                     child = current.begin();
                 } else {
@@ -734,13 +734,13 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
             if (addIt)
                 handle_set.insert(tmp);
         }
- 
+
         // try to apply or-cut to current's children
         or_cut(current);
     } while (current.number_of_children() != prev_guard_set.size() ||
              !std::equal(prev_guard_set.begin(), prev_guard_set.end(),
                          make_counting_iterator(current.begin())));
-	
+
     if (current.is_childless())
         return Disconnect; //0-subsumption
     return Keep;

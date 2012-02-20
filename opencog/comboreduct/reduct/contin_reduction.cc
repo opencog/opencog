@@ -31,7 +31,8 @@
 
 namespace opencog { namespace reduct {
 
-const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops, 
+const rule& contin_reduction(int reduct_effort,
+                             const vertex_set& ignore_ops, 
                              opencog::RandGen& rng)
 {
     // Rules that do not involve factorizing or distributing
@@ -71,6 +72,9 @@ const rule& contin_reduction(const opencog::combo::vertex_set& ignore_ops,
                         ignore_ops.find(id::div) == ignore_ops.end()),
                    when(downwards(reduce_sum_log()),
                         ignore_ops.find(id::log) == ignore_ops.end()),
+                   
+                   when(downwards(reduce_impulse_arg(reduct_effort, ignore_ops, rng)),
+                        ignore_ops.find(id::impulse) == ignore_ops.end()),
                    
                    upwards(reorder_commutative()),
                    when(downwards(reduce_fraction()),

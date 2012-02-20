@@ -713,7 +713,7 @@ int moses_exec(int argc, char** argv)
 
     // Continuous reduction rules used during search and representation
     // building.
-    const rule& contin_reduct = contin_reduction(ignore_ops, rng);
+    const rule& contin_reduct = contin_reduction(reduct_candidate_effort, ignore_ops, rng);
 
     // Logical reduction rules used during search.
     logical_reduction r(ignore_ops, rng);

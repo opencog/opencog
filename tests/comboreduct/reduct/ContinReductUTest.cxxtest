@@ -50,6 +50,7 @@ public:
         ITable rnt(tt, rng);
         
         int size_before, size_after;
+        int reduct_effort = 2;
         
         try {
             OTable ct1(tr, rnt, rng);
@@ -57,7 +58,7 @@ public:
             size_before=tr.size();
             std::cout << "before: " << tr << std::endl;
             
-            contin_reduce(tr, vertex_set(), rng);
+            contin_reduce(tr, reduct_effort, vertex_set(), rng);
             std::cout << "after:  " << tr << std::endl;      
             size_after=tr.size();
             OTable ct2(tr, rnt, rng);
@@ -206,6 +207,36 @@ public:
     // factorize/distribute test    
     void test_simplify15() {
         string tree_str="*(-1.75 +(*(+(1 *(+(1 *(+(1 *(-1 #9)) #9)) #9)) #1) #3))";
+        perform_test_reduce(tree_str);
+    }
+
+    // reduce argument of impulse
+    void test_simplify16() {
+        string tree_str="*(-1.75 impulse(and(or(and(#1 #2) #1))))";
+        perform_test_reduce(tree_str);
+    }
+
+    // reduce argument of impulse
+    void test_simplify17() {
+        string tree_str="*(-1.75 impulse(or(and(or(and(#1 #2) #1)) not(#1))))";
+        perform_test_reduce(tree_str);
+    }
+
+    // reduce argument of impulse
+    void test_simplify18() {
+        string tree_str="*(-1.75 impulse(or(and(or(0<(+(2 1)))))))";
+        perform_test_reduce(tree_str);
+    }
+
+    // reduce argument of impulse
+    void test_simplify19() {
+        string tree_str="*(-1.75 impulse(or(and(or(0<(+(2 #1)))))))";
+        perform_test_reduce(tree_str);
+    }
+
+    // reduce argument of impulse
+    void test_simplify20() {
+        string tree_str="*(-1.75 impulse(or(and(or(0<(+(2 *(2 #1) 6)))))))";
         perform_test_reduce(tree_str);
     }
 };

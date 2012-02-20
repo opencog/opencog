@@ -922,6 +922,18 @@ void reduce_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
     }
 }
 
+// Apply boolean reduction to the argument of impulse.
+void reduce_impulse_arg::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (*it == id::impulse) {
+        OC_ASSERT(it.has_one_child(),
+                  "impulse should have exactly one child (reduce_impulse_arg).");
+        pre_it it_child = it.begin();
+        logical_reduce(reduct_effort, tr, it_child, ignore_ops, rng);
+    }
+}
+
+
 } // ~namespace reduct
 } // ~namespace opencog
 
