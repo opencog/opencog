@@ -39,8 +39,8 @@ int nrep = 10000;
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
         stringstream ss;
-        ss << "-r" << i;
-#if 0
+        // ss << "-r" << i;
+#if 1
         nrep = 10000*(1<<i);
         ss << "-m" << nrep;
 #endif
@@ -49,8 +49,8 @@ int nrep = 10000;
 #if 1
         // Do NOT include a blank space after -f !!
         stringstream fss;
-        fss << "-fmoses-perf-r" << i << ".log";
-        // fss << "-fmoses-perf-bank-nn-m" << nrep << ".log";
+        // fss << "-fmoses-perf-r" << i << ".log";
+        fss << "-fmoses-perf-bank-nn2-m" << nrep << ".log";
         args.push_back(fss.str());
 #endif
 

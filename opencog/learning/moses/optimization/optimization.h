@@ -415,6 +415,8 @@ struct hill_climbing : optim_stats
         // center_inst is the current location on the hill.
         instance center_inst(init_inst);
         composite_score best_cscore = worst_composite_score;
+        score_t prev_best_score = worst_score;
+        score_t best_score = worst_score;
 
         // Initial distance is zero, so that the first time through
         // the loop, we handle just one instance, the initial instance.
@@ -528,8 +530,11 @@ struct hill_climbing : optim_stats
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
                 composite_score inst_cscore = deme[i].second;
-                if (cscore_gt(inst_cscore, best_cscore)) {
+                score_t iscore = get_weighted_score(inst_cscore);
+                static float_t min_score_improvement = 0.5;
+                if (iscore >  best_score + min_score_improvement) {
                     best_cscore = inst_cscore;
+                    best_score = iscore;
                     center_inst = deme[i].first;
                     has_improved = true;
                 }
@@ -543,8 +548,12 @@ struct hill_climbing : optim_stats
                     *eval_best = current_number_of_instances;
 
                 if (logger().isDebugEnabled()) {
+                    score_t best = get_score(best_cscore);
+                    score_t delta = best - prev_best_score;
+                    prev_best_score = best;
                     std::stringstream ss;
-                    ss << "Best score: " << " " << best_cscore;
+                    ss << "Best score: " << best_cscore
+                       << " Delta: " << delta;
                     logger().debug(ss.str());
                     if (logger().isFineEnabled()) {
                         std::stringstream fss;

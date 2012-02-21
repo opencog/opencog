@@ -1029,19 +1029,16 @@ struct metapopulation : public bscored_combo_tree_set
                 logger().fine() << "best composite score = " << _best_cscore;
                 logger().fine() << "candidate composite score = " << sc;
 
-                if (cscore_ge(csc, _best_cscore)) {
+                if (csc >= _best_cscore) {
                     logger().fine("Apparently that candidate score is better or equal to the best score");
-                    if (cscore_gt(csc, _best_cscore)) {
+                    if (csc > _best_cscore) {
                         logger().fine("Apparently that candidate score is just better");
                     }
                 }
             }
 
-            // I need to check whether the score is nan because
-            // actually the default >= operator won't do that on pairs
-            // (i.e. composite scores)
-            if (cscore_ge(csc, _best_cscore)) {
-                if (cscore_gt(csc, _best_cscore)) {
+            if (csc >= _best_cscore) {
+                if (csc > _best_cscore) {
                     _best_cscore = csc;
                     _best_candidates.clear();
                 }

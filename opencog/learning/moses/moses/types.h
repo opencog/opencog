@@ -88,12 +88,16 @@ struct composite_score: public std::pair<score_t, complexity_t>
     bool operator<=(const composite_score &r);
     inline bool operator>(const composite_score &r)
     {
-       return (weight*first + second) > (weight*r.first + r.second);
+       score_t lef = weight*first + second;
+       score_t rig = weight*r.first + r.second;
+       return (lef > rig);
     }
 
     inline bool operator>=(const composite_score &r)
     {
-       return (weight*first + second) >= (weight*r.first + r.second);
+       score_t lef = weight*first + second;
+       score_t rig = weight*r.first + r.second;
+       return (lef >= rig);
     }
 
     static float weight;
@@ -101,17 +105,27 @@ struct composite_score: public std::pair<score_t, complexity_t>
 
 inline bool operator>(const composite_score &l, const composite_score &r)
 {
-   return (composite_score::weight*l.first + l.second) > (composite_score::weight*r.first + r.second);
+   score_t lef = composite_score::weight*l.first + l.second;
+   score_t rig = composite_score::weight*r.first + r.second;
+   return (lef > rig);
+}
+
+inline bool operator>=(const composite_score &l, const composite_score &r)
+{
+   score_t lef = composite_score::weight*l.first + l.second;
+   score_t rig = composite_score::weight*r.first + r.second;
+   return (lef >= rig);
 }
 
 inline bool operator<(const composite_score &l, const composite_score &r)
 {
-   return (composite_score::weight*l.first + l.second) < (composite_score::weight*r.first + r.second);
+   score_t lef = composite_score::weight*l.first + l.second;
+   score_t rig = composite_score::weight*r.first + r.second;
+   return (lef < rig);
 }
 
 // Not implemented right now.... because not used anywhere...
 bool operator<=(const composite_score &l, const composite_score &r);
-bool operator>=(const composite_score &l, const composite_score &r);
 
 extern const composite_score worst_composite_score;
 
@@ -208,19 +222,6 @@ inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
 }
 
 /**
- * Non standard definition of greater than between 2 composite scores.
- * In that definition nan on the score is never greater than anything.
- */
-inline bool cscore_gt(const composite_score& l_csc, const composite_score& r_csc)
-{
-    return !isnan(l_csc) && (isnan(r_csc) || l_csc > r_csc);
-}
-inline bool cscore_ge(const composite_score& l_csc, const composite_score& r_csc)
-{
-    return cscore_gt(l_csc, r_csc) || l_csc == r_csc;
-}
-
-/**
  * greater_than operator for bscored_combo_tree.  The order is as
  * follow 1 the score matter, then complexity, then the combo_tree
  * itself. This is done (formerly replacing
@@ -240,8 +241,8 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
     {
         composite_score csc1 = get_composite_score(bs_tr1),
             csc2 = get_composite_score(bs_tr2);
-        return cscore_gt(csc1, csc2)
-            || (!cscore_gt(csc2, csc1) &&
+        return (csc1 >  csc2)
+            || (!(csc2 > csc1) &&
                 size_tree_order<vertex>()(get_tree(bs_tr1),
                                           get_tree(bs_tr2)));
     }
