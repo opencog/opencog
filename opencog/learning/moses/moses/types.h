@@ -211,8 +211,14 @@ inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
  * Non standard definition of greater than between 2 composite scores.
  * In that definition nan on the score is never greater than anything.
  */
-bool cscore_gt(const composite_score& l_csc, const composite_score& r_csc);
-bool cscore_ge(const composite_score& l_csc, const composite_score& r_csc);
+inline bool cscore_gt(const composite_score& l_csc, const composite_score& r_csc)
+{
+    return !isnan(l_csc) && (isnan(r_csc) || l_csc > r_csc);
+}
+inline bool cscore_ge(const composite_score& l_csc, const composite_score& r_csc)
+{
+    return cscore_gt(l_csc, r_csc) || l_csc == r_csc;
+}
 
 /**
  * greater_than operator for bscored_combo_tree.  The order is as
