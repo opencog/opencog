@@ -347,9 +347,11 @@ struct hill_climbing : optim_stats
      * - we sample the neighborhood at distance d,
      * - with N samples,
      * - the total number of neighbors at that distance is T
+     * XXX  I don't see any evidence that this heuristic is accomplishing
+     * anything useful; it just seems to add to the complexity of the
+     * algorithm, and I think it might best be removed. XXX
      */
-    float prob_improvement(deme_size_t N, deme_size_t T, unsigned d,
-                           const field_set& fields)
+    float prob_improvement(deme_size_t N, deme_size_t T)
     {
         // The following is based on the (not always true) assumption
         // that there is an improvement in the neighborhood.
@@ -452,46 +454,63 @@ struct hill_climbing : optim_stats
         unsigned iteration = 0;
 
         // Whether the score has improved during an iteration
-        while (true) {
-            bool has_improved = false;
-
-            // Logger
-            {
-                logger().debug("Iteration: %u", iteration++);
-            }
-            // ~Logger
-
-            // Number of instances to try, this go-around.
-            // fraction_of_remaining is 1/10th
-            deme_size_t number_of_new_instances =
-                (max_number_of_instances - current_number_of_instances)
-                * hc_params.fraction_of_remaining;
-
-            // this is to lower the cost of deme management
-            // (especially representation building)
-            if (number_of_new_instances < MINIMUM_DEME_SIZE)
-                number_of_new_instances =
-                    (max_number_of_instances - current_number_of_instances);
+        while (true)
+        {
+            logger().debug("Iteration: %u", iteration++);
 
             // Estimate the number of neighbours at the distance d.
             // This is faster than actually counting.
-            deme_size_t total_number_of_neighbours =
-                safe_binomial_coefficient(nn_estimate, distance);
+            deme_size_t total_number_of_neighbours;
 
-            // Estimate the probability of an improvement and halt if too low
-            // XXX This estimate is pretty hokey....
-            float p_improv = prob_improvement(number_of_new_instances,
-                                              total_number_of_neighbours,
-                                              distance, fields);
+            // Number of instances to try, this go-around.
+            deme_size_t number_of_new_instances;
 
-            logger().debug("Estimated probability to find an improvement = %f",
-                           p_improv);
-
-            if (p_improv < 0.01) {
-                logger().debug("The probability is too low to pursue the search",
-                               p_improv);
-                break;
+            if (distance <= 1)
+            {
+                // For a distance of one, and plain-old hill-climbing,
+                // just try *all* of the nearest neighbors. Do so until
+                // our budget runs out.
+                total_number_of_neighbours = nn_estimate;
+                number_of_new_instances = nn_estimate;
+                deme_size_t nleft = 
+                    max_number_of_instances - current_number_of_instances;
+                if (nleft < number_of_new_instances) number_of_new_instances = nleft;
             }
+            else
+            {
+                // For large-distance searches, there is a combinatorial
+                // explosion of the size of the search volume. Thus, be
+                // careful bedget our available cycles.
+                total_number_of_neighbours = safe_binomial_coefficient(nn_estimate, distance);
+
+                // fraction_of_remaining is 1/10th
+                number_of_new_instances = 
+                   (max_number_of_instances - current_number_of_instances)
+                   * hc_params.fraction_of_remaining;
+
+                // If fraction is small, just use up the rest of the cycles.
+                if (number_of_new_instances < MINIMUM_DEME_SIZE)
+                    number_of_new_instances =
+                        (max_number_of_instances - current_number_of_instances);
+
+                // Estimate the probability of an improvement and halt if too low
+                // XXX This estimate is pretty hokey... should probably be removed.
+                float p_improv = prob_improvement(number_of_new_instances,
+                                                  total_number_of_neighbours);
+
+                logger().debug(
+                    "Estimated probability to find an improvement = %f",
+                    p_improv);
+
+                if (p_improv < 0.01) {
+                    logger().debug("The probability is too low to pursue the search",
+                                   p_improv);
+                    break;
+                }
+            }
+            logger().debug(
+                "Budget %u samples out of estimated %u neighbours",
+                number_of_new_instances, total_number_of_neighbours);
 
             // The current_number_of_instances arg is needed only to
             // be able to manage the size of the deme appropriately.
@@ -501,10 +520,8 @@ struct hill_climbing : optim_stats
                                      current_number_of_instances,
                                      center_inst, deme, distance, rng);
 
-            // Logger
             logger().debug("Evaluate %u neighbors at distance %u",
                            number_of_new_instances, distance);
-            // ~Logger
 
             // score all new instances in the deme
             OMP_ALGO::transform
@@ -514,8 +531,13 @@ struct hill_climbing : optim_stats
                  // ref instead of by copy
                  boost::bind(boost::cref(score), _1));
 
-            // check if there is an instance in the deme better than
+            // Check if there is an instance in the deme better than
             // the best candidate
+            // XXX TODO: we should accept improvement only if the
+            // score improved by 0.5 or better, to avoid fine-tuning.
+            // Most problems have 1.0 as the smallest meaningful score
+            // change, so 0.5 seems reasonable...
+            bool has_improved = false;
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
                 composite_score inst_cscore = deme[i].second;
@@ -532,14 +554,13 @@ struct hill_climbing : optim_stats
                 distance = 1;
                 if (eval_best)
                     *eval_best = current_number_of_instances;
-                // Logger
+
                 if (logger().isDebugEnabled()) {
                     std::stringstream ss;
                     ss << "Best instance: " << fields.stream(center_inst)
                        << " " << best_cscore;
                     logger().debug(ss.str());
                 }
-                // ~Logger
             }
             else
                 distance++;

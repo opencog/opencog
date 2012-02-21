@@ -827,31 +827,10 @@ best: -4x1       -4x1
       -6x5 -6x7  -6x8   -6x6  -6x6
 
 ===========================================================
-bank.dat:
-moses -Hit -uQ3 -i bank.dat -W1
+Is over-fitting a danger?  Well, we are over-fitting if the compexlity
+of the solution formula approaches the complexity of the raw table of
+data.  So lets compare them:
 
-        score   time
--m10K:  -361     128
--m20K:  -278     487
--m40K:  -215    1808
--m80K:
-
-XXX above failed to reduce the argument of impulse...
-
-          z-default             -z6 -vdefault      -z10, -v1
-         score   time  plex  score  time  plex  score time   plex
--m10K:   -361     176   39   -346   194    34    -367  162    25
--m20K:   -258     511   47   -275   540    41    -274  656    51
--m40K:   -210    2496
--m80K:   -174   15445 
--m160K:  -159   50430
-
-bank.dat:
-91 lines, 38 bits input per line, one contin out, valued: 1-16: 4 bits
-total: 91x42 = 3822 bits
-
-===========================================================
-OK, measuring complexity:
 3-arity: 3 boolean-valued inputs one boolean-valued output,
 total: 2^3=8 rows 4 bits per row: thus, complexity of table
 is 4x8=32 bits.
@@ -861,4 +840,53 @@ typical moses solution: 10 or 11 bits.
 total: 2^4=16 rows 5 bits per row: thus, complexity of table
 is 5x16=80 bits.
 typical moses solution: 20 bits
+
+Clearly, for the parity problem, the solution does not over-fit.
+
+===========================================================
+Data collected on the bank.dat test case.
+
+Original hill-climbing algorithm:
+moses -Hit -uQ3 -i bank.dat -W1
+
+        score   time
+-m10K:  -361     128
+-m20K:  -278     487
+-m40K:  -215    1808
+-m80K:
+
+Re-do -- the above had a bug in reduct, where the argmument of impulse()
+was not being reduced.  Fixed in bzr commit 6586
+
+          z-default             -z6 -vdefault      -z10, -v1
+         score   time  plex  score  time  plex  score time   plex
+-m10K:   -361     176   39   -346   194    34    -367  162    25
+-m20K:   -258     477   47   -275   540    41    -274  656    51
+-m40K:   -210    2496   71
+-m80K:   -174   15445 
+-m160K:  -159   50430
+
+complexity of bank.dat:
+91 lines, 38 bits input per line, one contin out, valued: 1-16: 4 bits
+total: 91x42 = 3822 bits
+Conclude: it'll be hard to over-fit the data, at the rate we are going.
+
+Note really poor run-time performance of above.  This seems to be due to
+this:  First, we build a fairly small exemplar, and hill-climb it... but
+not until exhaustion, because the hill-climbing budget is badly
+calculated.  Then, for the second round, we build a massively complex
+exemplar, which is very expensive to evaluate... and then we don't even
+beother to exhaust the nearest-neighbor search before throwing it away.
+Solution: at least do an exhaustive search for closes
+nearest-neightbors, before giving up.  This seems to help:
+
+          z-default         
+         score   time  plex
+-m10K:   -340    45     14
+-m20K:   -269   167     30
+-m40K:   -228   658     52
+-m80K:   
+-m160K:  
+
+
 
