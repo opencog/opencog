@@ -25,6 +25,7 @@
 #define _MOSES_MOSES_H
 
 #include "metapopulation.h"
+#include "../optimization/optimization.h"
 
 namespace opencog {
  namespace moses {
@@ -77,9 +78,18 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     // ~Logger
     int gen_idx = 0;
 
+    optim_stats *os = dynamic_cast<optim_stats *> (&mp.optimize);
+
     // Print legend for the columns of the stats.
-    logger().info("Stats:# generation\tnum_evals\tmetapop_size\t"
-                  "best_score\tcomplexity\n");
+    if (logger().isInfoEnabled()) {
+        stringstream ss;
+        ss << "Stats:# gen\tnum_evals\tmetapop_size\tbest_score\tcomplexity";
+        if (os) {
+            ss << "\toptim_steps\tover_budget";
+        }
+        ss << endl;
+        logger().info(ss.str());
+    }
 
     while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++)) {
         // Logger
@@ -104,6 +114,10 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             ss << "\t" << mp.size();       // size of the metapopulation
             ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
             ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+            if (os) {
+                ss << "\t" << os->nsteps;  // number of iterations of optimizer
+                ss << "\t" << os->over_budget;  // exceeded max_evals
+            }
             logger().info(ss.str());
         }
 

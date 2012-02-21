@@ -39,7 +39,6 @@
 #include "../eda/local_structure.h"
 #include "../eda/optimize.h"
 #include "../representation/instance_set.h"
-#include "../moses/moses.h"
 #include "../moses/neighborhood_sampling.h"
 
 // we choose the number 100 because below that multithreading is
@@ -173,6 +172,14 @@ struct optim_parameters
     size_t max_dist;
 };
 
+// Statistics obtained during optimization run, useful for tuning.
+struct optim_stats
+{
+    optim_stats() : nsteps(0), over_budget(false) {}
+    int nsteps;
+    bool over_budget;
+};
+
 // Parameters specific to EDA optimization
 struct eda_parameters
 {
@@ -199,7 +206,7 @@ struct eda_parameters
     double model_complexity;
 };
 
-struct univariate_optimization
+struct univariate_optimization : optim_stats
 {
     univariate_optimization(RandGen& _rng,
                             const optim_parameters& op = optim_parameters(),
@@ -327,7 +334,7 @@ struct hc_parameters
  * only the instances that are equi-distant from the exemplar are
  * explored (i.e. at the same Hamming distance).
  */
-struct hill_climbing
+struct hill_climbing : optim_stats
 {
     hill_climbing(RandGen& _rng,
                   const optim_parameters& op = optim_parameters(),
@@ -387,6 +394,10 @@ struct hill_climbing
         // Logger
         logger(). debug("Local Search Optimization");
         // ~Logger
+
+        // Collect statistics about the run, in struct optim_stats
+        nsteps = 0;
+        over_budget = false;
 
         // Initial eval_best in case nothing is found.
         if (eval_best)
@@ -455,8 +466,6 @@ struct hill_climbing
             deme_size_t number_of_new_instances =
                 (max_number_of_instances - current_number_of_instances)
                 * hc_params.fraction_of_remaining;
-
-            
 
             // this is to lower the cost of deme management
             // (especially representation building)
@@ -535,6 +544,11 @@ struct hill_climbing
             else
                 distance++;
 
+            // Collect statistics about the run, in struct optim_stats
+            nsteps++;
+            if (max_number_of_instances <= current_number_of_instances)
+                over_budget = true;
+
             /* If this is the first time through the loop, then distance
              * was zero, there was only one instance at dist=0, and we
              * just scored it. Be sure to go around and do at least the
@@ -604,7 +618,7 @@ struct sa_parameters
 /**
  * simulated_annealing: Apply a modified smulated annealing-style search.
  */
-struct simulated_annealing
+struct simulated_annealing : optim_stats
 {
     typedef score_t energy_t;
 
