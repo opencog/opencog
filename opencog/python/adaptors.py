@@ -143,7 +143,7 @@ class ForestExtractor:
         return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) or self.is_action_instance(atom)# or self.is_action_element(atom)
         
     def is_action_instance(self, atom):        
-        return len(atom.name) and atom.name[-1].isdigit()
+        return atom.t == t.ConceptNode and len(atom.name) and atom.name[-1].isdigit()
         
 #    def is_action_element(self, atom):
 #        return ':' in atom.name
@@ -159,8 +159,9 @@ class ForestExtractor:
         if atom.is_node():
             if atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK'):
                 return False
-        else:
-            if (atom.is_a(t.SimultaneousEquivalenceLink) or atom.is_a(t.SimilarityLink) or atom.is_a(t.ImplicationLink) or atom.is_a(t.ReferenceLink) ):
+        else:            
+            if any([atom.is_a(ty) for ty in 
+                    [t.SimultaneousEquivalenceLink, t.SimilarityLink,  t.ImplicationLink, t.ReferenceLink] ]):
                 return False
 
         return True
@@ -271,111 +272,112 @@ class ForestExtractor:
         else:
             return None
 
-class GraphConverter:
-    def __init__(self, a, writer):
-        self.a = a
-        self.writer = writer
-        self.compact = True
-
-    def addVertex(self,atom):
-        if atom.is_node():
-            self.writer.outputNodeVertex(atom)
-        elif not self.compact or not self.is_compactable(atom):
-            self.writer.outputLinkVertex(atom)
-
-    def addEdges(self,atom):
-        if atom.is_node():
-            return
-        elif self.compact and self.is_compactable(atom):
-            self.writer.outputLinkEdge(atom)
-        else:
-            self.writer.outputLinkArgumentEdges(atom)
-
-    def output(self):
-        self.writer.start()
-        # Use inline generators when you want to return all the results (or use a callback?)
-        try:
-            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Atom)):
-                #print atom
-                self.addVertex(atom)
-            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Link)):
-                self.addEdges(atom)
-        except Exception, e:
-            print e.__class__,  str(e)
-            import pdb; pdb.set_trace()
-        self.writer.stop()
-
-    # This got a bit convoluted. The reason why it's necessary is to make sure children of an atom will be
-    # output first (although there would be other ways to do that)
-    def sorted_by_handle(self,atoms):
-        handles = [atom.h for atom in atoms]
-        handles.sort()
-        return [Atom(h,self.a) for h in handles]
-    
-    def is_compactable(self,atom):
-        return atom.arity == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
-
-import pygephi
-class GephiOutput:
-
-    def __init__(self, space):
-        self._as = space
-        self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
-        self.g.clean()
-        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0, 'x':1}
-
-    def start(self):
-        pass
-
-    def stop(self):
-        pass
-
-    def outputNodeVertex(self, a, label = None):
-        assert a.is_node()
-        if label==None:
-            label = '%s:%s' % (a.name, a.type_name)
-
-        self.g.add_node(str(a.h.value()), label=label,  **self.node_attributes)
-
-    def outputLinkEdge(self, a, label=None,outgoing=None):
-        
-        assert a.is_link()
-        assert len(a.out) == 2
-        assert (label==None) == (outgoing==None)
-
-        if label==None:
-            label = a.type_name
-
-        if outgoing==None:
-            outgoing = a.out
-
-        (out0, out1) = outgoing[0].h.value(), outgoing[1].h.value()       
-     
-        self.g.add_edge(str(a.h.value()), out0, out1, directed=True, label=label)
-       
-    def outputLinkVertex(self, a, label=None):
-        #import code; code.interact(local=locals())
-        #import ipdb; ipdb.set_trace()
-        assert a.is_link()
-       
-        if label==None:
-            label = a.type_name
-
-        self.g.add_node(str(a.h.value()), label=label, **self.node_attributes)
-   
-    def outputLinkArgumentEdges(self,a, outgoing=None):
-        #import code; code.interact(local=locals())
-        #import ipdb; ipdb.set_trace()
-        assert a.is_link()
-        # assumes outgoing links/nodes have already been output
-
-        if outgoing==None:
-            outgoing = a.out
-
-        for i in xrange(0, len(outgoing)):
-            outi = outgoing[i]
-            id = str(a.h.value())+'->'+str(outi.h.value())
-            self.g.add_edge(id, a.h.value(), outi.h.value(), directed = True,  label=str(i))
+# More primitive less elegant earlier approach
+#class GraphConverter:
+#    def __init__(self, a, writer):
+#        self.a = a
+#        self.writer = writer
+#        self.compact = True
+#
+#    def addVertex(self,atom):
+#        if atom.is_node():
+#            self.writer.outputNodeVertex(atom)
+#        elif not self.compact or not self.is_compactable(atom):
+#            self.writer.outputLinkVertex(atom)
+#
+#    def addEdges(self,atom):
+#        if atom.is_node():
+#            return
+#        elif self.compact and self.is_compactable(atom):
+#            self.writer.outputLinkEdge(atom)
+#        else:
+#            self.writer.outputLinkArgumentEdges(atom)
+#
+#    def output(self):
+#        self.writer.start()
+#        # Use inline generators when you want to return all the results (or use a callback?)
+#        try:
+#            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Atom)):
+#                #print atom
+#                self.addVertex(atom)
+#            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Link)):
+#                self.addEdges(atom)
+#        except Exception, e:
+#            print e.__class__,  str(e)
+#            import pdb; pdb.set_trace()
+#        self.writer.stop()
+#
+#    # This got a bit convoluted. The reason why it's necessary is to make sure children of an atom will be
+#    # output first (although there would be other ways to do that)
+#    def sorted_by_handle(self,atoms):
+#        handles = [atom.h for atom in atoms]
+#        handles.sort()
+#        return [Atom(h,self.a) for h in handles]
+#    
+#    def is_compactable(self,atom):
+#        return atom.arity == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
+#
+#import pygephi
+#class GephiOutput:
+#
+#    def __init__(self, space):
+#        self._as = space
+#        self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
+#        self.g.clean()
+#        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0, 'x':1}
+#
+#    def start(self):
+#        pass
+#
+#    def stop(self):
+#        pass
+#
+#    def outputNodeVertex(self, a, label = None):
+#        assert a.is_node()
+#        if label==None:
+#            label = '%s:%s' % (a.name, a.type_name)
+#
+#        self.g.add_node(str(a.h.value()), label=label,  **self.node_attributes)
+#
+#    def outputLinkEdge(self, a, label=None,outgoing=None):
+#        
+#        assert a.is_link()
+#        assert len(a.out) == 2
+#        assert (label==None) == (outgoing==None)
+#
+#        if label==None:
+#            label = a.type_name
+#
+#        if outgoing==None:
+#            outgoing = a.out
+#
+#        (out0, out1) = outgoing[0].h.value(), outgoing[1].h.value()       
+#     
+#        self.g.add_edge(str(a.h.value()), out0, out1, directed=True, label=label)
+#       
+#    def outputLinkVertex(self, a, label=None):
+#        #import code; code.interact(local=locals())
+#        #import ipdb; ipdb.set_trace()
+#        assert a.is_link()
+#       
+#        if label==None:
+#            label = a.type_name
+#
+#        self.g.add_node(str(a.h.value()), label=label, **self.node_attributes)
+#   
+#    def outputLinkArgumentEdges(self,a, outgoing=None):
+#        #import code; code.interact(local=locals())
+#        #import ipdb; ipdb.set_trace()
+#        assert a.is_link()
+#        # assumes outgoing links/nodes have already been output
+#
+#        if outgoing==None:
+#            outgoing = a.out
+#
+#        for i in xrange(0, len(outgoing)):
+#            outi = outgoing[i]
+#            id = str(a.h.value())+'->'+str(outi.h.value())
+#            self.g.add_edge(id, a.h.value(), outi.h.value(), directed = True,  label=str(i))
 
 class DottyOutput:
     def __init__(self,space):
