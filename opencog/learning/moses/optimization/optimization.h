@@ -333,6 +333,11 @@ struct hc_parameters
  * In call cases, the neighborhood searched is 'spherical'; that is,
  * only the instances that are equi-distant from the exemplar are
  * explored (i.e. at the same Hamming distance).
+ *
+ * NB: most problems seem to do just fine without the single-step, 
+ * broaden-search flag combination.  However, some problems, esp. those
+ * with a deceptive scoring function (e.g. polynomial factoring, -Hsr)
+ * seem to work better with -L1 -T1.   
  */
 struct hill_climbing : optim_stats
 {
@@ -340,35 +345,6 @@ struct hill_climbing : optim_stats
                   const optim_parameters& op = optim_parameters(),
                   const hc_parameters& hc = hc_parameters())
         : rng(_rng), opt_params(op), hc_params(hc) {}
-
-    /**
-     * Heuristic to estimate the probability that an improvement can
-     * be gotten given that
-     * - we sample the neighborhood at distance d,
-     * - with N samples,
-     * - the total number of neighbors at that distance is T
-     * XXX  I don't see any evidence that this heuristic is accomplishing
-     * anything useful; it just seems to add to the complexity of the
-     * algorithm, and I think it might best be removed. XXX
-     */
-    float prob_improvement(deme_size_t N, deme_size_t T)
-    {
-        // The following is based on the (not always true) assumption
-        // that there is an improvement in the neighborhood.
-        static const deme_size_t NB = 10000; // number of better candidates in
-                                             // the neighborhood at distance d
-                                             // that number is a big lie!
-
-        // If the entire neighborhood is explored then the improvement
-        // is sure to be found.
-        if (N >= T)
-            return 1;
-
-        // proportion of good candidates in the neighborhood
-        double B = std::min(1.0, (double) NB / (double) T);
-
-        return 1 - pow(1 - B, double(N));
-    }
 
     /**
      * Perform search of the local neighborhood of an instance.  The
@@ -458,6 +434,10 @@ struct hill_climbing : optim_stats
             // Number of instances to try, this go-around.
             deme_size_t number_of_new_instances;
 
+            // distances greater than 1 occur only when the -L1 -T1 flags
+            // are used, to throw this algo into a very different mode of
+            // operation, in an attempt to overcome deceptive scoring
+            // functions.
             if (distance <= 1)
             {
                 // For a distance of one, and plain-old hill-climbing,
@@ -491,8 +471,19 @@ struct hill_climbing : optim_stats
 
                 // Estimate the probability of an improvement and halt if too low
                 // XXX This estimate is pretty hokey... should probably be removed.
-                float p_improv = prob_improvement(number_of_new_instances,
-                                                  total_number_of_neighbours);
+                // If its based on something empirical, I don't know what that is...
+                float p_improv = 1.0;
+                if (number_of_new_instances < total_number_of_neighbours) {
+                    // Number of better candidates in the neighborhood.
+                    // This number is a big lie!
+                    double NB = 10000; 
+
+                    // Proportion of good candidates in the neighborhood.
+                    double T = total_number_of_neighbours;
+                    double B = std::min(1.0, NB / T);
+                    double N = number_of_new_instances;
+                    p_improv = 1.0 - pow(1.0 - B, double(N));
+                }
 
                 logger().debug(
                     "Estimated probability to find an improvement = %f",
