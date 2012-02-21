@@ -26,6 +26,7 @@
 
 #include <opencog/util/tree.h>
 
+#include <opencog/learning/moses/moses/metapopulation.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
