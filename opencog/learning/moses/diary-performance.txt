@@ -888,5 +888,35 @@ nearest-neightbors, before giving up.  This seems to help:
 -m80K:   
 -m160K:  
 
+======================================================================
+Regression test the rebudgeting.  
 
+The "budge" column shows the effect of exhaustive nearest-neighbor
+search in hill-climbing.  Conclusion: this is a sure-fire win! Woot!
+
+As above -Hpa -k4 -z3.5 -v5
+
+         orig  budge
+-r0:      24    23
+-r1:      61    60
+-r2:     227   144 
+-r3:     207    36
+-r4:      47    45
+-r5:      22    22
+-r6:     129   115
+-r7:     222    58
+-r8:     234   351
+-r9:     125    54
+-r10:     34    33
+-r11:    135    44
+-r12:     21    20
+-r13:    140    70
+-r14:     88   116
+-r15:     85    70
+-r16:     55   107
+-r17:    132   195
+-r18:    114   104
+-r19:      5     5
+
+avg:     105    84
 

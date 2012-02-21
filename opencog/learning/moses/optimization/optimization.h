@@ -421,6 +421,8 @@ struct hill_climbing : optim_stats
         deme_size_t current_number_of_instances = 0;
 
         // max_number_of_instances == 20 * info-theo-bits squared.
+        // XXX This math seems crazy/wonky to me. Review, and
+        // eliminate, as needed.
         deme_size_t max_number_of_instances =
             (deme_size_t)max_gens_total * (deme_size_t)pop_size;
 
@@ -429,15 +431,6 @@ struct hill_climbing : optim_stats
         // will be *much* smaller than the product above, and so will
         // always be clamped.  Note also that 'max_evals' is actually
         // 'number of evals remaining', and so is constantly shrinking.
-        // Later, in the loop below, we multiply this number by 1/10th
-        // so that we explore only 1/10th of 'number evals remaining'
-        // in this go-around.
-        //
-        // This has the perverse effect of wasting a lot of the
-        // evaluations early, when its easy to find improvement, and
-        // thus having very few evals left over when the going gets
-        // tough.  XXX This needs to be fixed. XXX
-        //
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
@@ -469,9 +462,12 @@ struct hill_climbing : optim_stats
             {
                 // For a distance of one, and plain-old hill-climbing,
                 // just try *all* of the nearest neighbors. Do so until
-                // our budget runs out.
-                total_number_of_neighbours = nn_estimate;
-                number_of_new_instances = nn_estimate;
+                // our budget runs out. We will over-estimate number of
+                // neighbors by 2, just to make sure we don't go into
+                // 'sample' mode when working with the deme. This saves
+                // cpu time. 
+                total_number_of_neighbours = 2*nn_estimate;
+                number_of_new_instances = 2*nn_estimate;
                 deme_size_t nleft = 
                     max_number_of_instances - current_number_of_instances;
                 if (nleft < number_of_new_instances) number_of_new_instances = nleft;
@@ -557,9 +553,13 @@ struct hill_climbing : optim_stats
 
                 if (logger().isDebugEnabled()) {
                     std::stringstream ss;
-                    ss << "Best instance: " << fields.stream(center_inst)
-                       << " " << best_cscore;
+                    ss << "Best score: " << " " << best_cscore;
                     logger().debug(ss.str());
+                    if (logger().isFineEnabled()) {
+                        std::stringstream fss;
+                        fss << "Best instance: " << fields.stream(center_inst);
+                        logger().fine(fss.str());
+                    }
                 }
             }
             else
@@ -576,24 +576,39 @@ struct hill_climbing : optim_stats
              * distance = 1 exploration. */
             if (1 == number_of_new_instances) continue;
 
-            /* If we're in single-step mode, then exit the loop as soon
-             * as we find improvement. */
-            if (hc_params.single_step && has_improved) break;
-
-            /* If we've aleady gotten the best possible score, we are done. */
-            if (opt_params.terminate_if_gte <= get_score(best_cscore)) break;
-
             /* If we've blown our budget for evaluating the scorer,
              * then we are done. */
-            if (max_number_of_instances <= current_number_of_instances) break;
+            if (max_number_of_instances <= current_number_of_instances) {
+                logger().debug("Terminate Local Search: Over budget");
+                break;
+            }
 
             /* If things haven't improved, we must be at the top of the hill.
              * Terminate, unless we've been asked to widen the search.
              * (i.e. to search for other nearby hills) */
-            if (!has_improved && !hc_params.widen_search) break;
+            if (!has_improved && !hc_params.widen_search) {
+                logger().debug("Terminate Local Search: No improvement");
+                break;
+            }
+
+            /* If we've aleady gotten the best possible score, we are done. */
+            if (opt_params.terminate_if_gte <= get_score(best_cscore)) {
+                logger().debug("Terminate Local Search: Found best score");
+                break;
+            }
+
+            /* If we're in single-step mode, then exit the loop as soon
+             * as we find improvement. */
+            if (hc_params.single_step && has_improved) {
+                logger().debug("Terminate Local Search: Single-step and found improvment");
+                break;
+            }
 
             /* If we've widened the search out to the max distance, we're done. */
-            if (max_distance < distance) break;
+            if (max_distance < distance) {
+                logger().debug("Terminate Local Search: Max search distance exxceeded");
+                break;
+            }
         }
 
         return current_number_of_instances;

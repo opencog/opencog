@@ -34,22 +34,23 @@ void measure(vector<string> arguments)
     fflush (stdout);
 
 int nrep = 10000;
-float step = sqrt(2.0);
     for (int i=0; i<nreps; i++)
     {
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
         stringstream ss;
-        // ss << "-r" << i;
-nrep = 10000*(1<<i);
+        ss << "-r" << i;
+#if 0
+        nrep = 10000*(1<<i);
         ss << "-m" << nrep;
+#endif
         args.push_back(ss.str());
 
 #if 1
         // Do NOT include a blank space after -f !!
         stringstream fss;
-        // fss << "-fmoses-perf-r" << i << ".log";
-        fss << "-fmoses-perf-bank-nn-m" << nrep << ".log";
+        fss << "-fmoses-perf-r" << i << ".log";
+        // fss << "-fmoses-perf-bank-nn-m" << nrep << ".log";
         args.push_back(fss.str());
 #endif
 
