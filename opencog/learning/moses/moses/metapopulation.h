@@ -355,14 +355,15 @@ struct metapopulation : public bscored_combo_tree_set
         // Note that (2/3)*ln2==0.5 and the best weights results in 
         // scores tht are about 0.5*complexity, so just use the weighted 
         // score... Note ln(1e4)==9.2  ln(1e6)==13.8
-        score_t sc = -get_weighted_score(*begin());
+        float sc = -0.4 * (float) get_complexity(*begin());
         sc += params.complexity_temperature * 13.8 / 100.0;
         sc += 2;  // heuristic hack... exp(2)==7 .. some inexpensive(?) elbow room.
+        if (20 < sc) sc = 20;
         size_t max_metapop_size = floor(expf(sc));
 
-        // Allow a population of at least 250, but no more than 1.1 million.
+        // Allow a population of at least 250, but no more than 123K.
         if (max_metapop_size < 250) max_metapop_size = 250;
-        if (1123123 < max_metapop_size) max_metapop_size = 1123123;
+        if (123123 < max_metapop_size) max_metapop_size = 123123;
         if (size() < max_metapop_size) return;
 
         // Erase all the lowest scores.

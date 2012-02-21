@@ -45,10 +45,11 @@ nrep = 10000*(1<<i);
         ss << "-m" << nrep;
         args.push_back(ss.str());
 
-#if 0
+#if 1
         // Do NOT include a blank space after -f !!
         stringstream fss;
-        fss << "-fmoses-perf-r" << i << ".log";
+        // fss << "-fmoses-perf-r" << i << ".log";
+        fss << "-fmoses-perf-m" << nrep << ".log";
         args.push_back(fss.str());
 #endif
 

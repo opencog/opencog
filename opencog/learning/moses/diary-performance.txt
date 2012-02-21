@@ -838,8 +838,27 @@ moses -Hit -uQ3 -i bank.dat -W1
 
 XXX above failed to reduce the argument of impulse...
 
-        score   time
--m10K:  -361     176
--m20K:  -258     511
--m40K:  -210    2496
--m80K:
+          z-default             -z6 -vdefault      -z10, -v1
+         score   time  plex  score  time  plex  score time   plex
+-m10K:   -361     176   39   -346   194    34    -367  162    25
+-m20K:   -258     511   47   -275   540    41    -274  656    51
+-m40K:   -210    2496
+-m80K:   -174   15445 
+-m160K:  -159   50430
+
+bank.dat:
+91 lines, 38 bits input per line, one contin out, valued: 1-16: 4 bits
+total: 91x42 = 3822 bits
+
+===========================================================
+OK, measuring complexity:
+3-arity: 3 boolean-valued inputs one boolean-valued output,
+total: 2^3=8 rows 4 bits per row: thus, complexity of table
+is 4x8=32 bits.
+typical moses solution: 10 or 11 bits.
+
+4-arity: 4 boolean-valued inputs one boolean-valued output,
+total: 2^4=16 rows 5 bits per row: thus, complexity of table
+is 5x16=80 bits.
+typical moses solution: 20 bits
+
