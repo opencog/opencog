@@ -880,13 +880,31 @@ beother to exhaust the nearest-neighbor search before throwing it away.
 Solution: at least do an exhaustive search for closes
 nearest-neightbors, before giving up.  This seems to help:
 
-          z-default         
-         score   time  plex
--m10K:   -340    45     14
--m20K:   -269   167     30
--m40K:   -228   658     52
--m80K:   
--m160K:  
+          z-default           exhaust                copy avoid
+         score   time  plex   score   time  plex   score   time   plex
+-m10K:   -340    45     14    -340     45    14    -340     41    14
+-m20K:   -265   167     30    -265    171    32    -265    162    32
+-m40K:   -228   658     52    -248   3103    40
+-m80K:                        -219  11117    50
+-m160K:                       -196  29415    60
+-m320K:                        4 gigs ram...
+
+Gahh ... -m40K goes to 3103 seconds, -248 score, -40 complexity when
+the first search is exhausted, and the second exemplar gets built.
+The second exemplar is huge/complex, and very slow to evaluate...
+
+OK, "Select candidates to merge" is taking too long:
+11904 in 1:35:23 or 5723 secs = 480 millisecs each
+8754 in 2:16 or 136 secs = 15 millisecs each
+29846 in 4:19:24 = 15563 secs = 520 millisecs each
+
+The "copy avoid" columns avoid a few pointless copies of the combo
+tree to the stack.
+
+Performance of 
+        auto select_candidates =
+in metapopulation.h is still a disaster area.
+
 
 ======================================================================
 Regression test the rebudgeting.  

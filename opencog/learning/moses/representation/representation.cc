@@ -186,12 +186,15 @@ void representation::transform(const instance& inst)
 combo_tree representation::get_clean_exemplar(bool reduce,
                                               bool knob_building) const
 {
-    return get_clean_combo_tree(exemplar(), reduce, knob_building);
+    // Make a copy -- expensive! but necessary.
+    combo_tree tr = exemplar();
+    get_clean_combo_tree(tr, reduce, knob_building);
+    return tr;
 }
 
-combo_tree representation::get_clean_combo_tree(combo_tree tr,
-                                                bool reduce,
-                                                bool knob_building) const
+void representation::get_clean_combo_tree(combo_tree &tr,
+                                          bool reduce,
+                                          bool knob_building) const
 {
     using namespace reduct;
 
@@ -212,8 +215,6 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
         else
             (*get_simplify_candidate())(tr);
     }
-
-    return tr;
 }
 
 /// Create a combo tree that corresponds to the instance inst.
@@ -225,15 +226,18 @@ combo_tree representation::get_clean_combo_tree(combo_tree tr,
 // 
 combo_tree representation::get_candidate(const instance& inst, bool reduce)
 {
-    // thread safe transform. If that turns out to be a bottle neck,
-    // one should copy the exemplar before tranformation and do the
-    // transformation (unlocked) on that copy
+    // In order to make this method thread-safe, a copy of the exemplar
+    // must be made under the lock, after the transform step. 
+    // Unfortunately, copying the exemplar is expensive, but seemingly
+    // unavoidable: the knob mapper only works for the member _exemplar.
+    // Thus we cannot have "const combo_tree &tr = exemplar();"
     boost::mutex::scoped_lock lock(tranform_mutex);
     transform(inst);
-    combo_tree tr = exemplar();
+    combo_tree tr = exemplar();  // make copy before unlocking.
     lock.unlock();
 
-    return get_clean_combo_tree(tr, reduce);
+    get_clean_combo_tree(tr, reduce);
+    return tr;
 }
 
 #ifdef EXEMPLAR_INST_IS_UNDEAD

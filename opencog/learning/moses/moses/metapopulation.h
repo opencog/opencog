@@ -548,21 +548,16 @@ struct metapopulation : public bscored_combo_tree_set
         //trees in the final deme
         metapop_candidates pot_candidates;
 
-        // Logger
         logger().debug("Sort the deme");
-        // ~Logger
 
         // sort the deme according to composite_score (descending order)
         std::sort(_deme->begin(), _deme->end(),
                   std::greater<scored_instance<composite_score> >());
 
-        // Logger
-        logger().debug("Select candidates to merge");
-        // ~Logger
-
         ///////////////////////////////////////////////////////////////
         // select the set of candidates to add in the metapopulation //
         ///////////////////////////////////////////////////////////////
+        logger().debug("Select candidates to merge");
 
         typedef boost::shared_mutex mutex;
         typedef boost::shared_lock<mutex> shared_lock;
@@ -630,15 +625,18 @@ struct metapopulation : public bscored_combo_tree_set
         // the range of the deme to merge goes up to
         // eval_during_this_deme in case the deme is closed before the
         // entire deme (or rather the current sample of it) has been
-        // explored
+        // explored (Huh??? What does this mean?)
+        // Note: this step can be very times consuming; it is currently
+        // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
+        // for me; my (reduced, simplified) instances have complexity
+        // of about 100. This seems too long/slow.
         deme_cit deme_begin = _deme->begin();
         deme_cit deme_end = _deme->begin() + eval_during_this_deme;
         OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
-        // Logger
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
-        // ~Logger
+
         auto compute_bscore = [this](metapop_candidates::value_type& cand) {
             composite_score csc = get_composite_score(cand.second);
             behavioral_score bsc = this->bscore(cand.first);
@@ -649,7 +647,7 @@ struct metapopulation : public bscored_combo_tree_set
 
         bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
         if (!params.include_dominated) {
-            // Logger
+
             logger().debug("Remove dominated candidates");
             if (logger().isFineEnabled()) {
                 logger().fine("Candidates with their bscores before"
@@ -658,10 +656,10 @@ struct metapopulation : public bscored_combo_tree_set
                 logger().fine(ostream(ss, candidates.begin(), candidates.end(),
                                       -1, true, true, true).str());
             }
-            // ~Logger
+
             size_t old_size = candidates.size();
             remove_dominated(candidates, params.jobs);
-            // Logger
+
             logger().debug("Removed %u dominated candidates out of %u",
                            old_size - candidates.size(), old_size);
             if (logger().isFineEnabled()) {
@@ -671,7 +669,6 @@ struct metapopulation : public bscored_combo_tree_set
                 logger().fine(ostream(ss, candidates.begin(), candidates.end(),
                                       -1, true, true, true).str());
             }
-            // ~Logger
         }
 
         // update the record of the best-seen score & trees

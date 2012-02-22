@@ -85,8 +85,8 @@ struct representation : public knob_mapper, boost::noncopyable
      * is true then _simplify_knob_building is used to reduce, otherwise
      * (the default) _simplify_candidate.
      */
-    combo_tree get_clean_combo_tree(combo_tree tr, bool reduce,
-                                    bool knob_building = false) const;
+    void get_clean_combo_tree(combo_tree &tr, bool reduce,
+                              bool knob_building = false) const;
 
     /**
      * Thread safe composition of transform and get_clean_exemplar.

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/instance_set.h
+ * opencog/learning/moses/representation/instance_set.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -278,7 +278,8 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 
         // get cleaned and reduced (according to
         // _simplify_knob_building) exemplar
-        combo_tree tmp = _rep.get_clean_combo_tree(exemplar, true, true);
+        combo_tree tmp = exemplar; // make a copy -- caution, expensive!
+        _rep.get_clean_combo_tree(tmp, true, true);
 
         // Note that complexity is negative, with -inf being highest,
         // 0 lowest, which is why this conditional is taken if tmp is
