@@ -29,6 +29,7 @@
 
 #include <boost/unordered_map.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
+#include <boost/operators.hpp>
 
 #include <opencog/util/functional.h>
 #include <opencog/util/foreach.h>
@@ -76,56 +77,23 @@ static const score_t worst_score = score_t(1) - best_score;
 // Define composite_score as a pair:
 // typedef std::pair<score_t, complexity_t> composite_score;
 // But modify the default sort ordering for these objects.
-struct composite_score: public std::pair<score_t, complexity_t>
+struct composite_score: public std::pair<score_t, complexity_t>,
+                        boost::less_than_comparable<composite_score>
 {
     composite_score (score_t s, complexity_t c) { first = s; second = c; }
     composite_score (const std::pair<score_t, complexity_t> &p) { first = p.first; second = p.second; }
     composite_score () { first = worst_score; second = worst_complexity; }
     composite_score& operator=(const composite_score &r) { first = r.first; second = r.second; return *this; }
 
-    // Not implemented right now.... because not used anywhere...
-    bool operator<(const composite_score &r);
-    bool operator<=(const composite_score &r);
-    inline bool operator>(const composite_score &r)
+    bool operator<(const composite_score &r)
     {
        score_t lef = weight*first + second;
        score_t rig = weight*r.first + r.second;
-       return (lef > rig);
-    }
-
-    inline bool operator>=(const composite_score &r)
-    {
-       score_t lef = weight*first + second;
-       score_t rig = weight*r.first + r.second;
-       return (lef >= rig);
+       return (lef < rig);        
     }
 
     static float weight;
 };
-
-inline bool operator>(const composite_score &l, const composite_score &r)
-{
-   score_t lef = composite_score::weight*l.first + l.second;
-   score_t rig = composite_score::weight*r.first + r.second;
-   return (lef > rig);
-}
-
-inline bool operator>=(const composite_score &l, const composite_score &r)
-{
-   score_t lef = composite_score::weight*l.first + l.second;
-   score_t rig = composite_score::weight*r.first + r.second;
-   return (lef >= rig);
-}
-
-inline bool operator<(const composite_score &l, const composite_score &r)
-{
-   score_t lef = composite_score::weight*l.first + l.second;
-   score_t rig = composite_score::weight*r.first + r.second;
-   return (lef < rig);
-}
-
-// Not implemented right now.... because not used anywhere...
-bool operator<=(const composite_score &l, const composite_score &r);
 
 extern const composite_score worst_composite_score;
 
