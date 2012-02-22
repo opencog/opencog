@@ -319,8 +319,8 @@ struct metapopulation : public bscored_combo_tree_set
         OC_ASSERT(sum > 0.0f, "There is an internal bug, please fix it");
 
         size_t fwd = distance(probs.begin(), roulette_select(probs.begin(),
-                                                           probs.end(),
-                                                           sum, rng));
+                                                             probs.end(),
+                                                             sum, rng));
         // cout << "select_exemplar(): sum=" << sum << " fwd =" << fwd
         // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
         return std::next(begin(), fwd);
