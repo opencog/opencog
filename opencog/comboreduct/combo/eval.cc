@@ -268,6 +268,7 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws_binding(rng, bmap, sib, pe);
                 res *= get_contin(vres);
+                if (0.0 == res) return res;  // avoid pointless evals
             }
             return res;
         }
@@ -276,12 +277,13 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
             sib_it sib = it.begin();
             vertex vx = eval_throws_binding(rng, bmap, sib, pe);
             x = get_contin(vx);
+            if (0.0 == x) return x;  // avoid pointless evals
             ++sib;
             vertex vy = eval_throws_binding(rng, bmap, sib, pe);
             y = get_contin(vy);
             contin_t res = x / y;
             if (isnan(res) || isinf(res))
-	      throw EvalException(vertex(res));
+                throw EvalException(vertex(res));
             return res;
         }
         case id::log : {
@@ -346,8 +348,7 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
     else if (is_action_symbol(v)) {
         return v;
     } else {
-        // @todo: strangely this cannot compile
-        // std::cerr << "unrecognized expression " << combo_tree(it) << std::endl;
+        // std::cerr << "unrecognized expression " << *it << std::endl;
         throw EvalException(*it);
         return v;
     }
