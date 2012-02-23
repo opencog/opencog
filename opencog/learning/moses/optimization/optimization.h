@@ -283,20 +283,31 @@ struct hc_parameters
 {
     hc_parameters(bool widen = false,
                   bool step = false,
-                  double _fraction_of_remaining = 0.1)
+                  double _fraction_of_remaining = 0.1,
+                  score_t _min_score_improvement = 0.5)
         : widen_search(widen),
           single_step(step),
-          fraction_of_remaining(_fraction_of_remaining) {
+          fraction_of_remaining(_fraction_of_remaining),
+          min_score_improvement(_min_score_improvement) {
         OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
     }
 
     bool widen_search;
     bool single_step;
 
-    // Things work better if the pop_size_ratio is used to control
-    // the allocation of resources.
-    // XXX So we should probably remove this!?
+    // One should probably try first to tweak pop_size_ratio to
+    // control the allocation of resources. However in some cases (for
+    // instance when hill_climbing is used for feature-selection),
+    // there is only one deme to explore and tweaking that parameter
+    // can make a difference (breadth vs depth)
     double fraction_of_remaining;
+
+    // We accept improvement only if the score improved by that amount
+    // or better, to avoid fine-tuning. It may be better to restart
+    // the search from a new exemplar rather wasting time climbing a
+    // near-plateau. Most problems have 1.0 as the smallest meaningful
+    // score change, so 0.5 as default seems reasonable...
+    score_t min_score_improvement;
 };
 
 /**
@@ -522,17 +533,12 @@ struct hill_climbing : optim_stats
 
             // Check if there is an instance in the deme better than
             // the best candidate
-            // XXX TODO: we should accept improvement only if the
-            // score improved by 0.5 or better, to avoid fine-tuning.
-            // Most problems have 1.0 as the smallest meaningful score
-            // change, so 0.5 seems reasonable...
             bool has_improved = false;
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
                 composite_score inst_cscore = deme[i].second;
                 score_t iscore = get_weighted_score(inst_cscore);
-                static float_t min_score_improvement = 0.5;
-                if (iscore >  best_score + min_score_improvement) {
+                if (iscore >  best_score + hc_params.min_score_improvement) {
                     best_cscore = inst_cscore;
                     best_score = iscore;
                     center_inst = deme[i].first;
