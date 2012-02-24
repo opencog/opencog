@@ -627,7 +627,7 @@ int moses_exec(int argc, char** argv)
             if (builtin_str_to_vertex(s, v)) {
                 if (!ignore_operators) {
                     ignore_ops = {id::plus, id::times, id::div,
-                                  id::exp, id::log, id::sin};
+                                  id::exp, id::log, id::sin, id::impulse};
                     ignore_operators = true;
                 }
                 ignore_ops.erase(v);

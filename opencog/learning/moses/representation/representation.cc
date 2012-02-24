@@ -202,14 +202,9 @@ void representation::get_clean_combo_tree(combo_tree &tr,
     clean_reduce(tr);
 
     if (reduce) { //reduce
-        // Logger
         if (logger().isFineEnabled()) {
-            std::stringstream ss;
-            ss << "Reduce candidate: "
-               << tr;
-            logger().fine(ss.str());
+            logger().fine() << "Reduce candidate: " << tr;
         }
-        // ~Logger
         if (knob_building)
             (*get_simplify_knob_building())(tr);
         else
