@@ -416,15 +416,47 @@ struct field_set
     std::string stream(const instance&) const;
     std::string stream_raw(const instance&) const;
 
+    /// Compute the Hamming distance between two instances.
     int hamming_distance(const instance& inst1, const instance& inst2) const
     {
         int d = 0;
         for (const_disc_iterator it1 = begin_raw(inst1), it2 = begin_raw(inst2);
-                it1 != end_raw(inst1);++it1, ++it2)
+                it1 != end_raw(inst1); ++it1, ++it2)
             d += (*it1 != *it2);
         return d;
     }
 
+    /// Copy fields that differ between base and reference, to the target.
+    ///
+    /// This routine will iterate over all the fields in the base instance.
+    /// If a field value differs between the base and the reference
+    /// instance, then the reference value will be copied to the target.
+    ///
+    /// The intended use of this is to merge two high-scoring instances
+    /// into one. Thus, typically, both target and reference will be high
+    /// scorers, and base a previous high scorer. Then the difference 
+    /// (reference minus base) are those bits that made reference into
+    /// such a great instance -- so copy those fields into the target.
+    /// For many simple hill-climbing, this actually works, because high
+    /// scoring knob settings are strongly correlated, even if we don't 
+    /// really know what these are (i.e. have not used an estimation-of-
+    /// distribution/Bayesian-optimization algorithm to figure out the
+    /// correlations). That is, we just blindly assume a correlation, and
+    /// hope for the best.
+    //
+    void merge_instance(instance& target,
+                        const instance& base,
+                        const instance& reference) const
+    {
+        disc_iterator tit = begin_raw(target);
+        for (const_disc_iterator bit = begin_raw(base),
+                                 rit = begin_raw(reference);
+             bit != end_raw(base); ++bit, ++rit, ++tit)
+        {
+            if (*bit != *rit) *tit = *rit;
+        }
+    }
+    
     // The fields are organized so that term fields come first,
     // followed by the continuous fields, and then the discrete
     // fields. These are then followed by the 1-bit (boolean)

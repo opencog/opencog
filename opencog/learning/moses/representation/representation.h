@@ -68,8 +68,8 @@ struct representation : public knob_mapper, boost::noncopyable
     void transform(const instance&);
 
     /**
-     * Returns a clean and reduced version of the current exemplar
-     * (usually after turning some of its knobs).
+     * Returns a clean and reduced version of the current exemplar.
+     * This would typically be called after turning some of its knobs.
      *
      * @param reduce whether the combo_tree is reduced before it is returned
      * @param knob_building if true then _simplify_knob_building is used to
