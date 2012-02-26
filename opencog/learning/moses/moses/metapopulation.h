@@ -1,8 +1,9 @@
 /** metapopulation.h ---
  *
  * Copyright (C) 2010 Novemente LLC
+ * Copyright (C) 2012 Poulin Holdings
  *
- * Authors: Nil Geisweiller, Moshe Looks
+ * Authors: Nil Geisweiller, Moshe Looks, Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -326,53 +327,51 @@ struct metapopulation : public bscored_combo_tree_set
         return std::next(begin(), fwd);
     }
 
+    /// Given the current complexity temp, return the range of scores that
+    /// are likely to be selected by the select_exemplar routine. Due to
+    /// exponential decay of scores in select_exemplar(), this is fairly
+    /// narrow: viz: e^30 = 1e13 ... We could probably get by with
+    /// e^14 = 1.2e6
+    //
+    score_t useful_score_range() const
+    {
+        return params.complexity_temperature * 30.0 / 100.0;
+    }
+
     /// Merge candidates in to the metapopulation. The set of
     /// candidates might be changed during merge, with the dominated
     /// candidates removed during the merge.
     template<typename Candidates>
     void merge_candidates(Candidates& candidates)
     {
+        // Note that merge_nondominated() is very cpu-expensive and
+        // complex...
         if (params.include_dominated)
             insert(candidates.begin(), candidates.end());
         else
             // merge_nondominated_any(candidates);
             merge_nondominated(candidates, params.jobs);
 
-        // Clamp the metapopulation size to something reasonable.
-        // In an excessively large metapop, any given exemplar will
-        // almost never be choosen.  Large metapops use up lots of RAM,
-        // and are slow to maintain in sorted order.  So keep them trim.
-        //
-        // The 2/3'rs of complexity is a heuristic: it allows for a
-        // sample of all possible exmplars that is fairly big, but far
-        // from exhaustive.
-        //
-        // The max allowed score should be equal to about
-        // (2/3)*ln2*best_complexity + 10*complexity_temperature.  The
-        // reason for this is that we want to maintain a decent variety
-        // of candidates, while realizing that select_exemplar() is
-        // unlikely to ever choose anything that scores poorer than that.
-        // Note that (2/3)*ln2==0.5 and the best weights results in 
-        // scores tht are about 0.5*complexity, so just use the weighted 
-        // score... Note ln(1e4)==9.2  ln(1e6)==13.8
-        float sc = -0.4 * (float) get_complexity(*begin());
-        sc += params.complexity_temperature * 13.8 / 100.0;
-        sc += 2;  // heuristic hack... exp(2)==7 .. some inexpensive(?) elbow room.
-        if (20 < sc) sc = 20;
-        size_t max_metapop_size = floor(expf(sc));
+        // Weed out excessively bad scores. The select_exemplar()
+        // routine picks an exemplar out of the metapopulation, using
+        // an exponential distribution of the score. Scores that
+        // are much worse than the best scores are extremely unlikely
+        // to be choosen, so discard these from the metapopulation.
+        // Keeping the metapop small brings huge benefits to the
+        // mem usage and runtime performance.
 
-        // Allow a population of at least 250, but no more than 123K.
-        if (max_metapop_size < 250) max_metapop_size = 250;
-        if (123123 < max_metapop_size) max_metapop_size = 123123;
-        if (size() < max_metapop_size) return;
+        score_t top_score = get_weighted_score(*begin());
+        score_t worst_score = top_score - useful_score_range();
 
-        // Erase all the lowest scores.
-        iterator it = std::next(begin(), max_metapop_size);
+        // Erase all the lowest scores.  The metapop is kept in
+        // weighted-score order by bscored_combo_tree_greater().
+        iterator it = begin();
         while (it != end()) {
-            iterator p = it;
+            score_t sc = get_weighted_score(*it);
+            if (sc < worst_score) break;
             it++;
-            erase(p);
         }
+        erase(it, end());
     }
 
     /**
@@ -528,6 +527,11 @@ struct metapopulation : public bscored_combo_tree_set
      * 1) mark the current deme exemplar to not explore it again,
      * 2) merge non-dominated candidates in the metapopulation,
      * 3) delete the deme instance from memory.
+XXX todo FIXME: the select_candidates step below is totally
+un-needed if we have the include-dominated flag set. Basically,
+the best/fastest/easiest algo just doesn't need behavioural scores,
+so we shouldn't waste the cpu time to compute these. And the time
+is rather expensive, actually, so ....
      */
     void close_deme()
     {
@@ -550,9 +554,31 @@ struct metapopulation : public bscored_combo_tree_set
 
         logger().debug("Sort the deme");
 
-        // sort the deme according to composite_score (descending order)
+        // Sort the deme according to composite_score (descending order)
         std::sort(_deme->begin(), _deme->end(),
                   std::greater<scored_instance<composite_score> >());
+
+        // Trim the deme down to size.  The point here is that the next
+        // stage, select_candidates below, is very cpu-intensive; we
+        // should keep only those candidates that will survive in the
+        // metapop.  But what are these? Well, select_exemplar() uses
+        // an exponential choice function; instances below a cut-off
+        // score have no chance at all of getting selected. So just
+        // eliminate them now, instead of later.
+        //
+        score_t top_sc = get_weighted_score(_deme->begin()->second);
+        score_t bot_sc = top_sc - useful_score_range();
+
+        for (size_t i = _deme->size()-1; 0 < i; --i) {
+            const composite_score &cscore = (*_deme)[i].second;
+            score_t score = get_weighted_score(cscore);
+            if (score < bot_sc) {
+                _deme->pop_back();
+            }
+        }
+
+        eval_during_this_deme = std::min(eval_during_this_deme,
+                                             (int)_deme->size());
 
         ///////////////////////////////////////////////////////////////
         // select the set of candidates to add in the metapopulation //
@@ -566,7 +592,7 @@ struct metapopulation : public bscored_combo_tree_set
         mutex pot_cnd_mutex; // mutex for pot_candidates
 
         // NB, this is an anonymous function. In particular, some
-        // compilers require that members be explicitly referenced 
+        // compilers require that members be explicitly referenced
         // with this-> as otherwise we get compile fails:
         // https://bugs.launchpad.net/bugs/933906
         auto select_candidates =

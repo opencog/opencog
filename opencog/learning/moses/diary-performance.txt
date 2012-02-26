@@ -912,15 +912,31 @@ and this is not easily fixable.
 
 ======================================================================
 
-Redo, with -n log -n exp -n sin
+Redo, with -n log -n exp -n sin  and again with -ndiv
 
-             baseline           nosinexplog
-         score   time   plex  score   time  plex
--m10K:   -340     41    14    -274    128    47
--m20K:   -265    162    32    -222    519    55
--m40K:   -248   2670    40    -182   1413    67
--m80K:   -219  10435    50    -145   3950    87
+             baseline            nosin exp log       nosinexplog nodiv
+         score   time   plex   score   time  plex   score   time  plex
+-m10K:   -340     41    14     -274    128    47     -258    256   32
+-m20K:   -265    162    32     -222    519    55     -232    720   42
+-m40K:   -248   2670    40     -182   1413    67     -190   1986   57
+-m80K:   -219  10435    50     -145   3950    87
 -m160K:  -196  26655    60
+-m320K:
+
+======================================================================
+
+Redo, with correlated hillclimbing
+basedline is 
+-Hit -uQ3 -i bank.dat -W1 -x1 -lDEBUG -n sin -n log -n exp
+
+
+             baseline              40-corr              re-up + trim
+         score   time  plex    score   time  plex    score   time  plex
+-m10K:   -274    128    47     -258    268    62     -185     245   57
+-m20K:   -222    519    55     -142    972   115     -128     571   78
+-m40K:   -182   1413    67     -135   3007   125     -116    2176   90
+-m80K:   -145   3950    87                           -116    6042   92
+-m160K:  
 -m320K:
 
 ======================================================================
@@ -928,30 +944,41 @@ Regression test the rebudgeting.
 
 The "budge" column shows the effect of exhaustive nearest-neighbor
 search in hill-climbing.  Conclusion: this is a sure-fire win! Woot!
+commited in bzr revision 6589/6590.
 
-As above -Hpa -k4 -z3.5 -v5
+The "trim" column shows the effect of triming the deme, by score,
+before merging it into the metapop.  It also uses a score-weighted
+metapop population control. (previous metapop posize control was
+indirect and wonky, and less effective).  committed in bzr revision 
+6603 (this revision).
 
-         orig  budge
--r0:      24    23
--r1:      61    60
--r2:     227   144 
--r3:     207    36
--r4:      47    45
--r5:      22    22
--r6:     129   115
--r7:     222    58
--r8:     234   351
--r9:     125    54
--r10:     34    33
--r11:    135    44
--r12:     21    20
--r13:    140    70
--r14:     88   116
--r15:     85    70
--r16:     55   107
--r17:    132   195
--r18:    114   104
--r19:      5     5
+The "tops" column shows the effect of trim, plus the top-score approach.
 
-avg:     105    84
+wtf: bzr rev 6602  Something is broken. What ??
+
+As above -Hpa -k4 -z3.5 -v5 -m150000
+
+         orig  budge  trim   tops   wtf
+-r0:      24    23     55     55    236
+-r1:      61    60    121     24    248
+-r2:     227   144     51     50     49
+-r3:     207    36     24     23    129
+-r4:      47    45     32     31     58
+-r5:      22    22    189    229    319
+-r6:     129   115     33    179    296
+-r7:     222    58     22     36     24
+-r8:     234   351    163    184     61
+-r9:     125    54    302    319    142
+-r10:     34    33     41     40     90
+-r11:    135    44     37     37     32
+-r12:     21    20    208    109    197
+-r13:    140    70     -1     35    185
+-r14:     88   116    224    453    190
+-r15:     85    70     76     54     83
+-r16:     55   107    260    135    229
+-r17:    132   195     22     22     44
+-r18:    114   104     39     31     63
+-r19:      5     5     37    195     57
+
+avg:     105    84    121    112    137
 
