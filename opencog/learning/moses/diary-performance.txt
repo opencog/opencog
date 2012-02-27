@@ -1043,5 +1043,4 @@ avg:      87     72
 
 todo:
  finish work on tops.... in metapop
-finish strip-out of scoring in optimizeation.h
-make test
+finish strip-out of scoring in metapop.h

@@ -360,6 +360,12 @@ struct metapopulation : public bscored_combo_tree_set
         // Keeping the metapop small brings huge benefits to the
         // mem usage and runtime performance.
 
+        // However, lets not get over-zelous; if the metapop is too small,
+        // then we have the nasty situation where none of the best-scoring
+        // individuals lead to a solution.  Fix the minimum metapop size
+        // to, oh, say, 250.
+        if (size() < 250) return;
+
         score_t top_score = get_weighted_score(*begin());
         score_t worst_score = top_score - useful_score_range();
 
@@ -566,19 +572,24 @@ is rather expensive, actually, so ....
         // score have no chance at all of getting selected. So just
         // eliminate them now, instead of later.
         //
-        score_t top_sc = get_weighted_score(_deme->begin()->second);
-        score_t bot_sc = top_sc - useful_score_range();
+        // However, trimming too much is bad: it can happen that none
+        // of the best-scoring instances lead to a solution. So keep
+        // around a reasonable pool. Wild choice ot 250 seems reasonable.
+        if (250 < _deme->size()) {
+            score_t top_sc = get_weighted_score(_deme->begin()->second);
+            score_t bot_sc = top_sc - useful_score_range();
 
-        for (size_t i = _deme->size()-1; 0 < i; --i) {
-            const composite_score &cscore = (*_deme)[i].second;
-            score_t score = get_weighted_score(cscore);
-            if (score < bot_sc) {
-                _deme->pop_back();
+            for (size_t i = _deme->size()-1; 0 < i; --i) {
+                const composite_score &cscore = (*_deme)[i].second;
+                score_t score = get_weighted_score(cscore);
+                if (score < bot_sc) {
+                    _deme->pop_back();
+                }
             }
-        }
 
-        eval_during_this_deme = std::min(eval_during_this_deme,
-                                             (int)_deme->size());
+            eval_during_this_deme =
+                std::min(eval_during_this_deme, (int)_deme->size());
+        }
 
         ///////////////////////////////////////////////////////////////
         // select the set of candidates to add in the metapopulation //
