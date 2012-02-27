@@ -671,17 +671,20 @@ is rather expensive, actually, so ....
         deme_cit deme_end = _deme->begin() + eval_during_this_deme;
         OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
-        logger().debug("Compute behavioral score of %d selected candidates",
-                       pot_candidates.size());
+        // Behavioural scores are needed only if domination-based
+        // merging is asked for.  Save CPU timke by not computing them.
+        if (!params.include_dominated) {
+            logger().debug("Compute behavioral score of %d selected candidates",
+                           pot_candidates.size());
 
-        auto compute_bscore = [this](metapop_candidates::value_type& cand) {
-            composite_score csc = get_composite_score(cand.second);
-            behavioral_score bsc = this->bscore(cand.first);
-            cand.second = composite_behavioral_score(bsc, csc);
-        };
-        OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
-                           compute_bscore);
-
+            auto compute_bscore = [this](metapop_candidates::value_type& cand) {
+                composite_score csc = get_composite_score(cand.second);
+                behavioral_score bsc = this->bscore(cand.first);
+                cand.second = composite_behavioral_score(bsc, csc);
+            };
+            OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
+                               compute_bscore);
+        }
         bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
         if (!params.include_dominated) {
 
@@ -711,21 +714,18 @@ is rather expensive, actually, so ....
         // update the record of the best-seen score & trees
         update_best_candidates(candidates);
 
-        //Logger
-        logger().debug("Merge %u candidates with the metapopulation",
+        if (logger().isDebugEnabled()) {
+            logger().debug("Merge %u candidates with the metapopulation",
                        candidates.size());
-        if (logger().isFineEnabled()) {
             logger().fine("Candidates with their bscores to merge with"
                           " the metapopulation:");
             stringstream ss;
             logger().fine(ostream(ss, candidates.begin(), candidates.end(),
                                   -1, true, true).str());
         }
-        // ~Logger
 
         merge_candidates(candidates);
 
-        // Logger
         if (logger().isDebugEnabled()) {
             logger().debug("Metapopulation size is %u", size());
             if (logger().isFineEnabled()) {
@@ -734,7 +734,6 @@ is rather expensive, actually, so ....
                 logger().fine(ostream(ss, -1, true, true).str());
             }
         }
-        // ~Logger
 
         delete _deme;
         delete _rep;
@@ -748,8 +747,8 @@ is rather expensive, actually, so ....
     bscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs)
     {
         bscored_combo_tree_set res;
-        foreach(bscored_combo_tree cnd, mcs)
-            if(find(cnd) == end())
+        foreach (bscored_combo_tree cnd, mcs)
+            if (find(cnd) == end())
                 res.insert(cnd);
         return res;
     }

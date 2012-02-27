@@ -929,6 +929,20 @@ Redo, with correlated hillclimbing
 basedline is 
 -Hit -uQ3 -i bank.dat -W1 -x1 -lDEBUG -n sin -n log -n exp
 
+"baseline" is from the above (the -n sinexplog flags)
+
+"40-corr" keeps only the top 40 instances for the next hill-climbing
+round. Since each climb uses up one instance, its impossible to have
+more than 40 climbs, so hill-climbing then terminates, and control returns
+to the metapop loop.
+
+The "re-up+trim" column does two things: 1) adds a new population control
+mechanism, and 2) does a full nearest-neighbr search every tenth hill-climb.
+For the other 9, it uses the same top-40 instances.
+
+The "trim-only" column removes the top-40 code, keeps to trimmed metapop
+ssize code, and also skips computation of behavioral scores.
+
 
              baseline              40-corr              re-up + trim
          score   time  plex    score   time  plex    score   time  plex
@@ -936,6 +950,15 @@ basedline is
 -m20K:   -222    519    55     -142    972   115     -128     571   78
 -m40K:   -182   1413    67     -135   3007   125     -116    2176   90
 -m80K:   -145   3950    87                           -116    6042   92
+-m160K:  
+-m320K:
+
+             trim-only                        
+         score   time  plex    score   time  plex    score   time  plex
+-m10K:    -273    91    48
+-m20K: 
+-m40K:  
+-m80K:   
 -m160K:  
 -m320K:
 
@@ -1016,29 +1039,35 @@ Below:
 Compare this to "trim" above, which is exactly the same code, but
 without this weight correction (i.e. min_score = 0.5)
 
-         min0  weigh
--r0:      18     35
--r1:      81     52
--r2:      35    107
--r3:     199     15
--r4:     165     15
--r5:      80     38
--r6:      26    111
--r7:      43     67
--r8:     308    170
--r9:      80     39
--r10:     71    150
--r11:     39     18
--r12:     16    129
--r13:     24     98
--r14:      5    155
--r15:     35     42
--r16:     73     72
--r17:     89     32
--r18:     81     36
--r19:    276     51
+"no-bs" is rev 6616: don't compute the behavioural score, because it's
+not needed unless one is doing domination-based merging.  (Note scores
+are consistently 1-2 seconds slower than "weigh", this seems to be due
+to other background jobs on this machine, and/or different cache patterns.
+Reversing flag does not change time.)
 
-avg:      87     72
+         min0  weigh   no-bs
+-r0:      18     35     37
+-r1:      81     52     54
+-r2:      35    107    112
+-r3:     199     15     16
+-r4:     165     15     16
+-r5:      80     38     41
+-r6:      26    111    115
+-r7:      43     67     68
+-r8:     308    170    112
+-r9:      80     39     41
+-r10:     71    150    193
+-r11:     39     18     19
+-r12:     16    129    133
+-r13:     24     98     99
+-r14:      5    155    151
+-r15:     35     42     43
+-r16:     73     72     75
+-r17:     89     32     33
+-r18:     81     36     37
+-r19:    276     51     53
+
+avg:      87     72     72
 
 
 todo:
