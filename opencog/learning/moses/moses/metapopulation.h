@@ -533,11 +533,6 @@ struct metapopulation : public bscored_combo_tree_set
      * 1) mark the current deme exemplar to not explore it again,
      * 2) merge non-dominated candidates in the metapopulation,
      * 3) delete the deme instance from memory.
-XXX todo FIXME: the select_candidates step below is totally
-un-needed if we have the include-dominated flag set. Basically,
-the best/fastest/easiest algo just doesn't need behavioural scores,
-so we shouldn't waste the cpu time to compute these. And the time
-is rather expensive, actually, so ....
      */
     void close_deme()
     {

@@ -14,6 +14,20 @@ below is being used to help me get baseline performance numbers, to
 understand how modifications affect performance, and to help make sure
 there are no regressions.
 
+=======================================================================
+Lessons learned
+
+There are many lessons learned from the results below.  Most of these
+have been incorporated into the code base.  Here's a summary of some of
+these.
+
+-- true hillcmbing vs. expanded neighborhood search.
+
+-- domination
+
+-- correlated hillclmbing
+
+=======================================================================
 Diary started in January 2012
 
 Opencog revision 6386:
@@ -76,7 +90,7 @@ Again, Now with -L1 -T1:
 
 avg: 9.68 (approx)
 
-So the 'true hillclimbing' is 2.3x faster thanold stuff, for this.
+So the 'true hillclimbing' is 2.3x faster than old stuff, for this.
 
 Now try 4-parity...
 -Hpa -k4 -m50000
@@ -941,7 +955,8 @@ mechanism, and 2) does a full nearest-neighbr search every tenth hill-climb.
 For the other 9, it uses the same top-40 instances.
 
 The "trim-only" column removes the top-40 code, keeps to trimmed metapop
-ssize code, and also skips computation of behavioral scores.
+size code, and also skips computation of behavioral scores.  Notice how
+trim-only score match the baseline, but offer a 2x run-time improvement.
 
 
              baseline              40-corr              re-up + trim
@@ -956,9 +971,9 @@ ssize code, and also skips computation of behavioral scores.
              trim-only                        
          score   time  plex    score   time  plex    score   time  plex
 -m10K:    -273    91    48
--m20K: 
--m40K:  
--m80K:   
+-m20K:    -222   256    53
+-m40K:    -183   635    63
+-m80K:    -148  1898    85
 -m160K:  
 -m320K:
 
