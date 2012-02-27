@@ -940,7 +940,7 @@ basedline is
 -m320K:
 
 ======================================================================
-Regression test the rebudgeting.  
+Regression test parity performance
 
 The "budge" column shows the effect of exhaustive nearest-neighbor
 search in hill-climbing.  Conclusion: this is a sure-fire win! Woot!
@@ -950,35 +950,60 @@ The "trim" column shows the effect of triming the deme, by score,
 before merging it into the metapop.  It also uses a score-weighted
 metapop population control. (previous metapop posize control was
 indirect and wonky, and less effective).  committed in bzr revision 
-6603 (this revision).
+6603 (this revision).  Notice that this is worse than before, 
+as explained below ... 
 
 The "tops" column shows the effect of trim, plus the top-score approach.
+It does seem better than trim ... 
 
-wtf: bzr rev 6602  Something is broken. What ??
+The "wtf" column is bzr rev 6602, trying to figure out what broke.
+Answer: rev 6593 was OK but 6594 broke. this is due to 
+min_score_improvement added in optimization/optimization.h lin 535
+(i.e. min_score=0.5 was introduced then.)
 
-As above -Hpa -k4 -z3.5 -v5 -m150000
+The "r6594" column is performance of revision 6594.  Note the
+horrible degradation of performance, compared to "trim".
+Using this rev, and setting min_score=0.0 gets us the nice 
+desirable "budge" numbers.  The reason that r6594 is worse than
+"wtf" is because "wtf" contains a copy optimization, introduced in
+revision 6598.
 
-         orig  budge  trim   tops   wtf
--r0:      24    23     55     55    236
--r1:      61    60    121     24    248
--r2:     227   144     51     50     49
--r3:     207    36     24     23    129
--r4:      47    45     32     31     58
--r5:      22    22    189    229    319
--r6:     129   115     33    179    296
--r7:     222    58     22     36     24
--r8:     234   351    163    184     61
--r9:     125    54    302    319    142
--r10:     34    33     41     40     90
--r11:    135    44     37     37     32
--r12:     21    20    208    109    197
--r13:    140    70     -1     35    185
--r14:     88   116    224    453    190
--r15:     85    70     76     54     83
--r16:     55   107    260    135    229
--r17:    132   195     22     22     44
--r18:    114   104     39     31     63
--r19:      5     5     37    195     57
+"boost" is rev 6596 (i.e. uses boost for the compare ops) but with
+min_score=0. Compare this to "budge", which differs from this mostly in
+the use of boost for the inequality compares.  Is it justified to
+conclude that boost is harmful? If so, then just barely...
 
-avg:     105    84    121    112    137
+The "min0" column is latest rev 6603 i.e. budge+trim, and min_score=0.0
+OK, best yet.
 
+The "prim" column is the pre-trim revision 6602, with the min_score=0.0
+Clearly, this is nearly identical to the "boost" column. The only real
+difference between these two is the no-copy fix, introduced in rev 6598.
+We conclude that the no-copy change gives us: (98-94)/94 = 4% performance.
+
+As above -Hpa -k4 -z3.5 -v5 -m350000
+
+         orig  budge  trim   tops   wtf   r6594  boost   min0  prim
+-r0:      24    23     55     55    236     57    137     18    134
+-r1:      61    60    121     24    248     34     30     81     29
+-r2:     227   144     51     50     49     72     86     35     83
+-r3:     207    36     24     23    129     91    103    199     99
+-r4:      47    45     32     31     58    131    573    165    554
+-r5:      22    22    189    229    319    105    121     80    115
+-r6:     129   115     33    179    296    133     29     26     28
+-r7:     222    58     22     36     24     15     76     43     73
+-r8:     234   521    163    184     61    225     61    308     58
+-r9:     125    54    302    319    142    216     72     80     69
+-r10:     34    33     41     40     90    269     86     71     83
+-r11:    135    44     37     37     32     80     43     39     41
+-r12:     21    20    208    109    197    226     46     16     44
+-r13:    140    70     -1     35    185    220     93     24     90
+-r14:     88   116    224    453    190    378      5      5      5
+-r15:     85    70     76     54     83     31     50     35     48
+-r16:     55   107    260    135    229     58    113     73    108
+-r17:    132   195     22     22     44    115    103     89    101
+-r18:    114   104     39     31     63    398     67     81     64
+-r19:      5     5     37    195     57    270     65    276     64
+
+avg:     105    93    121x   112    137    156     98     87     94
+                                                           y      y
