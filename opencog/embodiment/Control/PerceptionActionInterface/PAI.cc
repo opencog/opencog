@@ -1084,6 +1084,9 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 {
     // All the handle this action concerned , for event detector
     std::vector<Handle> actionConcernedHandles;
+    // The EvaluationLinks/InheritanceLink that constitute the action.
+    // Fishgram
+    //std::vector<Handle> actionFrameElements;
 
     if (atomSpace.getType(agentNode) == OBJECT_NODE)
     {
@@ -1105,6 +1108,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     inheritanceLinkOutgoing.push_back(actionNode);
     Handle inherLink = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
     actionConcernedHandles.push_back(inherLink);
+    //actionFrameElements.push_back(inherLink);
 
     // a vector to temporarily save all the parameter handles we create in this action, to be used in event responser
     // All the elements in this vector should be evaluationLink
@@ -1126,6 +1130,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     ActorInheritanceLinkOutgoing.push_back(actionActorPredicateNode);
     Handle inherLink2 = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, ActorInheritanceLinkOutgoing);
     actionConcernedHandles.push_back(inherLink2);
+    //actionFrameElements.push_back(inherLink2);
 
     // e.g.: the kick:Actor of kick2454 is npc145
     HandleSeq predicateListLinkOutgoing;
@@ -1333,6 +1338,17 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
         actionConcernedHandles.push_back(newStateEvalLink);
     }
 
+    // Jared    
+    // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
+    // while PLN may find it useful to have them together or separate.
+    Handle andLink = AtomSpaceUtil::addLink(atomSpace, AND_LINK, actionHandles);
+    // The event detector will record the AndLink in a scheme file, and its elements separately
+    actionConcernedHandles.push_back(andLink);    
+    // Add an AtTimeLink around the AndLink, because Fishgram will ignore the Action ID ConceptNode,
+    // and so it won't notice the AtTimeLink created above (which is only connected by having the same ActionID).
+    Handle atTimeLink2 = atomSpace.getTimeServer().addTimeInfo(andLink, tsValue);
+    actionConcernedHandles.push_back(atTimeLink2);
+    
     // call the event detector
     if (enableCollectActions)
         EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
