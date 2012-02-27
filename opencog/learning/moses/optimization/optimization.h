@@ -288,8 +288,15 @@ struct hc_parameters
         : widen_search(widen),
           single_step(step),
           fraction_of_remaining(_fraction_of_remaining),
-          min_score_improvement(_min_score_improvement) {
+          min_score_improvement(_min_score_improvement)
+    {
         OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
+
+        // If used with weighted_score, then must correct for weight.
+        // Failure to do so will result in bad performance, due to
+        // premature termination of the search.  See bzr rev 6605 
+        // for experimental results, details.
+        min_score_improvement *= composite_score::weight / (composite_score::weight+1.0);
     }
 
     bool widen_search;
@@ -307,6 +314,10 @@ struct hc_parameters
     // the search from a new exemplar rather wasting time climbing a
     // near-plateau. Most problems have 1.0 as the smallest meaningful
     // score change, so 0.5 as default seems reasonable...
+    //
+    // Note Bene: 0.5 is appropriate for the true score, not the weighted
+    // score.  Thus, we re-weight, in the constructor, for use with the
+    // wieghted score.
     score_t min_score_improvement;
 };
 

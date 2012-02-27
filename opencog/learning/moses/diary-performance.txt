@@ -951,7 +951,8 @@ before merging it into the metapop.  It also uses a score-weighted
 metapop population control. (previous metapop posize control was
 indirect and wonky, and less effective).  committed in bzr revision 
 6603 (this revision).  Notice that this is worse than before, 
-as explained below ... 
+which is unearthed below ... the reason turns out to be the introduction
+of "min_score_improvement" in rev 6594.
 
 The "tops" column shows the effect of trim, plus the top-score approach.
 It does seem better than trim ... 
@@ -985,25 +986,62 @@ As above -Hpa -k4 -z3.5 -v5 -m350000
 
          orig  budge  trim   tops   wtf   r6594  boost   min0  prim
 -r0:      24    23     55     55    236     57    137     18    134
--r1:      61    60    121     24    248     34     30     81     29
--r2:     227   144     51     50     49     72     86     35     83
--r3:     207    36     24     23    129     91    103    199     99
--r4:      47    45     32     31     58    131    573    165    554
--r5:      22    22    189    229    319    105    121     80    115
--r6:     129   115     33    179    296    133     29     26     28
--r7:     222    58     22     36     24     15     76     43     73
--r8:     234   521    163    184     61    225     61    308     58
--r9:     125    54    302    319    142    216     72     80     69
+-r1:      61    60    120     24    248     34     30     81     29
+-r2:     227   144     50     50     49     72     86     35     83
+-r3:     207    36     23     23    129     91    103    199     99
+-r4:      47    45     31     31     58    131    573    165    554
+-r5:      22    22    185    229    319    105    121     80    115
+-r6:     129   115     32    179    296    133     29     26     28
+-r7:     222    58     21     36     24     15     76     43     73
+-r8:     234   521    162    184     61    225     61    308     58
+-r9:     125    54    297    319    142    216     72     80     69
 -r10:     34    33     41     40     90    269     86     71     83
 -r11:    135    44     37     37     32     80     43     39     41
--r12:     21    20    208    109    197    226     46     16     44
--r13:    140    70     -1     35    185    220     93     24     90
--r14:     88   116    224    453    190    378      5      5      5
+-r12:     21    20    206    109    197    226     46     16     44
+-r13:    140    70    510     35    185    220     93     24     90
+-r14:     88   116    223    453    190    378      5      5      5
 -r15:     85    70     76     54     83     31     50     35     48
--r16:     55   107    260    135    229     58    113     73    108
+-r16:     55   107    258    135    229     58    113     73    108
 -r17:    132   195     22     22     44    115    103     89    101
 -r18:    114   104     39     31     63    398     67     81     64
 -r19:      5     5     37    195     57    270     65    276     64
 
-avg:     105    93    121x   112    137    156     98     87     94
-                                                           y      y
+avg:     105    93    121    112    137    156     98     87     94
+double-checked:         y                                  y      y
+
+Below:
+"min0" as above: revision 6603, with min_score = 0.0
+
+"weigh" is rev 6603, with min_score = 0.5*weight/(weight+1)
+Compare this to "trim" above, which is exactly the same code, but
+without this weight correction (i.e. min_score = 0.5)
+
+         min0  weigh
+-r0:      18     35
+-r1:      81     52
+-r2:      35    107
+-r3:     199     15
+-r4:     165     15
+-r5:      80     38
+-r6:      26    111
+-r7:      43     67
+-r8:     308    170
+-r9:      80     39
+-r10:     71    150
+-r11:     39     18
+-r12:     16    129
+-r13:     24     98
+-r14:      5    155
+-r15:     35     42
+-r16:     73     72
+-r17:     89     32
+-r18:     81     36
+-r19:    276     51
+
+avg:      87     72
+
+
+todo:
+ finish work on tops.... in metapop
+finish strip-out of scoring in optimizeation.h
+make test
