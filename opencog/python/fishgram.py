@@ -34,11 +34,11 @@ class Fishgram:
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
         self.min_embeddings = 3
-        self.max_embeddings = 150
+        self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 12
+        self.max_per_layer = 2000000000
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -50,7 +50,6 @@ class Fishgram:
 
     def run(self):
         '''The basic way to run Fishgram. It will find all the frequent conjunctions above min_frequency.'''
-        self.forest.extractForest()
 
 #        print '# predicates(1arg) including infrequent:', len(self.forest.tree_embeddings[1])
 #        self.forest.tree_embeddings[1] = dict([(tree, argslist_set)
@@ -120,7 +119,7 @@ class Fishgram:
         
         for (conj, embs) in self.prune_frequency(next_layer_iter):
         #for (conj, embs) in self.prune_surprise(next_layer_iter):
-            #print '***************', conj, len(embs)
+            print '***************', conj, len(embs)
             #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
             #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
             yield (conj, embs)
@@ -219,7 +218,7 @@ class Fishgram:
             for (t2, var2) in times_vars[i+1:]:
                 if 0 < t2 - t1 <= interval:
                     seq_and = Tree("SequentialAndLink",  var1, var2)
-                    if seq_and not in conj:
+                    if seq_and not in conj:                        
                         new_links+=(seq_and,)
                         connected = True
                 else:
@@ -261,9 +260,11 @@ class Fishgram:
             
             entry=conj2emblist[conj]
             if not len(entry):
-                print '+', conj
+                print '+', conj            
+            #sys.stdout.write('.')
+            
             if s not in entry:
-                entry.append(s)
+                entry.append(s)                
 
             # Faster, but causes a bug.
 #            canon = tuple(canonical_trees(conj))
@@ -687,12 +688,12 @@ class Fishgram:
             ideal_premises = template.pattern[:-1]
             ideal_conclusion = template.pattern[-1]
 
-            print 'template:', template
+            #print 'template:', template
 
             s2 = unify_conj(ideal_premises, premises, {})
-            print 'make_psi_rule: s2=%s' % (s2,)
+            #print 'make_psi_rule: s2=%s' % (s2,)
             s3 = unify_conj((ideal_conclusion,), (conclusion,), s2)
-            print 'make_psi_rule: s3=%s' % (s3,)
+            #print 'make_psi_rule: s3=%s' % (s3,)
             
             if s3 != None:
                 #premises2 = [x for x in premises if not unify (seq_and_template, x, {})]
@@ -985,14 +986,17 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
             self.fish
         except:            
             self.fish = Fishgram(atomspace)
+            
             #make_seq(atomspace)
             # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
             #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
             
             # Detect timestamps where a DemandGoal got satisfied or frustrated
             notice_changes(atomspace)
-            
+
             self.fish.forest.extractForest()
+            print len(self.fish.forest.all_trees)
+
 #            
 #            conj = (fish.forest.all_trees[0],)
 #            fish.forest.lookup_embeddings(conj)

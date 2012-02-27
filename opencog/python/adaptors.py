@@ -3,6 +3,8 @@ import opencog.cogserver
 from tree import *
 from util import *
 
+from pprint import pprint
+
 # to debug within the cogserver, try these, inside the relevant function:
 #import code; code.interact(local=locals())
 #import ipdb; ipdb.set_trace()
@@ -31,6 +33,7 @@ class ForestExtractor:
             'is_movable', 'is_noisy', 'null', 
             # Not useful e.g. because they contain numbers
             "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
+            'move:actor', 
             # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst'])
         
@@ -62,6 +65,10 @@ class ForestExtractor:
             objects.append(atom)
             self.i+=1
             return Tree(self.i-1)
+        elif self.is_action_instance(atom):
+            print 'is_action_instance', atom
+            # this is moderatly tacky, but doing anything different would require lots of changes...
+            return Tree('ListLink', [])
         elif atom.is_node():
             return Tree(atom)
         else:
@@ -71,16 +78,20 @@ class ForestExtractor:
     def extractForest(self):
 
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
-        for link in [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)
-                     or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
+        for link in [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)]:
+                     #or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
+                     #or x.is_a(t.AndLink)]: # temporary hack
             if not self.include_tree(link): continue
+            print link
             
             objects = []            
             #print self.extractTree(link, objects),  objects, self.i
             self.i = 0
             try:
                 tree = self.extractTree(link, objects)
+                print tree
             except(self.UnwantedAtomException):
+                print 'UnwantedAtomException'
                 continue
             objects = tuple(objects)
             
@@ -114,7 +125,9 @@ class ForestExtractor:
                 self.incoming[obj][size][slot].append(tree_id)
         
         # Make all bound trees. Enables using lookup_embeddings
-        self.all_bound_trees = [subst(subst_from_binding(b), tr) for tr, b in zip(self.all_trees, self.bindings)]        
+        self.all_bound_trees = [subst(subst_from_binding(b), tr) for tr, b in zip(self.all_trees, self.bindings)]    
+    
+        pprint({tr:len(embs) for (tr, embs) in self.tree_embeddings.items()})
 
     def output_tree(self, atom,  tree,  bindings):
         vertex_name = str(tree)
@@ -140,7 +153,7 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self,  atom):
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) or self.is_action_instance(atom)# or self.is_action_element(atom)
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) # or self.is_action_instance(atom)# or self.is_action_element(atom)
         
     def is_action_instance(self, atom):        
         return atom.t == t.ConceptNode and len(atom.name) and atom.name[-1].isdigit()
@@ -174,7 +187,7 @@ class ForestExtractor:
 
         # TODO check the TruthValue the same way as you would for other links.
         # work around hacks in other modules
-        if any([i.is_a(t.AtTimeLink) for i in link.incoming]) or link.is_a(t.ExecutionLink):
+        if any([i.is_a(t.AtTimeLink) or i.is_a for i in link.incoming]) or link.is_a(t.ExecutionLink):
             return False
         else:
             return True
