@@ -294,7 +294,7 @@ struct hc_parameters
 
         // If used with weighted_score, then must correct for weight.
         // Failure to do so will result in bad performance, due to
-        // premature termination of the search.  See bzr rev 6605 
+        // premature termination of the search.  See bzr rev 6613 
         // for experimental results, details.
         min_score_improvement *= composite_score::weight / (composite_score::weight+1.0);
     }

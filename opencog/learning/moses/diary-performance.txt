@@ -950,14 +950,14 @@ The "trim" column shows the effect of triming the deme, by score,
 before merging it into the metapop.  It also uses a score-weighted
 metapop population control. (previous metapop posize control was
 indirect and wonky, and less effective).  committed in bzr revision 
-6603 (this revision).  Notice that this is worse than before, 
+6611 (this revision).  Notice that this is worse than before, 
 which is unearthed below ... the reason turns out to be the introduction
 of "min_score_improvement" in rev 6594.
 
 The "tops" column shows the effect of trim, plus the top-score approach.
 It does seem better than trim ... 
 
-The "wtf" column is bzr rev 6602, trying to figure out what broke.
+The "wtf" column is bzr rev 6610, trying to figure out what broke.
 Answer: rev 6593 was OK but 6594 broke. this is due to 
 min_score_improvement added in optimization/optimization.h lin 535
 (i.e. min_score=0.5 was introduced then.)
@@ -974,10 +974,10 @@ min_score=0. Compare this to "budge", which differs from this mostly in
 the use of boost for the inequality compares.  Is it justified to
 conclude that boost is harmful? If so, then just barely...
 
-The "min0" column is latest rev 6603 i.e. budge+trim, and min_score=0.0
+The "min0" column is latest rev 6611 i.e. budge+trim, and min_score=0.0
 OK, best yet.
 
-The "prim" column is the pre-trim revision 6602, with the min_score=0.0
+The "prim" column is the pre-trim revision 6610, with the min_score=0.0
 Clearly, this is nearly identical to the "boost" column. The only real
 difference between these two is the no-copy fix, introduced in rev 6598.
 We conclude that the no-copy change gives us: (98-94)/94 = 4% performance.
@@ -1010,9 +1010,9 @@ avg:     105    93    121    112    137    156     98     87     94
 double-checked:         y                                  y      y
 
 Below:
-"min0" as above: revision 6603, with min_score = 0.0
+"min0" as above: revision 6611, with min_score = 0.0
 
-"weigh" is rev 6603, with min_score = 0.5*weight/(weight+1)
+"weigh" is rev 6611, with min_score = 0.5*weight/(weight+1)
 Compare this to "trim" above, which is exactly the same code, but
 without this weight correction (i.e. min_score = 0.5)
 
