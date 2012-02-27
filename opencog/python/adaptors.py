@@ -33,7 +33,7 @@ class ForestExtractor:
             'is_movable', 'is_noisy', 'null', 
             # Not useful e.g. because they contain numbers
             "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
-            'move:actor', 
+            'move:actor',  'is_moving', 
             # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst'])
         
@@ -188,6 +188,9 @@ class ForestExtractor:
         # TODO check the TruthValue the same way as you would for other links.
         # work around hacks in other modules
         if any([i.is_a(t.AtTimeLink) or i.is_a for i in link.incoming]) or link.is_a(t.ExecutionLink):
+            return False
+        # Throw away the AtTimeLink that just contains the Action ID
+        elif link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
             return False
         else:
             return True
