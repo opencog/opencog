@@ -558,7 +558,10 @@ struct hill_climbing : optim_stats
 
 #define RESCAN_TIME 10
 #define TOP_POP_SIZE 40
-            if ((iteration <= 2) || (0 == iteration%RESCAN_TIME)) {
+            // XXX disable for the moment; unit tests are failing; leave
+            // disabled till proper solution is created.
+            // if ((iteration <= 2) || (0 == iteration%RESCAN_TIME)) {
+            if (true) {
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
                 number_of_new_instances =
