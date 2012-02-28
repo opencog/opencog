@@ -116,7 +116,8 @@ these.
    high-scoring instances are highly correlated.  This does indeed
    seem to be the case for the bank.csv dataset, and so the best new 
    instances are mergers of the previous high scorers.  This seems
-   to offer a huge win. Research ongoing, will be checked in after
+   to offer a huge win, by offering much of the benefit of EDA/BOA
+   with none of the cost. Research ongoing, will be checked in after
    bzr 6617.
 
 =======================================================================
@@ -1086,7 +1087,7 @@ rounds.
          score   time  plex    score   time  plex    score   time  plex
 -m10K:    -240   175    59      -252   144   53
 -m20K:    -150   544    89      -147   383   79
--m40K:    -115  1760   112
+-m40K:    -115  1760   112      -116  1506  108
 -m80K:    
 -m160K:   
 
@@ -1173,29 +1174,33 @@ are consistently 1-2 seconds slower than "weigh", this seems to be due
 to other background jobs on this machine, and/or different cache patterns.
 Reversing flag does not change time.)
 
-         min0  weigh   no-bs
--r0:      18     35     37
--r1:      81     52     54
--r2:      35    107    112
--r3:     199     15     16
--r4:     165     15     16
--r5:      80     38     41
--r6:      26    111    115
--r7:      43     67     68
--r8:     308    170    112
--r9:      80     39     41
--r10:     71    150    193
--r11:     39     18     19
--r12:     16    129    133
--r13:     24     98     99
--r14:      5    155    151
--r15:     35     42     43
--r16:     73     72     75
--r17:     89     32     33
--r18:     81     36     37
--r19:    276     51     53
+"corr" is rev 6619: a correlated neighboring instance search. A bit
+of a regression from previous results, but seems to be due entirely
+to one outlier.  Further experiments/tuning to follow...
 
-avg:      87     72     72
+         min0  weigh  no-bs  corr
+-r0:      18     35     37    116
+-r1:      81     52     54     98
+-r2:      35    107    112     34
+-r3:     199     15     16     56
+-r4:     165     15     16     17
+-r5:      80     38     41     23
+-r6:      26    111    115     60
+-r7:      43     67     68     17
+-r8:     308    170    112    181
+-r9:      80     39     41     40
+-r10:     71    150    193     31
+-r11:     39     18     19     18
+-r12:     16    129    133     98
+-r13:     24     98     99    145
+-r14:      5    155    151    195
+-r15:     35     42     43    150
+-r16:     73     72     75    343
+-r17:     89     32     33     51
+-r18:     81     36     37     31
+-r19:    276     51     53     29
+
+avg:      87     72     72     87
 
 
 todo:

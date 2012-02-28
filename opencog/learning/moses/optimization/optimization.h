@@ -368,6 +368,34 @@ struct hill_climbing : optim_stats
                   const hc_parameters& hc = hc_parameters())
         : rng(_rng), opt_params(op), hc_params(hc) {}
 
+    deme_size_t merge(instance_set<composite_score>& deme,
+                      deme_size_t deme_size,
+                      deme_size_t num_to_make,
+                      deme_size_t sample_start,
+                      deme_size_t sample_size,
+                      const instance& base,
+                      const instance& reference)
+    {
+        if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
+
+        // We only want to work with the high-scorers.
+        // XXX TODO: actually, we don't need to sort all of them,
+        // only the highest-scoring num_to_make;
+        std::sort(deme.begin() + sample_start, 
+                  deme.begin() + sample_start + sample_size,
+                  std::greater<scored_instance<composite_score> >());
+
+        deme.resize(deme_size + num_to_make);
+
+        // Skip the first entry: it should be identical to "reference"
+        for (unsigned i = 0; i< num_to_make; i++) {
+            unsigned j = deme_size + i;
+            deme[j] = deme[sample_start + i + 1]; // +1 to skip the first one
+            deme.fields().merge_instance(deme[j], base, reference);
+        }
+        return num_to_make-1;  // -1 because we skipped the first.
+    }
+
     /**
      * Perform search of the local neighborhood of an instance.  The
      * search is exhaustive if the local neighborhood is small; else
@@ -446,6 +474,11 @@ struct hill_climbing : optim_stats
         unsigned distance = 0;
         unsigned iteration = 0;
 
+        // Needed for correlated neighborhood exploration.
+        instance prev_center = center_inst;
+        deme_size_t prev_start = 0;
+        deme_size_t prev_size = 0;
+
         // Whether the score has improved during an iteration
         while (true)
         {
@@ -523,13 +556,25 @@ struct hill_climbing : optim_stats
                 "Budget %u samples out of estimated %u neighbours",
                 number_of_new_instances, total_number_of_neighbours);
 
-            // The current_number_of_instances arg is needed only to
-            // be able to manage the size of the deme appropriately.
-            number_of_new_instances =
-                sample_new_instances(total_number_of_neighbours,
-                                     number_of_new_instances,
-                                     current_number_of_instances,
-                                     center_inst, deme, distance, rng);
+#define RESCAN_TIME 10
+#define TOP_POP_SIZE 40
+            if ((iteration <= 2) || (0 == iteration%RESCAN_TIME)) {
+                // The current_number_of_instances arg is needed only to
+                // be able to manage the size of the deme appropriately.
+                number_of_new_instances =
+                    sample_new_instances(total_number_of_neighbours,
+                                         number_of_new_instances,
+                                         current_number_of_instances,
+                                         center_inst, deme, distance, rng);
+            } else {
+                number_of_new_instances =
+                    merge(deme, current_number_of_instances, TOP_POP_SIZE,
+                          prev_start, prev_size, prev_center, center_inst);
+
+            }
+            prev_start = current_number_of_instances;
+            prev_size = number_of_new_instances;
+            prev_center = center_inst;
 
             logger().debug("Evaluate %u neighbors at distance %u",
                            number_of_new_instances, distance);
