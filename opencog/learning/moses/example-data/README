@@ -11,3 +11,4 @@ In order of increasing complexity and sophistication:
 disjunction.csv     -- a very very simple example.
 column-labels.csv   -- using column labels
 predicates.csv      -- learning arithmetic predicates.
+bank.csv            -- learning a score from boolean variables.

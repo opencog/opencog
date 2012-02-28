@@ -21,14 +21,108 @@ There are many lessons learned from the results below.  Most of these
 have been incorporated into the code base.  Here's a summary of some of
 these.
 
--- true hillcmbing vs. expanded neighborhood search.
+++ True hillcmbing vs. expanded neighborhood search. The original
+   "hillclimbing" code, circa bzr revision 6500, actually implemented a
+   kind of neighborhood search algorithm. That is, it searched a portion
+   of the nearest neighbors of an instance. If it found an improvement,
+   it returned to the metapop outer loop.  If it did not find
+   improvement, it expanded the search to 2nd-nearest neighbors, and so
+   on. The search was rarely exhaustive; the neighborhoods were 
+   sub-sampled, as the size of the neighborhoods grows combinatorially.
 
--- domination
+   By bzr rev 6522, the algo was refactored to implement "true
+   hillclimbing".  A portion of the nearest neighbors are searched. If
+   improvement is found, the the best instance is defined as the new
+   center, and it's nearest neighbors are searched. This process is
+   repeated until there is no improvement, and only then does control
+   return to the metapop outer loop.  The "true hillclimbing" algo
+   provides a 2.3x performance improvement over the old algo, as
+   documented below.  The behaviour of the old algo can be regained by
+   using the -L1 -T1 -I0 flags.
 
--- correlated hillclmbing
+   The so-called "simulated annealing" code still implements the old,
+   local neighborhood search algo, except that it uses a temerature to
+   occasionally widen the search to farther distances.  Thus, it should
+   be renamed to "star-shaped search", as the searched neighborhood is
+   star-shaped; the fatness of the star depending on a temperature.
+
+
+++ The "high score" trap. The runtime performance of the code circa
+   bzr rev 6522-6560 had a very strong dependence on the initial random
+   seed. For many seeds, runtime was worse-than-exponentially slower as
+   compared to the fastest cases.  This appears to be due to the fact
+   that sometimes the top-scored exemplar in the metapopulation does not
+   make a very good tree on which to build knobs.  In essence, the outer
+   loop, the metapopulation loop, was a strict hill-climber; it worked
+   only with the top scorers.  The solution to this was to convert the
+   metapop select_exemplar() routine to use an annealing-style
+   temperature.  Thus, some fraction of the time, a lower-scoring
+   exemplar would be used as the starting place for knob-building.
+   Additional performance is gained by weighting the complexity into the
+   selection: that is, a lower-scored, but also lower complexity
+   exemplar may be a better starting place than a high-score,
+   high-complexity exemplar.  The discovery & solution of this behaviour
+   is documented on the opencog blog; the blog page captured in the
+   file documentation/Select_Exemplar.html in this directory. Misc data
+   and graphing tools can be found in diary/complexity-temperature.
+   In the diary below, this starts at the section titled:
+   ++++++ The "high score" trap. AKA "select exemplar annealing" +++++
+   The final, fixed form of this code can be found in bzr rev 6582;
+   the -v and the -z flags are used to set the complexity weight and
+   temperature. The resulting performance improvement is about 200x 
+   for 4-parity (runtime, 20 different random seeds, before: about
+   55K seconds = 15 hours, after: about 300 seconds)  This is a huge
+   win. 
+
+   BTW, its not just the temperature that does this, but also a better
+   control over the metapopulation size.  The metapop size is managed
+   by refering to the score of exemplars; this obviates the need for
+   the "dominated merge" logic.  The dominated merge logic is very
+   complicated and quite slow; skipping this accounts for a large
+   performance boost. (In addition, domination had a way of knocking
+   out exemplars with decent scores, needed for the annealing
+   choice).
+
+
+++ Exhaustive neighborhood search. The moses algo needs to apportion
+   cpu cycles between the outer, metapop loop, and the inner, deme
+   exploration loop.  The old algo, circa 6582, did this via a fraction
+   of the remaining cycles. If the max allowed cycles (-m flag) was too
+   low, the nearest neighbor exploration would be subsampled (instead of
+   an exhaustive search). Altering the nearest neighbor search (when the
+   hamming distance really is just one) to be an exhaustive search seems
+   to improve things.  Note this affects just the ban.csv dataset, as
+   this was not an issue for 4-parity. Part of the problem with the bank
+   dataset is that it jumps from relatively simple exemplars in the
+   first round, to very complex (squared) exemplars in later
+   knob-building rounds; these later exemplars are very expensive to
+   evaluate, so it makes sense to exhaust the simple cases first.
+   Fixed by bzr rev 6590.  See "budge" column in "regression" section
+   below.
+
+++ Better population control, skip behavioral score computation.
+   Older code kept an excessively bloated metapopulation, members of
+   which were astronomically unikely to be choosen as futre
+   exemplars.  This gets fixed. In addition, old code was computing
+   behavioral scores, even though domination-merging is no longer
+   used. (Domination merging is a pig). Skipping this provides a huge
+   performance saving for complex exemplars, such as the bank.csv
+   dataset, but only minor effects (about 7%) for 4-parity.  This
+   is all checked in by bzr rev 6617.  Note that the combined effects
+   of the last several changes are about 3x to 4x, changing times for
+   4-parity from about 300 sconds in rev 6582 to 72 secons in rev 6617.
+
+++ Correlated knob-turning.  Explores the hypothesis that
+   high-scoring instances are highly correlated.  This does indeed
+   seem to be the case for the bank.csv dataset, and so the best new 
+   instances are mergers of the previous high scorers.  This seems
+   to offer a huge win. Research ongoing, will be checked in after
+   bzr 6617.
 
 =======================================================================
 Diary started in January 2012
+
++++++ True hillcmbing vs. expanded neighborhood search. +++++
 
 Opencog revision 6386:
 ----------------------
@@ -262,6 +356,7 @@ quickly for some random seeds, while improving  number of seeds that do lead
 to solutions.  Very strange.
 
 =======================================
+++++++ The "high score" trap. AKA "select exemplar annealing" +++++
 
 Hypothesis: to answer question "why do some random seeds take so long w/
 hill-climbing"?  Highest ranked exemplars, no matter how they are festooned
@@ -858,10 +953,10 @@ typical moses solution: 20 bits
 Clearly, for the parity problem, the solution does not over-fit.
 
 ===========================================================
-Data collected on the bank.dat test case.
+Data collected on the bank.csv test case (in the example-data directory).
 
 Original hill-climbing algorithm:
-moses -Hit -uQ3 -i bank.dat -W1
+moses -Hit -uQ3 -i bank.csv -W1
 
         score   time
 -m10K:  -361     128
@@ -880,7 +975,7 @@ was not being reduced.  Fixed in bzr commit 6586
 -m80K:   -174   15445 
 -m160K:  -159   50430
 
-complexity of bank.dat:
+complexity of bank.csv:
 91 lines, 38 bits input per line, one contin out, valued: 1-16: 4 bits
 total: 91x42 = 3822 bits
 Conclude: it'll be hard to over-fit the data, at the rate we are going.
@@ -891,10 +986,10 @@ not until exhaustion, because the hill-climbing budget is badly
 calculated.  Then, for the second round, we build a massively complex
 exemplar, which is very expensive to evaluate... and then we don't even
 beother to exhaust the nearest-neighbor search before throwing it away.
-Solution: at least do an exhaustive search for closes
+Solution: at least do an exhaustive search for closest
 nearest-neightbors, before giving up.  This seems to help:
 
-          z-default           exhaust                copy avoid
+              z-default           exhaust             copy avoid
          score   time  plex   score   time  plex   score   time   plex
 -m10K:   -340    45     14    -340     45    14    -340     41    14
 -m20K:   -265   167     30    -265    171    32    -265    162    32
@@ -941,7 +1036,7 @@ Redo, with -n log -n exp -n sin  and again with -ndiv
 
 Redo, with correlated hillclimbing
 basedline is 
--Hit -uQ3 -i bank.dat -W1 -x1 -lDEBUG -n sin -n log -n exp
+-Hit -uQ3 -i bank.csv -W1 -x1 -lDEBUG -n sin -n log -n exp
 
 "baseline" is from the above (the -n sinexplog flags)
 
@@ -957,6 +1052,15 @@ For the other 9, it uses the same top-40 instances.
 The "trim-only" column removes the top-40 code, keeps to trimmed metapop
 size code, and also skips computation of behavioral scores.  Notice how
 trim-only score match the baseline, but offer a 2x run-time improvement.
+"trim-only" is exactly the code in bzr version 6616, no modifications.
+
+The "curr+reup" column shows bzr rev 6616 plus the reup algo.  Its almost
+identical to "re-up+trim", and slightly faster, which is good: nothing was
+lost during the intervening hacking.
+
+The "100/20" column keeps the 100 top-scoring instances for the next
+round, and does a full nearest-neighborhood search only every 20
+rounds.
 
 
              baseline              40-corr              re-up + trim
@@ -965,17 +1069,26 @@ trim-only score match the baseline, but offer a 2x run-time improvement.
 -m20K:   -222    519    55     -142    972   115     -128     571   78
 -m40K:   -182   1413    67     -135   3007   125     -116    2176   90
 -m80K:   -145   3950    87                           -116    6042   92
--m160K:  
--m320K:
 
-             trim-only                        
+
+                                      nn5                    nn6
+             trim-only           urr+reup(40/10)           100/20
          score   time  plex    score   time  plex    score   time  plex
--m10K:    -273    91    48
--m20K:    -222   256    53
--m40K:    -183   635    63
+-m10K:    -273    91    48      -185    231   57      -214   233    80
+-m20K:    -222   256    53      -128    543   78      -159  1082   104
+-m40K:    -183   635    63      -116   2043   90      -146  2991   112
 -m80K:    -148  1898    85
--m160K:  
--m320K:
+-m160K:   -125  7798   108
+ 
+
+                 nn7                   nn8
+                40/20                  40/6                  20/6
+         score   time  plex    score   time  plex    score   time  plex
+-m10K:    -240   175    59      -252   144   53
+-m20K:    -150   544    89      -147   383   79
+-m40K:    -115  1760   112
+-m80K:    
+-m160K:   
 
 ======================================================================
 Regression test parity performance
@@ -1087,4 +1200,3 @@ avg:      87     72     72
 
 todo:
  finish work on tops.... in metapop
-finish strip-out of scoring in metapop.h
