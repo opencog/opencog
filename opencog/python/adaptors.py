@@ -13,7 +13,8 @@ t = types
 
 class ForestExtractor:
     """Extracts a forest of trees, where each tree is a Link (and children) that are true in the AtomSpace.
-    The trees may share some of the same Nodes."""
+    The trees may share some of the same Nodes. This is used as a preprocessor for Fishgram. It makes a huge
+    difference to the efficiency. There are lots of filters that let you control exactly which atoms will be used."""
     def __init__(self, atomspace, writer):
         self.a = atomspace
         self.writer = writer
@@ -26,7 +27,7 @@ class ForestExtractor:
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
         self.unwanted_atoms = set(["proximity", "near", 'next',
-            'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of', 'left_of', 'right_of', 
+            'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of',
             'below', 'above', 'between', 'touching', 'inside', 'outside', 
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
@@ -76,13 +77,16 @@ class ForestExtractor:
             return Tree(atom.type_name, args)
 
     def extractForest(self):
-
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
-        for link in [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)]:
+        initial_links = [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)]
+        print '/initial_links'
+        
+        for link in initial_links:
                      #or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
                      #or x.is_a(t.AndLink)]: # temporary hack
             if not self.include_tree(link): continue
-            print link
+            #print link
+            print '.'
             
             objects = []            
             #print self.extractTree(link, objects),  objects, self.i
@@ -91,7 +95,7 @@ class ForestExtractor:
                 tree = self.extractTree(link, objects)
                 print tree
             except(self.UnwantedAtomException):
-                print 'UnwantedAtomException'
+                #print 'UnwantedAtomException'
                 continue
             objects = tuple(objects)
             
@@ -332,68 +336,68 @@ class ForestExtractor:
 #    
 #    def is_compactable(self,atom):
 #        return atom.arity == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
-#
-#import pygephi
-#class GephiOutput:
-#
-#    def __init__(self, space):
-#        self._as = space
-#        self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
-#        self.g.clean()
-#        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0, 'x':1}
-#
-#    def start(self):
-#        pass
-#
-#    def stop(self):
-#        pass
-#
-#    def outputNodeVertex(self, a, label = None):
-#        assert a.is_node()
-#        if label==None:
-#            label = '%s:%s' % (a.name, a.type_name)
-#
-#        self.g.add_node(str(a.h.value()), label=label,  **self.node_attributes)
-#
-#    def outputLinkEdge(self, a, label=None,outgoing=None):
-#        
-#        assert a.is_link()
-#        assert len(a.out) == 2
-#        assert (label==None) == (outgoing==None)
-#
-#        if label==None:
-#            label = a.type_name
-#
-#        if outgoing==None:
-#            outgoing = a.out
-#
-#        (out0, out1) = outgoing[0].h.value(), outgoing[1].h.value()       
-#     
-#        self.g.add_edge(str(a.h.value()), out0, out1, directed=True, label=label)
-#       
-#    def outputLinkVertex(self, a, label=None):
-#        #import code; code.interact(local=locals())
-#        #import ipdb; ipdb.set_trace()
-#        assert a.is_link()
-#       
-#        if label==None:
-#            label = a.type_name
-#
-#        self.g.add_node(str(a.h.value()), label=label, **self.node_attributes)
-#   
-#    def outputLinkArgumentEdges(self,a, outgoing=None):
-#        #import code; code.interact(local=locals())
-#        #import ipdb; ipdb.set_trace()
-#        assert a.is_link()
-#        # assumes outgoing links/nodes have already been output
-#
-#        if outgoing==None:
-#            outgoing = a.out
-#
-#        for i in xrange(0, len(outgoing)):
-#            outi = outgoing[i]
-#            id = str(a.h.value())+'->'+str(outi.h.value())
-#            self.g.add_edge(id, a.h.value(), outi.h.value(), directed = True,  label=str(i))
+
+import pygephi
+class GephiOutput:
+
+    def __init__(self, space):
+        self._as = space
+        self.g = pygephi.JSONClient('http://localhost:8080/workspace0', autoflush=True)
+        self.g.clean()
+        self.node_attributes = {'size':10, 'r':0.0, 'g':0.0, 'b':1.0, 'x':1}
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def outputNodeVertex(self, a, label = None):
+        assert a.is_node()
+        if label==None:
+            label = '%s:%s' % (a.name, a.type_name)
+
+        self.g.add_node(str(a.h.value()), label=label,  **self.node_attributes)
+
+    def outputLinkEdge(self, a, label=None,outgoing=None):
+        
+        assert a.is_link()
+        assert len(a.out) == 2
+        assert (label==None) == (outgoing==None)
+
+        if label==None:
+            label = a.type_name
+
+        if outgoing==None:
+            outgoing = a.out
+
+        (out0, out1) = outgoing[0].h.value(), outgoing[1].h.value()       
+     
+        self.g.add_edge(str(a.h.value()), out0, out1, directed=True, label=label)
+       
+    def outputLinkVertex(self, a, label=None):
+        #import code; code.interact(local=locals())
+        #import ipdb; ipdb.set_trace()
+        assert a.is_link()
+       
+        if label==None:
+            label = a.type_name
+
+        self.g.add_node(str(a.h.value()), label=label, **self.node_attributes)
+   
+    def outputLinkArgumentEdges(self,a, outgoing=None):
+        #import code; code.interact(local=locals())
+        #import ipdb; ipdb.set_trace()
+        assert a.is_link()
+        # assumes outgoing links/nodes have already been output
+
+        if outgoing==None:
+            outgoing = a.out
+
+        for i in xrange(0, len(outgoing)):
+            outi = outgoing[i]
+            id = str(a.h.value())+'->'+str(outi.h.value())
+            self.g.add_edge(id, a.h.value(), outi.h.value(), directed = True,  label=str(i))
 
 class DottyOutput:
     def __init__(self,space):
@@ -691,7 +695,6 @@ class GephiMindAgent(opencog.cogserver.MindAgent):
         self.cycles = 1
 
     def run(self,atomspace):
-#        import pdb; pdb.set_trace()
 
         try:
             #import pdb; pdb.set_trace()
