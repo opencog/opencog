@@ -364,13 +364,53 @@ struct metapopulation : public bscored_combo_tree_set
         // then we have the nasty situation where none of the best-scoring
         // individuals lead to a solution.  Fix the minimum metapop size
         // to, oh, say, 250.
+        //
+        // But if the population starts exploding, this is also bad, as
+        // it chews up RAM with unlikely exemplars. Keep it in check by
+        // applying more and more stringent bounds on the allowable scores.
+        // The current implementation of useful_score_range() returns a
+        // value a bit on the large size, by a factor of 2 or so, so its
+        // quite OK to cut back on this value.  We do this in half-tones
+        // (twelfth root of 2).
+
         if (size() < 250) return;
 
         score_t top_score = get_weighted_score(*begin());
-        score_t worst_score = top_score - useful_score_range();
+        score_t range = useful_score_range();
+        size_t popsz = size();
+#define HALFTONE 0.943874313
+        if (10000 < popsz) range *= HALFTONE;
+        if (20000 < popsz) range *= HALFTONE;
+        if (30000 < popsz) range *= HALFTONE*HALFTONE;
+        if (40000 < popsz) range *= HALFTONE*HALFTONE;
+        if (50000 < popsz) range *= HALFTONE*HALFTONE*HALFTONE;
+        if (60000 < popsz) range *= HALFTONE*HALFTONE;
+        if (70000 < popsz) range *= HALFTONE;
+        if (80000 < popsz) range *= HALFTONE;
+        if (90000 < popsz) range *= HALFTONE;
+        if (100000 < popsz) range *= HALFTONE;
+        if (110000 < popsz) range *= HALFTONE;
+        if (120000 < popsz) range *= HALFTONE;
+        score_t worst_score = top_score - range;
 
-        // Erase all the lowest scores.  The metapop is kept in
-        // weighted-score order by bscored_combo_tree_greater().
+#if 0
+        // Erase all the lowest scores.  The metapop is not kept in
+        // weighted-score order, so we have to remove one at a time.
+        iterator it = begin();
+        while (it != end()) {
+            score_t sc = get_weighted_score(*it);
+            if (sc < worst_score)
+                it = erase (it);
+            else
+                it++;
+        }
+#else
+        // Erase all the lowest scores.  The metapop is in quasi-sorted
+        // order (since the deme was sorted before being appended), so
+        // this bulk remove mostly works "correctly". It is also 25% 
+        // faster than above. I think this is because the erase() above
+        // causes the std::set to try to sort the contents, and this
+        // ends up costing a lot.  I think... not sure.
         iterator it = begin();
         while (it != end()) {
             score_t sc = get_weighted_score(*it);
@@ -378,6 +418,7 @@ struct metapopulation : public bscored_combo_tree_set
             it++;
         }
         erase(it, end());
+#endif
     }
 
     /**
