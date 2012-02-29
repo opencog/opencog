@@ -299,7 +299,8 @@ void metapop_moses_results(RandGen& rng,
                               opt_params, meta_params, moses_params, pa);
         // log the number of cache failures
         if (pa.only_local) { // do not print if using distributed moses
-            logger().info("Number of cache failures for score = %u",
+            logger().info("Score cache hits=%u misses=%u",
+                          score_acache.get_hits(),
                           score_acache.get_failures());
         }
     }

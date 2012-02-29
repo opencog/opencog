@@ -490,9 +490,12 @@ struct adaptive_cache {
     /// If 1 - (free memory / total memory) > ulimit then the cache size is
     /// divided by ufrac. If used 1 - (free memory / total memory) < llimit then
     /// the cache size is multiplied by lfact.
+    /// Try not to set ulimit above 90%, as otherwise, the Linux kernel
+    /// obligingly tries to swap everything out to disk (see vm.swappiness
+    /// setting & LKML discussions w/ AKPM)
     adaptive_cache(Cache& cache, unsigned ncycles = 1000,
                    float llimit = 0.75, float lfact = 2,
-                   float ulimit = 0.99, float ufrac = 2)
+                   float ulimit = 0.90, float ufrac = 2)
         : _cache(cache), _counter(0), _ncycles(ncycles),
           _llimit(llimit), _lfact(lfact),
           _ulimit(ulimit), _ufrac(ufrac) {}
