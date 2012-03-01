@@ -283,7 +283,7 @@ struct hc_parameters
 {
     hc_parameters(bool widen = false,
                   bool step = false,
-                  double _fraction_of_remaining = 0.1,
+                  double _fraction_of_remaining = 1.0,
                   score_t _min_score_improvement = 0.5)
         : widen_search(widen),
           single_step(step),
@@ -491,41 +491,48 @@ struct hill_climbing : optim_stats
             // Number of instances to try, this go-around.
             deme_size_t number_of_new_instances;
 
-            // distances greater than 1 occur only when the -L1 -T1 flags
-            // are used, to throw this algo into a very different mode of
-            // operation, in an attempt to overcome deceptive scoring
-            // functions.
-            if (distance <= 1)
+            // For a distance of one, we use
+            // information_theoretic_bits as an approximation of the
+            // number of neighbors over-estimated by a factor of 2,
+            // just to decrease the chance of going into 'sample' mode
+            // when working with the deme. This saves cpu time.
+            if (distance == 1)
             {
-                // For a distance of one, and plain-old hill-climbing,
-                // just try *all* of the nearest neighbors. Do so until
-                // our budget runs out. We will over-estimate number of
-                // neighbors by 2, just to make sure we don't go into
-                // 'sample' mode when working with the deme. This saves
-                // cpu time. 
                 total_number_of_neighbours = 2*nn_estimate;
-                number_of_new_instances = 2*nn_estimate;
-                deme_size_t nleft = 
-                    max_number_of_instances - current_number_of_instances;
-                if (nleft < number_of_new_instances) number_of_new_instances = nleft;
+                // number_of_new_instances = 2*nn_estimate;
+                // deme_size_t nleft = 
+                //     max_number_of_instances - current_number_of_instances;
+                // if (nleft < number_of_new_instances)
+                //     number_of_new_instances = nleft;
             }
-            else
+            else // distance 0 is handled by that branch too
             {
                 // For large-distance searches, there is a combinatorial
                 // explosion of the size of the search volume. Thus, be
                 // careful bedget our available cycles.
-                total_number_of_neighbours = safe_binomial_coefficient(nn_estimate, distance);
+                total_number_of_neighbours =
+                    safe_binomial_coefficient(nn_estimate, distance);
+            }
+            // fraction_of_remaining is 1 by default, that is all
+            // budget is put in searching the neighborhood, this is OK
+            // when the distance is demed to stay low (traditional
+            // hill-climbing). Otherwise one can tweak the fraction of
+            // remaining (option -O) to allocate some resource to
+            // search more distant neighbors
+            number_of_new_instances = 
+                (max_number_of_instances - current_number_of_instances)
+                * hc_params.fraction_of_remaining;
+            
+            // If fraction is small, just use up the rest of the cycles.
+            if (number_of_new_instances < MINIMUM_DEME_SIZE)
+                number_of_new_instances =
+                    (max_number_of_instances - current_number_of_instances);
 
-                // fraction_of_remaining is 1/10th
-                number_of_new_instances = 
-                   (max_number_of_instances - current_number_of_instances)
-                   * hc_params.fraction_of_remaining;
-
-                // If fraction is small, just use up the rest of the cycles.
-                if (number_of_new_instances < MINIMUM_DEME_SIZE)
-                    number_of_new_instances =
-                        (max_number_of_instances - current_number_of_instances);
-
+            // distances greater than 1 occur only when the -L1 -T1 flags
+            // are used, to throw this algo into a very different mode of
+            // operation, in an attempt to overcome deceptive scoring
+            // functions.
+            if (distance > 1) {
                 // Estimate the probability of an improvement and halt if too low
                 // XXX This estimate is pretty hokey... should probably be removed.
                 // If its based on something empirical, I don't know what that is...
@@ -545,7 +552,7 @@ struct hill_climbing : optim_stats
                 logger().debug(
                     "Estimated probability to find an improvement = %f",
                     p_improv);
-
+                
                 if (p_improv < 0.01) {
                     logger().debug("The probability is too low to pursue the search",
                                    p_improv);
