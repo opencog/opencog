@@ -33,7 +33,6 @@ void measure(vector<string> arguments)
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);
 
-int nrep = 10000;
     for (int i=0; i<nreps; i++)
     {
         // Each run gets a new random seed (use the -r option for this).
