@@ -72,7 +72,7 @@ static const pair<string, string> cache_size_opt("cache-size", "s");
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> jobs_opt("jobs", "j");
-static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "Q");
+static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
 static const pair<string, string> inc_intensity_opt("inc-intensity", "T");
 static const pair<string, string> inc_target_size_opt("inc-target-size", "C");
 static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");

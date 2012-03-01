@@ -205,7 +205,10 @@ void metapop_moses_results(RandGen& rng,
         metapop.ostream(ss, 1, true, true);
         string res = (pa.output_with_labels && !pa.labels.empty()?
                       ph2l(ss.str(), pa.labels) : ss.str());
-        logger().info(string("Best candidate (preceded by its score and complexity): ") + res);
+        if (res.empty())
+            logger().info("No candidate is good enough to be returned. Yeah that's bad!");
+        else
+            logger().info("Best candidate (preceded by its score and complexity): %s", res.c_str());
     }
 }
 
