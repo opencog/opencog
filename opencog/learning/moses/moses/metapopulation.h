@@ -711,12 +711,13 @@ struct metapopulation : public bscored_combo_tree_set
 
         if (logger().isDebugEnabled()) {
             logger().debug("Merge %u candidates with the metapopulation",
-                       candidates.size());
-            logger().fine("Candidates with their bscores to merge with"
-                          " the metapopulation:");
-            stringstream ss;
-            logger().fine(ostream(ss, candidates.begin(), candidates.end(),
-                                  -1, true, true).str());
+                           candidates.size());
+            if (logger().isFineEnabled()) {
+                stringstream ss;
+                ss << "Candidates to merge with the metapopulation:" << std::endl;
+                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
+                                      -1, true, true).str());
+            }
         }
 
         merge_candidates(candidates);
@@ -1050,17 +1051,16 @@ struct metapopulation : public bscored_combo_tree_set
         if (!candidates.empty()) {
             const bscored_combo_tree& candidate = *candidates.begin();
             const composite_score& csc = get_composite_score(candidate);
-            score_t sc = get_score(csc);
 
             // Log stuff.
             if (logger().isFineEnabled()) {
-                logger().fine() << "best composite score = " << _best_cscore;
-                logger().fine() << "candidate composite score = " << sc;
+                logger().fine() << "Best composite score = " << _best_cscore;
+                logger().fine() << "Candidate composite score = " << csc;
 
                 if (csc >= _best_cscore) {
-                    logger().fine("Apparently that candidate score is better or equal to the best score");
+                    logger().fine("Candidate score is better than or equal to the best score");
                     if (csc > _best_cscore) {
-                        logger().fine("Apparently that candidate score is just better");
+                        logger().fine("Candidate score is just better");
                     }
                 }
             }
@@ -1094,22 +1094,23 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     /**
-     * stream out the n best candidates along with their scores
-     * (optionally complexity and bscore).  If n is negative, then
-     * stream them all out.  Note that the default sort order for the
-     * metapop is a wieghted linear combo of the best scores and the
-     * smallest complexities, so that the best-ranked candidates are
-     * not necessarily those with the best raw score.
+     * stream out the metapopulation in decreasing order of their
+     * score along with their scores (optionally complexity and
+     * bscore).  If n is negative, then stream them all out.  Note
+     * that the default sort order for the metapop is a weighted
+     * linear combo of the best scores and the smallest complexities,
+     * so that the best-ranked candidates are not necessarily those
+     * with the best raw score.
      */
     template<typename Out, typename In>
     Out& ostream(Out& out, In from, In to, long n = -1,
                  bool output_score = true,
                  bool output_complexity = false,
                  bool output_bscore = false,
-                 bool output_dominated = false)
+                 bool output_only_bests = false)
     {
-        if (output_dominated) {
-            for (; from != to && n != 0; from++, n--) {
+        if (!output_only_bests) {
+            for (; from != to && n != 0; ++from, n--) {
                 ostream_bscored_combo_tree(out, *from, output_score,
                                            output_complexity, output_bscore);
             }
@@ -1119,7 +1120,7 @@ struct metapopulation : public bscored_combo_tree_set
         // Else, search for the top score...
         score_t best_score = worst_score;
 
-        for (In f = from; f != to; f++) {
+        for (In f = from; f != to; ++f) {
             const bscored_combo_tree& bt = *f;
             score_t sc = get_score(bt);
             if (best_score < sc) best_score = sc;
@@ -1129,12 +1130,11 @@ struct metapopulation : public bscored_combo_tree_set
         // The problem here is that the highest scorers are not
         // necessarily ranked highest, as the ranking is a linear combo
         // of both score and complexity.
-        for (In f = from; f != to && n != 0; f++) {
+        for (In f = from; f != to && n != 0; ++f, n--) {
             const bscored_combo_tree& bt = *f;
             if (best_score <= get_score(bt)) {
                 ostream_bscored_combo_tree(out, *f, output_score,
                                            output_complexity, output_bscore);
-                n--;
             }
         }
         return out;
@@ -1146,22 +1146,36 @@ struct metapopulation : public bscored_combo_tree_set
                  bool output_score = true,
                  bool output_complexity = false,
                  bool output_bscore = false,
-                 bool output_dominated = false)
+                 bool output_only_bests = false)
     {
         return ostream(out, begin(), end(),
                        n, output_score, output_complexity,
-                       output_bscore, output_dominated);
+                       output_bscore, output_only_bests);
     }
 
+    ///  hmmm, apparently it's ambiguous with the one below, strange
+    // // Like above but assumes that from = c.begin() and to = c.end()
+    // template<typename Out, typename C>
+    // Out& ostream(Out& out, const C& c, long n = -1,
+    //              bool output_score = true,
+    //              bool output_complexity = false,
+    //              bool output_bscore = false,
+    //              bool output_dominated = false)
+    // {
+    //     return ostream(out, c.begin(), c.end(),
+    //                    n, output_score, output_complexity,
+    //                    output_bscore, output_dominated);
+    // }
+    
     // Like above, but using std::cout.
     void print(long n = -1,
                bool output_score = true,
                bool output_complexity = false,
                bool output_bscore = false,
-               bool output_dominated = false)
+               bool output_only_bests = false)
     {
         ostream(std::cout, n, output_score, output_complexity,
-                output_bscore, output_dominated);
+                output_bscore, output_only_bests);
     }
 
     RandGen& rng;
