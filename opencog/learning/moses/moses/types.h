@@ -80,20 +80,21 @@ static const score_t worst_score = score_t(1) - best_score;
 struct composite_score: public std::pair<score_t, complexity_t>,
                         boost::less_than_comparable<composite_score>
 {
-    composite_score (score_t s, complexity_t c) { first = s; second = c; }
-    composite_score (const std::pair<score_t, complexity_t> &p) { first = p.first; second = p.second; }
-    composite_score () { first = worst_score; second = worst_complexity; }
-    composite_score& operator=(const composite_score &r) { first = r.first; second = r.second; return *this; }
-
-    bool operator<(const composite_score &r)
-    {
-       score_t lef = weight*first + second;
-       score_t rig = weight*r.first + r.second;
-       return (lef < rig);        
-    }
+    typedef std::pair<score_t, complexity_t> super;
+    composite_score(score_t s, complexity_t c);
+    composite_score(const std::pair<score_t, complexity_t> &p);
+    composite_score();    // build the worst score
+    composite_score& operator=(const composite_score &r);
+    // compare weight*score + complexity
+    bool operator<(const composite_score &r) const;
 
     static float weight;
 };
+
+// bool operator<(const composite_score &l, const composite_score &r) {
+//     std::cout << "ZOZO THE CLOWN" << std::endl;
+//     return l.operator<(r);
+// }
 
 extern const composite_score worst_composite_score;
 
@@ -205,15 +206,7 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                                                            bool>
 {
     bool operator()(const bscored_combo_tree& bs_tr1,
-                    const bscored_combo_tree& bs_tr2) const
-    {
-        composite_score csc1 = get_composite_score(bs_tr1),
-            csc2 = get_composite_score(bs_tr2);
-        return (csc1 >  csc2)
-            || (!(csc2 > csc1) &&
-                size_tree_order<vertex>()(get_tree(bs_tr1),
-                                          get_tree(bs_tr2)));
-    }
+                    const bscored_combo_tree& bs_tr2) const;
 };
 typedef std::set<bscored_combo_tree,
                  bscored_combo_tree_greater> bscored_combo_tree_set;
