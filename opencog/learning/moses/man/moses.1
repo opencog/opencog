@@ -366,11 +366,14 @@ traditional hill-climbing algorithm described above.
 T}
 
 \fBsa\fR@T{
-Simulated annealing.  The \fB\-D\fR flag controls the size of the
-neighborhood that is searched during the early, "high-temperature"
+Simulated annealing.  (Deprated). The \fB\-D\fR flag controls the size 
+of the neighborhood that is searched during the early, "high-temperature"
 phase.  It has a significant effect on the run-time performance of the
 algorithm. Using \fB\-D2\fR or \fB\-D3\fR is likely to provide the best
 performance.
+
+The current implementation of this algorithm has numerous faults, making
+it unlikely to work well for most problems.
 T}
 
 \fBun\fR@T{
@@ -420,7 +423,7 @@ unlimited.
 Disable the merging of dominated candidates into the metapopulation.
 When this flag is specified, the metapopulation will consist entirely
 of the highest scoring candidates.  Specifying this flag can (severely)
-degrade performance, as this will make it more likely that the 
+degrade performance, as this will make it more likely that the
 algorithm will get trapped in a local maximum. In addition, culling
 the dominated candidates takes a significant amount of CPU time and
 complexity.

@@ -2,12 +2,14 @@
  * opencog/learning/moses/optimization/optimization.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings
  * All Rights Reserved
  *
  * Written by Moshe Looks
  *            Predrag Janicic
  *            Nil Geisweiller
  *            Xiaohui Liu
+ *            Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -294,7 +296,7 @@ struct hc_parameters
 
         // If used with weighted_score, then must correct for weight.
         // Failure to do so will result in bad performance, due to
-        // premature termination of the search.  See bzr rev 6613 
+        // premature termination of the search.  See bzr rev 6613
         // for experimental results, details.
         min_score_improvement *= composite_score::weight / (composite_score::weight+1.0);
     }
@@ -323,7 +325,7 @@ struct hc_parameters
 
 /**
  * Hill Climbing: search the local neighborhood of an instance for the
- * highest score, move to that spot, and repeat until no further 
+ * highest score, move to that spot, and repeat until no further
  * improvment is possible.
  *
  * This optimizatin algo performs an exhaustive search of the local
@@ -339,7 +341,7 @@ struct hc_parameters
  * theoretic bit length of the field set.
  *
  * The operation of this algorithm is modified in several important
- * ways. If the number of nearest neighbors exceeeds a significant 
+ * ways. If the number of nearest neighbors exceeeds a significant
  * fraction of the max-allowed scoring function evaluations, then the
  * nearest neighborhood is sub-sampled, instead of being exhaustively
  * searched.
@@ -356,10 +358,10 @@ struct hc_parameters
  * only the instances that are equi-distant from the exemplar are
  * explored (i.e. at the same Hamming distance).
  *
- * NB: most problems seem to do just fine without the single-step, 
+ * NB: most problems seem to do just fine without the single-step,
  * broaden-search flag combination.  However, some problems, esp. those
  * with a deceptive scoring function (e.g. polynomial factoring, -Hsr)
- * seem to work better with -L1 -T1.   
+ * seem to work better with -L1 -T1 -I0.
  */
 struct hill_climbing : optim_stats
 {
@@ -368,20 +370,40 @@ struct hill_climbing : optim_stats
                   const hc_parameters& hc = hc_parameters())
         : rng(_rng), opt_params(op), hc_params(hc) {}
 
-    deme_size_t merge(instance_set<composite_score>& deme,
-                      deme_size_t deme_size,
-                      deme_size_t num_to_make,
-                      deme_size_t sample_start,
-                      deme_size_t sample_size,
-                      const instance& base,
-                      const instance& reference)
+    /**
+     * Cross the single top-scoring against the next-highest scorers.
+     * @reference:    the top-scoring instance
+     * @base:         the base instance from which the top-scorer
+     *                was derived.
+     * @sample_start: the count, within the deme, at which the
+     *                next-highest scorers start. These are assumed to
+     *                have been derived from the base instance also.
+     * @sample_size:  the number of next-highest scoring instances in the
+     *                deme. These are assumed to be in sequential order,
+     *                starting at sample_start.
+     * @num_to_make:  Number of new instances to create.  The actual
+     *                number created will be the lesser of this and
+     *                sample_size-1.
+     *
+     * The arguments to this method are kind-of funky, as its presumed
+     * that the top-scoring instances are already in the deme, and had
+     * been added in a previous pass.
+     */
+    deme_size_t cross_top_one(instance_set<composite_score>& deme,
+                              deme_size_t deme_size,
+                              deme_size_t num_to_make,
+                              deme_size_t sample_start,
+                              deme_size_t sample_size,
+                              const instance& base,
+                              const instance& reference)
     {
         if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
 
         // We only want to work with the high-scorers.
         // XXX TODO: actually, we don't need to sort all of them,
-        // only the highest-scoring num_to_make;
-        std::sort(deme.begin() + sample_start, 
+        // only the highest-scoring num_to_make; thus using c++ bind
+        // might be more efficient, maybe.
+        std::sort(deme.begin() + sample_start,
                   deme.begin() + sample_start + sample_size,
                   std::greater<scored_instance<composite_score> >());
 
@@ -438,7 +460,7 @@ struct hill_climbing : optim_stats
                 information_theoretic_bits(deme.fields());
 
         // XXX The two functions below recompute nn_estimate, twice,
-        // again.  This is wasteful, and should be fixed ... 
+        // again.  This is wasteful, and should be fixed ...
         // pop_size == 20 * number of info-theoretic-bits in the field.
         // max_gens_total == number of info-theoretic-bits in the field.
         unsigned pop_size = opt_params.pop_size(fields);
@@ -540,7 +562,7 @@ struct hill_climbing : optim_stats
                 if (number_of_new_instances < total_number_of_neighbours) {
                     // Number of better candidates in the neighborhood.
                     // This number is a big lie!
-                    double NB = 10000; 
+                    double NB = 10000;
 
                     // Proportion of good candidates in the neighborhood.
                     double T = total_number_of_neighbours;
@@ -578,8 +600,8 @@ struct hill_climbing : optim_stats
                                          center_inst, deme, distance, rng);
             } else {
                 number_of_new_instances =
-                    merge(deme, current_number_of_instances, TOP_POP_SIZE,
-                          prev_start, prev_size, prev_center, center_inst);
+                    cross_top_one(deme, current_number_of_instances, TOP_POP_SIZE,
+                                  prev_start, prev_size, prev_center, center_inst);
 
             }
             prev_start = current_number_of_instances;
@@ -703,7 +725,7 @@ struct hill_climbing : optim_stats
 };
 
 /////////////////////////
-// Simulated Annealing //
+// Star-shaped search  //
 /////////////////////////
 
 // Parameters specific for Star-shaped set search
@@ -724,7 +746,29 @@ struct sa_parameters
 };
 
 /**
- * simulated_annealing: Apply a modified smulated annealing-style search.
+ * Star-shaped search: Apply a modified smulated annealing-style search.
+ * Deprecated; its not really simulated annealing, but something else,
+ * and this really doesn't work very well. Its here for backward
+ * compatibility, for the moment.
+ *
+ * The search pattern used is similar to the -L1 -T1 -I0 variant of 
+ * hill-climbing, except that, instead of always searching the nearest
+ * neighbors, it occasionally broadens the search to a larger
+ * neighborhood, looking at more distant neighbors (thus the name "star
+ * shape", as the common term for such non-convex sets in mathematics). 
+ * The fraction of more distant neighbors explored is determined by a
+ * temperature parameter, thus the allusion to annealing. In addition,
+ * the same temperature is also used to keep eithr the new best instance,
+ * or the old one.  Why these two different, unrelated things should ever
+ * have the same temperature is one of the reasons the implementation
+ * below is broken/deprecated.
+ *
+ * A "true" simulated-annealing algo would have worked like this:
+ * a) Explore the nearest-neighborhood of a "center instance".
+ * b) Using a Boltzmann distribution, select either the highest scroring
+ *    instance, or one of the next-best few, as the new center instance.
+ * c) Goto step a).
+ * but that's NOT AT ALL what this algo does.
  */
 struct simulated_annealing : optim_stats
 {
