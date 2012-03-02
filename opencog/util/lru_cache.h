@@ -37,6 +37,12 @@
 
 namespace opencog {
 
+/// @todo we want to have the caches inherit the functor F being
+/// cached because them one can put members in F and have the cached
+/// version of it where the code using F can still access all its
+/// members. Specifically this would be useful w.r.t. the fitness
+/// functions used by MOSES
+
 /**
  * A set of generic caches. Please be careful if you add more caches
  * that they do not break when the function to cache raises an
