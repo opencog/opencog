@@ -81,6 +81,10 @@ behavioral_score logical_bscore::best_possible_bscore() const {
     return behavioral_score(target.size(), 0);
 }
 
+score_t logical_bscore::min_improv() const {
+    return 0.5;
+}
+
 ///////////////////
 // contin_bscore //
 ///////////////////
@@ -122,6 +126,11 @@ behavioral_score contin_bscore::best_possible_bscore() const
     return behavioral_score(target.size() + (occam?1:0), 0);
 }
 
+score_t contin_bscore::min_improv() const {
+    return 0.0;                 // not necessarily right, just the
+                                // backward behavior
+}
+        
 void contin_bscore::set_complexity_coef(float alphabet_size, float stdev)
 {
     if(occam)
@@ -213,6 +222,10 @@ score_t precision_bscore::get_activation_penalty(score_t activation) const
     return log(pow((1 - dst), penalty));
 }
 
+score_t precision_bscore::min_improv() const {
+    return 0.0;                 // not necessarily right, just the
+                                // backward behavior
+}
         
 //////////////////////////////
 // discretize_contin_bscore //
@@ -250,7 +263,12 @@ discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
 behavioral_score discretize_contin_bscore::best_possible_bscore() const {
     return behavioral_score(target.size(), 0);
 }
-        
+
+score_t discretize_contin_bscore::min_improv() const {
+    return 0.0;                 // not necessarily right, just the
+                                // backward behavior
+}
+
 size_t discretize_contin_bscore::class_idx(contin_t v) const {
     if(v < thresholds[0])
         return 0;
@@ -348,6 +366,10 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
     if(occam)
         bs.push_back(0);
     return bs;
+}
+
+score_t ctruth_table_bscore::min_improv() const {
+    return 0.5;
 }
 
 //////////////////////////////////
@@ -525,6 +547,11 @@ score_t interesting_predicate_bscore::get_activation_penalty(score_t activation)
                       / (1 - max_activation));
     logger().fine("dst = %f", dst);
     return log(pow((1 - dst), penalty));
+}
+
+score_t interesting_predicate_bscore::min_improv() const {
+    return 0.0;                 // not necessarily right, just the
+                                // backward behavior
 }
 
 } // ~namespace moses

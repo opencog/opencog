@@ -31,6 +31,8 @@
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/range/algorithm/min_element.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/weighted_skewness.hpp>
@@ -63,6 +65,9 @@ struct score_base : public unary_function<combo_tree, score_t>
     // function. This is useful in order to stop running MOSES when
     // the best possible score is reached.
     virtual score_t best_possible_score() const = 0;
+
+    // Return the minimum value considered for improvement
+    virtual score_t min_improv() const = 0;
 };
 
 // Abstract bscoring function class to implement
@@ -75,6 +80,9 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
     // function. This is useful in order to stop running MOSES when
     // the best possible score is reached
     virtual behavioral_score best_possible_bscore() const = 0;
+
+    // Return the minimum value considered for improvement    
+    virtual score_t min_improv() const = 0;
 };
 
 /**
@@ -90,6 +98,12 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
 /// BScoreACache and ScoreACache typedefs do this. However, this begs
 /// a question: why do we need a base class anyway, if we're not going
 /// to need it? ??
+/// The answer:
+/// First we do use it in other bscores such as
+/// multiscore_based_bscore.
+/// Second after fixing the cache API (that is having the function
+/// being cached being inherited by the cache that compile error will
+/// go away and we can have bscore_based_score inherit it)
 
 template<typename BScore>
 struct bscore_based_score : public unary_function<combo_tree, score_t>
@@ -136,6 +150,13 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     {
         return boost::accumulate(bscore.best_possible_bscore(), 0.0);
     }
+
+    // Return the minimum value considered for improvement
+    score_t min_improv() const
+    {
+        return bscore.min_improv();
+    }
+    
     const BScore& bscore;
 };
 
@@ -169,7 +190,16 @@ struct multiscore_based_bscore : public bscore_base
         }
         return bs;
     }
-    
+
+    // return the min of all min_improv
+    score_t min_improv() const
+    {
+        score_t res = best_score;
+        foreach(const Score& s, scores)
+            res = min(res, s.min_improv());
+        return res;
+    }
+
     ScoreSeq scores;
 };
 
@@ -203,6 +233,15 @@ struct multibscore_based_bscore : public bscore_base
             boost::push_back(bs, bsc.best_possible_bscore());
         return bs;
     }
+
+    // return the min of all min_improv
+    score_t min_improv() const
+    {
+        score_t res = best_score;
+        foreach(const BScore& bs, bscores)
+            res = min(res, bs.min_improv());
+        return res;
+    }
     
     BScoreSeq bscores;
 };
@@ -223,7 +262,9 @@ struct logical_bscore : public bscore_base
     behavioral_score operator()(const combo_tree& tr) const;
 
     behavioral_score best_possible_bscore() const;
-    
+
+    score_t min_improv() const;
+
     complete_truth_table target;
     int arity;
 };
@@ -275,6 +316,8 @@ struct precision_bscore : public bscore_base
     // termination conditions (when the best bscore is reached).
     behavioral_score best_possible_bscore() const;
     
+    score_t min_improv() const;
+
     mutable CTable ctable;         // mutable because accessing a missing
                                    // element adds it in the map.
     unsigned ctable_usize;                  // uncompressed size of ctable
@@ -320,6 +363,8 @@ struct discretize_contin_bscore : public bscore_base
     // not quite true, because there could be duplicated inputs, but
     // that's acceptable for now.
     behavioral_score best_possible_bscore() const;
+
+    score_t min_improv() const;
     
     OTable target;
     ITable cit;
@@ -421,6 +466,8 @@ struct contin_bscore : public bscore_base
     // not quite true, because there could be duplicated inputs, but
     // that's acceptable for now.
     behavioral_score best_possible_bscore() const;
+
+    score_t min_improv() const;
     
     OTable target;
     ITable cti;
@@ -469,6 +516,8 @@ struct ctruth_table_bscore : public bscore_base
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
     behavioral_score best_possible_bscore() const;
+
+    score_t min_improv() const;
     
     mutable CTable ctt;         // mutable because accessing a missing
                                 // element adds it in the map.
@@ -531,6 +580,8 @@ struct interesting_predicate_bscore : public bscore_base
     // the KLD has no upper boundary so the best of possible score is
     // the maximum value a behavioral_score can represent
     behavioral_score best_possible_bscore() const;
+
+    score_t min_improv() const;
 
     counter_t counter; // counter of the unconditioned distribution
     pdf_t pdf;     // pdf of the unconditioned distribution
