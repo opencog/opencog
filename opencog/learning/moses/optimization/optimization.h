@@ -590,24 +590,36 @@ struct hill_climbing : optim_stats
 
             // For a distance of one, we use
             // information_theoretic_bits as an approximation of the
-            // number of neighbors over-estimated by a factor of 2,
+            // number of neighbors, over-estimated by a factor of 2,
             // just to decrease the chance of going into 'sample' mode
             // when working with the deme. This saves cpu time.
-            if (distance == 0)
-            {
-                total_number_of_neighbours = 1;
-                number_of_new_instances = 1;
-            }
-            else if (distance == 1)
+            if (distance == 1)
             {
                 total_number_of_neighbours = 2*nn_estimate;
                 number_of_new_instances = 2*nn_estimate;
 
                 // fraction_of_remaining is 1 by default
                 number_of_new_instances *= hc_params.fraction_of_remaining;
+
+                // avoid overflow.
+                deme_size_t nleft = 
+                    max_number_of_instances - current_number_of_instances;
+                if (nleft < number_of_new_instances)
+                    number_of_new_instances = nleft;
+
+            }
+            else if (distance == 0)
+            {
+                total_number_of_neighbours = 1;
+                number_of_new_instances = 1;
             }
             else // distance two or greater
             {
+               // distances greater than 1 occurs only when the -L1 -T1 flags
+               // are used.  This puts this algo into a very different mode of
+               // operation, in an attempt to overcome deceptive scoring
+               // functions.
+
                 // For large-distance searches, there is a combinatorial
                 // explosion of the size of the search volume. Thus, be
                 // careful budget our available cycles.
@@ -621,24 +633,18 @@ struct hill_climbing : optim_stats
                 // to power dist.
                 for (unsigned k=0; k<distance; k++)
                    number_of_new_instances *= hc_params.fraction_of_remaining;
-            }
 
-            // avoid overflow.
-            deme_size_t nleft = 
-                max_number_of_instances - current_number_of_instances;
-            if (nleft < number_of_new_instances)
-                number_of_new_instances = nleft;
+                deme_size_t nleft = 
+                    max_number_of_instances - current_number_of_instances;
 
-            // If fraction is small, just use up the rest of the cycles.
-            if (number_of_new_instances < MINIMUM_DEME_SIZE)
-                number_of_new_instances =
-                    (max_number_of_instances - current_number_of_instances);
+                // If fraction is small, just use up the rest of the cycles.
+                if (number_of_new_instances < MINIMUM_DEME_SIZE)
+                    number_of_new_instances = nleft;
 
-            // distances greater than 1 occurs only when the -L1 -T1 flags
-            // are used.  This puts this algo into a very different mode of
-            // operation, in an attempt to overcome deceptive scoring
-            // functions.
-            if (distance > 1) {
+                // avoid overflow.
+                if (nleft < number_of_new_instances)
+                    number_of_new_instances = nleft;
+
                 // Estimate the probability of an improvement and halt if too low
                 // XXX This estimate is pretty hokey... should probably be removed.
                 // If its based on something empirical, I don't know what that is...
