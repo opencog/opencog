@@ -371,35 +371,40 @@ struct hill_climbing : optim_stats
         : rng(_rng), opt_params(op), hc_params(hc) {}
 
     /**
-     * Cross the single top-scoring against the next-highest scorers.
-     * @reference:    the top-scoring instance
-     * @base:         the base instance from which the top-scorer
+     * Cross the single top-scoring instance against the next-highest scorers.
+     *
+     * As arguments, accepts a range of scored instances ("the sample"),
+     * and a singlee instance from which these were all derived ("the base"
+     * or center instance).  This will create a number of new instances,
+     * which will be a cross of the highest-scoring instance with the
+     * next-highest scoring instances.
+     *
+     * @deme:         the deme holding current instances, and where
+     *                new instances will be placed.
+     * @deme_size:    the current size of the deme. New instances
+     *                will be appended at the end.
+     * @base:         the base instance from which the sample was
      *                was derived.
      * @sample_start: the count, within the deme, at which the
-     *                next-highest scorers start. These are assumed to
-     *                have been derived from the base instance also.
-     * @sample_size:  the number of next-highest scoring instances in the
-     *                deme. These are assumed to be in sequential order,
-     *                starting at sample_start.
+     *                scored instances start. These are assumed to
+     *                have been derived from the base instance.
+     * @sample_size:  the number of instances in the sample. These
+     *                are assumed to be in sequential order, starting
+     *                at sample_start. 
      * @num_to_make:  Number of new instances to create.  The actual
      *                number created will be the lesser of this and
      *                sample_size-1.
-     *
-     * The arguments to this method are kind-of funky, as its presumed
-     * that the top-scoring instances are already in the deme, and had
-     * been added in a previous pass.
      */
     deme_size_t cross_top_one(instance_set<composite_score>& deme,
                               deme_size_t deme_size,
                               deme_size_t num_to_make,
                               deme_size_t sample_start,
                               deme_size_t sample_size,
-                              const instance& base,
-                              const instance& reference)
+                              const instance& base)
     {
         if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
 
-        // We only want to work with the high-scorers.
+        // We only need to work with the high-scorers.
         // XXX TODO: actually, we don't need to sort all of them,
         // only the highest-scoring num_to_make; thus using c++ bind
         // might be more efficient, maybe.
@@ -409,13 +414,79 @@ struct hill_climbing : optim_stats
 
         deme.resize(deme_size + num_to_make);
 
-        // Skip the first entry: it should be identical to "reference"
+        const instance &reference = deme[sample_start].first;
+
+        // Skip the first entry; its the top scorer.
         for (unsigned i = 0; i< num_to_make; i++) {
             unsigned j = deme_size + i;
             deme[j] = deme[sample_start + i + 1]; // +1 to skip the first one
             deme.fields().merge_instance(deme[j], base, reference);
         }
-        return num_to_make-1;  // -1 because we skipped the first.
+        return num_to_make;
+    }
+
+    /** two-dimensional simplex version of above. */
+    deme_size_t cross_top_two(instance_set<composite_score>& deme,
+                              deme_size_t deme_size,
+                              deme_size_t num_to_make,
+                              deme_size_t sample_start,
+                              deme_size_t sample_size,
+                              const instance& base)
+    {
+        // sample_size choose two.
+        unsigned max = sample_size * (sample_size-1) / 2;
+        if (max < num_to_make) num_to_make = max;
+
+        std::sort(deme.begin() + sample_start,
+                  deme.begin() + sample_start + sample_size,
+                  std::greater<scored_instance<composite_score> >());
+
+        deme.resize(deme_size + num_to_make);
+
+        // Summation is over a 2-simplex
+        for (unsigned i = 1; i< num_to_make; i++) {
+            const instance& reference = deme[sample_start+i].first;
+            for (unsigned j = 0; j < i; j++) {
+                unsigned n = deme_size + i*(i-1)/2 + j;
+                deme[n] = deme[sample_start + j];
+                deme.fields().merge_instance(deme[n], base, reference);
+            }
+        }
+        return num_to_make;
+    }
+
+    /** three-dimensional simplex version of above. */
+    deme_size_t cross_top_three(instance_set<composite_score>& deme,
+                              deme_size_t deme_size,
+                              deme_size_t num_to_make,
+                              deme_size_t sample_start,
+                              deme_size_t sample_size,
+                              const instance& base)
+    {
+        // sample_size choose three.
+        unsigned max = sample_size * (sample_size-1) * (sample_size-2) / 6;
+        if (max < num_to_make) num_to_make = max;
+
+        std::sort(deme.begin() + sample_start,
+                  deme.begin() + sample_start + sample_size,
+                  std::greater<scored_instance<composite_score> >());
+
+        deme.resize(deme_size + num_to_make);
+
+        // Summation is over a 3-simplex
+        for (unsigned i = 2; i< num_to_make; i++) {
+            const instance& iref = deme[sample_start+i].first;
+            for (unsigned j = 1; j < i; j++) {
+                const instance& jref = deme[sample_start+j].first;
+                for (unsigned k = 0; k < i; k++) {
+                    unsigned n = deme_size + i*(i-1)*(i-2)/6 + j*(j-1)/2 + k;
+                    deme[n] = deme[sample_start + k];
+                    deme.fields().merge_instance(deme[n], base, iref);
+                    deme.fields().merge_instance(deme[n], base, jref);
+                }
+            }
+        }
+        return num_to_make;
     }
 
     /**
@@ -485,6 +556,7 @@ struct hill_climbing : optim_stats
         unsigned max_distance = opt_params.max_distance(fields);
 
         // center_inst is the current location on the hill.
+        // Copy it, don't reference it, since sorting will mess up a ref.
         instance center_inst(init_inst);
         composite_score best_cscore = worst_composite_score;
         score_t prev_best_score = worst_score;
@@ -518,40 +590,49 @@ struct hill_climbing : optim_stats
             // number of neighbors over-estimated by a factor of 2,
             // just to decrease the chance of going into 'sample' mode
             // when working with the deme. This saves cpu time.
-            if (distance == 1)
+            if (distance == 0)
+            {
+                total_number_of_neighbours = 1;
+                number_of_new_instances = 1;
+            }
+            else if (distance == 1)
             {
                 total_number_of_neighbours = 2*nn_estimate;
-                // number_of_new_instances = 2*nn_estimate;
-                // deme_size_t nleft = 
-                //     max_number_of_instances - current_number_of_instances;
-                // if (nleft < number_of_new_instances)
-                //     number_of_new_instances = nleft;
+                number_of_new_instances = 2*nn_estimate;
+
+                // fraction_of_remaining is 1 by default
+                number_of_new_instances *= hc_params.fraction_of_remaining;
             }
-            else // distance 0 is handled by that branch too
+            else // distance two or greater
             {
                 // For large-distance searches, there is a combinatorial
                 // explosion of the size of the search volume. Thus, be
-                // careful bedget our available cycles.
+                // careful budget our available cycles.
                 total_number_of_neighbours =
                     safe_binomial_coefficient(nn_estimate, distance);
-            }
-            // fraction_of_remaining is 1 by default, that is all
-            // budget is put in searching the neighborhood, this is OK
-            // when the distance is demed to stay low (traditional
-            // hill-climbing). Otherwise one can tweak the fraction of
-            // remaining (option -O) to allocate some resource to
-            // search more distant neighbors
-            number_of_new_instances = 
-                (max_number_of_instances - current_number_of_instances)
-                * hc_params.fraction_of_remaining;
+
+                number_of_new_instances = total_number_of_neighbours;
             
+                // binomial coefficient has a combinatoric explosion to
+                // the power distance. So throttle back by fraction raised
+                // to power dist.
+                for (unsigned k=0; k<distance; k++)
+                   number_of_new_instances *= hc_params.fraction_of_remaining;
+            }
+
+            // avoid overflow.
+            deme_size_t nleft = 
+                max_number_of_instances - current_number_of_instances;
+            if (nleft < number_of_new_instances)
+                number_of_new_instances = nleft;
+
             // If fraction is small, just use up the rest of the cycles.
             if (number_of_new_instances < MINIMUM_DEME_SIZE)
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
 
-            // distances greater than 1 occur only when the -L1 -T1 flags
-            // are used, to throw this algo into a very different mode of
+            // distances greater than 1 occurs only when the -L1 -T1 flags
+            // are used.  This puts this algo into a very different mode of
             // operation, in an attempt to overcome deceptive scoring
             // functions.
             if (distance > 1) {
@@ -600,8 +681,8 @@ struct hill_climbing : optim_stats
                                          center_inst, deme, distance, rng);
             } else {
                 number_of_new_instances =
-                    cross_top_one(deme, current_number_of_instances, TOP_POP_SIZE,
-                                  prev_start, prev_size, prev_center, center_inst);
+                    cross_top_two(deme, current_number_of_instances, TOP_POP_SIZE,
+                                  prev_start, prev_size, prev_center);
 
             }
             prev_start = current_number_of_instances;
@@ -621,17 +702,23 @@ struct hill_climbing : optim_stats
 
             // Check if there is an instance in the deme better than
             // the best candidate
-            bool has_improved = false;
+            score_t prev_hi = best_score;
+            unsigned ibest = current_number_of_instances;
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
                 composite_score inst_cscore = deme[i].second;
                 score_t iscore = get_weighted_score(inst_cscore);
-                if (iscore >  best_score + hc_params.min_score_improvement) {
+                if (iscore >  best_score) {
                     best_cscore = inst_cscore;
                     best_score = iscore;
-                    center_inst = deme[i].first;
-                    has_improved = true;
+                    ibest = i;
                 }
+            }
+            // Make a copy of the best instance.
+            bool has_improved = false;
+            if (best_score >  prev_hi + hc_params.min_score_improvement) {
+                has_improved = true;
+                center_inst = deme[ibest].first;
             }
 
             current_number_of_instances += number_of_new_instances;
