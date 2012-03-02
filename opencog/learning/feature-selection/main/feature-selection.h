@@ -267,7 +267,7 @@ void feature_selection(Table& table,
     // setting OpenMP parameters
     setting_omp(fs_params.jobs);
     // setting moses optimization parameters
-    optim_parameters op_param(20, fs_params.max_score);
+    optim_parameters op_param(20, fs_params.max_score, 4, 0.0);
     if(fs_params.algorithm == un) {
         OC_ASSERT(false, "TODO");
     } else if(fs_params.algorithm == sa) {
@@ -277,7 +277,7 @@ void feature_selection(Table& table,
                                false,
                                fs_params.hc_fraction_of_remaining);
         hill_climbing hc(rng, op_param, hc_param);
-        moses_feature_selection(table, hc, fs_params);            
+        moses_feature_selection(table, hc, fs_params);
     } else if(fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);
     } else {
