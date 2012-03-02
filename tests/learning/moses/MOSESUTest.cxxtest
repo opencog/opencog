@@ -22,9 +22,12 @@
 
 #include <cxxtest/TestSuite.h>
 #include <opencog/learning/moses/main/moses_exec.h>
+#include <boost/current_function.hpp>
 #include "moses-framework.h"
 
 using namespace opencog::moses;
+using std::cout;
+using std::endl;
 
 const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
 
@@ -40,27 +43,35 @@ public:
     }
 
     void test_2_parity() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k2"});
     }
     void test_2_parity_with_labels() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k2", "-W1"});
     }
     void test_3_parity_multi_thread() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k3", "-m100000", "-j4"});
     }
     void test_3_mux() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hmux", "-k1"});
     }
     void test_sa_2_parity() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k2", "-asa"});
     }
     void test_sa_3_mux() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hmux", "-k1", "-asa"});
     }
     void test_un_3_pa_multi_thread() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k3", "-aun", "-m500000", "-j4"});
     }
     void test_it() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
         string max_evals("-m1000");
         moses_test_score({data_file_path, max_evals}, -3);
@@ -71,9 +82,11 @@ public:
      * -L1 flag to perform an exhaustive local search.
      */
     void test_sr_3() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hsr", "-k3", "-m100000", "-L1"});
     }
     void test_cp() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         string tr_str("or(and(#2 !#3) #1 !#4 #5)");
         string cp_opt("-y");
         // Note: This test is very sensitive to algorithmic details;
@@ -86,6 +99,7 @@ public:
         moses_test_combo({"-Hcp", cp_opt + tr_str, "-E3"}, {tr_str});
     }
     void test_kl() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         string tr1_str("or(and(!#1 #2) and(#1 !#2))");
         string tr2_str("and(or(!#1 !#2) or(#1 #2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
@@ -93,6 +107,7 @@ public:
                          {tr1_str, tr2_str});
     }
     void test_multi_kl() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
         string tr1_str("or(and(!#1 #2) and(#1 !#2))");
         string tr2_str("and(or(!#1 !#2) or(#1 #2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");

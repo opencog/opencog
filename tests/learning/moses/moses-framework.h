@@ -20,11 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cxxtest/TestSuite.h>
 #include <opencog/learning/moses/main/moses_exec.h>
 #include <boost/range/algorithm/find_if.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace opencog::moses;
+using namespace boost::posix_time;
 
 string build_arguments(vector<string>& arguments)
 {
@@ -54,6 +55,7 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
 
 void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
 {
+    auto t1 = microsec_clock::local_time();
     // build arguments
     string tempfile = build_arguments(arguments);
     // run moses
@@ -62,12 +64,15 @@ void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
     auto result = parse_result(tempfile);
     // check that the result is the expected one
     TS_ASSERT_LESS_THAN(fabs(result.first - expected_sc), 1.0e-8);
+    auto t2 = microsec_clock::local_time();
+    std::cout << "Real time: " << (t2 - t1) << std::endl;
 }
 
 // test that the first candidate is one of the expected combo tree
 void moses_test_combo(vector<string> arguments,
                       vector<string> expected_tr_strs)
 {
+    auto t1 = microsec_clock::local_time();
     // build arguments
     string tempfile = build_arguments(arguments);
     // run moses
@@ -81,5 +86,6 @@ void moses_test_combo(vector<string> arguments,
                                    stringstream(tr_str) >> tr;
                                    return tr == result.second;});
     TS_ASSERT(f_it != expected_tr_strs.end());
+    auto t2 = microsec_clock::local_time();
+    std::cout << "Real time: " << (t2 - t1) << std::endl;
 }
-
