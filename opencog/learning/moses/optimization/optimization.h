@@ -104,16 +104,25 @@ struct optim_parameters
 {
     optim_parameters(double _pop_size_ratio = 20,
                      score_t _terminate_if_gte = 0,
-                     size_t _max_dist = 4) :
+                     size_t _max_dist = 4,
+                     score_t _min_score_improv = 0.5) :
         term_total(1.0),
         term_improv(1.0),
 
         window_size_pop(0.05), //window size for RTR is
         window_size_len(1),    //min(windowsize_pop*N,windowsize_len*n)
 
-        pop_size_ratio(_pop_size_ratio),
+        pop_size_ratio(_pop_size_ratio),    
         terminate_if_gte(_terminate_if_gte),
-        max_dist(_max_dist) {}
+        max_dist(_max_dist),
+
+        // If used with weighted_score, then must correct for weight.
+        // Failure to do so will result in bad performance, due to
+        // premature termination of the search.  See bzr rev 6613
+        // for experimental results, details.
+        min_score_improv(_min_score_improv * composite_score::weight
+                         / (composite_score::weight + 1.0))
+    {}
 
     // N = p.popsize_ratio * n^1.05
     // XXX Why n^1.05 ??? This is going to have a significant effect
@@ -172,6 +181,17 @@ struct optim_parameters
     // Defines the max distance to search during one iteration (used
     // in method max_distance)
     size_t max_dist;
+
+    // We accept improvement only if the score improved by that amount
+    // or better, to avoid fine-tuning. It may be better to restart
+    // the search from a new exemplar rather wasting time climbing a
+    // near-plateau. Most problems have 1.0 as the smallest meaningful
+    // score change, so 0.5 as default seems reasonable...
+    //
+    // Note Bene: the initial value is appropriate for the true score,
+    // not the weighted score.  Thus, we re-weight, in the
+    // constructor, for use with the wieghted score.
+    score_t min_score_improv;
 };
 
 // Statistics obtained during optimization run, useful for tuning.
@@ -285,22 +305,14 @@ struct hc_parameters
 {
     hc_parameters(bool widen = false,
                   bool step = false,
-                  double _fraction_of_remaining = 1.0,
-                  score_t _min_score_improvement = 0.5)
+                  double _fraction_of_remaining = 1.0)
         : widen_search(widen),
           single_step(step),
-          fraction_of_remaining(_fraction_of_remaining),
-          min_score_improvement(_min_score_improvement)
+          fraction_of_remaining(_fraction_of_remaining)
     {
         OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
-
-        // If used with weighted_score, then must correct for weight.
-        // Failure to do so will result in bad performance, due to
-        // premature termination of the search.  See bzr rev 6613
-        // for experimental results, details.
-        min_score_improvement *= composite_score::weight / (composite_score::weight+1.0);
     }
-
+    
     bool widen_search;
     bool single_step;
 
@@ -310,17 +322,6 @@ struct hc_parameters
     // there is only one deme to explore and tweaking that parameter
     // can make a difference (breadth vs depth)
     double fraction_of_remaining;
-
-    // We accept improvement only if the score improved by that amount
-    // or better, to avoid fine-tuning. It may be better to restart
-    // the search from a new exemplar rather wasting time climbing a
-    // near-plateau. Most problems have 1.0 as the smallest meaningful
-    // score change, so 0.5 as default seems reasonable...
-    //
-    // Note Bene: 0.5 is appropriate for the true score, not the weighted
-    // score.  Thus, we re-weight, in the constructor, for use with the
-    // wieghted score.
-    score_t min_score_improvement;
 };
 
 /**
@@ -716,7 +717,7 @@ struct hill_climbing : optim_stats
             }
             // Make a copy of the best instance.
             bool has_improved = false;
-            if (best_score >  prev_hi + hc_params.min_score_improvement) {
+            if (best_score >  prev_hi + opt_params.min_score_improv) {
                 has_improved = true;
                 center_inst = deme[ibest].first;
             }
