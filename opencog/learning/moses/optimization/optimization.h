@@ -407,8 +407,8 @@ struct hill_climbing : optim_stats
 
         // We only need to work with the high-scorers.
         // XXX TODO: actually, we don't need to sort all of them,
-        // only the highest-scoring num_to_make; thus using c++ bind
-        // might be more efficient, maybe.
+        // only the highest-scoring num_to_make; thus, use nth_element
+        // http://en.cppreference.com/w/cpp/algorithm/nth_element
         std::sort(deme.begin() + sample_start,
                   deme.begin() + sample_start + sample_size,
                   std::greater<scored_instance<composite_score> >());
@@ -445,11 +445,12 @@ struct hill_climbing : optim_stats
         deme.resize(deme_size + num_to_make);
 
         // Summation is over a 2-simplex
-        for (unsigned i = 1; i< num_to_make; i++) {
+        for (unsigned i = 1; i < sample_size; i++) {
             const instance& reference = deme[sample_start+i].first;
             for (unsigned j = 0; j < i; j++) {
-                unsigned n = deme_size + i*(i-1)/2 + j;
-                deme[n] = deme[sample_start + j];
+                unsigned n = i*(i-1)/2 + j;
+                if (num_to_make <= n) return num_to_make;
+                deme[deme_size + n] = deme[sample_start + j];
                 deme.fields().merge_instance(deme[n], base, reference);
             }
         }
@@ -475,13 +476,14 @@ struct hill_climbing : optim_stats
         deme.resize(deme_size + num_to_make);
 
         // Summation is over a 3-simplex
-        for (unsigned i = 2; i< num_to_make; i++) {
+        for (unsigned i = 2; i < sample_size; i++) {
             const instance& iref = deme[sample_start+i].first;
             for (unsigned j = 1; j < i; j++) {
                 const instance& jref = deme[sample_start+j].first;
                 for (unsigned k = 0; k < i; k++) {
-                    unsigned n = deme_size + i*(i-1)*(i-2)/6 + j*(j-1)/2 + k;
-                    deme[n] = deme[sample_start + k];
+                    unsigned n = i*(i-1)*(i-2)/6 + j*(j-1)/2 + k;
+                    if (num_to_make <= n) return num_to_make;
+                    deme[deme_size + n] = deme[sample_start + k];
                     deme.fields().merge_instance(deme[n], base, iref);
                     deme.fields().merge_instance(deme[n], base, jref);
                 }
