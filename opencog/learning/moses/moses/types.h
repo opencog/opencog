@@ -85,7 +85,11 @@ struct composite_score: public std::pair<score_t, complexity_t>,
     composite_score(const std::pair<score_t, complexity_t> &p);
     composite_score();    // build the worst score
     composite_score& operator=(const composite_score &r);
+
     // compare weight*score + complexity
+    //
+    // Additionally we assume that nan is always more little than
+    // anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
 
     static float weight;

@@ -54,7 +54,10 @@ composite_score& composite_score::operator=(const composite_score &r) {
 bool composite_score::operator<(const composite_score &r) const {
     score_t lef = weight*first + second;
     score_t rig = weight*r.first + r.second;
-    return (lef < rig);
+    if (isnan(lef))
+        return !isnan(rig);
+    else
+        return (lef < rig);
 }
 
 } // ~namespace moses
