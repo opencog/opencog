@@ -364,12 +364,19 @@ struct hc_parameters
  * with a deceptive scoring function (e.g. polynomial factoring, -Hsr)
  * seem to work better with -L1 -T1 -I0.
  */
+// #define GATHER_STATS 1
 struct hill_climbing : optim_stats
 {
     hill_climbing(RandGen& _rng,
                   const optim_parameters& op = optim_parameters(),
                   const hc_parameters& hc = hc_parameters())
-        : rng(_rng), opt_params(op), hc_params(hc) {}
+        : rng(_rng), opt_params(op), hc_params(hc)
+    {
+#ifdef GATHER_STATS
+        hiscore = 0.0;
+        hicount = 0.0;
+#endif
+    }
 
     /**
      * Cross the single top-scoring instance against the next-highest scorers.
@@ -391,7 +398,7 @@ struct hill_climbing : optim_stats
      *                have been derived from the base instance.
      * @sample_size:  the number of instances in the sample. These
      *                are assumed to be in sequential order, starting
-     *                at sample_start. 
+     *                at sample_start.
      * @num_to_make:  Number of new instances to create.  The actual
      *                number created will be the lesser of this and
      *                sample_size-1.
@@ -405,10 +412,10 @@ struct hill_climbing : optim_stats
     {
         if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
 
-        // We only need to work with the high-scorers.
-        // XXX TODO: actually, we don't need to sort all of them,
-        // only the highest-scoring num_to_make; thus, use nth_element
-        // http://en.cppreference.com/w/cpp/algorithm/nth_element
+        // We to access the high-scorers.
+        // XXX We don't actually need them all sorted; we only need
+        // the highest-scoring num_to_make+1 to appear first, and
+        // after that, we don't care about the ordering.
         std::sort(deme.begin() + sample_start,
                   deme.begin() + sample_start + sample_size,
                   std::greater<scored_instance<composite_score> >());
@@ -602,7 +609,7 @@ struct hill_climbing : optim_stats
                 number_of_new_instances *= hc_params.fraction_of_remaining;
 
                 // avoid overflow.
-                deme_size_t nleft = 
+                deme_size_t nleft =
                     max_number_of_instances - current_number_of_instances;
                 if (nleft < number_of_new_instances)
                     number_of_new_instances = nleft;
@@ -627,14 +634,14 @@ struct hill_climbing : optim_stats
                     safe_binomial_coefficient(nn_estimate, distance);
 
                 number_of_new_instances = total_number_of_neighbours;
-            
+
                 // binomial coefficient has a combinatoric explosion to
                 // the power distance. So throttle back by fraction raised
                 // to power dist.
                 for (unsigned k=0; k<distance; k++)
                    number_of_new_instances *= hc_params.fraction_of_remaining;
 
-                deme_size_t nleft = 
+                deme_size_t nleft =
                     max_number_of_instances - current_number_of_instances;
 
                 // If fraction is small, just use up the rest of the cycles.
@@ -664,7 +671,7 @@ struct hill_climbing : optim_stats
                 logger().debug(
                     "Estimated probability to find an improvement = %f",
                     p_improv);
-                
+
                 if (p_improv < 0.01) {
                     logger().debug("The probability is too low to pursue the search",
                                    p_improv);
@@ -679,7 +686,7 @@ struct hill_climbing : optim_stats
 #define TOP_POP_SIZE 40
             // XXX disable for the moment; unit tests are failing; leave
             // disabled till proper solution is created.
-            // if ((iteration <= 2) || (0 == iteration%RESCAN_TIME)) {
+            // if ((iteration <= 2) || (0 == iteration%RESCAN_TIME))
             if (true) {
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
@@ -730,6 +737,36 @@ struct hill_climbing : optim_stats
                 center_inst = deme[ibest].first;
             }
 
+#ifdef GATHER_STATS
+            if (iteration > 1) {
+                if (scores.size() < number_of_new_instances) {
+                    unsigned old = scores.size();
+                    scores.resize(number_of_new_instances);
+                    counts.resize(number_of_new_instances);
+                    for (unsigned i=old; i<number_of_new_instances; i++) {
+                        scores[i] = 0.0;
+                        counts[i] = 0.0;
+                    }
+                }
+
+                // Gather statistics: compute the average distribution
+                // of scores, as compared to the previous high score.
+                sort(deme.begin()+current_number_of_instances,
+                     deme.end(),
+                     std::greater<scored_instance<composite_score> >());
+                for (unsigned i = current_number_of_instances;
+                     deme.begin() + i != deme.end(); ++i)
+                {
+                    composite_score inst_cscore = deme[i].second;
+                    score_t iscore = get_weighted_score(inst_cscore);
+                    unsigned j = i - current_number_of_instances;
+                    scores[j] += iscore;
+                    counts[j] += 1.0;
+                }
+                hiscore += prev_hi;
+                hicount += 1.0;
+            }
+#endif
             current_number_of_instances += number_of_new_instances;
 
             if (has_improved) {
@@ -741,14 +778,11 @@ struct hill_climbing : optim_stats
                     score_t best = get_score(best_cscore);
                     score_t delta = best - prev_best_score;
                     prev_best_score = best;
-                    std::stringstream ss;
-                    ss << "Best score: " << best_cscore
-                       << " Delta: " << delta;
-                    logger().debug(ss.str());
+                    logger().debug() << "Best score: " << best_cscore
+                                     << " Delta: " << delta;
                     if (logger().isFineEnabled()) {
-                        std::stringstream fss;
-                        fss << "Best instance: " << fields.stream(center_inst);
-                        logger().fine(fss.str());
+                        logger().fine() << "Best instance: "
+                                        << fields.stream(center_inst);
                     }
                 }
             }
@@ -818,6 +852,12 @@ struct hill_climbing : optim_stats
     RandGen& rng;
     optim_parameters opt_params;
     hc_parameters hc_params;
+#ifdef GATHER_STATS
+    vector<double> scores;
+    vector<double> counts;
+    double hiscore;
+    double hicount;
+#endif
 };
 
 /////////////////////////
@@ -847,11 +887,11 @@ struct sa_parameters
  * and this really doesn't work very well. Its here for backward
  * compatibility, for the moment.
  *
- * The search pattern used is similar to the -L1 -T1 -I0 variant of 
+ * The search pattern used is similar to the -L1 -T1 -I0 variant of
  * hill-climbing, except that, instead of always searching the nearest
  * neighbors, it occasionally broadens the search to a larger
  * neighborhood, looking at more distant neighbors (thus the name "star
- * shape", as the common term for such non-convex sets in mathematics). 
+ * shape", as the common term for such non-convex sets in mathematics).
  * The fraction of more distant neighbors explored is determined by a
  * temperature parameter, thus the allusion to annealing. In addition,
  * the same temperature is also used to keep eithr the new best instance,

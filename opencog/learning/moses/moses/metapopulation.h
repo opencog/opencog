@@ -159,7 +159,7 @@ struct metapopulation : public bscored_combo_tree_set
                    const reduct::rule& si_ca,
                    const reduct::rule& si_kb,
                    const Scoring& sc, const BScoring& bsc,
-                   const Optimization& opt = Optimization(),
+                   Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         rng(_rng), type(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), score(sc),
@@ -175,7 +175,7 @@ struct metapopulation : public bscored_combo_tree_set
                    const type_tree& tt,
                    const reduct::rule& si,
                    const Scoring& sc, const BScoring& bsc,
-                   const Optimization& opt = Optimization(),
+                   Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         rng(_rng), type(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
@@ -1225,7 +1225,7 @@ struct metapopulation : public bscored_combo_tree_set
     const reduct::rule* simplify_knob_building; // during knob building
     const Scoring& score;
     const BScoring& bscore; // behavioral score
-    Optimization optimize;
+    Optimization &optimize;
     metapop_parameters params;
 
 protected:

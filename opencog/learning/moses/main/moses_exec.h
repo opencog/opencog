@@ -153,14 +153,14 @@ struct metapop_moses_results_parameters
  * 3) print the results
  */
 template<typename Score, typename BScore, typename Optimization>
-void metapop_moses_results(RandGen& rng,
+void metapop_moses_results_a(RandGen& rng,
+                           Optimization& opt,
                            const std::vector<combo_tree>& bases,
                            const opencog::combo::type_tree& tt,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            const Score& sc,
                            const BScore& bsc,
-                           const Optimization& opt,
                            const metapop_parameters& meta_params,
                            const moses_parameters& moses_params,
                            const metapop_moses_results_parameters& pa)
@@ -216,7 +216,7 @@ void metapop_moses_results(RandGen& rng,
  * like above but takes the algo type instead of the algo template
  */
 template<typename Score, typename BScore>
-void metapop_moses_results(RandGen& rng,
+void metapop_moses_results_b(RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const opencog::combo::type_tree& tt,
                            const reduct::rule& si_ca,
@@ -229,20 +229,34 @@ void metapop_moses_results(RandGen& rng,
                            const metapop_moses_results_parameters& pa)
 {
     if (pa.opt_algo == un) { // univariate
-        metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              univariate_optimization(rng, opt_params),
+        univariate_optimization unopt(rng, opt_params);
+        metapop_moses_results_a(rng, unopt,
+                              bases, tt, si_ca, si_kb, sc, bsc,
                               meta_params, moses_params, pa);
     }
     else if (pa.opt_algo == sa) { // simulated annealing
-        metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              simulated_annealing(rng, opt_params),
+        simulated_annealing annealer(rng, opt_params);
+        metapop_moses_results_a(rng, annealer,
+                              bases, tt, si_ca, si_kb, sc, bsc,
                               meta_params, moses_params, pa);
     }
     else if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hc_parameters hc_params(pa.hc_widen_search, pa.hc_single_step);
-        metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              hill_climbing(rng, opt_params, hc_params),
+        hill_climbing climber(rng, opt_params, hc_params);
+        metapop_moses_results_a(rng, climber,
+                              bases, tt, si_ca, si_kb, sc, bsc,
                               meta_params, moses_params, pa);
+#ifdef GATHER_STATS
+        climber.hiscore /= climber.hicount;
+        for (unsigned i=0; i< climber.scores.size(); i++) {
+            climber.scores[i] /= climber.counts[i];
+            logger().info() << "Avg Scores: "
+                << i << "\t"
+                << climber.hiscore << "\t"
+                << climber.counts[i] << "\t"
+                << climber.scores[i];
+        }
+#endif
     }
     else {
         std::cerr << "Unknown optimization algo " << pa.opt_algo
@@ -296,7 +310,7 @@ void metapop_moses_results(RandGen& rng,
         Score score(BSCORE);
         prr_cache_threaded<Score> score_cache(initial_cache_size, score);
         ScoreACache score_acache(score_cache);
-        metapop_moses_results(rng, bases, tt, si_ca, si_kb,
+        metapop_moses_results_b(rng, bases, tt, si_ca, si_kb,
                               score_acache, BSCORE,
                               opt_params, meta_params, moses_params, pa);
         // log the number of cache failures
@@ -307,7 +321,7 @@ void metapop_moses_results(RandGen& rng,
         }
     }
     else {
-        metapop_moses_results(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
+        metapop_moses_results_b(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
                               opt_params, meta_params, moses_params, pa);
     }
 }
