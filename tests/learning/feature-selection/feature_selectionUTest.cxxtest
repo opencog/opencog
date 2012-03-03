@@ -41,11 +41,28 @@ public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
 
 
-    feature_selectionUTest() {
-        table = istreamTable(FEATURE_SELECTION_TEST_DIR"dataset.csv");
+    feature_selectionUTest() {        
+        table = istreamTable(FEATURE_SELECTION_TEST_DIR"dataset.csv");        
     }
 
-    void test_incremental_selection() {
+    void test_incremental_selection_j1() {
+        test_incremental_selection(1);
+    }
+    void test_incremental_selection_j4() {
+        test_incremental_selection(4);
+    }
+    void test_redundant_features_j1() {
+        test_redundant_features(1);
+    }
+    void test_redundant_features_j4() {
+        test_redundant_features(4);
+    }
+
+private:
+    
+    void test_incremental_selection(unsigned n_jobs) {
+        setting_omp(n_jobs);
+
         CTable ctable = table.compress();
         FeatureScorer fs(ctable);
         set<arity_t> features(counting_iterator<arity_t>(0),
@@ -59,7 +76,9 @@ public:
         TS_ASSERT_EQUALS(selected_features.size(), 6);
     }
 
-    void test_redundant_features() {
+    void test_redundant_features(unsigned n_jobs) {
+        setting_omp(n_jobs);
+
         CTable ctable = table.compress();
         FeatureScorer fs(ctable);
         set<arity_t> features{3, 4, 10, 17};
