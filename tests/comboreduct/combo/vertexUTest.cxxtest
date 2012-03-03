@@ -29,11 +29,11 @@ public:
     }
     void test_ph2l() {
         vector<string> labels{"fat", "pretty"};
-        TS_ASSERT_EQUALS(ph2l("and(#1 #2)", labels), "and(#fat #pretty)");
+        TS_ASSERT_EQUALS(ph2l("and($1 $2)", labels), "and($fat $pretty)");
     }
     void test_l2ph() {
         vector<string> labels{"fat", "pretty"};
-        TS_ASSERT_EQUALS(l2ph("and(#fat #pretty)", labels), "and(#1 #2)");
+        TS_ASSERT_EQUALS(l2ph("and($fat $pretty)", labels), "and($1 $2)");
     }
     void test_hash_value() {
         vertex v_db(4.2);

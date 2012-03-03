@@ -116,8 +116,8 @@ typedef boost::variant<builtin,
     \verb|_*_| is used for unification when the
     program output type is boolean.
   \item\verb|argument| is a structure representing input arguments into a Combo
-    program, noted \verb|#1|, \verb|#2|, etc. For instance the following
-    program (prefix representation) \verb|+(#1 #2)|, is the addition of two
+    program, noted \verb|$1|, \verb|$2|, etc. For instance the following
+    program (prefix representation) \verb|+($1 $2)|, is the addition of two
     input arguments.
   \item\verb|contin_t| is a float type.
   \item\verb|action| is a pointer to an abstract class \verb|action_base|
@@ -220,12 +220,12 @@ enum type_node {
   $$\verb|lambda(boolean boolean boolean boolean)|$$
   The first 3 \verb|boolean| design the input types and the last \verb|boolean|
   designs the ouput type. For instance the combo program
-  \verb|and(#1 #2 #3)| has the type above.
+  \verb|and($1 $2 $3)| has the type above.
 
   \subsection{Implicit vs explicit inputs}
 
   A combo program does not necessarily need to use explicitely
-  arguments \verb|#1|, \verb|#2|, etc, to define its inputs.
+  arguments \verb|$1|, \verb|$2|, etc, to define its inputs.
   A combo program is treated just like an operator, for instance,
   \verb|not(boolean_if)| will be treated as the function
   that takes 3 boolean inputs and returns the negation of the result
@@ -241,12 +241,12 @@ enum type_node {
   \verb|arg_list|, for instance the type tree of \verb|+| is 
   $$\verb|lambda(arg_list(contin) contin)|$$
 
-  A combo program can be made from both explicit (\verb|#1|,
-  \verb|#2|, etc) and 
+  A combo program can be made from both explicit (\verb|$1|,
+  \verb|$2|, etc) and 
   implicit inputs
   the convention is that the explicit inputs are always enumerated at
   first in the input list, no matter the order they appear in the combo
-  program. For instance the type of \verb|contin_if(and #1 #2)|
+  program. For instance the type of \verb|contin_if(and $1 $2)|
   has type tree
   $$\verb|lambda(contin contin arg_list(boolean) contin)|$$
 
@@ -283,7 +283,7 @@ enum type_node {
 
   Type checking is operated by evaluating the inheritance between
   two types. So for instance if one wants to check that the combo program
-  $$\verb|contin_if(and(#1 #2) 3 5)|$$
+  $$\verb|contin_if(and($1 $2) 3 5)|$$
   it will first infer its type using
   the type inference engine, which is
   $$\verb|lambda(boolean boolean contin)|$$

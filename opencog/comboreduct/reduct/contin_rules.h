@@ -64,14 +64,14 @@ struct reduce_factorize : public crule<reduce_factorize> {
 
 // *(+(X1 ... Xn) Y), distribute Y in +(X1 ... Xn)
 // then reduce +(*(X1 Y) ... *(Xn Y)) and keep it if shorter
-// For instance *(+(*(+(#1 #2 1) -1) 1) -1):
+// For instance *(+(*(+($1 $2 1) -1) 1) -1):
 // 1) distribute
-// +(*(+(#1 #2 1) -1 -1) *(1 -1))
+// +(*(+($1 $2 1) -1 -1) *(1 -1))
 // 2) reduce (without factorizing the root to avoid infinite loop)
-// +(*(+(#1 #2 1) 1) -1)
-// +(+(#1 #2 1) -1)
-// +(#1 #2 1 -1)
-// +(#1 #2)
+// +(*(+($1 $2 1) 1) -1)
+// +(+($1 $2 1) -1)
+// +($1 $2 1 -1)
+// +($1 $2)
 //
 // It assumes that there is only one child starting with + but
 // possibly several children with non-plus, that is 

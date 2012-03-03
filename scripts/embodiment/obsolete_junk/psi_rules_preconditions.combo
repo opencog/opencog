@@ -15,45 +15,45 @@
 
 # Know
 relateKnowPrecondition(1) :=
-    or(is_last_agent_action(#1 give_food_action)
-       is_last_agent_action(#1 kick_action self)
+    or(is_last_agent_action($1 give_food_action)
+       is_last_agent_action($1 kick_action self)
       )
 
 # Enemy
 relateEnemyWhenSeekedPrecondition(1) := 
 	and(is_fear(self)
-		not(is_pet(#1))
-		not(is_avatar(#1))
-		is_moving(#1)
-		is_moving_toward(self #1)
-		is_proportional_next(self #1 4 0.6)
+		not(is_pet($1))
+		not(is_avatar($1))
+		is_moving($1)
+		is_moving_toward(self $1)
+		is_proportional_next(self $1 4 0.6)
        )
 
 relateEnemyWhenAttackedPrecondition(1) :=
-	is_last_agent_action(#1 kick_action self)   
+	is_last_agent_action($1 kick_action self)   
 
 # CuriousAbout
 relateCuriousAboutPrecondition(1) :=
 	and(has_novelty(self)
         is_curious(self)
-        not(is_there_relation(know self #1))
+        not(is_there_relation(know self $1))
        )
 
 # Friend
 # Only avatar of pet can become friend
 is_pet_or_avatar(1) :=
-    or(is_pet(#1)
-       is_avatar(#1)
+    or(is_pet($1)
+       is_avatar($1)
       )
 
 relateFriendWhenReceiveFoodPrecondition(1) :=
-	is_last_agent_action(#1 give_food_action)   
+	is_last_agent_action($1 give_food_action)   
 
 # Anger
 relateAngerPrecondition(1) :=
 	and(is_angry(self)
-		and(or(next(self #1)
-			   near(self #1)
+		and(or(next(self $1)
+			   near(self $1)
               )
 			near(self nearest_edible)
            )
@@ -61,13 +61,13 @@ relateAngerPrecondition(1) :=
 
 relateAngerEnemyPrecondition(1) :=
 	and(is_aggressive(self)
-		next(self #1)
+		next(self $1)
        )
 
 relateAngerFoodThreatenPrecondition(1) :=
 	and(is_aggressive(self)
 		near(self nearest_edible)
-		next(self #1)
+		next(self $1)
        )
 
 # -------- Preconditions for EnergyDemandGoal Rules ---------------------------
@@ -75,8 +75,8 @@ relateAngerFoodThreatenPrecondition(1) :=
 # Food
 
 getFoodPrecondition(1) :=
-	and(is_edible(#1)
-		near(self #1)
+	and(is_edible($1)
+		near(self $1)
        )
 
 begFoodPrecondition(0) :=
@@ -88,16 +88,16 @@ searchForFoodPrecondition(0) :=
 sitToGetFoodPrecondition(1) :=
 	and(not(is_excited(self))
 		not(near(self nearest_edible))
-		is_avatar(#1)
-		near(self #1)
+		is_avatar($1)
+		near(self $1)
        ) 		
 
 barkToProtectFoodPrecondition(1) :=
 	and(near(self nearest_edible)	
 		is_angry(self)
-		is_proportional_next(self #1 4 0.6)
-		or(is_pet(#1)
-		   is_avatar(#1)
+		is_proportional_next(self $1 4 0.6)
+		or(is_pet($1)
+		   is_avatar($1)
           )
        )
 
@@ -105,15 +105,15 @@ biteToProtectFoodPrecondition(1) :=
 	and(near(self nearest_edible)
 		is_aggressive(self)
 		is_angry(self)
-        near(self #1)
-		is_avatar(#1)
+        near(self $1)
+		is_avatar($1)
        )
 
 # -------- Preconditions for WaterDemandGoal Rules ---------------------------
 
 getWaterPrecondition(1) :=
-    and(is_drinkable(#1)
-        near(self #1)    
+    and(is_drinkable($1)
+        near(self $1)    
        )
 
 searchForWaterPrecondition(0) :=
@@ -127,25 +127,25 @@ fleeWhenAttackedPrecondition(1) :=
     and(or(is_fear(self)
            not(is_angry(self))
           )
-	    next(self #1)
-	    is_last_agent_action(#1 kick_action self)
+	    next(self $1)
+	    is_last_agent_action($1 kick_action self)
 		not(near(self owner))
 	   ) 
 
 fleeWhenChasedByAMovingObjectPrecondition(1) :=
 	and(is_fear(self)
-		not(is_pet(#1))
-		not(is_avatar(#1))
-		is_moving(#1)
-		is_moving_toward(self #1)
-		is_proportional_next(self #1 4 0.6)
+		not(is_pet($1))
+		not(is_avatar($1))
+		is_moving($1)
+		is_moving_toward(self $1)
+		is_proportional_next(self $1 4 0.6)
        )
 
 # -------- Preconditions for AffiliationDemandGoal Rules ------------------------
 
 lookForCompanyPrecondition(1) :=
 	and(is_fearful(self)
-		is_owner(#1 self)
+		is_owner($1 self)
        	greater_than(get_current_action_repetition 3)
        )
 
@@ -170,29 +170,29 @@ playPrecondition(0) :=
 approachUnknownAvatarToInspectPrecondition(1) :=
 	and(near(self owner)
 		is_fear(self)
-		next(self #1)
-		not(near(self #1))
-		is_avatar(#1)
-		not(is_owner(#1 self))
-		not(is_there_relation(friend self #1))
-		not(is_there_relation(enemy self #1))
+		next(self $1)
+		not(near(self $1))
+		is_avatar($1)
+		not(is_owner($1 self))
+		not(is_there_relation(friend self $1))
+		not(is_there_relation(enemy self $1))
        )
 		
 approachToInspectPrecondition(1) :=
 	and(not(is_fear(self))
-	    not(near(self #1))
-	    not(is_there_relation(friend self #1))
-	    not(is_there_relation(enemy self #1))
+	    not(near(self $1))
+	    not(is_there_relation(friend self $1))
+	    not(is_there_relation(enemy self $1))
        )
 
 lickToInspectPrecondition(1) :=
-	near(self #1)
+	near(self $1)
 
 sniffToInspectPrecondition(1) :=
     and(or(not(is_fear(self))
            next(self owner)
           )
-        near(self #1)
+        near(self $1)
        )
 
 moveObjectToPlayPrecondition(0) :=
@@ -213,8 +213,8 @@ chaseMovingObjectPrecondition(0) :=
 approachToAttackPrecondition(1) :=
 	and(is_aggressive(self)
 	    is_angry(self)
-	    not(is_there_relation(friend self #1))
-	    not(near(self #1))
+	    not(is_there_relation(friend self $1))
+	    not(near(self $1))
        )
 
 lookForThingsToDestroyPrecondition(0) :=

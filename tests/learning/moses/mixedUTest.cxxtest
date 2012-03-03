@@ -42,7 +42,7 @@ public:
     }
 
     // A simple predicate learning test case, should learn this:
-    //   and(0<(+(-1 #x)) 0<(#y) #g) 
+    //   and(0<(+(-1 $x)) 0<($y) $g) 
     void test_predicates()
     {
         string data_file_path("-i" + mixedUTest_dir + "predicates.csv");
@@ -58,7 +58,7 @@ public:
                           "-upred", "-nimpulse", "-lDEBUG",
                           data_file_path,
                           },
-                          {"and(0<(+(-1 #1)) 0<(#2) #3)"});
+                          {"and(0<(+(-1 $1)) 0<($2) $3)"});
     }
 
     void test_fraction_predicates()

@@ -228,7 +228,7 @@ public:
         Filter::ActionFilter af(pet_str, avatar_str, wp, dos,
                                 idos, bas, arity, true, *rng);
         Filter::ActionFilter::combo_tree_ns_set action_subs;
-        //set up the arguments, #1=stick and #2=owner
+        //set up the arguments, $1=stick and $2=owner
         combo::argument_list al{definite_object(obj_str), id::owner};
         //set up the arguments for the first and second examplar (both the same)
         combo::argument_list_list all{al, al};
@@ -245,7 +245,7 @@ public:
         //elementary actions
         { //action seq 1
             combo_tree ass;
-            string assStr = string("goto_obj(#1 " GOTO_OBJ_SPEED_STR ")");
+            string assStr = string("goto_obj($1 " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -254,7 +254,7 @@ public:
         }
         { //action seq 2
             combo_tree ass;
-            string assStr = string("goto_obj(#2 " GOTO_OBJ_SPEED_STR ")");
+            string assStr = string("goto_obj($2 " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -305,7 +305,7 @@ public:
         //subsequence of actions
         { //action seq 8
             combo_tree ass;
-            string assStr = string("and_seq(goto_obj(#1 " GOTO_OBJ_SPEED_STR ") drop)");
+            string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") drop)");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -323,7 +323,7 @@ public:
         { //action seq 10
             combo_tree ass;
             string assStr = string("and_seq(goto_obj(") + obj_str
-                            + string(" " GOTO_OBJ_SPEED_STR ") goto_obj(#2 " GOTO_OBJ_SPEED_STR "))");
+                            + string(" " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -331,7 +331,7 @@ public:
         }
         { //action seq 11
             combo_tree ass;
-            string assStr = string("and_seq(goto_obj(#1 " GOTO_OBJ_SPEED_STR ") goto_obj(#2 " GOTO_OBJ_SPEED_STR "))");
+            string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -339,7 +339,7 @@ public:
         }
         { //action seq 12
             combo_tree ass;
-            string assStr = string("and_seq(goto_obj(#1 " GOTO_OBJ_SPEED_STR ") goto_obj(") + string(id::owner) + string(" " GOTO_OBJ_SPEED_STR "))");
+            string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") goto_obj(") + string(id::owner) + string(" " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -363,7 +363,7 @@ public:
         }
         { //action seq 15
             combo_tree ass;
-            string assStr = string("and_seq(goto_obj(random_object " GOTO_OBJ_SPEED_STR ") goto_obj(#2 " GOTO_OBJ_SPEED_STR "))");
+            string assStr = string("and_seq(goto_obj(random_object " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -403,7 +403,7 @@ public:
         }
         { //action seq 20
             combo_tree ass;
-            string assStr = string("and_seq(goto_obj(#1 " GOTO_OBJ_SPEED_STR ") goto_obj(random_object " GOTO_OBJ_SPEED_STR "))");
+            string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") goto_obj(random_object " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);
@@ -411,7 +411,7 @@ public:
         }
         { //action seq 21
             combo_tree ass;
-            string assStr = string("and_seq(goto_obj(nearest_object " GOTO_OBJ_SPEED_STR ") goto_obj(#2 " GOTO_OBJ_SPEED_STR "))");
+            string assStr = string("and_seq(goto_obj(nearest_object " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
             PetCombo::operator>>(assSS, ass);

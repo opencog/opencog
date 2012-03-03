@@ -610,7 +610,7 @@ typedef bool_matrix::const_iterator bm_cit;
  * there are 2 inputs, the output is ordered as follows:
  *
  * +-----------------------+--+--+
- * |Output                 |#1|#2|
+ * |Output                 |$1|$2|
  * +-----------------------+--+--+
  * |complete_truth_table[0]|F |F |
  * +-----------------------+--+--+

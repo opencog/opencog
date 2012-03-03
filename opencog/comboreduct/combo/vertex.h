@@ -111,7 +111,7 @@ typedef id::wild_card wild_card;
     of a function coded into a combo tree. In the case of a boolean
     argument a negative value corresponds to a negative literal.
     idx == 0 is invalide.
-    For example idx == -3 represents the literal NOT(#3) where #3 is the
+    For example idx == -3 represents the literal NOT($3) where $3 is the
     third argument of the function.
 */
 class argument
@@ -900,11 +900,11 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
 //* Return false if str has no ann matches.
 inline bool ann_str_to_vertex(const std::string& str, vertex& v)
 {
-    if (str[0] == '#' && str[1]=='N') {
+    if (str[0] == '$' && str[1]=='N') {
         int arg = boost::lexical_cast<int>(str.substr(2));
         v=ann_type(arg,id::ann_node);
     }
-    else if (str[0] == '#' && str[1]=='I') {
+    else if (str[0] == '$' && str[1]=='I') {
         int arg = boost::lexical_cast<int>(str.substr(2));
         v=ann_type(arg,id::ann_input);
     } else return false;
@@ -914,11 +914,11 @@ inline bool ann_str_to_vertex(const std::string& str, vertex& v)
 // return false if str has no argument matches
 inline bool argument_str_to_vertex(const std::string& str, vertex& v)
 {
-    if (str[0] == '#') {
+    if (str[0] == '$') {
         arity_t arg = boost::lexical_cast<arity_t>(str.substr(1));
         OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(arg);
-    } else if (str[0] == '!' && str[1] == '#') {
+    } else if (str[0] == '!' && str[1] == '$') {
         arity_t arg = boost::lexical_cast<arity_t>(str.substr(2));
         OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(-arg);
@@ -1057,15 +1057,15 @@ std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
  * This method allows to replace place holders by labels in a string
  * containing a combo expression.
  *
- * For instance "and(#1 #2)" would be replaced by "and(#fat #pretty)"
+ * For instance "and($1 $2)" would be replaced by "and($fat $pretty)"
  * provided with the vector of labels {"fat", "pretty"}
  */
 std::string ph2l(const std::string& ce,
                  const std::vector<std::string>& labels);
 
 /**
- * This is the converse of ph2l, that is given for instance "and(#fat
- * #pretty)" it returns "and(#1 #2)". If a variable is not in labels
+ * This is the converse of ph2l, that is given for instance "and($fat
+ * $pretty)" it returns "and($1 $2)". If a variable is not in labels
  * (that is it doesn't correspond to a place holder)
  */
 std::string l2ph(const std::string& ce,
@@ -1102,7 +1102,7 @@ std::ostream& operator<<(std::ostream&, const opencog::combo::ann_type&);
 std::ostream& operator<<(std::ostream&, const opencog::combo::builtin&);
 std::ostream& operator<<(std::ostream&, const opencog::combo::wild_card&);
 std::ostream& operator<<(std::ostream&, const opencog::combo::argument&);
-// output argument #n when positive, !#n when negative 
+// output argument $n when positive, !$n when negative 
 std::ostream& ostream_abbreviate_literal(std::ostream&, const opencog::combo::argument&);
 std::ostream& operator<<(std::ostream&, const opencog::combo::vertex&);
 

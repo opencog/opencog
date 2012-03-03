@@ -58,7 +58,7 @@ struct Evaluator {
 
 // there are 2 ways of binding input arguments to a combo_tree
 //
-// 1) associate the variable arguments #1, #2, etc with there values
+// 1) associate the variable arguments $1, $2, etc with there values
 // using a binding_map, and then eval will use that mapping to
 // evaluate the variable arguments on the fly
 //
@@ -80,7 +80,7 @@ inline boost::variant<vertex, combo_tree::iterator>& binding(int idx)
 }
 
 // binding arguments to function calls
-// That is it replaces all variable arguments (#1, #2, etc)
+// That is it replaces all variable arguments ($1, $2, etc)
 // by the provided arguments and append the implicit arguments at the
 // childfree operators.
 // explicit_arity corresponding to the highest argument idx, it is given

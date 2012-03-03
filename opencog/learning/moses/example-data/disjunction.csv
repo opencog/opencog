@@ -6,7 +6,7 @@
 ; Data consists of four columns; the first column is the "result",
 ; and subsequent columns are the "data to fit".  In this case, the
 ; first column is the boolen-or of the remaining columns.
-; Thus, we expect MOSES to learn the combo program "or(#1 #2 #3)".
+; Thus, we expect MOSES to learn the combo program "or($1 $2 $3)".
 ;
 ; To run, enter: "moses -H it -i disjunction.csv
 !

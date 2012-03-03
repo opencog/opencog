@@ -4,7 +4,7 @@
 
 testScript1(0) |= 
     testScript1Select(0) := is_pet(_*_)
-    testScript1EvalSelected(1) := greater_than(get_fear(#1) 0.55)
+    testScript1EvalSelected(1) := greater_than(get_fear($1) 0.55)
 
 testScript2(0) |=
     testScript2Select(0) := 
@@ -13,7 +13,7 @@ testScript2(0) |=
             is_small(_*_))
 
     testScript2EvalSelected(1) :=
-        not(is_edible(#1))
+        not(is_edible($1))
 
 testScript3(0) |=
     testScript3Select(0) := 

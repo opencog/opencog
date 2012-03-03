@@ -9,12 +9,12 @@
 ; In this example, the dataset reflects the predicate
 ; (x > 1.3) AND (y > 0.0) AND g and so the combo program that should be
 ; learned is
-;    and( greater_than_zero( plus(#x -1.3)) greater_than_zero(#y) #g)
+;    and( greater_than_zero( plus($x -1.3)) greater_than_zero($y) $g)
 ;
 ; To run, enter: "moses -H it -i predicates.csv -W1 -u pred"
 ;
 ; To run, with an example exemplar to get things started:
-; moses -H it -i predicates.csv -W1 -u pred -e "or(0<( #1) 0<( #2))"
+; moses -H it -i predicates.csv -W1 -u pred -e "or(0<( $1) 0<( $2))"
 ;
 ; Note: at this time, MOSES has great difficulty learning the above,
 ; desired predicate, although it does learn a different expression
@@ -62,7 +62,7 @@ x	y	g	pred
 3.1	-0.1	0	0
 4.1	-0.6	1	0
 
-# Make sure #g plays a role ... 
+# Make sure $g plays a role ... 
 15.2	0.1	1	1
 5.5	0.1	1	1
 4.1	0.4	0	0
@@ -70,7 +70,7 @@ x	y	g	pred
 2.9	1.2	0	0
 1.6	1.5	0	0
 
-# Make sure -#y doesn't get used wrong...
+# Make sure -$y doesn't get used wrong...
 -15.5	3.1	1	0
 -5.5	0.1	1	0
 -4.1	8.4	1	0
@@ -78,7 +78,7 @@ x	y	g	pred
 -2.9	21.2	1	0
 -1.6	1.5	1	0
 
-# Make sure that a solution with #x * #y isn't explored 
+# Make sure that a solution with $x * $y isn't explored 
 5.8	19.1	1	1
 15.9	0.1	1	1
 4.6	20.3	1	1
@@ -92,8 +92,8 @@ x	y	g	pred
 1.2	3.1	1	0
 0.45	2.6	1	0
 
-# Make sure that and(0<(+(-1.5 *(0.5 +(1 #x) #x))) 0<(#x)  isnt found.
-# The above is actually correct in that its equivalent to 1.3027756...< #x
+# Make sure that and(0<(+(-1.5 *(0.5 +(1 $x) $x))) 0<($x)  isnt found.
+# The above is actually correct in that its equivalent to 1.3027756...< $x
 # but its a polynomial and we'd prefer linear terms...
 # 1.305	14.1	1	1
 # 1.302	0.1	1	1

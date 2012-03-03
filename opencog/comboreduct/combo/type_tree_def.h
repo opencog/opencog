@@ -63,8 +63,8 @@ namespace id {
     // Argument. This is a small hack to avoid using union or variant
     // or similar ideas to list argument types.  THIS MUST BE LAST IN
     // THE ENUM.  The rest of the integers enumerate variables. That
-    // is, argument_type corresponds to #1, argument_type+1 corresponds
-    // to #2, and so on.
+    // is, argument_type corresponds to $1, argument_type+1 corresponds
+    // to $2, and so on.
     argument_type
   };
 }

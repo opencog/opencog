@@ -87,7 +87,7 @@ public:
     // *(x) -> x
     // +(x) -> x
     void test_simplify1() {
-        string tree_str="*(+(*(/(*(+(#1 *(#2 0)) 1) *(5.0 #3)) /(+(#3 /(0 #4)) 5.0))))";
+        string tree_str="*(+(*(/(*(+($1 *($2 0)) 1) *(5.0 $3)) /(+($3 /(0 $4)) 5.0))))";
         perform_test_reduce(tree_str);
     }
 
@@ -96,7 +96,7 @@ public:
     // x*y+x*z -> x*(y+z)
     // (x*y)/(x*z) -> y/z
     void test_simplify2() {
-        string tree_str="/(*(#5 +(*(#4 +(/(#1 #3) /(#2 #3))) *(#5 +(/(#1 #3) /(#2 #3))))) *(#5 #6))";
+        string tree_str="/(*($5 +(*($4 +(/($1 $3) /($2 $3))) *($5 +(/($1 $3) /($2 $3))))) *($5 $6))";
         perform_test_reduce(tree_str);
     }
 
@@ -105,7 +105,7 @@ public:
     // x/(y/z) -> (x*z)/y
     // x*(y/z) -> (x*y)/z
     void test_simplify3() {
-        string tree_str="*(/(/(#1 #2) #3) /(#4 /(#5 #6)) /(#7 /(#8 #9)))";
+        string tree_str="*(/(/($1 $2) $3) /($4 /($5 $6)) /($7 /($8 $9)))";
         perform_test_reduce(tree_str);
     }
 
@@ -115,7 +115,7 @@ public:
     // log(c/x) -> -log(c^-1*x)
     // log(exp(x)*y) -> x+log(y)
     void test_simplify4() {
-        string tree_str="*(+(log(+(#1 1)) log(+(#2 1))) +(log(+(#3 1)) *(log(+(#4 1)) -1)) log(/(5.0 +(#5 1))) log(*(exp(#6) +(#7 1))))";
+        string tree_str="*(+(log(+($1 1)) log(+($2 1))) +(log(+($3 1)) *(log(+($4 1)) -1)) log(/(5.0 +($5 1))) log(*(exp($6) +($7 1))))";
         perform_test_reduce(tree_str);
     }
 
@@ -129,96 +129,96 @@ public:
     // exp(log(x)+y) -> x*exp(y) (if log is not defined as log(abs(x)))
     // sin(x+c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
     void test_simplify5() {
-        string tree_str="+(*(exp(#1) exp(#2) #3 exp(#4)) /(#5 exp(#6)) exp(+(log(+(#7 1)) #8)) sin(+(#9 100.0)))";
+        string tree_str="+(*(exp($1) exp($2) $3 exp($4)) /($5 exp($6)) exp(+(log(+($7 1)) $8)) sin(+($9 100.0)))";
         perform_test_reduce(tree_str, false);
     }
 #endif
 
     // test_simplify6 :
     // test the distribute rule
-    // *(+(*(+(#1 #2 1) -1) 1) -1) should reduce to +(#1 #2)
+    // *(+(*(+($1 $2 1) -1) 1) -1) should reduce to +($1 $2)
     void test_simplify6() {
-        string tree_str="*(+(*(+(#1 #2 1) -1) 1) -1)";
+        string tree_str="*(+(*(+($1 $2 1) -1) 1) -1)";
         perform_test_reduce(tree_str);
     }
     
     // test_simplify7 :
     // test the distribute rule
-    // +(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1) should reduce to +(#1 #2)
+    // +(*(+(*(+($1 $2) 2) 1.5) 0.5) -1) should reduce to +($1 $2)
     void test_simplify7() {
-        string tree_str="+(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1)";
+        string tree_str="+(*(+(*(+($1 $2) 2) 1.5) 0.5) -1)";
         perform_test_reduce(tree_str);
     }
 
     // test_simplify8 :
     // test the distribute rule
     void test_simplify8() {
-        string tree_str="*(+(#3 *(2 +(*(+(#1 1)) 1))) #1 4)";
+        string tree_str="*(+($3 *(2 +(*(+($1 1)) 1))) $1 4)";
         perform_test_reduce(tree_str);
     }
 
     // test_simplify9 :
-    // +(#1 *(5 #1)) should reduce to *(6 #1)
+    // +($1 *(5 $1)) should reduce to *(6 $1)
     void test_simplify9() {
-        string tree_str="+(#1 *(5 #1))";
+        string tree_str="+($1 *(5 $1))";
         perform_test_reduce(tree_str);
     }
 
     // test_simplify10 :
     // factorize/distribute test
     /// @todo
-    // +(*(+(*(+(#1 1) 0.9375) -0.9375) #1) 2.9375) 
-    // becomes +(2.9375 *(+(-0.9375 *(0.9375 +(1 #1))) #1))
+    // +(*(+(*(+($1 1) 0.9375) -0.9375) $1) 2.9375) 
+    // becomes +(2.9375 *(+(-0.9375 *(0.9375 +(1 $1))) $1))
     // wich could probably be improved
     void test_simplify10() {
-        string tree_str="+(*(+(*(+(#1 1) 0.9375) -0.9375) #1) 2.9375)";
+        string tree_str="+(*(+(*(+($1 1) 0.9375) -0.9375) $1) 2.9375)";
         perform_test_reduce(tree_str, false);
     }
 
     // test_simplify11 :
     // factorize/distribute test
     void test_simplify11() {
-        string tree_str="*(+(*(#1 +(2.75 *(#1 -2))) 1) #1 +(0.5 *(#1 0.5)))";
+        string tree_str="*(+(*($1 +(2.75 *($1 -2))) 1) $1 +(0.5 *($1 0.5)))";
         perform_test_reduce(tree_str, false); /// @todo can do better
     }
 
     // test_simplify12 :
     // factorize/distribute test
     void test_simplify12() {
-        string tree_str="*(-1 +(1 #1) +(*(#1 #1) #1))";
+        string tree_str="*(-1 +(1 $1) +(*($1 $1) $1))";
         perform_test_reduce(tree_str, false); /// @todo can be improved
     }
 
     // test_simplify13 :
     // factorize/distribute test
     void test_simplify13() {
-        string tree_str="+(*(2 #1) *(+(1 *(+(1 *(-1 #1)) +(2 *(-4 #1))) *(+(2 *(-2 #1)) #1)) #1 #1))";
+        string tree_str="+(*(2 $1) *(+(1 *(+(1 *(-1 $1)) +(2 *(-4 $1))) *(+(2 *(-2 $1)) $1)) $1 $1))";
         perform_test_reduce(tree_str);
     }
 
     // test_simplify14 :
     // factorize/distribute test
     void test_simplify14() {
-        string tree_str="*(1.125 +(1 *(+(1 *(+(1 *(#1 #1)) #1)) +(1 #1) #1)))";
+        string tree_str="*(1.125 +(1 *(+(1 *(+(1 *($1 $1)) $1)) +(1 $1) $1)))";
         perform_test_reduce(tree_str, false); /// @todo can do better
     }
 
     // test_simplify15 :
     // factorize/distribute test    
     void test_simplify15() {
-        string tree_str="*(-1.75 +(*(+(1 *(+(1 *(+(1 *(-1 #9)) #9)) #9)) #1) #3))";
+        string tree_str="*(-1.75 +(*(+(1 *(+(1 *(+(1 *(-1 $9)) $9)) $9)) $1) $3))";
         perform_test_reduce(tree_str);
     }
 
     // reduce argument of impulse
     void test_simplify16() {
-        string tree_str="*(-1.75 impulse(and(or(and(#1 #2) #1))))";
+        string tree_str="*(-1.75 impulse(and(or(and($1 $2) $1))))";
         perform_test_reduce(tree_str);
     }
 
     // reduce argument of impulse
     void test_simplify17() {
-        string tree_str="*(-1.75 impulse(or(and(or(and(#1 #2) #1)) not(#1))))";
+        string tree_str="*(-1.75 impulse(or(and(or(and($1 $2) $1)) not($1))))";
         perform_test_reduce(tree_str);
     }
 
@@ -230,13 +230,13 @@ public:
 
     // reduce argument of impulse
     void test_simplify19() {
-        string tree_str="*(-1.75 impulse(or(and(or(0<(+(2 #1)))))))";
+        string tree_str="*(-1.75 impulse(or(and(or(0<(+(2 $1)))))))";
         perform_test_reduce(tree_str);
     }
 
     // reduce argument of impulse
     void test_simplify20() {
-        string tree_str="*(-1.75 impulse(or(and(or(0<(+(2 *(2 #1) 6)))))))";
+        string tree_str="*(-1.75 impulse(or(and(or(0<(+(2 *(2 $1) 6)))))))";
         perform_test_reduce(tree_str);
     }
 };

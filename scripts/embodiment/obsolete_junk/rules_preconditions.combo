@@ -525,9 +525,9 @@ feelFearPrecondition(0) :=
 # ----------------------- Relations Preconditions ----------------------
 
 does_last_pet_schema_contain_sniff_at(1) :=
-        or(is_last_pet_schema(drop_n_sniff_action action_success #1)
-           is_last_pet_schema(gobehind_n_sniff_butt_action action_success #1)
-           is_last_pet_schema(goto_sniff_action action_success #1)
+        or(is_last_pet_schema(drop_n_sniff_action action_success $1)
+           is_last_pet_schema(gobehind_n_sniff_butt_action action_success $1)
+           is_last_pet_schema(goto_sniff_action action_success $1)
         )
 
 #relateCuriousAboutPrecondition(0) :=

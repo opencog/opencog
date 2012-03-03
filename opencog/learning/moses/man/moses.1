@@ -122,7 +122,7 @@ As an example, the input file of comma-separated values:
 .fi
 
 when run with the flags \fI\-u\ out\ \-W1\fR will generate the combo
-program \fIand(#a\ #b)\fR. This program indicates that the third column
+program \fIand($a\ $b)\fR. This program indicates that the third column
 can be modelled as the boolean-and of the first two.  The \fI\-u\fR option
 specifies that it is the third column that should be modelled, and the
 \fI\-W1\fR flag indicates that column labels, rather than column numbers,
@@ -198,9 +198,9 @@ and then applying operations until the root node is reached.
 By convention, variables are denoted by a hash-mark followed by
 a number, although they may also be named. Variables are not 
 explicitly typed; they are only implicitly typed during program
-evaluation. Thus, for example, \fIor (#1 #2)\fP is a combo
+evaluation. Thus, for example, \fIor ($1 $2)\fP is a combo
 program that represents the boolean-or of two inputs,
-\fI#1\fP and \fI#2\fP.
+\fI$1\fP and \fI$2\fP.
 .PP
 Logical operators include \fIand\fR, \fIor\fR and \fInot\fR.
 The boolean \fIif\fR operator takes three arguments: if the first
@@ -217,8 +217,8 @@ the opposite: it takes a single boolean-valued expression, and returns
 The continuous-valued \fIif\fR operator functions analogously to the
 boolean \fIif\fR, but takes continuous-valued arguements.
 .PP
-Thus, as an example, the expression \fIand( 0<( +(#x 3))  0<(#y))\fR
-evaluates to \fItrue\fR if \fI#x\fR is greater than -3 and \fI#y\fR
+Thus, as an example, the expression \fIand( 0<( +($x 3))  0<($y))\fR
+evaluates to \fItrue\fR if \fI$x\fR is greater than -3 and \fI$y\fR
 is greater than zero.
 .PP
 The above operators are built-in; combo may also be extended with
@@ -546,8 +546,8 @@ Print the number of evaluations performed.
 .TP
 .BI \-W1\fR,\ \fB\-\-output\-with\-labels=1
 Use named labels instead of position placeholders when printing
-candidates. For example, *("#temperature" "#entropy") instead
-of *(#3 #4). This option is effective only when the data file
+candidates. For example, *("$temperature" "$entropy") instead
+of *($3 $4). This option is effective only when the data file
 contains labels in its header.
 .TP
 .BI \-x1\fR,\ \fB\-\-output\-complexity=1
@@ -588,7 +588,7 @@ T}
 \fBdj\fR@T{
 Disjunction problem. The scoring function awards a result that is a
 boolean disjunction (\fIor\fR) of \fIN\fR boolean-valued variables.
-The resulting combo program should be \fIor(#1 #2 ...)\fR.
+The resulting combo program should be \fIor($1 $2 ...)\fR.
 The size of the problem may be specified with the \fB\-k\fR option.
 T}
 \fBmux\fR@T{
@@ -615,7 +615,7 @@ given \fIx\fR as a free variable. The arithmetic operators would be
 addition, subtraction, multiplication and division; exponentiation
 is not allowed in the solution.  So, for example, using the
 \fB\-k2\fR option to specify the order\-2 polynomial \fIx+x^2\fR,
-then the shortest combo program is \fI*(+(1 #1) #1)\fR (that is,
+then the shortest combo program is \fI*(+(1 $1) $1)\fR (that is,
 the solution is \fIp(x)=x(x+1)\fR in the usual arithmetical notation).
 T}
 .TE
@@ -628,7 +628,7 @@ depends on the particular problem type.
 .TP
 .BI \-y\  prog \fR,\ \fB\-\-combo\-program= prog
 Specify the combo prorgram to be learned, when used in combination with
-the \fB-H cp\fR option.  Thus, for example, \fB-H cp -y "and(#1 #2)"\fR
+the \fB-H cp\fR option.  Thus, for example, \fB-H cp -y "and($1 $2)"\fR
 specifies that the two-input conjunction is to be learned.
 .PP
 .\" ============================================================

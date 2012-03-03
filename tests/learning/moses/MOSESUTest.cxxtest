@@ -87,29 +87,29 @@ public:
     }
     void test_cp() {
         cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr_str("or(and(#2 !#3) #1 !#4 #5)");
+        string tr_str("or(and($2 !$3) $1 !$4 $5)");
         string cp_opt("-y");
         // Note: This test is very sensitive to algorithmic details;
         // examples of perfect score solutions are:
-        // or(and(or(!#3 #4) #1) and(#2 !#3) !#4 #5)
-        // or(and(or(and(#4 #5) #2 #3) #1) and(or(#1 #2) !#3) !#4 #5)
-        // or(and(or(!#2 #4) #1) and(#2 !#3) !#4 #5) 
-        // or(and(or(#1 #2) !#3) and(or(!#2 #4 !#5) #1) !#4 #5)
+        // or(and(or(!$3 $4) $1) and($2 !$3) !$4 $5)
+        // or(and(or(and($4 $5) $2 $3) $1) and(or($1 $2) !$3) !$4 $5)
+        // or(and(or(!$2 $4) $1) and($2 !$3) !$4 $5) 
+        // or(and(or($1 $2) !$3) and(or(!$2 $4 !$5) $1) !$4 $5)
         // ... and many many more.  Need the -E3 flag to shrink it down.
         moses_test_combo({"-Hcp", cp_opt + tr_str, "-E3"}, {tr_str});
     }
     void test_kl() {
         cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr1_str("or(and(!#1 #2) and(#1 !#2))");
-        string tr2_str("and(or(!#1 !#2) or(#1 #2))");
+        string tr1_str("or(and(!$1 $2) and($1 !$2))");
+        string tr2_str("and(or(!$1 !$2) or($1 $2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
         moses_test_combo({"-Hip", data_file_path, "-m500", "-lfine", "-U0", "-X0", "-z100000"},
                          {tr1_str, tr2_str});
     }
     void test_multi_kl() {
         cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr1_str("or(and(!#1 #2) and(#1 !#2))");
-        string tr2_str("and(or(!#1 !#2) or(#1 #2))");
+        string tr1_str("or(and(!$1 $2) and($1 !$2))");
+        string tr2_str("and(or(!$1 !$2) or($1 $2))");
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
         moses_test_combo({"-Hip", data_file_path,  data_file_path, "-m500", "-l fine", "-U0", "-X0", "-z100000"}, {tr1_str, tr2_str});
     }

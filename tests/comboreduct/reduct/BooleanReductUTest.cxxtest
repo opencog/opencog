@@ -40,22 +40,22 @@ class BooleanReductUTest : public CxxTest::TestSuite
 
 public:
     void test_simplify1() {
-        test_simplify_tree_str("and(and(not(not(and(#4 #3))) or(not(or(#5 #4)) or(and(#1 #5) and(#1 #5)))) and(and(and(not(#1) not(#2)) not(not(#3))) or(and(not(#4) not(#5)) or(or(#2 #1) not(#5)))))");
+        test_simplify_tree_str("and(and(not(not(and($4 $3))) or(not(or($5 $4)) or(and($1 $5) and($1 $5)))) and(and(and(not($1) not($2)) not(not($3))) or(and(not($4) not($5)) or(or($2 $1) not($5)))))");
     }
     void test_simplify2() {
-        test_simplify_tree_str("not(or(and(and(not(#5) or(#5 #3)) not(or(#5 #2))) and(or(and(#5 #3) or(#5 #3)) not(not(#1)))))");
+        test_simplify_tree_str("not(or(and(and(not($5) or($5 $3)) not(or($5 $2))) and(or(and($5 $3) or($5 $3)) not(not($1)))))");
     }
     void test_simplify3() {
-        test_simplify_tree_str("and(or(not(and(or(#5 #3) not(#2))) or(or(or(#1 #2) and(#2 #3)) or(and(#2 #4) not(#5)))) not(not(and(or(#3 #3) or(#3 #4)))))");
+        test_simplify_tree_str("and(or(not(and(or($5 $3) not($2))) or(or(or($1 $2) and($2 $3)) or(and($2 $4) not($5)))) not(not(and(or($3 $3) or($3 $4)))))");
     }
     void test_simplify4() {
-        test_simplify_tree_str("or(and(not(#1) #3 or(#3 not(#1)) or(not(#1) and(#2 #1) and(#3 #2))) and(#3 #1) and(not(#3) or(#3 #1) not(or(#3 not(#1))) not(or(#2 #1))))");
+        test_simplify_tree_str("or(and(not($1) $3 or($3 not($1)) or(not($1) and($2 $1) and($3 $2))) and($3 $1) and(not($3) or($3 $1) not(or($3 not($1))) not(or($2 $1))))");
     }
     void test_simplify5() {
-        test_simplify_tree_str("or(and(or(not(#1) not(#2)) #3) and(or(not(#1) #3) not(#2)))");
+        test_simplify_tree_str("or(and(or(not($1) not($2)) $3) and(or(not($1) $3) not($2)))");
     }
     void test_simplify6() {
-        test_simplify_tree_str("and(or(and(or(not(#1) #3) not(#2)) and(not(#1) #3)) or(not(#2) #3))");
+        test_simplify_tree_str("and(or(and(or(not($1) $3) not($2)) and(not($1) $3)) or(not($2) $3))");
     }
 
 };

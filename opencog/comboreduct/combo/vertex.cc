@@ -33,7 +33,7 @@ namespace opencog { namespace combo {
 using namespace std;
 using namespace boost;
 
-// uncomment this to output a negative literal !#n instead of not(#n)
+// uncomment this to output a negative literal !$n instead of not($n)
 #define ABBREVIATE_NEGATIVE_LITERAL
 
 void copy_without_null_vertices(combo_tree::iterator src,
@@ -57,7 +57,7 @@ string ph2l(const string& ce, const vector<string>& labels)
     foreach(char c, ce) {
         if(!matching) {
             res += c;
-            if(c == '#') // matching starts
+            if(c == '$') // matching starts
                 matching = true;
         } else {
             if(c == ' ' || c == ')' || c == '\n') { //matching ends
@@ -86,7 +86,7 @@ string l2ph(const string& ce, const vector<string>& labels)
     foreach(char c, ce) {
         if(!matching) {
             res += c;
-            if(c == '#') // matching starts
+            if(c == '$') // matching starts
                 matching = true;
         } else {
             if(c == ' ' || c == ')' || c == '\n') { //matching ends
@@ -119,9 +119,9 @@ ostream& operator<<(ostream& out, const opencog::combo::ann_type& h)
     case id::ann:
         return out << "ann";
     case id::ann_input:
-        return out << "#I" << h.idx;
+        return out << "$I" << h.idx;
     case id::ann_node:
-        return out << "#N" << h.idx;
+        return out << "$N" << h.idx;
     default:
         return out << "ANN : UNKNOWN_HANDLE";
    }
@@ -184,9 +184,9 @@ ostream& operator<<(ostream& out, const opencog::combo::wild_card& w)
 ostream& ostream_abbreviate_literal(ostream& out, const opencog::combo::argument& a) {
     using namespace opencog::combo;
     if(a.is_negated()) {
-        return out << "!#" << -a.idx;
+        return out << "!$" << -a.idx;
     }
-    return out << "#" << a.idx;
+    return out << "$" << a.idx;
 }
 
 ostream& operator<<(ostream& out, const opencog::combo::argument& a)
@@ -196,8 +196,8 @@ ostream& operator<<(ostream& out, const opencog::combo::argument& a)
     return ostream_abbreviate_literal(out, a);
 #else
     if (a.is_negated())        
-        return out << "not(#" << -a.idx << ")";
-    return out << "#" << a.idx;
+        return out << "not($" << -a.idx << ")";
+    return out << "$" << a.idx;
 #endif
 }
 

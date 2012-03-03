@@ -323,22 +323,22 @@ if...then...else, etc.
 \emph on
 n
 \emph default
--ary function are denoted with hash marks, so that 
-\begin_inset Formula $\#1,\#2,\ldots,\#n$
+-ary function are denoted with dollars, so that 
+\begin_inset Formula $\$1,\$2,\ldots,\$n$
 \end_inset
 
  would be the arguments.
  Thus, for example, 
-\begin_inset Formula $(0<(0.5*\#1))\vee\#2$
+\begin_inset Formula $(0<(0.5*\$1))\vee\$2$
 \end_inset
 
- is a program that takes argument #1 (a float pt.
+ is a program that takes argument $1 (a float pt.
  number), multiplies it by 0.5, and checks to see if it is greater than zero.
  The result of this compare is or-ed (
 \begin_inset Formula $\vee$
 \end_inset
 
--ed) with argument #2 (a boolean).
+-ed) with argument $2 (a boolean).
  Although programs may be explicit, as in this example, a program can also
  be understood to be a 
 \emph on
@@ -408,7 +408,7 @@ knob
  is a single dimension of variation relative to a representation tree.
  It may be discrete or continuous.
  For example, given the program tree fragment 
-\begin_inset Formula $(0<(0.5*\#1))\vee\#2$
+\begin_inset Formula $(0<(0.5*\$1))\vee\$2$
 \end_inset
 
 , a continuous knob might be used to vary the numerical constant 0.5 to other
@@ -418,7 +418,7 @@ knob
 \end_inset
 
  would transform this tree fragment to 
-\begin_inset Formula $(0<(0.7*\#1))\vee\#2$
+\begin_inset Formula $(0<(0.7*\$1))\vee\$2$
 \end_inset
 
 .
@@ -439,7 +439,7 @@ multiplicity
 
 A discrete knob with a multiplicity of 4 might be used to transform the
  boolean input 
-\begin_inset Formula $\#2$
+\begin_inset Formula $\$2$
 \end_inset
 
 , with 0 meaning 'always true', 1 meaning 'invert', 2 meaning 'don't invert'
@@ -449,7 +449,7 @@ A discrete knob with a multiplicity of 4 might be used to transform the
 \end_inset
 
  would transform the above example tree to 
-\begin_inset Formula $(0<(0.5*\#1))\vee(\neg\#2)$
+\begin_inset Formula $(0<(0.5*\$1))\vee(\neg\$2)$
 \end_inset
 
 .
@@ -693,20 +693,20 @@ normal form
 \emph default
 .
  Thus, for example, 
-\begin_inset Formula $\#3\vee F$
+\begin_inset Formula $\$3\vee F$
 \end_inset
 
  can be reduced to just 
-\begin_inset Formula $\#3$
+\begin_inset Formula $\$3$
 \end_inset
 
  since or-ing with false changes nothing.
  Similarly, 
-\begin_inset Formula $0<0.5*\#6$
+\begin_inset Formula $0<0.5*\$6$
 \end_inset
 
  can be normalized to 
-\begin_inset Formula $0<\#6$
+\begin_inset Formula $0<\$6$
 \end_inset
 
  since multiplying by one-half never changes the sign of a number.

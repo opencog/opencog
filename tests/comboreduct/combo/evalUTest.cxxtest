@@ -11,7 +11,7 @@ class evalUTest :  public CxxTest::TestSuite {
 public:
   void test_set_bindings1() {
     combo_tree tr;
-    stringstream ss("+(#1 #2 *)");
+    stringstream ss("+($1 $2 *)");
     ss >> tr;
     std::cout << "TR : " << tr << std::endl;
     stringstream ss_expected_res("+(1 2 *(3 4)) ");

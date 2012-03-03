@@ -82,11 +82,11 @@ int main(int argc, char** argv)
         ss.add("impulse", 1, 100);
     }
     //add parameters
-    ss.add("#1", 0, 100);
-    ss.add("#2", 0, 100);
-    ss.add("#3", 0, 100);
-    ss.add("#4", 0, 100);
-    ss.add("#5", 0, 100);
+    ss.add("$1", 0, 100);
+    ss.add("$2", 0, 100);
+    ss.add("$3", 0, 100);
+    ss.add("$4", 0, 100);
+    ss.add("$5", 0, 100);
 
     vector<tree<string> > trees(noe);
     ramped_half_and_half(trees.begin(), trees.end(), ss, 2, max_depth, tce);

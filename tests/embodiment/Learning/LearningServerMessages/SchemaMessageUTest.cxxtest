@@ -35,7 +35,7 @@ static const std::string from  = "PET";
 static const std::string to    = "LS";
 static const std::string trick = "fetch";
 static const std::string trickCandidate = "fetch_1";
-static const std::string comboSchema = "and_seq(#1 #2 and_seq(#3 or_seq(#4 #5 or_seq(#6 #7 exec_seq(#8 #9 exec_seq(#10))))))";
+static const std::string comboSchema = "and_seq($1 $2 and_seq($3 or_seq($4 $5 or_seq($6 $7 exec_seq($8 $9 exec_seq($10))))))";
 
 class SchemaMessageUTest : public CxxTest::TestSuite
 {

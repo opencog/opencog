@@ -46,7 +46,7 @@ using boost::lexical_cast;
  *
  * @param combo_prog_str   the string containing the combo program
  * @param has_labels       true if the combo program has labels instead of
- * place holders (like and(#start #up) instead of and(#23 #134)
+ * place holders (like and($start $up) instead of and($23 $134)
  * @param labels           a vector of labels
  * @return                 the combo_tree
  */
@@ -84,7 +84,7 @@ int main(int argc,char** argv) {
         (opt_desc_str(combo_prog_file_opt).c_str(),
          value<string>(&pa.combo_programs_file),
          "File containing combo programs to replace the output (last column) of the data set. Each combo program in the file is seperated by a new line. For each program, all features sets are evaluated and their results displayed.\n")
-        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels #labels1, etc, instead of place holders. For instance one provide the combo program \"and(#large #tall)\" instead of \"and(#24 #124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
+        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program \"and($large $tall)\" instead of \"and($24 $124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
         (opt_desc_str(feature_opt).c_str(), value<vector<string> >(&pa.features),

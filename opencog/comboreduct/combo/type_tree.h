@@ -145,7 +145,7 @@ public:
  * Finally arg_list(T) does not inherit from T, neither the other way around
  * they are just different set of terms
  * so for instance + is typed lambda_type(arg_list(contin) contin)
- * and +(#1 #2 #3) is type lambda_type(contin contin contin contin)
+ * and +($1 $2 $3) is type lambda_type(contin contin contin contin)
  * but neither one or the other has any inheritance relationship
  * So the type system is extremly basic and limited but easy to implement
  * and probably enough for our current practical needs
@@ -345,7 +345,7 @@ bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n);
 arity_t infer_arity(const combo_tree& tr);
 
 // return the higher argument index of tr,
-// for instance if tr==+(#1 #5) it returns 5
+// for instance if tr==+($1 $5) it returns 5
 arity_t explicit_arity(const combo_tree& tr);
 
 // helpers to defined type_trees

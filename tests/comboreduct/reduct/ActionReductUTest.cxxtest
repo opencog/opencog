@@ -103,9 +103,9 @@ public:
 
 
   //test_simplify1 :
-  //and_seq(#1 #2 and_seq(#3 or_seq(#4 #5 or_seq(#6 #7))))
+  //and_seq($1 $2 and_seq($3 or_seq($4 $5 or_seq($6 $7))))
   void test_simplify1() {
-    string tree_str="and_seq(#1 #2 and_seq(#3 or_seq(#4 #5 or_seq(#6 #7 exec_seq(#8 #9 exec_seq(#10))))))";
+    string tree_str="and_seq($1 $2 and_seq($3 or_seq($4 $5 or_seq($6 $7 exec_seq($8 $9 exec_seq($10))))))";
 
     stringstream ss(tree_str);
     combo_tree tr;
@@ -135,9 +135,9 @@ public:
   }
 
   //test_simplify2 :
-  //action_action_if(#1 #2 #2) -> and_seq(exec_seq(#1) #2)
+  //action_action_if($1 $2 $2) -> and_seq(exec_seq($1) $2)
   void test_simplify2() {
-    string tree_str="action_action_if(#1 #2 #2)";
+    string tree_str="action_action_if($1 $2 $2)";
 
     stringstream ss(tree_str);
     combo_tree tr;
@@ -167,9 +167,9 @@ public:
   }
 
   //test_simplify3 :
-  //and_seq(#1 #2 or_seq(#3 #4 failure exec_seq(#5 #6 failure success) #6 success)) -> and_seq(#1 #2 or_seq(#3 #4 failure exec_seq(#5 #6 failure success) #6 success))
+  //and_seq($1 $2 or_seq($3 $4 failure exec_seq($5 $6 failure success) $6 success)) -> and_seq($1 $2 or_seq($3 $4 failure exec_seq($5 $6 failure success) $6 success))
   void test_simplify3() {
-    string tree_str="and_seq(#1 #2 or_seq(#3 #4 failure exec_seq(#5 #6 failure success) #6 success))";
+    string tree_str="and_seq($1 $2 or_seq($3 $4 failure exec_seq($5 $6 failure success) $6 success))";
 
     stringstream ss(tree_str);
     combo_tree tr;
@@ -233,7 +233,7 @@ public:
   //test_simplify5 :
   //action_if
   void test_simplify5() {
-    string tree_str="exec_seq(action_if(true #1 #2) action_if(false #1 #2) action_if(#3 #1 #1))";
+    string tree_str="exec_seq(action_if(true $1 $2) action_if(false $1 $2) action_if($3 $1 $1))";
 
     stringstream ss(tree_str);
     combo_tree tr;

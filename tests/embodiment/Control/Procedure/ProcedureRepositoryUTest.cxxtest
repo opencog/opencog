@@ -44,8 +44,8 @@ using namespace std;
 
 #define NUMBER_OF_COMBO_TREES 2
 const char* names[NUMBER_OF_COMBO_TREES] = {"andSeq", "orSeq"};
-const char* bodies[NUMBER_OF_COMBO_TREES] = {"and_seq(#1 #2 and_seq(#3 or_seq(#4 #5 or_seq(#6 #7))))",
-        "or_seq(#1 #2 or_seq(#3 or_seq(#4 #5 or_seq(#6 #7))))"
+const char* bodies[NUMBER_OF_COMBO_TREES] = {"and_seq($1 $2 and_seq($3 or_seq($4 $5 or_seq($6 $7))))",
+        "or_seq($1 $2 or_seq($3 or_seq($4 $5 or_seq($6 $7))))"
                                             };
 
 

@@ -16,6 +16,6 @@ approachCuriousPetPrecondition(0) |=
 	        is_there_relation(curious_about self _*_))
 
     approachCuriousPetPreconditionEvalSelect(1) :=
-	    and(not(is_angry(#1))
-	        not(is_fearful(#1)))
+	    and(not(is_angry($1))
+	        not(is_fearful($1)))
 

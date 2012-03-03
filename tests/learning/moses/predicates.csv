@@ -9,12 +9,12 @@
 ; In this example, the dataset reflects the predicate
 ; (x > 1.0) AND (y > 0.0) AND g and so the combo program that should be 
 ; learned is 
-;    and( greater_than_zero( plus(#x -1)) greater_than_zero(#y) #g)
+;    and( greater_than_zero( plus($x -1)) greater_than_zero($y) $g)
 ;
 ; To run, enter: "moses -H it -i predicates.csv -W1 -u pred"
 ;
 ; To run, with an example exemplar to get things started:
-; moses -H it -i predicates.csv -W1 -u pred -e "or(0<( #1) 0<( #2))" \
+; moses -H it -i predicates.csv -W1 -u pred -e "or(0<( $1) 0<( $2))" \
 ;       -n exp -n sin -n log
 ;
 ; The -n option excludes those operators from the solution set.

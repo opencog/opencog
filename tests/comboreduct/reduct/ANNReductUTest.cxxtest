@@ -31,7 +31,7 @@ using namespace ant_combo;
 class ANNReductUTest : public CxxTest::TestSuite {
 public:
     void test_simplify1() {
-        string tree_str = "ann(#N1(#I7 #N5(#I7(#N5) #I4 #I3 #I2 1.25 -1.25 -3.125 0.3125) #I2 #I3 #I4 -3.125 5.9375 0.625 0 3.125))";
+        string tree_str = "ann($N1($I7 $N5($I7($N5) $I4 $I3 $I2 1.25 -1.25 -3.125 0.3125) $I2 $I3 $I4 -3.125 5.9375 0.625 0 3.125))";
             
         stringstream ss(tree_str);
         combo_tree tr;

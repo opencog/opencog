@@ -45,12 +45,12 @@ namespace opencog { namespace moses {
 // various settings are accessible via turn(0), turn(1),...turn(multiplicity()-1).
 // In the continuous case, turn(contin_t) is used.
 //
-// For example, given the program tree fragment or(0<(*(#1,0.5)),#2), a
+// For example, given the program tree fragment or(0<(*($1,0.5)),$2), a
 // continuous knob might be used to vary the numerical constant. So setting
 // this knob to 0.7 would transform the tree fragment to
-// or(0<(*(#1,0.7)),#2). A discrete knob with multiplicity()==3 might be used to
-// transform the boolean input #2. So setting this knob to 1 might transform
-// the tree to or(0<(*(#1,0.7)),not(#2)), and setting it to 2 might remove it
+// or(0<(*($1,0.7)),$2). A discrete knob with multiplicity()==3 might be used to
+// transform the boolean input $2. So setting this knob to 1 might transform
+// the tree to or(0<(*($1,0.7)),not($2)), and setting it to 2 might remove it
 // from the tree (while setting it to 0 would return to the original tree).
 
 struct knob_base
@@ -322,7 +322,7 @@ struct logical_subtree_knob : public discrete_knob<3>
 
 private:
     // return << *_loc or << *_loc.begin() if it is null_vertex
-    // if *_loc is a negative literal returns !#n
+    // if *_loc is a negative literal returns !$n
     // if negated is true a copy of the literal is negated before being printed
     std::string locStr(bool negated = false) const
     {

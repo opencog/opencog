@@ -331,13 +331,13 @@ void build_knobs::insert_typed_arg(combo_tree &tr,
  * Each subtree must be "permitted", i.e. a legal combination of
  * logical operators, literals and predicates. These are called "perms".
  *
- * Here, a "literal" is one of the input "variables" #i. A positive
- * literal is just #i, and a negative literal is it's negation !#i.
+ * Here, a "literal" is one of the input "variables" $i. A positive
+ * literal is just $i, and a negative literal is it's negation !$i.
  *
  * For now, there are 2*_arity combinations, consisting of all
- * positive literals, and _arity pairs of op(#i #j) where 'op' is one
- * of the logic ops 'and' or 'or', such that op != *it, and #i is a
- * positive literal choosen randomly and #j is a positive or negative
+ * positive literals, and _arity pairs of op($i $j) where 'op' is one
+ * of the logic ops 'and' or 'or', such that op != *it, and $i is a
+ * positive literal choosen randomly and $j is a positive or negative
  * literal choosen randomly.
  */
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
@@ -364,7 +364,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         arg_type++;
     }
 
-    // Also create n random pairs op(#i #j) out of the total number
+    // Also create n random pairs op($i $j) out of the total number
     // 2 * choose(n,2) == n * (n-1) of possible pairs.
 
     // TODO: should bias the selection of these, so that
@@ -830,7 +830,7 @@ void build_knobs::linear_canonize_times(pre_it it)
 ///
 /// This recursively adds "pre-knobs" to all child terms. Such
 /// "pre-knobs" are terms that will later be converted into knobs.
-/// So, for example, this will insert terms such as *(0 #n) (an arg
+/// So, for example, this will insert terms such as *(0 $n) (an arg
 /// multiplied by zero), and the zero will later be made a knob.  The
 /// "pre-knobs" are always inserted linearly (i.e. prepended by a plus,
 /// so that they forma linear combination). 
@@ -867,7 +867,7 @@ void build_knobs::rec_canonize(pre_it it)
             }
         }
 
-        // Add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
+        // Add the basic elements: sin, log, exp, and any variables ($1, ..., $n)
         if (permitted_op(id::sin))
             append_linear_combination(mult_add(it, id::sin));
         if (permitted_op(id::log))
@@ -896,7 +896,7 @@ void build_knobs::rec_canonize(pre_it it)
 }
 
 /// Append a linear combination of *all* arguments. That is, append
-/// the term +( *(0 #1) *(0 #2) *(0 #3) ...)  Later on, the zero
+/// the term +( *(0 $1) *(0 $2) *(0 $3) ...)  Later on, the zero
 /// constants will become knobs.
 ///
 /// The appending happens at location it (which happens to always
@@ -908,7 +908,7 @@ void build_knobs::rec_canonize(pre_it it)
 ///
 /// If the argument is a boolean, then its run throught the impulse
 /// function (1.0 if T and 0.0 if F) and appended with multiplier.
-/// That is, its of the form +(... *(0 impulse(#n)) ...)
+/// That is, its of the form +(... *(0 impulse($n)) ...)
 //
 void build_knobs::append_linear_combination(pre_it it)
 {

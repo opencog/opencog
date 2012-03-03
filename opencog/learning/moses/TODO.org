@@ -33,8 +33,8 @@
 
 ** Ideas (things that should require thought before deciding whether to implement or not)
 - [ ] use a normalized variable instead of the variable itself in
-  continuous MOSES. For instance #1 becomes (#1 - mean)/std where mean
-  and std are the mean and the standard deviation of #1 respectively
+      continuous MOSES. For instance $1 becomes ($1 - mean)/std where mean
+  and std are the mean and the standard deviation of $1 respectively
 - [ ] replace the complexity function by a decent theoretical bit
   length of program
 - [ ] add affine adjustment for contin regression

@@ -95,18 +95,18 @@ public:
         string message = "good_dog";
         string petID = "Fido";
         string dummy_action_action = string(DUMMY_ACTION) + string("_action");
-        stringstream ss1("near(#1 #2)");
+        stringstream ss1("near($1 $2)");
         combo_tree tr1;
         // ss1 >> tr1;
         PetCombo::operator>>(ss1, tr1);
 
-        string tr2_str = string("near(#1 ") + obj_str + string(")");
+        string tr2_str = string("near($1 ") + obj_str + string(")");
         combo_tree tr2;
         stringstream ss2(tr2_str);
         // ss2 >> tr2;
         PetCombo::operator>>(ss2, tr2);
 
-        string tr3_str = string("near(#2 owner)");
+        string tr3_str = string("near($2 owner)");
         combo_tree tr3;
         stringstream ss3(tr3_str);
         // ss3 >> tr3;

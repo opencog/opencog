@@ -53,19 +53,19 @@ public:
 
     void test_logical() {
         string
-        tree_str = "and(#1 not(#2))",
+        tree_str = "and($1 not($2))",
 
-                   res00 = "and(#1 not(#2))",
-                           res01 = "and(not(#2))",
-                                   res02 = "and(not(#1) not(#2))",
+                   res00 = "and($1 not($2))",
+                           res01 = "and(not($2))",
+                                   res02 = "and(not($1) not($2))",
 
-                                           res10 = "and(#1 not(#2))",
-                                                   res11 = "and(#1)",
-                                                           res12 = "and(#1 #2)",
+                                           res10 = "and($1 not($2))",
+                                                   res11 = "and($1)",
+                                                           res12 = "and($1 $2)",
 
-                                                                   res20 = "and(#1 not(#2))",
-                                                                           res21 = "and(#1 not(#2) #3)",
-                                                                                   res22 = "and(#1 not(#2) not(#3))";
+                                                                   res20 = "and($1 not($2))",
+                                                                           res21 = "and($1 not($2) $3)",
+                                                                                   res22 = "and($1 not($2) not($3))";
 
         combo_tree tr = totree(tree_str);
         reduct::logical_reduce(tr);

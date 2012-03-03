@@ -4,63 +4,63 @@
 
 randbool(0) := 0<(+(rand -0.5))
 
-# #1 < #2
-less_than(2) := 0<(+(#2 *(-1 #1)))
+# $1 < $2
+less_than(2) := 0<(+($2 *(-1 $1)))
 
-# #1 > #2
-greater_than(2) := 0<(+(#1 *(-1 #2)))
+# $1 > $2
+greater_than(2) := 0<(+($1 *(-1 $2)))
 
-# #1 == #2
-equal_to(2) := and(not(less_than(#1 #2)) not(greater_than(#1 #2)))
+# $1 == $2
+equal_to(2) := and(not(less_than($1 $2)) not(greater_than($1 $2)))
 
 true_threshold(0) := 0.5
 
 # ----------------------- Traits helper functions ----------------
 is_aggressive(1) :=
-    greater_than(get_aggressiveness(#1) true_threshold)
+    greater_than(get_aggressiveness($1) true_threshold)
 
 is_curious(1) :=
-    greater_than(get_curiosity(#1) true_threshold)
+    greater_than(get_curiosity($1) true_threshold)
 
 is_playful(1) :=
-    greater_than(get_playfulness(#1) true_threshold)
+    greater_than(get_playfulness($1) true_threshold)
 
 is_friendly(1) :=
-    greater_than(get_friendliness(#1) true_threshold)
+    greater_than(get_friendliness($1) true_threshold)
 
 is_fearful(1) :=
-    greater_than(get_fearfulness(#1) true_threshold)
+    greater_than(get_fearfulness($1) true_threshold)
 
 is_appreciative(1) :=
-    greater_than(get_appreciativeness(#1) true_threshold)
+    greater_than(get_appreciativeness($1) true_threshold)
 
 is_excitable(1) := 
-    greater_than(get_excitability(#1) true_threshold)
+    greater_than(get_excitability($1) true_threshold)
 
 # ----------------------- Emo Feelings helper functions ----------
 is_happy(1) :=
-    greater_than(get_happiness(#1) true_threshold)
+    greater_than(get_happiness($1) true_threshold)
 
 is_fear(1) :=
-    greater_than(get_fear(#1) true_threshold)
+    greater_than(get_fear($1) true_threshold)
 
 is_proud(1) :=
-    greater_than(get_pride(#1) true_threshold)
+    greater_than(get_pride($1) true_threshold)
 
 is_lovely(1) :=
-    greater_than(get_love(#1) true_threshold)
+    greater_than(get_love($1) true_threshold)
 
 is_hateful(1) :=
-    greater_than(get_hate(#1) true_threshold)
+    greater_than(get_hate($1) true_threshold)
 
 is_angry(1) :=
-    greater_than(get_anger(#1) true_threshold)
+    greater_than(get_anger($1) true_threshold)
 
 is_grateful(1) := 
-    greater_than(get_gratitude(#1) true_threshold)
+    greater_than(get_gratitude($1) true_threshold)
 
 is_excited(1) :=
-    greater_than(get_excitability(#1) true_threshold)
+    greater_than(get_excitability($1) true_threshold)
 
 
 ###
@@ -100,9 +100,9 @@ randbool(0) := 0<(+(rand -0.5))
 #		      random_pet)
 #	   random_avatar)
 #chase_helper(1) :=
-#boolean_while(not(is_null(#1))
+#boolean_while(not(is_null($1))
 #	      and_seq(bark
-#		      goto_obj(#1 2)
+#		      goto_obj($1 2)
 #		      growl))
 #chase(0) := chase_helper(rand_pet_or_avatar)
 
@@ -142,16 +142,16 @@ and_seq(goto_obj(random_pickupable 2)
 # No functional language code sample is complete without a ridiculously
 # inefficient implementation of factorial
 ###
-factorial(1) := contin_if(0<(#1) *(#1 factorial(+(#1 -1))) 1)
+factorial(1) := contin_if(0<($1) *($1 factorial(+($1 -1))) 1)
 
 ###
 # And an even less efficient implementation of fibonacci
 ###
 fibonacci(1) := 
-contin_if(0<(#1)
-           contin_if(0<(+(#1 -1))
-	              +(fibonacci(+(#1 -1)) 
-        	        fibonacci(+(#1 -2)))
+contin_if(0<($1)
+           contin_if(0<(+($1 -1))
+	              +(fibonacci(+($1 -1)) 
+        	        fibonacci(+($1 -2)))
 	              1)
           0)
 
@@ -319,10 +319,10 @@ pick_grabs_scratch(0) :=
 chase_animal_people(1) :=
 	action_boolean_if(
 		boolean_if(
-			is_avatar(#1) true is_pet(#1)
+			is_avatar($1) true is_pet($1)
 		)
-		and_seq(growl_at(#1) 
-			bark follow(#1 10 2) 
+		and_seq(growl_at($1) 
+			bark follow($1 10 2) 
       		bark
       	)
       	sit
@@ -364,5 +364,5 @@ wander_searching_poo_place(0) :=
 not_hungry(0) := not(0<(+(get_hunger(self) -0.4)))
 
 #dummy mutually recursive schemata
-A(1) := contin_boolean_if(0<(#1) *(B(#1) 0.5) 0)
-B(1) := contin_boolean_if(0<(#1) +(A(#1) -0.5) 0)
+A(1) := contin_boolean_if(0<($1) *(B($1) 0.5) 0)
+B(1) := contin_boolean_if(0<($1) +(A($1) -0.5) 0)

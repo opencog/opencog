@@ -16,42 +16,42 @@ sleep(0) := sleep
 jump_up(0) := jump_up
 
 # 1:target 2:speed
-goto_obj(2) := goto_obj(#1 #2)
+goto_obj(2) := goto_obj($1 $2)
 
 # 1:target 2:speed
-gonear_obj(1) := gonear_obj(#1 2)
-gonear_obj2(2) := gonear_obj(#1 #2)
+gonear_obj(1) := gonear_obj($1 2)
+gonear_obj2(2) := gonear_obj($1 $2)
 
 # 1:target 2:speed
-gobehind_obj(1) := gobehind_obj(#1 2)
-gobehind_obj2(2) := gobehind_obj(#1 #2)
+gobehind_obj(1) := gobehind_obj($1 2)
+gobehind_obj2(2) := gobehind_obj($1 $2)
 
 # 1:target 2:duration 3:speed
-follow(3) := follow(#1 #2 #3)
-run_follow(1) := follow(#1 10 6)
+follow(3) := follow($1 $2 $3)
+run_follow(1) := follow($1 10 6)
 
 drop(0) := drop
-turn_to_face(1) := turn_to_face(#1)
+turn_to_face(1) := turn_to_face($1)
 
-say(2) := say(#1 #2)
+say(2) := say($1 $2)
 
 # Low level functions
 ######################
 
-say_n_bark(2) := and_seq( say(#1 #2) bark )
+say_n_bark(2) := and_seq( say($1 $2) bark )
 
-drop_n_eat(1) := and_seq( drop eat(#1) )
-drop_n_drink(1) := and_seq( drop drink(#1) )
-drop_n_bite(1) := and_seq( drop bite(#1) )
-drop_n_lick(1) := and_seq( drop lick_at(#1) )
-drop_n_sniff(1) := and_seq( drop sniff_at(#1) )
+drop_n_eat(1) := and_seq( drop eat($1) )
+drop_n_drink(1) := and_seq( drop drink($1) )
+drop_n_bite(1) := and_seq( drop bite($1) )
+drop_n_lick(1) := and_seq( drop lick_at($1) )
+drop_n_sniff(1) := and_seq( drop sniff_at($1) )
 drop_n_poo(0) := and_seq( drop poo )
 drop_n_pee(0) := and_seq( drop pee )
 drop_n_play(0) := and_seq( drop play )
 drop_n_celebrate(0) := and_seq( drop back_flip run_in_circle bark )
 
-pee_at(1) := and_seq( goto_obj(#1 2) pee )
-poo_at(1) := and_seq( goto_obj(#1 2) poo )
+pee_at(1) := and_seq( goto_obj($1 2) pee )
+poo_at(1) := and_seq( goto_obj($1 2) poo )
 
 grab_nearest_pickupable(0) :=
     action_boolean_if( near(self nearest_pickupable)
@@ -59,10 +59,10 @@ grab_nearest_pickupable(0) :=
 	                   action_failure
                      )
 
-walkto_obj(1) := goto_obj(#1 2.5)
-trotto_obj(1) := goto_obj(#1 4)
-runto_obj(1) := goto_obj(#1 5)
-doubletrotto_obj(1) := and_seq(trotto_obj(#1) trotto_obj(#1))
+walkto_obj(1) := goto_obj($1 2.5)
+trotto_obj(1) := goto_obj($1 4)
+runto_obj(1) := goto_obj($1 5)
+doubletrotto_obj(1) := and_seq(trotto_obj($1) trotto_obj($1))
 
 # Exemplar / owner function
 # ##########################
@@ -103,13 +103,13 @@ random_step_searching(0) :=
 
 random_search(0) := random_step_searching
 
-#play_with_grab_and_drop(1) := and_seq( goto_obj(#1 2) grab(#1) drop )
+#play_with_grab_and_drop(1) := and_seq( goto_obj($1 2) grab($1) drop )
 
-play_without_grab_and_drop(1) := and_seq( goto_obj(#1 2) 
-                                          sniff_at(#1) 
-#                                          bite(#1) 
-                                          lick_at(#1)
-#                                          kick(#1) 
+play_without_grab_and_drop(1) := and_seq( goto_obj($1 2) 
+                                          sniff_at($1) 
+#                                          bite($1) 
+                                          lick_at($1)
+#                                          kick($1) 
                                         )
 
 random_simple_action(0) := and_seq( sit bark sleep jump_up 
@@ -133,10 +133,10 @@ random_simple_action(0) := and_seq( sit bark sleep jump_up
 #    )
     
 eat_food(1) :=
-    and_seq( goto_obj(#1 2)
+    and_seq( goto_obj($1 2)
              drop
              wag
-             eat(#1)
+             eat($1)
              wander
            )
 
@@ -153,10 +153,10 @@ search_for_food(0) :=
 #    )
 
 drink_water(1) :=  
-    and_seq( goto_obj(#1 2)
+    and_seq( goto_obj($1 2)
              drop 
              wag 
-             drink(#1)
+             drink($1)
              wander
            )
 
@@ -198,8 +198,8 @@ search_for_poo_place(0) :=
 
 # Look at target and sit
 pay_attention(1) :=
-    action_boolean_if(not(is_null(#1))
-                      and_seq(turn_to_face(#1) sit)
+    action_boolean_if(not(is_null($1))
+                      and_seq(turn_to_face($1) sit)
                       sit)
 
 #Follows the owner whenever he is
@@ -249,7 +249,7 @@ goto_nearest_small(0) := action_boolean_if(exists_small goto_obj(nearest_small 2
 goto_nearest_poo_place(0) := action_boolean_if(exists_poo_place goto_obj(nearest_poo_place 2) action_failure)
 goto_nearest_pee_place(0) := action_boolean_if(exists_pee_place goto_obj(nearest_pee_place 2) action_failure)
 
-goto_object_and_grabit(1) := and_seq(goto_obj(#1 2) drop grab(#1))
+goto_object_and_grabit(1) := and_seq(goto_obj($1 2) drop grab($1))
 
 #goto_random_pickupable_and_grabit(0) :=
 #        and_seq(goto_random_pickupable
@@ -261,18 +261,18 @@ goto_random_pickupable_and_grabit(0) :=
 
 # to change for sniff function, note that there is an ambiguity
 # about sniff builtin_action and sniff function, that's not good
-gobehind_n_sniff_butt(1) := and_seq( gobehind_obj(#1 2) sniff_at(#1) )
+gobehind_n_sniff_butt(1) := and_seq( gobehind_obj($1 2) sniff_at($1) )
 
-bark_to_target(1) := and_seq( turn_to_face(#1) bark )
-beg_to_target(1) := and_seq( turn_to_face(#1) beg )
+bark_to_target(1) := and_seq( turn_to_face($1) bark )
+beg_to_target(1) := and_seq( turn_to_face($1) beg )
 goto_pet_home(0) := goto_obj(pet_home 3)
 
 # Grouping functions
 #######################
 
-group_command_2(2) := group_command(#1 #2)
-group_command_3(3) := group_command(#1 #2 #3)
-group_command_4(4) := group_command(#1 #2 #3 #4)
+group_command_2(2) := group_command($1 $2)
+group_command_3(3) := group_command($1 $2 $3)
+group_command_4(4) := group_command($1 $2 $3 $4)
 
 receive_latest_group_commands(0) := receive_latest_group_commands
 
@@ -283,54 +283,54 @@ stay(0) := action_success
 
 #### TEST ####
 
-dummy(1) := turn_to_face(#1)
+dummy(1) := turn_to_face($1)
 
 # defend friend from bite
 
-goto_bark_to_target(1) := and_seq(goto_obj(#1 2) bark_to_target(#1))
+goto_bark_to_target(1) := and_seq(goto_obj($1 2) bark_to_target($1))
 
 # approach schemata
 
-goto_sniff(1) := and_seq(goto_obj(#1 2) sniff_at(#1))
+goto_sniff(1) := and_seq(goto_obj($1 2) sniff_at($1))
 
 #TODO: this does not work again the problem is that random_object is
 #evaluated eager instead of lazy
-#go_away_from(1) := boolean_while(is_moderately_next(self #1)
+#go_away_from(1) := boolean_while(is_moderately_next(self $1)
 #                                 goto_obj(random_object 4))
 
 #this version should be replaced by the above once indefinite_object
 #are evaluated lazily
-go_away_from(1) := action_boolean_if(is_moderately_next(self #1)
+go_away_from(1) := action_boolean_if(is_moderately_next(self $1)
                                      goto_obj(random_object 4)
                                      goto_obj(random_object 4))
 
-goto_growl_or_bite(1) := and_seq(goto_obj(#1 2)
-                                 rand_action_2(bite(#1) growl_at(#1)))
+goto_growl_or_bite(1) := and_seq(goto_obj($1 2)
+                                 rand_action_2(bite($1) growl_at($1)))
 
 # reaction schemata
 
 react_from_growl(1) :=
         action_boolean_if(and(is_happy(self) is_excited(self))
-                          bark_at(#1)
+                          bark_at($1)
                           action_boolean_if(or(randbool is_fear(self))
-                                            go_away_from(#1)
+                                            go_away_from($1)
 		                            action_boolean_if(or(is_hateful(self) is_angry(self))
-                                                              bite(#1)
-                                                              growl_at(#1))))
+                                                              bite($1)
+                                                              growl_at($1))))
 
 react_from_bite(1) :=
         action_boolean_if(is_fear(self)
-                          and_seq(go_away_from(#1) pee)
-                          rand_action_5(bite(#1)
-                                        growl_at(#1)
-                                        bark_at(#1)
-                                        whine_at(#1)
-                                        and_seq(go_away_from(#1) pee)))
+                          and_seq(go_away_from($1) pee)
+                          rand_action_5(bite($1)
+                                        growl_at($1)
+                                        bark_at($1)
+                                        whine_at($1)
+                                        and_seq(go_away_from($1) pee)))
 
 react_from_sniff(1) :=
         action_boolean_if(and(is_aggressive(self) randbool)
-                          growl_at(#1)
-	                  rand_action_3(sniff_at(#1) sniff_pet_part(#1 BUTT) go_away_from(#1)))
+                          growl_at($1)
+	                  rand_action_3(sniff_at($1) sniff_pet_part($1 BUTT) go_away_from($1)))
 
 turn_around(0) := and_seq( turn_to_face(custom_position) 
 			   turn_to_face(custom_position) )
@@ -338,7 +338,7 @@ turn_around(0) := and_seq( turn_to_face(custom_position)
 # playful schemata
 
 bringRandomObject(1) := and_seq(goto_random_pickupable_and_grabit
-                                goto_obj(#1 2)
+                                goto_obj($1 2)
                                 drop)
 
 # that long schema while be replaced by a shorted version
@@ -380,42 +380,42 @@ moveObjectToPlay(0) := and_seq(goto_random_pickupable_and_grabit
                                goto_obj(random_object 2)
                                drop)
 
-goto_back_flip(1) := and_seq(trotto_obj(#1) back_flip)
+goto_back_flip(1) := and_seq(trotto_obj($1) back_flip)
 
 # that long schema while be replaced by a shorted version
 # once eager vs lazily control is implemented
 # because rand would always be the same value using a loop operator
 chasePetHoldingSomething(1) :=
-        and_seq(trotto_obj(#1)
-                runto_obj(#1)
-                action_boolean_if(near(self #1)
+        and_seq(trotto_obj($1)
+                runto_obj($1)
+                action_boolean_if(near(self $1)
                                   shake_head
-                                  runto_obj(#1))
-                trotto_obj(#1)
-                runto_obj(#1)
-                action_boolean_if(near(self #1)
+                                  runto_obj($1))
+                trotto_obj($1)
+                runto_obj($1)
+                action_boolean_if(near(self $1)
                                   bark
-                                  runto_obj(#1))
-                trotto_obj(#1)
-                runto_obj(#1)
-                action_boolean_if(near(self #1)
+                                  runto_obj($1))
+                trotto_obj($1)
+                runto_obj($1)
+                action_boolean_if(near(self $1)
                                   run_in_circle
-                                  runto_obj(#1))
-                trotto_obj(#1)
-                runto_obj(#1)
-                action_boolean_if(near(self #1)
+                                  runto_obj($1))
+                trotto_obj($1)
+                runto_obj($1)
+                action_boolean_if(near(self $1)
                                   shake_head
-                                  runto_obj(#1))
-                trotto_obj(#1)
-                runto_obj(#1)
-                action_boolean_if(near(self #1)
+                                  runto_obj($1))
+                trotto_obj($1)
+                runto_obj($1)
+                action_boolean_if(near(self $1)
                                   bark
-                                  runto_obj(#1))
-                trotto_obj(#1)
-                runto_obj(#1)
-                action_boolean_if(near(self #1)
+                                  runto_obj($1))
+                trotto_obj($1)
+                runto_obj($1)
+                action_boolean_if(near(self $1)
                                   rand_action_3(run_in_circle shake_head bark)
-                                  runto_obj(#1)))
+                                  runto_obj($1)))
 
 
 ################################

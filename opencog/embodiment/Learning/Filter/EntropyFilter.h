@@ -239,7 +239,7 @@ private:
 
     //build (or rebuild) the set of operands
     //by inserting all new definite_objects, indefinite_objects
-    //messages, input arguments (#1, #2, ...)
+    //messages, input arguments ($1, $2, ...)
     void build_operand_set();
 
     //build and insert all atomic perceptions of p

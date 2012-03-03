@@ -341,7 +341,7 @@ int moses_exec(int argc, char** argv)
          value<bool>(&output_with_labels)->default_value(false),
          "If 1, output the candidates with using the argument labels "
          "instead of argument numbers. For instance "
-         "*(\"#price\" \"#temprature\") instead of *(#1 #2). This only "
+         "*(\"$price\" \"$temprature\") instead of *($1 $2). This only "
          "works for data fitting problems where the data file contains "
          "labels in its header\n")
         (opt_desc_str(output_file_opt).c_str(),
@@ -427,7 +427,7 @@ int moses_exec(int argc, char** argv)
          "Include this operator, but exclude others, in the solution.  "
          "This option may be used several times to specify multiple "
          "operators.  Currently, only these operators are "
-         "supported: plus, times, div, sin, exp, log and variables (#n). "
+         "supported: plus, times, div, sin, exp, log and variables ($n). "
          "Note that variables and operators are treated separately, so "
          "that including only some operators will still include all "
          "variables, and including only some variables still include "
@@ -437,7 +437,7 @@ int moses_exec(int argc, char** argv)
          value<vector<string> >(&ignore_ops_str),
          str(format("Ignore the following operator in the program solution.  "
                     "This option may be used several times.  Currently, only div, "
-                    "sin, exp, log  and variables (#n) can be ignored.  "
+                    "sin, exp, log  and variables ($n) can be ignored.  "
                     "You may need to put variables under double quotes.  "
                     "This option has the priority over --%s.  "
                     "That is, if an operator is both be included and ignored, "
@@ -982,7 +982,7 @@ int moses_exec(int argc, char** argv)
     }
 
     // Demo/example problem: learn the logical disjunction. That is,
-    // moses should learn the following program: or(#1 #2 ... #k) where
+    // moses should learn the following program: or($1 $2 ... $k) where
     // k is the number of inputs specified by the -k option.
     else if (problem == dj)
     {
@@ -1030,7 +1030,7 @@ int moses_exec(int argc, char** argv)
     // consisting  of  nested arithmetic operators to compute p(x),
     // given x as a free variable.  So, for example the order-2 polynomial
     // can be written as x+x^2, and the shortest combo program is
-    // *(+(1 #1) #1) (that is, the  solution is p(x)=x(x+1) in the usual
+    // *(+(1 $1) $1) (that is, the  solution is p(x)=x(x+1) in the usual
     // arithmetical notation).
     else if (problem == sr)
     { // simple regression of f(x)_o = sum_{i={1,o}} x^i

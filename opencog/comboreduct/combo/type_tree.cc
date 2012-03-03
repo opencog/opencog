@@ -1259,7 +1259,7 @@ ostream& operator<<(ostream& out, const opencog::combo::type_node& n)
         return out << "ill_formed";
     default:
         if (n >= id::argument_type) {
-            return out << "#" << n - (int)id::argument_type + 1;
+            return out << "$" << n - (int)id::argument_type + 1;
         } else return out << "UNKNOWN_HANDLE";
     }
 }
@@ -1303,7 +1303,7 @@ istream& operator>>(istream& in, opencog::combo::type_node& n)
         n = id::unknown_type;
     else if (str == "ill_formed" || str == "ill_formed_type")
         n = id::ill_formed_type;
-    else if (str[0] == '#') {
+    else if (str[0] == '$') {
         int arg = boost::lexical_cast<int>(str.substr(1));
         OC_ASSERT(arg != 0,
                           "arg value should be different from zero.");

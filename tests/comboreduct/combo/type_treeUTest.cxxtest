@@ -10,7 +10,7 @@ class TreeTypeUTest : public CxxTest::TestSuite
 public:
 
     void test_get_type_tree1() {
-        string s = "and(#1 0<(+(#2 #2)) #3)";
+        string s = "and($1 0<(+($2 $2)) $3)";
         stringstream ss(s);
         combo_tree tr;
         ss >> tr;
@@ -23,8 +23,8 @@ public:
 
         std::cout << tt << std::endl;
 
-        string st = "application(->(arg_list(boolean) boolean) #1 application(->(contin boolean) application(->(arg_list(contin) contin) #2 #2)) #3) ";
-        TS_ASSERT(sst.str() == st);
+        string st = "application(->(arg_list(boolean) boolean) $1 application(->(contin boolean) application(->(arg_list(contin) contin) $2 $2)) $3) ";
+        TS_ASSERT_EQUALS(sst.str(), st);
     }
 
     void test_get_type_tree2() {
@@ -42,7 +42,7 @@ public:
 
         string st = "action_definite_object ";
 
-        TS_ASSERT(sst.str() == st);
+        TS_ASSERT_EQUALS(sst.str(), st);
     }
 
     void test_get_intersection1() {
@@ -171,7 +171,7 @@ public:
         sst_red << tt;
 
         string st = "boolean ";
-        TS_ASSERT(sst_red.str() == st);
+        TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
     //reduce a type_tree without arguments
@@ -197,7 +197,7 @@ public:
         sst_red << tt;
 
         string st = "->(contin boolean) ";
-        TS_ASSERT(sst_red.str() == st);
+        TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
     void test_reduce_type_tree3() {
@@ -230,7 +230,7 @@ public:
 
         std::cout << "REDUCED TT : " << tt << std::endl;
 
-        TS_ASSERT(sst.str() == st);
+        TS_ASSERT_EQUALS(sst.str(), st);
     }
 
     void test_reduce_type_tree5() {
@@ -246,7 +246,7 @@ public:
 
         std::cout << "REDUCED TT : " << tt << std::endl;
 
-        TS_ASSERT(sst.str() == st);
+        TS_ASSERT_EQUALS(sst.str(), st);
     }
 
     void test_reduce_type_tree6() {
@@ -262,7 +262,7 @@ public:
 
         std::cout << "REDUCED TT : " << tt << std::endl;
 
-        TS_ASSERT(sst.str() == st);
+        TS_ASSERT_EQUALS(sst.str(), st);
     }
 
     //reduce a type_tree with arguments
@@ -270,7 +270,7 @@ public:
 
         std::cout << "test_infer_type_tree1" << std::endl;
 
-        string s = "and(#1 0<(+(#2 #2)) #3)";
+        string s = "and($1 0<(+($2 $2)) $3)";
         stringstream ss(s);
         combo_tree tr;
         ss >> tr;
@@ -285,7 +285,7 @@ public:
         sst_red << tt;
 
         string st = "->(boolean contin boolean boolean) ";
-        TS_ASSERT(sst_red.str() == st);
+        TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
     //reduce a type_tree with arguments
@@ -308,7 +308,7 @@ public:
         sst_red << tt;
 
         string st = "->(arg_list(action_result) action_result) ";
-        TS_ASSERT(sst_red.str() == st);
+        TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
     //reduce a type_tree with arguments
@@ -331,15 +331,15 @@ public:
         sst_red << tt;
 
         string st = "wild_card ";
-        TS_ASSERT(sst_red.str() == st);
+        TS_ASSERT_EQUALS(sst_red.str(), st);
     }
 
-    //checked that dummy_definite_object(#1) is ill_formed
+    //checked that dummy_definite_object($1) is ill_formed
     void test_infer_type_tree4() {
 
         std::cout << "test_infer_type_tree4" << std::endl;
 
-        string s = "dummy_definite_object(#1)";
+        string s = "dummy_definite_object($1)";
         stringstream ss(s);
         combo_tree tr;
         ss >> tr;
@@ -410,7 +410,7 @@ public:
     }
 
     void test_does_contain_all_arg_up_to() {
-        stringstream ss("+(#1 impulse(#2) 4.0)");
+        stringstream ss("+($1 impulse($2) 4.0)");
         combo_tree tr;
         ss >> tr;
         TS_ASSERT(!does_contain_all_arg_up_to(tr, 1));
@@ -419,7 +419,7 @@ public:
     }
 
     void test_infer_vertex_type() {
-        stringstream ss("+(1 contin_if(and(#1 #2) *(#3 #4) +(#5 #6)))");
+        stringstream ss("+(1 contin_if(and($1 $2) *($3 $4) +($5 $6)))");
         combo_tree tr;
         ss >> tr;
         std::cout << "TR : " << tr << std::endl;
@@ -446,7 +446,7 @@ public:
     }
 
     void test_infer_arity1() {
-        stringstream ss("/(#1 +)");
+        stringstream ss("/($1 +)");
         combo_tree tr;
         ss >> tr;
         arity_t a = infer_arity(tr);
@@ -481,7 +481,7 @@ public:
     }
 
     void test_explicit_arity1() {
-        stringstream ss("+(1 #5 #1)");
+        stringstream ss("+(1 $5 $1)");
         combo_tree tr;
         ss >> tr;
         arity_t a = explicit_arity(tr);

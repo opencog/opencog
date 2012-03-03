@@ -16,26 +16,26 @@ sleep(0) := sleep
 jump_up(0) := jump_up
 
 # 1:target 2:speed
-goto_obj(2) := goto_obj(#1 #2)
+goto_obj(2) := goto_obj($1 $2)
 
 # 1:target 2:speed
-gonear_obj(1) := gonear_obj(#1 2)
-gonear_obj2(2) := gonear_obj(#1 #2)
+gonear_obj(1) := gonear_obj($1 2)
+gonear_obj2(2) := gonear_obj($1 $2)
 
 # 1:target 2:speed
-gobehind_obj(1) := gobehind_obj(#1 2)
-gobehind_obj2(2) := gobehind_obj(#1 #2)
+gobehind_obj(1) := gobehind_obj($1 2)
+gobehind_obj2(2) := gobehind_obj($1 $2)
 
 # 1:target 2:duration 3:speed
-follow(3) := follow(#1 #2 #3)
-run_follow(1) := follow(#1 10 6)
+follow(3) := follow($1 $2 $3)
+run_follow(1) := follow($1 10 6)
 
 drop(0) := drop
-turn_to_face(1) := turn_to_face(#1)
+turn_to_face(1) := turn_to_face($1)
 
-say(2) := say(#1 #2)
+say(2) := say($1 $2)
 
-eat(1) := eat(#1)
+eat(1) := eat($1)
 
 #walk random, but more forward and more right and does not rotate every time
 random_search(0) := 
@@ -72,13 +72,13 @@ random_search(0) :=
 #                              )
 #           )
 
-play_with_grab_and_drop(1) := and_seq( goto_obj(#1 2) grab(#1) drop )
+play_with_grab_and_drop(1) := and_seq( goto_obj($1 2) grab($1) drop )
 
-play_without_grab_and_drop(1) := and_seq( goto_obj(#1 2) 
-                                          sniff_at(#1) 
-                                          bite(#1) 
-                                          lick_at(#1)
-                                          kick(#1) 
+play_without_grab_and_drop(1) := and_seq( goto_obj($1 2) 
+                                          sniff_at($1) 
+                                          bite($1) 
+                                          lick_at($1)
+                                          kick($1) 
                                         )
 
 random_simple_action(0) := and_seq( sit bark sleep jump_up 
@@ -91,18 +91,18 @@ random_simple_action(0) := and_seq( sit bark sleep jump_up
 ##############################################
 
 eat_food(1) :=
-    and_seq( goto_obj(#1 2)
+    and_seq( goto_obj($1 2)
              drop
              wag
-             eat(#1)
+             eat($1)
              random_search
            )
 
 drink_water(1) :=  
-    and_seq( goto_obj(#1 2)
+    and_seq( goto_obj($1 2)
              drop 
              wag 
-             drink(#1)
+             drink($1)
              random_search
            )
 

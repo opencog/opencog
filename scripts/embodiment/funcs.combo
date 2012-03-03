@@ -35,9 +35,9 @@ randbool(0) := 0<(+(rand -0.5))
 #		      random_pet)
 #	   random_avatar)
 #chase_helper(1) :=
-#boolean_while(not(is_null(#1))
+#boolean_while(not(is_null($1))
 #	      and_seq(bark
-#		      goto_obj(#1 2)
+#		      goto_obj($1 2)
 #		      growl))
 #chase(0) := chase_helper(rand_pet_or_avatar)
 
@@ -77,16 +77,16 @@ and_seq(goto_obj(random_pickupable 2)
 # No functional language code sample is complete without a ridiculously
 # inefficient implementation of factorial
 ###
-factorial(1) := contin_if(0<(#1) *(#1 factorial(+(#1 -1))) 1)
+factorial(1) := contin_if(0<($1) *($1 factorial(+($1 -1))) 1)
 
 ###
 # And an even less efficient implementation of fibonacci
 ###
 fibonacci(1) := 
-contin_if(0<(#1)
-           contin_if(0<(+(#1 -1))
-	              +(fibonacci(+(#1 -1)) 
-        	        fibonacci(+(#1 -2)))
+contin_if(0<($1)
+           contin_if(0<(+($1 -1))
+	              +(fibonacci(+($1 -1)) 
+        	        fibonacci(+($1 -2)))
 	              1)
           0)
 
@@ -95,9 +95,9 @@ contin_if(0<(#1)
 # failure
 ###
 bring_to_owner_helper(1) :=
-    action_boolean_if(not(is_null(#1))
-                      and_seq(goto_obj(#1 2)
-                              grab(#1)
+    action_boolean_if(not(is_null($1))
+                      and_seq(goto_obj($1 2)
+                              grab($1)
                               action_boolean_if(exists(owner)
                                                 and_seq(goto_obj(owner 2) drop)
                                                 drop))
@@ -113,9 +113,9 @@ bring_to_owner(0) :=
 # Otherwise action_failure.
 ###
 lead_owner_to(1) :=
-    action_boolean_if(not(is_null(#1))
+    action_boolean_if(not(is_null($1))
                       and_seq(bark_at(owner)
-                              goto_obj(#1 2)
+                              goto_obj($1 2)
                               bark_at(owner))
                       action_failure)
 
@@ -124,11 +124,11 @@ lead_owner_to(1) :=
 # no avatar near, just sit.
 ###
 #bark_non_friend_helper(1) :=
-#    action_boolean_if(near(#1 self) and not(is_friendly(#1))
-#            and_seq(growl_at(#1) 
-#                    bare_teeth(#1)
-#                    bark_at(#1))
-#            and_seq(goto_obj(#1 2) wag jump_up))
+#    action_boolean_if(near($1 self) and not(is_friendly($1))
+#            and_seq(growl_at($1) 
+#                    bare_teeth($1)
+#                    bark_at($1))
+#            and_seq(goto_obj($1 2) wag jump_up))
 #
 #bark_non_friend_avatar(0) :=
 #    action_boolean_if(exists_avatar
@@ -149,9 +149,9 @@ lead_owner_to(1) :=
 # the closest avatar isn't friendly stay.
 ###
 #lick_friendly_helper(1) :=
-#     action_boolean_if(is_friendly(#1)
-#            and_seq(goto_obj(#1 2)
-#                    lick_at(#1))
+#     action_boolean_if(is_friendly($1)
+#            and_seq(goto_obj($1 2)
+#                    lick_at($1))
 #            stay)
 
 #lick_friendly_avatar(0) := 
@@ -163,9 +163,9 @@ lead_owner_to(1) :=
 # Greet a friendly avatar jumping on it
 ###
 #greet_avatar_with_jump_helper(1) :=
-#     action_boolean_if(is_friendly(#1)
-#            and_seq(goto_obj(#1 2)
-#                    jump_towards(#1))
+#     action_boolean_if(is_friendly($1)
+#            and_seq(goto_obj($1 2)
+#                    jump_towards($1))
 #            stay)
 
 

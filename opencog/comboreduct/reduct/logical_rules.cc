@@ -65,7 +65,7 @@ void simplify_predicates::operator()(combo_tree& tr, combo_tree::iterator it) co
 
     // After the above step, we can still have some pathological
     // expressions, such as "0<(1)" which can be reduced to true,
-    // or "0<(/(1 #1))",  which can be reduced to "0<(#1)" .. so do these.
+    // or "0<(/(1 $1))",  which can be reduced to "0<($1)" .. so do these.
     mixed_reduce(tr, it, rng);
 }
 

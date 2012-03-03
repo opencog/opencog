@@ -8,7 +8,7 @@
 #     1. There cannot be any whitespaces between operator and (
 #     2. There is no '-' operator, it is the default type of an unrecognized string.
 #        So for -x you must write *(-1 x). 
-#        But if you want you could define a procedure neg(1) := *(-1 #1) under
+#        But if you want you could define a procedure neg(1) := *(-1 $1) under
 #        scripts/embodiment/stdlib.combo
 #     3. The best doc about Combo is doc/comboreduct/ComboReduct.pdf in the OpenCog project
 #     4. You should avoid infinitely great number in Combo
@@ -20,10 +20,10 @@
 
 # FuzzyWithin is used to evaluate the truth value of a PredicateNode for DemandGoal 
 # given min/max acceptable values and its current level 
-# #1 x, #2 min, #3 max
-FuzzyWithin(3) := contin_if( less_than(#1 #2) 
-                             fuzzy_greater_than(#1 #2 1000)
-                             contin_if( greater_than(#1 #3)
+# $1 x, $2 min, $3 max
+FuzzyWithin(3) := contin_if( less_than($1 $2) 
+                             fuzzy_greater_than($1 $2 1000)
+                             contin_if( greater_than($1 $3)
                                         rand_within(0.95 1)
                                         rand_within(0.70 1) 
                                       )
