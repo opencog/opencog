@@ -309,6 +309,7 @@ int moses_exec(int argc, char** argv)
     options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "Produce help message.\n")
+        ("version", "Display the version of moses.\n")
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
@@ -575,7 +576,15 @@ int moses_exec(int argc, char** argv)
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
  
     if (vm.count("help") || argc == 1) {
-        cout << desc << "\n";
+        cout << desc << endl;
+        return 1;
+    }
+
+    if (vm.count("version")) {
+        cout << "moses " << MOSES_VERSION_MAJOR
+             << "." << MOSES_VERSION_MINOR
+             << "." << MOSES_VERSION_PATCH
+             << " (revno " << MOSES_BZR_REVNO << ")" << std::endl;;
         return 1;
     }
 
