@@ -11,9 +11,9 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
-//#ifdef HAVE_CYTHON
-//#include <opencog/cython/logic_wrapper_api.h>
-//#endif
+#ifdef HAVE_CYTHON
+#include <opencog/cython/logic_wrapper_api.h>
+#endif
 
 // for backward compatibility as from boost 1.46 filesystem 3 is the default
 #define BOOST_FILESYSTEM_VERSION 2
@@ -270,78 +270,77 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     test::custom_duration = 0.0;
     start = clock();
 
-//#ifdef HAVE_CYTHON
-//    // Code to run the Python backward chainer.
-//    PyGILState_STATE gstate;
-//    gstate = PyGILState_Ensure(); 
-//    import_logic_wrapper();
-//    //python_pln_fc(cogserver().getAtomSpace());
-//    //python_pln_fc();
-//    cout << "before python_pln_plan" << endl;
-//    python_pln_plan(cogserver().getAtomSpace());
-//    cout << "after python_pln_plan" << endl;
-//    Handle eh = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
-//    
-//    PyGILState_Release(gstate); 
-//
-//    TruthValuePtr etv = cogserver().getAtomSpace()->getTV(eh, NULL_VERSION_HANDLE);
-//#else
-//    TruthValuePtr etv;
-//    Handle eh;
-//#endif
+#ifdef HAVE_CYTHON
+    // Code to run the Python backward chainer.
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure(); 
+    import_logic_wrapper();
+    //python_pln_fc(cogserver().getAtomSpace());
+    //python_pln_fc();
+    cout << "before python_pln_plan" << endl;
+    python_pln_plan(cogserver().getAtomSpace());
+    cout << "after python_pln_plan" << endl;
+    Handle eh = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
+    
+    PyGILState_Release(gstate); 
 
-//    if (*etv != TruthValue::NULL_TV()) {
-//        /* Print resulting truth value compared to test requirements */
-//        printf("c: %f min: %f\n", etv->getConfidence(),
-//                t->minTV->getConfidence());
-//        printf("s: %f min: %f\n", etv->getMean(),
-//                t->minTV->getMean());
-//        printf("c: %f max: %f\n", etv->getConfidence(),
-//                t->maxTV->getConfidence());
-//        printf("s: %f max: %f\n", etv->getMean(),
-//                t->maxTV->getMean());
-//
-//        // TODO: print a trail
-//    }
-//
-//    /* Check whether resulting truth value meets test requirements */
-//    bool passed = (
-//        eh != Handle::UNDEFINED &&
-//        etv &&
-//        etv->getConfidence() >= t->minTV->getConfidence() &&
-//        etv->getMean()       >= t->minTV->getMean() &&
-//        etv->getConfidence() <= t->maxTV->getConfidence() &&
-//        etv->getMean()       <= t->maxTV->getMean()
-//    );
-//
-//    if (passed) {
-//        tests_passed++;
-//
-//        printf("\n"
-//               "**********************************************\n"
-//               "passed: %s.\n"
-//               "**********************************************\n",
-//            (etv?etv->toString().c_str():"(null TV)"));
-//    }
-//    else {
-//        printf("\n**********************************************\n"
-//               "FAILED: %s!\n"
-//               "**********************************************\n",
-//        (etv?etv->toString().c_str():"(null TV)"));
-//    }
-//
-//    // Still want to show this on failed tests
-//    finish = clock();
-//    duration = (double)(finish - start) / CLOCKS_PER_SEC;
-//    printf( "Test took %2.2f seconds TOTAL.\n", duration );
-//
-//    tests_total++;
-//    
-//    cout << "So far, failed " << (tests_total - tests_passed) << " out of "
-//         << tests_total << " tests." << endl;
+    TruthValuePtr etv = cogserver().getAtomSpace()->getTV(eh, NULL_VERSION_HANDLE);
+#else
+    TruthValuePtr etv;
+    Handle eh;
+#endif
 
-    //return passed;
-    return true;
+    if (*etv != TruthValue::NULL_TV()) {
+        /* Print resulting truth value compared to test requirements */
+        printf("c: %f min: %f\n", etv->getConfidence(),
+                t->minTV->getConfidence());
+        printf("s: %f min: %f\n", etv->getMean(),
+                t->minTV->getMean());
+        printf("c: %f max: %f\n", etv->getConfidence(),
+                t->maxTV->getConfidence());
+        printf("s: %f max: %f\n", etv->getMean(),
+                t->maxTV->getMean());
+
+        // TODO: print a trail
+    }
+
+    /* Check whether resulting truth value meets test requirements */
+    bool passed = (
+        eh != Handle::UNDEFINED &&
+        etv &&
+        etv->getConfidence() >= t->minTV->getConfidence() &&
+        etv->getMean()       >= t->minTV->getMean() &&
+        etv->getConfidence() <= t->maxTV->getConfidence() &&
+        etv->getMean()       <= t->maxTV->getMean()
+    );
+
+    if (passed) {
+        tests_passed++;
+
+        printf("\n"
+               "**********************************************\n"
+               "passed: %s.\n"
+               "**********************************************\n",
+            (etv?etv->toString().c_str():"(null TV)"));
+    }
+    else {
+        printf("\n**********************************************\n"
+               "FAILED: %s!\n"
+               "**********************************************\n",
+        (etv?etv->toString().c_str():"(null TV)"));
+    }
+
+    // Still want to show this on failed tests
+    finish = clock();
+    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+    printf( "Test took %2.2f seconds TOTAL.\n", duration );
+
+    tests_total++;
+    
+    cout << "So far, failed " << (tests_total - tests_passed) << " out of "
+         << tests_total << " tests." << endl;
+
+    return passed;
 }
 
 bool runPLNTest_CPP(Btr<PLNTest> t, bool test_bc)
