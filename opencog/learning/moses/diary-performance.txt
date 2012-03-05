@@ -929,13 +929,13 @@ All are for bzr rev 6582, unless otherwise noted.
 -r10   -7    -8    -6    -7    -7    -6             -4
 -r11   -6    -6    -6    -6   -10    -4            714
 -r12   -9    -6    -5    -5    -7  1117           4032
--r13   -9    -7    -4    -7    -6    -4
--r14   -7    -7    -6    -6    -7    -4
--r15   -7    -8    -7    -7    -7    -5
--r16  -10    -5    -6    -5    -9    -5
--r17  -10    -5    -8   -10    -7    -4
--r18   -5   -10   -10    -6    -5    -4
--r19   -8    -6    -8    -5    -8    -3
+-r13   -9    -7    -4    -7    -6    -4             -3
+-r14   -7    -7    -6    -6    -7    -4             -5
+-r15   -7    -8    -7    -7    -7    -5             -4
+-r16  -10    -5    -6    -5    -9    -5             -1
+-r17  -10    -5    -8   -10    -7    -4             -4
+-r18   -5   -10   -10    -6    -5    -4             -4
+-r19   -8    -6    -8    -5    -8    -3           5906
 
 best: -4x1       -4x1   
       -5x1 -5x3  -5x2   -5x3  -5x3
@@ -1073,10 +1073,20 @@ trim-only score match the baseline, but offer a 2x run-time improvement.
 
 The "curr+reup" column shows bzr rev 6616 plus the reup algo.  Its almost
 identical to "re-up+trim", and slightly faster, which is good: nothing was
-lost during the intervening hacking.
+lost during the intervening hacking. (40/10 means: 40 instances from the
+1-simplex, and a full nn scan every 10 generations.)  This is the current
+winner.
 
 The "100/20" column keeps the 100 top-scoring instances for the next
 round, and does a full nearest-neighborhood search only every 20
+rounds.
+
+The "40/20" column keeps the 40 top-scoring instances for the next
+round, and does a full nearest-neighborhood search only every 20
+rounds.
+
+The "40/6" column keeps the 40 top-scoring instances for the next
+round, and does a full nearest-neighborhood search every 6
 rounds.
 
 
@@ -1089,7 +1099,7 @@ rounds.
 
 
                                       nn5                    nn6
-             trim-only           urr+reup(40/10)           100/20
+             trim-only          curr+reup(40/10)           100/20
          score   time  plex    score   time  plex    score   time  plex
 -m10K:    -273    91    48      -185    231   57      -214   233    80
 -m20K:    -222   256    53      -128    543   78      -159  1082   104
@@ -1106,6 +1116,26 @@ rounds.
 -m40K:    -115  1760   112      -116  1506  108
 -m80K:    
 -m160K:   
+
+
+New baseline: below: bzr rev 6633 
+
+"baseline" is as code is checked in.
+
+"40/10" is the usual (40 instances, full nearest-neighbor refressh 
+every 10 generations), with the 1-simplex.
+
+
+              baseline           40/10 (nn9)
+         score  time  plex     score  time  plex
+-m10k:   -255     65    50     -163    170   54
+-m20k:   -229    243    53
+-m40k:   -187    798    64
+-m80k:   -153   1933    86
+-m160k:  -131   7476   104
+-m320k:  -120  30129   119
+-m640k:  -119  97385   117
+
 
 ======================================================================
 Regression test parity performance
@@ -1232,4 +1262,63 @@ of the metapop, which then damages performance.
 avg:      87     72     72     87     73     133     109
 
 
+Again:
+"baseline": revision 6616 (same as no-bs column above)
 
+"wtf": revision 6629 -- why is this not identical to baseline ?? Oh,
+because recent changes broke neighborhood size counting.
+
+"refix: revision 6630 -- why is this not identical to baseline ?? 
+Didn't 6630 restore the old logic?  Anyway, scratching the outlier
+gets us a reasonable number for the avg ... 
+
+
+      baseline  wtf   refix
+-r0:      37     56     36
+-r1:      54    118    128 
+-r2:     112     39     38
+-r3:      16    116     38
+-r4:      16     72     81
+-r5:      41     67     67
+-r6:     115     23     83
+-r7:      68     15     15
+-r8:     112     86     70
+-r9:      41    112    104
+-r10:    193     61     60
+-r11:     19     89     84
+-r12:    133     81     53
+-r13:     99     74     74
+-r14:    151     39     37
+-r15:     43    137    506
+-r16:     75     51     51
+-r17:     33    125    118
+-r18:     37    107    116
+-r19:     53     57     56
+
+avg:      72     77     91
+
+
+----------
+real	2m13.977s   base
+real	2m10.882s  revamp
+
+
+================================================================
+ Bank dataset measurements  columns are final score.
+
+-mxx == different numbers of iterations.
+Conclude: very little variation due to random number gen. This is very
+different than the parity problem.
+
+           -m10000                -m20000            -m40000
+:      time  score  plex     time  score  plex    time  score  plex
+-r0:     65  255.8    50     250   229.8    53     741  187.1    64
+-r1:     65  255.8    51     246   229.8    53     771  187.1    64
+-r2:     65  255.8    51     248   231.65   54     745  187.1    64
+-r3:     64  255.8    50     247   229.8    53     749  187.1    65
+-r4:     65  256.1    49     247   230.3    52     758  186.5    66
+-r5:     65  257.5    51     248   230.3    53     760  184.1    67
+-r6:     65  256.1    49     248   232.06   53     784  186.5    65
+-r7:     66  259.8    51     249   230.3    54     743  184.5    67
+-r8:     65  256.1    50     248   230.8    52     771  186.5    66
+-r9:     64  255.8    48     247   229.87   53     793  186.1    65
