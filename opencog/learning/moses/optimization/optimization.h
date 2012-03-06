@@ -197,8 +197,10 @@ struct optim_parameters
 // Statistics obtained during optimization run, useful for tuning.
 struct optim_stats
 {
-    optim_stats() : nsteps(0), over_budget(false) {}
-    int nsteps;
+    optim_stats() : nsteps(0), deme_count(0), total_evals(0), over_budget(false) {}
+    unsigned nsteps;
+    unsigned deme_count;
+    unsigned total_evals;
     bool over_budget;
 };
 
@@ -522,12 +524,24 @@ struct hill_climbing : optim_stats
                         const Scoring& score, unsigned max_evals,
                         unsigned* eval_best = NULL)
     {
-        // Logger
-        logger(). debug("Local Search Optimization");
-        // ~Logger
+        logger().debug("Local Search Optimization");
+        logger().info() << "Deme: # "   /* Legend for graph stats */
+                "deme_count\t"
+                "iteration\t"
+                "total_evals\t"
+                "new_instances\t"
+                "num_instances\t"
+                "has_improved\t"
+                "best_weighted_score\t"
+                "delta_weighted\t"
+                "best_raw\t"
+                "delta_raw\t"
+                "complexity";
+
 
         // Collect statistics about the run, in struct optim_stats
         nsteps = 0;
+        deme_count ++;
         over_budget = false;
 
         // Initial eval_best in case nothing is found.
@@ -569,7 +583,6 @@ struct hill_climbing : optim_stats
         // Copy it, don't reference it, since sorting will mess up a ref.
         instance center_inst(init_inst);
         composite_score best_cscore = worst_composite_score;
-        score_t prev_best_score = worst_score;
         score_t best_score = worst_score;
 
         // Initial distance is zero, so that the first time through
@@ -583,10 +596,12 @@ struct hill_climbing : optim_stats
         deme_size_t prev_start = 0;
         deme_size_t prev_size = 0;
 
+        bool rescan = false;
+
         // Whether the score has improved during an iteration
         while (true)
         {
-            logger().debug("Iteration: %u", iteration++);
+            logger().debug("Iteration: %u", ++iteration);
 
             // Estimate the number of neighbours at the distance d.
             // This is faster than actually counting.
@@ -686,7 +701,8 @@ struct hill_climbing : optim_stats
 #define TOP_POP_SIZE 40
             // XXX disable for the moment; unit tests are failing; leave
             // disabled till proper solution is created.
-            // if ((iteration <= 2) || (0 == iteration%RESCAN_TIME))
+            // if ((iteration <= 2) || (0 == iteration%RESCAN_TIME)) {
+            // if ((iteration <= 2) || rescan) {
             if (true) {
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
@@ -697,7 +713,7 @@ struct hill_climbing : optim_stats
                                          center_inst, deme, distance, rng);
             } else {
                 number_of_new_instances =
-                    cross_top_two(deme, current_number_of_instances, TOP_POP_SIZE,
+                    cross_top_one(deme, current_number_of_instances, TOP_POP_SIZE,
                                   prev_start, prev_size, prev_center);
 
             }
@@ -719,6 +735,8 @@ struct hill_climbing : optim_stats
             // Check if there is an instance in the deme better than
             // the best candidate
             score_t prev_hi = best_score;
+            score_t prev_best_raw = get_score(best_cscore);
+
             unsigned ibest = current_number_of_instances;
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
@@ -737,6 +755,7 @@ struct hill_climbing : optim_stats
                 center_inst = deme[ibest].first;
             }
 
+            score_t best_raw = get_score(best_cscore);
 #ifdef GATHER_STATS
             if (iteration > 1) {
                 if (scores.size() < number_of_new_instances) {
@@ -775,9 +794,7 @@ struct hill_climbing : optim_stats
                     *eval_best = current_number_of_instances;
 
                 if (logger().isDebugEnabled()) {
-                    score_t best = get_score(best_cscore);
-                    score_t delta = best - prev_best_score;
-                    prev_best_score = best;
+                    score_t delta = best_raw - prev_best_raw;
                     logger().debug() << "Best score: " << best_cscore
                                      << " Delta: " << delta;
                     if (logger().isFineEnabled()) {
@@ -791,6 +808,30 @@ struct hill_climbing : optim_stats
 
             // Collect statistics about the run, in struct optim_stats
             nsteps++;
+            total_evals += number_of_new_instances;
+
+            // Deme statistics, for performance graphing.
+            logger().info() << "Deme: "
+                << deme_count << "\t"
+                << iteration << "\t"
+                << total_evals << "\t"
+                << number_of_new_instances << "\t"
+                << current_number_of_instances << "\t"
+                << has_improved << "\t"
+                << best_score << "\t"   /* weighted score */
+                << best_score - prev_hi << "\t"  /* previous weighted */
+                << best_raw << "\t"     /* non-weighted, raw score */
+                << best_raw - prev_best_raw << "\t"
+                << -get_complexity(best_cscore);
+
+            if (!has_improved && !rescan && (2 < iteration)) {
+                rescan = true;
+                distance = 1;
+                continue;
+            } else {
+                rescan = false;
+            }
+
             if (max_number_of_instances <= current_number_of_instances)
                 over_budget = true;
 
