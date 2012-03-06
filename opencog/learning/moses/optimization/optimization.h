@@ -709,8 +709,8 @@ struct hill_climbing : optim_stats
             // XXX disable for the moment; unit tests are failing; leave
             // disabled till proper solution is created.
             // if ((iteration <= 2) || (0 == iteration%RESCAN_TIME)) {
-            // if ((iteration <= 2) || rescan) {
-            if (true) {
+            if ((iteration <= 2) || rescan) {
+            // if (true) {
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
                 number_of_new_instances =
