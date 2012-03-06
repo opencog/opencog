@@ -81,9 +81,9 @@ int main(int argc, char** argv)
     ann_pole2_score p2_score;
     ann_pole2_bscore p2_bscore; 
 
+    univariate_optimization univ(rng);
     metapopulation<ann_pole2_score, ann_pole2_bscore, univariate_optimization>
-        metapop_pole2(rng, tr, tt, *si, p2_score, p2_bscore,
-                      univariate_optimization(rng));
+        metapop_pole2(rng, tr, tt, *si, p2_score, p2_bscore, univ);
 
     moses::moses(metapop_pole2);
 

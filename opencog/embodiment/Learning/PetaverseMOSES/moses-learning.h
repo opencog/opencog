@@ -85,6 +85,7 @@ public:
 private:
     struct petaverse_score  *score;
     struct petaverse_bscore *bscore;
+    struct hill_climbing *climber;
     const FE& _fitness_estimator;
     Comp _comp;
     const definite_object_set& _dos;

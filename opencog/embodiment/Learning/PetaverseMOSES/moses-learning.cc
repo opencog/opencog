@@ -77,6 +77,7 @@ moses_learning::moses_learning(int nepc,
 
     score = new petaverse_score(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);
+    climber = new hill_climbing(_rng);
 
     metapop = NULL;
 
@@ -91,6 +92,7 @@ moses_learning::~moses_learning()
 {
     delete score;
     delete bscore;
+    delete climber;
     if (metapop)
         delete metapop;
 }
@@ -147,7 +149,7 @@ void moses_learning::operator()()
         metapop = new metapopulation<petaverse_score, petaverse_bscore,
                                      hill_climbing>
             (_rng, _center, tt, action_reduction(),
-             *score, *bscore, hill_climbing(_rng));
+             *score, *bscore, *climber);
 
         _hcState = HC_BUILD_CANDIDATES;
         break;

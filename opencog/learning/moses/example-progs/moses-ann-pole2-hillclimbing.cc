@@ -43,10 +43,10 @@ int main(int argc, char** argv)
     ann_pole2_score p2_score;
     ann_pole2_bscore p2_bscore;
 
+    hill_climbing climber(rng);
     metapopulation<ann_pole2_score, ann_pole2_bscore, hill_climbing>
         metapop_pole2(rng, tr, tt, clean_reduction(),
-                      p2_score, p2_bscore,
-                      hill_climbing(rng));
+                      p2_score, p2_bscore, climber);
 
     moses::moses(metapop_pole2);
 

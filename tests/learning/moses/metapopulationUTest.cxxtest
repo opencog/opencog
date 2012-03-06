@@ -44,14 +44,17 @@ class metapopulationUTest : public CxxTest::TestSuite {
     dummy_bscore _dbsc;
     vertex_set ignore_ops;
     logical_reduction lred;
+    dummy_optimization _do;
     metapopulation_t _metapopulation;
 
 public:
     metapopulationUTest()
         : _rng(1), _dsc(), _dbsc(), ignore_ops(),
           lred(ignore_ops, _rng),
+          _do(),
           _metapopulation(_rng, combo_tree(), type_tree(),
-                          lred.operator()(2), _dsc, _dbsc)
+                          lred.operator()(2), _dsc, _dbsc,
+                          _do)
     {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE); 

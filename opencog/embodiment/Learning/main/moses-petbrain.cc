@@ -61,10 +61,11 @@ int main(int argc, char** argv)
 
     interactive_score scorer;
     interactive_bscore bscorer;
+    hill_climbing climber(rng);
 
     metapopulation<interactive_score, interactive_bscore, hill_climbing>
         metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
-                scorer, bscorer, hill_climbing(rng));
+                scorer, bscorer, climber);
 
     cout << "build metapop" << endl;
 

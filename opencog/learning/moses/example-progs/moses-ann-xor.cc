@@ -66,9 +66,9 @@ int main(int argc, char** argv)
     if(!reduce)
         si = &(clean_reduction());
 
+    univariate_optimization univ(rng);
     metapopulation<ann_score, ann_bscore, univariate_optimization>
-        metapop(rng, tr, tt, *si, score, bscore,
-                univariate_optimization(rng));
+        metapop(rng, tr, tt, *si, score, bscore, univ);
     moses_parameters moses_param(max_evals);
     moses::moses(metapop, moses_param);
 

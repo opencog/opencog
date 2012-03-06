@@ -58,9 +58,9 @@ int main(int argc, char** argv)
     
     ann_pole2nv_score p2_score;
     ann_pole2nv_bscore p2_bscore; 
+    univariate_optimization univ(rng);
     metapopulation<ann_pole2nv_score, ann_pole2nv_bscore, univariate_optimization>
-        metapop_pole2(rng, tr, tt, *si, p2_score, p2_bscore,
-                      univariate_optimization(rng));
+        metapop_pole2(rng, tr, tt, *si, p2_score, p2_bscore, univ);
     moses_parameters moses_param(max_evals);
     moses::moses(metapop_pole2, moses_param);
 
