@@ -704,13 +704,12 @@ struct hill_climbing : optim_stats
                 "Budget %u samples out of estimated %u neighbours",
                 number_of_new_instances, total_number_of_neighbours);
 
-#define RESCAN_TIME 10
-#define TOP_POP_SIZE 40
-            // XXX disable for the moment; unit tests are failing; leave
-            // disabled till proper solution is created.
-            // if ((iteration <= 2) || (0 == iteration%RESCAN_TIME)) {
+            // The first few times through, (or if we decided on a full
+            // rescan), explore the entire nearest neighborhood.
+            // Otherwise make some optimistic assumptions about where
+            // the best new instances are likely to be, and go there.
             if ((iteration <= 2) || rescan) {
-            // if (true) {
+
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
                 number_of_new_instances =
@@ -719,6 +718,9 @@ struct hill_climbing : optim_stats
                                          current_number_of_instances,
                                          center_inst, deme, distance, rng);
             } else {
+#define TOP_POP_SIZE 40
+                // These cross-over (in the genetic sense) the
+                // top-scoring one, two and three instances,respectively.
                 number_of_new_instances =
                     cross_top_one(deme, current_number_of_instances, TOP_POP_SIZE,
                                   prev_start, prev_size, prev_center);
