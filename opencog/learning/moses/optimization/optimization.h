@@ -197,9 +197,11 @@ struct optim_parameters
 // Statistics obtained during optimization run, useful for tuning.
 struct optim_stats
 {
-    optim_stats() : nsteps(0), deme_count(0), total_evals(0), over_budget(false) {}
+    optim_stats()
+        : nsteps(0), deme_count(0), total_steps(0), total_evals(0), over_budget(false) {}
     unsigned nsteps;
     unsigned deme_count;
+    unsigned total_steps;
     unsigned total_evals;
     bool over_budget;
 };
@@ -525,10 +527,12 @@ struct hill_climbing : optim_stats
                         unsigned* eval_best = NULL)
     {
         logger().debug("Local Search Optimization");
-        logger().info() << "Deme: # "   /* Legend for graph stats */
+        logger().info() << "Demes: # "   /* Legend for graph stats */
                 "deme_count\t"
                 "iteration\t"
+                "total_steps\t"
                 "total_evals\t"
+                "microseconds\t"
                 "new_instances\t"
                 "num_instances\t"
                 "has_improved\t"
@@ -543,6 +547,8 @@ struct hill_climbing : optim_stats
         nsteps = 0;
         deme_count ++;
         over_budget = false;
+        struct timeval start;
+        gettimeofday(&start, NULL);
 
         // Initial eval_best in case nothing is found.
         if (eval_best)
@@ -597,6 +603,7 @@ struct hill_climbing : optim_stats
         deme_size_t prev_size = 0;
 
         bool rescan = false;
+        bool last_chance = false;
 
         // Whether the score has improved during an iteration
         while (true)
@@ -716,6 +723,18 @@ struct hill_climbing : optim_stats
                     cross_top_one(deme, current_number_of_instances, TOP_POP_SIZE,
                                   prev_start, prev_size, prev_center);
 
+                number_of_new_instances +=
+                    cross_top_two(deme,
+                                  current_number_of_instances + number_of_new_instances,
+                                  TOP_POP_SIZE,
+                                  prev_start, prev_size, prev_center);
+
+                number_of_new_instances +=
+                    cross_top_three(deme,
+                                  current_number_of_instances + number_of_new_instances,
+                                  TOP_POP_SIZE,
+                                  prev_start, prev_size, prev_center);
+
             }
             prev_start = current_number_of_instances;
             prev_size = number_of_new_instances;
@@ -807,14 +826,22 @@ struct hill_climbing : optim_stats
                 distance++;
 
             // Collect statistics about the run, in struct optim_stats
-            nsteps++;
+            nsteps ++;
+            total_steps ++;
             total_evals += number_of_new_instances;
+            struct timeval stop, elapsed;
+            gettimeofday(&stop, NULL);
+            timersub(&stop, &start, &elapsed);
+            start = stop;
+            unsigned usec = 1000000 * elapsed.tv_sec + elapsed.tv_usec;
 
             // Deme statistics, for performance graphing.
-            logger().info() << "Deme: "
+            logger().info() << "Demes: "
                 << deme_count << "\t"
                 << iteration << "\t"
+                << total_steps << "\t"
                 << total_evals << "\t"
+                << usec << "\t"
                 << number_of_new_instances << "\t"
                 << current_number_of_instances << "\t"
                 << has_improved << "\t"
@@ -824,26 +851,47 @@ struct hill_climbing : optim_stats
                 << best_raw - prev_best_raw << "\t"
                 << -get_complexity(best_cscore);
 
-            if (!has_improved && !rescan && (2 < iteration)) {
-                rescan = true;
-                distance = 1;
-                continue;
-            } else {
-                rescan = false;
+            /* If things haven't improved, try another go-around or two,
+             * see if we get lucky.
+             */
+            if (!has_improved && !last_chance) {
+
+                /* If we've been using the simplex extrapolation
+                 * (which is the case when 2<iteration), and there's
+                 * been no improvement, then try a full nearest-
+                 * neighborhood scan.  This tends to refresh the pool
+                 * of candidates, and keep things going a while longer.
+                 */
+                if (!rescan && (2 < iteration)) {
+                    rescan = true;
+                    distance = 1;
+                    continue;
+                }
+
+                /* If we just did the nearest neighbors, and found no
+                 * improvment, then try again with the simplexes.  That's
+                 * cheap & quick and one last chance to get lucky ...
+                 */
+                if (rescan || (2 == iteration)) {
+                    rescan = false;
+                    last_chance = true;
+                    distance = 1;
+                    continue;
+                }
             }
 
-            if (max_number_of_instances <= current_number_of_instances)
-                over_budget = true;
+            rescan = false;
 
             /* If this is the first time through the loop, then distance
              * was zero, there was only one instance at dist=0, and we
              * just scored it. Be sure to go around and do at least the
-             * distance = 1 exploration. */
+             * distance == 1 nearest-neighbor exploration. */
             if (1 == number_of_new_instances) continue;
 
             /* If we've blown our budget for evaluating the scorer,
              * then we are done. */
             if (max_number_of_instances <= current_number_of_instances) {
+                over_budget = true;
                 logger().debug("Terminate Local Search: Over budget");
                 break;
             }

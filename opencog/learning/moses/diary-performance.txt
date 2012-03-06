@@ -1120,22 +1120,55 @@ rounds.
 
 New baseline: below: bzr rev 6633 
 
-"baseline" is as code is checked in.
+"baseline" is as code is checked in. -- Except -- GATHER_STATS is
+defined, so this does introduce a sorting overhead that is hopefully
+not too big ...  !?
 
 "40/10" is the usual (40 instances, full nearest-neighbor refressh 
-every 10 generations), with the 1-simplex.
+every 10 generations), with the 1-simplex.  
+
+"40/rescan" evaluates 40 instances, but performs a full neighbor
+refresh only when no improvement is seen.  Again, this is 1-simplex.
+
+"40/10/2" is same as 40/10, but with the 2-simplex.
+"40/10/3" is same as 40/10, but with the 3-simplex.
+
+"40+40+40/10/1+2+3" is all three, combined, with full neighborhood
+re-eval every 10 generations.  40 new instances per simplex.
+
+"rescan/1+2+3" is all three, combined, with full neighborhood re-eval
+only when there's no improvement.  40 new instances per simplex.
 
 
-              baseline           40/10 (nn9)
-         score  time  plex     score  time  plex
--m10k:   -255     65    50     -163    170   54
--m20k:   -229    243    53
--m40k:   -187    798    64
--m80k:   -153   1933    86
+              baseline            40/10 (nn9)         40/rescan (nn10)
+         score  time  plex     score  time  plex     score  time  plex
+-m10k:   -255     65    50     -163    170   54      -179    207   59
+-m20k:   -229    243    53     -139    688   71      -160    655   71
+-m40k:   -187    798    64     -131   1829   80      -130   1490   87
+-m80k:   -153   1933    86     -131   4797   79      -125   5124   92
 -m160k:  -131   7476   104
 -m320k:  -120  30129   119
 -m640k:  -119  97385   117
 
+
+           40/10/2 (nn11)        40/10/3 (nn12)    40+40+40/10/1+2+3 (nn13)
+         score  time  plex     score  time  plex     score  time  plex
+-m10k:   -302     62   27      -282     75   45      -203     98   47
+-m20k:   -208    196   47      -209    220   59      -145    305   62
+-m40k:   -135    740   72      -167    718   76      -118   1112   87
+-m80k:   -116   2451   89      -149   1986   85      -118   3502   85
+-m160k:                                              -118  10326   85
+-m320k:                                              -118  24011   85
+
+
+        rescan/1+2+3 (nn14)
+         score  time  plex     score  time  plex     score  time  plex
+-m10k:   -248    138   44
+-m20k:   -160    462   66
+-m40k:   -125   1354   86
+-m80k:   -115   4010  104
+-m160k:  
+-m320k:  
 
 ======================================================================
 Regression test parity performance
