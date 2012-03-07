@@ -569,7 +569,12 @@ int moses_exec(int argc, char** argv)
        ;
 
     variables_map vm;
-    store(parse_command_line(argc, argv, desc), vm);
+    try {
+        store(parse_command_line(argc, argv, desc), vm);
+    }
+    catch (...) {
+        OC_ASSERT(0, "Fatal error: invalid or duplicated argument.\n");
+    }
     notify(vm);
 
     // set flags
