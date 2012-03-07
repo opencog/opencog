@@ -114,15 +114,10 @@ struct optim_parameters
 
         pop_size_ratio(_pop_size_ratio),    
         terminate_if_gte(_terminate_if_gte),
-        max_dist(_max_dist),
-
-        // If used with weighted_score, then must correct for weight.
-        // Failure to do so will result in bad performance, due to
-        // premature termination of the search.  See bzr rev 6613
-        // for experimental results, details.
-        min_score_improv(_min_score_improv * composite_score::weight
-                         / (composite_score::weight + 1.0))
-    {}
+        max_dist(_max_dist)
+    {
+        set_min_score_improv(_min_score_improv);
+    }
 
     // N = p.popsize_ratio * n^1.05
     // XXX Why n^1.05 ??? This is going to have a significant effect
@@ -162,6 +157,21 @@ struct optim_parameters
         return max_dist;
     }
 
+    // If used with weighted_score, then must correct for weight.
+    // Failure to do so will result in bad performance, due to
+    // premature termination of the search.  See bzr rev 6613
+    // for experimental results, details.
+    inline void set_min_score_improv(score_t s)
+    {
+        min_score_improvement = s * composite_score::weight
+                         / (composite_score::weight + 1.0);
+    }
+
+    inline score_t min_score_improv()
+    {
+        return min_score_improvement;
+    }
+
     // optimization is terminated after term_total*n generations, or
     // term_improv*sqrt(n/w) consecutive generations with no
     // improvement (w=windowsize)
@@ -178,6 +188,7 @@ struct optim_parameters
     // Optimization is terminated if best score is >= terminate_if_gte
     score_t terminate_if_gte;
 
+private:
     // Defines the max distance to search during one iteration (used
     // in method max_distance)
     size_t max_dist;
@@ -190,8 +201,8 @@ struct optim_parameters
     //
     // Note Bene: the initial value is appropriate for the true score,
     // not the weighted score.  Thus, we re-weight, in the
-    // constructor, for use with the wieghted score.
-    score_t min_score_improv;
+    // constructor, for use with the weighted score.
+    score_t min_score_improvement;
 };
 
 // Statistics obtained during optimization run, useful for tuning.
@@ -602,8 +613,8 @@ struct hill_climbing : optim_stats
         deme_size_t prev_start = 0;
         deme_size_t prev_size = 0;
 
-        bool rescan = false;
-        bool last_chance = false;
+        // bool rescan = false;
+        // bool last_chance = false;
 
         // Whether the score has improved during an iteration
         while (true)
@@ -708,7 +719,8 @@ struct hill_climbing : optim_stats
             // rescan), explore the entire nearest neighborhood.
             // Otherwise make some optimistic assumptions about where
             // the best new instances are likely to be, and go there.
-            if ((iteration <= 2) || rescan) {
+            // if ((iteration <= 2) || rescan) {
+            if (true) {
 
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
@@ -771,7 +783,7 @@ struct hill_climbing : optim_stats
             }
             // Make a copy of the best instance.
             bool has_improved = false;
-            if (best_score >  prev_hi + opt_params.min_score_improv) {
+            if (best_score >  prev_hi + opt_params.min_score_improv()) {
                 has_improved = true;
                 center_inst = deme[ibest].first;
             }
@@ -853,6 +865,7 @@ struct hill_climbing : optim_stats
                 << best_raw - prev_best_raw << "\t"
                 << -get_complexity(best_cscore);
 
+#if 0
             /* If things haven't improved, try another go-around or two,
              * see if we get lucky.
              */
@@ -883,6 +896,7 @@ struct hill_climbing : optim_stats
             }
 
             rescan = false;
+#endif
 
             /* If this is the first time through the loop, then distance
              * was zero, there was only one instance at dist=0, and we

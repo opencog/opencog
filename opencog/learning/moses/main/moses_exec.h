@@ -289,7 +289,7 @@ void metapop_moses_results(RandGen& rng,
         target_score = std::min(moses_params.max_score, bps);
     opt_params.terminate_if_gte = target_score;
     // update minimum score improvement
-    opt_params.min_score_improv = bb_score.min_improv();
+    opt_params.set_min_score_improv(bb_score.min_improv());
     moses_params.max_score = target_score;
     logger().info("Target score = %f", target_score);
 
