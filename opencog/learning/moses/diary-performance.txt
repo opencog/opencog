@@ -1323,39 +1323,84 @@ seems to be identical distribution to r6642, but 15% slower.  (this is
 probably because I did not comment out all of the simplex code. whoops)
 
 "reimp" is rev 6652, but with the min_improv logic fixed.  (and the 
-simplex code commented out; this time, all of it).
+simplex code commented out; this time, all of it).  Looks like we are
+back to refix performance levels.  Again, ditching the outlier, we
+get comparable perf to before.
 
+"zippo" is same as above, but with min_improv set to zero. Seems to be
+identical to improv, which is expected.  But why are all of these slower
+than the baseline ?? Answer: fluke, see immediately below.
+
+"120avg": Are the avg stats trustworthy? To determine this, run with
+120 different random seeds.  This should give signficantly better
+results the effect of outliers.  Hmm. Graphing the 120 and fitting
+an exponential decay shows a very clear exp(90*p) trend line, ruined
+by 7-8 outliers.  Both reimp and zippo have exactly the same trend.
+Redo of baseline 6616 for 120 also gives same graph, and even slightly
+worse, overall. Yayyy! This gives bzr rev 6653 a clean bill of health!
+Woot!
+
+(This also justifies discarding outliers...)
 
 As above -Hpa -k4 -z3.5 -v5 -m350000
 
-      baseline  wtf   refix  r6642 r6634 r6636 improv check reimp
--r0:      37     56     36    174    37   170    23    213    37
--r1:      54    118    128     89   130    86    58    113   132
--r2:     112     39     38     70    38    67    89     87    39
--r3:      16    116     38    137    39   133   165    169    39
--r4:      16     72     81    226    83   218    43    281    85
--r5:      41     67     67    260    67   253    21    316
--r6:     115     23     83    130         126   111    159
--r7:      68     15     15     14          14   195     18
--r8:     112     86     70    374         360   195    450
--r9:      41    112    104    172                75    209
--r10:    193     61     60     32                32     42
--r11:     19     89     84     39               133     50
--r12:    133     81     53    126                20    156
--r13:     99     74     74    351               121    429
--r14:    151     39     37    149               113    202
--r15:     43    137    506     29                70     35
--r16:     75     51     51    248                49    302
--r17:     33    125    118    112               247    137
--r18:     37    107    116    192               100    240
--r19:     53     57     56    297                 5    365
+      baseline  wtf   refix  r6642 r6634 r6636 improv check reimp zippo
+-r0:      37     56     36    174    37   170    23    213    37    22
+-r1:      54    118    128     89   130    86    58    113   132    56
+-r2:     112     39     38     70    38    67    89     87    39    85
+-r3:      16    116     38    137    39   133   165    169    39   163
+-r4:      16     72     81    226    83   218    43    281    85    42
+-r5:      41     67     67    260    67   253    21    316    70    21
+-r6:     115     23     83    130         126   111    159    87   108
+-r7:      68     15     15     14          14   195     18    15   188
+-r8:     112     86     70    374         360   195    450    72   189
+-r9:      41    112    104    172                75    209   108    74
+-r10:    193     61     60     32                32     42    62    31
+-r11:     19     89     84     39               133     50    87   129
+-r12:    133     81     53    126                20    156    55    20
+-r13:     99     74     74    351               121    429    77   118
+-r14:    151     39     37    149               113    202    38   108
+-r15:     43    137    506     29                70     35   521    67
+-r16:     75     51     51    248                49    302    52    48
+-r17:     33    125    118    112               247    137   122   238
+-r18:     37    107    116    192               100    240   120    97
+-r19:     53     57     56    297                 5    365    58     5
 
-avg:      72     77     91    162                93    198
+avg:      72     77     91    162                93    198    94    90
+120avg:  111                                                 102   107
+
+-------------------------------------
+See notes above: revision 6653 gets a clean bill of health!  Good to go!
+
+"simp" is 6653, simplex enabled, but rescan disabled.  Default
+min_improv=0.5 setting
+
+       simp
+-r0:   101
+-r1:   284
+-r2:   200
+-r3:   133
+-r4:    32
+-r5:    24
+-r6:    63
+-r7:   114
+-r8:    84
+-r9:    62
+-r10:   80
+-r11:  199
+-r12:   13
+-r13:  122
+-r14:   43
+-r15:   97
+-r16:  396
+-r17:   43
+-r18:   47
+-r19:  102
+
+avg:   112
 
 
-----------
-real	2m13.977s   base
-real	2m10.882s  revamp
+
 
 
 ================================================================
