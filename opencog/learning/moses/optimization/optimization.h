@@ -613,8 +613,8 @@ struct hill_climbing : optim_stats
         deme_size_t prev_start = 0;
         deme_size_t prev_size = 0;
 
-        // bool rescan = false;
-        // bool last_chance = false;
+        bool rescan = false;
+        bool last_chance = false;
 
         // Whether the score has improved during an iteration
         while (true)
@@ -655,10 +655,10 @@ struct hill_climbing : optim_stats
             }
             else // distance two or greater
             {
-               // distances greater than 1 occurs only when the -L1 -T1 flags
-               // are used.  This puts this algo into a very different mode of
-               // operation, in an attempt to overcome deceptive scoring
-               // functions.
+                // Distances greater than 1 occurs only when the -L1 flag
+                // is used.  This puts this algo into a very different mode
+                // of operation, in an attempt to overcome deceptive scoring
+                // functions.
 
                 // For large-distance searches, there is a combinatorial
                 // explosion of the size of the search volume. Thus, be
@@ -719,8 +719,8 @@ struct hill_climbing : optim_stats
             // rescan), explore the entire nearest neighborhood.
             // Otherwise make some optimistic assumptions about where
             // the best new instances are likely to be, and go there.
-            // if ((iteration <= 2) || rescan) {
-            if (true) {
+            if ((iteration <= 2) || rescan) {
+            // if (true) {
 
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
@@ -783,7 +783,7 @@ struct hill_climbing : optim_stats
             }
             // Make a copy of the best instance.
             bool has_improved = false;
-            if (best_score >  prev_hi + opt_params.min_score_improv()) {
+            if (best_score >  prev_hi) {
                 has_improved = true;
                 center_inst = deme[ibest].first;
             }
@@ -865,11 +865,13 @@ struct hill_climbing : optim_stats
                 << best_raw - prev_best_raw << "\t"
                 << -get_complexity(best_cscore);
 
-#if 0
-            /* If things haven't improved, try another go-around or two,
-             * see if we get lucky.
+#if 1
+            /* If the score hasn't taken a big step recently, then 
+             * re-survey the immediate local neighborhood.  We may get
+             * lucky.
              */
-            if (!has_improved && !last_chance) {
+            bool big_step = (best_score >  prev_hi + opt_params.min_score_improv());
+            if (!big_step && !last_chance) {
 
                 /* If we've been using the simplex extrapolation
                  * (which is the case when 2<iteration), and there's
@@ -882,7 +884,10 @@ struct hill_climbing : optim_stats
                     distance = 1;
                     continue;
                 }
-
+            }
+#endif
+#if 1
+            if (!has_improved && !last_chance) {
                 /* If we just did the nearest neighbors, and found no
                  * improvment, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
@@ -894,9 +899,10 @@ struct hill_climbing : optim_stats
                     continue;
                 }
             }
-
-            rescan = false;
 #endif
+
+            has_improved = big_step;
+            rescan = false;
 
             /* If this is the first time through the loop, then distance
              * was zero, there was only one instance at dist=0, and we

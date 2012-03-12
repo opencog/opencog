@@ -81,7 +81,8 @@ behavioral_score logical_bscore::best_possible_bscore() const {
     return behavioral_score(target.size(), 0);
 }
 
-score_t logical_bscore::min_improv() const {
+score_t logical_bscore::min_improv() const
+{
     return 0.5;
 }
 
@@ -126,9 +127,15 @@ behavioral_score contin_bscore::best_possible_bscore() const
     return behavioral_score(target.size() + (occam?1:0), 0);
 }
 
-score_t contin_bscore::min_improv() const {
-    return 0.0;                 // not necessarily right, just the
-                                // backward behavior
+score_t contin_bscore::min_improv() const
+{
+    // The backwards compat version of this is 0.0.  But for
+    // continuously-variable scores, this is crazy, as the
+    // system falls into a state of tweaking the tenth decimal place,
+    // Which is just wrong.
+// XXX this should be replaced by "relative accuracy".
+
+    return 0.25;
 }
         
 void contin_bscore::set_complexity_coef(float alphabet_size, float stdev)
@@ -235,7 +242,8 @@ score_t precision_bscore::get_activation_penalty(score_t activation) const
     return log(pow((1 - dst), penalty));
 }
 
-score_t precision_bscore::min_improv() const {
+score_t precision_bscore::min_improv() const
+{
     return 0.0;                 // not necessarily right, just the
                                 // backward behavior
 }
@@ -277,7 +285,8 @@ behavioral_score discretize_contin_bscore::best_possible_bscore() const {
     return behavioral_score(target.size(), 0);
 }
 
-score_t discretize_contin_bscore::min_improv() const {
+score_t discretize_contin_bscore::min_improv() const
+{
     return 0.0;                 // not necessarily right, just the
                                 // backward behavior
 }
@@ -381,7 +390,8 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
     return bs;
 }
 
-score_t ctruth_table_bscore::min_improv() const {
+score_t ctruth_table_bscore::min_improv() const
+{
     return 0.5;
 }
 
@@ -562,7 +572,8 @@ score_t interesting_predicate_bscore::get_activation_penalty(score_t activation)
     return log(pow((1 - dst), penalty));
 }
 
-score_t interesting_predicate_bscore::min_improv() const {
+score_t interesting_predicate_bscore::min_improv() const
+{
     return 0.0;                 // not necessarily right, just the
                                 // backward behavior
 }
