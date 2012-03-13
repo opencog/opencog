@@ -1213,10 +1213,17 @@ fixed.  Also slightly modified "last-chance" logic.
          score  time  plex     score  time  plex     score  time  plex
 -m10k:   -298     85   46      -305     84   47      -302     81   48
 -m20k:   -206    329   71      -183    382   86      -206    316   70
--m40k:   -119   1175  112      -130   1650  114
--m80k:   -104   5369  124      -101   4985  129
+-m40k:   -119   1175  112      -130   1650  114      -120   1304  114
+-m80k:   -104   5369  124      -101   4985  129       -97   4592  127
 -m160k:   
--m320k:   
+
+          r6656-r1 (nn25)
+         score  time  plex     score  time  plex     score  time  plex
+-m10k:   -298     82   47
+-m20k:   -206    317   71
+-m40k:   -117   1167  118
+-m80k:    -94   5001  128
+-m160k:   -89  16603  130
 
 ======================================================================
 Regression test parity performance

@@ -132,10 +132,12 @@ score_t contin_bscore::min_improv() const
     // The backwards compat version of this is 0.0.  But for
     // continuously-variable scores, this is crazy, as the
     // system falls into a state of tweaking the tenth decimal place,
-    // Which is just wrong.
-// XXX this should be replaced by "relative accuracy".
-
-    return 0.25;
+    // Limit any such tweaking to 4 decimal places of precision.
+    // (thus 1e-4 below).
+    //
+    // Note: positive min_improv is taken as an absolute score.
+    // Negative min_improve is treated as a relative score.
+    return -1.0e-4;
 }
         
 void contin_bscore::set_complexity_coef(float alphabet_size, float stdev)

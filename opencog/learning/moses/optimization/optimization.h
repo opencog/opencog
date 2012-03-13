@@ -870,7 +870,13 @@ struct hill_climbing : optim_stats
              * re-survey the immediate local neighborhood.  We may get
              * lucky.
              */
-            bool big_step = (best_score >  prev_hi + opt_params.min_score_improv());
+            bool big_step;
+            score_t imp = opt_params.min_score_improv();
+            if (0.0 <= imp)
+                 big_step = (best_score >  prev_hi + imp);
+            else
+                 big_step = (best_score >  prev_hi - imp * fabs(prev_hi));
+
             if (!big_step && !last_chance) {
 
                 /* If we've been using the simplex extrapolation
@@ -889,7 +895,7 @@ struct hill_climbing : optim_stats
 #if 1
             if (!has_improved && !last_chance) {
                 /* If we just did the nearest neighbors, and found no
-                 * improvment, then try again with the simplexes.  That's
+                 * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
                  */
                 if (rescan || (2 == iteration)) {
