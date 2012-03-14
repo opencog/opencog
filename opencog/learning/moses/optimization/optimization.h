@@ -890,10 +890,7 @@ struct hill_climbing : optim_stats
                     distance = 1;
                     continue;
                 }
-            }
-#endif
-#if 1
-            if (!has_improved && !last_chance) {
+
                 /* If we just did the nearest neighbors, and found no
                  * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
@@ -907,8 +904,10 @@ struct hill_climbing : optim_stats
             }
 #endif
 
+            /* Reset back to normal mode. */
             has_improved = big_step;
             rescan = false;
+            last_chance = false;
 
             /* If this is the first time through the loop, then distance
              * was zero, there was only one instance at dist=0, and we

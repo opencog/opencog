@@ -1169,6 +1169,10 @@ the short runs, but could be ruinous for the long runs ...
 "r6655-r1" is same as r6654-r1 but with the min_improvment regression
 fixed.  Also slightly modified "last-chance" logic.
 
+"r6657-r1" is same as above, but with two silly loop fixes, including
+putting back "last chance" as before.  Probably will make very little
+difference...
+
               baseline            40/10 (nn9)         40/rescan (nn10)
          score  time  plex     score  time  plex     score  time  plex
 -m10k:   -255     65    50     -163    170   54      -179    207   59
@@ -1217,13 +1221,14 @@ fixed.  Also slightly modified "last-chance" logic.
 -m80k:   -104   5369  124      -101   4985  129       -97   4592  127
 -m160k:   
 
-          r6656-r1 (nn25)
+          r6656-r1 (nn25)       r6657-r1 (nn26)
          score  time  plex     score  time  plex     score  time  plex
--m10k:   -298     82   47
--m20k:   -206    317   71
--m40k:   -117   1167  118
--m80k:    -94   5001  128
+-m10k:   -298     82   47      -303     78   48
+-m20k:   -206    317   71      -210    304   68
+-m40k:   -117   1167  118      -125   1016  101
+-m80k:    -94   5001  128      -108   3637  113
 -m160k:   -89  16603  130
+-m320k:   -89  39974  129
 
 ======================================================================
 Regression test parity performance

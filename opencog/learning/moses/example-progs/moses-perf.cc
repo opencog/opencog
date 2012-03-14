@@ -50,7 +50,7 @@ void measure(vector<string> arguments)
         // Do NOT include a blank space after -f !!
         stringstream fss;
         // fss << "-fmoses-perf-k5-r" << i << ".log";
-        fss << "-fmoses-perf-bank-nn25-m" << nrep << ".log";
+        fss << "-fmoses-perf-bank-nn26-m" << nrep << ".log";
         args.push_back(fss.str());
 #endif
 

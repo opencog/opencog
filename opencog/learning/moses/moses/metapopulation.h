@@ -695,11 +695,12 @@ struct metapopulation : public bscored_combo_tree_set
             }
         };
 
-        // the range of the deme to merge goes up to
-        // eval_during_this_deme in case the deme is closed before the
-        // entire deme (or rather the current sample of it) has been
-        // explored (Huh??? What does this mean?)
-        // Note: this step can be very times consuming; it is currently
+        // We use deme->begin() + eval_during_this_deme instead of 
+        // deme->end(), because we might have resized the deme to
+        // something larger than the actual number of instances we
+        // placed into it (XXX really? Does this ever happen?)
+        //
+        // Note: this step can be very time consuming; it currently
         // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
         // for me; my (reduced, simplified) instances have complexity
         // of about 100. This seems too long/slow.
