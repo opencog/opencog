@@ -70,6 +70,7 @@ public:
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-r3", "-Hpa", "-k3", "-aun", "-m500000", "-j4"});
     }
+
     void test_it() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
@@ -85,6 +86,7 @@ public:
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hsr", "-k3", "-m100000", "-L1"});
     }
+    
     void test_cp() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         string tr_str("or(and($2 !$3) $1 !$4 $5)");
@@ -98,6 +100,7 @@ public:
         // ... and many many more.  Need the -E3 flag to shrink it down.
         moses_test_combo({"-Hcp", cp_opt + tr_str, "-E3"}, {tr_str});
     }
+    
     void test_kl() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         string tr1_str("or(and(!$1 $2) and($1 !$2))");
@@ -113,4 +116,17 @@ public:
         string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
         moses_test_combo({"-Hip", data_file_path,  data_file_path, "-m500", "-l fine", "-U0", "-X0", "-z100000"}, {tr1_str, tr2_str});
     }
+    
+    void test_precision() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        string tr_str("$2");
+        string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
+        moses_test_combo({"-Hpre", data_file_path,  "-m100", "-q0.2", "-w0.5", "-Q1", "-z10000"}, {tr_str});
+    }
+    void test_negative_predictive_value() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        string tr_str("$1");
+        string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
+        moses_test_combo({"-Hpre", data_file_path, "-m100", "-q0.2", "-w0.5", "-Q-1", "-z10000"}, {tr_str});
+    }    
 };
