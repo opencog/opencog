@@ -1,0 +1,13 @@
+# v2 is great at maximizing the precision of the target, while v1 is
+# great at maximizing the negative predictive value of the target
+target,v1,v2
+0,0,0
+0,1,0
+0,0,0
+0,1,0
+0,1,0
+1,0,0
+1,0,0
+1,0,1
+1,0,1
+1,0,1
