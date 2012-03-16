@@ -287,10 +287,11 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  * This bscore has 3 components:
  *
  * 1) the precision (or the negative predictive value if positive is
- * false),
+ * false). Note that candidates are active when they output true (even
+ * if they try to maximize negative predictive value);
  *
  * 2) a penalty depending on whether the constraint explained below is
- * met,
+ * met;
  *
  * 3) and possibly the occam's razor.
  *
@@ -301,6 +302,10 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  * log( (1 - dst(activation, [min_activation, max_activation])) ^ penalty )
  * where dst(x, I) is defined as
  * dst(x, I) = max(min(I.min - x, 0) / I.min, min(x - I.max,0)/(1 - I.max))
+ *
+ * If the CTable output type is contin instead of boolean then the hit
+ * count is replaced by the sum of the outputs (or minus that sum if
+ * positive == false)
  */
 struct precision_bscore : public bscore_base
 {
@@ -330,6 +335,9 @@ struct precision_bscore : public bscore_base
 
 private:
     score_t get_activation_penalty(score_t activation) const;
+    // function to calculate the total weight of the observations
+    // associated to an input vector
+    std::function<score_t(CTable::counter_t&)> sum_outputs;
 };
         
 /**

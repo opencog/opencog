@@ -105,7 +105,7 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 
     // boost/range/algorithm/transform.
     // take two arrays ct, target, feed the elts to anon funtion[]
-    // (which just computes square of teh difference) and put the
+    // (which just computes square of the difference) and put the
     // results into bs.
     boost::transform(ct, target, bs.begin(),
                      [](const vertex& vl, const vertex& vr) {
@@ -156,6 +156,21 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     occam = p > 0.0f && p < 0.5f;
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
+
+    type_node output_type = *type_tree_output_type_tree(ctable.tt).begin();
+    if (output_type == id::boolean_type) {
+        vertex target = bool_to_vertex(positive);
+        sum_outputs = [target](CTable::counter_t& c)->score_t {
+            return c[target];
+        };
+    } else if (output_type == id::contin_type) {
+        sum_outputs = [this](CTable::counter_t& c)->score_t {
+            score_t res = 0.0;
+            foreach(const CTable::counter_t::value_type& cv, c)
+                res += get_contin(cv.first) * cv.second;
+            return (positive? res : -res);
+        };
+    }
 }
 
 behavioral_score precision_bscore::operator()(const combo_tree& tr) const
@@ -167,19 +182,18 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     behavioral_score bs;
     
     vertex target = bool_to_vertex(positive);
-    unsigned total = 0, // total number of positive (or negative if
-                        // positive is false)
-        correct = 0;      // number of correct predictions
+    unsigned active = 0;   // total number of active outputs by tr
+    score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
     boost::for_each(ctable | map_values, ot,
                     [&](CTable::counter_t& c, const vertex& v) {
-                        if (v == target) {
-                            correct += c[target];
-                            total += c.total_count();
+                        if (v == id::logical_true) {
+                            sao += sum_outputs(c);
+                            active += c.total_count();
                         }});
 
     // add precision component
-    score_t precision = correct / (score_t)total,
-        activation = total / (score_t)ctable_usize;
+    score_t precision = sao / active,
+        activation = (score_t)active / ctable_usize;
     logger().fine("precision = %f", precision);
     bs.push_back(precision);
     
@@ -190,11 +204,10 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     bs.push_back(activation_penalty);
     
     // Add the Occam's razor component
-    if (occam)                  // we divide by the number of
-                                // observation to normalize the
-                                // Occam's razor as well (this the
-                                // precision is normalized by total)
-        bs.push_back(complexity(tr) * complexity_coef / total);
+    if (occam)                  // we divide by the number of active
+                                // observations as to normalize the
+                                // Occam's razor as well
+        bs.push_back(complexity(tr) * complexity_coef / active);
 
     log_candidate_bscore(tr, bs);
 
