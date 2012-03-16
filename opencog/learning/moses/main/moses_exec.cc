@@ -628,7 +628,7 @@ int moses_exec(int argc, char** argv)
     // Infer arity
     combo::arity_t arity = infer_arity(problem, problem_size,
                                        input_data_files, combo_str);
-    logger().info("Infered arity = %d", arity);
+    logger().info("Inferred arity = %d", arity);
 
     // Convert include_only_ops_str to the set of actual operators to
     // ignore.
@@ -782,9 +782,22 @@ int moses_exec(int argc, char** argv)
             OC_ASSERT(output_type == table_output_tn);
 
             int as = alphabet_size(table_tt, ignore_ops);
-
-            if (output_type == id::boolean_type) {
-                if (problem == it) {
+            
+            if (problem == pre) { // problem == pre
+                typedef precision_bscore BScore;
+                boost::ptr_vector<BScore> bscores;
+                foreach(const CTable& ctable, ctables)
+                    bscores.push_back(new BScore(ctable, as, noise,
+                                                 min_rand_input,
+                                                 max_rand_input,
+                                                 abs(alpha), rng, alpha >= 0));
+                multibscore_based_bscore<BScore> bscore(bscores);
+                metapop_moses_results(rng, exemplars, table_tt,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
+            } else { // problem == it
+                if (output_type == id::boolean_type) {
                     typedef ctruth_table_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
                     foreach(const CTable& ctable, ctables)
@@ -794,48 +807,35 @@ int moses_exec(int argc, char** argv)
                                           bool_reduct, bool_reduct_rep, bscore,
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
-                } else { // problem == pre
-                    typedef precision_bscore BScore;
-                    boost::ptr_vector<BScore> bscores;
-                    foreach(const CTable& ctable, ctables)
-                        bscores.push_back(new BScore(ctable, as, noise,
-                                                     min_rand_input,
-                                                     max_rand_input,
-                                                     abs(alpha), rng, alpha >= 0));
-                    multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(rng, exemplars, table_tt,
-                                          bool_reduct, bool_reduct_rep, bscore,
-                                          opt_params, meta_params, moses_params,
-                                          mmr_pa);
                 }
-            }
-            else if (output_type == id::contin_type) {
-                if (discretize_thresholds.empty()) {
-                    typedef contin_bscore BScore;
-                    boost::ptr_vector<BScore> bscores;
-                    foreach(const Table& table, tables)
-                        bscores.push_back(new BScore(table, as, noise, rng));
-                    multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(rng, exemplars, table_tt,
-                                          contin_reduct, contin_reduct, bscore,
-                                          opt_params, meta_params, moses_params,
-                                          mmr_pa);
+                else if (output_type == id::contin_type) {
+                    if (discretize_thresholds.empty()) {
+                        typedef contin_bscore BScore;
+                        boost::ptr_vector<BScore> bscores;
+                        foreach(const Table& table, tables)
+                            bscores.push_back(new BScore(table, as, noise, rng));
+                        multibscore_based_bscore<BScore> bscore(bscores);
+                        metapop_moses_results(rng, exemplars, table_tt,
+                                              contin_reduct, contin_reduct, bscore,
+                                              opt_params, meta_params, moses_params,
+                                              mmr_pa);
+                    } else {
+                        typedef discretize_contin_bscore BScore;
+                        boost::ptr_vector<BScore> bscores;
+                        foreach(const Table& table, tables)
+                            bscores.push_back(new BScore(table.otable, table.itable,
+                                                         discretize_thresholds,
+                                                         weighted_accuracy,
+                                                         as, noise, rng));
+                        multibscore_based_bscore<BScore> bscore(bscores);
+                        metapop_moses_results(rng, exemplars, table_tt,
+                                              contin_reduct, contin_reduct, bscore,
+                                              opt_params, meta_params, moses_params,
+                                              mmr_pa);
+                    }
                 } else {
-                    typedef discretize_contin_bscore BScore;
-                    boost::ptr_vector<BScore> bscores;
-                    foreach(const Table& table, tables)
-                        bscores.push_back(new BScore(table.otable, table.itable,
-                                                     discretize_thresholds,
-                                                     weighted_accuracy,
-                                                     as, noise, rng));
-                    multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(rng, exemplars, table_tt,
-                                          contin_reduct, contin_reduct, bscore,
-                                          opt_params, meta_params, moses_params,
-                                          mmr_pa);
+                    unsupported_type_exit(output_type);
                 }
-            } else {
-                unsupported_type_exit(output_type);
             }
         }
         
