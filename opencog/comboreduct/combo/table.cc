@@ -184,6 +184,8 @@ CTable Table::compress() const
     // ~Logger
 
     CTable res(otable.get_label(), itable.get_labels());
+    // assign type_tree
+    res.tt = tt;                
 
     ITable::const_iterator in_it = itable.begin();
     OTable::const_iterator out_it = otable.begin();
@@ -514,19 +516,20 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     return in;
 }
 
-void istreamTable(const string& file_name, ITable& it, OTable& ot, int pos)
+void istreamTable(const string& file_name, ITable& it, OTable& ot,
+                  const type_tree& tt, int pos)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable(in, it, ot, has_header(file_name),
-                 infer_data_type_tree(file_name, pos), pos);
+    istreamTable(in, it, ot, has_header(file_name), tt, pos);
 }
 
 Table istreamTable(const string& file_name, int pos)
 {
     Table res;
-    istreamTable(file_name, res.itable, res.otable, pos);
+    res.tt = infer_data_type_tree(file_name, pos);
+    istreamTable(file_name, res.itable, res.otable, res.tt, pos);
     return res;
 }
 

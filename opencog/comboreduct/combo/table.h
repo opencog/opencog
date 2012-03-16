@@ -109,6 +109,8 @@ public:
         }
         return res;
     }
+
+    type_tree tt;
 };
 
 /**
@@ -539,7 +541,7 @@ std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
  * the file name is not correct then an OC_ASSERT is raised.
  */
 void istreamTable(const std::string& file_name,
-                  ITable& it, OTable& ot, int pos = 0);
+                  ITable& it, OTable& ot, const type_tree& tt, int pos = 0);
 /**
  * like above but return an object Table.
  */
