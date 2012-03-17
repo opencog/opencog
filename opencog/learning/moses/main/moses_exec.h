@@ -113,7 +113,8 @@ struct metapop_moses_results_parameters
                                      const jobs_t& _jobs,
                                      bool _only_local,
                                      bool _hc_widen_search,
-                                     bool _hc_single_step) :
+                                     bool _hc_single_step,
+                                     bool _hc_crossover) :
         vm(_vm), result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
@@ -125,7 +126,9 @@ struct metapop_moses_results_parameters
         output_file(_output_file),
         jobs(_jobs), only_local(_only_local),
         hc_widen_search(_hc_widen_search),
-        hc_single_step(_hc_single_step) {}
+        hc_single_step(_hc_single_step),
+        hc_crossover(_hc_crossover)
+        {}
 
     const variables_map& vm;
     long result_count;
@@ -145,6 +148,7 @@ struct metapop_moses_results_parameters
     // Not really results, but we have nowhere else to put these...
     bool hc_widen_search;
     bool hc_single_step;
+    bool hc_crossover;
 };
 
 /**
@@ -241,7 +245,9 @@ void metapop_moses_results_b(RandGen& rng,
                               meta_params, moses_params, pa);
     }
     else if (pa.opt_algo == hc) { // exhaustive neighborhood search
-        hc_parameters hc_params(pa.hc_widen_search, pa.hc_single_step);
+        hc_parameters hc_params(pa.hc_widen_search,
+                                pa.hc_single_step,
+                                pa.hc_crossover);
         hill_climbing climber(rng, opt_params, hc_params);
         metapop_moses_results_a(rng, climber,
                               bases, tt, si_ca, si_kb, sc, bsc,

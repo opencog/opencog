@@ -320,9 +320,11 @@ struct hc_parameters
 {
     hc_parameters(bool widen = false,
                   bool step = false,
+                  bool cross = false,
                   double _fraction_of_remaining = 1.0)
         : widen_search(widen),
           single_step(step),
+          crossover(cross),
           fraction_of_remaining(_fraction_of_remaining)
     {
         OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
@@ -330,6 +332,7 @@ struct hc_parameters
     
     bool widen_search;
     bool single_step;
+    bool crossover;
 
     // One should probably try first to tweak pop_size_ratio to
     // control the allocation of resources. However in some cases (for
@@ -719,8 +722,7 @@ struct hill_climbing : optim_stats
             // rescan), explore the entire nearest neighborhood.
             // Otherwise make some optimistic assumptions about where
             // the best new instances are likely to be, and go there.
-            if ((iteration <= 2) || rescan) {
-            // if (true) {
+            if (!hc_params.crossover || (iteration <= 2) || rescan) {
 
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
@@ -850,64 +852,66 @@ struct hill_climbing : optim_stats
             unsigned usec = 1000000 * elapsed.tv_sec + elapsed.tv_usec;
 
             // Deme statistics, for performance graphing.
-            logger().info() << "Demes: "
-                << deme_count << "\t"
-                << iteration << "\t"
-                << total_steps << "\t"
-                << total_evals << "\t"
-                << usec << "\t"
-                << number_of_new_instances << "\t"
-                << current_number_of_instances << "\t"
-                << has_improved << "\t"
-                << best_score << "\t"   /* weighted score */
-                << best_score - prev_hi << "\t"  /* previous weighted */
-                << best_raw << "\t"     /* non-weighted, raw score */
-                << best_raw - prev_best_raw << "\t"
-                << -get_complexity(best_cscore);
-
-#if 1
-            /* If the score hasn't taken a big step recently, then 
-             * re-survey the immediate local neighborhood.  We may get
-             * lucky.
-             */
-            bool big_step;
-            score_t imp = opt_params.min_score_improv();
-            if (0.0 <= imp)
-                 big_step = (best_score >  prev_hi + imp);
-            else
-                 big_step = (best_score >  prev_hi - imp * fabs(prev_hi));
-
-            if (!big_step && !last_chance) {
-
-                /* If we've been using the simplex extrapolation
-                 * (which is the case when 2<iteration), and there's
-                 * been no improvement, then try a full nearest-
-                 * neighborhood scan.  This tends to refresh the pool
-                 * of candidates, and keep things going a while longer.
-                 */
-                if (!rescan && (2 < iteration)) {
-                    rescan = true;
-                    distance = 1;
-                    continue;
-                }
-
-                /* If we just did the nearest neighbors, and found no
-                 * improvement, then try again with the simplexes.  That's
-                 * cheap & quick and one last chance to get lucky ...
-                 */
-                if (rescan || (2 == iteration)) {
-                    rescan = false;
-                    last_chance = true;
-                    distance = 1;
-                    continue;
-                }
+            if (logger().isInfoEnabled()) {
+                logger().info() << "Demes: "
+                    << deme_count << "\t"
+                    << iteration << "\t"
+                    << total_steps << "\t"
+                    << total_evals << "\t"
+                    << usec << "\t"
+                    << number_of_new_instances << "\t"
+                    << current_number_of_instances << "\t"
+                    << has_improved << "\t"
+                    << best_score << "\t"   /* weighted score */
+                    << best_score - prev_hi << "\t"  /* previous weighted */
+                    << best_raw << "\t"     /* non-weighted, raw score */
+                    << best_raw - prev_best_raw << "\t"
+                    << -get_complexity(best_cscore);
             }
-#endif
 
-            /* Reset back to normal mode. */
-            has_improved = big_step;
-            rescan = false;
-            last_chance = false;
+            if (hc_params.crossover) {
+                /* If the score hasn't taken a big step recently, then 
+                 * re-survey the immediate local neighborhood.  We may get
+                 * lucky.
+                 */
+                bool big_step;
+                score_t imp = opt_params.min_score_improv();
+                if (0.0 <= imp)
+                     big_step = (best_score >  prev_hi + imp);
+                else
+                     big_step = (best_score >  prev_hi - imp * fabs(prev_hi));
+
+                if (!big_step && !last_chance) {
+
+                    /* If we've been using the simplex extrapolation
+                     * (which is the case when 2<iteration), and there's
+                     * been no improvement, then try a full nearest-
+                     * neighborhood scan.  This tends to refresh the pool
+                     * of candidates, and keep things going a while longer.
+                     */
+                    if (!rescan && (2 < iteration)) {
+                        rescan = true;
+                        distance = 1;
+                        continue;
+                    }
+
+                    /* If we just did the nearest neighbors, and found no
+                     * improvement, then try again with the simplexes.  That's
+                     * cheap & quick and one last chance to get lucky ...
+                     */
+                    if (rescan || (2 == iteration)) {
+                        rescan = false;
+                        last_chance = true;
+                        distance = 1;
+                        continue;
+                    }
+                }
+
+                /* Reset back to normal mode. */
+                has_improved = big_step;
+                rescan = false;
+                last_chance = false;
+            }
 
             /* If this is the first time through the loop, then distance
              * was zero, there was only one instance at dist=0, and we

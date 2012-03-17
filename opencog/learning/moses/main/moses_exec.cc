@@ -303,6 +303,7 @@ int moses_exec(int argc, char** argv)
     // hc_param
     bool hc_widen_search;
     bool hc_single_step;
+    bool hc_crossover;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
@@ -551,6 +552,29 @@ int moses_exec(int argc, char** argv)
                     "flag is set, then consider using the widen-search flag "
                     "as well, so as to make forward progress.\n") % hc).c_str())
 
+        (opt_desc_str(hc_crossover_opt).c_str(),
+         value<bool>(&hc_crossover)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If false, then the entire "
+                    "local neighborhood of the current center "
+                    "instance is explored. The highest-scoring "
+                    "instance is then chosen as the new center "
+                    "instance, and the process is repeated.  For "
+                    "many datasets, however, the highest-scoring "
+                    "instances tend to cluster together, and so an "
+                    "exhaustive search may not be required. When "
+                    "this option is specified, a handful of the "
+                    "highest-scoring instances are crossed-over (in "
+                    "the genetic sense of cross-over) to create new "
+                    "instances.  Only these are evaluated for "
+                    "fitness; the exhaustive search step is skipped. "
+                    "For many problem types, especialy those with "
+                    "large neighborhoods (i.e. those with high "
+                    "prorgram complexity), this can lead to an "
+                    "order-of-magnitude speedup, or more.  For other "
+                    "problem types, especially those with deceptive "
+                    "scoring functions, this can hurt performance.\n"
+                    ) % hc).c_str())
+
         (opt_desc_str(ip_kld_weight_opt).c_str(),
          value<double>(&ip_kld_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of the KLD.\n") % ip).c_str())
@@ -606,7 +630,7 @@ int moses_exec(int argc, char** argv)
     logger().setFilename(log_file);
     trim(log_level);
     Logger::Level level = logger().getLevelFromString(log_level);
-    if (level !=Logger::BAD_LEVEL)
+    if (level != Logger::BAD_LEVEL)
         logger().setLevel(level);
     else {
         cerr << "Log level " << log_level << " is incorrect (see --help)." << endl;
@@ -670,7 +694,7 @@ int moses_exec(int argc, char** argv)
         exemplars.push_back(str_to_combo_tree(exemplar_str));
     }
 
-    // fill jobs
+    // Fill jobs
     jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
     bool only_local = true;
     foreach(const string& js, jobs_str) {
@@ -720,7 +744,9 @@ int moses_exec(int argc, char** argv)
                                             output_with_labels, opt_algo,
                                             enable_cache, labels,
                                             output_file, jobs, only_local,
-                                            hc_widen_search, hc_single_step);
+                                            hc_widen_search,
+                                            hc_single_step,
+                                            hc_crossover);
 
     // Continuous reduction rules used during search and representation
     // building.

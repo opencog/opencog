@@ -53,6 +53,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR logfile ]
 .RB [ \-g
 .IR max_gens ]
+.RB [ \-H
+.IR problem_type ]
 .RB [ \-I0 ]
 .RB [ \-i
 .IR filename ]
@@ -81,8 +83,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR random_seed ]
 .RB [ \-S0 ]
 .RB [ \-s1 ]
-.RB [ \-t1 ]
 .RB [ \-T1 ]
+.RB [ \-t1 ]
 .RB [ \-u
 .IR target_feature ]
 .RB [ \-V1 ]
@@ -94,6 +96,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-x1 ]
 .RB [ \-y
 .IR combo_program ]
+.RB [ \-Z1 ]
 .RB [ \-z
 .IR complexity_ratio ]
 .SH DESCRIPTION
@@ -501,6 +504,21 @@ complexity to dominate ranking, possibly trapping the algorithm in a
 local maximum.  Setting this ratio too high will add too much noise to the 
 metapopulation, preventing a solution from being found.  Recommended
 values would be in the range from 1 to 5; with 3.5 as the default.
+.TP
+.BI \-Z1\fR,\ \fB\-\-hc\-crossover=1
+Controls hill-climbing algorithm behaviour.  If false (the default),
+then the entire local neighborhood of the current center instance is
+explored. The highest-scoring instance is then chosen as the new center
+instance, and the process is repeated.  For many datasets, however, 
+the highest-scoring instances tend to cluster together, and so an
+exhaustive search may not be required. When this option is specified,
+a handful of the highest-scoring instances are crossed-over (in the
+genetic sense of cross-over) to create new instances.  Only these are
+evaluated for fitness; the exhaustive search step is skipped.  For many
+problem types, especialy those with large neighborhoods (i.e. those with
+high prorgram complexity), this can lead to an order-of-magnitude
+speedup, or more.  For other problem types, especially those with 
+deceptive scoring functions, this can hurt performance.
 
 .\" ============================================================
 .SS "Output control options"
@@ -638,6 +656,8 @@ Finish documenting these aglo flags:  -M
 These input flags: -b -G
 .PP
 These operator/problem type flags: -p
+.PP
+Other mystery flags: -J -K -U -X -Q
 
 .SH SEE ALSO
 .br
