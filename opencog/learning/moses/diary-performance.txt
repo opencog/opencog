@@ -1142,22 +1142,22 @@ re-eval every 10 generations.  40 new instances per simplex.
 "rescan/1+2+3" is all three, combined, with full neighborhood re-eval
 only when there's no improvement.  40 new instances per simplex.
 
-"r6654" is bzr rev 6654, but with the simplex&rescan code turned on,
+"r6660" is bzr rev 6660, but with the simplex&rescan code turned on,
 GATHER_STATS turned off.  I was expecting this to be same as above,
 but its not. Don't understand why... slower to get going than either of
 last two, but breaks past the barrier... Partial answer: 1) the
 min_score_improvement logic was accidentally broken in this rev, and
 also 2) there is more random-seed variability than I expected...
 
-"nolast" is 6654, with simplex and rescan, but the last-chance simplex
+"nolast" is 6660, with simplex and rescan, but the last-chance simplex
 disabled. Seems to get started a bit faster, than the previous, but
 stalls out sooner. Is this accidental i.e. due to random seed?
 
-"r6654-r1" is same as r6654, but with -r1 random seed, instead of r0
+"r6660-r1" is same as r6660, but with -r1 random seed, instead of r0
 (all others are r0).  at first faster, then false behind at 20K but
 pulls ahead by 40K...  go figure... 
 
-"r6654-r2" is same as r6654, but with -r2 random seed, instead of r0
+"r6660-r2" is same as r6660, but with -r2 random seed, instead of r0
 
 "volume" explores 10/40/70 instances inthe 1/2/3-simplex. Total is still
 120 as before.
@@ -1166,10 +1166,10 @@ Argghh. Many/most(???) of above have a min_score_improvement of 0.0 not
 0.5, and thus suffer from crazy score tweaking. This should not affect 
 the short runs, but could be ruinous for the long runs ...
 
-"r6655-r1" is same as r6654-r1 but with the min_improvment regression
+"r6661-r1" is same as r6660-r1 but with the min_improvment regression
 fixed.  Also slightly modified "last-chance" logic.
 
-"r6657-r1" is same as above, but with two silly loop fixes, including
+"r6663-r1" is same as above, but with two silly loop fixes, including
 putting back "last chance" as before.  Probably will make very little
 difference...
 
@@ -1194,7 +1194,7 @@ difference...
 -m320k:                                              -118  24011   85
 
 
-        rescan/1+2+3 (nn14)     r6654 (nn15,20)         nolast (nn16)
+        rescan/1+2+3 (nn14)     r6660 (nn15,20)         nolast (nn16)
          score  time  plex     score  time  plex     score  time  plex
 -m10k:   -248    138   44      -305     82   47      -309     80   47
 -m20k:   -160    462   66      -184    381   86      -187    301   70
@@ -1203,7 +1203,7 @@ difference...
 -m160k:                         -95  19500  137
 
 
-        r6654-r1 (nn17,21)       r6654-r2 (nn18)        volume (nn19)
+        r6660-r1 (nn17,21)       r6660-r2 (nn18)        volume (nn19)
          score  time  plex     score  time  plex     score  time  plex
 -m10k:   -298     81   47      -305     82   48      -315     79   38 
 -m20k:   -206    318   71      -206    322   71      -192    302   61
@@ -1213,7 +1213,7 @@ difference...
 -m320k:   -89  48000  128                            -105  35820  115
 
 
-          r6655-r1 (nn22)       r6655-r0 (nn23)       r6655-r2 (nn24)
+          r6661-r1 (nn22)       r6661-r0 (nn23)       r6661-r2 (nn24)
          score  time  plex     score  time  plex     score  time  plex
 -m10k:   -298     85   46      -305     84   47      -302     81   48
 -m20k:   -206    329   71      -183    382   86      -206    316   70
@@ -1221,13 +1221,13 @@ difference...
 -m80k:   -104   5369  124      -101   4985  129       -97   4592  127
 -m160k:   
 
-          r6656-r1 (nn25)       r6657-r1 (nn26)
+          r6662-r1 (nn25)       r6663-r1 (nn26)
          score  time  plex     score  time  plex     score  time  plex
 -m10k:   -298     82   47      -303     78   48
 -m20k:   -206    317   71      -210    304   68
 -m40k:   -117   1167  118      -125   1016  101
 -m80k:    -94   5001  128      -108   3637  113
--m160k:   -89  16603  130
+-m160k:   -89  16603  130      -102  14793  120
 -m320k:   -89  39974  129
 
 ======================================================================
