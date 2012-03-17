@@ -596,8 +596,8 @@ int moses_exec(int argc, char** argv)
     try {
         store(parse_command_line(argc, argv, desc), vm);
     }
-    catch (...) {
-        OC_ASSERT(0, "Fatal error: invalid or duplicated argument.\n");
+    catch (error& e) {
+        OC_ASSERT(0, "Fatal error: invalid or duplicated argument:\n\t%s\n", e.what());
     }
     notify(vm);
 

@@ -69,6 +69,7 @@ public:
                           "-upred",
                           "-nimpulse", "-nsin", "-nexp", "-nlog",
                           "-m150000",
+                          "-Z1",   // much much faster w/this flag...
                           data_file_path,
                           });
 
