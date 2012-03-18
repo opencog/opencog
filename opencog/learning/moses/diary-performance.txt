@@ -1173,6 +1173,14 @@ fixed.  Also slightly modified "last-chance" logic.
 putting back "last chance" as before.  Probably will make very little
 difference...
 
+"rebase" is revision 6666, but without the -Z1 flag. This should
+reproduce the old, full-neighbor-scan version of the code.  Poor
+performance is expected... and, indeed, it seems to resemble "baseline"
+
+"renew" is revision 6666, with the -Z1 flag. This should match
+"r6663-r1" exactly... and indeed, it does.
+
+
               baseline            40/10 (nn9)         40/rescan (nn10)
          score  time  plex     score  time  plex     score  time  plex
 -m10k:   -255     65    50     -163    170   54      -179    207   59
@@ -1221,14 +1229,25 @@ difference...
 -m80k:   -104   5369  124      -101   4985  129       -97   4592  127
 -m160k:   
 
-          r6662-r1 (nn25)       r6663-r1 (nn26)
+          r6662-r1 (nn25)       r6663-r1 (nn26)        rebase (nn27)
          score  time  plex     score  time  plex     score  time  plex
--m10k:   -298     82   47      -303     78   48
--m20k:   -206    317   71      -210    304   68
--m40k:   -117   1167  118      -125   1016  101
--m80k:    -94   5001  128      -108   3637  113
+-m10k:   -298     82   47      -303     78   48      -248     57   59
+-m20k:   -206    317   71      -210    304   68      -231    223   64
+-m40k:   -117   1167  118      -125   1016  101      -190    839   75
+-m80k:    -94   5001  128      -108   3637  113      -162   2150   85
 -m160k:   -89  16603  130      -102  14793  120
 -m320k:   -89  39974  129
+
+
+           renew (nn28)
+         score  time  plex     score  time  plex     score  time  plex
+-m10k:   -303     76   48
+-m20k:   -210    305   68
+-m40k:   -125   1032  101
+-m80k:   -108   3877  113
+-m160k:  -102  14427  120
+-m320k:  -101  41033  121
+
 
 ======================================================================
 Regression test parity performance
@@ -1438,33 +1457,34 @@ min_improv=0.5 setting (weighted down to 0.28)
 terminate search immediately.  Clearly, this doesn't bypass the core
 problem.
 
+"rech" is 6666; expect this to be comparable to previous runs.  In fact,
+its identical to "zippo" above. No regression, no mystery, good to go.
+
 As above -Hpa -k4 -z3.5 -v5 -m350000
 
-      simp   enab
--r0:   101    188
--r1:   284     -2
--r2:   200    384
--r3:   133    245
--r4:    32    154
--r5:    24    173
--r6:    63    189
--r7:   114     57
--r8:    84    139
--r9:    62     43
--r10:   80    404
--r11:  199    855
--r12:   13    423
--r13:  122     87
--r14:   43     98
--r15:   97    170
--r16:  396    127
--r17:   43    587
--r18:   47     99
--r19:  102    910
+      simp   enab  rech
+-r0:   101    188    22
+-r1:   284     -2    58
+-r2:   200    384    88
+-r3:   133    245   167
+-r4:    32    154    43
+-r5:    24    173    21
+-r6:    63    189   111
+-r7:   114     57   191
+-r8:    84    139   193
+-r9:    62     43    75
+-r10:   80    404    33
+-r11:  199    855   134
+-r12:   13    423    20
+-r13:  122     87   120
+-r14:   43     98   115
+-r15:   97    170    71
+-r16:  396    127    49
+-r17:   43    587   246
+-r18:   47     99   100
+-r19:  102    910     5
 
-avg:   112    318
-
-
+avg:   112    318    93
 
 
 
