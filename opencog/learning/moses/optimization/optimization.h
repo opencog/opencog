@@ -722,7 +722,17 @@ struct hill_climbing : optim_stats
             // rescan), explore the entire nearest neighborhood.
             // Otherwise make some optimistic assumptions about where
             // the best new instances are likely to be, and go there.
-            if (!hc_params.crossover || (iteration <= 2) || rescan) {
+            //
+            // If the size of the nearest neighborhood is small enough,
+            // then don't bother with the optimistic guessing.  The
+            // optimistic guessing will generate 3*TOP_POP_SIZE
+            // instances.  Our guestimate for number of neighbors
+            // intentionally over-estimates by a factor of two. So the
+            // breakeven point would be 6*TOP_POP_SIZE, and we pad this
+            // a bit, as small exhaustive searches do beat guessing...
+#define TOP_POP_SIZE 40
+            if (!hc_params.crossover || (iteration <= 2) || rescan || 
+                total_number_of_neighbours < 10*TOP_POP_SIZE) {
 
                 // The current_number_of_instances arg is needed only to
                 // be able to manage the size of the deme appropriately.
@@ -732,7 +742,6 @@ struct hill_climbing : optim_stats
                                          current_number_of_instances,
                                          center_inst, deme, distance, rng);
             } else {
-#define TOP_POP_SIZE 40
                 // These cross-over (in the genetic sense) the
                 // top-scoring one, two and three instances,respectively.
                 number_of_new_instances =

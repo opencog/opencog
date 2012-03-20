@@ -1180,6 +1180,11 @@ performance is expected... and, indeed, it seems to resemble "baseline"
 "renew" is revision 6666, with the -Z1 flag. This should match
 "r6663-r1" exactly... and indeed, it does.
 
+"all-small" is revision 6670, with -Z1 flag. The change here is an
+exhaustive search of the local neighborhood, when the local neighb is
+small.  This gives very good results for the smaller exemplar sizes
+for the first few exemplars.
+
 
               baseline            40/10 (nn9)         40/rescan (nn10)
          score  time  plex     score  time  plex     score  time  plex
@@ -1239,12 +1244,12 @@ performance is expected... and, indeed, it seems to resemble "baseline"
 -m320k:   -89  39974  129
 
 
-           renew (nn28)
+           renew (nn28)         all-small (nn29)
          score  time  plex     score  time  plex     score  time  plex
--m10k:   -303     76   48
--m20k:   -210    305   68
--m40k:   -125   1032  101
--m80k:   -108   3877  113
+-m10k:   -303     76   48      -248     58   59
+-m20k:   -210    305   68      -206    266   74
+-m40k:   -125   1032  101      -132   1086  114
+-m80k:   -108   3877  113      -122   6638  129
 -m160k:  -102  14427  120
 -m320k:  -101  41033  121
 
