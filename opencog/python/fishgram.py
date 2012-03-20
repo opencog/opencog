@@ -217,7 +217,7 @@ class Fishgram:
             
             for (t2, var2) in times_vars[i+1:]:
                 if 0 < t2 - t1 <= interval:
-                    seq_and = Tree("SequentialAndLink",  var1, var2)
+                    seq_and = Tree("SequentialAndLink", [var1, var2])
                     if seq_and not in conj:                        
                         new_links+=(seq_and,)
                         connected = True
@@ -532,7 +532,7 @@ class Fishgram:
                     id+=1
                     print concept
                     for tr in conj:
-                        s = {Tree(0):concept}
+                        s = {Var(0):concept}
                         bound_tree = subst(s, tr)
                         #print bound_tree
                         print atom_from_tree(bound_tree, self.atomspace)
@@ -549,15 +549,15 @@ class Fishgram:
                 vars = get_varlist(conj)
                 #print [str(var) for var in vars]
 
-                evalLink = Tree('EvaluationLink',
+                evalLink = T('EvaluationLink',
                                     predicate, 
                                     Tree('ListLink', vars))
                 andLink = Tree('AndLink',
                                     conj)
                 
-                qLink = Tree('ForAllLink', 
+                qLink = T('ForAllLink', 
                                 Tree('ListLink', vars), 
-                                Tree('ImplicationLink',
+                                T('ImplicationLink',
                                     andLink,
                                     evalLink))
                 a = atom_from_tree(qLink, self.atomspace)
@@ -656,11 +656,11 @@ class Fishgram:
                 
                 #print andLink
 
-                qLink = Tree('ForAllLink', 
+                qLink = T('ForAllLink', 
                                 Tree('ListLink', vars), 
-                                Tree('ImplicationLink',
-                                    Tree('AndLink',        # Psi rule "meta-and"
-                                        Tree('AndLink'),  # Psi rule context
+                                T('ImplicationLink',
+                                    T('AndLink',        # Psi rule "meta-and"
+                                        T('AndLink'),  # Psi rule context
                                         andLink),             # Psi rule action
                                     conclusion)
                                 )
@@ -707,7 +707,6 @@ class Fishgram:
         return None
 
     def causal_pattern_templates(self):
-        tr = Tree
         a = self.atomspace.add
         t = types
         
@@ -724,10 +723,10 @@ class Fishgram:
             for step in xrange(action_seq_size):
                 #next_step = step+1
                 
-                action_template = tr('AtTimeLink', times[step],
-                        tr('EvaluationLink',
+                action_template = T('AtTimeLink', times[step],
+                        T('EvaluationLink',
                             a(t.PredicateNode, name='actionDone'),
-                            tr('ListLink', 
+                            T('ListLink', 
                                actions[step]
                              )
                         )
@@ -739,16 +738,16 @@ class Fishgram:
                 # But sometimes if you have A -> B -> C the fishgram system will still generate the afterlink
                 # from A -> C, so you should allow it either way.
                 for next_step in times[step+1:]:
-                    seq_and_template = tr('SequentialAndLink', times[step], next_step)
+                    seq_and_template = T('SequentialAndLink', times[step], next_step)
                     template += [seq_and_template]
                 
                 #template += [action_template, seq_and_template]
 
-            increase_template = tr('AtTimeLink',
+            increase_template = T('AtTimeLink',
                          times[-1],
-                         tr('EvaluationLink',
+                         T('EvaluationLink',
                                     a(t.PredicateNode, name='increased'),
-                                    tr('ListLink', goal)
+                                    T('ListLink', goal)
                                     )
                          )
             
@@ -805,7 +804,7 @@ class Fishgram:
                 yield m.conj
 
     def _split_conj_into_rules(self, conj):
-        seq_and_template = Tree('SequentialAndLink', new_var(), new_var()) # two TimeNodes
+        seq_and_template = T('SequentialAndLink', new_var(), new_var()) # two TimeNodes
         after_links = tuple( x for x in conj if unify(seq_and_template, x, {}) != None )
         normal = tuple( x for x in conj if unify(seq_and_template, x, {}) == None )
         
@@ -902,7 +901,7 @@ def notice_changes(atomspace):
     target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
 
     for atom in target_PredicateNodes:
-        target = Tree('EvaluationLink', atom, Tree('ListLink'))
+        target = Tree('EvaluationLink', [atom, Tree('ListLink')])
 
         time = new_var()
         
@@ -918,7 +917,7 @@ def notice_changes(atomspace):
 #            # If this DemandGoal is in use there will be one value at each timestamp (otherwise none)
 #            assert len(matches) < 2
 #            matches[0].
-            template = Tree('AtTimeLink', time, target)
+            template = Tree('AtTimeLink', [time, target])
             a = atom_from_tree(template, atomspace)
             
             # Was the value updated at that timestamp? The PsiDemandUpdaterAgent is not run every cycle so many
@@ -950,11 +949,11 @@ def notice_changes(atomspace):
             time2 = times_with_update[i+1]
 
             tv = TruthValue(1, 1.0e35)
-            res = Tree('AtTimeLink',
+            res = T('AtTimeLink',
                      time2,
-                     Tree('EvaluationLink',
+                     T('EvaluationLink',
                                 atomspace.add(t.PredicateNode, name=pred),
-                                Tree('ListLink',
+                                T('ListLink',
                                     target
                                 )
                         )

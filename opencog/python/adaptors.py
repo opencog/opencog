@@ -65,7 +65,7 @@ class ForestExtractor:
         elif self.is_object(atom):
             objects.append(atom)
             self.i+=1
-            return Tree(self.i-1)
+            return Var(self.i-1)
         elif self.is_action_instance(atom):
             print 'is_action_instance', atom
             # this is moderatly tacky, but doing anything different would require lots of changes...
@@ -268,11 +268,12 @@ class ForestExtractor:
         interval = 100* 20
         
         # If this is called from lookup_embeddings_helper, s should contain specific TimeNodes
+        #s = {var:Tree(atom) for (var,atom) in s.items()}
         tr = subst(s, tr)
         
         # use unify to extract a SequentialAndLink
         t1_var, t2_var = new_var(), new_var()
-        template = Tree('SequentialAndLink', t1_var, t2_var)
+        template = T('SequentialAndLink', t1_var, t2_var)
         # template_s is just used to find the TimeNodes (to compare them with each other)
         template_s = unify(template, tr, s)
         if template_s == None:

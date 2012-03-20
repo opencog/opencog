@@ -10,6 +10,8 @@ import sys
 from itertools import permutations
 from util import *
 
+# Some broken weird stuff attempting to get around Cython
+
 #class FakeHandle:
 #    '''A simple class to imitate Handle for use with FakeAtom.'''
 #    def __init__(self, id):
@@ -66,30 +68,48 @@ def coerce_tree(x):
     if isinstance(x, Tree):
         return x
     else:
-        return Tree(x)
+        return T(x)
+
+def T(op, *args):
+    # Transparently allow using passing a list or using it in the more streamlined way
+    # (better for constructing trees by hand). It will also wrap arguments of any kind
+    # into Trees (BUT NOT RECURSIVELY!). Just using the Tree constructor directly would
+    # be more appropriate if you need efficiency or want to use the Trees to represent
+    # something beside Atoms.
+    
+    if len(args) and isinstance(args[0], list):
+        args = args[0]
+    # Transparently record Links as strings rather than Handles
+    assert type(op) != type(None)
+    if len(args):
+        if isinstance(op, Atom):
+            assert not op.is_a(types.Link)
+            final_op = op.type_name
+        else:
+            final_op = op
+        final_args = [coerce_tree(x) for x in args]
+    else:
+        final_op = op
+        final_args = []
+
+    return Tree(final_op, final_args)
+
+def Var(op):
+    return Tree(op)
 
 class Tree (object):
 #    cdef public object op
 #    cdef public list args
 #    cdef tuple _tuple
     
-    def __init__(self, op, *args):
-        # Transparently allow using passing a list or using it in the more streamlined way
-        # (better for constructing trees by hand)
-        if len(args) and isinstance(args[0], list):
-            args = args[0]
+    def __init__(self, op, args = None):
         # Transparently record Links as strings rather than Handles
         assert type(op) != type(None)
-        if len(args):
-            if isinstance(op, Atom):
-                assert not op.is_a(types.Link)
-                self.op = op.type_name
-            else:
-                self.op = op
-            self.args = [coerce_tree(x) for x in args]
-        else:
-            self.op = op
+        self.op = op
+        if args is None:
             self.args = []
+        else:
+            self.args = args
         
         self._tuple = None
 

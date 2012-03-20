@@ -10,7 +10,7 @@ from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
 
 import logic
-from tree import Tree as T
+from tree import T
 import opencog.util
 
 # run doctests
@@ -42,12 +42,12 @@ class LogicTest(TestCase):
         t = types
 
         x1 = logic.Rule(T(2), 
-                        [T('ImplicationLink', [T('EvaluationLink', [a.add(t.PredicateNode, 'is_axiom'), T('ListLink', [T(1000008)])]), T(2)]),
-                         T('EvaluationLink', [a.add(t.PredicateNode, 'is_axiom'), T('ListLink', [T(1000008)])])
+                        [T('ImplicationLink', T('EvaluationLink', a.add(t.PredicateNode, 'is_axiom'), T('ListLink', T(1000008))), T(2)),
+                         T('EvaluationLink', a.add(t.PredicateNode, 'is_axiom'), T('ListLink', T(1000008)))
                         ], name='ModusPonens')
         x2 = logic.Rule(T(2), 
-                        [T('ImplicationLink', [T('EvaluationLink', [a.add(t.PredicateNode, 'is_axiom'), T('ListLink', [T(1000011)])]), T(2)]),
-                         T('EvaluationLink', [a.add(t.PredicateNode, 'is_axiom'), T('ListLink', [T(1000011)])])
+                        [T('ImplicationLink', T('EvaluationLink', a.add(t.PredicateNode, 'is_axiom'), T('ListLink', T(1000011))), T(2)),
+                         T('EvaluationLink', a.add(t.PredicateNode, 'is_axiom'), T('ListLink', T(1000011)))
                         ], name='ModusPonens')
 
         self.assertTrue(x1.isomorphic(x2))

@@ -36,7 +36,7 @@ class Chainer:
 
         self.space = space
         self.viz = PLNviz(space)
-        #self.viz.connect()
+        self.viz.connect()
         self.setup_rules(space)
         self.apps = []
         # Disturbingly, a separate set is still necessary for rule applications as they contain lists so tuples are stored instead.
@@ -58,11 +58,11 @@ class Chainer:
             for atom in target_PredicateNodes:
                 # Here be DRAGONS!
                 #target = Tree('EvaluationLink', atom, Tree('ListLink'))
-                target = Tree('EvaluationLink', atom)
+                target = T('EvaluationLink', atom)
 
             a = self.space
 
-            rl = Tree('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+            rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
             atom_from_tree(rl, a)
             
             # hack
@@ -89,11 +89,11 @@ class Chainer:
                 actions = self.extract_plan(trail)
                 
                 # set plan_success
-                ps = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), Tree('ListLink'))
+                ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
                 # set plan_action_list
-                pal = Tree('ReferenceLink',
+                pal = T('ReferenceLink',
                             a.add_node(t.ConceptNode, 'plan_action_list'),
-                            Tree('ListLink', actions))
+                            T('ListLink', actions))
                 
                 ps_a  = atom_from_tree(ps, a)
                 pal_a = atom_from_tree(pal, a)
@@ -108,7 +108,7 @@ class Chainer:
             print e
 
 
-    #@profile
+    @profile
     def bc(self, target):
         #import prof3d; prof3d.profile_me()
         
@@ -127,7 +127,7 @@ class Chainer:
             self.results = []
 
             self.target = target
-            dummy = Rule(Tree('GOAL'), [target], name='producing target')
+            dummy = Rule(T('GOAL'), [target], name='producing target')
             self.apps.append(dummy)
 
             # viz - visualize the root
@@ -344,9 +344,9 @@ class Chainer:
             return goal.is_variable()
 
         def app_is_stupid(goal):
-            #nested_implication = standardize_apart(Tree('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
+            #nested_implication = standardize_apart(T('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
             # Accidentally unifies with (ImplicationLink $blah some_target) !
-            #nested_implication2 = Tree('ImplicationLink', Tree('ImplicationLink', 1, 2), 3)
+            #nested_implication2 = T('ImplicationLink', T('ImplicationLink', 1, 2), 3)
 
             # Nested ImplicationLinks
             # skip Implications between InheritanceLinks etc as well
@@ -357,7 +357,7 @@ class Chainer:
                 return True
 
             # Should actually block this one if it occurs anywhere, not just at the root of the tree.
-            very_vague = any(goal.isomorphic(standardize_apart(Tree(type, 1, 2))) for type in self.deduction_types)
+            very_vague = any(goal.isomorphic(standardize_apart(T(type, 1, 2))) for type in self.deduction_types)
             return (self_implication(goal) or
                          very_vague)
 
@@ -654,31 +654,31 @@ class Chainer:
                     r.tv = obj.tv
                     self.add_rule(r)
 
-        # Deduction
-        for type in self.deduction_types:
-            self.add_rule(Rule(Tree(type, 1,3), 
-                                         [Tree(type, 1, 2),
-                                          Tree(type, 2, 3), 
-                                          Tree(1),
-                                          Tree(2), 
-                                          Tree(3)],
-                                        name='Deduction', 
-                                        formula = formulas.deductionSimpleFormula))
-
-        # Inversion
-        for type in self.deduction_types:
-            self.add_rule(Rule( Tree(type, 2, 1), 
-                                         [Tree(type, 1, 2),
-                                          Tree(1),
-                                          Tree(2)], 
-                                         name='Inversion', 
-                                         formula = formulas.inversionFormula))
+        ## Deduction
+        #for type in self.deduction_types:
+        #    self.add_rule(Rule(T(type, 1,3), 
+        #                                 [T(type, 1, 2),
+        #                                  T(type, 2, 3), 
+        #                                  Var(1),
+        #                                  Var(2), 
+        #                                  Var(3)],
+        #                                name='Deduction', 
+        #                                formula = formulas.deductionSimpleFormula))
+        #
+        ## Inversion
+        #for type in self.deduction_types:
+        #    self.add_rule(Rule( T(type, 2, 1), 
+        #                                 [T(type, 1, 2),
+        #                                  Var(1),
+        #                                  Var(2)], 
+        #                                 name='Inversion', 
+        #                                 formula = formulas.inversionFormula))
 
         # ModusPonens
         for type in ['ImplicationLink']:
-            self.add_rule(Rule(Tree(2), 
-                                         [Tree(type, 1, 2),
-                                          Tree(1) ], 
+            self.add_rule(Rule(Var(2), 
+                                         [T(type, 1, 2),
+                                          Var(1) ], 
                                           name='ModusPonens', 
                                           formula = formulas.modusPonensFormula))
 
@@ -686,27 +686,27 @@ class Chainer:
 #        for type in ['ImplicationLink']:
 #            for size in xrange(5):
 #                args = [new_var() for i in xrange(size+1)]
-#                andlink = Tree('AndLink', args)
+#                andlink = T('AndLink', args)
 #
-#                self.add_rule(Rule(Tree(2), 
-#                                             [Tree(type, andlink, 2),
+#                self.add_rule(Rule(Var(2), 
+#                                             [T(type, andlink, 2),
 #                                              andlink ], 
 #                                              name='TheoremRule'))
         
        # ModusPonens for EvaluationLinks only
 #        for type in ['ImplicationLink']:
-#            conc = Tree('EvaluationLink', new_var(), new_var())
-#            prem = Tree('EvaluationLink', new_var(), new_var())
-#            imp = Tree('ImplicationLink', prem, conc)
+#            conc = T('EvaluationLink', new_var(), new_var())
+#            prem = T('EvaluationLink', new_var(), new_var())
+#            imp = T('ImplicationLink', prem, conc)
 #            
 #            self.add_rule(Rule(conc, 
 #                                         [imp, prem], 
 #                                          name='ModusPonens_Eval'))
 
 #        for type in ['ImplicationLink']:
-#            conc = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
-#            prem = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
-#            imp = Tree('ImplicationLink', prem, conc)
+#            conc = T('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
+#            prem = T('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
+#            imp = T('ImplicationLink', prem, conc)
 #            
 #            self.add_rule(Rule(conc, 
 #                                         [imp, prem], 
@@ -716,7 +716,7 @@ class Chainer:
         type = 'AndLink'
         for size in xrange(5):                
             args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(Tree(type, args),
+            self.add_rule(Rule(T(type, args),
                                args,
                                type[:-4], 
                                formula = formulas.andSymmetricFormula))
@@ -724,27 +724,27 @@ class Chainer:
         type = 'OrLink'
         for size in xrange(2):
             args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(Tree(type, args),
+            self.add_rule(Rule(T(type, args),
                                args,
                                type[:-4], 
                                formula = formulas.orFormula))
 
         # Adding a NOT
-        self.add_rule(Rule(Tree('NotLink', 1),
-                           [ Tree(1) ],
+        self.add_rule(Rule(T('NotLink', 1),
+                           [ Var(1) ],
                            name = 'Not', 
                            formula = formulas.notFormula))
 
         # Link conversion
-        self.add_rule(Rule(Tree('InheritanceLink', 1, 2),
-                           [ Tree('SubsetLink', 1, 2) ],
+        self.add_rule(Rule(T('InheritanceLink', 1, 2),
+                           [ T('SubsetLink', 1, 2) ],
                            name = 'SubsetLink=>InheritanceLink', 
                            formula = formulas.ext2InhFormula))
 
 #        # Producing ForAll/Bind/AverageLinks?
 #        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
-#            self.add_rule(Rule(Tree(type, 1, 2),
-#                               [ Tree(2) ],
+#            self.add_rule(Rule(T(type, 1, 2),
+#                               [ Var(2) ],
 #                               name = type+' abstraction', 
 #                               formula = formulas.identityFormula))
 
@@ -754,7 +754,7 @@ class Chainer:
 #        list_link = new_var()
 #        r = Rule(
 #                        fact,
-#                        [Tree('ForAllLink', list_link, fact )], 
+#                        [T('ForAllLink', list_link, fact )], 
 #                        name = 'ForAll'     
 #                    )
 #        r.tv = True
@@ -949,21 +949,21 @@ if __name__ == '__main__':
     a = AtomSpace()
     log.use_stdout(True)
 
-    atom_from_tree(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')), a).tv = TruthValue(1, 1)
-    #atom_from_tree(Tree('EvaluationLink',1), a).tv = TruthValue(1, 1)
+    atom_from_tree(T('EvaluationLink',a.add_node(t.PredicateNode,'A')), a).tv = TruthValue(1, 1)
+    #atom_from_tree(T('EvaluationLink',1), a).tv = TruthValue(1, 1)
 
     c = Chainer(a)
 
-    #search(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    #search(T('EvaluationLink',a.add_node(t.PredicateNode,'B')))
     #fc(a)
 
-    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    #c.bc(T('EvaluationLink',a.add_node(t.PredicateNode,'A')))
 
 #    global rules
-#    A = Tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
-#    B = Tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
+#    A = T('EvaluationLink',a.add_node(t.PredicateNode,'A'))
+#    B = T('EvaluationLink',a.add_node(t.PredicateNode,'B'))
 #    rules.append(Rule(B, 
 #                                  [ A ]))
 
-    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
-    c.bc(Tree('EvaluationLink',-1))
+    #c.bc(T('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    c.bc(T('EvaluationLink',-1))

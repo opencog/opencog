@@ -65,22 +65,22 @@ class TreeTest(TestCase):
         self.assertEquals(tree.coerce_tree("tree").op,"tree")
 
     def test_is_variable(self):
-        var_tree = tree.Tree(1)
+        var_tree = tree.Var(1)
         self.assertEquals(var_tree.is_variable(),True)
-        node_tree = tree.Tree(self.x1)
+        node_tree = tree.T(self.x1)
         self.assertEquals(node_tree.is_variable(),False)
 
     def test_unify(self):
-        x1_template = tree.Tree(self.x1)
+        x1_template = tree.T(self.x1)
         x1_tree = tree.tree_from_atom(self.x1)
         s = tree.unify(x1_template, x1_tree, {})
         self.assertEquals(s, {})
 
-        x2_template = tree.Tree(self.x2)
+        x2_template = tree.T(self.x2)
         s = tree.unify(x2_template, x1_tree, {})
         self.assertEquals(s, None)
         
-        all_template = tree.Tree(1)
+        all_template = tree.Var(1)
         l2_tree = tree.tree_from_atom(self.l2)
         s = tree.unify(all_template, l2_tree, {})
         s_correct = {all_template : l2_tree}
@@ -134,15 +134,15 @@ class TreeTest(TestCase):
         atoms = [self.l1, self.l2]
         
         # This is supposed to look up all Atoms of (exactly) type 'Link', and return their first outgoing atom
-        link_template = tree.Tree('Link', 1, 2)
-        first = tree.Tree(1)
+        link_template = tree.T('Link', 1, 2)
+        first = tree.Var(1)
         result_trees = tree.apply_rule(link_template, first, atoms)
         result_correct = map(tree.tree_from_atom, [self.x1, self.l1])
         self.assertEquals(result_trees, result_correct)
 
     def test_standardize_apart(self):
-        var1, var2 = tree.Tree(1), tree.Tree(2)
-        tr1 = tree.Tree('ListLink', var1, var2)
+        var1, var2 = tree.Var(1), tree.Var(2)
+        tr1 = tree.T('ListLink', var1, var2)
         
         tr2 = tree.standardize_apart(tr1)
         
@@ -159,8 +159,8 @@ class TreeTest(TestCase):
 
     def test_canonical_trees(self):
         conj = (
-            tree.Tree('ListLink', 1, 2), 
-            tree.Tree('ListLink', 2, 3)
+            tree.T('ListLink', 1, 2), 
+            tree.T('ListLink', 2, 3)
         )
         
         canon = tree.canonical_trees(conj)
