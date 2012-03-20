@@ -795,7 +795,7 @@ int moses_exec(int argc, char** argv)
 
             // Determine the default exemplar to start with
             if (exemplars.empty())
-                exemplars.push_back(type_to_exemplar(table_output_tn));
+                exemplars.push_back(type_to_exemplar(problem == pre? id::boolean_type : table_output_tn));
 
             type_node output_type =
                 *(get_output_type_tree(*exemplars.begin()->begin()).begin());
@@ -805,11 +805,10 @@ int moses_exec(int argc, char** argv)
             stringstream so;
             so << "Inferred output type: " << output_type;
             logger().info(so.str());
-            OC_ASSERT(output_type == table_output_tn);
-
-            int as = alphabet_size(table_tt, ignore_ops);
             
             if (problem == pre) { // problem == pre
+                type_tree cand_tt = gen_signature(id::boolean_type, arity);
+                int as = alphabet_size(cand_tt, ignore_ops);
                 typedef precision_bscore BScore;
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables)
@@ -818,11 +817,13 @@ int moses_exec(int argc, char** argv)
                                                  max_rand_input,
                                                  abs(alpha), rng, alpha >= 0));
                 multibscore_based_bscore<BScore> bscore(bscores);
-                metapop_moses_results(rng, exemplars, table_tt,
+                metapop_moses_results(rng, exemplars, cand_tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
             } else { // problem == it
+                OC_ASSERT(output_type == table_output_tn);
+                int as = alphabet_size(table_tt, ignore_ops);
                 if (output_type == id::boolean_type) {
                     typedef ctruth_table_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
