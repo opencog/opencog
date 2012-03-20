@@ -12,5 +12,3 @@ This directory currently contains four subdirectories:
 
 -- dimensionalembedding -- code that makes use of moses.
 
--- hillcimbing -- contains stale code, to be migrated to moses or
-   elsewhere, as needed, and then removed.
