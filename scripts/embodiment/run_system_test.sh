@@ -36,7 +36,7 @@ for gsfile in `find . -name "gsfile_*" ` ; do
 	fi
 done
 
-./stop_embodiment.csh
+./stop_embodiment.sh
 
 if [ $failed ]; then
 	echo "SOME TESTS FAILED";
