@@ -24,7 +24,7 @@
 #ifndef _HILLCLIMBING_INTERACTIVE_HILLCLIMBER_H
 #define _HILLCLIMBING_INTERACTIVE_HILLCLIMBER_H
 
-#include <opencog/learning/hillclimbing/hillclimber.h>
+#include "hillclimber.h"
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>

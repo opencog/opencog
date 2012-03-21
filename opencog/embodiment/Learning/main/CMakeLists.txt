@@ -16,5 +16,6 @@ TARGET_LINK_LIBRARIES (post_learning-rewriter
 
 ADD_EXECUTABLE (interactive-hillclimbing interactive-hillclimbing)
 TARGET_LINK_LIBRARIES (interactive-hillclimbing
-	hillclimbing
+	comboreduct
+	util
 )

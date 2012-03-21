@@ -22,7 +22,7 @@
  */
 
 
-#include <opencog/learning/hillclimbing/NeighborhoodGenerator.h>
+#include <opencog/embodiment/Learning/PetaverseHC/NeighborhoodGenerator.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/Learning/RewritingRules/hillclimbing_action_reduction.h>
 #include <opencog/embodiment/Learning/RewritingRules/hillclimbing_full_reduction.h>

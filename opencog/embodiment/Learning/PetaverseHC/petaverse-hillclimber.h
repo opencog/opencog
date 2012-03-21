@@ -24,7 +24,7 @@
 #ifndef _HILLCLIMBING_PETAVERSE_HILLCLIMBER_H
 #define _HILLCLIMBING_PETAVERSE_HILLCLIMBER_H
 
-#include <opencog/learning/hillclimbing/hillclimber.h>
+#include "hillclimber.h"
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 

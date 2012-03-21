@@ -1180,7 +1180,7 @@ performance is expected... and, indeed, it seems to resemble "baseline"
 "renew" is revision 6666, with the -Z1 flag. This should match
 "r6663-r1" exactly... and indeed, it does.
 
-"all-small" is revision 6670, with -Z1 flag. The change here is an
+"all-small" is revision 6670, with -r1 -Z1 flag. The change here is an
 exhaustive search of the local neighborhood, when the local neighb is
 small.  This gives very good results for the smaller exemplar sizes
 for the first few exemplars.
