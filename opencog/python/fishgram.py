@@ -38,7 +38,7 @@ class Fishgram:
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 2000000000
+        self.max_per_layer = 30
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -119,7 +119,7 @@ class Fishgram:
         
         for (conj, embs) in self.prune_frequency(next_layer_iter):
         #for (conj, embs) in self.prune_surprise(next_layer_iter):
-            print '***************', conj, len(embs)
+            #print '***************', conj, len(embs)
             #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
             #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
             yield (conj, embs)
@@ -205,8 +205,8 @@ class Fishgram:
         new_links = ()
         
         times_vars = [(obj, var) for (var, obj) in embedding.items()
-                      if obj.t == t.TimeNode]
-        times_vars = [(int(obj.name), var) for obj, var in times_vars]
+                      if obj.get_type() == t.TimeNode]
+        times_vars = [(int(obj.op.name), var) for obj, var in times_vars]
         times_vars.sort()
 
         for (i, (t1, var1)) in enumerate(times_vars[:-1]):
@@ -644,8 +644,8 @@ class Fishgram:
             
             # Convert it into a Psi Rule. Note that this will remove variables corresponding to the TimeNodes, but
             # the embedding counts will still be equivalent.
-            tmp = self.make_psi_rule(premises, conclusion)
-            #tmp = (premises, conclusion)
+            #tmp = self.make_psi_rule(premises, conclusion)
+            tmp = (premises, conclusion)
             if tmp:
                 (premises, conclusion) = tmp
                 
@@ -901,10 +901,8 @@ def notice_changes(atomspace):
     target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
 
     for atom in target_PredicateNodes:
-        target = Tree('EvaluationLink', [atom, Tree('ListLink')])
+        target = T('EvaluationLink', [atom, Tree('ListLink')])
 
-        time = new_var()
-        
         # find all of the xDemandGoal AtTimeLinks in order, sort them, then check whether each one is higher/lower than the previous one.       
         
         atTimes = []
@@ -917,7 +915,7 @@ def notice_changes(atomspace):
 #            # If this DemandGoal is in use there will be one value at each timestamp (otherwise none)
 #            assert len(matches) < 2
 #            matches[0].
-            template = Tree('AtTimeLink', [time, target])
+            template = T('AtTimeLink', [time, target])
             a = atom_from_tree(template, atomspace)
             
             # Was the value updated at that timestamp? The PsiDemandUpdaterAgent is not run every cycle so many
@@ -1017,8 +1015,8 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                        print 'emb:',  pp(bound_tree)
         
         #fish.iterated_implications()
-        #self.fish.implications()
-        self.fish.run()
+        self.fish.implications()
+        #self.fish.run()
         print "Finished one Fishgram cycle"
         
         #fish.make_all_psi_rules()

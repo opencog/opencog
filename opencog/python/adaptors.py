@@ -97,7 +97,7 @@ class ForestExtractor:
             except(self.UnwantedAtomException):
                 #print 'UnwantedAtomException'
                 continue
-            objects = tuple(objects)
+            objects = tuple(map(Tree,objects))
             
             #print tree,  [str(o) for o in objects]
             
@@ -105,7 +105,10 @@ class ForestExtractor:
             if len(objects):
                 self.all_trees.append(tree)
                 self.all_trees_atoms.append(link)
+                
+                
                 self.bindings.append(objects)
+                
                 for obj in objects:
                     self.all_objects.add(obj)
                     

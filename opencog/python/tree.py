@@ -419,7 +419,8 @@ def subst_from_binding(binding):
     return dict([ (Tree(i), obj) for i, obj in enumerate(binding)])
 
 def binding_from_subst(subst, atomspace):
-    return [ atom_from_tree(obj_tree, atomspace) for (var, obj_tree) in sorted(subst.items()) ]
+    #return [ atom_from_tree(obj_tree, atomspace) for (var, obj_tree) in sorted(subst.items()) ]
+    return [ obj_tree for (var, obj_tree) in sorted(subst.items()) ]
 
 def bind_conj(conj, b):
     return subst_conjunction(subst_from_binding(b), conj)
