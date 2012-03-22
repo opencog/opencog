@@ -120,8 +120,7 @@ class Chainer:
         
         try:
             tvs = self.get_tvs(target)
-            print "target truth values:", map(str, tvs)
-            assert not tvs
+            print "Existing target truth values:", map(str, tvs)
             
             #save_trees([target], 'target')
             #save_trees([tree_from_atom(a) for a in self.space.get_atoms_by_type(t.Atom) if a.tv.count > 0], 'as')
@@ -162,12 +161,12 @@ class Chainer:
 #                
 #                self.print_tree(bit)
 
-            for res in self.results:
-                print 'Inference trail:'
-                trail = self.trail(res)
-                self.print_tree(trail)
-                print 'Action plan (if applicable):'
-                print self.extract_plan(trail)
+            #for res in self.results:
+            #    print 'Inference trail:'
+            #    trail = self.trail(res)
+            #    self.print_tree(trail)
+            #    print 'Action plan (if applicable):'
+            #    print self.extract_plan(trail)
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
             return [atom_from_tree(result, self.space).h for result in self.results]
@@ -197,7 +196,7 @@ class Chainer:
         #next_target = self.bc_later.pop_last() # Depth-first search
         #next_target = self.get_fittest(self.bc_later) # Best-first search
         log.info(format_log('-BCQ', next_target))
-        self.bc_before.append(next_target)
+        self.add_tree_to_index(next_target, self.bc_before)
 
         ret = []
         apps = self.find_rule_applications(next_target)
@@ -314,8 +313,8 @@ class Chainer:
             # The proof DAG does not explicitly avoid linking things up in a loop (as it has no explicit links)
             if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
             #if not self.contains_isomorphic_tree(app, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
-                self.fc_before.append(app.head)
-                self.fc_later.append(app.head)
+                self.add_tree_to_index(app.head, self.fc_before)
+                self.add_tree_to_index(app.head, self.fc_later)
                 log.info(format_log('+FCQ', app.head, app.name))
                 stdout.flush()
 
@@ -327,7 +326,13 @@ class Chainer:
 #        queue = goals
 
     def contains_isomorphic_tree(self, tr, idx):        
-        return any(expr.isomorphic(tr) for expr in idx)
+        #return any(expr.isomorphic(tr) for expr in idx)
+        canonical = tr.canonical()
+        return canonical in idx
+
+    def add_tree_to_index(self, tr, idx):
+        canonical = tr.canonical()
+        idx.append(canonical)
 
 #    # NOTE: assumes that you want to add the item into the corresponding index
 #    def contains_isomorphic_tree(self, tr, idx):
@@ -385,7 +390,7 @@ class Chainer:
                     not self.contains_isomorphic_tree(goal, self.bc_later) ):
                 assert goal not in self.bc_before
                 assert goal not in self.bc_later
-                self.bc_later.append(goal)
+                self.add_tree_to_index(goal, self.bc_later)
                 added_queries.append(goal)
                 log.info(format_log('+BCQ', goal, app.name))
                 stdout.flush()
@@ -678,25 +683,25 @@ class Chainer:
                     r.tv = obj.tv
                     self.add_rule(r)
 
-        ## Deduction
-        #for type in self.deduction_types:
-        #    self.add_rule(Rule(T(type, 1,3), 
-        #                                 [T(type, 1, 2),
-        #                                  T(type, 2, 3), 
-        #                                  Var(1),
-        #                                  Var(2), 
-        #                                  Var(3)],
-        #                                name='Deduction', 
-        #                                formula = formulas.deductionSimpleFormula))
-        #
-        ## Inversion
-        #for type in self.deduction_types:
-        #    self.add_rule(Rule( T(type, 2, 1), 
-        #                                 [T(type, 1, 2),
-        #                                  Var(1),
-        #                                  Var(2)], 
-        #                                 name='Inversion', 
-        #                                 formula = formulas.inversionFormula))
+        # Deduction
+        for type in self.deduction_types:
+            self.add_rule(Rule(T(type, 1,3), 
+                                         [T(type, 1, 2),
+                                          T(type, 2, 3), 
+                                          Var(1),
+                                          Var(2), 
+                                          Var(3)],
+                                        name='Deduction', 
+                                        formula = formulas.deductionSimpleFormula))
+        
+        # Inversion
+        for type in self.deduction_types:
+            self.add_rule(Rule( T(type, 2, 1), 
+                                         [T(type, 1, 2),
+                                          Var(1),
+                                          Var(2)], 
+                                         name='Inversion', 
+                                         formula = formulas.inversionFormula))
 
         # ModusPonens
         for type in ['ImplicationLink']:

@@ -277,9 +277,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     import_logic_wrapper();
     //python_pln_fc(cogserver().getAtomSpace());
     //python_pln_fc();
-    cout << "before python_pln_plan" << endl;
-    python_pln_plan(cogserver().getAtomSpace());
-    cout << "after python_pln_plan" << endl;
+    //python_pln_plan(cogserver().getAtomSpace());
     Handle eh = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
     
     PyGILState_Release(gstate); 
