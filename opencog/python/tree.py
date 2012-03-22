@@ -326,26 +326,29 @@ def unify(x, y, s):
     """
     #print "unify %s %s" % (str(x), str(y))
 
-    assert not type(x) == tuple and not type(y) == tuple
+    tx = type(x)
+    ty = type(y)
+
+    assert not tx == tuple and not ty == tuple
 
     if s == None:
         return None
     # Not compatible with RPyC as it will make one of them 'netref t'
 #    elif type(x) != type(y):
 #        return None
-    elif x == y:
+    elif tx == ty and x == y:
         return s
-    elif isinstance(x, Tree) and x.is_variable():
+    elif tx == Tree and x.is_variable():
         return unify_var(x, y, s)
-    elif isinstance(y, Tree) and y.is_variable():
+    elif ty == Tree and y.is_variable():
         return unify_var(y, x, s)
         
-    elif isinstance(x, Tree) and isinstance(y, Tree):
+    elif tx == Tree and ty == Tree:
         s2 = unify(x.op, y.op, s)
         return unify(x.args,  y.args, s2)
 
     # Recursion to handle arguments.
-    elif isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
+    elif tx == list and ty == list and len(x) == len(y):
         # unify all the arguments (works with any number of arguments, including 0)
         s2 = unify(x[0], y[0], s)
         return unify(x[1:], y[1:], s2)
