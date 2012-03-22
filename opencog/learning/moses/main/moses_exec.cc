@@ -35,6 +35,8 @@ using boost::str;
 
 static const unsigned int max_filename_size = 255;
 
+bool output_python;
+
 /**
  * Display error message about unspecified combo tree and exit
  */
@@ -266,6 +268,7 @@ int moses_exec(int argc, char** argv)
     bool output_dominated = false;
     bool output_eval_number;
     bool output_with_labels;
+    bool output_python = false;
     string output_file;
     int max_gens;
     string log_level;
@@ -344,7 +347,12 @@ int moses_exec(int argc, char** argv)
          "instead of argument numbers. For instance "
          "*(\"$price\" \"$temprature\") instead of *($1 $2). This only "
          "works for data fitting problems where the data file contains "
-         "labels in its header\n")
+         "labels in its header.\n")
+        ("python",
+         value<bool>(&output_python)->default_value(false),
+         "If 1, output the program(s) as python code instead of combo. "
+         "Best with -c1 option to return a single python module. Only "
+         "implemented for boolean programs currently.\n")
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&output_file)->default_value(""),
          "File where to place the output. If empty, then output to stdout.\n")
@@ -744,6 +752,7 @@ int moses_exec(int argc, char** argv)
                                             output_with_labels, opt_algo,
                                             enable_cache, labels,
                                             output_file, jobs, only_local,
+                                            output_python,
                                             hc_widen_search,
                                             hc_single_step,
                                             hc_crossover);

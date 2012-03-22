@@ -70,7 +70,7 @@ namespace opencog { namespace combo {
     //for all definite_objects in tr, check if the string matches the name
     //of a procedure_call and replace it by it if so
     void instantiate_procedure_calls(combo_tree& tr,
-				     bool warn_on_definite_object=false) const;
+                                     bool warn_on_definite_object=false) const;
 
     //return a set of all procedure_call contained in a given procedure_call
     std::set<const procedure_call_base*> procedure_call_dependencies(const procedure_call_base* pc) const;
@@ -135,7 +135,7 @@ unsigned int load_procedure_repository(std::istream& in,
         while (in.peek()==' ' || in.peek()=='\n' || in.peek()=='\t')
             in.get();
         
-        if(in.peek()=='#') { //a comment line
+        if(in.peek()=='#') { // a comment line
             char tmp[LINE_CHAR_MAX];
             in.getline(tmp,LINE_CHAR_MAX);
             continue;

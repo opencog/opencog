@@ -1,4 +1,4 @@
-#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/combo.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 
 using namespace opencog;

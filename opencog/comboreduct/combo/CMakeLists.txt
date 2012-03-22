@@ -26,6 +26,8 @@ INSTALL(FILES
 	common_def.h
     simple_nn.h
     convert_ann_combo.h
+    iostream_combo.h
+    combo.h
 
 	DESTINATION
 

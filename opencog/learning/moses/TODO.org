@@ -1,13 +1,18 @@
 * MOSES
 ** Code Improvements
+- [ ] Move as many thing as possible in body files to decrease
+  recompiling time
 - [ ] refactore AntFitnessFunction moses/ant_scoring.h so that it uses
   eval in combo/eval.h
-- [ ] replace instance_t by vector<bool> (which should automatically pack everything)
+- [ ] replace instance_t by vector<bool> (which should automatically
+  pack everything)
 - [ ] make a Python binding for MOSES
 - [ ] fixed moses_exec so that it returns the right exit code
 - [ ] test option -E2 vs E3 for 11-multiplexer
-- [ ] finish integrate ANN (1-pole and 2-pole) in moses-exec and test why it has poor performance
-- [ ] comments in build_knobs::sample_logical_perms about n(n-1) and check that it's really correct
+- [ ] finish integrate ANN (1-pole and 2-pole) in moses-exec and test
+  why it has poor performance
+- [ ] comments in build_knobs::sample_logical_perms about n(n-1) and
+  check that it's really correct
 - [ ] support contin reduct effort
 - [ ] _perm_ratio is set to 0, experiment and add it to the program option
   if that is worth
@@ -15,17 +20,19 @@
   candidate to try but we're waiting for more threads to complete to
   see if can get more
 - [ ] add remaining evals in distributed moses in the log
-- [ ] added log for start "init metapop" and correct "start moses" (inside moses-exec I guess)
+- [ ] added log for start "init metapop" and correct "start moses"
+  (inside moses-exec I guess)
 - [ ] Distributed MOSES, should run an instance everytime a resource is
   free, and not wait for more merges
 - [ ] neighborhood_sampling method and other methods filling the deme
   should not assume the size is right and instead should use
   back_inserter(ret)
 - [ ] try adaptive reduct effort in moses-exec
-- [ ] in moses-exec replace boolean program options by flags (like with-blah or without-blah)
+- [ ] in moses-exec replace boolean program options by flags (like
+  with-blah or without-blah)
 - [ ] refactore test_sample_from_neighborhood in NeighborSamplingUTest
-- [ ] there are possibly confusions between eda::field_set::width_t, multiplicity_t and
-  combo::arity_t
+- [ ] there are possibly confusions between eda::field_set::width_t,
+  multiplicity_t and combo::arity_t
 - [ ] there is a big mess between score_t fitness_t and contin_t, fix
   that mess
 - [ ] refactore Pedrag slice moses code, optimization API should be

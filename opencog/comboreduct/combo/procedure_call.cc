@@ -23,12 +23,13 @@
  */
 #include "procedure_call.h"
 #include "type_tree.h"
+#include "iostream_combo.h"
 
 namespace opencog { namespace combo {
 
 procedure_call_base::procedure_call_base(const std::string& name,
                                          arity_t arity,
-                                         const combo::combo_tree& tr,
+                                         const combo_tree& tr,
                                          bool infer_type)
     : _name(name), _type_tree(id::unknown_type), _arity(arity),
       _output_type(id::unknown_type), _body(tr)

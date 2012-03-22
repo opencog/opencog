@@ -1,5 +1,7 @@
 * ComboReduct
 ** Code Improvements
+- [ ] it seems the operator== in vertex.h are not passing by reference
+  and copy instead maybe this isn't optimal
 - [ ] add a dummy action/perception vocabulary to not use
   ant_vocabulary when it is not necessary
 - [ ] moved ant evaluator as part of the ant vocabulary definition

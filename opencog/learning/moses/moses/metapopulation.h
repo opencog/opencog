@@ -1155,12 +1155,13 @@ struct metapopulation : public bscored_combo_tree_set
                  bool output_score = true,
                  bool output_complexity = false,
                  bool output_bscore = false,
-                 bool output_only_bests = false)
+                 bool output_only_bests = false,
+                 bool output_python = false)
     {
         if (!output_only_bests) {
             for (; from != to && n != 0; ++from, n--) {
                 ostream_bscored_combo_tree(out, *from, output_score,
-                                           output_complexity, output_bscore);
+                                           output_complexity, output_bscore, output_python);
             }
             return out;
         }
@@ -1182,7 +1183,7 @@ struct metapopulation : public bscored_combo_tree_set
             const bscored_combo_tree& bt = *f;
             if (best_score <= get_score(bt)) {
                 ostream_bscored_combo_tree(out, *f, output_score,
-                                           output_complexity, output_bscore);
+                                           output_complexity, output_bscore, output_python);
             }
         }
         return out;
@@ -1194,11 +1195,12 @@ struct metapopulation : public bscored_combo_tree_set
                  bool output_score = true,
                  bool output_complexity = false,
                  bool output_bscore = false,
-                 bool output_only_bests = false)
+                 bool output_only_bests = false,
+                 bool output_python = false)
     {
         return ostream(out, begin(), end(),
                        n, output_score, output_complexity,
-                       output_bscore, output_only_bests);
+                       output_bscore, output_only_bests, output_python);
     }
 
     ///  hmmm, apparently it's ambiguous with the one below, strange

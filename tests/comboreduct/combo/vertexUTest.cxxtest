@@ -1,4 +1,5 @@
 #include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/iostream_combo.h>
 
 using namespace opencog::combo;
 using namespace std;

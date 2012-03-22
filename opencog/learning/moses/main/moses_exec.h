@@ -38,8 +38,7 @@
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/oc_omp.h>
 
-#include <opencog/comboreduct/combo/eval.h>
-#include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/combo/combo.h>
 
 // for operator>> to combo
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
@@ -112,9 +111,11 @@ struct metapop_moses_results_parameters
                                      const string& _output_file,
                                      const jobs_t& _jobs,
                                      bool _only_local,
+                                     bool _output_python,
                                      bool _hc_widen_search,
                                      bool _hc_single_step,
-                                     bool _hc_crossover) :
+                                     bool _hc_crossover,
+                                     bool _hc_single_step) :
         vm(_vm), result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
@@ -125,10 +126,10 @@ struct metapop_moses_results_parameters
         enable_cache(_enable_cache), labels(_labels),
         output_file(_output_file),
         jobs(_jobs), only_local(_only_local),
+        output_python(_output_python),
         hc_widen_search(_hc_widen_search),
         hc_single_step(_hc_single_step),
-        hc_crossover(_hc_crossover)
-        {}
+        hc_crossover(_hc_crossover) {}
 
     const variables_map& vm;
     long result_count;
@@ -144,6 +145,7 @@ struct metapop_moses_results_parameters
     string output_file;
     const jobs_t& jobs;
     bool only_local;
+    bool output_python;
 
     // Not really results, but we have nowhere else to put these...
     bool hc_widen_search;
@@ -189,7 +191,9 @@ void metapop_moses_results_a(RandGen& rng,
                         pa.result_count, pa.output_score,
                         pa.output_complexity,
                         pa.output_bscore,
-                        pa.output_dominated);
+                        pa.output_dominated,
+                        pa.output_python); 
+
         if (pa.output_eval_number)
             ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
         string res = (pa.output_with_labels && !pa.labels.empty()?

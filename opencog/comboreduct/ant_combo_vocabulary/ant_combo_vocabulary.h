@@ -28,7 +28,7 @@
 #include "ant_perception.h"
 #include "ant_action_symbol.h"
 #include "ant_indefinite_object.h"
-#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/combo.h>
 
 //this namespace is defined in order to break ambiguities
 //and make coexist several vocabularies

@@ -45,6 +45,8 @@ using combo::vertex;
 using boost::indirect_iterator;
 using boost::transform_iterator;
 
+extern bool output_python;
+
 /////////////////
 // basic types //
 /////////////////
@@ -233,13 +235,20 @@ Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
 /**
  * stream out a candidate along with their scores (optionally
  * complexity and bscore).
+ *
+ * @param bool output_python if true, output is a python module instead of a combo program
  */
 template<typename Out>
 Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
                                 bool output_score = true,
                                 bool output_complexity = false,
-                                bool output_bscore = false)
+                                bool output_bscore = false,
+                                bool output_python = false)
 {
+    if(output_python)
+        return ostream_bscored_combo_tree_python(out, candidate, output_score,
+                                                 output_complexity, output_bscore);
+
     if(output_score)
         out << std::setprecision(io_score_precision)
             << get_score(candidate) << " ";
@@ -252,6 +261,49 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
     }
     return out;
 }
+
+/**
+ * stream out a candidate along with their scores (optionally
+ * complexity and bscore) as a python module
+ */
+template<typename Out>
+Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candidate,
+                                bool output_score = true,
+                                bool output_complexity = false,
+                                bool output_bscore = false)
+{
+    // ::opencog::moses::output_python = true;
+    
+    out << std::endl 
+        << "#!/usr/bin/python" << std::endl 
+        << "from operator import *" << std::endl
+        << std::endl
+        << "#These functions allow multiple args instead of lists." << std::endl
+        << "def ors(*args):" << std::endl
+        << "    return any(args)" << std::endl
+        << std::endl
+        << "def ands(*args):" << std::endl
+        << "    return all(args)" << std::endl
+        << std::endl;
+ 
+    if(output_score) {
+        out << "#score: " << std::setprecision(io_score_precision) << get_score(candidate) << std::endl;
+    }
+    if(output_complexity) {
+        out << " #complexity: " << get_complexity(candidate) << std::endl;
+    }
+    
+    out << std::endl << "def moses_eval(i):" << std::endl << "    return ";
+    out << get_tree(candidate) << std::endl;
+    
+    if(output_bscore) {    
+        out << std::endl<< "#bscore: " ;
+        ostream_behavioral_score(out, get_bscore(candidate));
+        out << std::endl;
+    }
+    return out;
+}
+
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::composite_score& ts)

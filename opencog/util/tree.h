@@ -81,6 +81,8 @@
 
 namespace opencog {
 
+// extern bool moses::output_python;
+
 namespace kp {
 
 template <class T1, class T2>
@@ -3194,6 +3196,7 @@ std::string subtree_to_string(iter it) {
             ss << subtree_to_string(sib);
         }
         ss << ")";
+        if (false/*::opencog::moses::output_python*/) ss << ",";
     }
     return ss.str();
 }

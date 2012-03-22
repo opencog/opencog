@@ -33,6 +33,7 @@
 #include <opencog/util/based_variant.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/combo/iostream_combo.h>
 
 #include "../moses/using.h"
 #include "../moses/complexity.h"

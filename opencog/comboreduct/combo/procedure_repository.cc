@@ -23,6 +23,7 @@
  */
 #include "procedure_repository.h"
 #include "type_tree.h"
+#include "iostream_combo.h"
 
 #include <boost/version.hpp>
 
