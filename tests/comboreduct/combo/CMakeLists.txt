@@ -27,6 +27,11 @@ TARGET_LINK_LIBRARIES(variable_unifierUTest
 	comboreduct
         util
 )
+ADD_CXXTEST(procedure_callUTest)
+TARGET_LINK_LIBRARIES(procedure_callUTest
+	comboreduct
+        util
+)
 ADD_CXXTEST(procedure_repositoryUTest)
 TARGET_LINK_LIBRARIES(procedure_repositoryUTest
 	comboreduct

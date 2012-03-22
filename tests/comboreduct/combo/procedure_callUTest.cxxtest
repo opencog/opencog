@@ -1,0 +1,42 @@
+/** procedure_callUTest.cxxtest --- 
+ *
+ * Copyright (C) 2012 OpenCof Foundation
+ *
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/comboreduct/combo/procedure_call.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+
+using namespace ant_combo;
+
+class procedure_callUTest : public CxxTest::TestSuite {
+public:
+
+    void test_parse_procedure_call() {
+        string add_proc("add(2) := +($1 $2) ");
+        std::stringstream ss;
+        ss << add_proc << std::endl;
+        
+        auto pc = load_procedure_call<ant_builtin_action, ant_perception, ant_action_symbol, ant_indefinite_object>(ss, true);
+        std::stringstream ss_res;
+        std::cout << pc << std::endl;
+        pc->toStream(ss_res, true);
+        TS_ASSERT_EQUALS(ss_res.str(), add_proc);
+    }
+};
