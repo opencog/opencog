@@ -14,6 +14,10 @@ import formulas
 
 from sys import stdout
 from profilestats import profile
+
+#import line_profiler
+#profiler = line_profiler.LineProfiler()
+
 from time import time
 import exceptions
 
@@ -56,6 +60,8 @@ class Chainer:
         
         global _line
         _line = 1
+        
+        #profiler.add_function(self.bc)
 
     def do_planning(self):
         try:
@@ -115,7 +121,7 @@ class Chainer:
 
 
     @profile
-    def bc(self, target):
+    def bc(self, target):        
         #import prof3d; prof3d.profile_me()
         
         try:
@@ -350,34 +356,40 @@ class Chainer:
 #        #print 'contains_isomorphic_tree', time() - start
 #        #return containing
 
-    def add_queries(self, app):
-        def goal_is_stupid(goal):
-            return goal.is_variable()
-
-        def app_is_stupid(goal):
-            #nested_implication = standardize_apart(T('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
-            # Accidentally unifies with (ImplicationLink $blah some_target) !
-            #nested_implication2 = T('ImplicationLink', T('ImplicationLink', 1, 2), 3)
-
-            # Nested ImplicationLinks
-            # skip Implications between InheritanceLinks etc as well
-            types = map(get_type, self.deduction_types)
-            if (goal.get_type() in types and len(goal.args) == 2 and
-                    (goal.args[0].get_type() in types or
-                     goal.args[1].get_type() in types) ):
-                return True
-
-            # Should actually block this one if it occurs anywhere, not just at the root of the tree.
-            very_vague = any(goal.isomorphic(standardize_apart(T(type, 1, 2))) for type in self.deduction_types)
-            return (self_implication(goal) or
-                         very_vague)
+    def _app_is_stupid(self, goal):
+        #nested_implication = standardize_apart(T('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
+        # Accidentally unifies with (ImplicationLink $blah some_target) !
+        #nested_implication2 = T('ImplicationLink', T('ImplicationLink', 1, 2), 3)
 
         # You should probably skip the app entirely if it has any self-implying goals
         def self_implication(goal):
             return any(goal.get_type() == get_type(type_name) and len(goal.args) == 2 and goal.args[0].isomorphic(goal.args[1])
                         for type_name in self.deduction_types)
 
-        if any(map(app_is_stupid, app.goals)) or app_is_stupid(app.head):
+        # Nested ImplicationLinks
+        # skip Implications between InheritanceLinks etc as well
+        types = map(get_type, self.deduction_types)
+        if (goal.get_type() in types and len(goal.args) == 2 and
+                (goal.args[0].get_type() in types or
+                 goal.args[1].get_type() in types) ):
+            return True
+
+        try:
+            self._very_vague_link_templates
+        except:
+            self._very_vague_link_templates = [standardize_apart(T(type, 1, 2)) for type in self.deduction_types]
+
+        # Should actually block this one if it occurs anywhere, not just at the root of the tree.
+        #very_vague = any(goal.isomorphic(standardize_apart(T(type, 1, 2))) for type in self.deduction_types)
+        very_vague = any(goal.isomorphic(template) for template in self._very_vague_link_templates)
+        return (self_implication(goal) or
+                     very_vague)
+
+    def add_queries(self, app):
+        def goal_is_stupid(goal):
+            return goal.is_variable()
+
+        if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head):
             return []
 
         added_queries = []
