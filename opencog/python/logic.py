@@ -8,6 +8,8 @@ from tree import *
 from util import pp, OrderedSet, concat_lists, inplace_set_attributes
 from opencog.util import log
 
+from collections import defaultdict
+
 import formulas
 
 from sys import stdout
@@ -34,6 +36,10 @@ class Chainer:
     def __init__(self, space):
         self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink']
 
+        # For an exact target (i.e. variables in exactly the same places aka isomorphic),
+        # store the list of TVs available.
+        self.target2tvs = defaultdict(list)
+
         self.space = space
         self.viz = PLNviz(space)
         self.viz.connect()
@@ -47,7 +53,7 @@ class Chainer:
 
         self.fc_later = OrderedSet()
         self.fc_before = OrderedSet()
-
+        
         global _line
         _line = 1
 
@@ -392,6 +398,7 @@ class Chainer:
         if canon not in self.apps_set:
             self.apps_set.add(canon)
             self.apps.append(app)
+        
         #if not any(app.isomorphic(existing) for existing in self.apps):
         #    self.apps.append(app)
 
@@ -420,6 +427,8 @@ class Chainer:
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
             atom_from_tree(app.head, self.space).tv = app.tv
+            
+            self.add_tv(app.head, app.tv)
             
             print (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
 
@@ -466,10 +475,21 @@ class Chainer:
         # If there are any variables in the target, and a TV is found, that means it has been proven
         # for all values of that variable.
         #rs = [r for r in rs if unify(expr, r.head, {}) != None]
-        rs = [r for r in self.rules+self.apps if expr.isomorphic(r.head)]
+        
+        canonical = expr.canonical()
+        try:
+            rs = self.target2tvs[canonical]
+            return rs
+        except KeyError:
+            return []
+    
+        #rs = [r for r in self.rules+self.apps if expr.isomorphic(r.head)]
 
-        return [r.tv for r in rs if r.tv.confidence > 0]
-        #return [r.tv for r in rs if r.tv]
+        #return [r.tv for r in rs if r.tv.confidence > 0]
+    
+    def add_tv(self, expr, tv):
+        canonical = expr.canonical()
+        self.target2tvs[canonical].append(tv)
 
 #    def is_true_weird(self, expr):
 #        #import pdb; pdb.set_trace()
@@ -481,6 +501,10 @@ class Chainer:
 
     def add_rule(self, rule):        
         self.rules.append(rule)
+        
+        # Only relevant to generators or axioms
+        canonical = rule.head.canonical()
+        self.target2tvs[canonical].append(rule.tv)
 
     def extract_plan(self, trail):
 #        def is_action(proofnode):
