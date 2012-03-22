@@ -112,6 +112,7 @@ class Tree (object):
             self.args = args
         
         self._tuple = None
+        self._is_variable = isinstance(self.op, int)
 
     def __str__(self):
         if self.is_leaf():
@@ -150,10 +151,11 @@ class Tree (object):
 
     def is_variable(self):
         "A variable is an int starting from 0"
-        return isinstance(self.op, int)
+        #return isinstance(self.op, int)
+        return self._is_variable
     
     def get_type(self):
-        if isinstance(self.op, int):
+        if self.is_variable():
             return types.Atom
         elif isinstance(self.op, Atom):
             return self.op.t
