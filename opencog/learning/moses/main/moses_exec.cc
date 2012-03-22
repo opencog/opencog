@@ -88,12 +88,12 @@ void no_input_datafile_exit() {
 void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
                              const string& input_data_file2, arity_t arity2)
 {
-    cerr << "Input file " << input_data_file1 << " has arity " << arity1
-         << "while input file " << input_data_file2 << "has_arity "
+    cerr << "File " << input_data_file1 << " has arity " << arity1
+         << " while file " << input_data_file2 << "has_arity "
          << arity2 << endl;
     exit(1);
 }
-        
+
 /**
  * Display error message about not recognized combo operator and exist
  */
