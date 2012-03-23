@@ -236,14 +236,15 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // observations. Neither the activation penalty nor the Occam's
     // razor are taken into account however.
     
-    std::function<score_t(const CTable::counter_t&)> tcf =
-        [this](const CTable::counter_t& c) {
+    auto tcf = [this](const CTable::counter_t& c) {
         return sum_outputs(c) / c.total_count();
     };
+
+    // @todo could be done in a line if boost::max_element did support
+    // C++ unanimous functions
     score_t mv = worst_score;
-    foreach(const auto& cr, ctable) {
+    foreach(const auto& cr, ctable)
         mv = max(mv, tcf(cr.second));
-    }
     return {mv};
 }
 
