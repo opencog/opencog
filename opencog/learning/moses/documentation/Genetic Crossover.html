@@ -3,69 +3,19 @@
 <html dir="ltr" lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <title>Genetic Crossover in MOSES | OpenCog Brainwave</title>
-<link rel="profile" href="http://gmpg.org/xfn/11">
 <link rel="stylesheet" type="text/css" media="all" href="./Genetic Crossover_files/style.css">
-<link rel="pingback" href="http://blog.opencog.org/xmlrpc.php">
-<link rel="alternate" type="application/rss+xml" title="OpenCog Brainwave » Feed" href="http://blog.opencog.org/feed/">
-<link rel="alternate" type="application/rss+xml" title="OpenCog Brainwave » Comments Feed" href="http://blog.opencog.org/comments/feed/">
 				
-	<script type="text/javascript" async="" src="./Genetic Crossover_files/ga.js"></script><script type="text/javascript">//<![CDATA[
-	// Google Analytics for WordPress by Yoast v4.1 | http://yoast.com/wordpress/google-analytics/
-	var _gaq = _gaq || [];
-	_gaq.push(['_setAccount','UA-11694492-3']);
-	_gaq.push(['_trackPageview'],['_trackPageLoadTime']);
-	(function() {
-		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	})();
-	//]]></script>
-<link rel="alternate" type="application/rss+xml" title="OpenCog Brainwave » Genetic Crossover in MOSES Comments Feed" href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/feed/">
-<script type="text/javascript" src="./Genetic Crossover_files/comment-reply.js"></script>
-<script type="text/javascript" src="./Genetic Crossover_files/jquery.js"></script>
-<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://blog.opencog.org/xmlrpc.php?rsd">
-<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://blog.opencog.org/wp-includes/wlwmanifest.xml"> 
-<link rel="index" title="OpenCog Brainwave" href="http://blog.opencog.org/">
-<link rel="start" title="Mapping Wordnet, RelEx to OpenCog" href="http://blog.opencog.org/2008/05/05/mapping-wordnet-relex-to-opencog/">
-<link rel="prev" title="Tuning Metalearning in MOSES" href="http://blog.opencog.org/2012/02/07/tuning-moses/">
-<meta name="generator" content="WordPress 3.0.1">
 <link rel="canonical" href="./Genetic Crossover_files/Genetic Crossover.html">
-<link rel="shortlink" href="http://blog.opencog.org/?p=370">
-<script type="text/javascript" src="./Genetic Crossover_files/lifestream.js"></script><link rel="stylesheet" type="text/css" media="screen" href="./Genetic Crossover_files/lifestream.css"><script type="text/javascript" async="" src="./Genetic Crossover_files/embed.js"></script><script src="./Genetic Crossover_files/thread.js" async="" charset="UTF-8"></script><link rel="stylesheet" type="text/css" href="./Genetic Crossover_files/defaults.css"><script src="./Genetic Crossover_files/disqus.js" async="" charset="UTF-8"></script><link rel="stylesheet" type="text/css" href="./Genetic Crossover_files/theme.css"><script src="./Genetic Crossover_files/theme.js" async="" charset="UTF-8"></script></head>
+</head>
 
 <body class="single single-post postid-370">
 <div id="wrapper" class="hfeed">
-	<div id="header">
-		<div id="masthead">
-			<div id="branding" role="banner">
-								<div id="site-title">
-					<span>
-						<a href="http://blog.opencog.org/" title="OpenCog Brainwave" rel="home">OpenCog Brainwave</a>
-					</span>
-				</div>
-				<div id="site-description">The latest developments in building an open-source mind</div>
-
-										<img src="./Genetic Crossover_files/cropped-pln-before.jpg" width="940" height="198" alt="">
-								</div><!-- #branding -->
-
-			<div id="access" role="navigation">
-			  				<div class="skip-link screen-reader-text"><a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#content" title="Skip to content">Skip to content</a></div>
-								<div class="menu-header"><ul id="menu-main" class="menu"><li id="menu-item-197" class="menu-item menu-item-type-custom menu-item-197"><a href="http://opencog.org/about">About OpenCog</a></li>
-<li id="menu-item-198" class="menu-item menu-item-type-custom menu-item-198"><a href="http://wiki.opencog.org/">Wiki</a></li>
-</ul></div>			</div><!-- #access -->
-		</div><!-- #masthead -->
-	</div><!-- #header -->
 
 	<div id="main">
 
 		<div id="container">
 			<div id="content" role="main">
 
-
-				<div id="nav-above" class="navigation">
-					<div class="nav-previous"><a href="http://blog.opencog.org/2012/02/07/tuning-moses/" rel="prev"><span class="meta-nav">←</span> Tuning Metalearning in MOSES</a></div>
-					<div class="nav-next"></div>
-				</div><!-- #nav-above -->
 
 				<div id="post-370" class="post-370 post type-post hentry category-design category-documentation category-introduction category-theory tag-genetic-algorithm tag-hillclimbing tag-learning tag-machine-learning tag-meta-learning tag-moses">
 					<h1 class="entry-title">Genetic Crossover in MOSES</h1>
@@ -101,233 +51,16 @@
 <h2>Appendix</h2>
 <p>Just to keep things honest, and to show some of the difficulty of algorithm tuning, below is a graph of some intermediate results taken during the work. &nbsp;I won’t explain what they all are, but do note one curious feature: &nbsp;the algos which advance the fastest initially seem to have trouble advancing later on. &nbsp;This suggests a somewhat “deceptive” scoring landscape: the strong early advancers get trapped in local maxima that they can’t escape. &nbsp; The weak early advancers somehow avoid these traps. &nbsp;Note also that results have some fair dependence on the random number generator seed; different algos effectively work with different random sequences, and so confuse direct comparison by some fair bit.</p>
 <div id="attachment_415" class="wp-caption alignleft" style="width: 1034px"><a href="./Genetic Crossover_files/deme-tri-more.png"><img class="size-full wp-image-415" src="./Genetic Crossover_files/deme-tri-more.png" alt="Many Different Algorithms" width="1024" height="768"></a><p class="wp-caption-text">Many Different Algorithms</p></div>
-<p class="wp-flattr-button"><iframe src="./Genetic Crossover_files/saved_resource.html" class="FlattrButton" width="110" height="20" frameborder="0" scrolling="no" border="0" marginheight="0" marginwidth="0" allowtransparency="true"></iframe></p>											</div><!-- .entry-content -->
+</div><!-- .entry-content -->
 
-					<div id="entry-author-info">
-						<div id="author-avatar">
-							<img alt="" src="./Genetic Crossover_files/14d7d1bbb01c91d5cc7e3855803dce18" class="avatar avatar-60 photo" height="60" width="60">						</div><!-- #author-avatar -->
-						<div id="author-description">
-							<h2>About Linas Vepstas</h2>
-							Computer Science Researcher							<div id="author-link">
-								<a href="http://blog.opencog.org/author/linasv/">
-									View all posts by Linas Vepstas <span class="meta-nav">→</span>								</a>
-							</div><!-- #author-link	-->
-						</div><!-- #author-description -->
-					</div><!-- #entry-author-info -->
-
-					<div class="entry-utility">
-						This entry was posted in <a href="http://blog.opencog.org/category/design/" title="View all posts in Design" rel="category tag">Design</a>, <a href="http://blog.opencog.org/category/documentation/" title="View all posts in Documentation" rel="category tag">Documentation</a>, <a href="http://blog.opencog.org/category/introduction/" title="View all posts in Introduction" rel="category tag">Introduction</a>, <a href="http://blog.opencog.org/category/theory/" title="View all posts in Theory" rel="category tag">Theory</a> and tagged <a href="http://blog.opencog.org/tag/genetic-algorithm/" rel="tag">Genetic Algorithm</a>, <a href="http://blog.opencog.org/tag/hillclimbing/" rel="tag">Hillclimbing</a>, <a href="http://blog.opencog.org/tag/learning/" rel="tag">Learning</a>, <a href="http://blog.opencog.org/tag/machine-learning/" rel="tag">Machine Learning</a>, <a href="http://blog.opencog.org/tag/meta-learning/" rel="tag">Meta-learning</a>, <a href="http://blog.opencog.org/tag/moses/" rel="tag">MOSES</a>. Bookmark the <a href="./Genetic Crossover_files/Genetic Crossover.html" title="Permalink to Genetic Crossover in MOSES" rel="bookmark">permalink</a>.											</div><!-- .entry-utility -->
 				</div><!-- #post-## -->
 
-				<div id="nav-below" class="navigation">
-					<div class="nav-previous"><a href="http://blog.opencog.org/2012/02/07/tuning-moses/" rel="prev"><span class="meta-nav">←</span> Tuning Metalearning in MOSES</a></div>
-					<div class="nav-next"></div>
-				</div><!-- #nav-below -->
-
-				
-<div id="disqus_thread"><div id="dsq-content" style="display: block; " class="clearfix">      <div id="dsq-global-toolbar" class="dsq-clearfix">        <ul class="dsq-global-toolbar-right dsq-clearfix">                    <li class="dsq-messages">                <div id="dsq-messagesx-toolbar-icon" class=" dsq-dropdown-tab dsq-toolbar-item dsq-clearfix" onclick="DISQUS.dtpl.actions.fire(&#39;messagesx.toggleBar&#39;); return false;">                    <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-message-count dsq-toolbar-label" id="dsq-messagesx-count">0</a>                </div>                <div id="dsq-messagesx-toolbar-dropdown" class="dsq-dropdown">                    <h4>Notifications</h4>                    <ul class="dsq-inbox" id="dsq-messagesx-inbox">                      <li id="dsq-inbox-no-messages">You have no messages</li>                    </ul>                </div>                <div id="dsq-alert" class="dsq-alert dsq-alert-hidden">                  <div class="dsq-alert-notch"></div>                  <p>You've received a new rank!</p>                </div>            </li>                            <li class="dsq-community-box">                <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-toolbar-item dsq-tt" onclick="DISQUS.dtpl.actions.fire(&#39;community.show&#39;); return false" title="Expand Community Box"><span class="dsq-toolbar-icon"></span></a>            </li>                            <li class="dsq-global-toolbar-dropdown-container">                    <div id="dsq-toolbar-dropdown">    <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-toolbar-logo dsq-toolbar-item dsq-clearfix"><span class="dsq-toolbar-icon">Disqus</span></a>    <div id="dsq-toolbar-dropdown-wrap" style="display: none">      <ul class="dsq-clearfix">                                    <li class="dsq-editprofile-link"><a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" onclick="return DISQUS.dtpl.actions.fire(&#39;user.remoteAccountSettings&#39;);"><span class="dsq-toolbar-icon"></span><span class="dsq-toolbar-label">Settings</span></a></li>                                      <li class="dsq-logout-link"><a href="http://disqus.com/logout/?ctkn=10d40dca1a2e58e3c71028078984346e"><span class="dsq-toolbar-icon"></span><span class="dsq-toolbar-label">Logout</span></a></li>                                <li class="dsq-about-link"><a href="http://disqus.com/" target="_blank"><span class="dsq-toolbar-icon"></span><span class="dsq-toolbar-label">About Disqus</span></a></li>      </ul>    </div>  </div>            </li>        </ul>                <ul class="dsq-global-toolbar-left dsq-clearfix">            <li class="dsq-like-thread">                <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" id="dsq-like-thread-button" class="dsq-toolbar-item dsq-clearfix  dsq-tt" onclick="DISQUS.dtpl.actions.fire(&#39;thread.vote&#39;, 1); return false;" title="I like this page">                    <span class="dsq-toolbar-icon"></span>                    <span class="dsq-toolbar-label">Like</span>                </a>            </li>            <li class="dsq-dislike-thread">                <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" id="dsq-dislike-thread-button" class="dsq-toolbar-item dsq-clearfix  dsq-tt" onclick="DISQUS.dtpl.actions.fire(&#39;thread.vote&#39;, -1); return false" title="I don&#39;t like this page">                    <span class="dsq-toolbar-icon">Dislike</span>                </a>            </li>            <li class="dsq-like-panel">                <ul class="dsq-like-faces dsq-clearfix">                        <li class="dsq-like-activity">    </li>                </ul>            </li>        </ul>            </div>    <div id="dsq-like-tooltip">      <div id="dsq-share-step-1" class="dsq-share-step">        <h3>Glad you liked it. Would you like to share?</h3>        <p class="dsq-tooltip-checkbox"><input type="checkbox" id="dsq-share-thread-facebook" value="Facebook"><label for="dsq-share-thread-facebook"><span class="dsq-facebook">Facebook</span></label></p>        <p class="dsq-tooltip-checkbox"><input type="checkbox" id="dsq-share-thread-twitter" value="Twitter"><label for="dsq-share-thread-twitter"><span class="dsq-twitter">Twitter</span></label></p>        <ul id="dsq-tooltip-actions">                        <li><a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" onclick="DISQUS.dtpl.actions.fire(&#39;thread.share.send&#39;); return false" class="dsq-primary-action">Share</a></li>                    <li><a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" onclick="DISQUS.dtpl.actions.fire(&#39;thread.share.cancel&#39;); return false" class="dsq-secondary-action">No thanks</a></li>        </ul>      </div>      <div id="dsq-share-step-2" class="dsq-share-step" style="display:none !important">        <p>Sharing this page …</p>      </div>      <div id="dsq-share-step-3" class="dsq-share-step" style="display:none !important">        <p>Thanks! <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-tooltip-decline" onclick="DISQUS.dtpl.actions.fire(&#39;thread.share.cancel&#39;); return false">Close</a></p>      </div>    </div>                                <div class="dsq-reply " id="dsq-reply">          <div id="dsq-account-dropdown">                              <a href="http://disqus.com/logout/?ctkn=10d40dca1a2e58e3c71028078984346e">Logout</a>                        </div>      <h3>Add New Comment</h3>        <div class="dsq-avatar">              <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" onclick="return DISQUS.dtpl.actions.fire(&#39;profile.show&#39;, null, &#39;google-a221b4b4e6dd199750731c51ee864a91&#39;); return false">          <img src="./Genetic Crossover_files/noavatar92.png" alt="Linas Vepstas">        </a>          </div>    <div class="dsq-textarea dsq-textarea-reply">      <div class="dsq-textarea-background">        <div class="dsq-textarea-wrapper" style="height: auto; ">          <!-- filled dynamically -->        <iframe name="easyXDM_DISQUS_net_default8401_provider" id="easyXDM_DISQUS_net_default8401_provider" scrolling="no" frameborder="0" src="./Genetic Crossover_files/reply.html" style="height: 58px; "></iframe></div>                  <div id="dsq-media-preview" class="dsq-media-preview" style="display:none">          </div>                <div class="dsq-post-tools">          <ul>            <li class="dsq-post-as">                              <button type="button" class="dsq-button" onclick="DISQUS.dtpl.actions.fire(&#39;comments.send&#39;, null, this);">                  Post as Linas Vepstas                </button>                          </li>                          <li class="dsq-attach-media">                <div class="dsq-attach-media-container">                  <span>Image</span>                  <!-- filled dynamically -->                <iframe name="easyXDM_DISQUS_net_default8402_provider" id="easyXDM_DISQUS_net_default8402_provider" scrolling="no" frameborder="0" src="./Genetic Crossover_files/upload.html"></iframe></div>              </li>                        <li class="dsq-share-on dsq-clearfix">                            </li>          </ul>        </div>      </div>    </div>  </div>                              <div id="dsq-sort-by">    <select id="dsq-sort-select" onchange="DISQUS.dtpl.actions.fire(&#39;thread.sort&#39;, this.value);">              <option value="hot" selected="selected">          Sort by popular now        </option>              <option value="best">          Sort by best rating        </option>              <option value="newest">          Sort by newest first        </option>              <option value="oldest">          Sort by oldest first        </option>          </select>  </div>      <h3>            Showing <span id="dsq-num-posts">1</span> comment        </h3>        <ul id="dsq-comments">            <li id="comment-471659184">  </li><li id="dsq-comment-471659184" data-dsq-comment-id="471659184" class="dsq-comment dsq-clearfix                        " style="margin-left:0px;">    <div class="dsq-avatar dsq-tt" title="Expand Nil Geisweiller&#39;s profile">      <a href="http://disqus.com/google-34b9f16aa6d0ab75d0040b25cd56eaf1/" onclick="DISQUS.dtpl.actions.fire(&#39;profile.show&#39;, 471659184, null); return false">        <img src="./Genetic Crossover_files/noavatar32.png" class="dsq-deferred-avatar" data-src="http://mediacdn.disqus.com/1332376993/images/noavatar32.png" alt="">      </a>    </div>    <div id="dsq-comment-body-471659184" class="dsq-comment-body">      <div class="dsq-comment-header">        <span class="dsq-commenter-name">Nil Geisweiller</span>                <span class="dsq-collapsed-count">                      1 comment collapsed                  </span>                <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-collapse-toggle dsq-collapse" title="Collapse thread" onclick="DISQUS.dtpl.actions.fire(&#39;comments.collapse&#39;, 471659184); return false;"><span>Collapse</span></a>        <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-collapse-toggle dsq-expand" title="Expand thread" onclick="DISQUS.dtpl.actions.fire(&#39;comments.expand&#39;, 471659184); return false;"><span>Expand</span></a>      </div>        <div class="dsq-comment-message" id="dsq-comment-message-471659184">                <div class="dsq-comment-text" id="dsq-comment-text-471659184">        <p>Awesome work, Linas.</p>
-
-<p>Your last remark "the algos which advance the fastest initially seem to have trouble advancing later on" is indeed pretty interesting. Maybe MOSES could do the tweaking itself depending on the target score or number of evals, etc, possibly via some form of metalearning.</p>
-
-<p>Could you briefly detail the legend of that last graph?</p>
-
-<p>Thanks...<br></p>      </div>                        </div>            <!-- edit box dynamically inserted here -->      <div id="dsq-append-edit-471659184"></div>        <div class="dsq-comment-footer">    <ul class="dsq-comment-actions">              <li id="dsq-like-471659184">          <span class="dsq-like-thumb dsq-font">A</span>          <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" onclick="DISQUS.dtpl.actions.fire(&#39;comments.like&#39;, this,471659184); return false">Like</a>        </li>                          <li>          <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-comment-reply" onclick="DISQUS.dtpl.actions.fire(&#39;comments.reply&#39;,471659184, this); return false">Reply</a>        </li>         </ul>    <ul class="dsq-comment-meta">      <li>  <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#comment-471659184" onclick="DISQUS.dtpl.actions.fire(&#39;comments.permalink&#39;, 471659184);" title="Link to comment by Nil Geisweiller">          2 days ago      </a></li>            <li style="display:none">          <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" id="dsq-comment-like-count-471659184" class="dsq-comment-like-count" onclick="return DISQUS.dtpl.actions.fire(&#39;comments.showUserVotes&#39;, 471659184); return false">0          Like      </a>      </li>              <li class="dsq-comment-flag" style="visibility: hidden">          <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-comment-flag dsq-font" onclick="return DISQUS.dtpl.actions.fire(&#39;comments.report&#39;, 471659184, false);">F</a>        </li>          </ul>  </div>      <!-- reply box dynamically inserted here -->      <div id="dsq-append-reply-471659184"></div>    </div>  </li>  <!-- new replies dynamically inserted here -->  <li id="dsq-append-post-471659184"></li>      </ul>        <div id="dsq-pagination">      <ul id="dsq-footer" class="dsq-clearfix">        <div id="dsq-subscribe">            <li>      <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#" class="dsq-subscribe-email" onclick="return DISQUS.dtpl.actions.fire(&#39;thread.subscribe&#39;);">        <span class="dsq-font">M</span> <em>Subscribe by email</em>      </a>    </li>    <li>    <a href="http://opencogbrainwave.disqus.com/genetic_crossover_in_moses/latest.rss" class="dsq-subscribe-rss">      <span class="dsq-font">S</span> <em>RSS</em>    </a>  </li>    </div>  </ul>    </div>                  <div class="dsq-trackback-url">      Trackback URL      <input onclick="this.select()" readonly="true" value="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/trackback/">    </div>      </div><div>  </div></div>
-
-<script type="text/javascript">
-/* <![CDATA[ */
-    var disqus_url = 'http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/';
-    var disqus_identifier = '370 http://blog.opencog.org/?p=370';
-    var disqus_container_id = 'disqus_thread';
-    var disqus_domain = 'disqus.com';
-    var disqus_shortname = 'opencogbrainwave';
-    var disqus_title = "Genetic Crossover in MOSES";
-        var disqus_config = function () {
-        var config = this; // Access to the config object
-
-        /* 
-           All currently supported events:
-            * preData — fires just before we request for initial data
-            * preInit - fires after we get initial data but before we load any dependencies
-            * onInit  - fires when all dependencies are resolved but before dtpl template is rendered
-            * afterRender - fires when template is rendered but before we show it
-            * onReady - everything is done
-         */
-
-        config.callbacks.preData.push(function() {
-            // clear out the container (its filled for SEO/legacy purposes)
-            document.getElementById(disqus_container_id).innerHTML = '';
-        });
-                config.callbacks.onReady.push(function() {
-            // sync comments in the background so we don't block the page
-            DISQUS.request.get('?cf_action=sync_comments&post_id=370');
-        });
-                    };
-    var facebookXdReceiverPath = 'http://blog.opencog.org/wp-content/plugins/disqus-comment-system/xd_receiver.htm';
-/* ]]> */
-</script>
-
-<script type="text/javascript">
-/* <![CDATA[ */
-    var DsqLocal = {
-        'trackbacks': [
-        ],
-        'trackback_url': "http:\/\/blog.opencog.org\/2012\/03\/20\/genetic-crossover-in-moses\/trackback\/"    };
-/* ]]> */
-</script>
-
-<script type="text/javascript">
-/* <![CDATA[ */
-(function() {
-    var dsq = document.createElement('script'); dsq.type = 'text/javascript';
-    dsq.async = true;
-    dsq.src = 'http://' + disqus_shortname + '.' + disqus_domain + '/embed.js?pname=wordpress&pver=2.65';
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-})();
-/* ]]> */
-</script>
-
-
-			</div><!-- #content -->
-		</div><!-- #container -->
-
-
-		<div id="primary" class="widget-area" role="complementary">
-			<ul class="xoxo">
-
-<li id="search-2" class="widget-container widget_search"><form role="search" method="get" id="searchform" action="http://blog.opencog.org/">
-	<div><label class="screen-reader-text" for="s">Search for:</label>
-	<input type="text" value="" name="s" id="s">
-	<input type="submit" id="searchsubmit" value="Search">
-	</div>
-	</form></li><li id="kachinglemedallion-3" class="widget-container widget_kachingle_medallion"><h3 class="widget-title">Support OpenCog</h3><!-- Kachingle Medallion 1.4: http://kachingle.com -->
-<br><!-- BEGIN KACHINGLE MEDALLION --><script type="text/javascript">if (!window.kachingle_loaded) {var _protocol = 'http'+(window.location.protocol == 'https:' ? 's' : '');document.writeln(unescape("%3Cscript type='text/javascript' src='"+_protocol+"://medallion.kachingle.com/kachingle_controls_revb.js'>%3C/script>"));}</script><script type="text/javascript" src="./Genetic Crossover_files/kachingle_controls_revb.js"></script>
-<div class="kmedallioncontainer" style="position: relative; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; background-image: none; border-top-style: none; border-right-style: none; border-bottom-style: none; border-left-style: none; border-width: initial; border-color: initial; border-image: initial; box-shadow: 0px 0px 0px; -webkit-box-shadow: 0px 0px 0px; height: 75px; width: 160px; "><iframe site="1422" stylename="neoclassical" style="margin-left: 0px; height: 75px; width: 160px; display: block; " scrolling="no" frameborder="0" allowtransparency="true" src="./Genetic Crossover_files/medallion.html"></iframe><div style="height: 74px; width: 160px; position: absolute; top: 1px; left: 0px; z-index: 1; background-color: transparent; background-image: none; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; border-top-style: none; border-right-style: none; border-bottom-style: none; border-left-style: none; border-width: initial; border-color: initial; border-image: initial; box-shadow: 0px 0px 0px; -webkit-box-shadow: 0px 0px 0px; "></div></div><!-- END KACHINGLE MEDALLION --></li>		<li id="recent-posts-2" class="widget-container widget_recent_entries">		<h3 class="widget-title">Recent Posts</h3>		<ul>
-				<li><a href="./Genetic Crossover_files/Genetic Crossover.html" title="Genetic Crossover in MOSES">Genetic Crossover in MOSES</a></li>
-				<li><a href="http://blog.opencog.org/2012/02/07/tuning-moses/" title="Tuning Metalearning in MOSES">Tuning Metalearning in MOSES</a></li>
-				<li><a href="http://blog.opencog.org/2011/08/04/virtual-learning-environment/" title="Preview of a virtual learning environment">Preview of a virtual learning environment</a></li>
-				<li><a href="http://blog.opencog.org/2011/05/20/opencog-recap-may-2011/" title="OpenCog Recap – March to May 2011">OpenCog Recap – March to May 2011</a></li>
-				<li><a href="http://blog.opencog.org/2011/02/21/destin-vision-development/" title="DeSTIN vision development">DeSTIN vision development</a></li>
-				</ul>
-		</li><li id="lifestream-2" class="widget-container widget_lifestream"><h3 class="widget-title">Activity</h3>	<ul class="lifestream">
-			<li class="lifestream_feedid_2 lifestream_feed_twitter" style="background-image: url(&#39;http://blog.opencog.org/wp-content/plugins/lifestream/extensions/twitter/icon.png&#39;);">
-			<div class="lifestream_text">
-				<div class="lifestream_label">RT <a class="user" href="http://www.twitter.com/dhart">@dhart</a>: OpenCog Foundation accepted for Google Summer of Code 2012 <a href="https://t.co/x0dulUrD">https://t.co/x0dulUrD</a> <a class="searchterm" href="https://search.twitter.com/search?q=%23GSOC">#GSOC</a> <a class="searchterm" href="https://search.twitter.com/search?q=%23OpenCog">#OpenCog</a></div>
-									<div class="lifestream_meta">— <abbr title="2012-03-17T00:23:55+00:00" class="lifestream_hour">March 17th</abbr> <span class="lifestream_via">via <a href="http://www.twitter.com/opencog">Twitter</a></span></div>
-											</div>
-		</li>
-				<li class="lifestream_feedid_2 lifestream_feed_twitter" style="background-image: url(&#39;http://blog.opencog.org/wp-content/plugins/lifestream/extensions/twitter/icon.png&#39;);">
-			<div class="lifestream_text">
-				<div class="lifestream_label">RT <a class="user" href="http://www.twitter.com/ferrouswheel">@ferrouswheel</a>: On that note, the HK <a class="user" href="http://www.twitter.com/opencog">@opencog</a> project is looking for developers: <a href="http://t.co/tAxsT5yD">http://t.co/tAxsT5yD</a></div>
-									<div class="lifestream_meta">— <abbr title="2011-10-22T10:16:11+00:00" class="lifestream_hour">October 22nd</abbr> <span class="lifestream_via">via <a href="http://www.twitter.com/opencog">Twitter</a></span></div>
-											</div>
-		</li>
-				<li class="lifestream_feedid_2 lifestream_feed_twitter" style="background-image: url(&#39;http://blog.opencog.org/wp-content/plugins/lifestream/extensions/twitter/icon.png&#39;);">
-			<div class="lifestream_text">
-				<div class="lifestream_label">RT <a class="user" href="http://www.twitter.com/ferrouswheel">@ferrouswheel</a>: Amused to find out people are making predictions about whether <a class="user" href="http://www.twitter.com/opencog">@opencog</a> will reach v1.0 in Dec 2012.</div>
-									<div class="lifestream_meta">— <abbr title="2011-10-22T10:16:09+00:00" class="lifestream_hour">October 22nd</abbr> <span class="lifestream_via">via <a href="http://www.twitter.com/opencog">Twitter</a></span></div>
-											</div>
-		</li>
-				<li class="lifestream_feedid_2 lifestream_feed_twitter" style="background-image: url(&#39;http://blog.opencog.org/wp-content/plugins/lifestream/extensions/twitter/icon.png&#39;);">
-			<div class="lifestream_text">
-				<div class="lifestream_label">Videos of what we've been working on <a href="http://t.co/qATDqQR">http://t.co/qATDqQR</a></div>
-									<div class="lifestream_meta">— <abbr title="2011-08-04T02:48:54+00:00" class="lifestream_hour">August 4th</abbr> <span class="lifestream_via">via <a href="http://www.twitter.com/opencog">Twitter</a></span></div>
-											</div>
-		</li>
-				<li class="lifestream_feedid_3 lifestream_feed_generic" style="background-image: url(&#39;http://opencog.org/wp-content/plugins/lifestream/extensions/youtube/icon.png&#39;);">
-			<div class="lifestream_text">
-				<div class="lifestream_label">Posted <a href="http://youtube.com/?v=m65Jn4-zCvM">Stephen Hawking Answers Eric Schmidt's Question about AI</a>.</div>
-									<div class="lifestream_meta">— <abbr title="2011-05-29T01:46:37+00:00" class="lifestream_hour">May 29th</abbr> <span class="lifestream_via">via <a href="http://www.referd.info/tag/opencog/rss.php">Youtube</a></span></div>
-											</div>
-		</li>
-				<li class="lifestream_feedid_2 lifestream_feed_twitter" style="background-image: url(&#39;http://blog.opencog.org/wp-content/plugins/lifestream/extensions/twitter/icon.png&#39;);">
-			<div class="lifestream_text">
-				<div class="lifestream_label">OpenCog Recap for May 2011: <a href="http://blog.opencog.org/2011/05/20/opencog-recap-may-2011/">http://blog.opencog.org/2011/05/20/opencog-recap-may-2011/</a> <a class="searchterm" href="https://search.twitter.com/search?q=%23ai">#ai</a> <a class="searchterm" href="https://search.twitter.com/search?q=%23machinelearning">#machinelearning</a></div>
-									<div class="lifestream_meta">— <abbr title="2011-05-20T04:39:31+00:00" class="lifestream_hour">May 20th</abbr> <span class="lifestream_via">via <a href="http://www.twitter.com/opencog">Twitter</a></span></div>
-											</div>
-		</li>
-				<li class="lifestream_feedid_2 lifestream_feed_twitter" style="background-image: url(&#39;http://blog.opencog.org/wp-content/plugins/lifestream/extensions/twitter/icon.png&#39;);">
-			<div class="lifestream_text">
-				<div class="lifestream_label">OpenCog now has Python bindings thanks to <a class="user" href="http://www.twitter.com/ferrouswheel">@ferrouswheel</a> <a href="http://wiki.opencog.org/w/Python">http://wiki.opencog.org/w/Python</a></div>
-									<div class="lifestream_meta">— <abbr title="2011-05-16T16:00:03+00:00" class="lifestream_hour">May 16th</abbr> <span class="lifestream_via">via <a href="http://www.twitter.com/opencog">Twitter</a></span></div>
-											</div>
-		</li>
-			</ul>
-	</li><li id="recent-comments-2" class="widget-container widget_recent_comments"><h3 class="widget-title">Recent Comments</h3><ul id="recentcomments"><li class="recentcomments">Nil Geisweiller on <a href="http://blog.opencog.org/2012/03/20/genetic-crossover-in-moses/#comment-90">Genetic Crossover in MOSES</a></li><li class="recentcomments"><a href="http://twitter.com/chhean" rel="external nofollow" class="url">chhean</a> on <a href="http://blog.opencog.org/2012/02/07/tuning-moses/#comment-87">Tuning Metalearning in MOSES</a></li><li class="recentcomments">Rob on <a href="http://blog.opencog.org/2009/01/12/determining-word-senses-from-grammatical-usage/#comment-86">Determining word senses from grammatical usage</a></li><li class="recentcomments"><a href="http://ferrouswheel.me/" rel="external nofollow" class="url">J P</a> on <a href="http://blog.opencog.org/2012/02/07/tuning-moses/#comment-85">Tuning Metalearning in MOSES</a></li><li class="recentcomments"><a href="http://mdude1350.livejournal.com/" rel="external nofollow" class="url">MDude1350</a> on <a href="http://blog.opencog.org/2011/08/04/virtual-learning-environment/#comment-83">Preview of a virtual learning environment</a></li></ul></li><li id="archives-2" class="widget-container widget_archive"><h3 class="widget-title">Archives</h3>		<ul>
-			<li><a href="http://blog.opencog.org/2012/03/" title="March 2012">March 2012</a></li>
-	<li><a href="http://blog.opencog.org/2012/02/" title="February 2012">February 2012</a></li>
-	<li><a href="http://blog.opencog.org/2011/08/" title="August 2011">August 2011</a></li>
-	<li><a href="http://blog.opencog.org/2011/05/" title="May 2011">May 2011</a></li>
-	<li><a href="http://blog.opencog.org/2011/02/" title="February 2011">February 2011</a></li>
-	<li><a href="http://blog.opencog.org/2010/12/" title="December 2010">December 2010</a></li>
-	<li><a href="http://blog.opencog.org/2010/09/" title="September 2010">September 2010</a></li>
-	<li><a href="http://blog.opencog.org/2010/08/" title="August 2010">August 2010</a></li>
-	<li><a href="http://blog.opencog.org/2010/02/" title="February 2010">February 2010</a></li>
-	<li><a href="http://blog.opencog.org/2009/11/" title="November 2009">November 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/10/" title="October 2009">October 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/09/" title="September 2009">September 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/07/" title="July 2009">July 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/06/" title="June 2009">June 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/04/" title="April 2009">April 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/03/" title="March 2009">March 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/02/" title="February 2009">February 2009</a></li>
-	<li><a href="http://blog.opencog.org/2009/01/" title="January 2009">January 2009</a></li>
-	<li><a href="http://blog.opencog.org/2008/10/" title="October 2008">October 2008</a></li>
-	<li><a href="http://blog.opencog.org/2008/09/" title="September 2008">September 2008</a></li>
-	<li><a href="http://blog.opencog.org/2008/08/" title="August 2008">August 2008</a></li>
-	<li><a href="http://blog.opencog.org/2008/07/" title="July 2008">July 2008</a></li>
-	<li><a href="http://blog.opencog.org/2008/06/" title="June 2008">June 2008</a></li>
-	<li><a href="http://blog.opencog.org/2008/05/" title="May 2008">May 2008</a></li>
-		</ul>
-</li><li id="categories-2" class="widget-container widget_categories"><h3 class="widget-title">Categories</h3>		<ul>
-	<li class="cat-item cat-item-3"><a href="http://blog.opencog.org/category/administravia/" title="View all posts filed under Administravia">Administravia</a>
-</li>
-	<li class="cat-item cat-item-4"><a href="http://blog.opencog.org/category/design/" title="View all posts filed under Design">Design</a>
-</li>
-	<li class="cat-item cat-item-5"><a href="http://blog.opencog.org/category/development/" title="View all posts filed under Development">Development</a>
-</li>
-	<li class="cat-item cat-item-6"><a href="http://blog.opencog.org/category/documentation/" title="View all posts filed under Documentation">Documentation</a>
-</li>
-	<li class="cat-item cat-item-7"><a href="http://blog.opencog.org/category/events/" title="View all posts filed under Events">Events</a>
-</li>
-	<li class="cat-item cat-item-8"><a href="http://blog.opencog.org/category/introduction/" title="View all posts filed under Introduction">Introduction</a>
-</li>
-	<li class="cat-item cat-item-9"><a href="http://blog.opencog.org/category/meta/" title="View all posts filed under Meta">Meta</a>
-</li>
-	<li class="cat-item cat-item-11"><a href="http://blog.opencog.org/category/theory/" title="View all posts filed under Theory">Theory</a>
-</li>
-		</ul>
-</li><li id="meta-2" class="widget-container widget_meta"><h3 class="widget-title">Meta</h3>			<ul>
-						<li><a href="http://blog.opencog.org/wp-login.php">Log in</a></li>
-			<li><a href="http://blog.opencog.org/feed/" title="Syndicate this site using RSS 2.0">Entries <abbr title="Really Simple Syndication">RSS</abbr></a></li>
-			<li><a href="http://opencogbrainwave.disqus.com/latest.rss" title="The latest comments to all posts in RSS">Comments <abbr title="Really Simple Syndication">RSS</abbr></a></li>
-			<li><a href="http://wordpress.org/" title="Powered by WordPress, state-of-the-art semantic personal publishing platform.">WordPress.org</a></li>
-						</ul>
-</li>			</ul>
 		</div><!-- #primary .widget-area -->
 
 	</div><!-- #main -->
 
-	<div id="footer" role="contentinfo">
-		<div id="colophon">
-
-
-
-			<div id="site-info">
-				<a href="http://blog.opencog.org/" title="OpenCog Brainwave" rel="home">
-					OpenCog Brainwave				</a>
-			</div><!-- #site-info -->
-
-			<div id="site-generator">
-								<a href="http://wordpress.org/" title="Semantic Personal Publishing Platform" rel="generator">
-					Proudly powered by WordPress.				</a>
-			</div><!-- #site-generator -->
-
-		</div><!-- #colophon -->
-	</div><!-- #footer -->
-
 </div><!-- #wrapper -->
 
-<script type="text/javascript" src="./Genetic Crossover_files/load.js"></script>
+</div>
 
-
-<iframe name="easyXDM_DISQUS_net_default8400_provider" id="easyXDM_DISQUS_net_default8400_provider" style="position: absolute; top: -2000px; left: 0px; " frameborder="0" src="./Genetic Crossover_files/def.html"></iframe><script src="./Genetic Crossover_files/saved_resource" charset="UTF-8"></script><div style="width: 468px; position: absolute; z-index: 2147483647; "><iframe style="height: 324px; width: 468px; display: none; " allowtransparency="true" scrolling="no" frameborder="0" src="./Genetic Crossover_files/medallion(1).html"></iframe><img src="./Genetic Crossover_files/close.png" style="position: absolute; top: 0px; right: 0px; z-index: 1; display: none; cursor: pointer; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; border-image: initial; "></div></body></html>
+</body></html>
