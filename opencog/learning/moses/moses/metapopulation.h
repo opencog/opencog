@@ -709,7 +709,7 @@ struct metapopulation : public bscored_combo_tree_set
         OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
         // Behavioural scores are needed only if domination-based
-        // merging is asked for.  Save CPU timke by not computing them.
+        // merging is asked for.  Save CPU time by not computing them.
         if (!params.include_dominated) {
             logger().debug("Compute behavioral score of %d selected candidates",
                            pot_candidates.size());
