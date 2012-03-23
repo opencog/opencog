@@ -1,0 +1,96 @@
+set term png size 1024,768
+# set term png size 640,480
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key right
+
+# =======================================================
+set out 'deme-tri.png'
+set xlabel "evaluation count"
+set ylabel "score"
+set title "Score vs. Evaluation Count, Bank Data"
+# set logscale x
+
+#    "deme-tri-nn11.data" using 3:9 title "nn11"
+#    "deme-tri-nn17.data" using 4:11 title "nn17"
+
+set key left
+set xrange [1:50000]
+set yrange [-600:0]
+plot "deme-tri.data" using 4:10 title "1+2+3 every 10", \
+     "deme-tri-rescan.data" using 4:11 title "1+2+3 rescan", \
+     "deme-tri-6654.data" using 4:11 title "rev6654", \
+     "deme-tri-nn16.data" using 4:11 title "nn16", \
+     "deme-tri-nn18.data" using 4:11 title "nn18", \
+     "deme-tri-nn28.data" using 4:11 title "nn28", \
+     "deme-tri-nn27.data" using 4:11 title "exhasutive basleine"
+
+# =======================================================
+set out 'deme-tri-more.png'
+set xlabel "Evaluation Count"
+set ylabel "Score"
+set title "Score vs. Evaluation Count, Bank Data"
+# set logscale x
+
+set key left
+set xrange [1:150000]
+set yrange [-200:-80]
+plot "deme-tri.data" using 4:10 title "1+2+3 every 10", \
+     "deme-tri-rescan.data" using 4:11 title "1+2+3 rescan", \
+     "deme-tri-6654.data" using 4:11 title "rev6654", \
+     "deme-tri-nn16.data" using 4:11 title "nn16", \
+     "deme-tri-nn18.data" using 4:11 title "nn18", \
+     "deme-tri-nn28.data" using 4:11 title "nn28", \
+     "deme-tri-nn27.data" using 4:11 title "exhaustive baseline"
+
+# =======================================================
+# Graph time, in milliseconds, to evaluate one instance
+# (i.e. knob-turn, score, etc.) Graph is per-unit-complexity
+# as otherwise the time goes up as the complexity of the 
+# instance goes up.  Noise graph, but mostly straight between
+# 0.2 and 0.6 milliseconds per eval.
+#
+set out 'deme-time.png'
+set xlabel "evaluation count"
+set ylabel "time (milliseconds)"
+set title "Evaluation time per unit complexity"
+
+set key left
+set xrange [1:50000]
+set yrange [0:1]
+# column 5 is the elapsed time in microsecs.
+# column 6 is the number of instances
+# column 13 is the complexity
+plot "deme-tri-rescan.data" using 4:($5/($6*$13*1000)) title ""
+
+# =======================================================
+set out 'deme-tri-ba.png'
+set xlabel "Evaluation Count"
+set ylabel "Score"
+set title "Score Improvement, by Iteration, Bank Data"
+# set logscale x
+
+set key left
+set xrange [1:50000]
+set yrange [-600:0]
+plot "deme-tri-nn27.data" using 4:11 title "exhastive", \
+     "deme-tri-nn28.data" using 4:11 title "simplex", \
+     "deme-tri-nn29.data" using 4:11 title "simplex nn"
+
+# =======================================================
+set term png size 640,480
+set out 'deme-tri-ti.png'
+set xlabel "Time (seconds)"
+set ylabel "Score"
+set title "Score vs. Time, Bank Data"
+
+set key left
+set xrange [1:900]
+set yrange [-500:0]
+plot sum27 = 0, sum28 = 0, sum29 = 0 \
+     "deme-tri-nn27.data" using (sum27 = sum27 + $5/1000000):11 title "exhastive", \
+     "deme-tri-nn29.data" using (sum29 = sum29 + $5/1000000):11 title "simplex"
+
+#      "deme-tri-nn28.data" using (sum28 = sum28 + $5/1000000):11 title "simplex", 

@@ -1,0 +1,18 @@
+set term png size 1024,768
+# set term png size 640,480
+set out 'hc.png'
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key left
+
+set xlabel "yah"
+set ylabel "score"
+set title "bank data"
+set yrange [-500:-300]
+
+plot "hc.data" using 1:3 title "prev", \
+     "hc.data" using 1:4 title "curr"
+
+#     "hc.data" using 1:($3-$4) title "delta"

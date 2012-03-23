@@ -1,0 +1,19 @@
+set term png size 1024,768
+set term png size 640,480
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key right
+
+# =======================================================
+set out 'hc-20.png'
+set xlabel "Instance Number"
+set ylabel "Score"
+set title "Nearest Neighbor Score, bank dataset"
+set xrange [0:120]
+set yrange [-300:-270]
+
+plot "hc-20.data" using 1:4 title "scores", \
+     "hc-20.data" using 1:2 title "previous high score" with lines
+

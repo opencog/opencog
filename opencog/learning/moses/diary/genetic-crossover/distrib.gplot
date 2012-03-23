@@ -1,0 +1,89 @@
+set term png size 1024,768
+set term png size 640,480
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key right
+
+# =======================================================
+set out 'distrib-parity.png'
+set xlabel "instance number"
+set ylabel "(weighted) score"
+set title "nearest neighbor score distribution (4-parity)"
+
+plot "parity-4.data" using 1:5 title "scores", \
+     "parity-4.data" using 1:3 title "previous high score" with lines
+
+# =======================================================
+set out 'distrib-avg-parity.png'
+set xlabel "instance number"
+set ylabel "(weighted) score"
+set title "nearest neighbor score distribution (4-parity)"
+
+plot "parity-avg.data" using 1:4 title "scores", \
+     "parity-avg.data" using 1:2 title "previous high score" with lines
+
+# =======================================================
+set out 'distrib-avg-parity-r1.png'
+set xlabel "instance number"
+set ylabel "(weighted) score"
+set title "nearest neighbor score distribution (4-parity)"
+
+plot "parity-avg-r1.data" using 1:4 title "scores", \
+     "parity-avg-r1.data" using 1:2 title "previous high score" with lines
+
+# =======================================================
+set out 'distrib-avg-bank-r0.png'
+set xlabel "Instance Number"
+set ylabel "(Average) Score Change"
+set title "Nearest Neighbor Score Change, bank dataset"
+
+set xrange [0:130]
+# plot "bank-avg-r0.data" using 1:4 title "scores", \
+#      "bank-avg-r0.data" using 1:2 title "previous high score" with lines
+plot "bank-avg-r0.data" using 1:($4-$2) title "", \
+     "bank-avg-r0.data" using 1:($2-$2) title "" with lines
+
+unset xrange
+
+# =======================================================
+set out 'distrib-avg-bank-r1.png'
+set xlabel "instance number"
+set ylabel "(weighted) score"
+set title "nearest neighbor score, bank data"
+
+plot "bank-avg-r1.data" using 1:4 title "scores", \
+     "bank-avg-r1.data" using 1:2 title "previous high score" with lines
+
+# =======================================================
+set out 'distrib-avg-bank-1-plex.png'
+set xlabel "Instance Number"
+set ylabel "(Average) Score Change"
+set title "1-simplex Score, bank data"
+
+plot "bank-avg-1-plex.data" using 1:($4-$2) title "", \
+     "bank-avg-1-plex.data" using 1:($2-$2) title "" with lines
+
+
+# =======================================================
+set out 'distrib-avg-bank-2-plex.png'
+set xlabel "Instance Number"
+set ylabel "(Average) Score Change"
+set title "2-simplex Score, bank data"
+
+set xrange [0:70]
+plot "bank-avg-2-plex.data" using 1:($4-$2) title "", \
+     "bank-avg-2-plex.data" using 1:($2-$2) title "" with lines
+
+# =======================================================
+set out 'distrib-avg-bank-3-plex.png'
+set xlabel "Instance Number"
+set ylabel "(Average) Score Change"
+set title "3-simplex Score, bank data"
+
+set xrange [0:160]
+set xzeroaxis
+plot "bank-avg-3-plex.data" using 1:($4-$2) title "", \
+     "bank-avg-3-plex.data" using 1:($2-$2) title "" with lines
+

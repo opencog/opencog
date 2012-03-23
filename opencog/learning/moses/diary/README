@@ -8,3 +8,14 @@ and design decisions.
 -- directory complexity-temperature:
    Graphs for understanding/changing the way select_exemplar() works,
    circa January/February 2012, bzr revisions 6530-6580 or so.
+   See ../documentation/Select_Exemplar.html for the formal write-up of
+   these results.
+
+-- directory genetic-crossover:
+   Graphs for exploring optimistic extrapolation in a modified
+   nearest-neighbor search.  Details changes in the bzr rev 6620-6683
+   or thereabouts. Research results documented in 
+   ../documentation/Genetic Crossover.html
+
+
+
