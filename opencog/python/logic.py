@@ -13,6 +13,7 @@ from collections import defaultdict
 import formulas
 
 from sys import stdout
+# You can use kcachegrind on cachegrind.out.profilestats
 from profilestats import profile
 
 #import line_profiler
@@ -405,7 +406,7 @@ class Chainer:
                 self.add_tree_to_index(goal, self.bc_later)
                 added_queries.append(goal)
                 log.info(format_log('+BCQ', goal, app.name))
-                stdout.flush()
+                #stdout.flush()
 
         # This records the path of potential rule-apps found on the way down the search tree,
         # so that results can be propogated back up that path. If you just did normal forward

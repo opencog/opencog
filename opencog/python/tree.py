@@ -112,7 +112,6 @@ class Tree (object):
             self.args = args
         
         self._tuple = None
-        self._is_variable = isinstance(self.op, int)
 
     def __str__(self):
         if self.is_leaf():
@@ -152,6 +151,10 @@ class Tree (object):
     def is_variable(self):
         "A variable is an int starting from 0"
         #return isinstance(self.op, int)
+        try:
+            self._is_variable
+        except:            
+            self._is_variable = isinstance(self.op, int)
         return self._is_variable
     
     def get_type(self):
@@ -334,10 +337,8 @@ def unify(x, y, s):
     if s == None:
         return None
     # Not compatible with RPyC as it will make one of them 'netref t'
-#    elif type(x) != type(y):
-#        return None
-    elif tx == ty and x == y:
-        return s
+    elif tx != ty:
+        return None
     elif tx == Tree and x.is_variable():
         return unify_var(x, y, s)
     elif ty == Tree and y.is_variable():
@@ -348,10 +349,17 @@ def unify(x, y, s):
         return unify(x.args,  y.args, s2)
 
     # Recursion to handle arguments.
-    elif tx == list and ty == list and len(x) == len(y):
-        # unify all the arguments (works with any number of arguments, including 0)
-        s2 = unify(x[0], y[0], s)
-        return unify(x[1:], y[1:], s2)
+    elif tx == list and ty == list:
+        if len(x) == len(y):
+            if len(x) == 0:
+                return s
+            else:
+                # unify all the arguments
+                s2 = unify(x[0], y[0], s)
+                return unify(x[1:], y[1:], s2)
+
+    elif tx == ty and x == y:
+        return s
         
     else:
         return None
