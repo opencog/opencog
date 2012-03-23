@@ -665,4 +665,9 @@ ostream& operator<<(ostream& out, const complete_truth_table& tt)
     return ostreamContainer(out, tt);
 }
 
+ostream& operator<<(ostream& out, const CTable& ct)
+{
+    return ostreamCTable(out, ct);
+}
+
 }} // ~namespaces combo opencog

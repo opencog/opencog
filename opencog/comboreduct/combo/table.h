@@ -727,6 +727,8 @@ std::ostream& operator<<(std::ostream& out, const OTable& ot);
 
 std::ostream& operator<<(std::ostream& out, const complete_truth_table& tt);
 
+std::ostream& operator<<(std::ostream& out, const CTable& ct);
+
 }} // ~namespaces combo opencog
 
 
