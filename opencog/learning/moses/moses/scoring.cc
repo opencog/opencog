@@ -29,8 +29,11 @@
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/range/algorithm/max_element.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
@@ -44,6 +47,7 @@ using namespace std;
 using boost::adaptors::map_values;
 using boost::adaptors::map_keys;
 using boost::adaptors::filtered;
+using boost::adaptors::transformed;
 using boost::transform;
 using namespace boost::phoenix;
 using boost::phoenix::arg_names::arg1;
@@ -169,11 +173,12 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     type_node output_type = *type_tree_output_type_tree(ctable.tt).begin();
     if (output_type == id::boolean_type) {
         vertex target = bool_to_vertex(positive);
-        sum_outputs = [target](CTable::counter_t& c)->score_t {
-            return c[target];
+        sum_outputs = [target](const CTable::counter_t& c)->score_t {
+            auto it = c.find(target);
+            return (it == c.cend()? 0.0 : it->second);
         };
     } else if (output_type == id::contin_type) {
-        sum_outputs = [this](CTable::counter_t& c)->score_t {
+        sum_outputs = [positive](const CTable::counter_t& c)->score_t {
             score_t res = 0.0;
             foreach(const CTable::counter_t::value_type& cv, c)
                 res += get_contin(cv.first) * cv.second;
@@ -194,7 +199,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
     boost::for_each(ctable | map_values, ot,
-                    [&](CTable::counter_t& c, const vertex& v) {
+                    [&](const CTable::counter_t& c, const vertex& v) {
                         if (v == id::logical_true) {
                             sao += sum_outputs(c);
                             active += c.total_count();
@@ -225,13 +230,21 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_bscore::best_possible_bscore() const
 {
-    // the best possible precision is 1 with no activation penalty
-    behavioral_score bs = {1, 0};
-
-    // add the Occam's razor feature
-    if(occam)
-        bs.push_back(0);
-    return bs;
+    // Return the maximum value one can get with a particular
+    // input. To reach that maximum value the activation will be the
+    // counts of that input divided by the total count of
+    // observations. Neither the activation penalty nor the Occam's
+    // razor are taken into account however.
+    
+    std::function<score_t(const CTable::counter_t&)> tcf =
+        [this](const CTable::counter_t& c) {
+        return sum_outputs(c) / c.total_count();
+    };
+    score_t mv = worst_score;
+    foreach(const auto& cr, ctable) {
+        mv = max(mv, tcf(cr.second));
+    }
+    return {mv};
 }
 
 score_t precision_bscore::get_activation_penalty(score_t activation) const

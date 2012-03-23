@@ -323,8 +323,7 @@ struct precision_bscore : public bscore_base
     
     score_t min_improv() const;
 
-    mutable CTable ctable;         // mutable because accessing a missing
-                                   // element adds it in the map.
+    CTable ctable;
     unsigned ctable_usize;                  // uncompressed size of ctable
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
@@ -337,7 +336,7 @@ private:
     score_t get_activation_penalty(score_t activation) const;
     // function to calculate the total weight of the observations
     // associated to an input vector
-    std::function<score_t(CTable::counter_t&)> sum_outputs;
+    std::function<score_t(const CTable::counter_t&)> sum_outputs;
 };
         
 /**
