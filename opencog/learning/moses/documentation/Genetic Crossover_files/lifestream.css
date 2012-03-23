@@ -1,0 +1,60 @@
+/* generic css */
+.lifestream a { background: none; padding: 0; }
+.lifestream_date { text-align: left; margin-bottom:5px; }
+.lifestream_icon a,
+.lifestream_text a { padding: 0 !important; background-image: none !important; display: inline !important; }
+.lifestream_icon a { text-decoration: none !important; }
+.lifestream_icon { width: 16px; }
+.lifestream .lifestream_meta { color: #aaa; font-size:x-small; }
+.lifestream_text { padding: 0 0.5em; text-align: left; }
+.lifestream img { border: 0; vertical-align: middle; }
+.lifestream_blogpost { font-size: 93%; margin-top: 5px; padding-left: 5px; font-style: italic; }
+/* table specific css */
+table.lifestream { border: 0; border-spacing: collapse; width: 100%; }
+table.lifestream td.lifestream_hour { text-align: center; padding: 3px 0.5em; width: 50px; }
+.lifestream abbr { text-decoration: none; border: 0; }
+table.lifestream td.lifestream_icon { padding: 3px 0.5em; }
+table.lifestream td { vertical-align: top; padding: 3px 0; }
+
+.lifestream_feedid_flickr div a { padding: 2px; }
+#sidebar .lifestream ul, .lifestream ul { list-style-type: none; margin: 0; padding: 0; }
+
+.lifestream_more span { color: #006699; text-decoration: underline; cursor: pointer; }
+
+/* list specific css */
+#sidebar ul.lifestream, ul.lifestream { list-style-type: none; margin: 0 0; padding: 0 5px; }
+#sidebar ul.lifestream li, ul.lifestream li { padding: 0 0 0 24px; margin: 5px 0; background-repeat: no-repeat !important; background-position: 0 0; }
+#sidebar ul.lifestream li a, ul.lifestream li a { display: inline; }
+#sidebar ul.lifestream li li { font-size: 85%; margin-left: 0; padding-left: 0; }
+#sidebar ul.lifestream ul { margin-left: 0; padding-left: 0; }
+/* fix for default wp theme */
+.lifestream li:before { content: none !important; }
+ul.lifestream .lifestream_hour { font-size: smaller; }
+ul.lifestream .lifestream_text { padding-left: 0; }
+ul.lifestream .lifestream_feedid_flickr .lifestream_hour { display: none; }
+
+.lifestream_text ul {
+    margin: 5px 0;
+    padding: 0;
+    list-style-type: none;
+    font-size: small;
+}
+html > body .lifestream_text li,
+.lifestream_text li {
+    margin: 1px 0;
+    padding: 2px;
+}
+.lifestream_text .photo img { border: 1px solid #aaa; padding: 2px; margin: 0 0 3px 0; }
+.lifestream_text .photo:hover img { border: 1px solid #006699; }
+
+.lifestream_events { margin-top: 2px; }
+.lifestream_credits { margin-bottom: 50px;}
+
+/* wp 3.0 new theme */
+#content tr td.lifestream_icon {
+    padding: 3px 3px 3px 9px;
+}
+#content tr td.lifestream_text {
+    padding: 6px;
+}
+#main .widget-area ul ul.lifestream { list-style: none; margin-left: 0; }

@@ -1,0 +1,36 @@
+/* NOTE on making changes to the stylesheets */
+/* Whenever making ANY change to this stylesheet, medallion.skin should be modified by		*/
+/* incrementing the value of the "nocache" parameter in the statement that loads the stylesheet.*/ 
+/* This will force every user to load the new stylesheet exactly once without caching, and then */
+/* return to their normal caching behavior thereafter.						*/
+
+/*
+  html5doctor.com Reset Stylesheet (Eric Meyer's Reset Reloaded + HTML5 baseline)
+  v1.4 2009-07-27 | Authors: Eric Meyer & Richard Clark
+  html5doctor.com/html-5-reset-stylesheet/
+*/
+html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, figure, footer, header, hgroup, menu, nav, section, menu, time, mark, audio, video { margin: 0; padding: 0; border: 0; outline: 0; font-size: 100%; vertical-align: baseline; }
+blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none; }
+nav ul { list-style: none }
+body { }
+article, aside, figure, footer, header, hgroup, nav, section { display: block }
+blockquote, q { quotes: none }
+a { margin: 0; padding: 0; font-size: 100%; vertical-align: baseline; background: transparent; }
+ins { background-color: #ff9; color: #000; text-decoration: none; }
+mark { background-color: #ff9; color: #000; font-style: italic; font-weight: bold; }
+del { text-decoration: line-through }
+abbr[title], dfn[title] { border-bottom: 1px dotted #000; cursor: help; }
+/* END RESET CSS */
+
+/* maxvoltar.com/archive/-webkit-font-smoothing */
+html { -webkit-font-smoothing: antialiased }
+
+
+/* Color Specific */ 
+.orange { background-color: #ff992c }
+.purple { background-color: #8A00D0 }
+.green { background-color: #5ab501 }
+.blue { background-color: #007ed6 }
+.red { background-color: #e21505 }
+.grey { background-color: #aaaaaa }
+
