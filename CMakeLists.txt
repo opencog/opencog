@@ -121,7 +121,8 @@ SET(Boost_USE_MULTITHREADED ON)
 
 # Required boost packages
 # hypertable requires boost iostreams
-FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem iostreams regex serialization signals system thread REQUIRED)
+# boost-1.49 no longer has a libboost_iostreams  
+FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
 
 # Optional boost packages; can build without these.
 # Arghhh. Except cmake is treating these as required, not optional. #$%**&
