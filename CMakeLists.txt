@@ -10,7 +10,8 @@
 #
 include(lib/Summary.cmake)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+# Seems to work fine with cmake-2.6 but previously, cmake-2.8 was required!?
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
 	CMAKE_POLICY(SET CMP0005 OLD)
