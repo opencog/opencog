@@ -66,7 +66,7 @@ struct Counter : public std::map<T, CT>,
     }
     Counter(const std::initializer_list<value_type>& il) {
         foreach(const auto& v, il)
-            operator[](v.first) = v.second;
+            this->operator[](v.first) = v.second;
     }
 
     // return the total of all counted elements
@@ -83,7 +83,7 @@ struct Counter : public std::map<T, CT>,
     // c1 = {'a':1, 'b':2, 'c':3}
     Counter& operator+=(const Counter& other) {
         foreach(const auto& v, other)
-            operator[](v.first) += v.second;
+            this->operator[](v.first) += v.second;
         return *this;
     }
     /// @todo add method to subtract, multiply, etc Counters, or
