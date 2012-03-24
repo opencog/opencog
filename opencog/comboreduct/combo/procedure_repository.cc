@@ -26,11 +26,13 @@
 
 #include <boost/version.hpp>
 
-// this is to avoid a boost bug
-#if BOOST_VERSION >= 104000
-#if BOOST_VERSION <= 104400
+// There is some kind of bug in Boost version 1.40 through 1.44
+// There's a different bug in Boost 1.49:  the graph classes define a
+// boost::get() template function which interferes with the 
+// boost::get() defined by boost::variant (needed by combo::vertex).
+#if ((BOOST_VERSION >= 104000) && (BOOST_VERSION <= 104400)) || \
+    (BOOST_VERSION == 104900)
 #define IGNORE_BOOST_GRAPH
-#endif
 #endif
 
 #ifndef IGNORE_BOOST_GRAPH
