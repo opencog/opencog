@@ -178,11 +178,11 @@ precision_bscore::precision_bscore(const CTable& _ctable,
             return (it == c.cend()? 0.0 : it->second);
         };
     } else if (output_type == id::contin_type) {
-        sum_outputs = [positive](const CTable::counter_t& c)->score_t {
+        sum_outputs = [this](const CTable::counter_t& c)->score_t {
             score_t res = 0.0;
             foreach(const CTable::counter_t::value_type& cv, c)
                 res += get_contin(cv.first) * cv.second;
-            return (positive? res : -res);
+            return (this->positive? res : -res);
         };
     }
 
