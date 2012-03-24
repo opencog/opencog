@@ -227,29 +227,30 @@ int nf_mapper<T>::add_item(sib_it item)
 {
     typename Item2Int::const_iterator item_loc = _item2int.find(item);
 
-    if (item_loc != _item2int.end()) //found it directly
+    // If found, return the index.
+    if (item_loc != _item2int.end())
         return item_loc->second;
 
-    if (argument* arg = boost::get<argument>(&*item)) { //search for its negative
+
+    // Perhaps its under minus-the-index?
+    if (argument* arg=boost::get<argument>(&*item)) {
         arg->negate();
         item_loc = _item2int.find(item);
         arg->negate();
-        return (item_loc == _item2int.end()) ? //add it if can't find its negative
-            _item2int.insert(make_pair
-                             (item,
-                              _int2item.insert
-                              (make_pair(_int2item.size() + 1,
-                                         item)).first->first)).first->second
-            :
-            -item_loc->second;
+        if (item_loc != _item2int.end()) {
+            return -item_loc->second;
+        }
     }
 
-    //add it directly
+    // Add it directly
+    int next_id = _int2item.size() + 1;
+    tree tr = tree(*item);
+
+    std::pair<int, tree> pr = make_pair(next_id, tr);
+
     return _item2int.insert(make_pair
                             (item,
-                             _int2item.insert
-                             (make_pair(_int2item.size() + 1,
-                                        item)).first->first)).first->second;
+                             _int2item.insert(pr).first->first)).first->second;
 }
 
 template<typename T>
