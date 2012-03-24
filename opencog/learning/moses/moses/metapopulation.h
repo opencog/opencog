@@ -874,12 +874,17 @@ struct metapopulation : public bscored_combo_tree_set
         //////////////
         // rec case //
         //////////////
+#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 6)
+ #define LAUNCH_SYNC std::launch::sync
+#else
+ #define LAUNCH_SYNC std::launch::deferred
+#endif
         bscored_combo_tree_ptr_vec_pair bcv_p = split(bcv);
         if (jobs > 1) { // multi-threaded
             auto s_jobs = split_jobs(jobs); // pair
             // recursive calls
             std::future<bscored_combo_tree_ptr_vec> task =
-                std::async(jobs > 1 ? std::launch::async : std::launch::sync,
+                std::async(jobs > 1 ? std::launch::async : LAUNCH_SYNC,
                            bind(&self::get_nondominated_rec, this,
                                 bcv_p.first, s_jobs.first));
             bscored_combo_tree_ptr_vec bcv2_nd =
