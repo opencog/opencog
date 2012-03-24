@@ -328,6 +328,9 @@ struct precision_bscore : public bscore_base
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     score_t min_activation, max_activation;
+    score_t max_denorm_precision; // uppper bound of the maximum
+                                  // denormalized precision for that
+                                  // CTable
     score_t penalty;
     RandGen& rng;
     bool positive;

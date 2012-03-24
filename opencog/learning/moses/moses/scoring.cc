@@ -185,11 +185,21 @@ precision_bscore::precision_bscore(const CTable& _ctable,
             return (positive? res : -res);
         };
     }
+
+    // max precision
+    auto tcf = [this](const CTable::counter_t& c) {
+        return sum_outputs(c) / c.total_count();
+    };
+    // @todo could be done in a line if boost::max_element did support
+    // C++ anonymous functions
+    max_denorm_precision = worst_score;
+    foreach(const auto& cr, ctable)
+        max_denorm_precision = max(max_denorm_precision, tcf(cr.second));
 }
 
 behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 {
-    // The OTable constructor takes the combo tree tr and evaluate it
+    // The OTable constructor takes the combo tree tr and evaluates it
     // for every row of input in ctt. (The rng is passed straight
     // through to the combo evaluator).
     OTable ot(tr, ctable, rng);
@@ -205,19 +215,19 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
                             active += c.total_count();
                         }});
 
-    // add precision component
-    score_t precision = sao / active,
+    // add (normalized) precision
+    score_t precision = (sao / active) / max_denorm_precision,
         activation = (score_t)active / ctable_usize;
     logger().fine("precision = %f", precision);
     bs.push_back(precision);
     
-    // add activation_penalty component
+    // add activation_penalty
     score_t activation_penalty = get_activation_penalty(activation);
     logger().fine("activation = %f", activation);
     logger().fine("activation penalty = %e", activation_penalty);
     bs.push_back(activation_penalty);
     
-    // Add the Occam's razor component
+    // Add the Occam's razor
     if (occam)                  // we divide by the number of active
                                 // observations as to normalize the
                                 // Occam's razor as well
@@ -230,22 +240,9 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_bscore::best_possible_bscore() const
 {
-    // Return the maximum value one can get with a particular
-    // input. To reach that maximum value the activation will be the
-    // counts of that input divided by the total count of
-    // observations. Neither the activation penalty nor the Occam's
-    // razor are taken into account however.
-    
-    auto tcf = [this](const CTable::counter_t& c) {
-        return sum_outputs(c) / c.total_count();
-    };
-
-    // @todo could be done in a line if boost::max_element did support
-    // C++ unanimous functions
-    score_t mv = worst_score;
-    foreach(const auto& cr, ctable)
-        mv = max(mv, tcf(cr.second));
-    return {mv};
+    // we do not take into account activation penalty nor Occam's
+    // razor
+    return {1};
 }
 
 score_t precision_bscore::get_activation_penalty(score_t activation) const
