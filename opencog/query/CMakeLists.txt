@@ -11,13 +11,19 @@ ADD_LIBRARY(query SHARED
 )
 
 ADD_DEPENDENCIES(query
-  opencog_atom_types
+	opencog_atom_types
 )
 
-TARGET_LINK_LIBRARIES(query
-  smob
-  server
-)
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(query
+		smob
+		server
+	)
+ELSE (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(query
+		server
+	)
+ENDIF (HAVE_GUILE)
 
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
