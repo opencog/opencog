@@ -26,8 +26,8 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/vertex
 	combo/using
 	combo/variable_unifier
-    combo/simple_nn
-    combo/convert_ann_combo
+	combo/simple_nn
+	combo/convert_ann_combo
 
 	reduct/action_reduction
 	reduct/action_rules
@@ -39,7 +39,7 @@ ADD_LIBRARY(comboreduct SHARED
 	reduct/general_rules
 	reduct/logical_reduction
 	reduct/ann_reduction
-    reduct/logical_rules
+	reduct/logical_rules
 	reduct/meta_rules
 	reduct/mixed_reduction
 	reduct/mixed_rules
@@ -53,16 +53,15 @@ ADD_LIBRARY(comboreduct SHARED
 	ant_combo_vocabulary/ant_action_symbol
 	ant_combo_vocabulary/ant_indefinite_object
 	ant_combo_vocabulary/ant_combo_vocabulary
-
 )
 
 TARGET_LINK_LIBRARIES (comboreduct
-    util
+	util
 )
 
 #install library
 IF (WIN32)
-   INSTALL(TARGETS comboreduct DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL(TARGETS comboreduct DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ELSE (WIN32)
-   INSTALL(TARGETS comboreduct LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL(TARGETS comboreduct LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ENDIF (WIN32)
