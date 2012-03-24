@@ -3,7 +3,10 @@
     ---------------------------------------------------------------
 
 Subdirectories contain assorted notes and data used to make coding
-and design decisions.
+and design decisions.  These are raw notes and data.  They are not going
+to be explained in any sort of greater detail than what can already be
+found within them.  They are meant to be a record of the research, so as
+to assist future verification or regression testing, etc.
 
 -- directory complexity-temperature:
    Graphs for understanding/changing the way select_exemplar() works,
@@ -14,7 +17,7 @@ and design decisions.
 -- directory genetic-crossover:
    Graphs for exploring optimistic extrapolation in a modified
    nearest-neighbor search.  Details changes in the bzr rev 6620-6683
-   or thereabouts. Research results documented in 
+   or thereabouts. Circa Feb/March 2012.  Research results documented in 
    ../documentation/Genetic Crossover.html
 
 
