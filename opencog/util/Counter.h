@@ -50,8 +50,8 @@ struct Counter : public std::map<T, CT>,
     template<typename IT>
     void init(IT from, IT to) {
         while(from != to) {
-            operator[](*from) += 1;  // we don't use ++ to put the
-                                     // least assumption on on CT
+            this->operator[](*from) += 1;  // we don't use ++ to put the
+                                           // least assumption on on CT
             ++from;
         }
     }
