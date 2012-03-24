@@ -50,7 +50,8 @@ int number_of_literals(const nf& f);
 
 //(p X)(!p Y) implies (X Y); this function finds all such matches
 template<typename Out>
-void implications(const clause& c1,const clause& c2,Out out) {
+void implications(const clause& c1,const clause& c2,Out out)
+{
     for (clause::const_iterator it1=c1.begin();it1!=c1.end();++it1) {
         for (clause::const_iterator it2=c2.begin();it2!=c2.end();++it2) {
             if (*it1==-*it2) {
@@ -67,7 +68,8 @@ void implications(const clause& c1,const clause& c2,Out out) {
 }
 
 template<typename BinaryPredicate>
-void pairwise_erase_if(nf& f,const BinaryPredicate& p) {
+void pairwise_erase_if(nf& f,const BinaryPredicate& p)
+{
     nf::iterator c1=f.begin();
     while (c1!=f.end()) {
         nf::iterator next1=c1,c2=f.begin();
@@ -90,7 +92,8 @@ void pairwise_erase_if(nf& f,const BinaryPredicate& p) {
 }
 
 template<typename T>
-class nf_mapper {
+class nf_mapper
+{
 public:
     typedef opencog::tree<T> tree;
     typedef typename tree::sibling_iterator sib_it;
@@ -117,7 +120,8 @@ protected:
 };
 
 template<typename T>
-nf nf_mapper<T>::add_cnf(sib_it from,sib_it to) {
+nf nf_mapper<T>::add_cnf(sib_it from,sib_it to)
+{
     nf res(distance(from,to));
     for (nf::iterator out=res.begin();out!=res.end();++from,++out)
         if (*from==id::logical_or)
@@ -127,8 +131,10 @@ nf nf_mapper<T>::add_cnf(sib_it from,sib_it to) {
             out->insert(add_item(from));
     return res;
 }
+
 template<typename T>
-nf nf_mapper<T>::add_dnf(sib_it from,sib_it to) {
+nf nf_mapper<T>::add_dnf(sib_it from,sib_it to)
+{
     nf res(distance(from,to));
     for (nf::iterator out=res.begin();out!=res.end();++from,++out)
         if (*from==id::logical_and)
@@ -141,7 +147,8 @@ nf nf_mapper<T>::add_dnf(sib_it from,sib_it to) {
 
 template<typename T>
 template<typename It>
-void nf_mapper<T>::extract_cnf(It from,It to,tree& t,sib_it sib) const {
+void nf_mapper<T>::extract_cnf(It from,It to,tree& t,sib_it sib) const
+{
     t.erase_children(sib);
     for (nf::const_iterator c=from;c!=to;++c)
         if (c->size()==1) {
@@ -163,7 +170,8 @@ void nf_mapper<T>::extract_cnf(It from,It to,tree& t,sib_it sib) const {
 
 template<typename T>
 template<typename It>
-void nf_mapper<T>::extract_dnf(It from,It to,tree& t,sib_it sib) const {
+void nf_mapper<T>::extract_dnf(It from,It to,tree& t,sib_it sib) const
+{
     t.erase_children(sib);
     for (nf::const_iterator c=from;c!=to;++c)
         if (c->empty()) {
@@ -189,7 +197,8 @@ void nf_mapper<T>::extract_dnf(It from,It to,tree& t,sib_it sib) const {
 
 template<typename T>
 void nf_mapper<T>::extract_conjunction(const clause& c,
-                                       tree& t,sib_it sib) const {
+                                       tree& t,sib_it sib) const
+{
     if (c.size()==1) {
         if (*c.begin()!=0) {
             if (*c.begin()<0) {
@@ -214,21 +223,22 @@ void nf_mapper<T>::extract_conjunction(const clause& c,
 }
 
 template<typename T>
-int nf_mapper<T>::add_item(sib_it item) {
-    typename Item2Int::const_iterator item_loc=_item2int.find(item);
+int nf_mapper<T>::add_item(sib_it item)
+{
+    typename Item2Int::const_iterator item_loc = _item2int.find(item);
 
-    if (item_loc!=_item2int.end()) //found it directly
+    if (item_loc != _item2int.end()) //found it directly
         return item_loc->second;
 
-    if (argument* arg=boost::get<argument>(&*item)) { //search for its negative
+    if (argument* arg = boost::get<argument>(&*item)) { //search for its negative
         arg->negate();
-        item_loc=_item2int.find(item);
+        item_loc = _item2int.find(item);
         arg->negate();
-        return (item_loc==_item2int.end()) ? //add it if can't find its negative
+        return (item_loc == _item2int.end()) ? //add it if can't find its negative
             _item2int.insert(make_pair
                              (item,
                               _int2item.insert
-                              (make_pair(_int2item.size()+1,
+                              (make_pair(_int2item.size() + 1,
                                          item)).first->first)).first->second
             :
             -item_loc->second;
@@ -238,12 +248,13 @@ int nf_mapper<T>::add_item(sib_it item) {
     return _item2int.insert(make_pair
                             (item,
                              _int2item.insert
-                             (make_pair(_int2item.size()+1,
+                             (make_pair(_int2item.size() + 1,
                                         item)).first->first)).first->second;
 }
 
 template<typename T>
-void nf_mapper<T>::create(tree& t,sib_it at,int idx) const {
+void nf_mapper<T>::create(tree& t,sib_it at,int idx) const
+{
     if (idx<0) {
         get_argument(*t.append_child
                      (typename tree::pre_order_iterator(at),
