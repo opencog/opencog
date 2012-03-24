@@ -1110,12 +1110,16 @@ std::ostream& operator<<(std::ostream&, const opencog::combo::vertex&);
 } // ~namespace opencog
 
 // this is to be able to use std::unordered_map and such
-namespace std {
+namespace std
+{
     template<>
-    inline size_t
-    hash<opencog::combo::vertex>::operator()(opencog::combo::vertex v) const {
-        return opencog::combo::hash_value(v);
-    }
+    struct hash<opencog::combo::vertex>
+    {
+        size_t operator()(opencog::combo::vertex v) const
+        {
+            return opencog::combo::hash_value(v);
+        }
+    };
 }
 
 #endif
