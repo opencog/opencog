@@ -39,7 +39,10 @@ ADD_CXXTEST(AtomSpaceWrapperUTest)
 ADD_CXXTEST(BITNodeUTest)
 ADD_CXXTEST(ASSOCUTest)
 ADD_CXXTEST(PLNUtilsUTest)
-ADD_CXXTEST(PLNSchemeWrapperUTest)
+
+IF (HAVE_GUILE)
+	ADD_CXXTEST(PLNSchemeWrapperUTest)
+ENDIF (HAVE_GUILE)
 
 # At this point, PLNUTest requires either libexpat or the Scheme
 # subsystem since axioms are loaded from files.
