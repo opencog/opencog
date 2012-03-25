@@ -147,7 +147,7 @@ void local_structure_model::sample(dtree::iterator dtr, disc_t& dst,
     } else {
         OC_ASSERT(dtr->size() == 1,
                   "dtree node size should be equals to 1.");
-        OC_ASSERT((int)dtr.number_of_children() > margs[dtr->front()],
+        OC_ASSERT(dtr.number_of_children() > margs[dtr->front()],
                   "dtree node children number grearter than margs.");
         dtree::sibling_iterator child = dtr.begin();
         child += margs[dtr->front()];
