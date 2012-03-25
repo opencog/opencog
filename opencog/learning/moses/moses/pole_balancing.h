@@ -8,6 +8,7 @@ namespace opencog {
 class CartPole {
 public:
     CartPole(bool randomize,bool velocity);
+    virtual ~CartPole() {}
     virtual void simplifyTask();  
     virtual void nextTask();
     virtual double evalNet(combo::ann *net);
