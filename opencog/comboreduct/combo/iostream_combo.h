@@ -39,16 +39,37 @@
 
 namespace opencog { namespace combo {
 
-// enum format {
-//     combo,
-//     python,
-//     format_count                // to get the number of formats
-// }
+namespace fmt {
+enum format {
+    combo,
+    python,
+    format_count                // to get the number of formats
+};
+}
+typedef fmt::format format;
 
-// // like operator<< but can choose the output format
-// std::ostream& ostream_combo(std::ostream&,
-//                             const combo::vertex&,
-//                             format f = combo);
+// like operator<< but can choose the output format
+std::ostream& ostream_builtin(std::ostream&, const builtin&, format f = fmt::combo);
+std::ostream& ostream_argument(std::ostream&, const argument&, format f = fmt::combo);
+std::ostream& ostream_vertex(std::ostream&, const vertex&, format f = fmt::combo);
+std::ostream& ostream_combo_tree(std::ostream&, const combo_tree, format f = fmt::combo);
+template<typename Iter>
+std::ostream& ostream_combo_it(std::ostream& out, Iter it, format f = fmt::combo) {
+    ostream_vertex(out, *it, f);
+    if (it.number_of_children() > 0) {
+        out << "(";
+        auto sib = it.begin();
+        ostream_combo_it(out, sib, f);
+        for (; sib != it.end(); ++sib) {
+            out << " ";
+            ostream_combo_it(out, sib, f);
+        }
+        out << ")";
+        if (f == fmt::python)
+            out << ",";
+    }
+    return out;
+}
 
 // return false if the string has no match
 inline bool builtin_str_to_vertex(const std::string& str, vertex& v)

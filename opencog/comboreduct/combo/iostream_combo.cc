@@ -30,11 +30,133 @@ namespace opencog { namespace combo {
 using namespace std;
 using namespace boost;
 
-//bool moses::output_python;
-
 // uncomment this to output a negative literal !$n instead of not($n)
 #define ABBREVIATE_NEGATIVE_LITERAL
 
+ostream& ostream_builtin(ostream& out, const builtin& h, format f)
+{
+    switch(f) {
+    case fmt::python:
+        switch (h) {
+        case id::null_vertex:
+            return out << "null_vertex";
+        case id::logical_and:
+            return out << "ands";
+        case id::logical_or:
+            return out << "ors";
+        case id::logical_not:
+            return out << "not";
+        case id::logical_true:
+            return out << "True";
+        case id::logical_false:
+            return out << "False";
+        default:
+            return out << "Builtin: " << h << " unknown";
+        }
+    case fmt::combo:
+        switch (h) {
+        case id::null_vertex:
+            return out << "null_vertex";
+        case id::logical_and:
+            return out << "and";
+        case id::logical_or:
+            return out << "or";
+        case id::logical_not:
+            return out << "not";
+        case id::logical_true:
+            return out << "true";
+        case id::logical_false:
+            return out << "false";
+        case id::contin_if:
+            return out << "contin_if";
+        case id::boolean_if:
+            return out << "boolean_if";
+        case id::plus:
+            return out << "+";
+        case id::times:
+            return out << "*";
+        case id::div:
+            return out << "/";
+        case id::log:
+            return out << "log";
+        case id::exp:
+            return out << "exp";
+        case id::sin:
+            return out << "sin";
+        case id::greater_than_zero:
+            return out << "0<";
+        case id::impulse:
+            return out << "impulse";
+        case id::rand:
+            return out << "rand";
+        default:
+            return out << "Builtin " << h << " unknown";
+        }
+    default:
+        return out << "Format " << f << " unknown";
+    }
+}
+
+ostream& ostream_argument(ostream& out, const argument& a, format f)
+{
+    switch(f) {
+    case fmt::python:
+        if (a.is_negated())        
+            return out << "not(i[" << -a.idx - 1 << "]),";
+        return out << "i[" << a.idx - 1 << "],";
+    case fmt::combo:
+#ifdef ABBREVIATE_NEGATIVE_LITERAL
+        return ostream_abbreviate_literal(out, a);
+#else
+        if (a.is_negated())        
+            return out << "not($" << -a.idx << ")";
+        return out << "$" << a.idx << vm;
+#endif
+    default:
+        return out << "Format " << f << "unknown";
+    }    
+}
+
+ostream& ostream_vertex(ostream& out, const vertex& v, format f)
+{
+    if (const ann_type* z = get<ann_type>(&v))
+        return out << (*z);
+    if (const argument* a = get<argument>(&v))
+        return ostream_argument(out, *a, f);
+    if (const builtin* h = get<builtin>(&v))
+        return ostream_builtin(out, *h, f);
+    if (const wild_card* w = get<wild_card>(&v))
+        return out << (*w);
+    if (const action* act = get<action>(&v))
+        return out << (*act);
+    if (const builtin_action* aact = get<builtin_action>(&v))
+        return out << (*aact);
+    if (const perception* per = get<perception>(&v))
+        return out << (*per);
+    if (const indefinite_object*
+            iot = get<indefinite_object>(&v))
+        return out << (*iot);
+    if (const message* m = get<message>(&v))
+        return out << (*m);
+    if (const definite_object* dot = get<definite_object>(&v))
+        return out << (*dot);
+    if (const action_symbol* as = get<action_symbol>(&v))
+        return out << (*as);
+    if (const procedure_call* cp = get<procedure_call>(&v)) {
+        return out << (*cp);
+    }
+    return out << get<contin_t>(v);
+}
+
+std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree ct, format f) {
+    for (combo_tree::iterator it=ct.begin(); it!=ct.end(); ++it) {
+        ostream_combo_it(out, it, f);
+        it.skip_children();
+        out << " ";
+    }
+    return out;
+}
+        
 string ph2l(const string& ce, const vector<string>& labels)
 {
     /// @todo the implementation could be done in 2 lines with
@@ -102,9 +224,8 @@ string l2ph(const string& ce, const vector<string>& labels)
     return res;
 }
 
-ostream& operator<<(ostream& out, const opencog::combo::ann_type& h)
+ostream& operator<<(ostream& out, const ann_type& h)
 {
-    using namespace opencog::combo;
     switch (h.id) {
     case id::ann:
         return out << "ann";
@@ -117,72 +238,13 @@ ostream& operator<<(ostream& out, const opencog::combo::ann_type& h)
    }
 }
 
-ostream& operator<<(ostream& out, const opencog::combo::builtin& h)
+ostream& operator<<(ostream& out, const builtin& h)
 {
-    using namespace opencog::combo;
-
-    if(false/*::opencog::moses::output_python*/) {
-        switch (h) {
-        case id::null_vertex:
-            return out << "null_vertex";
-        case id::logical_and:
-            return out << "ands";
-        case id::logical_or:
-            return out << "ors";
-        case id::logical_not:
-            return out << "not";
-        case id::logical_true:
-            return out << "True";
-        case id::logical_false:
-            return out << "False";
-        default:
-            return out << "BUILTIN_UNKNOWN_HANDLE";
-        }
-    }
-    
-    switch (h) {
-    case id::null_vertex:
-        return out << "null_vertex";
-    case id::logical_and:
-        return out << "and";
-    case id::logical_or:
-        return out << "or";
-    case id::logical_not:
-        return out << "not";
-    case id::logical_true:
-        return out << "true";
-    case id::logical_false:
-        return out << "false";
-    case id::contin_if:
-        return out << "contin_if";
-    case id::boolean_if:
-        return out << "boolean_if";
-    case id::plus:
-        return out << "+";
-    case id::times:
-        return out << "*";
-    case id::div:
-        return out << "/";
-    case id::log:
-        return out << "log";
-    case id::exp:
-        return out << "exp";
-    case id::sin:
-        return out << "sin";
-    case id::greater_than_zero:
-        return out << "0<";
-    case id::impulse:
-        return out << "impulse";
-    case id::rand:
-        return out << "rand";
-    default:
-        return out << "BUILTIN : UNKNOWN_HANDLE";
-    }
+    return ostream_builtin(out, h, fmt::combo);
 }
 
-ostream& operator<<(ostream& out, const opencog::combo::wild_card& w)
+ostream& operator<<(ostream& out, const wild_card& w)
 {
-    using namespace opencog::combo;
     switch (w) {
     case id::asterisk:
         return out << "_*_";
@@ -191,63 +253,21 @@ ostream& operator<<(ostream& out, const opencog::combo::wild_card& w)
     }
 }
 
-ostream& ostream_abbreviate_literal(ostream& out, const opencog::combo::argument& a) {
-    using namespace opencog::combo;
+ostream& ostream_abbreviate_literal(ostream& out, const argument& a) {
     if(a.is_negated()) {
         return out << "!$" << -a.idx;
     }
     return out << "$" << a.idx;
 }
 
-ostream& operator<<(ostream& out, const opencog::combo::argument& a)
+ostream& operator<<(ostream& out, const argument& a)
 {
-    using namespace opencog::combo;
-    
-    if(false/*::opencog::moses::output_python*/) {
-        if (a.is_negated())        
-            return out << "not(i[" << -a.idx - 1 << "]),";
-        return out << "i[" << a.idx - 1 << "],";
-    }
-    
-#ifdef ABBREVIATE_NEGATIVE_LITERAL
-    return ostream_abbreviate_literal(out, a);
-#else
-    if (a.is_negated())        
-        return out << "not($" << -a.idx << ")";
-    return out << "$" << a.idx << vm;
-#endif
+    return ostream_argument(out, a, fmt::combo);
 }
 
-ostream& operator<<(ostream& out, const opencog::combo::vertex& v)
+ostream& operator<<(ostream& out, const vertex& v)
 {
-    using namespace opencog::combo;
-    if (const ann_type* z = get<ann_type>(&v))
-        return out << (*z);
-    if (const argument* a = get<argument>(&v))
-        return out << (*a);
-    if (const builtin* h = get<builtin>(&v))
-        return out << (*h);
-    if (const wild_card* w = get<wild_card>(&v))
-        return out << (*w);
-    if (const action* act = get<action>(&v))
-        return out << (*act);
-    if (const builtin_action* aact = get<builtin_action>(&v))
-        return out << (*aact);
-    if (const perception* per = get<perception>(&v))
-        return out << (*per);
-    if (const indefinite_object*
-            iot = get<indefinite_object>(&v))
-        return out << (*iot);
-    if (const message* m = get<message>(&v))
-        return out << (*m);
-    if (const definite_object* dot = get<definite_object>(&v))
-        return out << (*dot);
-    if (const action_symbol* as = get<action_symbol>(&v))
-        return out << (*as);
-    if (const procedure_call* cp = get<procedure_call>(&v)) {
-        return out << (*cp);
-    }
-    return out << get<contin_t>(v);
+    return ostream_vertex(out, v, fmt::combo);
 }
 
 }} // ~namespaces combo opencog

@@ -100,7 +100,6 @@ enum wild_card {
 typedef id::wild_card wild_card;
 
 
-
 /*
   class argument
     represents the index, attribute idx, of an input variable

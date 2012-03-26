@@ -35,7 +35,7 @@
 #include <opencog/util/foreach.h>
 #include <opencog/util/iostreamContainer.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/combo.h>
 #include "complexity.h"
 
 namespace opencog { namespace moses {
@@ -272,8 +272,6 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
                                 bool output_complexity = false,
                                 bool output_bscore = false)
 {
-    // ::opencog::moses::output_python = true;
-    
     out << std::endl 
         << "#!/usr/bin/python" << std::endl 
         << "from operator import *" << std::endl
@@ -294,7 +292,8 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
     }
     
     out << std::endl << "def moses_eval(i):" << std::endl << "    return ";
-    out << get_tree(candidate) << std::endl;
+    ostream_combo_tree(out, get_tree(candidate), combo::fmt::python);
+    out << std::endl;
     
     if(output_bscore) {    
         out << std::endl<< "#bscore: " ;
