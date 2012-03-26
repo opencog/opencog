@@ -55,7 +55,7 @@ const rule& full_reduction(opencog::RandGen& rng)
                                                    id::boolean_type),
                                          downwards(reduce_ors(),
                                                    id::boolean_type))),
-                    downwards(remove_unary_junctors(),id::boolean_type),
+                    downwards(remove_unary_junctors(), id::boolean_type),
                     
                     //simple contin
                     downwards(reduce_plus_times_one_child()),
@@ -150,8 +150,7 @@ const rule& full_reduction(opencog::RandGen& rng)
                                                    id::boolean_type),
                                          downwards(reduce_ors(),
                                                    id::boolean_type))),
-                    downwards(remove_unary_junctors(),
-                              id::boolean_type),
+                    downwards(remove_unary_junctors(), id::boolean_type),
                     
                     //simple contin
                     downwards(reduce_plus_times_one_child()),

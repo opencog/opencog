@@ -203,7 +203,8 @@ void representation::get_clean_combo_tree(combo_tree &tr,
 
     if (reduce) { //reduce
         if (logger().isFineEnabled()) {
-            logger().fine() << "Reduce candidate: " << tr;
+            logger().fine() << "Reduce (knob=" << knob_building
+                            << ") candidate: " << tr;
         }
         if (knob_building)
             (*get_simplify_knob_building())(tr);

@@ -245,54 +245,54 @@ void reduce_or_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) c
     }
 }
 
-/// heuristic reduction of ORs based on complementary pairs:
-/// 1) pairwise implications of conjuncts (X&&a)||((Y&&!a) impl  X&&Y
+/// Heuristic reduction of ORs based on complementary pairs:
+/// 1) pairwise implications of conjuncts (X && a) || ((Y && !a) impl  X && Y
 /// 2) for all pairs of conjuncts, including implications (in X)
 ///    if X is a subset of (or equal to) Y, remove Y
 /// Also, true||X -> true, false||X -> X
 void reduce_ors::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    if (*it!=id::logical_or)
+    if (*it != id::logical_or)
         return;
 
-    //first construct a mapping between items and ints,
-    //and convert all conjunctions to this format
+    // First construct a mapping between items and ints,
+    // and convert all conjunctions to this format.
     nf_mapper<vertex> mapper;
-    nf f(mapper.add_dnf(tr.begin(it),tr.end(it)));
-    int sz=number_of_literals(f);
+    nf f(mapper.add_dnf(tr.begin(it), tr.end(it)));
+    int sz = number_of_literals(f);
 
-    //before this method will work, need to eliminate A&&!A clauses
-    f.remove_if(bind(tautology,_1));
+    // Before this method will work, need to eliminate A && !A clauses.
+    f.remove_if(bind(tautology, _1));
 
-    //remove clauses which are subsets of others
-    pairwise_erase_if(f,bind(subset_eq,_1,_2));
+    // Remove clauses which are subsets of others.
+    pairwise_erase_if(f, bind(subset_eq, _1, _2));
 
-    //create implications (and remove subsets) we could be cleverer by trying
-    //implications with implications, and/or not updating right a way, but it
-    //makes things more complicated and in practice doesn't seem to lead to
-    //appreciable further reduction
-    for (nf::iterator c1=f.begin();c1!=f.end();++c1) {
-        for (nf::iterator c2=f.begin();c2!=c1;++c2) {
+    // Create implications (and remove subsets).  We could be cleverer
+    // by trying implications with implications, and/or not updating
+    // right a way, but it makes things more complicated and in practice
+    // doesn't seem to lead to appreciable further reduction.
+    for (nf::iterator c1 = f.begin(); c1 != f.end(); ++c1) {
+        for (nf::iterator c2 = f.begin(); c2 != c1; ++c2) {
             nf impls;
-            implications(*c1,*c2,std::back_inserter(impls));
+            implications(*c1, *c2, std::back_inserter(impls));
 
-            for (nf::const_iterator impl=impls.begin();
-                 impl!=impls.end();++impl) {
-                for (nf::iterator c=f.begin();c!=f.end();)
-                    if (c!=c1 && c!=c2 && subset_eq(*impl,*c))
-                        c=f.erase(c);
+            for (nf::const_iterator impl = impls.begin();
+                 impl != impls.end(); ++impl) {
+                for (nf::iterator c = f.begin(); c != f.end();)
+                    if (c != c1 && c != c2 && subset_eq(*impl, *c))
+                        c = f.erase(c);
                     else
                         ++c;
-                if (subset(*impl,*c1))
-                    *c1=*impl;
-                if (subset(*impl,*c2))
-                    *c2=*impl;
+                if (subset(*impl, *c1))
+                    *c1 = *impl;
+                if (subset(*impl, *c2))
+                    *c2 = *impl;
             }
         }
     }
 
-    if (sz!=number_of_literals(f))
-        mapper.extract_dnf(f.begin(),f.end(),tr,it);
+    if (sz != number_of_literals(f))
+        mapper.extract_dnf(f.begin(), f.end(), tr, it);
 }
 
 /// heuristic reduction of ANDs based on complementary pairs:
