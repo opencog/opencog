@@ -248,9 +248,7 @@ int nf_mapper<T>::add_item(sib_it item)
     // Add it directly
     int next_id = _int2item.size() + 1;
 
-    // XXX The next line will not compuile under gcc-4.7.0
-    // The compiler complains it cannot convert sib_it to tree.
-    std::pair<int, tree> pr = make_pair(next_id, item);
+    std::pair<int, tree> pr = make_pair(next_id, tree(item));
 
     int actual_id = _int2item.insert(pr).first->first;
 
