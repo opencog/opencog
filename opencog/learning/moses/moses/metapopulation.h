@@ -875,7 +875,7 @@ struct metapopulation : public bscored_combo_tree_set
         // rec case //
         //////////////
 //  The names in enum std::launch have not yet been standardized.
-#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 6)
+#if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ >= 5) && (__GNUC_MINOR__ < 7)
  #define LAUNCH_SYNC std::launch::sync
 #else
  #define LAUNCH_SYNC std::launch::deferred
