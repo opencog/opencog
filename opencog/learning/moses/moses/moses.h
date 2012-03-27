@@ -91,19 +91,17 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info(ss.str());
     }
 
-    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++)) {
-        // Logger
+    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++))
+    {
         logger().info("Deme generation: %i", gen_idx);
-        // ~Logger
 
         // Run a generation
-        if (mp.expand(pa.max_evals - mp.n_evals(), pa.ignore_ops,
-                      pa.perceptions, pa.actions)) {
-        } else // In iterative hillclimbing it is possible (but not
-               // likely) that the metapop gets empty and expand
-               // return false
-            break;
+        bool more = mp.expand(pa.max_evals - mp.n_evals(), pa.ignore_ops,
+                      pa.perceptions, pa.actions);
 
+        // In iterative hillclimbing, it is possible (but not likely)
+        // that the metapop gets empty and expand returns false.
+        if (!more) break;
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
