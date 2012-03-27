@@ -539,9 +539,9 @@ private:
     // vertex being the output of the candidate, the
     // CTable::mapped_type being the distribution of outputs of a
     // given row.
-    std::function<score_t(const vertex&, CTable::mapped_type&)> func;
+    std::function<score_t(const vertex&, const CTable::counter_t&)> func;
     // as above but for computing the best possible bscore
-    std::function<score_t(CTable::mapped_type&)> best_func;
+    std::function<score_t(const CTable::counter_t&)> best_func;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured
