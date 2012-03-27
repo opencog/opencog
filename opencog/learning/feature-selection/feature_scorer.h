@@ -47,7 +47,7 @@ struct MutualInformation : public std::unary_function<FeatureSet, double> {
     }
 
 protected:
-    mutable CTable _ctable;
+    const CTable& _ctable;
 };
 
 /**
@@ -107,7 +107,7 @@ struct MICScorerTable : public std::unary_function<FeatureSet, double> {
     }
 
     const Table& _table;
-    mutable CTable _ctable;
+    CTable _ctable;
     double _confi; //  confidence intensity
 };
 

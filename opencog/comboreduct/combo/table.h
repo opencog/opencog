@@ -359,7 +359,7 @@ double mutualInformation(const Table& table, const FeatureSet& fs) {
  * content (by adding default value on missing keys).
  */
 template<typename FeatureSet>
-double mutualInformation(CTable& ctable, const FeatureSet& fs)
+double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 {
     // the following mapping is used to keep track of the number
     // of inputs a given setting. For instance X1=false, X2=true,
@@ -370,9 +370,9 @@ double mutualInformation(CTable& ctable, const FeatureSet& fs)
         ioc; // for H(Y, X1, ..., Xn)
     unsigned oc = 0; // for H(Y)
     double total = 0;
-    foreach(auto& row, ctable) {
-        unsigned falses = row.second[id::logical_false];
-        unsigned trues = row.second[id::logical_true];
+    foreach(const auto& row, ctable) {
+        unsigned falses = row.second.get(id::logical_false);
+        unsigned trues = row.second.get(id::logical_true);
         unsigned row_total = falses + trues;
         // update ic
         vertex_seq vec;

@@ -174,8 +174,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     if (output_type == id::boolean_type) {
         vertex target = bool_to_vertex(positive);
         sum_outputs = [target](const CTable::counter_t& c)->score_t {
-            auto it = c.find(target);
-            return (it == c.cend()? 0.0 : it->second);
+            return c.get(target);
         };
     } else if (output_type == id::contin_type) {
         sum_outputs = [this](const CTable::counter_t& c)->score_t {
@@ -364,12 +363,12 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
 
     // define func
-    func = [](const vertex& v, CTable::counter_t& c) {
-        return -score_t(c[negate_vertex(v)]); };
+    func = [](const vertex& v, const CTable::counter_t& c) {
+        return -score_t(c.get(negate_vertex(v))); };
 
     // define best_func
-    best_func = [](CTable::counter_t& c) {
-        return -score_t(min(c[id::logical_true], c[id::logical_false]));};
+    best_func = [](const CTable::counter_t& c) {
+        return -score_t(min(c.get(id::logical_true), c.get(id::logical_false)));};
 }
 
 behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const

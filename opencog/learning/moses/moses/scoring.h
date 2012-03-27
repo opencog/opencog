@@ -529,8 +529,7 @@ struct ctruth_table_bscore : public bscore_base
 
     score_t min_improv() const;
     
-    mutable CTable ctt;         // mutable because accessing a missing
-                                // element adds it in the map.
+    CTable ctt;
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     RandGen& rng;
@@ -595,7 +594,7 @@ struct interesting_predicate_bscore : public bscore_base
 
     counter_t counter; // counter of the unconditioned distribution
     pdf_t pdf;     // pdf of the unconditioned distribution
-    mutable KLDS<contin_t> klds;
+    mutable KLDS<contin_t> klds; /// @todo dangerous: not thread safe!!!
     CTable ctable;
     bool occam;
     score_t complexity_coef;
