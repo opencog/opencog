@@ -1,0 +1,11 @@
+/destinCuda
+/profiler
+/debug
+Debug
+DeSTIN_Session*
+*.trc
+DestinKernelJAVA_wrap.h
+libdestinjava.so
+libcudadestin.so
+DestinKernelJAVA_wrap.cxx
+testvideo

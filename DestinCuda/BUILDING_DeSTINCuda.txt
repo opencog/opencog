@@ -1,0 +1,4 @@
+Not much to it.
+cmake . 
+make
+./simpleRun.sh
