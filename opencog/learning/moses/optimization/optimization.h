@@ -887,6 +887,32 @@ struct hill_climbing : optim_stats
                     << -get_complexity(best_cscore);
             }
 
+            /* If this is the first time through the loop, then distance
+             * was zero, there was only one instance at dist=0, and we
+             * just scored it. Be sure to go around and do at least the
+             * distance == 1 nearest-neighbor exploration. */
+            if (1 == number_of_new_instances) continue;
+
+            /* If we've blown our budget for evaluating the scorer,
+             * then we are done. */
+            if (max_number_of_instances <= current_number_of_instances) {
+                over_budget = true;
+                logger().debug("Terminate Local Search: Over budget");
+                break;
+            }
+
+            /* If we've aleady gotten the best possible score, we are done. */
+            if (opt_params.terminate_if_gte <= best_raw_score) {
+                logger().debug("Terminate Local Search: Found best score");
+                break;
+            }
+
+            /* If we've widened the search out to the max distance, we're done. */
+            if (max_distance < distance) {
+                logger().debug("Terminate Local Search: Max search distance exceeded");
+                break;
+            }
+
             if (hc_params.crossover) {
                 /* If the score hasn't taken a big step recently, then 
                  * re-survey the immediate local neighborhood.  We may get
@@ -931,20 +957,6 @@ struct hill_climbing : optim_stats
                 last_chance = false;
             }
 
-            /* If this is the first time through the loop, then distance
-             * was zero, there was only one instance at dist=0, and we
-             * just scored it. Be sure to go around and do at least the
-             * distance == 1 nearest-neighbor exploration. */
-            if (1 == number_of_new_instances) continue;
-
-            /* If we've blown our budget for evaluating the scorer,
-             * then we are done. */
-            if (max_number_of_instances <= current_number_of_instances) {
-                over_budget = true;
-                logger().debug("Terminate Local Search: Over budget");
-                break;
-            }
-
             /* If things haven't improved, we must be at the top of the hill.
              * Terminate, unless we've been asked to widen the search.
              * (i.e. to search for other nearby hills) */
@@ -953,22 +965,10 @@ struct hill_climbing : optim_stats
                 break;
             }
 
-            /* If we've aleady gotten the best possible score, we are done. */
-            if (opt_params.terminate_if_gte <= best_raw_score) {
-                logger().debug("Terminate Local Search: Found best score");
-                break;
-            }
-
             /* If we're in single-step mode, then exit the loop as soon
              * as we find improvement. */
             if (hc_params.single_step && has_improved) {
                 logger().debug("Terminate Local Search: Single-step and found improvment");
-                break;
-            }
-
-            /* If we've widened the search out to the max distance, we're done. */
-            if (max_distance < distance) {
-                logger().debug("Terminate Local Search: Max search distance exxceeded");
                 break;
             }
         }
