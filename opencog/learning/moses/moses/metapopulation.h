@@ -1093,32 +1093,37 @@ struct metapopulation : public bscored_combo_tree_set
         return res;
     }
 
-    // update the record of the best-seen score & trees
+    // Update the record of the best score seen, and the associate tree.
     void update_best_candidates(const bscored_combo_tree_set& candidates)
     {
         if (!candidates.empty()) {
-            const bscored_combo_tree& candidate = *candidates.begin();
-            const composite_score& csc = get_composite_score(candidate);
 
-            // Log stuff.
-            if (logger().isFineEnabled()) {
-                logger().fine() << "Best composite score = " << _best_cscore;
-                logger().fine() << "Candidate composite score = " << csc;
+            // Candidates are kept in weighted score order, not in 
+            // absolute score order.  Thus, we need to search through
+            // the first few to find the true best score.  Also, there
+            // may be several candidates with the best score.
+            score_t best_score = get_score(_best_cscore);
+            complexity_t best_cpx = get_complexity(_best_cscore);
 
-                if (csc >= _best_cscore) {
-                    logger().fine("Candidate score is better than or equal to the best score");
-                    if (csc > _best_cscore) {
-                        logger().fine("Candidate score is just better");
+            foreach(const bscored_combo_tree& it, candidates)
+            {
+                const composite_score& cit = get_composite_score(it);
+                score_t sc = get_score(cit);
+                complexity_t cpx = get_complexity(cit);
+                if ((sc > best_score) ||
+                    ((sc == best_score) && (cpx >= best_cpx)))
+                {
+                    if ((sc > best_score) ||
+                        ((sc == best_score) && (cpx > best_cpx)))
+                    {
+                        _best_cscore = cit;
+                        best_score = get_score(_best_cscore);
+                        best_cpx = get_complexity(_best_cscore);
+                        _best_candidates.clear();
+                        logger().debug() << "New best score: " << _best_cscore;
                     }
+                    _best_candidates.insert(it);
                 }
-            }
-
-            if (csc >= _best_cscore) {
-                if (csc > _best_cscore) {
-                    _best_cscore = csc;
-                    _best_candidates.clear();
-                }
-                _best_candidates.insert(candidate);
             }
         }
     }
@@ -1130,7 +1135,7 @@ struct metapopulation : public bscored_combo_tree_set
             return;
 
         if (best_candidates().empty())
-            logger().info("Only worst scored candidates");
+            logger().info("No new best candidates");
         else {
             logger().info()
                << "The following candidate(s) have the best score "
