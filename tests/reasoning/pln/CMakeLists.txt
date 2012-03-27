@@ -24,6 +24,7 @@ LINK_DIRECTORIES (
 SET(PLN_LINK_LIBS
 	pln
 	server
+	builtinreqs 
 )
 
 IF (HAVE_CYTHON)

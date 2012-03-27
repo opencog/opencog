@@ -39,6 +39,7 @@ ADD_LIBRARY (server SHARED
 )
 
 SET(SERVER_LINK_LIBS 
+	builtinreqs
 	atomspace
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
@@ -65,7 +66,7 @@ ADD_EXECUTABLE(cogserver
 
 TARGET_LINK_LIBRARIES(cogserver
 	server
-    ${Boost_SYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 	${GUILE_LIBRARIES}
 )
 
