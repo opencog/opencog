@@ -42,15 +42,26 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
     FILE* fp = fopen(tempfile.c_str(), "r");
     __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
     istream in(&pipe_buf);
-    // parse result
-    score_t score;
-    in >> score;
-    combo_tree tr;
-    in >> tr;
-    cout << score << " " << tr << endl;
+
+    score_t hiscore = -1.0e37;
+    combo_tree hitr;
+
+    // Results are printed in random order these days...
+    while (!in.eof()) {
+       // parse result
+       score_t score;
+       in >> score;
+       combo_tree tr;
+       in >> tr;
+       if (hiscore < score) {
+           hiscore = score;
+           hitr = tr;
+           cout << score << " " << tr << endl;
+       }
+    }
     // close file and return result
     pclose(fp);
-    return {score, tr};
+    return {hiscore, hitr};
 }
 
 void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
