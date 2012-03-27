@@ -604,6 +604,7 @@ struct hill_climbing : optim_stats
         instance center_inst(init_inst);
         composite_score best_cscore = worst_composite_score;
         score_t best_score = worst_score;
+        score_t best_raw_score = worst_score;
 
         // Initial distance is zero, so that the first time through
         // the loop, we handle just one instance, the initial instance.
@@ -779,7 +780,7 @@ struct hill_climbing : optim_stats
             // Check if there is an instance in the deme better than
             // the best candidate
             score_t prev_hi = best_score;
-            score_t prev_best_raw = get_score(best_cscore);
+            score_t prev_best_raw = best_raw_score;
 
             unsigned ibest = current_number_of_instances;
             for (unsigned i = current_number_of_instances;
@@ -791,7 +792,18 @@ struct hill_climbing : optim_stats
                     best_score = iscore;
                     ibest = i;
                 }
+
+                // The instance with the best raw score will typically
+                // *not* be the same as the the one with the best
+                // weighted score.  We need the raw score for the
+                // termination condition, as, in the final answer, we
+                // want the best raw score, not the best weighted score.
+                score_t rscore = get_score(inst_cscore);
+                if (rscore >  best_raw_score) {
+                    best_raw_score = rscore;
+                }
             }
+
             // Make a copy of the best instance.
             bool has_improved = false;
             if (best_score >  prev_hi) {
@@ -799,7 +811,6 @@ struct hill_climbing : optim_stats
                 center_inst = deme[ibest].first;
             }
 
-            score_t best_raw = get_score(best_cscore);
 #ifdef GATHER_STATS
             if (iteration > 1) {
                 if (scores.size() < number_of_new_instances) {
@@ -838,9 +849,7 @@ struct hill_climbing : optim_stats
                     *eval_best = current_number_of_instances;
 
                 if (logger().isDebugEnabled()) {
-                    score_t delta = best_raw - prev_best_raw;
-                    logger().debug() << "Best score: " << best_cscore
-                                     << " Delta: " << delta;
+                    logger().debug() << "Best score: " << best_cscore;
                     if (logger().isFineEnabled()) {
                         logger().fine() << "Best instance: "
                                         << fields.stream(center_inst);
@@ -873,8 +882,8 @@ struct hill_climbing : optim_stats
                     << has_improved << "\t"
                     << best_score << "\t"   /* weighted score */
                     << best_score - prev_hi << "\t"  /* previous weighted */
-                    << best_raw << "\t"     /* non-weighted, raw score */
-                    << best_raw - prev_best_raw << "\t"
+                    << best_raw_score << "\t"     /* non-weighted, raw score */
+                    << best_raw_score - prev_best_raw << "\t"
                     << -get_complexity(best_cscore);
             }
 
@@ -945,7 +954,7 @@ struct hill_climbing : optim_stats
             }
 
             /* If we've aleady gotten the best possible score, we are done. */
-            if (opt_params.terminate_if_gte <= get_score(best_cscore)) {
+            if (opt_params.terminate_if_gte <= best_raw_score) {
                 logger().debug("Terminate Local Search: Found best score");
                 break;
             }

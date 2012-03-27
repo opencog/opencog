@@ -43,17 +43,26 @@ public:
 
     // A simple predicate learning test case, should learn this:
     //   and(0<(+(-1 $x)) 0<($y) $g) 
-    void test_predicates()
+    // We expect a score of zero, no matter what.
+    void test_predicate_score()
     {
         string data_file_path("-i" + mixedUTest_dir + "predicates.csv");
-        // We expect a score of zero, no matter what.
         moses_test_score({"-Hit", 
                           "-upred",
                           data_file_path,
                           });
+    }
 
+    // Same as above, but now look at the resulting form.
+    // A simple predicate learning test case, should learn this:
+    //   and(0<(+(-1 $x)) 0<($y) $g) 
+    // We expect a score of zero, no matter what.
+    // we expect the solution to be of a particular form.
+    void test_predicate_form()
+    {
         // Depending on the random number generator, moses might
         // find several acceptable solutions...
+        string data_file_path("-i" + mixedUTest_dir + "predicates.csv");
         moses_test_combo({"-Hit", 
                           "-upred", "-nimpulse",
                           data_file_path,
@@ -61,6 +70,8 @@ public:
                           {"and(0<(+(-1 $1)) 0<($2) $3)"});
     }
 
+    // A more difficult learning problem, requiring the
+    // learning of a non-trivial fractional value.
     void test_fraction_predicates()
     {
         string data_file_path("-i" + mixedUTest_dir + "predicates-1.3.csv");
