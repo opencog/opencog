@@ -373,7 +373,8 @@ struct metapopulation : public bscored_combo_tree_set
         // quite OK to cut back on this value.  We do this in half-tones
         // (twelfth root of 2).
 
-        if (size() < 250) return;
+#define MIN_POOL_SIZE 250
+        if (size() < MIN_POOL_SIZE) return;
 
         score_t top_score = get_weighted_score(*begin());
         score_t range = useful_score_range();
@@ -412,11 +413,13 @@ struct metapopulation : public bscored_combo_tree_set
         // causes the std::set to try to sort the contents, and this
         // ends up costing a lot.  I think... not sure.
         iterator it = begin();
+        for (int i=0; i<MIN_POOL_SIZE; i++) it++;
         while (it != end()) {
             score_t sc = get_weighted_score(*it);
             if (sc < worst_score) break;
             it++;
         }
+
         erase(it, end());
 #endif
     }
@@ -611,7 +614,7 @@ struct metapopulation : public bscored_combo_tree_set
         // However, trimming too much is bad: it can happen that none
         // of the best-scoring instances lead to a solution. So keep
         // around a reasonable pool. Wild choice ot 250 seems reasonable.
-        if (250 < _deme->size()) {
+        if (MIN_POOL_SIZE < _deme->size()) {
             score_t top_sc = get_weighted_score(_deme->begin()->second);
             score_t bot_sc = top_sc - useful_score_range();
 
