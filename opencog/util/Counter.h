@@ -69,6 +69,16 @@ struct Counter : public std::map<T, CT>,
             this->operator[](v.first) = v.second;
     }
 
+    // return the count of a key, possibly returning a default if none
+    // is present. That method different that operator[] because it
+    // doesn't insert the element if it is not present. This is very
+    // useful for multi-threading programming, and prevents data race
+    // bug
+    CT get(const T& key, CT c = CT()) const {
+        typename super::const_iterator it = find(key);
+        return it == this->cend()? c : it->second;
+    }
+    
     // return the total of all counted elements
     CT total_count() const {
         return boost::accumulate(*this | map_values, 0);
