@@ -303,19 +303,23 @@ std::istream& stream_to_combo_tree(std::istream& in, combo_tree& tr)
 }
 
 /**
- * This method allows to replace place holders by labels in a string
+ * ph2l where ph == "place holder" and l == "label"
+ *
+ * This method replaces place holders by labels in a string
  * containing a combo expression.
  *
- * For instance "and($1 $2)" would be replaced by "and($fat $pretty)"
- * provided with the vector of labels {"fat", "pretty"}
+ * For instance, "and($1 $2)" would be replaced by "and($fat $pretty)"
+ * given the vector of labels {"fat", "pretty"}
  */
 std::string ph2l(const std::string& ce,
                  const std::vector<std::string>& labels);
 
 /**
- * This is the converse of ph2l, that is given for instance "and($fat
- * $pretty)" it returns "and($1 $2)". If a variable is not in labels
- * (that is it doesn't correspond to a place holder)
+ * l2ph where ph == "place holder" and l == "label"
+ *
+ * This is the converse of ph2l. Given, for instance "and($fat $pretty)"
+ * it returns "and($1 $2)".  If a variable is not in labels
+ * (that is it doesn't correspond to a place holder) (???)
  */
 std::string l2ph(const std::string& ce,
                  const std::vector<std::string>& labels);

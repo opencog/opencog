@@ -23,6 +23,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
+#include <opencog/comboreduct/combo/iostream_combo.h>
 
 #include "PetActionSchema.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
@@ -87,17 +88,20 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
     const ActionType::ParamTypes& mandatoryParamTypes = actionType.getMandatoryParamTypes();
     if (arguments.size() < minArity) {
         throw InvalidParamException(TRACE_INFO,
-                                             "PetActionSchema - Schema %s got insuficient no. of parameters: %u (expected at least %u).", actionType.getName().c_str(), arguments.size(), minArity);
+             "PetActionSchema - Schema %s got insuficient no. "
+             "of parameters: %u (expected at least %u).",
+             actionType.getName().c_str(), arguments.size(), minArity);
     }
 
-    // TODO: Optional parameters are not being added, since procedure arity is constant (so, only for mandatory parameters)
+    // TODO: Optional parameters are not being added, since procedure arity is constant 
+    // (so, only for mandatory parameters)
     //       Review this when/if procedures may have variable number of parameters...
     //const ActionType::ParamTypes& optionalParamTypes = actionType.getOptionalParamTypes();
     unsigned int maximalArity = minArity + optionalArity;
     if (arguments.size() > maximalArity) {
         throw InvalidParamException(TRACE_INFO,
-                                             "PetActionSchema - Schema %s exceeded no. of parameters: %u (expected at most %u).",
-                                             actionType.getName().c_str(), arguments.size(), maximalArity);
+             "PetActionSchema - Schema %s exceeded no. of parameters: %u (expected at most %u).",
+             actionType.getName().c_str(), arguments.size(), maximalArity);
     }
 
     unsigned int argIndex = 0;
@@ -198,16 +202,16 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
 
         if (!validArg) {
             throw InvalidParamException(TRACE_INFO,
-                                                 "PetActionSchema - Schema %s got invalid argument at %u: %s (expected an %s).",
-                                                 actionType.getName().c_str(), argIndex,
-                                                 toString(arguments[0]).c_str(), paramType.getName().c_str());
+                "PetActionSchema - Schema %s got invalid argument at %u: %s (expected an %s).",
+                actionType.getName().c_str(), argIndex,
+                toString(arguments[0]).c_str(), paramType.getName().c_str());
         }
 
     }
     ActionPlanID planId = pai.createActionPlan();
     pai.addAction(planId, action);
 
-    // this function can throw a RuntimeException
+    // This function can throw a RuntimeException
 	if(!config().get_bool("EXTRACTED_ACTION_MODE")) {
 		pai.sendActionPlan(planId);
 	} else {
