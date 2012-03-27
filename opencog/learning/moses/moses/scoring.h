@@ -405,7 +405,7 @@ protected:
  * Behavioral scoring function minimizing residual errors.
  *
  * The first elements of the bscore correspond to the minus squared
- * errors. The last element is optional and corresponds to an program
+ * errors. The last element is optional and corresponds to a program
  * size penalty.
  *
  * The math justifying the program size penalty equations is based on
@@ -413,28 +413,35 @@ protected:
  * http://groups.google.com/group/opencog-news/browse_thread/thread/b7704419e082c6f1
  *
  * Here's a summary:
+ * Let M == model (the combo program being learned)
+ * Let D == data (the table of values being modelled)
+ * Let P(..) == probability
+ * Let dP(..) == probability density
  *
  * According to Bayes
- * dP(M|D) = dP(D|M) * P(M) / P(D)
  *
- * Now let's consider the log likelihood of M knowing D, since D is
+ *    dP(M|D) = dP(D|M) * P(M) / P(D)
+ *
+ * Now let's consider the log likelihood of M knowing D.  Since D is
  * constant we can ignore P(D), so:
- * LL(M) = log(dP(D|M)) + log(P(M))
+ *
+ *    LL(M) = log(dP(D|M)) + log(P(M))
  * 
  * Assume the output of M on input x has a Guassian noise of mean M(x)
  * and variance v, so dP(D|M) (the density probability)
- * dP(D|M) = Prod_{x\in D} (2*Pi*v)^(-1/2) exp(-(M(x)-D(x))^2/(2*v))
+ *
+ *   dP(D|M) = Prod_{x\in D} (2*Pi*v)^(-1/2) exp(-(M(x)-D(x))^2/(2*v))
  *
  * Assume
- * P(M) = |A|^-|M|
+ *    P(M) = |A|^-|M|
  * where |A| is the alphabet size.
  *
  * After simplification we can get the following log-likelihood of dP(M|D)
- * -|M|*log(|A|)*2*v - Sum_{x\in D} (M(x)-D(x))^2
+ *    -|M|*log(|A|)*2*v - Sum_{x\in D} (M(x)-D(x))^2
  *
  * Each datum corresponds to a feature of the bscore.
  *
- * |M|*log(|A|)*2*v corresponds to an additional feature when v > 0
+ *    |M|*log(|A|)*2*v corresponds to an additional feature when v > 0
  */
 struct contin_bscore : public bscore_base
 {

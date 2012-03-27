@@ -33,7 +33,7 @@ void measure(vector<string> arguments)
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);
 
-    for (int i=4; i<nreps; i++)
+    for (int i=0; i<nreps; i++)
     {
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
@@ -50,7 +50,7 @@ void measure(vector<string> arguments)
         // Do NOT include a blank space after -f !!
         stringstream fss;
         // fss << "-fmoses-perf-k5-r" << i << ".log";
-        fss << "-fmoses-perf-bank-nn29-m" << nrep << ".log";
+        fss << "-fmoses-perf-bank-nn30-m" << nrep << ".log";
         args.push_back(fss.str());
 #endif
 

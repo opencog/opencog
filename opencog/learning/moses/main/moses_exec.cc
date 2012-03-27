@@ -813,7 +813,7 @@ int moses_exec(int argc, char** argv)
             so << "Inferred output type: " << output_type;
             logger().info(so.str());
             
-            if (problem == pre) { // problem == pre
+            if (problem == pre) { // problem == pre  precision-based scoring
                 type_tree cand_tt = gen_signature(id::boolean_type, arity);
                 int as = alphabet_size(cand_tt, ignore_ops);
                 typedef precision_bscore BScore;
@@ -828,7 +828,7 @@ int moses_exec(int argc, char** argv)
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
-            } else { // problem == it
+            } else { // problem == it  i.e. input-table based scoring.
                 OC_ASSERT(output_type == table_output_tn);
                 int as = alphabet_size(table_tt, ignore_ops);
                 if (output_type == id::boolean_type) {
