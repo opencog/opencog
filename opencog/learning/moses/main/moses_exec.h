@@ -114,8 +114,7 @@ struct metapop_moses_results_parameters
                                      bool _output_python,
                                      bool _hc_widen_search,
                                      bool _hc_single_step,
-                                     bool _hc_crossover,
-                                     bool _hc_single_step) :
+                                     bool _hc_crossover) :
         vm(_vm), result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
