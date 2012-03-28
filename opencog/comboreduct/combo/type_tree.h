@@ -299,6 +299,10 @@ arity_t action_result_arity(const type_tree& ty);
 // then it solely one and it is the last argument
 arity_t type_tree_arity(const type_tree& ty);
 
+// Return the root of the type tree, convenient function when one
+// assumes that the type is elementary
+type_node get_type_node(const type_tree& tt);
+
 // return a vector containing the type of each input argument given a
 // reduced type tree signature if there is an arg_list(T) at last
 // argument then it fills the last element of the vector directly with

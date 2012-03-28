@@ -344,15 +344,20 @@ arity_t type_tree_arity(const type_tree& ty)
     return 0;
 }
 
+type_node get_type_node(const type_tree& tt)
+{
+    OC_ASSERT(!tt.empty());
+    return *tt.begin();
+}
+
 type_tree_seq type_tree_input_arg_types(const type_tree& ty)
 {
     OC_ASSERT(!ty.empty(),
-                      "Not sure this assert should not be replaced by a conditional");
+              "Not sure this assert should not be replaced by a conditional");
     type_tree_seq res;
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type) {
-        OC_ASSERT(!ty_it.is_childless(),
-                          "Lambda must not be childless");
+        OC_ASSERT(!ty_it.is_childless(), "Lambda must not be childless");
         type_tree_sib_it sib = ty_it.begin();
         //setting input argument type trees
         for (; sib != type_tree_sib_it(ty.last_child(ty_it)); ++sib) {
