@@ -26,12 +26,13 @@ class ForestExtractor:
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
-        self.unwanted_atoms = set(["proximity", "near", 'next',
+        self.unwanted_atoms = set(['proximity', 'near', #'next',
             'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of',
-            'below', 'above', 'between', 'touching', 'inside', 'outside', 
+            'between', 'touching', 'inside', 'outside', 'below', #'above',
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
-            'is_movable', 'is_noisy', 'null', 
+            'is_movable', 'is_noisy', 'null', 'Object',
+            'exist','decreased','increased',
             # Not useful e.g. because they contain numbers
             "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
             'move:actor',  'is_moving', 
@@ -79,14 +80,12 @@ class ForestExtractor:
     def extractForest(self):
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
         initial_links = [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)]
-        print '/initial_links'
         
         for link in initial_links:
                      #or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
                      #or x.is_a(t.AndLink)]: # temporary hack
             if not self.include_tree(link): continue
             #print link
-            print '.'
             
             objects = []            
             #print self.extractTree(link, objects),  objects, self.i
@@ -192,9 +191,13 @@ class ForestExtractor:
 #        if not link.is_a(t.SequentialAndLink):
 #            return False
 
+        ## Policy: Only do objects not times
+        #if link.is_a(t.AtTimeLink):
+        #    return False
+
         # TODO check the TruthValue the same way as you would for other links.
         # work around hacks in other modules
-        if any([i.is_a(t.AtTimeLink) or i.is_a for i in link.incoming]) or link.is_a(t.ExecutionLink):
+        if any([i.is_a(t.AtTimeLink) for i in link.incoming]) or link.is_a(t.ExecutionLink):
             return False
         # Throw away the AtTimeLink that just contains the Action ID
         elif link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):

@@ -33,12 +33,12 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 3
+        self.min_embeddings = 2
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 30
+        self.max_per_layer = 50
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -259,8 +259,8 @@ class Fishgram:
                 continue
             
             entry=conj2emblist[conj]
-            if not len(entry):
-                print '+', conj            
+            #if not len(entry):
+            #    print '+', conj            
             #sys.stdout.write('.')
             
             if s not in entry:
@@ -326,18 +326,18 @@ class Fishgram:
 
                         yield (remapped_conj_plus, new_s)
 
-    def extending_links(self, binding):
-        ret = set()
-        
-        for obj in binding:
-            for predsize in sorted(self.forest.incoming[obj].keys()):
-                #if predsize > 1: continue
-                for slot in sorted(self.forest.incoming[obj][predsize].keys()):
-                    for tree_id in self.forest.incoming[obj][predsize][slot]:
-                        if tree_id not in ret:
-                            ret.add(tree_id)
-         
-        return ret
+    #def extending_links(self, binding):
+    #    ret = set()
+    #    
+    #    for obj in binding:
+    #        for predsize in sorted(self.forest.incoming[obj].keys()):
+    #            #if predsize > 1: continue
+    #            for slot in sorted(self.forest.incoming[obj][predsize].keys()):
+    #                for tree_id in self.forest.incoming[obj][predsize][slot]:
+    #                    if tree_id not in ret:
+    #                        ret.add(tree_id)
+    #     
+    #    return ret
 
     # This is part of a different, earlier approach. It was based on the gSpan algorithm. The idea was that you must always
     # look for example graphs first, and then find what patterns there are. And as you made the example graphs larger, you
@@ -644,8 +644,8 @@ class Fishgram:
             
             # Convert it into a Psi Rule. Note that this will remove variables corresponding to the TimeNodes, but
             # the embedding counts will still be equivalent.
-            #tmp = self.make_psi_rule(premises, conclusion)
-            tmp = (premises, conclusion)
+            tmp = self.make_psi_rule(premises, conclusion)
+            #tmp = (premises, conclusion)
             if tmp:
                 (premises, conclusion) = tmp
                 
@@ -1015,8 +1015,8 @@ class FishgramMindAgent(opencog.cogserver.MindAgent):
 #                        print 'emb:',  pp(bound_tree)
         
         #fish.iterated_implications()
-        self.fish.implications()
-        #self.fish.run()
+        #self.fish.implications()
+        self.fish.run()
         print "Finished one Fishgram cycle"
         
         #fish.make_all_psi_rules()
