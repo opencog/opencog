@@ -148,7 +148,7 @@ int alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
     // However, all tables will be lambda_type ...
     combo::arity_t arity = type_tree_arity(tt);
 
-    type_node output_type = *type_tree_output_type_tree(tt).begin();
+    type_node output_type = get_type_node(type_tree_output_type_tree(tt));
     if (output_type == id::boolean_type) {
         return 3 + arity;
     } else if (output_type == id::contin_type) {
@@ -715,6 +715,8 @@ int moses_exec(int argc, char** argv)
         }
     }
 
+    setting_omp(jobs[localhost]);
+    
     // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,
                                    revisit, include_dominated, 
@@ -798,14 +800,14 @@ int moses_exec(int argc, char** argv)
 
             // Infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
-            type_node table_output_tn = *table_output_tt.begin();
+            type_node table_output_tn = get_type_node(table_output_tt);
 
             // Determine the default exemplar to start with
             if (exemplars.empty())
                 exemplars.push_back(type_to_exemplar(problem == pre? id::boolean_type : table_output_tn));
 
             type_node output_type =
-                *(get_output_type_tree(*exemplars.begin()->begin()).begin());
+                get_type_node(get_output_type_tree(*exemplars.begin()->begin()));
             if (output_type == id::unknown_type)
                 output_type = table_output_tn;
 
@@ -942,7 +944,7 @@ int moses_exec(int argc, char** argv)
             // get the combo_tree and infer its type
             type_tree tt = infer_type_tree(tr);
 
-            type_node output_type = *type_tree_output_type_tree(tt).begin();
+            type_node output_type = get_type_node(type_tree_output_type_tree(tt));
             // if no exemplar has been provided in option, use the default one
             if (exemplars.empty()) {
                 exemplars.push_back(type_to_exemplar(output_type));

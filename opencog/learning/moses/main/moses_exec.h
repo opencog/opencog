@@ -175,11 +175,8 @@ void metapop_moses_results_a(RandGen& rng,
         metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
 
     // run moses, either on localhost, or distributed.
-    if (pa.only_local) {
-        unsigned n_threads = pa.jobs.find(localhost)->second;
-        setting_omp(n_threads);
+    if (pa.only_local)
         moses::moses(metapop, moses_params);
-    }
     else
         moses::distributed_moses(metapop, pa.vm, pa.jobs, moses_params);
 
@@ -253,8 +250,8 @@ void metapop_moses_results_b(RandGen& rng,
                                 pa.hc_crossover);
         hill_climbing climber(rng, opt_params, hc_params);
         metapop_moses_results_a(rng, climber,
-                              bases, tt, si_ca, si_kb, sc, bsc,
-                              meta_params, moses_params, pa);
+                                bases, tt, si_ca, si_kb, sc, bsc,
+                                meta_params, moses_params, pa);
 #ifdef GATHER_STATS
         climber.hiscore /= climber.hicount;
         for (unsigned i=0; i< climber.scores.size(); i++) {
@@ -320,8 +317,8 @@ void metapop_moses_results(RandGen& rng,
         prr_cache_threaded<Score> score_cache(initial_cache_size, score);
         ScoreACache score_acache(score_cache);
         metapop_moses_results_b(rng, bases, tt, si_ca, si_kb,
-                              score_acache, BSCORE,
-                              opt_params, meta_params, moses_params, pa);
+                                score_acache, BSCORE,
+                                opt_params, meta_params, moses_params, pa);
         // log the number of cache failures
         if (pa.only_local) { // do not print if using distributed moses
             logger().info("Score cache hits=%u misses=%u",
@@ -331,7 +328,7 @@ void metapop_moses_results(RandGen& rng,
     }
     else {
         metapop_moses_results_b(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
-                              opt_params, meta_params, moses_params, pa);
+                                opt_params, meta_params, moses_params, pa);
     }
 }
 
