@@ -68,7 +68,7 @@ public:
     }
     void test_un_3_pa_multi_thread() {
         cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-r3", "-Hpa", "-k3", "-aun", "-m500000", "-j4"});
+        moses_test_score({"-r3", "-Hpa", "-k3", "-aun", "-m500000", "-j4", "-c3000"});
     }
 
     void test_it() {
