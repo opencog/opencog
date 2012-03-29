@@ -75,7 +75,7 @@ struct Counter : public std::map<T, CT>,
     // useful for multi-threading programming, and prevents data race
     // bug
     CT get(const T& key, CT c = CT()) const {
-        typename super::const_iterator it = find(key);
+        typename super::const_iterator it = this->find(key);
         return it == this->cend()? c : it->second;
     }
     
