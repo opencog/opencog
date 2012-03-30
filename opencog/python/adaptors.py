@@ -26,9 +26,9 @@ class ForestExtractor:
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
-        self.unwanted_atoms = set(['proximity', 'near', #'next',
+        self.unwanted_atoms = set(['proximity', 'near', 'next',
             'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of',
-            'between', 'touching', 'inside', 'outside', 'below', #'above',
+            'between', 'touching', 'inside', 'outside', 'below', 'above',
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
             'is_movable', 'is_noisy', 'null', 'Object',
@@ -111,24 +111,24 @@ class ForestExtractor:
                 for obj in objects:
                     self.all_objects.add(obj)
                     
-            # fishgram-specific
-            if tree not in self.tree_embeddings:
-                self.tree_embeddings[tree] = []
-            substitution = subst_from_binding(objects)
-            self.tree_embeddings[tree].append(substitution)
-            
-            size= len(objects)
-            tree_id = len(self.all_trees) - 1
-            for slot in xrange(size):
-                obj = objects[slot]
+                # fishgram-specific
+                if tree not in self.tree_embeddings:
+                    self.tree_embeddings[tree] = []
+                substitution = subst_from_binding(objects)
+                self.tree_embeddings[tree].append(substitution)
                 
-                if obj not in self.incoming:
-                    self.incoming[obj] = {}
-                if size not in self.incoming[obj]:
-                    self.incoming[obj][size] = {}
-                if slot not in self.incoming[obj][size]:
-                    self.incoming[obj][size][slot] = []
-                self.incoming[obj][size][slot].append(tree_id)
+                #size= len(objects)
+                #tree_id = len(self.all_trees) - 1
+                #for slot in xrange(size):
+                #    obj = objects[slot]
+                #    
+                #    if obj not in self.incoming:
+                #        self.incoming[obj] = {}
+                #    if size not in self.incoming[obj]:
+                #        self.incoming[obj][size] = {}
+                #    if slot not in self.incoming[obj][size]:
+                #        self.incoming[obj][size][slot] = []
+                #    self.incoming[obj][size][slot].append(tree_id)
         
         # Make all bound trees. Enables using lookup_embeddings
         self.all_bound_trees = [subst(subst_from_binding(b), tr) for tr, b in zip(self.all_trees, self.bindings)]    

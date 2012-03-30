@@ -282,13 +282,21 @@ class Fishgram:
             #if len(clones):
             #    continue
 
-            canonical_conj = tuple(canonical_trees(conj))
+            canonical_conj = tuple(canonical_trees(ptn.conj)+canonical_trees(ptn.seqs))
             #print 'canonical_conj', canonical_conj
 
             # Whether this conjunction is a reordering of an existing one. Currently the
             # canonical form only makes variable names consistent, and not orders.
             is_reordering = False
-            perms = permutated_canonical_tuples(conj)[1:]
+            
+            #import pdb; pdb.set_trace()
+            perms = [tuple(canonical_trees(perm)+canonical_trees(seqsperm))
+                     for perm in permutations(ptn.conj)
+                     for seqsperm in permutations(ptn.seqs)
+                     ][1:]
+            
+            
+            #perms = permutated_canonical_tuples(conj)[1:]
             print '#perms', len(perms),
             for permcanon in perms:
                 if permcanon in conj2ptn_emblist:
