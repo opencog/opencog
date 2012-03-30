@@ -165,8 +165,16 @@ public:
     binding_map get_binding_map(const vertex_seq& args) const
     {
         binding_map bmap;
-        for(arity_t i = 0; i < (arity_t)args.size(); ++i)
+        for(size_t i = 0; i < args.size(); ++i)
             bmap[i+1] = args[i];
+        return bmap;
+    }
+    // like above but only consider the arguments in as
+    binding_map get_binding_map(const vertex_seq& args, const arity_set& as) const
+    {
+        binding_map bmap;
+        foreach (arity_t a, as)
+            bmap[a] = args[a-1];
         return bmap;
     }
 
