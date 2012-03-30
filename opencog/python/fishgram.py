@@ -15,6 +15,9 @@ import time
 
 from logic import PLNviz
 
+import gc
+import sys
+
 # unit of timestamps is 0.01 second so multiply by 100
 interval = 100* 20
 
@@ -130,6 +133,7 @@ class Fishgram:
         # This would find+store the whole layer of extensions before pruning them
         # Less efficient but may be easier to debug
         next_layer = list(next_layer_iter)
+        print 'garbage:', gc.garbage
         for (ptn, embs) in self.prune_frequency(next_layer):
         #for (conj, embs) in self.prune_surprise(next_layer_iter):
             #print '***************', conj, len(embs)
@@ -165,8 +169,8 @@ class Fishgram:
                 #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
                 print '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m'
 
-                #for ptn, embs in new_layer:
-                #    print '     ', pp(ptn.conj), '         ', pp(ptn.seqs), '      ', len(embs) #, pp(embs)
+                for ptn, embs in new_layer:
+                    print pp(ptn.conj), '         ', pp(ptn.seqs), '      ', len(embs) #, pp(embs)
 
                 yield new_layer
             
@@ -211,15 +215,45 @@ class Fishgram:
         
         return remapping, new_s
 
-    def _add_all_seq_and_links(self, ptn, embedding):
-        '''Takes a conjunction (with variables as usual) and an embedding (i.e. substitution). Returns the conjunction
-        but with all possible SequentialAndLinks between variables. That is, if t2 and t1 are in the substitution, and
-        t2 is shortly after t1, then the relevant variables will be connected by a new SequentialAndLink (if it hasn't been
-        added previously).'''
+    #def _add_all_seq_and_links(self, ptn, embedding):
+    #    '''Takes a conjunction (with variables as usual) and an embedding (i.e. substitution). Returns the conjunction
+    #    but with all possible SequentialAndLinks between variables. That is, if t2 and t1 are in the substitution, and
+    #    t2 is shortly after t1, then the relevant variables will be connected by a new SequentialAndLink (if it hasn't been
+    #    added previously).'''
+    #    assert isinstance(ptn, Pattern)
+    #    
+    #    new_links = ()
+    #    
+    #    times_vars = [(obj, var) for (var, obj) in embedding.items()
+    #                  if obj.get_type() == t.TimeNode]
+    #    times_vars = [(int(obj.op.name), var) for obj, var in times_vars]
+    #    times_vars.sort()
+    #
+    #    for (i, (t1, var1)) in enumerate(times_vars[:-1]):
+    #        # We want to determine whether there is a connected graph of times.
+    #        # This variable represents whether this time is connected to a future time.
+    #        # If all of the times are connected to 1+ future time, then it is a connected graph.
+    #        connected = False
+    #        
+    #        for (t2, var2) in times_vars[i+1:]:
+    #            if 0 < t2 - t1 <= interval:
+    #                seq_and = Tree("SequentialAndLink", [var1, var2])
+    #                if seq_and not in ptn.seqs:                        
+    #                    new_links+=(seq_and,)
+    #                    connected = True
+    #            else:
+    #                break
+    #        
+    #        if not connected:
+    #            return None
+    #    
+    #    return tuple(new_links)
+
+    def _time_sequence(self, ptn, embedding):
+        '''Finds the sequence of times. i.e. for a given embedding, the TimeNodes will be in a certain
+        order. Rejects conjunction-embedding pairs if the times are too far apart.'''
         assert isinstance(ptn, Pattern)
-        
-        new_links = ()
-        
+
         times_vars = [(obj, var) for (var, obj) in embedding.items()
                       if obj.get_type() == t.TimeNode]
         times_vars = [(int(obj.op.name), var) for obj, var in times_vars]
@@ -231,19 +265,15 @@ class Fishgram:
             # If all of the times are connected to 1+ future time, then it is a connected graph.
             connected = False
             
-            for (t2, var2) in times_vars[i+1:]:
-                if 0 < t2 - t1 <= interval:
-                    seq_and = Tree("SequentialAndLink", [var1, var2])
-                    if seq_and not in ptn.seqs:                        
-                        new_links+=(seq_and,)
-                        connected = True
-                else:
-                    break
-            
-            if not connected:
-                return None
+            t2 = times_vars[i+1][0]
+            if 0 < t2 - t1 <= interval:
+                pass
+            else:
+                if not connected:
+                    return None
         
-        return tuple(new_links)
+        return tuple([var for (timenode,var) in times_vars])
+
 
     # This is the new approach to finding extensions. It works like this:
     # Start with the basic pattern/conjunction () - which means 'no criteria at all'
@@ -282,7 +312,7 @@ class Fishgram:
             #if len(clones):
             #    continue
 
-            canonical_conj = tuple(canonical_trees(ptn.conj)+canonical_trees(ptn.seqs))
+            canonical_conj = tuple(canonical_trees(ptn.conj)) + ptn.seqs
             #print 'canonical_conj', canonical_conj
 
             # Whether this conjunction is a reordering of an existing one. Currently the
@@ -290,14 +320,12 @@ class Fishgram:
             is_reordering = False
             
             #import pdb; pdb.set_trace()
-            perms = [tuple(canonical_trees(perm)+canonical_trees(seqsperm))
+            perms = [tuple(canonical_trees(perm)) + ptn.seqs
                      for perm in permutations(ptn.conj)
-                     for seqsperm in permutations(ptn.seqs)
                      ][1:]
             
-            
             #perms = permutated_canonical_tuples(conj)[1:]
-            print '#perms', len(perms),
+            #print '#perms', len(perms),
             for permcanon in perms:
                 if permcanon in conj2ptn_emblist:
                     is_reordering = True
@@ -305,7 +333,7 @@ class Fishgram:
             if is_reordering:
                 continue
             
-            print 'clonecheck time', time.time()-last_realtime, '#atoms #seqs',len(ptn.conj),len(ptn.seqs)
+            #print 'clonecheck time', time.time()-last_realtime, '#atoms #seqs',len(ptn.conj),len(ptn.seqs)
             
             entry=conj2ptn_emblist[canonical_conj]
             #if not len(entry[1]):
@@ -362,19 +390,20 @@ class Fishgram:
                         
                         remapped_ptn = Pattern(remapped_conj)
                         remapped_ptn.seqs = prev_ptn.seqs
-                        # Simple easy approach: just add all possible SequentialAndLinks
-                        new_seqs = self._add_all_seq_and_links(remapped_ptn, new_s)
+                        
+                        new_seqs = self._time_sequence(remapped_ptn, new_s)
                         # If there is a new time not connected to the others.
                         if new_seqs == None:
                             continue
                         remapped_ptn = Pattern(remapped_conj)
-                        remapped_ptn.seqs = prev_ptn.seqs + new_seqs
+                        remapped_ptn.seqs = new_seqs
 
                         # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern.
-                        # A connection can be one or both of: reusing a variable, and a variable being a time that is
-                        # close to already-mentioned times (i.e. has an afterlink)
+                        # A connection can be one or both of: reusing a variable (for an object or timenode);
+                        # or a variable being a time that is close to already-mentioned times.
                         if prev_ptn.conj != () :
-                            if not (len(remapping) or len(new_seqs) ):
+                            if not (len(remapping) or
+                                    (len(remapped_ptn.seqs) > 1 and len(remapped_ptn.seqs) - len(prev_ptn.seqs) > 0 )):
                                 continue
 
                         if remapped_tree in prev_ptn.conj:

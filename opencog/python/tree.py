@@ -118,7 +118,7 @@ class Tree (object):
             if isinstance(self.op, Atom):
                 return self.op.name+':'+self.op.type_name
             else:
-                return 'Tree:'+str(self.op)
+                return '$'+str(self.op)
         else:
             return '(' + str(self.op) + ' '+ ' '.join(map(str, self.args)) + ')'
 
