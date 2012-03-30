@@ -32,7 +32,7 @@
 // Macro OC_ASSERT corresponding to opencog::cassert(TRACE_INFO, ...)
 // if IGNORE_OC_ASSERT is not defined, and ignored otherwise
 
-//#define IGNORE_OC_ASSERT
+// #define IGNORE_OC_ASSERT
 
 #ifndef IGNORE_OC_ASSERT
 #define OC_ASSERT(...) \
