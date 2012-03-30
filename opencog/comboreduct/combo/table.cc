@@ -120,8 +120,9 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
             push_back(net.outputs[0]->activation);
         }
     } else {
+        arity_set as = get_argument_abs_idx_set(tr);
         foreach(const vertex_seq& vv, itable) {
-            binding_map bmap = itable.get_binding_map(vv);
+            binding_map bmap = itable.get_binding_map(vv, as);
             push_back(eval_throws_binding(rng, bmap, tr));
         }
     }
@@ -130,11 +131,10 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
 OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
                const string& ol) : label(ol)
 {
+    arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
-            binding_map bmap = ctable.get_binding_map(vs);
-            // print_binding_map(bmap);
-            const vertex &v = eval_throws_binding(rng, bmap, tr);
-            this->push_back(v);
+            binding_map bmap = ctable.get_binding_map(vs, as);
+            this->push_back(eval_throws_binding(rng, bmap, tr));
     });
 }
 

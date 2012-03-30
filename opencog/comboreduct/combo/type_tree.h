@@ -228,8 +228,8 @@ type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
 type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
                             const type_tree_seq& atl = empty_tts);
 
-// return the set of arguments of that tree
-vertex_set argument_set(const combo_tree& tr);
+// return the set of absolute idx corresponding to the arguments of tr
+arity_set get_argument_abs_idx_set(const combo_tree& tr);
 
 // infer the type_tree of each argument of a given combo_tree
 void infer_arg_type_tree(const combo_tree& tr, type_tree_seq& arg_types);
@@ -349,7 +349,7 @@ bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n);
 arity_t infer_arity(const combo_tree& tr);
 
 // return the higher argument index of tr,
-// for instance if tr==+($1 $5) it returns 5
+// for instance if tr == +($1 $5) it returns 5
 arity_t explicit_arity(const combo_tree& tr);
 
 // helpers to defined type_trees

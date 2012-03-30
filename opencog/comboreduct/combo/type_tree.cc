@@ -1044,13 +1044,12 @@ type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
     return res;
 }
 
-vertex_set argument_set(const combo_tree& tr)
+arity_set get_argument_abs_idx_set(const combo_tree& tr)
 {
-    typedef combo_tree::leaf_iterator leaf_it;
-    vertex_set res;
-    for (leaf_it lit = tr.begin_leaf(); lit != tr.end_leaf(); ++lit)
-        if (is_argument(*lit))
-            res.insert(*lit);
+    arity_set res;
+    foreach(const vertex& v, make_pair(tr.begin_leaf(), tr.end_leaf()))
+        if (const argument* ap = boost::get<argument>(&v))
+            res.insert(ap->abs_idx());
     return res;
 }
 

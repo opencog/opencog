@@ -68,7 +68,9 @@ struct Evaluator {
 // statically (be careful because it modifies the combo_tree) using
 // set_bindings
 
-// to support lazy evaluation, can also bind to a subtree
+// Associate the index of the argument (starting from 1) to the
+// iterator of the combo tree to return. It returns a combo tree
+// instead of a vertex to support lazy evaluation.
 typedef boost::unordered_map<arity_t,
                              boost::variant<vertex,
                                             combo_tree::iterator> > binding_map;
