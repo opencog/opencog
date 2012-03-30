@@ -1,6 +1,7 @@
 #install header files
 INSTALL(FILES
 
+    argument.h
     action.h
     action_eval.h
     action_symbol.h
