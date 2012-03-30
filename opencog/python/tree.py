@@ -490,6 +490,9 @@ def isomorphic_conjunctions_ordered(xs, ys):
     xs, ys = canonical_trees(xs), canonical_trees(ys)
     return xs == ys
 
+def permutated_canonical_tuples(trs):
+    return [ tuple(canonical_trees(perm)) for perm in permutations(trs) ]
+
 def canonical_trees(trs, dic = {}):
     '''Returns the canonical version of a list of trees, i.e. with the variables renamed (consistently) from 0,1,2.
     It can be a list of only one tree. If you want to use multiple trees, you must put them in the same list, so that

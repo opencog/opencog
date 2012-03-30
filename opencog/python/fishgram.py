@@ -36,12 +36,14 @@ class Pattern:
         self.seqs = ()
         self.embeddings = []
     
+    def __str__(self):
+        return 'Pattern('+pp(self.conj)+' '+pp(self.seqs)+')'
 
 class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 3
+        self.min_embeddings = 2
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
@@ -127,9 +129,8 @@ class Fishgram:
         
         # This would find+store the whole layer of extensions before pruning them
         # Less efficient but may be easier to debug
-        #next_layer = list(next_layer_iter)
-        
-        for (ptn, embs) in self.prune_frequency(next_layer_iter):
+        next_layer = list(next_layer_iter)
+        for (ptn, embs) in self.prune_frequency(next_layer):
         #for (conj, embs) in self.prune_surprise(next_layer_iter):
             #print '***************', conj, len(embs)
             #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
@@ -276,14 +277,29 @@ class Fishgram:
             
             # Check for other equivalent ones. It'd be possible to reduce them (and increase efficiency) by ordering
             # the extension of patterns. This would only work with a stable frequency measure though.
-            clones = [c for c in conj2ptn_emblist.keys()
-                       if isomorphic_conjunctions(conj, c) and c != conj]
-            if len(clones):
+            #clones = [c for c in conj2ptn_emblist.keys()
+            #           if isomorphic_conjunctions(conj, c) and c != conj]
+            #if len(clones):
+            #    continue
+
+            canonical_conj = tuple(canonical_trees(conj))
+            #print 'canonical_conj', canonical_conj
+
+            # Whether this conjunction is a reordering of an existing one. Currently the
+            # canonical form only makes variable names consistent, and not orders.
+            is_reordering = False
+            perms = permutated_canonical_tuples(conj)[1:]
+            print '#perms', len(perms),
+            for permcanon in perms:
+                if permcanon in conj2ptn_emblist:
+                    is_reordering = True
+            
+            if is_reordering:
                 continue
             
-            #print 'clonecheck time', time.time()-last_realtime
+            print 'clonecheck time', time.time()-last_realtime, '#atoms #seqs',len(ptn.conj),len(ptn.seqs)
             
-            entry=conj2ptn_emblist[conj]
+            entry=conj2ptn_emblist[canonical_conj]
             #if not len(entry[1]):
             #    print '====+>>', ptn.conj,
             #    if len(ptn.seqs):
@@ -295,7 +311,7 @@ class Fishgram:
             embs = entry[1]
             if s not in entry[1]:
                 embs.append(s)
-            conj2ptn_emblist[conj] = (ptn, embs)
+            conj2ptn_emblist[canonical_conj] = (ptn, embs)
 
             # Faster, but causes a bug.
 #            canon = tuple(canonical_trees(conj))
@@ -303,7 +319,7 @@ class Fishgram:
 #            print 'canon', pp(canon)
 #            conj2emblist[canon].append(s)
             #print 'extensions_simple', len(conj2emblist[canon])
-        
+            
         return conj2ptn_emblist.values()
 
     def find_extensions(self, prev_layer):
