@@ -359,7 +359,7 @@ type_tree_seq type_tree_input_arg_types(const type_tree& ty)
     if (*ty_it == id::lambda_type) {
         OC_ASSERT(!ty_it.is_childless(), "Lambda must not be childless");
         type_tree_sib_it sib = ty_it.begin();
-        //setting input argument type trees
+        // setting input argument type trees
         for (; sib != type_tree_sib_it(ty.last_child(ty_it)); ++sib) {
             res.push_back(type_tree(*sib == id::arg_list_type ? sib.begin() : sib));
         }

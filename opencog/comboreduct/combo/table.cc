@@ -64,19 +64,23 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
     //populate the matrix
     auto root = tt.begin();
     for (int i = 0; i < nsamples; ++i) {
-        size_t bidx = 0;
+        size_t bidx = 0;        // counter used to enumerate all
+                                // booleans
         vertex_seq vv;
         foreach(type_node n, make_pair(root.begin(), root.last_child()))
             if(n == id::boolean_type)
-                if(comp_tt)
-                    vv.push_back(bool_to_vertex(i & (1 << bidx++)));
-                else
-                    vv.push_back(bool_to_vertex(rng.randint(2)));
+                vv.push_back(bool_to_vertex(comp_tt?
+                                            i & (1 << bidx++)
+                                            : rng.randint(2)));
             else if(n == id::contin_type)
                 vv.push_back((max_contin - min_contin)
                              * rng.randdouble() + min_contin);
+            else if(n == id::unknown_type)
+                vv.push_back(vertex()); // push default vertex
+            else
+                OC_ASSERT(false, "Not implemented yet");                    
 
-        // input interval
+        // input vector
         push_back(vv);
     }
 }

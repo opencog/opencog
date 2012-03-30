@@ -142,6 +142,8 @@ public:
               size is automatically determined.
      * @param min_contin minimum contin value.
      * @param max_contin maximum contin value.
+     *
+     * It onyl works for contin-boolean signatures
      */
     // min_contin and max_contin are used in case tt has contin inputs
     ITable(const type_tree& tt, RandGen& rng, int nsamples = -1,
