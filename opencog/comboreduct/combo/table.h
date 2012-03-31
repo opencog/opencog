@@ -703,16 +703,17 @@ protected:
     template<typename T>
     void populate(const tree<T>& tr)
     {
+        bmap.resize(_arity);
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             for (int j = 0; j < _arity; ++j)
-                bmap[j + 1] = bool_to_vertex((i >> j) % 2);
+                bmap[j] = bool_to_vertex((i >> j) % 2);
             *it = eval_binding(*_rng, bmap, tr) == id::logical_true;
         }
     }
     arity_t _arity;
     RandGen* _rng; // _rng is dummy and not used anyway
-    mutable binding_map bmap;
+    mutable vertex_seq bmap;
 };
 
 //////////////////

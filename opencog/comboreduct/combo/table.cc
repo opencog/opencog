@@ -66,22 +66,22 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
     for (int i = 0; i < nsamples; ++i) {
         size_t bidx = 0;        // counter used to enumerate all
                                 // booleans
-        vertex_seq vv;
+        vertex_seq vs;
         foreach(type_node n, make_pair(root.begin(), root.last_child()))
             if(n == id::boolean_type)
-                vv.push_back(bool_to_vertex(comp_tt?
+                vs.push_back(bool_to_vertex(comp_tt?
                                             i & (1 << bidx++)
                                             : rng.randint(2)));
             else if(n == id::contin_type)
-                vv.push_back((max_contin - min_contin)
+                vs.push_back((max_contin - min_contin)
                              * rng.randdouble() + min_contin);
             else if(n == id::unknown_type)
-                vv.push_back(vertex()); // push default vertex
+                vs.push_back(vertex()); // push default vertex
             else
                 OC_ASSERT(false, "Not implemented yet");                    
 
         // input vector
-        push_back(vv);
+        push_back(vs);
     }
 }
 
@@ -124,11 +124,8 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
             push_back(net.outputs[0]->activation);
         }
     } else {
-        arity_set as = get_argument_abs_idx_set(tr);
-        foreach(const vertex_seq& vv, itable) {
-            binding_map bmap = itable.get_binding_map(vv, as);
-            push_back(eval_throws_binding(rng, bmap, tr));
-        }
+        foreach(const vertex_seq& vs, itable)
+            push_back(eval_throws_binding(rng, vs, tr));
     }
 }
 
@@ -137,8 +134,7 @@ OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
 {
     arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
-            binding_map bmap = ctable.get_binding_map(vs, as);
-            this->push_back(eval_throws_binding(rng, bmap, tr));
+            this->push_back(eval_throws_binding(rng, vs, tr));
     });
 }
 
@@ -176,7 +172,7 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
     const_iterator cit = begin();
     for (int i = 0; cit != end(); ++i, ++cit) {
         for (int j = 0; j < _arity; ++j)
-            bmap[j + 1] = bool_to_vertex((i >> j) % 2);
+            bmap[j] = bool_to_vertex((i >> j) % 2);
         if (*cit != vertex_to_bool(eval_binding(*_rng, bmap, tr)))
             return false;
     }

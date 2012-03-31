@@ -75,6 +75,7 @@ typedef boost::unordered_map<arity_t,
                              boost::variant<vertex,
                                             combo_tree::iterator> > binding_map;
 
+// This binding is not thread-safe (because it is static)
 inline boost::variant<vertex, combo_tree::iterator>& binding(int idx)
 {
     static binding_map map;
@@ -468,18 +469,20 @@ vertex eval_throws(RandGen& rng, const tree<T>& tr)
 /// binding_map. It also removes any type checking as it is the job of
 /// static type checker. The Evaluator is ignored till vu is
 /// completely removed
-vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
+// vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
+//                            combo_tree::iterator it, Evaluator* pe = NULL)
+vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe = NULL)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception);
 
-vertex eval_binding(RandGen& rng, binding_map& bmap, combo_tree::iterator it)
+vertex eval_binding(RandGen& rng,  const vertex_seq& bmap, combo_tree::iterator it)
      throw(ComboException, AssertionException, std::bad_exception);
 
-vertex eval_binding(RandGen& rng, binding_map& bmap, const combo_tree& tr)
+vertex eval_binding(RandGen& rng,  const vertex_seq& bmap, const combo_tree& tr)
     throw(StandardException, std::bad_exception);
 
-vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
+vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
                            const combo_tree& tr)
      throw(EvalException, ComboException, AssertionException,
            std::bad_exception);

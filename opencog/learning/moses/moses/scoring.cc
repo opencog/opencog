@@ -101,23 +101,22 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev)
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
-    // cti == ITable of inputs.
-    // OTable ct will contain evaluation of tree tr on the inputs cti.
-    OTable ct(tr, cti, rng);
-
     // OTable target is the table of output we want to get.
-    behavioral_score bs(target.size() + (occam?1:0));
+    behavioral_score bs;
 
     // boost/range/algorithm/transform.
-    // take two arrays ct, target, feed the elts to anon funtion[]
-    // (which just computes square of the difference) and put the
-    // results into bs.
-    boost::transform(ct, target, bs.begin(),
-                     [](const vertex& vl, const vertex& vr) {
-                         return -sq(get_contin(vl) - get_contin(vr)); });
+    // Take the input vectors cit, target, feed the elts to anon
+    // funtion[] (which just computes square of the difference) and
+    // put the results into bs.
+    boost::transform(cti, target, back_inserter(bs),
+                     [&](const vertex_seq& vs, const vertex& v) {
+                         contin_t tar = get_contin(v),
+                             res = get_contin(eval_binding(this->rng, vs, tr));
+                         return -sq(res - tar);
+                     });
     // add the Occam's razor feature
     if (occam)
-        bs.back() = complexity(tr) * complexity_coef;
+        bs.push_back(complexity(tr) * complexity_coef);
 
     // Logger
     log_candidate_bscore(tr, bs);
@@ -198,21 +197,20 @@ precision_bscore::precision_bscore(const CTable& _ctable,
 
 behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 {
-    // The OTable constructor takes the combo tree tr and evaluates it
-    // for every row of input in ctt. (The rng is passed straight
-    // through to the combo evaluator).
-    OTable ot(tr, ctable, rng);
     behavioral_score bs;
-    
+
+    // compute active and sum of all active outputs
     vertex target = bool_to_vertex(positive);
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
-    boost::for_each(ctable | map_values, ot,
-                    [&](const CTable::counter_t& c, const vertex& v) {
-                        if (v == id::logical_true) {
-                            sao += sum_outputs(c);
-                            active += c.total_count();
-                        }});
+    foreach(const CTable::value_type& vct, ctable) {
+        // vct.first = input vector
+        // vct.second = counter of outputs
+        if (eval_binding(rng, vct.first, tr) == id::logical_true) {
+            sao += sum_outputs(vct.second);
+            active += vct.second.total_count();
+        }
+    }
 
     // add (normalized) precision
     score_t precision = (sao / active) / max_denorm_precision,
@@ -330,7 +328,11 @@ size_t discretize_contin_bscore::class_idx_within(contin_t v,
 
 behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
 {
-    OTable ct(tr, cit, rng);
+    /// @todo could be optimized by avoiding computing the OTable and
+    /// directly using the results on the fly. On really big table
+    /// (dozens of thousands of data points and about 100 inputs, this
+    /// has overhead of about 10% of the overall time)
+    OTable ct(tr, cit, rng);    
     behavioral_score bs(target.size() + (occam?1:0));
     boost::transform(ct, classes, bs.begin(), [&](const vertex& v, size_t c_idx) {
             return (c_idx != this->class_idx(get_contin(v))) * this->weights[c_idx];
@@ -361,26 +363,18 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
     occam = p > 0.0f && p < 0.5f;
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
-
-    // define func
-    func = [](const vertex& v, const CTable::counter_t& c) {
-        return -score_t(c.get(negate_vertex(v))); };
-
-    // define best_func
-    best_func = [](const CTable::counter_t& c) {
-        return -score_t(min(c.get(id::logical_true), c.get(id::logical_false)));};
 }
 
 behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
-    // The OTable constructor will take the combo tree tr and evaluate
-    // it for every row of input in ctt. (The rng is passed straight
-    // through to the combo evaluator).
-    OTable ptt(tr, ctt, rng);
     behavioral_score bs;
 
     // Evaluate the bscore components for all rows of the ctable
-    transform(ptt, ctt | map_values, back_inserter(bs), func);
+    foreach(const CTable::value_type& vct, ctt) {
+        const vertex_seq& vs = vct.first;
+        const CTable::counter_t& c = vct.second;
+        bs.push_back(-score_t(c.get(negate_vertex(eval_binding(rng, vs, tr)))));
+    }
 
     // Add the Occam's razor feature
     if (occam)
@@ -394,7 +388,11 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 behavioral_score ctruth_table_bscore::best_possible_bscore() const
 {
     behavioral_score bs;
-    transform(ctt | map_values, back_inserter(bs), best_func);
+    transform(ctt | map_values, back_inserter(bs),
+              [](const CTable::counter_t& c) {
+                  return -score_t(min(c.get(id::logical_true),
+                                      c.get(id::logical_false)));
+              });
 
     // add the Occam's razor feature
     if(occam)
