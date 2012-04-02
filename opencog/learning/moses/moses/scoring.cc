@@ -355,14 +355,9 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
 ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
                                          float alphabet_size, float p,
                                          RandGen& _rng)
-    : ctt(_ctt), rng(_rng)
+    : ctable(_ctt), rng(_rng)
 {
-    // Both p==0.0 and p==0.5 are singularity points in the Occam's
-    // razor formula for discrete outputs (see the explanation in the
-    // comment above ctruth_table_bscore)
-    occam = p > 0.0f && p < 0.5f;
-    if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p);
+    set_complexity_coef(alphabet_size, p);
 }
 
 behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
@@ -370,7 +365,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
     behavioral_score bs;
 
     // Evaluate the bscore components for all rows of the ctable
-    foreach(const CTable::value_type& vct, ctt) {
+    foreach(const CTable::value_type& vct, ctable) {
         const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
         bs.push_back(-score_t(c.get(negate_vertex(eval_binding(rng, vs, tr)))));
@@ -388,7 +383,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 behavioral_score ctruth_table_bscore::best_possible_bscore() const
 {
     behavioral_score bs;
-    transform(ctt | map_values, back_inserter(bs),
+    transform(ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
                   return -score_t(min(c.get(id::logical_true),
                                       c.get(id::logical_false)));
@@ -403,6 +398,15 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
 score_t ctruth_table_bscore::min_improv() const
 {
     return 0.5;
+}
+
+void ctruth_table_bscore::set_complexity_coef(float alphabet_size, float p) {
+    // Both p==0.0 and p==0.5 are singularity points in the Occam's
+    // razor formula for discrete outputs (see the explanation in the
+    // comment above ctruth_table_bscore definition)
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
+        complexity_coef = discrete_complexity_coef(alphabet_size, p);
 }
 
 //////////////////////////////////

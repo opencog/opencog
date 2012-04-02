@@ -40,6 +40,17 @@
 
 namespace opencog { namespace combo {
 
+// templates helpers to convert C++ type into type_node
+/// @note if I don't inline I get linkage error, go figure...
+template<typename T>
+inline type_node type_node_of() { return id::ill_formed_type; }
+
+template<>
+inline type_node type_node_of<bool>() { return id::boolean_type; }
+        
+template<>
+inline type_node type_node_of<contin_t>() { return id::contin_type; }
+
 // returns the arity of builtin b
 char get_arity(builtin b);
 

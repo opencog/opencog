@@ -30,6 +30,8 @@ namespace opencog { namespace moses {
 // where n is the arity of even_parity
 struct even_parity
 {
+    typedef bool argument_type;
+    typedef bool result_type;
     // [from, to( corresponds to the sequence of inputs of the
     // function, the result corresponds to its output
     template<typename It>
@@ -44,6 +46,8 @@ struct even_parity
 // disjunction(x1, ..., xn) = true iff there exists i such that xi is true
 struct disjunction
 {
+    typedef bool argument_type;
+    typedef bool result_type;
     // [from, to( corresponds to the sequence of inputs of the
     // function, the result corresponds to its output
     template<typename It>
@@ -59,6 +63,8 @@ struct disjunction
 // is the address of the string bit described by a1, ..., an.
 struct multiplex
 {
+    typedef bool argument_type;
+    typedef bool result_type;
     multiplex(unsigned int n) : arity(n) { }
     unsigned int arity;
     // [from, to( corresponds to the sequence of inputs of the
@@ -84,6 +90,8 @@ struct multiplex
 // f(x)_0 = 0
 struct simple_symbolic_regression
 {
+    typedef contin_t argument_type;
+    typedef contin_t result_type;
     simple_symbolic_regression(int o = 4) : order(o) { }
     int order;
     template<typename It>
@@ -94,7 +102,6 @@ struct simple_symbolic_regression
         return res;
     }
 };
-
 
 } // ~namespace moses
 } // ~namespace opencog

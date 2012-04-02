@@ -1017,6 +1017,8 @@ int moses_exec(int argc, char** argv)
 
         type_tree tt = gen_signature(id::boolean_type, arity);
         logical_bscore bscore(func, arity);
+        // int as = alphabet_size(tt, ignore_ops); // TODO can be simplified
+        // ctruth_table_bscore bscore(func, arity, as, noise, rng, nsamples);
         metapop_moses_results(rng, exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);

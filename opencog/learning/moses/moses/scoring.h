@@ -525,6 +525,14 @@ private:
  */
 struct ctruth_table_bscore : public bscore_base
 {
+    template<typename Func>
+    ctruth_table_bscore(const Func& func, arity_t arity,
+                        float alphabet_size, float p,
+                        RandGen& _rng, int nsamples = -1)
+        : ctable(func, arity, _rng, nsamples), rng(_rng)
+    {
+        set_complexity_coef(alphabet_size, p);
+    }
     ctruth_table_bscore(const CTable& _ctt,
                         float alphabet_size, float p, RandGen& _rng);
 
@@ -535,8 +543,11 @@ struct ctruth_table_bscore : public bscore_base
     behavioral_score best_possible_bscore() const;
 
     score_t min_improv() const;
+
+private:
+    void set_complexity_coef(float alphabet_size, float p);
     
-    CTable ctt;
+    CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     RandGen& rng;
