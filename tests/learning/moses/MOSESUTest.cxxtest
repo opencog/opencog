@@ -87,6 +87,12 @@ public:
         moses_test_score({"-Hsr", "-k3", "-m100000", "-L1"});
     }
     
+    void test_cp_simple() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        string tr_str("and($1 $2)");
+        string cp_opt("-y");
+        moses_test_combo({"-Hcp", cp_opt + tr_str}, {tr_str});
+    }
     void test_cp() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         string tr_str("or(and($2 !$3) $1 !$4 $5)");
