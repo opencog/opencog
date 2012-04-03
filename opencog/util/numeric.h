@@ -279,7 +279,7 @@ template<typename FloatT> FloatT weightInformation(FloatT p)
 template<typename FloatT> FloatT binaryEntropy(FloatT p)
 {
     OC_ASSERT(p >= 0 && p <= 1,
-              "probability %f is not between 0 and 1", p);
+              "binaryEntropy: probability %f is not between 0 and 1", p);
     return weightInformation(p) + weightInformation(1.0 - p);
 }
 
@@ -305,7 +305,7 @@ double entropy(const C& c) {
 
 // compute the smallest divisor of n
 template<typename IntT> IntT smallest_divisor(IntT n) {
-    OC_ASSERT(n > 0, "n must be supperior than 0");
+    OC_ASSERT(n > 0, "smallest_divisor: n must be superior than 0");
     if(n<3)
         return n;
     else {
@@ -325,7 +325,8 @@ template<typename T> T sq(T x) { return x*x; }
 
 // check if x isn't too high and return 2^x
 template<typename OutInt> OutInt pow2(unsigned int x) {
-    OC_ASSERT(8*sizeof(OutInt) - (numeric_limits<OutInt>::is_signed?1:0) > x);
+    OC_ASSERT(8*sizeof(OutInt) - (numeric_limits<OutInt>::is_signed?1:0) > x,
+              "pow2: Amount to shift is out of range.");
     return static_cast<OutInt>(1) << x;
 }
 inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
