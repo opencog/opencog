@@ -649,8 +649,10 @@ depends on the particular problem type.
 .TP
 .BI \-y\  prog \fR,\ \fB\-\-combo\-program= prog
 Specify the combo prorgram to be learned, when used in combination with
-the \fB-H cp\fR option.  Thus, for example, \fB-H cp -y "and($1 $2)"\fR
-specifies that the two-input conjunction is to be learned.
+the \fB-H cp\fR option.  Thus, for example, \fB-H cp -y "and(\\$1 \\$2)"\fR
+specifies that the two-input conjunction is to be learned.  Keep in mind
+that $ is a reserved character in many shells, and thus must be escaped
+with a backslash in order to be passed to moses.
 .PP
 .\" ============================================================
 .SH TODO
