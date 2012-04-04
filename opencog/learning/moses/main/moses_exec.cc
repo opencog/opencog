@@ -39,7 +39,7 @@ static const unsigned int max_filename_size = 255;
  * Display error message about unspecified combo tree and exit
  */
 void unspecified_combo_exit() {
-    cerr << "error: you must specify which combo tree to learn (option -y)"
+    cerr << "Error: you must specify which combo tree to learn (option -y)."
          << endl;
     exit(1);
 }
@@ -48,7 +48,7 @@ void unspecified_combo_exit() {
  * Display error message about unsupported type and exit
  */
 void unsupported_type_exit(const type_tree& tt) {
-    cerr << "error: type " << tt << " currently not supported" << endl;
+    cerr << "Error: type " << tt << " currently not supported." << endl;
     exit(1);
 }
 void unsupported_type_exit(type_node type) {
@@ -59,8 +59,8 @@ void unsupported_type_exit(type_node type) {
  * Display error message about ill formed combo tree and exit
  */
 void illformed_exit(const combo_tree& tr) {
-    cerr << "error: apparently the combo tree "
-         << tr << "is not well formed" << endl;
+    cerr << "Error: apparently the combo tree "
+         << tr << "is not well formed." << endl;
     exit(1);
 }
 
@@ -68,8 +68,8 @@ void illformed_exit(const combo_tree& tr) {
  * Display error message about unsupported problem and exit
  */
 void unsupported_problem_exit(const string& problem) {
-    cerr << "error: problem " << problem
-         << " unsupported for the moment" << endl;
+    cerr << "Error: problem " << problem
+         << " unsupported for the moment." << endl;
     exit(1);
 }
 
@@ -88,7 +88,7 @@ void no_input_datafile_exit() {
 void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
                              const string& input_data_file2, arity_t arity2)
 {
-    cerr << "File " << input_data_file1 << " has arity " << arity1
+    cerr << "Error: File " << input_data_file1 << " has arity " << arity1
          << " while file " << input_data_file2 << "has_arity "
          << arity2 << endl;
     exit(1);
@@ -98,8 +98,8 @@ void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
  * Display error message about not recognized combo operator and exist
  */
 void not_recognized_combo_operator(const string& ops_str) {
-    cerr << "error: " << ops_str
-         << " is not recognized as combo operator" << endl;
+    cerr << "Error: " << ops_str
+         << " is not recognized as combo operator." << endl;
     exit(1);
 }
 
@@ -639,7 +639,7 @@ int moses_exec(int argc, char** argv)
     if (level != Logger::BAD_LEVEL)
         logger().setLevel(level);
     else {
-        cerr << "Log level " << log_level << " is incorrect (see --help)." << endl;
+        cerr << "Error: Log level " << log_level << " is incorrect (see --help)." << endl;
         exit(1);
     }
     logger().setBackTraceLevel(Logger::ERROR);
@@ -939,6 +939,19 @@ int moses_exec(int argc, char** argv)
     else if (combo_based_problem(problem))
     {
         combo_tree tr = str_to_combo_tree(combo_str);
+
+        // If the user specifies the combo program from bash or similar
+        // shells, and forgets to escape the $ in the variable names,
+        // then the resulting combo program will be garbage.  Try to
+        // sanity-check this, so as to avoid user frustration. 
+        // A symptom of this error is that the arity will be -1.
+        if (-1 == arity || NULL == strchr(combo_str.c_str(), '$')) {
+            cerr << "Error: the combo program " << tr 
+                 << " appears not to contain any arguments. Did you\n"
+                 << "forget to escape the $'s in the shell command line?"
+                 << endl;
+            exit(2);
+        }
 
         if (problem == cp) { // regression based on combo program
             // get the combo_tree and infer its type
