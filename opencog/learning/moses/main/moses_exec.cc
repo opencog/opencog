@@ -403,12 +403,21 @@ int moses_exec(int argc, char** argv)
          "problem size is larger than the value provided with that "
          "option then the dataset is subsampled randomly to reach the "
          "target size.\n")
+
         (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0),
-         "Min of an input value chosen randomly, only used when the problem takes continuous inputs. Temporary hack: if the problem is pre then this is used to determine the min activation.\n")
+         "Minimum value of a sampled coninuous input.  The cp, ip, and "
+         "pre problems all require a range of values to be sampled in "
+         "order to measure the fitness of a proposed solution. This "
+         "option sets the low end of the sampled range.\n")
+
         (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1),
-         "Max of an input value chosen randomly, only used when the problem takes continuous inputs. Temporary hack: if the problem is pre then this is used to determine the max activation.\n")
+         "Maximum value of a sampled coninuous input.  The cp, ip, and "
+         "pre problems all require a range of values to be sampled in "
+         "order to measure the fitness of a proposed solution. This "
+         "option sets the low high of the sampled range.\n")
+
         (opt_desc_str(log_level_opt).c_str(),
          value<string>(&log_level)->default_value("INFO"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, "
@@ -946,8 +955,8 @@ int moses_exec(int argc, char** argv)
         // sanity-check this, so as to avoid user frustration. 
         // A symptom of this error is that the arity will be -1.
         if (-1 == arity || NULL == strchr(combo_str.c_str(), '$')) {
-            cerr << "Error: the combo program " << tr 
-                 << " appears not to contain any arguments. Did you\n"
+            cerr << "Error: the combo program " << tr << "\n"
+                 << "appears not to contain any arguments. Did you\n"
                  << "forget to escape the $'s in the shell command line?"
                  << endl;
             exit(2);

@@ -605,13 +605,24 @@ l lx.
 Combo program regression. The scoring function is based on the
 combo program specified with the \fB-y\fR flag. That is, the goal of
 the run is to deduce and learn the specified combo program.
+
+When specifying combo programs with continuous variables in them, be
+sure to use the \fB\-q\fR, \fB\-w\fR and \fB\-b\fR flags to specify
+a range of input values to be sampled. In order to determine the fitness
+of a possible solution, it must be compared to the specified combo
+program.  The comparison is done at a variety of different input 
+values. If the range of sampled input values is inappropriate, or if
+there are not enough sampled values, then the fitness function may
+select unexpected, undesired solutions.
 T}
+
 \fBdj\fR@T{
 Disjunction problem. The scoring function awards a result that is a
 boolean disjunction (\fIor\fR) of \fIN\fR boolean-valued variables.
 The resulting combo program should be \fIor($1 $2 ...)\fR.
 The size of the problem may be specified with the \fB\-k\fR option.
 T}
+
 \fBmux\fR@T{
 Multiplex problem. The scoring function models a boolean digital
 multiplexer, that is, an electronic circuit where an "address" of \fIn\fR
@@ -622,12 +633,14 @@ option may be used to specify the value of \fIn\fR.  The actual size
 of the problem, measured in bits, is \fIn+2^n\fR and so increases
 exponentially fast.
 T}
+
 \fBpa\fR@T{
 Even parity problem.  The resulting combo program computes the parity of
 \fIk\fR bits, evaluating to true if the parity is even, else evaluating
 to false.
 The size of the problem may be specified with the \fB\-k\fR option.
 T}
+
 \fBsr\fR@T{
 Polynomial regression problem. Given the polynomial
 \fIp(x)=x+x^2+x^3+...x^k\fR, this searches for the shortest program
@@ -658,7 +671,9 @@ with a backslash in order to be passed to moses.
 .SH TODO
 Finish documenting these algo flags:  -M
 .PP
-These input flags: -b -G --python
+These input flags: -G
+.PP
+These output flags: --python
 .PP
 These operator/problem type flags: -p
 .PP

@@ -907,6 +907,8 @@ seconds, not 60 seconds, so the smaller run just was not realistic.
 
 ==================================================================
 
+ Attempts at 5-parity
+
 parity -k5 results   -Hpa -k5 
 
 All are -m150K unless otherwise noted, right?
