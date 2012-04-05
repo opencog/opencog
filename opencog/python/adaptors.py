@@ -26,18 +26,21 @@ class ForestExtractor:
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
-        self.unwanted_atoms = set(['proximity', 'near', 'next',
+        self.unwanted_atoms = set(['proximity', 'near', # 'next',
             'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of',
-            'between', 'touching', 'inside', 'outside', 'below', 'above',
+            'between', 'touching', 'inside', 'outside', 'below', # 'above',
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
             'is_movable', 'is_noisy', 'null', 'Object',
-            'exist','decreased','increased',
+            'exist', # 'decreased','increased',
             # Not useful e.g. because they contain numbers
             "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
             'move:actor',  'is_moving', 
             # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
-            'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst'])
+            'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst',
+            # These might be part of the old embodiment system or part of Psi, I'm not sure
+            'happiness','sadness','fear','excitement','anger',
+            'night'])
         
         # state
         self.all_objects  = set()# all objects in the AtomSpace
@@ -176,7 +179,8 @@ class ForestExtractor:
     def include_atom(self,  atom):
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
-            if atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK'):
+            if (atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK') or
+                atom.is_a(t.VariableNode)):
                 return False
         else:            
             if any([atom.is_a(ty) for ty in 

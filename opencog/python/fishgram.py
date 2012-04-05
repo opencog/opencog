@@ -21,6 +21,15 @@ import sys
 # unit of timestamps is 0.01 second so multiply by 100
 interval = 100* 20
 
+def format_log(*args):
+    global _line    
+    out = str(_line) + ' ' + ' '.join(map(str, args))
+#    if _line == 39:
+#        import pdb; pdb.set_trace()
+    _line+=1
+    return out
+_line = 1
+
 def pairwise(iterable):
     """
     s -> (s0,s1), (s1,s2), (s2, s3), ...
@@ -51,7 +60,7 @@ class Fishgram:
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 500
+        self.max_per_layer = 20
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -164,13 +173,13 @@ class Fishgram:
                 
                 del new_layer[self.max_per_layer+1:]
                 
-                conj_length = len(new_layer[0][0].conj)
-                #conj_length = set(len(pe[0].conj) for pe in new_layer)
+                #conj_length = len(new_layer[0][0].conj)
+                conj_length = set(len(pe[0].conj+pe[0].seqs) for pe in new_layer)
                 #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
-                print '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m'
+                print format_log( '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m')
 
-                for ptn, embs in new_layer:
-                    print pp(ptn.conj), '         ', pp(ptn.seqs), '      ', len(embs) #, pp(embs)
+                #for ptn, embs in new_layer:
+                #    print format_log(pp(ptn.conj), '         ', pp(ptn.seqs), '      ', len(embs))
 
                 yield new_layer
             
@@ -249,31 +258,52 @@ class Fishgram:
     #    
     #    return tuple(new_links)
 
-    def _time_sequence(self, ptn, embedding):
-        '''Finds the sequence of times. i.e. for a given embedding, the TimeNodes will be in a certain
-        order. Rejects conjunction-embedding pairs if the times are too far apart.'''
-        assert isinstance(ptn, Pattern)
+    #def _time_sequence(self, ptn, embedding):
+    #    '''Finds the sequence of times. i.e. for a given embedding, the TimeNodes will be in a certain
+    #    order. Rejects conjunction-embedding pairs if the times are too far apart.'''
+    #    assert isinstance(ptn, Pattern)
+    #
+    #    times_vars = [(obj, var) for (var, obj) in embedding.items()
+    #                  if obj.get_type() == t.TimeNode]
+    #    times_vars = [(int(obj.op.name), var) for obj, var in times_vars]
+    #    times_vars.sort()
+    #
+    #    for (i, (t1, var1)) in enumerate(times_vars[:-1]):
+    #        # We want to determine whether there is a connected graph of times.
+    #        # This variable represents whether this time is connected to a future time.
+    #        # If all of the times are connected to 1+ future time, then it is a connected graph.
+    #        connected = False
+    #        
+    #        t2 = times_vars[i+1][0]
+    #        if 0 < t2 - t1 <= interval:
+    #            pass
+    #        else:
+    #            if not connected:
+    #                return None
+    #    
+    #    return tuple([var for (timenode,var) in times_vars])
 
-        times_vars = [(obj, var) for (var, obj) in embedding.items()
-                      if obj.get_type() == t.TimeNode]
-        times_vars = [(int(obj.op.name), var) for obj, var in times_vars]
-        times_vars.sort()
-
-        for (i, (t1, var1)) in enumerate(times_vars[:-1]):
-            # We want to determine whether there is a connected graph of times.
-            # This variable represents whether this time is connected to a future time.
-            # If all of the times are connected to 1+ future time, then it is a connected graph.
-            connected = False
-            
-            t2 = times_vars[i+1][0]
-            if 0 < t2 - t1 <= interval:
-                pass
-            else:
-                if not connected:
-                    return None
+    def _after_existing_actions(self,prev_seqs, tr, new_embedding):
+        assert isinstance(prev_seqs, tuple)
+        assert isinstance(tr, Tree)
+        assert isinstance(new_embedding, dict)
+        assert tr.op == 'AtTimeLink'
         
-        return tuple([var for (timenode,var) in times_vars])
-
+        # Only add times at the end of the sequence
+        newly_added_var = tr.args[0]
+        newly_added_timestamp = int(new_embedding[newly_added_var].op.name)
+        
+        previous_latest_time_var = prev_seqs[-1].args[0]
+        previous_latest_timestamp = int(new_embedding[previous_latest_time_var].op.name)
+        
+        if 0 < newly_added_timestamp - previous_latest_timestamp <= interval:
+            return True
+        
+        if (newly_added_timestamp == previous_latest_timestamp and
+            prev_seqs[-1] != tr):
+            return True
+        
+        return False
 
     # This is the new approach to finding extensions. It works like this:
     # Start with the basic pattern/conjunction () - which means 'no criteria at all'
@@ -384,30 +414,48 @@ class Fishgram:
                         if tmp == None:
                             continue
                         remapping, new_s = tmp
-
+                        
                         remapped_tree = subst(remapping, tr)
-                        remapped_conj = prev_ptn.conj+(remapped_tree,)
                         
-                        remapped_ptn = Pattern(remapped_conj)
-                        remapped_ptn.seqs = prev_ptn.seqs
-                        
-                        new_seqs = self._time_sequence(remapped_ptn, new_s)
-                        # If there is a new time not connected to the others.
-                        if new_seqs == None:
-                            continue
-                        remapped_ptn = Pattern(remapped_conj)
-                        remapped_ptn.seqs = new_seqs
-
-                        # Skip 'links' where there is no remapping, i.e. no connection to the existing pattern.
-                        # A connection can be one or both of: reusing a variable (for an object or timenode);
-                        # or a variable being a time that is close to already-mentioned times.
-                        if prev_ptn.conj != () :
-                            if not (len(remapping) or
-                                    (len(remapped_ptn.seqs) > 1 and len(remapped_ptn.seqs) - len(prev_ptn.seqs) > 0 )):
-                                continue
-
                         if remapped_tree in prev_ptn.conj:
                             continue
+                        
+                        if tr_.op == 'AtTimeLink' and prev_ptn.seqs:
+                            after = self._after_existing_actions(prev_ptn.seqs,remapped_tree,new_s)
+
+                        # There needs to be a connection to the existing pattern.
+                        # A connection can be one or both of: reusing a variable (for an object or timenode);
+                        # or the latest action being shortly after the existing ones. The first action must
+                        # be connected to an existing object, i.e. it's not after anything but there is a
+                        # remapping.
+                        conj = prev_ptn.conj
+                        seqs = prev_ptn.seqs
+                        #import pdb; pdb.set_trace()
+                        
+                        firstlayer = (prev_ptn.conj == () and prev_ptn.seqs == ())
+                        if tr_.op != 'AtTimeLink':
+                            if len(remapping) or firstlayer:
+                                conj += (remapped_tree,)
+                            else:
+                                continue
+                        else:
+                            if len(prev_ptn.seqs) == 0:
+                                accept = ( len(remapping) or firstlayer)
+                            else:
+                                # Note: 'after' means the new timestamp is greater than OR EQUAL TO the existing one.
+                                # seqs will always contain an exact sequence, so you can't refer to other actions involving the
+                                # same object(s) but at a different time...
+                                accept = after
+                            
+                            if accept:
+                                seqs += (remapped_tree,)
+                            else:
+                                continue
+                        
+                        #print format_log('accepting an example for:',prev_ptn,'+',remapped_tree)
+                        
+                        remapped_ptn = Pattern(conj)
+                        remapped_ptn.seqs = seqs
 
                         self.viz.outputTreeNode(target=list(remapped_ptn.conj+remapped_ptn.seqs),
                                                 parent=list(prev_ptn.conj+prev_ptn.seqs), index=0)
