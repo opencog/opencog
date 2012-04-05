@@ -55,12 +55,12 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 2
+        self.min_embeddings = 3
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 20
+        self.max_per_layer = 9001
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -328,7 +328,7 @@ class Fishgram:
         for (ptn, s) in self.find_extensions(prev_layer):
             #print '...',time.time() - last_realtime
             last_realtime = time.time()
-            
+
             conj = ptn.conj + ptn.seqs
             
 #            num_variables = len(get_varlist(conj))
@@ -342,26 +342,37 @@ class Fishgram:
             #if len(clones):
             #    continue
 
-            canonical_conj = tuple(canonical_trees(ptn.conj)) + ptn.seqs
-            #print 'canonical_conj', canonical_conj
+            tmp = canonical_trees(ptn.conj)
+            canonical_conj = tuple(tmp) + ptn.seqs
+            
+            use_ordering = True
+            if use_ordering:
+                # A very hacky ordering system. Simply makes sure that each link added
+                # to the conjunction comes after the existing ones. I'm not sure if this
+                # will exclude some things appropriately. For example the < comparison
+                # will compare a mixture of predicate names and variable names. Also
+                # when you add two variables, it may break things too...
+                if len(tmp) >= 2 and tmp[-1] < tmp[-2]: continue
+            else:
+                #print 'canonical_conj', canonical_conj
 
-            # Whether this conjunction is a reordering of an existing one. Currently the
-            # canonical form only makes variable names consistent, and not orders.
-            is_reordering = False
-            
-            #import pdb; pdb.set_trace()
-            perms = [tuple(canonical_trees(perm)) + ptn.seqs
-                     for perm in permutations(ptn.conj)
-                     ][1:]
-            
-            #perms = permutated_canonical_tuples(conj)[1:]
-            #print '#perms', len(perms),
-            for permcanon in perms:
-                if permcanon in conj2ptn_emblist:
-                    is_reordering = True
-            
-            if is_reordering:
-                continue
+                # Whether this conjunction is a reordering of an existing one. Currently the
+                # canonical form only makes variable names consistent, and not orders.
+                is_reordering = False
+                
+                #import pdb; pdb.set_trace()
+                perms = [tuple(canonical_trees(perm)) + ptn.seqs
+                         for perm in permutations(ptn.conj)
+                         ][1:]
+                
+                #perms = permutated_canonical_tuples(conj)[1:]
+                #print '#perms', len(perms),
+                for permcanon in perms:
+                    if permcanon in conj2ptn_emblist:
+                        is_reordering = True
+                
+                if is_reordering:
+                    continue
             
             #print 'clonecheck time', time.time()-last_realtime, '#atoms #seqs',len(ptn.conj),len(ptn.seqs)
             
