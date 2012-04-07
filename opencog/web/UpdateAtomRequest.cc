@@ -188,7 +188,8 @@ bool UpdateAtomRequest::execute()
     } catch (std::runtime_error e) {
         // json spirit probably borked at parsing bad javascript
         if (_output.str().size() == 0) {
-            _output << "{\"error\":\"parsing json\"}" << std::endl;
+            //_output << "{\"error\":\"parsing json\"}" << std::endl;
+            _output << "{\"error\":"<<e.what()<<"\"}" << std::endl;
             send(_output.str());
         }
         return false;

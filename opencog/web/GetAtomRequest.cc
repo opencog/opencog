@@ -78,45 +78,49 @@ bool GetAtomRequest::execute()
         send(_output.str());
         return false;
     }
-    if (output_format == json_format) json_makeOutput(handle);
+    if (output_format == json_format)
+        _output << json_makeOutput(handle);
     else html_makeOutput(handle);
     send(_output.str());
     return true;
 }
 
-void GetAtomRequest::json_makeOutput(Handle h)
+std::string GetAtomRequest::json_makeOutput(Handle h)
 {
+    std::ostringstream output;
+    
     AtomSpace* as = server().getAtomSpace();
-    _output << "{\"handle\":" << h.value() << ",";// << std::endl;
+    output << "{\"handle\":" << h.value() << ",";// << std::endl;
 
-    _output << "\"type\":\"" << classserver().getTypeName(as->getType(h)) <<
+    output << "\"type\":\"" << classserver().getTypeName(as->getType(h)) <<
         "\",";// << std::endl;
-    _output << "\"name\":\"" << as->getName(h) << "\",";// << std::endl;
+    output << "\"name\":\"" << as->getName(h) << "\",";// << std::endl;
 
     // Here the outgoing targets string is made
     HandleSeq outgoing = as->getOutgoing(h);
-    _output << "\"outgoing\":[";
+    output << "\"outgoing\":[";
     for (uint i = 0; i < outgoing.size(); i++) {
-        if (i != 0) _output << ",";
-        _output << outgoing[i].value();
+        if (i != 0) output << ",";
+        output << outgoing[i].value();
     }
-    _output << "],";// << std::endl;
+    output << "],";// << std::endl;
 
     // Here the incoming string is made.
     HandleSeq incoming = as->getIncoming(h);
-    _output << "\"incoming\":[";
+    output << "\"incoming\":[";
     for (uint i = 0; i < incoming.size(); i++) {
-        if (i != 0) _output << ",";
-        _output << incoming[i].value();
+        if (i != 0) output << ",";
+        output << incoming[i].value();
     }
-    _output << "],"; // << std::endl;
-    _output << "\"sti\":" << as->getSTI(h) << ",";// <<std::endl;
-    _output << "\"lti\":" << as->getLTI(h) << ",";// <<std::endl;
+    output << "],"; // << std::endl;
+    output << "\"sti\":" << as->getSTI(h) << ",";// <<std::endl;
+    output << "\"lti\":" << as->getLTI(h) << ",";// <<std::endl;
 
     TruthValuePtr tvp = as->getTV(h);
-    _output << "\"truthvalue\":" << tvToJSON(tvp.get());// << std::endl;
-    _output << "}";
+    output << "\"truthvalue\":" << tvToJSON(tvp.get());// << std::endl;
+    output << "}";
 
+    return output.str();
 }
 
 std::string GetAtomRequest::tvToJSON(const TruthValue* tv)

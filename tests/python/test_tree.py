@@ -1,11 +1,8 @@
 from unittest import TestCase
-# uses Python mock, installed with "sudo easy_install mock"
-# http://www.voidspace.org.uk/python/mock/
-from mock import patch
 
-import opencog.atomspace
-from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
-from opencog.atomspace import types, is_a, get_type, get_type_name
+import atomspace_remote
+from atomspace_remote import AtomSpace, TruthValue, Atom #, Handle
+from atomspace_remote import types, get_type, get_type_name # is_a
 t=types
 
 import tree
@@ -22,6 +19,7 @@ class TreeTest(TestCase):
         self.x2 = self.a.add(t.ConceptNode,"test2")
         self.l1 = self.a.add(t.Link, out=[self.x1,self.x2])
         self.l2 = self.a.add(t.Link, out=[self.l1,self.x2])
+        print 'l1', self.l1
 
     def tearDown(self):
         del self.a

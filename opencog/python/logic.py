@@ -2,11 +2,10 @@
 
 #from IPython.Debugger import Tracer; debug_here = Tracer()
 
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, get_type_name
-import opencog.cogserver
+from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
 from tree import *
 from util import pp, OrderedSet, concat_lists, inplace_set_attributes
-from opencog.util import log
+from util import log
 
 from collections import defaultdict
 
@@ -14,7 +13,7 @@ import formulas
 
 from sys import stdout
 # You can use kcachegrind on cachegrind.out.profilestats
-from profilestats import profile
+#from profilestats import profile
 
 #import line_profiler
 #profiler = line_profiler.LineProfiler()
@@ -121,7 +120,7 @@ class Chainer:
             print e
 
 
-    @profile
+    #@profile
     def bc(self, target):        
         #import prof3d; prof3d.profile_me()
         
@@ -146,7 +145,7 @@ class Chainer:
             self.viz.outputTarget(target, None, 0, 'GOAL')
 
             start = time()
-            while self.bc_later and not self.results:
+            while self.bc_later: # and not self.results:
                 log.info(format_log(time() - start))
 #                if time() - start > 0:
 #                    print 'TIMEOUT'
@@ -160,7 +159,7 @@ class Chainer:
             
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
-            print [str(atom_from_tree(result, self.space).tv) for result in self.results]
+            #print [str(atom_from_tree(result, self.space).tv) for result in self.results]
 #            for res in self.results:
 #                bit = self.traverse_tree(res, set())
 #                self.add_depths(bit)
@@ -176,7 +175,9 @@ class Chainer:
             #    print self.extract_plan(trail)
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
-            return [atom_from_tree(result, self.space).h for result in self.results]
+
+            return self.results
+            #return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
             import traceback, pdb
 
@@ -193,7 +194,7 @@ class Chainer:
         # So reset this list so they will be tried again.
         self.fc_before = OrderedSet()
 
-        while self.fc_later and not self.results:
+        while self.fc_later: # and not self.results:
             self.propogate_results_step()
 
     def bc_step(self):
@@ -210,7 +211,7 @@ class Chainer:
 
         for a in apps:
             a = a.standardize_apart()
-            if not a.goals: print format_log('generator', repr(a))
+            #if not a.goals: print format_log('generator', repr(a))
             if not a.goals and a.tv:
                 # Makes sure it goes in the list of apps, but just propogate results from the head (i.e. the actual Atom)
                 # and not the goals (an empty list!)
@@ -444,11 +445,11 @@ class Chainer:
             input_tvs = [(tv.mean, tv.count) for tv in input_tvs]
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
-            atom_from_tree(app.head, self.space).tv = app.tv
+            #atom_from_tree(app.head, self.space).tv = app.tv
             
             self.add_tv(app.head, app.tv)
             
-            print (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
+            log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
 
     def find_rule_applications(self, target):
         '''The main 'meat' of the chainer. Finds all possible rule-applications matching your criteria.

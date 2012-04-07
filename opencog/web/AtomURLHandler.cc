@@ -67,6 +67,7 @@ void AtomURLHandler::handlePOSTCreate( struct mg_connection *conn,
     std::string json_str;
     if (ri->post_data_len > 0) {
         json_str = std::string(ri->post_data, ri->post_data_len);
+        std::cout << "#params" << params.size() << "data:" << json_str << std::endl;
         params.push_back(json_str);
     } else {
         mg_printf(_conn, "{\"error\":\"no_data\"}");

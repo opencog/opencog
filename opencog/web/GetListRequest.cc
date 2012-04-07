@@ -26,6 +26,8 @@
 #include "GetListRequest.h"
 #include "BaseURLHandler.h"
 
+#include "GetAtomRequest.h"
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/types.h>
@@ -468,7 +470,8 @@ void GetListRequest::json_makeOutput(HandleSeq &hs)
         Handle h = *it;
         if (!first) _output << ", ";
         else first = false;
-        _output << h.value();
+        //_output << h.value();
+        _output << GetAtomRequest::json_makeOutput(h);
     }
     _output << " ]" << std::endl << 
         "}" << std::endl;

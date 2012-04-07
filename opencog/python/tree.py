@@ -1,8 +1,4 @@
-from opencog.atomspace import AtomSpace, Atom, get_type, types
-
-#import rpyc_connection
-#_as = rpyc_connection.conn.modules['opencog.atomspace']
-#AtomSpace, types, Atom, get_type, is_a = _as.AtomSpace, _as.types, _as.Atom, _as.get_type, _as.is_a
+from atomspace_remote import AtomSpace, Atom, get_type, types
 
 from copy import copy, deepcopy
 from functools import *
@@ -21,47 +17,47 @@ from util import *
 #        return self.id
 
 from collections import namedtuple
-class FakeAtom:
-    '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
-    and is safe to use for Python multiprocessing. It is also compatible with PyPy.'''
-    def __init__(self, t,  type_name, name, id, tv):
-        self.t = t
-        self.type_name = type_name
-        self.name = name
-#        self._handle = FakeHandle(id)
-        self._handle_value = id
-        TruthValue = namedtuple('TruthValue', 'count')
-        self.tv = tv #TruthValue(count=1)
-    
-    def __str__(self):
-        return 'fake%s%s' % (self.type_name,  self.name)
-
-    def __eq__(self, other):
-        if type(self) != type(other):
-            return False
-        return self._handle_value == other._handle_value
-
-    def __hash__(self):
-        return hash(self._handle_value)
-
-#    def h(self):
-#        return self._handle
-
-    def is_a(self, _type):
-#        assert _type == types.Link
-        return is_a (self.t, _type)
-
-def fake_from_real_Atom(atom):
-    return FakeAtom(atom.t, atom.type_name, atom.name, atom.h.value(), atom.tv)
-
-def tree_with_fake_atoms(tr):
-    #if isinstance(tr.op, Atom):
-    if not isinstance(tr.op, Tree) and not isinstance(tr.op, str) and not isinstance(tr.op, int):
-        return Tree(fake_from_real_Atom(tr.op), [])
-    elif tr.is_leaf():
-        return tr
-    else:
-        return Tree(tr.op, map(tree_with_fake_atoms, tr.args))
+#class FakeAtom:
+#    '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
+#    and is safe to use for Python multiprocessing. It is also compatible with PyPy.'''
+#    def __init__(self, t,  type_name, name, id, tv):
+#        self.t = t
+#        self.type_name = type_name
+#        self.name = name
+##        self._handle = FakeHandle(id)
+#        self._handle_value = id
+#        TruthValue = namedtuple('TruthValue', 'count')
+#        self.tv = tv #TruthValue(count=1)
+#    
+#    def __str__(self):
+#        return 'fake%s%s' % (self.type_name,  self.name)
+#
+#    def __eq__(self, other):
+#        if type(self) != type(other):
+#            return False
+#        return self._handle_value == other._handle_value
+#
+#    def __hash__(self):
+#        return hash(self._handle_value)
+#
+##    def h(self):
+##        return self._handle
+#
+#    def is_a(self, _type):
+##        assert _type == types.Link
+#        return is_a (self.t, _type)
+#
+#def fake_from_real_Atom(atom):
+#    return FakeAtom(atom.t, atom.type_name, atom.name, atom.h, atom.tv)
+#
+#def tree_with_fake_atoms(tr):
+#    #if isinstance(tr.op, Atom):
+#    if not isinstance(tr.op, Tree) and not isinstance(tr.op, str) and not isinstance(tr.op, int):
+#        return Tree(fake_from_real_Atom(tr.op), [])
+#    elif tr.is_leaf():
+#        return tr
+#    else:
+#        return Tree(tr.op, map(tree_with_fake_atoms, tr.args))
 
 def coerce_tree(x):
     assert type(x) != type(None)
@@ -182,9 +178,9 @@ class Tree (object):
             return self._tuple
         else:
             # Atom doesn't support comparing to different types in the Python-standard way.
-            if isinstance(self.op, Atom) and not isinstance(self.op, FakeAtom):
+            if isinstance(self.op, Atom): # and not isinstance(self.op, FakeAtom):
                 #assert type(self.op.h) != type(None)
-                self._tuple = self.op.h.value()
+                self._tuple = self.op.h
                 return self._tuple
                 #return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
             else:

@@ -71,6 +71,7 @@ bool CreateAtomRequest::execute()
     HandleSeq outgoing;
     TruthValue* tv = NULL;
     Value json_top;
+
     try {
         read( data, json_top);
         const Object &json_obj = json_top.get_obj();
@@ -79,6 +80,7 @@ bool CreateAtomRequest::execute()
             const Pair& pair = json_obj[i];
             const std::string& name = pair.name_;
             const Value&  value = pair.value_;
+            std::cout << name << std::endl;
             if (name == "type") {
                 t = classserver().getType(value.get_str());
             } else if (name == "name") {
@@ -106,7 +108,8 @@ bool CreateAtomRequest::execute()
         // json spirit probably borked at parsing bad javascript
         if (tv) delete tv;
         if (_output.str().size() == 0) {
-            _output << "{\"error\":\"parsing json\"}" << std::endl;
+            //_output << "{\"error\":\"parsing json\"}" << std::endl;
+            _output << "{\"error\":"<<e.what()<<"\"}" << std::endl;
             send(_output.str());
         }
         return false;
