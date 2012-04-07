@@ -6,58 +6,7 @@ import sys
 from itertools import permutations
 from util import *
 
-# Some broken weird stuff attempting to get around Cython
-
-#class FakeHandle:
-#    '''A simple class to imitate Handle for use with FakeAtom.'''
-#    def __init__(self, id):
-#        self.id = id
-#    
-#    def value(self):
-#        return self.id
-
 from collections import namedtuple
-#class FakeAtom:
-#    '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
-#    and is safe to use for Python multiprocessing. It is also compatible with PyPy.'''
-#    def __init__(self, t,  type_name, name, id, tv):
-#        self.t = t
-#        self.type_name = type_name
-#        self.name = name
-##        self._handle = FakeHandle(id)
-#        self._handle_value = id
-#        TruthValue = namedtuple('TruthValue', 'count')
-#        self.tv = tv #TruthValue(count=1)
-#    
-#    def __str__(self):
-#        return 'fake%s%s' % (self.type_name,  self.name)
-#
-#    def __eq__(self, other):
-#        if type(self) != type(other):
-#            return False
-#        return self._handle_value == other._handle_value
-#
-#    def __hash__(self):
-#        return hash(self._handle_value)
-#
-##    def h(self):
-##        return self._handle
-#
-#    def is_a(self, _type):
-##        assert _type == types.Link
-#        return is_a (self.t, _type)
-#
-#def fake_from_real_Atom(atom):
-#    return FakeAtom(atom.t, atom.type_name, atom.name, atom.h, atom.tv)
-#
-#def tree_with_fake_atoms(tr):
-#    #if isinstance(tr.op, Atom):
-#    if not isinstance(tr.op, Tree) and not isinstance(tr.op, str) and not isinstance(tr.op, int):
-#        return Tree(fake_from_real_Atom(tr.op), [])
-#    elif tr.is_leaf():
-#        return tr
-#    else:
-#        return Tree(tr.op, map(tree_with_fake_atoms, tr.args))
 
 def coerce_tree(x):
     assert type(x) != type(None)
@@ -94,10 +43,6 @@ def Var(op):
     return Tree(op)
 
 class Tree (object):
-#    cdef public object op
-#    cdef public list args
-#    cdef tuple _tuple
-    
     def __init__(self, op, args = None):
         # Transparently record Links as strings rather than Handles
         assert type(op) != type(None)
@@ -201,6 +146,32 @@ class Tree (object):
         # t=Tree('EvaluationLink',Tree(1),Tree('ListLink',Tree('cat'),Tree('dog')))
         return [self]+concat_lists(map(Tree.flatten, self.args))
 
+class DAG(Tree):
+    def __init__(self,op,args):
+        Tree.__init__(self,op,args)
+        self.parents = []
+        
+        for a in args:
+            self.append(a)
+    
+    def append(self,child):
+        if self not in child.parents:
+            child.parents.append(self)
+            self.args.append(child)
+    
+    def __eq__(self,other):
+        if type(self) != type(other):
+            return False
+        return self.op == other.op
+
+    def __hash__(self):
+        return hash(self.op)
+    
+    def any_path_up_contains(self,targets):
+        if self in targets:
+            return True
+        return any(p.any_path_up_contains(targets) for p in self.parents)
+        
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():
         if atom.t in [types.VariableNode, types.FWVariableNode]:

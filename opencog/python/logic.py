@@ -43,6 +43,7 @@ class Chainer:
         # For an exact target (i.e. variables in exactly the same places aka isomorphic),
         # store the list of TVs available.
         self.target2tvs = defaultdict(list)
+        self.pd = dict()
 
         self.space = space
         self.viz = PLNviz(space)
@@ -63,61 +64,61 @@ class Chainer:
         
         #profiler.add_function(self.bc)
 
-    def do_planning(self):
-        try:
-            target_PredicateNodes = [x for x in self.space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
-
-            for atom in target_PredicateNodes:
-                # Here be DRAGONS!
-                #target = Tree('EvaluationLink', atom, Tree('ListLink'))
-                target = T('EvaluationLink', atom)
-
-            a = self.space
-
-            rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
-            atom_from_tree(rl, a)
-            
-            # hack
-            print 'target'
-            target_a = atom_from_tree(target, a)
-            print target_a
-            print target_a.tv
-            target_a.tv = TruthValue(0,  0)
-            print target_a
-            # Reset the rules list so the EvaluationLink in it won't have a TV!
-            self.setup_rules(a)
-
-            self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
-
-            result_atoms = self.bc(target)
-            
-            print "planning result: ",  result_atoms
-            
-            if result_atoms:
-                res_Handle = result_atoms[0]
-                res = tree_from_atom(Atom(res_Handle, a))
-                
-                trail = self.trail(res)
-                actions = self.extract_plan(trail)
-                
-                # set plan_success
-                ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
-                # set plan_action_list
-                pal = T('ReferenceLink',
-                            a.add_node(t.ConceptNode, 'plan_action_list'),
-                            T('ListLink', actions))
-                
-                ps_a  = atom_from_tree(ps, a)
-                pal_a = atom_from_tree(pal, a)
-                
-                print ps
-                print pal
-                ps_a.tv = TruthValue(1, 9001)
-                
-                print ps_a.tv
-
-        except Exception, e:
-            print e
+    #def do_planning(self):
+    #    try:
+    #        target_PredicateNodes = [x for x in self.space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
+    #
+    #        for atom in target_PredicateNodes:
+    #            # Here be DRAGONS!
+    #            #target = Tree('EvaluationLink', atom, Tree('ListLink'))
+    #            target = T('EvaluationLink', atom)
+    #
+    #        a = self.space
+    #
+    #        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+    #        atom_from_tree(rl, a)
+    #        
+    #        # hack
+    #        print 'target'
+    #        target_a = atom_from_tree(target, a)
+    #        print target_a
+    #        print target_a.tv
+    #        target_a.tv = TruthValue(0,  0)
+    #        print target_a
+    #        # Reset the rules list so the EvaluationLink in it won't have a TV!
+    #        self.setup_rules(a)
+    #
+    #        self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
+    #
+    #        result_atoms = self.bc(target)
+    #        
+    #        print "planning result: ",  result_atoms
+    #        
+    #        if result_atoms:
+    #            res_Handle = result_atoms[0]
+    #            res = tree_from_atom(Atom(res_Handle, a))
+    #            
+    #            trail = self.trail(res)
+    #            actions = self.extract_plan(trail)
+    #            
+    #            # set plan_success
+    #            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
+    #            # set plan_action_list
+    #            pal = T('ReferenceLink',
+    #                        a.add_node(t.ConceptNode, 'plan_action_list'),
+    #                        T('ListLink', actions))
+    #            
+    #            ps_a  = atom_from_tree(ps, a)
+    #            pal_a = atom_from_tree(pal, a)
+    #            
+    #            print ps
+    #            print pal
+    #            ps_a.tv = TruthValue(1, 9001)
+    #            
+    #            print ps_a.tv
+    #
+    #    except Exception, e:
+    #        print e
 
 
     #@profile
@@ -128,11 +129,6 @@ class Chainer:
             tvs = self.get_tvs(target)
             print "Existing target truth values:", map(str, tvs)
             
-            #save_trees([target], 'target')
-            #save_trees([tree_from_atom(a) for a in self.space.get_atoms_by_type(t.Atom) if a.tv.count > 0], 'as')
-            if Chainer._convert_atoms:
-                target = tree_with_fake_atoms(target)
-
             log.info(format_log('bc', target))
             self.bc_later = OrderedSet([target])
             self.results = []
@@ -145,7 +141,7 @@ class Chainer:
             self.viz.outputTarget(target, None, 0, 'GOAL')
 
             start = time()
-            while self.bc_later: # and not self.results:
+            while self.bc_later and not self.results:
                 log.info(format_log(time() - start))
 #                if time() - start > 0:
 #                    print 'TIMEOUT'
@@ -167,12 +163,12 @@ class Chainer:
 #                
 #                self.print_tree(bit)
 
-            #for res in self.results:
-            #    print 'Inference trail:'
-            #    trail = self.trail(res)
-            #    self.print_tree(trail)
-            #    print 'Action plan (if applicable):'
-            #    print self.extract_plan(trail)
+            for res in self.results:
+                print 'Inference trail:'
+                trail = self.trail(res)
+                self.print_tree(trail)
+                #print 'Action plan (if applicable):'
+                #print self.extract_plan(trail)
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
 
@@ -194,7 +190,7 @@ class Chainer:
         # So reset this list so they will be tried again.
         self.fc_before = OrderedSet()
 
-        while self.fc_later: # and not self.results:
+        while self.fc_later and not self.results:
             self.propogate_results_step()
 
     def bc_step(self):
@@ -415,16 +411,21 @@ class Chainer:
 
         canon = app.canonical_tuple()
         if canon not in self.apps_set:
-            self.apps_set.add(canon)
-            self.apps.append(app)
-        
-        #if not any(app.isomorphic(existing) for existing in self.apps):
-        #    self.apps.append(app)
-
-            # Only visualize it if it is actually new
-            # viz
-            for (i, input) in enumerate(app.goals):
-                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, repr(app))
+            app_pdn = self.add_app_to_pd(app)
+            if app_pdn == None:
+                #print "CYCLE", app.name, app.head, app.goals
+                pass
+            else:
+                self.apps_set.add(canon)
+                self.apps.append(app)
+            
+                #if not any(app.isomorphic(existing) for existing in self.apps):
+                #    self.apps.append(app)
+    
+                # Only visualize it if it is actually new
+                # viz
+                for (i, input) in enumerate(app.goals):
+                    self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
 
         return added_queries
 
@@ -510,6 +511,29 @@ class Chainer:
         canonical = expr.canonical()
         self.target2tvs[canonical].append(tv)
 
+    def expr2pdn(self, expr):
+        pdn = DAG(expr,[])
+        try:
+            return self.pd[pdn]
+        except KeyError:
+            self.pd[pdn] = pdn
+            return pdn
+
+    def add_app_to_pd(self, app):
+        '''Adds a rule application to the Proof DAG. NOTE: Won't
+        check whether the app is already present. Currently we do
+        that in add_queries.'''
+        head_pdn = self.expr2pdn(app.head.canonical())
+        app_pdn = DAG(app.name,[])
+        
+        goal_pdns = [self.expr2pdn(g.canonical()) for g in app.goals]
+        if head_pdn.any_path_up_contains(goal_pdns):
+            return None
+        for goal_pdn in goal_pdns:
+            app_pdn.append(goal_pdn)
+        head_pdn.append(app_pdn)
+        return app_pdn
+
 #    def is_true_weird(self, expr):
 #        #import pdb; pdb.set_trace()
 #        rs = self.find_rule_applications(expr)
@@ -518,7 +542,7 @@ class Chainer:
 #            import pdb; pdb.set_trace()
 #        return len([r.tv for r in rs if r.tv and not r.goals]) > 0
 
-    def add_rule(self, rule):        
+    def add_rule(self, rule):
         self.rules.append(rule)
         
         # Only relevant to generators or axioms
@@ -549,56 +573,65 @@ class Chainer:
         return actions
 
     def trail(self, target):
-        def filter_with_tv(tr):
-            args = []
-            for child in tr.args:
-                if len(self.get_tvs(child.op)) > 0:
-                    args.append(child)
-            return Tree(tr.op, args)
-        
-        bit = self.traverse_tree(target, set())
-        
-        return filter_with_tv(bit)
+        #def filter_with_tv(tr):
+        #    args = []
+        #    for child in tr.args:
+        #        if len(self.get_tvs(child.op)) > 0:
+        #            args.append(child)
+        #    return Tree(tr.op, args)
+        #
+        #bit = self.traverse_tree(target, set())
+        #
+        #return filter_with_tv(bit)
 
-    def traverse_tree(self, target, already):
-        producers = [app for app in self.apps if app.head.isomorphic(target)]
+        def filter_with_tv(dag):
+            args = [filter_with_tv(a) for a in dag.args if
+                    (isinstance(a.op,str) or len(self.get_tvs(a.op)) > 0)]
+            return DAG(dag.op, args)
         
-        # Deliberately allows repetition of subgoals
-        subgoals = concat_lists([list(app.goals) for app in producers])
-        subgoals_ = []
-        for goal in subgoals:
-            canon = goal.canonical()
-            if canon not in already:
-                subgoals_.append(canon)
-            already.add(canon)
-        
-        #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-        # Note: make a separate copy of `already` for each branch, so we only prevent loops within
-        # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
-        # (If you do, you'll want to do it a different way for each function)
-        return Tree(target, [self.traverse_tree(g, set(already)) for g in subgoals_])
+        root = self.expr2pdn(target)
 
-    def traverse_tree__(self, target):
-        pass
-    
-    # arrange the tree by rule applications not by goals
-    def traverse_tree_(self, target, already):
-        producers = [a for a in self.apps if a.head.unifies(target)]
+        return filter_with_tv(root)
         
-        # Deliberately allows repetition of subgoals
-        subgoals = concat_lists([list(app.goals) for app in producers])
-        producers_ = []
-        for app in producers:
-            canon = app.canonical_tuple()
-            if canon not in already:
-                producers_.append(canon)
-            already.add(canon)
-        
-        #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-        # Note: make a separate copy of `already` for each branch, so we only prevent loops within
-        # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
-        # (If you do, you'll want to do it a different way for each function)
-        return Tree(target, [self.traverse_tree(g, set(already)) for g in producers])
+    #def traverse_tree(self, target, already):
+    #    producers = [app for app in self.apps if app.head.isomorphic(target)]
+    #    
+    #    # Deliberately allows repetition of subgoals
+    #    subgoals = concat_lists([list(app.goals) for app in producers])
+    #    subgoals_ = []
+    #    for goal in subgoals:
+    #        canon = goal.canonical()
+    #        if canon not in already:
+    #            subgoals_.append(canon)
+    #        already.add(canon)
+    #    
+    #    #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
+    #    # Note: make a separate copy of `already` for each branch, so we only prevent loops within
+    #    # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
+    #    # (If you do, you'll want to do it a different way for each function)
+    #    return Tree(target, [self.traverse_tree(g, set(already)) for g in subgoals_])
+    #
+    #def traverse_tree__(self, target):
+    #    pass
+    #
+    ## arrange the tree by rule applications not by goals
+    #def traverse_tree_(self, target, already):
+    #    producers = [a for a in self.apps if a.head.unifies(target)]
+    #    
+    #    # Deliberately allows repetition of subgoals
+    #    subgoals = concat_lists([list(app.goals) for app in producers])
+    #    producers_ = []
+    #    for app in producers:
+    #        canon = app.canonical_tuple()
+    #        if canon not in already:
+    #            producers_.append(canon)
+    #        already.add(canon)
+    #    
+    #    #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
+    #    # Note: make a separate copy of `already` for each branch, so we only prevent loops within
+    #    # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
+    #    # (If you do, you'll want to do it a different way for each function)
+    #    return Tree(target, [self.traverse_tree(g, set(already)) for g in producers])
 
     def print_tree(self, tr, level = 1):
         try:
@@ -697,25 +730,25 @@ class Chainer:
                     r.tv = obj.tv
                     self.add_rule(r)
 
-        # Deduction
-        for type in self.deduction_types:
-            self.add_rule(Rule(T(type, 1,3), 
-                                         [T(type, 1, 2),
-                                          T(type, 2, 3), 
-                                          Var(1),
-                                          Var(2), 
-                                          Var(3)],
-                                        name='Deduction', 
-                                        formula = formulas.deductionSimpleFormula))
-        
-        # Inversion
-        for type in self.deduction_types:
-            self.add_rule(Rule( T(type, 2, 1), 
-                                         [T(type, 1, 2),
-                                          Var(1),
-                                          Var(2)], 
-                                         name='Inversion', 
-                                         formula = formulas.inversionFormula))
+        ## Deduction
+        #for type in self.deduction_types:
+        #    self.add_rule(Rule(T(type, 1,3), 
+        #                                 [T(type, 1, 2),
+        #                                  T(type, 2, 3), 
+        #                                  Var(1),
+        #                                  Var(2), 
+        #                                  Var(3)],
+        #                                name='Deduction', 
+        #                                formula = formulas.deductionSimpleFormula))
+        #
+        ## Inversion
+        #for type in self.deduction_types:
+        #    self.add_rule(Rule( T(type, 2, 1), 
+        #                                 [T(type, 1, 2),
+        #                                  Var(1),
+        #                                  Var(2)], 
+        #                                 name='Inversion', 
+        #                                 formula = formulas.inversionFormula))
 
         # ModusPonens
         for type in ['ImplicationLink']:

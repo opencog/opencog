@@ -105,6 +105,7 @@ class AtomSpace(object):
         return self._get_atom_by_handle(h)
     
     def _get_all_atoms(self):
+        print "REST: fetching all atoms"
         #all_handles = self._client.get_handles_by_type('Atom')
         #all_handles.sort()
         #all_atom_dicts = [self._client.get_atom(h) for h in all_handles]
@@ -117,6 +118,8 @@ class AtomSpace(object):
         
         self._all_atoms = all_atoms
         self._handle2atom = {atom.h:atom for atom in all_atoms}
+        
+        print "REST: relax"
 
     
     def _get_atom_by_handle(self,h):
