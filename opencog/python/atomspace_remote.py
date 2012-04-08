@@ -5,7 +5,7 @@ class TruthValue(object):
     def __init__(self,mean,count):
         self.mean = mean
         self.count = count
-        self.conf = count_to_confidence(count)
+        self.confidence = count_to_confidence(count)
     
     def __repr__(self):
         return '(%s %s)' % (self.mean, self.count)
@@ -42,6 +42,10 @@ class Atom(object):
     
     def is_node(self):
         return self.type_name.endswith("Node")
+    
+    def is_a(self,t):
+        # HACK
+        return t == self.t
     
     def __repr__(self):
         if self.is_node():
@@ -85,9 +89,15 @@ class AtomSpace(object):
     
     def get_atoms_by_type(self, type_name):
         #self._get_all_atoms()
-        # HACK        
-        return [atom for atom in self._all_atoms
-                if atom.type_name == type_name or type_name == 'Atom']
+        # HACK
+        if type_name == 'Link':
+            return [atom for atom in self._all_atoms
+                if not atom.is_node()]
+        elif type_name == 'Atom':
+            return [atom for atom in self._all_atoms]
+        else:
+            return [atom for atom in self._all_atoms
+                    if atom.type_name == type_name]
     
     def add(self, type_name, name='', out = []):
         ## TODO currently it just returns existing Atoms
@@ -97,6 +107,7 @@ class AtomSpace(object):
         #                a.out == out]
         #assert len(existing) == 1
         #return existing[0]
+        assert False
         out_handles = [o.h for o in out]
         atom = Atom(self,None,type_name,name,out_handles,TruthValue(0,0),None)
         d = self._client._dict_from_atom(atom)

@@ -1,8 +1,8 @@
 # You can test at the cogserver shell, using
 # import adaptors; reload(adaptors); import fishgram; reload(fishgram);from fishgram import *; fish = FishgramMindAgent(); fish.run(a)
 
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, types as t
-import opencog.cogserver
+from atomspace_remote import AtomSpace, types, Atom, TruthValue, types as t
+#import opencog.cogserver
 from tree import *
 import adaptors
 from pprint import pprint
@@ -55,7 +55,7 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 3
+        self.min_embeddings = 2
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
@@ -1111,62 +1111,62 @@ def notice_changes(atomspace):
             
             atTime.tv = TruthValue(0, 0)
 
-class ClockMindAgent(opencog.cogserver.MindAgent):
-    def __init__(self):
-        self.cycles = 1
-
-    def run(self,atomspace):
-        times = atomspace.get_atoms_by_type(t.TimeNode)
-        times = sorted(times, key= lambda t: int(t.name) )
-        
-        print times[-1].name
-
-class FishgramMindAgent(opencog.cogserver.MindAgent):
-    def __init__(self):
-        self.cycles = 1
-
-    def run(self,atomspace):
-        # It may be useful to store the fishgram object so you can reuse results in each cycle
-        try:
-            self.fish
-        except:            
-            self.fish = Fishgram(atomspace)
-            
-            #make_seq(atomspace)
-            # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
-            #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
-            
-            # Detect timestamps where a DemandGoal got satisfied or frustrated
-            notice_changes(atomspace)
-
-            self.fish.forest.extractForest()
-            print len(self.fish.forest.all_trees)
-
+#class ClockMindAgent(opencog.cogserver.MindAgent):
+#    def __init__(self):
+#        self.cycles = 1
+#
+#    def run(self,atomspace):
+#        times = atomspace.get_atoms_by_type(t.TimeNode)
+#        times = sorted(times, key= lambda t: int(t.name) )
+#        
+#        print times[-1].name
+#
+#class FishgramMindAgent(opencog.cogserver.MindAgent):
+#    def __init__(self):
+#        self.cycles = 1
+#
+#    def run(self,atomspace):
+#        # It may be useful to store the fishgram object so you can reuse results in each cycle
+#        try:
+#            self.fish
+#        except:            
+#            self.fish = Fishgram(atomspace)
 #            
-#            conj = (fish.forest.all_trees[0],)
-#            fish.forest.lookup_embeddings(conj)
-
-            #fish.forest.extractForest()
-            #time1, time2, time1_binding, time2_binding = new_var(), new_var(), new_var(), new_var()
-            #fish.forest.tree_embeddings[Tree('SequentialAndLink', time1, time2)] = [
-            #                                                    {time1: time1_binding, time2: time2_binding}]
-#            for layer in fish.closed_bfs_layers():
-#                for conj, embs in layer:
-#                    print
-#                    print pp(conj)
-#                    #print pp(embs)
-#                    lookup = pp( fish.forest.lookup_embeddings(conj) )
-#                    for bt in lookup:
-#                        print 'lookup:',  pp(bt)
-#                    for binding in embs:
-#                        bound_tree = bind_conj(conj, binding)
-#                        print 'emb:',  pp(bound_tree)
-        
-        #fish.iterated_implications()
-        #self.fish.implications()
-        self.fish.run()
-        print "Finished one Fishgram cycle"
-        
-        #fish.make_all_psi_rules()
-
-        self.cycles+=1
+#            #make_seq(atomspace)
+#            # Using the magic evaluator now. But add a dummy link so that the extractForest will include this
+#            #atomspace.add(t.SequentialAndLink, out=[atomspace.add(t.TimeNode, '0'), atomspace.add(t.TimeNode, '1')], tv=TruthValue(1, 1))
+#            
+#            # Detect timestamps where a DemandGoal got satisfied or frustrated
+#            notice_changes(atomspace)
+#
+#            self.fish.forest.extractForest()
+#            print len(self.fish.forest.all_trees)
+#
+##            
+##            conj = (fish.forest.all_trees[0],)
+##            fish.forest.lookup_embeddings(conj)
+#
+#            #fish.forest.extractForest()
+#            #time1, time2, time1_binding, time2_binding = new_var(), new_var(), new_var(), new_var()
+#            #fish.forest.tree_embeddings[Tree('SequentialAndLink', time1, time2)] = [
+#            #                                                    {time1: time1_binding, time2: time2_binding}]
+##            for layer in fish.closed_bfs_layers():
+##                for conj, embs in layer:
+##                    print
+##                    print pp(conj)
+##                    #print pp(embs)
+##                    lookup = pp( fish.forest.lookup_embeddings(conj) )
+##                    for bt in lookup:
+##                        print 'lookup:',  pp(bt)
+##                    for binding in embs:
+##                        bound_tree = bind_conj(conj, binding)
+##                        print 'emb:',  pp(bound_tree)
+#        
+#        #fish.iterated_implications()
+#        #self.fish.implications()
+#        self.fish.run()
+#        print "Finished one Fishgram cycle"
+#        
+#        #fish.make_all_psi_rules()
+#
+#        self.cycles+=1

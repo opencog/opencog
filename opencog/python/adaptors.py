@@ -1,5 +1,5 @@
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
-import opencog.cogserver
+from atomspace_remote import AtomSpace, types, Atom, TruthValue
+#import opencog.cogserver
 from tree import *
 from util import *
 
@@ -201,10 +201,12 @@ class ForestExtractor:
 
         # TODO check the TruthValue the same way as you would for other links.
         # work around hacks in other modules
-        if any([i.is_a(t.AtTimeLink) for i in link.incoming]) or link.is_a(t.ExecutionLink):
-            return False
+#        if any([i.is_a(t.AtTimeLink) for i in link.incoming]) or link.is_a(t.ExecutionLink):
+#            return False
+        if link.is_a(t.ExecutionLink):
+            return False        
         # Throw away the AtTimeLink that just contains the Action ID
-        elif link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
+        if link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
             return False
         else:
             return True
@@ -701,26 +703,26 @@ class FishgramFilter:
         return a.is_a(t.EvaluationLink) or a.is_a(t.ExecutionOutputLink) or a.is_a(t.ExecutionLink)
 
 # Hacks
-class GephiMindAgent(opencog.cogserver.MindAgent):
-    def __init__(self):
-        self.cycles = 1
-
-    def run(self,atomspace):
-
-        try:
-            #import pdb; pdb.set_trace()
-#            g = GraphConverter(atomspace,
-#                FishgramFilter(atomspace,
-#                SubdueTextOutput(atomspace)))
-#            g.output()
-
-            te = ForestExtractor(atomspace, GephiOutput(atomspace))
-            te.output()
-        except KeyError,  e:
-            KeyError
-        except Exception, e:
-            import traceback; traceback.print_exc(file=sys.stdout)
-        self.cycles+=1
+#class GephiMindAgent(opencog.cogserver.MindAgent):
+#    def __init__(self):
+#        self.cycles = 1
+#
+#    def run(self,atomspace):
+#
+#        try:
+#            #import pdb; pdb.set_trace()
+##            g = GraphConverter(atomspace,
+##                FishgramFilter(atomspace,
+##                SubdueTextOutput(atomspace)))
+##            g.output()
+#
+#            te = ForestExtractor(atomspace, GephiOutput(atomspace))
+#            te.output()
+#        except KeyError,  e:
+#            KeyError
+#        except Exception, e:
+#            import traceback; traceback.print_exc(file=sys.stdout)
+#        self.cycles+=1
 
 print __name__
 if __name__ == "__main__":
