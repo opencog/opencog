@@ -134,11 +134,12 @@ class Chainer:
             self.results = []
 
             self.target = target
-            dummy = Rule(T('GOAL'), [target], name='producing target')
-            self.apps.append(dummy)
+            #dummy = Rule(T('TARGET'), [target], name='producing target')
+            #self.apps.append(dummy)
+            #self.add_app_to_pd(dummy)
 
             # viz - visualize the root
-            self.viz.outputTarget(target, None, 0, 'GOAL')
+            self.viz.outputTarget(target, None, 0, 'TARGET')
 
             start = time()
             while self.bc_later and not self.results:
@@ -163,10 +164,10 @@ class Chainer:
 #                
 #                self.print_tree(bit)
 
-            for res in self.results:
-                print 'Inference trail:'
-                trail = self.trail(res)
-                self.print_tree(trail)
+            #for res in self.results:
+            #    print 'Inference trail:'
+            #    trail = self.trail(res)
+            #    self.print_tree(trail)
                 #print 'Action plan (if applicable):'
                 #print self.extract_plan(trail)
 #            for res in self.results:
@@ -299,10 +300,13 @@ class Chainer:
 
             got_result = self.check_premises(app)
             if got_result:
-                if app.head.op == 'GOAL':
-                    target = app.goals[0]
-                    log.info(format_log('Target produced!', target))
-                    self.results.append(target)
+                #if app.head.op == 'TARGET':
+                #    target = app.goals[0]
+                #    log.info(format_log('Target produced!', target))
+                #    self.results.append(target)
+                if app.head == self.target:
+                    log.info(format_log('Target produced!', app.head))
+                    self.results.append(app.head)
                 else:
                     #viz
                     self.viz.declareResult(app.head)
@@ -464,11 +468,14 @@ class Chainer:
         return ret
 
     def find_existing_rule_applications_by_premise(self, premise):
-        ret = []
-        for a in self.apps:
-            if any(arg.isomorphic(premise) for arg in a.goals):
-                ret.append(a)
-        return ret
+        #ret = []
+        #for a in self.apps:
+        #    if any(arg.isomorphic(premise) for arg in a.goals):
+        #        ret.append(a)
+        #
+
+        premise_pdn = self.expr2pdn(premise.canonical())        
+        return [app_pdn.op for app_pdn in premise_pdn.parents]
 
     def specialize_existing_rule_applications_by_premise(self, premise):
         ret = []
@@ -524,11 +531,14 @@ class Chainer:
         check whether the app is already present. Currently we do
         that in add_queries.'''
         head_pdn = self.expr2pdn(app.head.canonical())
-        app_pdn = DAG(app.name,[])
+        app_pdn = DAG(app,[])
         
         goal_pdns = [self.expr2pdn(g.canonical()) for g in app.goals]
         if head_pdn.any_path_up_contains(goal_pdns):
             return None
+        
+        #print 'add_app_to_pd:',repr(app)
+        
         for goal_pdn in goal_pdns:
             app_pdn.append(goal_pdn)
         head_pdn.append(app_pdn)
@@ -586,7 +596,7 @@ class Chainer:
 
         def filter_with_tv(dag):
             args = [filter_with_tv(a) for a in dag.args if
-                    (isinstance(a.op,str) or len(self.get_tvs(a.op)) > 0)]
+                    (isinstance(a.op,Rule) or len(self.get_tvs(a.op)) > 0)]
             return DAG(dag.op, args)
         
         root = self.expr2pdn(target)

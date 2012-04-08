@@ -107,7 +107,6 @@ class AtomSpace(object):
         #                a.out == out]
         #assert len(existing) == 1
         #return existing[0]
-        assert False
         out_handles = [o.h for o in out]
         atom = Atom(self,None,type_name,name,out_handles,TruthValue(0,0),None)
         d = self._client._dict_from_atom(atom)
