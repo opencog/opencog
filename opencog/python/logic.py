@@ -40,9 +40,6 @@ class Chainer:
     def __init__(self, space):
         self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink']
 
-        # For an exact target (i.e. variables in exactly the same places aka isomorphic),
-        # store the list of TVs available.
-        self.target2tvs = defaultdict(list)
         self.pd = dict()
 
         self.space = space
@@ -452,7 +449,8 @@ class Chainer:
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
             #atom_from_tree(app.head, self.space).tv = app.tv
             
-            self.add_tv(app.head, app.tv)
+            
+            self.add_tv(app, app.tv)
             
             log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
 
@@ -504,20 +502,20 @@ class Chainer:
         #rs = [r for r in rs if unify(expr, r.head, {}) != None]
         
         canonical = expr.canonical()
-        try:
-            rs = self.target2tvs[canonical]
-            return rs
-        except KeyError:
-            return []
+        expr_pdn = self.expr2pdn(canonical)
+        apps = expr_pdn.args
+        return [app.tv for app in apps if app.tv.count > 0]
+        #try:
+        #    
+        #    rs = self.target2tvs[canonical]
+        #    return rs
+        #except KeyError:
+        #    return []
     
         #rs = [r for r in self.rules+self.apps if expr.isomorphic(r.head)]
 
         #return [r.tv for r in rs if r.tv.confidence > 0]
     
-    def add_tv(self, expr, tv):
-        canonical = expr.canonical()
-        self.target2tvs[canonical].append(tv)
-
     def expr2pdn(self, expr):
         pdn = DAG(expr,[])
         try:
@@ -526,12 +524,18 @@ class Chainer:
             self.pd[pdn] = pdn
             return pdn
 
+    def add_tv(self,app,tv):
+        # HACK - will add a new copy of the same app with the TV, rather than just updating the existing one
+        app.tv = tv
+        self.add_app_to_pd(app)
+
     def add_app_to_pd(self, app):
         '''Adds a rule application to the Proof DAG. NOTE: Won't
         check whether the app is already present. Currently we do
         that in add_queries.'''
         head_pdn = self.expr2pdn(app.head.canonical())
         app_pdn = DAG(app,[])
+        app_pdn.tv = app.tv
         
         goal_pdns = [self.expr2pdn(g.canonical()) for g in app.goals]
         if head_pdn.any_path_up_contains(goal_pdns):
@@ -544,20 +548,12 @@ class Chainer:
         head_pdn.append(app_pdn)
         return app_pdn
 
-#    def is_true_weird(self, expr):
-#        #import pdb; pdb.set_trace()
-#        rs = self.find_rule_applications(expr)
-#        if len([r.tv for r in rs if r.tv and not r.goals]) > 0:
-#            print expr, repr(r)
-#            import pdb; pdb.set_trace()
-#        return len([r.tv for r in rs if r.tv and not r.goals]) > 0
-
     def add_rule(self, rule):
         self.rules.append(rule)
         
         # Only relevant to generators or axioms
-        canonical = rule.head.canonical()
-        self.target2tvs[canonical].append(rule.tv)
+        if rule.tv.confidence > 0:
+            self.add_app_to_pd(rule)
 
     def extract_plan(self, trail):
 #        def is_action(proofnode):
@@ -602,47 +598,7 @@ class Chainer:
         root = self.expr2pdn(target)
 
         return filter_with_tv(root)
-        
-    #def traverse_tree(self, target, already):
-    #    producers = [app for app in self.apps if app.head.isomorphic(target)]
-    #    
-    #    # Deliberately allows repetition of subgoals
-    #    subgoals = concat_lists([list(app.goals) for app in producers])
-    #    subgoals_ = []
-    #    for goal in subgoals:
-    #        canon = goal.canonical()
-    #        if canon not in already:
-    #            subgoals_.append(canon)
-    #        already.add(canon)
-    #    
-    #    #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-    #    # Note: make a separate copy of `already` for each branch, so we only prevent loops within
-    #    # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
-    #    # (If you do, you'll want to do it a different way for each function)
-    #    return Tree(target, [self.traverse_tree(g, set(already)) for g in subgoals_])
-    #
-    #def traverse_tree__(self, target):
-    #    pass
-    #
-    ## arrange the tree by rule applications not by goals
-    #def traverse_tree_(self, target, already):
-    #    producers = [a for a in self.apps if a.head.unifies(target)]
-    #    
-    #    # Deliberately allows repetition of subgoals
-    #    subgoals = concat_lists([list(app.goals) for app in producers])
-    #    producers_ = []
-    #    for app in producers:
-    #        canon = app.canonical_tuple()
-    #        if canon not in already:
-    #            producers_.append(canon)
-    #        already.add(canon)
-    #    
-    #    #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-    #    # Note: make a separate copy of `already` for each branch, so we only prevent loops within
-    #    # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
-    #    # (If you do, you'll want to do it a different way for each function)
-    #    return Tree(target, [self.traverse_tree(g, set(already)) for g in producers])
-
+    
     def print_tree(self, tr, level = 1):
         try:
             (tr.depth, tr.best_conf_above)
