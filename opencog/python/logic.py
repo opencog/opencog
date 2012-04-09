@@ -46,10 +46,7 @@ class Chainer:
         self.viz = PLNviz(space)
         self.viz.connect()
         self.setup_rules(space)
-        self.apps = []
-        # Disturbingly, a separate set is still necessary for rule applications as they contain lists so tuples are stored instead.
-        # Alternatively, a different hash and equality implementation could be used, or something
-        self.apps_set = OrderedSet()
+
         self.bc_later = OrderedSet()
         self.bc_before = OrderedSet()
 
@@ -131,9 +128,6 @@ class Chainer:
             self.results = []
 
             self.target = target
-            #dummy = Rule(T('TARGET'), [target], name='producing target')
-            #self.apps.append(dummy)
-            #self.add_app_to_pd(dummy)
 
             # viz - visualize the root
             self.viz.outputTarget(target, None, 0, 'TARGET')
@@ -147,9 +141,8 @@ class Chainer:
                 children = self.bc_step()
                 self.propogate_results_loop(children)
 
-                msg = '%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps))
+                msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
                 log.info(msg)
-                #print ('%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps)))
             
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
@@ -406,27 +399,18 @@ class Chainer:
                 log.info(format_log('+BCQ', goal, app.name))
                 #stdout.flush()
 
-        # This records the path of potential rule-apps found on the way down the search tree,
-        # so that results can be propogated back up that path. If you just did normal forward
-        # chaining on the results, it would take lots of other paths as well.
-
-        canon = app.canonical_tuple()
-        if canon not in self.apps_set:
-            app_pdn = self.add_app_to_pd(app)
-            if app_pdn == None:
-                #print "CYCLE", app.name, app.head, app.goals
-                pass
-            else:
-                self.apps_set.add(canon)
-                self.apps.append(app)
-            
-                #if not any(app.isomorphic(existing) for existing in self.apps):
-                #    self.apps.append(app)
-    
-                # Only visualize it if it is actually new
-                # viz
-                for (i, input) in enumerate(app.goals):
-                    self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
+        (status, app_pdn) = self.add_app_to_pdn(app)
+        if status == "CYCLE":
+            #print "CYCLE", app.name, app.head, app.goals
+            pass
+        elif status == "EXISTING":
+            # Already added this
+            pass
+        else:
+            # Only visualize it if it is actually new
+            # viz
+            for (i, input) in enumerate(app.goals):
+                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
 
         return added_queries
 
@@ -447,10 +431,9 @@ class Chainer:
             input_tvs = [(tv.mean, tv.count) for tv in input_tvs]
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
-            #atom_from_tree(app.head, self.space).tv = app.tv
+            #atom_from_tree(app.head, self.space).tv = app.tv            
             
-            
-            self.add_tv(app, app.tv)
+            self.set_tv(app, app.tv)
             
             log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
 
@@ -466,55 +449,34 @@ class Chainer:
         return ret
 
     def find_existing_rule_applications_by_premise(self, premise):
-        #ret = []
-        #for a in self.apps:
-        #    if any(arg.isomorphic(premise) for arg in a.goals):
-        #        ret.append(a)
-        #
-
         premise_pdn = self.expr2pdn(premise.canonical())        
         return [app_pdn.op for app_pdn in premise_pdn.parents]
 
     def specialize_existing_rule_applications_by_premise(self, premise):
         ret = []
-        for a in self.apps:
-            for arg in a.goals:
-                s = unify(arg, premise, {})
-                # TODO This is redundant as it's also calculated in the other function. But whatever.
-                if s != None and not arg.isomorphic(premise):
-                    new_a = a.subst(s)
+        for (expr,expr_pdn) in self.pd.items():
+            s = unify(expr, premise, {})
+            if s != None and not arg.isomorphic(premise):
+                # For every app with this as a premise
+                for app_pdn in expr_pdn.parents:
+                    #app = Rule(head=app_pdn.parents[0].op,goals=app_pdn.args,name=app_pdn)                    
+                    #Rule(head,goals,name,tv,formula)
+                    app = app_pdn.op
+                    new_a = app.subst(s)
                     ret.append(new_a)
         return ret
 
-#    def find_existing_rule(self, rule):
-#        matches = [r for r in self.rules if r.isomorphic(rule)]
-#        assert len(matches) < 2
-#        return matches
 
     def get_tvs(self, expr):
-        # NOTE: It may be easier to just do this by just storing the TVs for each target.
-        #rs = self.find_rule_applications(expr)
-
         # Only want to find results for this exact target, not every possible specialized version of it.
         # The chaining mechanism itself will create different apps for different specialized versions.
         # If there are any variables in the target, and a TV is found, that means it has been proven
         # for all values of that variable.
-        #rs = [r for r in rs if unify(expr, r.head, {}) != None]
         
         canonical = expr.canonical()
         expr_pdn = self.expr2pdn(canonical)
         apps = expr_pdn.args
         return [app.tv for app in apps if app.tv.count > 0]
-        #try:
-        #    
-        #    rs = self.target2tvs[canonical]
-        #    return rs
-        #except KeyError:
-        #    return []
-    
-        #rs = [r for r in self.rules+self.apps if expr.isomorphic(r.head)]
-
-        #return [r.tv for r in rs if r.tv.confidence > 0]
     
     def expr2pdn(self, expr):
         pdn = DAG(expr,[])
@@ -524,36 +486,47 @@ class Chainer:
             self.pd[pdn] = pdn
             return pdn
 
-    def add_tv(self,app,tv):
-        # HACK - will add a new copy of the same app with the TV, rather than just updating the existing one
-        app.tv = tv
-        self.add_app_to_pd(app)
+    def set_tv(self,app,tv):
+        # Find/add the app
+        a = self.app2pdn(app)
+        a.tv = tv
 
-    def add_app_to_pd(self, app):
-        '''Adds a rule application to the Proof DAG. NOTE: Won't
-        check whether the app is already present. Currently we do
-        that in add_queries.'''
+    def add_app_to_pdn(self,app):
         head_pdn = self.expr2pdn(app.head.canonical())
-        app_pdn = DAG(app,[])
-        app_pdn.tv = app.tv
-        
+
+        # Don't allow loops        
         goal_pdns = [self.expr2pdn(g.canonical()) for g in app.goals]
         if head_pdn.any_path_up_contains(goal_pdns):
-            return None
+            return ("CYCLE",None)
         
-        #print 'add_app_to_pd:',repr(app)
+        # Check if this application is in the Proof DAG already
+        existing = [apn for apn in head_pdn.args if apn.args == goal_pdns]
+        assert len(existing) < 2
+        if len(existing) == 1:
+            return ("EXISTING",existing[0])
+        else:
+            # Otherwise add it to the Proof DAG
+            app_pdn = DAG(app,[])
+            app_pdn.tv = app.tv
+            
+            #print 'add_app_to_pd:',repr(app)
+            
+            for goal_pdn in goal_pdns:
+                app_pdn.append(goal_pdn)
+            head_pdn.append(app_pdn)
         
-        for goal_pdn in goal_pdns:
-            app_pdn.append(goal_pdn)
-        head_pdn.append(app_pdn)
-        return app_pdn
+            return ("NEW",app_pdn)
 
+    def app2pdn(self,app):
+        (status,app_pdn) = self.add_app_to_pdn(app)
+        return app_pdn
+    
     def add_rule(self, rule):
         self.rules.append(rule)
         
         # Only relevant to generators or axioms
         if rule.tv.confidence > 0:
-            self.add_app_to_pd(rule)
+            self.app2pdn(rule)
 
     def extract_plan(self, trail):
 #        def is_action(proofnode):
