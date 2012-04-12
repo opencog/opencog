@@ -25,7 +25,7 @@ t = types
 
 def format_log(*args):
     global _line    
-    out = str(_line) + ' ' + ' '.join(map(str, args))
+    out = '['+str(_line) + '] ' + ' '.join(map(str, args))
 #    if _line == 32:
 #        import pdb; pdb.set_trace()
     _line+=1
@@ -133,8 +133,7 @@ class Chainer:
             self.viz.outputTarget(target, None, 0, 'TARGET')
 
             start = time()
-            while self.bc_later and not self.results:
-                log.info(format_log(time() - start))
+            while self.bc_later and not self.results:                
 #                if time() - start > 0:
 #                    print 'TIMEOUT'
 #                    break
@@ -142,7 +141,8 @@ class Chainer:
                 self.propogate_results_loop(children)
 
                 msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
-                log.info(msg)
+                log.info(format_log(msg))
+                log.info(format_log('time taken', time() - start))
             
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
@@ -454,16 +454,22 @@ class Chainer:
 
     def specialize_existing_rule_applications_by_premise(self, premise):
         ret = []
-        for (expr,expr_pdn) in self.pd.items():
-            s = unify(expr, premise, {})
-            if s != None and not arg.isomorphic(premise):
-                # For every app with this as a premise
-                for app_pdn in expr_pdn.parents:
-                    #app = Rule(head=app_pdn.parents[0].op,goals=app_pdn.args,name=app_pdn)                    
-                    #Rule(head,goals,name,tv,formula)
-                    app = app_pdn.op
-                    new_a = app.subst(s)
-                    ret.append(new_a)
+        for expr_pdn in self.pd.values():
+            for app_pdn in expr_pdn.parents:
+                #app = Rule(head=app_pdn.parents[0].op,goals=app_pdn.args,name=app_pdn)                    
+                #Rule(head,goals,name,tv,formula)
+                app = app_pdn.op
+
+                # It's necessary to store the app separately, because the
+                # variables in its arguments may (and may not) be shared
+                # between the arguments, but each expression-node in the
+                # proof DAG actually has standard variables from 0.
+                for arg in app.goals:
+                    s = unify(arg, premise, {})
+                    if s != None and not arg.isomorphic(premise):
+                        # For every app with this as a premise
+                            new_a = app.subst(s)
+                            ret.append(new_a)
         return ret
 
 
@@ -525,8 +531,8 @@ class Chainer:
         self.rules.append(rule)
         
         # Only relevant to generators or axioms
-        if rule.tv.confidence > 0:
-            self.app2pdn(rule)
+        #if rule.tv.confidence > 0:
+        #    self.app2pdn(rule)
 
     def extract_plan(self, trail):
 #        def is_action(proofnode):
