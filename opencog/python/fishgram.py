@@ -12,6 +12,7 @@ from itertools import *
 from collections import namedtuple, defaultdict
 import sys
 import time
+import math
 
 from logic import PLNviz
 
@@ -49,7 +50,7 @@ class Pattern:
         self.embeddings = []
     
     def __str__(self):
-        return 'Pattern('+pp(self.conj)+' '+pp(self.seqs)+')'
+        return '\x1B[1;37mPattern(\x1B[1;31m'+pp(self.conj)+' \x1B[1;34m'+pp(self.seqs)+'\x1B[1;37m)'
 
 class Fishgram:
     def __init__(self,  atomspace):
@@ -73,16 +74,6 @@ class Fishgram:
     def run(self):
         '''The basic way to run Fishgram. It will find all the frequent conjunctions above min_frequency.'''
 
-#        print '# predicates(1arg) including infrequent:', len(self.forest.tree_embeddings[1])
-#        self.forest.tree_embeddings[1] = dict([(tree, argslist_set)
-#                                               for (tree, argslist_set) in self.forest.tree_embeddings[1] .items()
-#                                               if len(argslist_set) >= self.min_embeddings])
-#        unary_conjunctions = dict([((tree, ), argslist_set) for (tree, argslist_set) in self.forest.tree_embeddings[1].items()])
-#
-#        print '# predicates(1arg):', len(unary_conjunctions)
-        #return self.add_all_predicates_1var(unary_conjunctions)
-
-        #return self.add_all_predicates_1var_dfs()
         return [layer for layer in self.closed_bfs_layers()]
 
     def iterated_implications(self):
@@ -143,8 +134,8 @@ class Fishgram:
         # Less efficient but may be easier to debug
         next_layer = list(next_layer_iter)
         print 'garbage:', gc.garbage
-        for (ptn, embs) in self.prune_frequency(next_layer):
-        #for (conj, embs) in self.prune_surprise(next_layer_iter):
+        #for (ptn, embs) in self.prune_frequency(next_layer):
+        for (ptn, embs) in self.prune_surprise(next_layer):
             #print '***************', conj, len(embs)
             #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
             #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
@@ -223,65 +214,6 @@ class Fishgram:
                 return None
         
         return remapping, new_s
-
-    #def _add_all_seq_and_links(self, ptn, embedding):
-    #    '''Takes a conjunction (with variables as usual) and an embedding (i.e. substitution). Returns the conjunction
-    #    but with all possible SequentialAndLinks between variables. That is, if t2 and t1 are in the substitution, and
-    #    t2 is shortly after t1, then the relevant variables will be connected by a new SequentialAndLink (if it hasn't been
-    #    added previously).'''
-    #    assert isinstance(ptn, Pattern)
-    #    
-    #    new_links = ()
-    #    
-    #    times_vars = [(obj, var) for (var, obj) in embedding.items()
-    #                  if obj.get_type() == t.TimeNode]
-    #    times_vars = [(int(obj.op.name), var) for obj, var in times_vars]
-    #    times_vars.sort()
-    #
-    #    for (i, (t1, var1)) in enumerate(times_vars[:-1]):
-    #        # We want to determine whether there is a connected graph of times.
-    #        # This variable represents whether this time is connected to a future time.
-    #        # If all of the times are connected to 1+ future time, then it is a connected graph.
-    #        connected = False
-    #        
-    #        for (t2, var2) in times_vars[i+1:]:
-    #            if 0 < t2 - t1 <= interval:
-    #                seq_and = Tree("SequentialAndLink", [var1, var2])
-    #                if seq_and not in ptn.seqs:                        
-    #                    new_links+=(seq_and,)
-    #                    connected = True
-    #            else:
-    #                break
-    #        
-    #        if not connected:
-    #            return None
-    #    
-    #    return tuple(new_links)
-
-    #def _time_sequence(self, ptn, embedding):
-    #    '''Finds the sequence of times. i.e. for a given embedding, the TimeNodes will be in a certain
-    #    order. Rejects conjunction-embedding pairs if the times are too far apart.'''
-    #    assert isinstance(ptn, Pattern)
-    #
-    #    times_vars = [(obj, var) for (var, obj) in embedding.items()
-    #                  if obj.get_type() == t.TimeNode]
-    #    times_vars = [(int(obj.op.name), var) for obj, var in times_vars]
-    #    times_vars.sort()
-    #
-    #    for (i, (t1, var1)) in enumerate(times_vars[:-1]):
-    #        # We want to determine whether there is a connected graph of times.
-    #        # This variable represents whether this time is connected to a future time.
-    #        # If all of the times are connected to 1+ future time, then it is a connected graph.
-    #        connected = False
-    #        
-    #        t2 = times_vars[i+1][0]
-    #        if 0 < t2 - t1 <= interval:
-    #            pass
-    #        else:
-    #            if not connected:
-    #                return None
-    #    
-    #    return tuple([var for (timenode,var) in times_vars])
 
     def _after_existing_actions(self,prev_seqs, tr, new_embedding):
         assert isinstance(prev_seqs, tuple)
@@ -473,131 +405,6 @@ class Fishgram:
 
                         yield (remapped_ptn, new_s)
 
-    #def extending_links(self, binding):
-    #    ret = set()
-    #    
-    #    for obj in binding:
-    #        for predsize in sorted(self.forest.incoming[obj].keys()):
-    #            #if predsize > 1: continue
-    #            for slot in sorted(self.forest.incoming[obj][predsize].keys()):
-    #                for tree_id in self.forest.incoming[obj][predsize][slot]:
-    #                    if tree_id not in ret:
-    #                        ret.add(tree_id)
-    #     
-    #    return ret
-
-    # This is part of a different, earlier approach. It was based on the gSpan algorithm. The idea was that you must always
-    # look for example graphs first, and then find what patterns there are. And as you made the example graphs larger, you
-    # would find more patterns.
-#    def extensions(self,  prev_layer):
-#        """Find all extensions for that fragment. An extension means adding one link to a particular
-#        node in the fragment. Nodes in the fragment are numbered from 0 onwards, and the numbers
-#        don't correspond to exact nodes in the AtomSpace. Each fragment has 1 or more embeddings,
-#        that is, matching sets of nodes/links in the AtomSpace."""
-#        # for each embedding
-#        # for each extension
-#        # add the new embedding to the set for that extension
-#        
-#        # new_layer is used to avoid redundancy. res keeps track of the smallest sets of results that can be returned at one time
-#        # (i.e. for which we can guarantee there won't be any further embeddings found later)
-#        new_layer = {}
-#        
-#        skipped = 0
-#        for (prev_conj,  prev_embeddings) in prev_layer:
-#            
-#            if len(new_layer) > self.max_per_layer:
-#                break
-#
-#            # Results for extending this conjunction. All results for this conjunction are produced in this iteration.
-#            res = {}
-#
-#            # Start with all single objects. The binding for no condition (empty tuple) is undefined. The algorithm
-#            # will create bindings for one-condition conjunctions and all other ones, by adding new variables when
-#            # necessary.
-#            if prev_conj == ():
-#                source_bindings = [(obj, ) for obj in self.forest.all_objects]
-#            else:
-#                source_bindings = prev_embeddings
-#            for emb in source_bindings:
-#                extension_tree_ids = self.extending_links(emb)
-#
-#                if prev_conj == ():
-#                    emb = []
-#
-#                #extension_tree_ids_sorted = sorted(extension_tree_ids,  key=lambda id: self.forest.all_trees[id])
-#                # If you sort the tree_ids by what bound-tree they are then you can return results more incrementally
-#                for tree_id in extension_tree_ids:
-#
-#                    # Using the particular tree-instance, find its outgoing set
-#                    bindings = self.forest.bindings[tree_id]
-#                    # WRONG as the embedding for () is [every] one object
-#                    #i = len(emb)
-#                    # The number of the first available variable
-#                    i = len(get_varlist(prev_conj))
-#                    # The mapping from the (abstract) tree to node numbers in this conjunction            
-#                    s = {}
-#                    # Since we allow N-ary patterns, it could be connected to any number (>=1) of
-#                    # nodes in the conjunction so far, and 0+ new ones
-#                    new_embedding = copy(emb)
-#                    for slot in xrange(len(bindings)):
-#                        obj = bindings[slot]
-#                        
-#                        if obj in emb:
-#                            s[Tree(slot)] = Tree(emb.index(obj))
-#                            assert len(s) <= len(bindings)
-#                        else:
-#                            s[Tree(slot)] = Tree(i)
-#                            tmp = list(new_embedding)
-#                            tmp.append(obj)
-#                            new_embedding = tuple(tmp)
-#                            assert obj == new_embedding[i]
-#                            i+=1
-#                            assert len(s) <= len(bindings)
-#
-#                    assert len(s) == len(bindings)
-#
-#                    # After completing the substitution...
-#                    tr = self.forest.all_trees[tree_id]                    
-#                    bound_tree = subst(s, tr)
-#
-#                    # Add this embedding for this bound tree.
-#                    # Bound trees contain variable numbers = the numbers inside the fragment                            
-#                    if bound_tree in prev_conj:
-#                        continue
-#                    
-#                    new_conj = prev_conj+(bound_tree,)                    
-#                    
-#                    clones = [c for c in new_layer if isomorphic_conjunctions(new_conj, c)]
-#                    if len(clones):
-#                        skipped+=1
-#                        continue
-#
-#                    if new_conj not in new_layer:
-#                            new_layer[new_conj] = []
-#                            res[new_conj] = []
-#                        
-#                    new_embedding = tuple(new_embedding)
-#                    # BUG
-#                    assert len(new_embedding) == len(get_varlist(new_conj))
-#                    if new_embedding not in new_layer[new_conj]:
-#                        new_layer[new_conj].append(new_embedding)
-#                        res[new_conj].append(new_embedding)
-#                    #print self.conjunction_to_string(new_conj), ":", len(new_layer[new_conj]), "so far"
-#                
-#            # Yield the results (once you know they aren't going to be changed...)
-#            for conj_emb_pair in res.items():
-#                yield conj_emb_pair
-#
-#        print "[skipped", skipped, "conjunction-embeddings that were isomorphic]",
-#        #return new_layer.items()
-#        # Stops iteration at the end of the function
-        
-#        # Can't just use new_layer.items() because we want one entry for each conjunction (plus all of its embeddings)
-#        return [(conj, new_layer[conj]) for conj in new_layer]
-
-#    def after_conj(self, c1, c2):
-#        return c1 < c2
-
     def prune_frequency(self, layer):
         for (ptn, embeddings) in layer:
             #self.surprise(conj, embeddings)
@@ -615,60 +422,55 @@ class Fishgram:
 
     def prune_surprise(self, layer):
         for (ptn, embeddings) in layer:
-            surprise = self.surprise(ptn, embeddings)
-            if len(ptn.conj) < 2 or surprise > 0.10:
-                print surprise, ptn
-                yield (ptn, embeddings)
-
+            if len(embeddings) >= self.min_embeddings:
+                if len(ptn.conj) < 2:
+                    yield (ptn, embeddings)
+                else:
+                    surprise = self.surprise(ptn, embeddings)
+                    if surprise >= 0: # and len(get_varlist(ptn.conj)) == 1 and len(ptn.seqs) == 0:
+                        print '\x1B[1;32m%.1f %s' % (surprise, ptn)
+                        yield (ptn, embeddings)
+    
     def surprise(self, ptn, embeddings):
-        conj = ptn.conj
+        conj = ptn.conj + ptn.seqs
         c = len(conj)
-        if c < 2:
-            return
+        assert c >= 2
 
         num_variables = len(get_varlist(conj))
-        if num_variables > 1:
-            return
         
-        # all_objects :: [Atom]
-        all_objects = self.forest.all_objects
-        # embeddings :: [{Tree(Var):Atom}]
-        # ab :: [Atom]
-        ab = [s.values()[0] for s in embeddings]
-        # xs :: [ [{Tree(Var):Tree(Atom)}] ]
-        xs = [self.forest.lookup_embeddings((tr, )) for tr in conj]
-        # xs :: [[Tree(Atom)]]
-        xs = [[s.values()[0] for s in embs] for embs in xs]
-        xs = [[atom_from_tree(a, self.atomspace) for a in embs] for embs in xs]
+        Nconj = len(embeddings)*1.0
         
-        N = self.count_actual_objs(all_objects)*1.0
-        NAB = self.count_actual_objs(ab)*1.0
-        Nxs = [self.count_actual_objs(x)*1.0 for x in xs]
+        Pconj = Nconj/self.total_possible_embeddings(conj,embeddings)
         
-        # With one conj and one variable, these should all be the same!
-        #print 'conj, N, len(all_objects), NAB, len(ab),  Nxs, map(len, xs)', conj, N, len(all_objects), NAB, len(ab),  Nxs, map(len, xs)
-        
-        # Means it contains a TimeNode. Possibly an error.
-        if any([c == 0 for c in Nxs]):
-            print 'only time:', conj, pp(embeddings)
-            return
-        
-        P = NAB/N**c
-        P_each = [Nx/N for Nx in Nxs]
-        #P_independent = util.product(Nxs)/N**c
-        P_independent = util.product(P_each)
+        P_independent = 1
+        for tr in conj:
+            Etr = self.forest.lookup_embeddings((tr,))
+            P_tr = len(Etr)*1.0 / self.total_possible_embeddings((tr,), Etr)
+            P_independent *= P_tr
+
         #surprise = NAB / (util.product(Nxs) * N**(c-1))
-        surprise = P / P_independent
+        surprise = Pconj / P_independent
         #print conj, surprise, P, P_independent, [Nx/N for Nx in Nxs], N
+        surprise = math.log(surprise, 2)
         return surprise
     
-    def count_actual_objs(self, atoms):
-        def filter_actual_objs(self, atoms):
-            actual_objs = [obj for obj in atoms if obj.t != t.TimeNode]
-            #print len(actual_objs), len(all_substs)
-            return actual_objs
+    def total_possible_embeddings(self, conj, embeddings):
+        N_objs = len(self.forest.all_objects)*1.0
+        N_times = len(self.forest.all_timestamps)*1.0
+        
+        # The number of possible embeddings for that combination of object-variables and time-variables
+        N_tuples = 1
+        for var in get_varlist(conj):
+            if var not in embeddings[0]:
+                print 'ERROR', conj
+                return 100000000000000.0
+            if embeddings[0][var].get_type() == t.TimeNode:
+                N_tuples *= N_times
+            else:
+                N_tuples *= N_objs
+        
+        return N_tuples
 
-        return len(self.filter_actual_objs(atoms))
     
     def outputConceptNodes(self, layers):
         id = 1001

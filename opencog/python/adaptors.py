@@ -31,11 +31,11 @@ class ForestExtractor:
             'between', 'touching', 'inside', 'outside', 'below', # 'above',
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
-            'is_movable', 'is_noisy', 'null', 'Object',
+            'is_movable', 'is_noisy', 'null', 'id_null', 'Object',
             'exist', # 'decreased','increased',
             # Not useful e.g. because they contain numbers
             "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
-            'move:actor',  'is_moving', 
+            'move:actor', 'is_moving', 
             # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst',
             # These might be part of the old embodiment system or part of Psi, I'm not sure
@@ -44,6 +44,7 @@ class ForestExtractor:
         
         # state
         self.all_objects  = set()# all objects in the AtomSpace
+        self.all_timestamps = set()
         self.all_trees = []
         self.all_trees_atoms = []
         self.bindings = []
@@ -112,7 +113,10 @@ class ForestExtractor:
                 self.bindings.append(objects)
                 
                 for obj in objects:
-                    self.all_objects.add(obj)
+                    if obj.get_type() != t.TimeNode:
+                        self.all_objects.add(obj)
+                    else:
+                        self.all_timestamps.add(obj)
                     
                 # fishgram-specific
                 if tree not in self.tree_embeddings:
@@ -137,6 +141,8 @@ class ForestExtractor:
         self.all_bound_trees = [subst(subst_from_binding(b), tr) for tr, b in zip(self.all_trees, self.bindings)]    
     
         pprint({tr:len(embs) for (tr, embs) in self.tree_embeddings.items()})
+        
+        print self.all_objects, self.all_timestamps
 
     def output_tree(self, atom,  tree,  bindings):
         vertex_name = str(tree)
