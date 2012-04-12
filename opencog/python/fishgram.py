@@ -61,7 +61,7 @@ class Fishgram:
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 9001
+        self.max_per_layer = 100
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -423,11 +423,11 @@ class Fishgram:
     def prune_surprise(self, layer):
         for (ptn, embeddings) in layer:
             if len(embeddings) >= self.min_embeddings:
-                if len(ptn.conj) < 2:
+                if len(ptn.conj) + len(ptn.seqs) < 2:
                     yield (ptn, embeddings)
                 else:
                     surprise = self.surprise(ptn, embeddings)
-                    if surprise >= 0: # and len(get_varlist(ptn.conj)) == 1 and len(ptn.seqs) == 0:
+                    if surprise > 0.9: # and len(get_varlist(ptn.conj)) == 1 and len(ptn.seqs) == 0:
                         print '\x1B[1;32m%.1f %s' % (surprise, ptn)
                         yield (ptn, embeddings)
     
@@ -448,10 +448,12 @@ class Fishgram:
             P_tr = len(Etr)*1.0 / self.total_possible_embeddings((tr,), Etr)
             P_independent *= P_tr
 
+        P_independent = P_independent ** (1.0/len(conj))
+
         #surprise = NAB / (util.product(Nxs) * N**(c-1))
         surprise = Pconj / P_independent
         #print conj, surprise, P, P_independent, [Nx/N for Nx in Nxs], N
-        surprise = math.log(surprise, 2)
+        #surprise = math.log(surprise, 2)
         return surprise
     
     def total_possible_embeddings(self, conj, embeddings):
@@ -462,7 +464,7 @@ class Fishgram:
         N_tuples = 1
         for var in get_varlist(conj):
             if var not in embeddings[0]:
-                print 'ERROR', conj
+                #print 'ERROR', conj
                 return 100000000000000.0
             if embeddings[0][var].get_type() == t.TimeNode:
                 N_tuples *= N_times
