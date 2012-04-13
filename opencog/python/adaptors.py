@@ -1,5 +1,8 @@
-from atomspace_remote import AtomSpace, types, Atom, TruthValue
-#import opencog.cogserver
+try:
+    from opencog.atomspace import AtomSpace, types, Atom, TruthValue
+    import opencog.cogserver
+except ImportError:
+    from atomspace_remote import AtomSpace, types, Atom, TruthValue
 from tree import *
 from util import *
 

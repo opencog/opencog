@@ -1,4 +1,7 @@
-from atomspace_remote import AtomSpace, Atom, get_type, types
+try:
+    from opencog.atomspace import AtomSpace, Atom, get_type, types
+except ImportError:
+    from atomspace_remote import AtomSpace, Atom, get_type, types
 
 from copy import copy, deepcopy
 from functools import *
@@ -125,7 +128,7 @@ class Tree (object):
             # Atom doesn't support comparing to different types in the Python-standard way.
             if isinstance(self.op, Atom): # and not isinstance(self.op, FakeAtom):
                 #assert type(self.op.h) != type(None)
-                self._tuple = self.op.h
+                self._tuple = self.op.h.value()
                 return self._tuple
                 #return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
             else:

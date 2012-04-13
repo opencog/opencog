@@ -2,10 +2,16 @@
 
 #from IPython.Debugger import Tracer; debug_here = Tracer()
 
-from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
+try:
+    from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name
+except ImportError:
+    from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
 from tree import *
 from util import pp, OrderedSet, concat_lists, inplace_set_attributes
-from util import log
+try:
+    from opencog.util import log
+except ImportError:
+    from util import log
 
 from collections import defaultdict
 

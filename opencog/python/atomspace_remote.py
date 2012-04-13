@@ -26,10 +26,18 @@ def count_to_confidence(count):
     KKK = 800.0
     return count / (count + KKK)
 
+class Handle(object):
+    def __init__(self,value):
+        self.v = value
+    
+    def value(self):
+        return self.v
+
 class Atom(object):
     def __init__(self,a,handle,type_name,name,out,tv,av):
         self._a = a
-        self.h = handle
+        self.h = Handle(handle)
+        self.hv = handle
         # use str so it won't be unicode - that counts as a different
         # type from str so it will break things.
         self.type_name = str(type_name)
@@ -66,7 +74,7 @@ class Atom(object):
         if type(other) != type(self):
             return cmp(type(self), type(other))
         else:
-            return cmp(self.h, other.h)
+            return cmp(self.hv, other.hv)
 
 class AtomTypeList(object):
     def __getattr__(self,type_name):
@@ -107,7 +115,7 @@ class AtomSpace(object):
         #                a.out == out]
         #assert len(existing) == 1
         #return existing[0]
-        out_handles = [o.h for o in out]
+        out_handles = [o.hv for o in out]
         atom = Atom(self,None,type_name,name,out_handles,TruthValue(0,0),None)
         d = self._client._dict_from_atom(atom)
         # This makes sure to get the TruthValue etc
@@ -127,7 +135,7 @@ class AtomSpace(object):
         all_atoms = map(self._client._atom_from_dict, all_atom_dicts)
         
         self._all_atoms = all_atoms
-        self._handle2atom = {atom.h:atom for atom in all_atoms}
+        self._handle2atom = {atom.hv:atom for atom in all_atoms}
         
         print "REST: relax"
 
