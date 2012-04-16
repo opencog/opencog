@@ -17,8 +17,8 @@
 ; If you run the Multiverse Client, comment the lines below 
 ;
 
-;(set! PET_HANDLE (PetNode "TestPet") )
-;(set! OWNER_HANDLE (AvatarNode "TestAvatar") )      
+(define PET_HANDLE (PetNode "TestPet") )
+(define OWNER_HANDLE (AvatarNode "TestAvatar") )      
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -508,7 +508,7 @@
 (define GetFoodGoal
     (AndLink 
         (add_goal (PredicateNode "is_edible") (VariableNode "$var_food") ) 
-;        (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
+        (add_goal (PredicateNode "exist") (VariableNode "$var_food") )
     )
 )
 

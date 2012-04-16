@@ -509,7 +509,7 @@
 ;
 
 (define (add_action schema_handle . arguments)
-    (ExecutionLink (cog-new-av 1 1 1)
+    (ExecutionLink (cog-new-av 1 1 1) (stv 1 1)
         schema_handle
         (ListLink (apply parse_arguments arguments) )
 

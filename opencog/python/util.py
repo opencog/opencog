@@ -25,6 +25,19 @@ def product(seq):
     return functools.reduce(operator.mul, seq, 1)
 
 # These can't be used in PyPy but otherwise are fine.
+def list_powerset(lst):
+    # the power set of the empty set has one element, the empty set
+    result = [[]]
+    for x in lst:
+        # for every additional element in our set
+        # the power set consists of the subsets that don't
+        # contain this element (just take the previous power set)
+        # plus the subsets that do contain the element (use list
+        # comprehension to add [x] onto everything in the
+        # previous power set)
+        result.extend([subset + [x] for subset in result])
+    return result
+
 #def output_atoms(atomspace):
 #    roots = [x for x in atomspace.get_atoms_by_type(types.Atom) if not x.incoming]
 #    #return repr( map(tree_from_atom, roots) )
@@ -173,6 +186,7 @@ class OrderedSet(collections.OrderedDict, collections.MutableSet):
 class Logger(object):
     def info(self, msg):
         print msg
+        #pass
     
     def use_stdout(self, use):
         pass
