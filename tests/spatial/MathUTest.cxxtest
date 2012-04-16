@@ -158,29 +158,29 @@ public:
         Vector3 p4( -1, -3, 2 );
         Vector3 p5( 1, -3, 2 );
 
-        Vector2 vec2;
-        Vector3 vec3;
-        Vector4 vec4;
-        Plane plane;
-        Face face( p1, p2, p3 );
+        Vector2 vec2; // not used
+        Vector3 vec3; // not used
+        Vector4 vec4; // not used
+        Plane plane; // not used
+        Face face( p1, p2, p3 ); // not used
 
-        Line line1( p1, p2 );
-        LineSegment seg1( p2, p3 );
+        Line line1( p1, p2 ); // not used
+        LineSegment seg1( p2, p3 ); // not used
         LineSegment seg2( p1, p2 );
         LineSegment seg3( p1, p2 );
         TS_ASSERT( line1 == seg2 )
         TS_ASSERT( seg3 == seg2 )
 
-        Rectangle rec1( p1, p2, p5 );
-        SquareFace sqf1( p1, p2, p4, p5 );
+        Rectangle rec1( p1, p2, p5 ); // not used
+        SquareFace sqf1( p1, p2, p4, p5 ); // not used
 
 
-        Quaternion quat( Vector3::X_UNIT, 0 );
-        Triangle tri( p1, p2, p3 );
-        Dimension2 dim2( 100, 200 );
-        Dimension3 dim3( 100, 200, 300 );
+        Quaternion quat( Vector3::X_UNIT, 0 ); // not used
+        Triangle tri( p1, p2, p3 ); // not used
+        Dimension2 dim2( 100, 200 ); // not used
+        Dimension3 dim3( 100, 200, 300 ); // not used
 
-        Vector3 up( 0, 1 );
+        Vector3 up( 0, 1 ); // not used
         Vector3 front( 35000, -2000 );
 
         float agentFovReach = 2;
@@ -211,7 +211,52 @@ public:
         Line leftLine2( Vector3(0, 0, 0), Vector3( 38358.3, 11437.4, 0) );
 
         TS_ASSERT( limitLine2.intersects( leftLine2 ) )
-
+        
+        // Testing Plane
+        float sample_dist = 5, epsilon = 1e-06;
+        
+        Vector3 sample_normal( 0, 1, 0 ), i( 1, 0, 0 ), j( 0, 1, 0 ), 
+                k( 0, 0, 1 ), zero( 0, 0, 0 );
+        
+        // Constructors
+        Plane plane1( );
+        Plane plane2( sample_normal, sample_dist );
+        TS_ASSERT( ( plane2.normal - sample_normal ).isZeroLength() );
+        TS_ASSERT( fabs( plane2.distanceFromOrigo + sample_dist ) < epsilon );
+        Plane plane3( plane2 );
+        TS_ASSERT( plane2 == plane3 );
+        // Linearly independent points
+        Plane plane4( i, j, k );
+        TS_ASSERT( fabs( plane4.normal.length( ) - 1 ) < epsilon );
+        TS_ASSERT( ( plane4.normal + plane4.distanceFromOrigo ).isZeroLength() );
+        // Linearly dependent points
+        Plane plane5( i, i, k );
+        TS_ASSERT( ( plane5.normal ).isZeroLength() );
+        TS_ASSERT( plane5.distanceFromOrigo < epsilon );
+        // Test set
+        plane5.set( sample_normal, sample_dist );
+        TS_ASSERT( plane5.normal == sample_normal );
+        TS_ASSERT( fabs( plane5.distanceFromOrigo + sample_dist ) < epsilon );
+        // Test getVector4
+        Vector4 v4 = plane4.getVector4();
+        TS_ASSERT( v4.dot( plane4.normal ) - plane4.normal.squaredLength( ) 
+                    + plane4.distanceFromOrigo < epsilon );
+        // getDistance
+        Vector3 plane4_middle(-plane4.distanceFromOrigo * plane4.normal);
+        TS_ASSERT( fabs( plane4.getDistance( plane4_middle ) ) < epsilon );
+        // getSide
+        TS_ASSERT( plane4.getSide ( zero ) == Plane :: POSITIVE );
+        // transformSelf
+        Plane newPlane4(plane4);
+        newPlane4.transformSelf( Matrix4( 1, 0, 0, 0, 
+                                        0, 1, 0, 0,
+                                        0, 0, 1, 0,
+                                        0, 0, 0, 1 ) );
+        TS_ASSERT( plane4 == newPlane4 );
+        // getIntersectionPoint
+        Plane vertical45( Vector3(-1, 1, 0), 0 ), horizontal( Vector3(0 , 0, 1), 1/3. );
+        TS_ASSERT( plane4.getIntersectionPoint( vertical45, horizontal ) == plane4_middle );
+        
     }
 
     void test_Entities( ) {
