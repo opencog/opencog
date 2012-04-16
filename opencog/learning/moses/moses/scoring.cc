@@ -168,7 +168,10 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     // comment above ctruth_table_bscore)
     occam = p > 0.0f && p < 0.5f;
     if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p);
+        complexity_coef = discrete_complexity_coef(alphabet_size, p)
+            / ctable_usize;     // normalized by the size of the table
+                                // because the precision is normalized
+                                // as well
 
     type_node output_type = *type_tree_output_type_tree(ctable.tt).begin();
     if (output_type == id::boolean_type) {
@@ -255,7 +258,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     if (occam)                  // we divide by the number of active
                                 // observations as to normalize the
                                 // Occam's razor as well
-        bs.push_back(complexity(tr) * complexity_coef / active);
+        bs.push_back(complexity(tr) * complexity_coef);
 
     log_candidate_bscore(tr, bs);
 
