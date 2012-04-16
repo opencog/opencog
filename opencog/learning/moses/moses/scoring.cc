@@ -255,9 +255,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     bs.push_back(activation_penalty);
     
     // Add the Occam's razor
-    if (occam)                  // we divide by the number of active
-                                // observations as to normalize the
-                                // Occam's razor as well
+    if (occam)
         bs.push_back(complexity(tr) * complexity_coef);
 
     log_candidate_bscore(tr, bs);
