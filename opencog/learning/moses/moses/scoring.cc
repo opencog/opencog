@@ -157,10 +157,11 @@ precision_bscore::precision_bscore(const CTable& _ctable,
                                    float alphabet_size, float p,
                                    float min_activation_, float max_activation_,
                                    float penalty_,
-                                   RandGen& _rng, bool positive_)
+                                   RandGen& _rng, bool positive_,
+                                   bool worst_norm_)
     : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
-      penalty(penalty_), rng(_rng), positive(positive_)
+      penalty(penalty_), rng(_rng), positive(positive_), worst_norm(worst_norm_)
 {
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
@@ -190,15 +191,17 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     };
     // @todo could be done in a line if boost::max_element did support
     // C++ anonymous functions
-    max_denorm_precision = worst_score;
+    max_precision = worst_score;
     foreach(const auto& cr, ctable)
-        max_denorm_precision = max(max_denorm_precision, tcf(cr.second));
+        max_precision = max(max_precision, tcf(cr.second));
 }
 
 behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 {
     behavioral_score bs;
 
+    map<contin_t, unsigned> worst_deciles;
+    
     // compute active and sum of all active outputs
     vertex target = bool_to_vertex(positive);
     unsigned active = 0;   // total number of active outputs by tr
@@ -207,14 +210,38 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
         // vct.first = input vector
         // vct.second = counter of outputs
         if (eval_binding(rng, vct.first, tr) == id::logical_true) {
-            sao += sum_outputs(vct.second);
-            active += vct.second.total_count();
+            contin_t sumo = sum_outputs(vct.second);
+            unsigned totalc = vct.second.total_count();
+            sao += sumo;
+            active += totalc;
+            if (worst_norm && sumo < 0)
+                worst_deciles[sumo] = totalc;
         }
     }
 
+    // remove all observations from worst_norm so that only the worst
+    // n_deciles or less remains and compute its average
+    contin_t avg_worst_deciles = 0.0;
+    if (worst_norm) {
+        unsigned worst_count = 0,
+            n_deciles = active / 10;
+        auto from = worst_deciles.begin(), to = worst_deciles.end();
+        for (; from != to && worst_count <= n_deciles; ++from) {
+            worst_count += from->second;
+            avg_worst_deciles += from->first * from->second;
+        }
+        worst_deciles.erase(from, to);
+        avg_worst_deciles /= worst_count;
+    }
+    
     // add (normalized) precision
-    score_t precision = (sao / active) / max_denorm_precision,
+    score_t precision = (sao / active) / max_precision,
         activation = (score_t)active / ctable_usize;
+
+    // normalize precision w.r.t. worst deciles
+    if (worst_norm && avg_worst_deciles < 0)
+        precision /= -avg_worst_deciles;
+    
     logger().fine("precision = %f", precision);
     bs.push_back(precision);
     

@@ -4,7 +4,7 @@
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
  *
- * Written by Moshe Looks
+ * Written by Moshe Looks, Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -305,7 +305,13 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  *
  * If the CTable output type is contin instead of boolean then the hit
  * count is replaced by the sum of the outputs (or minus that sum if
- * positive == false)
+ * this->positive == false)
+ *
+ * If worst_norm is true then the percision is divided by the absolute
+ * average of the negative lower (resp. positive upper if
+ * this->positive is false) decile or less. If there is no negative
+ * (resp. positive if this->positive is false) values then it is not
+ * normalized.
  */
 struct precision_bscore : public bscore_base
 {
@@ -313,14 +319,15 @@ struct precision_bscore : public bscore_base
                      float alphabet_size, float p,
                      float min_activation, float max_activation,
                      float penalty,
-                     RandGen& _rng, bool positive = true);
+                     RandGen& _rng, bool positive = true,
+                     bool worst_norm = false);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
     behavioral_score best_possible_bscore() const;
-    
+
     score_t min_improv() const;
 
     CTable ctable;
@@ -328,12 +335,11 @@ struct precision_bscore : public bscore_base
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     score_t min_activation, max_activation;
-    score_t max_denorm_precision; // uppper bound of the maximum
-                                  // denormalized precision for that
-                                  // CTable
+    score_t max_precision; // uppper bound of the maximum denormalized
+                           // precision for that CTable
     score_t penalty;
     RandGen& rng;
-    bool positive;
+    bool positive, worst_norm;
 
 private:
     score_t get_activation_penalty(score_t activation) const;
@@ -341,7 +347,7 @@ private:
     // associated to an input vector
     std::function<score_t(const CTable::counter_t&)> sum_outputs;
 };
-        
+
 /**
  * Fitness function based on discretization of the output. If the
  * classes match the bscore element is 0, or -1 otherwise. If

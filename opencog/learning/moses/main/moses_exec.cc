@@ -321,6 +321,9 @@ int moses_exec(int argc, char** argv)
     bool hc_single_step;
     bool hc_crossover;
 
+    // pre params
+    bool pre_worst_norm;
+
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
     options_description desc("Allowed options");
@@ -443,14 +446,18 @@ int moses_exec(int argc, char** argv)
          "Minimum value of a sampled coninuous input.  The cp, ip, and "
          "pre problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
-         "option sets the low end of the sampled range.\n")
+         "option sets the low end of the sampled range. In the case of "
+         "fitness function pre, the range corresponds to the activation "
+         "of the precision.\n")
 
         (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1.0),
          "Maximum value of a sampled coninuous input.  The cp, ip, and "
          "pre problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
-         "option sets the low high of the sampled range.\n")
+         "option sets the low high of the sampled range. In the case of "
+         "fitness function pre, the range corresponds to the activation "
+         "of the precision.\n")
 
         (opt_desc_str(log_level_opt).c_str(),
          value<string>(&log_level)->default_value("INFO"),
@@ -659,6 +666,10 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&alpha)->default_value(0.0),
          "If problem pre is used then if alpha is negative (any negative value), precision is replaced by negative predictive value. And then alpha plays the role of the activation constrain penalty from 0 to inf, 0 being no activation penalty at all, inf meaning hard constraint penalty (that is if the candidate is not in the range it has -inf activation penalty.)\n")
+
+        ("pre-worst-norm",
+         value<bool>(&pre_worst_norm)->default_value(false),
+         "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
        ;
 
     variables_map vm;
@@ -887,7 +898,8 @@ int moses_exec(int argc, char** argv)
                     bscores.push_back(new BScore(ctable, as, noise,
                                                  min_rand_input,
                                                  max_rand_input,
-                                                 abs(alpha), rng, alpha >= 0));
+                                                 abs(alpha), rng, alpha >= 0,
+                                                 pre_worst_norm));
                 multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(rng, exemplars, cand_tt,
                                       bool_reduct, bool_reduct_rep, bscore,
