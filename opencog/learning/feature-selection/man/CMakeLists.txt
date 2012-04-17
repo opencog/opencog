@@ -1,7 +1,7 @@
 #
-# Create/install MOSES man page
+# Create/install man pages
 
-set(MANPAGES moses.1)
+set(MANPAGES feature-selection.1)
 
 # We need gzip to make this work.
 find_program(GZIP_EXECUTABLE NAMES gzip)
@@ -19,8 +19,8 @@ foreach(manpage ${MANPAGES})
 	list(APPEND outlist ${CMAKE_CURRENT_BINARY_DIR}/${manpage}.gz)
 endforeach()
 
-# Define target so that 'make moses-man' will do something...
-add_custom_target(moses-man ALL DEPENDS ${outlist})
+# Define target so that 'make feature-man' will do something...
+add_custom_target(feature-man ALL DEPENDS ${outlist})
 
 # Install to final location ...
 install(
