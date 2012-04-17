@@ -57,16 +57,19 @@ const static unsigned max_filename_size = 255;
 /**
  * Display error message about unsupported type and exit
  */
-void unsupported_type_exit(const type_tree& tt) {
+void unsupported_type_exit(const type_tree& tt)
+{
     std::cerr << "error: type " << tt << "currently not supported" << std::endl;
     exit(1);
 }
-void unsupported_type_exit(type_node type) {
+
+void unsupported_type_exit(type_node type)
+{
     unsupported_type_exit(type_tree(type));
 }
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
     unsigned long rand_seed;
     string log_level;
     string log_file;
@@ -76,7 +79,7 @@ int main(int argc, char** argv) {
     // Declare the supported options.
     options_description desc("Allowed options");
     desc.add_options()
-        ("help,h", "Produce help message.\n")
+        ("help, h", "Produce help message.\n")
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
@@ -141,16 +144,16 @@ int main(int argc, char** argv) {
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);
 
-    // set flags
+    // Set flags
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
 
-    // help
+    // Help
     if (vm.count("help") || argc == 1) {
         cout << desc << std::endl;
         return 1;
     }
 
-    // set log
+    // Set log
     if(log_file_dep_opt) {
         std::set<std::string> ignore_opt{log_file_dep_opt_opt.first};
         log_file = determine_log_name(default_log_file_prefix,
@@ -162,17 +165,17 @@ int main(int argc, char** argv) {
     type_tree output_tt = type_tree_output_type_tree(inferred_tt);
     type_node inferred_type = *output_tt.begin();
 
-    // remove log_file
+    // Remove any existing log files.
     remove(log_file.c_str());
     logger().setFilename(log_file);
     trim(log_level);
     Logger::Level level = logger().getLevelFromString(log_level);
-    if (level !=Logger::BAD_LEVEL)
-        logger().setLevel(level);
-    else {
-        cerr << "Log level " << log_level << " is incorrect (see --help)." << endl;
+    if (level == Logger::BAD_LEVEL) {
+        cerr << "Fatal Error: Log level " << log_level
+             << " is incorrect (see --help)." << endl;
         exit(1);
     }
+    logger().setLevel(level);
     logger().setBackTraceLevel(Logger::ERROR);
 
     // Log command-line args
@@ -193,13 +196,14 @@ int main(int argc, char** argv) {
     logger().info("Read input file %s", fs_params.input_file.c_str());
     // ~Logger
 
-    // find the position of the target feature (the first one by default)
+    // Find the position of the target feature (the first one by default)
     int target_pos = fs_params.target_feature.empty()? 0
         : findTargetFeaturePosition(fs_params.input_file,
                                     fs_params.target_feature);
-    // read input_data_file file
+    // Read input_data_file file
     Table table = istreamTable(fs_params.input_file, target_pos);
 
+    // Go and do it.
     if(inferred_type == id::boolean_type) {
         feature_selection(table, fs_params, rng);
     } else {
