@@ -344,17 +344,22 @@ arity_t type_tree_arity(const type_tree& ty)
     return 0;
 }
 
+type_node get_type_node(const type_tree& tt)
+{
+    OC_ASSERT(!tt.empty());
+    return *tt.begin();
+}
+
 type_tree_seq type_tree_input_arg_types(const type_tree& ty)
 {
     OC_ASSERT(!ty.empty(),
-                      "Not sure this assert should not be replaced by a conditional");
+              "Not sure this assert should not be replaced by a conditional");
     type_tree_seq res;
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type) {
-        OC_ASSERT(!ty_it.is_childless(),
-                          "Lambda must not be childless");
+        OC_ASSERT(!ty_it.is_childless(), "Lambda must not be childless");
         type_tree_sib_it sib = ty_it.begin();
-        //setting input argument type trees
+        // setting input argument type trees
         for (; sib != type_tree_sib_it(ty.last_child(ty_it)); ++sib) {
             res.push_back(type_tree(*sib == id::arg_list_type ? sib.begin() : sib));
         }
@@ -1039,13 +1044,12 @@ type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
     return res;
 }
 
-vertex_set argument_set(const combo_tree& tr)
+arity_set get_argument_abs_idx_set(const combo_tree& tr)
 {
-    typedef combo_tree::leaf_iterator leaf_it;
-    vertex_set res;
-    for (leaf_it lit = tr.begin_leaf(); lit != tr.end_leaf(); ++lit)
-        if (is_argument(*lit))
-            res.insert(*lit);
+    arity_set res;
+    foreach(const vertex& v, make_pair(tr.begin_leaf(), tr.end_leaf()))
+        if (const argument* ap = boost::get<argument>(&v))
+            res.insert(ap->abs_idx());
     return res;
 }
 

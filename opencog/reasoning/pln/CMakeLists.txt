@@ -74,6 +74,7 @@ INCLUDE_DIRECTORIES (
 
 SET(PLN_LINK_LIBS
 	atomspace
+	server
 	util
 	#${Boost_SIGNALS_LIBRARY}
 )

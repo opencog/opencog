@@ -1,5 +1,8 @@
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
-import opencog.cogserver
+try:
+    from opencog.atomspace import AtomSpace, types, Atom, TruthValue
+    import opencog.cogserver
+except ImportError:
+    from atomspace_remote import AtomSpace, types, Atom, TruthValue
 from tree import *
 from util import *
 
@@ -26,20 +29,25 @@ class ForestExtractor:
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
-        self.unwanted_atoms = set(["proximity", "near", 'next',
+        self.unwanted_atoms = set(['proximity', 'near', # 'next',
             'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of',
-            'below', 'above', 'between', 'touching', 'inside', 'outside', 
+            'between', 'touching', 'inside', 'outside', 'below', # 'above',
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
-            'is_movable', 'is_noisy', 'null', 
+            'is_movable', 'is_noisy', 'null', 'id_null', 'Object',
+            'exist', # 'decreased','increased',
             # Not useful e.g. because they contain numbers
             "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
-            'move:actor',  'is_moving', 
+            'move:actor', 'is_moving', 
             # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
-            'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst'])
+            'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst',
+            # These might be part of the old embodiment system or part of Psi, I'm not sure
+            'happiness','sadness','fear','excitement','anger',
+            'night'])
         
         # state
         self.all_objects  = set()# all objects in the AtomSpace
+        self.all_timestamps = set()
         self.all_trees = []
         self.all_trees_atoms = []
         self.bindings = []
@@ -65,7 +73,7 @@ class ForestExtractor:
         elif self.is_object(atom):
             objects.append(atom)
             self.i+=1
-            return Tree(self.i-1)
+            return Var(self.i-1)
         elif self.is_action_instance(atom):
             print 'is_action_instance', atom
             # this is moderatly tacky, but doing anything different would require lots of changes...
@@ -79,14 +87,12 @@ class ForestExtractor:
     def extractForest(self):
         # TODO >0.5 for a fuzzy link means it's true, but probabilistic links may work differently        
         initial_links = [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)]
-        print '/initial_links'
         
         for link in initial_links:
                      #or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
                      #or x.is_a(t.AndLink)]: # temporary hack
             if not self.include_tree(link): continue
             #print link
-            print '.'
             
             objects = []            
             #print self.extractTree(link, objects),  objects, self.i
@@ -97,7 +103,7 @@ class ForestExtractor:
             except(self.UnwantedAtomException):
                 #print 'UnwantedAtomException'
                 continue
-            objects = tuple(objects)
+            objects = tuple(map(Tree,objects))
             
             #print tree,  [str(o) for o in objects]
             
@@ -105,33 +111,41 @@ class ForestExtractor:
             if len(objects):
                 self.all_trees.append(tree)
                 self.all_trees_atoms.append(link)
-                self.bindings.append(objects)
-                for obj in objects:
-                    self.all_objects.add(obj)
-                    
-            # fishgram-specific
-            if tree not in self.tree_embeddings:
-                self.tree_embeddings[tree] = []
-            substitution = subst_from_binding(objects)
-            self.tree_embeddings[tree].append(substitution)
-            
-            size= len(objects)
-            tree_id = len(self.all_trees) - 1
-            for slot in xrange(size):
-                obj = objects[slot]
                 
-                if obj not in self.incoming:
-                    self.incoming[obj] = {}
-                if size not in self.incoming[obj]:
-                    self.incoming[obj][size] = {}
-                if slot not in self.incoming[obj][size]:
-                    self.incoming[obj][size][slot] = []
-                self.incoming[obj][size][slot].append(tree_id)
+                
+                self.bindings.append(objects)
+                
+                for obj in objects:
+                    if obj.get_type() != t.TimeNode:
+                        self.all_objects.add(obj)
+                    else:
+                        self.all_timestamps.add(obj)
+                    
+                # fishgram-specific
+                if tree not in self.tree_embeddings:
+                    self.tree_embeddings[tree] = []
+                substitution = subst_from_binding(objects)
+                self.tree_embeddings[tree].append(substitution)
+                
+                #size= len(objects)
+                #tree_id = len(self.all_trees) - 1
+                #for slot in xrange(size):
+                #    obj = objects[slot]
+                #    
+                #    if obj not in self.incoming:
+                #        self.incoming[obj] = {}
+                #    if size not in self.incoming[obj]:
+                #        self.incoming[obj][size] = {}
+                #    if slot not in self.incoming[obj][size]:
+                #        self.incoming[obj][size][slot] = []
+                #    self.incoming[obj][size][slot].append(tree_id)
         
         # Make all bound trees. Enables using lookup_embeddings
         self.all_bound_trees = [subst(subst_from_binding(b), tr) for tr, b in zip(self.all_trees, self.bindings)]    
     
         pprint({tr:len(embs) for (tr, embs) in self.tree_embeddings.items()})
+        
+        print self.all_objects, self.all_timestamps
 
     def output_tree(self, atom,  tree,  bindings):
         vertex_name = str(tree)
@@ -174,7 +188,8 @@ class ForestExtractor:
     def include_atom(self,  atom):
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
-            if atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK'):
+            if (atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK') or
+                atom.is_a(t.VariableNode)):
                 return False
         else:            
             if any([atom.is_a(ty) for ty in 
@@ -189,12 +204,18 @@ class ForestExtractor:
 #        if not link.is_a(t.SequentialAndLink):
 #            return False
 
+        ## Policy: Only do objects not times
+        #if link.is_a(t.AtTimeLink):
+        #    return False
+
         # TODO check the TruthValue the same way as you would for other links.
         # work around hacks in other modules
-        if any([i.is_a(t.AtTimeLink) or i.is_a for i in link.incoming]) or link.is_a(t.ExecutionLink):
-            return False
+#        if any([i.is_a(t.AtTimeLink) for i in link.incoming]) or link.is_a(t.ExecutionLink):
+#            return False
+        if link.is_a(t.ExecutionLink):
+            return False        
         # Throw away the AtTimeLink that just contains the Action ID
-        elif link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
+        if link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
             return False
         else:
             return True
@@ -268,11 +289,12 @@ class ForestExtractor:
         interval = 100* 20
         
         # If this is called from lookup_embeddings_helper, s should contain specific TimeNodes
+        #s = {var:Tree(atom) for (var,atom) in s.items()}
         tr = subst(s, tr)
         
         # use unify to extract a SequentialAndLink
         t1_var, t2_var = new_var(), new_var()
-        template = Tree('SequentialAndLink', t1_var, t2_var)
+        template = T('SequentialAndLink', t1_var, t2_var)
         # template_s is just used to find the TimeNodes (to compare them with each other)
         template_s = unify(template, tr, s)
         if template_s == None:
@@ -690,26 +712,26 @@ class FishgramFilter:
         return a.is_a(t.EvaluationLink) or a.is_a(t.ExecutionOutputLink) or a.is_a(t.ExecutionLink)
 
 # Hacks
-class GephiMindAgent(opencog.cogserver.MindAgent):
-    def __init__(self):
-        self.cycles = 1
-
-    def run(self,atomspace):
-
-        try:
-            #import pdb; pdb.set_trace()
-#            g = GraphConverter(atomspace,
-#                FishgramFilter(atomspace,
-#                SubdueTextOutput(atomspace)))
-#            g.output()
-
-            te = ForestExtractor(atomspace, GephiOutput(atomspace))
-            te.output()
-        except KeyError,  e:
-            KeyError
-        except Exception, e:
-            import traceback; traceback.print_exc(file=sys.stdout)
-        self.cycles+=1
+#class GephiMindAgent(opencog.cogserver.MindAgent):
+#    def __init__(self):
+#        self.cycles = 1
+#
+#    def run(self,atomspace):
+#
+#        try:
+#            #import pdb; pdb.set_trace()
+##            g = GraphConverter(atomspace,
+##                FishgramFilter(atomspace,
+##                SubdueTextOutput(atomspace)))
+##            g.output()
+#
+#            te = ForestExtractor(atomspace, GephiOutput(atomspace))
+#            te.output()
+#        except KeyError,  e:
+#            KeyError
+#        except Exception, e:
+#            import traceback; traceback.print_exc(file=sys.stdout)
+#        self.cycles+=1
 
 print __name__
 if __name__ == "__main__":

@@ -28,9 +28,11 @@
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/adaptor/map.hpp>
+#include <boost/range/irange.hpp>
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/oc_omp.h>
 
 #include "ann.h"
 #include "simple_nn.h"
@@ -62,20 +64,24 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
     //populate the matrix
     auto root = tt.begin();
     for (int i = 0; i < nsamples; ++i) {
-        size_t bidx = 0;
-        vertex_seq vv;
+        size_t bidx = 0;        // counter used to enumerate all
+                                // booleans
+        vertex_seq vs;
         foreach(type_node n, make_pair(root.begin(), root.last_child()))
             if(n == id::boolean_type)
-                if(comp_tt)
-                    vv.push_back(bool_to_vertex(i & (1 << bidx++)));
-                else
-                    vv.push_back(bool_to_vertex(rng.randint(2)));
+                vs.push_back(bool_to_vertex(comp_tt?
+                                            i & (1 << bidx++)
+                                            : rng.randint(2)));
             else if(n == id::contin_type)
-                vv.push_back((max_contin - min_contin)
+                vs.push_back((max_contin - min_contin)
                              * rng.randdouble() + min_contin);
+            else if(n == id::unknown_type)
+                vs.push_back(vertex()); // push default vertex
+            else
+                OC_ASSERT(false, "Not implemented yet");                    
 
-        // input interval
-        push_back(vv);
+        // input vector
+        push_back(vs);
     }
 }
 
@@ -118,21 +124,17 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
             push_back(net.outputs[0]->activation);
         }
     } else {
-        foreach(const vertex_seq& vv, itable) {
-            binding_map bmap = itable.get_binding_map(vv);
-            push_back(eval_throws_binding(rng, bmap, tr));
-        }
+        foreach(const vertex_seq& vs, itable)
+            push_back(eval_throws_binding(rng, vs, tr));
     }
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
                const string& ol) : label(ol)
 {
+    arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
-            binding_map bmap = ctable.get_binding_map(vs);
-            // print_binding_map(bmap);
-            const vertex &v = eval_throws_binding(rng, bmap, tr);
-            this->push_back(v);
+            this->push_back(eval_throws_binding(rng, vs, tr));
     });
 }
 
@@ -170,7 +172,7 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
     const_iterator cit = begin();
     for (int i = 0; cit != end(); ++i, ++cit) {
         for (int j = 0; j < _arity; ++j)
-            bmap[j + 1] = bool_to_vertex((i >> j) % 2);
+            bmap[j] = bool_to_vertex((i >> j) % 2);
         if (*cit != vertex_to_bool(eval_binding(*_rng, bmap, tr)))
             return false;
     }
@@ -482,37 +484,42 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     }
 
     // Copy the input types to a vector; we need this to pass as an
-    // argument to boost::transform, below.  The output type comes last;
-    // make sure it is *not* placed in the array.
+    // argument to boost::transform, below.
     vector<type_node> vin_types;   // vector of input types
-    type_node out_type;            // dependent column type
-    type_tree_pre_it pit = tt.begin();
-    pit++;  // skip over lambda
-    out_type = *pit;
-    pit++;
-    for (;pit != tt.end(); pit++) {
-        vin_types.push_back (out_type);
-        out_type = *pit;
-    }
+    transform(type_tree_input_arg_types(tt),
+              back_inserter(vin_types), get_type_node);
+    type_node out_type =            // dependent column type
+        get_type_node(type_tree_output_type_tree(tt));
 
+    std::vector<string> lines; 
     while (get_data_line(in, line))
-    {
+        lines.push_back(line);
+    int ls = lines.size();
+    it.resize(ls);
+    ot.resize(ls);
+
+    // vector of indices [0, lines.size())
+    auto ir = boost::irange(0, ls);
+    vector<size_t> indices(ir.begin(), ir.end());
+    
+    auto parse_line = [&](int i) {
         // tokenize the line and fill the input vector and output
-        pair<vector<string>, string> io = tokenizeRowIO<string>(line, pos);
+        pair<vector<string>, string> io = tokenizeRowIO<string>(lines[i], pos);
 
         // check arity
         OC_ASSERT(arity == (arity_t)io.first.size(),
-                  "ERROR: Input file inconsistent: the row %u has %u "
+                  "ERROR: Input file inconsistent: the %uth row has %u "
                   "columns while the first row has %d columns.  All "
                   "rows should have the same number of columns.\n",
-                  ot.size(), io.first.size(), arity);
+                  i + 1, io.first.size(), arity);
 
         // fill table, based on the types passed in the type-tree
         vertex_seq ivs(arity);
         transform(vin_types, io.first, ivs.begin(), token_to_vertex);
-        it.push_back(ivs);
-        ot.push_back(token_to_vertex(out_type, io.second));
-    }
+        it[i] = ivs;
+        ot[i] = token_to_vertex(out_type, io.second);
+    };
+    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
     return in;
 }
 

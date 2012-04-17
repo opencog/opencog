@@ -169,3 +169,12 @@ class OrderedSet(collections.OrderedDict, collections.MutableSet):
     symmetric_difference = property(lambda self: self.__xor__)
     symmetric_difference_update = property(lambda self: self.__ixor__)
     union = property(lambda self: self.__or__)
+
+class Logger(object):
+    def info(self, msg):
+        print msg
+    
+    def use_stdout(self, use):
+        pass
+
+log = Logger()

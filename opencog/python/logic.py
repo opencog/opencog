@@ -2,16 +2,28 @@
 
 #from IPython.Debugger import Tracer; debug_here = Tracer()
 
-from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, get_type_name
-import opencog.cogserver
+try:
+    from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name
+except ImportError:
+    from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
 from tree import *
 from util import pp, OrderedSet, concat_lists, inplace_set_attributes
-from opencog.util import log
+try:
+    from opencog.util import log
+except ImportError:
+    from util import log
+
+from collections import defaultdict
 
 import formulas
 
 from sys import stdout
-from profilestats import profile
+# You can use kcachegrind on cachegrind.out.profilestats
+#from profilestats import profile
+
+#import line_profiler
+#profiler = line_profiler.LineProfiler()
+
 from time import time
 import exceptions
 
@@ -19,7 +31,7 @@ t = types
 
 def format_log(*args):
     global _line    
-    out = str(_line) + ' ' + ' '.join(map(str, args))
+    out = '['+str(_line) + '] ' + ' '.join(map(str, args))
 #    if _line == 32:
 #        import pdb; pdb.set_trace()
     _line+=1
@@ -34,121 +46,113 @@ class Chainer:
     def __init__(self, space):
         self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink']
 
+        self.pd = dict()
+
         self.space = space
         self.viz = PLNviz(space)
-        #self.viz.connect()
+        self.viz.connect()
         self.setup_rules(space)
-        self.apps = []
-        # Disturbingly, a separate set is still necessary for rule applications as they contain lists so tuples are stored instead.
-        # Alternatively, a different hash and equality implementation could be used, or something
-        self.apps_set = OrderedSet()
+
         self.bc_later = OrderedSet()
         self.bc_before = OrderedSet()
 
         self.fc_later = OrderedSet()
         self.fc_before = OrderedSet()
-
+        
         global _line
         _line = 1
+        
+        #profiler.add_function(self.bc)
 
-    def do_planning(self):
-        try:
-            target_PredicateNodes = [x for x in self.space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
-
-            for atom in target_PredicateNodes:
-                # Here be DRAGONS!
-                #target = Tree('EvaluationLink', atom, Tree('ListLink'))
-                target = Tree('EvaluationLink', atom)
-
-            a = self.space
-
-            rl = Tree('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
-            atom_from_tree(rl, a)
-            
-            # hack
-            print 'target'
-            target_a = atom_from_tree(target, a)
-            print target_a
-            print target_a.tv
-            target_a.tv = TruthValue(0,  0)
-            print target_a
-            # Reset the rules list so the EvaluationLink in it won't have a TV!
-            self.setup_rules(a)
-
-            self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
-
-            result_atoms = self.bc(target)
-            
-            print "planning result: ",  result_atoms
-            
-            if result_atoms:
-                res_Handle = result_atoms[0]
-                res = tree_from_atom(Atom(res_Handle, a))
-                
-                trail = self.trail(res)
-                actions = self.extract_plan(trail)
-                
-                # set plan_success
-                ps = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), Tree('ListLink'))
-                # set plan_action_list
-                pal = Tree('ReferenceLink',
-                            a.add_node(t.ConceptNode, 'plan_action_list'),
-                            Tree('ListLink', actions))
-                
-                ps_a  = atom_from_tree(ps, a)
-                pal_a = atom_from_tree(pal, a)
-                
-                print ps
-                print pal
-                ps_a.tv = TruthValue(1, 9001)
-                
-                print ps_a.tv
-
-        except Exception, e:
-            print e
+    #def do_planning(self):
+    #    try:
+    #        target_PredicateNodes = [x for x in self.space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
+    #
+    #        for atom in target_PredicateNodes:
+    #            # Here be DRAGONS!
+    #            #target = Tree('EvaluationLink', atom, Tree('ListLink'))
+    #            target = T('EvaluationLink', atom)
+    #
+    #        a = self.space
+    #
+    #        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+    #        atom_from_tree(rl, a)
+    #        
+    #        # hack
+    #        print 'target'
+    #        target_a = atom_from_tree(target, a)
+    #        print target_a
+    #        print target_a.tv
+    #        target_a.tv = TruthValue(0,  0)
+    #        print target_a
+    #        # Reset the rules list so the EvaluationLink in it won't have a TV!
+    #        self.setup_rules(a)
+    #
+    #        self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
+    #
+    #        result_atoms = self.bc(target)
+    #        
+    #        print "planning result: ",  result_atoms
+    #        
+    #        if result_atoms:
+    #            res_Handle = result_atoms[0]
+    #            res = tree_from_atom(Atom(res_Handle, a))
+    #            
+    #            trail = self.trail(res)
+    #            actions = self.extract_plan(trail)
+    #            
+    #            # set plan_success
+    #            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
+    #            # set plan_action_list
+    #            pal = T('ReferenceLink',
+    #                        a.add_node(t.ConceptNode, 'plan_action_list'),
+    #                        T('ListLink', actions))
+    #            
+    #            ps_a  = atom_from_tree(ps, a)
+    #            pal_a = atom_from_tree(pal, a)
+    #            
+    #            print ps
+    #            print pal
+    #            ps_a.tv = TruthValue(1, 9001)
+    #            
+    #            print ps_a.tv
+    #
+    #    except Exception, e:
+    #        print e
 
 
     #@profile
-    def bc(self, target):
+    def bc(self, target):        
         #import prof3d; prof3d.profile_me()
         
         try:
             tvs = self.get_tvs(target)
-            print "target truth values:", map(str, tvs)
-            assert not tvs
+            print "Existing target truth values:", map(str, tvs)
             
-            #save_trees([target], 'target')
-            #save_trees([tree_from_atom(a) for a in self.space.get_atoms_by_type(t.Atom) if a.tv.count > 0], 'as')
-            if Chainer._convert_atoms:
-                target = tree_with_fake_atoms(target)
-
             log.info(format_log('bc', target))
             self.bc_later = OrderedSet([target])
             self.results = []
 
             self.target = target
-            dummy = Rule(Tree('GOAL'), [target], name='producing target')
-            self.apps.append(dummy)
 
             # viz - visualize the root
-            self.viz.outputTarget(target, None, 0, 'GOAL')
+            self.viz.outputTarget(target, None, 0, 'TARGET')
 
             start = time()
-            while self.bc_later and not self.results:
-                log.info(format_log(time() - start))
+            while self.bc_later and not self.results:                
 #                if time() - start > 0:
 #                    print 'TIMEOUT'
 #                    break
                 children = self.bc_step()
                 self.propogate_results_loop(children)
 
-                msg = '%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps))
-                log.info(msg)
-                #print ('%s goals expanded, %s remaining, %s apps' % (len(self.bc_before), len(self.bc_later), len(self.apps)))
+                msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
+                log.info(format_log(msg))
+                log.info(format_log('time taken', time() - start))
             
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
-            print [str(atom_from_tree(result, self.space).tv) for result in self.results]
+            #print [str(atom_from_tree(result, self.space).tv) for result in self.results]
 #            for res in self.results:
 #                bit = self.traverse_tree(res, set())
 #                self.add_depths(bit)
@@ -156,15 +160,17 @@ class Chainer:
 #                
 #                self.print_tree(bit)
 
-            for res in self.results:
-                print 'Inference trail:'
-                trail = self.trail(res)
-                self.print_tree(trail)
-                print 'Action plan (if applicable):'
-                print self.extract_plan(trail)
+            #for res in self.results:
+            #    print 'Inference trail:'
+            #    trail = self.trail(res)
+            #    self.print_tree(trail)
+                #print 'Action plan (if applicable):'
+                #print self.extract_plan(trail)
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
-            return [atom_from_tree(result, self.space).h for result in self.results]
+
+            return self.results
+            #return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
             import traceback, pdb
 
@@ -191,14 +197,14 @@ class Chainer:
         #next_target = self.bc_later.pop_last() # Depth-first search
         #next_target = self.get_fittest(self.bc_later) # Best-first search
         log.info(format_log('-BCQ', next_target))
-        self.bc_before.append(next_target)
+        self.add_tree_to_index(next_target, self.bc_before)
 
         ret = []
         apps = self.find_rule_applications(next_target)
 
         for a in apps:
             a = a.standardize_apart()
-            if not a.goals: print format_log('generator', repr(a))
+            #if not a.goals: print format_log('generator', repr(a))
             if not a.goals and a.tv:
                 # Makes sure it goes in the list of apps, but just propogate results from the head (i.e. the actual Atom)
                 # and not the goals (an empty list!)
@@ -290,10 +296,13 @@ class Chainer:
 
             got_result = self.check_premises(app)
             if got_result:
-                if app.head.op == 'GOAL':
-                    target = app.goals[0]
-                    log.info(format_log('Target produced!', target))
-                    self.results.append(target)
+                #if app.head.op == 'TARGET':
+                #    target = app.goals[0]
+                #    log.info(format_log('Target produced!', target))
+                #    self.results.append(target)
+                if app.head == self.target:
+                    log.info(format_log('Target produced!', app.head))
+                    self.results.append(app.head)
                 else:
                     #viz
                     self.viz.declareResult(app.head)
@@ -308,8 +317,8 @@ class Chainer:
             # The proof DAG does not explicitly avoid linking things up in a loop (as it has no explicit links)
             if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
             #if not self.contains_isomorphic_tree(app, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
-                self.fc_before.append(app.head)
-                self.fc_later.append(app.head)
+                self.add_tree_to_index(app.head, self.fc_before)
+                self.add_tree_to_index(app.head, self.fc_later)
                 log.info(format_log('+FCQ', app.head, app.name))
                 stdout.flush()
 
@@ -321,7 +330,13 @@ class Chainer:
 #        queue = goals
 
     def contains_isomorphic_tree(self, tr, idx):        
-        return any(expr.isomorphic(tr) for expr in idx)
+        #return any(expr.isomorphic(tr) for expr in idx)
+        canonical = tr.canonical()
+        return canonical in idx
+
+    def add_tree_to_index(self, tr, idx):
+        canonical = tr.canonical()
+        idx.append(canonical)
 
 #    # NOTE: assumes that you want to add the item into the corresponding index
 #    def contains_isomorphic_tree(self, tr, idx):
@@ -339,34 +354,40 @@ class Chainer:
 #        #print 'contains_isomorphic_tree', time() - start
 #        #return containing
 
-    def add_queries(self, app):
-        def goal_is_stupid(goal):
-            return goal.is_variable()
-
-        def app_is_stupid(goal):
-            #nested_implication = standardize_apart(Tree('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
-            # Accidentally unifies with (ImplicationLink $blah some_target) !
-            #nested_implication2 = Tree('ImplicationLink', Tree('ImplicationLink', 1, 2), 3)
-
-            # Nested ImplicationLinks
-            # skip Implications between InheritanceLinks etc as well
-            types = map(get_type, self.deduction_types)
-            if (goal.get_type() in types and len(goal.args) == 2 and
-                    (goal.args[0].get_type() in types or
-                     goal.args[1].get_type() in types) ):
-                return True
-
-            # Should actually block this one if it occurs anywhere, not just at the root of the tree.
-            very_vague = any(goal.isomorphic(standardize_apart(Tree(type, 1, 2))) for type in self.deduction_types)
-            return (self_implication(goal) or
-                         very_vague)
+    def _app_is_stupid(self, goal):
+        #nested_implication = standardize_apart(T('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
+        # Accidentally unifies with (ImplicationLink $blah some_target) !
+        #nested_implication2 = T('ImplicationLink', T('ImplicationLink', 1, 2), 3)
 
         # You should probably skip the app entirely if it has any self-implying goals
         def self_implication(goal):
             return any(goal.get_type() == get_type(type_name) and len(goal.args) == 2 and goal.args[0].isomorphic(goal.args[1])
                         for type_name in self.deduction_types)
 
-        if any(map(app_is_stupid, app.goals)) or app_is_stupid(app.head):
+        # Nested ImplicationLinks
+        # skip Implications between InheritanceLinks etc as well
+        types = map(get_type, self.deduction_types)
+        if (goal.get_type() in types and len(goal.args) == 2 and
+                (goal.args[0].get_type() in types or
+                 goal.args[1].get_type() in types) ):
+            return True
+
+        try:
+            self._very_vague_link_templates
+        except:
+            self._very_vague_link_templates = [standardize_apart(T(type, 1, 2)) for type in self.deduction_types]
+
+        # Should actually block this one if it occurs anywhere, not just at the root of the tree.
+        #very_vague = any(goal.isomorphic(standardize_apart(T(type, 1, 2))) for type in self.deduction_types)
+        very_vague = any(goal.isomorphic(template) for template in self._very_vague_link_templates)
+        return (self_implication(goal) or
+                     very_vague)
+
+    def add_queries(self, app):
+        def goal_is_stupid(goal):
+            return goal.is_variable()
+
+        if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head):
             return []
 
         added_queries = []
@@ -379,26 +400,23 @@ class Chainer:
                     not self.contains_isomorphic_tree(goal, self.bc_later) ):
                 assert goal not in self.bc_before
                 assert goal not in self.bc_later
-                self.bc_later.append(goal)
+                self.add_tree_to_index(goal, self.bc_later)
                 added_queries.append(goal)
                 log.info(format_log('+BCQ', goal, app.name))
-                stdout.flush()
+                #stdout.flush()
 
-        # This records the path of potential rule-apps found on the way down the search tree,
-        # so that results can be propogated back up that path. If you just did normal forward
-        # chaining on the results, it would take lots of other paths as well.
-
-        canon = app.canonical_tuple()
-        if canon not in self.apps_set:
-            self.apps_set.add(canon)
-            self.apps.append(app)
-        #if not any(app.isomorphic(existing) for existing in self.apps):
-        #    self.apps.append(app)
-
+        (status, app_pdn) = self.add_app_to_pdn(app)
+        if status == "CYCLE":
+            #print "CYCLE", app.name, app.head, app.goals
+            pass
+        elif status == "EXISTING":
+            # Already added this
+            pass
+        else:
             # Only visualize it if it is actually new
             # viz
             for (i, input) in enumerate(app.goals):
-                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, repr(app))
+                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
 
         return added_queries
 
@@ -419,9 +437,11 @@ class Chainer:
             input_tvs = [(tv.mean, tv.count) for tv in input_tvs]
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
-            atom_from_tree(app.head, self.space).tv = app.tv
+            #atom_from_tree(app.head, self.space).tv = app.tv            
             
-            print (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
+            self.set_tv(app, app.tv)
+            
+            log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
 
     def find_rule_applications(self, target):
         '''The main 'meat' of the chainer. Finds all possible rule-applications matching your criteria.
@@ -435,52 +455,90 @@ class Chainer:
         return ret
 
     def find_existing_rule_applications_by_premise(self, premise):
-        ret = []
-        for a in self.apps:
-            if any(arg.isomorphic(premise) for arg in a.goals):
-                ret.append(a)
-        return ret
+        premise_pdn = self.expr2pdn(premise.canonical())        
+        return [app_pdn.op for app_pdn in premise_pdn.parents]
 
     def specialize_existing_rule_applications_by_premise(self, premise):
         ret = []
-        for a in self.apps:
-            for arg in a.goals:
-                s = unify(arg, premise, {})
-                # TODO This is redundant as it's also calculated in the other function. But whatever.
-                if s != None and not arg.isomorphic(premise):
-                    new_a = a.subst(s)
-                    ret.append(new_a)
+        for expr_pdn in self.pd.values():
+            for app_pdn in expr_pdn.parents:
+                #app = Rule(head=app_pdn.parents[0].op,goals=app_pdn.args,name=app_pdn)                    
+                #Rule(head,goals,name,tv,formula)
+                app = app_pdn.op
+
+                # It's necessary to store the app separately, because the
+                # variables in its arguments may (and may not) be shared
+                # between the arguments, but each expression-node in the
+                # proof DAG actually has standard variables from 0.
+                for arg in app.goals:
+                    s = unify(arg, premise, {})
+                    if s != None and not arg.isomorphic(premise):
+                        # For every app with this as a premise
+                            new_a = app.subst(s)
+                            ret.append(new_a)
         return ret
 
-#    def find_existing_rule(self, rule):
-#        matches = [r for r in self.rules if r.isomorphic(rule)]
-#        assert len(matches) < 2
-#        return matches
 
     def get_tvs(self, expr):
-        # NOTE: It may be easier to just do this by just storing the TVs for each target.
-        #rs = self.find_rule_applications(expr)
-
         # Only want to find results for this exact target, not every possible specialized version of it.
         # The chaining mechanism itself will create different apps for different specialized versions.
         # If there are any variables in the target, and a TV is found, that means it has been proven
         # for all values of that variable.
-        #rs = [r for r in rs if unify(expr, r.head, {}) != None]
-        rs = [r for r in self.rules+self.apps if expr.isomorphic(r.head)]
+        
+        canonical = expr.canonical()
+        expr_pdn = self.expr2pdn(canonical)
+        apps = expr_pdn.args
+        return [app.tv for app in apps if app.tv.count > 0]
+    
+    def expr2pdn(self, expr):
+        pdn = DAG(expr,[])
+        try:
+            return self.pd[pdn]
+        except KeyError:
+            self.pd[pdn] = pdn
+            return pdn
 
-        return [r.tv for r in rs if r.tv.confidence > 0]
-        #return [r.tv for r in rs if r.tv]
+    def set_tv(self,app,tv):
+        # Find/add the app
+        a = self.app2pdn(app)
+        a.tv = tv
 
-#    def is_true_weird(self, expr):
-#        #import pdb; pdb.set_trace()
-#        rs = self.find_rule_applications(expr)
-#        if len([r.tv for r in rs if r.tv and not r.goals]) > 0:
-#            print expr, repr(r)
-#            import pdb; pdb.set_trace()
-#        return len([r.tv for r in rs if r.tv and not r.goals]) > 0
+    def add_app_to_pdn(self,app):
+        head_pdn = self.expr2pdn(app.head.canonical())
 
-    def add_rule(self, rule):        
+        # Don't allow loops        
+        goal_pdns = [self.expr2pdn(g.canonical()) for g in app.goals]
+        if head_pdn.any_path_up_contains(goal_pdns):
+            return ("CYCLE",None)
+        
+        # Check if this application is in the Proof DAG already
+        existing = [apn for apn in head_pdn.args if apn.args == goal_pdns]
+        assert len(existing) < 2
+        if len(existing) == 1:
+            return ("EXISTING",existing[0])
+        else:
+            # Otherwise add it to the Proof DAG
+            app_pdn = DAG(app,[])
+            app_pdn.tv = app.tv
+            
+            #print 'add_app_to_pd:',repr(app)
+            
+            for goal_pdn in goal_pdns:
+                app_pdn.append(goal_pdn)
+            head_pdn.append(app_pdn)
+        
+            return ("NEW",app_pdn)
+
+    def app2pdn(self,app):
+        (status,app_pdn) = self.add_app_to_pdn(app)
+        return app_pdn
+    
+    def add_rule(self, rule):
         self.rules.append(rule)
+        
+        # Only relevant to generators or axioms
+        #if rule.tv.confidence > 0:
+        #    self.app2pdn(rule)
 
     def extract_plan(self, trail):
 #        def is_action(proofnode):
@@ -506,57 +564,26 @@ class Chainer:
         return actions
 
     def trail(self, target):
-        def filter_with_tv(tr):
-            args = []
-            for child in tr.args:
-                if len(self.get_tvs(child.op)) > 0:
-                    args.append(child)
-            return Tree(tr.op, args)
-        
-        bit = self.traverse_tree(target, set())
-        
-        return filter_with_tv(bit)
+        #def filter_with_tv(tr):
+        #    args = []
+        #    for child in tr.args:
+        #        if len(self.get_tvs(child.op)) > 0:
+        #            args.append(child)
+        #    return Tree(tr.op, args)
+        #
+        #bit = self.traverse_tree(target, set())
+        #
+        #return filter_with_tv(bit)
 
-    def traverse_tree(self, target, already):
-        producers = [app for app in self.apps if app.head.isomorphic(target)]
+        def filter_with_tv(dag):
+            args = [filter_with_tv(a) for a in dag.args if
+                    (isinstance(a.op,Rule) or len(self.get_tvs(a.op)) > 0)]
+            return DAG(dag.op, args)
         
-        # Deliberately allows repetition of subgoals
-        subgoals = concat_lists([list(app.goals) for app in producers])
-        subgoals_ = []
-        for goal in subgoals:
-            canon = goal.canonical()
-            if canon not in already:
-                subgoals_.append(canon)
-            already.add(canon)
-        
-        #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-        # Note: make a separate copy of `already` for each branch, so we only prevent loops within
-        # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
-        # (If you do, you'll want to do it a different way for each function)
-        return Tree(target, [self.traverse_tree(g, set(already)) for g in subgoals_])
+        root = self.expr2pdn(target)
 
-    def traverse_tree__(self, target):
-        pass
+        return filter_with_tv(root)
     
-    # arrange the tree by rule applications not by goals
-    def traverse_tree_(self, target, already):
-        producers = [a for a in self.apps if a.head.unifies(target)]
-        
-        # Deliberately allows repetition of subgoals
-        subgoals = concat_lists([list(app.goals) for app in producers])
-        producers_ = []
-        for app in producers:
-            canon = app.canonical_tuple()
-            if canon not in already:
-                producers_.append(canon)
-            already.add(canon)
-        
-        #return [target]+concat_lists([self.traverse_tree(g, already) for g in subgoals_])
-        # Note: make a separate copy of `already` for each branch, so we only prevent loops within
-        # a single branch. We don't (necessarily) want to stop a subtree from appearing in multiple branches.
-        # (If you do, you'll want to do it a different way for each function)
-        return Tree(target, [self.traverse_tree(g, set(already)) for g in producers])
-
     def print_tree(self, tr, level = 1):
         try:
             (tr.depth, tr.best_conf_above)
@@ -654,31 +681,31 @@ class Chainer:
                     r.tv = obj.tv
                     self.add_rule(r)
 
-        # Deduction
-        for type in self.deduction_types:
-            self.add_rule(Rule(Tree(type, 1,3), 
-                                         [Tree(type, 1, 2),
-                                          Tree(type, 2, 3), 
-                                          Tree(1),
-                                          Tree(2), 
-                                          Tree(3)],
-                                        name='Deduction', 
-                                        formula = formulas.deductionSimpleFormula))
-
-        # Inversion
-        for type in self.deduction_types:
-            self.add_rule(Rule( Tree(type, 2, 1), 
-                                         [Tree(type, 1, 2),
-                                          Tree(1),
-                                          Tree(2)], 
-                                         name='Inversion', 
-                                         formula = formulas.inversionFormula))
+        ## Deduction
+        #for type in self.deduction_types:
+        #    self.add_rule(Rule(T(type, 1,3), 
+        #                                 [T(type, 1, 2),
+        #                                  T(type, 2, 3), 
+        #                                  Var(1),
+        #                                  Var(2), 
+        #                                  Var(3)],
+        #                                name='Deduction', 
+        #                                formula = formulas.deductionSimpleFormula))
+        #
+        ## Inversion
+        #for type in self.deduction_types:
+        #    self.add_rule(Rule( T(type, 2, 1), 
+        #                                 [T(type, 1, 2),
+        #                                  Var(1),
+        #                                  Var(2)], 
+        #                                 name='Inversion', 
+        #                                 formula = formulas.inversionFormula))
 
         # ModusPonens
         for type in ['ImplicationLink']:
-            self.add_rule(Rule(Tree(2), 
-                                         [Tree(type, 1, 2),
-                                          Tree(1) ], 
+            self.add_rule(Rule(Var(2), 
+                                         [T(type, 1, 2),
+                                          Var(1) ], 
                                           name='ModusPonens', 
                                           formula = formulas.modusPonensFormula))
 
@@ -686,27 +713,27 @@ class Chainer:
 #        for type in ['ImplicationLink']:
 #            for size in xrange(5):
 #                args = [new_var() for i in xrange(size+1)]
-#                andlink = Tree('AndLink', args)
+#                andlink = T('AndLink', args)
 #
-#                self.add_rule(Rule(Tree(2), 
-#                                             [Tree(type, andlink, 2),
+#                self.add_rule(Rule(Var(2), 
+#                                             [T(type, andlink, 2),
 #                                              andlink ], 
 #                                              name='TheoremRule'))
         
        # ModusPonens for EvaluationLinks only
 #        for type in ['ImplicationLink']:
-#            conc = Tree('EvaluationLink', new_var(), new_var())
-#            prem = Tree('EvaluationLink', new_var(), new_var())
-#            imp = Tree('ImplicationLink', prem, conc)
+#            conc = T('EvaluationLink', new_var(), new_var())
+#            prem = T('EvaluationLink', new_var(), new_var())
+#            imp = T('ImplicationLink', prem, conc)
 #            
 #            self.add_rule(Rule(conc, 
 #                                         [imp, prem], 
 #                                          name='ModusPonens_Eval'))
 
 #        for type in ['ImplicationLink']:
-#            conc = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
-#            prem = Tree('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
-#            imp = Tree('ImplicationLink', prem, conc)
+#            conc = T('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
+#            prem = T('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
+#            imp = T('ImplicationLink', prem, conc)
 #            
 #            self.add_rule(Rule(conc, 
 #                                         [imp, prem], 
@@ -716,7 +743,7 @@ class Chainer:
         type = 'AndLink'
         for size in xrange(5):                
             args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(Tree(type, args),
+            self.add_rule(Rule(T(type, args),
                                args,
                                type[:-4], 
                                formula = formulas.andSymmetricFormula))
@@ -724,27 +751,27 @@ class Chainer:
         type = 'OrLink'
         for size in xrange(2):
             args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(Tree(type, args),
+            self.add_rule(Rule(T(type, args),
                                args,
                                type[:-4], 
                                formula = formulas.orFormula))
 
         # Adding a NOT
-        self.add_rule(Rule(Tree('NotLink', 1),
-                           [ Tree(1) ],
+        self.add_rule(Rule(T('NotLink', 1),
+                           [ Var(1) ],
                            name = 'Not', 
                            formula = formulas.notFormula))
 
         # Link conversion
-        self.add_rule(Rule(Tree('InheritanceLink', 1, 2),
-                           [ Tree('SubsetLink', 1, 2) ],
+        self.add_rule(Rule(T('InheritanceLink', 1, 2),
+                           [ T('SubsetLink', 1, 2) ],
                            name = 'SubsetLink=>InheritanceLink', 
                            formula = formulas.ext2InhFormula))
 
 #        # Producing ForAll/Bind/AverageLinks?
 #        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
-#            self.add_rule(Rule(Tree(type, 1, 2),
-#                               [ Tree(2) ],
+#            self.add_rule(Rule(T(type, 1, 2),
+#                               [ Var(2) ],
 #                               name = type+' abstraction', 
 #                               formula = formulas.identityFormula))
 
@@ -754,7 +781,7 @@ class Chainer:
 #        list_link = new_var()
 #        r = Rule(
 #                        fact,
-#                        [Tree('ForAllLink', list_link, fact )], 
+#                        [T('ForAllLink', list_link, fact )], 
 #                        name = 'ForAll'     
 #                    )
 #        r.tv = True
@@ -949,21 +976,21 @@ if __name__ == '__main__':
     a = AtomSpace()
     log.use_stdout(True)
 
-    atom_from_tree(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')), a).tv = TruthValue(1, 1)
-    #atom_from_tree(Tree('EvaluationLink',1), a).tv = TruthValue(1, 1)
+    atom_from_tree(T('EvaluationLink',a.add_node(t.PredicateNode,'A')), a).tv = TruthValue(1, 1)
+    #atom_from_tree(T('EvaluationLink',1), a).tv = TruthValue(1, 1)
 
     c = Chainer(a)
 
-    #search(Tree('EvaluationLink',a.add_node(t.PredicateNode,'B')))
+    #search(T('EvaluationLink',a.add_node(t.PredicateNode,'B')))
     #fc(a)
 
-    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    #c.bc(T('EvaluationLink',a.add_node(t.PredicateNode,'A')))
 
 #    global rules
-#    A = Tree('EvaluationLink',a.add_node(t.PredicateNode,'A'))
-#    B = Tree('EvaluationLink',a.add_node(t.PredicateNode,'B'))
+#    A = T('EvaluationLink',a.add_node(t.PredicateNode,'A'))
+#    B = T('EvaluationLink',a.add_node(t.PredicateNode,'B'))
 #    rules.append(Rule(B, 
 #                                  [ A ]))
 
-    #c.bc(Tree('EvaluationLink',a.add_node(t.PredicateNode,'A')))
-    c.bc(Tree('EvaluationLink',-1))
+    #c.bc(T('EvaluationLink',a.add_node(t.PredicateNode,'A')))
+    c.bc(T('EvaluationLink',-1))

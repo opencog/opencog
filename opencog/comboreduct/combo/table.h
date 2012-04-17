@@ -89,14 +89,28 @@ public:
     std::string olabel;               // output label
     std::vector<std::string> ilabels; // list of input labels
 
+    // definition is delaied after Table as it uses Table
+    template<typename Func>
+    CTable(const Func& func, arity_t arity, RandGen& rng, int nsamples = -1);
+    
     CTable(const std::string& _olabel, const std::vector<std::string>& _ilabels)
         : olabel(_olabel), ilabels(_ilabels) {}
 
-    binding_map get_binding_map(const key_type& args) const
+
+    // TODO remove that junk
+    binding_map get_binding_map(const vertex_seq& args) const
     {
         binding_map bmap;
         for (size_t i = 0; i < args.size(); ++i)
             bmap[i+1] = args[i];
+        return bmap;
+    }
+    // like above but only consider the arguments in as
+    binding_map get_binding_map(const vertex_seq& args, const arity_set& as) const
+    {
+        binding_map bmap;
+        foreach (arity_t a, as)
+            bmap[a] = args[a-1];
         return bmap;
     }
 
@@ -134,6 +148,8 @@ public:
               size is automatically determined.
      * @param min_contin minimum contin value.
      * @param max_contin maximum contin value.
+     *
+     * It onyl works for contin-boolean signatures
      */
     // min_contin and max_contin are used in case tt has contin inputs
     ITable(const type_tree& tt, RandGen& rng, int nsamples = -1,
@@ -157,8 +173,16 @@ public:
     binding_map get_binding_map(const vertex_seq& args) const
     {
         binding_map bmap;
-        for(arity_t i = 0; i < (arity_t)args.size(); ++i)
+        for(size_t i = 0; i < args.size(); ++i)
             bmap[i+1] = args[i];
+        return bmap;
+    }
+    // like above but only consider the arguments in as
+    binding_map get_binding_map(const vertex_seq& args, const arity_set& as) const
+    {
+        binding_map bmap;
+        foreach (arity_t a, as)
+            bmap[a] = args[a-1];
         return bmap;
     }
 
@@ -250,8 +274,8 @@ public:
 
     template<typename Func>
     OTable(const Func& f, const ITable& it,
-           const std::string& ol = default_output_label)
-        : label(ol) {
+           const std::string& ol = default_output_label) : label(ol)
+    {
         foreach(const vertex_seq& vs, it)
             push_back(f(vs.begin(), vs.end()));
     }
@@ -278,6 +302,16 @@ struct Table
     typedef vertex value_type;
 
     Table();
+
+    template<typename Func>
+    Table(const Func& func, arity_t a, RandGen& rng, int nsamples = -1) :
+        // tt(gen_signature(type_node_of<Func::argument_type>(),
+        //                  type_node_of<Func::result_type>(), a)),
+        // TODO
+        tt(gen_signature(type_node_of<bool>(),
+                         type_node_of<bool>(), a)),
+        itable(tt, rng), otable(func, itable) {}
+    
     Table(const combo_tree& tr, RandGen& rng, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     size_t size() const { return itable.size(); }
@@ -296,6 +330,13 @@ struct Table
     OTable otable;
 };
 
+template<typename Func>
+CTable::CTable(const Func& func, arity_t arity, RandGen& rng, int nsamples) {
+    Table table(func, arity, rng, nsamples);
+    *this = table.compress();
+}
+
+        
 ////////////////////////
 // Mutual Information //
 ////////////////////////
@@ -685,16 +726,17 @@ protected:
     template<typename T>
     void populate(const tree<T>& tr)
     {
+        bmap.resize(_arity);
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             for (int j = 0; j < _arity; ++j)
-                bmap[j + 1] = bool_to_vertex((i >> j) % 2);
+                bmap[j] = bool_to_vertex((i >> j) % 2);
             *it = eval_binding(*_rng, bmap, tr) == id::logical_true;
         }
     }
     arity_t _arity;
     RandGen* _rng; // _rng is dummy and not used anyway
-    mutable binding_map bmap;
+    mutable vertex_seq bmap;
 };
 
 //////////////////

@@ -7,6 +7,7 @@ ADD_SUBDIRECTORY(crutil)
 ADD_LIBRARY(comboreduct SHARED
 	crutil/exception
 
+    combo/argument
 	combo/action
 	combo/builtin_action
 	combo/message	

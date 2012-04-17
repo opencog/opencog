@@ -40,6 +40,17 @@
 
 namespace opencog { namespace combo {
 
+// templates helpers to convert C++ type into type_node
+/// @note if I don't inline I get linkage error, go figure...
+template<typename T>
+inline type_node type_node_of() { return id::ill_formed_type; }
+
+template<>
+inline type_node type_node_of<bool>() { return id::boolean_type; }
+        
+template<>
+inline type_node type_node_of<contin_t>() { return id::contin_type; }
+
 // returns the arity of builtin b
 char get_arity(builtin b);
 
@@ -204,39 +215,44 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                       const combo_tree& tr, combo_tree::iterator ct_it,
                       const std::string& proc_name);
 
-// return the intersection of 2 types
-// formally the intersection of 2 types T1 and T2 is defined by the
-// highes type (in the inheritance hierarchy) that inherits both T1 and T2
-// Here and now only a simpler definition is implemented yet practical enough
+// Return the intersection of 2 types. Formally the intersection of 2
+// types T1 and T2 is defined by the highest type (in the inheritance
+// hierarchy) that inherits both T1 and T2. For now only a simpler
+// definition is implemented yet practical enough
+//
 // for example :
+//
 // intersection of union(T1, T2) and union(T1, T3) is T1
+//
 // intersection of unknown_type and T is T
+//
 // intersection of ill_formed and T is ill_formed
+//
 // TODO : lambda
-// Of course the case if T1 inherit T2 then interection of T1 and T2 is T1
-// is also implemented
-// If the interection is ill_formed or anything else
-// then the type_tree returned is ill_formed
+//
+// Of course the case if T1 inherit T2 then interection of T1 and T2
+// is T1 is also implemented. If the interection is ill_formed or
+// anything else then the type_tree returned is ill_formed
 type_tree get_intersection(const type_tree& tt1, const type_tree& tt2);
 
 type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
                            const type_tree& tt2, type_tree_pre_it it2);
 
-// infer type of a vertex based on its contextual use
-// Note that such it will not be able to infer function that takes arg_list
-// in argument
+// infer type of a vertex based on its contextual use.  Note that such
+// it will not be able to infer function that takes arg_list in
+// argument.
 type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
                             const type_tree_seq& atl = empty_tts);
 
-// return the set of arguments of that tree
-vertex_set argument_set(const combo_tree& tr);
+// return the set of absolute idx corresponding to the arguments of tr
+arity_set get_argument_abs_idx_set(const combo_tree& tr);
 
 // infer the type_tree of each argument of a given combo_tree
 void infer_arg_type_tree(const combo_tree& tr, type_tree_seq& arg_types);
 
 // insert the types of the arguments in arg_types in the signature of
-// a given function type
-// if the function is a constant then wrap it in lambda_type
+// a given function type. If the function is a constant then wrap it
+// in lambda_type
 void insert_arg_type_tree(const type_tree_seq& arg_types,
                           type_tree& tt2);
 
@@ -299,6 +315,10 @@ arity_t action_result_arity(const type_tree& ty);
 // then it solely one and it is the last argument
 arity_t type_tree_arity(const type_tree& ty);
 
+// Return the root of the type tree, convenient function when one
+// assumes that the type is elementary
+type_node get_type_node(const type_tree& tt);
+
 // return a vector containing the type of each input argument given a
 // reduced type tree signature if there is an arg_list(T) at last
 // argument then it fills the last element of the vector directly with
@@ -345,7 +365,7 @@ bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n);
 arity_t infer_arity(const combo_tree& tr);
 
 // return the higher argument index of tr,
-// for instance if tr==+($1 $5) it returns 5
+// for instance if tr == +($1 $5) it returns 5
 arity_t explicit_arity(const combo_tree& tr);
 
 // helpers to defined type_trees

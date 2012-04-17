@@ -84,7 +84,9 @@ namespace opencog
 
                 inline bool operator == ( const Vector3& vector ) const
                 {
-                    return ( x == vector.x && y == vector.y && z == vector.z );
+                    return ( fabs( x - vector.x ) < 1e-06 && 
+                             fabs( y - vector.y ) < 1e-06 && 
+                             fabs( z - vector.z ) < 1e-06 );
                 }
 
                 inline bool operator != ( const Vector3& vector ) const

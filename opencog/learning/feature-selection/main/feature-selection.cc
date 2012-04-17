@@ -186,6 +186,9 @@ int main(int argc, char** argv) {
     // init random generator
     MT19937RandGen rng(rand_seed);
 
+    // setting OpenMP parameters
+    setting_omp(fs_params.jobs);
+
     // Logger
     logger().info("Read input file %s", fs_params.input_file.c_str());
     // ~Logger
@@ -194,10 +197,10 @@ int main(int argc, char** argv) {
     int target_pos = fs_params.target_feature.empty()? 0
         : findTargetFeaturePosition(fs_params.input_file,
                                     fs_params.target_feature);
+    // read input_data_file file
+    Table table = istreamTable(fs_params.input_file, target_pos);
 
     if(inferred_type == id::boolean_type) {
-        // read input_data_file file
-        Table table = istreamTable(fs_params.input_file, target_pos);
         feature_selection(table, fs_params, rng);
     } else {
         unsupported_type_exit(inferred_type);

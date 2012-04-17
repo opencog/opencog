@@ -29,7 +29,7 @@
 namespace opencog { namespace combo {
 
 namespace id {
-  enum type_node {
+enum type_node {
     // Type operators.
     lambda_type,      // Example : lambda_type(T1 T2 T3)
                       // represents a function that takes arguments of
@@ -66,7 +66,7 @@ namespace id {
     // is, argument_type corresponds to $1, argument_type+1 corresponds
     // to $2, and so on.
     argument_type
-  };
+};
 }
 typedef id::type_node type_node;
 

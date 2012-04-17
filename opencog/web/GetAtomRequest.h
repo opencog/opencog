@@ -66,8 +66,8 @@ public:
     std::string getHTML(std::string);
     std::string getHTMLHeader();
     void html_makeOutput(Handle h);
-    void json_makeOutput(Handle h);
-    std::string tvToJSON(const TruthValue* tv);
+    static std::string json_makeOutput(Handle h);
+    static std::string tvToJSON(const TruthValue* tv);
     void generateProcessingGraph(Handle h);
 };
 

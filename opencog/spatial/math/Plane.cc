@@ -86,7 +86,7 @@ Plane::SIDE Plane::getSide( const Vector3& point )
 
 void Plane::transformSelf( const Matrix4& transformation )
 {
-    Vector4 result = transformation * Vector4( this->normal, this->distanceFromOrigo );
+    Vector4 result = transformation * getVector4( ); 
     set( Vector3( result.x, result.y, result.z ), result.w );
 }
 
@@ -101,7 +101,7 @@ Vector3 Plane::getIntersectionPoint( const Plane& plane2, const Plane& plane3 ) 
         throw opencog::NotFoundException( TRACE_INFO, "There is no intersection point!" );
     } // if
 
-    return linearSystem.inverse( ) * ( Vector3( this->distanceFromOrigo, plane2.distanceFromOrigo, plane3.distanceFromOrigo ) );
+    return linearSystem.inverse( ) * ( -Vector3( this->distanceFromOrigo, plane2.distanceFromOrigo, plane3.distanceFromOrigo ) );
 }
 
 bool Plane::operator==( const Plane& other ) const

@@ -43,7 +43,6 @@ using namespace opencog;
 using namespace moses;
 using namespace combo;
 using namespace boost::assign; // bring 'operator+=()' into scope
-// using boost::counting_iterator;
 
 // feature selection algorithms
 static const string un="un"; // moses based univariate
@@ -264,8 +263,6 @@ void incremental_feature_selection(Table& table,
 void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params,
                        RandGen& rng) {
-    // setting OpenMP parameters
-    setting_omp(fs_params.jobs);
     // setting moses optimization parameters
     optim_parameters op_param(20, fs_params.max_score, 4, 0.0);
     if(fs_params.algorithm == un) {
@@ -275,6 +272,7 @@ void feature_selection(Table& table,
     } else if(fs_params.algorithm == hc) {
         hc_parameters hc_param(true, // widen distance if no improvement
                                false,
+                               false, // crossover
                                fs_params.hc_fraction_of_remaining);
         hill_climbing hc(rng, op_param, hc_param);
         moses_feature_selection(table, hc, fs_params);

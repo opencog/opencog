@@ -907,6 +907,8 @@ seconds, not 60 seconds, so the smaller run just was not realistic.
 
 ==================================================================
 
+ Attempts at 5-parity
+
 parity -k5 results   -Hpa -k5 
 
 All are -m150K unless otherwise noted, right?
@@ -1185,6 +1187,9 @@ exhaustive search of the local neighborhood, when the local neighb is
 small.  This gives very good results for the smaller exemplar sizes
 for the first few exemplars.
 
+"regress" is revision 6726, trying to make sure things still work.
+There was a change in the loop termination criteria.  -r1 -Z1
+
 
               baseline            40/10 (nn9)         40/rescan (nn10)
          score  time  plex     score  time  plex     score  time  plex
@@ -1244,11 +1249,11 @@ for the first few exemplars.
 -m320k:   -89  39974  129
 
 
-           renew (nn28)         all-small (nn29)
+           renew (nn28)         all-small (nn29)      regress (nn30)
          score  time  plex     score  time  plex     score  time  plex
--m10k:   -303     76   48      -248     58   59
--m20k:   -210    305   68      -206    266   74
--m40k:   -125   1032  101      -132   1086  114
+-m10k:   -303     76   48      -248     58   59      -248     57   59
+-m20k:   -210    305   68      -206    266   74      -206    264   74
+-m40k:   -125   1032  101      -132   1086  114      -132   1064  114
 -m80k:   -108   3877  113      -122   6638  129
 -m160k:  -102  14427  120      -121  20186  127
 -m320k:  -101  41033  121      -121  45621  125
@@ -1465,31 +1470,36 @@ problem.
 "rech" is 6666; expect this to be comparable to previous runs.  In fact,
 its identical to "zippo" above. No regression, no mystery, good to go.
 
+"rchk" is 6728; some mnor changes in termination criteria, should not
+have a big effect...  Hmm, numbers seems to be identical to "rech"+20%.
+Which means the termination was not affected (random numbers are drawn
+in the same order), but something added to the execution time ... !?
+
 As above -Hpa -k4 -z3.5 -v5 -m350000
 
-      simp   enab  rech
--r0:   101    188    22
--r1:   284     -2    58
--r2:   200    384    88
--r3:   133    245   167
--r4:    32    154    43
--r5:    24    173    21
--r6:    63    189   111
--r7:   114     57   191
--r8:    84    139   193
--r9:    62     43    75
--r10:   80    404    33
--r11:  199    855   134
--r12:   13    423    20
--r13:  122     87   120
--r14:   43     98   115
--r15:   97    170    71
--r16:  396    127    49
--r17:   43    587   246
--r18:   47     99   100
--r19:  102    910     5
+      simp   enab  rech   rchk
+-r0:   101    188    22     28
+-r1:   284     -2    58     71
+-r2:   200    384    88   -109
+-r3:   133    245   167    206
+-r4:    32    154    43     53
+-r5:    24    173    21     26
+-r6:    63    189   111    139
+-r7:   114     57   191    247
+-r8:    84    139   193    242
+-r9:    62     43    75     94
+-r10:   80    404    33     40
+-r11:  199    855   134    165
+-r12:   13    423    20     25
+-r13:  122     87   120    151
+-r14:   43     98   115    139
+-r15:   97    170    71     85
+-r16:  396    127    49     60
+-r17:   43    587   246    200
+-r18:   47     99   100    124
+-r19:  102    910     5      6
 
-avg:   112    318    93
+avg:   112    318    93    111
 
 
 

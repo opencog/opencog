@@ -39,7 +39,7 @@ static const unsigned int max_filename_size = 255;
  * Display error message about unspecified combo tree and exit
  */
 void unspecified_combo_exit() {
-    cerr << "error: you must specify which combo tree to learn (option -y)"
+    cerr << "Error: you must specify which combo tree to learn (option -y)."
          << endl;
     exit(1);
 }
@@ -48,7 +48,7 @@ void unspecified_combo_exit() {
  * Display error message about unsupported type and exit
  */
 void unsupported_type_exit(const type_tree& tt) {
-    cerr << "error: type " << tt << " currently not supported" << endl;
+    cerr << "Error: type " << tt << " currently not supported." << endl;
     exit(1);
 }
 void unsupported_type_exit(type_node type) {
@@ -59,8 +59,8 @@ void unsupported_type_exit(type_node type) {
  * Display error message about ill formed combo tree and exit
  */
 void illformed_exit(const combo_tree& tr) {
-    cerr << "error: apparently the combo tree "
-         << tr << "is not well formed" << endl;
+    cerr << "Error: apparently the combo tree "
+         << tr << "is not well formed." << endl;
     exit(1);
 }
 
@@ -68,8 +68,8 @@ void illformed_exit(const combo_tree& tr) {
  * Display error message about unsupported problem and exit
  */
 void unsupported_problem_exit(const string& problem) {
-    cerr << "error: problem " << problem
-         << " unsupported for the moment" << endl;
+    cerr << "Error: problem " << problem
+         << " unsupported for the moment." << endl;
     exit(1);
 }
 
@@ -88,7 +88,7 @@ void no_input_datafile_exit() {
 void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
                              const string& input_data_file2, arity_t arity2)
 {
-    cerr << "File " << input_data_file1 << " has arity " << arity1
+    cerr << "Error: File " << input_data_file1 << " has arity " << arity1
          << " while file " << input_data_file2 << "has_arity "
          << arity2 << endl;
     exit(1);
@@ -98,8 +98,8 @@ void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
  * Display error message about not recognized combo operator and exist
  */
 void not_recognized_combo_operator(const string& ops_str) {
-    cerr << "error: " << ops_str
-         << " is not recognized as combo operator" << endl;
+    cerr << "Error: " << ops_str
+         << " is not recognized as combo operator." << endl;
     exit(1);
 }
 
@@ -148,7 +148,7 @@ int alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
     // However, all tables will be lambda_type ...
     combo::arity_t arity = type_tree_arity(tt);
 
-    type_node output_type = *type_tree_output_type_tree(tt).begin();
+    type_node output_type = get_type_node(type_tree_output_type_tree(tt));
     if (output_type == id::boolean_type) {
         return 3 + arity;
     } else if (output_type == id::contin_type) {
@@ -171,6 +171,21 @@ combo_tree str_to_combo_tree(const string& combo_str)
     ss << combo_str;
     ss >> tr;
     return tr;
+}
+
+//* Get largest contin constant in a combo tree
+contin_t largest_const_in_tree(const combo_tree &tr)
+{
+    contin_t rc = 0.0;
+    combo_tree::pre_order_iterator it;
+    for(it = tr.begin(); it != tr.end(); it++) {
+        if (is_contin(*it)) {
+            contin_t val = get_contin(*it);
+            if (rc < val) rc = val;
+        }
+    }
+
+    return rc;
 }
 
 //* return true iff the problem is based on data file
@@ -306,39 +321,52 @@ int moses_exec(int argc, char** argv)
     bool hc_single_step;
     bool hc_crossover;
 
+    // pre params
+    bool pre_worst_norm;
+
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
     options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "Produce help message.\n")
+
         ("version", "Display the version of moses.\n")
+
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
+
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
          "Maximum number of fitness function evaluations.\n")
+
         (opt_desc_str(result_count_opt).c_str(),
          value<long>(&result_count)->default_value(10),
          "The number of results to return, ordered according to "
          "a linear combination of score and complexity. If negative, "
          "then return all results.\n")
+
         (opt_desc_str(output_score_opt).c_str(),
          value<bool>(&output_score)->default_value(true),
          "If 1, output the score before each candidate (at the left of the complexity).\n")
+
         (opt_desc_str(output_complexity_opt).c_str(),
          value<bool>(&output_complexity)->default_value(false),
          "If 1, output the complexity before each candidate (at the right of the score).\n")
+
         (opt_desc_str(output_bscore_opt).c_str(),
          value<bool>(&output_bscore)->default_value(false),
          "If 1, output the bscore below each candidate.\n")
+
         (opt_desc_str(output_dominated_opt).c_str(),
          value<bool>(&output_dominated)->default_value(false),
          "If 1, print the the entire metapopulation, and not just the "
          "highest scoring candidates.\n")
+
         (opt_desc_str(output_eval_number_opt).c_str(),
          value<bool>(&output_eval_number)->default_value(false),
          "If 1, output the actual number of evaluations.\n")
+
         (opt_desc_str(output_with_labels_opt).c_str(),
          value<bool>(&output_with_labels)->default_value(false),
          "If 1, output the candidates with using the argument labels "
@@ -346,23 +374,29 @@ int moses_exec(int argc, char** argv)
          "*(\"$price\" \"$temprature\") instead of *($1 $2). This only "
          "works for data fitting problems where the data file contains "
          "labels in its header.\n")
+
         ("python",
          value<bool>(&output_python)->default_value(false),
          "If 1, output the program(s) as python code instead of combo. "
          "Best with -c1 option to return a single python module. Only "
          "implemented for boolean programs currently.\n")
+
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&output_file)->default_value(""),
          "File where to place the output. If empty, then output to stdout.\n")
+
         (opt_desc_str(max_gens_opt).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
+
         (opt_desc_str(input_data_file_opt).c_str(),
          value<vector<string> >(&input_data_files),
          "Input table file in DSV format (with comma, whitespace and tabulation as seperator). Colums correspond to features and rows to observations. Can be used several times, in such a case the behavioral score of the whole problem is the concatenation of the behavioral scores of the sub-problems associated with the files. Each file must have the same number of features in the same order.\n")
+
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")
+
         (opt_desc_str(problem_opt).c_str(),
          value<string>(&problem)->default_value(it),
          str(format("Problem to solve, supported problems are:\n"
@@ -383,11 +417,13 @@ int moses_exec(int argc, char** argv)
                     "%s, multiplex\n"
                     "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
              % it % pre % ip % ann_it % cp % pa % dj % mux % sr).c_str())
+
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          str(format("Combo program to learn, used when the problem"
                     " %s is selected (option -%s).\n")
              % cp % problem_opt.second).c_str())
+
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
          str(format("For even parity (%s), disjunction (%s) and multiplex (%s)"
@@ -395,6 +431,7 @@ int moses_exec(int argc, char** argv)
                     " For regression of f(x)_o = sum_{i={1,o}} x^i (%s)"
                     " the problem size corresponds to the order o.\n")
              % pa % dj % mux % sr).c_str())
+
         (opt_desc_str(nsamples_opt).c_str(),
          value<int>(&nsamples)->default_value(-1),
          "Number of samples to describe the problem. "
@@ -403,16 +440,30 @@ int moses_exec(int argc, char** argv)
          "problem size is larger than the value provided with that "
          "option then the dataset is subsampled randomly to reach the "
          "target size.\n")
+
         (opt_desc_str(min_rand_input_opt).c_str(),
-         value<float>(&min_rand_input)->default_value(0),
-         "Min of an input value chosen randomly, only used when the problem takes continuous inputs. Temporary hack: if the problem is pre then this is used to determine the min activation.\n")
+         value<float>(&min_rand_input)->default_value(0.0),
+         "Minimum value of a sampled coninuous input.  The cp, ip, and "
+         "pre problems all require a range of values to be sampled in "
+         "order to measure the fitness of a proposed solution. This "
+         "option sets the low end of the sampled range. In the case of "
+         "fitness function pre, the range corresponds to the activation "
+         "of the precision.\n")
+
         (opt_desc_str(max_rand_input_opt).c_str(),
-         value<float>(&max_rand_input)->default_value(1),
-         "Max of an input value chosen randomly, only used when the problem takes continuous inputs. Temporary hack: if the problem is pre then this is used to determine the max activation.\n")
+         value<float>(&max_rand_input)->default_value(1.0),
+         "Maximum value of a sampled coninuous input.  The cp, ip, and "
+         "pre problems all require a range of values to be sampled in "
+         "order to measure the fitness of a proposed solution. This "
+         "option sets the low high of the sampled range. In the case of "
+         "fitness function pre, the range corresponds to the activation "
+         "of the precision.\n")
+
         (opt_desc_str(log_level_opt).c_str(),
          value<string>(&log_level)->default_value("INFO"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, "
          "DEBUG, FINE. Case does not matter.\n")
+
         (opt_desc_str(log_file_dep_opt_opt).c_str(),
          str(format("The name of the log is determined by the options, for"
                     " instance if moses-exec is called with -%s 123 -%s %s"
@@ -421,14 +472,17 @@ int moses_exec(int argc, char** argv)
                     " be longer than %s characters.\n")
              % rand_seed_opt.second % problem_opt.second % pa
              % max_filename_size).c_str())
+
         (opt_desc_str(log_file_opt).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
          str(format("File name where to write the log."
                     " This option is overwritten by %s.\n")
              % log_file_dep_opt_opt.first).c_str())
+
         (opt_desc_str(noise_opt).c_str(),
          value<float>(&noise)->default_value(0),
          "Assume that the data are noisy. This is a way to control the Occam's razor, the noisier the data the stronger the model complexity penalty. If the target feature is discrete, it corresponds to the probability p that an output datum is wrong (returns false while it should return true or the other way around), only values 0 < p < 0.5 are meaningful. If the target feature is continuous, it corresponds to the standard deviation of the (Gaussian) noise centered around each candidate's output, 0 or negative means no Occam's razor.\n")
+
         (opt_desc_str(include_only_ops_str_opt).c_str(),
          value<vector<string> >(&include_only_ops_str),
          "Include this operator, but exclude others, in the solution.  "
@@ -440,6 +494,7 @@ int moses_exec(int argc, char** argv)
          "variables, and including only some variables still include "
          "all operators).  You may need to put variables under double "
          "quotes.  This option does not work with ANN.\n")
+
         (opt_desc_str(ignore_ops_str_opt).c_str(),
          value<vector<string> >(&ignore_ops_str),
          str(format("Ignore the following operator in the program solution.  "
@@ -450,36 +505,44 @@ int moses_exec(int argc, char** argv)
                     "That is, if an operator is both be included and ignored, "
                     "then it is ignored.  This option does not work with ANN.\n")
              % include_only_ops_str_opt.first).c_str())
+
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
          str(format("Optimization algorithm, supported algorithms are"
                     " univariate (%s), simulation annealing (%s),"
                     " hillclimbing (%s).\n")
              % un % sa % hc).c_str())
+
         (opt_desc_str(exemplars_str_opt).c_str(),
          value<vector<string> >(&exemplars_str),
          "Start the search with a given exemplar, can be used several times.\n")
+
         (opt_desc_str(max_candidates_opt).c_str(),
          value<int>(&max_candidates)->default_value(-1),
          "Maximum number of considered candidates to be added to the metapopulation after optimizing deme.\n")
+
         (opt_desc_str(reduce_all_opt).c_str(),
          value<bool>(&reduce_all)->default_value(true),
          "Reduce all candidates before being evaluated.  Otherwise "
          "they are only reduced before being added to the "
          "metapopulation. This option can be valuable if memoization "
          "is enabled to avoid re-evaluate of duplicates.\n")
+
         (opt_desc_str(reduct_candidate_effort_opt).c_str(),
          value<int>(&reduct_candidate_effort)->default_value(2),
          "Effort allocated for reduction of candidates, in the range 0-3. "
          "0 means minimum effort, 3 means maximum effort.\n")
+
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
+
         (opt_desc_str(enable_cache_opt).c_str(),
          value<bool>(&enable_cache)->default_value(true),
          "Memoize, that is, cache evaluation results, so that identical "
          "candidates are not re-evaluated. The cache size is dynamically "
          "adjusted to fit in the RAM.\n")
+
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
          str(format("Number of jobs allocated for deme optimization."
@@ -498,14 +561,17 @@ int moses_exec(int argc, char** argv)
                     " files are gonna be generated when using this option on"
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
+
         (opt_desc_str(weighted_accuracy_opt).c_str(),
          value<bool>(&weighted_accuracy)->default_value(false),
          "This option is useful in case of unbalanced data as it "
          "weights the score so that each class weights equally "
          "regardless of their proportion in terms of sample size.\n")
+
         (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(20),
          "The higher the more effort is spent on a deme.\n")
+
         (opt_desc_str(max_score_opt).c_str(),
          value<score_t>(&max_score)->default_value(best_score),
          "The max score to reach, once reached MOSES halts. MOSES is sometimes able to calculate the max score that can be reached for a particular problem, in such case the max_score is automatically reset of the minimum between MOSES's calculation and the user's option.\n")
@@ -584,18 +650,26 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(ip_kld_weight_opt).c_str(),
          value<double>(&ip_kld_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of the KLD.\n") % ip).c_str())
+
         (opt_desc_str(ip_skewness_weight_opt).c_str(),
          value<double>(&ip_skewness_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of skewness.\n") % ip).c_str())
+
         (opt_desc_str(ip_stdU_weight_opt).c_str(),
          value<double>(&ip_stdU_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of stdU.\n") % ip).c_str())
+
         (opt_desc_str(ip_skew_U_weight_opt).c_str(),
          value<double>(&ip_skew_U_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of skew_U.\n") % ip).c_str()) 
+
         (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&alpha)->default_value(0.0),
          "If problem pre is used then if alpha is negative (any negative value), precision is replaced by negative predictive value. And then alpha plays the role of the activation constrain penalty from 0 to inf, 0 being no activation penalty at all, inf meaning hard constraint penalty (that is if the candidate is not in the range it has -inf activation penalty.)\n")
+
+        ("pre-worst-norm",
+         value<bool>(&pre_worst_norm)->default_value(false),
+         "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
        ;
 
     variables_map vm;
@@ -639,7 +713,7 @@ int moses_exec(int argc, char** argv)
     if (level != Logger::BAD_LEVEL)
         logger().setLevel(level);
     else {
-        cerr << "Log level " << log_level << " is incorrect (see --help)." << endl;
+        cerr << "Error: Log level " << log_level << " is incorrect (see --help)." << endl;
         exit(1);
     }
     logger().setBackTraceLevel(Logger::ERROR);
@@ -715,6 +789,8 @@ int moses_exec(int argc, char** argv)
         }
     }
 
+    setting_omp(jobs[localhost]);
+    
     // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,
                                    revisit, include_dominated, 
@@ -798,14 +874,14 @@ int moses_exec(int argc, char** argv)
 
             // Infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
-            type_node table_output_tn = *table_output_tt.begin();
+            type_node table_output_tn = get_type_node(table_output_tt);
 
             // Determine the default exemplar to start with
             if (exemplars.empty())
                 exemplars.push_back(type_to_exemplar(problem == pre? id::boolean_type : table_output_tn));
 
             type_node output_type =
-                *(get_output_type_tree(*exemplars.begin()->begin()).begin());
+                get_type_node(get_output_type_tree(*exemplars.begin()->begin()));
             if (output_type == id::unknown_type)
                 output_type = table_output_tn;
 
@@ -813,7 +889,7 @@ int moses_exec(int argc, char** argv)
             so << "Inferred output type: " << output_type;
             logger().info(so.str());
             
-            if (problem == pre) { // problem == pre
+            if (problem == pre) { // problem == pre  precision-based scoring
                 type_tree cand_tt = gen_signature(id::boolean_type, arity);
                 int as = alphabet_size(cand_tt, ignore_ops);
                 typedef precision_bscore BScore;
@@ -822,13 +898,14 @@ int moses_exec(int argc, char** argv)
                     bscores.push_back(new BScore(ctable, as, noise,
                                                  min_rand_input,
                                                  max_rand_input,
-                                                 abs(alpha), rng, alpha >= 0));
+                                                 abs(alpha), rng, alpha >= 0,
+                                                 pre_worst_norm));
                 multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(rng, exemplars, cand_tt,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
-            } else { // problem == it
+            } else { // problem == it  i.e. input-table based scoring.
                 OC_ASSERT(output_type == table_output_tn);
                 int as = alphabet_size(table_tt, ignore_ops);
                 if (output_type == id::boolean_type) {
@@ -938,15 +1015,30 @@ int moses_exec(int argc, char** argv)
     {
         combo_tree tr = str_to_combo_tree(combo_str);
 
-        if (problem == cp) { // regression based on combo program
-            // get the combo_tree and infer its type
+        // If the user specifies the combo program from bash or similar
+        // shells, and forgets to escape the $ in the variable names,
+        // then the resulting combo program will be garbage.  Try to
+        // sanity-check this, so as to avoid user frustration. 
+        // A symptom of this error is that the arity will be -1.
+        if (-1 == arity || NULL == strchr(combo_str.c_str(), '$')) {
+            cerr << "Error: the combo program " << tr << "\n"
+                 << "appears not to contain any arguments. Did you\n"
+                 << "forget to escape the $'s in the shell command line?"
+                 << endl;
+            exit(2);
+        }
+
+        if (problem == cp) { // Regression based on combo program
+            // Get the combo_tree and infer its type
             type_tree tt = infer_type_tree(tr);
 
-            type_node output_type = *type_tree_output_type_tree(tt).begin();
-            // if no exemplar has been provided in option, use the default one
+            type_node output_type = get_type_node(type_tree_output_type_tree(tt));
+
+            // If no exemplar has been provided in option, use the default one
             if (exemplars.empty()) {
                 exemplars.push_back(type_to_exemplar(output_type));
             }
+
             if (output_type == id::boolean_type) {
                 // @todo: Occam's razor and nsamples is not taken into account
                 logical_bscore bscore(tr, arity);
@@ -956,10 +1048,33 @@ int moses_exec(int argc, char** argv)
                                       mmr_pa);
             }
             else if (output_type == id::contin_type) {
-                // @todo: introduce some noise optionally
+
+                // Naive users of the combo regression mode will fail
+                // to understand that the input program must be sampled
+                // in order for the fitness function to be evaluated.
+                // The default sample range 0<x<1 is probably too small
+                // for any fancy-pants input program, so try to make
+                // a reasonable guess.  Yes, this is a stupid hack, but
+                // it does avoid the problem of naive users saying
+                // "aww moses sucks" when they fail to invoke it correctly.
+                if ((0.0 == min_rand_input) && (1.0 == max_rand_input)) {
+                    max_rand_input = 2.0 * largest_const_in_tree(tr);
+                    min_rand_input = -max_rand_input;
+                    if ((nsamples <= 0) && 
+                        (default_nsamples < 2 * arity * max_rand_input)) {
+                        nsamples = 2 * arity * max_rand_input;
+                    }
+                }
+
                 if (nsamples <= 0)
                     nsamples = default_nsamples;
 
+                logger().info() << "Will sample combo program " << tr << "\n"
+                                << "\tat " << nsamples << " input values, "
+                                << "ranging between " << min_rand_input
+                                << " and " << max_rand_input <<endl;
+
+                // @todo: introduce some noise optionally
                 ITable it(tt, rng, nsamples, max_rand_input, min_rand_input);
                 OTable ot(tr, it, rng);
 
@@ -1015,6 +1130,8 @@ int moses_exec(int argc, char** argv)
 
         type_tree tt = gen_signature(id::boolean_type, arity);
         logical_bscore bscore(func, arity);
+        // int as = alphabet_size(tt, ignore_ops); // TODO can be simplified
+        // ctruth_table_bscore bscore(func, arity, as, noise, rng, nsamples);
         metapop_moses_results(rng, exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);

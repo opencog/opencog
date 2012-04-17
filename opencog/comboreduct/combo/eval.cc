@@ -23,8 +23,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "eval.h"
+#include <iostream>
 
 namespace opencog { namespace combo {
+
+using namespace std;
 
 void set_bindings(combo_tree& tr, combo_tree::iterator it,
                   const std::vector<vertex>& args, arity_t explicit_arity)
@@ -163,39 +166,36 @@ void print_binding_map(const binding_map& bmap) {
     std::cout << "}" << std::endl;
 }
 
-/// Like above but ignore the variable_unifier and uses
-/// binding_map. It also removes any type checking as it is the job of
-/// static type checker. The Evaluator is ignored till vu is
-/// completely removed
-vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
+/// Like above but ignore the variable_unifier and uses vertex_map
+/// (faster and more direct than binding_map as it is an information
+/// already computed in the ITable or CTable). It also removes any
+/// type checking as it is the job of static type checker. The
+/// Evaluator is ignored till vu is completely removed
+vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception)
 {
-    // print_binding_map(bmap);
-    // std::cout << "EVAL: " << combo_tree(it) << std::endl;
+    // {
+    //     stringstream ss;
+    //     ss << "bmap = ";
+    //     ostreamContainer(ss, bmap);
+    //     logger().fine(ss.str());
+    // }
+    // {
+    //     stringstream ss;
+    //     ss << "eval_throws_binding: tr = " << combo_tree(it);
+    //     logger().fine(ss.str()); 
+    // }
 
     typedef combo_tree::sibling_iterator sib_it;
-    vertex& v = *it;
+    const vertex& v = *it;
 
     if (const argument* a = boost::get<argument>(&v)) {
         arity_t idx = a->idx;
         // Assumption : when idx is negative, the argument is
         // necessarily boolean, and must be negated.
-        if (idx > 0) {
-            if (const vertex* w = boost::get<const vertex>(&bmap[idx]))
-                return *w;
-            else
-                return eval_throws_binding(rng, bmap,
-                                   boost::get<combo_tree::iterator>(bmap[idx]),
-                                   pe);
-        } else {
-            if (const vertex* v = boost::get<const vertex>(&bmap[-idx]))
-                return negate_vertex(*v);
-            else
-                return negate_vertex(eval_throws_binding(rng, bmap,
-                                                         boost::get<combo_tree::iterator>(bmap[-idx]), pe));
-        }
+        return idx > 0? bmap[idx - 1] : negate_vertex(bmap[-idx - 1]);
     }
     // builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
@@ -315,17 +315,17 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
         }
     }
     // action
-    else if (is_action(*it) && pe) {
+    else if (is_action(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_action(it, combo::variable_unifier::DEFAULT_VU());
     }
     // perception
-    else if (is_perception(*it) && pe) {
+    else if (is_perception(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_percept(it, combo::variable_unifier::DEFAULT_VU());
     }
     // procedure
-    else if (is_procedure_call(*it) && pe) {
+    else if (is_procedure_call(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
     }
@@ -335,7 +335,7 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
         return pe->eval_indefinite_object(*io, combo::variable_unifier::DEFAULT_VU());
     }
     // definite objects evaluate to themselves
-    else if (is_definite_object(*it)) {
+    else if (is_definite_object(v)) {
         return v;
     }
     // contin constant
@@ -348,13 +348,13 @@ vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
     else if (is_action_symbol(v)) {
         return v;
     } else {
-        // std::cerr << "unrecognized expression " << *it << std::endl;
-        throw EvalException(*it);
+        // std::cerr << "unrecognized expression " << v << std::endl;
+        throw EvalException(v);
         return v;
     }
 }
 
-vertex eval_binding(RandGen& rng, binding_map& bmap, combo_tree::iterator it)
+vertex eval_binding(RandGen& rng, const vertex_seq& bmap, combo_tree::iterator it)
     throw (ComboException, AssertionException, std::bad_exception)
 {
     try {
@@ -364,13 +364,13 @@ vertex eval_binding(RandGen& rng, binding_map& bmap, combo_tree::iterator it)
     }
 }
 
-vertex eval_binding(RandGen& rng, binding_map& bmap, const combo_tree& tr)
+vertex eval_binding(RandGen& rng, const vertex_seq& bmap, const combo_tree& tr)
     throw (StandardException, std::bad_exception)
 {
     return eval_binding(rng, bmap, tr.begin());
 }
 
-vertex eval_throws_binding(RandGen& rng, binding_map& bmap, const combo_tree& tr)
+vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap, const combo_tree& tr)
     throw (EvalException, ComboException, AssertionException, std::bad_exception)
 {
     return eval_throws_binding(rng, bmap, tr.begin());

@@ -6,7 +6,9 @@ This directory currently contains four subdirectories:
 
 -- moses -- contains the code for the "meta-optimizing semantic
    evolutionary search" algorithm, used in several places inside
-   opencog.
+   opencog.  MOSES is able to perform regression, learning a combo
+   program from an input table. See the opencog wiki for more
+   information and documentation.
 
 -- feature selection -- code that makes use of moses.
 

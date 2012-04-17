@@ -77,38 +77,38 @@ class FishgramTest(TestCase):
         pass
 
     def test_make_psi_rule(self):
-        tr = tree.Tree
+        T = tree.T
         a = self.space.add
         t = types
         
-        bark =  tr('ExecutionLink',
+        bark =  T('ExecutionLink',
                     a(t.GroundedSchemaNode, name='bark'), 
-                    tr('ListLink')
+                    T('ListLink')
                 )
         
-        goal = tr('EvaluationLink',
+        goal = T('EvaluationLink',
                                 a(t.PredicateNode, name = 'EnergyDemandGoal'), 
-                                    tr('ListLink')
-                            )
+                                T('ListLink')
+                )
         
-        action = tr('AtTimeLink', 1,
-                                tr('EvaluationLink',
-                                    a(t.PredicateNode, name='actionDone'),
-                                    tr('ListLink',
-                                       bark
-                                     )
-                                )
+        action = T('AtTimeLink', 1,
+                    T('EvaluationLink',
+                        a(t.PredicateNode, name='actionDone'),
+                        T('ListLink',
+                           bark
+                         )
+                    )
+                )
+        seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
+        result =    T('AtTimeLink',
+                        2,
+                        T('EvaluationLink',
+                            a(t.PredicateNode, name='increased'),
+                            T('ListLink',
+                                goal
                             )
-        seq_and = tr('SequentialAndLink', 1, 2) # two TimeNodes
-        result = tr('AtTimeLink',
-                     2,
-                     tr('EvaluationLink',
-                                a(t.PredicateNode, name='increased'),
-                                tr('ListLink',
-                                    goal
-                                )
                         )
-                     )
+                    )
         
         premises = (action, seq_and)
         conclusion = result
@@ -126,34 +126,34 @@ class FishgramTest(TestCase):
         self.assertEquals(conclusion2, ideal_conclusion)
 
     def test_lookup_causal_patterns(self):
-        tr = tree.Tree
+        T = tree.T
         a = self.space.add
         t = types
         
-        bark =  tr('ExecutionLink',
+        bark =  T('ExecutionLink',
             a(t.GroundedSchemaNode, name='bark'), 
-            tr('ListLink')
+            T('ListLink')
         )
         
-        action = tr('AtTimeLink', 1,
-                                tr('EvaluationLink',
-                                    a(t.PredicateNode, name='actionDone'),
-                                    tr('ListLink',
-                                       bark
-                                     )
+        action = T('AtTimeLink', 1,
+                        T('EvaluationLink',
+                            a(t.PredicateNode, name='actionDone'),
+                            T('ListLink',
+                               bark
+                             )
+                        )
+                    )
+        seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
+        increase = T('AtTimeLink',
+                     2,
+                     T('EvaluationLink',
+                            a(t.PredicateNode, name='increased'),
+                            T('ListLink',
+                                T('EvaluationLink',
+                                    a(t.PredicateNode, name = 'EnergyDemandGoal'),
+                                    T('ListLink')
                                 )
                             )
-        seq_and = tr('SequentialAndLink', 1, 2) # two TimeNodes
-        increase = tr('AtTimeLink',
-                     2,
-                     tr('EvaluationLink',
-                                a(t.PredicateNode, name='increased'),
-                                tr('ListLink',
-                                    tr('EvaluationLink',
-                                        a(t.PredicateNode, name = 'EnergyDemandGoal'),
-                                        tr('ListLink')
-                                    )
-                                )
                         )
                      )
         

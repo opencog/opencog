@@ -4,7 +4,7 @@
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
  *
- * Written by Moshe Looks
+ * Written by Moshe Looks, Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -305,7 +305,13 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  *
  * If the CTable output type is contin instead of boolean then the hit
  * count is replaced by the sum of the outputs (or minus that sum if
- * positive == false)
+ * this->positive == false)
+ *
+ * If worst_norm is true then the percision is divided by the absolute
+ * average of the negative lower (resp. positive upper if
+ * this->positive is false) decile or less. If there is no negative
+ * (resp. positive if this->positive is false) values then it is not
+ * normalized.
  */
 struct precision_bscore : public bscore_base
 {
@@ -313,14 +319,15 @@ struct precision_bscore : public bscore_base
                      float alphabet_size, float p,
                      float min_activation, float max_activation,
                      float penalty,
-                     RandGen& _rng, bool positive = true);
+                     RandGen& _rng, bool positive = true,
+                     bool worst_norm = false);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
     behavioral_score best_possible_bscore() const;
-    
+
     score_t min_improv() const;
 
     CTable ctable;
@@ -328,12 +335,11 @@ struct precision_bscore : public bscore_base
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     score_t min_activation, max_activation;
-    score_t max_denorm_precision; // uppper bound of the maximum
-                                  // denormalized precision for that
-                                  // CTable
+    score_t max_precision; // uppper bound of the maximum denormalized
+                           // precision for that CTable
     score_t penalty;
     RandGen& rng;
-    bool positive;
+    bool positive, worst_norm;
 
 private:
     score_t get_activation_penalty(score_t activation) const;
@@ -341,7 +347,7 @@ private:
     // associated to an input vector
     std::function<score_t(const CTable::counter_t&)> sum_outputs;
 };
-        
+
 /**
  * Fitness function based on discretization of the output. If the
  * classes match the bscore element is 0, or -1 otherwise. If
@@ -405,7 +411,7 @@ protected:
  * Behavioral scoring function minimizing residual errors.
  *
  * The first elements of the bscore correspond to the minus squared
- * errors. The last element is optional and corresponds to an program
+ * errors. The last element is optional and corresponds to a program
  * size penalty.
  *
  * The math justifying the program size penalty equations is based on
@@ -413,28 +419,35 @@ protected:
  * http://groups.google.com/group/opencog-news/browse_thread/thread/b7704419e082c6f1
  *
  * Here's a summary:
+ * Let M == model (the combo program being learned)
+ * Let D == data (the table of values being modelled)
+ * Let P(..) == probability
+ * Let dP(..) == probability density
  *
  * According to Bayes
- * dP(M|D) = dP(D|M) * P(M) / P(D)
  *
- * Now let's consider the log likelihood of M knowing D, since D is
+ *    dP(M|D) = dP(D|M) * P(M) / P(D)
+ *
+ * Now let's consider the log likelihood of M knowing D.  Since D is
  * constant we can ignore P(D), so:
- * LL(M) = log(dP(D|M)) + log(P(M))
+ *
+ *    LL(M) = log(dP(D|M)) + log(P(M))
  * 
  * Assume the output of M on input x has a Guassian noise of mean M(x)
  * and variance v, so dP(D|M) (the density probability)
- * dP(D|M) = Prod_{x\in D} (2*Pi*v)^(-1/2) exp(-(M(x)-D(x))^2/(2*v))
+ *
+ *   dP(D|M) = Prod_{x\in D} (2*Pi*v)^(-1/2) exp(-(M(x)-D(x))^2/(2*v))
  *
  * Assume
- * P(M) = |A|^-|M|
+ *    P(M) = |A|^-|M|
  * where |A| is the alphabet size.
  *
  * After simplification we can get the following log-likelihood of dP(M|D)
- * -|M|*log(|A|)*2*v - Sum_{x\in D} (M(x)-D(x))^2
+ *    -|M|*log(|A|)*2*v - Sum_{x\in D} (M(x)-D(x))^2
  *
  * Each datum corresponds to a feature of the bscore.
  *
- * |M|*log(|A|)*2*v corresponds to an additional feature when v > 0
+ *    |M|*log(|A|)*2*v corresponds to an additional feature when v > 0
  */
 struct contin_bscore : public bscore_base
 {
@@ -518,6 +531,14 @@ private:
  */
 struct ctruth_table_bscore : public bscore_base
 {
+    template<typename Func>
+    ctruth_table_bscore(const Func& func, arity_t arity,
+                        float alphabet_size, float p,
+                        RandGen& _rng, int nsamples = -1)
+        : ctable(func, arity, _rng, nsamples), rng(_rng)
+    {
+        set_complexity_coef(alphabet_size, p);
+    }
     ctruth_table_bscore(const CTable& _ctt,
                         float alphabet_size, float p, RandGen& _rng);
 
@@ -528,20 +549,14 @@ struct ctruth_table_bscore : public bscore_base
     behavioral_score best_possible_bscore() const;
 
     score_t min_improv() const;
+
+private:
+    void set_complexity_coef(float alphabet_size, float p);
     
-    CTable ctt;
+    CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
     RandGen& rng;
-
-private:
-    // function to apply at each [compressed] row of the table, the
-    // vertex being the output of the candidate, the
-    // CTable::mapped_type being the distribution of outputs of a
-    // given row.
-    std::function<score_t(const vertex&, const CTable::counter_t&)> func;
-    // as above but for computing the best possible bscore
-    std::function<score_t(const CTable::counter_t&)> best_func;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured

@@ -68,7 +68,7 @@ public:
     }
     void test_un_3_pa_multi_thread() {
         cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-r3", "-Hpa", "-k3", "-aun", "-m500000", "-j4"});
+        moses_test_score({"-r3", "-Hpa", "-k3", "-aun", "-m500000", "-j4", "-c3000"});
     }
 
     void test_it() {
@@ -87,6 +87,15 @@ public:
         moses_test_score({"-Hsr", "-k3", "-m100000", "-L1"});
     }
     
+    void test_cp_simple() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+
+        // Sniff test, make sure -Hcp is at least minimally working.
+        string tr_str("and($1 $2)");
+        string cp_opt("-y");
+        moses_test_combo({"-Hcp", cp_opt + tr_str}, {tr_str});
+    }
+
     void test_cp() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         string tr_str("or(and($2 !$3) $1 !$4 $5)");
@@ -101,6 +110,18 @@ public:
         moses_test_combo({"-Hcp", cp_opt + tr_str, "-E3"}, {tr_str});
     }
     
+    void test_cp_contin() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+
+        // This one is challenging because if min, max_rand_input aren't
+        // set correctly, then the scoring table will be on too small a
+        // range, and moses will fail to find a solution.
+        string tr_str("+(6 *(6 $1))");
+        string cp_opt("-y");
+        moses_test_combo({"-Hcp", cp_opt + tr_str, "-nexp"}, 
+                         {tr_str, "*(6 +(1 $1))"});
+    }
+
     void test_kl() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         string tr1_str("or(and(!$1 $2) and($1 !$2))");

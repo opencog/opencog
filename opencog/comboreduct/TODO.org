@@ -1,5 +1,6 @@
 * ComboReduct
 ** Code Improvements
+- [ ] try to replace id::logical_true and id::logical_false by C++ boolean
 - [ ] it seems the operator== in vertex.h are not passing by reference
   and copy instead maybe this isn't optimal
 - [ ] add a dummy action/perception vocabulary to not use

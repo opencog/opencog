@@ -1,8 +1,7 @@
-from opencog.atomspace import AtomSpace, Atom, get_type, types
-
-#import rpyc_connection
-#_as = rpyc_connection.conn.modules['opencog.atomspace']
-#AtomSpace, types, Atom, get_type, is_a = _as.AtomSpace, _as.types, _as.Atom, _as.get_type, _as.is_a
+try:
+    from opencog.atomspace import AtomSpace, Atom, get_type, types
+except ImportError:
+    from atomspace_remote import AtomSpace, Atom, get_type, types
 
 from copy import copy, deepcopy
 from functools import *
@@ -10,86 +9,51 @@ import sys
 from itertools import permutations
 from util import *
 
-#class FakeHandle:
-#    '''A simple class to imitate Handle for use with FakeAtom.'''
-#    def __init__(self, id):
-#        self.id = id
-#    
-#    def value(self):
-#        return self.id
-
 from collections import namedtuple
-class FakeAtom:
-    '''A simple pure Python class that can emulate the Cython Atom class. It supports pickling
-    and is safe to use for Python multiprocessing. It is also compatible with PyPy.'''
-    def __init__(self, t,  type_name, name, id, tv):
-        self.t = t
-        self.type_name = type_name
-        self.name = name
-#        self._handle = FakeHandle(id)
-        self._handle_value = id
-        TruthValue = namedtuple('TruthValue', 'count')
-        self.tv = tv #TruthValue(count=1)
-    
-    def __str__(self):
-        return 'fake%s%s' % (self.type_name,  self.name)
-
-    def __eq__(self, other):
-        if type(self) != type(other):
-            return False
-        return self._handle_value == other._handle_value
-
-    def __hash__(self):
-        return hash(self._handle_value)
-
-#    def h(self):
-#        return self._handle
-
-    def is_a(self, _type):
-#        assert _type == types.Link
-        return is_a (self.t, _type)
-
-def fake_from_real_Atom(atom):
-    return FakeAtom(atom.t, atom.type_name, atom.name, atom.h.value(), atom.tv)
-
-def tree_with_fake_atoms(tr):
-    #if isinstance(tr.op, Atom):
-    if not isinstance(tr.op, Tree) and not isinstance(tr.op, str) and not isinstance(tr.op, int):
-        return Tree(fake_from_real_Atom(tr.op), [])
-    elif tr.is_leaf():
-        return tr
-    else:
-        return Tree(tr.op, map(tree_with_fake_atoms, tr.args))
 
 def coerce_tree(x):
     assert type(x) != type(None)
     if isinstance(x, Tree):
         return x
     else:
-        return Tree(x)
+        return T(x)
+
+def T(op, *args):
+    # Transparently allow using passing a list or using it in the more streamlined way
+    # (better for constructing trees by hand). It will also wrap arguments of any kind
+    # into Trees (BUT NOT RECURSIVELY!). Just using the Tree constructor directly would
+    # be more appropriate if you need efficiency or want to use the Trees to represent
+    # something beside Atoms.
+    
+    if len(args) and isinstance(args[0], list):
+        args = args[0]
+    # Transparently record Links as strings rather than Handles
+    assert type(op) != type(None)
+    if len(args):
+        if isinstance(op, Atom):
+            assert not op.is_a(types.Link)
+            final_op = op.type_name
+        else:
+            final_op = op
+        final_args = [coerce_tree(x) for x in args]
+    else:
+        final_op = op
+        final_args = []
+
+    return Tree(final_op, final_args)
+
+def Var(op):
+    return Tree(op)
 
 class Tree (object):
-#    cdef public object op
-#    cdef public list args
-#    cdef tuple _tuple
-    
-    def __init__(self, op, *args):
-        # Transparently allow using passing a list or using it in the more streamlined way
-        # (better for constructing trees by hand)
-        if len(args) and isinstance(args[0], list):
-            args = args[0]
+    def __init__(self, op, args = None):
         # Transparently record Links as strings rather than Handles
         assert type(op) != type(None)
-        if len(args):
-            if isinstance(op, Atom):
-                assert not op.is_a(types.Link)
-                self.op = op.type_name
-            else:
-                self.op = op
-            self.args = [coerce_tree(x) for x in args]
-        else:
-            self.op = op
+        self.op = op
+        if args is None:
             self.args = []
+        else:
+            self.args = args
         
         self._tuple = None
 
@@ -98,7 +62,7 @@ class Tree (object):
             if isinstance(self.op, Atom):
                 return self.op.name+':'+self.op.type_name
             else:
-                return 'Tree:'+str(self.op)
+                return '$'+str(self.op)
         else:
             return '(' + str(self.op) + ' '+ ' '.join(map(str, self.args)) + ')'
 
@@ -130,10 +94,15 @@ class Tree (object):
 
     def is_variable(self):
         "A variable is an int starting from 0"
-        return isinstance(self.op, int)
+        #return isinstance(self.op, int)
+        try:
+            self._is_variable
+        except:            
+            self._is_variable = isinstance(self.op, int)
+        return self._is_variable
     
     def get_type(self):
-        if isinstance(self.op, int):
+        if self.is_variable():
             return types.Atom
         elif isinstance(self.op, Atom):
             return self.op.t
@@ -157,7 +126,7 @@ class Tree (object):
             return self._tuple
         else:
             # Atom doesn't support comparing to different types in the Python-standard way.
-            if isinstance(self.op, Atom) and not isinstance(self.op, FakeAtom):
+            if isinstance(self.op, Atom): # and not isinstance(self.op, FakeAtom):
                 #assert type(self.op.h) != type(None)
                 self._tuple = self.op.h.value()
                 return self._tuple
@@ -180,6 +149,32 @@ class Tree (object):
         # t=Tree('EvaluationLink',Tree(1),Tree('ListLink',Tree('cat'),Tree('dog')))
         return [self]+concat_lists(map(Tree.flatten, self.args))
 
+class DAG(Tree):
+    def __init__(self,op,args):
+        Tree.__init__(self,op,args)
+        self.parents = []
+        
+        for a in args:
+            self.append(a)
+    
+    def append(self,child):
+        if self not in child.parents:
+            child.parents.append(self)
+            self.args.append(child)
+    
+    def __eq__(self,other):
+        if type(self) != type(other):
+            return False
+        return self.op == other.op
+
+    def __hash__(self):
+        return hash(self.op)
+    
+    def any_path_up_contains(self,targets):
+        if self in targets:
+            return True
+        return any(p.any_path_up_contains(targets) for p in self.parents)
+        
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():
         if atom.t in [types.VariableNode, types.FWVariableNode]:
@@ -304,29 +299,37 @@ def unify(x, y, s):
     """
     #print "unify %s %s" % (str(x), str(y))
 
-    assert not type(x) == tuple and not type(y) == tuple
+    tx = type(x)
+    ty = type(y)
+
+    assert not tx == tuple and not ty == tuple
 
     if s == None:
         return None
     # Not compatible with RPyC as it will make one of them 'netref t'
-#    elif type(x) != type(y):
-#        return None
-    elif x == y:
-        return s
-    elif isinstance(x, Tree) and x.is_variable():
+    elif tx != ty:
+        return None
+    elif tx == Tree and x.is_variable():
         return unify_var(x, y, s)
-    elif isinstance(y, Tree) and y.is_variable():
+    elif ty == Tree and y.is_variable():
         return unify_var(y, x, s)
         
-    elif isinstance(x, Tree) and isinstance(y, Tree):
+    elif tx == Tree and ty == Tree:
         s2 = unify(x.op, y.op, s)
         return unify(x.args,  y.args, s2)
 
     # Recursion to handle arguments.
-    elif isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
-        # unify all the arguments (works with any number of arguments, including 0)
-        s2 = unify(x[0], y[0], s)
-        return unify(x[1:], y[1:], s2)
+    elif tx == list and ty == list:
+        if len(x) == len(y):
+            if len(x) == 0:
+                return s
+            else:
+                # unify all the arguments
+                s2 = unify(x[0], y[0], s)
+                return unify(x[1:], y[1:], s2)
+
+    elif tx == ty and x == y:
+        return s
         
     else:
         return None
@@ -399,7 +402,8 @@ def subst_from_binding(binding):
     return dict([ (Tree(i), obj) for i, obj in enumerate(binding)])
 
 def binding_from_subst(subst, atomspace):
-    return [ atom_from_tree(obj_tree, atomspace) for (var, obj_tree) in sorted(subst.items()) ]
+    #return [ atom_from_tree(obj_tree, atomspace) for (var, obj_tree) in sorted(subst.items()) ]
+    return [ obj_tree for (var, obj_tree) in sorted(subst.items()) ]
 
 def bind_conj(conj, b):
     return subst_conjunction(subst_from_binding(b), conj)
@@ -455,6 +459,9 @@ def isomorphic_conjunctions(xs, ys):
 def isomorphic_conjunctions_ordered(xs, ys):
     xs, ys = canonical_trees(xs), canonical_trees(ys)
     return xs == ys
+
+#def permutated_canonical_tuples(trs):
+#    return [ tuple(canonical_trees(perm)) for perm in permutations(trs) ]
 
 def canonical_trees(trs, dic = {}):
     '''Returns the canonical version of a list of trees, i.e. with the variables renamed (consistently) from 0,1,2.
