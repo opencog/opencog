@@ -35,6 +35,8 @@ feature-selection \- blah blah blah
 .B feature-selection
 .RB [ \-a
 .IR algo ]
+.RB [ \-C
+.IR num_features ]
 .RB [ \-F
 .IR logfile ]
 .RB [ \-f
@@ -50,6 +52,8 @@ feature-selection \- blah blah blah
 .IR output_file ]
 .RB [ \-r
 .IR random_seed ]
+.RB [ \-T
+.IR intensity ]
 .RB [ \-u
 .IR target_feature ]
 .SH DESCRIPTION
@@ -66,6 +70,7 @@ feature-selection \- blah blah blah
 .\" ============================================================
 .SH OVERVIEW
 \fBfeature-selection\fP implements blah
+
 
 .PP
 .\" ============================================================
@@ -135,10 +140,44 @@ CSV/DSV file formats.
 .\" ============================================================
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
+The most important of these, for controlling behaviour, are the
+\fB\-a\fR, \fB\-f\fR and \fB\-r\fR flags.
+
+.TP
+.BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
+Select the algorithm to use for feature selection.
+Available algorithms include:
+.TS
+tab (@);
+l lx.
+\fBhc\fR@T{
+Hillclimbing. 
+T}
+\fBinc\fR@T{
+Incremental.
+
+Must specify either the \fB\-C\fP or the \fB\-T\fP flag, as otherwise,
+all features will be selected.
+T}
+.TE
+.TP
+.BI \-C\  num_features \fR,\ \fB\-\-inc\-target\-size= num_features
+Attempt to select \fInum_features\fR out of the total available set.
+This option is ignored unless the chosen algorithm is \fBinc\fP.
 
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
+
+.TP
+.BI \-T\  pressure \fR,\ \fB\-\-inc\-intenisty= pressure
+Apply a selection pressure to the features being choosen. This should
+specify a floating-point value between zero and one. A value of zero
+means that probably all features will be selected; a value of one means
+that probably no features will be selected.
+
+This option is ignored unless the chosen algorithm is \fBinc\fP.
+
 .PP
 .\" ============================================================
 .SH TODO

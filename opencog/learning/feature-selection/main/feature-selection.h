@@ -228,8 +228,9 @@ void write_results(const Table& table,
 }
 
 void incremental_feature_selection(Table& table,
-                                   const feature_selection_parameters& fs_params) {
-    if(fs_params.inc_intensity > 0 || fs_params.inc_target_size > 0) {
+                                   const feature_selection_parameters& fs_params)
+{
+    if (fs_params.inc_intensity > 0 || fs_params.inc_target_size > 0) {
         CTable ctable = table.compress();
         typedef MutualInformation<std::set<arity_t> > FeatureScorer;
         FeatureScorer fsc(ctable);
@@ -244,7 +245,7 @@ void incremental_feature_selection(Table& table,
                                                   0, 1,
                                                   fs_params.inc_target_size_epsilon)
             : cached_incremental_selection(features, fsc,
-                                           fs_params.inc_intensity,
+                                           ncrmfs_params.inc_intensity,
                                            fs_params.inc_interaction_terms,
                                            fs_params.inc_rintensity);
         if(selected_features.empty()) {
@@ -255,14 +256,15 @@ void incremental_feature_selection(Table& table,
             write_results(ftable, fs_params);
         }
     } else {
-        // nothing happened, print the initial table
+        // Nothing happened, print the initial table.
         write_results(table, fs_params);
     }
 }
 
 void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params,
-                       RandGen& rng) {
+                       RandGen& rng)
+{
     // setting moses optimization parameters
     optim_parameters op_param(20, fs_params.max_score, 4, 0.0);
     if(fs_params.algorithm == un) {
@@ -279,8 +281,9 @@ void feature_selection(Table& table,
     } else if(fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);
     } else {
-        std::cerr << "Algorithm '" << fs_params.algorithm
-                  << "' is unknown, please consult the help for the list of algorithms." << std::endl;
+        std::cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
+                  << "' is unknown, please consult the help for the "
+                     "list of algorithms." << std::endl;
         exit(1);
     }
 }
