@@ -25,18 +25,33 @@
 feature-selection \- blah blah blah
 .SH SYNOPSIS
 .\" The help & version command line
-.B moses
+.B feature-selection
 .RB \-h | \--help
 .br
-.B moses
+.B feature-selection
 .RB \--version
 .br
 .\" The general command line
-.B moses
-.RB [ \-A
-.IR max_score ]
+.B feature-selection
 .RB [ \-a
 .IR algo ]
+.RB [ \-F
+.IR logfile ]
+.RB [ \-f
+.IR feature ]
+.RB [ \-i
+.IR filename ]
+.RB [ \-j
+.IR jobs ]
+.RB [ \-L ]
+.RB [ \-l
+.IR loglevel ]
+.RB [ \-o
+.IR output_file ]
+.RB [ \-r
+.IR random_seed ]
+.RB [ \-u
+.IR target_feature ]
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
@@ -56,18 +71,85 @@ feature-selection \- blah blah blah
 .\" ============================================================
 .SH OPTIONS
 .PP
-Options blah blah fall into four classes: those for specifying inputs,
-controlling operation, printing output, and running
-\fBmoses\fP in demo mode.
+Options fall into three classes: options for controlling input and
+output, options for controlling the algorithm behaviour, and general
+options.
 
 .SS "General options"
 .TP
-.BI \-e\  exemplar
-Specify an initial \fIexemplar\fR to use. Each exemplar is written in
-combo. May be specified multiple times.
-.TP
 .B \-h, \-\-help
-Print help.
+Print command options and exit.
+.TP
+.BI \-j\  num \fR,\ \fB\-\-jobs= num
+Allocate \fInum\fR jobs for feature selection.
+Jobs can be executed on a remote machine as well,
+in such case the notation \fB\-j\fR \fIN:REMOTE_HOST\fR is used,
+where \fIN\fR is the number of jobs on the machine \fIREMOTE_HOST\fR.
+For instance, one can enter the options
+\fB\-j\fR4 \fB\-j\fR16:my_server.org
+(or \fB\-j\fR16:user@my_server.org if one wishes to
+run the remote jobs under a different user name),
+meaning that 4 jobs are allocated on the local machine
+and 16 jobs are allocated on my_server.org.
+The assumption is that feature-selection must be on the remote
+machine and is located in a directory included in the
+\fBPATH\fR environment variable. Beware that a lot of log
+files are going to be generated when using this option on
+the remote machines.
+.TP
+.B -\-version
+Print program version, and exit.
+
+.PP
+.\" ============================================================
+.SS "Input and output control options"
+These options control how the input and output is managed by the
+program.
+
+.TP
+.BI \-F\  filename \fR,\ \fB\-\-log\-file= filename
+Write debug log traces \fIfilename\fR. If not specified, traces
+are written to \fBfeature-selection.log\fR.
+.TP
+.BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
+The \fIfilename\fR specifies the input data file. The input table must
+be in 'delimiter\-separated value' (DSV) format.  Valid seperators
+are comma (CSV, or comma-separated values), blanks and tabs
+(whitespace). Columns correspond to features; there is one sample per
+(non-blank) row. Comment characters are hash, bang and semicolon (#!;)
+lines starting with a comment are ignored.
+The \fB\-i\fR flag may be specified multiple times, to indicate multiple
+input files. All files must have the same number of columns.
+.TP
+.BI \-L\fR,\ \fB\-\-log\-file\-dep\-opt
+Write debug log traces to a filename constructed from the passed
+option flags and values. The filename will be truncated to a maximum
+of 255 characters.
+.TP
+.BI \-l\  loglevel \fR,\ \fB\-\-log\-level= loglevel
+Specify the level of detail for debug loging. Possible
+values for \fIloglevel\fR are \fBNONE\fR, \fBERROR\fR, \fBWARN\fR,
+\fBINFO\fR, \fBDEBUG\fR, and \fBFINE\fR. Case does not matter.
+Caution: excessive logging detail can lead to program slowdown.
+.TP
+.BI \-o\  filename \fR,\ \fB\-\-output\-file= filename
+Write results to \fIfilename\fR. If not specified, results are written
+to \fBstdout\fR.
+.TP
+.BI \-u\  label \fR,\ \fB\-\-target\-feature= label
+The \fIlabel\fR is used as the target feature to fit.  If none is
+specified, then the first column is used.  The very first row of the
+input file, if it contains non-numeric, non-boolean values, is
+interpreted as column labels, as is the common practice for
+CSV/DSV file formats.
+.PP
+.\" ============================================================
+.SS "Algorithm control options"
+These options provide overall control over the algorithm execution.
+
+.TP
+.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
+Use \fIseed\fR as the seed value for the pseudo-random number generator.
 .PP
 .\" ============================================================
 .SH TODO
