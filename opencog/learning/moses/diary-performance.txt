@@ -1470,7 +1470,7 @@ problem.
 "rech" is 6666; expect this to be comparable to previous runs.  In fact,
 its identical to "zippo" above. No regression, no mystery, good to go.
 
-"rchk" is 6728; some mnor changes in termination criteria, should not
+"rchk" is r6726.1.2; some minor changes in termination criteria, should not
 have a big effect...  Hmm, numbers seems to be identical to "rech"+20%.
 Which means the termination was not affected (random numbers are drawn
 in the same order), but something added to the execution time ... !?
