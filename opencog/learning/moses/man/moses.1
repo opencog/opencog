@@ -248,7 +248,8 @@ combo. May be specified multiple times.
 Print command options, and exit.
 .TP
 .BI \-j\  num \fR,\ \fB\-\-jobs= num
-Allocate \fInum\fR jobs for deme optimization.
+Allocate \fInum\fR threads for deme optimization.  Using multiple
+threads will speed the search on a multi-core machine.
 Jobs can be executed on a remote machine as well,
 in such case the notation \fB\-j\fR \fIN:REMOTE_HOST\fR is used,
 where \fIN\fR is the number of jobs on the machine \fIREMOTE_HOST\fR.

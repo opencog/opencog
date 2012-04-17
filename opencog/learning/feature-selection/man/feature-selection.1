@@ -81,21 +81,10 @@ options.
 Print command options and exit.
 .TP
 .BI \-j\  num \fR,\ \fB\-\-jobs= num
-Allocate \fInum\fR jobs for feature selection.
-Jobs can be executed on a remote machine as well,
-in such case the notation \fB\-j\fR \fIN:REMOTE_HOST\fR is used,
-where \fIN\fR is the number of jobs on the machine \fIREMOTE_HOST\fR.
-For instance, one can enter the options
-\fB\-j\fR4 \fB\-j\fR16:my_server.org
-(or \fB\-j\fR16:user@my_server.org if one wishes to
-run the remote jobs under a different user name),
-meaning that 4 jobs are allocated on the local machine
-and 16 jobs are allocated on my_server.org.
-The assumption is that feature-selection must be on the remote
-machine and is located in a directory included in the
-\fBPATH\fR environment variable. Beware that a lot of log
-files are going to be generated when using this option on
-the remote machines.
+Allocate \fInum\fR threads for feature selection.  Using multiple
+threads on multi-core processors will speed the feature selection
+search.
+
 .TP
 .B -\-version
 Print program version, and exit.
@@ -158,7 +147,7 @@ write this man page
 .SH SEE ALSO
 .br
 More information is available at
-.B http://wiki.opencog.org/w/MOSES
+.B http://wiki.opencog.org/w/XXX???XXX
 .SH AUTHORS
 .nh
 \fBfeature-selection\fP was written by Nil Geisweiller.
