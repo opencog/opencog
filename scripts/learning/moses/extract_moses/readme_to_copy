@@ -1,0 +1,19 @@
+DESCRIPTION
+-----------
+
+Standalone version of MOSES under Apache license.
+
+INSTALLATION
+------------
+
+To compile, from the root directory of MOSES:
+
+$ mkdir bin
+$ cd bin
+$ cmake ..
+$ make
+
+Install (may required root privilege)
+
+# make install
+# ldconfig

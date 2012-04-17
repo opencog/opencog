@@ -1,0 +1,41 @@
+DESCRIPTION
+-----------
+
+Scripts to extract MOSES out of OpenCog project, and replace GPL
+license by Apache (MOSES has double licensing).
+
+Extraction
+----------
+
+To extract MOSES from OpenCog use the script OC2MOSES.sh. The usage is
+
+./OC2MOSES.sh MOSES_DIR
+
+OC_PATH must be the path of the OpenCog project. MOSES_DIR is the name
+of the directory to create and put the MOSES project under. For
+example
+
+$ ./OC2MOSES.sh ~/OpenCog/opencog/ moses-3.0.9
+
+It will create a directory moses-3.0.9 with a standalone version of
+MOSES under.
+
+Installation
+------------
+
+Enter that directory for the next steps to compile and install MOSES
+are
+
+$ cd moses2.3.2
+
+To compile, from the root directory of MOSES:
+
+$ mkdir bin
+$ cd bin
+$ cmake ..
+$ make
+
+Install (may required root privilege)
+
+# make install
+# ldconfig
