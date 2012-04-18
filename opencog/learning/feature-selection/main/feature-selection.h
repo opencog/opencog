@@ -245,7 +245,7 @@ void incremental_feature_selection(Table& table,
                                                   0, 1,
                                                   fs_params.inc_target_size_epsilon)
             : cached_incremental_selection(features, fsc,
-                                           ncrmfs_params.inc_intensity,
+                                           fs_params.inc_intensity,
                                            fs_params.inc_interaction_terms,
                                            fs_params.inc_rintensity);
         if(selected_features.empty()) {
