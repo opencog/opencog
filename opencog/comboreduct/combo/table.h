@@ -353,7 +353,12 @@ double OTEntropy(const OTable& ot);
  * provided by the output table of type OT, compute the mutual
  * information
  *
- * MI(X1, ..., Xn; Y)
+ *   MI(Y; X1, ..., Xn)
+ * as
+ *   MI(Y;X1, ..., Xn) = H(X1, ..., Xn) + H(Y) - H(X1, ..., Xn, Y)
+ *
+ * where
+ *   H(...) are the marginal entropies.
  *
  * @note only works for discrete data set.
  */
