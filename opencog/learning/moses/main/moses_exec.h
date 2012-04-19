@@ -159,16 +159,16 @@ struct metapop_moses_results_parameters
  */
 template<typename Score, typename BScore, typename Optimization>
 void metapop_moses_results_a(RandGen& rng,
-                           Optimization& opt,
-                           const std::vector<combo_tree>& bases,
-                           const opencog::combo::type_tree& tt,
-                           const reduct::rule& si_ca,
-                           const reduct::rule& si_kb,
-                           const Score& sc,
-                           const BScore& bsc,
-                           const metapop_parameters& meta_params,
-                           const moses_parameters& moses_params,
-                           const metapop_moses_results_parameters& pa)
+                             Optimization& opt,
+                             const std::vector<combo_tree>& bases,
+                             const opencog::combo::type_tree& tt,
+                             const reduct::rule& si_ca,
+                             const reduct::rule& si_kb,
+                             const Score& sc,
+                             const BScore& bsc,
+                             const metapop_parameters& meta_params,
+                             const moses_parameters& moses_params,
+                             const metapop_moses_results_parameters& pa)
 {
     // instantiate metapop
     metapopulation<Score, BScore, Optimization>
@@ -221,16 +221,16 @@ void metapop_moses_results_a(RandGen& rng,
  */
 template<typename Score, typename BScore>
 void metapop_moses_results_b(RandGen& rng,
-                           const std::vector<combo_tree>& bases,
-                           const opencog::combo::type_tree& tt,
-                           const reduct::rule& si_ca,
-                           const reduct::rule& si_kb,
-                           const Score& sc,
-                           const BScore& bsc,
-                           const optim_parameters& opt_params,
-                           const metapop_parameters& meta_params,
-                           const moses_parameters& moses_params,
-                           const metapop_moses_results_parameters& pa)
+                             const std::vector<combo_tree>& bases,
+                             const opencog::combo::type_tree& tt,
+                             const reduct::rule& si_ca,
+                             const reduct::rule& si_kb,
+                             const Score& sc,
+                             const BScore& bsc,
+                             const optim_parameters& opt_params,
+                             const metapop_parameters& meta_params,
+                             const moses_parameters& moses_params,
+                             const metapop_moses_results_parameters& pa)
 {
     if (pa.opt_algo == un) { // univariate
         univariate_optimization unopt(rng, opt_params);
