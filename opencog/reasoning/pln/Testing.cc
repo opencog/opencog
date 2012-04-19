@@ -11,7 +11,8 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
-#ifdef HAVE_CYTHON
+#ifdef HAVE_CYTHON_XXX_BROKEN
+Someone forgot to check in this file into the source tree!
 #include <opencog/cython/logic_wrapper_api.h>
 #endif
 
@@ -270,7 +271,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     test::custom_duration = 0.0;
     start = clock();
 
-#ifdef HAVE_CYTHON
+#ifdef HAVE_CYTHON_XXX_BROKEN
     // Code to run the Python backward chainer.
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure(); 
