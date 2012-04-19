@@ -24,8 +24,10 @@
 #define _OPENCOG_MT19937AR_H
 
 // Once C++11 is fully supported by GCC feel free to remove anything
-// wrapped by #ifndef USE_STL_RANDOM
-#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 6)
+// wrapped by #ifndef USE_STL_RANDOM  Note that this is not yet
+// supported as of gcc 4.6.2 and that this is the current version of gcc
+// shipped on most popular distros, as of first-half 2012.
+#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7)
 #define USE_STL_RANDOM
 #endif
 
@@ -80,7 +82,7 @@
 #include <opencog/util/RandGen.h>
 
 #ifdef USE_STL_RANDOM
-#include<random>
+#include <random>
 #endif
 
 namespace opencog
