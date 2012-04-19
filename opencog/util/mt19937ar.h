@@ -1,3 +1,35 @@
+/*
+ * Modifications of original are
+ *
+ * Copyright (C) 2010-2011 OpenCog Foundation
+ * All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef _OPENCOG_MT19937AR_H
+#define _OPENCOG_MT19937AR_H
+
+// Once C++11 is fully supported by GCC feel free to remove anything
+// wrapped by #ifndef USE_STL_RANDOM
+#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 6)
+#define USE_STL_RANDOM
+#endif
+
+#ifndef USE_STL_RANDOM
 /* 
    A C-program for MT19937, with initialization improved 2002/1/26.
    Coded by Takuji Nishimura and Makoto Matsumoto.
@@ -43,11 +75,13 @@
    http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
    email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
 */
-
-#ifndef _OPENCOG_MT19937AR_H
-#define _OPENCOG_MT19937AR_H
+#endif
 
 #include <opencog/util/RandGen.h>
+
+#ifdef USE_STL_RANDOM
+#include<random>
+#endif
 
 namespace opencog
 {
@@ -56,6 +90,8 @@ class MT19937RandGen : public RandGen
 {
 
 private: 
+
+#ifndef USE_STL_RANDOM
 
     /* Period parameters */  
     static int  N;
@@ -96,11 +132,20 @@ private:
     /* generates a random number on [0,1) with 53-bit resolution*/
     double genrand_res53(void);
 
+#else
+
+    std::mt19937 randomGenerator;
+
+#endif
+
 public: 
 
     MT19937RandGen(unsigned long s);
+
+#ifndef USE_STL_RANDOM
     MT19937RandGen(unsigned long init_key[], int key_length);
     ~MT19937RandGen();
+#endif
 
     // random int between 0 and max rand number.
     int randint();
