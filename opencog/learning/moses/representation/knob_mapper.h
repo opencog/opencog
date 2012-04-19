@@ -43,6 +43,7 @@ struct knob_mapper
     typedef disc_map::value_type disc_v;
     typedef disc_map::const_iterator disc_map_cit;
     typedef disc_map::iterator disc_map_it;
+
     typedef std::multimap<field_set::contin_spec, contin_knob> contin_map;
     typedef contin_map::value_type contin_v;
     typedef contin_map::const_iterator contin_map_cit;
