@@ -51,9 +51,6 @@
 #include "../moses/scoring.h"
 #include "moses_exec_def.h"
 
-// enable a cache on bscore (takes more memory)
-#define ENABLE_BCACHE
-
 namespace opencog { namespace moses {
 
 using namespace boost::program_options;
@@ -301,29 +298,44 @@ void metapop_moses_results(RandGen& rng,
 
     if (pa.enable_cache) {
         static const unsigned initial_cache_size = 1000000;
-#ifdef ENABLE_BCACHE
-        typedef prr_cache_threaded<BScore> BScoreCache;
-        typedef adaptive_cache<BScoreCache> BScoreACache;
-        typedef bscore_based_score<BScoreACache> Score;
-        BScoreCache bscore_cache(initial_cache_size, bsc);
-        BScoreACache bscore_acache(bscore_cache);
-#define BSCORE bscore_acache
-#else
-        typedef bscore_based_score<BScore> Score;
-#define BSCORE bsc
-#endif
-        typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
-        Score score(BSCORE);
-        prr_cache_threaded<Score> score_cache(initial_cache_size, score);
-        ScoreACache score_acache(score_cache);
-        metapop_moses_results_b(rng, bases, tt, si_ca, si_kb,
-                                score_acache, BSCORE,
-                                opt_params, meta_params, moses_params, pa);
-        // log the number of cache failures
-        if (pa.only_local) { // do not print if using distributed moses
-            logger().info("Score cache hits=%u misses=%u",
-                          score_acache.get_hits(),
-                          score_acache.get_failures());
+        
+        if(meta_params.include_dominated) {
+            typedef bscore_based_score<BScore> Score;
+            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+            Score score(bsc);
+            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
+            ScoreACache score_acache(score_cache);
+            metapop_moses_results_b(rng, bases, tt, si_ca, si_kb,
+                                    score_acache, bsc,
+                                    opt_params, meta_params, moses_params, pa);
+            // log the number of cache failures
+            if (pa.only_local) { // do not print if using distributed moses
+                logger().info("Score cache hits=%u misses=%u",
+                              score_acache.get_hits(),
+                              score_acache.get_failures());
+            }
+        }
+        else {
+            // We put the cache on the bscore as well because then it
+            // is reused later (for metapopulation merging)
+            typedef prr_cache_threaded<BScore> BScoreCache;
+            typedef adaptive_cache<BScoreCache> BScoreACache;
+            typedef bscore_based_score<BScoreACache> Score;
+            BScoreCache bscore_cache(initial_cache_size, bsc);
+            BScoreACache bscore_acache(bscore_cache);
+            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+            Score score(bscore_acache);
+            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
+            ScoreACache score_acache(score_cache);
+            metapop_moses_results_b(rng, bases, tt, si_ca, si_kb,
+                                    score_acache, bscore_acache,
+                                    opt_params, meta_params, moses_params, pa);
+            // log the number of cache failures
+            if (pa.only_local) { // do not print if using distributed moses
+                logger().info("Score cache hits=%u misses=%u",
+                              score_acache.get_hits(),
+                              score_acache.get_failures());
+            }
         }
     }
     else {
