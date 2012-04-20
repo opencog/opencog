@@ -141,25 +141,18 @@ class Chainer:
 
             start = time()
             while self.bc_later and not self.results:
-#                if time() - start > 0:
-#                    print 'TIMEOUT'
-#                    break
                 children = self.bc_step()
                 self.propogate_results_loop(children)
 
                 msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
                 log.info(format_log(msg))
                 log.info(format_log('time taken', time() - start))
+                #log.info(format_log('PD:'))
+                #for pdn in self.pd:
+                #    log.info(format_log(len(pdn.args),str(pdn)))
             
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
-            #print [str(atom_from_tree(result, self.space).tv) for result in self.results]
-#            for res in self.results:
-#                bit = self.traverse_tree(res, set())
-#                self.add_depths(bit)
-#                self.add_best_conf_above(bit)
-#                
-#                self.print_tree(bit)
 
             for res in self.results:
                 print 'Inference trail:'
@@ -174,7 +167,6 @@ class Chainer:
             #return [atom_from_tree(result, self.space).h for result in self.results]
         except Exception, e:
             import traceback, pdb
-
             #pdb.set_trace()
             print traceback.format_exc(10)
             # Start the post-mortem debugger
@@ -211,44 +203,19 @@ class Chainer:
                 # and not the goals (an empty list!)
                 ret.append(a.head)                
                 self.add_queries(a)
-                #ret += self.add_queries(a)
                 #viz
                 self.viz.declareResult(a.head)
             else:
                 added_queries = self.add_queries(a)
                 ret += added_queries
-#            added_queries = self.add_queries(a)
-#            ret += added_queries
 
         return ret
 
     def propogate_results_step(self):
-        #print 'fcq', map(str, self.fc_later)
         next_premise = self.fc_later.pop_last() # Depth-first search
-        #self.fc_before.append(next_premise)
         #next_premise = self.get_fittest() # Best-first search
 
         log.info(format_log('-FCQ', next_premise))
-#        import pdb; pdb.set_trace()
-
-#        # Handle the case of actual Atoms, albeit in a somewhat messy way.
-#        # NOTE: The backward chainer won't find rules with actual Atoms, because
-#        # it's only interested in adding the GOALS of a rule into the queue.
-#        # In addition, it will repeat results that were found via actual rules.
-#        # It should be possible to do this via 1-step recursion, or something.
-#        # This would also require the exact target!
-#        if self.get_tvs(next_premise):
-#            if next_premise.unifies(self.target):
-#                self.results.append(next_premise)
-#                #viz
-#                self.viz.declareResult(next_premise)
-#
-#            if not self.contains_isomorphic_tree(next_premise, self.fc_before_idx) and not self.contains_isomorphic_tree(next_premise, self.fc_later_idx):
-#                print (format_log('lookup:', next_premise))
-#                stdout.flush()
-#                self.fc_later.append(app.head)
-#            
-#            self.add_queries(app)
 
         # WARNING: the specialization process won't spec based on premises that only exist as axioms, or...
 
@@ -261,31 +228,10 @@ class Chainer:
                               not any(r2.isomorphic(r) for r2 in potential_results)]
         #print 'potential_results', potential_results
 
-#        # Notice if this is actually one of the original axioms. This needs to be done separately. Because
-#        # get_tv requires the app to already have found the exact atom, with no variables where there shouldn't be.
-#        # So this system allows discovering more specific atoms, which then leads to specializing one or more apps.
-#        direct_rules = [r for r in self.find_rule_applications(next_premise) if r.tv and not r.goals]
-#        for atom_rule in direct_rules:
-#            if atom_rule.head.isomorphic(next_premise):
-#                print (format_log('lookup:', atom_rule.head))
-#                potential_results.append(atom_rule)
-#            else:
-#                print (format_log('spec:', atom_rule.head))
-#                specialized.append(atom_rule)
 
         # If B->C => C was checked by BC before, it will be in the bc_before set. But it now has a TV, so it should
         # be used again!
 
-        #print [r for r in potential_results+specialized if str(r.head) == '(SubsetLink AlQaeda:ConceptNode Abu:ConceptNode)']
-
-        # If more specific values for the (variables in the) goals have been found, then make a new
-        # app, which is more specific. In particular, those variables will have been filled in within any other
-        # goals too.
-        #for app in specialized:
-            # If new values for the variables have just been found, we want to use the query mechanism,
-            # to find any other goals. They may also be more specific now (if they used the same variables),
-            # so we want to find them again before propogating results any further.
-            #self.add_queries(app)
         # Ignore invalid rule applications (i.e. if add_queries returns nothing)
         specialized = [app for app in specialized if self.add_queries(app)]
         #print 'specialized', specialized
@@ -323,13 +269,6 @@ class Chainer:
                 log.info(format_log('+FCQ', app.head, app.name))
                 stdout.flush()
 
-# Some hints about how to make an index that stores the canonical trees.
-#    def index_fill(self, idx, goals):
-#        for g in goals:
-#            canon = tuple(canonical_trees((g, )))
-#            idx.add(canon)
-#        queue = goals
-
     def contains_isomorphic_tree(self, tr, idx):        
         #return any(expr.isomorphic(tr) for expr in idx)
         canonical = tr.canonical()
@@ -339,26 +278,8 @@ class Chainer:
         canonical = tr.canonical()
         idx.append(canonical)
 
-#    # NOTE: assumes that you want to add the item into the corresponding index
-#    def contains_isomorphic_tree(self, tr, idx):
-#        start = time()
-#        #containing = any(tr.isomorphic(existing) for existing in collection)
-#        canon = tuple(canonical_trees((tr, )))
-#        #idx = self.indexes[collection]
-#        if canon in idx:
-#            #print 'contains_isomorphic_tree', time() - start
-#            return True
-#        else:
-#            idx.add(canon)
-#            #print 'contains_isomorphic_tree', time() - start
-#            return False
-#        #print 'contains_isomorphic_tree', time() - start
-#        #return containing
 
     def _app_is_stupid(self, goal):
-        #nested_implication = standardize_apart(T('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
-        # Accidentally unifies with (ImplicationLink $blah some_target) !
-        #nested_implication2 = T('ImplicationLink', T('ImplicationLink', 1, 2), 3)
 
         # You should probably skip the app entirely if it has any self-implying goals
         def self_implication(goal):
@@ -392,7 +313,7 @@ class Chainer:
             return []
 
         # If the app is a cycle or already added, don't add it or any of its goals
-        (status, app_pdn) = self.add_app_to_pdn(app)
+        (status, app_pdn) = self.add_app_to_pd(app)
         if status == "CYCLE":
             #print "CYCLE", app.name, app.head, app.goals
             return []
@@ -490,7 +411,7 @@ class Chainer:
         canonical = expr.canonical()
         expr_pdn = self.expr2pdn(canonical)
         app_pdns = expr_pdn.args
-        print 'get_tvs:', [repr(app_pdn.op) for app_pdn in app_pdns if app_pdn.tv.count > 0]
+        #print 'get_tvs:', [repr(app_pdn.op) for app_pdn in app_pdns if app_pdn.tv.count > 0]
         return [app_pdn.tv for app_pdn in app_pdns if app_pdn.tv.count > 0]
     
     def expr2pdn(self, expr):
@@ -498,6 +419,7 @@ class Chainer:
         try:
             return self.pd[pdn]
         except KeyError:
+            print 'expr2pdn adding %s for the first time' % (pdn,)
             self.pd[pdn] = pdn
             return pdn
 
@@ -506,19 +428,26 @@ class Chainer:
         a = self.app2pdn(app)
         a.tv = tv
 
-    def add_app_to_pdn(self,app):
+    def add_app_to_pd(self,app):
         head_pdn = self.expr2pdn(app.head.canonical())
 
-        # Don't allow loops        
-        goal_pdns = [self.expr2pdn(g.canonical()) for g in app.goals]
+        def canonical_app_goals(goals):
+            return map(Tree.canonical, goals)
+
+        goals_canonical = canonical_app_goals(app.goals)
+        # Don't allow loops. Does this need to be a separate test? It should probably
+        # check whether the new target is more specific, not just equal?
+        goal_pdns = [self.expr2pdn(g) for g in goals_canonical]
         if head_pdn.any_path_up_contains(goal_pdns):
-            return ("CYCLE",None)
+            return ('CYCLE',None)
         
-        # Check if this application is in the Proof DAG already
-        existing = [apn for apn in head_pdn.args if apn.args == goal_pdns]
+        # Check if this application is in the Proof DAG already.
+        # NOTE: You must use the app's goals rather than the the app PDN's arguments,
+        # because the app's goals may share variables.
+        existing = [apn for apn in head_pdn.args if canonical_app_goals(apn.op.goals) == goals_canonical]
         assert len(existing) < 2
         if len(existing) == 1:
-            return ("EXISTING",existing[0])
+            return ('EXISTING',existing[0])
         else:
             # Otherwise add it to the Proof DAG
             app_pdn = DAG(app,[])
@@ -530,10 +459,12 @@ class Chainer:
                 app_pdn.append(goal_pdn)
             head_pdn.append(app_pdn)
         
-            return ("NEW",app_pdn)
+            print 'add_app_to_pd adding %s for the first time' % (app_pdn,)
+        
+            return ('NEW',app_pdn)
 
     def app2pdn(self,app):
-        (status,app_pdn) = self.add_app_to_pdn(app)
+        (status,app_pdn) = self.add_app_to_pd(app)
         return app_pdn
     
     def add_rule(self, rule):
@@ -602,7 +533,6 @@ class Chainer:
             successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             return DAG(expr_pdn.op, successful_rules)
         
-        import pdb; pdb.set_trace()
         root = self.expr2pdn(target)
 
         return filter_expr(root)
