@@ -8,10 +8,11 @@ except ImportError:
     from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
 from tree import *
 from util import pp, OrderedSet, concat_lists, inplace_set_attributes
-try:
-    from opencog.util import log
-except ImportError:
-    from util import log
+from pprint import pprint
+#try:
+#    from opencog.util import log
+#except ImportError:
+from util import log
 
 from collections import defaultdict
 
@@ -122,7 +123,7 @@ class Chainer:
 
 
     #@profile
-    def bc(self, target):        
+    def bc(self, target):
         #import prof3d; prof3d.profile_me()
         
         try:
@@ -139,7 +140,7 @@ class Chainer:
             self.viz.outputTarget(target, None, 0, 'TARGET')
 
             start = time()
-            while self.bc_later and not self.results:                
+            while self.bc_later and not self.results:
 #                if time() - start > 0:
 #                    print 'TIMEOUT'
 #                    break
@@ -160,10 +161,10 @@ class Chainer:
 #                
 #                self.print_tree(bit)
 
-            #for res in self.results:
-            #    print 'Inference trail:'
-            #    trail = self.trail(res)
-            #    self.print_tree(trail)
+            for res in self.results:
+                print 'Inference trail:'
+                trail = self.trail(res)
+                self.print_tree(trail)
                 #print 'Action plan (if applicable):'
                 #print self.extract_plan(trail)
 #            for res in self.results:
@@ -300,16 +301,16 @@ class Chainer:
                 #    target = app.goals[0]
                 #    log.info(format_log('Target produced!', target))
                 #    self.results.append(target)
-                if app.head == self.target:
-                    log.info(format_log('Target produced!', app.head))
-                    self.results.append(app.head)
-                else:
-                    #viz
-                    self.viz.declareResult(app.head)
-                    
-                    self.compute_and_add_tv(app)
+                #viz
+                self.viz.declareResult(app.head)
+                
+                self.compute_and_add_tv(app)
 
-                    real_results.append(app)
+                real_results.append(app)
+
+                if app.head == self.target:
+                    log.info(format_log('Target produced!', app.head, app.tv))
+                    self.results.append(app.head)
 
         for app in specialized+real_results:
             # If there is a result, then you want to propogate it up. You should also propogate specializations,
@@ -390,6 +391,20 @@ class Chainer:
         if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head):
             return []
 
+        # If the app is a cycle or already added, don't add it or any of its goals
+        (status, app_pdn) = self.add_app_to_pdn(app)
+        if status == "CYCLE":
+            #print "CYCLE", app.name, app.head, app.goals
+            return []
+        elif status == "EXISTING":
+            # Already added this
+            return []
+        else:
+            # Only visualize it if it is actually new
+            # viz
+            for (i, input) in enumerate(app.goals):
+                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
+
         added_queries = []
 
         # It's useful to add the head if (and only if) it is actually more specific than anything currently in the BC tree.
@@ -404,20 +419,7 @@ class Chainer:
                 added_queries.append(goal)
                 log.info(format_log('+BCQ', goal, app.name))
                 #stdout.flush()
-
-        (status, app_pdn) = self.add_app_to_pdn(app)
-        if status == "CYCLE":
-            #print "CYCLE", app.name, app.head, app.goals
-            pass
-        elif status == "EXISTING":
-            # Already added this
-            pass
-        else:
-            # Only visualize it if it is actually new
-            # viz
-            for (i, input) in enumerate(app.goals):
-                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
-
+        
         return added_queries
 
     def check_premises(self, app):
@@ -487,8 +489,9 @@ class Chainer:
         
         canonical = expr.canonical()
         expr_pdn = self.expr2pdn(canonical)
-        apps = expr_pdn.args
-        return [app.tv for app in apps if app.tv.count > 0]
+        app_pdns = expr_pdn.args
+        print 'get_tvs:', [repr(app_pdn.op) for app_pdn in app_pdns if app_pdn.tv.count > 0]
+        return [app_pdn.tv for app_pdn in app_pdns if app_pdn.tv.count > 0]
     
     def expr2pdn(self, expr):
         pdn = DAG(expr,[])
@@ -536,9 +539,10 @@ class Chainer:
     def add_rule(self, rule):
         self.rules.append(rule)
         
+        # This is necessary so get_tvs will work
         # Only relevant to generators or axioms
-        #if rule.tv.confidence > 0:
-        #    self.app2pdn(rule)
+        if rule.tv.confidence > 0:
+            self.app2pdn(rule)
 
     def extract_plan(self, trail):
 #        def is_action(proofnode):
@@ -575,14 +579,31 @@ class Chainer:
         #
         #return filter_with_tv(bit)
 
-        def filter_with_tv(dag):
-            args = [filter_with_tv(a) for a in dag.args if
-                    (isinstance(a.op,Rule) or len(self.get_tvs(a.op)) > 0)]
-            return DAG(dag.op, args)
+        def rule_found_result(rule_pdn):
+            return rule_pdn.tv.count > 0
+            #try:
+            #    rule_pdn.tv
+            #    return True
+            #except AttributeError:
+            #    return False
+
+            #return hasattr(rule_pdn, 'tv')
+
+        def recurse(rule_pdn):
+            print repr(rule_pdn.op),' PDN args', rule_pdn.args
+            exprs = map(filter_expr,rule_pdn.args)
+            return DAG(rule_pdn.op, exprs)
+
+        def filter_expr(expr_pdn):
+            print expr_pdn.op, expr_pdn.args
+            #successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
+            successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
+            return DAG(expr_pdn.op, successful_rules)
         
+        import pdb; pdb.set_trace()
         root = self.expr2pdn(target)
 
-        return filter_with_tv(root)
+        return filter_expr(root)
     
     def print_tree(self, tr, level = 1):
         try:
@@ -594,78 +615,78 @@ class Chainer:
         for child in tr.args:
             self.print_tree(child, level+1)
 
-    def viz_proof_tree(self, pt):
-        self.viz.connect()
-
-        target = pt.op
-        self.viz.outputTarget(target, None, 0, repr(target))
-        
-        for arg in pt.args:
-            self.viz_proof_tree_(arg)
-        
-    def viz_proof_tree_(self, pt):
-        target = pt.op
-        
-        self.viz.declareResult(target)
-        
-        for (i, input) in enumerate(pt.args):
-            self.viz.outputTarget(input, target, i, repr(target))
-
-        for arg in pt.args:
-            self.viz_proof_tree_(arg)
-
-    def add_depths(self, bitnode, level = 1):
-        #args = [self.add_depths(child, level+1) for child in tr.args]
-        #return Tree((level, tr.op), args)
-        
-        args = [self.add_depths(child, level+1) for child in bitnode.args]
-        return inplace_set_attributes(bitnode, depth=level)
-
-    def add_best_conf_above(self, bitnode, best_above=0.0):
-        bitnode.best_conf_above = best_above
-
-        if best_above > 0:
-            print '-------', str(bitnode), best_above
-
-        confs_this_target = [tv.confidence for tv in self.get_tvs(bitnode.op)]
-        best_above = max([best_above] + confs_this_target)
-        
-        for child in bitnode.args:
-            self.add_best_conf_above(child, best_above) 
-        return bitnode
-
-    def get_fittest(self, queue):
-        def num_vars(target):
-            return len([vertex for vertex in target.flatten() if vertex.is_variable()])
-
-        competition_weight = - 10000
-        depth_weight = -100
-        solution_space_weight = -0.01
-
-        bit = self.traverse_tree(self.target, set())
-        self.add_depths(bit)
-        self.add_best_conf_above(bit)
-        
-        #self.print_tree(bit)
-        
-        flat = bit.flatten()
-        in_queue = [bitnode for bitnode in flat if self.contains_isomorphic_tree(bitnode.op, queue)]
-        if not in_queue:
-            import pdb; pdb.set_trace()
-        assert in_queue
-        scores = [ bitnode.best_conf_above * competition_weight
-                        +bitnode.depth * depth_weight
-                        +num_vars(bitnode.op) * solution_space_weight
-                        for bitnode in in_queue]
-        ranked_bitnodes = zip(scores, in_queue)
-        #ranked.sort(key=lambda (score, tr): -score)
-        #print format_log(ranked)
-        best = max(ranked_bitnodes, key=lambda (score, tr): score) [1] . op
-        length = len(queue)
-        queue.remove(next(existing for existing in queue if existing.isomorphic(best)))
-        assert len(queue) == length - 1
-        #print best
-        return best
+    #def viz_proof_tree(self, pt):
+    #    self.viz.connect()
+    #
+    #    target = pt.op
+    #    self.viz.outputTarget(target, None, 0, repr(target))
+    #    
+    #    for arg in pt.args:
+    #        self.viz_proof_tree_(arg)
+    #    
+    #def viz_proof_tree_(self, pt):
+    #    target = pt.op
+    #    
+    #    self.viz.declareResult(target)
+    #    
+    #    for (i, input) in enumerate(pt.args):
+    #        self.viz.outputTarget(input, target, i, repr(target))
+    #
+    #    for arg in pt.args:
+    #        self.viz_proof_tree_(arg)
+    #
+    #def add_depths(self, bitnode, level = 1):
+    #    #args = [self.add_depths(child, level+1) for child in tr.args]
+    #    #return Tree((level, tr.op), args)
+    #    
+    #    args = [self.add_depths(child, level+1) for child in bitnode.args]
+    #    return inplace_set_attributes(bitnode, depth=level)
+    #
+    #def add_best_conf_above(self, bitnode, best_above=0.0):
+    #    bitnode.best_conf_above = best_above
+    #
+    #    if best_above > 0:
+    #        print '-------', str(bitnode), best_above
+    #
+    #    confs_this_target = [tv.confidence for tv in self.get_tvs(bitnode.op)]
+    #    best_above = max([best_above] + confs_this_target)
+    #    
+    #    for child in bitnode.args:
+    #        self.add_best_conf_above(child, best_above) 
+    #    return bitnode
+    #
+    #def get_fittest(self, queue):
+    #    def num_vars(target):
+    #        return len([vertex for vertex in target.flatten() if vertex.is_variable()])
+    #
+    #    competition_weight = - 10000
+    #    depth_weight = -100
+    #    solution_space_weight = -0.01
+    #
+    #    bit = self.traverse_tree(self.target, set())
+    #    self.add_depths(bit)
+    #    self.add_best_conf_above(bit)
+    #    
+    #    #self.print_tree(bit)
+    #    
+    #    flat = bit.flatten()
+    #    in_queue = [bitnode for bitnode in flat if self.contains_isomorphic_tree(bitnode.op, queue)]
+    #    if not in_queue:
+    #        import pdb; pdb.set_trace()
+    #    assert in_queue
+    #    scores = [ bitnode.best_conf_above * competition_weight
+    #                    +bitnode.depth * depth_weight
+    #                    +num_vars(bitnode.op) * solution_space_weight
+    #                    for bitnode in in_queue]
+    #    ranked_bitnodes = zip(scores, in_queue)
+    #    #ranked.sort(key=lambda (score, tr): -score)
+    #    #print format_log(ranked)
+    #    best = max(ranked_bitnodes, key=lambda (score, tr): score) [1] . op
+    #    length = len(queue)
+    #    queue.remove(next(existing for existing in queue if existing.isomorphic(best)))
+    #    assert len(queue) == length - 1
+    #    #print best
+    #    return best
 
     def setup_rules(self, a):
         self.rules = []
