@@ -136,7 +136,7 @@ private:
 
 #else
 
-    std::mt19937 randomGenerator;
+    std::mt19937 randomGen;
 
 #endif
 
@@ -149,6 +149,9 @@ public:
     ~MT19937RandGen();
 #endif
 
+    // reset the random seed
+    void seed(unsigned long); 
+    
     // random int between 0 and max rand number.
     int randint();
 
@@ -171,6 +174,9 @@ public:
     bool randbool();
 };
 
-}
+// singleton instance (following Meyer's design pattern)
+RandGen& randGen();
+
+} // namespace opencog
 
 #endif // _OPENCOG_MT19937AR_H

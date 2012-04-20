@@ -38,6 +38,9 @@ public:
 
     virtual ~RandGen() {}
 
+    // reset the random seed
+    virtual void seed(unsigned long) = 0;
+    
     // random int between 0 and max rand number.
     virtual int randint() = 0;
 

@@ -95,7 +95,7 @@ MT19937RandGen::MT19937RandGen(unsigned long s) {
     init();
     init_genrand(s);
 #else
-    randomGenerator.seed(s);
+    randomGen.seed(s);
 #endif
 }
 
@@ -110,13 +110,21 @@ MT19937RandGen::~MT19937RandGen() {
 }
 #endif
 
+void MT19937RandGen::seed(unsigned long s) {
+#ifndef USE_STL_RANDOM
+    init_genrand(s);
+#else
+    randomGen.seed(s);
+#endif
+}
+
 // random int between 0 and max rand number.
 int MT19937RandGen::randint() {
 #ifndef USE_STL_RANDOM
     return (int)genrand_int31();
 #else
     std::uniform_int_distribution<int> dis;
-    return dis(randomGenerator);
+    return dis(randomGen);
 #endif
 }
 
@@ -125,7 +133,7 @@ float MT19937RandGen::randfloat() {
 #ifndef USE_STL_RANDOM
     return (float) genrand_real1();
 #else
-    return randomGenerator() / (float)randomGenerator.max();
+    return randomGen() / (float)randomGen.max();
 #endif
 }
 
@@ -134,7 +142,7 @@ double MT19937RandGen::randdouble() {
 #ifndef USE_STL_RANDOM
     return genrand_real1();
 #else
-    return randomGenerator() / (double)randomGenerator.max();
+    return randomGen() / (double)randomGen.max();
 #endif
 }
   
@@ -144,7 +152,7 @@ double MT19937RandGen::randDoubleOneExcluded() {
     return genrand_real2();
 #else
     std::uniform_real_distribution<double> dis;
-    return dis(randomGenerator);
+    return dis(randomGen);
 #endif
 }
 
@@ -297,6 +305,14 @@ double MT19937RandGen::genrand_res53(void)
     unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6; 
     return(a*67108864.0+b)*(1.0/9007199254740992.0); 
 } 
+
+// Create and return the signle instance. The initial seed is zero but
+// can be changed with the public method RandGen::seed(unsigned long)
+RandGen& opencog::randGen()
+{
+    static MT19937RandGen instance(0);
+    return instance;
+}
 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
 #endif
