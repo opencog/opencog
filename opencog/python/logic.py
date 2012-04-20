@@ -165,8 +165,8 @@ class Chainer:
                 print 'Inference trail:'
                 trail = self.trail(res)
                 self.print_tree(trail)
-                #print 'Action plan (if applicable):'
-                #print self.extract_plan(trail)
+                print 'Action plan (if applicable):'
+                print self.extract_plan(trail)
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
 
@@ -555,8 +555,10 @@ class Chainer:
 #        return actions
         # The list of actions in an ImplicationLink. Sometimes there are none,
         # sometimes one; if there is a SequentialAndLink then it can be more than one.
-        def actions(proofnode):
+        def actions(proofnode):            
             target = proofnode.op
+            if isinstance(target, Rule):
+                return []
             if target.op in ['ExecutionLink',  'SequentialAndLink']:
                 return [pn.op]
             else:
