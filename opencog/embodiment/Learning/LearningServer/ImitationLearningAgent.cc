@@ -350,7 +350,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                              // for the moment
                                              operator_set(),
                                              _atomic_perceptions,
-                                             _atomic_actions, *_rng);
+                                             _atomic_actions);
         } else OC_ASSERT(false,
                                     "A valid learning algo must be selected, see src/Control/SystemParameters.h for the various options");
 

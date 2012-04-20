@@ -70,8 +70,7 @@ public:
                    const definite_object_set& dos,
                    const operator_set& ignore_ops,
                    const combo_tree_ns_set& perceptions,
-                   const combo_tree_ns_set& actions,
-                   RandGen& rng);
+                   const combo_tree_ns_set& actions);
 
     ~moses_learning();
 
@@ -103,8 +102,6 @@ private:
     combo_tree _center;
 
     int _nepc;
-
-    RandGen& _rng;
 
     HCState _hcState;
 

@@ -160,8 +160,6 @@ protected:
      */
     sib_it _it;
 
-    RandGen& _rng;
-
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;
     boost::tribool _failed; //set to true if failed, false if not failed,

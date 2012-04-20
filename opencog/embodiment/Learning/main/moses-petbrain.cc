@@ -43,28 +43,27 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    int max_evals, rand_seed;
+    int max_evals;
     try {
         if (argc != 3)
             throw "foo";
-        rand_seed = lexical_cast<int>(argv[1]);
+        int rand_seed = lexical_cast<int>(argv[1]);
         max_evals = lexical_cast<int>(argv[2]);
+        randGen().seed(rand_seed);
     } catch (...) {
         cerr << "usage: " << argv[0] << " seed maxevals" << endl;
         exit(1);
     }
-
-    MT19937RandGen rng(rand_seed);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::action_result_type, 1);
 
     interactive_score scorer;
     interactive_bscore bscorer;
-    hill_climbing climber(rng);
+    hill_climbing climber;
 
     metapopulation<interactive_score, interactive_bscore, hill_climbing>
-        metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
+        metapop(combo_tree(id::sequential_and), tt, action_reduction(),
                 scorer, bscorer, climber);
 
     cout << "build metapop" << endl;
