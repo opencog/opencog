@@ -319,7 +319,7 @@ struct precision_bscore : public bscore_base
                      float alphabet_size, float p,
                      float min_activation, float max_activation,
                      float penalty,
-                     RandGen& _rng, bool positive = true,
+                     bool positive = true,
                      bool worst_norm = false);
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -338,7 +338,6 @@ struct precision_bscore : public bscore_base
     score_t max_precision; // uppper bound of the maximum denormalized
                            // precision for that CTable
     score_t penalty;
-    RandGen& rng;
     bool positive, worst_norm;
 
 private:
@@ -362,16 +361,14 @@ struct discretize_contin_bscore : public bscore_base
     discretize_contin_bscore(const OTable& ot, const ITable& it,
                              const vector<contin_t>& thres,
                              bool weighted_average,
-                             float alphabet_size, float p,
-                             RandGen& _rng);
+                             float alphabet_size, float p);
 
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
     // discretize_contin_bscore(const Table& table,
     //                          const vector<contin_t>& thres,
     //                          bool weighted_average,
-    //                          float alphabet_size, float p,
-    //                          RandGen& _rng);
+    //                          float alphabet_size, float p);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -389,7 +386,6 @@ struct discretize_contin_bscore : public bscore_base
                                 // deal with unbalanced data.
     bool occam;                 // Whether Occam's razor is enabled
     score_t complexity_coef;
-    RandGen& rng;
 
 protected:
     // Return the index of the class of value v.
@@ -453,9 +449,8 @@ struct contin_bscore : public bscore_base
 {
     template<typename Scoring>
     contin_bscore(const Scoring& score, const ITable& r,
-                  float alphabet_size, float stdev,
-                  RandGen& _rng)
-        : target(score, r), cti(r), rng(_rng)
+                  float alphabet_size, float stdev)
+        : target(score, r), cti(r)
     {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
@@ -464,9 +459,8 @@ struct contin_bscore : public bscore_base
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
     contin_bscore(const OTable& t, const ITable& r,
-                  float alphabet_size, float stdev,
-                  RandGen& _rng)
-        : target(t), cti(r), rng(_rng)
+                  float alphabet_size, float stdev)
+        : target(t), cti(r)
     {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
@@ -475,9 +469,8 @@ struct contin_bscore : public bscore_base
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
     contin_bscore(const Table& table,
-                  float alphabet_size, float stdev,
-                  RandGen& _rng)
-        : target(table.otable), cti(table.itable), rng(_rng)
+                  float alphabet_size, float stdev)
+        : target(table.otable), cti(table.itable)
     {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
@@ -496,7 +489,6 @@ struct contin_bscore : public bscore_base
     ITable cti;
     bool occam;
     score_t complexity_coef;
-    RandGen& rng;
 
 private:
     void set_complexity_coef(float alphabet_size, float stdev);
@@ -533,14 +525,12 @@ struct ctruth_table_bscore : public bscore_base
 {
     template<typename Func>
     ctruth_table_bscore(const Func& func, arity_t arity,
-                        float alphabet_size, float p,
-                        RandGen& _rng, int nsamples = -1)
-        : ctable(func, arity, _rng, nsamples), rng(_rng)
+                        float alphabet_size, float p, int nsamples = -1)
+        : ctable(func, arity, nsamples)
     {
         set_complexity_coef(alphabet_size, p);
     }
-    ctruth_table_bscore(const CTable& _ctt,
-                        float alphabet_size, float p, RandGen& _rng);
+    ctruth_table_bscore(const CTable& _ctt, float alphabet_size, float p);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -556,7 +546,6 @@ private:
     CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
-    RandGen& rng;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured
@@ -588,7 +577,6 @@ struct interesting_predicate_bscore : public bscore_base
 
     interesting_predicate_bscore(const CTable& ctable,
                                  float alphabet_size, float stdev,
-                                 RandGen& _rng,
                                  weight_t kld_weight = 1.0,
                                  weight_t skewness_weight = 1.0,
                                  weight_t stdU_weight = 1.0,
@@ -614,7 +602,6 @@ struct interesting_predicate_bscore : public bscore_base
     bool occam;
     score_t complexity_coef;
     contin_t skewness;   // skewness of the unconditioned distribution
-    RandGen& rng;
 
     // weights of the various features
     weight_t kld_w;

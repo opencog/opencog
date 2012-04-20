@@ -91,8 +91,7 @@ namespace moses {
                  const StructureLearningPolicy& learn_structure,
                  const ProbsLearningPolicy& learn_probs,
                  const ReplacementPolicy& replace,
-                 LoggingPolicy& write_log, 
-                 RandGen& rng) 
+                 LoggingPolicy& write_log) 
     {
 
 
@@ -141,7 +140,7 @@ namespace moses {
             // Initialize the model (run it's constructor).
             logger().debug("Build probabilistic model");
             model_type model(current.fields(), promising.begin(),
-                             promising.end(), rng);
+                             promising.end());
             
             // Update the model. First, learn the "structure" of the
             // dependencies between different variables in the

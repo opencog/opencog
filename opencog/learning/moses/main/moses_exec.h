@@ -155,8 +155,7 @@ struct metapop_moses_results_parameters
  * 3) print the results
  */
 template<typename Score, typename BScore, typename Optimization>
-void metapop_moses_results_a(RandGen& rng,
-                             Optimization& opt,
+void metapop_moses_results_a(Optimization& opt,
                              const std::vector<combo_tree>& bases,
                              const opencog::combo::type_tree& tt,
                              const reduct::rule& si_ca,
@@ -169,7 +168,7 @@ void metapop_moses_results_a(RandGen& rng,
 {
     // instantiate metapop
     metapopulation<Score, BScore, Optimization>
-        metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
+        metapop(bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
 
     // run moses, either on localhost, or distributed.
     if (pa.only_local)
@@ -217,8 +216,7 @@ void metapop_moses_results_a(RandGen& rng,
  * like above but takes the algo type instead of the algo template
  */
 template<typename Score, typename BScore>
-void metapop_moses_results_b(RandGen& rng,
-                             const std::vector<combo_tree>& bases,
+void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const opencog::combo::type_tree& tt,
                              const reduct::rule& si_ca,
                              const reduct::rule& si_kb,
@@ -230,24 +228,21 @@ void metapop_moses_results_b(RandGen& rng,
                              const metapop_moses_results_parameters& pa)
 {
     if (pa.opt_algo == un) { // univariate
-        univariate_optimization unopt(rng, opt_params);
-        metapop_moses_results_a(rng, unopt,
-                              bases, tt, si_ca, si_kb, sc, bsc,
-                              meta_params, moses_params, pa);
+        univariate_optimization unopt(opt_params);
+        metapop_moses_results_a(unopt, bases, tt, si_ca, si_kb, sc, bsc,
+                                meta_params, moses_params, pa);
     }
     else if (pa.opt_algo == sa) { // simulated annealing
-        simulated_annealing annealer(rng, opt_params);
-        metapop_moses_results_a(rng, annealer,
-                              bases, tt, si_ca, si_kb, sc, bsc,
-                              meta_params, moses_params, pa);
+        simulated_annealing annealer(opt_params);
+        metapop_moses_results_a(annealer, bases, tt, si_ca, si_kb, sc, bsc,
+                                meta_params, moses_params, pa);
     }
     else if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hc_parameters hc_params(pa.hc_widen_search,
                                 pa.hc_single_step,
                                 pa.hc_crossover);
-        hill_climbing climber(rng, opt_params, hc_params);
-        metapop_moses_results_a(rng, climber,
-                                bases, tt, si_ca, si_kb, sc, bsc,
+        hill_climbing climber(opt_params, hc_params);
+        metapop_moses_results_a(climber, bases, tt, si_ca, si_kb, sc, bsc,
                                 meta_params, moses_params, pa);
 #ifdef GATHER_STATS
         climber.hiscore /= climber.hicount;
@@ -274,8 +269,7 @@ void metapop_moses_results_b(RandGen& rng,
  * like above, but assumes that the score is bscore based
  */
 template<typename BScore>
-void metapop_moses_results(RandGen& rng,
-                           const std::vector<combo_tree>& bases,
+void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const opencog::combo::type_tree& tt,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
@@ -305,7 +299,7 @@ void metapop_moses_results(RandGen& rng,
             Score score(bsc);
             prr_cache_threaded<Score> score_cache(initial_cache_size, score);
             ScoreACache score_acache(score_cache);
-            metapop_moses_results_b(rng, bases, tt, si_ca, si_kb,
+            metapop_moses_results_b(bases, tt, si_ca, si_kb,
                                     score_acache, bsc,
                                     opt_params, meta_params, moses_params, pa);
             // log the number of cache failures
@@ -327,7 +321,7 @@ void metapop_moses_results(RandGen& rng,
             Score score(bscore_acache);
             prr_cache_threaded<Score> score_cache(initial_cache_size, score);
             ScoreACache score_acache(score_cache);
-            metapop_moses_results_b(rng, bases, tt, si_ca, si_kb,
+            metapop_moses_results_b(bases, tt, si_ca, si_kb,
                                     score_acache, bscore_acache,
                                     opt_params, meta_params, moses_params, pa);
             // log the number of cache failures
@@ -339,7 +333,7 @@ void metapop_moses_results(RandGen& rng,
         }
     }
     else {
-        metapop_moses_results_b(rng, bases, tt, si_ca, si_kb, bb_score, bsc,
+        metapop_moses_results_b(bases, tt, si_ca, si_kb, bb_score, bsc,
                                 opt_params, meta_params, moses_params, pa);
     }
 }

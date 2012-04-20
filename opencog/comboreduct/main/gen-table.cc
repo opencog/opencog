@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     }
 
     // init random generator
-    MT19937RandGen rng(rand_seed);
+    randGen().seed(rand_seed);
 
     /// @todo translate in case the variables are names rather than
     /// place holders
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
     OC_ASSERT(is_well_formed(tt));
 
     // generate input table
-    Table table(tr, rng, nsamples, min_contin, max_contin);
+    Table table(tr, nsamples, min_contin, max_contin);
 
     // output the table
     if(output_file.empty())

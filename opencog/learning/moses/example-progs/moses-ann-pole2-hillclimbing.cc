@@ -33,7 +33,7 @@ int main(int argc, char** argv)
     cout << "Network depth: " << nn.feedforward_depth() << endl;
     cout << &nn << endl;
 
-    MT19937RandGen rng(0);
+    randGen().seed(0);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::ann_type, 1);
@@ -43,10 +43,10 @@ int main(int argc, char** argv)
     ann_pole2_score p2_score;
     ann_pole2_bscore p2_bscore;
 
-    hill_climbing climber(rng);
+    hill_climbing hc;
     metapopulation<ann_pole2_score, ann_pole2_bscore, hill_climbing>
-        metapop_pole2(rng, tr, tt, clean_reduction(),
-                      p2_score, p2_bscore, climber);
+        metapop_pole2(tr, tt, clean_reduction(),
+                      p2_score, p2_bscore, hc);
 
     moses::moses(metapop_pole2);
 

@@ -55,7 +55,6 @@ struct representation : public knob_mapper, boost::noncopyable
                    const reduct::rule& simplify_knob_building,
                    const combo_tree& exemplar_,
                    const combo::type_tree& t,
-                   RandGen& rng,
                    const operator_set& ignore_ops = operator_set(),
                    const combo_tree_ns_set* perceptions = NULL,
                    const combo_tree_ns_set* actions = NULL);
@@ -171,7 +170,6 @@ protected:
 #endif
 
     field_set _fields;
-    RandGen& rng;
     const reduct::rule* _simplify_candidate; // used to simplify candidates
     const reduct::rule* _simplify_knob_building; // used to simplify
                                                  // during knob

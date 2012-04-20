@@ -929,7 +929,7 @@ void reduce_impulse_arg::operator()(combo_tree& tr, combo_tree::iterator it) con
         OC_ASSERT(it.has_one_child(),
                   "impulse should have exactly one child (reduce_impulse_arg).");
         pre_it it_child = it.begin();
-        logical_reduce(reduct_effort, tr, it_child, ignore_ops, rng);
+        logical_reduce(reduct_effort, tr, it_child, ignore_ops);
     }
 }
 

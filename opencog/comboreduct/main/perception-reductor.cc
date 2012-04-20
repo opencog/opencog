@@ -40,7 +40,7 @@ int main()
 
     combo_tree tr;
 
-    opencog::MT19937RandGen rng(0);
+    randGen().seed(0);
 
     while (cin.good()) {
         cin >> tr;
@@ -60,7 +60,7 @@ int main()
         }
 
         //produce random inputs
-        ITable cti(tt, rng);
+        ITable cti(tt);
         //print cti, for debugging
         cout << "Rnd matrix :" << endl << cti;
 

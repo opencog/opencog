@@ -144,7 +144,6 @@ struct metapopulation : public bscored_combo_tree_set
     /**
      *  Constuctor for the class metapopulation
      *
-     * @param _rng    rand number
      * @param bases   exemplars used to initialize the metapopulation
      * @param tt      type of expression to be learned
      * @param si      reduct rule for reducting
@@ -153,15 +152,14 @@ struct metapopulation : public bscored_combo_tree_set
      * @param opt     optimization should be providing for the learning
      * @param pa      parameter for selecting the deme
      */
-    metapopulation(RandGen& _rng,
-                   const std::vector<combo_tree>& bases,
+    metapopulation(const std::vector<combo_tree>& bases,
                    const type_tree& tt,
                    const reduct::rule& si_ca,
                    const reduct::rule& si_kb,
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        rng(_rng), type(tt), simplify_candidate(&si_ca),
+        type(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
@@ -170,14 +168,13 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     // Like above but using a single base, and a single reduction rule.
-    metapopulation(RandGen& _rng,
-                   const combo_tree& base,
+    metapopulation(const combo_tree& base,
                    const type_tree& tt,
                    const reduct::rule& si,
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        rng(_rng), type(tt), simplify_candidate(&si),
+        type(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
@@ -321,7 +318,7 @@ struct metapopulation : public bscored_combo_tree_set
 
         size_t fwd = distance(probs.begin(), roulette_select(probs.begin(),
                                                              probs.end(),
-                                                             sum, rng));
+                                                             sum, randGen()));
         // cout << "select_exemplar(): sum=" << sum << " fwd =" << fwd
         // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
         return std::next(begin(), fwd);
@@ -529,7 +526,7 @@ struct metapopulation : public bscored_combo_tree_set
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
                                       _exemplar->first, type,
-                                      rng, ignore_ops, perceptions, actions);
+                                      ignore_ops, perceptions, actions);
 
             // If the representation is empty, try the next
             // best-scoring exemplar.
@@ -1236,7 +1233,6 @@ struct metapopulation : public bscored_combo_tree_set
                 output_bscore, output_only_bests);
     }
 
-    RandGen& rng;
     combo::type_tree type;
     const reduct::rule* simplify_candidate; // to simplify candidates
     const reduct::rule* simplify_knob_building; // during knob building

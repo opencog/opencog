@@ -30,7 +30,7 @@
 
 namespace opencog { namespace reduct {
 
-const rule& full_reduction(opencog::RandGen& rng)
+const rule& full_reduction()
 {
     static iterative r_without_reduce_gt_zero_prod;
 
@@ -41,7 +41,7 @@ const rule& full_reduction(opencog::RandGen& rng)
         (sequential(
                     //general
                     downwards(level()),
-                    upwards(eval_constants(rng)),
+                    upwards(eval_constants()),
 
                     //logical
                     downwards(reduce_nots(),id::boolean_type),
@@ -136,7 +136,7 @@ const rule& full_reduction(opencog::RandGen& rng)
         (sequential(
                     //general
                     downwards(level()),
-                    upwards(eval_constants(rng)),
+                    upwards(eval_constants()),
                     
                     //logical
                     downwards(reduce_nots(),id::boolean_type),

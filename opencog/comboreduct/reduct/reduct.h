@@ -71,12 +71,11 @@ const rule& ann_reduction();
 // @ignore_ops is the set of operators to ignore
 // logical_reduction doesn't use it itself, but does pass it
 // on to the contin_reduction step of any predicates encountered.
-// Reduction levels of 2 and higher must specify ignore_ops and rng.
+// Reduction levels of 2 and higher must specify ignore_ops.
 struct logical_reduction
 {
     logical_reduction();
-    logical_reduction(const vertex_set& ignore_ops,
-                      opencog::RandGen& rng);
+    logical_reduction(const vertex_set& ignore_ops);
     ~logical_reduction();
 
     const rule& operator()(int effort = 2);
@@ -87,11 +86,10 @@ private:
 
 // @ignore_ops is the set of operators to ignore
 const rule& contin_reduction(int reduct_effort, 
-                             const vertex_set& ignore_ops,
-                             opencog::RandGen& rng);
+                             const vertex_set& ignore_ops);
 
-const rule& mixed_reduction(opencog::RandGen& rng);
-const rule& full_reduction(opencog::RandGen& rng);
+const rule& mixed_reduction();
+const rule& full_reduction();
 const rule& action_reduction();
 const rule& perception_reduction();
 
@@ -109,18 +107,16 @@ const rule& clean_reduction();
  */
 inline void logical_reduce(int effort, combo_tree& tr,
                            combo_tree::iterator it,
-                           const vertex_set& ignore_ops,
-                           opencog::RandGen& rng)
+                           const vertex_set& ignore_ops)
 {
-    logical_reduction r(ignore_ops, rng);
+    logical_reduction r(ignore_ops);
     r(effort)(tr, it);
 }
 
 inline void logical_reduce(int effort, combo_tree& tr,
-                           const vertex_set& ignore_ops,
-                           opencog::RandGen& rng)
+                           const vertex_set& ignore_ops)
 {
-    logical_reduction r(ignore_ops, rng);
+    logical_reduction r(ignore_ops);
     r(effort)(tr);
 }
 
@@ -136,29 +132,26 @@ inline void logical_reduce(int effort, combo_tree& tr)
  */
 inline void contin_reduce(combo_tree& tr, combo_tree::iterator it,
                           int reduct_effort, 
-                          const vertex_set& ignore_ops,
-                          opencog::RandGen& rng)
+                          const vertex_set& ignore_ops)
 {
-    contin_reduction(reduct_effort, ignore_ops, rng)(tr, it);
+    contin_reduction(reduct_effort, ignore_ops)(tr, it);
 }
 
 inline void contin_reduce(combo_tree& tr, 
                           int reduct_effort,
-                          const vertex_set& ignore_ops,
-                          opencog::RandGen& rng)
+                          const vertex_set& ignore_ops)
 {
-    contin_reduction(reduct_effort, ignore_ops, rng)(tr); 
+    contin_reduction(reduct_effort, ignore_ops)(tr); 
 }
 
-inline void mixed_reduce(combo_tree& tr, combo_tree::iterator it,
-                         opencog::RandGen& rng)
+inline void mixed_reduce(combo_tree& tr, combo_tree::iterator it)
 {
-    mixed_reduction(rng)(tr, it);
+    mixed_reduction()(tr, it);
 }
 
-inline void mixed_reduce(combo_tree& tr, opencog::RandGen& rng)
+inline void mixed_reduce(combo_tree& tr)
 {
-    mixed_reduction(rng)(tr);
+    mixed_reduction()(tr);
 }
 
 /**
@@ -167,15 +160,14 @@ inline void mixed_reduce(combo_tree& tr, opencog::RandGen& rng)
  * arithmetic operators, contin-typed constants, and contin-valued
  * literals.  (Elsewhere, we call these "predicate trees").
  */
-inline void full_reduce(combo_tree& tr, combo_tree::iterator it,
-                        opencog::RandGen& rng)
+inline void full_reduce(combo_tree& tr, combo_tree::iterator it)
 {
-    full_reduction(rng)(tr, it);
+    full_reduction()(tr, it);
 }
 
-inline void full_reduce(combo_tree& tr, opencog::RandGen& rng)
+inline void full_reduce(combo_tree& tr)
 {
-    full_reduction(rng)(tr);
+    full_reduction()(tr);
 }
 
 inline void ann_reduce(combo_tree& tr)
@@ -197,19 +189,18 @@ inline void clean_reduce(combo_tree& tr)
 }
 
 inline void clean_and_full_reduce(combo_tree& tr,
-                                  combo_tree::iterator it,
-                                  opencog::RandGen& rng)
+                                  combo_tree::iterator it)
 {
     // clean_and_full_reduction()(tr,it);
     clean_reduce(tr, it);
-    full_reduce(tr, it, rng);
+    full_reduce(tr, it);
 }
 
-inline void clean_and_full_reduce(combo_tree& tr, opencog::RandGen& rng)
+inline void clean_and_full_reduce(combo_tree& tr)
 { 
     // clean_and_full_reduction()(tr,tr.begin()); 
     clean_reduce(tr);
-    full_reduce(tr, rng);
+    full_reduce(tr);
 }
 
 //action

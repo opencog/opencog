@@ -72,8 +72,6 @@ int main(int argc,char** argv) {
   ant_score scorer;
   ant_bscore bscorer;
 
-  MT19937RandGen rng(rand_seed);
-
   operator_set ignore_ops;
   combo_tree_ns_set perceptions;
   combo_tree_ns_set actions;
@@ -86,28 +84,27 @@ int main(int argc,char** argv) {
 
 /*
   metapopulation<ant_score,ant_bscore,iterative_hillclimbing> 
-    metapop(rng,combo_tree(id::sequential_and),tt,action_reduction(),
+    metapop(combo_tree(id::sequential_and),tt,action_reduction(),
 	    scorer,
 	    bscorer,
-            iterative_hillclimbing(rng));
+            iterative_hillclimbing());
   //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
   moses::moses(metapop,max_evals,0,&os,&perceptions,&actions,op);
 */
 
 /*
   metapopulation<ant_score,ant_bscore,univariate_optimization> 
-    metapop(rng,combo_tree(id::sequential_and),tt,action_reduction(),
+    metapop(combo_tree(id::sequential_and),tt,action_reduction(),
 	    scorer,
 	    bscorer,
-            univariate_optimization(rng));
+            univariate_optimization());
   moses::moses(metapop,max_evals,0,&os,&perceptions,&actions,op);
 */
 
-
-  hill_climbing climber(rng);
+  hill_climbing hc;
   metapopulation<ant_score, ant_bscore, hill_climbing> 
-      metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
-              scorer, bscorer, climber);
+      metapop(combo_tree(id::sequential_and), tt, action_reduction(),
+              scorer, bscorer, hc);
   
   moses_parameters moses_param(max_evals, -1, 0,
                                ignore_ops, &perceptions, &actions);

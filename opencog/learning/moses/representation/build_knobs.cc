@@ -45,8 +45,7 @@ using namespace std;
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
 
-build_knobs::build_knobs(RandGen& _rng,
-                         combo_tree& exemplar,
+build_knobs::build_knobs(combo_tree& exemplar,
                          const combo::type_tree& tt,
                          representation& rep,
                          const operator_set& ignore_ops,
@@ -55,7 +54,7 @@ build_knobs::build_knobs(RandGen& _rng,
                          contin_t step_size,
                          contin_t expansion,
                          field_set::width_t depth)
-    : rng(_rng), _exemplar(exemplar), _rep(rep),
+    : _exemplar(exemplar), _rep(rep),
       _arity(tt.begin().number_of_children() - 1), types(tt),
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _perm_ratio(0),
@@ -372,7 +371,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     unsigned int max_pairs = _arity * (_arity - 1);
     if (max_pairs > 0) {
         type_tree_sib_it arg_types = types.begin(types.begin());  // first child
-        lazy_random_selector select(max_pairs, rng);
+        lazy_random_selector select(max_pairs);
 
         // Actual number of pairs to create ...
         unsigned int n_pairs =
@@ -556,26 +555,26 @@ void build_knobs::build_action(pre_it it)
 
     if (*it == id::sequential_and) {
 
-        if (it.is_childless() || rng.randint(100) < p)
+        if (it.is_childless() || randGen().randint(100) < p)
             add_action_knobs(it);
 
         for (sib_it sib = it.begin(); sib != it.end();++sib) {
             if (is_builtin_action(*sib)) {
 
-                if (rng.randint(100) > p)
+                if (randGen().randint(100) > p)
                     add_simple_action_knobs(sib, true);
                 else
                     add_action_knobs(sib = _exemplar.insert_above(sib, id::sequential_and), false);
             }
 //      else if (*sib==id::null_vertex) break;
             else if (*sib == id::action_boolean_if) {
-                if (rng.randint(100) >= p)
+                if (randGen().randint(100) >= p)
                     add_simple_action_knobs(sib, true);
                 build_action(sib);
             }
         }
 
-        if (rng.randint(100) >= p)
+        if (randGen().randint(100) >= p)
             add_action_knobs(_exemplar.append_child(it, id::sequential_and),
                              false);
     } else if (*it == id::action_boolean_if) {
@@ -623,13 +622,13 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    lazy_random_selector select(number_of_actions*(number_of_actions - 1), rng);
+    lazy_random_selector select(number_of_actions*(number_of_actions - 1));
 
     dorepeat(n) {
         combo_tree v(id::action_boolean_if);
         pre_it iv = v.begin();
 
-        int rand_int = rng.randint(_perceptions->size());
+        int rand_int = randGen().randint(_perceptions->size());
         combo_tree_ns_set_it p_it = _perceptions->begin();
         for (int ind = 0; ind < rand_int; ++ind)
             ++p_it;

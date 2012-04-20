@@ -36,7 +36,7 @@ using namespace reduct;
 
 int main()
 {
-    MT19937RandGen rng(1);
+    randGen().seed(1);
 
     combo_tree tr;
 
@@ -57,23 +57,23 @@ int main()
         }
 
         // produce random inputs
-        ITable cti(tt, rng);
+        ITable cti(tt);
         // print cti, for debugging
         cout << "Rnd matrix :" << endl << cti;
 
         try {
             // evalutate tr over cti and fill mt1
-            OTable mt1(tr, cti, rng);
+            OTable mt1(tr, cti);
             //print mt1, for debugging
             cout << "MT1" << endl << mt1 << endl;
 
             //print the tree before reduction, for debugging
             cout << "Before : " << tr << endl;
 
-            full_reduce(tr, rng);
+            full_reduce(tr);
 
             // evaluate tr over cti and fill mt2
-            OTable mt2(tr, cti, rng);
+            OTable mt2(tr, cti);
             //print mt2, for debugging
             cout << "MT2" << endl << mt2 << endl;
 

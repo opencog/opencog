@@ -12,8 +12,6 @@ using namespace opencog;
 using namespace reduct;
 using namespace ant_combo;
 
-static MT19937RandGen rng(0);
-
 class MixedReductUTest : public CxxTest::TestSuite {
 public:
     void base_test(const string& tree_str) {
@@ -27,15 +25,15 @@ public:
         
         TS_ASSERT(ct);
         
-        ITable cti(tt, rng);
+        ITable cti(tt);
         
         int size_before, size_after;
         try {
-            OTable mt1(tr, cti, rng);
+            OTable mt1(tr, cti);
             size_before=tr.size();
-            mixed_reduce(tr, rng);
+            mixed_reduce(tr);
             size_after=tr.size();
-            OTable mt2(tr, cti, rng);
+            OTable mt2(tr, cti);
             
             TS_ASSERT_LESS_THAN(size_after,size_before);
             TS_ASSERT_EQUALS(mt1,mt2);

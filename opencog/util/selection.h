@@ -28,13 +28,14 @@
 #include <iterator>
 #include "dorepeat.h"
 #include "RandGen.h"
+#include "mt19937ar.h"
 
 namespace opencog
 {
 
 struct tournament_selection
 {
-    tournament_selection(unsigned int t_size_, RandGen& _rng)
+    tournament_selection(unsigned int t_size_, RandGen& _rng = randGen())
     : t_size(t_size_), rng(_rng)
     {
         OC_ASSERT(t_size > 0);
@@ -77,7 +78,7 @@ struct tournament_selection
  * sum = sum_{x in [from, to(} *x
  */
 template<typename It, typename ScoreT>
-It roulette_select(It from, It to, ScoreT sum, RandGen& rng)
+It roulette_select(It from, It to, ScoreT sum, RandGen& rng = randGen())
 {
     sum = ScoreT(double(sum) * rng.randdouble());
     do {
@@ -92,7 +93,7 @@ It roulette_select(It from, It to, ScoreT sum, RandGen& rng)
 }
 
 template<typename It>
-It roulette_select(It from, It to, RandGen& rng)
+It roulette_select(It from, It to, RandGen& rng = randGen())
 {
     typedef typename std::iterator_traits<It>::value_type score_type;
     return roulette_select(from, to,
@@ -107,7 +108,7 @@ public:
     typedef NodeT value_type;
     typedef std::vector<std::pair<NodeT, int> > PSeq;
 
-    NodeSelector(RandGen& _rng) : rng(_rng) {
+    NodeSelector(RandGen& _rng = randGen()) : rng(_rng) {
     }
 
     NodeT select(int arity) const {

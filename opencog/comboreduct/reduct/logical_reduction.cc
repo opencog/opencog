@@ -42,8 +42,7 @@ logical_reduction::~logical_reduction()
 	if (complexe) delete complexe;
 }
 
-logical_reduction::logical_reduction(const vertex_set& ignore_ops,
-                                     opencog::RandGen& rng)
+logical_reduction::logical_reduction(const vertex_set& ignore_ops)
 {
     using namespace opencog::combo;
 
@@ -60,9 +59,9 @@ logical_reduction::logical_reduction(const vertex_set& ignore_ops,
     // Arghh .. XXX should use reduct_effort==3 for the complexe rule.
     int reduct_effort = 2;
 
-    // Can't be static, due to ignore_ops and rng arguments
+    // Can't be static, due to ignore_ops argument
     medium = new
-        sequential(downwards(simplify_predicates(reduct_effort, ignore_ops, rng), id::boolean_type),
+        sequential(downwards(simplify_predicates(reduct_effort, ignore_ops), id::boolean_type),
                    downwards(reduce_nots(), id::boolean_type),
                    
                    iterative(sequential(pre_subtree_to_enf,
@@ -107,7 +106,7 @@ const rule& logical_reduction::operator()(int effort)
     // The higher reduction efforts require the use of a different
     // constructor.
     OC_ASSERT(medium, "Error: logical reduction effort 2 and greater "
-                      "requires ignore_ops and rng");
+                      "requires ignore_ops");
 
     switch (effort) {
     case 2: return *medium;

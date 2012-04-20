@@ -46,8 +46,8 @@ int main(int argc, char** argv)
         exit(1);
     }
     //Random number generator
-    MT19937RandGen rng(0);
-    NodeSelector<string> ss(rng);
+    randGen().seed(0);
+    NodeSelector<string> ss(randGen());
 
     max_depth = lexical_cast<int>(argv[2]);
     noe = lexical_cast<int>(argv[3]);
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
         ss.add("0", 0, 100);
         //and some random const between 0 and 1
         for (int i = 0;i < 200;++i)
-            ss.add(lexical_cast<string>(rng.randfloat()), 0, 1);
+            ss.add(lexical_cast<string>(randGen().randfloat()), 0, 1);
     }
     //special operators for mixed-type tree
     if (string(argv[1]) == string("mix")) {

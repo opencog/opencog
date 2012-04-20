@@ -44,11 +44,9 @@ struct level : public crule<level>
 // op(op(const,const),var), e.g., +(2,x,1) => +(3,x)
 struct eval_constants : public crule<eval_constants>
 { 
-    opencog::RandGen& rng;
     Evaluator* evaluator;
-    eval_constants(opencog::RandGen& _rng, Evaluator* e = NULL)
-        : crule<eval_constants>::crule("eval_constants"),
-          rng(_rng), evaluator(e) {}
+    eval_constants(Evaluator* e = NULL)
+        : crule<eval_constants>::crule("eval_constants"), evaluator(e) {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 

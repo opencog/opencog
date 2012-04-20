@@ -47,7 +47,7 @@ struct build_knobs : boost::noncopyable
 {
     // used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
-    build_knobs(RandGen& rng, combo_tree& exemplar,
+    build_knobs(combo_tree& exemplar,
                 const type_tree& tt, representation& rep,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
@@ -60,7 +60,6 @@ struct build_knobs : boost::noncopyable
     void build_contin(combo_tree::iterator it);
 
 protected:
-    RandGen& rng;
     combo_tree& _exemplar;
     representation& _rep;
 

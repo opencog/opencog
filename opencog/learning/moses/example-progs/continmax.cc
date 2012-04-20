@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
     // Initialize random number generator (from the first argument
     // given to the program).
-    opencog::MT19937RandGen rng(args.rand_seed);
+    randGen().seed(args.rand_seed);
 
     // Create a set of "fields". Each field is a contin variable.
 
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, depth), args.length);
     instance_set<contin_t> population(args.popsize, fs);
     foreach(instance& inst, population) {
-        occam_randomize_contin(fs, inst, rng);
+        occam_randomize_contin(fs, inst);
         cout << fs.stream(inst) << endl;
         cout << fs.stream_raw(inst) << endl;
     }
@@ -115,12 +115,11 @@ int main(int argc, char** argv)
              terminate_if_gte<contin_t>(-args.length*epsilon), // TerminationPolicy
              //terminate_if_gte(args.length*(7-2*epsilon)*(7-2*epsilon)),
 
-             tournament_selection(2, rng),       // SelectionPolicy
+             tournament_selection(2),            // SelectionPolicy
              univariate(),                       // StructureLearningPolicy
              local_structure_probs_learning(),   // ProbsLearningPolicy
              replace_the_worst(),                // ReplacementPolicy
-             mlogger,
-             rng);
+             mlogger);
 
     // The logger is asynchronous, so flush it's output before
     // writing to cout, else output will be garbled.

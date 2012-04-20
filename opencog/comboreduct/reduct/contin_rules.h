@@ -178,11 +178,9 @@ struct reduce_impulse_arg : public crule<reduce_impulse_arg>
 {
     int reduct_effort;
     const vertex_set &ignore_ops;
-    opencog::RandGen& rng;
-    reduce_impulse_arg(int effort, const vertex_set &igop,
-                       opencog::RandGen& _rng)
+    reduce_impulse_arg(int effort, const vertex_set &igop)
         : crule<reduce_impulse_arg>::crule("reduce_impulse_arg"),
-          reduct_effort(effort), ignore_ops(igop), rng(_rng) {}
+          reduct_effort(effort), ignore_ops(igop) {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 

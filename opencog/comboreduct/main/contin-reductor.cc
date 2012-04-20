@@ -35,7 +35,7 @@ using namespace reduct;
 
 int main()
 {
-    MT19937RandGen rng(1);
+    randGen().seed(1);
     int reduct_effort = 2;
     combo_tree tr;
 
@@ -47,7 +47,7 @@ int main()
         type_tree tt = infer_type_tree(tr);
 
         //produce random inputs
-        ITable cti(tt, rng);
+        ITable cti(tt);
 
         try {
 
@@ -56,15 +56,15 @@ int main()
 
 
             //evalutate tr over cti and fill ct1
-            OTable ct1(tr, cti, rng);
+            OTable ct1(tr, cti);
 
             //print the tree before reduction, for debugging
             cout << "Before : " << tr << endl;
 
-            contin_reduce(tr, reduct_effort, vertex_set(), rng);
+            contin_reduce(tr, reduct_effort, vertex_set());
 
             //evaluate tr over cti and fill ct2
-            OTable ct2(tr, cti, rng);
+            OTable ct2(tr, cti);
 
             cout << "After  : " << tr << endl;
             if (ct1 != ct2) {

@@ -111,7 +111,7 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     boost::transform(cti, target, back_inserter(bs),
                      [&](const vertex_seq& vs, const vertex& v) {
                          contin_t tar = get_contin(v),
-                             res = get_contin(eval_binding(this->rng, vs, tr));
+                             res = get_contin(eval_binding(vs, tr));
                          return -sq(res - tar);
                      });
     // add the Occam's razor feature
@@ -157,11 +157,11 @@ precision_bscore::precision_bscore(const CTable& _ctable,
                                    float alphabet_size, float p,
                                    float min_activation_, float max_activation_,
                                    float penalty_,
-                                   RandGen& _rng, bool positive_,
+                                   bool positive_,
                                    bool worst_norm_)
     : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
-      penalty(penalty_), rng(_rng), positive(positive_), worst_norm(worst_norm_)
+      penalty(penalty_), positive(positive_), worst_norm(worst_norm_)
 {
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
@@ -212,7 +212,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     foreach(const CTable::value_type& vct, ctable) {
         // vct.first = input vector
         // vct.second = counter of outputs
-        if (eval_binding(rng, vct.first, tr) == id::logical_true) {
+        if (eval_binding(vct.first, tr) == id::logical_true) {
             contin_t sumo = sum_outputs(vct.second);
             unsigned totalc = vct.second.total_count();
             sao += sumo;
@@ -299,9 +299,8 @@ discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
                                                    const vector<contin_t>& thres,
                                                    bool wa,
                                                    float alphabet_size,
-                                                   float p,
-                                                   RandGen& _rng)
-    : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa), rng(_rng),
+                                                   float p)
+    : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa),
       classes(ot.size()), weights(thresholds.size() + 1, 1) {
     // enforce that thresholds is sorted
     boost::sort(thresholds);
@@ -360,7 +359,7 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
     /// directly using the results on the fly. On really big table
     /// (dozens of thousands of data points and about 100 inputs, this
     /// has overhead of about 10% of the overall time)
-    OTable ct(tr, cit, rng);    
+    OTable ct(tr, cit);    
     behavioral_score bs(target.size() + (occam?1:0));
     boost::transform(ct, classes, bs.begin(), [&](const vertex& v, size_t c_idx) {
             return (c_idx != this->class_idx(get_contin(v))) * this->weights[c_idx];
@@ -381,9 +380,8 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
 /////////////////////////
         
 ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
-                                         float alphabet_size, float p,
-                                         RandGen& _rng)
-    : ctable(_ctt), rng(_rng)
+                                         float alphabet_size, float p)
+    : ctable(_ctt)
 {
     set_complexity_coef(alphabet_size, p);
 }
@@ -396,7 +394,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
     foreach(const CTable::value_type& vct, ctable) {
         const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
-        bs.push_back(-score_t(c.get(negate_vertex(eval_binding(rng, vs, tr)))));
+        bs.push_back(-score_t(c.get(negate_vertex(eval_binding(vs, tr)))));
     }
 
     // Add the Occam's razor feature
@@ -444,7 +442,6 @@ void ctruth_table_bscore::set_complexity_coef(float alphabet_size, float p) {
 interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_,
                                                            float alphabet_size,
                                                            float stdev,
-                                                           RandGen& _rng,
                                                            weight_t kld_w_,
                                                            weight_t skewness_w_,
                                                            weight_t stdU_w_,
@@ -455,7 +452,7 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
                                                            bool positive_,
                                                            bool abs_skewness_,
                                                            bool decompose_kld_)
-    : ctable(ctable_), rng(_rng),
+    : ctable(ctable_),
       kld_w(kld_w_), skewness_w(skewness_w_), abs_skewness(abs_skewness_),
       stdU_w(stdU_w_), skew_U_w(skew_U_w_), min_activation(min_activation_),
       max_activation(max_activation_), penalty(penalty_), positive(positive_),
@@ -484,7 +481,7 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
 
 behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
-    OTable pred_ot(tr, ctable, rng);
+    OTable pred_ot(tr, ctable);
 
     vertex target = bool_to_vertex(positive);
     

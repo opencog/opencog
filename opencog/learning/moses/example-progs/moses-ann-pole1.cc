@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     combo_tree tr;
     cin >> tr; 
 
-    MT19937RandGen rng(seed);
+    randGen().seed(seed);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::ann_type, 1);
@@ -82,9 +82,9 @@ int main(int argc, char** argv)
     ann_pole_score p_score;
     ann_pole_bscore p_bscore; 
 
-    univariate_optimization omizer(rng);
+    univariate_optimization optim_algo;
     metapopulation<ann_pole_score, ann_pole_bscore, univariate_optimization>
-        metapop_pole(rng, tr, tt, *si, p_score, p_bscore, omizer);
+        metapop_pole(tr, tt, *si, p_score, p_bscore, optim_algo);
 
     moses::moses(metapop_pole);
 

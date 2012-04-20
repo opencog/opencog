@@ -68,7 +68,7 @@ struct replace_the_worst
 //
 struct rtr_replacement
 {
-    rtr_replacement(const field_set& fs, int ws, RandGen& _rng)
+    rtr_replacement(const field_set& fs, int ws, RandGen& _rng = randGen())
         : window_size(ws), _fields(&fs), rng(_rng) { }
 
     template<typename NewInst, typename Dst>

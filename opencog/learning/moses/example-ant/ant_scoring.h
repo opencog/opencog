@@ -209,17 +209,15 @@ private:
 };
 
 struct AntFitnessEstimator : public AntFitnessFunction {
-    AntFitnessEstimator(opencog::RandGen& _rng, int steps = 600, int noise = 0)
-            : AntFitnessFunction(steps), _noise(noise), rng(_rng) { }
+    AntFitnessEstimator(int steps = 600, int noise = 0)
+            : AntFitnessFunction(steps), _noise(noise) { }
     result_type operator()(argument_type tr) const {
-        int error = rng.randint(_noise + 1) - _noise / 2;
+        int error = opencog::randGen().randint(_noise + 1) - _noise / 2;
         return AntFitnessFunction::operator()(tr) + error;
     }
 
 private:
     const int _noise;
-    opencog::RandGen& rng;
-
 };
 
 

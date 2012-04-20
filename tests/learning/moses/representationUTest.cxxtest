@@ -64,9 +64,9 @@ public:
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
         vertex_set ignore_ops{id::div, id::exp, id::log, id::sin};
-        representation rep(contin_reduction(reduct_effort, ignore_ops, rng),
-                           contin_reduction(reduct_effort, ignore_ops, rng), tr, tt,
-                           rng, ignore_ops);
+        representation rep(contin_reduction(reduct_effort, ignore_ops),
+                           contin_reduction(reduct_effort, ignore_ops), tr, tt,
+                           ignore_ops);
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
@@ -78,12 +78,11 @@ public:
         type_tree tt = gen_signature(id::boolean_type, 3);
 
         const vertex_set ignore_ops;
-        logical_reduction r(ignore_ops, rng);
+        logical_reduction r(ignore_ops);
         const rule& r2 = r.operator()(2);
         const rule& r3 = r.operator()(3);
 
-        representation rep(r2, r3,
-                           tr, tt, rng, vertex_set());
+        representation rep(r2, r3, tr, tt, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
@@ -95,11 +94,10 @@ public:
         type_tree tt = infer_type_tree(tr);
 
         const vertex_set ignore_ops;
-        logical_reduction r(ignore_ops, rng);
+        logical_reduction r(ignore_ops);
         const rule& r2 = r.operator()(2);
 
-        representation rep(r2, r2,
-                           tr, tt, rng, vertex_set());
+        representation rep(r2, r2, tr, tt, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
@@ -111,11 +109,10 @@ public:
         type_tree tt = infer_type_tree(tr);
 
         const vertex_set ignore_ops;
-        logical_reduction r(ignore_ops, rng);
+        logical_reduction r(ignore_ops);
         const rule& r2 = r.operator()(2);
 
-        representation rep(r2, r2,
-                           tr, tt, rng, vertex_set());
+        representation rep(r2, r2, tr, tt, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
@@ -127,11 +124,10 @@ public:
         type_tree tt = infer_type_tree(tr);
 
         const vertex_set ignore_ops;
-        logical_reduction r(ignore_ops, rng);
+        logical_reduction r(ignore_ops);
         const rule& r2 = r.operator()(2);
 
-        representation rep(r2, r2,
-                           tr, tt, rng, vertex_set());
+        representation rep(r2, r2, tr, tt, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
@@ -143,12 +139,11 @@ public:
         type_tree tt = infer_type_tree(tr);
 
         const vertex_set ignore_ops;
-        logical_reduction r(ignore_ops, rng);
+        logical_reduction r(ignore_ops);
         const rule& r2 = r.operator()(2);
         const rule& r0 = r.operator()(0);
 
-        representation rep(r2, r0,
-                           tr, tt, rng, vertex_set());
+        representation rep(r2, r0, tr, tt, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }

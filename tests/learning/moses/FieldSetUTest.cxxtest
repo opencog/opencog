@@ -16,7 +16,7 @@ public:
         instance inst(fs.packed_width());
         opencog::MT19937RandGen rng(1);
 
-        randomize(fs, inst, rng);
+        randomize(fs, inst);
         std::cout << std::endl
                   << fs.stream(inst) << std::endl;
         std::cout << fs.stream_raw(inst) << std::endl;
@@ -38,8 +38,8 @@ public:
     {
         field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), 1);
         instance inst(fs.packed_width());
-        opencog::MT19937RandGen rng(1);
-        randomize(fs, inst, rng);
+        randGen().seed(1);
+        randomize(fs, inst);
 
         size_t idx = 1;
         disc_t rv, v = field_set::contin_spec::Left;
@@ -80,9 +80,9 @@ public:
         
         instance inst(fs.packed_width());
 
-        opencog::MT19937RandGen rng(1);
+        randGen().seed(1);
         dorepeat(check_count) {
-            size_t idx = rng.randint(s);
+            size_t idx = randGen().randint(s);
             disc_t rv(1), v(1);
             
             fs.set_raw(inst, idx, v);
@@ -102,10 +102,10 @@ public:
         std::vector<field_set::spec>  v{s(cs1), s(cs2), s(cs3), s(ds1)};
         field_set fs(v.begin(), v.end());
 
-        opencog::MT19937RandGen rng(1);
+        randGen().seed(1);
 
         instance inst(fs.packed_width());
-        randomize(fs,inst,rng);
+        randomize(fs,inst);
         std::cout << " raw : " << fs.stream(inst) << std::endl;
         std::cout << " the number of contin_spec:" << fs.contin().size() << std::endl;
         TS_ASSERT_EQUALS(fs.contin().size(), 3);

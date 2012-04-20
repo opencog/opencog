@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     combo_tree tr;
     cin >> tr; 
     
-    opencog::MT19937RandGen rng(seed);
+    randGen().seed(seed);
 
     // this will let representation building know that we are dealing
     // with an ANN, what it says is that the type of combo_tree to
@@ -66,9 +66,9 @@ int main(int argc, char** argv)
     if(!reduce)
         si = &(clean_reduction());
 
-    univariate_optimization univ(rng);
+    univariate_optimization univ;
     metapopulation<ann_score, ann_bscore, univariate_optimization>
-        metapop(rng, tr, tt, *si, score, bscore, univ);
+        metapop(tr, tt, *si, score, bscore, univ);
     moses_parameters moses_param(max_evals);
     moses::moses(metapop, moses_param);
 

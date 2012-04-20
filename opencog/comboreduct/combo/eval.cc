@@ -171,7 +171,7 @@ void print_binding_map(const binding_map& bmap) {
 /// already computed in the ITable or CTable). It also removes any
 /// type checking as it is the job of static type checker. The
 /// Evaluator is ignored till vu is completely removed
-vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
+vertex eval_throws_binding(const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception)
@@ -207,47 +207,47 @@ vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
             return v;
         case id::logical_and :
             for (sib_it sib = it.begin();sib != it.end();++sib)
-                if (eval_throws_binding(rng, bmap, sib, pe) == id::logical_false)
+                if (eval_throws_binding(bmap, sib, pe) == id::logical_false)
                     return id::logical_false;
             return id::logical_true;
         case id::logical_or :
             for (sib_it sib = it.begin();sib != it.end();++sib)
-                if (eval_throws_binding(rng, bmap, sib, pe) == id::logical_true)
+                if (eval_throws_binding(bmap, sib, pe) == id::logical_true)
                     return id::logical_true;
             return id::logical_false;                
         case id::logical_not :
-            return negate_vertex(eval_throws_binding(rng, bmap, it.begin(), pe));
+            return negate_vertex(eval_throws_binding(bmap, it.begin(), pe));
         case id::boolean_if : {
             sib_it sib = it.begin();
-            vertex vcond = eval_throws_binding(rng, bmap, sib, pe);
+            vertex vcond = eval_throws_binding(bmap, sib, pe);
             ++sib;
             if (vcond == id::logical_true) {
-                return eval_throws_binding(rng, bmap, sib, pe);
+                return eval_throws_binding(bmap, sib, pe);
             } else {
                 ++sib;
-                return eval_throws_binding(rng, bmap, sib, pe);
+                return eval_throws_binding(bmap, sib, pe);
             }
         }
         // mixed operators
         case id::contin_if : {
             sib_it sib = it.begin();
-            vertex vcond = eval_throws_binding(rng, bmap, sib, pe);
+            vertex vcond = eval_throws_binding(bmap, sib, pe);
             ++sib;
             if (vcond == id::logical_true) {
-                return eval_throws_binding(rng, bmap, sib, pe);
+                return eval_throws_binding(bmap, sib, pe);
             } else {
                 ++sib;
-                return eval_throws_binding(rng, bmap, sib, pe);
+                return eval_throws_binding(bmap, sib, pe);
             }
         }
         case id::greater_than_zero : {
             sib_it sib = it.begin();
-            vertex x = eval_throws_binding(rng, bmap, sib, pe);
+            vertex x = eval_throws_binding(bmap, sib, pe);
             return bool_to_vertex(0 < get_contin(x));
         }
         case id::impulse : {
             vertex i;
-            i = eval_throws_binding(rng, bmap, it.begin(), pe);
+            i = eval_throws_binding(bmap, it.begin(), pe);
             return (i == id::logical_true ? 1.0 : 0.0);
         }
         // continuous operator
@@ -255,18 +255,18 @@ vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
             contin_t res = 0;
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws_binding(rng, bmap, sib, pe);
+                vertex vres = eval_throws_binding(bmap, sib, pe);
                 res += get_contin(vres);
             }
             return res;
         }
         case id::rand :
-            return rng.randfloat();
+            return randGen().randfloat();
         case id::times : {
             contin_t res = 1;
             //assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws_binding(rng, bmap, sib, pe);
+                vertex vres = eval_throws_binding(bmap, sib, pe);
                 res *= get_contin(vres);
                 if (0.0 == res) return res;  // avoid pointless evals
             }
@@ -275,11 +275,11 @@ vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
         case id::div : {
             contin_t x, y;
             sib_it sib = it.begin();
-            vertex vx = eval_throws_binding(rng, bmap, sib, pe);
+            vertex vx = eval_throws_binding(bmap, sib, pe);
             x = get_contin(vx);
             if (0.0 == x) return x;  // avoid pointless evals
             ++sib;
-            vertex vy = eval_throws_binding(rng, bmap, sib, pe);
+            vertex vy = eval_throws_binding(bmap, sib, pe);
             y = get_contin(vy);
             contin_t res = x / y;
             if (isnan(res) || isinf(res))
@@ -287,7 +287,7 @@ vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
             return res;
         }
         case id::log : {
-            vertex vx = eval_throws_binding(rng, bmap, it.begin(), pe);
+            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
 #ifdef ABS_LOG
             contin_t res = log(std::abs(get_contin(vx)));
 #else
@@ -298,7 +298,7 @@ vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
             return res;
         }
         case id::exp : {
-            vertex vx = eval_throws_binding(rng, bmap, it.begin(), pe);
+            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
             contin_t res = exp(get_contin(vx));
             // this may happen in case the argument is too high, then
             // exp will be infty
@@ -306,7 +306,7 @@ vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
             return res;
         }
         case id::sin : {
-            vertex vx = eval_throws_binding(rng, bmap, it.begin(), pe);
+            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
             return sin(get_contin(vx));
         }
         default :
@@ -354,26 +354,26 @@ vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
     }
 }
 
-vertex eval_binding(RandGen& rng, const vertex_seq& bmap, combo_tree::iterator it)
+vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
     throw (ComboException, AssertionException, std::bad_exception)
 {
     try {
-        return eval_throws_binding(rng, bmap, it);
+        return eval_throws_binding(bmap, it);
     } catch (EvalException e) {
         return e.get_vertex();
     }
 }
 
-vertex eval_binding(RandGen& rng, const vertex_seq& bmap, const combo_tree& tr)
+vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
     throw (StandardException, std::bad_exception)
 {
-    return eval_binding(rng, bmap, tr.begin());
+    return eval_binding(bmap, tr.begin());
 }
 
-vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap, const combo_tree& tr)
+vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
     throw (EvalException, ComboException, AssertionException, std::bad_exception)
 {
-    return eval_throws_binding(rng, bmap, tr.begin());
+    return eval_throws_binding(bmap, tr.begin());
 }
 
 

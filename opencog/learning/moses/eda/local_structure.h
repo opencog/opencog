@@ -74,8 +74,7 @@ struct local_structure_model : public nullary_function<instance>,
 
     // creates a model based on a set of fields and a range of instances
     template<typename It>
-    local_structure_model(const field_set& fields,
-                          It from, It to, RandGen& _rng);
+    local_structure_model(const field_set& fields, It from, It to);
 
     instance operator()() const; // sample from the model
 
@@ -98,7 +97,6 @@ protected:
                                 // dependencies between fields. This
                                 // is solely used to compute _ordering
     field_set _fields;
-    RandGen& rng;
 
     // true if the variable at index idx is identical over the range
     // of instances [l, u)
@@ -171,14 +169,12 @@ protected:
 //
 template<typename It>
 local_structure_model::local_structure_model(const field_set& fs,
-                                             It from, It to,
-                                             RandGen& _rng) :
+                                             It from, It to) :
     super(fs.raw_size()),
     _instance_length(fs.packed_width()),
     _ordering(make_counting_iterator(0), make_counting_iterator(int(size()))),
     _initial_deps(size()),  // by inheritance, this is vector<dtree>::size()
-    _fields(fs),
-    rng(_rng)
+    _fields(fs)
 {
     super::iterator dtr = begin();
 

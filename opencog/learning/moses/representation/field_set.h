@@ -27,6 +27,7 @@
 #include <map>
 
 #include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_assert.h>
 
@@ -989,9 +990,9 @@ public:
             return _fs->disc_and_bits()[spec_idx].multy;
         }
 
-        void randomize(RandGen& rng)
+        void randomize()
         {
-            _fs->set_raw(*_inst, _idx, rng.randint(multy()));
+            _fs->set_raw(*_inst, _idx, randGen().randint(multy()));
         }
 
     protected:

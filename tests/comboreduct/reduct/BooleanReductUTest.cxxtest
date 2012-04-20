@@ -16,8 +16,6 @@ using namespace opencog;
 using namespace reduct;
 using namespace ant_combo;
 
-static opencog::MT19937RandGen rng(0);
-
 class BooleanReductUTest : public CxxTest::TestSuite
 {
     void test_simplify_tree_str(const string& tr_str)
@@ -30,7 +28,7 @@ class BooleanReductUTest : public CxxTest::TestSuite
         complete_truth_table tt1(tr);
         size_before = tr.size();
         vertex_set ignore_ops;
-        logical_reduce(3, tr, ignore_ops, rng);
+        logical_reduce(3, tr, ignore_ops);
         size_after = tr.size();
         complete_truth_table tt2(tr, integer_log2(tt1.size()));
         

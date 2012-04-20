@@ -77,11 +77,10 @@ representation::representation(const reduct::rule& simplify_candidate,
                                const reduct::rule& simplify_knob_building,
                                const combo_tree& exemplar_,
                                const type_tree& tt,
-                               RandGen& _rng,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set* perceptions,
                                const combo_tree_ns_set* actions)
-    : _exemplar(exemplar_), rng(_rng),
+    : _exemplar(exemplar_),
       _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
 {
@@ -92,7 +91,7 @@ representation::representation(const reduct::rule& simplify_candidate,
     }
 
     // Build the knobs.
-    build_knobs(rng, _exemplar, tt, *this, ignore_ops,
+    build_knobs(_exemplar, tt, *this, ignore_ops,
                 perceptions, actions,
                 stepsize, expansion, depth);
 

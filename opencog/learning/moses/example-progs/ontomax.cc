@@ -70,14 +70,14 @@ int main(int argc,char** argv)
 
     // Initialize random number generator (from the first argument
     // given to the program).
-    MT19937RandGen rng(args.rand_seed);
+    randGen().seed(args.rand_seed);
 
     term_tree tr("");
     recbuild(tr, tr.begin(), branching, depth, 0, 0);
     field_set fs(field_set::term_spec(tr), args.length);
     instance_set<contin_t> population(args.popsize,fs);
     foreach(instance& inst,population) {
-        occam_randomize_term(fs,inst,rng);
+        occam_randomize_term(fs, inst);
     }
 
 
@@ -90,12 +90,11 @@ int main(int argc,char** argv)
              terminate_if_gte<contin_t>((depth+pow(float(branching),
                                                    depth)-1)*args.length),
                                                  // TerminationPolicy
-             tournament_selection(2, rng),       // SelectionPolicy
+             tournament_selection(2),            // SelectionPolicy
              univariate(),                       // StructureLearningPolicy
              local_structure_probs_learning(),   // ProbsLearningPolicy
              replace_the_worst(),                // ReplacementPolicy
-             mlogger,
-             rng);
+             mlogger);
 
     // The logger is asynchronous, so flush it's output before
     // writing to cout, else output will be garbled.

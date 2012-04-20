@@ -51,7 +51,6 @@ typedef ref_rule_map::iterator ref_rule_map_it;
  */
 const rule* select_rule(string rule_ref_str)
 {
-    static MT19937RandGen rnd = MT19937RandGen(0);
     static opencog::combo::vertex_set ignore_ops;
     int reduct_effort = 2;
 
@@ -76,7 +75,7 @@ const rule* select_rule(string rule_ref_str)
                           "subtree_to_enf"))
 
         // Contin buried in logical exprs.
-        ("PRD", make_pair(new simplify_predicates(reduct_effort, ignore_ops, rnd),
+        ("PRD", make_pair(new simplify_predicates(reduct_effort, ignore_ops),
                           "simplify_predicates"))
         // Contin rules
         ("PZ", make_pair(new downwards(reduce_plus_zero()),
@@ -108,7 +107,7 @@ const rule* select_rule(string rule_ref_str)
         // General rules
         ("LEV", make_pair(new downwards(level()),
                           "level"))
-        ("EC", make_pair(new upwards(eval_constants(rnd)),
+        ("EC", make_pair(new upwards(eval_constants()),
                          "eval_constants"));
     if(rule_ref_str == "h") {
         for(ref_rule_map_const_it cit = ref_rules.begin();
@@ -132,7 +131,7 @@ const rule* select_rule(string rule_ref_str)
 
 int main()
 {
-    MT19937RandGen rng(1);
+    randGen().seed(1);
 
     combo_tree tr;
 
@@ -170,13 +169,13 @@ int main()
             if (selected_rule) {
 
                 //produce random inputs
-                ITable cti(tt, rng);
+                ITable cti(tt);
                 //print cti, for debugging
                 //cout << "Rnd matrix :" << endl << cti;
             
                 try {
                     //evalutate tr over cti and fill mt1
-                    //mixed_table mt1(tr, cti, tr_type, rng);
+                    //mixed_table mt1(tr, cti, tr_type);
                     //print mt1, for debugging
                     //cout << "MT1" << endl << mt1 << endl;
                     
@@ -186,7 +185,7 @@ int main()
                     (*selected_rule)(tr);
                     
                     //evaluate tr over cti and fill mt2
-                    //mixed_table mt2(tr, cti, tr_type, rng);
+                    //mixed_table mt2(tr, cti, tr_type);
                     //print mt2, for debugging
                     //cout << "MT2" << endl << mt2 << endl;
                     

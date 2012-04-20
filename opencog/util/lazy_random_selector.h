@@ -25,6 +25,7 @@
 
 #include "lazy_selector.h"
 #include "RandGen.h"
+#include "mt19937ar.h"
 
 namespace opencog
 {
@@ -34,7 +35,8 @@ namespace opencog
 // (i.e. it never selects twice the same number)
 // each in O(1) and only uses O(m) memory - useful where n is much larger than m
 struct lazy_random_selector : public lazy_selector {
-    lazy_random_selector(unsigned int n, opencog::RandGen& _rng) : lazy_selector(n), rng(_rng) { }
+    lazy_random_selector(unsigned int n, opencog::RandGen& _rng = randGen())
+        : lazy_selector(n), rng(_rng) { }
     unsigned int select();
 private:
     opencog::RandGen& rng;

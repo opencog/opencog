@@ -32,8 +32,7 @@
 namespace opencog { namespace reduct {
 
 const rule& contin_reduction(int reduct_effort,
-                             const vertex_set& ignore_ops, 
-                             opencog::RandGen& rng)
+                             const vertex_set& ignore_ops)
 {
     // Rules that do not involve factorizing or distributing
     static sequential seq_without_factorize_distribute =
@@ -44,7 +43,7 @@ const rule& contin_reduction(int reduct_effort,
                    downwards(reduce_plus_zero()),
 
                    downwards(level()),
-                   upwards(eval_constants(rng)),
+                   upwards(eval_constants()),
                            
                    downwards(reduce_plus_times_one_child()),
                    downwards(reduce_plus_zero()),
@@ -73,7 +72,7 @@ const rule& contin_reduction(int reduct_effort,
                    when(downwards(reduce_sum_log()),
                         ignore_ops.find(id::log) == ignore_ops.end()),
                    
-                   when(downwards(reduce_impulse_arg(reduct_effort, ignore_ops, rng)),
+                   when(downwards(reduce_impulse_arg(reduct_effort, ignore_ops)),
                         ignore_ops.find(id::impulse) == ignore_ops.end()),
                    
                    upwards(reorder_commutative()),

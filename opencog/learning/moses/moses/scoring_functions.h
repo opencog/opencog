@@ -69,13 +69,10 @@ struct CaseBasedBoolean : public unary_function<combo_tree, score_t>
 
     bool bool_evaluate(const vector<bool>& bindings, const combo_tree& tr) const
     {
-        static MT19937RandGen rng(0); // this is not useful anyway,
-                                      // remove once rng has a factory
-                                      // and is optional
         for(unsigned int i = 0; i < bindings.size(); ++i) {
             binding(i+1) = bool_to_vertex(bindings[i]);
         }
-        return vertex_to_bool(eval_throws(rng, tr));
+        return vertex_to_bool(eval_throws(tr));
     }
 
     ConfusionMatrix ComputeConfusionMatrix(const combo_tree& tr) const {
