@@ -41,7 +41,6 @@ using namespace pai;
 
 RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         const combo::combo_tree& tr,
-        RandGen& rng,
         const std::vector<combo::vertex>& arguments,
         bool dsdp, combo::variable_unifier& vu)
         : _ww(ww), _tr(tr), _it(_tr.begin()), _hasBegun(false),

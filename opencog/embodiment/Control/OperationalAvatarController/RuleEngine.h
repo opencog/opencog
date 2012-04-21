@@ -369,9 +369,6 @@ private:
     bool groupingMode;
     std::string groupLeaderId;
 
-    // Random number Generator
-    opencog::RandGen * rng;
-
     /**
      * Process all rules suggesting actions / feelings / relations for the
      * activated ones

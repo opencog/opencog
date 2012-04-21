@@ -549,9 +549,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
-    // Get rand generator
-    // RandGen & randGen = oac->getRandGen();
-
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
@@ -840,10 +837,9 @@ std::cout<<"'do_planning' can not find any suitable plan for the selected demand
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
     float selectionThreshold = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
-                                                                       SELECTION_THRESHOLD_MODULATOR_NAME,
-                                                                       randGen
+                                                                       SELECTION_THRESHOLD_MODULATOR_NAME
                                                                       );
-    if ( randGen.randfloat() > selectionThreshold )
+    if ( randGen().randfloat() > selectionThreshold )
     {
 
         selectedDemandGoal = this->chooseRandomDemandGoal(); 

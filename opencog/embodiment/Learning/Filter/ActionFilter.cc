@@ -46,10 +46,9 @@ ActionFilter::ActionFilter(const std::string& self_id,
                            const indefinite_object_set& ios,
                            const builtin_action_set& bas,
                            arity_t arity,
-                           bool type_check,
-                           opencog::RandGen& rng)
+                           bool type_check)
         : _self_id(self_id), _owner_id(owner_id), _wp(wp), _dos(dos),
-        _ios(ios), _bas(bas), _arity(arity), _type_check(type_check), _rng(rng)
+        _ios(ios), _bas(bas), _arity(arity), _type_check(type_check)
 {
 }
 
@@ -416,8 +415,7 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
                         WorldWrapperUtil::maketree_percept(is_X, defo);
                     bool corresponding_arg_exists =
                         combo::vertex_to_bool(WorldWrapperUtil::evalPerception
-                                              (_rng,
-                                               smh,
+                                              (smh,
                                                time,
                                                _wp.getAtomSpace(),
                                                _self_id, _owner_id,
@@ -430,7 +428,7 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
             //non random object case
             //evaluate the indefinite object and check that it matches obj_name
             else {
-                vertex v = WorldWrapperUtil::evalIndefiniteObject(_rng,
+                vertex v = WorldWrapperUtil::evalIndefiniteObject(
                            smh,
                            time,
                            _wp.getAtomSpace(),

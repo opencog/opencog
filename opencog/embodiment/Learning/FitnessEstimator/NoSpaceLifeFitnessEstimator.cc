@@ -53,18 +53,17 @@ NoSpaceLifeFitnessEstimator::NoSpaceLifeFitnessEstimator
  const definite_object_set& dos, BehaviorCategory& BDCat,
  const std::vector<Temporal>& ets, const argument_list_list& all,
  int indefinite_object_count, int operator_count,
- int predicate_count, int action_count, opencog::RandGen& rng)
+ int predicate_count, int action_count)
         : _wp(wp), _dos(dos), _petName(petName), _ownerName(ownerName),
         _avatarName(avatarName), _trickName(trickName),
         _BDCat(BDCat), _exemplarTemporals(ets), _all(all),
         _BDMatcher(&wp->getAtomSpace()),
         _sizePenalty(dos, indefinite_object_count, operator_count,
-                     predicate_count, action_count),
+                     predicate_count, action_count)
 #ifdef IS_FE_LRU_CACHE
-        _bd_cache(FE_LRU_CACHE_SIZE),
-        _cache_success(0), _total_fitness_call(0),
+        , _bd_cache(FE_LRU_CACHE_SIZE),
+        _cache_success(0), _total_fitness_call(0)
 #endif
-        _rng(rng)
 {
 
     OC_ASSERT(BDCat.getSize() == (int)all.size(),
@@ -135,9 +134,8 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
                         _ownerName,
                         _avatarName,
                         *cbd_it,
-                        *eti,
-                        _rng);
-                RunningComboProcedure rp(nspww, tr, _rng, *allci, _sendDefinitePlan);
+                        *eti);
+                RunningComboProcedure rp(nspww, tr, *allci, _sendDefinitePlan);
                 unsigned int cbd_size = cbd_it->size();
                 for (unsigned int i = 0;
                         !rp.isFinished() &&

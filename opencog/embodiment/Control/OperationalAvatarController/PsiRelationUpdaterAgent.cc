@@ -437,8 +437,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
 void PsiRelationUpdaterAgent::updateEntityRelation(AtomSpace & atomSpace, 
                                                    Handle petHandle, 
                                                    Procedure::ProcedureInterpreter & procedureInterpreter, 
-                                                   const Procedure::ProcedureRepository & procedureRepository, 
-                                                   RandGen & randGen) 
+                                                   const Procedure::ProcedureRepository & procedureRepository)
 
 {
     // Shuffle all the instant Psi Rules about Relation 
@@ -477,8 +476,7 @@ void PsiRelationUpdaterAgent::updateEntityRelation(AtomSpace & atomSpace,
                                                      procedureInterpreter, 
                                                      procedureRepository, 
                                                      hInstantRelationRule, 
-                                                     varBindCandidates, 
-                                                     randGen
+                                                     varBindCandidates
                                                    ) ) {
             
             // Split the Psi Rule into Goal, Action and Preconditions
@@ -541,9 +539,6 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
-    // Get rand generator
-    RandGen & randGen = oac->getRandGen();
-
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
@@ -590,11 +585,10 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     // Decide whether to update relations during this cognitive cycle (controlled by the modulator 'SecuringThreshold')
     // float securingThreshold =
     AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
-                                            SECURING_THRESHOLD_MODULATOR_NAME, 
-                                            randGen);
+                                            SECURING_THRESHOLD_MODULATOR_NAME);
 
 // TODO: Uncomment the lines below once finish testing
-//    if ( randGen.randfloat() < securingThreshold ) 
+//    if ( randGen().randfloat() < securingThreshold ) 
 //    {
 //        logger().debug(
 //                "PsiRelationUpdaterAgent::%s - Skip updating the relations for this cognitive cycle [ cycle = %d ] ", 
@@ -612,6 +606,6 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     this->updateEntityNovelty(server);
    
     // Update other relations 
-    this->updateEntityRelation(atomSpace, petHandle, procedureInterpreter, procedureRepository, randGen);
+    this->updateEntityRelation(atomSpace, petHandle, procedureInterpreter, procedureRepository);
 }
 

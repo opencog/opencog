@@ -85,8 +85,8 @@ struct interactive_hillclimber {
     void set_current_fitness(fitness_t f) {
         _hillclimber->set_current_fitness(f);
     }
-    const combo_tree& current_program(RandGen& rng) {
-        return _hillclimber->current_program(rng);
+    const combo_tree& current_program() {
+        return _hillclimber->current_program();
     }
 
     void reset_cache() {

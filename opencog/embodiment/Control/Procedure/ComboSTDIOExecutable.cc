@@ -27,7 +27,6 @@
 #include <opencog/embodiment/WorldWrapper/ShellWorldWrapper.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/util/mt19937ar.h>
 #include <fstream>
 #include <iostream>
 
@@ -55,8 +54,6 @@ int main(int argc, char** argv)
         int n = cpr.loadFromStream(fin);
         std::cout << "loaded " << n << " combo functions from " << argv[1] << std::endl;
     }
-
-    opencog::MT19937RandGen rng(0);
 
     combo_tree tr;
     opencog::world::ShellWorldWrapper sww;
@@ -88,7 +85,7 @@ int main(int argc, char** argv)
         try {
             cpr.instantiateProcedureCalls(tr, true);
             std::vector<combo::vertex> empty_arguments;
-            RunningComboProcedure rp(sww, tr, rng, empty_arguments);
+            RunningComboProcedure rp(sww, tr, empty_arguments);
             while (!rp.isFinished()) {
                 rp.cycle();
             }

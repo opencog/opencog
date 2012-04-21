@@ -24,7 +24,6 @@
 
 #include <opencog/embodiment/Control/Procedure/RunningProcedureId.h>
 #include "ComboInterpreterUTest.h"
-#include <opencog/util/mt19937ar.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
@@ -50,13 +49,11 @@ class scriptsComboInterpreterUTest :  public CxxTest::TestSuite , ComboInterpret
 private:
 
     ComboProcedureRepository cpr;
-    opencog::RandGen* rng;
     bool combo_loaded;
 
 public :
 
     scriptsComboInterpreterUTest() {
-        rng = new opencog::MT19937RandGen(0);
         combo_loaded = false;
     }
 
@@ -69,14 +66,6 @@ public :
         cout << "loaded " << n << " combo functions from " << file_combo << std::endl;
         addFeelingsAndTraits();
         combo_loaded = true;
-    }
-
-    ~scriptsComboInterpreterUTest() {
-        delete rng;
-    }
-
-    opencog::RandGen& getRandGen() {
-        return *rng;
     }
 
     void addFeelingsAndTraits() {
@@ -417,7 +406,7 @@ public :
         cpr.instantiateProcedureCalls(tree, true);
 
         vector<vertex> arguments ;
-        Procedure::ComboInterpreter interpreter(*ppai, *rng);
+        Procedure::ComboInterpreter interpreter(*ppai);
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
@@ -460,7 +449,7 @@ public :
 
 
         vector<vertex> arguments ;
-        Procedure::ComboInterpreter interpreter(*ppai, *rng);
+        Procedure::ComboInterpreter interpreter(*ppai);
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
@@ -510,7 +499,7 @@ public :
         cpr.instantiateProcedureCalls(tree, true);
 
         vector<vertex> arguments ;
-        Procedure::ComboInterpreter interpreter(*ppai, *rng);
+        Procedure::ComboInterpreter interpreter(*ppai);
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments, vu);
 
         while (! interpreter.isFinished(runningId)) {

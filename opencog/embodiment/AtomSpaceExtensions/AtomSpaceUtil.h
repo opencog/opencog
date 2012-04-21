@@ -190,9 +190,7 @@ public:
      *             GroundSchemaNode: modulatorUpdater
      */ 
     static float getCurrentModulatorLevel(const AtomSpace & atomSpace, 
-                                          const std::string & modulatorName, 
-                                          opencog::RandGen & randGen
-                                         );
+                                          const std::string & modulatorName);
     /**
      * Returns the current level of the given Demand.
      *
@@ -205,9 +203,7 @@ public:
      * @return float    The current level of a given Demand
      */ 
     static float getCurrentDemandLevel(const AtomSpace & atomSpace, 
-                                       const std::string & demandName, 
-                                       opencog::RandGen & randGen
-                                      );
+                                       const std::string & demandName);
 
     /**
      * Get the handle to Demand Goal (EvaluationLink)

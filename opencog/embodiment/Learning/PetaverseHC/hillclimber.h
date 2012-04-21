@@ -254,10 +254,10 @@ struct hillclimber {
     //WARNING : current_program() has a side effect since it informs
     //that that program is delivered to the user and therefor will not
     //be sent again
-    const combo_tree& current_program(RandGen& rng) {
+    const combo_tree& current_program() {
 
         //returns the best program which has never been sent to the owner
-        ordered_neighborhood_it oni = random_not_sent_best_program(rng);
+        ordered_neighborhood_it oni = random_not_sent_best_program();
         if (oni == _ordered_best_estimates.end()) { //no such best program
             _current_program.clear();
         } else {
@@ -414,15 +414,15 @@ private:
     //return the best candidate so far that has not been sent yet for trial.
     //If there is no such candidate (all has been sent or no candidates
     //have been produced), then it returns the end interator
-    ordered_neighborhood_it random_not_sent_best_program(RandGen& rng) {
+    ordered_neighborhood_it random_not_sent_best_program() {
         ordered_neighborhood_it oni = _ordered_best_estimates.end();
         if (!_ordered_best_estimates.empty()) {
-            oni = random_best_candidate(rng);
+            oni = random_best_candidate();
             while (!_ordered_best_estimates.empty()
                     && has_been_sent_to_user(oni->second)) {
                 _ordered_best_estimates.erase(oni);
                 if (!_ordered_best_estimates.empty())
-                    oni = random_best_candidate(rng);
+                    oni = random_best_candidate();
             }
         }
         return oni;
@@ -430,7 +430,7 @@ private:
 
     //return randomly one of the best (fitness, cadidate)
     //from ordered_neighborhood_it
-    ordered_neighborhood_it random_best_candidate(RandGen& rng) {
+    ordered_neighborhood_it random_best_candidate() {
         ordered_neighborhood_it res = _ordered_best_estimates.begin();
         OC_ASSERT(!_ordered_best_estimates.empty(),
                 "_ordered_best_estimates should not be empty, if it may indeed be  empty then it is a bug, ask Nil to fix it");
@@ -438,7 +438,7 @@ private:
         //choose randomly among programs with the same fitness
         int plateau_size = _ordered_best_estimates.count(fit);
         if (plateau_size > 1) {
-            int chosen_one = rng.randint(plateau_size);
+            int chosen_one = randGen().randint(plateau_size);
             for (int i_co = 0; i_co < chosen_one; ++i_co)
                 ++res;
         }
@@ -473,8 +473,9 @@ private:
 
     //return a combo_tree randomly choosen from _order_neighborhood
     //the higher the fitness the higher the chance to be choosen
-    const combo_tree& choose_rand_tree_from_order_neighborhood(RandGen& rng) {
+    const combo_tree& choose_rand_tree_from_order_neighborhood() {
 
+        RandGen &rng = randGen();
         ordered_neighborhood_it oni;
         do {
             //generate 2 gaussian numbers with variance 1 and mean 0

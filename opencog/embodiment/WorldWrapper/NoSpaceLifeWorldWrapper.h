@@ -53,8 +53,7 @@ public:
                             const string& ownerName,
                             const string& avatarName,
                             const CompositeBehaviorDescription& cbd,
-                            const Temporal& exemplarTemporal,
-                            opencog::RandGen& _rng);
+                            const Temporal& exemplarTemporal);
     ~NoSpaceLifeWorldWrapper();
 
     /**
@@ -103,8 +102,6 @@ private:
     const string& _petName;
     const string& _ownerName;
     const string& _avatarName; //avatar to imitate, to take its view point
-
-    opencog::RandGen& rng;
 };
 
 } } // namespace opencog::world

@@ -122,15 +122,13 @@ public:
      * @parem  hListLink          Handle to ListLink that contains arguments
      * @param  varBindCandidates  All the possible variable bindings for the selected Psi Rule
      * @param  schemaArguments    Return the arguments that would be used while executing the combo procedure
-     * @param  randGen            Random number generator
      *
      * @return  The number of arguments got
      */
     static bool getSchemaArguments(const AtomSpace & atomSpace, 
                                    Handle hListLink, 
                                    const std::vector<std::string> & varBindCandidates, 
-                                   std::vector <combo::vertex> & schemaArguments, 
-                                   RandGen & randGen);
+                                   std::vector <combo::vertex> & schemaArguments);
 
     /**
      * Initialize all the possible variable bindings in Psi Rule with all the entities the pet encounters
@@ -192,8 +190,7 @@ public:
                             Procedure::ProcedureInterpreter & procedureInterpreter, 
                             const Procedure::ProcedureRepository & procedureRepository, 
                             Handle hPrecondition, 
-                            combo::variable_unifier & unifier, 
-                            RandGen & randGen);
+                            combo::variable_unifier & unifier);
 
     /**
      * Slightly easier-to-use version of the above, which creates unifier itself.
@@ -201,8 +198,7 @@ public:
     static bool isSatisfied(const AtomSpace & atomSpace,
                             Procedure::ProcedureInterpreter & procedureInterpreter,
                             const Procedure::ProcedureRepository & procedureRepository,
-                            Handle hPrecondition,
-                            RandGen & randGen);
+                            Handle hPrecondition);
 
     /**
      * Check if all the Preconditions of a given Psi Rule are satisfied. 
@@ -213,7 +209,6 @@ public:
      * @param  procedureRepository   Where to search the procedure given its name
      * @param  hPsiRule              Handle to the a Psi Rule, i.e. an ImplicationLink
      * @param  varBindCandidates     All the possible variable bindings for the selected Psi Rule
-     * @param  randGen               Random number generator
      *
      * @return true if all the preconditions of the given Psi Rule are satisfied, otherwise return false                              
      */
@@ -221,8 +216,7 @@ public:
                                           Procedure::ProcedureInterpreter & procedureInterpreter, 
                                           const Procedure::ProcedureRepository & procedureRepository, 
                                           Handle hPsiRule, 
-                                          std::vector<std::string> & varBindCandidates, 
-                                          RandGen & randGen);
+                                          std::vector<std::string> & varBindCandidates);
 
     /**
      * Apply the given Psi Rule. 
@@ -232,7 +226,6 @@ public:
      * @param  procedureRepository   Where to search the procedure given its name
      * @param  psiRules
      * @param  varBindCandidates     All the possible variable bindings for the selected Psi Rule
-     * @param  randGen               Random number generator
      *
      * @return  true if success. 
      *
@@ -249,8 +242,7 @@ public:
                                                       Procedure::ProcedureInterpreter & procedureInterpreter, 
                                                       const Procedure::ProcedureRepository & procedureRepository, 
                                                       Handle hPsiRule,
-                                                      const std::vector<std::string> & varBindCandidates, 
-                                                      RandGen & randGen);
+                                                      const std::vector<std::string> & varBindCandidates);
 
     /**
      * Get/ set previous/ current Demand Goal (EvaluationLink)

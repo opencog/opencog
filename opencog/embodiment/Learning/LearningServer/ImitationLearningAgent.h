@@ -112,8 +112,6 @@ private:
     std::string _owner_id;
     std::string _avatar_id;
     std::string _trick_name;
-
-    RandGen* _rng;
 };
 
 }} // ~namespace opencog::messaging

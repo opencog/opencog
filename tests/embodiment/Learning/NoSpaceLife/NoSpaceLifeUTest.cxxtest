@@ -23,7 +23,6 @@
 
 
 #include <opencog/util/numeric.h>
-#include <opencog/util/mt19937ar.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 
@@ -41,8 +40,6 @@ using namespace std;
 #define T3 3*ACTION_DONE_TIME
 #define TIMING_RELEVENT false
 
-static opencog::MT19937RandGen rng(0);
-
 class NoSpaceLifeUTest : public CxxTest::TestSuite
 {
 public:
@@ -51,8 +48,7 @@ public:
 
     void test_processSequence_and() {
         //initialize random generator
-        // TODO: this should be done where/when the RandGen object is created
-        //opencog::seed_rand((unsigned)time(0));
+        //randGen().seed(0);
 
         //fill combo tree with program
         string obj_str = "stick";
@@ -140,7 +136,7 @@ public:
         //and check that it fits
 
         NoSpaceLife nsl(atomSpace, pet_str, owner_str, owner_str, bd,
-                        Temporal(0, 3*ACTION_DONE_TIME + 2*PAUSE_TIME), rng);
+                        Temporal(0, 3*ACTION_DONE_TIME + 2*PAUSE_TIME));
 
         combo_tree::iterator head = tr.begin();
 
@@ -160,7 +156,7 @@ public:
         //and check that it fits too
 
         NoSpaceLife nsl_rand(atomSpace, pet_str, owner_str, owner_str, bd,
-                             Temporal(0, 3*ACTION_DONE_TIME + 2*PAUSE_TIME), rng);
+                             Temporal(0, 3*ACTION_DONE_TIME + 2*PAUSE_TIME));
 
         combo_tree::iterator head_rand = tr_rand.begin();
 

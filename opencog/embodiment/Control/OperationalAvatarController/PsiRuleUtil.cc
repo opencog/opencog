@@ -178,8 +178,7 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
 bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace, 
                                      Handle hListLink, 
                                      const std::vector<std::string> & varBindCandidates, 
-                                     std::vector <vertex> & schemaArguments, 
-                                     RandGen & randGen) 
+                                     std::vector <vertex> & schemaArguments)
 {
     // Check hListLink is of type ListLink
     if ( atomSpace.getType(hListLink) != LIST_LINK ) {
@@ -203,7 +202,7 @@ bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace,
     int indexVariableBind; 
 
     if ( !varBindCandidates.empty() ) {
-        indexVariableBind = randGen.randint( varBindCandidates.size() ); 
+        indexVariableBind = randGen().randint( varBindCandidates.size() ); 
         variableBind = varBindCandidates[indexVariableBind];
         bChooseVariableBind = true; 
     }
@@ -297,8 +296,7 @@ void PsiRuleUtil::updateVarBindCandidates(const variable_unifier & unifier,
 bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                               Procedure::ProcedureInterpreter & procedureInterpreter,
                               const Procedure::ProcedureRepository & procedureRepository,
-                              Handle hPrecondition,
-                              RandGen & randGen)
+                              Handle hPrecondition)
 {
     std::vector<std::string> varBindCandidates;
 
@@ -326,16 +324,14 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
             procedureInterpreter,
             procedureRepository,
             hPrecondition,
-            unifier,
-            randGen);
+            unifier);
 }
 
 bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace, 
                               Procedure::ProcedureInterpreter & procedureInterpreter, 
                               const Procedure::ProcedureRepository & procedureRepository, 
                               Handle hPrecondition, 
-                              variable_unifier & unifier, 
-                              RandGen & randGen) 
+                              variable_unifier & unifier)
 {
     // Variables used by combo interpreter
     std::vector <vertex> schemaArguments;
@@ -382,7 +378,7 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
         Handle hListLink = atomSpace.getOutgoing(hPrecondition, 1); // Handle to ListLink containing arguments
         std::vector<std::string> emptyVarBindCandidates; 
 
-        if ( !PsiRuleUtil::getSchemaArguments( atomSpace, hListLink, emptyVarBindCandidates, schemaArguments, randGen) )
+        if ( !PsiRuleUtil::getSchemaArguments( atomSpace, hListLink, emptyVarBindCandidates, schemaArguments) )
             return false; 
 
         logger().debug("PsiRuleUtil::%s - Got %d arguments.", 
@@ -458,8 +454,7 @@ bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace,
                                             Procedure::ProcedureInterpreter & procedureInterpreter, 
                                             const Procedure::ProcedureRepository & procedureRepository, 
                                             Handle hPsiRule, 
-                                            std::vector<std::string> & varBindCandidates, 
-                                            RandGen & randGen) 
+                                            std::vector<std::string> & varBindCandidates)
 {
     Handle hGoalEvaluationLink, hActionExecutionLink, hPreconditionAndLink;
     std::vector<Handle> hPreconditionEvalutaionLinks;  
@@ -508,8 +503,7 @@ bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace,
                                         procedureInterpreter,
                                         procedureRepository, 
                                         hPrecondition,
-                                        unifier,
-                                        randGen
+                                        unifier
                                        ) ) {
             bAllPreconditionsSatisfied = false;
             break; 
@@ -535,8 +529,7 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
                                                         Procedure::ProcedureInterpreter & procedureInterpreter, 
                                                         const Procedure::ProcedureRepository & procedureRepository, 
                                                         Handle hPsiRule,
-                                                        const std::vector<std::string> & varBindCandidates, 
-                                                        RandGen & randGen)
+                                                        const std::vector<std::string> & varBindCandidates)
 {
     // Executing schema id when error happens
     const Procedure::RunningProcedureID errorExecutingSchemaId = 0; 
@@ -564,7 +557,7 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
     // Get combo arguments for Action
     Handle hListLink = atomSpace.getOutgoing(executionLinkAction, 1); // Handle to ListLink containing arguments
 
-    if ( !PsiRuleUtil::getSchemaArguments(atomSpace, hListLink, varBindCandidates, schemaArguments, randGen) )
+    if ( !PsiRuleUtil::getSchemaArguments(atomSpace, hListLink, varBindCandidates, schemaArguments) )
         return errorExecutingSchemaId; 
 
     // Run the Procedure of the Action

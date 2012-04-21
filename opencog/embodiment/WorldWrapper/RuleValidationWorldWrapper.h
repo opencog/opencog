@@ -35,7 +35,7 @@ class RuleValidationWorldWrapper : public WorldWrapperBase
 
 public:
 
-    RuleValidationWorldWrapper(VirtualWorldData::VirtualWorldState & virtualWorld);//, opencog::RandGen& _rng);
+    RuleValidationWorldWrapper(VirtualWorldData::VirtualWorldState & virtualWorld);
     ~RuleValidationWorldWrapper();
 
     // override

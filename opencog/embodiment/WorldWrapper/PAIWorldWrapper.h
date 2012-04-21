@@ -36,7 +36,7 @@ class PAIWorldWrapper : public WorldWrapperBase
 {
 public:
 
-    PAIWorldWrapper(opencog::pai::PAI& _pai, opencog::RandGen& _rng);
+    PAIWorldWrapper(opencog::pai::PAI& _pai);
     ~PAIWorldWrapper();
 
     /**
@@ -74,7 +74,6 @@ public:
 private:
     opencog::pai::PAI& pai;
     opencog::pai::ActionPlanID planID;
-    opencog::RandGen& rng;
 
     // sometimes it is possible to know in advance whether the plan has failed
     // without sending it if _planHasFailed is true then we know for sure that

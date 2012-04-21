@@ -51,8 +51,7 @@ public:
                           const combo_tree_ns_set& actions,
                           bool abibb,
                           bool neic,
-                          bool reduct_enabled,
-                          opencog::RandGen& rng);
+                          bool reduct_enabled);
 
     ~petaverse_hillclimber();
 
@@ -74,8 +73,6 @@ private:
     const std::set<vertex>& _elementary_operators;
     const combo_tree_ns_set& _conditions;
     const combo_tree_ns_set& _actions;
-
-    opencog::RandGen& _rng;
 
     hillclimber<FE, Comp> _hillclimber;
 

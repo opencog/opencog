@@ -55,7 +55,6 @@ int main(int argc, char * argv[])
         seed = time(NULL);
 
     cout << "Random seed is " << seed << endl;
-    MT19937RandGen rng(seed);
 
     //typedef LocalSpaceMap2D<Handle, double, hashHandle, spatial::ObjMetaData > LSM;
     typedef LocalSpaceMap2D LSM;
@@ -67,11 +66,11 @@ int main(int argc, char * argv[])
             6);
 
     TB::CalculatedPath action_plan;
-    TB tb(lsm, action_plan, rng);
+    TB tb(lsm, action_plan);
     tb.init_ncurses();
 
     // Randomly generate a map:
-    populateRandom(rng, lsm, 20, tb.getCenter());
+    populateRandom(lsm, 20, tb.getCenter());
     //populateRandom<Handle,double,hashHandle,spatial::ObjMetaData>(lsm, 20, tb.getCenter());
     tb.place_pet_randomly(tb.getCenter());
     tb.place_goal_randomly(tb.getCenter());

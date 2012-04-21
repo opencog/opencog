@@ -35,7 +35,6 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/mt19937ar.h>
 
 #include <boost/format.hpp>
 #include <fstream>
@@ -202,10 +201,8 @@ void RuleProcessor::evaluateRules(const std::string & filename)
  */
 void RuleProcessor::evaluatePreconditions()
 {
-
-    opencog::MT19937RandGen rng(0);
-    Procedure::ComboInterpreter comboInterpreter(this->worldState, rng);
-    Procedure::ComboSelectInterpreter comboSelectInterpreter(this->worldState, rng);
+    Procedure::ComboInterpreter comboInterpreter(this->worldState);
+    Procedure::ComboSelectInterpreter comboSelectInterpreter(this->worldState);
 
     std::map<std::string, std::string>::iterator it;
     for (it = this->rulePreconditionMap.begin(); it != this->rulePreconditionMap.end(); it++) {

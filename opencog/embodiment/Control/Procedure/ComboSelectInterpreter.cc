@@ -28,16 +28,16 @@
 
 namespace opencog { namespace Procedure {
 
-ComboSelectInterpreter::ComboSelectInterpreter(pai::PAI& pai, RandGen& rng)
+ComboSelectInterpreter::ComboSelectInterpreter(pai::PAI& pai)
 {
-    this->comboInterpreter = new ComboInterpreter(pai, rng);
+    this->comboInterpreter = new ComboInterpreter(pai);
     this->next = 0;
 }
 
 ComboSelectInterpreter::ComboSelectInterpreter(
-        VirtualWorldData::VirtualWorldState& v, RandGen& rng)
+        VirtualWorldData::VirtualWorldState& v)
 {
-    this->comboInterpreter = new ComboInterpreter(v, rng);
+    this->comboInterpreter = new ComboInterpreter(v);
     this->next = 0;
 }
 

@@ -48,7 +48,7 @@ typedef LSMap2DSearchNode MapSearchNode;
 //typedef spatial::GridPoint GridPoint;
 //typedef spatial::Point Point;
 
-Map* populateRandomMap(RandGen& rng)
+Map* populateRandomMap()
 {
     Map *lmap = new Map(0, MAP_WIDTH, MAP_WIDTH,
                         0, MAP_HEIGHT, MAP_HEIGHT,
@@ -57,7 +57,7 @@ Map* populateRandomMap(RandGen& rng)
 
     cout << "Builing random map objects...\n";
     //populateRandom<unsigned int,double,boost::hash<unsigned int> >(*lmap, OBJECTS,
-    populateRandom(rng, *lmap, OBJECTS, spatial::GridPoint(0, 0));
+    populateRandom(*lmap, OBJECTS, spatial::GridPoint(0, 0));
     cout << " done.\n";
 
     return lmap;
@@ -65,8 +65,9 @@ Map* populateRandomMap(RandGen& rng)
 
 
 //generate a random legal (non-obstacle) node
-MapSearchNode getRandomNode(Map *map, RandGen& rng)
+MapSearchNode getRandomNode(Map *map)
 {
+    RandGen &rng = randGen();
     MapSearchNode node;
     do {
         node.x = rng.randint(map->xDim());
@@ -75,23 +76,23 @@ MapSearchNode getRandomNode(Map *map, RandGen& rng)
     return node;
 }
 
-void generateRandomStartAndGoal(Map *lmap, LSMap2DSearchNode &nodeStart, LSMap2DSearchNode &nodeEnd, RandGen& rng)
+void generateRandomStartAndGoal(Map *lmap, LSMap2DSearchNode &nodeStart, LSMap2DSearchNode &nodeEnd)
 {
     // Create a start and goal state with legal nodes
-    nodeStart = getRandomNode(lmap, rng);
-    nodeEnd = getRandomNode(lmap, rng);
+    nodeStart = getRandomNode(lmap);
+    nodeEnd = getRandomNode(lmap);
 }
 
 
 //add solution path to the map (as non-obstacle),
 //so we can print it out with the map
-void addSolutionToMap(AStarController &asc, Map *map, RandGen& rng)
+void addSolutionToMap(AStarController &asc, Map *map)
 {
     vector<spatial::Point> solution_points = asc.getSolutionPoints();
     //add solution to map
     spatial::ObjectMetaData no_meta;
 //    map->addNonObstacle(toString(rng.randint()), solution_points.begin(), solution_points.end(), no_meta);
-    map->addObject(opencog::toString(rng.randint()), no_meta, false );
+    map->addObject(opencog::toString(randGen().randint()), no_meta, false );
 }
 
 
@@ -164,10 +165,10 @@ int main(int argc, char * argv[])
     MapSearchNode nodeStart, nodeEnd;
 
     //seed random number generator
-    MT19937RandGen rng(time(0));
+    randGen().seed(time(0));
 
     //create and populate random map for test purposes
-    Map *map = populateRandomMap(rng);
+    Map *map = populateRandomMap();
     asc.setMap(map);
 
     unsigned int SearchCount = 0;
@@ -175,7 +176,7 @@ int main(int argc, char * argv[])
     while (SearchCount < NUM_SEARCHES) {
 
         //generate random start and goal for test purposes
-        generateRandomStartAndGoal(map, nodeStart, nodeEnd, rng);
+        generateRandomStartAndGoal(map, nodeStart, nodeEnd);
 
         //set start and goal nodes
         asc.setStartAndGoalStates(nodeStart, nodeEnd);
@@ -185,7 +186,7 @@ int main(int argc, char * argv[])
         //find the shortest path
         SearchResult = asc.findPath();
         if (PRINT_MAP) {
-            addSolutionToMap(asc, map, rng);
+            addSolutionToMap(asc, map);
         }
 
         //get the solution path as grid points

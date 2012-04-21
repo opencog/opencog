@@ -78,17 +78,17 @@ void ProcedureInterpreter::run(NetworkElement *ne)
 
 ProcedureInterpreter::ProcedureInterpreter(PAI& p) : _pai(&p)
 {
-    //initialize the random generator
+    // Initialize the random generator
     unsigned long rand_seed;
     if (config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         rand_seed = 0;
     } else {
         rand_seed = time(NULL);
     }
-    rng = new MT19937RandGen(rand_seed);
-    logger().info("Created random number generator (%p) for ComboInterpreter with seed %lu", rng, rand_seed);
-    comboInterpreter = new ComboInterpreter(*_pai, *rng);
-    comboSelectInterpreter = new ComboSelectInterpreter(*_pai, *rng);
+    randGen().seed(rand_seed);
+    logger().info("Created random number generator for ComboInterpreter with seed %lu", rand_seed);
+    comboInterpreter = new ComboInterpreter(*_pai);
+    comboSelectInterpreter = new ComboSelectInterpreter(*_pai);
     _next = 0;
 }
 
@@ -96,7 +96,6 @@ ProcedureInterpreter::~ProcedureInterpreter()
 {
     delete comboInterpreter;
     delete comboSelectInterpreter;
-    delete rng;
 }
 
 RunningProcedureID ProcedureInterpreter::runProcedure(

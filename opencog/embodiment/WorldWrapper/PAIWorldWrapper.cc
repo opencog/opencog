@@ -66,8 +66,8 @@ using namespace opencog::pai;
  */
 
 //ctor, stor
-PAIWorldWrapper::PAIWorldWrapper(PAI& _pai, RandGen& _rng)
-        : pai(_pai), rng(_rng), _hasPlanFailed(false) { }
+PAIWorldWrapper::PAIWorldWrapper(PAI& _pai)
+        : pai(_pai), _hasPlanFailed(false) { }
 
 PAIWorldWrapper::~PAIWorldWrapper() { }
 
@@ -502,7 +502,7 @@ combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier
     Handle smh = pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
     unsigned int current_time = pai.getLatestSimWorldTimestamp();
     OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
-    combo::vertex v = WorldWrapperUtil::evalPerception(rng, smh, current_time,
+    combo::vertex v = WorldWrapperUtil::evalPerception(smh, current_time,
                       pai.getAtomSpace(),
                       selfName(), ownerName(),
                       it, false, vu);
@@ -527,7 +527,7 @@ combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
     unsigned int current_time = pai.getLatestSimWorldTimestamp();
     OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
 
-    combo::vertex v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, current_time,
+    combo::vertex v = WorldWrapperUtil::evalIndefiniteObject(smh, current_time,
                       pai.getAtomSpace(),
                       selfName(), ownerName(),
                       io, false, vu);
@@ -657,7 +657,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
 
         } else {
             spatial::TangentBug::CalculatedPath calculatedPath;
-            spatial::TangentBug tb(sm, calculatedPath, rng);
+            spatial::TangentBug tb(sm, calculatedPath);
 
             //place the pet and the goal on the map
             tb.place_pet(begin.first, begin.second);
@@ -1195,10 +1195,10 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             } // else
 
             if ( parameter == "randbool" ) {
-                parameter = ((rng.randint() % 2) == 0) ? "0" : "1";
+                parameter = ((randGen().randint() % 2) == 0) ? "0" : "1";
             } else if ( parameter == "rand" ) {
                 std::stringstream rand;
-                rand << rng.randdouble( );
+                rand << randGen().randdouble( );
                 parameter = rand.str( );
             } // if
 
@@ -1429,7 +1429,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     break;
         //now stepping actions
     case id::random_step:        // random_step
-        theta = 2.0 * PI * rng.randdouble();
+        theta = 2.0 * PI * randGen().randdouble();
         goto build_step;
     case id::step_backward :     // step_backward
         theta = getAngleFacing(WorldWrapperUtil::selfHandle(as,

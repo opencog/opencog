@@ -717,8 +717,8 @@ bool TangentBug::reeval_subgoal(look_info &new_subgoal)
  * Public functions
  * ----------------------------------------------------------------------------
  */
-TangentBug::TangentBug(const Map& lsm, CalculatedPath& calculatedPath, opencog::RandGen& _rng) :
-        lsm(&lsm), calculatedPath(calculatedPath), rng(_rng)
+TangentBug::TangentBug(const Map& lsm, CalculatedPath& calculatedPath) :
+        lsm(&lsm), calculatedPath(calculatedPath), rng(randGen())
 {
     init_vars();
 }

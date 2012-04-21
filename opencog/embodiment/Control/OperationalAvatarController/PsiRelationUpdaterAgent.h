@@ -162,8 +162,7 @@ private:
     void updateEntityRelation(AtomSpace & atomSpace, 
                               Handle petHandle, 
                               Procedure::ProcedureInterpreter & procedureInterpreter, 
-                              const Procedure::ProcedureRepository & procedureRepository, 
-                              RandGen & randGen);
+                              const Procedure::ProcedureRepository & procedureRepository);
 
 public:
 

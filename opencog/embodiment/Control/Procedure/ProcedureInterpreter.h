@@ -93,7 +93,6 @@ protected:
     typedef std::map<RunningProcedureID, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureID, combo::variable_unifier> UnifierResultMap;
 
-    RandGen* rng;
     ComboInterpreter* comboInterpreter;
     ComboSelectInterpreter* comboSelectInterpreter;
     Map _map;

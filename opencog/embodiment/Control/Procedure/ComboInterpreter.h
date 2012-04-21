@@ -70,8 +70,8 @@ class ComboInterpreter : public boost::noncopyable
 {
 
 public:
-    ComboInterpreter(PAI& p, RandGen& rng);
-    ComboInterpreter(VirtualWorldData::VirtualWorldState& v, RandGen& rng);
+    ComboInterpreter(PAI& p);
+    ComboInterpreter(VirtualWorldData::VirtualWorldState& v);
     virtual ~ComboInterpreter();
 
     //run executes a single action plan of some procedure (if any are ready)
@@ -113,7 +113,6 @@ protected:
     typedef std::map<RunningProcedureId, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureId, combo::variable_unifier> UnifierResultMap;
 
-    RandGen& rng;
 //    WorldWrapper::PAIWorldWrapper _ww;
     WorldWrapperBase * _ww;
     Map _map;

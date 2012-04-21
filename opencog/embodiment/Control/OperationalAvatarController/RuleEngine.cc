@@ -85,7 +85,6 @@ throw( RuntimeException ) :
 
     this->petHandle = AtomSpaceUtil::getAgentHandle( *(oac->getAtomSpace()),
                       petName );
-    rng = new MT19937RandGen(0);
     if ( petHandle == Handle::UNDEFINED ) {
         throw RuntimeException( TRACE_INFO,
                                 ( "There is no pet named '"
@@ -199,7 +198,6 @@ RuleEngine::~RuleEngine( )
 {
     delete(longTermAttentionValue);
     delete(defaultTruthValue);
-    delete(rng);
 }
 
 /* ----------------------------------------------------------------------------
@@ -1230,8 +1228,8 @@ void RuleEngine::runSchemaForCurrentAction( void )
  */
 void RuleEngine::processRules( void )
 {
-    Procedure::ComboInterpreter comboInterpreter(this->oac->getPAI(), *rng);
-    Procedure::ComboSelectInterpreter comboSelectInterpreter(this->oac->getPAI(), *rng);
+    Procedure::ComboInterpreter comboInterpreter(this->oac->getPAI());
+    Procedure::ComboSelectInterpreter comboSelectInterpreter(this->oac->getPAI());
     //const Procedure::ComboProcedureRepository& repository = this->oac->getProcedureRepository().getComboRepository();
     const Procedure::ProcedureRepository& repository = this->oac->getProcedureRepository();
 
@@ -1519,7 +1517,7 @@ void RuleEngine::processNextAction( void )
         //to be sure that RuleEngine will select a candidate
         //we choose randomly one now that will be checked in the
         //"take the maximum weighted action" below
-        int chosen_i = rng->randint(weightedActions.size());
+        int chosen_i = randGen().randint(weightedActions.size());
         it_chosen = weightedActions.begin();
         for (int i = 0; i < chosen_i; ++i)
             ++it_chosen;
@@ -1538,7 +1536,7 @@ void RuleEngine::processNextAction( void )
             //Note that this matters only if it is not the last
             //candidate so that at least one candidate is choosen
             bool take_candidate_into_account
-                = (it == it_chosen || biased_randbool(bias, *rng));
+                = (it == it_chosen || biased_randbool(bias));
 
             //std::cout << "TAKE CANDIDATE INTO ACCOUNT: "
             //        << take_candidate_into_account << std::endl;
@@ -1563,7 +1561,7 @@ void RuleEngine::processNextAction( void )
                         // if the option rwpc is enable then it
                         // choose the parameter randomly
                         int pci = (enable_rand_wild_card ?
-                                   rng->randint(varBindCandidates.size())
+                                   randGen().randint(varBindCandidates.size())
                                    : 0);
 
                         std::cout << "CHOOSE INDEX WILD_CARD CANDIDATE: "

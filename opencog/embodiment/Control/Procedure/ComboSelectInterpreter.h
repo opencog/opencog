@@ -40,8 +40,8 @@ class ComboSelectInterpreter
 
 public:
 
-    ComboSelectInterpreter(pai::PAI& pai, RandGen& rng);
-    ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v, RandGen& rng);
+    ComboSelectInterpreter(pai::PAI& pai);
+    ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v);
     ~ComboSelectInterpreter();
 
     // from idle task

@@ -308,9 +308,6 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
-    // Get random generator
-    RandGen & randGen = oac->getRandGen(); 
-
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
@@ -349,8 +346,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     }
 
     // Decide whether to update relations during this cognitive cycle (controlled by the modulator 'SecuringThreshold')
-    float securingThreshold = AtomSpaceUtil::getCurrentModulatorLevel(randGen,
-                                                                      atomSpace,
+    float securingThreshold = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
                                                                       SECURING_THRESHOLD_MODULATOR_NAME, 
                                                                       petId
                                                                      );
@@ -389,7 +385,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
         totalRemainSteps --; 	    
        
         // Randomly select an entity
-        iEntity = this->entityList.begin() + randGen.randint( this->entityList.size() ); 
+        iEntity = this->entityList.begin() + randGen().randint( this->entityList.size() ); 
 
         // If the entity is the pet itself, skip it
         if ( *iEntity == petId ) 
@@ -402,7 +398,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
             continue; 
 
         // Randomly select a relation
-        iRelation = this->relationList.begin() + randGen.randint( this->relationList.size() );	
+        iRelation = this->relationList.begin() + randGen().randint( this->relationList.size() );	
 
         // Get the Handle to the EvaluationLink holding the relation between the entity and the pet
         // If it doesn't exist, the function below would create one and return it. 

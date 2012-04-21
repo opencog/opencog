@@ -33,7 +33,6 @@
 
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/mt19937ar.h>
 
 #include <boost/format.hpp>
 
@@ -762,14 +761,6 @@ PAI & OAC::getPAI()
 Pet & OAC::getPet()
 {
     return *pet;
-}
-
-// Static/Shared random number generator
-boost::shared_ptr<RandGen> OAC::rngPtr( new MT19937RandGen((unsigned long) time(NULL)) );
-
-RandGen & OAC::getRandGen()
-{
-    return *( this->rngPtr.get() );
 }
 
 ProcedureInterpreter & OAC::getProcedureInterpreter()
