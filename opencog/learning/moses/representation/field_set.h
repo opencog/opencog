@@ -1125,6 +1125,7 @@ public:
 
     // --------------------------------------------------------
     // Get the begin, end iterators for the bit fields.
+    /// @todo rename that begin_bit for more consistency
     const_bit_iterator begin_bits(const instance& inst) const
     {
         return (begin_bit_fields() == _fields.end() ? const_bit_iterator() :

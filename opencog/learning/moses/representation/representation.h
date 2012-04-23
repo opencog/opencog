@@ -91,7 +91,18 @@ struct representation : public knob_mapper, boost::noncopyable
      * Thread safe composition of transform and get_clean_exemplar.
      */
     combo_tree get_candidate(const instance& inst, bool reduce);
+    
+    /**
+     * Like get_candidate but without lock
+     */
+    combo_tree get_candidate2(const instance& inst, bool reduce) const;
 
+    // recursive helper
+    void get_candidate_rec(const instance& inst,
+                           combo_tree::iterator src,
+                           combo_tree::iterator parent_dst,
+                           combo_tree& candidate) const;
+    
     //* return _simplify_candidate
     const reduct::rule* get_simplify_candidate() const {
         return _simplify_candidate;

@@ -92,6 +92,26 @@ struct disc_knob_base : public knob_base
     virtual void disallow(int) = 0;
     virtual void allow(int) = 0;
 
+    /**
+     * Append the right content (determined by idx) to parent_dst. If
+     * candidate is empty then it sets the content as head. If
+     * anything is appended then parent_dst will be overwritten with
+     * the iterator pointing to that new content.
+     *
+     * @param candidate  candidate destination
+     * @param parent_dst iterator pointing to the parent of the future
+     *                   node to be appended. Then the iterator
+     *                   pointing to that new content (if any) is
+     *                   copied in parent_dst
+     * @param idx        disc idx
+     *
+     * @return iterator pointing to the next node of the exemplar to
+     * copy.
+     */
+    virtual combo_tree::iterator append_to(combo_tree& candidate,
+                                           combo_tree::iterator& parent_dst,
+                                           int idx) const = 0;
+    
     // Create a spec describing the space spanned by the knob.
     virtual field_set::disc_spec spec() const = 0;
 
@@ -122,6 +142,26 @@ struct contin_knob : public knob_base
     void turn(contin_t x)
     {
         *_loc = x;
+    }
+
+    /**
+     * Append the right content (determined by idx) to parent_dst. If
+     * candidate is empty then it sets the content as head. If
+     * anything is appended then parent_dst will be overwritten with
+     * the iterator pointing to that new content.
+     *
+     * @param candidate  candidate destination
+     * @param parent_dst iterator pointing to the parent of the future
+     *                   node to be appended.
+     * @param c          contin constant to be append
+     */
+    void append_to(combo_tree& candidate, combo_tree::iterator parent_dst,
+                   contin_t c) const
+    {
+        if (candidate.empty())
+            candidate.set_head(c);
+        else
+            candidate.append_child(parent_dst, c);
     }
 
     // Return the spec describing the space spanned by the knob
@@ -198,13 +238,14 @@ protected:
 // XXX This uses reduct::logical_reduction rules; it is not clear if those
 // rules tolerate predicates.
 //
-// XXX what is the difference between "present" and "absent" ??? A knob
-// that is "absent" from a logical "or" is the same as "present and false".
-// while one that is absent from a logical "and" is the same as "present and true"
-// So I think this is a bit confusing ...  I think that a better
-// implementation might have four settings: "invert", "identity",
-// "always true" and "alwys false".  So, overall, this is confusing
-// without some sort of additional justification.
+// XXX what is the difference between "present" and "absent" ??? A
+// knob that is "absent" from a logical "or" is the same as "present
+// and false".  while one that is absent from a logical "and" is the
+// same as "present and true" So I think this is a bit confusing ...
+// I think that a better implementation might have four settings:
+// "invert", "identity", "always true" and "always false".  So,
+// overall, this is confusing without some sort of additional
+// justification.
 //
 // XXX Also -- I think I want to rename this to "logical unary knob",
 // or something like that, as it is a unary logical function ... err...
@@ -307,6 +348,33 @@ struct logical_subtree_knob : public discrete_knob<3>
         _current = idx;
     }
 
+    combo_tree::iterator append_to(combo_tree& candidate,
+                                   combo_tree::iterator& parent_dst,
+                                   int idx) const
+    {
+        typedef combo_tree::iterator pre_it;
+        
+        idx = map_idx(idx);
+        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 3.");
+
+        // append v to parent_dst's children. If candidate is empty
+        // then set it as head. Return the iterator pointing to the
+        // new content.
+        auto append_child = [&candidate](pre_it parent_dst, const vertex& v) {
+            return candidate.empty()? candidate.set_head(v)
+            : candidate.append_child(parent_dst, v);
+        };
+
+        pre_it new_src;
+        if (idx == negated)
+            parent_dst = append_child(parent_dst, id::logical_not);
+        if (idx != absent) {
+            new_src = _default == present ? _loc : (pre_it)_loc.begin();
+            parent_dst = append_child(parent_dst, *new_src);
+        }
+        return new_src;
+    }
+    
     field_set::disc_spec spec() const {
         return field_set::disc_spec(multiplicity());
     }
@@ -420,7 +488,15 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
     }
 
 
-    field_set::disc_spec spec() const {
+    combo_tree::iterator append_to(combo_tree& candidate,
+                                   combo_tree::iterator& parent_dst,
+                                   int idx) const
+    {
+        OC_ASSERT(false, "Not implemented yet");
+        return combo_tree::iterator();
+    }
+
+        field_set::disc_spec spec() const {
         return field_set::disc_spec(multiplicity());
     }
 
@@ -475,6 +551,14 @@ struct simple_action_subtree_knob : public discrete_knob<2>
         }
 
         _current = idx;
+    }
+
+    combo_tree::iterator append_to(combo_tree& candidate,
+                                   combo_tree::iterator& parent_dst,
+                                   int idx) const
+    {
+        OC_ASSERT(false, "Not implemented yet");
+        return combo_tree::iterator();
     }
 
     field_set::disc_spec spec() const {

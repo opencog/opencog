@@ -2,9 +2,11 @@
  * opencog/learning/moses/moses/knob_mapper.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2008-2012 OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Moshe Looks
+ *            Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,7 +34,8 @@
 namespace opencog { namespace moses {
 
 /**
- * maps disc_spec (resp. contin_spec) to actual disc_knob (resp. contin_knob)
+ * maps disc_spec (resp. contin_spec) to actual disc_knob
+ * (resp. contin_knob). The disc mapping includes bits.
  */
 struct knob_mapper
 {

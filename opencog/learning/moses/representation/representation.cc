@@ -231,8 +231,103 @@ combo_tree representation::get_candidate(const instance& inst, bool reduce)
     combo_tree tr = exemplar();  // make copy before unlocking.
     lock.unlock();
 
+    {
+        stringstream ss;
+        ss << "get_candidate before reduct: " << tr;
+        logger().fine(ss.str());
+    }
     get_clean_combo_tree(tr, reduce);
+    {
+        stringstream ss;
+        ss << "get_candidate after reduct: " << tr;
+        logger().fine(ss.str());
+    }
     return tr;
+}
+
+// Same function as get_candidate but doesn't use lock and does not
+// modify _exemplar, instead it build the combo tree from scratch
+combo_tree representation::get_candidate2(const instance& inst, bool reduce) const
+{
+    combo_tree candidate;
+    get_candidate_rec(inst, _exemplar.begin(), candidate.end(), candidate);
+    {
+        stringstream ss;
+        ss << "get_candidate2 before reduct: " << candidate;
+        logger().fine(ss.str());
+    }
+    // this can probably be simplified, it doesn't need to remove
+    // null_vertices anymore
+    get_clean_combo_tree(candidate, reduce);
+    {
+        stringstream ss;
+        ss << "get_candidate2 after reduct: " << candidate;
+        logger().fine(ss.str());
+    }
+    return candidate;
+}
+
+// Append *src (turned according inst) as child of parent_dst and, in
+// case it's not null_vertex, repeat recursively using that appended
+// child as new parent_dst. If candidate is empty (parent_dst is
+// invalid) then copy *src (turned according to inst) as root of
+// candidate
+void representation::get_candidate_rec(const instance& inst,
+                                       combo_tree::iterator src,
+                                       combo_tree::iterator parent_dst,
+                                       combo_tree& candidate) const
+{
+    typedef combo_tree::iterator pre_it;
+    typedef combo_tree::sibling_iterator sib_it;
+
+    // recursive call on the children of src to parent_dst
+    auto recursive_call = [&inst, &candidate, this](pre_it new_parent_dst,
+                                                    pre_it src) {
+        for(sib_it src_child = src.begin(); src_child != src.end(); ++src_child)
+            get_candidate_rec(inst, src_child, new_parent_dst, candidate);        
+    };
+
+    // append v to parent_dst's children. If candidate is empty then
+    // set it as head. Return the iterator pointing to the new content.
+    auto append_child = [&candidate](pre_it parent_dst, const vertex& v) {
+        return candidate.empty()? candidate.set_head(v)
+            : candidate.append_child(parent_dst, v);
+    };
+
+    // find the knob associated to src (if any)
+    disc_map_cit dcit = find_disc_knob(src); // TODO optimize
+    if (dcit == disc.end()) {
+        contin_map_cit ccit = find_contin_knob(src);
+        if (ccit == contin.end()) // No knob found      
+            recursive_call(append_child(parent_dst, *src), src);
+        else { // contin knob found
+            // TODO optimize
+            contin_map_cit ckb = contin.begin();
+            field_set::const_contin_iterator ci = _fields.begin_contin(inst);
+            while (ckb != ccit) { ++ci; ++ckb; }
+            OC_ASSERT(ci != _fields.end_contin(inst) && ckb != contin.end());
+            ccit->second.append_to(candidate, parent_dst, *ci);
+        }
+    } else { // disc knob found
+        // TODO optimize
+        disc_map_cit dkb = disc.begin();
+        field_set::const_disc_iterator di = _fields.begin_disc(inst);
+        while (dkb != dcit && di != _fields.end_disc(inst)) { ++di; ++dkb; }
+        // get disc idx
+        int idx;
+        if (di != _fields.end_disc(inst)) {
+            OC_ASSERT(dkb != disc.end());
+            idx = *di;
+        } else {
+            field_set::const_bit_iterator bi = _fields.begin_bits(inst);
+            while (dkb != dcit) { ++bi; ++dkb; }
+            OC_ASSERT(bi != _fields.end_bits(inst) && dkb != disc.end());
+            idx = *bi;
+        }
+        pre_it new_src = dcit->second->append_to(candidate, parent_dst, idx);
+        if (_exemplar.is_valid(new_src))
+            recursive_call(parent_dst, new_src);
+    }
 }
 
 #ifdef EXEMPLAR_INST_IS_UNDEAD
