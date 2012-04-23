@@ -45,7 +45,7 @@ void occam_randomize_term(const field_set&, instance&);
 void occam_randomize_contin(const field_set&, instance&);
 
 //uniformly randomize all bit or disc fields
-void uniform_randomize_bits(const field_set&, instance&);
+void uniform_randomize_bit(const field_set&, instance&);
 void uniform_randomize_disc(const field_set&, instance&);
 
 //occam randomize all contin and term fields, and uniformly randomize all bit

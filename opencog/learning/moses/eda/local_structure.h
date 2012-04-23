@@ -248,7 +248,7 @@ local_structure_model::local_structure_model(const field_set& fs,
     // Each discrete variable can take on multiplicity of different
     // values, specifically, one of disc_spec::multy() of them. Thus,
     // each node in the dependency tree will have an arity of multy.
-    foreach (const field_set::disc_spec& d, _fields.disc_and_bits())
+    foreach (const field_set::disc_spec& d, _fields.disc_and_bit())
         make_dtree(dtr++, d.multy);
 
     // Now that we have created all of the dtrees, construct a

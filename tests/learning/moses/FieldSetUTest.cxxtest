@@ -109,7 +109,7 @@ public:
         std::cout << " raw : " << fs.stream(inst) << std::endl;
         std::cout << " the number of contin_spec:" << fs.contin().size() << std::endl;
         TS_ASSERT_EQUALS(fs.contin().size(), 3);
-        TS_ASSERT_EQUALS(fs.disc_and_bits().size(), 1);
+        TS_ASSERT_EQUALS(fs.disc_and_bit().size(), 1);
     }
 
 };

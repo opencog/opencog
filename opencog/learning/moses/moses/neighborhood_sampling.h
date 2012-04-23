@@ -64,8 +64,8 @@ void generate_initial_sample(const field_set& fs, int n, Out out, Out end)
         randomize(fs, inst);
 
         // Bias towards the exemplar instance
-        for (field_set::bit_iterator it = fs.begin_bits(inst);
-             it != fs.end_bits(inst); ++it)
+        for (field_set::bit_iterator it = fs.begin_bit(inst);
+             it != fs.end_bit(inst); ++it)
             if (randGen().randbool())
                 *it = false;
         for (field_set::disc_iterator it = fs.begin_disc(inst);
@@ -275,7 +275,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
 
         for (unsigned i = 1; i <= dist; ) {
             size_t r = select();
-            field_set::bit_iterator itb = fs.begin_bits(new_inst);
+            field_set::bit_iterator itb = fs.begin_bit(new_inst);
             field_set::disc_iterator itd = fs.begin_disc(new_inst);
             field_set::contin_iterator itc = fs.begin_contin(new_inst);
             // modify bit
@@ -332,8 +332,8 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
     // Reset all fields (zero them out).
     // contin and term algebra fields are ignored. XXX Why?
     // Don't we want to start with all-zero contins ??? XXX fixme...
-    for (field_set::bit_iterator it = fs.begin_bits(inst);
-            it != fs.end_bits(inst); ++it)
+    for (field_set::bit_iterator it = fs.begin_bit(inst);
+            it != fs.end_bit(inst); ++it)
         *it = false;
 
     for (field_set::disc_iterator it = fs.begin_disc(inst);
@@ -533,7 +533,7 @@ Out vary_n_knobs(const field_set& fs,
     if ((fs.begin_bit_raw_idx() <= starting_index) &&
         (starting_index < fs.end_bit_raw_idx()))
     {
-        field_set::bit_iterator itb = fs.begin_bits(tmp_inst);
+        field_set::bit_iterator itb = fs.begin_bit(tmp_inst);
         itb += starting_index - fs.begin_bit_raw_idx();
 
         // Recursive call, moved for one position.

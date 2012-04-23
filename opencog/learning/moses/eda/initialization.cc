@@ -73,10 +73,10 @@ void occam_randomize_contin(const field_set& fs, instance& inst)
         occam_randomize_contin(fs, inst, it);
 }
 
-void uniform_randomize_bits(const field_set& fs, instance& inst)
+void uniform_randomize_bit(const field_set& fs, instance& inst)
 {
     //could be faster
-    generate(fs.begin_bits(inst), fs.end_bits(inst),
+    generate(fs.begin_bit(inst), fs.end_bit(inst),
              bind(&RandGen::randbool, ref(randGen())));
 }
 
@@ -92,7 +92,7 @@ void randomize(const field_set& fs, instance& inst)
     occam_randomize_term(fs, inst);
     occam_randomize_contin(fs, inst);
     uniform_randomize_disc(fs, inst);
-    uniform_randomize_bits(fs, inst);
+    uniform_randomize_bit(fs, inst);
 }
 
 } // ~namespace moses

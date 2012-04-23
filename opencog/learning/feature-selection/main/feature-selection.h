@@ -168,7 +168,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
     foreach(const std::string& f, fs_params.initial_features) {
         size_t idx = std::distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found
-            *(fields.begin_bits(res) + idx) = true;
+            *(fields.begin_bit(res) + idx) = true;
             // for logging
             vif += f;
         }

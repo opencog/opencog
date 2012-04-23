@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 
     // Initialize each member of the population to a random value.
     foreach(instance& inst, population)
-        generate(fs.begin_bits(inst), fs.end_bits(inst),
+        generate(fs.begin_bit(inst), fs.end_bit(inst),
                  bind(&RandGen::randbool, boost::ref(randGen())));
 
     // Run the optimizer.

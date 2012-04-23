@@ -174,8 +174,8 @@ void representation::transform(const instance& inst)
         //_exemplar.validate();
     }
 
-    for (field_set::const_bit_iterator bi = _fields.begin_bits(inst);
-            bi != _fields.end_bits(inst); ++bi, ++dkb) {
+    for (field_set::const_bit_iterator bi = _fields.begin_bit(inst);
+            bi != _fields.end_bit(inst); ++bi, ++dkb) {
         dkb->second->turn(*bi);
     }
     //cout << _exemplar << endl;
@@ -319,9 +319,9 @@ void representation::get_candidate_rec(const instance& inst,
             OC_ASSERT(dkb != disc.end());
             idx = *di;
         } else {
-            field_set::const_bit_iterator bi = _fields.begin_bits(inst);
+            field_set::const_bit_iterator bi = _fields.begin_bit(inst);
             while (dkb != dcit) { ++bi; ++dkb; }
-            OC_ASSERT(bi != _fields.end_bits(inst) && dkb != disc.end());
+            OC_ASSERT(bi != _fields.end_bit(inst) && dkb != disc.end());
             idx = *bi;
         }
         pre_it new_src = dcit->second->append_to(candidate, parent_dst, idx);
@@ -361,8 +361,8 @@ void representation::set_exemplar_inst()
 
     // @todo: term algebras
     // bit
-    for(field_set::bit_iterator it = _fields.begin_bits(_exemplar_inst);
-        it != _fields.end_bits(_exemplar_inst); ++it)
+    for(field_set::bit_iterator it = _fields.begin_bit(_exemplar_inst);
+        it != _fields.end_bit(_exemplar_inst); ++it)
         *it = false;
     // disc
     for(field_set::disc_iterator it = _fields.begin_disc(_exemplar_inst);
