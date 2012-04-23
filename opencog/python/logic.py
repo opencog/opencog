@@ -49,6 +49,8 @@ class Chainer:
 
         self.pd = dict()
 
+        self.results = []
+
         self.space = space
         self.viz = PLNviz(space)
         self.viz.connect()
@@ -173,7 +175,27 @@ class Chainer:
             #pdb.pm()
             return []
 
-    def propogate_results_loop(self, premises):        
+    def fc(self):
+        axioms = [r.head for r in self.rules if r.tv.count > 0]
+        self.propogate_results_loop(axioms)
+        
+        while self.fc_later:
+            next_premise = self.get_fittest() # Best-first search
+            log.info(format_log('-FCQ', next_premise))
+
+            apps = self.find_new_rule_applications_by_premise(next_premise)
+            for app in apps:
+                got_result = self.check_premises(app)
+                if got_result:
+                    self.compute_and_add_tv(app)
+                    
+                    if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
+                        self.add_tree_to_index(app.head, self.fc_before)
+                        self.add_tree_to_index(app.head, self.fc_later)
+                        log.info(format_log('+FCQ', app.head, app.name))
+                        stdout.flush()
+
+    def propogate_results_loop(self, premises):
         assert not self.fc_later
         self.fc_later = OrderedSet(premises)
         # Any result which has been propogated before, may now be useful in new places.
@@ -189,6 +211,9 @@ class Chainer:
         next_target = self.bc_later.pop_first() # Breadth-first search
         #next_target = self.bc_later.pop_last() # Depth-first search
         #next_target = self.get_fittest(self.bc_later) # Best-first search
+
+        next_target = standardize_apart(next_target)
+
         log.info(format_log('-BCQ', next_target))
         self.add_tree_to_index(next_target, self.bc_before)
 
@@ -214,6 +239,8 @@ class Chainer:
     def propogate_results_step(self):
         next_premise = self.fc_later.pop_last() # Depth-first search
         #next_premise = self.get_fittest() # Best-first search
+
+        next_premise = standardize_apart(next_premise)
 
         log.info(format_log('-FCQ', next_premise))
 
@@ -399,6 +426,16 @@ class Chainer:
                         # For every app with this as a premise
                             new_a = app.subst(s)
                             ret.append(new_a)
+        return ret
+
+    def find_new_rule_applications_by_premise(self,premise):
+        ret = []
+        for r in self.rules:
+            for g in r.goals:
+                s = unify(g, premise, {})
+                if s != None:
+                    new_rule = r.subst(s)
+                    ret.append(new_rule)
         return ret
 
 
