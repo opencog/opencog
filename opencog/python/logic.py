@@ -456,7 +456,7 @@ class Chainer:
         try:
             return self.pd[pdn]
         except KeyError:
-            print 'expr2pdn adding %s for the first time' % (pdn,)
+            #print 'expr2pdn adding %s for the first time' % (pdn,)
             self.pd[pdn] = pdn
             return pdn
 
@@ -496,7 +496,7 @@ class Chainer:
                 app_pdn.append(goal_pdn)
             head_pdn.append(app_pdn)
         
-            print 'add_app_to_pd adding %s for the first time' % (app_pdn,)
+            #print 'add_app_to_pd adding %s for the first time' % (app_pdn,)
         
             return ('NEW',app_pdn)
 
@@ -667,6 +667,10 @@ class Chainer:
                 tr = tree_from_atom(obj)
                 # A variable with a TV could just prove anything; that's evil!
                 if not tr.is_variable():
+                    
+                    if 'CHUNK' in str(tr):
+                        continue
+                    
                     r = Rule(tr, [], '[axiom]')
                     r.tv = obj.tv
                     self.add_rule(r)
@@ -756,6 +760,12 @@ class Chainer:
         self.add_rule(Rule(T('InheritanceLink', 1, 2),
                            [ T('SubsetLink', 1, 2) ],
                            name = 'SubsetLink=>InheritanceLink', 
+                           formula = formulas.ext2InhFormula))
+
+        # In planning, assume that an ExecutionLink (action) will be performed
+        self.add_rule(Rule(T('ExecutionLink', 1, 2),
+                           [],
+                           name = 'PerformAction',
                            formula = formulas.ext2InhFormula))
 
 #        # Producing ForAll/Bind/AverageLinks?
