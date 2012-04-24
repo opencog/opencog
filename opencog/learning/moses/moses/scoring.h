@@ -689,7 +689,7 @@ struct complexity_based_scorer : public unary_function<instance,
         // ~Logger
 
         try {
-            combo_tree tr = _rep.get_candidate2(inst, _reduce);
+            combo_tree tr = _rep.get_candidate(inst, _reduce);
             return composite_score(score(tr), complexity(tr));
         } catch (...) {
             stringstream ss;

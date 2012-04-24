@@ -302,7 +302,7 @@ struct field_set
         }
     };
 
-    // A spec, in general, is one of the above  three specs.
+    // A spec, in general, is one of the above three specs.
     typedef boost::variant<term_spec, contin_spec, disc_spec> spec;
 
     // Default constructor for an empty field set

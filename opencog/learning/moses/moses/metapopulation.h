@@ -665,7 +665,7 @@ struct metapopulation : public bscored_combo_tree_set
                 // @todo: below, the candidate is reduced possibly for the
                 // second time.  This second reduction could probably be
                 // avoided with some clever cache or something. (or a flag?)
-                combo_tree tr = this->_rep->get_candidate2(inst, true);
+                combo_tree tr = this->_rep->get_candidate(inst, true);
 
                 // Look for tr in the list of potential candidates.
                 // Return true if not found.

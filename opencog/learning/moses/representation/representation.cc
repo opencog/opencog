@@ -24,6 +24,7 @@
  */
 
 #include <boost/thread.hpp>
+#include <boost/range/algorithm/find_if.hpp>
 
 #include <opencog/util/lazy_random_selector.h>
 
@@ -142,6 +143,28 @@ representation::representation(const reduct::rule& simplify_candidate,
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
+    // build mapping from combo tree iterator to knobs and idx
+    for (pre_it it = _exemplar.begin(); it != _exemplar.end(); ++it) {
+        // find disc knobs
+        disc_map_cit d_cit = boost::find_if(disc, [&it](const disc_v& v) {
+                return v.second->get_loc() == it; });
+        if (d_cit != disc.end()) {
+            it_disc_knob[it] = d_cit;
+            it_disc_idx[it] = _fields.begin_disc_raw_idx()
+                + distance(disc.cbegin(), d_cit);
+        } else {
+            // find contin knobs
+            contin_map_cit c_cit =
+                boost::find_if(contin, [&it](const contin_v& v) {
+                        return v.second.get_loc() == it; });
+            if (c_cit != contin.end()) {
+                it_contin_knob[it] = c_cit;
+                it_contin_idx[it] = distance(contin.cbegin(), c_cit);
+            }
+        }
+    }
+
+    
 #ifdef EXEMPLAR_INST_IS_UNDEAD
     set_exemplar_inst();
 
@@ -187,13 +210,13 @@ combo_tree representation::get_clean_exemplar(bool reduce,
 {
     // Make a copy -- expensive! but necessary.
     combo_tree tr = exemplar();
-    get_clean_combo_tree(tr, reduce, knob_building);
+    clean_combo_tree(tr, reduce, knob_building);
     return tr;
 }
 
-void representation::get_clean_combo_tree(combo_tree &tr,
-                                          bool reduce,
-                                          bool knob_building) const
+void representation::clean_combo_tree(combo_tree &tr,
+                                      bool reduce,
+                                      bool knob_building) const
 {
     using namespace reduct;
 
@@ -218,8 +241,10 @@ void representation::get_clean_combo_tree(combo_tree &tr,
 /// it matches the supplied inst, copying the rep to an equivalent,
 /// but knob-less combo tree, and returning that.  Optionally, if the
 /// 'reduce' flag is set, then the tree is reduced.
-// 
-combo_tree representation::get_candidate(const instance& inst, bool reduce)
+///
+/// Warning: use get_candidate instead which is both more efficient
+/// and scales better on multi-proc (as it is locker free)
+combo_tree representation::get_candidate_lock(const instance& inst, bool reduce)
 {
     // In order to make this method thread-safe, a copy of the exemplar
     // must be made under the lock, after the transform step. 
@@ -230,40 +255,19 @@ combo_tree representation::get_candidate(const instance& inst, bool reduce)
     transform(inst);
     combo_tree tr = exemplar();  // make copy before unlocking.
     lock.unlock();
-
-    {
-        stringstream ss;
-        ss << "get_candidate before reduct: " << tr;
-        logger().fine(ss.str());
-    }
-    get_clean_combo_tree(tr, reduce);
-    {
-        stringstream ss;
-        ss << "get_candidate after reduct: " << tr;
-        logger().fine(ss.str());
-    }
+    clean_combo_tree(tr, reduce);
     return tr;
 }
 
 // Same function as get_candidate but doesn't use lock and does not
 // modify _exemplar, instead it build the combo tree from scratch
-combo_tree representation::get_candidate2(const instance& inst, bool reduce) const
+combo_tree representation::get_candidate(const instance& inst, bool reduce) const
 {
     combo_tree candidate;
     get_candidate_rec(inst, _exemplar.begin(), candidate.end(), candidate);
-    {
-        stringstream ss;
-        ss << "get_candidate2 before reduct: " << candidate;
-        logger().fine(ss.str());
-    }
     // this can probably be simplified, it doesn't need to remove
     // null_vertices anymore
-    get_clean_combo_tree(candidate, reduce);
-    {
-        stringstream ss;
-        ss << "get_candidate2 after reduct: " << candidate;
-        logger().fine(ss.str());
-    }
+    clean_combo_tree(candidate, reduce);
     return candidate;
 }
 
@@ -295,36 +299,18 @@ void representation::get_candidate_rec(const instance& inst,
     };
 
     // find the knob associated to src (if any)
-    disc_map_cit dcit = find_disc_knob(src); // TODO optimize
+    disc_map_cit dcit = find_disc_knob(src);
     if (dcit == disc.end()) {
         contin_map_cit ccit = find_contin_knob(src);
-        if (ccit == contin.end()) // No knob found      
+        if (ccit == contin.end()) // no knob found      
             recursive_call(append_child(parent_dst, *src), src);
         else { // contin knob found
-            // TODO optimize
-            contin_map_cit ckb = contin.begin();
-            field_set::const_contin_iterator ci = _fields.begin_contin(inst);
-            while (ckb != ccit) { ++ci; ++ckb; }
-            OC_ASSERT(ci != _fields.end_contin(inst) && ckb != contin.end());
-            ccit->second.append_to(candidate, parent_dst, *ci);
+            contin_t c = _fields.get_contin(inst, it_contin_idx.find(src)->second);
+            ccit->second.append_to(candidate, parent_dst, c);
         }
     } else { // disc knob found
-        // TODO optimize
-        disc_map_cit dkb = disc.begin();
-        field_set::const_disc_iterator di = _fields.begin_disc(inst);
-        while (dkb != dcit && di != _fields.end_disc(inst)) { ++di; ++dkb; }
-        // get disc idx
-        int idx;
-        if (di != _fields.end_disc(inst)) {
-            OC_ASSERT(dkb != disc.end());
-            idx = *di;
-        } else {
-            field_set::const_bit_iterator bi = _fields.begin_bit(inst);
-            while (dkb != dcit) { ++bi; ++dkb; }
-            OC_ASSERT(bi != _fields.end_bit(inst) && dkb != disc.end());
-            idx = *bi;
-        }
-        pre_it new_src = dcit->second->append_to(candidate, parent_dst, idx);
+        int d = _fields.get_raw(inst, it_disc_idx.find(src)->second);
+        pre_it new_src = dcit->second->append_to(candidate, parent_dst, d);
         if (_exemplar.is_valid(new_src))
             recursive_call(parent_dst, new_src);
     }
