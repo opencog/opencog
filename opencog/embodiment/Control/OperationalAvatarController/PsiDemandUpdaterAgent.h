@@ -174,13 +174,13 @@ private:
      * Publish updated demand truth values via ZeroMQ
      */
     void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
+#endif
 
     /**
      * Send updated values to the virtual world where the pet lives
      */
     void sendUpdatedValues(opencog::CogServer * server); 
 
-#endif    
 
     // Initialize demandList etc.
     void init(opencog::CogServer * server);
