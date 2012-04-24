@@ -26,7 +26,7 @@ Installation
 Enter that directory for the next steps to compile and install MOSES
 are
 
-$ cd moses2.3.2
+$ cd moses-3.0.9
 
 To compile, from the root directory of MOSES:
 
