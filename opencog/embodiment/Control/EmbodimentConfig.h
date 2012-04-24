@@ -123,52 +123,6 @@ protected:
             "COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE",
                                             "rules_action_schemata.combo",
 
-            // TODO: Remove Rule Engine configurations once OpenPsi works fine
-            //
-            // Rule Engine parameters
-            "RE_CYCLE_PERIOD",              "2", //counted in term multiple idle cycles
-            "RE_DEFAULT_MEAN",              "0.5",
-            "RE_DEFAULT_COUNT",             "18",      // set to make confidence = 0.9 (see #define KKK
-            // in SimpleTruthValue.cc and
-            // SimpleTruthvalue::getConfidence()
-            "RE_CYCLES_DURING_NOVELTY",     "5",
-            "RE_FEELINGS_DECREASE_FACTOR",  "0.01",
-            "RE_CYCLES_FOR_REQUESTED_SCHEMA",  
-                                            "7",
-            "RE_CYCLES_DURING_AGENT_LAST_ACTION",
-                                            "3",
-            
-            // rule engine configurations
-            "RE_CORE_FILE",                 "rules_core.lua",
-            "RE_DEFAULT_PET_TRAITS",        "maxie",
-            "RE_DEFAULT_HUMANOID_TRAITS",   "maria",
-            "RE_RULES_FILENAME_MASK",       "%s_rules.lua",
-            "RE_TRAITS_FILENAME_MASK",      "%s_traits_%s.lua",
-            "RE_PET_DEFINITIONS_FILE",      "petDefinitions.lua",
-            
-            //about the randomization of schema rule selection
-            //0 means, no random noise, the engine chooses the rule with max weight
-            //1 means maximal noise
-            //and any float in between represents the noise intensity
-            "RE_SCHEMA_SELECTION_RANDOM_NOISE",
-                                            "0",
-            //false means no random selection the first found is taken
-            //true means with random selection (uniform here)
-            "RE_WILD_CARD_RANDOM_SELECTION","false",
-            
-            // rule validation configurations
-            "RV_CORE_FILE",                 "validation_core.lua",
-            
-            // Reinforcement learning parameters
-            "RL_REWARD",                    "0.05",  // max reward to be applied to a rule implication link
-            "RL_PUNISH",                    "0.05",  // max punish to be applied to a rule implication link
-            "RL_TIME_WINDOW",               "5.0",   // in secs
-            "RL_GAUSSIAN_MEAN",             "2.5",   // in secs
-            "RL_GAUSSIAN_STD_DEVIATION",    "0.5",
-            
-            "MAX_RULE_STRENGTH",            "0.95",   // the maximum strength allowd to a rule via
-            // reinforcement learning
-            
             // pet commands
             "STOP_LEARNING_CMD",            "stop learning",
             "TRY_SCHEMA_CMD",               "try",
