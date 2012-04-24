@@ -120,8 +120,6 @@ protected:
             "COMBO_STDLIB_REPOSITORY_FILE", "stdlib.combo",
             "COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE",
                                             "rules_preconditions.combo",
-            "COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE",
-                                            "rules_preconditions.combo-select",
             "COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE",
                                             "rules_action_schemata.combo",
 
