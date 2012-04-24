@@ -196,7 +196,7 @@ spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
 
     Handle spaceMapHandle = this->agent->getAtomSpace().getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
-        logger().debug("ScavengerHuntAgentModeHandler - There is no space map loaded at this moment" );
+        logger().debug("DefaultAgentModeHandler - There is no space map loaded at this moment" );
         return 0;
     } // if
 

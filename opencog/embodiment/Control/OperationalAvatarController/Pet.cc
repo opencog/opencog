@@ -37,9 +37,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-//#include "RuleEngine.h"
 #include "LearningAgentModeHandler.h"
-#include "ScavengerHuntAgentModeHandler.h"
 #include "DefaultAgentModeHandler.h"
 
 #include <cstdlib>
