@@ -38,13 +38,8 @@ using namespace boost;
 using namespace std;
 
 using world::PAIWorldWrapper;
-using world::RuleValidationWorldWrapper;
 
 ComboInterpreter::ComboInterpreter(PAI& p) : _ww(new PAIWorldWrapper(p)), _next(0)
-{
-}
-
-ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v) : _ww(new RuleValidationWorldWrapper(v)), _next(0)
 {
 }
 

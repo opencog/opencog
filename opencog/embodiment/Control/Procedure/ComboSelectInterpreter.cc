@@ -34,14 +34,6 @@ ComboSelectInterpreter::ComboSelectInterpreter(pai::PAI& pai)
     this->next = 0;
 }
 
-ComboSelectInterpreter::ComboSelectInterpreter(
-        VirtualWorldData::VirtualWorldState& v)
-{
-    this->comboInterpreter = new ComboInterpreter(v);
-    this->next = 0;
-}
-
-
 ComboSelectInterpreter::~ComboSelectInterpreter()
 {
     delete this->comboInterpreter;

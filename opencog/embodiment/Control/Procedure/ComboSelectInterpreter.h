@@ -41,7 +41,6 @@ class ComboSelectInterpreter
 public:
 
     ComboSelectInterpreter(pai::PAI& pai);
-    ComboSelectInterpreter(VirtualWorldData::VirtualWorldState& v);
     ~ComboSelectInterpreter();
 
     // from idle task
