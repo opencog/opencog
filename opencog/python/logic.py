@@ -17,6 +17,7 @@ from util import log
 from collections import defaultdict
 
 import formulas
+import rules
 
 from sys import stdout
 # You can use kcachegrind on cachegrind.out.profilestats
@@ -54,7 +55,7 @@ class Chainer:
         self.space = space
         self.viz = PLNviz(space)
         self.viz.connect()
-        self.setup_rules(space)
+        self.setup_rules()
 
         self.bc_later = OrderedSet()
         self.bc_before = OrderedSet()
@@ -512,15 +513,12 @@ class Chainer:
         if rule.tv.confidence > 0:
             self.app2pdn(rule)
 
+    def setup_rules(self):
+        self.rules = []
+        for r in rules.rules(self.space):
+            self.add_rule(r)
+
     def extract_plan(self, trail):
-#        def is_action(proofnode):
-#            target = proofnode.op
-#            return target.op == 'ExecutionLink'
-#        # Extract all the targets in best-first order
-#        proofnodes = trail.flatten()
-#        proofnodes.reverse()
-#        actions = [pn.op for pn in proofnodes if is_action(pn)]
-#        return actions
         # The list of actions in an ImplicationLink. Sometimes there are none,
         # sometimes one; if there is a SequentialAndLink then it can be more than one.
         def actions(proofnode):            
@@ -538,26 +536,8 @@ class Chainer:
         return actions
 
     def trail(self, target):
-        #def filter_with_tv(tr):
-        #    args = []
-        #    for child in tr.args:
-        #        if len(self.get_tvs(child.op)) > 0:
-        #            args.append(child)
-        #    return Tree(tr.op, args)
-        #
-        #bit = self.traverse_tree(target, set())
-        #
-        #return filter_with_tv(bit)
-
         def rule_found_result(rule_pdn):
             return rule_pdn.tv.count > 0
-            #try:
-            #    rule_pdn.tv
-            #    return True
-            #except AttributeError:
-            #    return False
-
-            #return hasattr(rule_pdn, 'tv')
 
         def recurse(rule_pdn):
             print repr(rule_pdn.op),' PDN args', rule_pdn.args
@@ -656,226 +636,6 @@ class Chainer:
     #    assert len(queue) == length - 1
     #    #print best
     #    return best
-
-    def setup_rules(self, a):
-        self.rules = []
-
-        # All existing Atoms
-        for obj in a.get_atoms_by_type(t.Atom):
-            # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-            if obj.tv.count > 0 and obj.tv.mean > 0:
-                tr = tree_from_atom(obj)
-                # A variable with a TV could just prove anything; that's evil!
-                if not tr.is_variable():
-                    
-                    if 'CHUNK' in str(tr):
-                        continue
-                    
-                    r = Rule(tr, [], '[axiom]')
-                    r.tv = obj.tv
-                    self.add_rule(r)
-
-        ## Deduction
-        #for type in self.deduction_types:
-        #    self.add_rule(Rule(T(type, 1,3), 
-        #                                 [T(type, 1, 2),
-        #                                  T(type, 2, 3), 
-        #                                  Var(1),
-        #                                  Var(2), 
-        #                                  Var(3)],
-        #                                name='Deduction', 
-        #                                formula = formulas.deductionSimpleFormula))
-        #
-        ## Inversion
-        #for type in self.deduction_types:
-        #    self.add_rule(Rule( T(type, 2, 1), 
-        #                                 [T(type, 1, 2),
-        #                                  Var(1),
-        #                                  Var(2)], 
-        #                                 name='Inversion', 
-        #                                 formula = formulas.inversionFormula))
-
-        # ModusPonens
-        for type in ['ImplicationLink']:
-            self.add_rule(Rule(Var(2), 
-                                         [T(type, 1, 2),
-                                          Var(1) ], 
-                                          name='ModusPonens', 
-                                          formula = formulas.modusPonensFormula))
-
-#       # MP for AndLink as a premise
-#        for type in ['ImplicationLink']:
-#            for size in xrange(5):
-#                args = [new_var() for i in xrange(size+1)]
-#                andlink = T('AndLink', args)
-#
-#                self.add_rule(Rule(Var(2), 
-#                                             [T(type, andlink, 2),
-#                                              andlink ], 
-#                                              name='TheoremRule'))
-        
-       # ModusPonens for EvaluationLinks only
-#        for type in ['ImplicationLink']:
-#            conc = T('EvaluationLink', new_var(), new_var())
-#            prem = T('EvaluationLink', new_var(), new_var())
-#            imp = T('ImplicationLink', prem, conc)
-#            
-#            self.add_rule(Rule(conc, 
-#                                         [imp, prem], 
-#                                          name='ModusPonens_Eval'))
-
-#        for type in ['ImplicationLink']:
-#            conc = T('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
-#            prem = T('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
-#            imp = T('ImplicationLink', prem, conc)
-#            
-#            self.add_rule(Rule(conc, 
-#                                         [imp, prem], 
-#                                          name='ModusPonens_AB'))
-
-        # AND/OR
-        type = 'AndLink'
-        for size in xrange(5):                
-            args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(T(type, args),
-                               args,
-                               type[:-4], 
-                               formula = formulas.andSymmetricFormula))
-
-        type = 'OrLink'
-        for size in xrange(2):
-            args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(T(type, args),
-                               args,
-                               type[:-4], 
-                               formula = formulas.orFormula))
-
-        # Adding a NOT
-        self.add_rule(Rule(T('NotLink', 1),
-                           [ Var(1) ],
-                           name = 'Not', 
-                           formula = formulas.notFormula))
-
-        # Link conversion
-        self.add_rule(Rule(T('InheritanceLink', 1, 2),
-                           [ T('SubsetLink', 1, 2) ],
-                           name = 'SubsetLink=>InheritanceLink', 
-                           formula = formulas.ext2InhFormula))
-
-        # In planning, assume that an ExecutionLink (action) will be performed
-        self.add_rule(Rule(T('ExecutionLink', 1, 2),
-                           [],
-                           name = 'PerformAction',
-                           formula = formulas.ext2InhFormula))
-
-#        # Producing ForAll/Bind/AverageLinks?
-#        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
-#            self.add_rule(Rule(T(type, 1, 2),
-#                               [ Var(2) ],
-#                               name = type+' abstraction', 
-#                               formula = formulas.identityFormula))
-
-        # This may cause weirdness with things matching too eagerly...
-#       # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
-#        fact = new_var()
-#        list_link = new_var()
-#        r = Rule(
-#                        fact,
-#                        [T('ForAllLink', list_link, fact )], 
-#                        name = 'ForAll'     
-#                    )
-#        r.tv = True
-#        self.add_rule(r)
-
-        for atom in a.get_atoms_by_type(t.AverageLink):
-            # out[0] is the ListLink of VariableNodes, out[1] is the expression
-            tr = tree_from_atom(atom.out[1])
-            r = Rule(tr, [], name='Average')
-            r.tv = atom.tv
-            self.add_rule(r)
-
-        Chainer._convert_atoms = False
-
-class Rule :
-    def __init__ (self, head, goals, name, tv = TruthValue(0, 0), formula = None):
-        if Chainer._convert_atoms:
-            self.head = tree_with_fake_atoms(head)
-            self.goals = map(tree_with_fake_atoms, goals)
-        else:
-            self.head = head
-            self.goals = goals
-
-        self.name = name
-        self.tv = tv
-        self.formula = if_(formula, formula, formulas.identityFormula)
-
-        #self.bc_depth = 0
-
-    def __str__(self):
-        return self.name
-
-#    def __repr__ (self) :
-#        rep = str(self.head)
-#        sep = " :- "
-#        for goal in self.goals :
-#            rep += sep + str(goal)
-#            sep = ","
-#        return rep
-
-    def __repr__ (self) :
-        rep = self.name + ' '  + str(self.head) + ' ' + str(self.tv)
-        #rep += ' '*self.bc_depth*3
-        rep += '\n'
-        for goal in self.goals :
-            #rep += ' '*(self.bc_depth*3+3)
-            rep += str(goal) + '\n'
-        return rep
-
-    def standardize_apart(self):
-        head_goals = (self.head,)+tuple(self.goals)
-        tmp = standardize_apart(head_goals)
-        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv, formula=self.formula)
-
-        return new_version
-
-    def isomorphic(self, other):
-        # One way: make conjunctions out of the rules to make
-        # sure variable renamings are consistent across both
-        # conclusion and premises
-        self_conj = (self.head,)+tuple(self.goals)
-        other_conj = (other.head,)+tuple(other.goals)
-
-        return isomorphic_conjunctions_ordered(self_conj, other_conj)
-
-    def canonical_tuple(self):
-        try:
-            return self._tuple
-        except:
-            conj = (self.head,)+tuple(self.goals)
-            self._tuple = tuple(canonical_trees(conj))
-            return self._tuple
-
-    def unifies(self, other):
-        self_conj = (self.head,)+tuple(self.goals)
-        other_conj = (other.head,)+tuple(other.goals)
-
-        return unify(self_conj, other_conj, {}) != None
-
-    def subst(self, s):
-        new_head = subst(s, self.head)
-        new_goals = list(subst_conjunction(s, self.goals))
-        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv, formula = self.formula)
-        return new_rule
-
-#    def category(self):
-#        '''Returns the category of this rule. It can be either an axiom, a PLN Rule (e.g. Modus Ponens), or an
-#        application. An application is a PLN Rule applied to specific arguments.'''
-#        if self.name == '[axiom]':
-#            return 'axiom'
-#        elif self.name.startswith('[application]'):
-#            return 'application'
-#        else:
-#            return 'rule'
 
 from urllib2 import URLError
 def check_connected(method):
