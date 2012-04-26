@@ -45,7 +45,7 @@ class Chainer:
     # Convert Atoms into FakeAtoms for Pypy/Pickle/Multiprocessing compatibility
     _convert_atoms = False
 
-    def __init__(self, space):
+    def __init__(self, space, planning_mode = False):
         self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink']
 
         self.pd = dict()
@@ -53,6 +53,7 @@ class Chainer:
         self.results = []
 
         self.space = space
+        self.planning_mode = planning_mode
         self.viz = PLNviz(space)
         self.viz.connect()
         self.setup_rules()
@@ -67,63 +68,6 @@ class Chainer:
         _line = 1
         
         #profiler.add_function(self.bc)
-
-    #def do_planning(self):
-    #    try:
-    #        target_PredicateNodes = [x for x in self.space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
-    #
-    #        for atom in target_PredicateNodes:
-    #            # Here be DRAGONS!
-    #            #target = Tree('EvaluationLink', atom, Tree('ListLink'))
-    #            target = T('EvaluationLink', atom)
-    #
-    #        a = self.space
-    #
-    #        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
-    #        atom_from_tree(rl, a)
-    #        
-    #        # hack
-    #        print 'target'
-    #        target_a = atom_from_tree(target, a)
-    #        print target_a
-    #        print target_a.tv
-    #        target_a.tv = TruthValue(0,  0)
-    #        print target_a
-    #        # Reset the rules list so the EvaluationLink in it won't have a TV!
-    #        self.setup_rules(a)
-    #
-    #        self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
-    #
-    #        result_atoms = self.bc(target)
-    #        
-    #        print "planning result: ",  result_atoms
-    #        
-    #        if result_atoms:
-    #            res_Handle = result_atoms[0]
-    #            res = tree_from_atom(Atom(res_Handle, a))
-    #            
-    #            trail = self.trail(res)
-    #            actions = self.extract_plan(trail)
-    #            
-    #            # set plan_success
-    #            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
-    #            # set plan_action_list
-    #            pal = T('ReferenceLink',
-    #                        a.add_node(t.ConceptNode, 'plan_action_list'),
-    #                        T('ListLink', actions))
-    #            
-    #            ps_a  = atom_from_tree(ps, a)
-    #            pal_a = atom_from_tree(pal, a)
-    #            
-    #            print ps
-    #            print pal
-    #            ps_a.tv = TruthValue(1, 9001)
-    #            
-    #            print ps_a.tv
-    #
-    #    except Exception, e:
-    #        print e
-
 
     #@profile
     def bc(self, target):
@@ -639,6 +583,61 @@ class Chainer:
     #    assert len(queue) == length - 1
     #    #print best
     #    return best
+
+def do_planning(space):
+    try:
+        # ReferenceLink ConceptNode:'psi_demand_goal_list' (ListLink stuff)
+        target_PredicateNodes = [x for x in space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
+        
+        for atom in target_PredicateNodes:
+            # Here be DRAGONS!
+            #target = Tree('EvaluationLink', atom, Tree('ListLink'))
+            target = T('EvaluationLink', atom)
+
+        a = space        
+
+        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+        atom_from_tree(rl, a)
+        
+        # hack
+        print 'target'
+        target_a = atom_from_tree(target, a)
+        print target_a
+        print target_a.tv
+        target_a.tv = TruthValue(0,  0)
+        print target_a
+        
+        chainer = Chainer(a, planning_mode = True)        
+
+        result_atoms = chainer.bc(target)
+        
+        print "planning result: ",  result_atoms
+        
+        if result_atoms:
+            res_Handle = result_atoms[0]
+            res = tree_from_atom(Atom(res_Handle, a))
+            
+            trail = chainer.trail(res)
+            actions = chainer.extract_plan(trail)
+            
+            # set plan_success
+            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
+            # set plan_action_list
+            pal = T('ReferenceLink',
+                        a.add_node(t.ConceptNode, 'plan_action_list'),
+                        T('ListLink', actions))
+            
+            ps_a  = atom_from_tree(ps, a)
+            pal_a = atom_from_tree(pal, a)
+            
+            print ps
+            print pal
+            ps_a.tv = TruthValue(1.0, count_from_confidence(1.0))
+            
+            print ps_a.tv
+
+    except Exception, e:
+        print e
 
 from urllib2 import URLError
 def check_connected(method):
