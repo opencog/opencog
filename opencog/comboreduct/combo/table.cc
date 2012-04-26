@@ -449,11 +449,15 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
         else if (token == "1")
             return id::logical_true;
         else
-            OC_ASSERT(0, "Expecting boolean value, got %s\n", token.c_str());
+            OC_ASSERT(false, "Expecting boolean value, got %s", token.c_str());
         break;
 
     case id::contin_type:
-        return lexical_cast<contin_t>(token);
+        try {
+            return lexical_cast<contin_t>(token);
+        } catch(boost::bad_lexical_cast&) {
+            OC_ASSERT(false, "Could not cast %s to contin", token.c_str());
+        }
 
     default:
         stringstream ss;
