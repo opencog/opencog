@@ -129,52 +129,52 @@ class Chainer:
     def bc(self, target):
         #import prof3d; prof3d.profile_me()
         
-        try:
-            tvs = self.get_tvs(target)
-            print "Existing target truth values:", map(str, tvs)
-            
-            log.info(format_log('bc', target))
-            self.bc_later = OrderedSet([target])
-            self.results = []
+        #try:
+        tvs = self.get_tvs(target)
+        print "Existing target truth values:", map(str, tvs)
+        
+        log.info(format_log('bc', target))
+        self.bc_later = OrderedSet([target])
+        self.results = []
 
-            self.target = target
+        self.target = target
 
-            # viz - visualize the root
-            self.viz.outputTarget(target, None, 0, 'TARGET')
+        # viz - visualize the root
+        self.viz.outputTarget(target, None, 0, 'TARGET')
 
-            start = time()
-            while self.bc_later and not self.results:
-                children = self.bc_step()
-                self.propogate_results_loop(children)
+        start = time()
+        while self.bc_later and not self.results:
+            children = self.bc_step()
+            self.propogate_results_loop(children)
 
-                msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
-                log.info(format_log(msg))
-                log.info(format_log('time taken', time() - start))
-                #log.info(format_log('PD:'))
-                #for pdn in self.pd:
-                #    log.info(format_log(len(pdn.args),str(pdn)))
-            
-            # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
-            print msg
+            msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
+            log.info(format_log(msg))
+            log.info(format_log('time taken', time() - start))
+            #log.info(format_log('PD:'))
+            #for pdn in self.pd:
+            #    log.info(format_log(len(pdn.args),str(pdn)))
+        
+        # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
+        print msg
 
-            for res in self.results:
-                print 'Inference trail:'
-                trail = self.trail(res)
-                self.print_tree(trail)
-                print 'Action plan (if applicable):'
-                print self.extract_plan(trail)
+        for res in self.results:
+            print 'Inference trail:'
+            trail = self.trail(res)
+            self.print_tree(trail)
+            print 'Action plan (if applicable):'
+            print self.extract_plan(trail)
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
 
-            return self.results
-            #return [atom_from_tree(result, self.space).h for result in self.results]
-        except Exception, e:
-            import traceback, pdb
-            #pdb.set_trace()
-            print traceback.format_exc(10)
-            # Start the post-mortem debugger
-            #pdb.pm()
-            return []
+        return self.results
+        #return [atom_from_tree(result, self.space).h for result in self.results]
+        #except Exception, e:
+        #    import traceback, pdb
+        #    #pdb.set_trace()
+        #    print traceback.format_exc(10)
+        #    # Start the post-mortem debugger
+        #    #pdb.pm()
+        #    return []
 
     def fc(self):
         axioms = [r.head for r in self.rules if r.tv.count > 0]
@@ -450,7 +450,10 @@ class Chainer:
         expr_pdn = self.expr2pdn(canonical)
         app_pdns = expr_pdn.args
         #print 'get_tvs:', [repr(app_pdn.op) for app_pdn in app_pdns if app_pdn.tv.count > 0]
-        return [app_pdn.tv for app_pdn in app_pdns if app_pdn.tv.count > 0]
+        tvs = [app_pdn.tv for app_pdn in app_pdns if app_pdn.tv.count > 0]
+        if len(tvs) > 1:
+            print 'get_tvs',expr,tvs
+        return tvs
     
     def expr2pdn(self, expr):
         pdn = DAG(expr,[])
@@ -523,7 +526,7 @@ class Chainer:
         # sometimes one; if there is a SequentialAndLink then it can be more than one.
         def actions(proofnode):            
             target = proofnode.op
-            if isinstance(target, Rule):
+            if isinstance(target, rules.Rule):
                 return []
             if target.op in ['ExecutionLink',  'SequentialAndLink']:
                 return [pn.op]
@@ -540,12 +543,12 @@ class Chainer:
             return rule_pdn.tv.count > 0
 
         def recurse(rule_pdn):
-            print repr(rule_pdn.op),' PDN args', rule_pdn.args
+            #print repr(rule_pdn.op),' PDN args', rule_pdn.args
             exprs = map(filter_expr,rule_pdn.args)
             return DAG(rule_pdn.op, exprs)
 
         def filter_expr(expr_pdn):
-            print expr_pdn.op, expr_pdn.args
+            #print expr_pdn.op, [repr(rpdn.op) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             #successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             return DAG(expr_pdn.op, successful_rules)
@@ -555,11 +558,11 @@ class Chainer:
         return filter_expr(root)
     
     def print_tree(self, tr, level = 1):
-        try:
-            (tr.depth, tr.best_conf_above)
-            print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
-        except AttributeError:
-            print ' '*(level-1)*3, tr.op
+        #try:
+        #    (tr.depth, tr.best_conf_above)
+        #    print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
+        #except AttributeError:
+        print ' '*(level-1)*3, tr.op
         
         for child in tr.args:
             self.print_tree(child, level+1)

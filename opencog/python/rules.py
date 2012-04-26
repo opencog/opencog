@@ -1,7 +1,7 @@
 try:
-    from opencog.atomspace import TruthValue, types as t
+    from opencog.atomspace import TruthValue, confidence_to_count, types as t
 except ImportError:
-    from atomspace_remote import TruthValue, types as t
+    from atomspace_remote import TruthValue, types as t, confidence_to_count, types as t
 
 import formulas
 from tree import *
@@ -114,10 +114,11 @@ def rules(a):
                        formula = formulas.ext2InhFormula))
 
     # In planning, assume that an ExecutionLink (action) will be performed
-    rules.append(Rule(T('ExecutionLink', 1, 2),
+    r = Rule(T('ExecutionLink', 1, 2),
                        [],
-                       name = 'PerformAction',
-                       formula = formulas.ext2InhFormula))
+                       name = 'PerformAction')
+    r.tv = TruthValue(1.0,confidence_to_count(1.0))
+    rules.append(r)
 
 #        # Producing ForAll/Bind/AverageLinks?
 #        for type in ['ForAllLink', 'BindLink', 'AverageLink']:

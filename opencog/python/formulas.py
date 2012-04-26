@@ -14,10 +14,11 @@ def identityFormula(tvs, U):
     
     return (sA, nA)
 
-def trueFormula(tvs, U):
-    [] = tvs
-    
-    return (1.0, confidence_to_count(1.0))
+# Won't work with the current control
+#def trueFormula(tvs, U):
+#    [] = tvs
+#    
+#    return (1.0, confidence_to_count(1.0))
 
 def deductionSimpleFormula(tvs, U):
     (sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _) = tvs
