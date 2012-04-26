@@ -169,6 +169,7 @@ class Chainer:
         for a in apps:
             a = a.standardize_apart()
             self.add_queries(a)
+            self.add_queries_fc(a)
 
         return
 
@@ -226,14 +227,18 @@ class Chainer:
         # will need to be used to make more specialized apps for backward chaining
         # (example: if you find an ImplicationLink for ModusPonens, then potentially
         # some of the goals or the head can be made more specific. You should add the
-        # whole app (maybe?)
+        # whole app (maybe?) Something goes wrong if you just run add_queries here
+        # instead of copypasting
+        #for app in specialized:
+        #    if not self._app_is_stupid(app):
+        #        for goal in (app.head,)+tuple(app.goals):                
+        #            if (not self.contains_isomorphic_tree(goal, self.bc_later)
+        #                and not self.contains_isomorphic_tree(goal, self.bc_later)):
+        #                    self.add_tree_to_index(goal, self.bc_later)
+        #                    #added_queries.append(goal)
+        #                    log.info(format_log('+BCQ', goal, app.name))
         for app in specialized:
-            for goal in (app.head,)+tuple(app.goals):
-                if (not self.contains_isomorphic_tree(goal, self.bc_before)
-                    and not self.contains_isomorphic_tree(goal, self.bc_later)):
-                        self.add_tree_to_index(goal, self.bc_later)
-                        #added_queries.append(goal)
-                        log.info(format_log('+BCQ', goal, app.name))
+            self.add_queries(app)
 
         for app in real_results:
             # If there is a result, then you want to propogate it up. You should also propogate specializations,
@@ -311,6 +316,7 @@ class Chainer:
                     log.info(format_log('+BCQ', goal, app.name))
                     #stdout.flush()
 
+    def add_queries_fc(self,app):
         # Whether it is new or not
         # Allow adding it to the FCQ multiple times, because you need to check
         # for results multiple times
@@ -364,8 +370,9 @@ class Chainer:
                 for (h, tv) in candidate_heads_tvs:
                     s = unify(h, target, {})
                     if s != None:
+                        print s
                         # Make a new version of the Rule for this Atom
-                        new_rule = r.subst({Var(1):h})
+                        new_rule = r.subst({Var(123):h})
                         # If the Atom has variables, give them values from the target
                         # new_rule = new_rule.subst(s)
                         new_rule.tv = tv

@@ -25,7 +25,7 @@ def rules(a):
                 r = Rule(tr, [], '[axiom]', tv = obj.tv)
                 rules.append(r)
 
-    #r = Rule(Var(1),[],
+    #r = Rule(Var(123),[],
     #                  name='Lookup',
     #                  match=match_axiom)
     #rules.append(r)
