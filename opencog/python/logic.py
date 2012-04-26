@@ -89,8 +89,8 @@ class Chainer:
 
         start = time()
         while self.bc_later and not self.results:
-            children = self.bc_step()
-            self.propogate_results_loop(children)
+            self.bc_step()
+            self.propogate_results_loop()
 
             msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
             log.info(format_log(msg))
@@ -141,9 +141,9 @@ class Chainer:
                         log.info(format_log('+FCQ', app.head, app.name))
                         stdout.flush()
 
-    def propogate_results_loop(self, premises):
-        assert not self.fc_later
-        self.fc_later = OrderedSet(premises)
+    def propogate_results_loop(self):
+        #assert not self.fc_later
+        #self.fc_later = OrderedSet(premises)
         # Any result which has been propogated before, may now be useful in new places.
         # So reset this list so they will be tried again.
         self.fc_before = OrderedSet()
@@ -168,19 +168,9 @@ class Chainer:
 
         for a in apps:
             a = a.standardize_apart()
-            #if not a.goals: print format_log('generator', repr(a))
-            if not a.goals and a.tv:
-                # Makes sure it goes in the list of apps, but just propogate results from the head (i.e. the actual Atom)
-                # and not the goals (an empty list!)
-                ret.append(a.head)                
-                self.add_queries(a)
-                #viz
-                self.viz.declareResult(a.head)
-            else:
-                added_queries = self.add_queries(a)
-                ret += added_queries
+            self.add_queries(a)
 
-        return ret
+        return
 
     def propogate_results_step(self):
         next_premise = self.fc_later.pop_last() # Depth-first search
@@ -189,6 +179,7 @@ class Chainer:
         next_premise = standardize_apart(next_premise)
 
         log.info(format_log('-FCQ', next_premise))
+        #import pdb; pdb.set_trace()
 
         # WARNING: the specialization process won't spec based on premises that only exist as axioms, or...
 
@@ -196,22 +187,22 @@ class Chainer:
         # then you have a result! Apply the rule and see if it produces the target (or just an intermediary step).
         potential_results = self.find_existing_rule_applications_by_premise(next_premise)
         specialized = self.specialize_existing_rule_applications_by_premise(next_premise)
-        # Make sure you don't create a specialization that already exists
-        specialized = [r for r in specialized if 
-                              not any(r2.isomorphic(r) for r2 in potential_results)]
-        #print 'potential_results', potential_results
-
-
-        # If B->C => C was checked by BC before, it will be in the bc_before set. But it now has a TV, so it should
-        # be used again!
-
-        # Ignore invalid rule applications (i.e. if add_queries returns nothing)
-        specialized = [app for app in specialized if self.add_queries(app)]
-        #print 'specialized', specialized
+        ## Make sure you don't create a specialization that already exists
+        #specialized = [r for r in specialized if 
+        #                      not any(r2.isomorphic(r) for r2 in potential_results)]
+        ##print 'potential_results', potential_results
+        #
+        #
+        ## If B->C => C was checked by BC before, it will be in the bc_before set. But it now has a TV, so it should
+        ## be used again!
+        #
+        ## Ignore invalid rule applications (i.e. if add_queries returns nothing)
+        #specialized = [app for app in specialized if self.add_queries(app)]
+        ##print 'specialized', specialized
 
         real_results = []
 
-        for app in potential_results:
+        for app in potential_results + specialized:
             #print repr(a)
 
             got_result = self.check_premises(app)
@@ -231,7 +222,20 @@ class Chainer:
                     log.info(format_log('Target produced!', app.head, app.tv))
                     self.results.append(app.head)
 
-        for app in specialized+real_results:
+        # If you DON'T search generators explicitly, then the premises
+        # will need to be used to make more specialized apps for backward chaining
+        # (example: if you find an ImplicationLink for ModusPonens, then potentially
+        # some of the goals or the head can be made more specific. You should add the
+        # whole app (maybe?)
+        for app in specialized:
+            for goal in (app.head,)+tuple(app.goals):
+                if (not self.contains_isomorphic_tree(goal, self.bc_before)
+                    and not self.contains_isomorphic_tree(goal, self.bc_later)):
+                        self.add_tree_to_index(goal, self.bc_later)
+                        #added_queries.append(goal)
+                        log.info(format_log('+BCQ', goal, app.name))
+
+        for app in real_results:
             # If there is a result, then you want to propogate it up. You should also propogate specializations,
             # so that their parents will be specialized as well.
             # The proof DAG does not explicitly avoid linking things up in a loop (as it has no explicit links)
@@ -287,34 +291,36 @@ class Chainer:
 
         # If the app is a cycle or already added, don't add it or any of its goals
         (status, app_pdn) = self.add_app_to_pd(app)
-        if status == "CYCLE":
-            #print "CYCLE", app.name, app.head, app.goals
-            return []
-        elif status == "EXISTING":
-            # Already added this
-            return []
-        else:
+        if status == 'NEW':
             # Only visualize it if it is actually new
             # viz
             for (i, input) in enumerate(app.goals):
                 self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
 
-        added_queries = []
-
+        # NOTE: For generators, the app_pdn will exist already for some reason
         # It's useful to add the head if (and only if) it is actually more specific than anything currently in the BC tree.
         # This happens all the time when atoms are found.
         for goal in tuple(app.goals)+(app.head,):
-            if     (not goal_is_stupid(goal) and
-                    not self.contains_isomorphic_tree(goal, self.bc_before) and
-                    not self.contains_isomorphic_tree(goal, self.bc_later) ):
-                assert goal not in self.bc_before
-                assert goal not in self.bc_later
-                self.add_tree_to_index(goal, self.bc_later)
-                added_queries.append(goal)
-                log.info(format_log('+BCQ', goal, app.name))
-                #stdout.flush()
+            if     not goal_is_stupid(goal):
+                if  (not self.contains_isomorphic_tree(goal, self.bc_before) and
+                     not self.contains_isomorphic_tree(goal, self.bc_later) ):
+                    assert goal not in self.bc_before
+                    assert goal not in self.bc_later
+                    self.add_tree_to_index(goal, self.bc_later)
+                    #added_queries.append(goal)
+                    log.info(format_log('+BCQ', goal, app.name))
+                    #stdout.flush()
+
+        # Whether it is new or not
+        # Allow adding it to the FCQ multiple times, because you need to check
+        # for results multiple times
+        #for goal in tuple(app.goals)+(app.head,):
+        for goal in (app.head,):
+            if not self.contains_isomorphic_tree(goal, self.fc_later):
+                log.info(format_log('+FCQ', goal, app.name))
+                self.add_tree_to_index(goal, self.fc_later)
         
-        return added_queries
+        return None
 
     def check_premises(self, app):
         '''Check whether the given app can produce a result. This will happen if all its premises are
@@ -346,7 +352,9 @@ class Chainer:
         for r in self.rules:
             if r.match == None:
                 s = unify(r.head, target, {})
-                if s != None:                    
+                if s != None:
+                    if r.name == '[axiom]':
+                        print '>>>>>',repr(r)
                     new_rule = r.subst(s)
                     ret.append(new_rule)
             else:

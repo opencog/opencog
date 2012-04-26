@@ -11,24 +11,24 @@ def rules(a):
     rules = []
 
     # All existing Atoms
-    #for obj in a.get_atoms_by_type(t.Atom):
-    #    # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-    #    if obj.tv.count > 0 and obj.tv.mean > 0:
-    #        tr = tree_from_atom(obj)
-    #        # A variable with a TV could just prove anything; that's evil!
-    #        if not tr.is_variable():
-    #            
-    #            # tacky filter
-    #            if 'CHUNK' in str(tr):
-    #                continue
-    #            
-    #            r = Rule(tr, [], '[axiom]', tv = obj.tv)
-    #            rules.append(r)
+    for obj in a.get_atoms_by_type(t.Atom):
+        # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+        if obj.tv.count > 0 and obj.tv.mean > 0:
+            tr = tree_from_atom(obj)
+            # A variable with a TV could just prove anything; that's evil!
+            if not tr.is_variable():
+                
+                # tacky filter
+                if 'CHUNK' in str(tr):
+                    continue
+                
+                r = Rule(tr, [], '[axiom]', tv = obj.tv)
+                rules.append(r)
 
-    r = Rule(Var(1),[],
-                      name='Lookup',
-                      match=match_axiom)
-    rules.append(r)
+    #r = Rule(Var(1),[],
+    #                  name='Lookup',
+    #                  match=match_axiom)
+    #rules.append(r)
 
     ## Deduction
     #for type in self.deduction_types:
