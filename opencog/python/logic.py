@@ -4,6 +4,7 @@
 
 try:
     from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name
+    import opencog.cogserver
 except ImportError:
     from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
 from tree import *
@@ -733,6 +734,22 @@ class PLNviz:
 
             self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
             self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
+
+class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
+    '''This agent should be run every cycle to cooperate with the C++
+    PsiActionSelectionAgent. This agent adds plans to the AtomSpace, and the
+    C++ agent loads plans from the AtomSpace and executes them. (Executing a plan
+    can take many cognitive cycles).'''
+    def __init__(self):
+        self.cycles = 0
+
+    def run(self,atomspace):
+        self.cycles += 1
+        
+        # hack. don't wait until the plan failed/succeeded, just run planning every
+        # cycle, and the plan will be picked up by the C++ PsiActionSelectionAgent
+        # when it needs a new plan
+        do_planning(atomspace)
 
 if __name__ == '__main__':
     a = AtomSpace()
