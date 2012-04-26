@@ -344,10 +344,24 @@ class Chainer:
         Chainers can be made by searching for certain apps and doing things with them.'''
         ret = []
         for r in self.rules:
-            s = unify(r.head, target, {})
-            if s != None:
-                new_rule = r.subst(s)
-                ret.append(new_rule)
+            if r.match == None:
+                s = unify(r.head, target, {})
+                if s != None:                    
+                    new_rule = r.subst(s)
+                    ret.append(new_rule)
+            else:
+                # If the Rule has a special function for producing answers, run it
+                # and check the results are valid.
+                candidate_heads_tvs = r.match(self.space, target)
+                for (h, tv) in candidate_heads_tvs:
+                    s = unify(h, target, {})
+                    if s != None:
+                        # Make a new version of the Rule for this Atom
+                        new_rule = r.subst({Var(1):h})
+                        # If the Atom has variables, give them values from the target
+                        # new_rule = new_rule.subst(s)
+                        new_rule.tv = tv
+                        ret.append(new_rule)
         return ret
 
     def find_existing_rule_applications_by_premise(self, premise):

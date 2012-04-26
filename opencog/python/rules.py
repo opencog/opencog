@@ -11,20 +11,24 @@ def rules(a):
     rules = []
 
     # All existing Atoms
-    for obj in a.get_atoms_by_type(t.Atom):
-        # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-        if obj.tv.count > 0 and obj.tv.mean > 0:
-            tr = tree_from_atom(obj)
-            # A variable with a TV could just prove anything; that's evil!
-            if not tr.is_variable():
-                
-                # tacky filter
-                if 'CHUNK' in str(tr):
-                    continue
-                
-                r = Rule(tr, [], '[axiom]')
-                r.tv = obj.tv
-                rules.append(r)
+    #for obj in a.get_atoms_by_type(t.Atom):
+    #    # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+    #    if obj.tv.count > 0 and obj.tv.mean > 0:
+    #        tr = tree_from_atom(obj)
+    #        # A variable with a TV could just prove anything; that's evil!
+    #        if not tr.is_variable():
+    #            
+    #            # tacky filter
+    #            if 'CHUNK' in str(tr):
+    #                continue
+    #            
+    #            r = Rule(tr, [], '[axiom]', tv = obj.tv)
+    #            rules.append(r)
+
+    r = Rule(Var(1),[],
+                      name='Lookup',
+                      match=match_axiom)
+    rules.append(r)
 
     ## Deduction
     #for type in self.deduction_types:
@@ -116,8 +120,8 @@ def rules(a):
     # In planning, assume that an ExecutionLink (action) will be performed
     r = Rule(T('ExecutionLink', 1, 2),
                        [],
-                       name = 'PerformAction')
-    r.tv = TruthValue(1.0,confidence_to_count(1.0))
+                       name = 'PerformAction',
+                       tv = TruthValue(1.0,confidence_to_count(1.0)))
     rules.append(r)
 
 #        # Producing ForAll/Bind/AverageLinks?
@@ -148,13 +152,25 @@ def rules(a):
 
     return rules
 
+def match_axiom(space,target):
+    if isinstance(target.op, Atom):
+        return target
+    
+    candidates = space.get_atoms_by_type(target.get_type())
+    candidate_trees = (tree_from_atom(atom) for atom in candidates)
+    candidate_tvs = (c.tv for c in candidates)
+    
+    return zip(candidate_trees, candidate_tvs)
+
 class Rule :
-    def __init__ (self, head, goals, name, tv = TruthValue(0, 0), formula = None):
+    def __init__ (self, head, goals, name, tv = TruthValue(0, 0),
+                  formula = None, match = None):
         self.head = head
         self.goals = goals
 
         self.name = name
         self.tv = tv
+        self.match = match
         self.formula = if_(formula, formula, formulas.identityFormula)
 
         #self.bc_depth = 0
