@@ -11,10 +11,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
-#ifdef HAVE_CYTHON_XXX_BROKEN
-Someone forgot to check in this file into the source tree!
 #include <opencog/cython/logic_wrapper_api.h>
-#endif
 
 // for backward compatibility as from boost 1.46 filesystem 3 is the default
 #define BOOST_FILESYSTEM_VERSION 2
@@ -271,23 +268,16 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     test::custom_duration = 0.0;
     start = clock();
 
-#ifdef HAVE_CYTHON_XXX_BROKEN
     // Code to run the Python backward chainer.
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure(); 
     import_logic_wrapper();
     //python_pln_fc(cogserver().getAtomSpace());
     //python_pln_fc();
-    //python_pln_plan(cogserver().getAtomSpace());
     Handle eh = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
-    
     PyGILState_Release(gstate); 
 
     TruthValuePtr etv = cogserver().getAtomSpace()->getTV(eh, NULL_VERSION_HANDLE);
-#else
-    TruthValuePtr etv;
-    Handle eh;
-#endif
 
     if (*etv != TruthValue::NULL_TV()) {
         /* Print resulting truth value compared to test requirements */

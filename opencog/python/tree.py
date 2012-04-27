@@ -151,7 +151,7 @@ class Tree (object):
 
 class DAG(Tree):
     def __init__(self,op,args):
-        Tree.__init__(self,op,args)
+        Tree.__init__(self,op,[])
         self.parents = []
         
         for a in args:
