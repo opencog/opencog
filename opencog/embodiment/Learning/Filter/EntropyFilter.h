@@ -121,8 +121,7 @@ public:
                   const definite_object_set& dos,
                   const message_set& ms,
                   const agent_to_actions& atas,
-                  const type_tree_seq& input_arg_types,
-                  opencog::RandGen& _rng);
+                  const type_tree_seq& input_arg_types);
     ~EntropyFilter();
 
     //update the map _perceptToTim and _total_time by evaluating all
@@ -208,8 +207,6 @@ private:
     //reevaluating nearest_X
     //several time during the same
     //spaceMap.
-
-    opencog::RandGen& _rng;
 
     /**
      * Return true is the vertex corresponds to a predicate that is

@@ -36,12 +36,12 @@ using namespace opencog;
 using namespace moses;
 
 class optimizationUTest : public CxxTest::TestSuite {
-    MT19937RandGen rng;
 
 public:
-    optimizationUTest() : rng(1000) {
+    optimizationUTest() {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);
+        randGen().seed(10000);
     }
     /**
      * test hll_climbing optimization in standalone. The
@@ -56,17 +56,17 @@ public:
         field_set fs(field_set::disc_spec(2), fs_size);
         // initial instance
         instance init_inst(fs.packed_width());
-        randomize(fs, init_inst, rng);
+        randomize(fs, init_inst);
         // target instance
         instance target_inst(fs.packed_width());
-        randomize(fs, target_inst, rng);
+        randomize(fs, target_inst);
         std::cout << "target_inst =" << fs.stream(target_inst) << std::endl;
         // scorer
         distance_based_scorer scorer(fs, target_inst);
         // Local search optimization
         optim_parameters op_param(20, 1);
         hc_parameters hc_param(false); // do not terminate if improvement
-        hill_climbing hc(rng, op_param, hc_param);
+        hill_climbing hc(op_param, hc_param);
         // empty deme
         instance_set<composite_score> deme(fs);
         // perform the search

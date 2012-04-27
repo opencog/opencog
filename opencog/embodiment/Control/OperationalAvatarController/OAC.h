@@ -279,11 +279,6 @@ public:
 #endif // HAVE_ZMQ
 
     /**
-     * Return the reference to rand generator
-     */ 
-    RandGen & getRandGen();
-
-    /**
      * Get the Procedure Interpreter associated with the OAC.
      *
      * @return The ProcedureInterpreter associated with the OAC.

@@ -26,7 +26,6 @@
 
 #include "ProcedureInterpreter.h"
 #include "ComboProcedure.h"
-#include "ComboSelectProcedure.h"
 #include "RunningProcedureId.h"
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
@@ -78,25 +77,22 @@ void ProcedureInterpreter::run(NetworkElement *ne)
 
 ProcedureInterpreter::ProcedureInterpreter(PAI& p) : _pai(&p)
 {
-    //initialize the random generator
+    // Initialize the random generator
     unsigned long rand_seed;
     if (config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         rand_seed = 0;
     } else {
         rand_seed = time(NULL);
     }
-    rng = new MT19937RandGen(rand_seed);
-    logger().info("Created random number generator (%p) for ComboInterpreter with seed %lu", rng, rand_seed);
-    comboInterpreter = new ComboInterpreter(*_pai, *rng);
-    comboSelectInterpreter = new ComboSelectInterpreter(*_pai, *rng);
+    randGen().seed(rand_seed);
+    logger().info("Created random number generator for ComboInterpreter with seed %lu", rand_seed);
+    comboInterpreter = new ComboInterpreter(*_pai);
     _next = 0;
 }
 
 ProcedureInterpreter::~ProcedureInterpreter()
 {
     delete comboInterpreter;
-    delete comboSelectInterpreter;
-    delete rng;
 }
 
 RunningProcedureID ProcedureInterpreter::runProcedure(
@@ -105,22 +101,10 @@ RunningProcedureID ProcedureInterpreter::runProcedure(
     logger().info("ProcedureInterpreter - runProcedure(%s)", p.getName().c_str());
 
     if (p.getType() == COMBO) {
-
         logger().debug("ProcedureInterpreter - Running a combo procedure.");
 
         RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
         _map.insert(std::make_pair(++_next, rcpID));
-    } else if (p.getType() == COMBO_SELECT) {
-
-        logger().debug("ProcedureInterpreter - Running a combo select procedure.");
-
-        const ComboSelectProcedure& procedure = ((const ComboSelectProcedure&) p);
-        RunningProcedureId rcpID =
-            comboSelectInterpreter->runProcedure(procedure.getFirstScript(),
-                                                 procedure.getSecondScript(),
-                                                 arguments);
-        _map.insert(std::make_pair(++_next, rcpID));
-
     } else if (p.getType() == BUILT_IN) {
         logger().debug("ProcedureInterpreter - Running a builtin procedure.");
         RunningBuiltInProcedure rbp = RunningBuiltInProcedure(*_pai, (const BuiltInProcedure&) p, arguments);
@@ -145,15 +129,6 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments, vu);
         _map.insert(std::make_pair(++_next, rcpID));
 
-    } else if (p.getType() == COMBO_SELECT) {
-        logger().debug(
-                     "ProcedureInterpreter - Running a combo select procedure.");
-        const ComboSelectProcedure& procedure = ((const ComboSelectProcedure&) p);
-        RunningProcedureId rcpID = comboSelectInterpreter->runProcedure(procedure.getFirstScript(),
-                                   procedure.getSecondScript(),
-                                   arguments, vu);
-        _map.insert(std::make_pair(++_next, rcpID));
-
     } else {
         OC_ASSERT(false, "ProcedureInterpreter - Only combo procedures accept variable unifier parameters.");
     }
@@ -172,11 +147,7 @@ bool ProcedureInterpreter::isFinished(RunningProcedureID id) const
         if ((rbp = boost::get<RunningBuiltInProcedure>(&rp))) {
             result = rbp->isFinished();
         } else if ((rpId = boost::get<RunningProcedureId>(&rp))) {
-            if (rpId->getType() == COMBO) {
-                result = comboInterpreter->isFinished(*rpId);
-            } else if (rpId->getType() == COMBO_SELECT) {
-                result = comboSelectInterpreter->isFinished(*rpId);
-            }
+            result = comboInterpreter->isFinished(*rpId);
         }
     }
     logger().debug("ProcedureInterpreter - isFinished(%lu)? Result: %d.",
@@ -193,11 +164,7 @@ bool ProcedureInterpreter::isFailed(RunningProcedureID id) const
         const RunningProcedureId* rpId;
 
         if ((rpId = boost::get<RunningProcedureId>(&(it->second)))) {
-            if (rpId->getType() == COMBO) {
-                result = comboInterpreter->isFailed(*rpId);
-            } else if (rpId->getType() == COMBO_SELECT) {
-                result = comboSelectInterpreter->isFailed(*rpId);
-            }
+            result = comboInterpreter->isFailed(*rpId);
 
         } else {
             result = boost::get<RunningBuiltInProcedure>(it->second).isFailed();
@@ -228,11 +195,7 @@ combo::vertex ProcedureInterpreter::getResult(RunningProcedureID id)
             result = rbp->getResult();
 
         } else if ((rpId = boost::get<RunningProcedureId>(&rp))) {
-            if (rpId->getType() == COMBO) {
-                result = comboInterpreter->getResult(*rpId);
-            } else if (rpId->getType() == COMBO_SELECT) {
-                result = comboSelectInterpreter->getResult(*rpId);
-            }
+            result = comboInterpreter->getResult(*rpId);
         }
 
     } else {
@@ -260,11 +223,7 @@ void ProcedureInterpreter::stopProcedure(RunningProcedureID id)
     Map::iterator it = _map.find(id);
     if (it != _map.end()) {
         RunningProcedureId* rpId = boost::get<RunningProcedureId>(&(it->second));
-        if (rpId->getType() == COMBO) {
-            comboInterpreter->stopProcedure(*rpId);
-        } else if (rpId->getType() == COMBO_SELECT) {
-            comboSelectInterpreter->stopProcedure(*rpId);
-        }
+        comboInterpreter->stopProcedure(*rpId);
         _map.erase(it);
     }
     Set::iterator failed_it = _failed.find(id);
@@ -280,11 +239,6 @@ void ProcedureInterpreter::stopProcedure(RunningProcedureID id)
 ComboInterpreter& ProcedureInterpreter::getComboInterpreter() const
 {
     return *comboInterpreter;
-}
-
-ComboSelectInterpreter& ProcedureInterpreter::getComboSelectInterpreter() const
-{
-    return *comboSelectInterpreter;
 }
 
 } // ~namespace Procedure

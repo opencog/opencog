@@ -33,23 +33,6 @@ namespace opencog { namespace combo {
 
 namespace id {
 enum avatar_action_symbol_enum {
-    TOWARDS,
-    AWAY,
-    RIGHT_FOOT,
-    LEFT_FOOT,
-    RIGHT_HAND,
-    LEFT_HAND,
-    CROTCH,
-    BUTT,
-    NOSE,
-    RIGHT_EAR,
-    LEFT_EAR,
-    NECK,
-    RIGHT_SHOULDER,
-    LEFT_SHOULDER,
-    TWITCH,
-    PERK,
-    BACK,
     avatar_action_symbol_count
 };
 }
@@ -68,23 +51,6 @@ typedef avatar_operator<avatar_action_symbol_enum, id::avatar_action_symbol_coun
 
 static const action_symbol_basic_description asbd[] = {
     //action_symbol          name                 type
-    { id::TOWARDS,           "TOWARDS",           "action_symbol" },
-    { id::AWAY,              "AWAY",              "action_symbol" },
-    { id::RIGHT_FOOT,        "RIGHT_FOOT",        "action_symbol" },
-    { id::LEFT_FOOT,         "LEFT_FOOT",         "action_symbol" },
-    { id::RIGHT_HAND,        "RIGHT_HAND",        "action_symbol" },
-    { id::LEFT_HAND,         "LEFT_HAND",         "action_symbol" },
-    { id::CROTCH,            "CROTCH",            "action_symbol" },
-    { id::BUTT,              "BUTT",              "action_symbol" },
-    { id::NOSE,              "NOSE",              "action_symbol" },
-    { id::RIGHT_EAR,         "RIGHT_EAR",         "action_symbol" },
-    { id::LEFT_EAR,          "LEFT_EAR",          "action_symbol" },
-    { id::NECK,              "NECK",              "action_symbol" },
-    { id::RIGHT_SHOULDER,    "RIGHT_SHOULDER",    "action_symbol" },
-    { id::LEFT_SHOULDER,     "LEFT_SHOULDER",     "action_symbol" },
-    { id::TWITCH,            "TWITCH",            "action_symbol" },
-    { id::PERK,              "PERK",              "action_symbol" },
-    { id::BACK,              "BACK",              "action_symbol" }
 };
 
 }//~namespace avatar_perception_properties

@@ -129,8 +129,7 @@ void eval_output_results(const eval_features_parameters& pa,
                          const vector<set<arity_t> > fss,
                          const vector<combo_tree>& trs,
                          const ITable& it,
-                         const OTable& ot,
-                         opencog::RandGen& rng) {
+                         const OTable& ot) {
 
     typedef MICScorer<set<arity_t> > FSScorer;
 
@@ -141,7 +140,7 @@ void eval_output_results(const eval_features_parameters& pa,
     } else {
         foreach(const combo_tree& tr, trs) {
             // evaluated tr over input table
-            OTable ot_tr(tr, it, rng);
+            OTable ot_tr(tr, it);
             ot_tr.set_label(ot.get_label());
 
             FSScorer fs_sc(it, ot_tr, pa.confidence_penalty_intensity);
@@ -152,8 +151,7 @@ void eval_output_results(const eval_features_parameters& pa,
     }
 }
 
-void read_eval_output_results(const eval_features_parameters& pa,
-                              opencog::RandGen& rng) {
+void read_eval_output_results(const eval_features_parameters& pa) {
     Table table = istreamTable(pa.input_table_file);
 
     // determine labels
@@ -180,7 +178,7 @@ void read_eval_output_results(const eval_features_parameters& pa,
     }
 
     // eval and output the results
-    eval_output_results(pa, labels, fss, trs, table.itable, table.otable, rng);
+    eval_output_results(pa, labels, fss, trs, table.itable, table.otable);
 }
 
 #endif // _OPENCOG_EVAL_FEATURES_H

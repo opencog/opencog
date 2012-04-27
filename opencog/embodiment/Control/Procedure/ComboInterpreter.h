@@ -27,9 +27,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/variable_unifier.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
-#include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
 #include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
-#include <opencog/embodiment/WorldWrapper/RuleValidationWorldWrapper.h>
 #include "RunningProcedureId.h"
 #include "RunningComboProcedure.h"
 #include <vector>
@@ -70,8 +68,7 @@ class ComboInterpreter : public boost::noncopyable
 {
 
 public:
-    ComboInterpreter(PAI& p, RandGen& rng);
-    ComboInterpreter(VirtualWorldData::VirtualWorldState& v, RandGen& rng);
+    ComboInterpreter(PAI& p);
     virtual ~ComboInterpreter();
 
     //run executes a single action plan of some procedure (if any are ready)
@@ -113,7 +110,6 @@ protected:
     typedef std::map<RunningProcedureId, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureId, combo::variable_unifier> UnifierResultMap;
 
-    RandGen& rng;
 //    WorldWrapper::PAIWorldWrapper _ww;
     WorldWrapperBase * _ww;
     Map _map;

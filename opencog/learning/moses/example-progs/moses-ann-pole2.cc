@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     combo_tree tr;
     cin >> tr; 
 
-    opencog::MT19937RandGen rng(seed);
+    randGen().seed(seed);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::ann_type, 1);
@@ -81,9 +81,9 @@ int main(int argc, char** argv)
     ann_pole2_score p2_score;
     ann_pole2_bscore p2_bscore; 
 
-    univariate_optimization univ(rng);
+    univariate_optimization univ;
     metapopulation<ann_pole2_score, ann_pole2_bscore, univariate_optimization>
-        metapop_pole2(rng, tr, tt, *si, p2_score, p2_bscore, univ);
+        metapop_pole2(tr, tt, *si, p2_score, p2_bscore, univ);
 
     moses::moses(metapop_pole2);
 

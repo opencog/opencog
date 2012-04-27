@@ -30,12 +30,12 @@
 
 namespace opencog { namespace reduct {
 
-const rule& mixed_reduction(opencog::RandGen& rng)
+const rule& mixed_reduction()
 {
     static sequential non_recursive = 
         sequential(// General
                    downwards(level()),
-                   upwards(eval_constants(rng)),
+                   upwards(eval_constants()),
                    
                    // Simple mixed
 #ifndef ABS_LOG

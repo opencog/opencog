@@ -40,12 +40,11 @@ NoSpaceLifeWorldWrapper::NoSpaceLifeWorldWrapper(AtomSpace& atomSpace,
         const string& ownerName,
         const string& avatarName,
         const CompositeBehaviorDescription& cbd,
-        const Temporal& et,
-        opencog::RandGen& _rng)
+        const Temporal& et)
         : _isFailed(false), _isFinished(true),
-        _noSpaceLife(atomSpace, petName, ownerName, avatarName, cbd, et, _rng),
+        _noSpaceLife(atomSpace, petName, ownerName, avatarName, cbd, et),
         _atomSpace(atomSpace), _petName(petName), _ownerName(ownerName),
-        _avatarName(avatarName), rng(_rng) {}
+        _avatarName(avatarName) {}
 
 NoSpaceLifeWorldWrapper::~NoSpaceLifeWorldWrapper() {}
 
@@ -90,7 +89,7 @@ bool NoSpaceLifeWorldWrapper::sendSequential_and(sib_it from, sib_it to)
                                      "A SpaceMap must exists");
                     //eval indefinite object, put _avatarName as selfName to get
                     //avatar_to_imitate's view point
-                    *arg = WorldWrapperUtil::evalIndefiniteObject(rng, h,
+                    *arg = WorldWrapperUtil::evalIndefiniteObject(h,
                             simulated_time,
                             _atomSpace,
                             _avatarName,
@@ -110,7 +109,7 @@ combo::vertex NoSpaceLifeWorldWrapper::evalPerception(pre_it it, combo::variable
     OC_ASSERT(h != Handle::UNDEFINED, "A SpaceMap must exists");
     //eval perception, put _avatarName as selfName to get
     //avatar_to_imitate's view point
-    return WorldWrapperUtil::evalPerception(rng, h, simulated_time,
+    return WorldWrapperUtil::evalPerception(h, simulated_time,
                                             _atomSpace, _avatarName,
                                             _ownerName, it, LOOK_IN_THE_PAST);
 }
@@ -122,7 +121,7 @@ combo::vertex NoSpaceLifeWorldWrapper::evalIndefiniteObject(combo::indefinite_ob
     OC_ASSERT(h != Handle::UNDEFINED, "A SpaceMap must exists");
     //eval indefinite object, put _avatarName as selfName to get
     //avatar_to_imitate's view point
-    return WorldWrapperUtil::evalIndefiniteObject(rng, h,
+    return WorldWrapperUtil::evalIndefiniteObject(h,
             simulated_time,
             _atomSpace,
             _avatarName, _ownerName, io,

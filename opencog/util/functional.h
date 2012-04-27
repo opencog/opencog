@@ -33,7 +33,7 @@ T& valueof(T* v)
 {
     return *v;
 }
-
+    
 // Returns a vector of const pointers given a container
 template<typename Container>
 std::vector<const typename Container::value_type*>

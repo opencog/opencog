@@ -852,12 +852,10 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
 }
 
 float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
-                                              const std::string & modulatorName,
-                                              opencog::RandGen & randGen
-                                             )
+                                              const std::string & modulatorName)
 
 {
-    float errorValue = randGen.randfloat();   // If error happens, return this value anyway.
+    float errorValue = randGen().randfloat();   // If error happens, return this value anyway.
 
     // Get the Handle to GroundSchemaNode
     std::string modulatorUpdater = modulatorName + "ModulatorUpdater";
@@ -1021,11 +1019,9 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
 }
 
 float AtomSpaceUtil::getCurrentDemandLevel(const AtomSpace & atomSpace,
-                                           const std::string & demandName,
-                                           opencog::RandGen & randGen
-                                          )
+                                           const std::string & demandName)
 {
-    float errorValue = randGen.randfloat();   // If error happens, return this value anyway.
+    float errorValue = randGen().randfloat();   // If error happens, return this value anyway.
 
     // Get the Handle to GroundSchemaNode
     std::string demandUpdater = demandName + "DemandUpdater";

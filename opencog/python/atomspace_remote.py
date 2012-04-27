@@ -1,5 +1,6 @@
 import urllib2
 import json
+import pickle
 
 class TruthValue(object):
     def __init__(self,mean,count):
@@ -147,6 +148,17 @@ class AtomSpace(object):
             new_atom = self._client._atom_from_dict(self._client.get_atom(h))
             self._handle2atom[h] = new_atom
             return new_atom
+    
+def dump_atomspace(space, file='atomspace.pickle'):
+    f = open(file,'w')
+    pickle.dump(space, f)
+    f.close()
+
+def load_atomspace(file='atomspace.pickle'):
+    f = open(file, 'r')
+    space = pickle.load(f)
+    f.close()
+    return space
 
 class AtomSpaceJSONClient(object):
     '''Connects a Python process to a separate CogServer process using the REST/JSON API.'''

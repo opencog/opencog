@@ -27,6 +27,7 @@
 #include <map>
 
 #include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_assert.h>
 
@@ -301,7 +302,7 @@ struct field_set
         }
     };
 
-    // A spec, in general, is one of the above  three specs.
+    // A spec, in general, is one of the above three specs.
     typedef boost::variant<term_spec, contin_spec, disc_spec> spec;
 
     // Default constructor for an empty field set
@@ -374,8 +375,8 @@ struct field_set
 
     // Return vector of discrete specs. This vector includes the single
     // bit (boolean) specs, which are at the end of the array, thus the
-    // name "disc and bits".
-    const vector<disc_spec>& disc_and_bits() const
+    // name "disc and bit".
+    const vector<disc_spec>& disc_and_bit() const
     {
         return _disc;
     }
@@ -986,12 +987,12 @@ public:
         {
             // The _idx is raw; we want the index into the disc_spec.
             size_t spec_idx = _fs->raw_to_disc_idx(_idx);
-            return _fs->disc_and_bits()[spec_idx].multy;
+            return _fs->disc_and_bit()[spec_idx].multy;
         }
 
-        void randomize(RandGen& rng)
+        void randomize()
         {
-            _fs->set_raw(*_inst, _idx, rng.randint(multy()));
+            _fs->set_raw(*_inst, _idx, randGen().randint(multy()));
         }
 
     protected:
@@ -1020,7 +1021,7 @@ public:
         {
             // The _idx is raw; we want the index into the disc_spec.
             size_t spec_idx = _fs->raw_to_disc_idx(_idx);
-            return _fs->disc_and_bits()[spec_idx].multy;
+            return _fs->disc_and_bit()[spec_idx].multy;
         }
 
     protected:
@@ -1124,27 +1125,28 @@ public:
 
     // --------------------------------------------------------
     // Get the begin, end iterators for the bit fields.
-    const_bit_iterator begin_bits(const instance& inst) const
+    /// @todo rename that begin_bit for more consistency
+    const_bit_iterator begin_bit(const instance& inst) const
     {
         return (begin_bit_fields() == _fields.end() ? const_bit_iterator() :
                 const_bit_iterator(inst.begin() + begin_bit_fields()->major_offset,
                                    begin_bit_fields()->minor_offset));
     }
 
-    const_bit_iterator end_bits(const instance& inst) const
+    const_bit_iterator end_bit(const instance& inst) const
     {
         return (begin_bit_fields() == _fields.end() ? const_bit_iterator() :
                 ++const_bit_iterator(--inst.end(), _fields.back().minor_offset));
     }
 
-    bit_iterator begin_bits(instance& inst) const
+    bit_iterator begin_bit(instance& inst) const
     {
         return (begin_bit_fields() == _fields.end() ? bit_iterator() :
                 bit_iterator(inst.begin() + begin_bit_fields()->major_offset,
                              begin_bit_fields()->minor_offset));
     }
 
-    bit_iterator end_bits(instance& inst) const
+    bit_iterator end_bit(instance& inst) const
     {
         return (begin_bit_fields() == _fields.end() ? bit_iterator() :
                 ++bit_iterator(--inst.end(), _fields.back().minor_offset));

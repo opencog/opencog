@@ -39,7 +39,6 @@ class metapopulationUTest : public CxxTest::TestSuite {
     typedef metapopulation<dummy_score,
                            dummy_bscore,
                            dummy_optimization> metapopulation_t;
-    MT19937RandGen _rng;
     dummy_score _dsc;
     dummy_bscore _dbsc;
     vertex_set ignore_ops;
@@ -49,15 +48,16 @@ class metapopulationUTest : public CxxTest::TestSuite {
 
 public:
     metapopulationUTest()
-        : _rng(1), _dsc(), _dbsc(), ignore_ops(),
-          lred(ignore_ops, _rng),
+        : _dsc(), _dbsc(), ignore_ops(),
+          lred(ignore_ops),
           _do(),
-          _metapopulation(_rng, combo_tree(), type_tree(),
+          _metapopulation(combo_tree(), type_tree(),
                           lred.operator()(2), _dsc, _dbsc,
                           _do)
     {
         logger().setPrintToStdoutFlag(true);
-        logger().setLevel(Logger::FINE); 
+        logger().setLevel(Logger::FINE);
+        randGen().seed(1);
     }
 
     // test metapopulation::remove_dominated

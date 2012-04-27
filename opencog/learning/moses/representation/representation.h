@@ -55,7 +55,6 @@ struct representation : public knob_mapper, boost::noncopyable
                    const reduct::rule& simplify_knob_building,
                    const combo_tree& exemplar_,
                    const combo::type_tree& t,
-                   RandGen& rng,
                    const operator_set& ignore_ops = operator_set(),
                    const combo_tree_ns_set* perceptions = NULL,
                    const combo_tree_ns_set* actions = NULL);
@@ -85,14 +84,27 @@ struct representation : public knob_mapper, boost::noncopyable
      * is true then _simplify_knob_building is used to reduce, otherwise
      * (the default) _simplify_candidate.
      */
-    void get_clean_combo_tree(combo_tree &tr, bool reduce,
-                              bool knob_building = false) const;
+    void clean_combo_tree(combo_tree &tr, bool reduce,
+                          bool knob_building = false) const;
 
     /**
-     * Thread safe composition of transform and get_clean_exemplar.
+     * Thread safe composition of transform and
+     * get_clean_exemplar. Around for the time being just in case but
+     * should be removed eventually.
      */
-    combo_tree get_candidate(const instance& inst, bool reduce);
+    combo_tree get_candidate_lock(const instance& inst, bool reduce);
+    
+    /**
+     * Like get_candidate but without lock
+     */
+    combo_tree get_candidate(const instance& inst, bool reduce) const;
 
+    // recursive helper
+    void get_candidate_rec(const instance& inst,
+                           combo_tree::iterator src,
+                           combo_tree::iterator parent_dst,
+                           combo_tree& candidate) const;
+    
     //* return _simplify_candidate
     const reduct::rule* get_simplify_candidate() const {
         return _simplify_candidate;
@@ -171,7 +183,6 @@ protected:
 #endif
 
     field_set _fields;
-    RandGen& rng;
     const reduct::rule* _simplify_candidate; // used to simplify candidates
     const reduct::rule* _simplify_knob_building; // used to simplify
                                                  // during knob

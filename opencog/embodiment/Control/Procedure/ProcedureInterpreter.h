@@ -25,7 +25,6 @@
 #define _PROCEDURE_INTERPRETER_H
 
 #include "ComboInterpreter.h"
-#include "ComboSelectInterpreter.h"
 #include "RunningBuiltInProcedure.h"
 
 #include <boost/noncopyable.hpp>
@@ -83,9 +82,6 @@ public:
     // return the combo interpreter object
     ComboInterpreter& getComboInterpreter() const;
 
-    // return the combo select interpreter object
-    ComboSelectInterpreter& getComboSelectInterpreter() const;
-
 protected:
     typedef std::map<RunningProcedureID, RunningProcedure> Map;
     typedef std::vector<Map::iterator> Vec;
@@ -93,9 +89,7 @@ protected:
     typedef std::map<RunningProcedureID, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureID, combo::variable_unifier> UnifierResultMap;
 
-    RandGen* rng;
     ComboInterpreter* comboInterpreter;
-    ComboSelectInterpreter* comboSelectInterpreter;
     Map _map;
     Set _failed;
     ResultMap _resultMap;

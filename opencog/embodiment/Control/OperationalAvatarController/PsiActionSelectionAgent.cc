@@ -27,11 +27,6 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
-#ifdef HAVE_CYTHON
-#include <Python.h>
-#include <opencog/cython/logic_wrapper_api.h>
-#endif
-
 using namespace opencog::oac;
 
 extern int currentDebugLevel;
@@ -145,30 +140,6 @@ void PsiActionSelectionAgent::getActions(AtomSpace & atomSpace, Handle hStep,
 
 bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
 {
-    #ifdef HAVE_CYTHON
-    // Code to run the Python backward chaining planner.
-    cout << "Py_IsInitialized()" << Py_IsInitialized() << endl;
-    Py_Initialize();
-    PyGILState_STATE gstate;
-    cout << "step 1" << endl;
-    gstate = PyGILState_Ensure();
-    cout << "step 2" << endl;
-
-    if (import_logic_wrapper() == -1) {
-        PyErr_Print();
-        
-        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
-    }
-    
-    cout << "step 3" << endl;
-    python_pln_plan(&atomSpace);
-    cout << "any errors?" << endl;
-    PyErr_Print();
-//    python_pln_plan();
-    cout << "step 4" << endl;
-    PyGILState_Release(gstate);
-    #endif
-    
     // Check the state of latest planning
     std::vector<Handle> tempOutgoingSet, emptyOutgoingSet; 
     tempOutgoingSet.push_back( atomSpace.addNode(PREDICATE_NODE, "plan_success") ); 
@@ -188,23 +159,23 @@ bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
 
     this->plan_selected_demand_goal = hSelectedDemandGoal; 
 
-//    Handle hRuleList =
-//        AtomSpaceUtil::getReference(atomSpace, 
-//                                    atomSpace.getHandle(CONCEPT_NODE, 
-//                                                        "plan_rule_list"
-//                                                       )
-//                                   );
-//
-//    this->plan_rule_list = atomSpace.getOutgoing(hRuleList); 
-//
-//    Handle hContextList =
-//        AtomSpaceUtil::getReference(atomSpace, 
-//                                    atomSpace.getHandle(CONCEPT_NODE, 
-//                                                        "plan_context_list"
-//                                                       )
-//                                   );
-//
-//    this->plan_context_list = atomSpace.getOutgoing(hContextList); 
+    Handle hRuleList =
+        AtomSpaceUtil::getReference(atomSpace, 
+                                    atomSpace.getHandle(CONCEPT_NODE, 
+                                                        "plan_rule_list"
+                                                       )
+                                   );
+
+    this->plan_rule_list = atomSpace.getOutgoing(hRuleList); 
+
+    Handle hContextList =
+        AtomSpaceUtil::getReference(atomSpace, 
+                                    atomSpace.getHandle(CONCEPT_NODE, 
+                                                        "plan_context_list"
+                                                       )
+                                   );
+
+    this->plan_context_list = atomSpace.getOutgoing(hContextList); 
 
     Handle hActionList =
         AtomSpaceUtil::getReference(atomSpace, 
@@ -219,32 +190,32 @@ bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
     return true; 
 }
 
-//void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace, Handle hPlanning)
-//{
-//    std::vector<Handle> resultHandleSet = atomSpace.getOutgoing(hPlanning); 
-//
-//    Handle planRuleListReferenceLink = resultHandleSet[0]; 
-//    Handle planContextListReferenceLink = resultHandleSet[1]; 
-//    Handle planActionListReferenceLink = resultHandleSet[2];
-//    Handle planSelectedDemandGoalReferenceLink = resultHandleSet[3]; 
-//
-//    this->plan_selected_demand_goal =
-//        atomSpace.getOutgoing(planSelectedDemandGoalReferenceLink, 1); 
-//
-//    this->plan_rule_list = atomSpace.getOutgoing(
-//                               atomSpace.getOutgoing(planRuleListReferenceLink, 1)
-//                                                ); 
-//
-//    this->plan_context_list = atomSpace.getOutgoing(
-//                                  atomSpace.getOutgoing(planContextListReferenceLink, 1)
-//                                                   ); 
-//
-//    this->plan_action_list = atomSpace.getOutgoing(
-//                                 atomSpace.getOutgoing(planActionListReferenceLink, 1)
-//                                                  );
-//    this->temp_action_list = this->plan_action_list; 
-//
-//}
+void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace, Handle hPlanning)
+{
+    std::vector<Handle> resultHandleSet = atomSpace.getOutgoing(hPlanning); 
+
+    Handle planRuleListReferenceLink = resultHandleSet[0]; 
+    Handle planContextListReferenceLink = resultHandleSet[1]; 
+    Handle planActionListReferenceLink = resultHandleSet[2];
+    Handle planSelectedDemandGoalReferenceLink = resultHandleSet[3]; 
+
+    this->plan_selected_demand_goal =
+        atomSpace.getOutgoing(planSelectedDemandGoalReferenceLink, 1); 
+
+    this->plan_rule_list = atomSpace.getOutgoing(
+                               atomSpace.getOutgoing(planRuleListReferenceLink, 1)
+                                                ); 
+
+    this->plan_context_list = atomSpace.getOutgoing(
+                                  atomSpace.getOutgoing(planContextListReferenceLink, 1)
+                                                   ); 
+
+    this->plan_action_list = atomSpace.getOutgoing(
+                                 atomSpace.getOutgoing(planActionListReferenceLink, 1)
+                                                  );
+    this->temp_action_list = this->plan_action_list; 
+
+}
 
 void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
 {
@@ -549,9 +520,6 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC * oac = (OAC *) server;
 
-    // Get rand generator
-    // RandGen & randGen = oac->getRandGen();
-
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
@@ -749,23 +717,23 @@ std::cout<<"current action is still running [SchemaId = "
 #if HAVE_GUILE    
     // If we've used up the current plan, do a new planning
     if ( this->temp_action_list.empty() && this->current_actions.empty() ) {
-//        // Initialize scheme evaluator
-//        SchemeEval & evaluator = SchemeEval::instance();    
-//        std::string scheme_expression, scheme_return_value;
-//
-//        scheme_expression = "( do_planning )";
-//
-//        // Run the Procedure that do planning
-//        scheme_return_value = evaluator.eval(scheme_expression);
-//
-//        if ( evaluator.eval_error() ) {
-//            logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
-//                             __FUNCTION__, 
-//                             scheme_expression.c_str() 
-//                          );
-//
-//            return; 
-//        }
+        // Initialize scheme evaluator
+        SchemeEval & evaluator = SchemeEval::instance();    
+        std::string scheme_expression, scheme_return_value;
+
+        scheme_expression = "( do_planning )";
+
+        // Run the Procedure that do planning
+        scheme_return_value = evaluator.eval(scheme_expression);
+
+        if ( evaluator.eval_error() ) {
+            logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
+                             __FUNCTION__, 
+                             scheme_expression.c_str() 
+                          );
+
+            return; 
+        }
 
         // Try to get the plan stored in AtomSpace
         if ( !this->getPlan(atomSpace) ) {
@@ -780,7 +748,7 @@ std::cout<<"'do_planning' can not find any suitable plan for the selected demand
             return;  
         }
 
-        //this->stimulateAtoms(); 
+        this->stimulateAtoms(); 
 
 //        std::cout<<std::endl<<"Done (do_planning), scheme_return_value(Handle): "<<scheme_return_value; 
 //        Handle hPlanning = Handle( atol(scheme_return_value.c_str()) );         
@@ -840,10 +808,9 @@ std::cout<<"'do_planning' can not find any suitable plan for the selected demand
 
     // Change the current Demand Goal randomly (controlled by the modulator 'SelectionThreshold')
     float selectionThreshold = AtomSpaceUtil::getCurrentModulatorLevel(atomSpace,
-                                                                       SELECTION_THRESHOLD_MODULATOR_NAME,
-                                                                       randGen
+                                                                       SELECTION_THRESHOLD_MODULATOR_NAME
                                                                       );
-    if ( randGen.randfloat() > selectionThreshold )
+    if ( randGen().randfloat() > selectionThreshold )
     {
 
         selectedDemandGoal = this->chooseRandomDemandGoal(); 

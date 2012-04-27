@@ -24,8 +24,6 @@
 #ifndef ACTIONFILTER_H_
 #define ACTIONFILTER_H_
 
-#include <opencog/util/RandGen.h>
-
 #include <opencog/comboreduct/combo/vertex.h>
 
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
@@ -67,8 +65,7 @@ public:
                  const indefinite_object_set& idos,
                  const builtin_action_set& bas,
                  arity_t arity,
-                 bool type_check,
-                 opencog::RandGen& rng);
+                 bool type_check);
     ~ActionFilter();
 
     /**
@@ -109,8 +106,6 @@ private:
     const builtin_action_set& _bas;
     arity_t _arity;
     bool _type_check; //type check the generated actions
-
-    opencog::RandGen& _rng;
 
     //generates the complete action sequence set of a given
     //CompositeBehaviorDescription

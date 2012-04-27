@@ -67,8 +67,7 @@ private:
      * vector.
      */
     static std::vector<combo::definite_object>
-    getDefiniteObjects(opencog::RandGen& rng,
-                       Handle smh,
+    getDefiniteObjects(Handle smh,
                        unsigned long time,
                        AtomSpace& atomSpace,
                        const std::string& self_id,
@@ -122,14 +121,11 @@ private:
      * @param atomSpace     The AtomSpace where to look for the Modulator.
      * @param modulatorName The Modulator name, which is defined in "PredefinedProcedureNames.h" 
      *                      in AtomSpace folder.
-     * @param randGen       Random number generator                     
      * @param time      The current timestamp, which is used for cache searching. 
      */
     static float getModulator(const AtomSpace & atomSpace,
                               const std::string & modulatorName,
-                              opencog::RandGen & randGen,
-                              unsigned long time
-                             );
+                              unsigned long time);
 
     /**
      * Return the value for the given Demand within the AtomSpace.
@@ -138,28 +134,23 @@ private:
      * @param atomSpace  The AtomSpace where to look for the Demand.
      * @param demandName The Demand name, which is defined in "PredefinedProcedureNames.h" 
      *                   in AtomSpace folder.
-     * @param randGen    Random number generator
      * @param time       The current timestamp, which is used for cache searching. 
      */
     static float getDemand(const AtomSpace & atomSpace,
                            const std::string & demandName,
-                           opencog::RandGen & randGen,
-                           unsigned long time
-                          );
+                           unsigned long time);
 
     /**
      * Return the truth value for the given Demand Goal.
      * Demand not presented in AtomSpace will return a random value in [0, 1].
      *
-     * @param rng       Random generator
      * @param atomSpace The AtomSpace where to look for the Demand.
      * @param modulator The Demand name, which is defined in "PredefinedProcedureNames.h" 
      *                  in AtomSpace folder.
      * @param self_id   ID of the Pet itself.
      * @param time      The current timestamp, which is used for cache searching. 
      */
-    static float getDemandGoalTruthValue(opencog::RandGen & rng,  
-                                         const AtomSpace & atomSpace,
+    static float getDemandGoalTruthValue(const AtomSpace & atomSpace,
                                          const std::string & demand,
                                          const std::string & self_id,
                                          unsigned long time
@@ -170,7 +161,6 @@ private:
      * the atomSpace. The feeling or trait whose value is to be retrieved is
      * presented in the combo tree representation.
      *
-     * @param rng          random number generator
      * @param smh          a SpaceMap Handle
      * @param time         world timestamp at which the evaluation occurs
      * @param atomSpace    the AtomSpace
@@ -182,8 +172,7 @@ private:
      * @param vu      variable_unifier object used to resolve wild_card symbol _*_
      */
 
-    static float getEmotionalFeelingOrTrait(opencog::RandGen& rng,
-                                            Handle smh,
+    static float getEmotionalFeelingOrTrait(Handle smh,
                                             unsigned long time,
                                             AtomSpace& atomSpace,
                                             const std::string& self_id,
@@ -237,15 +226,13 @@ public:
      * AtomSpace querying for inheritance links of nullary predicates
      * (e.g. food_bowl)
      */
-    static std::string lookupInheritanceLink(opencog::RandGen& rng,
-            const AtomSpace& as, Handle);
+    static std::string lookupInheritanceLink(const AtomSpace& as, Handle);
 
     /**
      * AtomSpace querying for execution links of nullary predicates
      * (e.g. pet_bowl)
      */
-    static std::string lookupExecLink(opencog::RandGen& rng,
-                                      const AtomSpace& as, Handle);
+    static std::string lookupExecLink(const AtomSpace& as, Handle);
 
     /**
      * convenience function - used to create predicates for filtering
@@ -311,7 +298,7 @@ public:
      *                     using past state or current state
      * @param vu      variable_unifier object used to resolve wild_card symbol _*_
      */
-    static combo::vertex evalIndefiniteObject(opencog::RandGen& rng,
+    static combo::vertex evalIndefiniteObject(
             Handle smh,
             unsigned long time,
             AtomSpace& atomSpace,
@@ -323,7 +310,7 @@ public:
     throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
 
     //like above but uses directly avatar_indefinite_object_enum
-    static combo::vertex evalIndefiniteObject(opencog::RandGen& rng,
+    static combo::vertex evalIndefiniteObject(
             Handle smh,
             unsigned long time,
             AtomSpace& atomSpace,
@@ -343,8 +330,7 @@ public:
      *                     using past state or current state
      * @param vu      variable_unifier object used to resolve wild_card symbol _*_
      */
-    static combo::vertex evalPerception(opencog::RandGen& rng,
-                                        Handle smh,
+    static combo::vertex evalPerception(Handle smh,
                                         unsigned long time,
                                         AtomSpace& atomSpace,
                                         const std::string& self_id,

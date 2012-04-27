@@ -43,13 +43,12 @@ NoSpaceLife::NoSpaceLife(AtomSpace& atomSpace, const std::string& pet_id,
                          const std::string& owner_id,
                          const std::string& avatar_id,
                          const CompositeBehaviorDescription& cbd,
-                         const Temporal& et,
-                         opencog::RandGen& rng) :
+                         const Temporal& et) :
         _atomSpace(atomSpace), _pet_id(pet_id), _owner_id(owner_id),
         _avatar_id(avatar_id),
         _currentTime(0), _currentIndex(0), _currentMapHandle(Handle::UNDEFINED),
         _hasTimeChanged(true), _imitatedBD(cbd), _exemplarTemporal(et),
-        _generatedBD(&atomSpace), _rng(rng)
+        _generatedBD(&atomSpace)
 {
     _currentTime = _imitatedBD.getStartTime();
 }
@@ -195,7 +194,7 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
 
 builtin_action NoSpaceLife::choose_random_step() const
 {
-    int c = _rng.randint(4);
+    int c = randGen().randint(4);
     switch (c) {
     case 0:
         return get_instance(id::step_backward);
@@ -255,7 +254,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
                     pre_it it = WorldWrapperUtil::maketree_percept(p, do_id);
                     corresponding_arg_exists =
                         combo::vertex_to_bool(
-                            WorldWrapperUtil::evalPerception(_rng, getCurrentMapHandle(),
+                            WorldWrapperUtil::evalPerception(getCurrentMapHandle(),
                                                              _currentTime, _atomSpace,
                                                              _avatar_id, _owner_id,
                                                              it, true));
@@ -268,7 +267,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
     if (corresponding_arg_exists) {
         return definite_object(do_id);
     } else {
-        vertex v = WorldWrapperUtil::evalIndefiniteObject(_rng,
+        vertex v = WorldWrapperUtil::evalIndefiniteObject(
                    getCurrentMapHandle(),
                    _currentTime,
                    _atomSpace,

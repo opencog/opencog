@@ -48,21 +48,19 @@ public:
 
   void check(combo_tree tr, string str)
   {
-    MT19937RandGen rng(0);
     vertex_set ignore_ops;
 
     clean_reduce(tr);
-    logical_reduce(2, tr, ignore_ops, rng);
+    logical_reduce(2, tr, ignore_ops);
 
     combo_tree xx = totree(str);
-    logical_reduce(2, xx, ignore_ops, rng);
+    logical_reduce(2, xx, ignore_ops);
 
     TS_ASSERT(tr == xx);
   }
 
   void test_logical()
   {
-    MT19937RandGen rng(0);
     vertex_set ignore_ops;
     string 
       tree_str="and($1 not($2))",
@@ -80,7 +78,7 @@ public:
       res22="and($1 not($2) not($3))";
     
     combo_tree tr=totree(tree_str);
-    reduct::logical_reduce(2, tr, ignore_ops, rng);
+    reduct::logical_reduce(2, tr, ignore_ops);
 
     combo_tree t1(argument(1)),t2(argument(2)),t3(argument(3));
     logical_subtree_knob 

@@ -32,7 +32,7 @@
 
 namespace opencog { namespace Procedure {
 
-typedef enum {BUILT_IN, COMBO, COMBO_SELECT} ProcedureType;
+typedef enum {BUILT_IN, COMBO} ProcedureType;
 
 class GeneralProcedure
 {

@@ -30,8 +30,6 @@
 #include <opencog/embodiment/Learning/behavior/CompositeBehaviorDescription.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
-#include <opencog/util/RandGen.h>
-
 #define ACTION_DONE_TIME 200 //each action takes 2 seconds
 #define PAUSE_TIME 200
 #define BEHAVED_STR "behaved"
@@ -57,8 +55,7 @@ public:
     NoSpaceLife(AtomSpace& atomSpace, const std::string& pet_id,
                 const std::string& owner_id, const std::string& avatar_id,
                 const CompositeBehaviorDescription& cbd,
-                const Temporal& exemplarTemporal,
-                opencog::RandGen& rng);
+                const Temporal& exemplarTemporal);
 
     ~NoSpaceLife();
 
@@ -107,8 +104,6 @@ private:
     const Temporal& _exemplarTemporal;
 
     CompositeBehaviorDescription _generatedBD;
-
-    opencog::RandGen& _rng;
 
     void generateElementaryBD(ElementaryBehaviorDescription& ebd,
                               pre_it it,

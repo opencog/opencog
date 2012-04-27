@@ -76,7 +76,6 @@ struct RunningComboProcedure : public combo::Evaluator {
 
     //construct an rp from a worldwrapper and a tree
     RunningComboProcedure(WorldWrapperBase& ww, const combo::combo_tree& tr,
-                          RandGen& rng,
                           const std::vector<combo::vertex>& arguments,
                           bool doesSendDefinitePlan = true,
                           combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
@@ -159,8 +158,6 @@ protected:
      * has not yet been evaluated.
      */
     sib_it _it;
-
-    RandGen& _rng;
 
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;

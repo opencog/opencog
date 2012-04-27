@@ -279,8 +279,9 @@ reproducing the target.
 .PP
 Input files should consist of ASCII data, separated by commas or
 whitespace.  The appearance of \fB# ;\fR or \fB!\fR in the first
-column denotes a comment. The first non-comment, non-numeric row in the
-file (if any) is taken to hold column labels. The target column may be
+column denotes a comment line; this line will be ignored. The first
+non-comment row, if it is also non-numeric, is taken to hold column
+labels. The target column may be
 specified using the \fB\-u\fR option with a column name. The printing of
 column names on output is controlled with the \fB\-W1\fR flag.
 .TP

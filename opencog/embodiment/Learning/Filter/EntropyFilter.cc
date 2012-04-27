@@ -71,15 +71,13 @@ EntropyFilter::EntropyFilter(const std::string& self_id,
                              const definite_object_set& dos,
                              const message_set& ms,
                              const agent_to_actions& atas,
-                             const type_tree_seq& input_arg_types,
-                             opencog::RandGen& rng)
+                             const type_tree_seq& input_arg_types)
         : _self_id(self_id), _owner_id(owner_id),
         _atomSpace(atomSpace), _elementary_perceptions(ep),
         _idos(idos), _dos(dos), _ms(ms), _atas(atas),
         _input_arg_types(input_arg_types),
         _total_time(0),
-        _indefToDef(id::avatar_indefinite_object_count, ""),
-        _rng(rng)
+        _indefToDef(id::avatar_indefinite_object_count, "")
 {
 
     _arity = _input_arg_types.size();
@@ -219,7 +217,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                     //check if the indefinite object is in _indefToDef cache
                     if (_indefToDef[(unsigned int)ioe] == "") {
                         *opra =
-                            WorldWrapperUtil::evalIndefiniteObject(_rng, smh,
+                            WorldWrapperUtil::evalIndefiniteObject(smh,
                                                                    ltl,
                                                                    _atomSpace,
                                                                    _self_id,
@@ -261,7 +259,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 OC_ASSERT(_hasSaidDelay > 0,
                                  "_hasSaidDelay cannot be null otherwise that may provoke an infinite loop");
                 for (unsigned long i = ltu; i > ltl; i -= _hasSaidDelay) {
-                    if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                    if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(
                                               smh,
                                               i,
                                               _atomSpace,
@@ -312,7 +310,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                     //check if evalLink_h match the template
                     if (dft(evalLink_h)) {
                         unsigned long cur_tu = i->getTemporal()->getUpperBound();
-                        if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                        if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(
                                                   smh,
                                                   cur_tu,
                                                   _atomSpace,
@@ -342,7 +340,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 std::pair<bool, unsigned long>& p = vti->second;
                 if (!canUsePreviousValue) {
                     p.first =
-                        combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng, smh,
+                        combo::vertex_to_bool(WorldWrapperUtil::evalPerception(smh,
                                               ltl,
                                               _atomSpace,
                                               _self_id,
@@ -359,7 +357,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
 
             if (head == get_instance(id::has_said)) {
                 for (unsigned long i = ltu; i > ltl; i -= _hasSaidDelay) {
-                    if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                    if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(
                                               smh,
                                               i,
                                               _atomSpace,
@@ -375,7 +373,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                     }
                 }
             } else {
-                if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(
                                           smh,
                                           ltl,
                                           _atomSpace,

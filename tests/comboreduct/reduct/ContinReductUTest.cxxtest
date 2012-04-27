@@ -33,8 +33,6 @@ using namespace opencog;
 using namespace reduct;
 using namespace ant_combo;
 
-static MT19937RandGen rng(0);
-
 class ContinReductUTest : public CxxTest::TestSuite {
 public:
     // test if the combo program of string tr_str is shorter (or equal
@@ -47,21 +45,21 @@ public:
 
         type_tree tt = infer_type_tree(tr);
         
-        ITable rnt(tt, rng);
+        ITable rnt(tt);
         
         int size_before, size_after;
         int reduct_effort = 2;
         
         try {
-            OTable ct1(tr, rnt, rng);
+            OTable ct1(tr, rnt);
             // std::cout << "ct1:" << std::endl << ct1 << std::endl;;
             size_before=tr.size();
             std::cout << "before: " << tr << std::endl;
             
-            contin_reduce(tr, reduct_effort, vertex_set(), rng);
+            contin_reduce(tr, reduct_effort, vertex_set());
             std::cout << "after:  " << tr << std::endl;      
             size_after=tr.size();
-            OTable ct2(tr, rnt, rng);
+            OTable ct2(tr, rnt);
             // std::cout << "ct2:" << std::endl << ct2 << std::endl;;
             
             if(strict) {

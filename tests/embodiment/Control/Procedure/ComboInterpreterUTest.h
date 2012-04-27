@@ -80,7 +80,6 @@ public:
     }
 
     virtual ~ComboInterpreterUTest() {}
-    virtual opencog::RandGen& getRandGen() = 0;
 
     void init(std::string _xmlFileName, std::string petName) {
         atomSpace = new AtomSpace();
@@ -132,7 +131,7 @@ public:
         cpr.instantiateProcedureCalls(tree, true);
 
         std::vector<vertex> arguments ;
-        Procedure::ComboInterpreter interpreter(*ppai, getRandGen());
+        Procedure::ComboInterpreter interpreter(*ppai);
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);
@@ -174,7 +173,7 @@ public:
         ss >> tree;
 
         std::vector<vertex> arguments ;
-        Procedure::ComboInterpreter interpreter(*ppai, getRandGen());
+        Procedure::ComboInterpreter interpreter(*ppai);
         Procedure::RunningProcedureId runningId = interpreter.runProcedure(tree, arguments);
         while (! interpreter.isFinished(runningId)) {
             interpreter.run(NULL);

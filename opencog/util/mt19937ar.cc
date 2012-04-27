@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef USE_STL_RANDOM
 /* Original:
  
    A C-program for MT19937, with initialization improved 2002/1/26.
@@ -65,6 +66,7 @@
    http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
    email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
 */
+#endif
 
 #include "mt19937ar.h"
 
@@ -77,20 +79,27 @@
 
 using namespace opencog;
 
+#ifndef USE_STL_RANDOM
 /* Period parameters */  
 int MT19937RandGen::N = 624;
 int MT19937RandGen::M = 397;
 unsigned long MT19937RandGen::MATRIX_A = 0x9908b0dfUL;   /* constant vector a */
 unsigned long MT19937RandGen::UPPER_MASK = 0x80000000UL; /* most significant w-r bits */
 unsigned long MT19937RandGen::LOWER_MASK = 0x7fffffffUL; /* least significant r bits */
+#endif
 
 // PUBLIC METHODS: 
 
 MT19937RandGen::MT19937RandGen(unsigned long s) {
+#ifndef USE_STL_RANDOM
     init();
     init_genrand(s);
+#else
+    randomGen.seed(s);
+#endif
 }
 
+#ifndef USE_STL_RANDOM
 MT19937RandGen::MT19937RandGen(unsigned long init_key[], int key_length) {
     init();
     init_by_array(init_key, key_length);
@@ -99,78 +108,78 @@ MT19937RandGen::MT19937RandGen(unsigned long init_key[], int key_length) {
 MT19937RandGen::~MT19937RandGen() {
     delete[] mt;
 }
+#endif
+
+void MT19937RandGen::seed(unsigned long s) {
+#ifndef USE_STL_RANDOM
+    init_genrand(s);
+#else
+    randomGen.seed(s);
+#endif
+}
 
 // random int between 0 and max rand number.
 int MT19937RandGen::randint() {
-    int result;
-    result = (int) genrand_int31();
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::randint() => %d", result);
+#ifndef USE_STL_RANDOM
+    return (int)genrand_int31();
+#else
+    std::uniform_int_distribution<int> dis;
+    return dis(randomGen);
 #endif
-    return result;
 }
 
-//random float in [0,1]
-float MT19937RandGen::randfloat() { 
-    float result;
-    result = (float) genrand_real1();
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::randfloat() => %f", result);
+// random float in [0,1]
+float MT19937RandGen::randfloat() {
+#ifndef USE_STL_RANDOM
+    return (float) genrand_real1();
+#else
+    return randomGen() / (float)randomGen.max();
 #endif
-    return result;
 }
 
-//random double in [0,1]
+// random double in [0,1]
 double MT19937RandGen::randdouble() { 
-    double result;
-    result = genrand_real1();
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::randfloat() => %f", result);
+#ifndef USE_STL_RANDOM
+    return genrand_real1();
+#else
+    return randomGen() / (double)randomGen.max();
 #endif
-    return result;
 }
   
 //random double in [0,1)
-double MT19937RandGen::randDoubleOneExcluded() { 
-    double result;
-    result = genrand_real2();
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::randDoubleOneExcluded() => %f", result);
+double MT19937RandGen::randDoubleOneExcluded() {
+#ifndef USE_STL_RANDOM
+    return genrand_real2();
+#else
+    std::uniform_real_distribution<double> dis;
+    return dis(randomGen);
 #endif
-    return result;
 }
 
 //random int in [0,n)
-int MT19937RandGen::randint(int n) { 
-    int result;
-    result = (int) genrand_int31()%n;
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::randint(%d) => %d", n, result);
+int MT19937RandGen::randint(int n) {
+#ifndef USE_STL_RANDOM
+    return (int)genrand_int31() % n;
+#else
+    return (int)randint() % n;
 #endif
-    return result;
 }
 
 // return -1 or 1 randonly
 int MT19937RandGen::randPositiveNegative(){
-    int result;
-    result = (this->randint(2) == 0) ? 1 : -1;
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::randPositiveNegative() => %d", result);
-#endif
-    return result;
+    return (this->randint(2) == 0) ? 1 : -1;
 }
 
 //random boolean
-bool MT19937RandGen::randbool() { 
-    bool result;
-    result = genrand_int31()%2==0;
-#ifdef DEBUG_RAND_CALLS
-    logger().debug("MT19937RandGen::randbool() => %s", result?"true":"false");
+bool MT19937RandGen::randbool() {
+#ifndef USE_STL_RANDOM
+    return genrand_int31() % 2 == 0;
+#else
+    return randint() % 2 == 0;
 #endif
-    return result;
 }
 
-
+#ifndef USE_STL_RANDOM
 // PRIVATE METHODS
 
 /* creates the data structures */
@@ -297,4 +306,13 @@ double MT19937RandGen::genrand_res53(void)
     return(a*67108864.0+b)*(1.0/9007199254740992.0); 
 } 
 
+// Create and return the signle instance. The initial seed is zero but
+// can be changed with the public method RandGen::seed(unsigned long)
+RandGen& opencog::randGen()
+{
+    static MT19937RandGen instance(0);
+    return instance;
+}
+
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
+#endif

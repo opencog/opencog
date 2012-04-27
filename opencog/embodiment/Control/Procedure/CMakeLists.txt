@@ -6,10 +6,6 @@ ADD_LIBRARY (Procedure
     ComboProcedureRepository
     BuiltInProcedureRepository
     ProcedureRepository
-    ComboSelectProcedure
-    ComboSelectProcedureRepository
-    ComboSelectInterpreter
-    RunningComboSelectProcedure
     ComboShellServer
     ProcedureInterpreter
     RunningBuiltInProcedure

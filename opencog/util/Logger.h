@@ -306,9 +306,8 @@ private:
 
 }; // class
 
-// singleton instance (following meyer's design pattern)
+// singleton instance (following Meyer's design pattern)
 Logger& logger();
-
 
 }  // namespace opencog
 

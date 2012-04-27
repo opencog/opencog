@@ -111,14 +111,13 @@ struct contin_max : public unary_function<instance, contin_t>
 //
 struct contin_uniform : public unary_function<instance, contin_t>
 {
-    contin_uniform(const field_set& fs, contin_t minval, contin_t maxval,
-                   RandGen& rng)
+    contin_uniform(const field_set& fs, contin_t minval, contin_t maxval)
         : fields(fs), target(fs.n_contin_fields())
     {
         generate(target.begin(), target.end(),
                  bind(std::plus<contin_t>(),
                       bind(std::multiplies<contin_t>(),
-                           bind(&RandGen::randdouble, ref(rng)),
+                           bind(&RandGen::randdouble, ref(randGen())),
                            maxval - minval), minval));
     }
 

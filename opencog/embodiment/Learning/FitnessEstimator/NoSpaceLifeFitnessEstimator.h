@@ -86,8 +86,7 @@ public:
                                 int indefinite_object_count,
                                 int operator_count,
                                 int predicate_Count,
-                                int action_count,
-                                opencog::RandGen& rng);
+                                int action_count);
 
     ~NoSpaceLifeFitnessEstimator();
 
@@ -134,8 +133,6 @@ private:
     mutable unsigned int _cache_success;
     mutable unsigned int _total_fitness_call;
 #endif
-
-    opencog::RandGen& _rng;
 
     //true to be activated
     bool _randomOperatorOptimization;

@@ -83,7 +83,7 @@ information_theoretic_bits(const field_set& fs)
     double res = 0;
 
     size_t n_disc_fields = fs.n_disc_fields();
-    vector<field_set::disc_spec>::const_iterator it = fs.disc_and_bits().begin();
+    vector<field_set::disc_spec>::const_iterator it = fs.disc_and_bit().begin();
     for (size_t cnt=0; cnt < n_disc_fields; cnt++, it++) {
         const field_set::disc_spec& d = *it;
         res += log2<double>(d.multy);
@@ -245,10 +245,9 @@ struct eda_parameters
 
 struct univariate_optimization : optim_stats
 {
-    univariate_optimization(RandGen& _rng,
-                            const optim_parameters& op = optim_parameters(),
+    univariate_optimization(const optim_parameters& op = optim_parameters(),
                             const eda_parameters& ep = eda_parameters())
-        : rng(_rng), opt_params(op), eda_params(ep) {}
+        : opt_params(op), eda_params(ep) {}
 
     //return # of evaluations actually performed
     template<typename Scoring>
@@ -273,8 +272,7 @@ struct univariate_optimization : optim_stats
         // Create the initial sample
         // Generate the initial sample to populate the deme
         deme.resize(pop_size);
-        generate_initial_sample(deme.fields(), pop_size, deme.begin(),
-                                deme.end(), rng);
+        generate_initial_sample(deme.fields(), pop_size, deme.begin(), deme.end());
 
         if (eda_params.is_tournament_selection()) {
             cout_log_best_and_gen logger;
@@ -284,13 +282,12 @@ struct univariate_optimization : optim_stats
                     (composite_score(opt_params.terminate_if_gte,
                                       worst_composite_score.second),
                      max_gens_improv),
-                    tournament_selection((unsigned)eda_params.selection, rng),
+                    tournament_selection((unsigned)eda_params.selection),
                     univariate(), local_structure_probs_learning(),
                     // rtr_replacement(deme.fields(),
-                    //                      opt_params.rtr_window_size(deme.fields()),
-                    //                      rng),
+                    //                      opt_params.rtr_window_size(deme.fields())),
                     replace_the_worst(),
-                    logger, rng);
+                    logger);
         } else { //truncation selection
             OC_ASSERT(false,
                       "Trunction selection not implemented."
@@ -307,7 +304,6 @@ struct univariate_optimization : optim_stats
         }
     }
 
-    RandGen& rng;
     optim_parameters opt_params;
     eda_parameters eda_params;
 };
@@ -385,10 +381,9 @@ struct hc_parameters
 // #define GATHER_STATS 1
 struct hill_climbing : optim_stats
 {
-    hill_climbing(RandGen& _rng,
-                  const optim_parameters& op = optim_parameters(),
+    hill_climbing(const optim_parameters& op = optim_parameters(),
                   const hc_parameters& hc = hc_parameters())
-        : rng(_rng), opt_params(op), hc_params(hc)
+        : opt_params(op), hc_params(hc)
     {
 #ifdef GATHER_STATS
         hiscore = 0.0;
@@ -741,7 +736,7 @@ struct hill_climbing : optim_stats
                     sample_new_instances(total_number_of_neighbours,
                                          number_of_new_instances,
                                          current_number_of_instances,
-                                         center_inst, deme, distance, rng);
+                                         center_inst, deme, distance);
             } else {
                 // These cross-over (in the genetic sense) the
                 // top-scoring one, two and three instances,respectively.
@@ -987,7 +982,6 @@ struct hill_climbing : optim_stats
         return operator()(deme, init_inst, score, max_evals);
     }
 
-    RandGen& rng;
     optim_parameters opt_params;
     hc_parameters hc_params;
 #ifdef GATHER_STATS
@@ -1048,11 +1042,9 @@ struct simulated_annealing : optim_stats
 {
     typedef score_t energy_t;
 
-    simulated_annealing(RandGen& _rng,
-                const optim_parameters& op = optim_parameters(),
-                const sa_parameters& sa = sa_parameters())
-        : rng(_rng),
-          opt_params(op), sa_params(sa) {}
+    simulated_annealing(const optim_parameters& op = optim_parameters(),
+                        const sa_parameters& sa = sa_parameters())
+        : opt_params(op), sa_params(sa) {}
 
     double accept_probability(energy_t energy_new, energy_t energy_old,
                               double temperature)
@@ -1144,7 +1136,7 @@ struct simulated_annealing : optim_stats
                 sample_new_instances(sa_params.max_new_instances,
                                      current_number_of_instances,
                                      center_instance, deme,
-                                     current_distance, rng);
+                                     current_distance);
 
             // If the temperature is too high, then the distance will
             // be too large, and no instances will be found at that
@@ -1177,7 +1169,7 @@ struct simulated_annealing : optim_stats
                 accept_probability(best_instance_energy,
                                    best_instance_energy, current_temp);
 
-            if (actual_accept_prob >= rng.randdouble()) {
+            if (actual_accept_prob >= randGen().randdouble()) {
                 center_instance_energy = best_instance_energy;
                 center_instance = best_instance;
                 // Logger
@@ -1212,7 +1204,6 @@ struct simulated_annealing : optim_stats
         return operator()(deme, init_inst, score, max_evals);
     }
 
-    RandGen& rng;
     optim_parameters opt_params;
     sa_parameters sa_params;
 protected:

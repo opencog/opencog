@@ -40,8 +40,8 @@ using namespace moses;
 std::set<arity_t> get_feature_set(const field_set& fields,
                                   const instance& inst) {
     std::set<arity_t> fs;
-    field_set::const_bit_iterator bit = fields.begin_bits(inst);
-    for(arity_t i = 0; bit != fields.end_bits(inst); bit++, i++)
+    field_set::const_bit_iterator bit = fields.begin_bit(inst);
+    for(arity_t i = 0; bit != fields.end_bit(inst); bit++, i++)
         if(*bit)
             fs.insert(i);
     return fs;

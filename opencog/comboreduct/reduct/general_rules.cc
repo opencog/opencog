@@ -48,7 +48,7 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (it.is_childless()) {
         if (is_indefinite_object(*it)) //not sure we want that when indefinite_object is random
-            *it = eval_throws(rng, it, evaluator);
+            *it = eval_throws(it, evaluator);
         return;
     }
     sib_it to;
@@ -72,7 +72,7 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
             if (!is_constant(*sib))
                 return;	
     }
-    *it=eval_throws(rng, it, evaluator);
+    *it=eval_throws(it, evaluator);
     tr.erase_children(it);
 }
 

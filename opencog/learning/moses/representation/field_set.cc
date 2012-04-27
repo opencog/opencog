@@ -134,7 +134,7 @@ std::string field_set::stream(const instance& inst) const
     ostreamContainer(ss, begin_term(inst), end_term(inst), "#", "#", "", false);
     ostreamContainer(ss, begin_contin(inst), end_contin(inst), "|", "|", "", false);
     ostreamContainer(ss, begin_disc(inst), end_disc(inst), " ", " ", "", false);
-    ostreamContainer(ss, begin_bits(inst), end_bits(inst), "", "", "", false);
+    ostreamContainer(ss, begin_bit(inst), end_bit(inst), "", "", "", false);
     ss << "]";
     return ss.str();
 }
@@ -246,8 +246,8 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
             << "; }," << endl;
     }
 
-    vector<disc_spec>::const_iterator dit = disc_and_bits().begin();
-    vector<disc_spec>::const_iterator dend = disc_and_bits().end();
+    vector<disc_spec>::const_iterator dit = disc_and_bit().begin();
+    vector<disc_spec>::const_iterator dend = disc_and_bit().end();
     for (; dit != dend; dit++, idx++)
     {
         if (2 < dit->multy)

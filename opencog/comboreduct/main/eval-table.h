@@ -98,18 +98,17 @@ void output_results(const evalTableParameters& pa,
 
 void eval_output_results(const evalTableParameters& pa,
                          const vector<combo_tree>& trs,
-                         ITable& it, const OTable& ot, opencog::RandGen& rng) {
+                         ITable& it, const OTable& ot) {
     foreach(const combo_tree& tr, trs) {
         // evaluated tr over input table
-        OTable ot_tr(tr, it, rng);        
+        OTable ot_tr(tr, it);        
         ot_tr.set_label(ot.get_label());
         // print results
         output_results(pa, ot, ot_tr);
     }
 }
 
-void read_eval_output_results(const evalTableParameters& pa,
-                              opencog::RandGen& rng) {
+void read_eval_output_results(const evalTableParameters& pa) {
     // find the position of the target feature of the data file if any
     int target_pos = 0;
     if(!pa.target_feature.empty() && !pa.input_table_file.empty())
@@ -136,7 +135,7 @@ void read_eval_output_results(const evalTableParameters& pa,
         }
     }
     // eval and output the results
-    eval_output_results(pa, trs, table.itable, table.otable, rng);
+    eval_output_results(pa, trs, table.itable, table.otable);
 }
 
 #endif // _OPENCOG_EVAL_TABLE_H

@@ -168,7 +168,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
     foreach(const std::string& f, fs_params.initial_features) {
         size_t idx = std::distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found
-            *(fields.begin_bits(res) + idx) = true;
+            *(fields.begin_bit(res) + idx) = true;
             // for logging
             vif += f;
         }
@@ -262,8 +262,7 @@ void incremental_feature_selection(Table& table,
 }
 
 void feature_selection(Table& table,
-                       const feature_selection_parameters& fs_params,
-                       RandGen& rng)
+                       const feature_selection_parameters& fs_params)
 {
     // setting moses optimization parameters
     optim_parameters op_param(20, fs_params.max_score, 4, 0.0);
@@ -276,7 +275,7 @@ void feature_selection(Table& table,
                                false,
                                false, // crossover
                                fs_params.hc_fraction_of_remaining);
-        hill_climbing hc(rng, op_param, hc_param);
+        hill_climbing hc(op_param, hc_param);
         moses_feature_selection(table, hc, fs_params);
     } else if(fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);

@@ -49,7 +49,7 @@ ITable::ITable() {}
 ITable::ITable(const ITable::super& mat, vector<string> il)
     : super(mat), labels(il) {}
 
-ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
+ITable::ITable(const type_tree& tt, int nsamples,
                contin_t min_contin, contin_t max_contin)
 {
     arity_t barity = boolean_arity(tt), carity = contin_arity(tt);
@@ -71,10 +71,10 @@ ITable::ITable(const type_tree& tt, RandGen& rng, int nsamples,
             if(n == id::boolean_type)
                 vs.push_back(bool_to_vertex(comp_tt?
                                             i & (1 << bidx++)
-                                            : rng.randint(2)));
+                                            : randGen().randint(2)));
             else if(n == id::contin_type)
                 vs.push_back((max_contin - min_contin)
-                             * rng.randdouble() + min_contin);
+                             * randGen().randdouble() + min_contin);
             else if(n == id::unknown_type)
                 vs.push_back(vertex()); // push default vertex
             else
@@ -102,8 +102,8 @@ OTable::OTable(const string& ol) : label(ol) {}
 
 OTable::OTable(const super& ot, const string& ol) : super(ot), label(ol) {}
 
-OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
-               const string& ol) : label(ol)
+OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
+    : label(ol)
 {
     OC_ASSERT(!tr.empty());
     if (is_ann_type(*tr.begin())) {
@@ -125,16 +125,16 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
         }
     } else {
         foreach(const vertex_seq& vs, itable)
-            push_back(eval_throws_binding(rng, vs, tr));
+            push_back(eval_throws_binding(vs, tr));
     }
 }
 
-OTable::OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
-               const string& ol) : label(ol)
+OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
+    : label(ol)
 {
     arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
-            this->push_back(eval_throws_binding(rng, vs, tr));
+            this->push_back(eval_throws_binding(vs, tr));
     });
 }
 
@@ -150,10 +150,10 @@ const string& OTable::get_label() const
 
 Table::Table() {}
 
-Table::Table(const combo_tree& tr, RandGen& rng, int nsamples,
+Table::Table(const combo_tree& tr, int nsamples,
              contin_t min_contin, contin_t max_contin) :
-    tt(infer_type_tree(tr)), itable(tt, rng, nsamples, min_contin, max_contin),
-    otable(tr, itable, rng) {}
+    tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
+    otable(tr, itable) {}
 
 complete_truth_table::size_type
 complete_truth_table::hamming_distance(const complete_truth_table& other) const
@@ -173,7 +173,7 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
     for (int i = 0; cit != end(); ++i, ++cit) {
         for (int j = 0; j < _arity; ++j)
             bmap[j] = bool_to_vertex((i >> j) % 2);
-        if (*cit != vertex_to_bool(eval_binding(*_rng, bmap, tr)))
+        if (*cit != vertex_to_bool(eval_binding(bmap, tr)))
             return false;
     }
     return true;
@@ -449,11 +449,15 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
         else if (token == "1")
             return id::logical_true;
         else
-            OC_ASSERT(0, "Expecting boolean value, got %s\n", token.c_str());
+            OC_ASSERT(false, "Expecting boolean value, got %s", token.c_str());
         break;
 
     case id::contin_type:
-        return lexical_cast<contin_t>(token);
+        try {
+            return lexical_cast<contin_t>(token);
+        } catch(boost::bad_lexical_cast&) {
+            OC_ASSERT(false, "Could not cast %s to contin", token.c_str());
+        }
 
     default:
         stringstream ss;
@@ -615,29 +619,29 @@ ostream& ostreamCTable(ostream& out, const CTable& ct) {
     return out;
 }
 
-void subsampleTable(ITable& it, OTable& ot, unsigned nsamples, RandGen& rng)
+void subsampleTable(ITable& it, OTable& ot, unsigned nsamples)
 {
     OC_ASSERT(it.size() == ot.size());
     if(nsamples < ot.size()) {
         unsigned int nremove = ot.size() - nsamples;
         dorepeat(nremove) {
-            unsigned int ridx = rng.randint(ot.size());
+            unsigned int ridx = randGen().randint(ot.size());
             it.erase(it.begin()+ridx);
             ot.erase(ot.begin()+ridx);
         }
     }
 }
 
-void subsampleTable(Table& table, unsigned nsamples, RandGen& rng)
+void subsampleTable(Table& table, unsigned nsamples)
 {
-    subsampleTable(table.itable, table.otable, nsamples, rng);
+    subsampleTable(table.itable, table.otable, nsamples);
 }
 
-void subsampleTable(ITable& it, unsigned nsamples, RandGen& rng) {
+void subsampleTable(ITable& it, unsigned nsamples) {
     if(nsamples < it.size()) {
         unsigned int nremove = it.size() - nsamples;
         dorepeat(nremove) {
-            unsigned int ridx = rng.randint(it.size());
+            unsigned int ridx = randGen().randint(it.size());
             it.erase(it.begin()+ridx);
         }
     }

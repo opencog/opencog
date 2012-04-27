@@ -52,8 +52,8 @@ ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
     } else {
         rand_seed = time(NULL);
     }
-    _rng = new opencog::MT19937RandGen(rand_seed);
-    logger().info("ImitationLearningAgent - Created random number generator (%p) for ImitationLearningAgent with seed %lu", _rng, rand_seed);
+    randGen().seed(rand_seed);
+    logger().info("ImitationLearningAgent - Created random number generator for ImitationLearningAgent with seed %lu", rand_seed);
 
     //instanciate the learning vocabulary provider
     const std::string ILALGO = config().get("IMITATION_LEARNING_ALGORITHM");
@@ -70,7 +70,6 @@ ImitationLearningAgent::~ImitationLearningAgent()
     delete _entropyFilter;
     delete _PIL;
     delete _PVoc;
-    delete _rng;
 }
 
 //run method
@@ -241,8 +240,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                            wp->getAtomSpace(),
                                            ep, io, _definite_objects, _messages,
                                            _atas,
-                                           atl,
-                                           *_rng);
+                                           atl);
         OC_ASSERT(_atomic_perceptions.empty(),
                          "_atomic_perceptions must be empty because stopLearning would have clear it");
 
@@ -269,7 +267,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
             config().get_bool("TYPE_CHECK_GENERATED_COMBO");
 
         Filter::ActionFilter af(_avatar_id, _owner_id, *wp, _definite_objects,
-                                io, ea, _arity, type_check_actions, *_rng);
+                                io, ea, _arity, type_check_actions);
 
         OC_ASSERT(_atomic_actions.empty(),
                          "_atomic_actions must be empty because stopLearning would have clear it");
@@ -309,7 +307,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
             new FE(wp, _pet_id, _owner_id, _avatar_id, _trick_name,
                    _definite_objects, *_BDCat, _exemplarTemporals, _all, io.size(),
                    eo.size(),
-                   _atomic_perceptions.size(), _atomic_actions.size(), *_rng);
+                   _atomic_perceptions.size(), _atomic_actions.size());
 
         //----------------------------------
         //instanciate petaverse-hillclimbing
@@ -336,8 +334,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                              _definite_objects, eo,
                                              _atomic_perceptions,
                                              _atomic_actions,
-                                             abibb, neic, true,
-                                             *_rng);
+                                             abibb, neic, true);
         } else if (ILALGO == opencog::control::ImitationLearningAlgo::MOSES) {
             _PIL = new moses::moses_learning(nepc, *_fitnessEstimator,
                                              _definite_objects,
@@ -350,7 +347,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                              // for the moment
                                              operator_set(),
                                              _atomic_perceptions,
-                                             _atomic_actions, *_rng);
+                                             _atomic_actions);
         } else OC_ASSERT(false,
                                     "A valid learning algo must be selected, see src/Control/SystemParameters.h for the various options");
 
@@ -446,8 +443,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         Filter::ActionFilter af(_avatar_id, _owner_id, *wp, _definite_objects,
                                 _PVoc->get_indefinite_objects(),
                                 _PVoc->get_elementary_actions(),
-                                _arity, type_check_actions,
-                                *_rng);
+                                _arity, type_check_actions);
 
         _atomic_actions.clear();
         af.insertActionSubseqs(_atomic_actions, *_BDCat, _all,

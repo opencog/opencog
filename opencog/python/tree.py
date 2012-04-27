@@ -151,7 +151,7 @@ class Tree (object):
 
 class DAG(Tree):
     def __init__(self,op,args):
-        Tree.__init__(self,op,args)
+        Tree.__init__(self,op,[])
         self.parents = []
         
         for a in args:
@@ -169,6 +169,9 @@ class DAG(Tree):
 
     def __hash__(self):
         return hash(self.op)
+    
+    def __str__(self):
+        return 'PDN '+str(self.op)
     
     def any_path_up_contains(self,targets):
         if self in targets:

@@ -42,7 +42,7 @@ int main()
 
     combo_tree tr;
 
-    opencog::MT19937RandGen rng(0);
+    randGen().seed(0);
 
     //bool b=is_random(id::random_drinkable);
     //cout << "is random" << b << endl;
@@ -117,13 +117,13 @@ int main()
         }
 
         //produce random inputs
-        ITable cti(tt, rng);
+        ITable cti(tt);
         //print cti, for debugging
         cout << "Rnd matrix :" << endl << cti;
 
         try {
             //evalutate tr over cti and fill mat1
-            OTable mat1(tr, cti, rng);
+            OTable mat1(tr, cti);
             //print mat1, for debugging
             cout << "MAT1" << endl << mat1 << endl;
 
@@ -133,7 +133,7 @@ int main()
             action_reduce(tr);
 
             //evaluate tr over cti and fill mat2
-            OTable mat2(tr, cti, rng);
+            OTable mat2(tr, cti);
             //print mat2, for debugging
             cout << "MAT2" << endl << mat2 << endl;
 

@@ -91,7 +91,7 @@ public:
 
     // definition is delaied after Table as it uses Table
     template<typename Func>
-    CTable(const Func& func, arity_t arity, RandGen& rng, int nsamples = -1);
+    CTable(const Func& func, arity_t arity, int nsamples = -1);
     
     CTable(const std::string& _olabel, const std::vector<std::string>& _ilabels)
         : olabel(_olabel), ilabels(_ilabels) {}
@@ -152,7 +152,7 @@ public:
      * It onyl works for contin-boolean signatures
      */
     // min_contin and max_contin are used in case tt has contin inputs
-    ITable(const type_tree& tt, RandGen& rng, int nsamples = -1,
+    ITable(const type_tree& tt, int nsamples = -1,
            contin_t min_contin = -1.0, contin_t max_contin = 1.0);
 
     // set input labels
@@ -261,15 +261,13 @@ public:
     OTable(const super& ot, const std::string& ol = default_output_label);
 
     /// Construct the OTable by evaluating the combo tree @tr for each
-    /// row in the input ITable. The @rng is not used here, but is
-    /// passed to the combo evaluator.
-    OTable(const combo_tree& tr, const ITable& itable, RandGen& rng,
+    /// row in the input ITable.
+    OTable(const combo_tree& tr, const ITable& itable,
            const std::string& ol = default_output_label);
 
     /// Construct the OTable by evaluating the combo tree @tr for each
-    /// row in the input CTable. The @rng is not used here, but is
-    /// passed to the combo evaluator.
-    OTable(const combo_tree& tr, const CTable& ctable, RandGen& rng,
+    /// row in the input CTable.
+    OTable(const combo_tree& tr, const CTable& ctable,
            const std::string& ol = default_output_label);
 
     template<typename Func>
@@ -304,15 +302,12 @@ struct Table
     Table();
 
     template<typename Func>
-    Table(const Func& func, arity_t a, RandGen& rng, int nsamples = -1) :
-        // tt(gen_signature(type_node_of<Func::argument_type>(),
-        //                  type_node_of<Func::result_type>(), a)),
-        // TODO
+    Table(const Func& func, arity_t a, int nsamples = -1) :
         tt(gen_signature(type_node_of<bool>(),
                          type_node_of<bool>(), a)),
-        itable(tt, rng), otable(func, itable) {}
+        itable(tt), otable(func, itable) {}
     
-    Table(const combo_tree& tr, RandGen& rng, int nsamples = -1,
+    Table(const combo_tree& tr, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
@@ -331,8 +326,8 @@ struct Table
 };
 
 template<typename Func>
-CTable::CTable(const Func& func, arity_t arity, RandGen& rng, int nsamples) {
-    Table table(func, arity, rng, nsamples);
+CTable::CTable(const Func& func, arity_t arity, int nsamples) {
+    Table table(func, arity, nsamples);
     *this = table.compress();
 }
 
@@ -624,17 +619,17 @@ std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
  * template to subsample input and output tables, after subsampling
  * the table have size min(nsamples, *table.size())
  */
-void subsampleTable(ITable& it, OTable& ot, unsigned nsamples, RandGen& rng);
+void subsampleTable(ITable& it, OTable& ot, unsigned nsamples);
 
 /**
  * Like above on Table instead of ITable and OTable
  */
-void subsampleTable(Table& table, unsigned nsamples, RandGen& rng);
+void subsampleTable(Table& table, unsigned nsamples);
 
 /**
  * like above but subsample only the input table
  */
-void subsampleTable(ITable& it, unsigned nsamples, RandGen& rng);
+void subsampleTable(ITable& it, unsigned nsamples);
 
 /////////////////
 // Truth table //
@@ -674,12 +669,12 @@ class complete_truth_table : public bool_vector
 public:
     typedef bool_vector super;
 
-    complete_truth_table() : _rng(NULL) { }
+    complete_truth_table() {}
     template<typename It>
-    complete_truth_table(It from, It to) : super(from, to), _rng(NULL) { }
+    complete_truth_table(It from, It to) : super(from, to) {}
     template<typename T>
     complete_truth_table(const tree<T>& tr, arity_t arity)
-        : super(pow2(arity)), _arity(arity), _rng(NULL)
+        : super(pow2(arity)), _arity(arity)
     {
         populate(tr);
     }
@@ -687,14 +682,13 @@ public:
     complete_truth_table(const tree<T>& tr)
     {
         _arity = arity(tr);
-        _rng = NULL;
         this->resize(pow2(_arity));
         populate(tr);
     }
 
     template<typename Func>
     complete_truth_table(const Func& f, arity_t arity)
-        : super(pow2(arity)), _arity(arity), _rng(NULL) {
+        : super(pow2(arity)), _arity(arity) {
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             bool_vector v(_arity);
@@ -736,11 +730,10 @@ protected:
         for (int i = 0; it != end(); ++i, ++it) {
             for (int j = 0; j < _arity; ++j)
                 bmap[j] = bool_to_vertex((i >> j) % 2);
-            *it = eval_binding(*_rng, bmap, tr) == id::logical_true;
+            *it = eval_binding(bmap, tr) == id::logical_true;
         }
     }
     arity_t _arity;
-    RandGen* _rng; // _rng is dummy and not used anyway
     mutable vertex_seq bmap;
 };
 

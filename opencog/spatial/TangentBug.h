@@ -156,7 +156,7 @@ namespace opencog
              *
              * Pass in an empty list that we can put points into.
              */
-            TangentBug(const Map& lsm, CalculatedPath& calculatedPath, opencog::RandGen& _rng);
+            TangentBug(const Map& lsm, CalculatedPath& calculatedPath);
             ~TangentBug();
 
             look_info look_along_ray(

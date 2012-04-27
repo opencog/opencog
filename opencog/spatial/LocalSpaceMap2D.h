@@ -29,7 +29,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/functional.h>
-#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
 
@@ -357,7 +357,7 @@ namespace opencog
 
             //find a random entity satisfying some predicate
             template<typename Pred>
-                ObjectID findRandomFiltered(Pred pred, opencog::RandGen& rng) const {
+                ObjectID findRandomFiltered(Pred pred) const {
 
                 //filter out all entities that match
                 std::vector<ObjectID> tmp;
@@ -373,7 +373,7 @@ namespace opencog
                     } // if
                 } // for
 
-                return tmp.empty() ? ObjectID() : tmp[rng.randint(tmp.size())];
+                return tmp.empty() ? ObjectID() : tmp[randGen().randint(tmp.size())];
             }
 
             // return id's of all objects within the space map

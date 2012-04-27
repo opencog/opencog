@@ -141,7 +141,7 @@ void local_structure_model::sample(dtree::iterator dtr, disc_t& dst,
         if (dtr->back() > 0)
             dst = distance(dtr->begin(),
                            roulette_select(dtr->begin(), --(dtr->end()),
-                                           dtr->back(), rng));
+                                           dtr->back()));
         else
             dst = 0;//rng.randint(dtr->size()-1); //if no data, do uniform selection    WHY IS THIS COMMENTED OUT???
     } else {

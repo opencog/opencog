@@ -4,18 +4,21 @@
 
 try:
     from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name
+    import opencog.cogserver
 except ImportError:
     from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
 from tree import *
 from util import pp, OrderedSet, concat_lists, inplace_set_attributes
-try:
-    from opencog.util import log
-except ImportError:
-    from util import log
+from pprint import pprint
+#try:
+#    from opencog.util import log
+#except ImportError:
+from util import log
 
 from collections import defaultdict
 
 import formulas
+import rules
 
 from sys import stdout
 # You can use kcachegrind on cachegrind.out.profilestats
@@ -43,15 +46,18 @@ class Chainer:
     # Convert Atoms into FakeAtoms for Pypy/Pickle/Multiprocessing compatibility
     _convert_atoms = False
 
-    def __init__(self, space):
+    def __init__(self, space, planning_mode = False):
         self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink']
 
         self.pd = dict()
 
+        self.results = []
+
         self.space = space
+        self.planning_mode = planning_mode
         self.viz = PLNviz(space)
         self.viz.connect()
-        self.setup_rules(space)
+        self.setup_rules()
 
         self.bc_later = OrderedSet()
         self.bc_before = OrderedSet()
@@ -64,65 +70,8 @@ class Chainer:
         
         #profiler.add_function(self.bc)
 
-    #def do_planning(self):
-    #    try:
-    #        target_PredicateNodes = [x for x in self.space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
-    #
-    #        for atom in target_PredicateNodes:
-    #            # Here be DRAGONS!
-    #            #target = Tree('EvaluationLink', atom, Tree('ListLink'))
-    #            target = T('EvaluationLink', atom)
-    #
-    #        a = self.space
-    #
-    #        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
-    #        atom_from_tree(rl, a)
-    #        
-    #        # hack
-    #        print 'target'
-    #        target_a = atom_from_tree(target, a)
-    #        print target_a
-    #        print target_a.tv
-    #        target_a.tv = TruthValue(0,  0)
-    #        print target_a
-    #        # Reset the rules list so the EvaluationLink in it won't have a TV!
-    #        self.setup_rules(a)
-    #
-    #        self.rules = [r for r in self.rules if r.name not in ['Deduction', 'Inversion']]
-    #
-    #        result_atoms = self.bc(target)
-    #        
-    #        print "planning result: ",  result_atoms
-    #        
-    #        if result_atoms:
-    #            res_Handle = result_atoms[0]
-    #            res = tree_from_atom(Atom(res_Handle, a))
-    #            
-    #            trail = self.trail(res)
-    #            actions = self.extract_plan(trail)
-    #            
-    #            # set plan_success
-    #            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
-    #            # set plan_action_list
-    #            pal = T('ReferenceLink',
-    #                        a.add_node(t.ConceptNode, 'plan_action_list'),
-    #                        T('ListLink', actions))
-    #            
-    #            ps_a  = atom_from_tree(ps, a)
-    #            pal_a = atom_from_tree(pal, a)
-    #            
-    #            print ps
-    #            print pal
-    #            ps_a.tv = TruthValue(1, 9001)
-    #            
-    #            print ps_a.tv
-    #
-    #    except Exception, e:
-    #        print e
-
-
     #@profile
-    def bc(self, target):        
+    def bc(self, target):
         #import prof3d; prof3d.profile_me()
         
         try:
@@ -132,57 +81,75 @@ class Chainer:
             log.info(format_log('bc', target))
             self.bc_later = OrderedSet([target])
             self.results = []
-
+    
             self.target = target
-
+    
             # viz - visualize the root
             self.viz.outputTarget(target, None, 0, 'TARGET')
-
+    
             start = time()
-            while self.bc_later and not self.results:                
-#                if time() - start > 0:
-#                    print 'TIMEOUT'
-#                    break
-                children = self.bc_step()
-                self.propogate_results_loop(children)
-
+            while self.bc_later and not self.results:
+                self.bc_step()
+                self.propogate_results_loop()
+    
                 msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
                 log.info(format_log(msg))
                 log.info(format_log('time taken', time() - start))
+                #log.info(format_log('PD:'))
+                #for pdn in self.pd:
+                #    log.info(format_log(len(pdn.args),str(pdn)))
             
             # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
             print msg
-            #print [str(atom_from_tree(result, self.space).tv) for result in self.results]
-#            for res in self.results:
-#                bit = self.traverse_tree(res, set())
-#                self.add_depths(bit)
-#                self.add_best_conf_above(bit)
-#                
-#                self.print_tree(bit)
-
-            #for res in self.results:
-            #    print 'Inference trail:'
-            #    trail = self.trail(res)
-            #    self.print_tree(trail)
-                #print 'Action plan (if applicable):'
-                #print self.extract_plan(trail)
-#            for res in self.results:
-#                self.viz_proof_tree(self.trail(res))
-
-            return self.results
-            #return [atom_from_tree(result, self.space).h for result in self.results]
+    
+            for res in self.results:
+                print 'Inference trail:'
+                trail = self.trail(res)
+                self.print_tree(trail)
+                print 'Action plan (if applicable):'
+                print self.extract_plan(trail)
+    #            for res in self.results:
+    #                self.viz_proof_tree(self.trail(res))
+    
+            #return self.results
+            ret = []
+            for tr in self.results:
+                atom = atom_from_tree(tr, self.space)
+                # haxx
+                atom.tv = self.get_tvs(tr)[0]
+                ret.append(atom.h)
+            return ret
         except Exception, e:
             import traceback, pdb
-
             #pdb.set_trace()
             print traceback.format_exc(10)
             # Start the post-mortem debugger
             #pdb.pm()
             return []
 
-    def propogate_results_loop(self, premises):        
-        assert not self.fc_later
-        self.fc_later = OrderedSet(premises)
+    #def fc(self):
+    #    axioms = [r.head for r in self.rules if r.tv.count > 0]
+    #    self.propogate_results_loop(axioms)
+    #    
+    #    while self.fc_later:
+    #        next_premise = self.get_fittest() # Best-first search
+    #        log.info(format_log('-FCQ', next_premise))
+    #
+    #        apps = self.find_new_rule_applications_by_premise(next_premise)
+    #        for app in apps:
+    #            got_result = self.check_premises(app)
+    #            if got_result:
+    #                self.compute_and_add_tv(app)
+    #                
+    #                if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
+    #                    self.add_tree_to_index(app.head, self.fc_before)
+    #                    self.add_tree_to_index(app.head, self.fc_later)
+    #                    log.info(format_log('+FCQ', app.head, app.name))
+    #                    stdout.flush()
+
+    def propogate_results_loop(self):
+        #assert not self.fc_later
+        #self.fc_later = OrderedSet(premises)
         # Any result which has been propogated before, may now be useful in new places.
         # So reset this list so they will be tried again.
         self.fc_before = OrderedSet()
@@ -196,6 +163,9 @@ class Chainer:
         next_target = self.bc_later.pop_first() # Breadth-first search
         #next_target = self.bc_later.pop_last() # Depth-first search
         #next_target = self.get_fittest(self.bc_later) # Best-first search
+
+        next_target = standardize_apart(next_target)
+
         log.info(format_log('-BCQ', next_target))
         self.add_tree_to_index(next_target, self.bc_before)
 
@@ -204,50 +174,19 @@ class Chainer:
 
         for a in apps:
             a = a.standardize_apart()
-            #if not a.goals: print format_log('generator', repr(a))
-            if not a.goals and a.tv:
-                # Makes sure it goes in the list of apps, but just propogate results from the head (i.e. the actual Atom)
-                # and not the goals (an empty list!)
-                ret.append(a.head)                
-                self.add_queries(a)
-                #ret += self.add_queries(a)
-                #viz
-                self.viz.declareResult(a.head)
-            else:
-                added_queries = self.add_queries(a)
-                ret += added_queries
-#            added_queries = self.add_queries(a)
-#            ret += added_queries
+            self.add_queries(a)
+            self.add_queries_fc(a)
 
-        return ret
+        return
 
     def propogate_results_step(self):
-        #print 'fcq', map(str, self.fc_later)
         next_premise = self.fc_later.pop_last() # Depth-first search
-        #self.fc_before.append(next_premise)
         #next_premise = self.get_fittest() # Best-first search
 
-        log.info(format_log('-FCQ', next_premise))
-#        import pdb; pdb.set_trace()
+        next_premise = standardize_apart(next_premise)
 
-#        # Handle the case of actual Atoms, albeit in a somewhat messy way.
-#        # NOTE: The backward chainer won't find rules with actual Atoms, because
-#        # it's only interested in adding the GOALS of a rule into the queue.
-#        # In addition, it will repeat results that were found via actual rules.
-#        # It should be possible to do this via 1-step recursion, or something.
-#        # This would also require the exact target!
-#        if self.get_tvs(next_premise):
-#            if next_premise.unifies(self.target):
-#                self.results.append(next_premise)
-#                #viz
-#                self.viz.declareResult(next_premise)
-#
-#            if not self.contains_isomorphic_tree(next_premise, self.fc_before_idx) and not self.contains_isomorphic_tree(next_premise, self.fc_later_idx):
-#                print (format_log('lookup:', next_premise))
-#                stdout.flush()
-#                self.fc_later.append(app.head)
-#            
-#            self.add_queries(app)
+        log.info(format_log('-FCQ', next_premise))
+        #import pdb; pdb.set_trace()
 
         # WARNING: the specialization process won't spec based on premises that only exist as axioms, or...
 
@@ -255,43 +194,23 @@ class Chainer:
         # then you have a result! Apply the rule and see if it produces the target (or just an intermediary step).
         potential_results = self.find_existing_rule_applications_by_premise(next_premise)
         specialized = self.specialize_existing_rule_applications_by_premise(next_premise)
-        # Make sure you don't create a specialization that already exists
-        specialized = [r for r in specialized if 
-                              not any(r2.isomorphic(r) for r2 in potential_results)]
-        #print 'potential_results', potential_results
-
-#        # Notice if this is actually one of the original axioms. This needs to be done separately. Because
-#        # get_tv requires the app to already have found the exact atom, with no variables where there shouldn't be.
-#        # So this system allows discovering more specific atoms, which then leads to specializing one or more apps.
-#        direct_rules = [r for r in self.find_rule_applications(next_premise) if r.tv and not r.goals]
-#        for atom_rule in direct_rules:
-#            if atom_rule.head.isomorphic(next_premise):
-#                print (format_log('lookup:', atom_rule.head))
-#                potential_results.append(atom_rule)
-#            else:
-#                print (format_log('spec:', atom_rule.head))
-#                specialized.append(atom_rule)
-
-        # If B->C => C was checked by BC before, it will be in the bc_before set. But it now has a TV, so it should
-        # be used again!
-
-        #print [r for r in potential_results+specialized if str(r.head) == '(SubsetLink AlQaeda:ConceptNode Abu:ConceptNode)']
-
-        # If more specific values for the (variables in the) goals have been found, then make a new
-        # app, which is more specific. In particular, those variables will have been filled in within any other
-        # goals too.
-        #for app in specialized:
-            # If new values for the variables have just been found, we want to use the query mechanism,
-            # to find any other goals. They may also be more specific now (if they used the same variables),
-            # so we want to find them again before propogating results any further.
-            #self.add_queries(app)
-        # Ignore invalid rule applications (i.e. if add_queries returns nothing)
-        specialized = [app for app in specialized if self.add_queries(app)]
-        #print 'specialized', specialized
+        ## Make sure you don't create a specialization that already exists
+        #specialized = [r for r in specialized if 
+        #                      not any(r2.isomorphic(r) for r2 in potential_results)]
+        ##print 'potential_results', potential_results
+        #
+        #
+        ## If B->C => C was checked by BC before, it will be in the bc_before set. But it now has a TV, so it should
+        ## be used again!
+        #
+        ## Ignore invalid rule applications (i.e. if add_queries returns nothing)
+        #specialized = [app for app in specialized if self.add_queries(app)]
+        ##print 'specialized', specialized
 
         real_results = []
 
-        for app in potential_results:
+        for app in potential_results + specialized:
+            assert not app is None
             #print repr(a)
 
             got_result = self.check_premises(app)
@@ -300,18 +219,37 @@ class Chainer:
                 #    target = app.goals[0]
                 #    log.info(format_log('Target produced!', target))
                 #    self.results.append(target)
-                if app.head == self.target:
-                    log.info(format_log('Target produced!', app.head))
-                    self.results.append(app.head)
-                else:
-                    #viz
-                    self.viz.declareResult(app.head)
-                    
+                #viz
+                self.viz.declareResult(app.head)
+                
+                (status, app_pdn) = self.add_app_to_pd(app)
+                if status != 'CYCLE':
                     self.compute_and_add_tv(app)
 
                     real_results.append(app)
+    
+                    if app.head == self.target:
+                        log.info(format_log('Target produced!', app.head, app.tv))
+                        self.results.append(app.head)
 
-        for app in specialized+real_results:
+        # If you DON'T search generators explicitly, then the premises
+        # will need to be used to make more specialized apps for backward chaining
+        # (example: if you find an ImplicationLink for ModusPonens, then potentially
+        # some of the goals or the head can be made more specific. You should add the
+        # whole app (maybe?) Something goes wrong if you just run add_queries here
+        # instead of copypasting
+        #for app in specialized:
+        #    if not self._app_is_stupid(app):
+        #        for goal in (app.head,)+tuple(app.goals):                
+        #            if (not self.contains_isomorphic_tree(goal, self.bc_later)
+        #                and not self.contains_isomorphic_tree(goal, self.bc_later)):
+        #                    self.add_tree_to_index(goal, self.bc_later)
+        #                    #added_queries.append(goal)
+        #                    log.info(format_log('+BCQ', goal, app.name))
+        for app in specialized:
+            self.add_queries(app)
+
+        for app in real_results:
             # If there is a result, then you want to propogate it up. You should also propogate specializations,
             # so that their parents will be specialized as well.
             # The proof DAG does not explicitly avoid linking things up in a loop (as it has no explicit links)
@@ -322,13 +260,6 @@ class Chainer:
                 log.info(format_log('+FCQ', app.head, app.name))
                 stdout.flush()
 
-# Some hints about how to make an index that stores the canonical trees.
-#    def index_fill(self, idx, goals):
-#        for g in goals:
-#            canon = tuple(canonical_trees((g, )))
-#            idx.add(canon)
-#        queue = goals
-
     def contains_isomorphic_tree(self, tr, idx):        
         #return any(expr.isomorphic(tr) for expr in idx)
         canonical = tr.canonical()
@@ -338,26 +269,8 @@ class Chainer:
         canonical = tr.canonical()
         idx.append(canonical)
 
-#    # NOTE: assumes that you want to add the item into the corresponding index
-#    def contains_isomorphic_tree(self, tr, idx):
-#        start = time()
-#        #containing = any(tr.isomorphic(existing) for existing in collection)
-#        canon = tuple(canonical_trees((tr, )))
-#        #idx = self.indexes[collection]
-#        if canon in idx:
-#            #print 'contains_isomorphic_tree', time() - start
-#            return True
-#        else:
-#            idx.add(canon)
-#            #print 'contains_isomorphic_tree', time() - start
-#            return False
-#        #print 'contains_isomorphic_tree', time() - start
-#        #return containing
 
     def _app_is_stupid(self, goal):
-        #nested_implication = standardize_apart(T('ImplicationLink', 1, Tree('ImplicationLink', 2, 3)))
-        # Accidentally unifies with (ImplicationLink $blah some_target) !
-        #nested_implication2 = T('ImplicationLink', T('ImplicationLink', 1, 2), 3)
 
         # You should probably skip the app entirely if it has any self-implying goals
         def self_implication(goal):
@@ -390,35 +303,42 @@ class Chainer:
         if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head):
             return []
 
-        added_queries = []
-
-        # It's useful to add the head if (and only if) it is actually more specific than anything currently in the BC tree.
-        # This happens all the time when atoms are found.
-        for goal in tuple(app.goals)+(app.head,):
-            if     (not goal_is_stupid(goal) and
-                    not self.contains_isomorphic_tree(goal, self.bc_before) and
-                    not self.contains_isomorphic_tree(goal, self.bc_later) ):
-                assert goal not in self.bc_before
-                assert goal not in self.bc_later
-                self.add_tree_to_index(goal, self.bc_later)
-                added_queries.append(goal)
-                log.info(format_log('+BCQ', goal, app.name))
-                #stdout.flush()
-
-        (status, app_pdn) = self.add_app_to_pdn(app)
-        if status == "CYCLE":
-            #print "CYCLE", app.name, app.head, app.goals
-            pass
-        elif status == "EXISTING":
-            # Already added this
-            pass
-        else:
+        # If the app is a cycle or already added, don't add it or any of its goals
+        (status, app_pdn) = self.add_app_to_pd(app)
+        if status == 'NEW':
             # Only visualize it if it is actually new
             # viz
             for (i, input) in enumerate(app.goals):
                 self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
 
-        return added_queries
+        if status == 'CYCLE':
+            return
+        
+        # NOTE: For generators, the app_pdn will exist already for some reason
+        # It's useful to add the head if (and only if) it is actually more specific than anything currently in the BC tree.
+        # This happens all the time when atoms are found.
+        for goal in tuple(app.goals)+(app.head,):
+            if     not goal_is_stupid(goal):
+                if  (not self.contains_isomorphic_tree(goal, self.bc_before) and
+                     not self.contains_isomorphic_tree(goal, self.bc_later) ):
+                    assert goal not in self.bc_before
+                    assert goal not in self.bc_later
+                    self.add_tree_to_index(goal, self.bc_later)
+                    #added_queries.append(goal)
+                    log.info(format_log('+BCQ', goal, app.name))
+                    #stdout.flush()
+
+    def add_queries_fc(self,app):
+        # Whether it is new or not
+        # Allow adding it to the FCQ multiple times, because you need to check
+        # for results multiple times
+        #for goal in tuple(app.goals)+(app.head,):
+        for goal in (app.head,):
+            if not self.contains_isomorphic_tree(goal, self.fc_later):
+                log.info(format_log('+FCQ', goal, app.name))
+                self.add_tree_to_index(goal, self.fc_later)
+        
+        return None
 
     def check_premises(self, app):
         '''Check whether the given app can produce a result. This will happen if all its premises are
@@ -426,7 +346,10 @@ class Chainer:
         that are exactly isomorphic to those in the app (i.e. no more specific or general). The chainer
         itself is responsible for finding specific enough apps.'''
         input_tvs = [self.get_tvs(input) for input in app.goals]
-        return all(input_tvs)
+        res = all(tvs != [] for tvs in input_tvs)
+        if len(app.goals) > 0:
+            print '########check_premises',repr(app),res
+        return res
     
     def compute_and_add_tv(self, app):
         # NOTE: assumes this is the real copy of the rule, not just a new one.
@@ -438,6 +361,7 @@ class Chainer:
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
             #atom_from_tree(app.head, self.space).tv = app.tv            
+            assert app.tv.count > 0
             
             self.set_tv(app, app.tv)
             
@@ -448,10 +372,33 @@ class Chainer:
         Chainers can be made by searching for certain apps and doing things with them.'''
         ret = []
         for r in self.rules:
-            s = unify(r.head, target, {})
-            if s != None:
-                new_rule = r.subst(s)
-                ret.append(new_rule)
+            if r.match == None:
+                s = unify(r.head, target, {})
+                if s != None:
+                    if r.name == '[axiom]':
+                        print '>>>>>',repr(r)
+                    new_rule = r.subst(s)
+                    ret.append(new_rule)
+            else:
+                # If the Rule has a special function for producing answers, run it
+                # and check the results are valid.
+                s = unify(r.head, target, {})
+                if s == None:
+                    continue
+                new_r = r.subst(s)
+                candidate_heads_tvs = new_r.match(self.space, target)
+                for (h, tv) in candidate_heads_tvs:
+                    s = unify(h, target, {})
+                    if s != None:
+                        # Make a new version of the Rule for this Atom
+                        #new_rule = r.subst({Var(123):h})
+                        new_rule = new_r.subst(s)
+                        new_rule.head = h
+                        # If the Atom has variables, give them values from the target
+                        # new_rule = new_rule.subst(s)
+                        print '##printing new magic tv', new_rule.head, tv
+                        self.set_tv(new_rule,tv)
+                        ret.append(new_rule)
         return ret
 
     def find_existing_rule_applications_by_premise(self, premise):
@@ -478,6 +425,16 @@ class Chainer:
                             ret.append(new_a)
         return ret
 
+    def find_new_rule_applications_by_premise(self,premise):
+        ret = []
+        for r in self.rules:
+            for g in r.goals:
+                s = unify(g, premise, {})
+                if s != None:
+                    new_rule = r.subst(s)
+                    ret.append(new_rule)
+        return ret
+
 
     def get_tvs(self, expr):
         # Only want to find results for this exact target, not every possible specialized version of it.
@@ -487,35 +444,49 @@ class Chainer:
         
         canonical = expr.canonical()
         expr_pdn = self.expr2pdn(canonical)
-        apps = expr_pdn.args
-        return [app.tv for app in apps if app.tv.count > 0]
+        app_pdns = expr_pdn.args
+        #print 'get_tvs:', [repr(app_pdn.op) for app_pdn in app_pdns if app_pdn.tv.count > 0]
+        tvs = [app_pdn.tv for app_pdn in app_pdns if app_pdn.tv.count > 0]
+        #if len(tvs) > 1:
+        print 'get_tvs',expr,tvs
+        return tvs
     
     def expr2pdn(self, expr):
         pdn = DAG(expr,[])
         try:
             return self.pd[pdn]
         except KeyError:
+            #print 'expr2pdn adding %s for the first time' % (pdn,)
             self.pd[pdn] = pdn
             return pdn
 
     def set_tv(self,app,tv):
+        assert isinstance(app, rules.Rule)
         # Find/add the app
         a = self.app2pdn(app)
+        assert isinstance(a, DAG)
         a.tv = tv
 
-    def add_app_to_pdn(self,app):
+    def add_app_to_pd(self,app):
         head_pdn = self.expr2pdn(app.head.canonical())
 
-        # Don't allow loops        
-        goal_pdns = [self.expr2pdn(g.canonical()) for g in app.goals]
+        def canonical_app_goals(goals):
+            return map(Tree.canonical, goals)
+
+        goals_canonical = canonical_app_goals(app.goals)
+        # Don't allow loops. Does this need to be a separate test? It should probably
+        # check whether the new target is more specific, not just equal?
+        goal_pdns = [self.expr2pdn(g) for g in goals_canonical]
         if head_pdn.any_path_up_contains(goal_pdns):
-            return ("CYCLE",None)
+            return ('CYCLE',None)
         
-        # Check if this application is in the Proof DAG already
-        existing = [apn for apn in head_pdn.args if apn.args == goal_pdns]
+        # Check if this application is in the Proof DAG already.
+        # NOTE: You must use the app's goals rather than the the app PDN's arguments,
+        # because the app's goals may share variables.
+        existing = [apn for apn in head_pdn.args if canonical_app_goals(apn.op.goals) == goals_canonical]
         assert len(existing) < 2
         if len(existing) == 1:
-            return ("EXISTING",existing[0])
+            return ('EXISTING',existing[0])
         else:
             # Otherwise add it to the Proof DAG
             app_pdn = DAG(app,[])
@@ -527,32 +498,34 @@ class Chainer:
                 app_pdn.append(goal_pdn)
             head_pdn.append(app_pdn)
         
-            return ("NEW",app_pdn)
+            #print 'add_app_to_pd adding %s for the first time' % (app_pdn,)
+        
+            return ('NEW',app_pdn)
 
     def app2pdn(self,app):
-        (status,app_pdn) = self.add_app_to_pdn(app)
+        (status,app_pdn) = self.add_app_to_pd(app)
         return app_pdn
     
     def add_rule(self, rule):
         self.rules.append(rule)
         
+        # This is necessary so get_tvs will work
         # Only relevant to generators or axioms
-        #if rule.tv.confidence > 0:
-        #    self.app2pdn(rule)
+        if rule.tv.confidence > 0:
+            self.app2pdn(rule)
+
+    def setup_rules(self):
+        self.rules = []
+        for r in rules.rules(self.space, self.deduction_types):
+            self.add_rule(r)
 
     def extract_plan(self, trail):
-#        def is_action(proofnode):
-#            target = proofnode.op
-#            return target.op == 'ExecutionLink'
-#        # Extract all the targets in best-first order
-#        proofnodes = trail.flatten()
-#        proofnodes.reverse()
-#        actions = [pn.op for pn in proofnodes if is_action(pn)]
-#        return actions
         # The list of actions in an ImplicationLink. Sometimes there are none,
         # sometimes one; if there is a SequentialAndLink then it can be more than one.
-        def actions(proofnode):
+        def actions(proofnode):            
             target = proofnode.op
+            if isinstance(target, rules.Rule):
+                return []
             if target.op in ['ExecutionLink',  'SequentialAndLink']:
                 return [pn.op]
             else:
@@ -564,318 +537,161 @@ class Chainer:
         return actions
 
     def trail(self, target):
-        #def filter_with_tv(tr):
-        #    args = []
-        #    for child in tr.args:
-        #        if len(self.get_tvs(child.op)) > 0:
-        #            args.append(child)
-        #    return Tree(tr.op, args)
-        #
-        #bit = self.traverse_tree(target, set())
-        #
-        #return filter_with_tv(bit)
+        def rule_found_result(rule_pdn):
+            return rule_pdn.tv.count > 0
 
-        def filter_with_tv(dag):
-            args = [filter_with_tv(a) for a in dag.args if
-                    (isinstance(a.op,Rule) or len(self.get_tvs(a.op)) > 0)]
-            return DAG(dag.op, args)
+        def recurse(rule_pdn):
+            #print repr(rule_pdn.op),' PDN args', rule_pdn.args
+            exprs = map(filter_expr,rule_pdn.args)
+            return DAG(rule_pdn.op, exprs)
+
+        def filter_expr(expr_pdn):
+            #print expr_pdn.op, [repr(rpdn.op) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
+            #successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
+            successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
+            return DAG(expr_pdn.op, successful_rules)
         
         root = self.expr2pdn(target)
 
-        return filter_with_tv(root)
+        return filter_expr(root)
     
     def print_tree(self, tr, level = 1):
-        try:
-            (tr.depth, tr.best_conf_above)
-            print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
-        except AttributeError:
-            print ' '*(level-1)*3, tr.op
+        #try:
+        #    (tr.depth, tr.best_conf_above)
+        #    print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
+        #except AttributeError:
+        print ' '*(level-1)*3, tr.op
         
         for child in tr.args:
             self.print_tree(child, level+1)
 
-    def viz_proof_tree(self, pt):
-        self.viz.connect()
+    #def viz_proof_tree(self, pt):
+    #    self.viz.connect()
+    #
+    #    target = pt.op
+    #    self.viz.outputTarget(target, None, 0, repr(target))
+    #    
+    #    for arg in pt.args:
+    #        self.viz_proof_tree_(arg)
+    #    
+    #def viz_proof_tree_(self, pt):
+    #    target = pt.op
+    #    
+    #    self.viz.declareResult(target)
+    #    
+    #    for (i, input) in enumerate(pt.args):
+    #        self.viz.outputTarget(input, target, i, repr(target))
+    #
+    #    for arg in pt.args:
+    #        self.viz_proof_tree_(arg)
+    #
+    #def add_depths(self, bitnode, level = 1):
+    #    #args = [self.add_depths(child, level+1) for child in tr.args]
+    #    #return Tree((level, tr.op), args)
+    #    
+    #    args = [self.add_depths(child, level+1) for child in bitnode.args]
+    #    return inplace_set_attributes(bitnode, depth=level)
+    #
+    #def add_best_conf_above(self, bitnode, best_above=0.0):
+    #    bitnode.best_conf_above = best_above
+    #
+    #    if best_above > 0:
+    #        print '-------', str(bitnode), best_above
+    #
+    #    confs_this_target = [tv.confidence for tv in self.get_tvs(bitnode.op)]
+    #    best_above = max([best_above] + confs_this_target)
+    #    
+    #    for child in bitnode.args:
+    #        self.add_best_conf_above(child, best_above) 
+    #    return bitnode
+    #
+    #def get_fittest(self, queue):
+    #    def num_vars(target):
+    #        return len([vertex for vertex in target.flatten() if vertex.is_variable()])
+    #
+    #    competition_weight = - 10000
+    #    depth_weight = -100
+    #    solution_space_weight = -0.01
+    #
+    #    bit = self.traverse_tree(self.target, set())
+    #    self.add_depths(bit)
+    #    self.add_best_conf_above(bit)
+    #    
+    #    #self.print_tree(bit)
+    #    
+    #    flat = bit.flatten()
+    #    in_queue = [bitnode for bitnode in flat if self.contains_isomorphic_tree(bitnode.op, queue)]
+    #    if not in_queue:
+    #        import pdb; pdb.set_trace()
+    #    assert in_queue
+    #    scores = [ bitnode.best_conf_above * competition_weight
+    #                    +bitnode.depth * depth_weight
+    #                    +num_vars(bitnode.op) * solution_space_weight
+    #                    for bitnode in in_queue]
+    #    ranked_bitnodes = zip(scores, in_queue)
+    #    #ranked.sort(key=lambda (score, tr): -score)
+    #    #print format_log(ranked)
+    #    best = max(ranked_bitnodes, key=lambda (score, tr): score) [1] . op
+    #    length = len(queue)
+    #    queue.remove(next(existing for existing in queue if existing.isomorphic(best)))
+    #    assert len(queue) == length - 1
+    #    #print best
+    #    return best
 
-        target = pt.op
-        self.viz.outputTarget(target, None, 0, repr(target))
+def do_planning(space):
+    try:
+        # ReferenceLink ConceptNode:'psi_demand_goal_list' (ListLink stuff)
+        target_PredicateNodes = [x for x in space.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
         
-        for arg in pt.args:
-            self.viz_proof_tree_(arg)
+        for atom in target_PredicateNodes:
+            # Here be DRAGONS!
+            #target = Tree('EvaluationLink', atom, Tree('ListLink'))
+            target = T('EvaluationLink', atom)
+
+        a = space        
+
+        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+        atom_from_tree(rl, a)
         
-    def viz_proof_tree_(self, pt):
-        target = pt.op
+        # hack
+        print 'target'
+        target_a = atom_from_tree(target, a)
+        print target_a
+        print target_a.tv
+        target_a.tv = TruthValue(0,  0)
+        print target_a
         
-        self.viz.declareResult(target)
+        chainer = Chainer(a, planning_mode = True)        
+
+        result_atoms = chainer.bc(target)
         
-        for (i, input) in enumerate(pt.args):
-            self.viz.outputTarget(input, target, i, repr(target))
-
-        for arg in pt.args:
-            self.viz_proof_tree_(arg)
-
-    def add_depths(self, bitnode, level = 1):
-        #args = [self.add_depths(child, level+1) for child in tr.args]
-        #return Tree((level, tr.op), args)
+        print "planning result: ",  result_atoms
         
-        args = [self.add_depths(child, level+1) for child in bitnode.args]
-        return inplace_set_attributes(bitnode, depth=level)
+        if result_atoms:
+            res_Handle = result_atoms[0]
+            res = tree_from_atom(Atom(res_Handle, a))
+            
+            trail = chainer.trail(res)
+            actions = chainer.extract_plan(trail)
+            
+            # set plan_success
+            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
+            # set plan_action_list
+            pal = T('ReferenceLink',
+                        a.add_node(t.ConceptNode, 'plan_action_list'),
+                        T('ListLink', actions))
+            
+            ps_a  = atom_from_tree(ps, a)
+            pal_a = atom_from_tree(pal, a)
+            
+            print ps
+            print pal
+            ps_a.tv = TruthValue(1.0, count_from_confidence(1.0))
+            
+            print ps_a.tv
 
-    def add_best_conf_above(self, bitnode, best_above=0.0):
-        bitnode.best_conf_above = best_above
-
-        if best_above > 0:
-            print '-------', str(bitnode), best_above
-
-        confs_this_target = [tv.confidence for tv in self.get_tvs(bitnode.op)]
-        best_above = max([best_above] + confs_this_target)
-        
-        for child in bitnode.args:
-            self.add_best_conf_above(child, best_above) 
-        return bitnode
-
-    def get_fittest(self, queue):
-        def num_vars(target):
-            return len([vertex for vertex in target.flatten() if vertex.is_variable()])
-
-        competition_weight = - 10000
-        depth_weight = -100
-        solution_space_weight = -0.01
-
-        bit = self.traverse_tree(self.target, set())
-        self.add_depths(bit)
-        self.add_best_conf_above(bit)
-        
-        #self.print_tree(bit)
-        
-        flat = bit.flatten()
-        in_queue = [bitnode for bitnode in flat if self.contains_isomorphic_tree(bitnode.op, queue)]
-        if not in_queue:
-            import pdb; pdb.set_trace()
-        assert in_queue
-        scores = [ bitnode.best_conf_above * competition_weight
-                        +bitnode.depth * depth_weight
-                        +num_vars(bitnode.op) * solution_space_weight
-                        for bitnode in in_queue]
-        ranked_bitnodes = zip(scores, in_queue)
-        #ranked.sort(key=lambda (score, tr): -score)
-        #print format_log(ranked)
-        best = max(ranked_bitnodes, key=lambda (score, tr): score) [1] . op
-        length = len(queue)
-        queue.remove(next(existing for existing in queue if existing.isomorphic(best)))
-        assert len(queue) == length - 1
-        #print best
-        return best
-
-    def setup_rules(self, a):
-        self.rules = []
-
-        # All existing Atoms
-        for obj in a.get_atoms_by_type(t.Atom):
-            # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-            if obj.tv.count > 0 and obj.tv.mean > 0:
-                tr = tree_from_atom(obj)
-                # A variable with a TV could just prove anything; that's evil!
-                if not tr.is_variable():
-                    r = Rule(tr, [], '[axiom]')
-                    r.tv = obj.tv
-                    self.add_rule(r)
-
-        ## Deduction
-        #for type in self.deduction_types:
-        #    self.add_rule(Rule(T(type, 1,3), 
-        #                                 [T(type, 1, 2),
-        #                                  T(type, 2, 3), 
-        #                                  Var(1),
-        #                                  Var(2), 
-        #                                  Var(3)],
-        #                                name='Deduction', 
-        #                                formula = formulas.deductionSimpleFormula))
-        #
-        ## Inversion
-        #for type in self.deduction_types:
-        #    self.add_rule(Rule( T(type, 2, 1), 
-        #                                 [T(type, 1, 2),
-        #                                  Var(1),
-        #                                  Var(2)], 
-        #                                 name='Inversion', 
-        #                                 formula = formulas.inversionFormula))
-
-        # ModusPonens
-        for type in ['ImplicationLink']:
-            self.add_rule(Rule(Var(2), 
-                                         [T(type, 1, 2),
-                                          Var(1) ], 
-                                          name='ModusPonens', 
-                                          formula = formulas.modusPonensFormula))
-
-#       # MP for AndLink as a premise
-#        for type in ['ImplicationLink']:
-#            for size in xrange(5):
-#                args = [new_var() for i in xrange(size+1)]
-#                andlink = T('AndLink', args)
-#
-#                self.add_rule(Rule(Var(2), 
-#                                             [T(type, andlink, 2),
-#                                              andlink ], 
-#                                              name='TheoremRule'))
-        
-       # ModusPonens for EvaluationLinks only
-#        for type in ['ImplicationLink']:
-#            conc = T('EvaluationLink', new_var(), new_var())
-#            prem = T('EvaluationLink', new_var(), new_var())
-#            imp = T('ImplicationLink', prem, conc)
-#            
-#            self.add_rule(Rule(conc, 
-#                                         [imp, prem], 
-#                                          name='ModusPonens_Eval'))
-
-#        for type in ['ImplicationLink']:
-#            conc = T('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
-#            prem = T('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
-#            imp = T('ImplicationLink', prem, conc)
-#            
-#            self.add_rule(Rule(conc, 
-#                                         [imp, prem], 
-#                                          name='ModusPonens_AB'))
-
-        # AND/OR
-        type = 'AndLink'
-        for size in xrange(5):                
-            args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(T(type, args),
-                               args,
-                               type[:-4], 
-                               formula = formulas.andSymmetricFormula))
-
-        type = 'OrLink'
-        for size in xrange(2):
-            args = [new_var() for i in xrange(size+1)]
-            self.add_rule(Rule(T(type, args),
-                               args,
-                               type[:-4], 
-                               formula = formulas.orFormula))
-
-        # Adding a NOT
-        self.add_rule(Rule(T('NotLink', 1),
-                           [ Var(1) ],
-                           name = 'Not', 
-                           formula = formulas.notFormula))
-
-        # Link conversion
-        self.add_rule(Rule(T('InheritanceLink', 1, 2),
-                           [ T('SubsetLink', 1, 2) ],
-                           name = 'SubsetLink=>InheritanceLink', 
-                           formula = formulas.ext2InhFormula))
-
-#        # Producing ForAll/Bind/AverageLinks?
-#        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
-#            self.add_rule(Rule(T(type, 1, 2),
-#                               [ Var(2) ],
-#                               name = type+' abstraction', 
-#                               formula = formulas.identityFormula))
-
-        # This may cause weirdness with things matching too eagerly...
-#       # Both of these rely on the policy that tree_from_atom replaces VariableNodes in the AtomSpace with the variables the tree class uses.
-#        fact = new_var()
-#        list_link = new_var()
-#        r = Rule(
-#                        fact,
-#                        [T('ForAllLink', list_link, fact )], 
-#                        name = 'ForAll'     
-#                    )
-#        r.tv = True
-#        self.add_rule(r)
-
-        for atom in a.get_atoms_by_type(t.AverageLink):
-            # out[0] is the ListLink of VariableNodes, out[1] is the expression
-            tr = tree_from_atom(atom.out[1])
-            r = Rule(tr, [], name='Average')
-            r.tv = atom.tv
-            self.add_rule(r)
-
-        Chainer._convert_atoms = False
-
-class Rule :
-    def __init__ (self, head, goals, name, tv = TruthValue(0, 0), formula = None):
-        if Chainer._convert_atoms:
-            self.head = tree_with_fake_atoms(head)
-            self.goals = map(tree_with_fake_atoms, goals)
-        else:
-            self.head = head
-            self.goals = goals
-
-        self.name = name
-        self.tv = tv
-        self.formula = if_(formula, formula, formulas.identityFormula)
-
-        #self.bc_depth = 0
-
-    def __str__(self):
-        return self.name
-
-#    def __repr__ (self) :
-#        rep = str(self.head)
-#        sep = " :- "
-#        for goal in self.goals :
-#            rep += sep + str(goal)
-#            sep = ","
-#        return rep
-
-    def __repr__ (self) :
-        rep = self.name + ' '  + str(self.head) + ' ' + str(self.tv)
-        #rep += ' '*self.bc_depth*3
-        rep += '\n'
-        for goal in self.goals :
-            #rep += ' '*(self.bc_depth*3+3)
-            rep += str(goal) + '\n'
-        return rep
-
-    def standardize_apart(self):
-        head_goals = (self.head,)+tuple(self.goals)
-        tmp = standardize_apart(head_goals)
-        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv, formula=self.formula)
-
-        return new_version
-
-    def isomorphic(self, other):
-        # One way: make conjunctions out of the rules to make
-        # sure variable renamings are consistent across both
-        # conclusion and premises
-        self_conj = (self.head,)+tuple(self.goals)
-        other_conj = (other.head,)+tuple(other.goals)
-
-        return isomorphic_conjunctions_ordered(self_conj, other_conj)
-
-    def canonical_tuple(self):
-        try:
-            return self._tuple
-        except:
-            conj = (self.head,)+tuple(self.goals)
-            self._tuple = tuple(canonical_trees(conj))
-            return self._tuple
-
-    def unifies(self, other):
-        self_conj = (self.head,)+tuple(self.goals)
-        other_conj = (other.head,)+tuple(other.goals)
-
-        return unify(self_conj, other_conj, {}) != None
-
-    def subst(self, s):
-        new_head = subst(s, self.head)
-        new_goals = list(subst_conjunction(s, self.goals))
-        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv, formula = self.formula)
-        return new_rule
-
-#    def category(self):
-#        '''Returns the category of this rule. It can be either an axiom, a PLN Rule (e.g. Modus Ponens), or an
-#        application. An application is a PLN Rule applied to specific arguments.'''
-#        if self.name == '[axiom]':
-#            return 'axiom'
-#        elif self.name.startswith('[application]'):
-#            return 'application'
-#        else:
-#            return 'rule'
+    except Exception, e:
+        print e
 
 from urllib2 import URLError
 def check_connected(method):
@@ -971,6 +787,22 @@ class PLNviz:
 
             self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
             self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
+
+class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
+    '''This agent should be run every cycle to cooperate with the C++
+    PsiActionSelectionAgent. This agent adds plans to the AtomSpace, and the
+    C++ agent loads plans from the AtomSpace and executes them. (Executing a plan
+    can take many cognitive cycles).'''
+    def __init__(self):
+        self.cycles = 0
+
+    def run(self,atomspace):
+        self.cycles += 1
+        
+        # hack. don't wait until the plan failed/succeeded, just run planning every
+        # cycle, and the plan will be picked up by the C++ PsiActionSelectionAgent
+        # when it needs a new plan
+        do_planning(atomspace)
 
 if __name__ == '__main__':
     a = AtomSpace()

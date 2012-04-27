@@ -112,7 +112,7 @@ int main(int argc,char** argv) {
     pa.has_labels = vm.count("labels");
 
     // init random generator
-    opencog::MT19937RandGen rng(rand_seed);
+    randGen().seed(rand_seed);
 
-    read_eval_output_results(pa, rng);
+    read_eval_output_results(pa);
 }

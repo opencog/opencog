@@ -38,13 +38,8 @@ using namespace boost;
 using namespace std;
 
 using world::PAIWorldWrapper;
-using world::RuleValidationWorldWrapper;
 
-ComboInterpreter::ComboInterpreter(PAI& p, RandGen& _rng) : rng(_rng), _ww(new PAIWorldWrapper(p, _rng)), _next(0)
-{
-}
-
-ComboInterpreter::ComboInterpreter(VirtualWorldData::VirtualWorldState& v, RandGen& _rng) : rng(_rng), _ww(new RuleValidationWorldWrapper(v)), _next(0)
+ComboInterpreter::ComboInterpreter(PAI& p) : _ww(new PAIWorldWrapper(p)), _next(0)
 {
 }
 
@@ -64,7 +59,7 @@ void ComboInterpreter::run(messaging::NetworkElement *ne)
     if (!config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         //loop in random order until we find a running procedure that's ready
         //along the way, get rid of done procedures
-        sel = new lazy_random_selector(_vec.size(), rng);
+        sel = new lazy_random_selector(_vec.size());
     } else {
         sel = new lazy_normal_selector(_vec.size());
     }
@@ -161,7 +156,7 @@ void ComboInterpreter::run(messaging::NetworkElement *ne)
 RunningProcedureId ComboInterpreter::runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments)
 {
     RunningProcedureId id(++_next, COMBO);
-    _vec.push_back(_map.insert(make_pair(id, RunningComboProcedure(*_ww, tr, rng, arguments))).first);
+    _vec.push_back(_map.insert(make_pair(id, RunningComboProcedure(*_ww, tr, arguments))).first);
     return id;
 }
 
@@ -169,7 +164,7 @@ RunningProcedureId ComboInterpreter::runProcedure(const combo::combo_tree& tr, c
 RunningProcedureId ComboInterpreter::runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments, combo::variable_unifier& vu)
 {
     RunningProcedureId id(++_next, COMBO);
-    _vec.push_back(_map.insert(make_pair(id, RunningComboProcedure(*_ww, tr, rng, arguments, true, vu))).first);
+    _vec.push_back(_map.insert(make_pair(id, RunningComboProcedure(*_ww, tr, arguments, true, vu))).first);
     return id;
 }
 

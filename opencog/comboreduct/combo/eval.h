@@ -29,7 +29,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/foreach.h>
-#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <opencog/comboreduct/crutil/exception.h>
 #include "vertex.h"
@@ -106,8 +106,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent);
 /// @todo that one should be removed and replaced by
 /// eval_throws_binding (and the latter should be renamed eval_throws)
 template<typename It>
-vertex eval_throws(RandGen& rng,
-                   It it, Evaluator* pe = NULL,
+vertex eval_throws(It it, Evaluator* pe = NULL,
                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception)
@@ -127,15 +126,13 @@ vertex eval_throws(RandGen& rng,
             if (const vertex* v = boost::get<const vertex>(&binding(idx)))
                 return * v;
             else
-                return eval_throws(rng,
-                                   boost::get<combo_tree::iterator>(binding(idx)),
+                return eval_throws(boost::get<combo_tree::iterator>(binding(idx)),
                                    pe, vu);
         } else {
             if (const vertex* v = boost::get<const vertex>(&binding(-idx)))
                 return negate_vertex(*v);
             else
-                return negate_vertex(eval_throws(rng,
-                                                 boost::get<combo_tree::iterator>(binding(-idx)),
+                return negate_vertex(eval_throws(boost::get<combo_tree::iterator>(binding(-idx)),
                                                  pe, vu));
         }
     }
@@ -151,13 +148,13 @@ vertex eval_throws(RandGen& rng,
             for (sib_it sib = it.begin();sib != it.end();++sib) {
 
                 if (vu.empty()) { // no wild_card case
-                    if (eval_throws(rng, sib, pe, vu) == id::logical_false) {
+                    if (eval_throws(sib, pe, vu) == id::logical_false) {
                         return id::logical_false;
                     }
                 } else { // wild_card case
                     combo::variable_unifier work_vu(vu);
                     work_vu.setUpdated(false);
-                    bool is_false = (eval_throws(rng, sib, pe, work_vu)
+                    bool is_false = (eval_throws(sib, pe, work_vu)
                                      == id::logical_false); 
                     vu.unify(combo::UNIFY_AND, work_vu);
                     if(is_false) {
@@ -175,7 +172,7 @@ vertex eval_throws(RandGen& rng,
             // default case, no wild card
             if (vu.empty()) {
                 for (sib_it sib = it.begin();sib != it.end();++sib) {
-                    if (eval_throws(rng, sib, pe, vu) == id::logical_true) {
+                    if (eval_throws(sib, pe, vu) == id::logical_true) {
                         return id::logical_true;
                     }
                 }
@@ -194,8 +191,7 @@ vertex eval_throws(RandGen& rng,
 
                     combo::variable_unifier return_vu(work_vu);
                     return_vu.setUpdated(false);
-                    bool res = vertex_to_bool(eval_throws(rng, sib, pe,
-                                                          return_vu));
+                    bool res = vertex_to_bool(eval_throws(sib, pe, return_vu));
 
                     if(!return_vu.isUpdated()) {
                         if(res) { // then all activated entities are
@@ -237,7 +233,7 @@ vertex eval_throws(RandGen& rng,
                       "logical_not should have exactly one child,"
                       " instead it has %u", it.number_of_children());
             if (vu.empty()) {
-                return negate_vertex(eval_throws(rng, it.begin(), pe, vu));
+                return negate_vertex(eval_throws(it.begin(), pe, vu));
             }
 
             // variable unifier not empty, need to unify
@@ -246,7 +242,7 @@ vertex eval_throws(RandGen& rng,
             combo::variable_unifier work_vu(vu);
             work_vu.setUpdated(false);
 
-            vertex vx = eval_throws(rng, it.begin(), pe, work_vu);
+            vertex vx = eval_throws(it.begin(), pe, work_vu);
             vu.unify(combo::UNIFY_NOT, work_vu);
 
             if (work_vu.isUpdated()) {
@@ -259,14 +255,14 @@ vertex eval_throws(RandGen& rng,
                               "combo_tree node should have exactly three children"
                               " (id::boolean_if)");
             sib_it sib = it.begin();
-            vertex vcond = eval_throws(rng, sib, pe, vu);
+            vertex vcond = eval_throws(sib, pe, vu);
             OC_ASSERT(is_boolean(vcond), "vertex should be a booelan.");
             ++sib;
             if (vcond == id::logical_true) {
-                return eval_throws(rng, sib, pe, vu);
+                return eval_throws(sib, pe, vu);
             } else {
                 ++sib;
-                return eval_throws(rng, sib, pe, vu);
+                return eval_throws(sib, pe, vu);
             }
         }
         // mixed operators
@@ -275,15 +271,15 @@ vertex eval_throws(RandGen& rng,
                       "combo_tree node should have exactly three children"
                       " (id::contin_if)");
             sib_it sib = it.begin();
-            vertex vcond = eval_throws(rng, sib, pe, vu);
+            vertex vcond = eval_throws(sib, pe, vu);
             OC_ASSERT(is_boolean(vcond),
                       "vertex should be a boolean.");
             ++sib;
             if (vcond == id::logical_true) {
-                return eval_throws(rng, sib, pe, vu);
+                return eval_throws(sib, pe, vu);
             } else {
                 ++sib;
-                return eval_throws(rng, sib, pe, vu);
+                return eval_throws(sib, pe, vu);
             }
         }
         case id::greater_than_zero : {
@@ -291,7 +287,7 @@ vertex eval_throws(RandGen& rng,
                       "combo_tree node should have exactly three children"
                       " (id::greater_than_zero).");
             sib_it sib = it.begin();
-            vertex x = eval_throws(rng, sib, pe, vu);
+            vertex x = eval_throws(sib, pe, vu);
             OC_ASSERT(is_contin(x),
                       "vertex should be a contin.");
             return bool_to_vertex(0 < get_contin(x));
@@ -301,7 +297,7 @@ vertex eval_throws(RandGen& rng,
             OC_ASSERT(it.has_one_child(),
                       "combo_tree node should have exactly one child"
                       " (id::impulse).");
-            i = eval_throws(rng, it.begin(), pe, vu);
+            i = eval_throws(it.begin(), pe, vu);
             OC_ASSERT(is_boolean(i),
                       "vetex should be a boolean).");
             return (i == id::logical_true ? 1.0 : 0.0);
@@ -311,19 +307,19 @@ vertex eval_throws(RandGen& rng,
             contin_t res = 0;
             // assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws(rng, sib, pe, vu);
+                vertex vres = eval_throws(sib, pe, vu);
                 OC_ASSERT(is_contin(vres), "vertex should be a contin.");
                 res += get_contin(vres);
             }
             return res;
         }
         case id::rand :
-            return rng.randfloat();
+            return randGen().randfloat();
         case id::times : {
             contin_t res = 1;
             // assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws(rng, sib, pe, vu);
+                vertex vres = eval_throws(sib, pe, vu);
                 OC_ASSERT(is_contin(vres), "vertex should be a contin");
                 res *= get_contin(vres);
             }
@@ -335,12 +331,12 @@ vertex eval_throws(RandGen& rng,
                       "combo_tree node should have exactly two children"
                       " (id::div).");
             sib_it sib = it.begin();
-            vertex vx = eval_throws(rng, sib, pe, vu);
+            vertex vx = eval_throws(sib, pe, vu);
             OC_ASSERT(is_contin(vx),
                       "vertex should be a contin.");
             x = get_contin(vx);
             ++sib;
-            vertex vy = eval_throws(rng, sib, pe, vu);
+            vertex vy = eval_throws(sib, pe, vu);
             OC_ASSERT(is_contin(vy),
                       "vertex should be a contin.");
             y = get_contin(vy);
@@ -353,7 +349,7 @@ vertex eval_throws(RandGen& rng,
             OC_ASSERT(it.has_one_child(),
                       "combo_tree node should have exactly one child"
                       " (id::log).");
-            vertex vx = eval_throws(rng, it.begin(), pe, vu);
+            vertex vx = eval_throws(it.begin(), pe, vu);
             OC_ASSERT(is_contin(vx),
                       "vertex should be a contin");
 #ifdef ABS_LOG
@@ -369,7 +365,7 @@ vertex eval_throws(RandGen& rng,
             OC_ASSERT(it.has_one_child(),
                       "combo_tree node should have exactly one child"
                       " (id::exp)");
-            vertex vx = eval_throws(rng, it.begin(), pe, vu);
+            vertex vx = eval_throws(it.begin(), pe, vu);
             OC_ASSERT(is_contin(vx),
                       "vertex should be an contin");
             contin_t res = exp(get_contin(vx));
@@ -381,7 +377,7 @@ vertex eval_throws(RandGen& rng,
             OC_ASSERT(it.has_one_child(),
                       "combo_tree node should have exactly one child"
                       " (id::sin)");
-            vertex vx = eval_throws(rng, it.begin(), pe, vu);
+            vertex vx = eval_throws(it.begin(), pe, vu);
             OC_ASSERT(is_contin(vx),
                       "vertex should be a contin.");
             return sin(get_contin(vx));
@@ -437,53 +433,52 @@ vertex eval_throws(RandGen& rng,
 }
 
 template<typename It>
-vertex eval(RandGen& rng, It it)
+vertex eval(It it)
      throw(ComboException,
            AssertionException, std::bad_exception)
 {
     try {
-        return eval_throws(rng, it);
+        return eval_throws(it);
     } catch (EvalException e) {
         return e.get_vertex();
     }
 }
 
 template<typename T>
-vertex eval(RandGen& rng, const tree<T>& tr)
+vertex eval(const tree<T>& tr)
      throw(StandardException, std::bad_exception)
 {
-    return eval(rng, tr.begin());
+    return eval(tr.begin());
 }
 
 template<typename T>
-vertex eval_throws(RandGen& rng, const tree<T>& tr)
+vertex eval_throws(const tree<T>& tr)
      throw(EvalException,
            ComboException,
            AssertionException,
            std::bad_exception)
 {
-    return eval_throws(rng, tr.begin());
+    return eval_throws(tr.begin());
 }
 
 /// Like above but ignore the variable_unifier and uses
 /// binding_map. It also removes any type checking as it is the job of
 /// static type checker. The Evaluator is ignored till vu is
 /// completely removed
-// vertex eval_throws_binding(RandGen& rng, binding_map& bmap,
+// vertex eval_throws_binding(binding_map& bmap,
 //                            combo_tree::iterator it, Evaluator* pe = NULL)
-vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
+vertex eval_throws_binding(const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe = NULL)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception);
 
-vertex eval_binding(RandGen& rng,  const vertex_seq& bmap, combo_tree::iterator it)
+vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
      throw(ComboException, AssertionException, std::bad_exception);
 
-vertex eval_binding(RandGen& rng,  const vertex_seq& bmap, const combo_tree& tr)
+vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
     throw(StandardException, std::bad_exception);
 
-vertex eval_throws_binding(RandGen& rng, const vertex_seq& bmap,
-                           const combo_tree& tr)
+vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
      throw(EvalException, ComboException, AssertionException,
            std::bad_exception);
 

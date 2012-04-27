@@ -133,8 +133,6 @@ private:
     bool petIsMoving;
     std::string currentWalkingProcedure;
     std::string currentWalkingTargetId;
-
-    friend class RuleEngineUtil;
 };
 
 } } // namespace opencog::oac

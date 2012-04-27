@@ -452,8 +452,8 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
 }
 
 // create and return the single instance
-static Logger instance;
 Logger& opencog::logger()
 {
+    static Logger instance;
     return instance;
 }

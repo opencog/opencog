@@ -85,15 +85,15 @@ public:
         opencog::MT19937RandGen rng(rand_seed);
         field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), fs_size);
         instance inst(fs.packed_width());
-        randomize(fs, inst, rng);
+        randomize(fs, inst);
         
         instance new_inst(inst);
         
         // choose randomly a contin among the fs_size ones
-        int rnd_idx = rng.randint(fs_size);
+        int rnd_idx = randGen().randint(fs_size);
         field_set::contin_iterator it = fs.begin_contin(inst) + rnd_idx;
         cout << "before generate:" << fs.stream_raw(inst) << endl;
-        generate_contin_neighbor(fs, new_inst, it, distance, rng);
+        generate_contin_neighbor(fs, new_inst, it, distance);
         cout << "after generate:" << fs.stream_raw(new_inst) << endl;
         
         int new_dist = fs.hamming_distance(inst, new_inst);
@@ -116,7 +116,7 @@ public:
         size_t sampled_size;
         unsigned int sampled_max_distance;
         unsigned int sampled_min_distance;        
-        opencog::MT19937RandGen rng(rand_seed);
+        randGen().seed(rand_seed);
 
         // 1. test, the exemplar is initialized to 0
         {
@@ -130,7 +130,7 @@ public:
             sample_from_neighborhood(deme.fields(),
                                      distance,
                                      sample_size,
-                                     deme.begin(), deme.end(), rng);
+                                     deme.begin(), deme.end());
             get_sample_size_and_distance(deme,
                                          sampled_size,
                                          sampled_max_distance,
@@ -151,7 +151,7 @@ public:
             width = 4;
             field_set fs(field_set::disc_spec(width), fs_size);
             instance center_inst(fs.packed_width());
-            randomize(fs, center_inst, rng);
+            randomize(fs, center_inst);
             instance_set<composite_score> 
                 deme(100, center_inst, fs);
           
@@ -161,7 +161,7 @@ public:
                                      distance,
                                      sample_size,
                                      deme.begin(), deme.end(),
-                                     rng, center_inst);
+                                     center_inst);
 
             get_sample_size_and_distance(deme,sampled_size,
                                          sampled_max_distance,
@@ -184,7 +184,7 @@ public:
             
             field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), fs_size);
             instance center_inst(fs.packed_width());
-            randomize(fs, center_inst, rng);
+            randomize(fs, center_inst);
             instance_set<composite_score> deme(100, center_inst, fs);
             
             cout << "the initial randomize instance:" << endl
@@ -194,7 +194,7 @@ public:
                                      distance,
                                      sample_size,
                                      deme.begin(), deme.end(),
-                                     rng, center_inst);
+                                     center_inst);
 
             get_sample_size_and_distance(deme, sampled_size,
                                          sampled_max_distance,
@@ -272,8 +272,8 @@ public:
         field_set fs(field_set::disc_spec(width), size);
         instance center_inst(fs.packed_width());
         int rand_seed = clock();
-        opencog::MT19937RandGen rng(rand_seed);
-        randomize(fs, center_inst,rng); 
+        randGen().seed(rand_seed);
+        randomize(fs, center_inst); 
         test_generate_all_in_neighborhood(fs, distance, 100, center_inst);
     }
 
@@ -287,8 +287,8 @@ public:
         field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), fs_size);
         instance center_inst(fs.packed_width());
         int rand_seed = clock();
-        opencog::MT19937RandGen rng(rand_seed);
-        randomize(fs, center_inst, rng); 
+        randGen().seed(rand_seed);
+        randomize(fs, center_inst); 
         test_generate_all_in_neighborhood(fs, distance, 100, center_inst);
     }
 

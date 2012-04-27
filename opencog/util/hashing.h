@@ -30,6 +30,15 @@
 namespace opencog
 {
 
+// Functor returning the address of an object pointed by an
+// iterator. Iseful for defining the hash function of an iterator.
+template<typename It>
+struct obj_ptr_hash {
+    size_t operator()(const It& it) const {
+        return boost::hash_value(&(*it));
+    }
+};
+
 template < typename T,
 typename Hash = boost::hash<T> >
 struct deref_hash {

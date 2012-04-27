@@ -229,7 +229,7 @@ namespace opencog
         /**
          * DEPRECATED METHOD - it must be removed as like TangentBugTestExec and AStarTest
          */
-        void populateRandom(opencog::RandGen& rng, spatial::LocalSpaceMap2D& lsm,
+        void populateRandom(spatial::LocalSpaceMap2D& lsm,
                             int obstacles, const spatial::GridPoint& prob_center, int std_dev = 75);
 
     } // spatial

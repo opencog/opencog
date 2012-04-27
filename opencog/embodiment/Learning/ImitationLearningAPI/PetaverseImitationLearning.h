@@ -116,8 +116,7 @@ public:
                                    const definite_object_set& dos,
                                    const operator_set& os,
                                    const combo_tree_ns_set& perceptions,
-                                   const combo_tree_ns_set& actions,
-                                   opencog::RandGen& rng) {};
+                                   const combo_tree_ns_set& actions) {}
 
     /**
      * Base destructor

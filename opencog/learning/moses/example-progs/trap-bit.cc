@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 
     // Initialize random number generator (from the first argument
     // given to the program).
-    MT19937RandGen rng(args.rand_seed);
+    randGen().seed(args.rand_seed);
 
     // Create a set of "fields". Each field is a discrete variable,
     // with two possible settings. That is, each field is a boolean.
@@ -176,8 +176,8 @@ int main(int argc, char** argv)
 
     // Initialize each member of the population to a random value.
     foreach(instance& inst, population)
-        generate(fs.begin_bits(inst), fs.end_bits(inst),
-                 bind(&RandGen::randbool, boost::ref(rng)));
+        generate(fs.begin_bit(inst), fs.end_bit(inst),
+                 bind(&RandGen::randbool, boost::ref(randGen())));
 
     // Run the optimizer.
     // For this problem, there is no dependency at all between different
@@ -218,12 +218,11 @@ int main(int argc, char** argv)
              args.max_gens,                      // max number of generations to run
              trap(n, args.length),               // ScoringPolicy
              terminate_if_gte<int>(n*args.length), // TerminationPolicy
-             tournament_selection(2, rng),       // SelectionPolicy
+             tournament_selection(2),            // SelectionPolicy
              univariate(),                       // StructureLearningPolicy
              local_structure_probs_learning(),   // ProbsLearningPolicy
              replace_the_worst(),                // ReplacementPolicy
-             mlogger,
-             rng);
+             mlogger);
 
     // The logger is asynchronous, so flush it's output before
     // writing to cout, else output will be garbled.

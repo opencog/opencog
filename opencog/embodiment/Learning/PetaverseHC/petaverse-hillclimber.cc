@@ -35,11 +35,10 @@ petaverse_hillclimber::petaverse_hillclimber(int nepc,
         const combo_tree_ns_set& actions,
         bool abibb,
         bool neic,
-        bool reduct_enabled,
-        opencog::RandGen& rng)
+        bool reduct_enabled)
         : _comp(dos),
         _elementary_operators(eo), _conditions(conditions),
-        _actions(actions), _rng(rng),
+        _actions(actions),
         _hillclimber(fitness_estimator, nepc, _elementary_operators,
                      _conditions, _actions, _comp,
                      hillclimbing_action_reduction(),
@@ -74,7 +73,7 @@ const combo_tree& petaverse_hillclimber::best_program_estimated()
 
 const combo_tree& petaverse_hillclimber::current_program()
 {
-    _current_program = _hillclimber.current_program(_rng);
+    _current_program = _hillclimber.current_program();
     reduct::post_learning_rewrite(_current_program);
     return _current_program;
 }

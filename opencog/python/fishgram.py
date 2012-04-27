@@ -59,7 +59,7 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 2
+        self.min_embeddings = 3
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
@@ -172,8 +172,8 @@ class Fishgram:
                 #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
                 print format_log( '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m')
 
-                #for ptn, embs in new_layer:
-                #    print format_log(pp(ptn.conj), '         ', pp(ptn.seqs), '      ', len(embs))
+                for ptn, embs in new_layer:
+                    print format_log(ptn, len(embs))
 
                 yield new_layer
             
@@ -429,36 +429,99 @@ class Fishgram:
                 if len(ptn.conj) + len(ptn.seqs) < 2:
                     yield (ptn, embeddings)
                 else:
-                    surprise = self.surprise(ptn, embeddings)
-                    if surprise > 0.9: # and len(get_varlist(ptn.conj)) == 1 and len(ptn.seqs) == 0:
+                    surprise = self.surprise(ptn)
+                    if len(ptn.conj) > 0 and surprise > 0.9: # and len(get_varlist(ptn.conj)) == 1 and len(ptn.seqs) == 0:
                         print '\x1B[1;32m%.1f %s' % (surprise, ptn)
                         yield (ptn, embeddings)
     
-    def surprise(self, ptn, embeddings):
+    #def surprise(self, ptn, embeddings):
+    #    conj = ptn.conj + ptn.seqs
+    #    c = len(conj)
+    #    assert c >= 2
+    #
+    #    num_variables = len(get_varlist(conj))
+    #    
+    #    #print 'incremental:', embeddings
+    #    embeddings = self.forest.lookup_embeddings(conj)
+    #    #print 'search:', embeddings
+    #    
+    #    Nconj = len(embeddings)*1.0
+    #    
+    #    Pconj = Nconj/self.total_possible_embeddings(conj,embeddings)
+    #    
+    #    P_independent = 1
+    #    for tr in conj:
+    #        Etr = self.forest.lookup_embeddings((tr,))
+    #        P_tr = len(Etr)*1.0 / self.total_possible_embeddings((tr,), Etr)
+    #        P_independent *= P_tr
+    #
+    #    P_independent = P_independent ** (1.0/len(conj))
+    #
+    #    #self.distribution(ptn, embeddings)
+    #
+    #    #surprise = NAB / (util.product(Nxs) * N**(c-1))
+    #    surprise = Pconj / P_independent
+    #    #print conj, surprise, P, P_independent, [Nx/N for Nx in Nxs], N
+    #    #surprise = math.log(surprise, 2)
+    #    return surprise
+    
+    def surprise(self, ptn):
         conj = ptn.conj + ptn.seqs
-        c = len(conj)
-        assert c >= 2
 
-        num_variables = len(get_varlist(conj))
+        #print 'incremental:', embeddings
+        embeddings = self.forest.lookup_embeddings(conj)
+        #print 'search:', embeddings
         
-        Nconj = len(embeddings)*1.0
-        
+        Nconj = len(embeddings)*1.0        
         Pconj = Nconj/self.total_possible_embeddings(conj,embeddings)
+        #Pconj = self.num_obj_combinations(conj,embeddings)/self.total_possible_embeddings(conj,embeddings)
+
+        #print 'P) \x1B[1;32m%.5f %s' % (Pconj, ptn)
         
         P_independent = 1
         for tr in conj:
             Etr = self.forest.lookup_embeddings((tr,))
             P_tr = len(Etr)*1.0 / self.total_possible_embeddings((tr,), Etr)
+            #P_tr = self.num_obj_combinations((tr,), Etr)/self.total_possible_embeddings((tr,), Etr)
             P_independent *= P_tr
 
-        P_independent = P_independent ** (1.0/len(conj))
+        #P_independent = P_independent ** (1.0/len(conj))
 
-        #surprise = NAB / (util.product(Nxs) * N**(c-1))
+        #self.distribution(ptn, embeddings)
+
         surprise = Pconj / P_independent
         #print conj, surprise, P, P_independent, [Nx/N for Nx in Nxs], N
         #surprise = math.log(surprise, 2)
         return surprise
     
+    def num_obj_combinations(self, conj, embeddings):
+        '''Count the number of combinations of objects, such that everything in the conjunction is true,
+        and there is at least one time period where all of the events happened. It's equivalent to having
+        an AverageLink for the objects and ExistLink for the times.'''
+        # Find every unique embedding after removing the times.
+        embs_notimes = set( 
+            frozenset((var,obj) for (var,obj) in emb.items() if obj.get_type() != t.TimeNode)
+            for emb in embeddings)
+        
+        return len(embs_notimes)*1.0
+    
+    #def num_tuples(self, conj, embeddings):
+    #    #variables = get_varlist(conj)
+    #    
+    #    objvars = [var for var in get_varlist(conj) if
+    #               embeddings[0][var].get_type() == t.TimeNode]
+    #    
+    #    self.num_tuples_helper(objvars, embeddings)
+    #
+    #def num_tuples_helper(self, objvars, embeddings):
+    #    if len(objvars) == 0:
+    #        return 1
+    #    
+    #    count = 0
+    #    var = objvars[0]
+    #    possible_values = set(emb[var] for emb in objvars)
+        
+
     def total_possible_embeddings(self, conj, embeddings):
         N_objs = len(self.forest.all_objects)*1.0
         N_times = len(self.forest.all_timestamps)*1.0
@@ -470,11 +533,12 @@ class Fishgram:
                 #print 'ERROR', conj
                 return 100000000000000.0
             if embeddings[0][var].get_type() == t.TimeNode:
-                N_tuples *= N_times
+                #N_tuples *= N_times
+                pass
             else:
                 N_tuples *= N_objs
         
-        return N_tuples
+        return N_tuples*1.0
 
     
     def outputConceptNodes(self, layers):
@@ -845,7 +909,7 @@ class Fishgram:
 #        return len(small_embs) * implied_cases
 
 def notice_changes(atomspace):    
-    tv_delta = 0.01    
+    tv_delta = 0.000001
     
     t = types
     

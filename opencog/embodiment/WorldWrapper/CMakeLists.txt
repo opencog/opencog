@@ -6,10 +6,8 @@ ADD_LIBRARY(WorldWrapper
     WorldWrapper
     WorldWrapperUtil
     WorldWrapperUtilCache
-    WorldWrapperUtilMock
     ShellWorldWrapper
     PAIWorldWrapper
-    RuleValidationWorldWrapper
     NoSpaceLifeWorldWrapper
 )
 
@@ -27,6 +25,5 @@ TARGET_LINK_LIBRARIES(WorldWrapper
     MessagingSystem
 #    ImaginaryLife
     AvatarComboVocabulary
-    VirtualWorldData
     ${XERCESC_LIBRARIES}
 )

@@ -66,8 +66,8 @@ using namespace opencog::pai;
  */
 
 //ctor, stor
-PAIWorldWrapper::PAIWorldWrapper(PAI& _pai, RandGen& _rng)
-        : pai(_pai), rng(_rng), _hasPlanFailed(false) { }
+PAIWorldWrapper::PAIWorldWrapper(PAI& _pai)
+        : pai(_pai), _hasPlanFailed(false) { }
 
 PAIWorldWrapper::~PAIWorldWrapper() { }
 
@@ -502,7 +502,7 @@ combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier
     Handle smh = pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
     unsigned int current_time = pai.getLatestSimWorldTimestamp();
     OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
-    combo::vertex v = WorldWrapperUtil::evalPerception(rng, smh, current_time,
+    combo::vertex v = WorldWrapperUtil::evalPerception(smh, current_time,
                       pai.getAtomSpace(),
                       selfName(), ownerName(),
                       it, false, vu);
@@ -527,7 +527,7 @@ combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
     unsigned int current_time = pai.getLatestSimWorldTimestamp();
     OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
 
-    combo::vertex v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, current_time,
+    combo::vertex v = WorldWrapperUtil::evalIndefiniteObject(smh, current_time,
                       pai.getAtomSpace(),
                       selfName(), ownerName(),
                       io, false, vu);
@@ -657,7 +657,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
 
         } else {
             spatial::TangentBug::CalculatedPath calculatedPath;
-            spatial::TangentBug tb(sm, calculatedPath, rng);
+            spatial::TangentBug tb(sm, calculatedPath);
 
             //place the pet and the goal on the map
             tb.place_pet(begin.first, begin.second);
@@ -954,7 +954,6 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 
 PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 {
-    unsigned int current_time = pai.getLatestSimWorldTimestamp();
     AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     static const std::map<avatar_builtin_action_enum, ActionType> actions2types =
@@ -993,8 +992,6 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
           {id::bite, ActionType::BITE()},
           {id::pet, ActionType::PET()},
           {id::kick, ActionType::KICK()},
-          {id::group_command, ActionType::GROUP_COMMAND()},
-          {id::receive_latest_group_commands, ActionType::RECEIVE_LATEST_GROUP_COMMANDS()},
           {id::sit, ActionType::SIT()},
           {id::look_at, ActionType::LOOK_AT()},
           {id::say, ActionType::SAY()},
@@ -1154,256 +1151,6 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     }
     break;
 
-    case id::group_command: {    // group_command(string, string [, arg_list] )
-        logger().debug(
-                     "PAIWorldWrapper - Building PetAction group_command. number_of_children: %d",
-                     from.number_of_children( ) );
-
-        if ( from.number_of_children( ) < 2 ) {
-            throw InvalidParamException(TRACE_INFO,
-                                                 "PAIWorldWrapper - Invalid number of arguments for group_command" );
-        } // if
-
-        sib_it arguments = from.begin( );
-        combo::variable_unifier vu;
-        // get target name. can be an agent name or all_agents
-        std::string targetName;
-
-        if ( is_indefinite_object( *arguments ) ) {
-            targetName = get_definite_object( evalIndefiniteObject( get_indefinite_object( *arguments ), vu ) );
-        } else {
-            targetName = get_definite_object( *arguments );
-        } // else
-
-        ++arguments;
-
-        std::string commandName = get_definite_object( *arguments );
-
-        std::vector<std::string> actionDoneParameters;
-        actionDoneParameters.push_back( commandName );
-
-        //std::vector<std::string> parameters;
-        std::stringstream parameters;
-        for (++arguments; arguments != from.end(); arguments++) {
-            // retrieve a string containing a given parameter
-            std::string parameter;
-
-            if ( is_indefinite_object( *arguments ) ) {
-                parameter = get_definite_object( evalIndefiniteObject( get_indefinite_object( *arguments ), vu ) );
-            } else {
-                parameter = get_definite_object( *arguments );
-            } // else
-
-            if ( parameter == "randbool" ) {
-                parameter = ((rng.randint() % 2) == 0) ? "0" : "1";
-            } else if ( parameter == "rand" ) {
-                std::stringstream rand;
-                rand << rng.randdouble( );
-                parameter = rand.str( );
-            } // if
-
-
-            //parameters.push_back( parameter );
-            parameters << parameter;
-            sib_it nextArgument = arguments;
-            ++nextArgument;
-            actionDoneParameters.push_back( parameter );
-            if ( nextArgument != from.end( ) ) {
-                parameters << ";";
-            } // if
-        } // for
-
-
-        action.addParameter( ActionParameter( "target", ActionParamType::STRING( ), targetName ) );
-        action.addParameter( ActionParameter( "command", ActionParamType::STRING( ), commandName ) );
-        action.addParameter( ActionParameter( "parameters", ActionParamType::STRING( ), parameters.str() ) );
-
-        pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "groupCommandDone", actionDoneParameters );
-
-    }
-    break;
-
-    case id::receive_latest_group_commands: {
-        OC_ASSERT(from.number_of_children() == 0);
-
-        logger().debug(
-                     "PAIWorldWrapper - receiving latest_group_commands from all agents" );
-
-        //pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
-
-        // retrieve all agents
-        std::vector<Handle> agentsHandles;
-        as.getHandleSet( back_inserter(agentsHandles), AVATAR_NODE, false );
-        as.getHandleSet( back_inserter(agentsHandles), HUMANOID_NODE, false );
-        as.getHandleSet( back_inserter(agentsHandles), PET_NODE, false );
-
-
-        Handle selfHandle = WorldWrapperUtil::selfHandle(  as, selfName( ) );
-        unsigned int i;
-        for ( i = 0; i < agentsHandles.size( ); ++i ) {
-            if ( agentsHandles[i] == Handle::UNDEFINED || agentsHandles[i] == selfHandle ) {
-                // ignore non agents entities
-                // ignore self
-                continue;
-            } // if
-            std::string agentId = as.getName( agentsHandles[i] );
-            logger().debug(
-                         "PAIWorldWrapper - verifying agent[%s]", agentId.c_str( ) );
-
-            unsigned long delay_past = 10 * PAIUtils::getTimeFactor();
-            unsigned long t_past = ( delay_past < current_time ? current_time - delay_past : 0 );
-
-            Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( as, agentId, "group_command", Temporal( t_past, current_time ), TemporalTable::OVERLAPS );
-
-            if ( agentActionLink == Handle::UNDEFINED ) {
-                logger().debug("PAIWorldWrapper - agent[%s] did not sent group command during the last 30 seconds", agentId.c_str( ) );
-                continue;
-            } // if
-
-
-            std::string parametersString =
-                AtomSpaceUtil::convertAgentActionParametersToString( as, agentActionLink );
-
-            std::vector<std::string> commandParameters;
-            boost::split( commandParameters, parametersString, boost::is_any_of( ";" ) );
-            // trim all elements
-            unsigned int k;
-            for ( k = 0; k < commandParameters.size( ); ++k ) {
-                boost::trim( commandParameters[k] );
-            }
-
-            logger().debug("PAIWorldWrapper - number of parameters[%d], string[%s]", commandParameters.size( ), parametersString.c_str( ) );
-
-            if ( commandParameters.size( ) > 0 && ( commandParameters[0] == "all_agents" ||
-                                                    commandParameters[0] == selfName( ) ) ) {
-                std::vector<std::string> commandArguments;
-                commandArguments.push_back( agentId );
-
-                unsigned int j;
-                for ( j = 1; j < commandParameters.size( ); ++j ) {
-                    commandArguments.push_back( commandParameters[j] );
-                } // for
-
-                pai.getAvatarInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
-
-            } // if
-        } // for
-
-    }
-    break;
-
-    //we'll do all of the cases where there's bodyPart arg converted to the right integer constants here
-
-    //these have the target and specific parts
-    case id::sniff_avatar_part: { // sniff_avatar_part(avatar,RIGHT_FOOT|LEFT_FOOT|RIGHT_HAND|LEFT_HAND|CROTCH|BUTT)
-        OC_ASSERT(from.number_of_children() == 2);
-        action.addParameter(ActionParameter("avatar",
-                                            ActionParamType::ENTITY(),
-                                            Entity(get_definite_object(*from.begin()),
-                                                   resolveType(*from.begin()))));
-        combo::vertex v = *from.last_child();
-        OC_ASSERT(is_action_symbol(v),
-                         "It is assumed v is an action_symbol");
-        combo::avatar_action_symbol_enum ase = get_enum(get_action_symbol(v));
-        string part;
-        // From Pet Action spec: RIGHT_FOOT = 0, LEFT_FOOT = 1, BUTT = 2, RIGHT_HAND = 2, LEFT_HAND = 3, CROTCH = 4
-        switch (ase) {
-        case id::RIGHT_FOOT:
-            part = "0";
-            break;
-        case id::LEFT_FOOT:
-            part = "1";
-            break;
-        case id::BUTT:
-            part = "2";
-            break;
-        case id::RIGHT_HAND:
-            part = "3";
-            break;
-        case id::LEFT_HAND:
-            part = "4";
-            break;
-        case id::CROTCH:
-            part = "5";
-            break;
-        default:
-            logger().error("PAIWorldWrapper - Invalid avatar part as parameter for sniff_avatar_part: %s.", get_instance(ase)->get_name().c_str());
-            OC_ASSERT(false);
-        }
-        action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
-    }
-    break;
-    case id::sniff_pet_part: {  // sniff_pet_part(pet,NOSE|NECK|BUTT)
-        OC_ASSERT(from.number_of_children() == 2);
-        action.addParameter(ActionParameter("pet",
-                                            ActionParamType::ENTITY(),
-                                            Entity(get_definite_object(*from.begin()),
-                                                   resolveType(*from.begin()))));
-        combo::vertex v = *from.last_child();
-        OC_ASSERT(is_action_symbol(v),
-                         "It is assumed v is an action_symbol");
-        avatar_action_symbol_enum ase = get_enum(get_action_symbol(v));
-        string part;
-        switch (ase) {
-        case id::NOSE:
-            part = "0";
-            break;
-        case id::NECK:
-            part = "1";
-            break;
-        case id::BUTT:
-            part = "2";
-            break;
-        default:
-            logger().error("PAIWorldWrapper - Invalid pet part as parameter for sniff_pet_part: %s.", get_instance(ase)->get_name().c_str());
-            OC_ASSERT(false);
-        }
-        action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
-    }
-    break;
-    //these have specific actions for each part
-    case id::scratch_self: {    // scratch_self(NOSE|RIGHT_EAR|LEFT_EAR|NECK|RIGHT_SHOULDER|LEFT_SHOULDER)
-        combo::vertex v = *from.begin();
-        OC_ASSERT(is_action_symbol(v),
-                         "It is assumed v is an action_symbol");
-        combo::avatar_action_symbol_enum ase = get_enum(get_action_symbol(v));
-        switch (ase) {
-        case id::NOSE:
-            action = ActionType::SCRATCH_SELF_NOSE();
-            break;
-        case id::RIGHT_EAR:
-            action = ActionType::SCRATCH_SELF_RIGHT_EAR();
-            break;
-        case id::LEFT_EAR:
-            action = ActionType::SCRATCH_SELF_LEFT_EAR();
-            break;
-        case id::NECK:
-            action = ActionType::SCRATCH_SELF_NECK();
-            break;
-        case id::RIGHT_SHOULDER:
-            action = ActionType::SCRATCH_SELF_RIGHT_SHOULDER();
-            break;
-        case id::LEFT_SHOULDER:
-            action = ActionType::SCRATCH_SELF_LEFT_SHOULDER();
-            break;
-        default:
-            logger().error("PAIWorldWrapper - Invalid pet part as parameter for scratch_self: %s.", get_instance(ase)->get_name().c_str());
-            OC_ASSERT(false);
-        }
-    }
-    break;
-
-    case id::move_left_ear:  // move_left_ear(TWITCH|PERK|BACK)
-    case id::move_right_ear: // move_right_ear(TWITCH|PERK|BACK)
-        if (*from.begin() == get_instance(id::TWITCH)) {
-            action = (bae == get_instance(id::move_left_ear)) ? ActionType::LEFT_EAR_TWITCH() : ActionType::RIGHT_EAR_TWITCH();
-        } else if (*from.begin() == get_instance(id::PERK)) {
-            action = (bae == get_instance(id::move_left_ear)) ? ActionType::LEFT_EAR_PERK() : ActionType::RIGHT_EAR_PERK();
-        } else {
-            action = (bae == get_instance(id::move_left_ear)) ? ActionType::LEFT_EAR_BACK() : ActionType::RIGHT_EAR_BACK();
-        }
-        break;
-
         //now rotations
     case id::rotate_left:      // rotate_left
         action.addParameter(ActionParameter("rotation",
@@ -1429,7 +1176,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     break;
         //now stepping actions
     case id::random_step:        // random_step
-        theta = 2.0 * PI * rng.randdouble();
+        theta = 2.0 * PI * randGen().randdouble();
         goto build_step;
     case id::step_backward :     // step_backward
         theta = getAngleFacing(WorldWrapperUtil::selfHandle(as,
@@ -1467,32 +1214,6 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                                                            (double)petLoc.second,
                                                            0.0)));
             }
-            action.addParameter(ActionParameter("speed",
-                                                ActionParamType::FLOAT(),
-                                                lexical_cast<string>(pai.getAvatarInterface().computeWalkingSpeed())));
-        }
-        break;
-    case id::step_towards:      // step_towards(obj,TOWARDS|AWAY)
-        OC_ASSERT(from.number_of_children() == 2);
-        OC_ASSERT(*from.last_child() == get_instance(id::TOWARDS) ||
-                  *from.last_child() == get_instance(id::AWAY));
-        {
-            double stepSize = (sm.diagonalSize()) * STEP_SIZE_PERCENTAGE / 100; // 2% of the width
-
-            // object position
-            SpaceServer::SpaceMapPoint p = WorldWrapperUtil::getLocation(sm, as, toHandle(get_definite_object(*from.begin())));
-
-            double len = pow((p.first * p.first) + (p.second * p.second), 0.5);
-            p.first *= min(stepSize / len, 1.0);
-            p.second *= min(stepSize / len, 1.0);
-
-            if (*from.last_child() == get_instance(id::AWAY)) {
-                p.first = -p.first;
-                p.second = -p.second;
-            }
-            action.addParameter(ActionParameter("target",
-                                                ActionParamType::VECTOR(),
-                                                Vector(p.first, p.second, 0.0)));
             action.addParameter(ActionParameter("speed",
                                                 ActionParamType::FLOAT(),
                                                 lexical_cast<string>(pai.getAvatarInterface().computeWalkingSpeed())));

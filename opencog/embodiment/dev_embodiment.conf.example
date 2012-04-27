@@ -180,17 +180,11 @@ STI_DECAYING_CYCLE_PERIOD = 1
 # If you would like to use PLN planner, set it to true, otherwise it will use random breadth-first planner
 PSI_PLAN_BY_PLN = false
 
-# how many idle cycles the RuleEngine is called
-RE_CYCLE_PERIOD                                  = 2
-
 # how much cycles one moment will take
 ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD = 1
 
 # how much cycles the importance decay will take
 IMPORTANCE_DECAY_CYCLE_PERIOD = 1
-
-#RE_DEFAULT_COUNT	    18
-#RE_DEFAULT_MEAN		0.5  
 
 # Reward values
 #
@@ -350,31 +344,6 @@ RL_GAUSSIAN_STD_DEVIATION       = 0.707
 
 # Maximum rule strength via reinforcement learning
 #MAX_RULE_STRENGTH              = 0.95
-
-#
-# Rule Engine configurations
-#
-#RE_FEELINGS_DECREASE_FACTOR    = 0.01
-#RE_CYCLES_DURING_NOVELTY       = 5   
-RE_CYCLES_FOR_REQUESTED_SCHEMA	= 10
-#RE_CYCLES_DURING_AGENT_LAST_ACTION = 3
-
-# default dog options: diablo|maxie|bob|princess|sleepy    
-#RE_DEFAULT_PET_TRAITS 			maxie
-#RE_DEFAULT_HUMANOID_TRAITS 	maria
-    
-#RE_CORE_FILE 				rules_core.lua    
-#RE_RULES_FILENAME_MASK       %s_rules.lua
-#RE_TRAITS_FILENAME_MASK      %s_traits_%s.lua
-#RE_PET_DEFINITIONS_FILE 	petDefinitions.lua
-
-#about the randomization of schema rule selection
-#0 means, no random noise, the engine chooses the rule with max weight
-#1 means maximal noise, and any float in between represents a noise intensity
-RE_SCHEMA_SELECTION_RANDOM_NOISE = 0.3
-#false means no random selection the first found is taken
-#true means with random selection (uniform here)
-RE_WILD_CARD_RANDOM_SELECTION   = false
 
 #Used by BE and BDTracker
 #Defines the distance (in percentage of the diagonal of the SpaceMap)

@@ -217,7 +217,7 @@ int main(int argc, char** argv)
     logger().info(cmdline);
     
     // init random generator
-    MT19937RandGen rng(rand_seed);
+    randGen().seed(rand_seed);
 
     // setting OpenMP parameters
     setting_omp(fs_params.jobs);
@@ -235,7 +235,7 @@ int main(int argc, char** argv)
 
     // Go and do it.
     if(inferred_type == id::boolean_type) {
-        feature_selection(table, fs_params, rng);
+        feature_selection(table, fs_params);
     } else {
         unsupported_type_exit(inferred_type);
     }

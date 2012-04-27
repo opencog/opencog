@@ -29,9 +29,9 @@ class ForestExtractor:
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
-        self.unwanted_atoms = set(['proximity', 'near', # 'next',
+        self.unwanted_atoms = set(['proximity', 'near', 'next',
             'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of',
-            'between', 'touching', 'inside', 'outside', 'below', # 'above',
+            'between', 'touching', 'inside', 'outside', 'below', 'above',
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
             'is_movable', 'is_noisy', 'null', 'id_null', 'Object',
@@ -43,7 +43,10 @@ class ForestExtractor:
             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst',
             # These might be part of the old embodiment system or part of Psi, I'm not sure
             'happiness','sadness','fear','excitement','anger',
-            'night'])
+            'night',
+            'actionFailed','decreased',
+            'food_bowl', # redundant with is_edible
+            'foodState','egg','dish'])
         
         # state
         self.all_objects  = set()# all objects in the AtomSpace
@@ -75,7 +78,7 @@ class ForestExtractor:
             self.i+=1
             return Var(self.i-1)
         elif self.is_action_instance(atom):
-            print 'is_action_instance', atom
+            #print 'is_action_instance', atom
             # this is moderatly tacky, but doing anything different would require lots of changes...
             return Tree('ListLink', [])
         elif atom.is_node():
@@ -99,7 +102,7 @@ class ForestExtractor:
             self.i = 0
             try:
                 tree = self.extractTree(link, objects)
-                print tree
+                #print tree
             except(self.UnwantedAtomException):
                 #print 'UnwantedAtomException'
                 continue
@@ -189,6 +192,7 @@ class ForestExtractor:
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
             if (atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK') or
+                atom.name.endswith('Stimulus') or atom.name.endswith('Modulator') or
                 atom.is_a(t.VariableNode)):
                 return False
         else:            
@@ -210,15 +214,18 @@ class ForestExtractor:
 
         # TODO check the TruthValue the same way as you would for other links.
         # work around hacks in other modules
-#        if any([i.is_a(t.AtTimeLink) for i in link.incoming]) or link.is_a(t.ExecutionLink):
-#            return False
+        if any([i.is_a(t.AtTimeLink) for i in link.incoming]):
+            return False
         if link.is_a(t.ExecutionLink):
             return False        
-        # Throw away the AtTimeLink that just contains the Action ID
-        if link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
-            return False
-        else:
-            return True
+        # Throw away the AtTimeLink that just contains the Action ID. But in the new format,
+        # there's an AndLink containing ALL the details of the action - so this policy would
+        # delete all actions recorded by Shujing's code!
+        #if link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
+        #    return False
+        #else:
+        #    return True
+        return True
 
     # tr = fish.forest.all_trees[0]
     # fish.forest.lookup_embeddings((tr,))
@@ -228,19 +235,11 @@ class ForestExtractor:
         It could also be used to find (the embeddings for) extra conjunctions that fishgram has skipped
         (which would be useful for the calculations used when finding implication rules)."""
 
-        # Find all bound trees
-#        try:
-#            self.all_bound_trees
-#        except AttributeError:
-#            self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
-##        self.all_bound_trees = [subst(subst_from_binding(b), t) for t, b in zip(self.all_trees, self.bindings)]
-        
         return self.lookup_embeddings_helper(conj, (), {}, self.all_bound_trees)
 
     def lookup_embeddings_helper(self, conj, bound_conj_so_far, s, all_bound_trees):
 
         if conj == ():            
-            #return bound_conj_so_far
             return [s]
 
         # Find all compatible embeddings. Then commit to that tree
@@ -249,17 +248,13 @@ class ForestExtractor:
         ret = []
         substs = []
         matching_bound_trees = []
-        s2 = ForestExtractor.magic_eval(self.a, tr, s)
-        if s2 != None:
-            substs.append(s2)
-            bound_tr = subst(s2, tr)
-            matching_bound_trees.append(bound_tr)
-        else: # For efficiency, don't try looking it up it if it was magically evaluated
-            for bound_tr in all_bound_trees:
-                s2 = unify(tr, bound_tr, s)
-                if s2 != None:
-                    substs.append( s2 )
-                    matching_bound_trees.append(bound_tr)
+
+        for bound_tr in all_bound_trees:
+            s2 = unify(tr, bound_tr, s)
+            if s2 != None:
+                #s2_notimes = { var:obj for (var,obj) in s2.items() if obj.get_type() != t.TimeNode }
+                substs.append( s2 )
+                matching_bound_trees.append(bound_tr)
 
         for s2, bound_tr in zip(substs, matching_bound_trees):
             bc = bound_conj_so_far + ( bound_tr , )
@@ -272,92 +267,6 @@ class ForestExtractor:
                     ret.append(final_s)
         
         return ret
-    
-    @staticmethod
-    def magic_eval(atomspace, tr, s = {}):
-        '''Evaluate special operators (as opposed to ordinary links in the atomspace).
-        tr is a tree containing a link or operator. s is a substitution to use with tr.
-        Currently the only operator is SequentialAndLink (the type). A SequentialAndLink
-        between Atoms will be accepted if a) 1 or both of its arguments are only variables, or
-        b) its arguments are TimeNodes within a certain interval (currently 30 seconds).
-        If all possible valid links corresponding to this operator were explicitly recorded
-        in the AtomSpace, you would be able to get the same effect by trying to unify tr
-        against the trees for every Atom in the AtomSpace.
-        
-        NOTE: In a conjunction, the operator must be after any links that use the variables.'''
-        # unit of timestamps is 0.01 second so multiply by 100
-        interval = 100* 20
-        
-        # If this is called from lookup_embeddings_helper, s should contain specific TimeNodes
-        #s = {var:Tree(atom) for (var,atom) in s.items()}
-        tr = subst(s, tr)
-        
-        # use unify to extract a SequentialAndLink
-        t1_var, t2_var = new_var(), new_var()
-        template = T('SequentialAndLink', t1_var, t2_var)
-        # template_s is just used to find the TimeNodes (to compare them with each other)
-        template_s = unify(template, tr, s)
-        if template_s == None:
-            return None
-        time1_tr = template_s[t1_var]
-        time2_tr = template_s[t2_var]
-        if time1_tr.is_variable() or time2_tr.is_variable():
-            return s
-        
-        time1_atom = time1_tr.op
-        time2_atom = time2_tr.op
-        
-        t1 = int(time1_atom.name)
-        t2 = int(time2_atom.name)
-        if 0 < t2 - t1 <= interval:
-            return s
-        else:
-            return None
-
-# More primitive less elegant earlier approach
-#class GraphConverter:
-#    def __init__(self, a, writer):
-#        self.a = a
-#        self.writer = writer
-#        self.compact = True
-#
-#    def addVertex(self,atom):
-#        if atom.is_node():
-#            self.writer.outputNodeVertex(atom)
-#        elif not self.compact or not self.is_compactable(atom):
-#            self.writer.outputLinkVertex(atom)
-#
-#    def addEdges(self,atom):
-#        if atom.is_node():
-#            return
-#        elif self.compact and self.is_compactable(atom):
-#            self.writer.outputLinkEdge(atom)
-#        else:
-#            self.writer.outputLinkArgumentEdges(atom)
-#
-#    def output(self):
-#        self.writer.start()
-#        # Use inline generators when you want to return all the results (or use a callback?)
-#        try:
-#            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Atom)):
-#                #print atom
-#                self.addVertex(atom)
-#            for atom in self.sorted_by_handle(self.a.get_atoms_by_type(t.Link)):
-#                self.addEdges(atom)
-#        except Exception, e:
-#            print e.__class__,  str(e)
-#            import pdb; pdb.set_trace()
-#        self.writer.stop()
-#
-#    # This got a bit convoluted. The reason why it's necessary is to make sure children of an atom will be
-#    # output first (although there would be other ways to do that)
-#    def sorted_by_handle(self,atoms):
-#        handles = [atom.h for atom in atoms]
-#        handles.sort()
-#        return [Atom(h,self.a) for h in handles]
-#    
-#    def is_compactable(self,atom):
-#        return atom.arity == 2 and len(atom.incoming) == 0 and not FishgramFilter.is_application_link(atom) # TODO haxx?
 
 import pygephi
 class GephiOutput:
@@ -567,149 +476,6 @@ class SubdueTextOutput:
             print "%% Processing", str(a), "!!! Error - did not previously output the vertex for this link:", str(Atom(Handle(e.args[0]),  self._as))
 
         print output,
-
-# Does the following three transformations:
-# * All ObjectNodes and TimeNodes are replaced with just a label. This means that a subgraph miner will find patterns
-# where ANY ObjectNode has certain links; in other words objects are distinguished based on their features rather than
-# treating every object differently. This enables generaliing patterns between different objects - very important!
-# * Any time a PredicateNode or ConceptNode is used, make a separate copy. Otherwise every concept will have large numbers of links
-# coming out of it (increasing connectivity without making it any more expressive). Greater connectivity is BAD for graph mining runtimes.
-# * Every EvaluationLink, ExecutionLink etc is replaced with a new node. e.g [in OpenCog Scheme format].
-# (ExecutionLink (PredicateNode "near")
-#   (ListLink
-#     (ObjectNode "id_123")
-#     (ObjectNode "id_456")
-# ))
-# is translated into:
-# a vertex called "ObjectNode" (with an id of say 1)
-# another vertex called "ObjectNode" (with an id of 2)
-# a vertex called "near" (with an id of 3)
-# a link marked "0"  which goes from the near vertex to the first object vertex
-# a link marked "1"  which goes from the near vertex to the second object vertex
-
-# TODO: FishgramFilter doesn't treat unordered links any differently (and DottyOutput couldn't handle it anyway?)
-# TODO: Treat symmetric relations as unordered links. Have an option for unordered, and switch it off for dotty output
-# (or make dotty ignore its effects)
-# TODO: can convert Eval(near:Pred List(a b)) into near(a b), but won't make that an unordered link...
-# Should have the SymmetricRelation ConceptNode.
-class FishgramFilter:
-    def __init__(self,space,writer):
-        self._as = space
-        self.writer = writer
-
-    def start(self):
-        self.writer.start()
-
-    def stop(self):
-        self.writer.stop()
-
-    def outputNodeVertex(self,a):
-        assert a.is_node()
-
-        if self.ignore(a): return
-
-        # TODO: keep the ID if it's a Pet/Avatar/Humanoid; include Node type?
-        # Remember that there is always an InheritanceLink to (ConceptNode "PetNode"), etc.
-        if a.is_a(t.ObjectNode) or a.is_a(t.TimeNode):
-            self.writer.outputNodeVertex(a,label=a.type_name) #'_OBJECT_')
-        else:
-            self.writer.outputNodeVertex(a)
-
-    def outputLinkEdge(self,a):
-        assert a.is_link()
-        assert len(a.out) == 2
-
-        if self.ignore(a): return
-
-        if not self.is_application_link(a):
-            self.writer.outputLinkEdge(a)
-        else:
-            label = a.out[0].name #PredicateNode name
-            outgoing = a.out[1].out # ListLink outgoing
-            self.writer.outputLinkEdge(a,label,outgoing)
-
-    def outputLinkVertex(self,a):
-        assert a.is_link()
-
-        if self.ignore(a): return
-
-        if not self.is_application_link(a):
-            self.writer.outputLinkVertex(a)
-        else:
-            # Send this predicate to the single-edge system if possible
-            if self.is_compactableEvalLink(a):
-                self.outputLinkEdge(a)
-            else:
-                label = a.out[0].name #PredicateNode name
-                self.writer.outputLinkVertex(a,label)
-
-    def outputLinkArgumentEdges(self,a):
-        assert a.is_link()
-        # assumes outgoing links/nodes have already been output
-
-        if self.ignore(a): return
-
-        #import ipdb; ipdb.set_trace()
-
-        if not self.is_application_link(a):
-            self.writer.outputLinkArgumentEdges(a)
-        else:
-            if self.is_compactableEvalLink(a):
-                return #Already handled by outputLinkEdge
-            else:
-                label = a.out[0].name
-                outgoing = a.out[1].out # ListLink outgoing -TODO assumes a ListLink even when the Predicate has 1 argument
-                self.writer.outputLinkVertex(a, label)
-                self.writer.outputLinkArgumentEdges(a,outgoing)
-
-    def ignore(self,a):
-        # allows WRLinks (WordReference) to make it more interesting.
-        # e.g. there's a WRLink from WordNode:"soccer ball", but the most specific ConceptNode is "ball"
-        #return not (a.is_a(t.Node) or a.is_a(t.InheritanceLink) or a.is_a(t.EvaluationLink))
-        include = True # proably safe to allow any link now, except false EvaluationLinks
-#        include = (a.is_a(t.Node) or a.is_a(t.InheritanceLink) or a.is_a(t.SimilarityLink) or
-#                        self.is_application_link(a) or
-#                        a.is_a(t.AtTimeLink) )
-        # Can't assume that EvalLinks or similar can be converted into single Edges (they may have something else pointing to them)
-        #if a.is_a(t.PredicateNode): include = False
-        if a.is_a(t.LatestLink): include = False
-        if self.is_application_link(a):
-           # TODO hack to deal with actionDone predicates not having TVs
-           # TODO Won't handle cases where an EvalLink with no TV is wrapped in something OTHER than an AtTimeLink
-           times = [x for x in a.out if x.t == t.AtTimeLink]
-           # Deal with AtTime(T, SimilarityLink( ExecutionOutputLink ...
-           times += [x for x in times if x.t == t.AtTimeLink]
-           if any(self.is_true_tv(o.tv) for o in [a]+times): include = True
-           if a.out[0].name == "proximity": include = False
-        
-        # Allow nested ListLinks, but still replace ones that are inside an EvaluationLink or similar
-        if a.is_a(t.ListLink):
-            if len(a.incoming) == 0 or self.is_application_link(a.incoming[0]):
-                include = False
-            else:
-                include = True
-
-        return not include
-
-    def is_true_tv(self, tv):
-            return tv.mean >= 0.5 and tv.count > 0
-
-    def simplify(self,a):
-        """If it is an EvaluationLink, replace it with a simple Predicate. Otherwise return the same thing"""
-        if a.is_a(t.EvaluationLink):
-            return None
-
-    @staticmethod
-    def is_compactableEvalLink(a):
-        # Check that the EvaluationLink can be replaced with a single edge
-        # i.e. if the EvalLink has no incoming and _its ListLink_ has 2 arguments
-        #label = a.out[0].name #PredicateNode name
-        outgoing = a.out[1].out # ListLink outgoing
-        return len(outgoing) == 2 and len(a.incoming) == 0
-
-    @staticmethod
-    def is_application_link(a):
-        return a.is_a(t.EvaluationLink) or a.is_a(t.ExecutionOutputLink) or a.is_a(t.ExecutionLink)
 
 # Hacks
 #class GephiMindAgent(opencog.cogserver.MindAgent):

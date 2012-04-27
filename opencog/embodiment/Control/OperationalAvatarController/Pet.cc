@@ -37,9 +37,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-//#include "RuleEngine.h"
 #include "LearningAgentModeHandler.h"
-#include "ScavengerHuntAgentModeHandler.h"
 #include "DefaultAgentModeHandler.h"
 
 #include <cstdlib>
@@ -163,60 +161,6 @@ void Pet::initTraitsAndFeelings()
                 std::string("sadness"), tv, petHandle), 1);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("excitement"), tv, petHandle), 1);
-
-    // traits
-    float value;
-    char line[256];
-    std::string trait;
-
-    std::string defaultDog = config().get("RE_DEFAULT_PET_TRAITS");
-    std::string traitsFilenameMask = config().get("RE_TRAITS_FILENAME_MASK");
-
-    std::stringstream name(std::stringstream::out);
-    name << boost::format( traitsFilenameMask ) % this->agentType %
-        this->agentTraits;
-
-    std::ifstream fin;
-    if (fileExists(name.str().c_str())) {
-        fin.open(name.str().c_str(), std::ios_base::in); 
-    } 
-    /**
-     // TODO: disable traits file for the moment, because we've removed these lua files
-    else {
-        logger().error("Pet - File does not exist '%s'.", name.str().c_str());
-        name.str(std::string());
-        name << boost::format( traitsFilenameMask ) % this->agentType %
-            defaultDog;
-
-        if (fileExists(name.str().c_str())) {
-            fin.open(name.str().c_str(), std::ios_base::in);
-        } else {
-            logger().error("Pet - File does not exist '%s'.",
-                    name.str().c_str()); }
-    }
-    */
-
-    if (fin.is_open()) {
-        while (!fin.eof()) {
-            fin.getline(line, 256);
-
-            // not a comentary or an empty line
-            if (line[0] != '#' && line[0] != 0x00) {
-                std::istringstream in ((std::string)line);
-
-                in >> trait;
-                in >> value;
-
-                logger().debug("Pet - Loaded '%s' - trait '%s' with value '%.3f'.",
-                             name.str().c_str(), trait.c_str(), value);
-
-                tv.setMean(value);
-                AtomSpaceUtil::setPredicateValue(*atomSpace, trait, tv,
-                        petHandle);
-            }
-        }
-    }
-    fin.close();
 }
 
 void Pet::setPAI(PAI *pai)

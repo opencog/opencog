@@ -107,13 +107,13 @@ bool ObjectMetaData::operator!=(const ObjectMetaData& rhs) const
 /**
  * DEPRECATED METHOD - it must be removed as like TangentBugTestExec and AStarTest
  */
-void opencog::spatial::populateRandom(opencog::RandGen& rng,
-                                      spatial::LocalSpaceMap2D& lsm,
+void opencog::spatial::populateRandom(spatial::LocalSpaceMap2D& lsm,
                                       int obstacles,
                                       const spatial::GridPoint& prob_center,
                                       int std_dev)
 {
 
+    opencog::RandGen& rng = randGen();
     for (int cnt = 0; cnt < obstacles; ++cnt) {
         unsigned
             center_x = gaussian_rand<unsigned>(prob_center.first, std_dev, rng),

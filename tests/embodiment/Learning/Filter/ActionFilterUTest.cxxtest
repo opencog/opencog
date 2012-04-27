@@ -25,9 +25,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 
-#include <opencog/util/RandGen.h>
-#include <opencog/util/mt19937ar.h>
-
 #include <opencog/embodiment/Learning/Filter/ActionFilter.h>
 #include <opencog/embodiment/Learning/behavior/BDRetriever.h>
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
@@ -80,10 +77,6 @@ public:
     }
 
     void test_computeLikelihood() {
-        //initialize random generator
-        // TODO: this should be done where/when the RandGen object is created
-        opencog::RandGen* rng = new opencog::MT19937RandGen(0);
-
         //first we add in the atomSpace the following 2 behavior descriptions :
         //1) goto(stick) drop, from 0 to 2*TIME_INTERVAL
         //2) goto(stick) goto(Paul), from 10*TIME_INTERVAL to 11*TIME_INTERVAL
@@ -226,7 +219,7 @@ public:
         //set up action filter and compute the set of action subsequences
         arity_t arity = 2;
         Filter::ActionFilter af(pet_str, avatar_str, wp, dos,
-                                idos, bas, arity, true, *rng);
+                                idos, bas, arity, true);
         Filter::ActionFilter::combo_tree_ns_set action_subs;
         //set up the arguments, $1=stick and $2=owner
         combo::argument_list al{definite_object(obj_str), id::owner};

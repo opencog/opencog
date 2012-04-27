@@ -61,17 +61,14 @@ struct remove_unary_junctors : public crule<remove_unary_junctors>
 struct simplify_predicates : public crule<simplify_predicates>
 {
     simplify_predicates(int effort,
-                        const vertex_set& ignore_ops_,
-                        opencog::RandGen& rng_)
+                        const vertex_set& ignore_ops_)
         : crule<simplify_predicates>::crule("simplify_predicates"),
-          reduct_effort(effort), ignore_ops(ignore_ops_), rng(rng_)
-    {}
+          reduct_effort(effort), ignore_ops(ignore_ops_) {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 
 protected:
     int reduct_effort;
     const vertex_set& ignore_ops;
-    opencog::RandGen& rng;
 };
 
 /// Remove operators 'and', 'or' and 'not' that have no argument. Note

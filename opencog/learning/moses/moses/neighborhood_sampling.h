@@ -55,23 +55,22 @@ using std::numeric_limits;
  *            of the deme if it does so then an assert is raised
  */
 template<typename Out>
-void generate_initial_sample(const field_set& fs, int n, Out out, Out end,
-                             RandGen& rng)
+void generate_initial_sample(const field_set& fs, int n, Out out, Out end)
 {
     dorepeat(n) {
 
         instance inst(fs.packed_width());
 
-        randomize(fs, inst, rng);
+        randomize(fs, inst);
 
         // Bias towards the exemplar instance
-        for (field_set::bit_iterator it = fs.begin_bits(inst);
-             it != fs.end_bits(inst); ++it)
-            if (rng.randbool())
+        for (field_set::bit_iterator it = fs.begin_bit(inst);
+             it != fs.end_bit(inst); ++it)
+            if (randGen().randbool())
                 *it = false;
         for (field_set::disc_iterator it = fs.begin_disc(inst);
              it != fs.end_disc(inst); ++it)
-            if (rng.randbool())
+            if (randGen().randbool())
                 *it = 0;
 
         //add it
@@ -103,12 +102,11 @@ Deprecated code -- this algo doesnt really make sense.
  *             equal to n
  * @param it   the contin iterator of the instance
  * @param dist the Hamming distance by which the contin will be modified.
- * @param rng  the random generator
  */
 inline void hamming_contin_neighbor(const field_set& fs,
                                      instance& inst,
                                      field_set::contin_iterator it,
-                                     unsigned dist, RandGen& rng)
+                                     unsigned dist)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
     size_t length = fs.contin_length(inst, it.idx());
@@ -116,7 +114,7 @@ inline void hamming_contin_neighbor(const field_set& fs,
     // a random_selector is used not to pick up twice the same idx.
     // The max idx corresponds either to the first Stop, or, in case
     // there is no Stop, the last disc (i.e. either Left or Right)
-    lazy_random_selector select(std::min(length + 1, depth), rng);
+    lazy_random_selector select(std::min(length + 1, depth));
 
     for (unsigned i = dist; i > 0; i--) {
         size_t r = select();
@@ -124,7 +122,7 @@ inline void hamming_contin_neighbor(const field_set& fs,
         itr += begin + r;
         // case inst at itr is Stop
         if (*itr == field_set::contin_spec::Stop) {
-            *itr = rng.randbool() ?
+            *itr = randGen().randbool() ?
                 field_set::contin_spec::Left:
                 field_set::contin_spec::Right;
             length++;
@@ -136,7 +134,7 @@ inline void hamming_contin_neighbor(const field_set& fs,
             bool before_stop = r + 1 == length;
             // whether we allow to turn it to stop
             bool can_be_stop = i <= select.count_n_free();
-            if (before_stop && can_be_stop && rng.randbool()) {
+            if (before_stop && can_be_stop && randGen().randbool()) {
                 *itr = field_set::contin_spec::Stop;
                 select.reset_range(--length);
             } else
@@ -149,10 +147,9 @@ inline void hamming_contin_neighbor(const field_set& fs,
 // Twiddle one contin bit only.
 // Only two choices available: change it to stop, or flip it.
 // @itr points to a (pseudo-) bit in the contin (as a raw field).
-inline void twiddle_contin_bit(field_set::disc_iterator itr,
-                               RandGen& rng)
+inline void twiddle_contin_bit(field_set::disc_iterator itr)
 {
-    if (rng.randbool())
+    if (randGen().randbool())
     {
         *itr = field_set::contin_spec::Stop;
     }
@@ -184,12 +181,11 @@ inline void twiddle_contin_bit(field_set::disc_iterator itr,
  * @param inst the instance to be modified
  * @param it   the contin iterator pointing into the instance
  * @param dist the distance to consider.
- * @param rng  the random generator
  */
 inline void generate_contin_neighbor(const field_set& fs,
                                      instance& inst,
                                      field_set::contin_iterator it,
-                                     unsigned dist, RandGen& rng)
+                                     unsigned dist)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
     size_t length = fs.contin_length(inst, it.idx());
@@ -201,7 +197,7 @@ inline void generate_contin_neighbor(const field_set& fs,
     {
         field_set::disc_iterator itr = fs.begin_raw(inst);
         itr += begin + length;
-        twiddle_contin_bit(itr, rng);
+        twiddle_contin_bit(itr);
     }
     else
     {
@@ -209,16 +205,16 @@ inline void generate_contin_neighbor(const field_set& fs,
         // and there is room at the end of the contin to change a less
         // significant bit.
         field_set::disc_iterator itr = fs.begin_raw(inst);
-        if (rng.randbool())
+        if (randGen().randbool())
         {
             itr += begin + length;
-            twiddle_contin_bit(itr, rng);
+            twiddle_contin_bit(itr);
         }
         else
         {
             // There is a stop bit here. Change it to L or R.
             itr += begin + length + 1;
-            if (rng.randbool())
+            if (randGen().randbool())
             {
                *itr = field_set::contin_spec::Right;
             }
@@ -236,7 +232,7 @@ inline void generate_contin_neighbor(const field_set& fs,
     // seem to be worth the effort, right?
     if (1 < dist)
     {
-        generate_contin_neighbor(fs, inst, it, dist-1, rng);
+        generate_contin_neighbor(fs, inst, it, dist-1);
     }
 }
 
@@ -255,13 +251,11 @@ inline void generate_contin_neighbor(const field_set& fs,
  * @param end           deme iterator, containing the end iterator,
  *                      necessary to check that 'out' does not go out
  *                      of the deme if it does so then an assert is raised
- * @param rng           the random generator
  * @param center_inst   the center instance
  */
 template<typename Out>
 void sample_from_neighborhood(const field_set& fs, unsigned dist,
                               unsigned sample_size, Out out, Out end,
-                              RandGen& rng,
                               const instance & center_inst)
 {
     OC_ASSERT(center_inst.size() == fs.packed_width(),
@@ -277,11 +271,11 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
     dorepeat(sample_size) {
 
         instance new_inst(center_inst);
-        lazy_random_selector select(dim, rng);
+        lazy_random_selector select(dim, randGen());
 
         for (unsigned i = 1; i <= dist; ) {
             size_t r = select();
-            field_set::bit_iterator itb = fs.begin_bits(new_inst);
+            field_set::bit_iterator itb = fs.begin_bit(new_inst);
             field_set::disc_iterator itd = fs.begin_disc(new_inst);
             field_set::contin_iterator itc = fs.begin_contin(new_inst);
             // modify bit
@@ -292,7 +286,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
             // modify disc
             } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc_fields()))) {
                 itd += r - fs.n_bits();
-                disc_t temp = 1 + rng.randint(itd.multy() - 1);
+                disc_t temp = 1 + randGen().randint(itd.multy() - 1);
                 if ( *itd == temp)
                     *itd = 0;
                 else
@@ -304,7 +298,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
                 itc += r - fs.n_bits() - fs.n_disc_fields();
                 // @todo: now the distance is 1, choose the distance
                 // of contin possibly different than 1
-                generate_contin_neighbor(fs, new_inst, itc, 1, rng);
+                generate_contin_neighbor(fs, new_inst, itc, 1);
                 i++;
             }
         }
@@ -331,23 +325,22 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
  */
 template<typename Out>
 void sample_from_neighborhood(const field_set& fs, unsigned dist,
-                              unsigned sample_size, Out out, Out end,
-                              RandGen& rng)
+                              unsigned sample_size, Out out, Out end)
 {
     instance inst(fs.packed_width());
 
     // Reset all fields (zero them out).
     // contin and term algebra fields are ignored. XXX Why?
     // Don't we want to start with all-zero contins ??? XXX fixme...
-    for (field_set::bit_iterator it = fs.begin_bits(inst);
-            it != fs.end_bits(inst); ++it)
+    for (field_set::bit_iterator it = fs.begin_bit(inst);
+            it != fs.end_bit(inst); ++it)
         *it = false;
 
     for (field_set::disc_iterator it = fs.begin_disc(inst);
             it != fs.end_disc(inst); ++it)
         *it = 0;
 
-    sample_from_neighborhood(fs, dist, sample_size, out, end, rng, inst);
+    sample_from_neighborhood(fs, dist, sample_size, out, end, inst);
 }
 
 
@@ -540,7 +533,7 @@ Out vary_n_knobs(const field_set& fs,
     if ((fs.begin_bit_raw_idx() <= starting_index) &&
         (starting_index < fs.end_bit_raw_idx()))
     {
-        field_set::bit_iterator itb = fs.begin_bits(tmp_inst);
+        field_set::bit_iterator itb = fs.begin_bit(tmp_inst);
         itb += starting_index - fs.begin_bit_raw_idx();
 
         // Recursive call, moved for one position.
@@ -761,8 +754,7 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
                      deme_size_t current_number_of_instances,
                      const instance& center_inst,
                      instance_set<composite_score>& deme,
-                     unsigned dist,
-                     RandGen& rng)
+                     unsigned dist)
 {
     // We assume that the total number of neighbors was just an estimate.
     // If the number of requested new instances is even close to the
@@ -783,7 +775,7 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
         sample_from_neighborhood(deme.fields(), dist,
                                  number_of_new_instances,
                                  deme.begin() + current_number_of_instances,
-                                 deme.end(), rng,
+                                 deme.end(),
                                  center_inst);
     } else {
         number_of_new_instances = total_number_of_neighbours;
@@ -807,8 +799,7 @@ sample_new_instances(deme_size_t number_of_new_instances,
                      deme_size_t current_number_of_instances,
                      const instance& center_inst,
                      instance_set<composite_score>& deme,
-                     unsigned dist,
-                     RandGen& rng)
+                     unsigned dist)
 {
     // The number of all neighbours at the distance d (stops
     // counting when above number_of_new_instances).
@@ -818,7 +809,7 @@ sample_new_instances(deme_size_t number_of_new_instances,
     return sample_new_instances(total_number_of_neighbours,
                                 number_of_new_instances,
                                 current_number_of_instances,
-                                center_inst, deme, dist, rng);
+                                center_inst, deme, dist);
 }
 
 } // ~namespace moses

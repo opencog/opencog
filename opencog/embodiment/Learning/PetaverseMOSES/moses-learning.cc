@@ -49,12 +49,11 @@ moses_learning::moses_learning(int nepc,
                                const definite_object_set& dos,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set& perceptions,
-                               const combo_tree_ns_set& actions,
-                               RandGen& rng)
+                               const combo_tree_ns_set& actions)
         : _fitness_estimator(fitness_estimator), _comp(dos), _dos(dos), 
           _ignore_ops(ignore_ops),
           _perceptions(perceptions), _actions(actions), 
-          _rng(rng), max_score(0)
+          max_score(0)
 {
 
     _nepc = nepc;
@@ -77,7 +76,7 @@ moses_learning::moses_learning(int nepc,
 
     score = new petaverse_score(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);
-    climber = new hill_climbing(_rng);
+    climber = new hill_climbing;
 
     metapop = NULL;
 
@@ -148,7 +147,7 @@ void moses_learning::operator()()
 
         metapop = new metapopulation<petaverse_score, petaverse_bscore,
                                      hill_climbing>
-            (_rng, _center, tt, action_reduction(),
+            (_center, tt, action_reduction(),
              *score, *bscore, *climber);
 
         _hcState = HC_BUILD_CANDIDATES;
