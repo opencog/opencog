@@ -358,7 +358,16 @@ bool has_header(const string& dataFileName)
 
 type_node infer_type_from_token(const string& token)
 {
-    if(token == "0" || token == "1")
+    /* Prefered representation is T's and 0's, to maximize clarity,
+     * readability.  Numeric values are easily confused with contin
+     * type.
+     */ 
+    if (token == "0" || 
+        token == "1" ||
+        token == "T" ||
+        token == "F" ||
+        token == "t" ||
+        token == "f")
         return id::boolean_type;
     else {
         try {
@@ -444,9 +453,9 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
     switch (tipe) {
 
     case id::boolean_type:
-        if (token == "0")
+        if ("0" == token || "F" == token || "f" == token)
             return id::logical_false;
-        else if (token == "1")
+        else if ("1" == token || "T" == token || "t" == token)
             return id::logical_true;
         else
             OC_ASSERT(false, "Expecting boolean value, got %s", token.c_str());
