@@ -74,72 +74,78 @@ class Chainer:
     def bc(self, target):
         #import prof3d; prof3d.profile_me()
         
-        #try:
-        tvs = self.get_tvs(target)
-        print "Existing target truth values:", map(str, tvs)
-        
-        log.info(format_log('bc', target))
-        self.bc_later = OrderedSet([target])
-        self.results = []
+        try:
+            tvs = self.get_tvs(target)
+            print "Existing target truth values:", map(str, tvs)
+            
+            log.info(format_log('bc', target))
+            self.bc_later = OrderedSet([target])
+            self.results = []
+    
+            self.target = target
+    
+            # viz - visualize the root
+            self.viz.outputTarget(target, None, 0, 'TARGET')
+    
+            start = time()
+            while self.bc_later and not self.results:
+                self.bc_step()
+                self.propogate_results_loop()
+    
+                msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
+                log.info(format_log(msg))
+                log.info(format_log('time taken', time() - start))
+                #log.info(format_log('PD:'))
+                #for pdn in self.pd:
+                #    log.info(format_log(len(pdn.args),str(pdn)))
+            
+            # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
+            print msg
+    
+            for res in self.results:
+                print 'Inference trail:'
+                trail = self.trail(res)
+                self.print_tree(trail)
+                print 'Action plan (if applicable):'
+                print self.extract_plan(trail)
+    #            for res in self.results:
+    #                self.viz_proof_tree(self.trail(res))
+    
+            #return self.results
+            ret = []
+            for tr in self.results:
+                atom = atom_from_tree(tr, self.space)
+                # haxx
+                atom.tv = self.get_tvs(tr)[0]
+                ret.append(atom.h)
+            return ret
+        except Exception, e:
+            import traceback, pdb
+            #pdb.set_trace()
+            print traceback.format_exc(10)
+            # Start the post-mortem debugger
+            #pdb.pm()
+            return []
 
-        self.target = target
-
-        # viz - visualize the root
-        self.viz.outputTarget(target, None, 0, 'TARGET')
-
-        start = time()
-        while self.bc_later and not self.results:
-            self.bc_step()
-            self.propogate_results_loop()
-
-            msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
-            log.info(format_log(msg))
-            log.info(format_log('time taken', time() - start))
-            #log.info(format_log('PD:'))
-            #for pdn in self.pd:
-            #    log.info(format_log(len(pdn.args),str(pdn)))
-        
-        # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
-        print msg
-
-        for res in self.results:
-            print 'Inference trail:'
-            trail = self.trail(res)
-            self.print_tree(trail)
-            print 'Action plan (if applicable):'
-            print self.extract_plan(trail)
-#            for res in self.results:
-#                self.viz_proof_tree(self.trail(res))
-
-        #return self.results
-        return [atom_from_tree(result, self.space).h for result in self.results]
-        #except Exception, e:
-        #    import traceback, pdb
-        #    #pdb.set_trace()
-        #    print traceback.format_exc(10)
-        #    # Start the post-mortem debugger
-        #    #pdb.pm()
-        #    return []
-
-    def fc(self):
-        axioms = [r.head for r in self.rules if r.tv.count > 0]
-        self.propogate_results_loop(axioms)
-        
-        while self.fc_later:
-            next_premise = self.get_fittest() # Best-first search
-            log.info(format_log('-FCQ', next_premise))
-
-            apps = self.find_new_rule_applications_by_premise(next_premise)
-            for app in apps:
-                got_result = self.check_premises(app)
-                if got_result:
-                    self.compute_and_add_tv(app)
-                    
-                    if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
-                        self.add_tree_to_index(app.head, self.fc_before)
-                        self.add_tree_to_index(app.head, self.fc_later)
-                        log.info(format_log('+FCQ', app.head, app.name))
-                        stdout.flush()
+    #def fc(self):
+    #    axioms = [r.head for r in self.rules if r.tv.count > 0]
+    #    self.propogate_results_loop(axioms)
+    #    
+    #    while self.fc_later:
+    #        next_premise = self.get_fittest() # Best-first search
+    #        log.info(format_log('-FCQ', next_premise))
+    #
+    #        apps = self.find_new_rule_applications_by_premise(next_premise)
+    #        for app in apps:
+    #            got_result = self.check_premises(app)
+    #            if got_result:
+    #                self.compute_and_add_tv(app)
+    #                
+    #                if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
+    #                    self.add_tree_to_index(app.head, self.fc_before)
+    #                    self.add_tree_to_index(app.head, self.fc_later)
+    #                    log.info(format_log('+FCQ', app.head, app.name))
+    #                    stdout.flush()
 
     def propogate_results_loop(self):
         #assert not self.fc_later
@@ -204,6 +210,7 @@ class Chainer:
         real_results = []
 
         for app in potential_results + specialized:
+            assert not app is None
             #print repr(a)
 
             got_result = self.check_premises(app)
@@ -215,7 +222,9 @@ class Chainer:
                 #viz
                 self.viz.declareResult(app.head)
                 
-                self.compute_and_add_tv(app)
+                (status, app_pdn) = self.add_app_to_pd(app)
+                if status != 'CYCLE':
+                    self.compute_and_add_tv(app)
 
                 real_results.append(app)
 
@@ -302,6 +311,9 @@ class Chainer:
             for (i, input) in enumerate(app.goals):
                 self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
 
+        if status == 'CYCLE':
+            return
+        
         # NOTE: For generators, the app_pdn will exist already for some reason
         # It's useful to add the head if (and only if) it is actually more specific than anything currently in the BC tree.
         # This happens all the time when atoms are found.
@@ -346,6 +358,7 @@ class Chainer:
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
             #atom_from_tree(app.head, self.space).tv = app.tv            
+            assert app.tv.count > 0
             
             self.set_tv(app, app.tv)
             
@@ -439,8 +452,10 @@ class Chainer:
             return pdn
 
     def set_tv(self,app,tv):
+        assert isinstance(app, rules.Rule)
         # Find/add the app
         a = self.app2pdn(app)
+        assert isinstance(a, DAG)
         a.tv = tv
 
     def add_app_to_pd(self,app):

@@ -198,8 +198,8 @@ class OrderedSet(collections.OrderedDict, collections.MutableSet):
 
 class Logger(object):
     def info(self, msg):
-        print msg
-        #pass
+        #print msg
+        pass
     
     def use_stdout(self, use):
         pass
