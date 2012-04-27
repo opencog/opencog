@@ -11,25 +11,26 @@ def rules(a, deduction_types):
     rules = []
 
     # All existing Atoms
-    for obj in a.get_atoms_by_type(t.Atom):
-        # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-        if obj.tv.count > 0 and obj.tv.mean > 0:
-            tr = tree_from_atom(obj)
-            # A variable with a TV could just prove anything; that's evil!
-            if not tr.is_variable():
-                
-                # tacky filter
-                if 'CHUNK' in str(tr):
-                    continue
-                
-                r = Rule(tr, [], '[axiom]', tv = obj.tv)
-                rules.append(r)
+    #for obj in a.get_atoms_by_type(t.Atom):
+    #    # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+    #    if obj.tv.count > 0 and obj.tv.mean > 0:
+    #        tr = tree_from_atom(obj)
+    #        # A variable with a TV could just prove anything; that's evil!
+    #        if not tr.is_variable():
+    #            
+    #            # tacky filter
+    #            if 'CHUNK' in str(tr):
+    #                continue
+    #            
+    #            r = Rule(tr, [], '[axiom]', tv = obj.tv)
+    #            rules.append(r)
 
-    #r = Rule(Var(123),[],
-    #                  name='Lookup',
-    #                  match=match_axiom,
-    #                  tv = TruthValue(1,1))
-    #rules.append(r)
+    # Just lookup the rule rather than having separate rules. Would be faster
+    # with a large number of atoms (i.e. more scalable)
+    r = Rule(Var(123),[],
+                      name='Lookup',
+                      match=match_axiom)
+    rules.append(r)
 
     # Deduction
     for type in deduction_types:
@@ -155,9 +156,12 @@ def rules(a, deduction_types):
 
 def match_axiom(space,target):
     if isinstance(target.op, Atom):
-        return target
+        candidates = [target.op]
+    else:
+        candidates = space.get_atoms_by_type(target.get_type())
     
-    candidates = space.get_atoms_by_type(target.get_type())
+    candidates = [c for c in candidates if c.tv.count > 0]
+    
     candidate_trees = (tree_from_atom(atom) for atom in candidates)
     candidate_tvs = (c.tv for c in candidates)
     

@@ -226,11 +226,11 @@ class Chainer:
                 if status != 'CYCLE':
                     self.compute_and_add_tv(app)
 
-                real_results.append(app)
-
-                if app.head == self.target:
-                    log.info(format_log('Target produced!', app.head, app.tv))
-                    self.results.append(app.head)
+                    real_results.append(app)
+    
+                    if app.head == self.target:
+                        log.info(format_log('Target produced!', app.head, app.tv))
+                        self.results.append(app.head)
 
         # If you DON'T search generators explicitly, then the premises
         # will need to be used to make more specialized apps for backward chaining
@@ -383,7 +383,6 @@ class Chainer:
                 for (h, tv) in candidate_heads_tvs:
                     s = unify(h, target, {})
                     if s != None:
-                        print s
                         # Make a new version of the Rule for this Atom
                         new_rule = r.subst({Var(123):h})
                         # If the Atom has variables, give them values from the target
