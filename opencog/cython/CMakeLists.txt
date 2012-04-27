@@ -122,7 +122,7 @@ ADD_LIBRARY(logic_wrapper SHARED
 )
 
 TARGET_LINK_LIBRARIES(logic_wrapper
-    pln
+#    pln
     atomspace
 )
 
@@ -138,11 +138,11 @@ ADD_LIBRARY (PythonModule SHARED
     PyMindAgent.cc
     PyRequest.cc
 )
-ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
+#ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
+ADD_DEPENDENCIES(PythonModule agent_finder logic_wrapper)
 
 TARGET_LINK_LIBRARIES(PythonModule
     server
-    PythonEval
     ${PYTHON_LIBRARIES}
 )
 

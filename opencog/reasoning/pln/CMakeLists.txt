@@ -82,8 +82,8 @@ SET(PLN_LINK_LIBS
 IF (HAVE_CYTHON)
 	SET(PLN_LINK_LIBS
 #		logic_wrapper
-#		PythonModule
-#		${PYTHON_LIBRARIES}
+		PythonModule
+		${PYTHON_LIBRARIES}
 	${PLN_LINK_LIBS})
 ENDIF (HAVE_CYTHON)
 

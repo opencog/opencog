@@ -7,7 +7,7 @@ import formulas
 from tree import *
 
 
-def rules(a):
+def rules(a, deduction_types):
     rules = []
 
     # All existing Atoms
@@ -27,28 +27,29 @@ def rules(a):
 
     #r = Rule(Var(123),[],
     #                  name='Lookup',
-    #                  match=match_axiom)
+    #                  match=match_axiom,
+    #                  tv = TruthValue(1,1))
     #rules.append(r)
 
-    ## Deduction
-    #for type in self.deduction_types:
-    #    rules.append(Rule(T(type, 1,3), 
-    #                                 [T(type, 1, 2),
-    #                                  T(type, 2, 3), 
-    #                                  Var(1),
-    #                                  Var(2), 
-    #                                  Var(3)],
-    #                                name='Deduction', 
-    #                                formula = formulas.deductionSimpleFormula))
-    #
-    ## Inversion
-    #for type in self.deduction_types:
-    #    rules.append(Rule( T(type, 2, 1), 
-    #                                 [T(type, 1, 2),
-    #                                  Var(1),
-    #                                  Var(2)], 
-    #                                 name='Inversion', 
-    #                                 formula = formulas.inversionFormula))
+    # Deduction
+    for type in deduction_types:
+        rules.append(Rule(T(type, 1,3), 
+                                     [T(type, 1, 2),
+                                      T(type, 2, 3), 
+                                      Var(1),
+                                      Var(2), 
+                                      Var(3)],
+                                    name='Deduction', 
+                                    formula = formulas.deductionSimpleFormula))
+    
+    # Inversion
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1), 
+                                     [T(type, 1, 2),
+                                      Var(1),
+                                      Var(2)], 
+                                     name='Inversion', 
+                                     formula = formulas.inversionFormula))
 
     # ModusPonens
     for type in ['ImplicationLink']:

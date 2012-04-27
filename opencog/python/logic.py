@@ -111,8 +111,8 @@ class Chainer:
 #            for res in self.results:
 #                self.viz_proof_tree(self.trail(res))
 
-        return self.results
-        #return [atom_from_tree(result, self.space).h for result in self.results]
+        #return self.results
+        return [atom_from_tree(result, self.space).h for result in self.results]
         #except Exception, e:
         #    import traceback, pdb
         #    #pdb.set_trace()
@@ -492,7 +492,7 @@ class Chainer:
 
     def setup_rules(self):
         self.rules = []
-        for r in rules.rules(self.space):
+        for r in rules.rules(self.space, self.deduction_types):
             self.add_rule(r)
 
     def extract_plan(self, trail):
