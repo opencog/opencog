@@ -32,26 +32,37 @@ def rules(a, deduction_types):
                       match=match_axiom)
     rules.append(r)
 
-    # Deduction
-    for type in deduction_types:
-        rules.append(Rule(T(type, 1,3), 
-                                     [T(type, 1, 2),
-                                      T(type, 2, 3), 
-                                      Var(1),
-                                      Var(2), 
-                                      Var(3)],
-                                    name='Deduction', 
-                                    formula = formulas.deductionSimpleFormula))
-    
-    # Inversion
-    for type in deduction_types:
-        rules.append(Rule( T(type, 2, 1), 
-                                     [T(type, 1, 2),
-                                      Var(1),
-                                      Var(2)], 
-                                     name='Inversion', 
-                                     formula = formulas.inversionFormula))
+    r = Rule(T('EvaluationLink',
+               a.add(t.PredicateNode,'+'),
+               T('ListLink',
+                 Var(1),
+                 Var(2),
+                 Var(3))),
+             [],
+             name='PredicateEvaluation',
+             match=match_predicate)
+    rules.append(r)
 
+    ## Deduction
+    #for type in deduction_types:
+    #    rules.append(Rule(T(type, 1,3), 
+    #                                 [T(type, 1, 2),
+    #                                  T(type, 2, 3), 
+    #                                  Var(1),
+    #                                  Var(2), 
+    #                                  Var(3)],
+    #                                name='Deduction', 
+    #                                formula = formulas.deductionSimpleFormula))
+    #
+    ## Inversion
+    #for type in deduction_types:
+    #    rules.append(Rule( T(type, 2, 1), 
+    #                                 [T(type, 1, 2),
+    #                                  Var(1),
+    #                                  Var(2)], 
+    #                                 name='Inversion', 
+    #                                 formula = formulas.inversionFormula))
+    #
     # ModusPonens
     for type in ['ImplicationLink']:
         rules.append(Rule(Var(2), 
@@ -167,6 +178,28 @@ def match_axiom(space,target):
     
     return zip(candidate_trees, candidate_tvs)
 
+def match_predicate(space,target):
+    # Actually it would be much better to use the standard target for this rule
+    # + unify to find the places
+    print 'match_predicate',target
+    ll = target.args[1]
+    print ll
+    (n1,n2,n3) = ll.args
+    
+    candidates = []
+    if (n1.get_type() == t.NumberNode and n2.get_type() == t.NumberNode):
+        if (n3.get_type() == t.NumberNode):
+            if int(n1.op.name) + int(n2.op.name) == int(n3.op.name):
+                candidates.append((target, TruthValue(1.0,confidence_to_count(1.0))))
+        elif (n3.is_variable()):
+            addition = int(n1.op.name) + int(n2.op.name)
+            s = {n3: Tree(space.add(t.NumberNode,str(addition)))}
+            c = subst(s, target)
+            print 'match_predicate:c',c
+            candidates.append((c, TruthValue(1.0,confidence_to_count(1.0))))
+    
+    return candidates
+
 class Rule :
     def __init__ (self, head, goals, name, tv = TruthValue(0, 0),
                   formula = None, match = None):
@@ -177,6 +210,9 @@ class Rule :
         self.tv = tv
         self.match = match
         self.formula = if_(formula, formula, formulas.identityFormula)
+
+        if name == 'Lookup':
+            assert len(goals) == 0
 
         #self.bc_depth = 0
 
@@ -203,7 +239,8 @@ class Rule :
     def standardize_apart(self):
         head_goals = (self.head,)+tuple(self.goals)
         tmp = standardize_apart(head_goals)
-        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv, formula=self.formula)
+        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv,
+                           formula=self.formula, match = self.match)
 
         return new_version
 
@@ -233,7 +270,8 @@ class Rule :
     def subst(self, s):
         new_head = subst(s, self.head)
         new_goals = list(subst_conjunction(s, self.goals))
-        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv, formula = self.formula)
+        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv,
+                        formula = self.formula, match = self.match)
         return new_rule
 
 #    def category(self):
