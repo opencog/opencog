@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     options_description desc("Allowed options");
 
     desc.add_options()
-        ("help, h", "Produce help message.\n")
+        ("help,h", "Produce help message.\n")
 
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
@@ -151,11 +151,19 @@ int main(int argc, char** argv)
 
         (opt_desc_str(inc_intensity_opt).c_str(),
          value<double>(&fs_params.inc_intensity)->default_value(0),
-         "Incremental Selection parameter. Value between 0 and 1. 0 means all features are selected, 1 corresponds to the stronger selection pressure, probably no features are selected at 1.\n")
+            "Incremental Selection pressue. Value should lie between "
+            "0 and 1. A value of 0 means all features are selected, "
+            "while a value of 1 corresponds to a very strong selection "
+            "pressure.  It is likely that no features are selected "
+            "the pressure is set to 1. The -C flag over-rides this "
+            "setting.\n")
 
         (opt_desc_str(inc_target_size_opt).c_str(),
          value<unsigned>(&fs_params.inc_target_size)->default_value(0),
-         "Incremental Selection parameter. The number of features to attempt to select. This option overwrites feature-selection-intensity. 0 means disabled.\n")
+            "Incremental Selection feature count.  This option "
+            "specifies the number of features to be selected out of "
+            "the dataset.  A value of 0 disables this option. "
+            "Specifying over-rides the -T flag.\n")
 
         (opt_desc_str(inc_target_size_epsilon_opt).c_str(),
          value<double>(&fs_params.inc_target_size_epsilon)->default_value(0.001),

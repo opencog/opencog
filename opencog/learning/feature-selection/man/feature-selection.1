@@ -33,6 +33,8 @@ feature-selection \- blah blah blah
 .br
 .\" The general command line
 .B feature-selection
+.RB \-i
+.IR filename
 .RB [ \-a
 .IR algo ]
 .RB [ \-C
@@ -41,8 +43,6 @@ feature-selection \- blah blah blah
 .IR logfile ]
 .RB [ \-f
 .IR feature ]
-.RB [ \-i
-.IR filename ]
 .RB [ \-j
 .IR jobs ]
 .RB [ \-L ]
@@ -157,12 +157,14 @@ T}
 Incremental.
 
 Must specify either the \fB\-C\fP or the \fB\-T\fP flag, as otherwise,
-all features will be selected.
+no features will be selected.
 T}
 .TE
 .TP
 .BI \-C\  num_features \fR,\ \fB\-\-inc\-target\-size= num_features
 Attempt to select \fInum_features\fR out of the total available set.
+Setting this flag over-rides the \fB\-T\fP option.
+
 This option is ignored unless the chosen algorithm is \fBinc\fP.
 
 .TP
@@ -170,11 +172,12 @@ This option is ignored unless the chosen algorithm is \fBinc\fP.
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 
 .TP
-.BI \-T\  pressure \fR,\ \fB\-\-inc\-intenisty= pressure
+.BI \-T\  pressure \fR,\ \fB\-\-inc\-intensity= pressure
 Apply a selection pressure to the features being choosen. This should
 specify a floating-point value between zero and one. A value of zero
-means that probably all features will be selected; a value of one means
-that probably no features will be selected.
+means that it is likely that all features will be selected; a value
+of one means that it is likely that no features will be selected.
+Specifying the \fB-C\fP flag over-rides this option.
 
 This option is ignored unless the chosen algorithm is \fBinc\fP.
 
