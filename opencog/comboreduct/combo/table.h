@@ -337,30 +337,37 @@ CTable::CTable(const Func& func, arity_t arity, int nsamples) {
 ////////////////////////
 
 /**
- * Compute the entropy H(Y) of an output table. It assumes the data
- * are discretized.
+ * Compute the joint entropy H(Y) of an output table. It assumes the data
+ * are discretized. (?)
  */
 double OTEntropy(const OTable& ot);
 
 /**
- * Given a feature set X1, ..., Xn provided a set of indices of the
- * column of an input table of type IT, and an output feature Y
- * provided by the output table of type OT, compute the mutual
- * information
+ * Compute the mutual information between a set of independent features
+ * X_1, ... X_n and a taget feature Y.
+ *
+ * The target (output) featuer Y is provided in the output table OTable,
+ * whereas the input features are specified as a set of indexes giving
+ * columns in the input table ITable.
+ *
+ * The mutual information 
  *
  *   MI(Y; X1, ..., Xn)
- * as
+ *
+ * is computed as
+ *
  *   MI(Y;X1, ..., Xn) = H(X1, ..., Xn) + H(Y) - H(X1, ..., Xn, Y)
  *
  * where
- *   H(...) are the marginal entropies.
+ *   H(...) are the joint entropies.
  *
  * @note only works for discrete data set.
  */
 template<typename FeatureSet>
-double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& fs) {
-    // the following mapping is used to keep track of the number
-    // of inputs a given setting. For instance X1=false, X2=true,
+double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& fs)
+{
+    // The following mapping is used to keep track of the number
+    // of inputs a given setting. For instance, X1=false, X2=true,
     // X3=true is one possible setting. It is then used to compute
     // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
     typedef Counter<vertex_seq, unsigned> VSCounter;
@@ -377,19 +384,23 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
         ioc_vec.push_back(*o_it);
         ++ioc[ioc_vec];
     }
+
     // Compute the probability distributions
     std::vector<double> ip(ic.size()), iop(ioc.size());
     double total = it.size();
     auto div_total = [&](unsigned c) { return c/total; };
     transform(ic | map_values, ip.begin(), div_total);
     transform(ioc | map_values, iop.begin(), div_total);
-    // Compute the entropies
+
+    // Compute the joint entropies
     return entropy(ip) + OTEntropy(ot) - entropy(iop);
 }
 
-// like above but taking a table in argument instead of input and output tables
+// Like the above, but taking a table in argument instead of 
+// input and output tables
 template<typename FeatureSet>
-double mutualInformation(const Table& table, const FeatureSet& fs) {
+double mutualInformation(const Table& table, const FeatureSet& fs)
+{
     return mutualInformation(table.itable, table.otable, fs);
 }
 
