@@ -113,6 +113,9 @@ class SchemeEval
 		}
 };
 
+/** For easier wrapping by Cython */
+std::string eval_scheme(std::string &s);
+
 }
 
 #else /* HAVE_GUILE */
@@ -150,6 +153,12 @@ class SchemeEval
 		}
 };
 
+std::string eval_scheme(std::string &s) {
+	std::string ret("");
+	return ret;
+}
+
 }
 #endif/* HAVE_GUILE */
+
 #endif /* OPENCOG_SCHEME_EVAL_H */

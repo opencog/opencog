@@ -347,8 +347,8 @@ class Chainer:
         itself is responsible for finding specific enough apps.'''
         input_tvs = [self.get_tvs(input) for input in app.goals]
         res = all(tvs != [] for tvs in input_tvs)
-        if len(app.goals) > 0:
-            print '########check_premises',repr(app),res
+        #if len(app.goals) > 0:
+        #    print '########check_premises',repr(app),res
         return res
     
     def compute_and_add_tv(self, app):
@@ -375,8 +375,8 @@ class Chainer:
             if r.match == None:
                 s = unify(r.head, target, {})
                 if s != None:
-                    if r.name == '[axiom]':
-                        print '>>>>>',repr(r)
+                    #if r.name == '[axiom]':
+                    #    print '>>>>>',repr(r)
                     new_rule = r.subst(s)
                     ret.append(new_rule)
             else:
@@ -448,7 +448,7 @@ class Chainer:
         #print 'get_tvs:', [repr(app_pdn.op) for app_pdn in app_pdns if app_pdn.tv.count > 0]
         tvs = [app_pdn.tv for app_pdn in app_pdns if app_pdn.tv.count > 0]
         #if len(tvs) > 1:
-        print 'get_tvs',expr,tvs
+        #print 'get_tvs',expr,tvs
         return tvs
     
     def expr2pdn(self, expr):

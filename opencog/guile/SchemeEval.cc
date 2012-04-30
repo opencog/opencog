@@ -727,6 +727,30 @@ void * SchemeEval::c_wrap_apply_scm(void * p)
 	return self;
 }
 
+std::string opencog::eval_scheme(std::string &s) {
+    SchemeEval & evaluator = SchemeEval::instance();    
+    std::string scheme_return_value;
+
+	// Run the speech act schema to generate answers
+    scheme_return_value = evaluator.eval(s);
+	
+	if ( evaluator.eval_error() ) {
+		logger().error( "SchemeEval::%s - Failed to execute '%s'", 
+						 __FUNCTION__, 
+						 s.c_str() 
+					  );
+	}
+
+	if (evaluator.input_pending() ) {
+		logger().error( "SchemeEval::%s - Scheme syntax error in input: '%s'", 
+				 __FUNCTION__, 
+				 s.c_str() 
+			  );
+		evaluator.clear_pending();
+	}
+	
+	return scheme_return_value;
+}
 
 #endif
 

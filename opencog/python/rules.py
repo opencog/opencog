@@ -43,26 +43,26 @@ def rules(a, deduction_types):
              match=match_predicate)
     rules.append(r)
 
-    ## Deduction
-    #for type in deduction_types:
-    #    rules.append(Rule(T(type, 1,3), 
-    #                                 [T(type, 1, 2),
-    #                                  T(type, 2, 3), 
-    #                                  Var(1),
-    #                                  Var(2), 
-    #                                  Var(3)],
-    #                                name='Deduction', 
-    #                                formula = formulas.deductionSimpleFormula))
-    #
-    ## Inversion
-    #for type in deduction_types:
-    #    rules.append(Rule( T(type, 2, 1), 
-    #                                 [T(type, 1, 2),
-    #                                  Var(1),
-    #                                  Var(2)], 
-    #                                 name='Inversion', 
-    #                                 formula = formulas.inversionFormula))
-    #
+    # Deduction
+    for type in deduction_types:
+        rules.append(Rule(T(type, 1,3), 
+                                     [T(type, 1, 2),
+                                      T(type, 2, 3), 
+                                      Var(1),
+                                      Var(2), 
+                                      Var(3)],
+                                    name='Deduction', 
+                                    formula = formulas.deductionSimpleFormula))
+    
+    # Inversion
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1), 
+                                     [T(type, 1, 2),
+                                      Var(1),
+                                      Var(2)], 
+                                     name='Inversion', 
+                                     formula = formulas.inversionFormula))
+    
     # ModusPonens
     for type in ['ImplicationLink']:
         rules.append(Rule(Var(2), 
@@ -195,7 +195,7 @@ def match_predicate(space,target):
             addition = int(n1.op.name) + int(n2.op.name)
             s = {n3: Tree(space.add(t.NumberNode,str(addition)))}
             c = subst(s, target)
-            print 'match_predicate:c',c
+            print '>>>match_predicate:c',c
             candidates.append((c, TruthValue(1.0,confidence_to_count(1.0))))
     
     return candidates

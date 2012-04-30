@@ -38,6 +38,12 @@ add_custom_command(OUTPUT logic_wrapper.cpp logic_wrapper_api.h
   DEPENDS "opencog/atomspace.pxd")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h")
 
+add_custom_command(OUTPUT scheme_wrapper.cpp
+  COMMAND
+  ${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
+  DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc")
+list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
+
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython SHARED
     opencog/atomspace.cpp
@@ -132,6 +138,22 @@ SET_TARGET_PROPERTIES(logic_wrapper PROPERTIES
     PREFIX ""
     OUTPUT_NAME logic_wrapper)
 
+IF(GUILE_FOUND)
+	ADD_LIBRARY(scheme_wrapper SHARED
+		scheme_wrapper.cpp
+	)
+
+	TARGET_LINK_LIBRARIES(scheme_wrapper
+		scheme-shell smob
+	)
+	
+	ADD_DEPENDENCIES(scheme_wrapper scheme-shell)
+
+	SET_TARGET_PROPERTIES(scheme_wrapper PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME scheme_wrapper)
+ENDIF(GUILE_FOUND)
+
 # Python module to be loaded by CogServer
 ADD_LIBRARY (PythonModule SHARED
 	PythonModule.cc 
@@ -139,11 +161,12 @@ ADD_LIBRARY (PythonModule SHARED
     PyRequest.cc
 )
 #ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
-ADD_DEPENDENCIES(PythonModule agent_finder logic_wrapper)
+ADD_DEPENDENCIES(PythonModule agent_finder)
+
+SET(PYTHONMODULE_LINK_LIBS server ${PYTHON_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(PythonModule
-    server
-    ${PYTHON_LIBRARIES}
+    ${PYTHONMODULE_LINK_LIBS}
 )
 
 IF (WIN32)
