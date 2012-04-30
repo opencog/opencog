@@ -2,6 +2,8 @@ import urllib2
 import json
 import pickle
 
+import util
+
 class TruthValue(object):
     def __init__(self,mean,count):
         self.mean = mean
@@ -108,7 +110,7 @@ class AtomSpace(object):
             return [atom for atom in self._all_atoms
                     if atom.type_name == type_name]
     
-    def add(self, type_name, name='', out = []):
+    def add(self, type_name, name='', out = [], tv = TruthValue(0,0)):
         ## TODO currently it just returns existing Atoms
         #existing = [a for a in self._all_atoms if
         #                a.type_name == type_name and
@@ -117,10 +119,9 @@ class AtomSpace(object):
         #assert len(existing) == 1
         #return existing[0]
         out_handles = [o.hv for o in out]
-        atom = Atom(self,None,type_name,name,out_handles,TruthValue(0,0),None)
-        d = self._client._dict_from_atom(atom)
+        atom = Atom(self,None,type_name,name,out_handles,tv,None)
         # This makes sure to get the TruthValue etc
-        h = self._client.add_atom(d)
+        h = self._client.add_atom(atom)
         return self._get_atom_by_handle(h)
     
     def _get_all_atoms(self):
@@ -132,8 +133,7 @@ class AtomSpace(object):
 
         # Newer version, where the REST API will send the full details
         # of all the Atoms in a single message - much faster
-        all_atom_dicts = self._client._get_atoms_by_type('Atom')
-        all_atoms = map(self._client._atom_from_dict, all_atom_dicts)
+        all_atoms = self._client._get_atoms_by_type('Atom')
         
         self._all_atoms = all_atoms
         self._handle2atom = {atom.hv:atom for atom in all_atoms}
@@ -190,7 +190,8 @@ class AtomSpaceJSONClient(object):
         #print section
         #print response
         res = json.loads(response)
-        return res['result']
+        all_atom_dicts = res['result']
+        return map(self._client._atom_from_dict, all_atom_dicts)
     
     def get_atom(self,handle):
         '''int -> IO dict'''
@@ -199,8 +200,8 @@ class AtomSpaceJSONClient(object):
         res = json.loads(response)
         return res
 
-    def add_atom(self,data):
-        out = json.dumps(data) + '\r\n'
+    def add_atom(self,atom):
+        out = _json_from_atom(atom)
         response = self.__send('atom/',out)
         res = json.loads(response)
         return res['handle']
@@ -217,20 +218,19 @@ class AtomSpaceJSONClient(object):
                     type_name = d['type'],
                     name = d['name'],
                     out = d['outgoing'],
-                    tv = self._tv_from_dict(d['truthvalue']),
+                    tv = util._tv_from_dict(d['truthvalue']),
                     av = (d['sti'],d['lti']))
-    
-    def _tv_from_dict(self, d):
-        stv_dict = d['simple']
-        return TruthValue(stv_dict['str'], stv_dict['count'])
 
-    def _dict_from_atom(self,a):
-        d = {
-            'type':a.type_name,
-            'name':a.name,
-            'outgoing':a._out,
-            'truthvalue':{'simple':{'str':a.tv.mean,'count':a.tv.count}},
-            # TODO set sti and lti
-            }
+# This function is repeated with a slight change due to
+# an annoying mess with handling outgoing sets inside the Python
+# remote atomspace class
+def _dict_from_atom(a):  
+    d = {
+        'type':a.type_name,
+        'name':a.name,
+        'outgoing':a._out,
+        'truthvalue':{'simple':{'str':a.tv.mean,'count':a.tv.count}},
+        # TODO set sti and lti
+        }
 
-        return d
+    return d

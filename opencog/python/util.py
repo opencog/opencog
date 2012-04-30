@@ -1,5 +1,3 @@
-#from opencog.atomspace import types
-
 import collections
 import cPickle as pickle
 
@@ -205,3 +203,71 @@ class Logger(object):
         pass
 
 log = Logger()
+
+
+# Note. Due to various technical annoyances, the json save/load
+# functionality probably won't work atomspace_remote currently
+try:
+    from opencog.atomspace import types as t, TruthValue
+except ImportError:
+    from atomspace_remote import types as t, TruthValue
+
+import json
+from opencog.atomspace import get_type
+
+
+def save_atomspace_json(space, file='atomspace.json'):
+    f = open(file,'w')
+    for atom in space.get_atoms_by_type(t.Atom):
+        f.write(_json_from_atom(atom))
+
+def load_atomspace_json(space, file='atomspace.json'):    
+    f = open(file, 'r')
+    for line in f.readlines():
+        _atom_from_json(space, line)
+
+# repeated here because the atomspace_remote version needs to be tied to the
+# Python AtomSpace internals (and this version is connected to the Cython
+# AtomSpace internals)
+def _atom_from_json(space, s):
+    d = json.loads(s)
+    
+    return _atom_from_dict(space, d)
+    
+def _atom_from_dict(space, d):
+    (type_name,) = d['type'],
+    (name,) = d['name'],
+    (out,) = d['outgoing'],
+    (tv,) = _tv_from_dict(d['truthvalue']),
+    
+    out = [_atom_from_dict(space, o) for o in out]
+    
+    if out == []:
+        out = None
+    if type_name.endswith('Link'):
+        name = None
+    
+    #print get_type(type_name), name, out, tv
+    atom =space.add(get_type(type_name), name=name,
+              out = out, tv = tv)
+    return atom
+
+def _json_from_atom(atom):
+    d = _dict_from_atom(atom)
+    return json.dumps(d) + '\r\n'
+    
+def _dict_from_atom(a):
+    out = map(_dict_from_atom, a.out)
+    d = {
+        'type':a.type_name,
+        'name':a.name,
+        'outgoing':out,
+        'truthvalue':{'simple':{'str':a.tv.mean,'count':a.tv.count}},
+        # TODO set sti and lti
+        }
+
+    return d
+
+def _tv_from_dict(d):
+    stv_dict = d['simple']
+    return TruthValue(stv_dict['str'], stv_dict['count'])
