@@ -324,6 +324,9 @@ int moses_exec(int argc, char** argv)
     // pre params
     bool pre_worst_norm;
 
+    // it params
+    bool it_abs_err;
+
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
     options_description desc("Allowed options");
@@ -670,6 +673,10 @@ int moses_exec(int argc, char** argv)
         ("pre-worst-norm",
          value<bool>(&pre_worst_norm)->default_value(false),
          "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
+
+        ("it-abs-err",
+         value<bool>(&it_abs_err)->default_value(false),
+         "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
        ;
 
     variables_map vm;
@@ -923,8 +930,11 @@ int moses_exec(int argc, char** argv)
                     if (discretize_thresholds.empty()) {
                         typedef contin_bscore BScore;
                         boost::ptr_vector<BScore> bscores;
+                        contin_bscore::err_function_type eft =
+                            it_abs_err ? contin_bscore::abs_error :
+                            contin_bscore::squared_error;
                         foreach(const Table& table, tables)
-                            bscores.push_back(new BScore(table, as, noise));
+                            bscores.push_back(new BScore(table, as, noise, eft));
                         multibscore_based_bscore<BScore> bscore(bscores);
                         metapop_moses_results(exemplars, table_tt,
                                               contin_reduct, contin_reduct, bscore,
@@ -1200,9 +1210,12 @@ int moses_exec(int argc, char** argv)
         ITable it(tt, (nsamples>0 ? nsamples : default_nsamples));
 
         int as = alphabet_size(tt, ignore_ops);
-
+        
+        contin_bscore::err_function_type eft =
+            it_abs_err ? contin_bscore::abs_error :
+            contin_bscore::squared_error;
         contin_bscore bscore(simple_symbolic_regression(problem_size),
-                             it, as, noise);
+                             it, as, noise, eft);
         metapop_moses_results(exemplars, tt,
                               contin_reduct, contin_reduct, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);

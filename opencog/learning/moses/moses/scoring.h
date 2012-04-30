@@ -447,33 +447,47 @@ protected:
  */
 struct contin_bscore : public bscore_base
 {
+    enum err_function_type {
+        squared_error,
+        abs_error
+    };
+
+    void init(float alphabet_size, float stdev,
+              err_function_type eft = squared_error) {
+        occam = stdev > 0;
+        set_complexity_coef(alphabet_size, stdev);
+        switch (eft) {
+        case squared_error:
+            err_func = [](contin_t y1, contin_t y2) { return sq(y1 - y2); };
+            break;
+        case abs_error:
+            err_func = [](contin_t y1, contin_t y2) { return std::abs(y1 - y2); };
+            break;
+        default:
+            OC_ASSERT(false);
+        }
+    };        
+    
     template<typename Scoring>
     contin_bscore(const Scoring& score, const ITable& r,
-                  float alphabet_size, float stdev)
-        : target(score, r), cti(r)
-    {
-        occam = stdev > 0;
-        set_complexity_coef(alphabet_size, stdev);
+                  float alphabet_size, float stdev,
+                  err_function_type eft = squared_error)
+        : target(score, r), cti(r) {
+        init(alphabet_size, stdev, eft);
     }
 
-    // @todo when switching to gcc 4.6 use constructor delagation to
-    // simplify that
     contin_bscore(const OTable& t, const ITable& r,
-                  float alphabet_size, float stdev)
-        : target(t), cti(r)
-    {
-        occam = stdev > 0;
-        set_complexity_coef(alphabet_size, stdev);
+                  float alphabet_size, float stdev,
+                  err_function_type eft = squared_error)
+        : target(t), cti(r) {
+        init(alphabet_size, stdev, eft);
     }
 
-    // @todo when switching to gcc 4.6 use constructor delagation to
-    // simplify that
     contin_bscore(const Table& table,
-                  float alphabet_size, float stdev)
-        : target(table.otable), cti(table.itable)
-    {
-        occam = stdev > 0;
-        set_complexity_coef(alphabet_size, stdev);
+                  float alphabet_size, float stdev,
+                  err_function_type eft = squared_error)
+        : target(table.otable), cti(table.itable) {
+        init(alphabet_size, stdev, eft);
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -492,6 +506,10 @@ struct contin_bscore : public bscore_base
 
 private:
     void set_complexity_coef(float alphabet_size, float stdev);
+
+    // for a given data point calculate the error of the target
+    // compared to the candidate output
+    std::function<score_t(contin_t, contin_t)> err_func;
 };
 
 /**

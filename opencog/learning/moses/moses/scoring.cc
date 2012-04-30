@@ -112,7 +112,7 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
                      [&](const vertex_seq& vs, const vertex& v) {
                          contin_t tar = get_contin(v),
                              res = get_contin(eval_binding(vs, tr));
-                         return -sq(res - tar);
+                         return -err_func(res, tar);
                      });
     // add the Occam's razor feature
     if (occam)
