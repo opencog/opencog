@@ -37,9 +37,10 @@ namespace opencog {
 
 /**
  * Returns a set S of features following the algo:
+ * 0) res = empty set
  * 1.a) Select all relevant features (that score above threshold), called rel
  * 1.b) Select all redundant features among rel, called red
- * 1.c) res += res - red
+ * 1.c) res += rel - red
  * 2) remove rel from the initial set features, called tf
  * 3.a) select all pairs of relevant features from ft, called rel
  * 3.b) select all redundant features among rel, called red
@@ -78,24 +79,24 @@ FeatureSet incremental_selection(const FeatureSet& features,
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 
-    for(unsigned i = 1; i <= max_interaction_terms; ++i) {
-        // define the set of set of features to test for relevancy
+    for (unsigned i = 1; i <= max_interaction_terms; ++i) {
+        // Define the set of set of features to test for relevancy
         FeatureSet tf = set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
-        // add the set of relevant features for that iteration in rel
+
+        // Add the set of relevant features for that iteration in rel
         rel.empty();
-        
         auto fss_view = random_access_view(fss);
         auto filter_relevant = [&](const FeatureSet* fs) {
-            if(scorer(*fs) > threshold) {
+            if (scorer(*fs) > threshold) {
                 unique_lock lock(mutex);
                 /// @todo this lock can be more granular
                 rel.insert(fs->begin(), fs->end());
             }};
         OMP_ALGO::for_each(fss_view.begin(), fss_view.end(), filter_relevant);
 
-        if(red_threshold > 0) {
-            // define the set of set of features to test redundancy
+        if (red_threshold > 0) {
+            // Define the set of set of features to test for redundancy
             std::set<FeatureSet> nrfss = powerset(rel, i+1, true);
             // determine the set of redundant features
             FeatureSet red;

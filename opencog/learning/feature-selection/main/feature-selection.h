@@ -248,7 +248,7 @@ void incremental_feature_selection(Table& table,
                                            fs_params.inc_intensity,
                                            fs_params.inc_interaction_terms,
                                            fs_params.inc_rintensity);
-        if(selected_features.empty()) {
+        if (selected_features.empty()) {
             err_empty_features();
         } else {
             Table ftable = table.filter(selected_features);
