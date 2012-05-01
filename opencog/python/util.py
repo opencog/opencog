@@ -195,9 +195,13 @@ class OrderedSet(collections.OrderedDict, collections.MutableSet):
     union = property(lambda self: self.__or__)
 
 class Logger(object):
+    def __init__(self, f = 'opencog-python.log'):
+        self._file = open(f,'w')
+    
     def info(self, msg):
-        #print msg
-        pass
+        print >>self._file, msg
+        self._file.flush()
+        #pass
     
     def use_stdout(self, use):
         pass

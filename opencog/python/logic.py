@@ -74,58 +74,57 @@ class Chainer:
     def bc(self, target):
         #import prof3d; prof3d.profile_me()
         
-        try:
-            tvs = self.get_tvs(target)
-            print "Existing target truth values:", map(str, tvs)
-            
-            log.info(format_log('bc', target))
-            self.bc_later = OrderedSet([target])
-            self.results = []
-    
-            self.target = target
-    
-            # viz - visualize the root
-            self.viz.outputTarget(target, None, 0, 'TARGET')
-    
-            start = time()
-            while self.bc_later and not self.results:
-                self.bc_step()
-                self.propogate_results_loop()
-    
-                msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
-                log.info(format_log(msg))
-                log.info(format_log('time taken', time() - start))
-                #log.info(format_log('PD:'))
-                #for pdn in self.pd:
-                #    log.info(format_log(len(pdn.args),str(pdn)))
-            
-            # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
-            print msg
-    
-            for res in self.results:
-                print 'Inference trail:'
-                trail = self.trail(res)
-                self.print_tree(trail)
-                print 'Action plan (if applicable):'
-                print self.extract_plan(trail)
-    #            for res in self.results:
-    #                self.viz_proof_tree(self.trail(res))
-    
-            #return self.results
-            ret = []
-            for tr in self.results:
-                atom = atom_from_tree(tr, self.space)
-                # haxx
-                atom.tv = self.get_tvs(tr)[0]
-                ret.append(atom.h)
-            return ret
-        except Exception, e:
-            import traceback, pdb
-            #pdb.set_trace()
-            print traceback.format_exc(10)
-            # Start the post-mortem debugger
-            #pdb.pm()
-            return []
+        #try:
+        tvs = self.get_tvs(target)
+        print "Existing target truth values:", map(str, tvs)
+        
+        log.info(format_log('bc', target))
+        self.bc_later = OrderedSet([target])
+        self.results = []
+
+        self.target = target
+
+        # viz - visualize the root
+        self.viz.outputTarget(target, None, 0, 'TARGET')
+
+        start = time()
+        while self.bc_later and not self.results:
+            self.bc_step()
+
+            msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
+            log.info(format_log(msg))
+            log.info(format_log('time taken', time() - start))
+            #log.info(format_log('PD:'))
+            #for pdn in self.pd:
+            #    log.info(format_log(len(pdn.args),str(pdn)))
+        
+        # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
+        print msg
+
+        for res in self.results:
+            print 'Inference trail:'
+            trail = self.trail(res)
+            self.print_tree(trail)
+            print 'Action plan (if applicable):'
+            print self.extract_plan(trail)
+#            for res in self.results:
+#                self.viz_proof_tree(self.trail(res))
+
+        #return self.results
+        ret = []
+        for tr in self.results:
+            atom = atom_from_tree(tr, self.space)
+            # haxx
+            atom.tv = self.get_tvs(tr)[0]
+            ret.append(atom.h)
+        return ret
+        #except Exception, e:
+        #    import traceback, pdb
+        #    #pdb.set_trace()
+        #    print traceback.format_exc(10)
+        #    # Start the post-mortem debugger
+        #    #pdb.pm()
+        #    return []
 
     #def fc(self):
     #    axioms = [r.head for r in self.rules if r.tv.count > 0]
@@ -147,16 +146,6 @@ class Chainer:
     #                    log.info(format_log('+FCQ', app.head, app.name))
     #                    stdout.flush()
 
-    def propogate_results_loop(self):
-        #assert not self.fc_later
-        #self.fc_later = OrderedSet(premises)
-        # Any result which has been propogated before, may now be useful in new places.
-        # So reset this list so they will be tried again.
-        self.fc_before = OrderedSet()
-
-        while self.fc_later and not self.results:
-            self.propogate_results_step()
-
     def bc_step(self):
         assert self.bc_later
         #print 'bcq', map(str, self.bc_later)
@@ -174,91 +163,10 @@ class Chainer:
 
         for a in apps:
             a = a.standardize_apart()
-            self.add_queries(a)
-            self.add_queries_fc(a)
+            if self.add_queries(a):
+                self.find_axioms_for_rule_app(a)
 
         return
-
-    def propogate_results_step(self):
-        next_premise = self.fc_later.pop_last() # Depth-first search
-        #next_premise = self.get_fittest() # Best-first search
-
-        next_premise = standardize_apart(next_premise)
-
-        log.info(format_log('-FCQ', next_premise))
-        #import pdb; pdb.set_trace()
-
-        # WARNING: the specialization process won't spec based on premises that only exist as axioms, or...
-
-        # If the premises are already specific enough to be produced exactly by an existing chain of apps...
-        # then you have a result! Apply the rule and see if it produces the target (or just an intermediary step).
-        potential_results = self.find_existing_rule_applications_by_premise(next_premise)
-        specialized = self.specialize_existing_rule_applications_by_premise(next_premise)
-        ## Make sure you don't create a specialization that already exists
-        #specialized = [r for r in specialized if 
-        #                      not any(r2.isomorphic(r) for r2 in potential_results)]
-        ##print 'potential_results', potential_results
-        #
-        #
-        ## If B->C => C was checked by BC before, it will be in the bc_before set. But it now has a TV, so it should
-        ## be used again!
-        #
-        ## Ignore invalid rule applications (i.e. if add_queries returns nothing)
-        #specialized = [app for app in specialized if self.add_queries(app)]
-        ##print 'specialized', specialized
-
-        real_results = []
-
-        for app in potential_results + specialized:
-            assert not app is None
-            #print repr(a)
-
-            got_result = self.check_premises(app)
-            if got_result:
-                #if app.head.op == 'TARGET':
-                #    target = app.goals[0]
-                #    log.info(format_log('Target produced!', target))
-                #    self.results.append(target)
-                #viz
-                self.viz.declareResult(app.head)
-                
-                (status, app_pdn) = self.add_app_to_pd(app)
-                if status != 'CYCLE':
-                    self.compute_and_add_tv(app)
-
-                    real_results.append(app)
-    
-                    if app.head == self.target:
-                        log.info(format_log('Target produced!', app.head, app.tv))
-                        self.results.append(app.head)
-
-        # If you DON'T search generators explicitly, then the premises
-        # will need to be used to make more specialized apps for backward chaining
-        # (example: if you find an ImplicationLink for ModusPonens, then potentially
-        # some of the goals or the head can be made more specific. You should add the
-        # whole app (maybe?) Something goes wrong if you just run add_queries here
-        # instead of copypasting
-        #for app in specialized:
-        #    if not self._app_is_stupid(app):
-        #        for goal in (app.head,)+tuple(app.goals):                
-        #            if (not self.contains_isomorphic_tree(goal, self.bc_later)
-        #                and not self.contains_isomorphic_tree(goal, self.bc_later)):
-        #                    self.add_tree_to_index(goal, self.bc_later)
-        #                    #added_queries.append(goal)
-        #                    log.info(format_log('+BCQ', goal, app.name))
-        for app in specialized:
-            self.add_queries(app)
-
-        for app in real_results:
-            # If there is a result, then you want to propogate it up. You should also propogate specializations,
-            # so that their parents will be specialized as well.
-            # The proof DAG does not explicitly avoid linking things up in a loop (as it has no explicit links)
-            if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
-            #if not self.contains_isomorphic_tree(app, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
-                self.add_tree_to_index(app.head, self.fc_before)
-                self.add_tree_to_index(app.head, self.fc_later)
-                log.info(format_log('+FCQ', app.head, app.name))
-                stdout.flush()
 
     def contains_isomorphic_tree(self, tr, idx):        
         #return any(expr.isomorphic(tr) for expr in idx)
@@ -268,7 +176,6 @@ class Chainer:
     def add_tree_to_index(self, tr, idx):
         canonical = tr.canonical()
         idx.append(canonical)
-
 
     def _app_is_stupid(self, goal):
 
@@ -296,12 +203,15 @@ class Chainer:
         return (self_implication(goal) or
                      very_vague)
 
+    def reject_expression(self,expr):
+        return self._app_is_stupid(expr) or expr.is_variable()
+
     def add_queries(self, app):
         def goal_is_stupid(goal):
             return goal.is_variable()
 
         if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head):
-            return []
+            return
 
         # If the app is a cycle or already added, don't add it or any of its goals
         (status, app_pdn) = self.add_app_to_pd(app)
@@ -311,13 +221,13 @@ class Chainer:
             for (i, input) in enumerate(app.goals):
                 self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
 
-        if status == 'CYCLE':
+        if status == 'CYCLE' or status == 'EXISTING':
             return
         
         # NOTE: For generators, the app_pdn will exist already for some reason
         # It's useful to add the head if (and only if) it is actually more specific than anything currently in the BC tree.
         # This happens all the time when atoms are found.
-        for goal in tuple(app.goals)+(app.head,):
+        for goal in tuple(app.goals):
             if     not goal_is_stupid(goal):
                 if  (not self.contains_isomorphic_tree(goal, self.bc_before) and
                      not self.contains_isomorphic_tree(goal, self.bc_later) ):
@@ -327,18 +237,7 @@ class Chainer:
                     #added_queries.append(goal)
                     log.info(format_log('+BCQ', goal, app.name))
                     #stdout.flush()
-
-    def add_queries_fc(self,app):
-        # Whether it is new or not
-        # Allow adding it to the FCQ multiple times, because you need to check
-        # for results multiple times
-        #for goal in tuple(app.goals)+(app.head,):
-        for goal in (app.head,):
-            if not self.contains_isomorphic_tree(goal, self.fc_later):
-                log.info(format_log('+FCQ', goal, app.name))
-                self.add_tree_to_index(goal, self.fc_later)
-        
-        return None
+        return app
 
     def check_premises(self, app):
         '''Check whether the given app can produce a result. This will happen if all its premises are
@@ -372,59 +271,152 @@ class Chainer:
         Chainers can be made by searching for certain apps and doing things with them.'''
         ret = []
         for r in self.rules:
-            if r.match == None:
-                s = unify(r.head, target, {})
-                if s != None:
-                    #if r.name == '[axiom]':
-                    #    print '>>>>>',repr(r)
-                    new_rule = r.subst(s)
-                    ret.append(new_rule)
-            else:
-                # If the Rule has a special function for producing answers, run it
-                # and check the results are valid.
-                s = unify(r.head, target, {})
-                if s == None:
+            if not r.goals:
+                continue
+            assert r.match == None
+            s = unify(r.head, target, {})
+            if s != None:
+                #if r.name == '[axiom]':
+                #    print '>>>>>',repr(r)
+                new_rule = r.subst(s)
+                ret.append(new_rule)
+        return ret
+
+    def find_axioms_for_rule_app(self, app):
+        for (i, goal) in enumerate(app.goals):
+            # For example, if you need Inh Mohammad $x, Inh $x terrorist, $x
+            # this will avoid finding $x (which could be any atom in the system!) -
+            # it'll find the InheritanceLink first and then the ConceptNode
+            if self.reject_expression(goal):
+                continue
+            for r in self.rules:
+                axiom_app = None
+                if len(r.goals):
                     continue
-                new_r = r.subst(s)
-                candidate_heads_tvs = new_r.match(self.space, target)
-                for (h, tv) in candidate_heads_tvs:
-                    s = unify(h, target, {})
+                if r.match == None:
+                    s = unify(r.head, goal, {})
                     if s != None:
-                        # Make a new version of the Rule for this Atom
-                        #new_rule = r.subst({Var(123):h})
-                        new_rule = new_r.subst(s)
-                        new_rule.head = h
-                        # If the Atom has variables, give them values from the target
-                        # new_rule = new_rule.subst(s)
-                        print '##printing new magic tv', new_rule.head, tv
-                        self.set_tv(new_rule,tv)
-                        ret.append(new_rule)
-        return ret
+                        #if r.name == '[axiom]':
+                        #    print '>>>>>',repr(r)
+                        axiom_app = r.subst(s)
+                else:
+                    # If the Rule has a special function for producing answers, run it
+                    # and check the results are valid. NOTE: this algorithm is messy
+                    # and may have mistakes
+                    s = unify(r.head, goal, {})
+                    if s == None:
+                        continue
+                    new_r = r.subst(s)
+                    candidate_heads_tvs = new_r.match(self.space, goal)
+                    for (h, tv) in candidate_heads_tvs:
+                        s = unify(h, goal, {})
+                        if s != None:
+                            # Make a new version of the Rule for this Atom
+                            #new_rule = r.subst({Var(123):h})
+                            axiom_app = new_r.subst(s)
+                            axiom_app.head = h
+                            # If the Atom has variables, give them values from the target
+                            # new_rule = new_rule.subst(s)
+                            log.info(format_log('##find_axioms_for_rule_app: printing new magic tv', axiom_app.head, tv))
+                            self.set_tv(axiom_app,tv)
+                
+                if axiom_app != None:
+                    if len(s) == 0:
+                        assert goal == axiom_app.head
+                        self.propogate_result(app)
+                    else:
+                        self.propogate_specialization(axiom_app.head, i, app)
 
-    def find_existing_rule_applications_by_premise(self, premise):
-        premise_pdn = self.expr2pdn(premise.canonical())        
-        return [app_pdn.op for app_pdn in premise_pdn.parents]
+    def propogate_result(self, orig_app):
+        # app was already precise enough to look up this axiom exactly.
+        # Attempt to apply the app using the new TV for the premise
+        app = orig_app
+        got_result = self.check_premises(app)
+        if got_result:
+            # Only allow one result. NOTE: this will break the Revision rule
+            if len(self.get_tvs(app.head)):
+                return
+            
+            log.info(format_log('propogate_result',repr(app)))
+            #if app.head.op == 'TARGET':
+            #    target = app.goals[0]
+            #    log.info(format_log('Target produced!', target))
+            #    self.results.append(target)
+            #viz
+            self.viz.declareResult(app.head)
+            self.compute_and_add_tv(app)
 
-    def specialize_existing_rule_applications_by_premise(self, premise):
-        ret = []
-        for expr_pdn in self.pd.values():
-            for app_pdn in expr_pdn.parents:
-                #app = Rule(head=app_pdn.parents[0].op,goals=app_pdn.args,name=app_pdn)                    
-                #Rule(head,goals,name,tv,formula)
-                app = app_pdn.op
+            if app.head == self.target:
+                log.info(format_log('Target produced!', app.head, app.tv))
+                self.results.append(app.head)
+            
+            # then propogate the result further upward
+            result_pdn = self.expr2pdn(app.head.canonical())
+            upper_pdns = [app_pdn for app_pdn in result_pdn.parents]
+            for app_pdn in upper_pdns:
+                self.propogate_result(app_pdn.op)
+    
+    def propogate_specialization(self, new_premise, i, orig_app):    
+        s = unify(orig_app.goals[i], new_premise, {})
+        
+        assert s != None
+        if s == {}:
+            return
 
-                # It's necessary to store the app separately, because the
-                # variables in its arguments may (and may not) be shared
-                # between the arguments, but each expression-node in the
-                # proof DAG actually has standard variables from 0.
-                for arg in app.goals:
-                    s = unify(arg, premise, {})
-                    if s != None and not arg.isomorphic(premise):
-                        # For every app with this as a premise
-                            new_a = app.subst(s)
-                            ret.append(new_a)
-        return ret
+        log.info(format_log('propogate_specialization',new_premise,i,repr(orig_app)))
+        
+        new_app = orig_app.subst(s)
+        # Stop if it's a cycle or already exists
+        if not self.add_queries(new_app):
+            return
+        
+        orig_app_pdn = self.app2pdn(orig_app)
+        assert len(orig_app_pdn.parents) == 1
+        orig_result_pdn = orig_app_pdn.parents[0]
+        
+        new_result = new_app.head
+        
+        # After you finish specializing, it may be a usable rule app
+        # (i.e. all premises have been found exactly).
+        # This will check, and do nothing if it's not.
+        self.propogate_result(new_app)
+        
+        # for every app that uses orig_result/new_result as a premise, force that app to
+        # be specialized
+        for higher_app_pdn in orig_result_pdn.parents:
+            j = higher_app_pdn.args.index(orig_result_pdn)
+            self.propogate_specialization(new_result, j, higher_app_pdn.op)
+            
+        ## Specialize the app using the new, more specific premise, and add
+        ## it to backward chaining
+        #new_app = orig_app.subst(s)
+        #print '>>>>propogate_result spec',repr(orig_app),repr(new_app)
+        #
+        ## old_result_pdn is the target for the application, before we found
+        ## more specific variable bindings in this premise.
+        #old_result_pdn = self.expr2pdn(app.head.canonical())
+        ## look at the rules you can apply using the new result as a premise
+        #upper_pdns = [app_pdn for app_pdn in result_pdn.parents]
+        #for app_pdn in upper_pdns:
+        #    
+        #    s = unify()
+        #
+        #if new_app.head == orig_app.head:
+        #    # Stop the recursion upwards - this rule app still produces the same
+        #    # thing, and has no new TV. But what if the other goals were changed?
+        #    return
+        #else:
+        #    
+        ##if new_app.head != orig_app.head:
+        ##    new_app.head = orig_app.head
+        #    #(status, new_app_pdn) = self.add_app_to_pd(new_app)
+        #    #(status2, orig_app_pdn) = self.add_app_to_pd(orig_app)
+        #    ## See the number of rules using each result expression
+        #    #print '##########WOWOWOWOWOWOW#############', len(orig_app_pdn.parents[0].parents), len(new_app_pdn.parents[0].parents)
+        ##if new_app.head == orig_app.head:
+        ##    self.add_queries(new_app)
 
+    # used by forward chaining
     def find_new_rule_applications_by_premise(self,premise):
         ret = []
         for r in self.rules:
@@ -464,6 +456,7 @@ class Chainer:
         assert isinstance(app, rules.Rule)
         # Find/add the app
         a = self.app2pdn(app)
+        assert not a is None
         assert isinstance(a, DAG)
         a.tv = tv
 
@@ -504,6 +497,7 @@ class Chainer:
 
     def app2pdn(self,app):
         (status,app_pdn) = self.add_app_to_pd(app)
+        assert status != 'CYCLE'
         return app_pdn
     
     def add_rule(self, rule):

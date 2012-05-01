@@ -46,7 +46,6 @@ both/targetslist/21_test.conf
 both/28_test.conf
 ''')
 
-
 files = files_list.split('\n')
 
 def test_all(a):
