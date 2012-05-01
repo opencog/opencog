@@ -35,8 +35,8 @@ t = types
 def format_log(*args):
     global _line    
     out = '['+str(_line) + '] ' + ' '.join(map(str, args))
-#    if _line == 32:
-#        import pdb; pdb.set_trace()
+    #if _line == 12:
+    #    import pdb; pdb.set_trace()
     _line+=1
     return out
 _line = 1
@@ -77,12 +77,19 @@ class Chainer:
         #try:
         tvs = self.get_tvs(target)
         print "Existing target truth values:", map(str, tvs)
+        if len(tvs):
+            raise NotImplementedError('Cannot revise multiple TruthValues, so no point in doing this search')
         
         log.info(format_log('bc', target))
         self.bc_later = OrderedSet([target])
         self.results = []
 
         self.target = target
+        # Have a sentinel application at the top
+        #self.root = T('WIN')
+        #
+        #self.rules.append(rules.Rule(self.root,[target],name='producing target'))
+        #self.bc_later = OrderedSet(self.root)
 
         # viz - visualize the root
         self.viz.outputTarget(target, None, 0, 'TARGET')
@@ -293,6 +300,10 @@ class Chainer:
                 axiom_app = None
                 if len(r.goals):
                     continue
+                
+                #if r.name == 'ForAll':
+                #    import pdb; pdb.set_trace()
+                
                 if r.match == None:
                     s = unify(r.head, goal, {})
                     if s != None:
@@ -321,7 +332,9 @@ class Chainer:
                             self.set_tv(axiom_app,tv)
                 
                 if axiom_app != None:
-                    if len(s) == 0:
+                    gvs = get_varlist(goal)
+                    goal_vars_mapped = [v for v in s.keys() if v in gvs]
+                    if len(goal_vars_mapped) == 0:
                         assert goal == axiom_app.head
                         self.propogate_result(app)
                     else:
@@ -330,11 +343,13 @@ class Chainer:
     def propogate_result(self, orig_app):
         # app was already precise enough to look up this axiom exactly.
         # Attempt to apply the app using the new TV for the premise
+        print(format_log('propogate_result',repr(orig_app)))
         app = orig_app
         got_result = self.check_premises(app)
         if got_result:
             # Only allow one result. NOTE: this will break the Revision rule
             if len(self.get_tvs(app.head)):
+                print 'WARNING: rejecting repeated result', app.head
                 return
             
             log.info(format_log('propogate_result',repr(app)))
@@ -376,16 +391,26 @@ class Chainer:
         
         new_result = new_app.head
         
+        
+        
         # After you finish specializing, it may be a usable rule app
         # (i.e. all premises have been found exactly).
         # This will check, and do nothing if it's not.
         self.propogate_result(new_app)
         
-        # for every app that uses orig_result/new_result as a premise, force that app to
-        # be specialized
-        for higher_app_pdn in orig_result_pdn.parents:
-            j = higher_app_pdn.args.index(orig_result_pdn)
-            self.propogate_specialization(new_result, j, higher_app_pdn.op)
+        # Specialize higher-up rules, iff the head has actually been changed
+        if new_app.head != orig_app.head:
+            # for every app that uses orig_result/new_result as a premise, force that app to
+            # be specialized
+            for higher_app_pdn in orig_result_pdn.parents:
+                j = higher_app_pdn.args.index(orig_result_pdn)
+                self.propogate_specialization(new_result, j, higher_app_pdn.op)
+        
+        ## Check if any of the other subgoals are now different
+        #og = orig_app.goals[:i]+orig_app.goals[i+1:]
+        #ng = new_app.goals[:i]+new_app.goals[i+1:]
+        #if any(old_goal != new_goal for (old_goal, new_goal) in zip(og, ng)):
+        #    self.find_axioms_for_rule_app(new_app)
             
         ## Specialize the app using the new, more specific premise, and add
         ## it to backward chaining

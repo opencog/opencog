@@ -20,11 +20,11 @@ psi/psi_planning_two_step_test.conf
 #agisim_planning/FetchDemo5_test.conf
 #agisim_planning/FetchDemo5_subgoal_test.conf
 #agisim_planning/11_test.conf
-bc/AnotBdemo_full_test.conf
+#bc/AnotBdemo_full_test.conf
 bc/new/NotEvaluatorRule_test.conf
 bc/new/and_test.conf
 bc/new/or_test.conf
-bc/new/LookupRule_test.conf
+#bc/new/LookupRule_test.conf
 #bc/plus_test.conf
 bc/targetslist/4_test.conf
 #bc/targetslist/9_test.conf
@@ -43,8 +43,14 @@ both/new/DeductionRule_test.conf
 both/targetslist/21_test.conf
 #both/woa_demo_test.conf
 #both/AnotBdemo_partial_test.conf
-both/28_test.conf
+#both/28_test.conf
 ''')
+
+#files_list = '''bc/AnotBdemo_full_test.conf'''
+#files_list ='''
+#both/new/BasicForAllDemo_test.conf
+#both/new/BasicForAllDemo2_test.conf
+#'''
 
 files = files_list.split('\n')
 

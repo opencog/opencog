@@ -54,14 +54,14 @@ def rules(a, deduction_types):
                                     name='Deduction', 
                                     formula = formulas.deductionSimpleFormula))
     
-    ## Inversion
-    #for type in deduction_types:
-    #    rules.append(Rule( T(type, 2, 1), 
-    #                                 [T(type, 1, 2),
-    #                                  Var(1),
-    #                                  Var(2)], 
-    #                                 name='Inversion', 
-    #                                 formula = formulas.inversionFormula))
+    # Inversion
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1), 
+                                     [T(type, 1, 2),
+                                      Var(1),
+                                      Var(2)], 
+                                     name='Inversion', 
+                                     formula = formulas.inversionFormula))
     
     # ModusPonens
     for type in ['ImplicationLink']:
@@ -160,6 +160,13 @@ def rules(a, deduction_types):
         # out[0] is the ListLink of VariableNodes, out[1] is the expression
         tr = tree_from_atom(atom.out[1])
         r = Rule(tr, [], name='Average')
+        r.tv = atom.tv
+        rules.append(r)
+
+    for atom in a.get_atoms_by_type(t.ForAllLink):
+        # out[0] is the ListLink of VariableNodes, out[1] is the expression
+        tr = tree_from_atom(atom.out[1])
+        r = Rule(tr, [], name='ForAll')
         r.tv = atom.tv
         rules.append(r)
 
