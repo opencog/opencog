@@ -79,6 +79,24 @@ FeatureSet incremental_selection(const FeatureSet& features,
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 
+#if DEBUG
+    for (unsigned i = 1; i <= max_interaction_terms; ++i) {
+        std::set<FeatureSet> ps = powerset(features, i, true);
+        typename std::set<FeatureSet>::const_iterator psit;
+        for (psit = ps.begin(); psit != ps.end(); psit++) {
+            const FeatureSet &fs = *psit;
+            std::cout << "fs";
+            typename FeatureSet::const_iterator fi;
+            for (fi = fs.begin(); fi != fs.end(); fi++) {
+                std::cout << "-" << *fi;
+            }
+            double mi = scorer(fs);
+            std::cout << "\t" << mi << std::endl;
+        }
+        std::cout << "============================" << std::endl;
+    }
+#endif
+
     for (unsigned i = 1; i <= max_interaction_terms; ++i) {
         // Define the set of set of features to test for relevancy
         FeatureSet tf = set_difference(features, rel);
