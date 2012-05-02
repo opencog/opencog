@@ -87,8 +87,8 @@ int main(int argc, char** argv)
          "Random seed.\n")
 
         (opt_desc_str(algo_opt).c_str(),
-         value<string>(&fs_params.algorithm)->default_value(hc),
-         string("Feature selection algorithm. Supported algorithms are\n")
+         value<string>(&fs_params.algorithm)->default_value(cor),
+         string("Feature selection algorithm. Supported algorithms are:\n")
              /*
               * We're not going to support univariate or sa any time
               * soon, and maybe never; they're kind-of deprecated in
@@ -96,8 +96,9 @@ int main(int argc, char** argv)
              .append(un).append(" for univariate,\n")
              .append(sa).append(" for simulated annealing,\n")
              */
-             .append(hc).append(" for hillclimbing,\n")
-             .append(inc).append(" for incremental.\n").c_str())
+             .append(cor).append(" for maximal mutual information,\n")
+             .append(hc).append(" for hillclimbing (unsupported),\n")
+             .append(inc).append(" for incremental mutual information.\n").c_str())
 
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&fs_params.input_file),
