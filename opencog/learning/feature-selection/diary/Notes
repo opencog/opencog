@@ -1,0 +1,85 @@
+
+                     Feature Selection Diary/Notes
+                     -----------------------------
+
+This is a raw diary of some research notes concerning feature selection
+and the algorithms, their effect on various datasets, etc. These notes
+are not going to be explained in any kind of detail; they are mostly
+for my own use, so that I can remember what was done.
+
+
+Linas Vepstas, April 2012
+-------------------------
+
+mi.dat mi.png -- mutual information of bank dataset
+
+graph of mutual information of dependent variable and 1,2,3,4 
+independent vars.
+
+Note shallow falloff.
+
+Note: the banking dataset has been thresholded, so all variables
+are booleans.  There are many thresholding schemes, this is a "typical"
+one.  There are 38 variables in total.
+
+To sort a dataset accoring to MI, do this:
+cat mi4.dat | sort -g -r -k 2 > mi-4.dat
+
+mi-1.dat: sorted (ranked) MI between target and one feature.
+   top three MI features are:  29 22 8  and then 36 10 11  then 7 33 23 19
+   above are grouped into rough equivalent classes, equivalence == about
+   the same MI.
+
+mi-2.dat: sorted (ranked) MI between target and two features.
+   top three are 11-29  22-29 29-36  (note all three use 29, which 
+   is the #1 ranked feature, above)  All have about the same MI.
+
+   mi-2 next 5 are: 7-29 29-33 23-29 19-29 28-29  again all have 29 in them
+   mi-2 first non-29 is the 13th one which is 8-22
+
+mi-3.dat: sorted (ranked) MI between target and three features.
+   top three featuresets: 29-32-36  11-22-29  8-11-29 note second and
+   third one use the top-ranked featureset from mi-2  but the first one
+   uses the third-ranked from mi-2
+
+   mi-3 next 5: 22-29-36 11-25-29 28-29-32 7-11-29  11-29-33 
+   note 3 of 5 are 11-29 spin-offs, one is combo of 2nd and 3rd place of
+   mi-2, but one is odball, spinoff from 8th place mi-2
+
+mi-4: top-3 are 23-29-32-36 22-29-32-36 11-29-32-36 are all based from 
+   the top-ranked featureset of mi-3  but the rest are more confused.
+
+
+Bugs: incremental_selection was calling rel.empty() instead of
+rel.clear().
+The without-clearing algo found: 8-11-22-29-33 (using U4)
+This is ranked 49th in the mi-5.dat set (of 501942 feature sets
+with 5 features in them)
+
+ranking of four-feature susbsets of the above:
+8-11-22-29  is 10th  @0.287484
+8-11-22-33  is 1323th at 0.205948
+8-11-29-33  is 18th at 0.2812
+8-22-29-33  is 341th @0.236133
+11-22-29-33 is 20th  @0.280736
+
+
+The with-clearing algo (with bugfix) found: 11-22-29-33-36 (using U4)
+This is ranked 433rd in mi-5
+
+11-22-29-33  is 20th   @0.280736
+11-22-29-36  is 35th   @0.272682
+11-22-33-36  is 5116th @0.162252
+11-29-33-36  is 107th  @0.25794
+22-29-33-36  is 96th   @0.258925
+
+
+Using the bug-fixed, with-clearing algo, and going to -U5 gives 
+a feature set 7-10-11-22-29 which is ranked 6th.
+
+-U3 gives: 11-22-29-33-36  is 433rd
+-U2 gives:  (no data)
+-U1 gives: 8-10-22-29-36    is 6062th
+
+I guess these are all reasonable rankings.
+

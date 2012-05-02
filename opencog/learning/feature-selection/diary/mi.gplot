@@ -1,0 +1,25 @@
+set term png size 640,480
+set term png size 1024,768
+set out 'mi.png'
+
+# set style data points
+# set style data lines
+set style data linespoints
+# set logscale x
+set logscale y
+set key right
+
+# Don't label the tics on the x axis
+# set xtics ("" 0)
+set format x ""
+
+set xlabel "Rank (scaled)"
+set ylabel "Mutual Information"
+set title "Bank Dataset Mutual Information"
+
+plot "mi-1.dat" using (37*36*35*$0/24):2 title "MI(T; X)", \
+     "mi-2.dat" using (36*35*$0/12):2 title "MI(T; X,Y)", \
+     "mi-3.dat" using (35*$0/4):2 title "MI(T; X,Y,Z)", \
+     "mi-4.dat" using ($0):2 title "MI(T; X,Y,Z,W)"
+     
+
