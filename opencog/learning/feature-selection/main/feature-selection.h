@@ -81,13 +81,13 @@ struct feature_selection_parameters
     std::string target_feature;
     std::string output_file;
     std::vector<std::string> initial_features;
+    unsigned target_size;
     unsigned long cache_size;
+    unsigned jobs;
     double confi; //  confidence intensity
     double max_score;
-    unsigned jobs;
     double hc_fraction_of_remaining;
     double inc_intensity;
-    unsigned inc_target_size;
     double inc_target_size_epsilon;
     double inc_rintensity;
     unsigned inc_interaction_terms;
@@ -203,16 +203,16 @@ void write_results(const Table& table,
 void incremental_feature_selection(Table& table,
                                    const feature_selection_parameters& fs_params)
 {
-    if (fs_params.inc_intensity > 0 || fs_params.inc_target_size > 0) {
+    if (fs_params.inc_intensity > 0 || fs_params.target_size > 0) {
         CTable ctable = table.compress();
         typedef MutualInformation<std::set<arity_t> > FeatureScorer;
         FeatureScorer fsc(ctable);
         auto ir = boost::irange(0, table.get_arity());
         std::set<arity_t> features(ir.begin(), ir.end());
         std::set<arity_t> selected_features = 
-            fs_params.inc_target_size > 0?
+            fs_params.target_size > 0?
             cached_adaptive_incremental_selection(features, fsc,
-                                                  fs_params.inc_target_size,
+                                                  fs_params.target_size,
                                                   fs_params.inc_interaction_terms,
                                                   fs_params.inc_rintensity,
                                                   0, 1,
@@ -237,7 +237,7 @@ void incremental_feature_selection(Table& table,
 void correlated_feature_selection(Table& table,
                                   const feature_selection_parameters& fs_params)
 {
-    if (fs_params.inc_target_size > 0) {
+    if (fs_params.target_size > 0) {
         CTable ctable = table.compress();
         typedef MutualInformation<std::set<arity_t> > FeatureScorer;
         FeatureScorer fsc(ctable);
@@ -245,7 +245,7 @@ void correlated_feature_selection(Table& table,
         std::set<arity_t> features(ir.begin(), ir.end());
         std::set<arity_t> selected_features = 
             correlation_selection(features, fsc,
-                                  (unsigned) fs_params.inc_target_size);
+                                  (unsigned) fs_params.target_size);
 
         if (selected_features.empty()) {
             err_empty_features();

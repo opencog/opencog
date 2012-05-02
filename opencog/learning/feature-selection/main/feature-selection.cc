@@ -76,7 +76,7 @@ static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> jobs_opt("jobs", "j");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
 static const pair<string, string> inc_intensity_opt("inc-intensity", "T");
-static const pair<string, string> inc_target_size_opt("target-size", "C");
+static const pair<string, string> target_size_opt("target-size", "C");
 static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");
 static const pair<string, string> inc_redundant_intensity_opt("inc-redundant-intensity", "D");
 static const pair<string, string> inc_interaction_terms_opt("inc-interaction-terms", "U");
@@ -203,8 +203,8 @@ int main(int argc, char** argv)
             "the pressure is set to 1. The -C flag over-rides this "
             "setting.\n")
 
-        (opt_desc_str(inc_target_size_opt).c_str(),
-         value<unsigned>(&fs_params.inc_target_size)->default_value(0),
+        (opt_desc_str(target_size_opt).c_str(),
+         value<unsigned>(&fs_params.target_size)->default_value(0),
             "Feature count.  This option "
             "specifies the number of features to be selected out of "
             "the dataset.  A value of 0 disables this option. "
