@@ -32,16 +32,16 @@ def rules(a, deduction_types):
     #                  match=match_axiom)
     #rules.append(r)
 
-    #r = Rule(T('EvaluationLink',
-    #           a.add(t.PredicateNode,'+'),
-    #           T('ListLink',
-    #             Var(1),
-    #             Var(2),
-    #             Var(3))),
-    #         [],
-    #         name='PredicateEvaluation',
-    #         match=match_predicate)
-    #rules.append(r)
+    r = Rule(T('EvaluationLink',
+               a.add(t.PredicateNode,'+'),
+               T('ListLink',
+                 Var(1),
+                 Var(2),
+                 Var(3))),
+             [],
+             name='PredicateEvaluation',
+             match=match_predicate)
+    rules.append(r)
     
     # Deduction
     for type in deduction_types:

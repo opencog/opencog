@@ -312,6 +312,14 @@ def unify(x, y, s):
     # Not compatible with RPyC as it will make one of them 'netref t'
     elif tx != ty:
         return None
+    # Obviously this is redundant with the equality check at the end,
+    # but I moved that to the end because it's expensive to check
+    # whether two trees are equal (and it has to check it separately for
+    # every subtree, even if it's going to recurse anyway)
+    #elif x == y:
+    #   return s
+    elif tx == Tree and ty == Tree and x.is_variable() and y.is_variable() and x == y:
+        return s
     elif tx == Tree and x.is_variable():
         return unify_var(x, y, s)
     elif ty == Tree and y.is_variable():
@@ -331,7 +339,7 @@ def unify(x, y, s):
                 s2 = unify(x[0], y[0], s)
                 return unify(x[1:], y[1:], s2)
 
-    elif tx == ty and x == y:
+    elif x == y:
         return s
         
     else:
@@ -341,6 +349,7 @@ def unify_var(var, x, s):
     if var in s:
         return unify(s[var], x, s)
     elif occur_check(var, x, s):
+        raise ValueError('cycle in variable bindings')
         return None
     else:
         return extend(s, var, x)

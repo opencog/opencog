@@ -1,8 +1,11 @@
 from unittest import TestCase
 
-import atomspace_remote
-from atomspace_remote import AtomSpace, TruthValue, Atom #, Handle
-from atomspace_remote import types, get_type, get_type_name # is_a
+try:
+    from opencog.atomspace import AtomSpace, TruthValue, Atom #, Handle
+    from opencog.atomspace import types, get_type, get_type_name # is_a
+except ImportError:
+    from atomspace_remote import AtomSpace, TruthValue, Atom #, Handle
+    from atomspace_remote import types, get_type, get_type_name # is_a
 t=types
 
 import tree
@@ -69,21 +72,49 @@ class TreeTest(TestCase):
         self.assertEquals(node_tree.is_variable(),False)
 
     def test_unify(self):
-        x1_template = tree.T(self.x1)
+        T = tree.T
+        V = tree.Var
+        x1_template = T(self.x1)
         x1_tree = tree.tree_from_atom(self.x1)
         s = tree.unify(x1_template, x1_tree, {})
         self.assertEquals(s, {})
 
-        x2_template = tree.T(self.x2)
+        x2_template = T(self.x2)
         s = tree.unify(x2_template, x1_tree, {})
         self.assertEquals(s, None)
         
-        all_template = tree.Var(1)
+        all_template = V(1)
         l2_tree = tree.tree_from_atom(self.l2)
         s = tree.unify(all_template, l2_tree, {})
         s_correct = {all_template : l2_tree}
         self.assertEquals(s, s_correct)
+
+        t1 = V(1)
+        t2 = V(2)
+        s = tree.unify(t1, t2, {})
+        self.assertEquals(s, {V(1):V(2)})
         
+        t1 = V(1)
+        t2 = V(2)
+        s_correct = {V(1):V(2)}
+        s = tree.unify(t1, t2, s_correct)
+        self.assertEquals(s, s_correct)
+        
+        t1 = T('blah',V(1))
+        t2 = T('blah',V(2))
+        s = tree.unify(t1, t2, {})
+        self.assertEquals(s, {V(1):V(2)})
+        
+        t1 = T('blah',V(1), V(2))
+        t2 = T('blah',V(3), V(4))
+        s = tree.unify(t1, t2, {})
+        self.assertEquals(s, {V(1):V(3), V(2):V(4)})
+        
+        t1 = T('blah',V(1), V(1))
+        t2 = T('blah',V(2), V(2))
+        s = tree.unify(t1, t2, {})
+        self.assertEquals(s, {V(1):V(2)})
+
     def  test_find_conj(self):
         conj = (tree.tree_from_atom(self.l1), tree.tree_from_atom(self.l2))
         

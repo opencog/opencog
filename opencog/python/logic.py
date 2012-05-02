@@ -77,8 +77,8 @@ class Chainer:
         #try:
         tvs = self.get_tvs(target)
         print "Existing target truth values:", map(str, tvs)
-        if len(tvs):
-            raise NotImplementedError('Cannot revise multiple TruthValues, so no point in doing this search')
+        #if len(tvs):
+        #    raise NotImplementedError('Cannot revise multiple TruthValues, so no point in doing this search')
         
         log.info(format_log('bc', target))
         self.bc_later = OrderedSet([target])
@@ -86,10 +86,10 @@ class Chainer:
 
         self.target = target
         # Have a sentinel application at the top
-        #self.root = T('WIN')
-        #
-        #self.rules.append(rules.Rule(self.root,[target],name='producing target'))
-        #self.bc_later = OrderedSet(self.root)
+        self.root = T('WIN')
+        
+        self.rules.append(rules.Rule(self.root,[target],name='producing target'))
+        self.bc_later = OrderedSet([self.root])
 
         # viz - visualize the root
         self.viz.outputTarget(target, None, 0, 'TARGET')
@@ -281,6 +281,10 @@ class Chainer:
             if not r.goals:
                 continue
             assert r.match == None
+            
+            if target == self.root and r.name != 'producing target':
+                continue
+            
             s = unify(r.head, target, {})
             if s != None:
                 #if r.name == '[axiom]':
@@ -291,6 +295,17 @@ class Chainer:
 
     def find_axioms_for_rule_app(self, app):
         for (i, goal) in enumerate(app.goals):
+
+            def found_axiom(axiom_app, s):
+                if axiom_app != None:
+                    gvs = get_varlist(goal)
+                    goal_vars_mapped = [v for v in s.keys() if v in gvs]
+                    if len(goal_vars_mapped) == 0:
+                        assert goal == axiom_app.head
+                        self.propogate_result(app)
+                    else:
+                        self.propogate_specialization(axiom_app.head, i, app)
+
             # For example, if you need Inh Mohammad $x, Inh $x terrorist, $x
             # this will avoid finding $x (which could be any atom in the system!) -
             # it'll find the InheritanceLink first and then the ConceptNode
@@ -301,8 +316,7 @@ class Chainer:
                 if len(r.goals):
                     continue
                 
-                #if r.name == 'ForAll':
-                #    import pdb; pdb.set_trace()
+                r = r.standardize_apart()
                 
                 if r.match == None:
                     s = unify(r.head, goal, {})
@@ -310,6 +324,8 @@ class Chainer:
                         #if r.name == '[axiom]':
                         #    print '>>>>>',repr(r)
                         axiom_app = r.subst(s)
+                        
+                        found_axiom(axiom_app, s)
                 else:
                     # If the Rule has a special function for producing answers, run it
                     # and check the results are valid. NOTE: this algorithm is messy
@@ -330,15 +346,8 @@ class Chainer:
                             # new_rule = new_rule.subst(s)
                             log.info(format_log('##find_axioms_for_rule_app: printing new magic tv', axiom_app.head, tv))
                             self.set_tv(axiom_app,tv)
-                
-                if axiom_app != None:
-                    gvs = get_varlist(goal)
-                    goal_vars_mapped = [v for v in s.keys() if v in gvs]
-                    if len(goal_vars_mapped) == 0:
-                        assert goal == axiom_app.head
-                        self.propogate_result(app)
-                    else:
-                        self.propogate_specialization(axiom_app.head, i, app)
+                            
+                            found_axiom(axiom_app, s)
 
     def propogate_result(self, orig_app):
         # app was already precise enough to look up this axiom exactly.
@@ -348,9 +357,9 @@ class Chainer:
         got_result = self.check_premises(app)
         if got_result:
             # Only allow one result. NOTE: this will break the Revision rule
-            if len(self.get_tvs(app.head)):
-                print 'WARNING: rejecting repeated result', app.head
-                return
+            #if len(self.get_tvs(app.head)):
+            #    print 'WARNING: rejecting repeated result', app.head
+            #    return
             
             log.info(format_log('propogate_result',repr(app)))
             #if app.head.op == 'TARGET':
@@ -361,9 +370,10 @@ class Chainer:
             self.viz.declareResult(app.head)
             self.compute_and_add_tv(app)
 
-            if app.head == self.target:
-                log.info(format_log('Target produced!', app.head, app.tv))
-                self.results.append(app.head)
+            if app.head == self.root:
+                log.info(format_log('Target produced!', app.goals[0], self.get_tvs(app.goals[0])))
+                self.results.append(app.goals[0])
+                return
             
             # then propogate the result further upward
             result_pdn = self.expr2pdn(app.head.canonical())
@@ -371,7 +381,9 @@ class Chainer:
             for app_pdn in upper_pdns:
                 self.propogate_result(app_pdn.op)
     
-    def propogate_specialization(self, new_premise, i, orig_app):    
+    def propogate_specialization(self, new_premise, i, orig_app):
+        orig_app = orig_app.standardize_apart()
+        new_premise = standardize_apart(new_premise)
         s = unify(orig_app.goals[i], new_premise, {})
         
         assert s != None
@@ -407,10 +419,10 @@ class Chainer:
                 self.propogate_specialization(new_result, j, higher_app_pdn.op)
         
         ## Check if any of the other subgoals are now different
-        #og = orig_app.goals[:i]+orig_app.goals[i+1:]
-        #ng = new_app.goals[:i]+new_app.goals[i+1:]
-        #if any(old_goal != new_goal for (old_goal, new_goal) in zip(og, ng)):
-        #    self.find_axioms_for_rule_app(new_app)
+        og = orig_app.goals[:i]+orig_app.goals[i+1:]
+        ng = new_app.goals[:i]+new_app.goals[i+1:]
+        if any(old_goal != new_goal for (old_goal, new_goal) in zip(og, ng)):
+            self.find_axioms_for_rule_app(new_app)
             
         ## Specialize the app using the new, more specific premise, and add
         ## it to backward chaining
