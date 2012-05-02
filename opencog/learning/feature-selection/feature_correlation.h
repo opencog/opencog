@@ -1,8 +1,9 @@
 /** feature_correlation.h ---
  *
- * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2010,2012 OpenCog Foundation
  *
- * Author: Nil Geisweiller <nilg@laptop>
+ * Authors: Nil Geisweiller <nilg@laptop>
+ *          Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,8 +22,8 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_SELECTION_ALGO_H
-#define _OPENCOG_FEATURE_SELECTION_ALGO_H
+#ifndef _OPENCOG_FEATURE_CORRELATION_ALGO_H
+#define _OPENCOG_FEATURE_CORRELATION_ALGO_H
 
 #include <functional>
 
@@ -38,42 +39,24 @@ namespace opencog {
 /**
  * Returns a set S of features following the algo:
  * 0) res = empty set
- * 1.a) Select all relevant features (that score above threshold), called rel
- * 1.b) Select all redundant features among rel, called red
- * 1.c) res += rel - red
- * 2) remove rel from the initial set features, call this tf
- * 3.a) select all pairs of relevant features from tf, called rel
- * 3.b) select all redundant features among rel, called red
- * 4) follow the same pattern with triplets, etc, until max_interaction_terms.
- * 5) return res
+ * 1) Select single individual features with the highest mutual
+ *    information (MI)
+ * 2) Add one feature, compute new MI; keep only highest MI results.
+ * 3) Repeat, until desired number of features is obtained.
+ * 4) return res
  *
  * @param features       The initial set of features to be selected from
- * @param scorer         The function to score a set of features, it is
- *                       assumed that the codomain of the scorer is [0,1],
- *                       0 for the lowest score and 1 for the higest score.
- * @param threshold      The threshold to select a set of feature, in [0,1]
- * @param max_interaction_terms The maximum size of each feature set tested in the scorer
- * @param red_threshold  If >0 it modulates the intensity of the
- *                       threshold of redundant_features(), precisely
- *                       red_threshold * threshold
- *                       Otherwise redundant features are ignored.
+ * @param scorer         The function to score a set of features.
+ * @param num_features   The desired number of features to return.
  *
  * @return               The set of selected features
- *
- * @note                 It is strongly suggested to wrap a cache around the
- *                       Scorer because the algorithm may do redundant
- *                       evaluations. Or you may use directly
- *                       cached_incremental_selection defined below
  */
 template<typename Scorer, typename FeatureSet>
-FeatureSet incremental_selection(const FeatureSet& features,
+FeatureSet correlation_selection(const FeatureSet& features,
                                  const Scorer& scorer,
-                                 double threshold,
-                                 unsigned max_interaction_terms = 1,
-                                 double red_threshold = 0)
+                                 unsigned num_features)
 {
-    FeatureSet rel; // set of relevant features for a given iteration
-    FeatureSet res; // set of relevant non-redundant features to return
+    FeatureSet res; // set of features to return
 
     typedef boost::shared_mutex shared_mutex;
     typedef boost::shared_lock<shared_mutex> shared_lock;
@@ -98,10 +81,8 @@ FeatureSet incremental_selection(const FeatureSet& features,
     }
 #endif
 
-    for (unsigned i = 1; i <= max_interaction_terms; ++i) {
-        // Define the set of set of features to test for relevancy
-        FeatureSet tf = set_difference(features, rel);
-        std::set<FeatureSet> fss = powerset(tf, i, true);
+    for (unsigned i = 1; i <= num_features; ++i) {
+        std::map<double, FeatureSet> hi_scorers
 
         // Add the set of relevant features for that iteration in rel
         rel.clear();
@@ -114,56 +95,12 @@ FeatureSet incremental_selection(const FeatureSet& features,
             }};
         OMP_ALGO::for_each(fss_view.begin(), fss_view.end(), filter_relevant);
 
-        if (red_threshold > 0) {
-            // Define the set of set of features to test for redundancy
-            std::set<FeatureSet> nrfss = powerset(rel, i+1, true);
-            // determine the set of redundant features
-            FeatureSet red;
-            auto filter_redundant = [&](const FeatureSet* fs) {
-                bool fs_red_disjoint = [&]() {
-                    shared_lock lock(mutex);
-                    return has_empty_intersection(*fs, red); }();
-                if (fs_red_disjoint) {
-                    FeatureSet rfs = redundant_features(*fs, scorer,
-                                                        threshold
-                                                        * red_threshold);
-                    unique_lock lock(mutex);
-                    /// @todo the lock could be more granular
-                    red.insert(rfs.begin(), rfs.end());
-                }};
-            auto nrfss_view = random_access_view(nrfss);
-            OMP_ALGO::for_each(nrfss_view.begin(), nrfss_view.end(),
-                               filter_redundant);
-            // add in res the relevant non-redundant features
-            std::set_difference(rel.begin(), rel.end(), red.begin(), red.end(),
-                                std::inserter(res, res.begin()));
-        } else {
-            res.insert(rel.begin(), rel.end());
-        }
+        res.insert(rel.begin(), rel.end());
     }
     return res;
 }
 
-/**
- * like incremental_selection but automatically wrap a cache around the scorer
- */
-template<typename Scorer, typename FeatureSet>
-FeatureSet cached_incremental_selection(const FeatureSet& features,
-                                        const Scorer& scorer,
-                                        double threshold,
-                                        unsigned max_interaction_terms = 1,
-                                        double red_threshold = 0)
-{
-    std::cout << "cached_incremental_selection" << std::endl;
-    /// @todo replace by lru_cache once thread safe fixed
-    prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
-                                                     (int)max_interaction_terms),
-                                            scorer);
-    return incremental_selection(features, scorer_cache, threshold,
-                                 max_interaction_terms, red_threshold);
-}
-
-
+#if 0
 /**
  * like incremental_selection but take the number of feature to select
  * instead of a threshold. It searches it by bisection.
@@ -232,27 +169,9 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
     return f;
 }
 
-/**
- * Return a set of redundant features of a given set of features. It
- * look for a subset of features that do not manage to raise the score
- * above a given threshold.
- */
-template<typename Scorer, typename FeatureSet>
-FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
-                              double threshold)
-{
-    FeatureSet res;
-    foreach(const typename FeatureSet::value_type& f, features) {
-        FeatureSet sf = set_difference(features, res);
-        sf.erase(f);
-        if(!sf.empty() && (scorer(features) - scorer(sf) < threshold))
-            res.insert(f);
-    }
-    return res;
-}
-
+#endif
 
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_SELECTION_ALGO_H
+#endif // _OPENCOG_FEATURE_CORRELATION_ALGO_H
