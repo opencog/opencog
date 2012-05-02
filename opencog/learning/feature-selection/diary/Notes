@@ -1,6 +1,7 @@
 
                      Feature Selection Diary/Notes
                      -----------------------------
+                     Linas Vepstas, April 2012
 
 This is a raw diary of some research notes concerning feature selection
 and the algorithms, their effect on various datasets, etc. These notes
@@ -8,9 +9,39 @@ are not going to be explained in any kind of detail; they are mostly
 for my own use, so that I can remember what was done.
 
 
-Linas Vepstas, April 2012
--------------------------
+Overview
+--------
 
+Mutual Information MI is used in the
+feature-selection/dimensional-reduction code. I computed the MI between
+the target variable T and one feature X or two features, X,Y, etc. to
+obtain MI(T; X) and MI(T; X,Y), etc.   These are then ranked (sorted)
+from highest to lowest, and graphed.  To make these comparable on the
+same X-axis, I have to rescale with binomial coefficients (the rescaling
+is "exact").  This is shown in the graph "mi.png".
+
+Note that these do *not* obey Zipf's law.
+
+The large, long flat region implies that many/most feature sets are
+reasonably correlated with the target variable; only a small fraction of
+feature sets are truly bad, and should not be used for modelling.
+Adding one more feature consistently improves the MI.   I suppose that,
+at some point, over-fitting starts to happen, but I am not sure
+when/where/how this would be seen in the context of this graph. 
+
+
+The graph "size-mi.png" shows the mutual information of the highest-ranked
+feature-set of a given size.   This graph shows how considering larger
+feature-set sizes improves the MI scores, until a plateau at around 21
+features is reached (Recall the bank dataset has 38 features in it; the
+dataset has 91 rows.)
+
+Presumably, using anything more than the 21 selected features would
+result in over-fitting, but that's just a guess.
+
+
+Notes, April 2012
+-----------------
 mi.dat mi.png -- mutual information of bank dataset
 
 graph of mutual information of dependent variable and 1,2,3,4 
@@ -82,4 +113,5 @@ a feature set 7-10-11-22-29 which is ranked 6th.
 -U1 gives: 8-10-22-29-36    is 6062th
 
 I guess these are all reasonable rankings.
+
 

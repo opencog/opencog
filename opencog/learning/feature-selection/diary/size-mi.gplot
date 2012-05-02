@@ -1,0 +1,18 @@
+set term png size 1024,768
+set term png size 640,480
+set out 'size-mi.png'
+
+# set style data points
+# set style data lines
+set style data linespoints
+# set logscale x
+# set logscale y
+set key right
+
+set xlabel "Number of features in highest-ranked feature set"
+set ylabel "Mutual Information"
+set title "Bank Dataset Mutual Information"
+
+plot "size-mi.dat" using 1:2 title ""
+     
+
