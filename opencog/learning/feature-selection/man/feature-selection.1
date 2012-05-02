@@ -69,7 +69,7 @@ but it can be used in more general settings.
 
 .PP
 .\" ============================================================
-.SH EXAMPLE
+.SH EXAMPLES
 .TP
 .BI feature-selection\ \-i raw_data.csv \ \-acor\ \-C 10 \ \-o reduced.csv \ \-F fs.log
 
@@ -107,8 +107,17 @@ called \'feature selection\' or \'dimensional reduction\'.  This
 program, \fBfeature-selection\fP, does this, using one of several
 different algorithms.
 
+This program accepts inputs in a fairly generic whitespace or comma
+delimited table format: whitespace may consist of repeated tabs or
+blanks; values may be comma-separated but padded with blanks.
+The input file may contain comment lines; these lines must start with 
+a hash-mark (#), exclamation mark (!) or semi-colon (;) as the first
+character.
 
-XXX talk about allowable CSV formats
+Boolean values may be indicated with any of the characters 0,f,F and 
+1,t,T.  Column values must be either boolean or numeric; at this time,
+non-numeric data, including dates or columns containing currency symbols
+are not supported.
 
 .PP
 .\" ============================================================
@@ -188,14 +197,40 @@ Available algorithms include:
 .TS
 tab (@);
 l lx.
-\fBhc\fR@T{
-Hillclimbing. 
-T}
-\fBinc\fR@T{
-Incremental.
+\fBcor\fR@T{
+Maximal Mutual Information.
 
-Must specify either the \fB\-C\fP or the \fB\-T\fP flag, as otherwise,
-no features will be selected.
+This algorithm searches for the featureset with the highest mutual
+information with regard to the target variable.  It does so by adding
+one feature at a time to the featureset, computing the mutual
+information, ranking the result, and keeping only the highest-ranked
+results.  It can be thought of as a kind-of hill-climbing in the space
+of mutual information.  This process is repeated until the desired
+number of features is found.  
+
+The number of desired features must be specified with the \fB\-C\fP
+option, as otherwise, all features will be selected.
+T}
+
+\fBinc\fR@T{
+Incremental, Non-Redundant Mutual Information.
+
+Builds a featureset by incrementally adding features with the highest
+mutual information with regard to the target.  Features are accepted
+only if the mutual information is above a specified threshold. Features
+are rejected if they appear to be redundant with others: that is,
+if, by their presence, they fail to change the total mutual information
+by more than a minimum amount.
+
+One may specify either the number of features to be selected, or
+one may specify a general "pressure" to automatically modulate the
+number of features found.  That is, one must specify either the
+\fB\-C\fP or the \fB\-T\fP flag, as otherwise, all features will
+be selected.
+T}
+
+\fBhc\fR@T{
+MOSES Hillclimbing. Currently unsupported.
 T}
 .TE
 .TP
@@ -203,11 +238,8 @@ T}
 Attempt to select \fInum_features\fR out of the total available set.
 Setting this flag over-rides the \fB\-T\fP option.
 
-This option is ignored unless the chosen algorithm is \fBinc\fP.
-
-.TP
-.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
-Use \fIseed\fR as the seed value for the pseudo-random number generator.
+This option is ignored unless the chosen algorithm is \fBinc\fP or
+\fBcor\fP.
 
 .TP
 .BI \-T\  pressure \fR,\ \fB\-\-inc\-intensity= pressure
@@ -218,6 +250,12 @@ of one means that it is likely that no features will be selected.
 Specifying the \fB-C\fP flag over-rides this option.
 
 This option is ignored unless the chosen algorithm is \fBinc\fP.
+
+.TP
+.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
+Use \fIseed\fR as the seed value for the pseudo-random number generator.
+The \fBinc\fP and \fPhc\fP algorthms make use of the random number
+generator, and so results may depend on the random seed.
 
 .PP
 .\" ============================================================
