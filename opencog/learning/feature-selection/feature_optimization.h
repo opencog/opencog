@@ -122,7 +122,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
                 bool fs_red_disjoint = [&]() {
                     shared_lock lock(mutex);
                     return has_empty_intersection(*fs, red); }();
-                if(fs_red_disjoint) {
+                if (fs_red_disjoint) {
                     FeatureSet rfs = redundant_features(*fs, scorer,
                                                         threshold
                                                         * red_threshold);
@@ -175,17 +175,24 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
                                           double min = 0, double max = 1,
                                           double epsilon = 0.001) {
     double mean = (min+max)/2;
-    // Logger
-    logger().debug("Call adaptive_incremental_selection with threshold %f",
-                   mean);
-    // ~Logger
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "Call adaptive_incremental_selection(size="
+                         << features_size_target
+                         << ", terms=" << max_interaction_terms
+                         << ", red thresh=" << red_threshold
+                         << ", min=" << min
+                         << ", max=" << max
+                         << ", epsi=" << epsilon
+                         <<") so selection-thres=" << mean;
+    }
+
     FeatureSet res = incremental_selection(features, scorer, mean,
                                            max_interaction_terms, red_threshold);
     unsigned rsize = res.size();
     // Logger
     logger().debug("Selected %d features", rsize);
     // ~Logger
-    if(isWithin(min, max, epsilon) || rsize == features_size_target)
+    if (isWithin(min, max, epsilon) || rsize == features_size_target)
         return res;
     else {
         double nmin = rsize < features_size_target? min : mean;
@@ -208,7 +215,8 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
                                                  unsigned max_interaction_terms = 1,
                                                  double red_threshold = 0,
                                                  double min = 0, double max = 1,
-                                                 double epsilon = 0.01) {
+                                                 double epsilon = 0.01)
+{
     /// @todo replace by lru_cache once thread safe fixed
     prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
                                                      (int)max_interaction_terms),
