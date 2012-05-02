@@ -56,8 +56,6 @@ FeatureSet correlation_selection(const FeatureSet& features,
                                  const Scorer& scorer,
                                  unsigned num_features)
 {
-    FeatureSet res; // set of features to return
-
     typedef boost::shared_mutex shared_mutex;
     typedef boost::shared_lock<shared_mutex> shared_lock;
     typedef boost::unique_lock<shared_mutex> unique_lock;
@@ -81,22 +79,31 @@ FeatureSet correlation_selection(const FeatureSet& features,
     }
 #endif
 
+    std::set<FeatureSet> tops;
     for (unsigned i = 1; i <= num_features; ++i) {
-        std::map<double, FeatureSet> hi_scorers
+        std::map<double, FeatureSet> ranks;
 
-        // Add the set of relevant features for that iteration in rel
-        rel.clear();
-        auto fss_view = random_access_view(fss);
-        auto filter_relevant = [&](const FeatureSet* fs) {
-            if (scorer(*fs) > threshold) {
+        // Rank the highest scorers
+        auto rank_em = [&](const FeatureSet &fs)
+        {
+            typename FeatureSet::const_iterator fi;
+            for (fi = fs.begin(); fi != fs.end(); fi++) {
+                FeatureSet prod = fs;
+                prod.insert(*fi);
+
+                double mi = scorer(prod);
+
                 unique_lock lock(mutex);
                 /// @todo this lock can be more granular
-                rel.insert(fs->begin(), fs->end());
-            }};
-        OMP_ALGO::for_each(fss_view.begin(), fss_view.end(), filter_relevant);
+                ranks.insert(std::pair<double, FeatureSet>(mi, prod));
+            }
+        };
+        OMP_ALGO::for_each(tops.begin(), tops.end(), rank_em);
 
-        res.insert(rel.begin(), rel.end());
     }
+
+    FeatureSet res;
+    // res.insert(rel.begin(), rel.end());
     return res;
 }
 

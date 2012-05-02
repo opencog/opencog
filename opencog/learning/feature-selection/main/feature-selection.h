@@ -36,6 +36,7 @@
 #include <opencog/comboreduct/combo/table.h>
 
 #include "../feature_scorer.h"
+#include "../feature_correlation.h"
 #include "../feature_optimization.h"
 #include "../moses_based_scorer.h"
 
@@ -50,7 +51,8 @@ static const string sa="sa"; // moses based simulation annealing
 static const string hc="hc"; // moses based hillclimbing
 static const string inc="inc"; // incremental_selection (see
                                // feature_optimization.h)
-
+static const string cor="cor"; // correlated_selection (see
+                               // feature_correlation.h)
 static const string default_log_file_prefix = "feature-selection";
 static const string default_log_file_suffix = "log";
 static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
@@ -261,24 +263,54 @@ void incremental_feature_selection(Table& table,
     }
 }
 
+void correlated_feature_selection(Table& table,
+                                  const feature_selection_parameters& fs_params)
+{
+    if (fs_params.inc_target_size > 0) {
+        CTable ctable = table.compress();
+        typedef MutualInformation<std::set<arity_t> > FeatureScorer;
+        FeatureScorer fsc(ctable);
+        auto ir = boost::irange(0, table.get_arity());
+        std::set<arity_t> features(ir.begin(), ir.end());
+        std::set<arity_t> selected_features = 
+            correlation_selection(features, fsc,
+                                  (unsigned) fs_params.inc_target_size);
+
+        if (selected_features.empty()) {
+            err_empty_features();
+        } else {
+            Table ftable = table.filter(selected_features);
+            log_selected_features(table.get_arity(), ftable);
+            write_results(ftable, fs_params);
+        }
+    } else {
+        // Nothing happened, print the initial table.
+        write_results(table, fs_params);
+    }
+}
+
 void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params)
 {
     // setting moses optimization parameters
     optim_parameters op_param(20, fs_params.max_score, 4, 0.0);
-    if(fs_params.algorithm == un) {
+    if (fs_params.algorithm == un)  {
+        // XXX will we ever support this? I don't think so...
         OC_ASSERT(false, "TODO");
-    } else if(fs_params.algorithm == sa) {
+    } else if (fs_params.algorithm == sa) {
+        // XXX will we ever support this? I don't think so...
         OC_ASSERT(false, "TODO");        
-    } else if(fs_params.algorithm == hc) {
+    } else if (fs_params.algorithm == hc) {
         hc_parameters hc_param(true, // widen distance if no improvement
                                false,
                                false, // crossover
                                fs_params.hc_fraction_of_remaining);
         hill_climbing hc(op_param, hc_param);
         moses_feature_selection(table, hc, fs_params);
-    } else if(fs_params.algorithm == inc) {
+    } else if (fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);
+    } else if (fs_params.algorithm == cor) {
+        correlated_feature_selection(table, fs_params);
     } else {
         std::cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
                   << "' is unknown, please consult the help for the "
