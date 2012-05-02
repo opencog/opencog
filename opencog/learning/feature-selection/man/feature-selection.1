@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH FEATURE-SELECTION 1 "April 27, 2012" "3.0.9" "OpenCog Learning"
+.TH FEATURE-SELECTION 1 "May 2, 2012" "3.0.11" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -22,7 +22,7 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-feature-selection \- blah blah blah
+feature-selection \- dimensional reduction of datasets
 .SH SYNOPSIS
 .\" The help & version command line
 .B feature-selection
@@ -61,16 +61,54 @@ feature-selection \- blah blah blah
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics,
 .\" respectively.
-\fBfeature-selection\fP is the command-line blah ...
+\fBfeature-selection\fP is a command-line utility for performing
+dimensional reduction of large datasets, so as to prepare them 
+for a later regession analysis.  It is intended to be used to filter
+data before it is fit with the \fBmoses\fP machine-learning program,
+but it can be used in more general settings.  
+
 .PP
 .\" ============================================================
 .SH EXAMPLE
+.TP
+.BI feature-selection\ \-i raw_data.csv \ \-acor\ \-C 10 \ \-o reduced.csv \ \-F fs.log
+
+Use the input file \fIraw_data.csv\fP as the input dataset.  The input
+file must be a tab-separated or comma-separated table of values.  The 
+dependent feature is assumed to be in the first column.  The \fBcor\fP
+algorithm will be used to select 10 different features that are the most
+strongly correlated with the dependent feature.  The output will be
+written to the file \fIreduced.csv\fP, consisting of the dependent
+feature, in the first column, followed by the 10 most predictive
+columns.  A logfile of algorithm progress will be written to
+\fIfs.log\fP.
+
+.TP
+.BI feature-selection\ \-i raw_data.csv \ \-acor\ \-C 10 \ \-o reduced.csv \ \-u Q3
+
+As above, but use the column labelled \fIQ3\fP as the target feature.
+This assumes that the input dataset contains columns labels as the first
+row in the dataset.  The selected column labels are reproduced in the
+output file.
 
 .PP
 .\" ============================================================
 .SH OVERVIEW
-\fBfeature-selection\fP implements blah
 
+In regression analysis, one has, in general, a table of values or
+\'features\', and the goal of predicting one feature, the \'target\', 
+(located in one column of the table) based on the values of the
+other features (in other columns).  It is common that only some
+of the features are useful predictors of the target, while many
+others are mostly just noise.  Regression analysis becomes difficult
+if there are too many input variables, and so regression can be improved
+by simply filtering out the useless features. Doing this is generically
+called \'feature selection\' or \'dimensional reduction\'.  This
+program, \fBfeature-selection\fP, does this, using one of several
+different algorithms.
+
+
+XXX talk about allowable CSV formats
 
 .PP
 .\" ============================================================
