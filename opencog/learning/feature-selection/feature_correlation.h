@@ -97,6 +97,9 @@ FeatureSet correlation_selection(const FeatureSet& features,
         {
             typename FeatureSet::const_iterator fi;
             for (fi = features.begin(); fi != features.end(); fi++) {
+
+                if (fs.end() != fs.find(*fi)) continue;
+
                 FeatureSet prod = fs;
                 prod.insert(*fi);
 
@@ -134,6 +137,8 @@ FeatureSet correlation_selection(const FeatureSet& features,
             j++;
             if (top_size < j) break;
         }
+
+        OC_ASSERT (!ranks.empty(), "Fatal Error: no ranked feature sets");
 
         // Get the highest MI found.  If these are not getting better,
         // then stop looking for new features.
