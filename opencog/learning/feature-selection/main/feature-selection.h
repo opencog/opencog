@@ -89,7 +89,7 @@ struct feature_selection_parameters
     double hc_fraction_of_remaining;
     double inc_intensity;
     double inc_target_size_epsilon;
-    double inc_rintensity;
+    double inc_red_intensity;
     unsigned inc_interaction_terms;
 };
 
@@ -214,13 +214,13 @@ void incremental_feature_selection(Table& table,
             cached_adaptive_incremental_selection(features, fsc,
                                                   fs_params.target_size,
                                                   fs_params.inc_interaction_terms,
-                                                  fs_params.inc_rintensity,
+                                                  fs_params.inc_red_intensity,
                                                   0, 1,
                                                   fs_params.inc_target_size_epsilon)
             : cached_incremental_selection(features, fsc,
                                            fs_params.inc_intensity,
                                            fs_params.inc_interaction_terms,
-                                           fs_params.inc_rintensity);
+                                           fs_params.inc_red_intensity);
         if (selected_features.empty()) {
             err_empty_features();
         } else {

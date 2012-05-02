@@ -169,6 +169,12 @@ int main(int argc, char** argv)
           .append(" characters.\n").c_str())
 
 
+        (opt_desc_str(target_size_opt).c_str(),
+         value<unsigned>(&fs_params.target_size)->default_value(0),
+            "Feature count.  This option "
+            "specifies the number of features to be selected out of "
+            "the dataset.  A value of 0 disables this option. \n")
+
 // XXX XXX XXX XXXXXXXXXXXXXXXXXXX
 
         (opt_desc_str(initial_feature_opt).c_str(), value<vector<string> >(&fs_params.initial_features),
@@ -186,41 +192,44 @@ int main(int argc, char** argv)
          value<double>(&fs_params.confi)->default_value(1.0),
          "Intensity of the confidence penalty, in [0,+Inf), 0 means no confidence penalty. This parameter influences how much importance we attribute to the confidence of the feature quality measure. The less samples in the data set, the more features the less confidence in the feature set quality measure.\n")
 
-        (opt_desc_str(max_score_opt).c_str(),
-         value<double>(&fs_params.max_score)->default_value(1),
-         "For MOSES based algorithms. The max score to reach, once reached feature selection halts.\n")
-
-        (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
-         value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.1),
-         "Hillclimbing parameter. Determine the fraction of the remaining number of eval to use for the current iteration.\n")
-
         (opt_desc_str(inc_intensity_opt).c_str(),
          value<double>(&fs_params.inc_intensity)->default_value(0),
-            "Incremental Selection pressue. Value should lie between "
-            "0 and 1. A value of 0 means all features are selected, "
-            "while a value of 1 corresponds to a very strong selection "
-            "pressure.  It is likely that no features are selected "
-            "the pressure is set to 1. The -C flag over-rides this "
-            "setting.\n")
+            "Incremental Selection parameter. Floating point number. "
+            "Specifies the threshold above which the mutual information "
+            "of a feature is considered to be significantly correlated "
+            "to the target.  Values should non-negative.  A value of "
+            "zero means that all features weill be selected. "
+            "The -C flag over-rides this setting.\n")
 
-        (opt_desc_str(target_size_opt).c_str(),
-         value<unsigned>(&fs_params.target_size)->default_value(0),
-            "Feature count.  This option "
-            "specifies the number of features to be selected out of "
-            "the dataset.  A value of 0 disables this option. "
-            "Specifying over-rides the -T flag.\n")
+        (opt_desc_str(inc_redundant_intensity_opt).c_str(),
+         value<double>(&fs_params.inc_red_intensity)->default_value(0.1),
+         "Incremental Selection parameter. Floating-point value must "
+         "lie between 0.0 and 1.0.  A value of 0.0 means that no "
+         "redundant features will discarded, while 1.0 will cause a "
+         "maximal number will be discarded.\n")
 
         (opt_desc_str(inc_target_size_epsilon_opt).c_str(),
          value<double>(&fs_params.inc_target_size_epsilon)->default_value(0.001),
-         "Incremental Selection parameter. Error interval tolerated to control the automatically adjust feature selection intensity when using option -C.\n")
-
-        (opt_desc_str(inc_redundant_intensity_opt).c_str(),
-         value<double>(&fs_params.inc_rintensity)->default_value(0.1),
-         "Incremental Selection parameter. Value between 0 and 1. 0 means no redundant features are discarded, 1 means redudant features are maximally discarded.\n")
+         "Incremental Selection parameter. Toleance applied when "
+         "selecting for a fixed number of features (option -C).\n")
 
         (opt_desc_str(inc_interaction_terms_opt).c_str(),
          value<unsigned>(&fs_params.inc_interaction_terms)->default_value(1),
-         "Incremental Selection parameter. Maximum number of interaction terms considered during feature selection. Higher values make the feature selection more accurate but is computationally expensive.\n")
+         "Incremental Selection parameter. Maximum number of "
+         "interaction terms considered during incremental feature "
+         "selection. Higher values make the feature selection more "
+         "accurate but is exponentially more computationally expensive.\n")
+
+        (opt_desc_str(max_score_opt).c_str(),
+         value<double>(&fs_params.max_score)->default_value(1),
+         "Hillclimbing parameter. The max score to reach, once "
+         "reached feature selection halts.\n")
+
+        (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
+         value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.1),
+         "Hillclimbing parameter. Determine the fraction of the "
+         "remaining number of eval to use for the current iteration.\n")
+
         ;
 
     variables_map vm;
