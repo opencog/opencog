@@ -112,23 +112,43 @@ int main(int argc, char** argv)
          value<string>(&fs_params.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
 
+        (opt_desc_str(jobs_opt).c_str(),
+         value<unsigned>(&fs_params.jobs)->default_value(1),
+         string("Number of threads to use.\n").c_str())
+
+        (opt_desc_str(log_level_opt).c_str(),
+         value<string>(&log_level)->default_value("DEBUG"),
+         "Log level; verbosity of logging and debugging messages to "
+         "write. Possible levels are NONE, ERROR, WARN, INFO, DEBUG, "
+         "FINE. Case does not matter.\n")
+
+        (opt_desc_str(log_file_opt).c_str(),
+         value<string>(&log_file)->default_value(default_log_file),
+         string("File name where to record the output log. This "
+         "option is overridden by the --")
+         .append(log_file_dep_opt_opt.first)
+         .append(" option.\n").c_str())
+
+        (opt_desc_str(log_file_dep_opt_opt).c_str(),
+         string("Use an option-dependent logfile name. The name of "
+          "the log is determined by the command-line options; the "
+          "specified string will form the base of the filename.  So, "
+          "for instance, if the option -r 123 is given, then the "
+          "logfile name will be feature-selection_random-seed_123.log.  "
+          "The filename will be truncated to a maximum of ")
+          .append(lexical_cast<string>(max_filename_size))
+          .append(" characters. This option takes precendence over "
+          "the -F option.\n").c_str())
+
+
+// XXX XXX XXX XXXXXXXXXXXXXXXXXXX
+
         (opt_desc_str(initial_feature_opt).c_str(), value<vector<string> >(&fs_params.initial_features),
          "Initial feature to search from. This option can be used as many times as features to include in the initial feature set. An initial feature set close to the one maximizing the feature quality measure can greatly increase feature selection speed.\n")
 
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned>(&fs_params.max_evals)->default_value(10000),
          "Maximum number of fitness function evaluations.\n")
-
-        (opt_desc_str(log_level_opt).c_str(),
-         value<string>(&log_level)->default_value("DEBUG"),
-         "Log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.\n")
-
-        (opt_desc_str(log_file_dep_opt_opt).c_str(),
-         string("The name of the log is determined by the options, for instance if feature-selection is called with -r 123 the log name is feature-selection_random-seed_123.log. Note that the name will be truncated in order not to be longer than ").append(lexical_cast<string>(max_filename_size)).append(" characters.\n").c_str())
-
-        (opt_desc_str(log_file_opt).c_str(),
-         value<string>(&log_file)->default_value(default_log_file),
-         string("File name where to write the log. This option is overwritten by ").append(log_file_dep_opt_opt.first).append(".\n").c_str())
 
         (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned long>(&fs_params.cache_size)->default_value(1000000),
@@ -141,10 +161,6 @@ int main(int argc, char** argv)
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&fs_params.max_score)->default_value(1),
          "For MOSES based algorithms. The max score to reach, once reached feature selection halts.\n")
-
-        (opt_desc_str(jobs_opt).c_str(),
-         value<unsigned>(&fs_params.jobs)->default_value(1),
-         string("Number of jobs allocated.\n").c_str())
 
         (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
          value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.1),
@@ -161,7 +177,7 @@ int main(int argc, char** argv)
 
         (opt_desc_str(inc_target_size_opt).c_str(),
          value<unsigned>(&fs_params.inc_target_size)->default_value(0),
-            "Incremental Selection feature count.  This option "
+            "Feature count.  This option "
             "specifies the number of features to be selected out of "
             "the dataset.  A value of 0 disables this option. "
             "Specifying over-rides the -T flag.\n")
