@@ -1,4 +1,4 @@
-/** feature_optimization.h --- 
+/** feature_optimization.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -41,12 +41,12 @@ namespace opencog {
  * 1.a) Select all relevant features (that score above threshold), called rel
  * 1.b) Select all redundant features among rel, called red
  * 1.c) res += rel - red
- * 2) remove rel from the initial set features, called tf
- * 3.a) select all pairs of relevant features from ft, called rel
+ * 2) remove rel from the initial set features, call this tf
+ * 3.a) select all pairs of relevant features from tf, called rel
  * 3.b) select all redundant features among rel, called red
  * 4) follow the same pattern with triplets, etc, until max_interaction_terms.
  * 5) return res
- * 
+ *
  * @param features       The initial set of features to be selected from
  * @param scorer         The function to score a set of features, it is
  *                       assumed that the codomain of the scorer is [0,1],
@@ -70,7 +70,8 @@ FeatureSet incremental_selection(const FeatureSet& features,
                                  const Scorer& scorer,
                                  double threshold,
                                  unsigned max_interaction_terms = 1,
-                                 double red_threshold = 0) {
+                                 double red_threshold = 0)
+{
     FeatureSet rel; // set of relevant features for a given iteration
     FeatureSet res; // set of relevant non-redundant features to return
 
@@ -151,7 +152,8 @@ FeatureSet cached_incremental_selection(const FeatureSet& features,
                                         const Scorer& scorer,
                                         double threshold,
                                         unsigned max_interaction_terms = 1,
-                                        double red_threshold = 0) {
+                                        double red_threshold = 0)
+{
     std::cout << "cached_incremental_selection" << std::endl;
     /// @todo replace by lru_cache once thread safe fixed
     prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
@@ -173,7 +175,8 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
                                           unsigned max_interaction_terms = 1,
                                           double red_threshold = 0,
                                           double min = 0, double max = 1,
-                                          double epsilon = 0.001) {
+                                          double epsilon = 0.001)
+{
     double mean = (min+max)/2;
     if (logger().isDebugEnabled()) {
         logger().debug() << "Call adaptive_incremental_selection(size="
@@ -236,7 +239,8 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
  */
 template<typename Scorer, typename FeatureSet>
 FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
-                              double threshold) {
+                              double threshold)
+{
     FeatureSet res;
     foreach(const typename FeatureSet::value_type& f, features) {
         FeatureSet sf = set_difference(features, res);
