@@ -104,7 +104,8 @@ FeatureSet correlation_selection(const FeatureSet& features,
             rank_em(emptySet);
         }
 
-        // Discard all but the highest scorers.
+        // Discard all but the highest scorers.  When done, 'tops'
+        // will hold FeatureSets with exactly 'i' elts each.
         tops.clear();
         unsigned j = 0;
         typename std::map<double, FeatureSet>::const_reverse_iterator mit;
@@ -136,6 +137,8 @@ FeatureSet correlation_selection(const FeatureSet& features,
         for (fi = res.begin(); fi != res.end(); fi++) {
             ss << " " << *fi;
         }
+        double mi = scorer(res);
+        ss << " MI=" << mi;
         logger().debug() << ss.str();
     }
     return res;

@@ -141,6 +141,20 @@ FeatureSet incremental_selection(const FeatureSet& features,
             res.insert(rel.begin(), rel.end());
         }
     }
+
+    // Log what it is that we actually got.
+    if (logger().isDebugEnabled()) {
+        std::stringstream ss;
+        ss << "Exit incremental_selection(), selected: ";
+        typename FeatureSet::const_iterator fi;
+        for (fi = res.begin(); fi != res.end(); fi++) {
+            ss << " " << *fi;
+        }
+        double mi = scorer(res);
+        ss << " MI=" << mi;
+        logger().debug() << ss.str();
+    }
+
     return res;
 }
 
