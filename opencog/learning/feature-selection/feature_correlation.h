@@ -38,56 +38,54 @@ namespace opencog {
 
 /**
  * Returns a set S of features following the algo:
- * 0) res = empty set
- * 1) Select single individual features with the highest mutual
- *    information (MI)
- * 2) Add one feature, compute new MI; keep only highest MI results.
- * 3) Repeat, until desired number of features is obtained.
- * 4) return res
+ * 0) set<FeatureSet> tops = empty set
+ * 1) For each FeatureSet fs in tops:
+ * 2)     Add one feature, compute new MI. Repeat 1)
+ * 3) Discard all but top_size of highest scorers
+ * 4) tops = the highest scorers.
+ * 5) Repeat, until tops hold FeatureSets of 'num_features' features.
+ * 6) return highest scorer from tops.
  *
  * @param features       The initial set of features to be selected from
  * @param scorer         The function to score a set of features.
  * @param num_features   The desired number of features to return.
+ * @param top_size       Number of top-correlated feature sets to explore.
  *
  * @return               The set of selected features
  */
 template<typename Scorer, typename FeatureSet>
 FeatureSet correlation_selection(const FeatureSet& features,
                                  const Scorer& scorer,
-                                 unsigned num_features)
+                                 unsigned num_features,
+                                 unsigned top_size=100)
 {
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "Call correlation_selection(num_features="
+                         << num_features
+                         << ", top_size=" << top_size
+                         <<")";
+    }
+
+
     typedef boost::shared_mutex shared_mutex;
     typedef boost::shared_lock<shared_mutex> shared_lock;
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 
-#if DEBUG
-    for (unsigned i = 1; i <= max_interaction_terms; ++i) {
-        std::set<FeatureSet> ps = powerset(features, i, true);
-        typename std::set<FeatureSet>::const_iterator psit;
-        for (psit = ps.begin(); psit != ps.end(); psit++) {
-            const FeatureSet &fs = *psit;
-            std::cout << "fs";
-            typename FeatureSet::const_iterator fi;
-            for (fi = fs.begin(); fi != fs.end(); fi++) {
-                std::cout << "-" << *fi;
-            }
-            double mi = scorer(fs);
-            std::cout << "\t" << mi << std::endl;
-        }
-        std::cout << "============================" << std::endl;
-    }
-#endif
-
+    // Start with the empty set
     std::set<FeatureSet> tops;
+
+    // Repeat, until we've gotton the highest-ranked FeatueSet
+    // that has 'num_features' in it.
     for (unsigned i = 1; i <= num_features; ++i) {
         std::map<double, FeatureSet> ranks;
 
-        // Rank the highest scorers
+        // Add one feature at a time to fs, and score the
+        // result.  Rank the result.
         auto rank_em = [&](const FeatureSet &fs)
         {
             typename FeatureSet::const_iterator fi;
-            for (fi = fs.begin(); fi != fs.end(); fi++) {
+            for (fi = features.begin(); fi != features.end(); fi++) {
                 FeatureSet prod = fs;
                 prod.insert(*fi);
 
@@ -100,84 +98,48 @@ FeatureSet correlation_selection(const FeatureSet& features,
         };
         OMP_ALGO::for_each(tops.begin(), tops.end(), rank_em);
 
+        // First time through, only.  Just rank one feature.
+        if (tops.size() == 0) {
+            FeatureSet emptySet;
+            rank_em(emptySet);
+        }
+
+        // Discard all but the highest scorers.
+        tops.clear();
+        unsigned j = 0;
+        typename std::map<double, FeatureSet>::const_reverse_iterator mit;
+        for (mit = ranks.rbegin(); mit != ranks.rend(); mit++) {
+#if DEBUG
+            std::cout << "MI=" << mit->first << " feats=";
+            typename FeatureSet::const_iterator fi;
+            FeatureSet ff = mit->second;
+            for (fi = ff.begin(); fi != ff.end(); fi++) {
+                std::cout << "-" << *fi;
+             }
+             std::cout << std::endl;
+#endif
+            tops.insert(mit->second);
+            j++;
+            if (top_size < j) break;
+        }
     }
 
+    // If we did this correctly, then the highest scorer is at the
+    // end of the set.  Return that.
     FeatureSet res;
-    // res.insert(rel.begin(), rel.end());
+    if (!tops.empty()) res = *tops.rbegin();
+
+    if (logger().isDebugEnabled()) {
+        std::stringstream ss;
+        ss << "Exit correlation_selection(), selected: ";
+        typename FeatureSet::const_iterator fi;
+        for (fi = res.begin(); fi != res.end(); fi++) {
+            ss << " " << *fi;
+        }
+        logger().debug() << ss.str();
+    }
     return res;
 }
-
-#if 0
-/**
- * like incremental_selection but take the number of feature to select
- * instead of a threshold. It searches it by bisection.
- */
-template<typename Scorer, typename FeatureSet>
-FeatureSet adaptive_incremental_selection(const FeatureSet& features,
-                                          const Scorer& scorer,
-                                          unsigned features_size_target,
-                                          unsigned max_interaction_terms = 1,
-                                          double red_threshold = 0,
-                                          double min = 0, double max = 1,
-                                          double epsilon = 0.001)
-{
-    double mean = (min+max)/2;
-    if (logger().isDebugEnabled()) {
-        logger().debug() << "Call adaptive_incremental_selection(size="
-                         << features_size_target
-                         << ", terms=" << max_interaction_terms
-                         << ", red thresh=" << red_threshold
-                         << ", min=" << min
-                         << ", max=" << max
-                         << ", epsi=" << epsilon
-                         <<") so selection-thres=" << mean;
-    }
-
-    FeatureSet res = incremental_selection(features, scorer, mean,
-                                           max_interaction_terms, red_threshold);
-    unsigned rsize = res.size();
-    // Logger
-    logger().debug("Selected %d features", rsize);
-    // ~Logger
-    if (isWithin(min, max, epsilon) || rsize == features_size_target)
-        return res;
-    else {
-        double nmin = rsize < features_size_target? min : mean;
-        double nmax = rsize < features_size_target? mean : max;
-        return adaptive_incremental_selection(features, scorer,
-                                              features_size_target,
-                                              max_interaction_terms,
-                                              red_threshold,
-                                              nmin, nmax, epsilon);
-    }
-}
-
-/**
- * like adaptive_incremental_selection but wrapping the scorer with a cache
- */
-template<typename Scorer, typename FeatureSet>
-FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
-                                                 const Scorer& scorer,
-                                                 unsigned features_size_target,
-                                                 unsigned max_interaction_terms = 1,
-                                                 double red_threshold = 0,
-                                                 double min = 0, double max = 1,
-                                                 double epsilon = 0.01)
-{
-    /// @todo replace by lru_cache once thread safe fixed
-    prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
-                                                     (int)max_interaction_terms),
-                                            scorer);
-    FeatureSet f = adaptive_incremental_selection(features, scorer_cache,
-                                                  features_size_target,
-                                                  max_interaction_terms,
-                                                  red_threshold,
-                                                  min, max, epsilon);
-    return f;
-}
-
-#endif
-
 
 } // ~namespace opencog
 
