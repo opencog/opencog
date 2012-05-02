@@ -82,15 +82,15 @@ struct feature_selection_parameters
     std::string output_file;
     std::vector<std::string> initial_features;
     unsigned target_size;
+    double threshold;
     unsigned long cache_size;
     unsigned jobs;
     double confi; //  confidence intensity
     double max_score;
-    double hc_fraction_of_remaining;
-    double inc_intensity;
     double inc_target_size_epsilon;
     double inc_red_intensity;
     unsigned inc_interaction_terms;
+    double hc_fraction_of_remaining;
 };
 
 template<typename Table, typename Optimize, typename Scorer>
@@ -203,7 +203,7 @@ void write_results(const Table& table,
 void incremental_feature_selection(Table& table,
                                    const feature_selection_parameters& fs_params)
 {
-    if (fs_params.inc_intensity > 0 || fs_params.target_size > 0) {
+    if (fs_params.threshold > 0 || fs_params.target_size > 0) {
         CTable ctable = table.compress();
         typedef MutualInformation<std::set<arity_t> > FeatureScorer;
         FeatureScorer fsc(ctable);
@@ -218,7 +218,7 @@ void incremental_feature_selection(Table& table,
                                                   0, 1,
                                                   fs_params.inc_target_size_epsilon)
             : cached_incremental_selection(features, fsc,
-                                           fs_params.inc_intensity,
+                                           fs_params.threshold,
                                            fs_params.inc_interaction_terms,
                                            fs_params.inc_red_intensity);
         if (selected_features.empty()) {
@@ -246,7 +246,7 @@ void correlated_feature_selection(Table& table,
         std::set<arity_t> selected_features = 
             correlation_selection(features, fsc,
                                   (unsigned) fs_params.target_size,
-                                  fs_params.inc_intensity);
+                                  fs_params.threshold);
 
         if (selected_features.empty()) {
             err_empty_features();

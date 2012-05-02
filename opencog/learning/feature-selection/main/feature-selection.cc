@@ -71,15 +71,15 @@ static const pair<string, string> log_level_opt("log-level", "l");
 static const pair<string, string> log_file_opt("log-file", "F");
 static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
 static const pair<string, string> cache_size_opt("cache-size", "s");
+static const pair<string, string> target_size_opt("target-size", "C");
+static const pair<string, string> threshold_opt("threshold", "T");
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> jobs_opt("jobs", "j");
-static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
-static const pair<string, string> inc_intensity_opt("inc-intensity", "T");
-static const pair<string, string> target_size_opt("target-size", "C");
 static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");
 static const pair<string, string> inc_redundant_intensity_opt("inc-redundant-intensity", "D");
 static const pair<string, string> inc_interaction_terms_opt("inc-interaction-terms", "U");
+static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -175,6 +175,15 @@ int main(int argc, char** argv)
             "specifies the number of features to be selected out of "
             "the dataset.  A value of 0 disables this option. \n")
 
+        (opt_desc_str(threshold_opt).c_str(),
+         value<double>(&fs_params.threshold)->default_value(0),
+            "Improvment threshold. Floating point number. "
+            "Specifies the threshold above which the mutual information "
+            "of a feature is considered to be significantly correlated "
+            "to the target.  A value of zero means that all features "
+            "will be selected. \n"
+            "For the -ainc algo only, the -C flag over-rides this setting.\n")
+
 // XXX XXX XXX XXXXXXXXXXXXXXXXXXX
 
         (opt_desc_str(initial_feature_opt).c_str(), value<vector<string> >(&fs_params.initial_features),
@@ -191,15 +200,6 @@ int main(int argc, char** argv)
         (opt_desc_str(confidence_penalty_intensity_opt).c_str(),
          value<double>(&fs_params.confi)->default_value(1.0),
          "Intensity of the confidence penalty, in [0,+Inf), 0 means no confidence penalty. This parameter influences how much importance we attribute to the confidence of the feature quality measure. The less samples in the data set, the more features the less confidence in the feature set quality measure.\n")
-
-        (opt_desc_str(inc_intensity_opt).c_str(),
-         value<double>(&fs_params.inc_intensity)->default_value(0),
-            "Incremental Selection parameter. Floating point number. "
-            "Specifies the threshold above which the mutual information "
-            "of a feature is considered to be significantly correlated "
-            "to the target.  Values should non-negative.  A value of "
-            "zero means that all features weill be selected. "
-            "The -C flag over-rides this setting.\n")
 
         (opt_desc_str(inc_redundant_intensity_opt).c_str(),
          value<double>(&fs_params.inc_red_intensity)->default_value(0.1),

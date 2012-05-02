@@ -203,15 +203,16 @@ l lx.
 Maximal Mutual Information.
 
 This algorithm searches for the featureset with the highest mutual
-information with regard to the target variable.  It does so by adding
-one feature at a time to the featureset, computing the mutual
-information, ranking the result, and keeping only the highest-ranked
-results.  It can be thought of as a kind-of hill-climbing in the space
+information (MI) with regard to the target variable.  It does so by
+adding one feature at a time to the featureset, computing the MI,
+ranking the result, and keeping only the highest-ranked results.
+It can be thought of as a kind-of hill-climbing in the space
 of mutual information.  This process is repeated until the desired
-number of features is found.  
+number of features is found, or until the MI score stops improving.
 
-The number of desired features must be specified with the \fB\-C\fP
-option, as otherwise, all features will be selected.
+The maximum number of desired features must be specified with the
+\fB\-C\fP option.  The \fB-T\fP option can be used to specify the
+minimum desired improvement in the MI score.
 T}
 
 \fBinc\fR@T{
@@ -236,22 +237,21 @@ MOSES Hillclimbing. Currently unsupported.
 T}
 .TE
 .TP
-.BI \-C\  num_features \fR,\ \fB\-\-inc\-target\-size= num_features
-Attempt to select \fInum_features\fR out of the total available set.
-Setting this flag over-rides the \fB\-T\fP option.
+.BI \-C\  num_features \fR,\ \fB\-\-target\-size= num_features
+Attempt to select at most \fInum_features\fR out of the input set.
 
-This option is ignored unless the chosen algorithm is \fBinc\fP or
-\fBcor\fP.
+This option is ignored unless the chosen algorithm is \fBcor\fP or
+\fBinc\fP.  When the selected algorithm is \fBinc\fP, then the 
+\fB\-T\fP option is ignored.
 
 .TP
-.BI \-T\  pressure \fR,\ \fB\-\-inc\-intensity= pressure
-Apply a selection pressure to the features being choosen. This should
-specify a floating-point value between zero and one. A value of zero
-means that it is likely that all features will be selected; a value
-of one means that it is likely that no features will be selected.
-Specifying the \fB-C\fP flag over-rides this option.
+.BI \-T\  threshold \fR,\ \fB\-\-threshold= threshold
+Apply a floating-point threshold for selecting a feature.
+A positive value prevents low-scoring features from being 
+selected; a value of zero or less will accept all features.
 
-This option is ignored unless the chosen algorithm is \fBinc\fP.
+This option is ignored unless the chosen algorithm is 
+\fBcor\fP or \fBinc\fP.
 
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
