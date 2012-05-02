@@ -52,7 +52,38 @@ using namespace boost::program_options;
 using boost::lexical_cast;
 using boost::trim;
 
+// Assorted defaults.
 const static unsigned max_filename_size = 255;
+
+static const string default_log_file_prefix = "feature-selection";
+static const string default_log_file_suffix = "log";
+static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
+
+// Program option names and abbreviations.
+static const pair<string, string> rand_seed_opt("random-seed", "r");
+static const pair<string, string> algo_opt("algo", "a");
+static const pair<string, string> input_data_file_opt("input-file", "i");
+static const pair<string, string> target_feature_opt("target-feature", "u");
+static const pair<string, string> initial_feature_opt("initial-feature", "f");
+static const pair<string, string> max_evals_opt("max-evals", "m");
+static const pair<string, string> output_file_opt("output-file", "o");
+static const pair<string, string> log_level_opt("log-level", "l");
+static const pair<string, string> log_file_opt("log-file", "F");
+static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
+static const pair<string, string> cache_size_opt("cache-size", "s");
+static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
+static const pair<string, string> max_score_opt("max-score", "A");
+static const pair<string, string> jobs_opt("jobs", "j");
+static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
+static const pair<string, string> inc_intensity_opt("inc-intensity", "T");
+static const pair<string, string> inc_target_size_opt("target-size", "C");
+static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");
+static const pair<string, string> inc_redundant_intensity_opt("inc-redundant-intensity", "D");
+static const pair<string, string> inc_interaction_terms_opt("inc-interaction-terms", "U");
+
+string opt_desc_str(const pair<string, string>& opt) {
+    return string(opt.first).append(",").append(opt.second);
+}
 
 /**
  * Display error message about unsupported type and exit
