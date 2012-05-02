@@ -103,7 +103,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
         std::set<FeatureSet> fss = powerset(tf, i, true);
 
         // Add the set of relevant features for that iteration in rel
-        rel.empty();
+        rel.clear();
         auto fss_view = random_access_view(fss);
         auto filter_relevant = [&](const FeatureSet* fs) {
             if (scorer(*fs) > threshold) {
