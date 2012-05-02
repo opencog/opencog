@@ -46,7 +46,6 @@ feature-selection \- dimensional reduction of datasets
 .RB [ \-j
 .IR jobs ]
 .RB [ \-L ]
-.IR logfile_base_name ]
 .RB [ \-l
 .IR loglevel ]
 .RB [ \-o
@@ -151,8 +150,8 @@ program.
 .TP
 .BI \-F\  filename \fR,\ \fB\-\-log\-file= filename
 Write debug log traces to \fIfilename\fR. If not specified, traces
-are written to \fBfeature-selection.log\fR.  This option is over-ridden
-by the \-L option.
+are written to \fBfeature-selection.log\fR.  If the \-L option
+is specified, this will be used as the base of the filename.
 .TP
 .BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
 The \fIfilename\fR specifies the input data file. The input table must
@@ -164,10 +163,11 @@ lines starting with a comment are ignored.
 The \fB\-i\fR flag may be specified multiple times, to indicate multiple
 input files. All files must have the same number of columns.
 .TP
-.BI \-L\ basename \fR,\ \fB\-\-log\-file\-base\-name= basename
-Write debug log traces to a filename constructed from
-\fIbasename\fP and the other option flags and their values.
-The filename will be truncated to a maximum of 255 characters.
+.BI \-L\fR,\ \fB\-\-log\-file\-dep\-opt
+Write debug log traces to a filename constructed from the
+\fIlogfile\fP specified in the \fB\-F\fP command, used as a prefix, 
+and the other option flags and their values.  The filename will 
+be truncated to a maximum of 255 characters.
 .TP
 .BI \-l\  loglevel \fR,\ \fB\-\-log\-level= loglevel
 Specify the level of detail for debug loging. Possible

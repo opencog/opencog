@@ -124,21 +124,18 @@ int main(int argc, char** argv)
 
         (opt_desc_str(log_file_opt).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
-         string("File name where to record the output log. This "
-         "option is overridden by the --")
-         .append(log_file_dep_opt_opt.first)
-         .append(" option.\n").c_str())
+         string("File name where to record the output log.\n")
+         .c_str())
 
         (opt_desc_str(log_file_dep_opt_opt).c_str(),
          string("Use an option-dependent logfile name. The name of "
           "the log is determined by the command-line options; the "
-          "specified string will form the base of the filename.  So, "
-          "for instance, if the option -r 123 is given, then the "
-          "logfile name will be feature-selection_random-seed_123.log.  "
+          "base (prefix) of the file is that given by the -F option.  "
+          "So, for instance, if the options -L foo -r 123 are given, "
+          "then the logfile name will be foo_random-seed_123.log.  "
           "The filename will be truncated to a maximum of ")
           .append(lexical_cast<string>(max_filename_size))
-          .append(" characters. This option takes precendence over "
-          "the -F option.\n").c_str())
+          .append(" characters.\n").c_str())
 
 
 // XXX XXX XXX XXXXXXXXXXXXXXXXXXX
@@ -209,11 +206,22 @@ int main(int argc, char** argv)
     }
 
     // Set log
-    if(log_file_dep_opt) {
-        std::set<std::string> ignore_opt{log_file_dep_opt_opt.first};
-        log_file = determine_log_name(default_log_file_prefix,
+    if (log_file_dep_opt) {
+        std::set<std::string> ignore_opt {
+            log_file_dep_opt_opt.first,
+            log_file_opt.first
+        };
+
+        // If the user specified a log file with -F then treat this
+        // as the prefix to the long filename.
+        string log_file_prefix = default_log_file_prefix;
+        if (log_file != default_log_file) {
+            log_file_prefix = log_file;
+        }
+
+        log_file = determine_log_name(log_file_prefix,
                                       vm, ignore_opt,
-                                      std::string(".").append(default_log_file_suffix));
+                    std::string(".").append(default_log_file_suffix));
     }
 
     type_tree inferred_tt = infer_data_type_tree(fs_params.input_file);

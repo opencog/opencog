@@ -68,7 +68,7 @@ static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> log_level_opt("log-level", "l");
 static const pair<string, string> log_file_opt("log-file", "F");
-static const pair<string, string> log_file_dep_opt_opt("log-file-base-name", "L");
+static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
 static const pair<string, string> cache_size_opt("cache-size", "s");
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> max_score_opt("max-score", "A");
@@ -103,7 +103,8 @@ void log_selected_features(arity_t old_arity, const Table& ftable) {
 
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
-struct feature_selection_parameters {
+struct feature_selection_parameters
+{
     std::string algorithm;
     unsigned int max_evals;
     std::string input_file;
