@@ -43,12 +43,19 @@ namespace opencog {
  * 2)     Add one feature, compute new MI. Repeat 1)
  * 3) Discard all but top_size of highest scorers
  * 4) tops = the highest scorers.
- * 5) Repeat, until tops hold FeatureSets of 'num_features' features.
- * 6) return highest scorer from tops.
+ * 5) If mutual information hasn't improved by threshold,
+ *    then skip next step.
+ * 6) Repeat, until tops holds FeatureSets of at most 
+ *    'num_features' features.
+ * 7) return highest scorer from tops.
  *
  * @param features       The initial set of features to be selected from
  * @param scorer         The function to score a set of features.
- * @param num_features   The desired number of features to return.
+ * @param num_features   The maximum number of features to return.
+ * @param threshold      Minimum desired improvement in mutual
+ *                       information from each addition of a feature
+ *                       to the feature set.  If improvement is not seen
+ *                       then search is halted.
  * @param top_size       Number of top-correlated feature sets to explore.
  *
  * @return               The set of selected features
@@ -57,11 +64,13 @@ template<typename Scorer, typename FeatureSet>
 FeatureSet correlation_selection(const FeatureSet& features,
                                  const Scorer& scorer,
                                  unsigned num_features,
-                                 unsigned top_size=100)
+                                 double threshold = 0.0,
+                                 unsigned top_size = 100)
 {
     if (logger().isDebugEnabled()) {
         logger().debug() << "Call correlation_selection(num_features="
                          << num_features
+                         << ", threshold=" << threshold
                          << ", top_size=" << top_size
                          <<")";
     }
@@ -74,10 +83,12 @@ FeatureSet correlation_selection(const FeatureSet& features,
 
     // Start with the empty set
     std::set<FeatureSet> tops;
+    double previous_high_score = -1.0;
 
     // Repeat, until we've gotton the highest-ranked FeatueSet
-    // that has 'num_features' in it.
+    // that has at most 'num_features' in it.
     for (unsigned i = 1; i <= num_features; ++i) {
+
         std::map<double, FeatureSet> ranks;
 
         // Add one feature at a time to fs, and score the
@@ -123,6 +134,15 @@ FeatureSet correlation_selection(const FeatureSet& features,
             j++;
             if (top_size < j) break;
         }
+
+        // Get the highest MI found.  If these are not getting better,
+        // then stop looking for new features.
+        double high_score = ranks.rbegin()->first;
+        logger().debug("corr_sel: featureset size %d MI=%f", i, high_score);
+        if (high_score - previous_high_score < threshold) break;
+
+        // Record the highest score found.
+        previous_high_score = high_score;
     }
 
     // If we did this correctly, then the highest scorer is at the

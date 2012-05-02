@@ -245,7 +245,8 @@ void correlated_feature_selection(Table& table,
         std::set<arity_t> features(ir.begin(), ir.end());
         std::set<arity_t> selected_features = 
             correlation_selection(features, fsc,
-                                  (unsigned) fs_params.target_size);
+                                  (unsigned) fs_params.target_size,
+                                  fs_params.inc_intensity);
 
         if (selected_features.empty()) {
             err_empty_features();
