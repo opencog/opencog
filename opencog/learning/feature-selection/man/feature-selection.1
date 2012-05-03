@@ -216,7 +216,16 @@ number of features is found, or until the MI score stops improving.
 
 The maximum number of desired features must be specified with the
 \fB\-C\fP option.  The \fB-T\fP option can be used to specify the
-minimum desired improvement in the MI score.
+minimum desired improvement in the MI score.  That is, the algorithm
+keeps adding features to the feature set until the improvment in the MI
+score does not exceed this threshold.  Features are added in random
+order, so that if there are redundant features, only one will be 
+added, depending on the random seed given with the \fB\-r\fP option.
+
+Two features are considered redundant if they are highly correlated,
+so that adding either one of the two may improve MI a lot, but adding
+the second will not.  Thus, only one is really needed; using the 
+\fB\-T\fP option helps eliminate redundant features.
 T}
 
 \fBinc\fR@T{
@@ -257,6 +266,14 @@ selected; a value of zero or less will accept all features.
 This option is ignored unless the chosen algorithm is 
 \fBmmi\fP or \fBinc\fP.
 
+.TP
+.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
+Use \fIseed\fR as the seed value for the pseudo-random number generator.
+The various algorithms use the random number generator in different
+ways.  The \fPmmi\fP algorthm explicitly shuffles features, so that 
+if the dataset contains multiple redundant features, one will be 
+chosen randomly.
+
 .\" ============================================================
 .SS "Incremental algorithm options"
 These options only apply to the \fB\-ainc\fP algorithm.
@@ -277,12 +294,6 @@ is not able to directly select a fixed number of features; rather, it
 dynamically adjusts the threshold until the desired number of features
 results. This option controls the smallest adjustment made.
 
-.TP
-.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
-Use \fIseed\fR as the seed value for the pseudo-random number generator.
-The \fBinc\fP and \fPhc\fP algorthms make use of the random number
-generator, and so results may depend on the random seed.
-
 .PP
 .\" ============================================================
 .SH TODO
@@ -292,8 +303,6 @@ the following, because they are MOSES-related: -A -O
 -U
 
 What's this?: -f -m ??
-
-Does -r actually do anything for -ainc ??
 
 .SH SEE ALSO
 .br

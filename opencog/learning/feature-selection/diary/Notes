@@ -115,3 +115,11 @@ a feature set 7-10-11-22-29 which is ranked 6th.
 I guess these are all reasonable rankings.
 
 
+Shuffle
+-------
+-T0.02
+selected:  8 9 10 11 22 25 26 29 31 32 33 36 MI=0.640749
+selected:  8 9 10 11 21 25 26 29 31 32 33 36 MI=0.640749 -r2
+selected:  8 9 10 11 22 25 26 29 31 32 33 36 MI=0.640749 -r3
+selected:  8 9 10 11 22 25 26 29 31 32 33 36 MI=0.640749 -r4
+selected:  8 9 10 11 21 25 26 29 31 32 33 36 MI=0.640749 -r5

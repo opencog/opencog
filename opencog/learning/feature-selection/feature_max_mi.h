@@ -88,6 +88,15 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     if (features.size() < num_features)
         num_features = features.size();
 
+    // Randomize order, so that different redundant features
+    // get a chance to show up in the final list. Copy set to
+    // vector, then shuffle the vector.
+    std::vector<typename FeatureSet::value_type> shuffle;
+    foreach(typename FeatureSet::value_type v, features)
+        shuffle.push_back(v);
+    auto shr = [&](ptrdiff_t i) { return randGen().randint(i); };
+    random_shuffle(shuffle.begin(), shuffle.end(), shr);
+
     // Repeat, until we've gotton the highest-ranked FeatueSet
     // that has at most 'num_features' in it.
     for (unsigned i = 1; i <= num_features; ++i) {
@@ -98,8 +107,8 @@ FeatureSet max_mi_selection(const FeatureSet& features,
         // result.  Rank the result.
         auto rank_em = [&](const FeatureSet &fs)
         {
-            typename FeatureSet::const_iterator fi;
-            for (fi = features.begin(); fi != features.end(); fi++) {
+            // typename FeatureSet::const_iterator fi;
+            for (auto fi = shuffle.begin(); fi != shuffle.end(); fi++) {
 
                 if (fs.end() != fs.find(*fi)) continue;
 
