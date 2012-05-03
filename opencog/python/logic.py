@@ -156,9 +156,9 @@ class Chainer:
     def bc_step(self):
         assert self.bc_later
         #print 'bcq', map(str, self.bc_later)
-        next_target = self.bc_later.pop_first() # Breadth-first search
+        #next_target = self.bc_later.pop_first() # Breadth-first search
         #next_target = self.bc_later.pop_last() # Depth-first search
-        #next_target = self.get_fittest(self.bc_later) # Best-first search
+        next_target = self.get_fittest(self.bc_later) # Best-first search
 
         next_target = standardize_apart(next_target)
 
@@ -669,6 +669,35 @@ class Chainer:
     #    #print best
     #    return best
 
+    def get_fittest(self, queue):
+        def get_coords(expr):
+            name = expr.op.name
+            tuple_str = name[3:]
+            coords = tuple(map(int, tuple_str[1:-1].split(',')))
+            return coords
+            
+        def get_distance(expr):
+            # the location being explored
+            l = get_coords(expr)
+            # the goal
+            t = (90, 90, 98)#get_coords(self.target)
+            dist = abs(l[0] - t[0]) + abs(l[1] - t[1]) + abs(l[2] - t[2])
+            return dist
+        
+        def score(expr):
+            if not isinstance(expr.op, Atom):
+                return 1000
+            else:
+                return - get_distance(expr)
+        
+        best = max(queue, key = score)
+        print best
+        if isinstance(best.op, Atom):
+            print 'distance', get_distance(best)
+        queue.remove(best)
+        
+        return best
+
 def do_planning(space):
     try:
         # ReferenceLink ConceptNode:'psi_demand_goal_list' (ListLink stuff)
@@ -764,6 +793,9 @@ class PLNviz:
 
     @check_connected
     def outputTarget(self, target, parent, index, rule=None):
+        if str(target) == '$1':
+            return
+        
         self.parents[target].add(parent)
 
         #target_id = str(hash(target))
