@@ -64,22 +64,22 @@ static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> algo_opt("algo", "a");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
-static const pair<string, string> initial_feature_opt("initial-feature", "f");
 static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> log_level_opt("log-level", "l");
 static const pair<string, string> log_file_opt("log-file", "F");
 static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
-static const pair<string, string> cache_size_opt("cache-size", "s");
 static const pair<string, string> target_size_opt("target-size", "C");
 static const pair<string, string> threshold_opt("threshold", "T");
-static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
-static const pair<string, string> max_score_opt("max-score", "A");
 static const pair<string, string> jobs_opt("jobs", "j");
 static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");
 static const pair<string, string> inc_redundant_intensity_opt("inc-redundant-intensity", "D");
 static const pair<string, string> inc_interaction_terms_opt("inc-interaction-terms", "U");
+static const pair<string, string> hc_initial_feature_opt("initial-feature", "f");
+static const pair<string, string> hc_max_score_opt("max-score", "A");
+static const pair<string, string> hc_confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
+static const pair<string, string> hc_cache_size_opt("cache-size", "s");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -113,10 +113,6 @@ int main(int argc, char** argv)
     desc.add_options()
         ("help,h", "Produce help message.\n")
 
-        (opt_desc_str(rand_seed_opt).c_str(),
-         value<unsigned long>(&rand_seed)->default_value(1),
-         "Random seed.\n")
-
         (opt_desc_str(algo_opt).c_str(),
          value<string>(&fs_params.algorithm)->default_value(mmi),
          string("Feature selection algorithm. Supported algorithms are:\n")
@@ -131,6 +127,7 @@ int main(int argc, char** argv)
              .append(hc).append(" for hillclimbing (unsupported),\n")
              .append(inc).append(" for incremental mutual information.\n").c_str())
 
+        // ======= File I/O opts =========
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&fs_params.input_file),
          "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
@@ -142,10 +139,6 @@ int main(int argc, char** argv)
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&fs_params.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
-
-        (opt_desc_str(jobs_opt).c_str(),
-         value<unsigned>(&fs_params.jobs)->default_value(1),
-         string("Number of threads to use.\n").c_str())
 
         (opt_desc_str(log_level_opt).c_str(),
          value<string>(&log_level)->default_value("DEBUG"),
@@ -168,6 +161,10 @@ int main(int argc, char** argv)
           .append(lexical_cast<string>(max_filename_size))
           .append(" characters.\n").c_str())
 
+        // ======= Generic algo opts =========
+        (opt_desc_str(jobs_opt).c_str(),
+         value<unsigned>(&fs_params.jobs)->default_value(1),
+         string("Number of threads to use.\n").c_str())
 
         (opt_desc_str(target_size_opt).c_str(),
          value<unsigned>(&fs_params.target_size)->default_value(0),
@@ -184,16 +181,11 @@ int main(int argc, char** argv)
             "will be selected. \n"
             "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
-// XXX XXX XXX XXXXXXXXXXXXXXXXXXX
+        (opt_desc_str(rand_seed_opt).c_str(),
+         value<unsigned long>(&rand_seed)->default_value(1),
+         "Random seed.\n")
 
-        (opt_desc_str(cache_size_opt).c_str(),
-         value<unsigned long>(&fs_params.cache_size)->default_value(1000000),
-         "Cache size, so that identical candidates are not re-evaluated, 0 means no cache.\n")
-
-        (opt_desc_str(confidence_penalty_intensity_opt).c_str(),
-         value<double>(&fs_params.confi)->default_value(1.0),
-         "Intensity of the confidence penalty, in [0,+Inf), 0 means no confidence penalty. This parameter influences how much importance we attribute to the confidence of the feature quality measure. The less samples in the data set, the more features the less confidence in the feature set quality measure.\n")
-
+        // ======= Incremental selection params =======
         (opt_desc_str(inc_redundant_intensity_opt).c_str(),
          value<double>(&fs_params.inc_red_intensity)->default_value(0.1),
          "Incremental Selection parameter. Floating-point value must "
@@ -213,13 +205,23 @@ int main(int argc, char** argv)
          "selection. Higher values make the feature selection more "
          "accurate but is combinatorially more computationally expensive.\n")
 
-        (opt_desc_str(max_score_opt).c_str(),
-         value<double>(&fs_params.max_score)->default_value(1),
+        // ======= Hill-climbing only params =======
+        (opt_desc_str(hc_max_score_opt).c_str(),
+         value<double>(&fs_params.hc_max_score)->default_value(1),
          "Hillclimbing parameter.  The max score to reach, once "
          "reached feature selection halts.\n")
 
-        (opt_desc_str(initial_feature_opt).c_str(), 
-         value<vector<string> >(&fs_params.initial_features),
+        (opt_desc_str(hc_confidence_penalty_intensity_opt).c_str(),
+         value<double>(&fs_params.hc_confi)->default_value(1.0),
+         "Hillclimbing parameter.  Intensity of the confidence "
+         "penalty, in the range [0,+Inf).  Zero means no confidence "
+         "penalty. This parameter influences how much importance is "
+         "attributed to the confidence of the quality measure. The "
+         "fewer samples in the data set, the more features the "
+         "less confidence in the feature set quality measure.\n")
+
+        (opt_desc_str(hc_initial_feature_opt).c_str(), 
+         value<vector<string> >(&fs_params.hc_initial_features),
          "Hillclimbing parameter.  Initial feature to search from.  "
          "This option can be used as many times as there are features, "
          "to have them included in the initial feature set. If the "
@@ -235,6 +237,11 @@ int main(int argc, char** argv)
          value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.1),
          "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
+
+        (opt_desc_str(hc_cache_size_opt).c_str(),
+         value<unsigned long>(&fs_params.hc_cache_size)->default_value(1000000),
+         "Hillclimbing parameter.  Cache size, so that identical "
+         "candidates are not re-evaluated.   Zero means no cache.\n")
 
         ;
 

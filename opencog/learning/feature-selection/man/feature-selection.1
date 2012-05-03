@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.\" Man page for feature-seection
+.\" Man page for feature-selection
 .\"
 .\" Copyright (C) 2012 Linas Vepstas
 .\"
@@ -65,11 +65,11 @@ feature-selection \- dimensional reduction of datasets
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
-.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
+.\" \fI<whatever>\fP escape sequences to invoke bold face and italics,
 .\" respectively.
 \fBfeature-selection\fP is a command-line utility for performing
 dimensional reduction of large datasets, so as to prepare them 
-for a later regession analysis.  It is intended to be used to filter
+for a later regression analysis.  It is intended to be used to filter
 data before it is fit with the \fBmoses\fP machine-learning program,
 but it can be used in more general settings.  
 
@@ -130,7 +130,7 @@ are not supported.
 .SH OPTIONS
 .PP
 Options fall into three classes: options for controlling input and
-output, options for controlling the algorithm behaviour, and general
+output, options for controlling the algorithm behavior, and general
 options.
 
 .SS "General options"
@@ -161,7 +161,7 @@ is specified, this will be used as the base of the filename.
 .TP
 .BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
 The \fIfilename\fR specifies the input data file. The input table must
-be in 'delimiter\-separated value' (DSV) format.  Valid seperators
+be in 'delimiter\-separated value' (DSV) format.  Valid separators
 are comma (CSV, or comma-separated values), blanks and tabs
 (whitespace). Columns correspond to features; there is one sample per
 (non-blank) row. Comment characters are hash, bang and semicolon (#!;)
@@ -176,7 +176,7 @@ and the other option flags and their values.  The filename will
 be truncated to a maximum of 255 characters.
 .TP
 .BI \-l\  loglevel \fR,\ \fB\-\-log\-level= loglevel
-Specify the level of detail for debug loging. Possible
+Specify the level of detail for debug logging. Possible
 values for \fIloglevel\fR are \fBNONE\fR, \fBERROR\fR, \fBWARN\fR,
 \fBINFO\fR, \fBDEBUG\fR, and \fBFINE\fR. Case does not matter.
 Caution: excessive logging detail can lead to program slowdown.
@@ -195,7 +195,7 @@ CSV/DSV file formats.
 .\" ============================================================
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
-The most important of these, for controlling behaviour, are the
+The most important of these, for controlling behavior, are the
 \fB\-a\fR, \fB\-C\fR and \fB\-T\fR flags.
 
 .TP
@@ -220,7 +220,7 @@ number of features is found, or until the MI score stops improving.
 The maximum number of desired features must be specified with the
 \fB\-C\fP option.  The \fB-T\fP option can be used to specify the
 minimum desired improvement in the MI score.  That is, the algorithm
-keeps adding features to the feature set until the improvment in the MI
+keeps adding features to the feature set until the improvement in the MI
 score does not exceed this threshold.  Features are added in random
 order, so that if there are redundant features, only one will be 
 added, depending on the random seed given with the \fB\-r\fP option.
@@ -273,7 +273,7 @@ This option is ignored unless the chosen algorithm is
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 The various algorithms use the random number generator in different
-ways.  The \fPmmi\fP algorthm explicitly shuffles features, so that 
+ways.  The \fPmmi\fP algorithm explicitly shuffles features, so that 
 if the dataset contains multiple redundant features, one will be 
 chosen randomly.
 
@@ -282,7 +282,7 @@ chosen randomly.
 These options only apply to the \fB\-ainc\fP algorithm.
 
 .TP
-.BI \-D\  fraction \fR,\ \fB\-\-int\-redundant\-intesity= fraction
+.BI \-D\  fraction \fR,\ \fB\-\-int\-redundant\-intensity= fraction
 Threshold fraction used to reject redundant features. If a feature
 contributes less than \fIfraction\fP * \fIthreshold\fP to the total
 score, it will be rejected from the final feature set.  That is, if
@@ -302,17 +302,15 @@ results. This option controls the smallest adjustment made.
 The number of variables used in computing the joint entropy.  Normally,
 this algorithm never computes the joint entropy of multiple features;
 it only considers the effect of a single feature at a time on the
-target (that is, it only computes the mutual inforrmation between one
-featuree and the target).  Specifying a number greater than one will
+target (that is, it only computes the mutual information between one
+feature and the target).  Specifying a number greater than one will
 consider the mutual information between multiple features and the
 target.  Note that using this calculation is combinatorially more 
-computatinally expensive, as all possible choices are considered.
+computationally expensive, as all possible choices are considered.
 .PP
 .\" ============================================================
 .SH TODO
-Document the MOSES-algorithm and the options tht it takes: -A -f -m -O
-
-What's this?: -c ??
+Document the MOSES-algorithm and the options that it takes: -A -c -f -m -O -s
 
 .SH SEE ALSO
 .br

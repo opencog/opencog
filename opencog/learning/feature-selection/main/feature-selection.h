@@ -80,17 +80,17 @@ struct feature_selection_parameters
     std::string input_file;
     std::string target_feature;
     std::string output_file;
-    std::vector<std::string> initial_features;
     unsigned target_size;
     double threshold;
-    unsigned long cache_size;
     unsigned jobs;
-    double confi; //  confidence intensity
-    double max_score;
     double inc_target_size_epsilon;
     double inc_red_intensity;
     unsigned inc_interaction_terms;
+    double hc_max_score;
+    double hc_confi; //  confidence intensity
+    unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
+    std::vector<std::string> hc_initial_features;
 };
 
 template<typename Table, typename Optimize, typename Scorer>
@@ -140,7 +140,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
     instance res(fields.packed_width());
     vector<std::string> labels = readInputLabels(fs_params.input_file);
     vector<std::string> vif; // valid initial features, used for logging
-    foreach(const std::string& f, fs_params.initial_features) {
+    foreach(const std::string& f, fs_params.hc_initial_features) {
         size_t idx = std::distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found
             *(fields.begin_bit(res) + idx) = true;
@@ -176,13 +176,13 @@ void moses_feature_selection(Table& table,
     instance init_inst = initial_instance(fs_params, fields);
     // define feature set quality scorer
     typedef MICScorerTable<set<arity_t> > FSScorer;
-    FSScorer fs_sc(table, fs_params.confi);
+    FSScorer fs_sc(table, fs_params.hc_confi);
     typedef moses_based_scorer<FSScorer> MBScorer;
     MBScorer mb_sc(fs_sc, fields);
     // possibly wrap in a cache
-    if(fs_params.cache_size > 0) {
+    if(fs_params.hc_cache_size > 0) {
         typedef prr_cache_threaded<MBScorer> ScorerCache;
-        ScorerCache sc_cache(fs_params.cache_size, mb_sc);
+        ScorerCache sc_cache(fs_params.hc_cache_size, mb_sc);
         moses_feature_selection(table, fields, deme, init_inst, optimize,
                                 sc_cache, fs_params);
         // Logger
@@ -266,8 +266,6 @@ void max_mi_feature_selection(Table& table,
 void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params)
 {
-    // setting moses optimization parameters
-    optim_parameters op_param(20, fs_params.max_score, 4, 0.0);
     if (fs_params.algorithm == un)  {
         // XXX will we ever support this? I don't think so...
         OC_ASSERT(false, "TODO");
@@ -275,6 +273,8 @@ void feature_selection(Table& table,
         // XXX will we ever support this? I don't think so...
         OC_ASSERT(false, "TODO");        
     } else if (fs_params.algorithm == hc) {
+        // setting moses optimization parameters
+        optim_parameters op_param(20, fs_params.hc_max_score, 4, 0.0);
         hc_parameters hc_param(true, // widen distance if no improvement
                                false,
                                false, // crossover
