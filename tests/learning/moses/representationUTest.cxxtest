@@ -69,6 +69,13 @@ public:
                            ignore_ops);
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
+
+        rep.ostream_prototype(std::cout << "Prototype = ") << std::endl;
+
+        std::stringstream ss;
+        string expected_str("+(*(+(*(+(*(+(*(+(*($1 +([1.75] *([0] $1))) [1.875] *([0] $1)) $1 +([1] *([0] $1))) [0.75] *([0] $1)) +([0.75] *([0] $1))) [1.375] *([0] $1)) +([0.75] *([0] $1))) [0] *([0] $1)) [1]) [-1.25])");
+        rep.ostream_prototype(ss);
+        TS_ASSERT_EQUALS(ss.str(), expected_str);
     }
 
     void test_boolean_rep1()
@@ -85,6 +92,14 @@ public:
         representation rep(r2, r3, tr, tt, vertex_set());
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
+
+        rep.ostream_prototype(std::cout << "Prototype = ") << std::endl;
+
+        std::stringstream ss;
+        string expected_str("or(and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or](!$1 $3) [nil or !or](!$2 $3) [nil or !or](!$1 $2) or([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and](!$2 $3) [nil and !and](!$1 $3) [nil and !and](!$1 $2))) [nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and]($1 $3) [nil and !and](!$1 $2) [nil and !and]($1 $2) and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or](!$1 $2) [nil or !or]($1 $2) [nil or !or](!$1 $3)))");
+        rep.ostream_prototype(ss);
+        TS_ASSERT_EQUALS(ss.str(), expected_str);
+
     }
 
     void test_boolean_rep2()
