@@ -25,7 +25,7 @@ class ForestExtractor:
         # policy
         # Whether to create miner-friendly output, rather than human-friendly output.
         # Makes it output all object-nodes with the same label. May be more useful for visualisation anyway.
-        self.miner_friendly = True
+        self.miner_friendly = False
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
@@ -106,7 +106,9 @@ class ForestExtractor:
             except(self.UnwantedAtomException):
                 #print 'UnwantedAtomException'
                 continue
-            objects = tuple(map(Tree,objects))
+            # fishgram wants objects as trees for consistency, but
+            # gephi output class wants atoms...
+            #objects = tuple(map(Tree,objects))
             
             #print tree,  [str(o) for o in objects]
             
@@ -119,7 +121,8 @@ class ForestExtractor:
                 self.bindings.append(objects)
                 
                 for obj in objects:
-                    if obj.get_type() != t.TimeNode:
+                    #if obj.get_type() != t.TimeNode:
+                    if obj.t != t.TimeNode:
                         self.all_objects.add(obj)
                     else:
                         self.all_timestamps.add(obj)
@@ -173,8 +176,9 @@ class ForestExtractor:
             self.output_tree(self.all_trees_atoms[i],  self.all_trees[i],  self.bindings[i])
         self.writer.stop()
 
-    def is_object(self,  atom):
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) # or self.is_action_instance(atom)# or self.is_action_element(atom)
+    def is_object(self, atom):
+        return atom.name.startswith('at ')
+        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) or atom.name.startswith('at ') # or self.is_action_instance(atom)# or self.is_action_element(atom)
         
     def is_action_instance(self, atom):        
         return atom.t == t.ConceptNode and len(atom.name) and atom.name[-1].isdigit()
@@ -197,7 +201,8 @@ class ForestExtractor:
                 return False
         else:            
             if any([atom.is_a(ty) for ty in 
-                    [t.SimultaneousEquivalenceLink, t.SimilarityLink,  t.ImplicationLink, t.ReferenceLink] ]):
+                    [t.SimultaneousEquivalenceLink, t.SimilarityLink, # t.ImplicationLink,
+                     t.ReferenceLink] ]):
                 return False
 
         return True
@@ -478,26 +483,26 @@ class SubdueTextOutput:
         print output,
 
 # Hacks
-#class GephiMindAgent(opencog.cogserver.MindAgent):
-#    def __init__(self):
-#        self.cycles = 1
-#
-#    def run(self,atomspace):
-#
-#        try:
-#            #import pdb; pdb.set_trace()
-##            g = GraphConverter(atomspace,
-##                FishgramFilter(atomspace,
-##                SubdueTextOutput(atomspace)))
-##            g.output()
-#
-#            te = ForestExtractor(atomspace, GephiOutput(atomspace))
-#            te.output()
-#        except KeyError,  e:
-#            KeyError
-#        except Exception, e:
-#            import traceback; traceback.print_exc(file=sys.stdout)
-#        self.cycles+=1
+class GephiMindAgent(opencog.cogserver.MindAgent):
+    def __init__(self):
+        self.cycles = 1
+
+    def run(self,atomspace):
+
+        try:
+            #import pdb; pdb.set_trace()
+#            g = GraphConverter(atomspace,
+#                FishgramFilter(atomspace,
+#                SubdueTextOutput(atomspace)))
+#            g.output()
+
+            te = ForestExtractor(atomspace, GephiOutput(atomspace))
+            te.output()
+        except KeyError,  e:
+            KeyError
+        except Exception, e:
+            import traceback; traceback.print_exc(file=sys.stdout)
+        self.cycles+=1
 
 print __name__
 if __name__ == "__main__":

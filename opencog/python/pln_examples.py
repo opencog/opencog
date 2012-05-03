@@ -44,6 +44,7 @@ both/woa_demo_test.conf
 both/AnotBdemo_partial_test.conf
 #both/28_test.conf
 bc/plus_test.conf
+bc/new/pathfinding_test.conf
 ''')
 
 #files_list = '''bc/plus_test.conf'''
@@ -51,6 +52,9 @@ bc/plus_test.conf
 #both/new/BasicForAllDemo_test.conf
 #both/new/BasicForAllDemo2_test.conf
 #'''
+files_list = '''
+bc/new/pathfinding_test.conf
+'''
 
 files = files_list.split('\n')
 

@@ -210,6 +210,15 @@ def atom_from_tree(tree, a):
 def find(template, atoms):
     return [a for a in atoms if unify(tree_from_atom(a), template, {}) != None]
 
+def find_tree(template, atoms):
+    def convert(x):
+        if isinstance(x,Atom):
+            return tree_from_atom(x)
+        else:
+            return x
+    
+    return [convert(a) for a in atoms if unify(convert(a), template, {}) != None]
+
 class Match(object):
     def __init__(self, subst = {}, atoms = [], conj = ()):
         self.subst = subst

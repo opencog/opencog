@@ -10,6 +10,8 @@ from tree import *
 def rules(a, deduction_types):
     rules = []
 
+    path_rules(a)
+
     # All existing Atoms
     for obj in a.get_atoms_by_type(t.Atom):
         # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
@@ -171,6 +173,98 @@ def rules(a, deduction_types):
         rules.append(r)
 
     return rules
+
+def path_rules(a):
+    # Pathfinding experiments
+    template =  T('LatestLink',
+                    T('AtTimeLink',
+                        Var(-1),
+                        T('EvaluationLink',
+                            T(a.add(t.PredicateNode, 'AGISIM_position')),
+                            T('ListLink',
+                                Var(0),
+                                Var(1),
+                                Var(2),
+                                Var(3)
+                            )
+                        )
+                    )
+                )
+    
+    print template
+    
+    def change_position(coords):
+        s = {Var(i+1):T(a.add(t.NumberNode, str(c))) for (i, c) in enumerate(coords)}
+        return subst(s, template)
+    
+    def get_position(tr):
+        s = unify(template, tr, {})
+        return tuple(float(s[Var(i)].op.name) for i in [1,2,3])
+    
+    def is_block(tr):
+        s = unify(template, tr, {})
+        return s[Var(0)].op.name.startswith('id_CHUNK')
+    
+    lls = a.get_atoms_by_type(t.LatestLink)
+    pls = find_tree(template,lls)
+    print len(pls)
+    
+    # add in the ground blocks.
+    ground = []
+    z = 98
+    for x in xrange(0,100):
+        for y in xrange(0,100):
+            #p1 = change_position((x,y,z))
+            #ground.append(p1)
+            p1c = (x,y,z)
+            
+            ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)] #,(x,y,z-1),(x,y,z+1)]
+            for n in ns:
+                #p2 = change_position((i,j,z))
+                
+                r = T('ImplicationLink',
+                    a.add(t.ConceptNode,'at %s' % str(p1c)),
+                    a.add(t.ConceptNode,'at %s' % str(n))
+                )
+                ra = atom_from_tree(r, a)
+                ra.tv = TruthValue(1,confidence_to_count(1.0))
+                #print ra
+    
+    for pl in pls:
+        if not is_block(pl):
+            continue
+        
+        coords = get_position(pl)
+        #print coords
+        (x,y,z) = coords
+        (x,y,z) = (x-0.5,y-0.5,z)
+        ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z),(x,y,z-1),(x,y,z+1)]
+        #print pl
+        for n in ns:
+            neighbor_block_template = change_position(n)
+            #print neighbor_block_template
+            tmp = find_tree(neighbor_block_template, pls)
+            # Pray there is nothing else at that exact coordinate
+            assert len(tmp) < 2
+            
+            if len(tmp):
+                # Can go straight from one block to another
+                tr = T('ImplicationLink',
+                    a.add(t.ConceptNode,'at %s' % str(coords)),
+                    a.add(t.ConceptNode,'at %s' % str(n))
+                )
+                #print tr
+                atom_from_tree(tr, a).tv = TruthValue(1,confidence_to_count(1.0))
+    
+    return []
+    
+    
+    for obj in a.get_atoms_by_type(t.ObjectNode):
+        if not obj.name.startswith('id_CHUNK'):
+            continue
+        
+        block = T(obj)
+
 
 def match_axiom(space,target):
     if isinstance(target.op, Atom):

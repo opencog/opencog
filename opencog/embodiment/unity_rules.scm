@@ -398,107 +398,107 @@
 ; Rules related to EnergyDemandGoal
 ;
 
-; build a block with random texture. offset should be a NumberNode
-(define (build_dark_block offset)
-    (OrLink
-        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Stone") )
-        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Dirt") )
-        (add_action (GroundedSchemaNode "build_block") offset (WordNode "TopSoil") )
-        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Light") )
-    )
-)
-
-(define (build_light_block offset)
-    (OrLink
-        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Lava") )
-        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Leaves") )
-    )
-)
-
-(define multiple_step_forward
-    (SequentialAndLink
-        (build_dark_block (NumberNode "0") )
-;        (add_action (GroundedSchemaNode "step_forward") ) ; TODO: direction for step_backward is wrong sometimes
-        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
-    ) 
-)
-
-; Rotate randomly
-(define random_rotate_right
-    (OrLink
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "73") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "79") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "83") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "89") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "97") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "101") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "103") )  
-    )
-)
-
-(define random_rotate_left
-    (OrLink
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-73") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-79") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-83") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-89") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-97") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-101") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-103") )  
-    )
-)
-
-(define random_rotate_back
-    (OrLink
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "173") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-179") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "181") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "-191") )  
-        (add_action (GroundedSchemaNode "rotate") (NumberNode "193") )  
-    )
-)
-
-(define random_rotate
-    (OrLink
-        random_rotate_left
-        random_rotate_left
-        random_rotate_left
-        random_rotate_right
-        random_rotate_right
-        random_rotate_right
-        random_rotate_right
-        random_rotate_back
-    )
-)
-
-(define random_build_destroy_blocks
-    (SequentialAndLink
-        random_rotate
-        (build_dark_block (NumberNode "1") )
-        (OrLink
-            (SequentialAndLink
-                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-                (build_dark_block (NumberNode "0") )
-            )
-            (SequentialAndLink
-                (add_action (GroundedSchemaNode "destroy_block") ) 
-                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-            )
-            (SequentialAndLink
-                (add_action (GroundedSchemaNode "destroy_block") ) 
-                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-            )
-        )
-    )        
-)    
-
-(define random_search
-;    random_build_destroy_blocks
-    (SequentialAndLink
-        random_rotate
-        (add_action (GroundedSchemaNode "step_forward") ) 
-    ) 
-)
+;; build a block with random texture. offset should be a NumberNode
+;(define (build_dark_block offset)
+;    (OrLink
+;        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Stone") )
+;        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Dirt") )
+;        (add_action (GroundedSchemaNode "build_block") offset (WordNode "TopSoil") )
+;        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Light") )
+;    )
+;)
+;
+;(define (build_light_block offset)
+;    (OrLink
+;        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Lava") )
+;        (add_action (GroundedSchemaNode "build_block") offset (WordNode "Leaves") )
+;    )
+;)
+;
+;(define multiple_step_forward
+;    (SequentialAndLink
+;        (build_dark_block (NumberNode "0") )
+;;        (add_action (GroundedSchemaNode "step_forward") ) ; TODO: direction for step_backward is wrong sometimes
+;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+;    ) 
+;)
+;
+;; Rotate randomly
+;(define random_rotate_right
+;    (OrLink
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "73") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "79") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "83") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "89") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "97") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "101") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "103") )  
+;    )
+;)
+;
+;(define random_rotate_left
+;    (OrLink
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-73") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-79") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-83") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-89") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-97") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-101") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-103") )  
+;    )
+;)
+;
+;(define random_rotate_back
+;    (OrLink
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "173") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-179") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "181") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "-191") )  
+;        (add_action (GroundedSchemaNode "rotate") (NumberNode "193") )  
+;    )
+;)
+;
+;(define random_rotate
+;    (OrLink
+;        random_rotate_left
+;        random_rotate_left
+;        random_rotate_left
+;        random_rotate_right
+;        random_rotate_right
+;        random_rotate_right
+;        random_rotate_right
+;        random_rotate_back
+;    )
+;)
+;
+;(define random_build_destroy_blocks
+;    (SequentialAndLink
+;        random_rotate
+;        (build_dark_block (NumberNode "1") )
+;        (OrLink
+;            (SequentialAndLink
+;                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+;                (build_dark_block (NumberNode "0") )
+;            )
+;            (SequentialAndLink
+;                (add_action (GroundedSchemaNode "destroy_block") ) 
+;                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+;            )
+;            (SequentialAndLink
+;                (add_action (GroundedSchemaNode "destroy_block") ) 
+;                (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+;            )
+;        )
+;    )        
+;)    
+;
+;(define random_search
+;;    random_build_destroy_blocks
+;    (SequentialAndLink
+;        random_rotate
+;        (add_action (GroundedSchemaNode "step_forward") ) 
+;    ) 
+;)
 
 ;------------------------------------------------------------------------------
 ;
@@ -653,10 +653,10 @@
 
 ;------------------------------------------------------------------------------
 
-(add_rule (stv 0.2 1.0) GetFoodGoal 
-    random_search
-    NULL_PRECONDITION
-)
+;(add_rule (stv 0.2 1.0) GetFoodGoal 
+;    random_search
+;    NULL_PRECONDITION
+;)
 
 ; TODO: very simple rules only for testing dialog_system
 (add_rule (stv 0.3 1.0) GetFoodGoal
@@ -679,7 +679,7 @@
 (define GetWaterGoal
     (AndLink 
         (add_goal (PredicateNode "is_drinkable") (VariableNode "$var_water") ) 
-        (add_goal (PredicateNode "exist") (VariableNode "$var_water") )
+;        (add_goal (PredicateNode "exist") (VariableNode "$var_water") )
 ;        (add_goal (PredicateNode "near") PET_HANDLE (VariableNode "$var_water") )
     )    
 )
@@ -695,10 +695,10 @@
     )
 )    
 
-(add_rule (stv 1.0 1.0) GetWaterGoal 
-    random_search
-    NULL_PRECONDITION
-)
+;(add_rule (stv 1.0 1.0) GetWaterGoal 
+;    random_search
+;    NULL_PRECONDITION
+;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -748,32 +748,32 @@
 ; Rules related to CertaintyDemandGoal
 ;
 
-(define build_jump_line_ladder
-    (SequentialAndLink
-        (build_dark_block (NumberNode "1") ) ;build block in middle front
-        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-        (build_dark_block (NumberNode "0") ) ;build block in lower front
-    )        
-)
-
-(define build_jump_twisted_ladder
-    (SequentialAndLink
-        (build_dark_block (NumberNode "1") ) ;build block in middle front
-        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
-        (OrLink
-            (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )  
-            (add_action (GroundedSchemaNode "rotate") (NumberNode "-90") )  
-        )
-        (build_dark_block (NumberNode "0") ) ;build block in lower front
-    )        
-)
-
-(add_rule (cog-new-stv 0.0 1.0) CertaintyDemandGoal 
-    random_build_destroy_blocks
-;    random_search
-;    build_jump_twisted_ladder
-    NULL_PRECONDITION
-)
+;(define build_jump_line_ladder
+;    (SequentialAndLink
+;        (build_dark_block (NumberNode "1") ) ;build block in middle front
+;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+;        (build_dark_block (NumberNode "0") ) ;build block in lower front
+;    )        
+;)
+;
+;(define build_jump_twisted_ladder
+;    (SequentialAndLink
+;        (build_dark_block (NumberNode "1") ) ;build block in middle front
+;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) ;jump on to the block 
+;        (OrLink
+;            (add_action (GroundedSchemaNode "rotate") (NumberNode "90") )  
+;            (add_action (GroundedSchemaNode "rotate") (NumberNode "-90") )  
+;        )
+;        (build_dark_block (NumberNode "0") ) ;build block in lower front
+;    )        
+;)
+;
+;(add_rule (cog-new-stv 0.0 1.0) CertaintyDemandGoal 
+;    random_build_destroy_blocks
+;;    random_search
+;;    build_jump_twisted_ladder
+;    NULL_PRECONDITION
+;)
 
 ; This rule will increase the agent's certainty by asking questions to other agents. 
 ;(add_rule (cog-new-stv 1.0 1.0) CertaintyDemandGoal 
@@ -786,24 +786,24 @@
 ; Rules related to CompetenceDemandGoal
 ;
 
-(define random_simple_action
-    (OrLink
-        random_rotate
-        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
-        (add_action (GroundedSchemaNode "step_forward") ) 
-        (add_action (GroundedSchemaNode "step_backward") ) 
-    )
-)
-
-(add_rule (cog-new-stv 0.65 1.0) CompetenceDemandGoal 
-    random_simple_action 
-    NULL_PRECONDITION 
-)
-
-(add_rule (cog-new-stv 0.35 1.0) CompetenceDemandGoal 
-    random_build_destroy_blocks
-    NULL_PRECONDITION 
-)
+;(define random_simple_action
+;    (OrLink
+;        random_rotate
+;        (add_action (GroundedSchemaNode "jump_forward") (NumberNode "1") ) 
+;        (add_action (GroundedSchemaNode "step_forward") ) 
+;        (add_action (GroundedSchemaNode "step_backward") ) 
+;    )
+;)
+;
+;(add_rule (cog-new-stv 0.65 1.0) CompetenceDemandGoal 
+;    random_simple_action 
+;    NULL_PRECONDITION 
+;)
+;
+;(add_rule (cog-new-stv 0.35 1.0) CompetenceDemandGoal 
+;    random_build_destroy_blocks
+;    NULL_PRECONDITION 
+;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
