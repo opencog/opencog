@@ -118,7 +118,7 @@ int main(int argc, char** argv)
          "Random seed.\n")
 
         (opt_desc_str(algo_opt).c_str(),
-         value<string>(&fs_params.algorithm)->default_value(cor),
+         value<string>(&fs_params.algorithm)->default_value(mmi),
          string("Feature selection algorithm. Supported algorithms are:\n")
              /*
               * We're not going to support univariate or sa any time
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
              .append(un).append(" for univariate,\n")
              .append(sa).append(" for simulated annealing,\n")
              */
-             .append(cor).append(" for maximal mutual information,\n")
+             .append(mmi).append(" for maximal mutual information,\n")
              .append(hc).append(" for hillclimbing (unsupported),\n")
              .append(inc).append(" for incremental mutual information.\n").c_str())
 

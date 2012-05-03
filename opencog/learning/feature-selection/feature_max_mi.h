@@ -1,4 +1,4 @@
-/** feature_correlation.h ---
+/** feature_max_mi.h ---
  *
  * Copyright (C) 2010,2012 OpenCog Foundation
  *
@@ -22,8 +22,8 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_CORRELATION_ALGO_H
-#define _OPENCOG_FEATURE_CORRELATION_ALGO_H
+#ifndef _OPENCOG_FEATURE_MAX_MI_ALGO_H
+#define _OPENCOG_FEATURE_MAX_MI_ALGO_H
 
 #include <functional>
 
@@ -61,14 +61,14 @@ namespace opencog {
  * @return               The set of selected features
  */
 template<typename Scorer, typename FeatureSet>
-FeatureSet correlation_selection(const FeatureSet& features,
-                                 const Scorer& scorer,
-                                 unsigned num_features,
-                                 double threshold = 0.0,
-                                 unsigned top_size = 100)
+FeatureSet max_mi_selection(const FeatureSet& features,
+                            const Scorer& scorer,
+                            unsigned num_features,
+                            double threshold = 0.0,
+                            unsigned top_size = 100)
 {
     if (logger().isDebugEnabled()) {
-        logger().debug() << "Call correlation_selection(num_features="
+        logger().debug() << "Call max_mi_selection(num_features="
                          << num_features
                          << ", threshold=" << threshold
                          << ", top_size=" << top_size
@@ -143,7 +143,7 @@ FeatureSet correlation_selection(const FeatureSet& features,
         // Get the highest MI found.  If these are not getting better,
         // then stop looking for new features.
         double high_score = ranks.rbegin()->first;
-        logger().debug("corr_sel: featureset size %d MI=%f", i, high_score);
+        logger().debug("max_mi: featureset size %d MI=%f", i, high_score);
         if (high_score - previous_high_score < threshold) break;
 
         // Record the highest score found.
@@ -157,7 +157,7 @@ FeatureSet correlation_selection(const FeatureSet& features,
 
     if (logger().isDebugEnabled()) {
         std::stringstream ss;
-        ss << "Exit correlation_selection(), selected: ";
+        ss << "Exit max_mi_selection(), selected: ";
         typename FeatureSet::const_iterator fi;
         for (fi = res.begin(); fi != res.end(); fi++) {
             ss << " " << *fi;
@@ -171,4 +171,4 @@ FeatureSet correlation_selection(const FeatureSet& features,
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_CORRELATION_ALGO_H
+#endif // _OPENCOG_FEATURE_MAX_MI_ALGO_H

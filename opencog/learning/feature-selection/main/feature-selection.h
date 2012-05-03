@@ -36,7 +36,7 @@
 #include <opencog/comboreduct/combo/table.h>
 
 #include "../feature_scorer.h"
-#include "../feature_correlation.h"
+#include "../feature_max_mi.h"
 #include "../feature_optimization.h"
 #include "../moses_based_scorer.h"
 
@@ -51,8 +51,8 @@ static const string sa="sa"; // moses based simulation annealing
 static const string hc="hc"; // moses based hillclimbing
 static const string inc="inc"; // incremental_selection (see
                                // feature_optimization.h)
-static const string cor="cor"; // correlated_selection (see
-                               // feature_correlation.h)
+static const string mmi="mmi"; // max_mi_selection (see
+                               // feature_max_mi.h)
 
 void err_empty_features() {
     std::cerr << "No features have been selected." << std::endl;
@@ -234,7 +234,7 @@ void incremental_feature_selection(Table& table,
     }
 }
 
-void correlated_feature_selection(Table& table,
+void max_mi_feature_selection(Table& table,
                                   const feature_selection_parameters& fs_params)
 {
     if (fs_params.target_size > 0) {
@@ -244,9 +244,9 @@ void correlated_feature_selection(Table& table,
         auto ir = boost::irange(0, table.get_arity());
         std::set<arity_t> features(ir.begin(), ir.end());
         std::set<arity_t> selected_features = 
-            correlation_selection(features, fsc,
-                                  (unsigned) fs_params.target_size,
-                                  fs_params.threshold);
+            max_mi_selection(features, fsc,
+                             (unsigned) fs_params.target_size,
+                             fs_params.threshold);
 
         if (selected_features.empty()) {
             err_empty_features();
@@ -281,8 +281,8 @@ void feature_selection(Table& table,
         moses_feature_selection(table, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);
-    } else if (fs_params.algorithm == cor) {
-        correlated_feature_selection(table, fs_params);
+    } else if (fs_params.algorithm == mmi) {
+        max_mi_feature_selection(table, fs_params);
     } else {
         std::cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
                   << "' is unknown, please consult the help for the "

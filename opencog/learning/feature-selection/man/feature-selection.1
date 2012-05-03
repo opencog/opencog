@@ -71,11 +71,11 @@ but it can be used in more general settings.
 .\" ============================================================
 .SH EXAMPLES
 .TP
-.BI feature-selection\ \-i raw_data.csv \ \-acor\ \-C 10 \ \-o reduced.csv \ \-F fs.log
+.BI feature-selection\ \-i raw_data.csv \ \-ammi\ \-C 10 \ \-o reduced.csv \ \-F fs.log
 
 Use the input file \fIraw_data.csv\fP as the input dataset.  The input
 file must be a tab-separated or comma-separated table of values.  The 
-dependent feature is assumed to be in the first column.  The \fBcor\fP
+dependent feature is assumed to be in the first column.  The \fBmmi\fP
 algorithm will be used to select 10 different features that are the most
 strongly correlated with the dependent feature.  The output will be
 written to the file \fIreduced.csv\fP, consisting of the dependent
@@ -84,7 +84,7 @@ columns.  A logfile of algorithm progress will be written to
 \fIfs.log\fP.
 
 .TP
-.BI feature-selection\ \-i raw_data.csv \ \-acor\ \-C 10 \ \-o reduced.csv \ \-u Q3
+.BI feature-selection\ \-i raw_data.csv \ \-ammi\ \-C 10 \ \-o reduced.csv \ \-u Q3
 
 As above, but use the column labelled \fIQ3\fP as the target feature.
 This assumes that the input dataset contains columns labels as the first
@@ -190,7 +190,7 @@ CSV/DSV file formats.
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
 The most important of these, for controlling behaviour, are the
-\fB\-a\fR, \fB\-f\fR and \fB\-r\fR flags.
+\fB\-a\fR, \fB\-C\fR and \fB\-T\fR flags.
 
 .TP
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
@@ -199,7 +199,7 @@ Available algorithms include:
 .TS
 tab (@);
 l lx.
-\fBcor\fR@T{
+\fBmmi\fR@T{
 Maximal Mutual Information.
 
 This algorithm searches for the featureset with the highest mutual
@@ -240,7 +240,7 @@ T}
 .BI \-C\  num_features \fR,\ \fB\-\-target\-size= num_features
 Attempt to select at most \fInum_features\fR out of the input set.
 
-This option is ignored unless the chosen algorithm is \fBcor\fP or
+This option is ignored unless the chosen algorithm is \fBmmi\fP or
 \fBinc\fP.  When the selected algorithm is \fBinc\fP, then the 
 \fB\-T\fP option is ignored.
 
@@ -251,13 +251,17 @@ A positive value prevents low-scoring features from being
 selected; a value of zero or less will accept all features.
 
 This option is ignored unless the chosen algorithm is 
-\fBcor\fP or \fBinc\fP.
+\fBmmi\fP or \fBinc\fP.
 
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 The \fBinc\fP and \fPhc\fP algorthms make use of the random number
 generator, and so results may depend on the random seed.
+
+.\" ============================================================
+.SS "Incremental algorithm options"
+These options only apply to the \fB\-ainc\fP algorithm.
 
 .PP
 .\" ============================================================
@@ -269,12 +273,15 @@ the following, because they are MOSES-related: -A -O
 
 What's this?: -f -m ??
 
+Does -r actually do anything for -ainc ??
+
 .SH SEE ALSO
 .br
 More information is available at
 .B http://wiki.opencog.org/w/XXX???XXX
 .SH AUTHORS
 .nh
-\fBfeature-selection\fP was written by Nil Geisweiller.
+\fBfeature-selection\fP was written by Nil Geisweiller and modified by
+Linas Vepstas
 .PP
 This manual page is being written by Linas Vepstas. It is INCOMPLETE.
