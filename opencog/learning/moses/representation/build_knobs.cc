@@ -510,7 +510,7 @@ void build_knobs::build_logical(pre_it it)
                 pre_it cit = pit.begin();  // get the arg of predicate.
 
                 OC_ASSERT((is_argument(*cit) || is_contin_expr(*cit)),
-                    "Error: predicate term must be made of contin");
+                          "Error: predicate term must be made of contin");
 
                 // contin_canonize() creates a big pre-knob expr at @it.
                 // build_contin() does the actual knob insertion into

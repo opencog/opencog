@@ -138,8 +138,8 @@ struct representation : public knob_mapper, boost::noncopyable
     {
         typedef combo_tree::sibling_iterator sib_it;
         if (is_contin(*it)) { // contin
-                contin_map_cit c_cit = find_contin_knob(it);
-                out << (c_cit == contin.end() ? *it : c_cit->second.toStr());
+            contin_map_cit c_cit = find_contin_knob(it);
+            out << (c_cit == contin.end() ? *it : c_cit->second.toStr());
         } else { // disc
             disc_map_cit d_cit = find_disc_knob(it);
             out << (d_cit == disc.end() ? *it : d_cit->second->toStr());

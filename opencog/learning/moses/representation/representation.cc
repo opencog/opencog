@@ -96,13 +96,6 @@ representation::representation(const reduct::rule& simplify_candidate,
                 perceptions, actions,
                 stepsize, expansion, depth);
 
-    {
-        std::stringstream ss;
-        ss << "Created prototype: ";
-        ostream_prototype(ss);
-        logger().debug(ss.str());
-    }
-
 #if 0
     // Attempt to adjust the contin spec step size to a value that is
     // "most likely to be useful" for exploring the neighborhood of an
@@ -164,6 +157,11 @@ representation::representation(const reduct::rule& simplify_candidate,
         }
     }
 
+    {
+        std::stringstream ss;
+        ostream_prototype(ss << "Created prototype: ");
+        logger().debug(ss.str());
+    }
     
 #ifdef EXEMPLAR_INST_IS_UNDEAD
     set_exemplar_inst();
