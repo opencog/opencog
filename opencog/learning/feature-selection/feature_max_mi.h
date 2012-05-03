@@ -85,6 +85,9 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     std::set<FeatureSet> tops;
     double previous_high_score = -1.0;
 
+    if (features.size() < num_features)
+        num_features = features.size();
+
     // Repeat, until we've gotton the highest-ranked FeatueSet
     // that has at most 'num_features' in it.
     for (unsigned i = 1; i <= num_features; ++i) {
@@ -113,7 +116,7 @@ FeatureSet max_mi_selection(const FeatureSet& features,
         OMP_ALGO::for_each(tops.begin(), tops.end(), rank_em);
 
         // First time through, only.  Just rank one feature.
-        if (tops.size() == 0) {
+        if (1 == i) {
             FeatureSet emptySet;
             rank_em(emptySet);
         }

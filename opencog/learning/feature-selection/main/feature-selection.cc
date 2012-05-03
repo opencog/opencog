@@ -210,7 +210,7 @@ int main(int argc, char** argv)
 
         (opt_desc_str(inc_target_size_epsilon_opt).c_str(),
          value<double>(&fs_params.inc_target_size_epsilon)->default_value(0.001),
-         "Incremental Selection parameter. Toleance applied when "
+         "Incremental Selection parameter. Tolerance applied when "
          "selecting for a fixed number of features (option -C).\n")
 
         (opt_desc_str(inc_interaction_terms_opt).c_str(),

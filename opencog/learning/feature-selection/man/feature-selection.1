@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH FEATURE-SELECTION 1 "May 2, 2012" "3.0.11" "OpenCog Learning"
+.TH FEATURE-SELECTION 1 "May 2, 2012" "3.0.12" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -39,23 +39,27 @@ feature-selection \- dimensional reduction of datasets
 .IR algo ]
 .RB [ \-C
 .IR num_features ]
-.RB [ \-F
-.IR log_file ]
-.RB [ \-f
-.IR feature ]
+.RB [ \-u
+.IR target_feature ]
 .RB [ \-j
 .IR jobs ]
+.RB [ \-F
+.IR log_file ]
 .RB [ \-L ]
 .RB [ \-l
 .IR loglevel ]
 .RB [ \-o
 .IR output_file ]
+.RB [ \-D
+.IR fraction ]
+.RB [ \-E
+.IR tolerance ]
+.RB [ \-f
+.IR feature ]
 .RB [ \-r
 .IR random_seed ]
 .RB [ \-T
-.IR intensity ]
-.RB [ \-u
-.IR target_feature ]
+.IR threshold ]
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
@@ -253,15 +257,31 @@ selected; a value of zero or less will accept all features.
 This option is ignored unless the chosen algorithm is 
 \fBmmi\fP or \fBinc\fP.
 
+.\" ============================================================
+.SS "Incremental algorithm options"
+These options only apply to the \fB\-ainc\fP algorithm.
+
+.TP
+.BI \-D\  fraction \fR,\ \fB\-\-int\-redundant\-intesity= fraction
+Threshold fraction used to reject redundant features. If a feature
+contributes less than \fIfraction\fP * \fIthreshold\fP to the total
+score, it will be rejected from the final feature set.  That is, if
+two features are strongly correlated, one should be considered 
+redundant; as to which is de-selected will depend on the random-number
+generator, i.e. on the random seed specified with the \fB\-r\fP option.
+
+.TP
+.BI \-E\  tolerance \fR,\ \fB\-\-inc\-target\-size\-epsilon= tolerance
+To be used only with the \fB\-C\fP option.  The incremental algorithm
+is not able to directly select a fixed number of features; rather, it
+dynamically adjusts the threshold until the desired number of features
+results. This option controls the smallest adjustment made.
+
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 The \fBinc\fP and \fPhc\fP algorthms make use of the random number
 generator, and so results may depend on the random seed.
-
-.\" ============================================================
-.SS "Incremental algorithm options"
-These options only apply to the \fB\-ainc\fP algorithm.
 
 .PP
 .\" ============================================================
@@ -269,7 +289,7 @@ These options only apply to the \fB\-ainc\fP algorithm.
 Document some of the more obscure flags.  Right now, we are missing
 the following, because they are MOSES-related: -A -O
 
--E  -D -U
+-U
 
 What's this?: -f -m ??
 
