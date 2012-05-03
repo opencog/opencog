@@ -180,7 +180,8 @@ protected:
     }
 };
 
-// Least Recently Used Cache with thread safety
+// Least Recently Used Cache with thread safety (this isn't really
+// thread safe yet, it's still buggy)
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
