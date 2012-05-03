@@ -41,6 +41,8 @@ feature-selection \- dimensional reduction of datasets
 .IR num_features ]
 .RB [ \-T
 .IR threshold ]
+.RB [ \-r
+.IR random_seed ]
 .RB [ \-u
 .IR target_feature ]
 .RB [ \-j
@@ -56,10 +58,6 @@ feature-selection \- dimensional reduction of datasets
 .IR fraction ]
 .RB [ \-E
 .IR tolerance ]
-.RB [ \-f
-.IR feature ]
-.RB [ \-r
-.IR random_seed ]
 .RB [ \-U
 .IR num_terms ]
 .SH DESCRIPTION
@@ -105,13 +103,28 @@ In regression analysis, one has, in general, a table of values or
 \'features\', and the goal of predicting one feature, the \'target\', 
 (located in one column of the table) based on the values of the
 other features (in other columns).  It is common that only some
-of the features are useful predictors of the target, while many
+of the features are useful predictors of the target, while the
 others are mostly just noise.  Regression analysis becomes difficult
 if there are too many input variables, and so regression can be improved
-by simply filtering out the useless features. Doing this is generically
+simply by filtering out the useless features. Doing this is generically
 called \'feature selection\' or \'dimensional reduction\'.  This
 program, \fBfeature-selection\fP, does this, using one of several
 different algorithms.
+
+In general, feature selection is done by looking for a correlation
+between the target feature, and other features.  This correlation
+can be computed in a number of different ways; this program uses
+mutual information.  A strong correlation between the featureset
+and the target variable suggests that the featureset is the 
+appropriate one for performing regression analysis.
+
+It can happen that two (or more) features are strongly correlated with
+each-other, and that only one of these is needed as a predictor. Adding
+any one of these features to the featureset will improve the
+correlation considerably, but adding any of the others will have little
+or no effect.  Such sets of features are called \'redundant\'.  A good
+selection algorithm will select only one of the features of the
+redundant set, omitting the others.
 
 This program accepts inputs in a fairly generic whitespace or comma
 delimited table format: whitespace may consist of repeated tabs or
@@ -310,15 +323,17 @@ computationally expensive, as all possible choices are considered.
 .PP
 .\" ============================================================
 .SH TODO
-Document the MOSES-algorithm and the options that it takes: -A -c -f -m -O -s
+Document the MOSES-algorithm and the options that it takes: -A -c -f -m
+-O -s.  These are not documented because the hill-climbing algo is
+currently not supported.
 
 .SH SEE ALSO
 .br
 More information is available at
-.B http://wiki.opencog.org/w/XXX???XXX
+.B http://wiki.opencog.org/w/Feature_selection
 .SH AUTHORS
 .nh
 \fBfeature-selection\fP was written by Nil Geisweiller and modified by
 Linas Vepstas
 .PP
-This manual page is being written by Linas Vepstas. It is INCOMPLETE.
+This manual page is being written by Linas Vepstas.
