@@ -39,6 +39,8 @@ feature-selection \- dimensional reduction of datasets
 .IR algo ]
 .RB [ \-C
 .IR num_features ]
+.RB [ \-T
+.IR threshold ]
 .RB [ \-u
 .IR target_feature ]
 .RB [ \-j
@@ -58,8 +60,8 @@ feature-selection \- dimensional reduction of datasets
 .IR feature ]
 .RB [ \-r
 .IR random_seed ]
-.RB [ \-T
-.IR threshold ]
+.RB [ \-U
+.IR num_terms ]
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
@@ -208,7 +210,8 @@ Maximal Mutual Information.
 
 This algorithm searches for the featureset with the highest mutual
 information (MI) with regard to the target variable.  It does so by
-adding one feature at a time to the featureset, computing the MI,
+adding one feature at a time to the featureset, computing the MI
+between the target variable and this featureset,
 ranking the result, and keeping only the highest-ranked results.
 It can be thought of as a kind-of hill-climbing in the space
 of mutual information.  This process is repeated until the desired
@@ -294,15 +297,22 @@ is not able to directly select a fixed number of features; rather, it
 dynamically adjusts the threshold until the desired number of features
 results. This option controls the smallest adjustment made.
 
+.TP
+.BI \-U\  num_terms \fR,\ \fB\-\-inc\-interaction\-terms= num_terms
+The number of variables used in computing the joint entropy.  Normally,
+this algorithm never computes the joint entropy of multiple features;
+it only considers the effect of a single feature at a time on the
+target (that is, it only computes the mutual inforrmation between one
+featuree and the target).  Specifying a number greater than one will
+consider the mutual information between multiple features and the
+target.  Note that using this calculation is combinatorially more 
+computatinally expensive, as all possible choices are considered.
 .PP
 .\" ============================================================
 .SH TODO
-Document some of the more obscure flags.  Right now, we are missing
-the following, because they are MOSES-related: -A -O
+Document the MOSES-algorithm and the options tht it takes: -A -f -m -O
 
--U
-
-What's this?: -f -m ??
+What's this?: -c ??
 
 .SH SEE ALSO
 .br

@@ -186,13 +186,6 @@ int main(int argc, char** argv)
 
 // XXX XXX XXX XXXXXXXXXXXXXXXXXXX
 
-        (opt_desc_str(initial_feature_opt).c_str(), value<vector<string> >(&fs_params.initial_features),
-         "Initial feature to search from. This option can be used as many times as features to include in the initial feature set. An initial feature set close to the one maximizing the feature quality measure can greatly increase feature selection speed.\n")
-
-        (opt_desc_str(max_evals_opt).c_str(),
-         value<unsigned>(&fs_params.max_evals)->default_value(10000),
-         "Maximum number of fitness function evaluations.\n")
-
         (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned long>(&fs_params.cache_size)->default_value(1000000),
          "Cache size, so that identical candidates are not re-evaluated, 0 means no cache.\n")
@@ -218,16 +211,29 @@ int main(int argc, char** argv)
          "Incremental Selection parameter. Maximum number of "
          "interaction terms considered during incremental feature "
          "selection. Higher values make the feature selection more "
-         "accurate but is exponentially more computationally expensive.\n")
+         "accurate but is combinatorially more computationally expensive.\n")
 
         (opt_desc_str(max_score_opt).c_str(),
          value<double>(&fs_params.max_score)->default_value(1),
-         "Hillclimbing parameter. The max score to reach, once "
+         "Hillclimbing parameter.  The max score to reach, once "
          "reached feature selection halts.\n")
+
+        (opt_desc_str(initial_feature_opt).c_str(), 
+         value<vector<string> >(&fs_params.initial_features),
+         "Hillclimbing parameter.  Initial feature to search from.  "
+         "This option can be used as many times as there are features, "
+         "to have them included in the initial feature set. If the "
+         "initial feature set is close to the one that maximizes the "
+         "quality measure, the selection speed can be greatly increased.\n")
+
+        (opt_desc_str(max_evals_opt).c_str(),
+         value<unsigned>(&fs_params.max_evals)->default_value(10000),
+         "Hillclimbing parameter.  Maximum number of fitness function "
+         "evaluations.\n")
 
         (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
          value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.1),
-         "Hillclimbing parameter. Determine the fraction of the "
+         "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
 
         ;

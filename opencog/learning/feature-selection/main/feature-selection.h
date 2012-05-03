@@ -99,7 +99,8 @@ void moses_feature_selection(Table& table,
                              instance_set<composite_score>& deme,
                              instance& init_inst,
                              Optimize& optimize, const Scorer& scorer,
-                             const feature_selection_parameters& fs_params) {
+                             const feature_selection_parameters& fs_params)
+{
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
     unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
@@ -133,6 +134,7 @@ void moses_feature_selection(Table& table,
     write_results(ftable, fs_params);
 }
 
+/** For the MOSES algo, generate the intial instance */
 instance initial_instance(const feature_selection_parameters& fs_params,
                           const field_set& fields) {
     instance res(fields.packed_width());
