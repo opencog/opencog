@@ -1229,7 +1229,8 @@ ostream& operator<<(ostream& out, const opencog::combo::type_node& n)
 {
     using namespace opencog::combo;
     switch (n) {
-        //type operators
+
+        // Type operators
     case id::lambda_type:
         return out << "->";
     case id::application_type:
@@ -1238,11 +1239,16 @@ ostream& operator<<(ostream& out, const opencog::combo::type_node& n)
         return out << "union";
     case id::arg_list_type:
         return out << "arg_list";
-        //elementary types
+
+        // Elementary types
     case id::boolean_type:
         return out << "boolean";
     case id::contin_type:
         return out << "contin";
+    case id::enum_type:
+        return out << "enum";
+
+    // Motor control and sensory types
     case id::action_result_type:
         return out << "action_result";
     case id::definite_object_type:
@@ -1284,11 +1290,16 @@ istream& operator>>(istream& in, opencog::combo::type_node& n)
         n = id::union_type;
     else if (str == "arg_list" || str == "arg_list_type")
         n = id::arg_list_type;
-    //elementary types
+
+    // Elementary types
     else if (str == "boolean" || str == "boolean_type")
         n = id::boolean_type;
     else if (str == "contin" || str == "contin_t" || str == "contin_type")
         n = id::contin_type;
+    else if (str == "enum" || str == "enum_t" || str == "enum_type")
+        n = id::enum_type;
+
+    // Types for motor control, sensory data.
     else if (str == "action_result" || str == "action_result_type")
         n = id::action_result_type;
     else if (str == "definite_object" || str == "definite_object_type")

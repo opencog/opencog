@@ -3,6 +3,8 @@
 # The famous  R.A. Fisher 1936 dataset.
 #
 # Goal is to classify the last column, baed on the first four columns.
+# To run:
+#    moses -i iris.data
 #
 5.1,3.5,1.4,0.2,Iris-setosa
 4.9,3.0,1.4,0.2,Iris-setosa

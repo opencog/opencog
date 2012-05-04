@@ -54,19 +54,20 @@ class procedure_call_base;
 
 typedef const procedure_call_base* procedure_call;
 
-//this idiom allows builtin to live in namespace combo, but all
-//ids to be hidden inside the namespace id
+// This idiom allows builtin to live in namespace combo, but all
+// ids to be hidden inside the namespace id
 namespace id {
 
- // Nil: IMO we should replace these enum by class containing the enum
- // + methods with properties and strings rather than having that in
- // description. And of course do the same for builtin actions and
- // other enum. That way there would no possible ambiguity in
- // overloading methods which interpret enum as int by default which
- // leads to nightmarish errors. It might also that the new standard
- // C++0x fixes that that problem all by itself since in that standard
- // 2 different enum are considered as different type.
-enum builtin {
+// Nil: IMO we should replace this enum by a class containing the enum
+// + methods with properties and strings rather than having that in
+// description. And of course do the same for builtin actions and
+// other enum. That way there would no possible ambiguity in
+// overloading methods which interpret enum as int by default which
+// leads to nightmarish errors. It might also that the new standard
+// C++0x fixes that that problem all by itself since in that standard
+// 2 different enums are considered to be different types.
+enum builtin
+{
     null_vertex = 0,
     logical_true, logical_false, // contants are put first to be in
                                  // sync with
@@ -101,11 +102,13 @@ enum wild_card {
 typedef id::wild_card wild_card;
 
 typedef double contin_t;
+typedef unsigned enum_t;  // Index into map of string names.
 
 // contants are put first to be in sync with
 // lexicographic_subtree_order, it is not mandatory but it should make
 // the reduct engine a bit faster
 typedef boost::variant < contin_t,
+                         enum_t,
                          builtin,
                          wild_card,
                          argument,

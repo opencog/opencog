@@ -43,8 +43,11 @@ enum type_node {
                       // zero or more elements of type T
 
     // Elementary types.
-    boolean_type,
-    contin_type,
+    boolean_type,     // True or False, 1 or 0
+    contin_type,      // continuously-valued (floating point)
+    enum_type,        // alphanumeric string (& limited punctuation)
+
+    // Types for motor control, sensory data.
     action_result_type,
     definite_object_type,
     action_definite_object_type, // Like definite_object, but contains
@@ -53,9 +56,11 @@ enum type_node {
     message_type,
     action_symbol_type,
     wild_card_type,
+
+    // Neural networks
     ann_type,                   // For evolving anns
 
-    unknown_type,  // The uber type.  All types inherite from unkown
+    unknown_type,  // The uber type.  All types inherit from unkown
                    // but ill_formed_type
 
     ill_formed_type, // When the type is just wrong

@@ -356,6 +356,10 @@ bool has_header(const string& dataFileName)
     return n == id::ill_formed_type;
 }
 
+/**
+ * Given an input string, guess the type of the string.
+ * Inferable types are: boolean, contin and enum.
+ */
 type_node infer_type_from_token(const string& token)
 {
     /* Prefered representation is T's and 0's, to maximize clarity,
@@ -369,6 +373,12 @@ type_node infer_type_from_token(const string& token)
         token == "t" ||
         token == "f")
         return id::boolean_type;
+
+    // If it starts with an alphabetic character, assume its a string
+    else if (isalpha(token[0]))
+        return id::enum_type;
+
+    // Hope that we can cast this to a float point number.
     else {
         try {
             lexical_cast<contin_t>(token);
