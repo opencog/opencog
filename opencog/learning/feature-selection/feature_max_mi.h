@@ -82,7 +82,7 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     shared_mutex mutex;
 
     // Start with the empty set
-    std::set<FeatureSet> tops;
+    std::map<double, FeatureSet> tops;
     double previous_high_score = -1.0;
 
     if (features.size() < num_features)
@@ -105,8 +105,9 @@ FeatureSet max_mi_selection(const FeatureSet& features,
 
         // Add one feature at a time to fs, and score the
         // result.  Rank the result.
-        auto rank_em = [&](const FeatureSet &fs)
+        auto rank_em = [&](const std::pair<double, FeatureSet> &pr)
         {
+            const FeatureSet &fs = pr.second;
             // typename FeatureSet::const_iterator fi;
             for (auto fi = shuffle.begin(); fi != shuffle.end(); fi++) {
 
@@ -127,7 +128,7 @@ FeatureSet max_mi_selection(const FeatureSet& features,
         // First time through, only.  Just rank one feature.
         if (1 == i) {
             FeatureSet emptySet;
-            rank_em(emptySet);
+            rank_em(std::pair<double, FeatureSet>(0.0, emptySet));
         }
 
         // Discard all but the highest scorers.  When done, 'tops'
@@ -145,7 +146,7 @@ FeatureSet max_mi_selection(const FeatureSet& features,
              }
              std::cout << std::endl;
 #endif
-            tops.insert(mit->second);
+            tops.insert(*mit);
             j++;
             if (top_size < j) break;
         }
@@ -165,7 +166,7 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     // If we did this correctly, then the highest scorer is at the
     // end of the set.  Return that.
     FeatureSet res;
-    if (!tops.empty()) res = *tops.rbegin();
+    if (!tops.empty()) res = tops.rbegin()->second;
 
     if (logger().isDebugEnabled()) {
         std::stringstream ss;
