@@ -898,8 +898,8 @@ void build_knobs::rec_canonize(pre_it it)
 /// the term +( *(0 $1) *(0 $2) *(0 $3) ...)  Later on, the zero
 /// constants will become knobs.
 ///
-/// The appending happens at location it (which happens to always
-/// be in the exampler, in the current usage). if *it isn't plus,
+/// The appending happens at location 'it' (which happens to always
+/// be in the exampler, in the current usage).  If '*it' isn't plus,
 /// then plus is inserted.
 ///
 /// If the argument is of type contin, then it is directly inserted,

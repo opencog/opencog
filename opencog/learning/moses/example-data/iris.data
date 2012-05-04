@@ -4,7 +4,9 @@
 #
 # Goal is to classify the last column, baed on the first four columns.
 # To run:
-#    moses -i iris.data
+#    moses -i iris.data -u5
+#
+# -u5 means that the target variable is in the 5th column
 #
 5.1,3.5,1.4,0.2,Iris-setosa
 4.9,3.0,1.4,0.2,Iris-setosa

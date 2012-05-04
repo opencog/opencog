@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "April 12, 2012" "3.0.9" "OpenCog Learning"
+.TH MOSES 1 "May 4, 2012" "3.0.14" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -326,12 +326,14 @@ lines starting with a comment are ignored.
 The \fB-i\fR flag may be specified multiple times, to indicate multiple
 input files. All files must have the same number of columns.
 .TP
-.BI \-u\  label \fR,\ \fB\-\-target\-feature= label
-The \fIlabel\fR is used as the target feature to fit.  If none is
-specified, then the first column is used.  The very first row of the
-input file, if it contains non-numeric, non-boolean values, is 
-interpreted as column labels, as is the common practice for 
-CSV/DSV file formats.
+.BI \-u\  column \fR,\ \fB\-\-target\-feature= column
+The \fIcolumn\fR is used as the target feature to fit.  If no column
+is specified, then the first column is used.  The \fIcolumn\fR may be
+numeric, or it may be a column label.  If it is numeric, it is taken
+to be the number of the column, with column 1 being the left-most.
+If \fIcolumn\fR begins with an alphabetic character, it is taken to be
+a column label.  In this case, the very first row of the
+input file must contain column labels.
 
 .\" ============================================================
 .SS "Algorithm control options"

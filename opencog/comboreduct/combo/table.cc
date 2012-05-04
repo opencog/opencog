@@ -390,12 +390,32 @@ type_node infer_type_from_token(const string& token)
     }
 }
 
+/**
+ * Find the column number associated with the name "target"
+ * 
+ * If the target begins with an alpha character, it is assumed to be a
+ * column label. We return the column number; 0 is the left-most column.
+ *
+ * If the targt is numeric, just assum that it is a column number.
+ */
 int findTargetFeaturePosition(const string& fileName, const string& target)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
     get_data_line(*in, line);
     vector<string> labels = tokenizeRow<string>(line);
+
+    // If its just numeric, go with it; double-check the value.
+    if (isdigit(target[0])) {
+        int pos = atoi(target.c_str());
+        pos --;  // let users number columns starting at 1.
+        OC_ASSERT((pos < (int) labels.size()) || (pos < 0),
+            "ERROR: The column number \"%s\" doesn't exist in data file %s",
+            target.c_str(), fileName.c_str());
+        return pos;
+    }
+
+    // Not numeric; search for the column name
     unsigned pos = distance(labels.begin(), find(labels, target));
     OC_ASSERT(pos < labels.size(),
               "ERROR: There is no column labelled \"%s\" in data file %s",
