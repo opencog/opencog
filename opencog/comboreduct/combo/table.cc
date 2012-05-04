@@ -457,6 +457,14 @@ table_tokenizer get_row_tokenizer(string& line)
     return tokenizer(line, sep);
 }
 
+// XXX Right now, this is a global, but it really belongs, err, ahh,
+// somewhere.  Right now, this is a single, shared map for all enums
+// that occur in the input; however, we probably want to have a distinct
+// map for each different column; in particular, this will be needed
+// for any kind of monte-carlo table scoring.  FIXME 
+unsigned enum_issued = 0;
+map<string, unsigned> enum_map;
+
 /// cast string "token" to a vertex of type "tipe"
 vertex token_to_vertex(const type_node &tipe, const string& token)
 {
@@ -477,7 +485,16 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
         } catch(boost::bad_lexical_cast&) {
             OC_ASSERT(false, "Could not cast %s to contin", token.c_str());
         }
+        break;
 
+    case id::enum_type: {
+        map<string, unsigned>::iterator entry = enum_map.find(token);
+        if (entry == enum_map.end()) {
+           enum_issued ++;
+           entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
+        }
+        return (enum_t) entry->second;
+    }
     default:
         stringstream ss;
         ss << "Unable to handle input type=" << tipe << endl;
