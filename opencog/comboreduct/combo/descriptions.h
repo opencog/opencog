@@ -60,7 +60,8 @@ struct builtin_argument {
 //
 // ToDo: would be nice to have a more Caml/Haskell style syntax here,
 // right?
-static const builtin_description bd[] = {
+static const builtin_description bd[] =
+{
     //action                    type  
     { id::null_vertex,          "unknown" },
     { id::logical_and,          "->(arg_list(boolean) boolean)" },
@@ -86,9 +87,11 @@ static const builtin_description bd[] = {
 
 
 // This singleton class stores properties of builtins.
-// Within the constructor, properties, given above in an easily editable form, are read and
-// stored in a suitable form, with fast access and small ammount of used memory
-class builtins_properties {
+// Within the constructor, properties, given above in an easily
+// editable form, are read and stored in a suitable form, with fast
+// access and small ammount of used memory
+class builtins_properties
+{
 public:
     static builtins_properties& instance() {
         static builtins_properties singleton;
@@ -187,10 +190,12 @@ struct action_argument {
 };
 
 
-// For all actions the arity must be given here; the ordering of the actions is irrelevant.
-// This array is used for building an array with actions as indeces, within the singleton
-// class action_properties. This array should not have any other usages.
-static const action_description ad[] = {
+// For all actions, the arity must be given here; the ordering of the
+// actions is irrelevant.  This array is used for building an array
+// with actions as indices, within the singleton class action_properties.
+// This array should not have any other usages.
+static const action_description ad[] =
+{
     //action                  type  
     { id::sequential_and,     "->(arg_list(action_result) action_result)" },
     { id::sequential_or,      "->(arg_list(action_result) action_result)" },
@@ -210,9 +215,11 @@ static const action_description ad[] = {
 
 
 // This singleton class stores properties of actions.
-// Within the constructor, properties, given above in an easily editable form, are read and
-// stored in a suitable form, with fast access and small ammount of used memory
-class actions_properties {
+// Within the constructor, properties, given above in an easily
+// editable form, are read and stored in a suitable form, with
+// fast access and small ammount of used memory
+class actions_properties
+{
 public:
     static actions_properties& instance() {
         static actions_properties singleton;
@@ -230,8 +237,6 @@ public:
     
     // returns the arity of a 
     id::type_node output_type_of_action(action a) { return output_type[a]; }
-
-
 
 private:
     char arity[id::action_count];
