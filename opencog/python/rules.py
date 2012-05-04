@@ -5,7 +5,7 @@ except ImportError:
 
 import formulas
 from tree import *
-
+import math
 
 def rules(a, deduction_types):
     rules = []
@@ -201,13 +201,27 @@ def path_rules(a):
         s = unify(template, tr, {})
         return tuple(float(s[Var(i)].op.name) for i in [1,2,3])
     
-    def is_block(tr):
+    def get_name(tr):
         s = unify(template, tr, {})
-        return s[Var(0)].op.name.startswith('id_CHUNK')
+        return s[Var(0)].op.name
+    
+    def is_block(tr):        
+        return get_name(tr).startswith('id_CHUNK')
     
     lls = a.get_atoms_by_type(t.LatestLink)
     pls = find_tree(template,lls)
     print len(pls)
+    
+    taken_grids = set()
+    # Find any objects/blocks and assume they are obstacles.
+    for pl in pls:
+        #if is_block(pl):
+        #    continue
+        (x,y,z) = get_position(pl)
+        print (x,y,z), get_name(pl)
+        (x,y,z) = tuple(map(math.floor,(x,y,z)))
+        print (x,y,z), get_name(pl)
+        taken_grids.add((x,y,z))
     
     # add in the ground blocks.
     ground = []
@@ -217,6 +231,10 @@ def path_rules(a):
             #p1 = change_position((x,y,z))
             #ground.append(p1)
             p1c = (x,y,z)
+            
+            if (x,y,z+1) in taken_grids:
+                print 'occupied'
+                continue
             
             ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)] #,(x,y,z-1),(x,y,z+1)]
             for n in ns:
@@ -230,6 +248,7 @@ def path_rules(a):
                 ra.tv = TruthValue(1,confidence_to_count(1.0))
                 #print ra
     
+    # add in any other surfaces (made of blocks)
     for pl in pls:
         if not is_block(pl):
             continue
@@ -238,6 +257,11 @@ def path_rules(a):
         #print coords
         (x,y,z) = coords
         (x,y,z) = (x-0.5,y-0.5,z)
+        
+        if (x,y,z+1) in taken_grids:
+            print 'occupied'
+            continue
+        
         ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z),(x,y,z-1),(x,y,z+1)]
         #print pl
         for n in ns:
@@ -258,12 +282,11 @@ def path_rules(a):
     
     return []
     
-    
-    for obj in a.get_atoms_by_type(t.ObjectNode):
-        if not obj.name.startswith('id_CHUNK'):
-            continue
-        
-        block = T(obj)
+    #for obj in a.get_atoms_by_type(t.ObjectNode):
+    #    if not obj.name.startswith('id_CHUNK'):
+    #        continue
+    #    
+    #    block = T(obj)
 
 
 def match_axiom(space,target):

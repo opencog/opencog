@@ -681,7 +681,9 @@ class Chainer:
             l = get_coords(expr)
             # the goal
             t = (90, 90, 98)#get_coords(self.target)
-            dist = abs(l[0] - t[0]) + abs(l[1] - t[1]) + abs(l[2] - t[2])
+            xdist, ydist, zdist = abs(l[0] - t[0]), abs(l[1] - t[1]), abs(l[2] - t[2])
+            dist = xdist+ydist+zdist
+            #dist = (xdist**2.0+ydist**2.0+zdist**2.0)**0.5
             return dist
         
         def score(expr):
