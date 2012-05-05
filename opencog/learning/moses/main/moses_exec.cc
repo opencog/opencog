@@ -38,7 +38,8 @@ static const unsigned int max_filename_size = 255;
 /**
  * Display error message about unspecified combo tree and exit
  */
-void unspecified_combo_exit() {
+void unspecified_combo_exit()
+{
     cerr << "Error: you must specify which combo tree to learn (option -y)."
          << endl;
     exit(1);
@@ -47,11 +48,13 @@ void unspecified_combo_exit() {
 /**
  * Display error message about unsupported type and exit
  */
-void unsupported_type_exit(const type_tree& tt) {
+void unsupported_type_exit(const type_tree& tt)
+{
     cerr << "Error: type " << tt << " currently not supported." << endl;
     exit(1);
 }
-void unsupported_type_exit(type_node type) {
+void unsupported_type_exit(type_node type)
+{
     unsupported_type_exit(type_tree(type));
 }
 
@@ -111,8 +114,9 @@ combo_tree type_to_exemplar(type_node type)
     switch(type) {
     case id::boolean_type: return combo_tree(id::logical_and);
     case id::contin_type: return combo_tree(id::plus);
+    case id::enum_type: return combo_tree(id::choice);
     case id::ill_formed_type:
-        cerr << "The data type is incorrect, perhaps it has not been"
+        cerr << "Error: The data type is incorrect, perhaps it has not been"
              << " possible to infer it from the input table." << endl;
         exit(1);
     default:
@@ -138,6 +142,13 @@ combo_tree ann_exemplar(combo::arity_t arity)
     return ann_tr;
 }
 
+static bool contains_type(const type_tree_pre_it it, id::type_node ty)
+{
+    for (type_tree_sib_it tts = it.begin(); tts != it.end(); tts++) 
+        if (*tts == ty) return true;
+    return false;
+}
+
 /**
  * Determine the alphabet size given the type_tree of the problem and
  * a list of operators to ignore.
@@ -152,9 +163,24 @@ int alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
     if (output_type == id::boolean_type) {
         return 3 + arity;
     } else if (output_type == id::contin_type) {
-        // set alphabet size, 8 is roughly the number of operators
+        // Set alphabet size, 8 is roughly the number of operators
         // in contin formula, it will have to be adapted
+        // Well, there could be a mix of booleans too.
         return 8 + arity - ignore_ops.size();
+    } else if (output_type == id::enum_type) {
+
+        // Try to take into account a table with both booleans and
+        // contins.
+        type_tree_pre_it ttl = tt.begin();
+
+        if (contains_type(ttl, id::contin_type))
+            arity += 8 - ignore_ops.size();
+
+        if (contains_type(ttl, id::boolean_type)) 
+            arity += 3;
+
+        return arity;
+
     } else if (output_type == id::ann_type) {
         return 2 + arity*arity; // to account for hidden neurons, very roughly
     } else {
@@ -871,30 +897,27 @@ int moses_exec(int argc, char** argv)
             ctables.push_back(table.compress());
         }
 
-        if (problem == it || problem == pre) { // regression based on
-                                               // input table, if pre
-                                               // then try to maximize
-                                               // precision (or
-                                               // negative predictive
-                                               // value) instead of
-                                               // accuracy
+        // 'it' means regression based on input table.
+        // 'pre' means we must maximize precision (that is, negative
+        // predictive value), instead of accuracy.
+        if (problem == it || problem == pre) {
 
             // Infer the type of the input table
             type_tree table_output_tt = type_tree_output_type_tree(table_tt);
             type_node table_output_tn = get_type_node(table_output_tt);
 
             // Determine the default exemplar to start with
+            // problem == pre  precision-based scoring
             if (exemplars.empty())
-                exemplars.push_back(type_to_exemplar(problem == pre? id::boolean_type : table_output_tn));
+                exemplars.push_back(type_to_exemplar(
+                    problem == pre? id::boolean_type : table_output_tn));
 
             type_node output_type =
                 get_type_node(get_output_type_tree(*exemplars.begin()->begin()));
             if (output_type == id::unknown_type)
                 output_type = table_output_tn;
 
-            stringstream so;
-            so << "Inferred output type: " << output_type;
-            logger().info(so.str());
+            logger().info() << "Inferred output type: " << output_type;
             
             if (problem == pre) { // problem == pre  precision-based scoring
                 type_tree cand_tt = gen_signature(id::boolean_type, arity);
@@ -954,6 +977,19 @@ int moses_exec(int argc, char** argv)
                                               opt_params, meta_params, moses_params,
                                               mmr_pa);
                     }
+                } else if (output_type == id::enum_type) {
+                    unsupported_type_exit(output_type);
+#if 0
+                    typedef ctruth_table_bscore BScore;
+                    boost::ptr_vector<BScore> bscores;
+                    foreach(const CTable& ctable, ctables)
+                        bscores.push_back(new BScore(ctable, as, noise));
+                    multibscore_based_bscore<BScore> bscore(bscores);
+                    metapop_moses_results(exemplars, table_tt,
+                                          bool_reduct, bool_reduct_rep, bscore,
+                                          opt_params, meta_params, moses_params,
+                                          mmr_pa);
+#endif
                 } else {
                     unsupported_type_exit(output_type);
                 }
