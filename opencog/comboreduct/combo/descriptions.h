@@ -62,7 +62,7 @@ struct builtin_argument {
 // right?
 static const builtin_description bd[] =
 {
-    //action                    type  
+    // name                     type  
     { id::null_vertex,          "unknown" },
     { id::logical_and,          "->(arg_list(boolean) boolean)" },
     { id::logical_or,           "->(arg_list(boolean) boolean)" },
@@ -79,10 +79,17 @@ static const builtin_description bd[] =
     { id::sin,                  "->(contin contin)" },
     { id::greater_than_zero,    "->(contin boolean)" }, 
     { id::impulse,              "->(boolean contin)" },
+    { id::rand,                 "contin" },
+
     //{ id::ann,                  "->(arg_list(boolean))" },
     //{ id::ann_node,             "->(arg_list(boolean))" },
     //{ id::ann_input,           "boolean" },
-    { id::rand,                 "contin" },
+
+    { id::choice,               "->(arg_list(boolean) enum)" },
+
+    // Tests for equality. Someday, we should also allow equality
+    // testing for booleans, contin as well, but not today. 
+    { id::equ,                  "->(enum enum boolean)" },
 };
 
 

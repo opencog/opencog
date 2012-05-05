@@ -69,12 +69,16 @@ namespace id {
 enum builtin
 {
     null_vertex = 0,
+
+    // simple boolean functions
     logical_true, logical_false, // contants are put first to be in
                                  // sync with
                                  // lexicographic_subtree_order, it is
                                  // not mandatory but it should make
                                  // the reduct engine a bit faster
     logical_and, logical_or, logical_not, 
+
+    // contin functions (take contin as arg, or return contin)
     contin_if,
     boolean_if,
     plus, times, div, exp,
@@ -82,8 +86,13 @@ enum builtin
     sin,
     greater_than_zero,
     impulse,
-    rand,         //random contin_t in [0,1) FIXME TODO : update reduct rules
-    builtin_count //to get the number of builtin
+    rand,         // random contin_t in [0,1) FIXME TODO : update reduct rules
+
+    // enum functions (take enum as arg or return enum)
+    choice,
+    equ,
+
+    builtin_count // to get the number of builtin
 };
 
 }

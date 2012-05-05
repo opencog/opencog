@@ -327,7 +327,7 @@ arity_t action_result_arity(const type_tree& ty)
 arity_t type_tree_arity(const type_tree& ty)
 {
     OC_ASSERT(!ty.empty(),
-                      "Not sure this assert should not be replaced by a conditional");
+             "Not sure this assert should not be replaced by a conditional");
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type) {
         unsigned int noc = ty_it.number_of_children();
@@ -556,7 +556,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //-----------
     if (*it == id::lambda_type) {
         OC_ASSERT(!it.is_childless(),
-                          "lambda_type must have at least a child");
+                  "lambda_type must have at least a child");
         //if lambda has only one child
         //then reduce lambda(X) -> X
         if (it.has_one_child()) {
@@ -759,7 +759,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                         cia_it = tt.erase(cia_it);
                     }
                     
-                    if(!tr.empty()) //to move the operands of tr to the next
+                    if (!tr.empty()) //to move the operands of tr to the next
                         ct_it_child = tr.next_sibling(ct_it_child);
                 }
                 //remove a possibly remaining arg_list(T) in the input arguments
