@@ -426,10 +426,78 @@ score_t ctruth_table_bscore::min_improv() const
     return 0.5;
 }
 
-void ctruth_table_bscore::set_complexity_coef(float alphabet_size, float p) {
+void ctruth_table_bscore::set_complexity_coef(float alphabet_size, float p)
+{
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
     // comment above ctruth_table_bscore definition)
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
+        complexity_coef = discrete_complexity_coef(alphabet_size, p);
+}
+
+/////////////////////////
+// enum_table_bscore //
+/////////////////////////
+        
+enum_table_bscore::enum_table_bscore(const CTable& _ctt,
+                                     float alphabet_size, float p)
+    : ctable(_ctt)
+{
+    set_complexity_coef(alphabet_size, p);
+}
+
+behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
+{
+    behavioral_score bs;
+
+    // Evaluate the bscore components for all rows of the ctable
+    foreach(const CTable::value_type& vct, ctable) {
+        const vertex_seq& vs = vct.first;
+        const CTable::counter_t& c = vct.second;
+cout<<"duuude yeahhh"<<endl;
+// under construction, this is wrong, for now
+         bs.push_back(-score_t(c.get(negate_vertex(eval_binding(vs, tr)))));
+// XXX  what is this doing ???
+    }
+
+    // Add the Occam's razor feature
+    if (occam)
+        bs.push_back(complexity(tr) * complexity_coef);
+
+    log_candidate_bscore(tr, bs);
+
+    return bs;
+}
+
+behavioral_score enum_table_bscore::best_possible_bscore() const
+{
+cout <<"duuude we want nothing but the best"<<endl;
+    behavioral_score bs;
+    transform(ctable | map_values, back_inserter(bs),
+              [](const CTable::counter_t& c) {
+// under construction, this is wrong, for now
+// XXX wtf ??
+                  return -score_t(min(c.get(id::logical_true),
+                                      c.get(id::logical_false)));
+              });
+
+    // add the Occam's razor feature
+    if(occam)
+        bs.push_back(0);
+    return bs;
+}
+
+score_t enum_table_bscore::min_improv() const
+{
+    return 0.5;
+}
+
+void enum_table_bscore::set_complexity_coef(float alphabet_size, float p)
+{
+    // Both p==0.0 and p==0.5 are singularity points in the Occam's
+    // razor formula for discrete outputs (see the explanation in the
+    // comment above enum_table_bscore definition)
     occam = p > 0.0f && p < 0.5f;
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);

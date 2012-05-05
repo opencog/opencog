@@ -566,6 +566,48 @@ private:
     score_t complexity_coef;
 };
 
+/**
+ * Like ctruth_bscore but for enums.
+ *
+ * The CTable ctt holds the "compressed" data table, consisting of
+ * rows of input (independent) variables, and a single output
+ * (dependent) variable. Scoring is performed by evaluating the
+ * combo tree for each input row, and comparing the evaluation results
+ * to the output column.
+ *
+ * The first elements correspond to the minus absolute errors (0 if
+ * the enums match, -1 if they don't). The last element is optional
+ * and corresponds to a program size penalty.
+ *
+ * Regarding the program size penalty, see ctruth_bscore, above.
+ */
+struct enum_table_bscore : public bscore_base
+{
+    template<typename Func>
+    enum_table_bscore(const Func& func, arity_t arity,
+                      float alphabet_size, float p, int nsamples = -1)
+        : ctable(func, arity, nsamples)
+    {
+        set_complexity_coef(alphabet_size, p);
+    }
+    enum_table_bscore(const CTable& _ctt, float alphabet_size, float p);
+
+    behavioral_score operator()(const combo_tree& tr) const;
+
+    // Return the best possible bscore. Used as one of the
+    // termination conditions (when the best bscore is reached).
+    behavioral_score best_possible_bscore() const;
+
+    score_t min_improv() const;
+
+private:
+    void set_complexity_coef(float alphabet_size, float p);
+    
+    CTable ctable;
+    bool occam; // If true, then Occam's razor is taken into account.
+    score_t complexity_coef;
+};
+
 // Bscore to find interesting predicates. Interestingness is measured
 // in terms of several features such as
 //

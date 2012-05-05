@@ -880,9 +880,7 @@ int moses_exec(int argc, char** argv)
 
         // Infer the signature based on the input table.
         type_tree table_tt = infer_data_type_tree(input_data_files.front(), target_column);
-        stringstream ss;
-        ss << "Inferred data signature " << table_tt;
-        logger().info(ss.str());
+        logger().info() << "Inferred data signature " << table_tt;
 
         // Read input data files
         vector<Table> tables;
@@ -919,7 +917,8 @@ int moses_exec(int argc, char** argv)
 
             logger().info() << "Inferred output type: " << output_type;
             
-            if (problem == pre) { // problem == pre  precision-based scoring
+            // problem == pre  precision-based scoring
+            if (problem == pre) {
                 type_tree cand_tt = gen_signature(id::boolean_type, arity);
                 int as = alphabet_size(cand_tt, ignore_ops);
                 typedef precision_bscore BScore;
@@ -935,9 +934,14 @@ int moses_exec(int argc, char** argv)
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
-            } else { // problem == it  i.e. input-table based scoring.
+            } 
+
+            // problem == it  i.e. input-table based scoring.
+            else {
                 OC_ASSERT(output_type == table_output_tn);
                 int as = alphabet_size(table_tt, ignore_ops);
+
+                // --------- Boolean output type
                 if (output_type == id::boolean_type) {
                     typedef ctruth_table_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
@@ -949,6 +953,23 @@ int moses_exec(int argc, char** argv)
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
                 }
+
+                // --------- Enumerated output type
+                else if (output_type == id::enum_type) {
+                    // much like the boolean type above, just a
+                    // slightly different scorer.
+                    typedef enum_table_bscore BScore;
+                    boost::ptr_vector<BScore> bscores;
+                    foreach(const CTable& ctable, ctables)
+                        bscores.push_back(new BScore(ctable, as, noise));
+                    multibscore_based_bscore<BScore> bscore(bscores);
+                    metapop_moses_results(exemplars, table_tt,
+                                          contin_reduct, contin_reduct, bscore,
+                                          opt_params, meta_params, moses_params,
+                                          mmr_pa);
+                }
+
+                // --------- Contin output type
                 else if (output_type == id::contin_type) {
                     if (discretize_thresholds.empty()) {
                         typedef contin_bscore BScore;
@@ -977,20 +998,10 @@ int moses_exec(int argc, char** argv)
                                               opt_params, meta_params, moses_params,
                                               mmr_pa);
                     }
-                } else if (output_type == id::enum_type) {
-                    unsupported_type_exit(output_type);
-#if 0
-                    typedef ctruth_table_bscore BScore;
-                    boost::ptr_vector<BScore> bscores;
-                    foreach(const CTable& ctable, ctables)
-                        bscores.push_back(new BScore(ctable, as, noise));
-                    multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(exemplars, table_tt,
-                                          bool_reduct, bool_reduct_rep, bscore,
-                                          opt_params, meta_params, moses_params,
-                                          mmr_pa);
-#endif
-                } else {
+                }
+
+                // --------- Unknown output type
+                else {
                     unsupported_type_exit(output_type);
                 }
             }
