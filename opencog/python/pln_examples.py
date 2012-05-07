@@ -47,14 +47,13 @@ bc/plus_test.conf
 bc/new/pathfinding_test.conf
 ''')
 
+files_list = '''bc/new/pathfinding_test.conf'''
+
 #files_list = '''bc/plus_test.conf'''
 #files_list ='''
 #both/new/BasicForAllDemo_test.conf
 #both/new/BasicForAllDemo2_test.conf
 #'''
-files_list = '''
-bc/new/pathfinding_test.conf
-'''
 
 files = files_list.split('\n')
 

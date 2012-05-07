@@ -226,7 +226,7 @@ class Chainer:
             # Only visualize it if it is actually new
             # viz
             for (i, input) in enumerate(app.goals):
-                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app.name)
+                self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app)
 
         if status == 'CYCLE' or status == 'EXISTING':
             return
@@ -253,8 +253,7 @@ class Chainer:
         itself is responsible for finding specific enough apps.'''
         input_tvs = [self.get_tvs(input) for input in app.goals]
         res = all(tvs != [] for tvs in input_tvs)
-        #if len(app.goals) > 0:
-        #    print '########check_premises',repr(app),res
+        print '########check_premises',repr(app),res
         return res
     
     def compute_and_add_tv(self, app):
@@ -298,9 +297,16 @@ class Chainer:
 
             def found_axiom(axiom_app, s):
                 if axiom_app != None:
-                    gvs = get_varlist(goal)
-                    goal_vars_mapped = [v for v in s.keys() if v in gvs]
-                    if len(goal_vars_mapped) == 0:
+                    self.add_app_to_pd(axiom_app)
+                    if axiom_app.tv.count > 0:
+                        self.viz.outputTarget(None,axiom_app.head,0,axiom_app)
+                        self.viz.declareResult(axiom_app.head)
+                    
+                    # Neither of these options work with ForAllLinks...
+                    #gvs = get_varlist(goal)
+                    #goal_vars_mapped = [v for v in s.keys() if v in gvs]
+                    #if len(goal_vars_mapped) == 0:
+                    if len(s) == 0:
                         assert goal == axiom_app.head
                         self.propogate_result(app)
                     else:
@@ -345,7 +351,8 @@ class Chainer:
                             # If the Atom has variables, give them values from the target
                             # new_rule = new_rule.subst(s)
                             log.info(format_log('##find_axioms_for_rule_app: printing new magic tv', axiom_app.head, tv))
-                            self.set_tv(axiom_app,tv)
+                            if not tv is None:
+                                self.set_tv(axiom_app,tv)
                             
                             found_axiom(axiom_app, s)
 
@@ -669,13 +676,13 @@ class Chainer:
     #    #print best
     #    return best
 
-    def get_fittest(self, queue):
+    def bc_score(self, expr):
         def get_coords(expr):
             name = expr.op.name
             tuple_str = name[3:]
             coords = tuple(map(int, tuple_str[1:-1].split(',')))
             return coords
-            
+
         def get_distance(expr):
             # the location being explored
             l = get_coords(expr)
@@ -686,16 +693,25 @@ class Chainer:
             #dist = (xdist**2.0+ydist**2.0+zdist**2.0)**0.5
             return dist
         
-        def score(expr):
-            if not isinstance(expr.op, Atom):
-                return 1000
-            else:
-                return - get_distance(expr)
+        if expr.get_type() == t.ConceptNode and expr.op.name.startswith('at '):
+            return -get_distance(expr)
+        else:
+            return 1000
+
+    def get_fittest(self, queue):
+        def get_score(expr):
+            expr_pdn = self.expr2pdn(expr)
+            
+            try:
+                return expr_pdn.bc_score
+            except AttributeError:
+                expr_pdn.bc_score = self.bc_score(expr)
+                return expr_pdn.bc_score
         
-        best = max(queue, key = score)
+        # PDNs with the same score will be explored in the order they were added,
+        # ie breadth-first search
+        best = max(queue, key = get_score)
         print best
-        if isinstance(best.op, Atom):
-            print 'distance', get_distance(best)
         queue.remove(best)
         
         return best
@@ -803,17 +819,20 @@ class PLNviz:
         #target_id = str(hash(target))
         target_id = str(target)
 
-        if parent == None:
+        if parent == None and target != None:
             self.g.add_node(target_id, label=str(target), **self.root_attributes)
 
         if parent != None:
-            self.g.add_node(target_id, label=str(target), **self.node_attributes)
+            # i.e. if it's a generator, which has no goals and only
+            # produces a result, which is called 'parent' here
+            if target != None:
+                self.g.add_node(target_id, label=str(target), **self.node_attributes)
 
             #parent_id = str(hash(parent))
             #link_id = str(hash(target_id+parent_id))
             parent_id = str(parent)
             #rule_app_id = 'rule '+repr(rule)+parent_id
-            rule_app_id = 'rule '+str(rule)+parent_id
+            rule_app_id = 'rule '+repr(rule)+parent_id
             target_to_rule_id = rule_app_id+target_id
             parent_to_rule_id = rule_app_id+' parent'
 

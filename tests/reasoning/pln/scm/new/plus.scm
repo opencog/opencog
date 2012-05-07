@@ -10,5 +10,17 @@
 )
 )
 
+;(EvaluationLink (stv 1 1)
+;    (PredicateNode "+")
+;    (ListLink
+;        (NumberNode "1")
+;        (NumberNode "1")
+;        (NumberNode "2")
+;    )
+;)
+
 (define target (EvaluationLink (ConceptNode "WIN")))
-(ImplicationLink sum target (stv 1 1))
+(ForAllLink (stv 1 1)
+    (ListLink (VariableNode "TheAmazingResult"))
+    (ImplicationLink sum target)
+)

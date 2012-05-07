@@ -29,10 +29,10 @@ def rules(a, deduction_types):
 
     # Just lookup the rule rather than having separate rules. Would be faster
     # with a large number of atoms (i.e. more scalable)
-    #r = Rule(Var(123),[],
-    #                  name='Lookup',
-    #                  match=match_axiom)
-    #rules.append(r)
+    r = Rule(Var(123),[],
+                      name='Lookup',
+                      match=match_axiom)
+    rules.append(r)
 
     r = Rule(T('EvaluationLink',
                a.add(t.PredicateNode,'+'),
@@ -320,7 +320,7 @@ def match_predicate(space,target):
             s = {n3: Tree(space.add(t.NumberNode,str(addition)))}
             c = subst(s, target)
             print '>>>match_predicate:c',c
-            candidates.append((c, TruthValue(1.0,confidence_to_count(1.0))))
+            candidates.append((c, None))
     
     return candidates
 
@@ -354,10 +354,10 @@ class Rule :
     def __repr__ (self) :
         rep = self.name + ' '  + str(self.head) + ' ' + str(self.tv)
         #rep += ' '*self.bc_depth*3
-        rep += '\n'
+        rep += ' :- '
         for goal in self.goals :
             #rep += ' '*(self.bc_depth*3+3)
-            rep += str(goal) + '\n'
+            rep += str(goal) + ' //'
         return rep
 
     def standardize_apart(self):
