@@ -10,7 +10,26 @@ import math
 def rules(a, deduction_types):
     rules = []
 
-    path_rules(a)
+    #path_rules(a)
+
+    r = Rule(T('EvaluationLink',
+                a.add(t.PredicateNode,'neighbor'),
+                T('ListLink',
+                    Var(1),
+                    Var(2)
+                )),
+             [],
+             name='Neighbors',
+             match=match_neighbors)
+    rules.append(r)
+    #r = Rule(T('ImplicationLink',
+    #            Var(1),
+    #            Var(2)
+    #            ),
+    #         [],
+    #         name='Neighbors',
+    #         match=match_neighbors)
+    #rules.append(r)
 
     # All existing Atoms
     for obj in a.get_atoms_by_type(t.Atom):
@@ -29,41 +48,41 @@ def rules(a, deduction_types):
 
     # Just lookup the rule rather than having separate rules. Would be faster
     # with a large number of atoms (i.e. more scalable)
-    r = Rule(Var(123),[],
-                      name='Lookup',
-                      match=match_axiom)
-    rules.append(r)
+    #r = Rule(Var(123),[],
+    #                  name='Lookup',
+    #                  match=match_axiom)
+    #rules.append(r)
 
-    r = Rule(T('EvaluationLink',
-               a.add(t.PredicateNode,'+'),
-               T('ListLink',
-                 Var(1),
-                 Var(2),
-                 Var(3))),
-             [],
-             name='PredicateEvaluation',
-             match=match_predicate)
-    rules.append(r)
-    
-    # Deduction
-    for type in deduction_types:
-        rules.append(Rule(T(type, 1,3), 
-                                     [T(type, 1, 2),
-                                      T(type, 2, 3), 
-                                      Var(1),
-                                      Var(2), 
-                                      Var(3)],
-                                    name='Deduction', 
-                                    formula = formulas.deductionSimpleFormula))
-    
+    #r = Rule(T('EvaluationLink',
+    #           a.add(t.PredicateNode,'+'),
+    #           T('ListLink',
+    #             Var(1),
+    #             Var(2),
+    #             Var(3))),
+    #         [],
+    #         name='PredicateEvaluation',
+    #         match=match_predicate)
+    #rules.append(r)
+    #
+    ## Deduction
+    #for type in deduction_types:
+    #    rules.append(Rule(T(type, 1,3), 
+    #                                 [T(type, 1, 2),
+    #                                  T(type, 2, 3), 
+    #                                  Var(1),
+    #                                  Var(2), 
+    #                                  Var(3)],
+    #                                name='Deduction', 
+    #                                formula = formulas.deductionSimpleFormula))
+    #
     # Inversion
-    for type in deduction_types:
-        rules.append(Rule( T(type, 2, 1), 
-                                     [T(type, 1, 2),
-                                      Var(1),
-                                      Var(2)], 
-                                     name='Inversion', 
-                                     formula = formulas.inversionFormula))
+    #for type in deduction_types:
+    #    rules.append(Rule( T(type, 2, 1), 
+    #                                 [T(type, 1, 2),
+    #                                  Var(1),
+    #                                  Var(2)], 
+    #                                 name='Inversion', 
+    #                                 formula = formulas.inversionFormula))
     
     # ModusPonens
     for type in ['ImplicationLink']:
@@ -111,26 +130,26 @@ def rules(a, deduction_types):
                            args,
                            type[:-4], 
                            formula = formulas.andSymmetricFormula))
-
-    type = 'OrLink'
-    for size in xrange(2):
-        args = [new_var() for i in xrange(size+1)]
-        rules.append(Rule(T(type, args),
-                           args,
-                           type[:-4], 
-                           formula = formulas.orFormula))
-
-    # Adding a NOT
-    rules.append(Rule(T('NotLink', 1),
-                       [ Var(1) ],
-                       name = 'Not', 
-                       formula = formulas.notFormula))
-
-    # Link conversion
-    rules.append(Rule(T('InheritanceLink', 1, 2),
-                       [ T('SubsetLink', 1, 2) ],
-                       name = 'SubsetLink=>InheritanceLink', 
-                       formula = formulas.ext2InhFormula))
+    
+    #type = 'OrLink'
+    #for size in xrange(2):
+    #    args = [new_var() for i in xrange(size+1)]
+    #    rules.append(Rule(T(type, args),
+    #                       args,
+    #                       type[:-4], 
+    #                       formula = formulas.orFormula))
+    #
+    ## Adding a NOT
+    #rules.append(Rule(T('NotLink', 1),
+    #                   [ Var(1) ],
+    #                   name = 'Not', 
+    #                   formula = formulas.notFormula))
+    #
+    ## Link conversion
+    #rules.append(Rule(T('InheritanceLink', 1, 2),
+    #                   [ T('SubsetLink', 1, 2) ],
+    #                   name = 'SubsetLink=>InheritanceLink', 
+    #                   formula = formulas.ext2InhFormula))
 
     # In planning, assume that an ExecutionLink (action) will be performed
     r = Rule(T('ExecutionLink', 1, 2),
@@ -237,12 +256,20 @@ def path_rules(a):
                 continue
             
             ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)] #,(x,y,z-1),(x,y,z+1)]
+            ns += [(x,y,z+1) for n in ns]
             for n in ns:
                 #p2 = change_position((i,j,z))
                 
-                r = T('ImplicationLink',
-                    a.add(t.ConceptNode,'at %s' % str(p1c)),
-                    a.add(t.ConceptNode,'at %s' % str(n))
+                #r = T('ImplicationLink',
+                #    a.add(t.ConceptNode,'at %s' % str(p1c)),
+                #    a.add(t.ConceptNode,'at %s' % str(n))
+                #)
+                r = T('EvaluationLink',
+                    a.add(t.PredicateNode,'neighbor'),
+                    T('ListLink',
+                        a.add(t.ConceptNode,'at %s' % str(p1c)),
+                        a.add(t.ConceptNode,'at %s' % str(n))
+                    )
                 )
                 ra = atom_from_tree(r, a)
                 ra.tv = TruthValue(1,confidence_to_count(1.0))
@@ -262,7 +289,8 @@ def path_rules(a):
             print 'occupied'
             continue
         
-        ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z),(x,y,z-1),(x,y,z+1)]
+        ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)]
+        ns += [(x,y,z+1) for n in ns]
         #print pl
         for n in ns:
             neighbor_block_template = change_position(n)
@@ -273,9 +301,16 @@ def path_rules(a):
             
             if len(tmp):
                 # Can go straight from one block to another
-                tr = T('ImplicationLink',
-                    a.add(t.ConceptNode,'at %s' % str(coords)),
-                    a.add(t.ConceptNode,'at %s' % str(n))
+                #tr = T('ImplicationLink',
+                #    a.add(t.ConceptNode,'at %s' % str(coords)),
+                #    a.add(t.ConceptNode,'at %s' % str(n))
+                #)
+                tr = T('EvaluationLink',
+                    a.add(t.PredicateNode,'neighbor'),
+                    T('ListLink',
+                        a.add(t.ConceptNode,'at %s' % str(coords)),
+                        a.add(t.ConceptNode,'at %s' % str(n))
+                    )
                 )
                 #print tr
                 atom_from_tree(tr, a).tv = TruthValue(1,confidence_to_count(1.0))
@@ -301,6 +336,49 @@ def match_axiom(space,target):
     candidate_tvs = (c.tv for c in candidates)
     
     return zip(candidate_trees, candidate_tvs)
+
+def match_neighbors(space,target):
+    print 'match_neighbors',target
+    template = T('EvaluationLink',
+                space.add(t.PredicateNode,'neighbor'),
+                T('ListLink',
+                    Var(1),
+                    Var(2)
+                )
+     )
+    s = unify(template, target, {})
+    cube1 = s[Var(1)]
+    
+    #template = T('ImplicationLink',
+    #    Var(2),
+    #    Var(1)
+    #)
+    #s = unify(template, target, {})
+    #cube1 = s[Var(1)]
+    
+    def get_coords(expr):
+        name = expr.op.name
+        tuple_str = name[3:]
+        coords = tuple(map(int, tuple_str[1:-1].split(',')))
+        return coords
+
+    if cube1.is_variable() or not isinstance(cube1.op, Atom):
+        return []
+    (x,y,z) = get_coords(cube1)
+    
+    ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)]
+    # jumping onto a block
+    ns += [(x,y,z+1) for n in ns]
+    
+    tv = TruthValue(1,confidence_to_count(1.0))
+    candidates = []
+    for n in ns:
+        cube2 = Tree(space.add(t.ConceptNode, 'at %s' % str(n)))
+        s = {Var(1):cube1, Var(2):cube2}
+        cand = subst(s, template)
+        candidates.append((cand,tv))
+
+    return candidates
 
 def match_predicate(space,target):
     # Actually it would be much better to use the standard target for this rule

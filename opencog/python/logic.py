@@ -211,13 +211,38 @@ class Chainer:
                      very_vague)
 
     def reject_expression(self,expr):
-        return self._app_is_stupid(expr) or expr.is_variable()
+        return self._app_is_stupid(expr) or expr.is_variable() or not self.check_domain_recursive(expr)
+        
+    def check_domain_recursive(self, expr):
+        '''Check that any predicates used in the expression are used correctly. It's
+        recursive, so it works on e.g. an AndLink containing some EvaluationLinks.'''
+        res = all(self.check_domain(subtree) for subtree in expr.flatten())
+        #print format_log('check_domain_recursive',expr,res)
+        return res
+    
+    def check_domain(self, expr):
+        '''A basic ad-hoc system for checking the domain (i.e. inputs) of a predicate'''
+        if expr.is_variable():
+            return True
+        pred = new_var()
+        argument_list = new_var()
+        template = T('EvaluationLink',
+                     pred,
+                     argument_list)
+        s = unify(template, expr, {})
+        if s == None:
+            return True
+        pred_name = s[pred].op.name
+        args_trees = s[argument_list].args
+        if pred_name == 'neighbor':
+            return all(a.is_variable() or a.get_type() == t.ConceptNode for a in args_trees)
+        return True
 
     def add_queries(self, app):
         def goal_is_stupid(goal):
             return goal.is_variable()
 
-        if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head):
+        if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head) or not all(g.is_variable() or self.check_domain_recursive(g) for g in list(app.goals)+[app.head]):
             return
 
         # If the app is a cycle or already added, don't add it or any of its goals
@@ -390,7 +415,7 @@ class Chainer:
     
     def propogate_specialization(self, new_premise, i, orig_app):
         orig_app = orig_app.standardize_apart()
-        new_premise = standardize_apart(new_premise)
+        #new_premise = standardize_apart(new_premise)
         s = unify(orig_app.goals[i], new_premise, {})
         
         assert s != None
@@ -410,7 +435,8 @@ class Chainer:
         
         new_result = new_app.head
         
-        
+        if self.reject_expression(new_result):
+            return
         
         # After you finish specializing, it may be a usable rule app
         # (i.e. all premises have been found exactly).
@@ -693,10 +719,19 @@ class Chainer:
             #dist = (xdist**2.0+ydist**2.0+zdist**2.0)**0.5
             return dist
         
-        if expr.get_type() == t.ConceptNode and expr.op.name.startswith('at '):
-            return -get_distance(expr)
-        else:
-            return 1000
+        worst_distance = 10**9
+        # The greatest distance refered to in the expression
+        for subtree in expr.flatten():
+            if subtree.get_type() == t.ConceptNode and subtree.op.name.startswith('at '):
+                # Hack to skip messy useless Implications that just have
+                # the destination + a variable
+                if get_distance(subtree) != 0:
+                    worst_distance = min(get_distance(subtree), worst_distance)
+        
+        # TODO will return very low, uniform scores for anything other
+        # than pathfinding!
+        print '>>>',-worst_distance, expr
+        return -worst_distance
 
     def get_fittest(self, queue):
         def get_score(expr):

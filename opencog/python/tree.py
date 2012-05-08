@@ -146,6 +146,7 @@ class Tree (object):
         return canonical_trees([self])[0]
 
     def flatten(self):
+        '''Returns every possible subtree of this tree'''
         # t=Tree('EvaluationLink',Tree(1),Tree('ListLink',Tree('cat'),Tree('dog')))
         return [self]+concat_lists(map(Tree.flatten, self.args))
 
@@ -316,6 +317,12 @@ def unify(x, y, s):
 
     assert not tx == tuple and not ty == tuple
 
+    # This assert won't work because of how variable substitution is used inside the
+    # unification code.
+    #if tx == Tree and ty == Tree and not x.is_variable() and not y.is_variable():
+    #    # Make sure that they have no shared variables
+    #    assert not set(get_varlist(x)).intersection(get_varlist(y))
+
     if s == None:
         return None
     # Not compatible with RPyC as it will make one of them 'netref t'
@@ -405,8 +412,11 @@ def subst(s, x):
 #        # Notice recursive substitutions. i.e. $1->$2, $2->$3
 #        # This recursion should also work for e.g. $1->foo($2), $2->bar
 #        return subst(s, s.get(x, x))
+    assert isinstance(x, Tree)
     if x.is_variable():
-        return s.get(x, x)
+        value = s.get(x, x)
+        assert isinstance(value, Tree)
+        return value
     elif x.is_leaf(): 
         return x
     else: 
