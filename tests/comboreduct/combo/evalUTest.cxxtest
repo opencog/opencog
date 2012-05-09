@@ -16,8 +16,9 @@ public:
     std::cout << "TR : " << tr << std::endl;
     stringstream ss_expected_res("+(1 2 *(3 4)) ");
 
-    //test set_bindings on vertex vector
-    std::vector<vertex> al{1, 2, 3, 4};
+    // test set_bindings on vertex vector
+    std::vector<vertex> al{1.0, 2.0, 3.0, 4.0 };
+
     combo_tree tr_copy(tr);
     set_bindings(tr, tr.begin(), al, explicit_arity(tr));
     std::cout << "TR AFTER BINDING : " << tr << std::endl;

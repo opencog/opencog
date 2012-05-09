@@ -171,7 +171,7 @@ public :
         str += ")";
         runProcedureInCombo(str, v);
 
-        vertex v1(4);
+        vertex v1(4.0);
         str.clear();
         str.assign("get_current_action_repetition");
         runProcedureInCombo(str, v1);
