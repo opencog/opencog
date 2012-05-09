@@ -353,7 +353,9 @@ bool has_header(const string& dataFileName)
     string line;
     get_data_line(*in, line);
     type_node n = infer_type_from_token(tokenizeRow<string>(line).front());
-    return n == id::ill_formed_type;
+
+    // Well, first row might be enums, or headers...
+    return (n == id::ill_formed_type) || (n == id::enum_type);
 }
 
 /**
