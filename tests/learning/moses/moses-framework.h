@@ -30,7 +30,8 @@ using namespace boost::posix_time;
 string build_arguments(vector<string>& arguments)
 {
     char tempfile[] = "/tmp/mosesUTestXXXXXX";
-    mkstemp(tempfile);
+    int fd = mkstemp(tempfile);
+    OC_ASSERT (fd != -1);
     arguments.insert(arguments.begin(), "moses-exec");
     arguments.push_back(string("-o").append(tempfile).c_str());
     return tempfile;
