@@ -97,7 +97,7 @@ public:
         : olabel(_olabel), ilabels(_ilabels) {}
 
 
-    // TODO remove that junk
+    // TODO remove that junk  !?? Remove what junk ?? Huh ?? XXX
     binding_map get_binding_map(const vertex_seq& args) const
     {
         binding_map bmap;
@@ -105,6 +105,7 @@ public:
             bmap[i+1] = args[i];
         return bmap;
     }
+
     // like above but only consider the arguments in as
     binding_map get_binding_map(const vertex_seq& args, const arity_set& as) const
     {
@@ -114,7 +115,7 @@ public:
         return bmap;
     }
 
-    // return the total number of observations (should be equal to the
+    // Return the total number of observations (should be equal to the
     // size of the corresponding uncompressed table)
     unsigned uncompressed_size() {
         unsigned res = 0;
@@ -432,13 +433,13 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
             vec.push_back(row.first[idx]);
         ic[vec] += row_total;
         // update ioc
-        if(falses > 0) {
-            vec.push_back(false);
+        if (falses > 0) {
+            vec.push_back(id::logical_false);
             ioc[vec] += falses;
             vec.pop_back();
         }
-        if(trues > 0) {
-            vec.push_back(true);
+        if (trues > 0) {
+            vec.push_back(id::logical_true);
             ioc[vec] += trues;
         }
         // update oc
