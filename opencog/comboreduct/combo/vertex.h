@@ -89,7 +89,8 @@ enum builtin
     rand,         // random contin_t in [0,1) FIXME TODO : update reduct rules
 
     // enum functions (take enum as arg or return enum)
-    choice,
+    // XXX These could/should be generalized to any types.
+    cond,
     equ,
 
     builtin_count // to get the number of builtin

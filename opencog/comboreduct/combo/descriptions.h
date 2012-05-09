@@ -85,10 +85,18 @@ static const builtin_description bd[] =
     //{ id::ann_node,             "->(arg_list(boolean))" },
     //{ id::ann_input,           "boolean" },
 
-    { id::choice,               "->(arg_list(boolean) enum)" },
+    // cond primitive, a la lisp/sheme: if (pred1) value1; else
+    // if (pred2) value2; else if ... else value_n. 
+    // XXX For just right now, 'value' will be an enum, but really,
+    // it should be union(bool, contin, enum, etc). FIXME later.
+    //
+    // { id::cond,               "->(arg_list(boolean enum) enum)" },
+    { id::cond,               "->(boolean enum enum enum)" },
 
-    // Tests for equality. Someday, we should also allow equality
+    // Tests for equality. XXX Someday, we should also allow equality
     // testing for booleans, contin as well, but not today. 
+    // Fixing this will require work in typechecker, and use of union
+    // type. XXX FIXME...
     { id::equ,                  "->(enum enum boolean)" },
 };
 
