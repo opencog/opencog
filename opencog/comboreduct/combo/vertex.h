@@ -581,7 +581,8 @@ inline bool is_procedure_call(const vertex& v)
     return (boost::get<procedure_call>(&v));
 }
 
-inline procedure_call get_procedure_call(const vertex& v)
+// Return cont&, avoid running the copy constructor!
+inline const procedure_call& get_procedure_call(const vertex& v)
 {
     return (boost::get<procedure_call>(v));
 }
@@ -591,7 +592,8 @@ inline bool is_action_symbol(const vertex& v)
     return (boost::get<action_symbol>(&v));
 }
 
-inline action_symbol get_action_symbol(const vertex& v)
+// Return cont&, avoid running the copy constructor!
+inline const action_symbol& get_action_symbol(const vertex& v)
 {
     return (boost::get<action_symbol>(v));
 }
@@ -601,7 +603,8 @@ inline bool is_indefinite_object(const vertex& v)
     return (boost::get<indefinite_object>(&v));
 }
 
-inline indefinite_object get_indefinite_object(const vertex& v)
+// Return cont&, avoid running the copy constructor!
+inline const indefinite_object& get_indefinite_object(const vertex& v)
 {
     return (boost::get<indefinite_object>(v));
 }
@@ -611,9 +614,21 @@ inline bool is_message(const vertex& v)
     return (boost::get<message>(&v));
 }
 
-inline message get_message(const vertex& v)
+// Return cont&, avoid running the copy constructor!
+inline const message& get_message(const vertex& v)
 {
     return (boost::get<message>(v));
+}
+
+inline bool is_enum_type(const vertex& v)
+{
+    return (boost::get<enum_t>(&v));
+}
+
+// Return cont&, avoid running the copy constructor!
+inline const enum_t& get_enum_type(const vertex& v)
+{
+    return (boost::get<enum_t>(v));
 }
 
 inline bool is_builtin(const vertex& v)
