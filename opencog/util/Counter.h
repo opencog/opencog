@@ -40,11 +40,10 @@ using boost::adaptors::map_values;
  */
 
 template<typename T, typename CT>
-struct Counter : public std::map<T, CT>,
+class Counter : public std::map<T, CT>,
     boost::addable<Counter<T, CT>>
 {
-    typedef std::map<T, CT> super;
-    typedef typename super::value_type value_type;
+protected:
     // this will be replaced by C++11 constructor delegation instead
     // of init
     template<typename IT>
@@ -55,6 +54,11 @@ struct Counter : public std::map<T, CT>,
             ++from;
         }
     }
+
+public:
+    typedef std::map<T, CT> super;
+    typedef typename super::value_type value_type;
+
     Counter() {}
     template<typename IT>
     Counter(IT from, IT to) {
