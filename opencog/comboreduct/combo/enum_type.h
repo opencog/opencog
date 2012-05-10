@@ -30,7 +30,6 @@
 #include <boost/thread.hpp>
 
 #define COMBO_ENUM_TYPE_PREFIX "enum_type:"
-#define COMBO_ENUM_TYPE_BAD_VALUE "--BAD_VALUE--"
 
 namespace opencog { namespace combo {
 
@@ -98,8 +97,7 @@ public:
     }
     static enum_t get_random_enum();
     static size_t size() {
-        // Subtract one for bad value.
-        return enum_map.size() - 1;
+        return enum_map.size();
     }
 };
 

@@ -798,18 +798,24 @@ void build_knobs::enum_canonize(pre_it it)
 cout <<"duude its can="<<combo_tree(it)<<endl;
 }
 
-// Add enum knobs to a tree. 
-// XXX Right now, this adds predicate-enum pairs to a cond
-// An alternative might be to turn the enum into a disc_knob
-// but this is not obviously better (or worse) for the job.
+// Add enum knobs to a tree.  That is, we assume the return value of
+// the tree is an enum.  At this time, it means that the root of the
+// tree must be a cond, returning enum.  Thus, adding knobs just means
+// adding boolean conditions to the cond, and enums if that condition
+// is fulfilled.
+//
+// XXX An alternative might be to turn the enum into a disc_knob
+// but this is not obviously better (or worse) job.  Hmm. Need to
+// think about this...
 void build_knobs::build_enum(pre_it it)
 {
     // If the node is not a cond, we don't know what to do.
     if (*it != id::cond)
         return;
 
-    // Insert some predicates and enums.  Always insert at
-    // least one pair.
+    // Insert some conditions and enums.  Always insert at least one
+    // pair. The logical_and will get blown up into a bunch of knobs
+    // by the build_logical, below.
     size_t half = enum_t::size() / 2 + 1;
     for (size_t i=0; i<half; i++) {
         _exemplar.prepend_child(it, enum_t::get_random_enum());
@@ -818,18 +824,13 @@ void build_knobs::build_enum(pre_it it)
 
     for (sib_it sib = it.begin(); sib != it.end(); ++sib)
     {
-        // Put some knobs into the cond predicate.
+        // Put some knobs into the condition.
         if (is_logical_operator(*sib) || is_predicate(sib)) {
             build_logical(sib);
         }
 
-        // Weed out bad enum types, if any.
-        if (is_enum_type(*sib)) {
-            const enum_t &e = get_enum_type(*sib);
-            if (e.getContent() == COMBO_ENUM_TYPE_BAD_VALUE) {
-                *sib = enum_t::get_random_enum();
-            }
-        }
+        // Skip the return value.
+        if (is_enum_type(*sib)) sib++;
     }
 }
 

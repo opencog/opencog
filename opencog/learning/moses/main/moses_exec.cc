@@ -116,7 +116,7 @@ combo_tree type_to_exemplar(type_node type)
     case id::contin_type: return combo_tree(id::plus);
     case id::enum_type: {
         combo_tree tr(id::cond);
-        tr.append_child(tr.begin(), enum_t(COMBO_ENUM_TYPE_BAD_VALUE));
+        tr.append_child(tr.begin(), enum_t::get_random_enum());
         return tr;
     }
     case id::ill_formed_type:
