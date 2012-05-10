@@ -142,7 +142,7 @@ typedef vertex_set::const_iterator vertex_set_const_it;
 typedef std::vector<vertex> vertex_seq;
 typedef vertex_seq::iterator vertex_seq_it;
 typedef vertex_seq::const_iterator vertex_seq_const_it;
-        
+
 typedef std::set<vertex> operator_set;
 typedef operator_set::iterator operator_set_it;
 typedef operator_set::iterator operator_set_const_it;
@@ -157,7 +157,7 @@ typedef argument_list_list::const_iterator argument_list_list_const_it;
 // Disambiguate stream operator; use the one declared in util/tree.h
 std::istream& operator>>(std::istream& in, combo::vertex& v);
 
-// ------------------------------------------------------- 
+// -------------------------------------------------------
 // builtin == vertex
 inline bool operator==(const vertex& v, builtin h)
 {
@@ -319,7 +319,7 @@ inline bool operator!=(const vertex& v, ann_ids a)
     return !(v == a);
 }
 inline bool operator!=(ann_ids a,const vertex& v)
-{ 
+{
     return !(v == a);
 }
 */
@@ -384,7 +384,7 @@ inline bool operator!=(action_symbol i, const vertex& v)
 {
     return !(v == i);
 }
-// ------------------------------------------------------- 
+// -------------------------------------------------------
 
 // don't know why this is needed *in namespace boost*, but it is, for
 // e.g. calling a generic stl function that compares vertices for
@@ -411,8 +411,12 @@ inline size_t hash_value(const vertex& v)
     static const size_t c3 = c2 + size_t(id::action_count);
     static const size_t c_last = c3;
 
-    //there will be some overlap between contin_t, definite_object, message
-    //and procedure_call but this overlap is unavoidable
+    // There will be some overlap between contin_t, definite_object,
+    // message, etc., but this overlap seems unavoidable.  If this
+    // becomes a problem, one could create a registery for globally
+    // unique strings, and use that instead of the hash.  (Might be
+    // faster, too ??)  (See for example, enum_type.h, but make that
+    // global, insted of specific to enum_type.)
 
     if (const builtin* h = boost::get<builtin>(&v))
         return size_t(*h);
@@ -422,59 +426,66 @@ inline size_t hash_value(const vertex& v)
         return size_t(a->idx * (a->is_negated() + 2)) + c1;
     if (const contin_t* c = boost::get<contin_t>(&v)) {
         size_t tmp = c_last;
-        /// WARNING: let the boost namespace as it permits to not generate
-        /// infinit recursive calls of hash_value(const vertex& v)
+        // WARNING: Use the boost namespace, as it prevents an
+        // infinite recursive call to hash_value(const vertex& v)
         hash_combine(tmp, boost::hash_value(*c));
+        return tmp;
+    }
+    if (const enum_t* m = boost::get<enum_t>(&v)) {
+        size_t tmp = c_last;
+        // WARNING: Use the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(m->getContent()));
         return tmp;
     }
     if (const action* a = boost::get<action>(&v))
         return size_t(*a) + c2;
     if (const builtin_action* b = boost::get<builtin_action>(&v)) {
         size_t tmp = c_last;
-        /// WARNING: let the boost namespace (see above)
+        // WARNING: Use the boost namespace (see above)
         hash_combine(tmp, boost::hash_value(*b));
         return tmp;
     }
     if (const perception* p = boost::get<perception>(&v)) {
         size_t tmp = c_last;
-        /// WARNING: let the boost namespace (see above)
+        // WARNING: Use the boost namespace (see above)
         hash_combine(tmp, boost::hash_value(*p));
         return tmp;
     }
     if (const definite_object* d = boost::get<definite_object>(&v)) {
         size_t tmp = c_last;
-        /// WARNING: let the boost namespace (see above)
+        // WARNING: Use the boost namespace (see above)
         hash_combine(tmp, boost::hash_value(*d));
         return tmp;
     }
     if (const indefinite_object* i = boost::get<indefinite_object>(&v)) {
         size_t tmp = c_last;
-        /// WARNING: let the boost namespace (see above)
+        // WARNING: Use the boost namespace (see above)
         hash_combine(tmp, boost::hash_value(*i));
         return tmp;
     }
     if (const message* m = boost::get<message>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, combo::hash_value(*m));
+        // WARNING: Use the boost namespace (see above)
+        hash_combine(tmp, boost::hash_value(m->getContent()));
         return tmp;
     }
     if (const procedure_call* pc = boost::get<procedure_call>(&v)) {
         size_t tmp = c_last;
         std::cout << pc << std::endl;
-        /// WARNING: let the boost namespace (see above)
+        // WARNING: Use the boost namespace (see above)
         // TODO
         // hash_combine(tmp, boost::hash_value(*pc));
         return tmp;
     }
     if (const action_symbol* as = boost::get<action_symbol>(&v)) {
         size_t tmp = c_last;
-        /// WARNING: let the boost namespace (see above)
+        // WARNING: Use the boost namespace (see above)
         hash_combine(tmp, boost::hash_value(*as));
         return tmp;
     }
     if (const ann_type* a = boost::get<ann_type>(&v)) {
         size_t tmp = c_last;
-        /// WARNING: let the boost namespace (see above)
+        // WARNING: Use the boost namespace (see above)
         hash_combine(tmp, boost::hash_value(a->idx));
         return tmp;
     }
@@ -482,7 +493,7 @@ inline size_t hash_value(const vertex& v)
     return 0;
 }
 
-// ------------------------------------------------------- 
+// -------------------------------------------------------
 
 typedef tree<vertex> combo_tree;
 // ns stands for normal size
@@ -493,7 +504,7 @@ typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
 // Disambiguate stream operator; use the one declared in util/tree.h
 std::istream& operator>>(std::istream& in, combo::combo_tree& tr);
 
-// ------------------------------------------------------- 
+// -------------------------------------------------------
 // Algebraic properties
 
 template<typename T>
@@ -563,7 +574,7 @@ inline bool is_identity_of_indiscernibles(const T& v)
     else return false;
 }
 
-// ------------------------------------------------------- 
+// -------------------------------------------------------
 
 inline bool is_procedure_call(const vertex& v)
 {
@@ -712,7 +723,7 @@ inline definite_object get_definite_object(const vertex& v)
     return (boost::get<definite_object>(v));
 }
 
-// ------------------------------------------------------- 
+// -------------------------------------------------------
 // Bollean utility functions
 
 inline vertex bool_to_vertex(bool b)
