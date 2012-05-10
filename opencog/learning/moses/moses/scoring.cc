@@ -462,8 +462,10 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
     foreach (const CTable::value_type& vct, ctable) {
         const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
-        // The number that are wrong equals total minus correct.
-        bs.push_back(score_t(c.get(eval_binding(vs, tr)) - c.total_count()));
+        // The number that are wrong equals total minus num correct.
+        score_t sc = score_t(c.get(eval_binding(vs, tr)));
+        sc -= score_t(c.total_count());
+        bs.push_back(sc);
     }
 
     // Add the Occam's razor feature
@@ -477,23 +479,21 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score enum_table_bscore::best_possible_bscore() const
 {
-// Under construction ... Not done yet...
-cout <<"duuude we want nothing but the best"<<endl;
     behavioral_score bs;
     transform(ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
                   // OK, this looks like magic, but here's what it does:
                   // CTable is a compressed table; multiple rows may
                   // have identical inputs, differing only in output.
-                  // Clearly, in such a case, both outputs cannot be
+                  // Clearly, in such a case, different outputs cannot be
                   // simultanously satisfied, but we can try to satisfy
-                  // the one of which there is more.  Thus, we take
-                  // the min of the two possiblities.
-// XXX We want to know what all the enum possibilities are.
-// and we need to try to satisfy thim.... XXX anyway the logical_tue
-// needs to be replaced by the enums.
-                  return -score_t(min(c.get(id::logical_true),
-                                      c.get(id::logical_false)));
+                  // the one of which there is the most.
+                  unsigned most = 0;
+                  CTable::counter_t::const_iterator it = c.begin();
+                  for (; it != c.end(); it++) {
+                      if (most < it->second) most = it->second;
+                  }
+                  return score_t (most - c.total_count());
               });
 
     // add the Occam's razor feature
