@@ -1246,7 +1246,7 @@ ostream& operator<<(ostream& out, const opencog::combo::type_node& n)
     case id::contin_type:
         return out << "contin";
     case id::enum_type:
-        return out << "enum";
+        return out << "enum_t";
 
     // Motor control and sensory types
     case id::action_result_type:

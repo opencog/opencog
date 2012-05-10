@@ -89,6 +89,15 @@ build_knobs::build_knobs(combo_tree& exemplar,
         build_logical(_exemplar.begin());
         logical_cleanup();
     }
+    else if (output_type == id::contin_type) {
+        contin_canonize(_exemplar.begin());
+        build_contin(_exemplar.begin());
+    }
+    else if (output_type == id::enum_type) {
+        // contin_canonize(_exemplar.begin());
+        // build_contin(_exemplar.begin());
+        OC_ASSERT(0, "enum under construction");
+    }
     else if (output_type == id::action_result_type) {
         // Petbrain
         action_canonize(_exemplar.begin());
@@ -98,10 +107,6 @@ build_knobs::build_knobs(combo_tree& exemplar,
     else if (output_type == id::ann_type) {
         // ANN
         ann_canonize(_exemplar.begin());
-        build_contin(_exemplar.begin());
-    }
-    else if (output_type == id::contin_type) {
-        contin_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
     }
     else
@@ -309,7 +314,7 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
  * If it is of contin type, wrap it up into a predicate, and insert that.
  */
 void build_knobs::insert_typed_arg(combo_tree &tr,
-                                   type_tree_sib_it arg_type, 
+                                   type_tree_sib_it arg_type,
                                    argument &arg)
 {
     if (*arg_type == id::boolean_type)
@@ -528,7 +533,282 @@ void build_knobs::build_logical(pre_it it)
 }
 
 // ***********************************************************************
-// Actions
+// Contin
+
+// Given a pointer @it into the exemplar, the contin_cannonize()
+// method will insert a "canonical form" above this pointer.
+//
+// The canonical form we want for a contin-valued term is a linear-
+// weighted fraction whose numerator and denominator are either
+// generalized polynomials or other contin-valued terms, i.e.:
+//
+//    c1 + (c2 * p1) / p2
+//
+// The generalized polys (p1 and p2) may contain x, sin, abs_log, exp,
+// x*y, where x and y are any other contin-valued terms.
+//
+// We assume that reduction has already taken place, i.e. that p1, p2
+// are already in reduced form.
+//
+// If there are multiple divisors, they will be transformed into separate terms
+// (???)
+void build_knobs::contin_canonize(pre_it it)
+{
+    if (is_contin(*it) && get_contin(*it) == 0) {
+        *it = id::plus;
+    }
+    if (*it == id::div) {
+        OC_ASSERT((it.number_of_children() == 2),
+                  "id::div built in must have exactly 2 children.");
+        _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
+
+        canonize_div(it);
+    }
+    else if (*it == id::plus) {
+        // Move the constant child upwards.
+        add_constant_child(it, 0);
+        _exemplar.insert_above(it, id::plus);
+        _exemplar.move_after(it, pre_it(it.last_child()));
+        // Handle any divs.
+        for (sib_it div = _exemplar.partition(it.begin(), it.end(),
+                                              bind(not_equal_to<vertex>(), _1,
+                                                   id::div));
+             div != it.end();)
+            canonize_div(_exemplar.move_after(it, pre_it(div++)));
+
+        // Handle the rest of the children.
+        if (permitted_op(id::div)) {
+            _exemplar.append_child(_exemplar.insert_above(it, id::div),
+                                   contin_t(1));
+            canonize_div(_exemplar.parent(it));
+        } else
+            linear_canonize_times(it);
+    }
+    else {
+        _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
+        if (permitted_op(id::div)) {
+            _exemplar.append_child(_exemplar.insert_above(it, id::div),
+                                   contin_t(1));
+            canonize_div(_exemplar.parent(it));
+        } else
+            linear_canonize_times(it);
+    }
+
+#ifdef DEBUG_INFO
+    cout << "ok " << _exemplar << endl;
+#endif
+
+}
+
+/// build contin -- given a contin expression, insert knobs for that
+/// expression into the field set.
+///
+/// This routine just loops over the children of @it, looking for any
+/// contin-valued constants.  These constants are turned into knobs,
+/// and added to the field set for the representation.
+//
+void build_knobs::build_contin(pre_it it)
+{
+    pre_it end = it;
+    end.skip_children();
+    for (++end; it != end; ++it) {
+        if (is_contin(*it)) {
+            // This creates a knob at a particular location in the
+            // exemplar inside the representation, and it creates a
+            // field spec for the knob. This field spec is not yet
+            // yet a part of any field set; this happens later, when
+            // the representation is built.
+            contin_knob kb(_exemplar, it, _step_size, _expansion, _depth);
+            _rep.contin.insert(make_pair(kb.spec(), kb));
+        }
+    }
+}
+
+void build_knobs::canonize_div(pre_it it)
+{
+    linear_canonize_times(it.begin());
+    linear_canonize(it.last_child());
+}
+
+void build_knobs::add_constant_child(pre_it it, contin_t v)
+{
+    sib_it sib = find_if(it.begin(), it.end(), is_contin);
+    if (sib == it.end())
+        _exemplar.append_child(it, v);
+    else
+        _exemplar.swap(sib, it.last_child());
+}
+
+// Make it binary * with second arg a constant.
+pre_it build_knobs::canonize_times(pre_it it)
+{
+    // get contin child of 'it', if 'it' == 'times' and such contin
+    // child exists
+    sib_it sib = (*it != id::times ?
+                  it.end() : find_if(it.begin(), it.end(), is_contin));
+    if (sib == it.end()) {
+        pre_it it_times = (*it == id::times?
+                           it : _exemplar.insert_above(it, id::times));
+        _exemplar.append_child(it_times, contin_t(1));
+        return it_times;
+    } else if (it.number_of_children() > 2) {
+        _exemplar.insert_above(it, id::times);
+        _exemplar.move_after(it, pre_it(sib));
+        return _exemplar.parent(it);
+    } else {
+        _exemplar.swap(sib, it.last_child());
+        return it;
+    }
+}
+
+void build_knobs::linear_canonize_times(pre_it it)
+{
+    linear_canonize(canonize_times(it).begin());
+}
+
+/// linear_canonize: insert "pre-knobs" into an exemplar.
+/// @it: points into a term of type contin. By convention, this is
+///      always pointing into the exemplar.
+///
+/// This recursively adds "pre-knobs" to all child terms. Such
+/// "pre-knobs" are terms that will later be converted into knobs.
+/// So, for example, this will insert terms such as *(0 $n) (an arg
+/// multiplied by zero), and the zero will later be made a knob.  The
+/// "pre-knobs" are always inserted linearly (i.e. prepended by a plus,
+/// so that they forma linear combination).
+///
+/// The recursive aspect of this is such that, if it encounters terms
+/// that are functions, it will canonize their arguments as well.  Thus,
+/// sin(), exp(), log() will all get their args cannonized.  Note that
+/// the function impulse() returns contin but take a boolean expr: in
+/// this case, we call logical_canonize on it's arg.
+//
+void build_knobs::linear_canonize(pre_it it)
+{
+    // If we're not appending to plus, then insert one.
+    if (*it != id::plus)
+        it = _exemplar.insert_above(it, id::plus);
+    add_constant_child(it, 0);
+
+    // Add the basic elements and recurse, if necessary.
+    rec_canonize(it);
+}
+
+void build_knobs::rec_canonize(pre_it it)
+{
+    // cout << "X " << _exemplar << " | " << combo_tree(it) << endl;
+    // Recurse on whatever's already present, and create a multiplicand for it.
+    if (*it == id::plus) {
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
+            if (!is_contin(*sib)) {
+                sib = canonize_times(sib);
+                rec_canonize(sib.begin());
+                OC_ASSERT(is_contin(*sib.last_child()),
+                          "Sibling's last child isn't id::contin.");
+                rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
+            }
+        }
+
+        // Add the basic elements: sin, log, exp, and any variables ($1, ..., $n)
+        if (permitted_op(id::sin))
+            append_linear_combination(mult_add(it, id::sin));
+        if (permitted_op(id::log))
+            append_linear_combination(mult_add(it, id::log));
+        if (permitted_op(id::exp))
+            append_linear_combination(mult_add(it, id::exp));
+        append_linear_combination(it);
+    }
+    // functions that take a single contin arg: canonize the arg.
+    else if (*it == id::sin || *it == id::log || *it == id::exp) {
+        linear_canonize(it.begin());
+    }
+    else if ((*it == id::times) || (*it == id::div)) {
+        // @todo: think about that case...
+        logger().warn("TODO: handle case where it = id::times in build_knobs::rec_canonize");
+    }
+    // functions that take a single boolean arg: canonize the arg.
+    else if (*it == id::impulse) {
+        logical_canonize(it.begin());
+    }
+    else {
+        stringstream ss;
+        ss << *it << " not a buitin, neither an argument";
+        OC_ASSERT(is_argument(*it), ss.str());
+    }
+}
+
+/// Append a linear combination of *all* arguments. That is, append
+/// the term +( *(0 $1) *(0 $2) *(0 $3) ...)  Later on, the zero
+/// constants will become knobs.
+///
+/// The appending happens at location 'it' (which happens to always
+/// be in the exampler, in the current usage).  If '*it' isn't plus,
+/// then plus is inserted.
+///
+/// If the argument is of type contin, then it is directly inserted,
+/// as shown above.
+///
+/// If the argument is a boolean, then its run throught the impulse
+/// function (1.0 if T and 0.0 if F) and appended with multiplier.
+/// That is, its of the form +(... *(0 impulse($n)) ...)
+//
+void build_knobs::append_linear_combination(pre_it it)
+{
+    if (*it != id::plus)
+        it = _exemplar.append_child(it, id::plus);
+
+    // The type tree holds a lambda which encloses a list of types,
+    // i.e. it looks like ->(type type type ... otype)
+    // The two begin's skip over the lambda "->"
+    type_tree_sib_it tit = types.begin().begin();
+    foreach (int idx, from_one(_arity))
+    {
+        vertex arg = argument(idx);
+        if (permitted_op(arg)) {
+            if (*tit == id::contin_type) {
+                mult_add(it, arg);
+            }
+            else if (*tit == id::boolean_type) {
+                if (permitted_op(id::impulse)) {
+                    pre_it imp = mult_add(it, id::impulse);
+                    _exemplar.append_child(imp, arg);
+                }
+            }
+            else {
+                OC_ASSERT(0,
+                    "Error: When building contin expressions, got "
+                    "unsupported argument type.");
+            }
+        }
+        tit++;
+    }
+}
+
+pre_it build_knobs::mult_add(pre_it it, const vertex& v)
+{
+    pre_it times_it =
+        _exemplar.insert_above(_exemplar.append_child(it, contin_t(0)), id::times);
+    return _exemplar.append_child(times_it, v);
+}
+
+static int get_max_id(sib_it it, int max_id = 0)
+{
+    int temp;
+
+    if(!is_ann_type(*it))
+        return max_id;
+
+    if((temp=get_ann_type(*it).idx)>max_id)
+        max_id=temp;
+
+    for (sib_it sib = it.begin(); sib!=it.end(); ++sib)
+        max_id=get_max_id(sib,max_id);
+
+    return max_id;
+}
+
+// ***********************************************************************
+// Actions for the PetBrain
 
 void build_knobs::action_canonize(pre_it it)
 {
@@ -687,281 +967,6 @@ void build_knobs::action_cleanup()
             ++it;
     if (_exemplar.empty())
         _exemplar.set_head(id::sequential_and);
-}
-
-// ***********************************************************************
-// Contin
-
-// Given a pointer @it into the exemplar, the contin_cannonize() 
-// method will insert a "canonical form" above this pointer.
-//
-// The canonical form we want for a contin-valued term is a linear-
-// weighted fraction whose numerator and denominator are either
-// generalized polynomials or other contin-valued terms, i.e.:
-//
-//    c1 + (c2 * p1) / p2
-//
-// The generalized polys (p1 and p2) may contain x, sin, abs_log, exp,
-// x*y, where x and y are any other contin-valued terms.
-//
-// We assume that reduction has already taken place, i.e. that p1, p2
-// are already in reduced form.
-//
-// If there are multiple divisors, they will be transformed into separate terms
-// (???)
-void build_knobs::contin_canonize(pre_it it)
-{
-    if (is_contin(*it) && get_contin(*it) == 0) {
-        *it = id::plus;
-    }
-    if (*it == id::div) {
-        OC_ASSERT((it.number_of_children() == 2),
-                  "id::div built in must have exactly 2 children.");
-        _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
-
-        canonize_div(it);
-    }
-    else if (*it == id::plus) {
-        // Move the constant child upwards.
-        add_constant_child(it, 0);
-        _exemplar.insert_above(it, id::plus);
-        _exemplar.move_after(it, pre_it(it.last_child()));
-        // Handle any divs.
-        for (sib_it div = _exemplar.partition(it.begin(), it.end(),
-                                              bind(not_equal_to<vertex>(), _1,
-                                                   id::div));
-             div != it.end();)
-            canonize_div(_exemplar.move_after(it, pre_it(div++)));
-
-        // Handle the rest of the children.
-        if (permitted_op(id::div)) {
-            _exemplar.append_child(_exemplar.insert_above(it, id::div),
-                                   contin_t(1));
-            canonize_div(_exemplar.parent(it));
-        } else
-            linear_canonize_times(it);
-    }
-    else {
-        _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
-        if (permitted_op(id::div)) {
-            _exemplar.append_child(_exemplar.insert_above(it, id::div),
-                                   contin_t(1));
-            canonize_div(_exemplar.parent(it));
-        } else
-            linear_canonize_times(it);
-    }
-
-#ifdef DEBUG_INFO
-    cout << "ok " << _exemplar << endl;
-#endif
-
-}
-
-/// build contin -- given a contin expression, insert knobs for that
-/// expression into the field set.
-///
-/// This routine just loops over the children of @it, looking for any
-/// contin-valued constants.  These constants are turned into knobs,
-/// and added to the field set for the representation.
-//
-void build_knobs::build_contin(pre_it it)
-{
-    pre_it end = it;
-    end.skip_children();
-    for (++end; it != end; ++it) {
-        if (is_contin(*it)) {
-            // This creates a knob at a particular location in the
-            // exemplar inside the representation, and it creates a
-            // field spec for the knob. This field spec is not yet
-            // yet a part of any field set; this happens later, when
-            // the representation is built.
-            contin_knob kb(_exemplar, it, _step_size, _expansion, _depth);
-            _rep.contin.insert(make_pair(kb.spec(), kb));
-        }
-    }
-}
-
-void build_knobs::canonize_div(pre_it it)
-{
-    linear_canonize_times(it.begin());
-    linear_canonize(it.last_child());
-}
-
-void build_knobs::add_constant_child(pre_it it, contin_t v)
-{
-    sib_it sib = find_if(it.begin(), it.end(), is_contin);
-    if (sib == it.end())
-        _exemplar.append_child(it, v);
-    else
-        _exemplar.swap(sib, it.last_child());
-}
-
-// Make it binary * with second arg a constant.
-pre_it build_knobs::canonize_times(pre_it it)
-{
-    // get contin child of 'it', if 'it' == 'times' and such contin
-    // child exists
-    sib_it sib = (*it != id::times ?
-                  it.end() : find_if(it.begin(), it.end(), is_contin));
-    if (sib == it.end()) {
-        pre_it it_times = (*it == id::times?
-                           it : _exemplar.insert_above(it, id::times));
-        _exemplar.append_child(it_times, contin_t(1));
-        return it_times;
-    } else if (it.number_of_children() > 2) {
-        _exemplar.insert_above(it, id::times);
-        _exemplar.move_after(it, pre_it(sib));
-        return _exemplar.parent(it);
-    } else {
-        _exemplar.swap(sib, it.last_child());
-        return it;
-    }
-}
-
-void build_knobs::linear_canonize_times(pre_it it)
-{
-    linear_canonize(canonize_times(it).begin());
-}
-
-/// linear_canonize: insert "pre-knobs" into an exemplar.
-/// @it: points into a term of type contin. By convention, this is
-///      always pointing into the exemplar.
-///
-/// This recursively adds "pre-knobs" to all child terms. Such
-/// "pre-knobs" are terms that will later be converted into knobs.
-/// So, for example, this will insert terms such as *(0 $n) (an arg
-/// multiplied by zero), and the zero will later be made a knob.  The
-/// "pre-knobs" are always inserted linearly (i.e. prepended by a plus,
-/// so that they forma linear combination). 
-///
-/// The recursive aspect of this is such that, if it encounters terms
-/// that are functions, it will canonize their arguments as well.  Thus,
-/// sin(), exp(), log() will all get their args cannonized.  Note that
-/// the function impulse() returns contin but take a boolean expr: in
-/// this case, we call logical_canonize on it's arg.
-//
-void build_knobs::linear_canonize(pre_it it)
-{
-    // If we're not appending to plus, then insert one.
-    if (*it != id::plus)
-        it = _exemplar.insert_above(it, id::plus);
-    add_constant_child(it, 0);
-
-    // Add the basic elements and recurse, if necessary.
-    rec_canonize(it);
-}
-
-void build_knobs::rec_canonize(pre_it it)
-{
-    // cout << "X " << _exemplar << " | " << combo_tree(it) << endl;
-    // Recurse on whatever's already present, and create a multiplicand for it.
-    if (*it == id::plus) {
-        for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-            if (!is_contin(*sib)) {
-                sib = canonize_times(sib);
-                rec_canonize(sib.begin());
-                OC_ASSERT(is_contin(*sib.last_child()),
-                          "Sibling's last child isn't id::contin.");
-                rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
-            }
-        }
-
-        // Add the basic elements: sin, log, exp, and any variables ($1, ..., $n)
-        if (permitted_op(id::sin))
-            append_linear_combination(mult_add(it, id::sin));
-        if (permitted_op(id::log))
-            append_linear_combination(mult_add(it, id::log));
-        if (permitted_op(id::exp))
-            append_linear_combination(mult_add(it, id::exp));
-        append_linear_combination(it);
-    }
-    // functions that take a single contin arg: canonize the arg.
-    else if (*it == id::sin || *it == id::log || *it == id::exp) {
-        linear_canonize(it.begin());
-    }
-    else if ((*it == id::times) || (*it == id::div)) {
-        // @todo: think about that case...
-        logger().warn("TODO: handle case where it = id::times in build_knobs::rec_canonize");
-    }
-    // functions that take a single boolean arg: canonize the arg.
-    else if (*it == id::impulse) {
-        logical_canonize(it.begin());
-    }
-    else {
-        stringstream ss;
-        ss << *it << " not a buitin, neither an argument";
-        OC_ASSERT(is_argument(*it), ss.str());
-    }
-}
-
-/// Append a linear combination of *all* arguments. That is, append
-/// the term +( *(0 $1) *(0 $2) *(0 $3) ...)  Later on, the zero
-/// constants will become knobs.
-///
-/// The appending happens at location 'it' (which happens to always
-/// be in the exampler, in the current usage).  If '*it' isn't plus,
-/// then plus is inserted.
-///
-/// If the argument is of type contin, then it is directly inserted,
-/// as shown above.
-///
-/// If the argument is a boolean, then its run throught the impulse
-/// function (1.0 if T and 0.0 if F) and appended with multiplier.
-/// That is, its of the form +(... *(0 impulse($n)) ...)
-//
-void build_knobs::append_linear_combination(pre_it it)
-{
-    if (*it != id::plus)
-        it = _exemplar.append_child(it, id::plus);
-
-    // The type tree holds a lambda which encloses a list of types,
-    // i.e. it looks like ->(type type type ... otype)
-    // The two begin's skip over the lambda "->"
-    type_tree_sib_it tit = types.begin().begin();
-    foreach (int idx, from_one(_arity))
-    {
-        vertex arg = argument(idx);
-        if (permitted_op(arg)) {
-            if (*tit == id::contin_type) {
-                mult_add(it, arg);
-            }
-            else if (*tit == id::boolean_type) {
-                if (permitted_op(id::impulse)) {
-                    pre_it imp = mult_add(it, id::impulse);
-                    _exemplar.append_child(imp, arg);
-                }
-            }
-            else {
-                OC_ASSERT(0,
-                    "Error: When building contin expressions, got "
-                    "unsupported argument type.");
-            }
-        }
-        tit++;
-    }
-}
-
-pre_it build_knobs::mult_add(pre_it it, const vertex& v)
-{
-    pre_it times_it =
-        _exemplar.insert_above(_exemplar.append_child(it, contin_t(0)), id::times);
-    return _exemplar.append_child(times_it, v);
-}
-
-static int get_max_id(sib_it it, int max_id = 0)
-{
-    int temp;
-
-    if(!is_ann_type(*it))
-        return max_id;
-
-    if((temp=get_ann_type(*it).idx)>max_id)
-        max_id=temp;
-
-    for (sib_it sib = it.begin(); sib!=it.end(); ++sib)
-        max_id=get_max_id(sib,max_id);
-
-    return max_id;
 }
 
 // ***********************************************************************
