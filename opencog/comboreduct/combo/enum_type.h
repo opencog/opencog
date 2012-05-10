@@ -32,37 +32,59 @@
 
 namespace opencog { namespace combo {
 
-//message is essentially a string but is coded as a different type
-//as definite_object because it semantically denotes something else
-class message {
+// enum_t is essentially a string but is coded as a different type
+// than definite_object (or message), because it semantically denotes
+// something else.
+class enum_t
+{
 private:
+    unsigned id;
     std::string _content;
+
+    // Global table of string-to-int, so that the operator==()
+    // can run efficiently (for scoring) without a string-compare.
+    static unsigned enum_issued;
+    static std::map<std::string, unsigned> enum_map;
+
+    unsigned get_id(const std::string& token)
+    {
+        // XXX Need a thread lock here.
+        map<string, unsigned>::iterator entry = enum_map.find(token);
+        if (entry == enum_map.end()) {
+           enum_issued ++;
+           entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
+        }
+        return (unsigned) entry->second;
+    }
+
 public:
-    message(std::string m) {
+    enum_t(const std::string &m)
+    {
         _content = m;
+        id = get_id (_content);
     }
 
     std::string getContent() const {
         return _content;
     }
 
-    bool operator==(message m) const {
-        return _content==m.getContent();
+    bool operator==(enum_t m) const {
+        return id == m.id;
     }
-    bool operator!=(message m) const {
-        return _content!=m.getContent();
+    bool operator!=(enum_t m) const {
+        return id != m.id;
     }
-    bool operator<(message m) const {
-        return _content<m.getContent();
+    bool operator<(enum_t m) const {
+        return _content < m.getContent();
     }
-    bool operator<=(message m) const {
-        return _content<=m.getContent();
+    bool operator<=(enum_t m) const {
+        return _content <= m.getContent();
     }
-    bool operator>(message m) const {
-        return _content>m.getContent();
+    bool operator>(enum_t m) const {
+        return _content > m.getContent();
     }
-    bool operator>=(message m) const {
-        return _content>=m.getContent();
+    bool operator>=(enum_t m) const {
+        return _content >= m.getContent();
     }
     
     static std::string prefix() {
@@ -70,11 +92,7 @@ public:
     }
 };
 
-typedef std::set<message> message_set;
-typedef message_set::iterator message_set_it;
-typedef message_set::const_iterator message_set_const_it;
-
-std::ostream& operator<<(std::ostream&, const opencog::combo::message&);
+std::ostream& operator<<(std::ostream&, const opencog::combo::enum_t&);
 
 } // ~namespace combo
 } // ~namespace opencog

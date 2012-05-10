@@ -33,9 +33,10 @@
 
 namespace opencog { namespace combo {
 
-//message is essentially a string but is coded as a different type
-//as definite_object because it semantically denotes something else
-class message {
+// message is essentially a string but is coded as a different type
+// than definite_object, because it semantically denotes something else.
+class message
+{
 private:
     std::string _content;
 public:
@@ -47,6 +48,9 @@ public:
         return _content;
     }
 
+    // @todo: this operator is used for scoring, and so the string
+    // compare may make things slow... perhaps we should use a map
+    // the same way that enum_t does.
     bool operator==(message m) const {
         return _content==m.getContent();
     }
