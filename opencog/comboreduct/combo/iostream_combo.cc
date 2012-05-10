@@ -51,7 +51,7 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
         case id::logical_false:
             return out << "False";
         default:
-            return out << "Builtin: " << h << " unknown";
+            return out << "Builtin: " << (unsigned) h << " unknown";
         }
     case fmt::combo:
         switch (h) {
@@ -67,10 +67,6 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
             return out << "true";
         case id::logical_false:
             return out << "false";
-        case id::contin_if:
-            return out << "contin_if";
-        case id::boolean_if:
-            return out << "boolean_if";
         case id::plus:
             return out << "+";
         case id::times:
@@ -89,8 +85,17 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
             return out << "impulse";
         case id::rand:
             return out << "rand";
+
+        case id::contin_if:
+            return out << "contin_if";
+        case id::boolean_if:
+            return out << "boolean_if";
+        case id::cond:
+            return out << "cond";
+        case id::equ:
+            return out << "equ";
         default:
-            return out << "Builtin " << h << " unknown";
+            return out << "Builtin " << (unsigned) h << " unknown";
         }
     default:
         return out << "Format " << f << " unknown";
@@ -119,12 +124,18 @@ ostream& ostream_argument(ostream& out, const argument& a, format f)
 
 ostream& ostream_vertex(ostream& out, const vertex& v, format f)
 {
-    if (const ann_type* z = get<ann_type>(&v))
-        return out << (*z);
+    // Handle the most likely types first.
     if (const argument* a = get<argument>(&v))
         return ostream_argument(out, *a, f);
     if (const builtin* h = get<builtin>(&v))
         return ostream_builtin(out, *h, f);
+    if (const enum_t* m = get<enum_t>(&v))
+        return out << m->getContent();
+
+    // XXX ?? Ahem, won't calling out<<(*m) just lead to infinite
+    // recursion ?? 
+    if (const ann_type* z = get<ann_type>(&v))
+        return out << (*z);
     if (const wild_card* w = get<wild_card>(&v))
         return out << (*w);
     if (const action* act = get<action>(&v))
@@ -133,20 +144,16 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
         return out << (*aact);
     if (const perception* per = get<perception>(&v))
         return out << (*per);
-    if (const indefinite_object*
-            iot = get<indefinite_object>(&v))
+    if (const indefinite_object* iot = get<indefinite_object>(&v))
         return out << (*iot);
     if (const message* m = get<message>(&v))
-        return out << (*m);
+        return out << m->getContent();
     if (const definite_object* dot = get<definite_object>(&v))
         return out << (*dot);
     if (const action_symbol* as = get<action_symbol>(&v))
         return out << (*as);
     if (const procedure_call* cp = get<procedure_call>(&v))
         return out << (*cp);
-
-    if (const enum_t* m = get<enum_t>(&v))
-        return out << (*m);
 
     if (double x =  get<contin_t>(v))
         return out << x;
