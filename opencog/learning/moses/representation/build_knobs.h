@@ -148,8 +148,6 @@ protected:
     // ------------------------------------------------------
     // enum_type knob building
     void enum_canonize(combo_tree::iterator);
-    void add_enum_knobs(combo_tree::iterator it,
-                        bool add_if_in_exemplar = true);
 
     // ------------------------------------------------------
     // action knob building

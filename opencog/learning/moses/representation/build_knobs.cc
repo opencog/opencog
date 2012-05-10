@@ -790,22 +790,6 @@ pre_it build_knobs::mult_add(pre_it it, const vertex& v)
     return _exemplar.append_child(times_it, v);
 }
 
-static int get_max_id(sib_it it, int max_id = 0)
-{
-    int temp;
-
-    if(!is_ann_type(*it))
-        return max_id;
-
-    if((temp=get_ann_type(*it).idx)>max_id)
-        max_id=temp;
-
-    for (sib_it sib = it.begin(); sib!=it.end(); ++sib)
-        max_id=get_max_id(sib,max_id);
-
-    return max_id;
-}
-
 // ***********************************************************************
 // Enumerated types.
 
@@ -814,28 +798,39 @@ void build_knobs::enum_canonize(pre_it it)
 cout <<"duude its can="<<combo_tree(it)<<endl;
 }
 
+// Add enum knobs to a tree. 
+// XXX Right now, this adds predicate-enum pairs to a cond
+// An alternative might be to turn the enum into a disc_knob
+// but this is not obviously better (or worse) for the job.
 void build_knobs::build_enum(pre_it it)
 {
-cout <<"duude its eno="<<combo_tree(it)<<endl;
+    // If the node is not a cond, we don't know what to do.
+    if (*it != id::cond)
+        return;
+
+    // Insert some predicates and enums.  Always insert at
+    // least one pair.
+    size_t half = enum_t::size() / 2 + 1;
+    for (size_t i=0; i<half; i++) {
+        _exemplar.prepend_child(it, enum_t::get_random_enum());
+        _exemplar.prepend_child(it, id::logical_and);
+    }
+
     for (sib_it sib = it.begin(); sib != it.end(); ++sib)
     {
-cout <<"sib="<<combo_tree(sib)<<endl;
+        // Put some knobs into the cond predicate.
+        if (is_logical_operator(*sib) || is_predicate(sib)) {
+            build_logical(sib);
+        }
+
+        // Weed out bad enum types, if any.
         if (is_enum_type(*sib)) {
             const enum_t &e = get_enum_type(*sib);
             if (e.getContent() == COMBO_ENUM_TYPE_BAD_VALUE) {
-                cout<<"duude its bad!"<<endl;
-                // call add_enum_knobs here..
                 *sib = enum_t::get_random_enum();
-cout <<"duude its now="<<combo_tree(it)<<endl;
             }
         }
     }
-}
-
-void build_knobs::add_enum_knobs(pre_it it, bool add_if_in_exemplar)
-{
-    vector<combo_tree> perms;
-    // sample_enum_perms(it, perms);
 }
 
 // ***********************************************************************
@@ -1002,6 +997,24 @@ void build_knobs::action_cleanup()
 
 // ***********************************************************************
 // ANN stuff
+
+#if DEAD_CODE
+static int get_max_id(sib_it it, int max_id = 0)
+{
+    int temp;
+
+    if (!is_ann_type(*it))
+        return max_id;
+
+    if ((temp = get_ann_type(*it).idx) > max_id)
+        max_id = temp;
+
+    for (sib_it sib = it.begin(); sib != it.end(); ++sib)
+        max_id = get_max_id(sib,max_id);
+
+    return max_id;
+}
+#endif
 
 static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
 {

@@ -97,6 +97,10 @@ public:
         return COMBO_ENUM_TYPE_PREFIX;
     }
     static enum_t get_random_enum();
+    static size_t size() {
+        // Subtract one for bad value.
+        return enum_map.size() - 1;
+    }
 };
 
 std::ostream& operator<<(std::ostream&, const opencog::combo::enum_t&);
