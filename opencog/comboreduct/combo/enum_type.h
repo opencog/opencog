@@ -24,6 +24,7 @@
 #ifndef _COMBO_ENUM_TYPE_H
 #define _COMBO_ENUM_TYPE_H
 
+#include <map>
 #include <ostream>
 #include <string>
 #include <boost/thread.hpp>

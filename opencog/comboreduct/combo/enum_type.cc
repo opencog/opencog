@@ -24,14 +24,15 @@
 #include "enum_type.h"
 
 namespace opencog { namespace combo {
+using namespace std;
 
 // Global table of string-to-int, so that the operator==()
 // can run efficiently (for scoring) without a string-compare.
 unsigned enum_t::enum_issued = 0;
-std::map<std::string, unsigned> enum_t::enum_map;
-boost::shared_mutex id_mutex;
+map<string, unsigned> enum_t::enum_map;
+boost::shared_mutex enum_t::id_mutex;
 
-unsigned enum_t::get_id(const std::string& token)
+unsigned enum_t::get_id(const string& token)
 {
     typedef boost::shared_mutex mutex;
     typedef boost::unique_lock<mutex> unique_lock;
@@ -46,7 +47,7 @@ unsigned enum_t::get_id(const std::string& token)
     return (unsigned) entry->second;
 }
 
-std::ostream& operator<<(std::ostream& out, const combo::enum_t& m)
+ostream& operator<<(ostream& out, const combo::enum_t& m)
 {
     return out << combo::enum_t::prefix() 
                << "(" << m.getId() << "):"

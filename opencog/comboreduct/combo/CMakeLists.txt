@@ -1,34 +1,34 @@
 #install header files
 INSTALL(FILES
 
-    argument.h
-    action.h
-    action_eval.h
-    action_symbol.h
-	builtin_action.h
-	message.h
+	action.h
+	action_eval.h
 	action_symbol.h
-	indefinite_object.h
-	definite_object.h
-	procedure_call.h
-	procedure_repository.h
+	argument.h
 	assumption.h
+	builtin_action.h
+	combo.h
+	common_def.h
+	convert_ann_combo.h
+	definite_object.h
+	enum_type.h
 	eval.h
-    table.h
+	indefinite_object.h
+	iostream_combo.h
+	message.h
+	operator_base.h
 	perception.h
 	perception_eval.h
+	procedure_call.h
+	procedure_repository.h
+	simple_nn.h
+	table.h
 	tree_generation.h
-	type_tree_def.h
 	type_tree.h
-	vertex.h
+	type_tree_def.h
 	using.h
 	variable_unifier.h	
-	operator_base.h
-	common_def.h
-    simple_nn.h
-    convert_ann_combo.h
-    iostream_combo.h
-    combo.h
+	vertex.h
 
 	DESTINATION
 

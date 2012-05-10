@@ -7,29 +7,30 @@ ADD_SUBDIRECTORY(crutil)
 ADD_LIBRARY(comboreduct SHARED
 	crutil/exception
 
-    combo/argument
 	combo/action
-	combo/builtin_action
-	combo/message	
 	combo/action_symbol
+	combo/argument
+	combo/assumption
+	combo/builtin_action
+	combo/convert_ann_combo
 	combo/definite_object
+	combo/enum_type
+	combo/eval
 	combo/indefinite_object
+	combo/iostream_combo
 	combo/procedure_call
 	combo/procedure_repository
-	combo/assumption
-	combo/eval
-	combo/table
+	combo/message	
 	combo/perception
 	combo/perception_eval
+	combo/simple_nn
+	combo/table
 	combo/tree_generation
 	combo/type_tree_def
 	combo/type_tree
-	combo/vertex
 	combo/using
 	combo/variable_unifier
-	combo/simple_nn
-	combo/convert_ann_combo
-    combo/iostream_combo
+	combo/vertex
 
 	reduct/action_reduction
 	reduct/action_rules
