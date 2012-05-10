@@ -98,12 +98,16 @@ const vector<string>& ITable::get_labels() const
     } else return labels;
 }
 
-OTable::OTable(const string& ol) : label(ol) {}
+// -------------------------------------------------------
 
-OTable::OTable(const super& ot, const string& ol) : super(ot), label(ol) {}
+OTable::OTable(const string& ol)
+    : label(ol), enum_issued(0) {}
+
+OTable::OTable(const super& ot, const string& ol)
+    : super(ot), label(ol), enum_issued(0) {}
 
 OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
-    : label(ol)
+    : label(ol), enum_issued(0)
 {
     OC_ASSERT(!tr.empty());
     if (is_ann_type(*tr.begin())) {
@@ -130,7 +134,7 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
-    : label(ol)
+    : label(ol), enum_issued(0)
 {
     arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
@@ -147,6 +151,19 @@ const string& OTable::get_label() const
 {
     return label;
 }
+
+vertex OTable::get_enum_vertex(const string& token)
+{
+    map<string, unsigned>::iterator entry = enum_map.find(token);
+    if (entry == enum_map.end()) {
+       enum_issued ++;
+       entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
+    }
+    return (enum_t) entry->second;
+}
+
+
+// -------------------------------------------------------
 
 Table::Table() {}
 
@@ -201,6 +218,8 @@ CTable Table::compress() const
     return res;
 }
 
+// -------------------------------------------------------
+
 bool OTable::operator==(const OTable& rhs) const
 {
     const static contin_t epsilon = 1e-12;
@@ -244,6 +263,8 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
     OC_ASSERT(ot.size() == size() && size() > 0);
     return sqrt(mean_squared_error(ot));
 }
+
+// -------------------------------------------------------
 
 double OTEntropy(const OTable& ot)
 {
@@ -479,14 +500,6 @@ table_tokenizer get_row_tokenizer(string& line)
     return tokenizer(line, sep);
 }
 
-// XXX Right now, this is a global, but it really belongs, err, ahh,
-// somewhere.  Right now, this is a single, shared map for all enums
-// that occur in the input; however, we probably want to have a distinct
-// map for each different column; in particular, this will be needed
-// for any kind of monte-carlo table scoring.  FIXME 
-unsigned enum_issued = 0;
-map<string, unsigned> enum_map;
-
 /// cast string "token" to a vertex of type "tipe"
 vertex token_to_vertex(const type_node &tipe, const string& token)
 {
@@ -509,14 +522,10 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
         }
         break;
 
-    case id::enum_type: {
-        map<string, unsigned>::iterator entry = enum_map.find(token);
-        if (entry == enum_map.end()) {
-           enum_issued ++;
-           entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
-        }
-        return (enum_t) entry->second;
-    }
+    // Punt for now; this needs to be fixed up later.
+    case id::enum_type:
+        return (enum_t) 0;
+ 
     default:
         stringstream ss;
         ss << "Unable to handle input type=" << tipe << endl;
@@ -576,10 +585,14 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
                   i + 1, io.first.size(), arity);
 
         // fill table, based on the types passed in the type-tree
+        // XXX TODO: handle enum_type in the input table!
         vertex_seq ivs(arity);
         transform(vin_types, io.first, ivs.begin(), token_to_vertex);
         it[i] = ivs;
+
         ot[i] = token_to_vertex(out_type, io.second);
+        if (out_type == id::enum_type)
+            ot[i] = ot.get_enum_vertex(io.second);
     };
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
     return in;

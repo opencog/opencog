@@ -273,7 +273,8 @@ public:
 
     template<typename Func>
     OTable(const Func& f, const ITable& it,
-           const std::string& ol = default_output_label) : label(ol)
+           const std::string& ol = default_output_label)
+        : label(ol), enum_issued(0)
     {
         foreach(const vertex_seq& vs, it)
             push_back(f(vs.begin(), vs.end()));
@@ -286,8 +287,15 @@ public:
     contin_t sum_squared_error(const OTable& ot) const;
     contin_t mean_squared_error(const OTable& ot) const;
     contin_t root_mean_square_error(const OTable& ot) const;
+
+    vertex get_enum_vertex(const std::string& token);
+
 private:
     std::string label; // output label
+
+    // enum_type lookup table.
+    unsigned enum_issued;
+    std::map<std::string, unsigned> enum_map;
 };
 
 /**
