@@ -411,6 +411,13 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
     behavioral_score bs;
     transform(ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
+                  // OK, this looks like magic, but here's what it does:
+                  // CTable is a compressed table; multiple rows may
+                  // have identical inputs, differing only in output.
+                  // Clearly, in such a case, both outputs cannot be
+                  // simultanously satisfied, but we can try to satisfy
+                  // the one of which there is more.  Thus, we take
+                  // the min of the two possiblities.
                   return -score_t(min(c.get(id::logical_true),
                                       c.get(id::logical_false)));
               });
@@ -476,8 +483,16 @@ cout <<"duuude we want nothing but the best"<<endl;
     behavioral_score bs;
     transform(ctable | map_values, back_inserter(bs),
               [](const CTable::counter_t& c) {
-// under construction, this is wrong, for now
-// XXX wtf ??
+                  // OK, this looks like magic, but here's what it does:
+                  // CTable is a compressed table; multiple rows may
+                  // have identical inputs, differing only in output.
+                  // Clearly, in such a case, both outputs cannot be
+                  // simultanously satisfied, but we can try to satisfy
+                  // the one of which there is more.  Thus, we take
+                  // the min of the two possiblities.
+// XXX We want to know what all the enum possibilities are.
+// and we need to try to satisfy thim.... XXX anyway the logical_tue
+// needs to be replaced by the enums.
                   return -score_t(min(c.get(id::logical_true),
                                       c.get(id::logical_false)));
               });
