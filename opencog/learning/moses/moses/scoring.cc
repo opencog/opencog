@@ -391,7 +391,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
     behavioral_score bs;
 
     // Evaluate the bscore components for all rows of the ctable
-    foreach(const CTable::value_type& vct, ctable) {
+    foreach (const CTable::value_type& vct, ctable) {
         const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
         bs.push_back(-score_t(c.get(negate_vertex(eval_binding(vs, tr)))));
@@ -459,13 +459,11 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
     behavioral_score bs;
 
     // Evaluate the bscore components for all rows of the ctable
-    foreach(const CTable::value_type& vct, ctable) {
+    foreach (const CTable::value_type& vct, ctable) {
         const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
-cout<<"duuude yeahhh"<<endl;
-// under construction, this is wrong, for now
-         bs.push_back(-score_t(c.get(negate_vertex(eval_binding(vs, tr)))));
-// XXX  what is this doing ???
+        // The number that are wrong equals total minus correct.
+        bs.push_back(score_t(c.get(eval_binding(vs, tr)) - c.total_count()));
     }
 
     // Add the Occam's razor feature
@@ -479,6 +477,7 @@ cout<<"duuude yeahhh"<<endl;
 
 behavioral_score enum_table_bscore::best_possible_bscore() const
 {
+// Under construction ... Not done yet...
 cout <<"duuude we want nothing but the best"<<endl;
     behavioral_score bs;
     transform(ctable | map_values, back_inserter(bs),

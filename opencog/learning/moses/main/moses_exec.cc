@@ -114,7 +114,11 @@ combo_tree type_to_exemplar(type_node type)
     switch(type) {
     case id::boolean_type: return combo_tree(id::logical_and);
     case id::contin_type: return combo_tree(id::plus);
-    case id::enum_type: return combo_tree(id::cond);
+    case id::enum_type: {
+        combo_tree tr(id::cond);
+        tr.append_child(tr.begin(), enum_t(""));
+        return tr;
+    }
     case id::ill_formed_type:
         cerr << "Error: The data type is incorrect, perhaps it has not been"
              << " possible to infer it from the input table." << endl;
