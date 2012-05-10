@@ -56,8 +56,9 @@ struct build_knobs : boost::noncopyable
                 field_set::width_t depth = 4);
 
     void build_logical(combo_tree::iterator it);
-    void build_action(combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
+    void build_enum(combo_tree::iterator it);
+    void build_action(combo_tree::iterator it);
 
 protected:
     combo_tree& _exemplar;
@@ -120,19 +121,7 @@ protected:
     bool disc_probe(disc_knob_base& kb);
 
     // ------------------------------------------------------
-    // action knob building
-    void action_canonize(combo_tree::iterator);
-    void add_action_knobs(combo_tree::iterator it,
-                          bool add_if_in_exemplar = true);
-    void add_simple_action_knobs(combo_tree::iterator it,
-                                 bool add_if_in_exemplar = true);
-    void sample_action_perms(combo_tree::iterator it,
-                             vector<combo_tree>& perms);
-    void simple_action_probe(combo_tree::iterator it, bool add_if_in_exemplar);
-    void action_probe(/*const combo_tree& tr*/vector<combo_tree>& perms,
-                      combo_tree::iterator it, bool add_if_in_exemplar);
-    void action_cleanup();
-
+    // contin knob building
     void contin_canonize(combo_tree::iterator);
     void canonize_div(combo_tree::iterator it);
     void add_constant_child(combo_tree::iterator it, contin_t v);
@@ -155,8 +144,32 @@ protected:
     // is assumes 'it' is '+', appends *(0 v) as child of 'it' and
     // returns the iterator pointing to v
     combo_tree::iterator mult_add(combo_tree::iterator it, const vertex& v);
+
+    // ------------------------------------------------------
+    // enum_type knob building
+    void enum_canonize(combo_tree::iterator);
+    void add_enum_knobs(combo_tree::iterator it,
+                        bool add_if_in_exemplar = true);
+
+    // ------------------------------------------------------
+    // action knob building
+    void action_canonize(combo_tree::iterator);
+    void add_action_knobs(combo_tree::iterator it,
+                          bool add_if_in_exemplar = true);
+    void add_simple_action_knobs(combo_tree::iterator it,
+                                 bool add_if_in_exemplar = true);
+    void sample_action_perms(combo_tree::iterator it,
+                             vector<combo_tree>& perms);
+    void simple_action_probe(combo_tree::iterator it, bool add_if_in_exemplar);
+    void action_probe(/*const combo_tree& tr*/vector<combo_tree>& perms,
+                      combo_tree::iterator it, bool add_if_in_exemplar);
+    void action_cleanup();
+
+    // ------------------------------------------------------
+    // ann knob building
     void ann_canonize(combo_tree::iterator);
 
+    // ------------------------------------------------------
     typedef boost::shared_mutex shared_mutex;
     typedef boost::shared_lock<shared_mutex> shared_lock;
     typedef boost::unique_lock<shared_mutex> unique_lock;

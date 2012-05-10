@@ -22,15 +22,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "enum_type.h"
+#include <opencog/util/mt19937ar.h>
 
 namespace opencog { namespace combo {
 using namespace std;
 
 // Global table of string-to-int, so that the operator==()
 // can run efficiently (for scoring) without a string-compare.
-unsigned enum_t::enum_issued = 0;
+unsigned enum_t::enum_issued = UINT_MAX;
 map<string, unsigned> enum_t::enum_map;
 boost::shared_mutex enum_t::id_mutex;
+
+enum_t enum_t::get_random_enum()
+{
+    int r = randGen().randint(enum_issued);
+
+    map<string, unsigned>::iterator entry = enum_map.begin();
+    if (UINT_MAX == entry->second) entry++;  // skip bad value
+    while (r) {
+       r--; entry ++;
+       if (UINT_MAX == entry->second) entry++;  // skip bad_value
+    }
+    return enum_t(entry->first, entry->second);
+}
 
 unsigned enum_t::get_id(const string& token)
 {
@@ -39,10 +53,16 @@ unsigned enum_t::get_id(const string& token)
 
     unique_lock lock(id_mutex);
 
+    // Make sure that the bad value is enum -1.
+    if (UINT_MAX == enum_issued) {
+        enum_issued = 0;
+        enum_map.insert(pair<string, unsigned>(COMBO_ENUM_TYPE_BAD_VALUE, UINT_MAX)).first;
+    }
+
     map<string, unsigned>::iterator entry = enum_map.find(token);
     if (entry == enum_map.end()) {
-       enum_issued ++;
-       entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
+        enum_issued ++;
+        entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
     }
     return (unsigned) entry->second;
 }

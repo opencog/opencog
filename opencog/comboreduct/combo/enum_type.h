@@ -29,7 +29,8 @@
 #include <string>
 #include <boost/thread.hpp>
 
-#define COMBO_ENUM_TYPE_PREFIX "message:"
+#define COMBO_ENUM_TYPE_PREFIX "enum_type:"
+#define COMBO_ENUM_TYPE_BAD_VALUE "--BAD_VALUE--"
 
 namespace opencog { namespace combo {
 
@@ -48,8 +49,15 @@ private:
     static std::map<std::string, unsigned> enum_map;
     static boost::shared_mutex id_mutex;
 
+protected:
     // Issue a unique id number.
     unsigned get_id(const std::string& token);
+
+    enum_t(const std::string &m, unsigned i)
+    {
+        _content = m;
+        id = i;
+    }
 
 public:
     enum_t(const std::string &m)
@@ -88,6 +96,7 @@ public:
     static std::string prefix() {
         return COMBO_ENUM_TYPE_PREFIX;
     }
+    static enum_t get_random_enum();
 };
 
 std::ostream& operator<<(std::ostream&, const opencog::combo::enum_t&);
