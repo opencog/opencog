@@ -24,10 +24,9 @@
 #ifndef _COMBO_MESSAGE_H
 #define _COMBO_MESSAGE_H
 
-#include <opencog/util/exceptions.h>
-
-#include "type_tree_def.h"
-#include "operator_base.h"
+#include <ostream>
+#include <set>
+#include <string>
 
 #define COMBO_MESSAGE_PREFIX "message:"
 

@@ -24,9 +24,9 @@
 #ifndef _COMBO_ENUM_TYPE_H
 #define _COMBO_ENUM_TYPE_H
 
-#include <opencog/util/exceptions.h>
-
-#include "type_tree_def.h"
+#include <ostream>
+#include <string>
+#include <boost/thread.hpp>
 
 #define COMBO_ENUM_TYPE_PREFIX "message:"
 
@@ -45,23 +45,20 @@ private:
     // can run efficiently (for scoring) without a string-compare.
     static unsigned enum_issued;
     static std::map<std::string, unsigned> enum_map;
+    static boost::shared_mutex id_mutex;
 
-    unsigned get_id(const std::string& token)
-    {
-        // XXX Need a thread lock here.
-        map<string, unsigned>::iterator entry = enum_map.find(token);
-        if (entry == enum_map.end()) {
-           enum_issued ++;
-           entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
-        }
-        return (unsigned) entry->second;
-    }
+    // Issue a unique id number.
+    unsigned get_id(const std::string& token);
 
 public:
     enum_t(const std::string &m)
     {
         _content = m;
         id = get_id (_content);
+    }
+
+    unsigned getId() const {
+        return id;
     }
 
     std::string getContent() const {
