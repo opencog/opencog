@@ -274,7 +274,7 @@ public:
     template<typename Func>
     OTable(const Func& f, const ITable& it,
            const std::string& ol = default_output_label)
-        : label(ol), enum_issued(0)
+        : label(ol)
     {
         foreach(const vertex_seq& vs, it)
             push_back(f(vs.begin(), vs.end()));
@@ -292,10 +292,6 @@ public:
 
 private:
     std::string label; // output label
-
-    // enum_type lookup table.
-    unsigned enum_issued;
-    std::map<std::string, unsigned> enum_map;
 };
 
 /**

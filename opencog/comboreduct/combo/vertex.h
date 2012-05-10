@@ -34,16 +34,17 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 
-#include "argument.h"
 #include "action.h"
-#include "builtin_action.h"
 #include "action_symbol.h"
-#include "perception.h"
+#include "ann.h"
+#include "argument.h"
+#include "builtin_action.h"
+#include "common_def.h"
 #include "definite_object.h"
+#include "enum_type.h"
 #include "indefinite_object.h"
 #include "message.h"
-#include "ann.h"
-#include "common_def.h"
+#include "perception.h"
 
 // uncomment that if you want to interpret log(x) as log(abs(x))
 // #define ABS_LOG
@@ -76,7 +77,7 @@ enum builtin
                                  // lexicographic_subtree_order, it is
                                  // not mandatory but it should make
                                  // the reduct engine a bit faster
-    logical_and, logical_or, logical_not, 
+    logical_and, logical_or, logical_not,
 
     // contin functions (take contin as arg, or return contin)
     plus, times, div, exp,
@@ -104,8 +105,8 @@ enum builtin
 
 typedef id::builtin builtin;
 
-//this idiom allows wild_card to live in namespace combo, but all
-//ids to be hidden inside the namespace id
+// This idiom allows wild_card to live in namespace combo, but all
+// ids to be hidden inside the namespace id.
 namespace id {
 enum wild_card {
     asterisk = 0,
@@ -115,7 +116,6 @@ enum wild_card {
 typedef id::wild_card wild_card;
 
 typedef double contin_t;
-typedef unsigned enum_t;  // Index into map of string names.
 
 // contants are put first to be in sync with
 // lexicographic_subtree_order, it is not mandatory but it should make
@@ -157,16 +157,7 @@ typedef argument_list_list::const_iterator argument_list_list_const_it;
 // Disambiguate stream operator; use the one declared in util/tree.h
 std::istream& operator>>(std::istream& in, combo::vertex& v);
 
-// procedure_call == vertex
-// bool operator==(const vertex& v, procedure_call h);
-
-// inline bool operator==(procedure_call h, const vertex& v)
-// {
-//     return (v == h);
-// }
-// bool operator!=(const vertex& v, procedure_call h);
-// bool operator!=(procedure_call h, const vertex& v);
-        
+// ------------------------------------------------------- 
 // builtin == vertex
 inline bool operator==(const vertex& v, builtin h)
 {
@@ -333,7 +324,27 @@ inline bool operator!=(ann_ids a,const vertex& v)
 }
 */
 
-//message == vertex
+// enum_t == vertex
+inline bool operator==(const vertex& v, enum_t m)
+{
+    if (const enum_t* vm = boost::get<enum_t>(&v))
+        return (*vm == m);
+    return false;
+}
+inline bool operator==(enum_t m, const vertex& v)
+{
+    return (v == m);
+}
+inline bool operator!=(const vertex& v, enum_t m)
+{
+    return !(v == m);
+}
+inline bool operator!=(enum_t m, const vertex& v)
+{
+    return !(v == m);
+}
+
+// message == vertex
 inline bool operator==(const vertex& v, message m)
 {
     if (const message* vm = boost::get<message>(&v))
@@ -373,10 +384,11 @@ inline bool operator!=(action_symbol i, const vertex& v)
 {
     return !(v == i);
 }
+// ------------------------------------------------------- 
 
 // don't know why this is needed *in namespace boost*, but it is, for
 // e.g. calling a generic stl function that compares vertices for
-// inequality
+// inequality XXX Huh? but its not in namespace boost !?
 inline bool operator!=(const vertex& v1, const vertex& v2)
 {
     return !(v1 == v2);
@@ -394,8 +406,8 @@ inline size_t hash_value(const vertex& v)
     using boost::hash_combine;
 
     static const size_t c1 = size_t(id::builtin_count);
-    //it is likely that a combo will rarely have over 15 arguments
-    static const size_t c2 = c1 + 15;
+    // It is likely that a combo will rarely have over 315 arguments
+    static const size_t c2 = c1 + 315;
     static const size_t c3 = c2 + size_t(id::action_count);
     static const size_t c_last = c3;
 
@@ -470,6 +482,8 @@ inline size_t hash_value(const vertex& v)
     return 0;
 }
 
+// ------------------------------------------------------- 
+
 typedef tree<vertex> combo_tree;
 // ns stands for normal size
 typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
@@ -478,6 +492,9 @@ typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
 
 // Disambiguate stream operator; use the one declared in util/tree.h
 std::istream& operator>>(std::istream& in, combo::combo_tree& tr);
+
+// ------------------------------------------------------- 
+// Algebraic properties
 
 template<typename T>
 inline bool is_associative(const T& v)
@@ -545,6 +562,8 @@ inline bool is_identity_of_indiscernibles(const T& v)
         return get_perception(v)->is_identity_of_indiscernibles();
     else return false;
 }
+
+// ------------------------------------------------------- 
 
 inline bool is_procedure_call(const vertex& v)
 {
@@ -692,6 +711,9 @@ inline definite_object get_definite_object(const vertex& v)
 {
     return (boost::get<definite_object>(v));
 }
+
+// ------------------------------------------------------- 
+// Bollean utility functions
 
 inline vertex bool_to_vertex(bool b)
 {

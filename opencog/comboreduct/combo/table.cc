@@ -101,13 +101,13 @@ const vector<string>& ITable::get_labels() const
 // -------------------------------------------------------
 
 OTable::OTable(const string& ol)
-    : label(ol), enum_issued(0) {}
+    : label(ol) {}
 
 OTable::OTable(const super& ot, const string& ol)
-    : super(ot), label(ol), enum_issued(0) {}
+    : super(ot), label(ol) {}
 
 OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
-    : label(ol), enum_issued(0)
+    : label(ol)
 {
     OC_ASSERT(!tr.empty());
     if (is_ann_type(*tr.begin())) {
@@ -134,7 +134,7 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
-    : label(ol), enum_issued(0)
+    : label(ol)
 {
     arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
@@ -151,17 +151,6 @@ const string& OTable::get_label() const
 {
     return label;
 }
-
-vertex OTable::get_enum_vertex(const string& token)
-{
-    map<string, unsigned>::iterator entry = enum_map.find(token);
-    if (entry == enum_map.end()) {
-       enum_issued ++;
-       entry = enum_map.insert(pair<string, unsigned>(token, enum_issued)).first;
-    }
-    return (enum_t) entry->second;
-}
-
 
 // -------------------------------------------------------
 
@@ -522,9 +511,12 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
         }
         break;
 
-    // Punt for now; this needs to be fixed up later.
     case id::enum_type:
-        return (enum_t) 0;
+        // Enum types must begin with an alpha character
+        if (isalpha(token[0]))
+            return enum_t(token);
+        OC_ASSERT(false, "Enum type must begin with alphabetic char, but %s doesn't", token.c_str());
+        break;
  
     default:
         stringstream ss;
@@ -585,14 +577,10 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
                   i + 1, io.first.size(), arity);
 
         // fill table, based on the types passed in the type-tree
-        // XXX TODO: handle enum_type in the input table!
         vertex_seq ivs(arity);
         transform(vin_types, io.first, ivs.begin(), token_to_vertex);
         it[i] = ivs;
-
         ot[i] = token_to_vertex(out_type, io.second);
-        if (out_type == id::enum_type)
-            ot[i] = ot.get_enum_vertex(io.second);
     };
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
     return in;

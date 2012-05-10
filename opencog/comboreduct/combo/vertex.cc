@@ -50,9 +50,9 @@ bool operator!=(procedure_call h, const vertex& v)
 
 vertex negate_vertex(const vertex& v)
 {
-    if(v == id::logical_true)
+    if (v == id::logical_true)
         return id::logical_false;
-    else if(v == id::logical_false)
+    else if (v == id::logical_false)
         return id::logical_true;
     else {
         std::stringstream ss;

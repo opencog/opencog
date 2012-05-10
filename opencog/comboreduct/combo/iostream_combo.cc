@@ -142,10 +142,17 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
         return out << (*dot);
     if (const action_symbol* as = get<action_symbol>(&v))
         return out << (*as);
-    if (const procedure_call* cp = get<procedure_call>(&v)) {
+    if (const procedure_call* cp = get<procedure_call>(&v))
         return out << (*cp);
-    }
-    return out << get<contin_t>(v);
+
+    if (const enum_t* m = get<enum_t>(&v))
+        return out << (*m);
+
+    if (double x =  get<contin_t>(v))
+        return out << x;
+
+    OC_ASSERT(false, "Don't know how to print this type");
+    return out;
 }
 
 std::ostream& ostream_combo_tree(std::ostream& out, const combo_tree ct, format f) {
