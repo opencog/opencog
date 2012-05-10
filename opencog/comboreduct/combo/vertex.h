@@ -79,8 +79,6 @@ enum builtin
     logical_and, logical_or, logical_not, 
 
     // contin functions (take contin as arg, or return contin)
-    contin_if,
-    boolean_if,
     plus, times, div, exp,
     log, // if ABS_LOG is enabled then log(x) := log(abs(x))
     sin,
@@ -88,10 +86,15 @@ enum builtin
     impulse,
     rand,         // random contin_t in [0,1) FIXME TODO : update reduct rules
 
-    // enum functions (take enum as arg or return enum)
-    // XXX These could/should be generalized to any types.
+    // generic functions
+    // Currently take enum as arg or return enum, but should
+    // be generalized soon.  XXX do this...
     cond,
     equ,
+
+    // XXX These should be obsoleted by cond, shortly.
+    contin_if,
+    boolean_if,
 
     builtin_count // to get the number of builtin
 };

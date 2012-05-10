@@ -200,57 +200,42 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     // builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
         switch (*b) {
-            //boolean operators
+
+        // Boolean operators
+        case id::logical_false :
         case id::logical_true :
             return v;
-        case id::logical_false :
-            return v;
+
         case id::logical_and :
-            for (sib_it sib = it.begin();sib != it.end();++sib)
+            for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 if (eval_throws_binding(bmap, sib, pe) == id::logical_false)
                     return id::logical_false;
             return id::logical_true;
+
         case id::logical_or :
-            for (sib_it sib = it.begin();sib != it.end();++sib)
+            for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 if (eval_throws_binding(bmap, sib, pe) == id::logical_true)
                     return id::logical_true;
             return id::logical_false;                
+
         case id::logical_not :
             return negate_vertex(eval_throws_binding(bmap, it.begin(), pe));
-        case id::boolean_if : {
-            sib_it sib = it.begin();
-            vertex vcond = eval_throws_binding(bmap, sib, pe);
-            ++sib;
-            if (vcond == id::logical_true) {
-                return eval_throws_binding(bmap, sib, pe);
-            } else {
-                ++sib;
-                return eval_throws_binding(bmap, sib, pe);
-            }
-        }
-        // mixed operators
-        case id::contin_if : {
-            sib_it sib = it.begin();
-            vertex vcond = eval_throws_binding(bmap, sib, pe);
-            ++sib;
-            if (vcond == id::logical_true) {
-                return eval_throws_binding(bmap, sib, pe);
-            } else {
-                ++sib;
-                return eval_throws_binding(bmap, sib, pe);
-            }
-        }
+
+        // Mixed operators
+
         case id::greater_than_zero : {
             sib_it sib = it.begin();
             vertex x = eval_throws_binding(bmap, sib, pe);
             return bool_to_vertex(0 < get_contin(x));
         }
+
         case id::impulse : {
             vertex i;
             i = eval_throws_binding(bmap, it.begin(), pe);
             return (i == id::logical_true ? 1.0 : 0.0);
         }
-        // continuous operator
+
+        // Continuous operators
         case id::plus : {
             contin_t res = 0;
             //assumption : plus can have 1 or more arguments
@@ -260,8 +245,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             }
             return res;
         }
-        case id::rand :
-            return randGen().randfloat();
+
         case id::times : {
             contin_t res = 1;
             //assumption : times can have 1 or more arguments
@@ -272,6 +256,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             }
             return res;
         }
+
         case id::div : {
             contin_t x, y;
             sib_it sib = it.begin();
@@ -286,6 +271,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
                 throw EvalException(vertex(res));
             return res;
         }
+
         case id::log : {
             vertex vx = eval_throws_binding(bmap, it.begin(), pe);
 #ifdef ABS_LOG
@@ -297,6 +283,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
                 throw EvalException(vertex(res));
             return res;
         }
+
         case id::exp : {
             vertex vx = eval_throws_binding(bmap, it.begin(), pe);
             contin_t res = exp(get_contin(vx));
@@ -305,9 +292,53 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             if (isinf(res)) throw EvalException(vertex(res));
             return res;
         }
+
         case id::sin : {
             vertex vx = eval_throws_binding(bmap, it.begin(), pe);
             return sin(get_contin(vx));
+        }
+
+        case id::rand :
+            return randGen().randfloat();
+
+
+        // Control operators
+
+        // XXX TODO: boolean_if and contin_if should go away.
+        case id::boolean_if : 
+        case id::contin_if :
+        case id::cond : {
+            // XXX this implementation is incorrect, a place-holder for
+            // now.  (it implements a simple if; it really should
+            // implement nested-ifs. i.e. have a true cond syntax...
+            sib_it sib = it.begin();
+            sib_it last = sib;
+            while (1) {
+                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
+
+                vertex vcond = eval_throws_binding(bmap, sib, pe);
+                last = sib;
+                ++sib;
+
+                // The very last value is the universal "else" clause,
+                // taken when none of the previous predicates were true.
+                if (sib == it.end()) {
+                    return eval_throws_binding(bmap, last, pe);
+                }
+
+                // If condition is true, then return value immediately
+                // following. Else, skip the value, and loop around again.
+                if (vcond == id::logical_true) {
+                    return eval_throws_binding(bmap, sib, pe);
+                } else {
+                    last = sib;
+                    ++sib;
+                }
+            }
+        }
+        case id::equ : {
+            OC_ASSERT(false, "The equ operator is not handled yet...");
+            return v;
         }
         default :
             OC_ASSERT(false, "That case is not handled");
