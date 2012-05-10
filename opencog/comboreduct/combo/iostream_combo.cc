@@ -155,10 +155,12 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
     if (const procedure_call* cp = get<procedure_call>(&v))
         return out << (*cp);
 
-    if (double x =  get<contin_t>(v))
-        return out << x;
+    try {
+        return out << get<contin_t>(v);
+    } catch (...) {
+        OC_ASSERT(false, "Don't know how to print this type");
+    }
 
-    OC_ASSERT(false, "Don't know how to print this type");
     return out;
 }
 
