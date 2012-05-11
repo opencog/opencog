@@ -49,9 +49,10 @@ complexity_t tree_complexity(combo_tree::iterator it)
         return 0;
 
     if (is_argument(*it)
+        || is_contin(*it)    // XXX Why !?
         || is_builtin_action(*it)
         || is_ann_type(*it)
-        || is_constant(*it))
+        || is_action_result(*it))
         return -1;
 
     // recursive cases

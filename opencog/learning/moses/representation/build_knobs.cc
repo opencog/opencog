@@ -838,9 +838,6 @@ void build_knobs::build_enum(pre_it it)
         if (is_logical_operator(*sib) || is_predicate(sib)) {
             build_logical(sib);
         }
-
-        // Skip the return value.
-        if (is_enum_type(*sib)) sib++;
     }
 }
 

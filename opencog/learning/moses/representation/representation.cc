@@ -85,17 +85,14 @@ representation::representation(const reduct::rule& simplify_candidate,
       _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
 {
-    {
-        std::stringstream ss;
-        ss << "Building representation from exemplar: " << _exemplar;
-        logger().debug(ss.str());
-    }
+    logger().debug() << "Building representation from exemplar: " << _exemplar;
 
     // Build the knobs.
     build_knobs(_exemplar, tt, *this, ignore_ops,
                 perceptions, actions,
                 stepsize, expansion, depth);
 
+    logger().debug() << "After knob building: " << _exemplar;
 #if 0
     // Attempt to adjust the contin spec step size to a value that is
     // "most likely to be useful" for exploring the neighborhood of an
@@ -157,7 +154,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         }
     }
 
-    {
+    if (logger().isDebugEnabled()) {
         std::stringstream ss;
         ostream_prototype(ss << "Created prototype: ");
         logger().debug(ss.str());
