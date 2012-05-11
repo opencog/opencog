@@ -260,10 +260,15 @@ void build_knobs::logical_cleanup()
         _exemplar.set_head(id::logical_and);
 }
 
-bool build_knobs::disc_probe(disc_knob_base& kb) {
+bool build_knobs::disc_probe(disc_knob_base& kb)
+{
     return disc_probe(_exemplar, kb);
 }
 
+// XXX This probing and complexity measuring can be rather costly.
+// Is it really, really needed?  Can we punt and cross our fingers,
+// and live with the few over-expensive cases?  XXX TODO -- measure
+// the resulting performance ...
 bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
 {
     using namespace reduct;
@@ -801,8 +806,8 @@ cout <<"duude its can="<<combo_tree(it)<<endl;
 // Add enum knobs to a tree.  That is, we assume the return value of
 // the tree is an enum.  At this time, it means that the root of the
 // tree must be a cond, returning enum.  Thus, adding knobs just means
-// adding boolean conditions to the cond, and enums if that condition
-// is fulfilled.
+// adding boolean conditions to the cond, followed by the enum that
+// is the consequent (i.e. is returned if that condition is fulfilled).
 //
 // XXX An alternative might be to turn the enum into a disc_knob
 // but this is not obviously better (or worse) job.  Hmm. Need to
@@ -813,9 +818,9 @@ void build_knobs::build_enum(pre_it it)
     if (*it != id::cond)
         return;
 
-    // Insert some conditions and enums.  Always insert at least one
-    // pair. The logical_and will get blown up into a bunch of knobs
-    // by the build_logical, below.
+    // Insert clauses that consist of condition-enum pairs.  Always
+    // insert at least one clause. The logical_and will get blown up
+    // into a bunch of knobs by the build_logical, below.
     size_t half = enum_t::size() / 2 + 1;
     for (size_t i=0; i<half; i++) {
         _exemplar.prepend_child(it, enum_t::get_random_enum());
