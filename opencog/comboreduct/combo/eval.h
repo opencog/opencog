@@ -250,30 +250,16 @@ vertex eval_throws(It it, Evaluator* pe = NULL,
             }
             return negate_vertex(vx);
         }
-        case id::boolean_if : {
-            OC_ASSERT(it.number_of_children() == 3,
-                              "combo_tree node should have exactly three children"
-                              " (id::boolean_if)");
-            sib_it sib = it.begin();
-            vertex vcond = eval_throws(sib, pe, vu);
-            OC_ASSERT(is_boolean(vcond), "vertex should be a booelan.");
-            ++sib;
-            if (vcond == id::logical_true) {
-                return eval_throws(sib, pe, vu);
-            } else {
-                ++sib;
-                return eval_throws(sib, pe, vu);
-            }
-        }
-        // mixed operators
+
+        // conditional operators
+        case id::boolean_if : 
         case id::contin_if : {
             OC_ASSERT(it.number_of_children() == 3,
                       "combo_tree node should have exactly three children"
-                      " (id::contin_if)");
+                      " (id::xxx_if)");
             sib_it sib = it.begin();
             vertex vcond = eval_throws(sib, pe, vu);
-            OC_ASSERT(is_boolean(vcond),
-                      "vertex should be a boolean.");
+            OC_ASSERT(is_boolean(vcond), "vertex should be a boolean.");
             ++sib;
             if (vcond == id::logical_true) {
                 return eval_throws(sib, pe, vu);
@@ -282,6 +268,8 @@ vertex eval_throws(It it, Evaluator* pe = NULL,
                 return eval_throws(sib, pe, vu);
             }
         }
+
+        // mixed operators
         case id::greater_than_zero : {
             OC_ASSERT(it.has_one_child(),
                       "combo_tree node should have exactly three children"
