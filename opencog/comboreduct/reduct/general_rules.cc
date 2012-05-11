@@ -47,10 +47,14 @@ void level::operator()(combo_tree& tr, combo_tree::iterator it) const
 void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (it.is_childless()) {
-        if (is_indefinite_object(*it)) //not sure we want that when indefinite_object is random
-            *it = eval_throws(it, evaluator);
+        if (is_indefinite_object(*it)) {
+            //not sure we want that when indefinite_object is random
+            vertex_seq empty;
+            *it = eval_throws_binding(empty, it, evaluator);
+        }
         return;
     }
+
     sib_it to;
     if (is_associative(*it)) {
         if (is_commutative(*it)) {
@@ -72,7 +76,14 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
             if (!is_constant(*sib))
                 return;	
     }
-    *it = eval_throws(it, evaluator);
+
+    // We pass an empty vertex sequence, as there should be no
+    // arguments in the tree below 'it'.  Viz, the only things we
+    // expect to evaluate are things like 'not(true)', '*(-1.75 1)'
+    // '+(2 0 6)' and so on.  If there are args, then hopefully and
+    // exception will be thrown :-)
+    vertex_seq empty;
+    *it = eval_throws_binding(empty, it, evaluator);
     tr.erase_children(it);
 }
 
