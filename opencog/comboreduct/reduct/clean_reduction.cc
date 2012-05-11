@@ -28,7 +28,8 @@
 
 namespace opencog { namespace reduct {
 
-const rule& clean_reduction() {
+const rule& clean_reduction()
+{
     static sequential r= sequential(downwards(remove_null_vertices()),
                                     upwards(remove_dangling_junctors()));
     return r;

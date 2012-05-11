@@ -81,12 +81,33 @@ void remove_unary_junctors::operator()(combo_tree& tr, combo_tree::iterator it) 
 
 void remove_dangling_junctors::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
-    for (sib_it sib = it.begin(); sib != it.end(); )
-        if ((*sib == id::logical_and || *sib == id::logical_or || *sib==id::logical_not)
-           && sib.is_childless())
-            tr.erase(sib++);
-        else
-            ++sib;
+    // Most nodes take simple lists; but not cond. Cond takes clauses,
+    // which are pairs. If we remove the condition, we must also remove
+    // the consequent.
+// XXX TODO: I don't understand why this is not damaging contin_if and
+// boolean_if ... !? but .. umm, maybe build_knobs is not creating any
+// kinds of contin_if's and boolean_if's that can be damaged... well,
+// no matter, because thes if's will be replaced by cond... 
+    if (*it != id::cond) {
+        for (sib_it sib = it.begin(); sib != it.end(); )
+            if ((*sib == id::logical_and ||
+                 *sib == id::logical_or ||
+                 *sib==id::logical_not) && sib.is_childless())
+                tr.erase(sib++);
+            else
+                ++sib;
+    } else {
+        for (sib_it sib = it.begin(); sib != it.end(); )
+            if ((*sib == id::logical_and ||
+                 *sib == id::logical_or ||
+                 *sib==id::logical_not) && sib.is_childless()) {
+                tr.erase(sib++);
+                tr.erase(sib++);
+            } else {
+                ++sib;
+                ++sib;
+            }
+    }
 }
 
 /// and(true X)->X,  or(true X)->true

@@ -53,7 +53,7 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
     }
     sib_it to;
     if(is_associative(*it)) {
-        if(is_commutative(*it)) {
+        if (is_commutative(*it)) {
             to=tr.partition(it.begin(),it.end(),is_constant<vertex>);
             int n_consts=distance(it.begin(),to);
             if (n_consts<2 && (!(n_consts==1 && it.has_one_child())))
@@ -77,22 +77,40 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
 }
 
 //Reorder children of commutative operators (should be applied upwards)
-void reorder_commutative::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(is_commutative(*it))
+void reorder_commutative::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (is_commutative(*it))
         tr.sort_on_subtrees(it.begin(),it.end(),
                             opencog::lexicographic_subtree_order<vertex>(),false);
 }
 
-//Get rid of subtrees marked with a null_vertex in their roots
-void remove_null_vertices::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    for (sib_it sib=it.begin();sib!=it.end();)
-        if (*sib==id::null_vertex)
-            sib=tr.erase(sib);
-        else
-            ++sib;
+// Get rid of subtrees marked with a null_vertex in their roots
+void remove_null_vertices::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    // Most nodes take simple lists; but not cond. Cond takes clauses,
+    // which are pairs. If we remove the condition, we must also remove
+    // the consequent.
+    if (*it != id::cond) {
+        for (sib_it sib = it.begin(); sib != it.end(); )
+            if (*sib == id::null_vertex)
+                sib = tr.erase(sib);
+            else
+                ++sib;
+    } else {
+        for (sib_it sib = it.begin(); sib != it.end(); )
+            if (*sib == id::null_vertex) {
+                sib = tr.erase(sib);
+                sib = tr.erase(sib);
+            }
+            else {
+                ++sib;
+                ++sib;
+            }
+    }
 }
 
-void remove_all_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void remove_all_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     delete_all_assumptions(tr);
 }
 
