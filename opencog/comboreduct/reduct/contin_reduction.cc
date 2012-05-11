@@ -24,6 +24,7 @@
 #include "reduct.h"
 #include "meta_rules.h"
 #include "general_rules.h"
+#include "branch_rules.h"
 #include "contin_rules.h"
 
 // Note: the rule names are useful when debugging the reduct engine
@@ -39,12 +40,12 @@ const rule& contin_reduction(int reduct_effort,
         sequential(// These next two below are performed first, because
                    // representation building puts in lots of 0*#n terms,
                    // and getting rid of these early saves headaches later.
-                   downwards(reduce_times_one_zero()), 
+                   downwards(reduce_times_one_zero()),
                    downwards(reduce_plus_zero()),
 
                    downwards(level()),
                    upwards(eval_constants()),
-                           
+
                    downwards(reduce_plus_times_one_child()),
                    downwards(reduce_plus_zero()),
                    downwards(reduce_times_one_zero()),
@@ -67,14 +68,17 @@ const rule& contin_reduction(int reduct_effort,
                         ignore_ops.find(id::sin) == ignore_ops.end()
                         && ignore_ops.find(id::log) == ignore_ops.end()),
 #endif
-                   when(downwards(reduce_times_div()), 
+                   when(downwards(reduce_times_div()),
                         ignore_ops.find(id::div) == ignore_ops.end()),
                    when(downwards(reduce_sum_log()),
                         ignore_ops.find(id::log) == ignore_ops.end()),
-                   
+
                    when(downwards(reduce_impulse_arg(reduct_effort, ignore_ops)),
                         ignore_ops.find(id::impulse) == ignore_ops.end()),
-                   
+
+                   when(downwards(reduce_cond_arg(reduct_effort, ignore_ops)),
+                        ignore_ops.find(id::cond) == ignore_ops.end()),
+
                    upwards(reorder_commutative()),
                    when(downwards(reduce_fraction()),
                         ignore_ops.find(id::div) == ignore_ops.end()),
@@ -85,13 +89,13 @@ const rule& contin_reduction(int reduct_effort,
         iterative(seq_without_factorize_distribute,
                   "iter_without_factorize_distribute");
 
-    static sequential complete_factorize = 
+    static sequential complete_factorize =
         sequential(downwards(reduce_factorize()),
                    when(downwards(reduce_factorize_fraction()),
                         ignore_ops.find(id::div) == ignore_ops.end()),
                    seq_without_factorize_distribute,
                    "complete_factorize");
-    
+
     static downwards complete_distribute =
         downwards(reduce_distribute(iter_without_factorize_distribute));
 
