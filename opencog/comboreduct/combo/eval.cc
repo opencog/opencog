@@ -347,7 +347,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     }
 
     // enums are constants too
-    else if (boost::get<enum_t>(&v)) {
+    else if (is_enum_type(v)) {
         return v;
     }
 

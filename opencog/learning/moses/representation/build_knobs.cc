@@ -814,8 +814,13 @@ cout <<"duude its can="<<combo_tree(it)<<endl;
 // think about this...
 void build_knobs::build_enum(pre_it it)
 {
+    // If the tree is just a bare enum, put a cond up above it.
+    if (is_enum_type(*it)) {
+        it = _exemplar.insert_above(it, id::cond);
+    }
+
     // If the node is not a cond, we don't know what to do.
-    if (*it != id::cond)
+    else if (*it != id::cond)
         return;
 
     // Insert clauses that consist of condition-enum pairs.  Always
