@@ -308,9 +308,6 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::boolean_if : 
         case id::contin_if :
         case id::cond : {
-            // XXX this implementation is incorrect, a place-holder for
-            // now.  (it implements a simple if; it really should
-            // implement nested-ifs. i.e. have a true cond syntax...
             sib_it sib = it.begin();
             sib_it last = sib;
             while (1) {
