@@ -461,7 +461,7 @@ void AtomSpaceWrapper::setTV(pHandle h, const TruthValue& tv)
     atomspace->setTV(real.first, tv, real.second);
 }
 
-shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
+boost::shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
                                                          const string& name,
                                                          bool subclass)
 {
@@ -471,7 +471,7 @@ shared_ptr<set<pHandle> > AtomSpaceWrapper::getHandleSet(Type T,
     else
         atomspace->getHandleSet(back_inserter(hret), name.c_str(), T, subclass);
 
-    shared_ptr<set<pHandle> > retFake(new set<pHandle>);
+    boost::shared_ptr<set<pHandle> > retFake(new set<pHandle>);
     foreach(Handle h, hret) {
         pHandleSeq phs = realToFakeHandle(h);
         retFake->insert(phs.begin(), phs.end());
@@ -1311,7 +1311,7 @@ void AtomSpaceWrapper::DumpCoreNodes(int logLevel)
 
 void AtomSpaceWrapper::DumpCore(Type T)
 {
-    shared_ptr<set<pHandle> > fa = getHandleSet(T,"");
+    boost::shared_ptr<set<pHandle> > fa = getHandleSet(T,"");
     for_each(fa->begin(), fa->end(), handle_print<0>());
 }
 
