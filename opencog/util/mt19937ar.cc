@@ -305,6 +305,7 @@ double MT19937RandGen::genrand_res53(void)
     unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6; 
     return(a*67108864.0+b)*(1.0/9007199254740992.0); 
 } 
+#endif
 
 // Create and return the signle instance. The initial seed is zero but
 // can be changed with the public method RandGen::seed(unsigned long)
@@ -315,4 +316,3 @@ RandGen& opencog::randGen()
 }
 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
-#endif
