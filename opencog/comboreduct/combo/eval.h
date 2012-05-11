@@ -103,8 +103,15 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
 void set_bindings(combo_tree& tr, const std::vector<vertex>&);
 void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent);
 
-/// @todo that one should be removed and replaced by
-/// eval_throws_binding (and the latter should be renamed eval_throws)
+#define ALMOST_DEAD_EVAL_CODE 1
+#if ALMOST_DEAD_EVAL_CODE
+/// @todo that one should be removed and replaced by eval_throws_binding
+/// Right now, as far as I can tell, only embodiment code does this.
+/// I'm hoping that some embodiment re-write will make this go away.
+/// Note, however, emobodiment seems to use the variable unifiers, so
+/// I'm, not sure about that.
+/// Anyway, the code below is no longer maintained, and is missing 
+/// support for newer & better stuff.
 template<typename It>
 vertex eval_throws(It it, Evaluator* pe = NULL,
                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
@@ -448,6 +455,7 @@ vertex eval_throws(const tree<T>& tr)
 {
     return eval_throws(tr.begin());
 }
+#endif
 
 /// Like above but ignore the variable_unifier and uses
 /// binding_map. It also removes any type checking as it is the job of

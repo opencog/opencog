@@ -309,28 +309,24 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::contin_if :
         case id::cond : {
             sib_it sib = it.begin();
-            sib_it last = sib;
             while (1) {
                 OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
 
                 vertex vcond = eval_throws_binding(bmap, sib, pe);
-                last = sib;
-                ++sib;
+                ++sib;  // move past the condition
 
                 // The very last value is the universal "else" clause,
                 // taken when none of the previous predicates were true.
-                if (sib == it.end()) {
-                    return eval_throws_binding(bmap, last, pe);
-                }
+                if (sib == it.end())
+                    return vcond;
 
-                // If condition is true, then return value immediately
-                // following. Else, skip the value, and loop around again.
-                if (vcond == id::logical_true) {
+                // If condition is true, then return the consequent
+                // (i.e. the value immediately following.) Else, skip
+                // the consequent, and loop around again.
+                if (vcond == id::logical_true)
                     return eval_throws_binding(bmap, sib, pe);
-                } else {
-                    last = sib;
-                    ++sib;
-                }
+
+                ++sib;  // move past the consequent
             }
         }
         case id::equ : {
@@ -342,6 +338,20 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             return v;
         }
     }
+
+    // contin constant
+    else if (const contin_t* c = boost::get<contin_t>(&v)) {
+        if (isnan(*c) || isinf(*c))
+            throw EvalException(vertex(*c));
+        return v;
+    }
+
+    // enums are constants too
+    else if (boost::get<enum_t>(&v)) {
+        return v;
+    }
+
+    // PetBrain stuff
     // action
     else if (is_action(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
@@ -365,12 +375,6 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     // definite objects evaluate to themselves
     else if (is_definite_object(v)) {
         return v;
-    }
-    // contin constant
-    else if (const contin_t* c = boost::get<contin_t>(&v)) {
-      if (isnan(*c) || isinf(*c))
-          throw EvalException(vertex(*c));
-      return v;
     }
     // action symbol
     else if (is_action_symbol(v)) {
