@@ -513,24 +513,6 @@ void reduce_op_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) con
     }
 }
 
-// contin_if(x y y) -> y
-void reduce_contin_if_equal_branch::operator()(combo_tree& tr,
-                                               combo_tree::iterator it) const
-{
-    if(*it==id::contin_if) {
-        OC_ASSERT(tr.number_of_children(it)==3,
-                  "combo_tree node should have exactly two children (reduce_op_contin_if).");
-        pre_it cond = tr.child(it, 0);
-        pre_it b1 = tr.child(it, 1);
-        pre_it b2 = tr.child(it, 2);
-        if(tr.equal_subtree(b1, b2)) {
-            *it=*b1;
-            tr.erase(tr.flatten(b1));
-            tr.erase(cond);
-            tr.erase(b2);
-        }
-    }
-}
 
 // contin_if(x op(y z) op(y w)) -> op(y contin_if(x z w))
 // op in {+, *, /}. If op is / the order of argument is respected

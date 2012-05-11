@@ -137,13 +137,6 @@ struct reduce_op_contin_if : public crule<reduce_op_contin_if> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-//contin_if(x y y) -> y
-struct reduce_contin_if_equal_branch : public crule<reduce_contin_if_equal_branch> 
-{
-    reduce_contin_if_equal_branch() : crule<reduce_contin_if_equal_branch>::crule("reduce_contin_if_equal_branch") {}
-    void operator()(combo_tree& tr,combo_tree::iterator it) const;
-};
-
 //contin_if(x op(y z) op(y w)) -> op(y contin_if(x z w))
 //op in {+, *, /}. If op is / the order of argument is respected
 struct reduce_contin_if_inner_op : public crule<reduce_contin_if_inner_op> {

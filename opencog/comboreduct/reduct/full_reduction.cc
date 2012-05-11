@@ -24,6 +24,7 @@
 #include "reduct.h"
 #include "meta_rules.h"
 #include "general_rules.h"
+#include "branch_rules.h"
 #include "logical_rules.h"
 #include "contin_rules.h"
 #include "mixed_rules.h"
@@ -102,7 +103,7 @@ const rule& full_reduction()
                     downwards(reduce_impulse_prod()),
                     downwards(reduce_contin_if()),
                     downwards(reduce_op_contin_if()),
-                    downwards(reduce_contin_if_equal_branch()),
+                    downwards(reduce_cond_else()),
                     downwards(reduce_contin_if_inner_op()),
                     downwards(reduce_contin_if_substitute_cond()),
                     //downwards(reduce_junction_gt_zero_sum_constant()),
@@ -197,7 +198,7 @@ const rule& full_reduction()
                     downwards(reduce_impulse_prod()),
                     downwards(reduce_contin_if()),
                     downwards(reduce_op_contin_if()),
-                    downwards(reduce_contin_if_equal_branch()),
+                    downwards(reduce_cond_else()),
                     downwards(reduce_contin_if_inner_op()),
                     downwards(reduce_contin_if_substitute_cond()),
                     //downwards(reduce_junction_gt_zero_sum_constant()),

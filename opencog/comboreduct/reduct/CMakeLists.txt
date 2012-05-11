@@ -37,6 +37,7 @@
 INSTALL(FILES
 
 	action_rules.h
+	branch_rules.h
 	contin_rules.h
 	flat_normal_form.h
 	general_rules.h

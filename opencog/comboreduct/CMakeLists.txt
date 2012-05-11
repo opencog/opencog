@@ -34,6 +34,7 @@ ADD_LIBRARY(comboreduct SHARED
 
 	reduct/action_reduction
 	reduct/action_rules
+	reduct/branch_rules
 	reduct/clean_reduction
 	reduct/contin_reduction
 	reduct/contin_rules
