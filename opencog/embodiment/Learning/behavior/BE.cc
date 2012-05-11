@@ -522,7 +522,7 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
 
         foreach(const VFpair& vf, factories) {
             set<Handle> f_perceptions;
-            opencog::copy_if(new_perceptions.begin(),
+            copy_if(new_perceptions.begin(),
                              new_perceptions.end(),
                              inserter(f_perceptions, f_perceptions.begin()),
                              does_fit_template(vf.first, &wp->getAtomSpace()));
@@ -573,7 +573,7 @@ bool BehaviorEncoder::update(Temporal start_moment)
 
     foreach(const VFpair& vf, factories) {
         set<Handle> f_perceptions;
-        opencog::copy_if(new_perceptions.begin(),
+        copy_if(new_perceptions.begin(),
                          new_perceptions.end(),
                          inserter(f_perceptions, f_perceptions.begin()),
                          does_fit_template(vf.first, &wp->getAtomSpace()));

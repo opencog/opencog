@@ -26,6 +26,11 @@
 #ifndef OPENCOG_COPYIF_H
 #define OPENCOG_COPYIF_H
 
+// The newer gcc's implement std::copy_if which seems to do the same
+// thing ...  I'm not sure if this starts with gcc-4.6 or earlier,
+// though, so this may need tweaking.  Certainly, gcc-4.6.3 has this.
+#if !((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 6))
+
 namespace opencog
 {
 
@@ -43,5 +48,7 @@ OutputIter copy_if(ForwardIter begin, ForwardIter end, OutputIter dest, UnaryPre
 }
 
 } // namespace opencog
+
+#endif
 
 #endif /* OPENCOG_COPYIF_H */
