@@ -52,15 +52,15 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
         return;
     }
     sib_it to;
-    if(is_associative(*it)) {
+    if (is_associative(*it)) {
         if (is_commutative(*it)) {
-            to=tr.partition(it.begin(),it.end(),is_constant<vertex>);
-            int n_consts=distance(it.begin(),to);
-            if (n_consts<2 && (!(n_consts==1 && it.has_one_child())))
+            to = tr.partition(it.begin(), it.end(), is_constant<vertex>);
+            int n_consts = distance(it.begin(), to);
+            if (n_consts < 2 && (!(n_consts == 1 && it.has_one_child())))
                 return;
-            if (to!=it.end()) {
-                tr.reparent(tr.append_child(it,*it),it.begin(),to);
-                it=it.last_child();
+            if (to != it.end()) {
+                tr.reparent(tr.append_child(it, *it), it.begin(), to);
+                it = it.last_child();
             }
         }
         else {
@@ -68,19 +68,19 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
         }
     }
     else {
-        for (sib_it sib=it.begin();sib!=it.end();++sib)
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
             if (!is_constant(*sib))
                 return;	
     }
-    *it=eval_throws(it, evaluator);
+    *it = eval_throws(it, evaluator);
     tr.erase_children(it);
 }
 
-//Reorder children of commutative operators (should be applied upwards)
+// Reorder children of commutative operators (should be applied upwards)
 void reorder_commutative::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
     if (is_commutative(*it))
-        tr.sort_on_subtrees(it.begin(),it.end(),
+        tr.sort_on_subtrees(it.begin(), it.end(),
                             opencog::lexicographic_subtree_order<vertex>(),false);
 }
 
