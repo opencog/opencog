@@ -24,10 +24,13 @@
 #define _OPENCOG_MT19937AR_H
 
 // Once C++11 is fully supported by GCC feel free to remove anything
-// wrapped by #ifndef USE_STL_RANDOM  Note that this is not yet
-// supported as of gcc 4.6.2 and that this is the current version of gcc
-// shipped on most popular distros, as of first-half 2012.
-#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 7)
+// wrapped by #ifndef USE_STL_RANDOM  
+// The situation is confusing... According to gnu.org, this has been
+// supported since gcc-4.3 (but possibly in the tr1 namespace ??)
+// In Ubuntu oneiric, with gcc-4.6.2, the build failed.
+//  With gcc-4.6.3, things work.  I'm confused. This
+// needs more user reports.
+#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 6)
 #define USE_STL_RANDOM
 #endif
 
