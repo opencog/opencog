@@ -116,7 +116,7 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
                      });
     // add the Occam's razor feature
     if (occam)
-        bs.push_back(complexity(tr) * complexity_coef);
+        bs.push_back(tree_complexity(tr) * complexity_coef);
 
     // Logger
     log_candidate_bscore(tr, bs);
@@ -256,7 +256,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     
     // Add the Occam's razor
     if (occam)
-        bs.push_back(complexity(tr) * complexity_coef);
+        bs.push_back(tree_complexity(tr) * complexity_coef);
 
     log_candidate_bscore(tr, bs);
 
@@ -366,7 +366,7 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
         });
     // add the Occam's razor feature
     if(occam)
-        bs.back() = complexity(tr) * complexity_coef;
+        bs.back() = tree_complexity(tr) * complexity_coef;
 
     // Logger
     log_candidate_bscore(tr, bs);
@@ -399,7 +399,7 @@ behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 
     // Add the Occam's razor feature
     if (occam)
-        bs.push_back(complexity(tr) * complexity_coef);
+        bs.push_back(tree_complexity(tr) * complexity_coef);
 
     log_candidate_bscore(tr, bs);
 
@@ -470,7 +470,7 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
 
     // Add the Occam's razor feature
     if (occam)
-        bs.push_back(complexity(tr) * complexity_coef);
+        bs.push_back(tree_complexity(tr) * complexity_coef);
 
     log_candidate_bscore(tr, bs);
 
@@ -659,7 +659,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
         
         // add the Occam's razor feature
         if(occam)
-            bs.push_back(complexity(tr) * complexity_coef);
+            bs.push_back(tree_complexity(tr) * complexity_coef);
     } else {
         bs.push_back(worst_score);
     }

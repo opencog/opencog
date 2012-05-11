@@ -282,7 +282,7 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
         /// there is a strange thing with kb.complexity_bound()
         /// because apparently when it is 0 it actually makes
         /// _exemplar simpler
-        complexity_t initial_c = complexity(exemplar);
+        complexity_t initial_c = tree_complexity(exemplar);
 
         // get cleaned and reduced (according to
         // _simplify_knob_building) exemplar
@@ -292,7 +292,7 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
         // Note that complexity is negative, with -inf being highest,
         // 0 lowest, which is why this conditional is taken if tmp is
         // simpler after reduction
-        if (initial_c < complexity(tmp)) {
+        if (initial_c < tree_complexity(tmp)) {
             to_disallow.push_back(idx);
         }
     }

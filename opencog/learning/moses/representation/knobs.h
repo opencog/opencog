@@ -307,7 +307,7 @@ struct logical_subtree_knob : public discrete_knob<3>
     }
 
     int complexity_bound() const {
-        return (_current == absent ? 0 : complexity(_loc));
+        return (_current == absent ? 0 : tree_complexity(_loc));
     }
 
     void clear_exemplar() {
@@ -458,7 +458,7 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
     }
 
     int complexity_bound() const {
-        return complexity(_loc);
+        return tree_complexity(_loc);
     }
 
     void clear_exemplar() {
@@ -523,7 +523,7 @@ struct simple_action_subtree_knob : public discrete_knob<2>
     }
 
     int complexity_bound() const {
-        return (_current == absent ? 0 : complexity(_loc));
+        return (_current == absent ? 0 : tree_complexity(_loc));
     }
 
     void clear_exemplar() {

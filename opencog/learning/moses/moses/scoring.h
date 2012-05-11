@@ -750,7 +750,7 @@ struct complexity_based_scorer : public unary_function<instance,
 
         try {
             combo_tree tr = _rep.get_candidate(inst, _reduce);
-            return composite_score(score(tr), complexity(tr));
+            return composite_score(score(tr), tree_complexity(tr));
         } catch (...) {
             stringstream ss;
             ss << "The following instance has failed to be evaluated: " 

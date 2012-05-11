@@ -60,6 +60,7 @@ int main(int argc,char** argv) {
     if (argc!=3)
       throw "foo";
     rand_seed=lexical_cast<int>(argv[1]);
+    randGen().seed(rand_seed);
     max_evals=atoi(argv[2]);
   } catch (...) {
     cerr << "usage: " << argv[0] << " seed maxevals" << endl;

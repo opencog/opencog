@@ -31,29 +31,41 @@ namespace opencog { namespace moses {
 using namespace opencog::combo;
 
 // for a Boolean formula, the complexity is the neg(# of literals)
-
-complexity_t complexity(combo_tree::iterator it) {
+// XX this is missing things ... 
+complexity_t tree_complexity(combo_tree::iterator it) 
+{
     // base cases
-    if (*it==id::logical_true || *it==id::logical_false || *it==id::null_vertex)
+    if (*it == id::logical_true
+        || *it == id::logical_false
+        || *it == id::null_vertex)
         return 0;
 
-    if (is_argument(*it) || is_builtin_action(*it) || is_ann_type(*it)
+    if (is_argument(*it)
+        || is_builtin_action(*it)
+        || is_ann_type(*it)
         || is_constant(*it))
         return -1;
 
     // recursive cases
-    if (*it==id::logical_not)
-        return complexity(it.begin());
+    if (*it == id::logical_not)
+        return tree_complexity(it.begin());
 
     // div and trigonometric functions have complexity -1
-    int c = -int(*it==id::div || *it==id::exp || *it==id::log || *it==id::sin);
+    int c = -int(*it==id::div 
+                 || *it==id::exp
+                 || *it==id::log
+                 || *it==id::sin);
     for (combo_tree::sibling_iterator sib = it.begin(); sib != it.end(); ++sib)
-        c += complexity(sib);
+        c += tree_complexity(sib);
     return c;
 }
 
-complexity_t complexity(const combo_tree& tr) {
-    return complexity(tr.begin());
+complexity_t tree_complexity(const combo_tree& tr)
+{
+    combo_tree::iterator it = tr.begin();
+    if (it == tr.end()) return 0;
+
+    return tree_complexity(tr.begin());
 }
 
 } // ~namespace moses
