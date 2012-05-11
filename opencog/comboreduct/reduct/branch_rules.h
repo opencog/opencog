@@ -29,8 +29,20 @@
 
 namespace opencog { namespace reduct {
 
+/// Apply boolean reduction to each predicate
+/// (same class structure as reduce_impulse_arg)
+struct reduce_cond_arg : public crule<reduce_cond_arg>
+{
+    int reduct_effort;
+    const vertex_set &ignore_ops;
+    reduce_cond_arg(int effort, const vertex_set &igop)
+        : crule<reduce_cond_arg>::crule("reduce_cond_arg"),
+          reduct_effort(effort), ignore_ops(igop) {}
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
+}; 
 
-// cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
+
+/// cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
 struct reduce_cond_else : public crule<reduce_cond_else> 
 {
     reduce_cond_else() 

@@ -173,7 +173,8 @@ struct reduce_sin : public crule<reduce_sin> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-// Apply boolean reduction to the argument of impulse.
+/// Apply boolean reduction to the argument of impulse.
+/// (same class structure as reduce_cond_arg)
 struct reduce_impulse_arg : public crule<reduce_impulse_arg>
 {
     int reduct_effort;

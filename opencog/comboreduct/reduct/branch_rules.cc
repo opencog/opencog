@@ -32,6 +32,21 @@ typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
 
+// Apply boolean reduction to the argument of impulse.
+void reduce_cond_arg::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (*it != id::cond) return;
+
+    // Every other one is a condition, except for the last one.
+    size_t nc = tr.number_of_children(it);
+    for (sib_it sib = it.begin(); 3 <= nc; nc -= 2) {
+        logical_reduce(reduct_effort, tr, sib, ignore_ops);
+        sib++;
+        sib++;
+    }
+}
+
+
 // cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
 //
 // This obsoletes reduce_contin_if_equal_branch
