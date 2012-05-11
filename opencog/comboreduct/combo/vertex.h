@@ -783,7 +783,8 @@ inline bool is_logical_operator(const T& v)
 template<typename T>
 inline bool is_constant(const T& v)
 {
-    return (is_boolean(v) || is_contin(v) || is_action_result(v));
+    return (is_boolean(v) || is_contin(v)
+           || is_enum_type(v) || is_action_result(v));
 }
 
 /// Return true if v is part of a contin-typed expression.
