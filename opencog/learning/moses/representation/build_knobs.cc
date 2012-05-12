@@ -797,22 +797,17 @@ pre_it build_knobs::mult_add(pre_it it, const vertex& v)
 
 // ***********************************************************************
 // Enumerated types.
+// For now, we only handle enumerated types on output, and not on input.
+// TODO: implement support for enumerated types in the input.
+
+/// enum_cannonize: make sure that the exemplar is in cannonical form.
+/// The canonical form will be of the form
+///       cond(p1 x1  p2 x2 ... pn xn y)
+/// where each possible enum is likely to appear in at least one of the
+/// consequents xk (or the else clause y).  Also, each of the predicates pk
+/// are also in canonical form.
 
 void build_knobs::enum_canonize(pre_it it)
-{
-cout <<"duude its can="<<combo_tree(it)<<endl;
-}
-
-// Add enum knobs to a tree.  That is, we assume the return value of
-// the tree is an enum.  At this time, it means that the root of the
-// tree must be a cond, returning enum.  Thus, adding knobs just means
-// adding boolean conditions to the cond, followed by the enum that
-// is the consequent (i.e. is returned if that condition is fulfilled).
-//
-// XXX An alternative might be to turn the enum into a disc_knob
-// but this is not obviously better (or worse) job.  Hmm. Need to
-// think about this...
-void build_knobs::build_enum(pre_it it)
 {
     // If the tree is just a bare enum, put a cond up above it.
     if (is_enum_type(*it)) {
@@ -823,18 +818,58 @@ void build_knobs::build_enum(pre_it it)
     else if (*it != id::cond)
         return;
 
-    // Insert clauses that consist of condition-enum pairs.  Always
-    // insert at least one clause. The logical_and will get blown up
-    // into a bunch of knobs by the build_logical, below.
-    size_t half = enum_t::size() / 2 + 1;
-    for (size_t i=0; i<half; i++) {
-        _exemplar.prepend_child(it, enum_t::get_random_enum());
+    // Append clauses that consist of condition-enum pairs.  Always
+    // append at least one clause.  Put them at the back of the cond,
+    // the idea being that the clauses at the front of the cond are
+    // probably already quite adequate, having been evolved to be good.
+    //
+    // The inserted logical_and will get blown up into a big rep by the
+    // logical_canonize step.
+
+    sib_it last = it.begin();
+
+    // If there is only one clause, don't clobber it.
+    // insert always hapens after the iterator, so back up
+    // enough to be able to insert.
+    size_t sz = _exemplar.number_of_children(it);
+    if (1 == sz) {
+        last = _exemplar.prepend_child(it, enum_t::get_random_enum());
         _exemplar.prepend_child(it, id::logical_and);
+    } else {
+        last = _exemplar.child(it, sz - 2);
+        _exemplar.insert(last, enum_t::get_random_enum());
+        _exemplar.insert(last, id::logical_and);
     }
 
+    // Now that we know where to insert, insert a bunch.
+    size_t a_bunch = (2 * enum_t::size()) / 3;
+    for (size_t i = 0; i < a_bunch; i++) {
+        _exemplar.insert(last, enum_t::get_random_enum());
+        _exemplar.insert(last, id::logical_and);
+    }
+
+    // Cannonize every predicate. 
     for (sib_it sib = it.begin(); sib != it.end(); ++sib)
     {
-        // Put some knobs into the condition.
+        if (is_logical_operator(*sib) || is_predicate(sib)) {
+            logical_canonize(sib);
+        }
+    }
+}
+
+// Add knobs.  Right now, none of the enum consequents are knob-able.
+// At this point in time, I don't think it matters much (it will
+// matter a whole lot more, when enums-in-input-columns are supported).
+// If/when this time comes, we'll replace each enum with a disc_knob.
+//
+// Anyway, what this routine does is to insert knobs for each of the
+// predicates that appear in the cond.
+//
+void build_knobs::build_enum(pre_it it)
+{
+    // Look for all the predicates, and make sure they get knobs.
+    for (sib_it sib = it.begin(); sib != it.end(); ++sib)
+    {
         if (is_logical_operator(*sib) || is_predicate(sib)) {
             build_logical(sib);
         }
