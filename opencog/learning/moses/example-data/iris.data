@@ -4,9 +4,10 @@
 #
 # Goal is to classify the last column, baed on the first four columns.
 # To run:
-#    moses -i iris.data -u5
+#    moses -i iris.data -u5 -n sin -n log -n exp -n div
 #
 # -u5 means that the target variable is in the 5th column
+# -n op means that operator 'op' should not be used in the solution.
 #
 # The classification is easy, if one focuses on the last column.
 # In particular, linear regression works really well on this dataset.

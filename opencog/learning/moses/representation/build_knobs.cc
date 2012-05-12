@@ -849,11 +849,18 @@ void build_knobs::enum_canonize(pre_it it)
     }
 
     // Cannonize every predicate. 
-    for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-    {
+    // This loop is strangely structured because the logical_canonize()
+    // does an insert_above, and thus wrecks the iterator.
+    sib_it sib = it.begin();
+    while(1) {
+        sib_it next = sib;
+        next++;
+        if (next == it.end()) break;
+        next++;
         if (is_logical_operator(*sib) || is_predicate(sib)) {
             logical_canonize(sib);
         }
+        sib = next;
     }
 }
 
