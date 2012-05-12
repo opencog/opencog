@@ -409,7 +409,7 @@ void reduce_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const
         pre_it cond = tr.child(it, 0);
         pre_it b1 = tr.child(it, 1);
         pre_it b2 = tr.child(it, 2);
-        if(*cond==id::logical_true) {
+        if (*cond == id::logical_true) {
             *it = *b1;
             tr.flatten(b1);
             tr.erase(cond);

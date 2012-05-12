@@ -42,11 +42,21 @@ struct reduce_cond_arg : public crule<reduce_cond_arg>
 }; 
 
 
+/// cond(v) -> v
 /// cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
 struct reduce_cond_else : public crule<reduce_cond_else> 
 {
     reduce_cond_else() 
         : crule<reduce_cond_else>::crule("reduce_cond_else") {}
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
+};
+
+
+/// cond(... p x q x ...) -> cond (... or(p q) x ...)
+struct reduce_cond_adjacent : public crule<reduce_cond_adjacent> 
+{
+    reduce_cond_adjacent() 
+        : crule<reduce_cond_adjacent>::crule("reduce_cond_adjacent") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
