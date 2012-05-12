@@ -826,26 +826,12 @@ void build_knobs::enum_canonize(pre_it it)
     // The inserted logical_and will get blown up into a big rep by the
     // logical_canonize step.
 
-    sib_it last = it.begin();
-
-    // If there is only one clause, don't clobber it.
-    // insert always hapens after the iterator, so back up
-    // enough to be able to insert.
-    size_t sz = _exemplar.number_of_children(it);
-    if (1 == sz) {
-        last = _exemplar.prepend_child(it, enum_t::get_random_enum());
-        _exemplar.prepend_child(it, id::logical_and);
-    } else {
-        last = _exemplar.child(it, sz - 2);
-        _exemplar.insert(last, enum_t::get_random_enum());
-        _exemplar.insert(last, id::logical_and);
-    }
-
-    // Now that we know where to insert, insert a bunch.
-    size_t a_bunch = (2 * enum_t::size()) / 3;
+    // Insert a bunch of clauses. At least one.
+    sib_it last = it.last_child();
+    size_t a_bunch = (2 * enum_t::size()) / 3 + 1;
     for (size_t i = 0; i < a_bunch; i++) {
-        _exemplar.insert(last, enum_t::get_random_enum());
         _exemplar.insert(last, id::logical_and);
+        _exemplar.insert(last, enum_t::get_random_enum());
     }
 
     // Cannonize every predicate. 
