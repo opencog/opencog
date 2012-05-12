@@ -47,27 +47,37 @@ void reduce_cond_arg::operator()(combo_tree& tr, combo_tree::iterator it) const
 }
 
 
+// cond(v) -> v
 // cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
 //
 // This obsoletes reduce_contin_if_equal_branch
 void reduce_cond_else::operator()(combo_tree& tr,
                                   combo_tree::iterator it) const
 {
-    if (*it == id::cond ||
-        *it == id::contin_if)
-    {
+    if ((*it != id::cond) && (*it != id::contin_if)) return;
+
+    while (1) {
         size_t last = tr.number_of_children(it);
-        if (last < 3) return;
+
+        // cond(v) -> v
+        if (1 == last) {
+            *it = *(it.begin());
+            tr.erase(tr.flatten(it.begin()));
+            return;
+        }
+
+        // Look at the last two consequents.
+        // cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
         last -= 3;
         pre_it cond = tr.child(it, last);
-        pre_it b1 = tr.child(it, last+1);
-        pre_it b2 = tr.child(it, last+2);
-        if (tr.equal_subtree(b1, b2)) {
-            *it = *b1;
-            tr.erase(tr.flatten(b1));
+        pre_it c1 = tr.child(it, last+1);
+        pre_it c2 = tr.child(it, last+2);
+        if (tr.equal_subtree(c1, c2)) {
             tr.erase(cond);
-            tr.erase(b2);
-        }
+            *cond = *c1;
+            tr.erase(c2);
+        } else
+            break;
     }
 }
 
