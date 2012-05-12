@@ -55,7 +55,7 @@ struct build_knobs : boost::noncopyable
                 contin_t step_size = 1.0, contin_t expansion = 1.0,
                 field_set::width_t depth = 4);
 
-    void build_logical(combo_tree::iterator it);
+    void build_logical(combo_tree&, combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
     void build_enum(combo_tree::iterator it);
     void build_action(combo_tree::iterator it);
@@ -100,7 +100,8 @@ protected:
                                                        unsigned n_jobs = 1) const;
     void logical_cleanup();
 
-    void add_logical_knobs(combo_tree::iterator it,
+    void add_logical_knobs(combo_tree& exemplar,
+                           combo_tree::iterator it,
                            bool add_if_in_exemplar = true);
 
     void sample_logical_perms(combo_tree::iterator it,

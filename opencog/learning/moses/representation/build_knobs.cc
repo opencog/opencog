@@ -86,7 +86,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
         //
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
-        build_logical(_exemplar.begin());
+        build_logical(_exemplar, _exemplar.begin());
         logical_cleanup();
     }
     else if (output_type == id::contin_type) {
@@ -96,6 +96,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
     else if (output_type == id::enum_type) {
         enum_canonize(_exemplar.begin());
         build_enum(_exemplar.begin());
+        logical_cleanup();
     }
     else if (output_type == id::action_result_type) {
         // Petbrain
@@ -451,7 +452,8 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
  * arguments, and knobs for predicates (which are functions that return
  * a boolean value).
  */
-void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
+void build_knobs::add_logical_knobs(combo_tree& exempl,
+                                    pre_it it, bool add_if_in_exemplar)
 {
     // If the node is not a logic op, then bail.  That is, we don't want
     // to insert any kind of boolean knobs into other kinds of ops.
@@ -462,7 +464,7 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
     sample_logical_perms(it, perms);
 
     ptr_vector<logical_subtree_knob> kb_v =
-        logical_probe_rec(_exemplar, it, perms.begin(), perms.end(),
+        logical_probe_rec(exempl, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, num_threads());
 
     foreach (const logical_subtree_knob& kb, kb_v) {
@@ -474,7 +476,7 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
  * build_logical -- add knobs to an exemplar that contains only boolean
  * and logic terms, and no other kinds of terms.
  */
-void build_knobs::build_logical(pre_it it)
+void build_knobs::build_logical(combo_tree& exempl, pre_it it)
 {
     id::builtin flip = id::null_vertex;
 
@@ -498,15 +500,15 @@ void build_knobs::build_logical(pre_it it)
 
     if (flip != id::null_vertex)
     {
-        add_logical_knobs(it);
+        add_logical_knobs(exempl, it);
         for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
             // Insert logical and/or knobs above arguments and predicates.
             if (is_argument(*sib)) {
-                add_logical_knobs(_exemplar.insert_above(sib, flip), false);
+                add_logical_knobs(exempl, exempl.insert_above(sib, flip), false);
             }
             else if (is_predicate(sib)) {
-                add_logical_knobs(_exemplar.insert_above(sib, flip), false);
+                add_logical_knobs(exempl, exempl.insert_above(sib, flip), false);
 
                 // At this time, we assume that the only predicate is
                 // "greater_than_zero", and it has a single arg, which
@@ -530,9 +532,9 @@ void build_knobs::build_logical(pre_it it)
             else if (*sib == id::null_vertex)
                 break;
             else
-                build_logical(sib);
+                build_logical(exempl, sib);
         }
-        add_logical_knobs(_exemplar.append_child(it, flip));
+        add_logical_knobs(exempl, exempl.append_child(it, flip));
     }
 }
 
@@ -861,11 +863,27 @@ void build_knobs::enum_canonize(pre_it it)
 void build_knobs::build_enum(pre_it it)
 {
     // Look for all the predicates, and make sure they get knobs.
-    for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-    {
+    // This loop is strangely structured because the replace()
+    // clobbers the iterator.
+    sib_it sib = it.begin();
+    while(1) {
+        sib_it next = sib;
+        next++;
+        if (next == it.end()) break;
+        next++;
+
         if (is_logical_operator(*sib) || is_predicate(sib)) {
-            build_logical(sib);
+            // What we mean to do here is just this:
+            //     build_logical(_exemplar, sib);
+            // Unfortunately, disc_probe(), when it cleans the tmp tree,
+            // wipes out the entire cond structure, and so the cond tree
+            // never gets correctly decorated.  Instead, we just treat
+            // each logical subtree individually, and paste it into place.
+            combo_tree subtree(sib);
+            build_logical(subtree, subtree.begin());
+            _exemplar.replace(sib, subtree.begin());
         }
+        sib = next;
     }
 }
 
