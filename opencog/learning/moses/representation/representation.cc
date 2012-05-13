@@ -254,7 +254,7 @@ combo_tree representation::get_candidate_lock(const instance& inst, bool reduce)
     return tr;
 }
 
-// Same function as get_candidate but doesn't use lock and does not
+// Same function as get_candidate_lock but doesn't use lock and does not
 // modify _exemplar, instead it build the combo tree from scratch
 combo_tree representation::get_candidate(const instance& inst, bool reduce) const
 {
@@ -281,14 +281,16 @@ void representation::get_candidate_rec(const instance& inst,
 
     // recursive call on the children of src to parent_dst
     auto recursive_call = [&inst, &candidate, this](pre_it new_parent_dst,
-                                                    pre_it src) {
+                                                    pre_it src)
+    {
         for(sib_it src_child = src.begin(); src_child != src.end(); ++src_child)
             get_candidate_rec(inst, src_child, new_parent_dst, candidate);        
     };
 
     // append v to parent_dst's children. If candidate is empty then
     // set it as head. Return the iterator pointing to the new content.
-    auto append_child = [&candidate](pre_it parent_dst, const vertex& v) {
+    auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
+    {
         return candidate.empty()? candidate.set_head(v)
             : candidate.append_child(parent_dst, v);
     };

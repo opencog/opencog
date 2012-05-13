@@ -55,7 +55,8 @@ struct build_knobs : boost::noncopyable
                 contin_t step_size = 1.0, contin_t expansion = 1.0,
                 field_set::width_t depth = 4);
 
-    void build_logical(combo_tree&, combo_tree::iterator it);
+    void build_logical(combo_tree::iterator sub,
+                       combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
     void build_enum(combo_tree::iterator it);
     void build_action(combo_tree::iterator it);
@@ -93,14 +94,17 @@ protected:
     void logical_canonize(combo_tree::iterator);
 
     template<typename It>
-    ptr_vector<logical_subtree_knob> logical_probe_rec(combo_tree& exemplar,
-                                                       combo_tree::iterator it,
-                                                       It from, It to,
-                                                       bool add_if_in_exemplar,
-                                                       unsigned n_jobs = 1) const;
+    ptr_vector<logical_subtree_knob> logical_probe_rec(
+                        combo_tree::iterator subtree,
+                        combo_tree& exemplar,
+                        combo_tree::iterator it,
+                        It from, It to,
+                        bool add_if_in_exemplar,
+                        unsigned n_jobs = 1) const;
+
     void logical_cleanup();
 
-    void add_logical_knobs(combo_tree& exemplar,
+    void add_logical_knobs(combo_tree::iterator subtree,
                            combo_tree::iterator it,
                            bool add_if_in_exemplar = true);
 
@@ -117,9 +121,7 @@ protected:
      *
      * Return false if all settings are disallowed, true otherwise.
      */
-    bool disc_probe(combo_tree& exemplar, disc_knob_base& kb) const;
-    // like the above but exemplar is _exemplar
-    bool disc_probe(disc_knob_base& kb);
+    bool disc_probe(combo_tree::iterator subtree, disc_knob_base& kb) const;
 
     // ------------------------------------------------------
     // contin knob building

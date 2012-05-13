@@ -86,7 +86,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
         //
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
-        build_logical(_exemplar, _exemplar.begin());
+        build_logical(_exemplar.begin(), _exemplar.begin());
         logical_cleanup();
     }
     else if (output_type == id::contin_type) {
@@ -182,7 +182,8 @@ void build_knobs::logical_canonize(pre_it it)
 
 
 /**
- * @param exemplar reference to the exemplar to apply probe
+ * @param subtree  subtree of exemplar to be probed
+ * @param exemplr  reference to the exemplar to apply probe
  * @param it       where in the exemplar
  * @param from     begin iterator of perms (see sample_logical_perms)
  * @param to       end iterator of perms (see sample_logical_perms)
@@ -193,7 +194,8 @@ void build_knobs::logical_canonize(pre_it it)
  */
 template<typename It>
 ptr_vector<logical_subtree_knob>
-build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
+build_knobs::logical_probe_rec(pre_it subtree,
+                               combo_tree& exemplr, pre_it it,
                                It from, It to,
                                bool add_if_in_exemplar,
                                unsigned n_jobs) const
@@ -207,34 +209,35 @@ build_knobs::logical_probe_rec(combo_tree& exemplar, pre_it it,
         // Copy exemplar and it for the second recursive call (this
         // has to be put before the asyncronous call to avoid
         // read/write conflicts)
-        combo_tree exemplar_copy(exemplar);
+        combo_tree exemplar_copy(exemplr);
         pre_it it_copy = exemplar_copy.begin();
-        advance(it_copy, distance(exemplar.begin(), it));
+        advance(it_copy, distance(exemplr.begin(), it));
 
         // asynchronous recursive call for [from, mid)
         future<ptr_vector<logical_subtree_knob>> f_async =
             async(launch::async,
-                  [&]() {return this->logical_probe_rec(exemplar, it, from, mid,
+                  [&]() {return this->logical_probe_rec(subtree,
+                                                        exemplr, it, from, mid,
                                                         add_if_in_exemplar,
                                                         s_jobs.first);});
 
         // synchronous recursive call for [mid, to) on the copy
         ptr_vector<logical_subtree_knob> kb_copy_v =
-            logical_probe_rec(exemplar_copy, it_copy, mid, to,
+            logical_probe_rec(subtree, exemplar_copy, it_copy, mid, to,
                               add_if_in_exemplar, s_jobs.second);
 
         // append kb_copy_v to kb_v
         auto kb_v = f_async.get();
         foreach (const logical_subtree_knob& kb_copy, kb_copy_v) {
-            kb_v.push_back(new logical_subtree_knob(exemplar, it, kb_copy));
+            kb_v.push_back(new logical_subtree_knob(exemplr, it, kb_copy));
         }
         return kb_v;
     } else {
         ptr_vector<logical_subtree_knob> kb_v;
         while (from != to) {
-            auto kb = new logical_subtree_knob(exemplar, it, from->begin());
+            auto kb = new logical_subtree_knob(exemplr, it, from->begin());
             if ((add_if_in_exemplar || !kb->in_exemplar())
-                && disc_probe(exemplar, *kb))
+                && disc_probe(subtree, *kb))
             {
                 kb_v.push_back(kb);
             }
@@ -261,16 +264,11 @@ void build_knobs::logical_cleanup()
         _exemplar.set_head(id::logical_and);
 }
 
-bool build_knobs::disc_probe(disc_knob_base& kb)
-{
-    return disc_probe(_exemplar, kb);
-}
-
 // XXX This probing and complexity measuring can be rather costly.
 // Is it really, really needed?  Can we punt and cross our fingers,
 // and live with the few over-expensive cases?  XXX TODO -- measure
 // the resulting performance ...
-bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
+bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
 {
     using namespace reduct;
 
@@ -283,11 +281,11 @@ bool build_knobs::disc_probe(combo_tree& exemplar, disc_knob_base& kb) const
         /// there is a strange thing with kb.complexity_bound()
         /// because apparently when it is 0 it actually makes
         /// _exemplar simpler
-        complexity_t initial_c = tree_complexity(exemplar);
+        complexity_t initial_c = tree_complexity(subtree);
 
         // get cleaned and reduced (according to
         // _simplify_knob_building) exemplar
-        combo_tree tmp = exemplar; // make a copy -- caution, expensive!
+        combo_tree tmp(subtree); // make a copy -- caution, expensive!
         _rep.clean_combo_tree(tmp, true, true);
 
         // Note that complexity is negative, with -inf being highest,
@@ -452,7 +450,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
  * arguments, and knobs for predicates (which are functions that return
  * a boolean value).
  */
-void build_knobs::add_logical_knobs(combo_tree& exempl,
+void build_knobs::add_logical_knobs(pre_it subtree,
                                     pre_it it, bool add_if_in_exemplar)
 {
     // If the node is not a logic op, then bail.  That is, we don't want
@@ -464,7 +462,7 @@ void build_knobs::add_logical_knobs(combo_tree& exempl,
     sample_logical_perms(it, perms);
 
     ptr_vector<logical_subtree_knob> kb_v =
-        logical_probe_rec(exempl, it, perms.begin(), perms.end(),
+        logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, num_threads());
 
     foreach (const logical_subtree_knob& kb, kb_v) {
@@ -475,8 +473,12 @@ void build_knobs::add_logical_knobs(combo_tree& exempl,
 /**
  * build_logical -- add knobs to an exemplar that contains only boolean
  * and logic terms, and no other kinds of terms.
+ *
+ * @subtree -- pointer to a subtree of the exemplar that consists of 
+ *             of "purely" logical elements.
+ * @it -- an iterator pointing into the the subtree
  */
-void build_knobs::build_logical(combo_tree& exempl, pre_it it)
+void build_knobs::build_logical(pre_it subtree, pre_it it)
 {
     id::builtin flip = id::null_vertex;
 
@@ -500,15 +502,15 @@ void build_knobs::build_logical(combo_tree& exempl, pre_it it)
 
     if (flip != id::null_vertex)
     {
-        add_logical_knobs(exempl, it);
+        add_logical_knobs(subtree, it);
         for (sib_it sib = it.begin(); sib != it.end(); ++sib)
         {
             // Insert logical and/or knobs above arguments and predicates.
             if (is_argument(*sib)) {
-                add_logical_knobs(exempl, exempl.insert_above(sib, flip), false);
+                add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
             }
             else if (is_predicate(sib)) {
-                add_logical_knobs(exempl, exempl.insert_above(sib, flip), false);
+                add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
 
                 // At this time, we assume that the only predicate is
                 // "greater_than_zero", and it has a single arg, which
@@ -532,9 +534,9 @@ void build_knobs::build_logical(combo_tree& exempl, pre_it it)
             else if (*sib == id::null_vertex)
                 break;
             else
-                build_logical(exempl, sib);
+                build_logical(subtree, sib);
         }
-        add_logical_knobs(exempl, exempl.append_child(it, flip));
+        add_logical_knobs(subtree, _exemplar.append_child(it, flip));
     }
 }
 
@@ -873,15 +875,13 @@ void build_knobs::build_enum(pre_it it)
         next++;
 
         if (is_logical_operator(*sib) || is_predicate(sib)) {
-            // What we mean to do here is just this:
-            //     build_logical(_exemplar, sib);
+            // Naively, what one might want to do here is:
+            //     build_logical(_exemplar.begin(), sib);
             // Unfortunately, disc_probe(), when it cleans the tmp tree,
             // wipes out the entire cond structure, and so the cond tree
             // never gets correctly decorated.  Instead, we just treat
-            // each logical subtree individually, and paste it into place.
-            combo_tree subtree(sib);
-            build_logical(subtree, subtree.begin());
-            _exemplar.replace(sib, subtree.begin());
+            // each logical subtree individually.
+            build_logical(sib, sib);
         }
         sib = next;
     }

@@ -225,7 +225,7 @@ protected:
     // the shift is definitely in the wrong direction!! FIXME.
     int map_idx(int idx) const {
         if (idx == _default)
-            idx = 0;
+            idx = 0;  // interpreted as "absent", as used below. XXX
         else if (idx == 0)
             idx = _default;
         return idx + (_disallowed << (Multiplicity - idx)).count();
@@ -306,11 +306,13 @@ struct logical_subtree_knob : public discrete_knob<3>
         _tr.append_child(_loc, subtree);
     }
 
-    int complexity_bound() const {
+    int complexity_bound() const
+    {
         return (_current == absent ? 0 : tree_complexity(_loc));
     }
 
-    void clear_exemplar() {
+    void clear_exemplar()
+    {
         if (in_exemplar())
             turn(0);
         else
@@ -360,11 +362,17 @@ struct logical_subtree_knob : public discrete_knob<3>
         // append v to parent_dst's children. If candidate is empty
         // then set it as head. Return the iterator pointing to the
         // new content.
-        auto append_child = [&candidate](pre_it parent_dst, const vertex& v) {
+        auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
+        {
             return candidate.empty()? candidate.set_head(v)
             : candidate.append_child(parent_dst, v);
         };
 
+        // XXX new_src may be returned un-initialized, and therefore
+        // may crash if used. Must call tree::is_valid() to determine
+        // if its good, before using it.  This seems sloppy; I think
+        // setting explcitly to something.end() would be cleaner.
+        // FIXME someday.
         pre_it new_src;
         if (idx == negated)
             parent_dst = append_child(parent_dst, id::logical_not);
