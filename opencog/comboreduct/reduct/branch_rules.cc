@@ -46,6 +46,13 @@ void reduce_cond_arg::operator()(combo_tree& tr, combo_tree::iterator it) const
     }
 }
 
+// cond(v) -> v
+static inline void zap_one(combo_tree& tr, combo_tree::iterator it)
+{
+    pre_it top = it;
+    *it = *it.begin();  // it may be head of the tree...
+    tr.erase(tr.flatten(top));
+}
 
 // cond(v) -> v
 // cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
@@ -61,10 +68,7 @@ void reduce_cond_else::operator()(combo_tree& tr,
 
         // cond(v) -> v
         if (1 == last) {
-            // XXX Is this correct? I don't thnk so.
-            pre_it val = it.begin();
-            *it = *val;
-            tr.erase(tr.flatten(val));
+            zap_one(tr, it);
             return;
         }
 
@@ -113,29 +117,55 @@ void reduce_cond_adjacent::operator()(combo_tree& tr,
     }
 }
 
-#if UNDER_CONSTRUCTION
 // cond(true x1 ... pn xn y) -> x1
-// cond(false x1 ... pn xn y) -> cond(p2 x2 .. pn xn y)
+// cond(p1 x1 ... true xk ... pn xn y) -> cond(p1 x1 ... p{k-1} x{k-1} xk)
+//
+// cond(false x1 ... pn xn y) -> cond(p2 x2 ... pn xn y)
+// cond(p1 x1 ... false xk ... pn xn y) -> 
+//                 cond(p1 x1 ... p{k-1} x{k-1} p{k+1} x{k+1} ... pn xn y)
 void reduce_cond_const::operator()(combo_tree& tr,
                                    combo_tree::iterator it) const
 {
     if ((*it != id::cond) && (*it != id::contin_if)) return;
+
+    sib_it sib = it.begin();
+    size_t num = tr.number_of_children(it);
     while (1) {
-        pre_it cond = tr.child(it, 0);
-        pre_it quent = tr.child(it, 1);
-        if (*cond == id::logical_true) {
-            *it = *quent;
-            tr.flatten(quent);
-            tr.erase(cond);
+
+        // cond(v) -> v
+        if (1 == num) {
+            zap_one(tr, it);
+            return;
+        }
+
+        pre_it pred = sib;
+        pre_it quent = ++sib;
+        if (sib == it.end()) return;
+        ++sib;
+
+        // Truncate everything after the true predicate
+        if (*pred == id::logical_true) {
+            tr.erase(pred);
+            num --;
 
             // Erase everything else that follows.
-            for (sib_it sib = ++quent; sib != it.end(); sib++) {
+            for (; sib != it.end(); sib++) {
                 tr.erase(sib);
+                num --;
             }
+
+            if (num == 1) zap_one(tr, it);
+            return;
+        }
+
+        // Eliminate the false clause
+        if (*pred == id::logical_false) {
+            tr.erase(pred);
+            tr.erase(quent);
+            num -= 2;
         }
     }
 }
-#endif
 
 } // ~namespace reduct
 } // ~namespace opencog

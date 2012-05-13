@@ -49,6 +49,8 @@ const rule& contin_reduction(int reduct_effort,
                    downwards(reduce_plus_times_one_child()),
                    downwards(reduce_plus_zero()),
                    downwards(reduce_times_one_zero()),
+
+                   downwards(reduce_cond_const()),
                    downwards(reduce_cond_else()),
                    downwards(reduce_cond_adjacent()),
                    when(downwards(reduce_sin()),

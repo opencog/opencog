@@ -42,8 +42,9 @@ struct reduce_cond_arg : public crule<reduce_cond_arg>
 }; 
 
 
-/// cond(v) -> v
+/// If the last two consequents are identical, omit the last clause.
 /// cond(p1 x1 ... pn xn p x x) -> cond(p1 x1 ... pn xn x)
+/// cond(v) -> v
 struct reduce_cond_else : public crule<reduce_cond_else> 
 {
     reduce_cond_else() 
@@ -52,6 +53,7 @@ struct reduce_cond_else : public crule<reduce_cond_else>
 };
 
 
+/// If two neighboring consequents are identical, merge them.
 /// cond(... p x q x ...) -> cond (... or(p q) x ...)
 struct reduce_cond_adjacent : public crule<reduce_cond_adjacent> 
 {
@@ -60,7 +62,31 @@ struct reduce_cond_adjacent : public crule<reduce_cond_adjacent>
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
-  
+/// Reduce cond's with constant predicates.
+///
+/// Any predicate that is true truncates the rest of the condition.
+/// cond(true x1 ... pn xn y) -> x1
+/// cond(p1 x1 ... true xk ... pn xn y) -> cond(p1 x1 ... p{k-1} x{k-1}
+/// xk)
+///
+/// Any predicate that is false causes the whole clause to fall out.
+/// cond(false x1 ... pn xn y) -> cond(p2 x2 ... pn xn y)
+/// cond(p1 x1 ... false xk ... pn xn y) -> 
+///                 cond(p1 x1 ... p{k-1} x{k-1} p{k+1} x{k+1} ... pn xn
+///                 y)
+///
+/// This can happen along the way.
+/// cond(v) -> v
+///
+/// This partially obsoletes reduce_contin_if
+struct reduce_cond_const : public crule<reduce_cond_const> 
+{
+    reduce_cond_const() 
+        : crule<reduce_cond_const>::crule("reduce_cond_const") {}
+    void operator()(combo_tree& tr, combo_tree::iterator it) const;
+};
+
+
 } // ~namespace reduct
 } // ~namespace opencog
 
