@@ -121,6 +121,20 @@ these.
    bzr 6617.
 
 =======================================================================
+Major Studies
+
+Diary contains these major sections, below.
+
+-- Study of parity problem perforrmance, Jan-Feb 2012
+   (discrete logic problem)
+
+-- Study of bank dataset  Feb-March 2012
+   (learning of continuous-valued function)
+
+-- Study of Iris dataset  May 2012
+   (clustering/categorization problem)
+
+=======================================================================
 Diary started in January 2012
 
 +++++ True hillcmbing vs. expanded neighborhood search. +++++
@@ -972,6 +986,11 @@ typical moses solution: 20 bits
 Clearly, for the parity problem, the solution does not over-fit.
 
 ===========================================================
+===========================================================
+===========================================================
+===========================================================
+===========================================================
+Banking questionaire dataset, February/March 2012
 Data collected on the bank.csv test case (in the example-data directory).
 
 Original hill-climbing algorithm:
@@ -1524,3 +1543,34 @@ different than the parity problem.
 -r7:     66  259.8    51     249   230.3    54     743  184.5    67
 -r8:     65  256.1    50     248   230.8    52     771  186.5    66
 -r9:     64  255.8    48     247   229.87   53     793  186.1    65
+
+===========================================================
+===========================================================
+===========================================================
+===========================================================
+===========================================================
+Iris clustering dataset, May 2012
+
+Data collected on the iris.data test case (in the example-data directory).
+This is a famous dataset going back to 1936, for categorizing Iris species,
+based on the dimensions of their leaves, etc.
+
+Basic command line:
+moses -i iris.data -u5  -n sin -n log -n exp -n div
+i.e. we don't want any of the higher math functions.
+
+           -m10000        -m20000         -m40000          -m80000
+:     time scor plex   time scor plex  time scor plex   time scor plex
+-r0:    63    5   8     143    5   8    305   5    8
+-r1:    53   11   9     183   11   9    438  11    9
+-r2:    44   46   9     128    7  10    323   7   10
+-r3:    80   50   5     179   50   5    381  50    5
+-r4:    58   54   6     121   54   6    251  54    6
+-r5:    83    6   7     204    6   7    
+-r6:    40   50   4      82   50   4    
+-r7:    82   50   5     174   50   5    
+-r8:    69   41  10     203   41  10    
+-r9:    55    6   7     128    6   7    
+
+
+
