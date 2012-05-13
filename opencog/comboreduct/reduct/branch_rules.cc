@@ -61,6 +61,7 @@ void reduce_cond_else::operator()(combo_tree& tr,
 
         // cond(v) -> v
         if (1 == last) {
+            // XXX Is this correct? I don't thnk so.
             pre_it val = it.begin();
             *it = *val;
             tr.erase(tr.flatten(val));
@@ -75,7 +76,6 @@ void reduce_cond_else::operator()(combo_tree& tr,
         pre_it c2 = tr.child(it, last+2);
         if (tr.equal_subtree(c1, c2)) {
             tr.erase(cond);
-            *cond = *c1;
             tr.erase(c2);
         } else
             break;
@@ -88,34 +88,28 @@ void reduce_cond_adjacent::operator()(combo_tree& tr,
 {
     if (*it != id::cond) return;
 
-    // Two clauses, plus the else cklause means at least 5 terms for
+    // Two clauses, plus the else clause means at least 5 terms for
     // this to even make sense.
     size_t sz = tr.number_of_children(it);
     sib_it sib = it.begin();
     for (; 5 <= sz; sz -= 2) {
 
-        pre_it c1 = sib;
-        sib_it q1 = ++sib;
-        pre_it c2 = ++sib;
-        sib_it q2 = c2; q2++;
+        sib_it p = sib;
+        sib_it x1 = ++sib;
+        sib_it q = ++sib;
+        sib_it x2 = q;  x2++;
 
         // If the two consequents aren't equal, try the next pair.
-        if (!tr.equal_subtree(q1, q2)) continue;
+        if (!tr.equal_subtree(x1, x2)) continue;
         
-        pre_it por = tr.insert(c1, id::logical_or);
+        pre_it por = tr.insert_above(p, id::logical_or);
+        tr.move_after(por.begin(), q);
 
-        pre_it new1 = tr.append_child(por, *c1);
-        tr.reparent(new1, c1.begin(), c1.end());
-        tr.erase(c1);
-        
-        pre_it new2 = tr.append_child(por, *c2);
-        tr.reparent(new2, c2.begin(), c2.end());
-        tr.erase(c2);
-        
-        tr.erase(q2);
+        sib = x2;
+        sib++;
+        sz -= 2;
 
-        // Lost track of things; recurse to find more, if any. 
-        operator()(tr, it);
+        tr.erase(x2);
     }
 }
 
