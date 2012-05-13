@@ -30,11 +30,15 @@
 #include "Logger.h"
 #include "Config.h"
 
+#include <pthread.h>
+#define pthread_yield sched_yield
+
 #ifndef WIN32
 #include <cxxabi.h>
 #include <execinfo.h>
 #endif
 
+#include <iostream>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
