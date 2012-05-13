@@ -497,13 +497,14 @@ bool procedure_repository::infer_types_repo() {
                 message << "procedure_repository::infer_types_repo -"
                         << " Type check error in procedure '"
                         << pc->get_name()
-                        << "'. The type infered in content, which is "
+                        << "'. The type infered from context, which is '"
                         << tt_ss.str()
-                        << ", does not inherit the type previously known or infered"
-                        << ", which is "
+                        << "', does not inherit the type previously known or infered"
+                        << ", which is '"
                         << pt_ss.str()
-                        << ". Have a look at the log for more information on"
-                        << " why it failed or above on the standard output if the"
+                        << "'. Look at the log for more information on"
+                        << " why it failed or above on the standard"
+                        << " output if the"
                         << " log has been redirected to it.";
                 OC_ASSERT(false, message.str().c_str());
             }

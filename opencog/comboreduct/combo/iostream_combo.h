@@ -84,10 +84,10 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
         v = id::logical_true;
     else if (str == "false" || str == "logical_false")
         v = id::logical_false;
+    else if (str == "cond")
+        v = id::cond;
     else if (str == "contin_if" || str == "contin_boolean_if")
         v = id::contin_if;
-    else if (str == "boolean_if" || str == "boolean_boolean_if")
-        v = id::boolean_if;
     else if (str == "+" || str == "plus")
         v = id::plus;
     else if (str == "*" || str == "times")

@@ -259,7 +259,6 @@ vertex eval_throws(It it, Evaluator* pe = NULL,
         }
 
         // conditional operators
-        case id::boolean_if : 
         case id::contin_if : {
             OC_ASSERT(it.number_of_children() == 3,
                       "combo_tree node should have exactly three children"

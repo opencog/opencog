@@ -84,10 +84,10 @@ void remove_dangling_junctors::operator()(combo_tree& tr, combo_tree::iterator i
     // Most nodes take simple lists; but not cond. Cond takes clauses,
     // which are pairs. If we remove the condition, we must also remove
     // the consequent.
-// XXX TODO: I don't understand why this is not damaging contin_if and
-// boolean_if ... !? but .. umm, maybe build_knobs is not creating any
-// kinds of contin_if's and boolean_if's that can be damaged... well,
-// no matter, because thes if's will be replaced by cond... 
+// XXX TODO: I don't understand why this is not damaging contin_if  !??
+// But .. umm, maybe build_knobs is not creating any kinds of contin_if's
+// that can be damaged... well, no matter, because thes if's will be
+// replaced by cond... 
     if (*it != id::cond) {
         for (sib_it sib = it.begin(); sib != it.end(); )
             if ((*sib == id::logical_and ||

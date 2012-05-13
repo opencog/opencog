@@ -88,8 +88,6 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
 
         case id::contin_if:
             return out << "contin_if";
-        case id::boolean_if:
-            return out << "boolean_if";
         case id::cond:
             return out << "cond";
         case id::equ:

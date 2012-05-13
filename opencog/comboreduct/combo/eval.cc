@@ -304,8 +304,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
         // Control operators
 
-        // XXX TODO: boolean_if and contin_if should go away.
-        case id::boolean_if : 
+        // XXX TODO: contin_if should go away.
         case id::contin_if :
         case id::cond : {
             sib_it sib = it.begin();

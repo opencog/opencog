@@ -70,7 +70,6 @@ static const builtin_description bd[] =
     { id::logical_true,         "boolean" },
     { id::logical_false,        "boolean" },
     { id::contin_if,            "->(boolean contin contin contin)" },
-    { id::boolean_if,           "->(boolean boolean boolean boolean)" },
     { id::plus,                 "->(arg_list(contin) contin)" },
     { id::times,                "->(arg_list(contin) contin)" },
     { id::div,                  "->(contin contin contin)" },
@@ -85,8 +84,10 @@ static const builtin_description bd[] =
     //{ id::ann_node,             "->(arg_list(boolean))" },
     //{ id::ann_input,           "boolean" },
 
-    // cond primitive, a la lisp/sheme: if (pred1) value1; else
-    // if (pred2) value2; else if ... else value_n. 
+    // cond primitive, in the style of lisp/sheme: so
+    //     cond(p1 v1 p2 v2 .. pn vn y) 
+    // means:
+    //     if (p1) v1; else if (p2) v2; else if ... else y
     // XXX For just right now, 'value' will be an enum, but really,
     // it should be union(bool, contin, enum, etc). FIXME later.
     //

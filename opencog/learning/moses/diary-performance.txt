@@ -1566,11 +1566,17 @@ i.e. we don't want any of the higher math functions.
 -r2:    44   46   9     128    7  10    323   7   10
 -r3:    80   50   5     179   50   5    381  50    5
 -r4:    58   54   6     121   54   6    251  54    6
--r5:    83    6   7     204    6   7    
--r6:    40   50   4      82   50   4    
--r7:    82   50   5     174   50   5    
--r8:    69   41  10     203   41  10    
--r9:    55    6   7     128    6   7    
+-r5:    83    6   7     204    6   7    417   6    7
+-r6:    40   50   4      82   50   4    171  50    4
+-r7:    82   50   5     174   50   5    355  50    5
+-r8:    69   41  10     203   41  10    512  40   13
+-r9:    55    6   7     128    6   7    282   6    7
+
+
+Idea: If the leading conditions in a cond acheive perfect score on
+their target, leave them alone, and stop evolving them.  Instead,
+focus on what's left.  This could/should improve convergence
+significantly.
 
 
 

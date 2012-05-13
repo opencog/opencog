@@ -89,6 +89,8 @@ int main()
     cout << "type tree: " << ba2->get_type_tree() << endl;
     cout << "output type " << ba2->get_output_type_tree() << endl;
 
+#if 0
+    // TODO -- replace this by cond
     cout << "6----------------" << endl;
 
     cout << "arity " << (int)get_arity(id::boolean_if) << endl;
@@ -97,6 +99,7 @@ int main()
     cout << "arg " << 0 << get_input_type_tree(id::boolean_if, 0) << endl;
     cout << "arg " << 1 << get_input_type_tree(id::boolean_if, 1) << endl;
     cout << "arg " << 2 << get_input_type_tree(id::boolean_if, 2) << endl;
+#endif
 
     cout << "----------------" << endl;
 
