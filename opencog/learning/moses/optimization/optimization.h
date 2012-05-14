@@ -98,6 +98,33 @@ information_theoretic_bits(const field_set& fs)
     return res;
 }
 
+/// Hill-climbing paramters
+struct hc_parameters
+{
+    hc_parameters(bool widen = false,
+                  bool step = false,
+                  bool cross = false,
+                  double _fraction_of_remaining = 1.0)
+        : widen_search(widen),
+          single_step(step),
+          crossover(cross),
+          fraction_of_remaining(_fraction_of_remaining)
+    {
+        OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
+    }
+    
+    bool widen_search;
+    bool single_step;
+    bool crossover;
+
+    // One should probably try first to tweak pop_size_ratio to
+    // control the allocation of resources. However in some cases (for
+    // instance when hill_climbing is used for feature-selection),
+    // there is only one deme to explore and tweaking that parameter
+    // can make a difference (breadth vs depth)
+    double fraction_of_remaining;
+};
+
 // Parameters used mostly for EDA algorithms but also possibly by
 // other algo
 struct optim_parameters
@@ -187,6 +214,9 @@ struct optim_parameters
 
     // Optimization is terminated if best score is >= terminate_if_gte
     score_t terminate_if_gte;
+
+    // Some hill-climbing-specific parameters.
+    hc_parameters hc_params;
 
 private:
     // Defines the max distance to search during one iteration (used
@@ -312,32 +342,6 @@ struct univariate_optimization : optim_stats
 // Hill Climbing //
 ///////////////////
 
-struct hc_parameters
-{
-    hc_parameters(bool widen = false,
-                  bool step = false,
-                  bool cross = false,
-                  double _fraction_of_remaining = 1.0)
-        : widen_search(widen),
-          single_step(step),
-          crossover(cross),
-          fraction_of_remaining(_fraction_of_remaining)
-    {
-        OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
-    }
-    
-    bool widen_search;
-    bool single_step;
-    bool crossover;
-
-    // One should probably try first to tweak pop_size_ratio to
-    // control the allocation of resources. However in some cases (for
-    // instance when hill_climbing is used for feature-selection),
-    // there is only one deme to explore and tweaking that parameter
-    // can make a difference (breadth vs depth)
-    double fraction_of_remaining;
-};
-
 /**
  * Hill Climbing: search the local neighborhood of an instance for the
  * highest score, move to that spot, and repeat until no further
@@ -381,10 +385,10 @@ struct hc_parameters
 // #define GATHER_STATS 1
 struct hill_climbing : optim_stats
 {
-    hill_climbing(const optim_parameters& op = optim_parameters(),
-                  const hc_parameters& hc = hc_parameters())
-        : opt_params(op), hc_params(hc)
+    hill_climbing(const optim_parameters& op = optim_parameters())
+        : opt_params(op)
     {
+        hc_params = opt_params.hc_params;
 #ifdef GATHER_STATS
         hiscore = 0.0;
         hicount = 0.0;

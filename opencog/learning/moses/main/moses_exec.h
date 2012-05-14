@@ -108,10 +108,7 @@ struct metapop_moses_results_parameters
                                      const string& _output_file,
                                      const jobs_t& _jobs,
                                      bool _only_local,
-                                     bool _output_python,
-                                     bool _hc_widen_search,
-                                     bool _hc_single_step,
-                                     bool _hc_crossover) :
+                                     bool _output_python) :
         vm(_vm), result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
@@ -122,10 +119,7 @@ struct metapop_moses_results_parameters
         enable_cache(_enable_cache), labels(_labels),
         output_file(_output_file),
         jobs(_jobs), only_local(_only_local),
-        output_python(_output_python),
-        hc_widen_search(_hc_widen_search),
-        hc_single_step(_hc_single_step),
-        hc_crossover(_hc_crossover) {}
+        output_python(_output_python) {}
 
     const variables_map& vm;
     long result_count;
@@ -142,11 +136,6 @@ struct metapop_moses_results_parameters
     const jobs_t& jobs;
     bool only_local;
     bool output_python;
-
-    // Not really results, but we have nowhere else to put these...
-    bool hc_widen_search;
-    bool hc_single_step;
-    bool hc_crossover;
 };
 
 /**
@@ -228,10 +217,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const metapop_moses_results_parameters& pa)
 {
     if (pa.opt_algo == hc) { // exhaustive neighborhood search
-        hc_parameters hc_params(pa.hc_widen_search,
-                                pa.hc_single_step,
-                                pa.hc_crossover);
-        hill_climbing climber(opt_params, hc_params);
+        hill_climbing climber(opt_params);
         metapop_moses_results_a(climber, bases, tt, si_ca, si_kb, sc, bsc,
                                 meta_params, moses_params, pa);
 #ifdef GATHER_STATS

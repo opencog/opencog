@@ -838,6 +838,9 @@ int moses_exec(int argc, char** argv)
 
     // Set optim_parameters.
     optim_parameters opt_params(pop_size_ratio, max_score, max_dist);
+    opt_params.hc_params.widen_search = hc_widen_search;
+    opt_params.hc_params.single_step = hc_single_step;
+    opt_params.hc_params.crossover = hc_crossover;
 
     // Set moses_parameters.
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
@@ -864,10 +867,7 @@ int moses_exec(int argc, char** argv)
                                             output_with_labels, opt_algo,
                                             enable_cache, labels,
                                             output_file, jobs, only_local,
-                                            output_python,
-                                            hc_widen_search,
-                                            hc_single_step,
-                                            hc_crossover);
+                                            output_python);
 
     // Continuous reduction rules used during search and representation
     // building.

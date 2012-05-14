@@ -1576,8 +1576,8 @@ i.e. we don't want any of the higher math functions.
           -m160K           -m320K
 :     time scor plex   time scor plex  time scor plex   time scor plex
 -r0:  1463    5   8    2945    5   8
--r1:  2070   11   9     
--r2:  2272    7  10     
+-r1:  2070   11   9    4487   11   9 
+-r2:  2272    7  10    5121    7  10
 -r3:  3170    8  13     
 -r4:  2179   13  13     
 -r5:  2054    6   7     
