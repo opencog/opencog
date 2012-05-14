@@ -19,13 +19,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "moses_exec.h"
-#include "../example-progs/scoring_iterators.h"
-
 #include <boost/format.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
+
+#include "moses_exec.h"
+#include "../moses/partial.h"
+#include "../example-progs/scoring_iterators.h"
 
 namespace opencog { namespace moses {
 
@@ -971,6 +972,9 @@ int moses_exec(int argc, char** argv)
                                           contin_reduct, contin_reduct, bscore,
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
+
+                    partial_solver pc(ctables);
+                    pc.solve();
                 }
 
                 // --------- Contin output type

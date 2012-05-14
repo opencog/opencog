@@ -21,23 +21,24 @@ ADD_SUBDIRECTORY (example-progs)
 ADD_SUBDIRECTORY (man)
 
 ADD_LIBRARY (moses SHARED
-	representation/build_knobs
-	representation/knob_mapper
-	representation/knobs
-	representation/representation
-	representation/field_set
+	eda/initialization
+	eda/local_structure
+	moses/complexity
+	moses/distributed_moses
 	moses/metapopulation
 	moses/moses
-	moses/distributed_moses
-	moses/complexity
-	moses/scoring
 	moses/neighborhood_sampling
+	moses/partial
+	moses/pole_balancing
+	moses/scoring
 	moses/scoring_functions
 	moses/types
 	moses/using
-	moses/pole_balancing
-	eda/initialization
-	eda/local_structure
+	representation/build_knobs
+	representation/field_set
+	representation/knob_mapper
+	representation/knobs
+	representation/representation
 )
 
 TARGET_LINK_LIBRARIES (moses

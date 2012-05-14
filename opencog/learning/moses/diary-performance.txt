@@ -1561,22 +1561,30 @@ i.e. we don't want any of the higher math functions.
 
            -m10000        -m20000         -m40000          -m80000
 :     time scor plex   time scor plex  time scor plex   time scor plex
--r0:    63    5   8     143    5   8    305   5    8
--r1:    53   11   9     183   11   9    438  11    9
--r2:    44   46   9     128    7  10    323   7   10
--r3:    80   50   5     179   50   5    381  50    5
--r4:    58   54   6     121   54   6    251  54    6
--r5:    83    6   7     204    6   7    417   6    7
--r6:    40   50   4      82   50   4    171  50    4
--r7:    82   50   5     174   50   5    355  50    5
--r8:    69   41  10     203   41  10    512  40   13
--r9:    55    6   7     128    6   7    282   6    7
+-r0:    63    5   8     143    5   8    305   5    8     695    5   8
+-r1:    53   11   9     183   11   9    438  11    9    1021   11   9
+-r2:    44   46   9     128    7  10    323   7   10     918    7  10
+-r3:    80   50   5     179   50   5    381  50    5     951    8  13
+-r4:    58   54   6     121   54   6    251  54    6     643   16  10
+-r5:    83    6   7     204    6   7    417   6    7     900    6   7
+-r6:    40   50   4      82   50   4    171  50    4     374   50   4
+-r7:    82   50   5     174   50   5    355  50    5     808   50   5
+-r8:    69   41  10     203   41  10    512  40   13    1342   40  13
+-r9:    55    6   7     128    6   7    282   6    7     645    6   7
+
+
+         -m160000      
+:     time scor plex   time scor plex  time scor plex   time scor plex
+-r0:  1463    5   8     
+-r1:  2070   11   9     
+-r2:  2272    7  10     
 
 
 Idea: If the leading conditions in a cond acheive perfect score on
 their target, leave them alone, and stop evolving them.  Instead,
 focus on what's left.  This could/should improve convergence
-significantly.
+significantly.  .. Doesn't have to be perfect; jus better than
+some threshold...
 
 
 
