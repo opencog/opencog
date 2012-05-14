@@ -197,6 +197,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     max_precision = worst_score;
     foreach(const auto& cr, ctable)
         max_precision = max(max_precision, tcf(cr.second));
+    logger().fine("max_precision = %f", max_precision);
 }
 
 behavioral_score precision_bscore::operator()(const combo_tree& tr) const
@@ -206,7 +207,6 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     map<contin_t, unsigned> worst_deciles;
     
     // compute active and sum of all active outputs
-    vertex target = bool_to_vertex(positive);
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
     foreach(const CTable::value_type& vct, ctable) {
