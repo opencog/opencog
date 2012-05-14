@@ -139,26 +139,14 @@ struct metapop_moses_results_parameters
 };
 
 /**
- * 1) create a metapopulation
- * 2) run moses
- * 3) print the results
+ * 1) run moses
+ * 2) print the results
  */
 template<typename Score, typename BScore, typename Optimization>
-void metapop_moses_results_a(Optimization& opt,
-                             const std::vector<combo_tree>& bases,
-                             const opencog::combo::type_tree& tt,
-                             const reduct::rule& si_ca,
-                             const reduct::rule& si_kb,
-                             const Score& sc,
-                             const BScore& bsc,
-                             const metapop_parameters& meta_params,
+void metapop_moses_results_a(metapopulation<Score, BScore, Optimization> &metapop,
                              const moses_parameters& moses_params,
                              const metapop_moses_results_parameters& pa)
 {
-    // instantiate metapop
-    metapopulation<Score, BScore, Optimization>
-        metapop(bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
-
     // run moses, either on localhost, or distributed.
     if (pa.only_local)
         moses::moses(metapop, moses_params);
@@ -218,8 +206,11 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
 {
     if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
-        metapop_moses_results_a(climber, bases, tt, si_ca, si_kb, sc, bsc,
-                                meta_params, moses_params, pa);
+
+        metapopulation<Score, BScore, hill_climbing>
+            metapop(bases, tt, si_ca, si_kb, sc, bsc, climber, meta_params);
+
+        metapop_moses_results_a(metapop, moses_params, pa);
 #ifdef GATHER_STATS
         climber.hiscore /= climber.hicount;
         for (unsigned i=0; i< climber.scores.size(); i++) {
@@ -234,13 +225,19 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     }
     else if (pa.opt_algo == sa) { // simulated annealing
         simulated_annealing annealer(opt_params);
-        metapop_moses_results_a(annealer, bases, tt, si_ca, si_kb, sc, bsc,
-                                meta_params, moses_params, pa);
+
+        metapopulation<Score, BScore, simulated_annealing>
+            metapop(bases, tt, si_ca, si_kb, sc, bsc, annealer, meta_params);
+
+        metapop_moses_results_a(metapop, moses_params, pa);
     }
     else if (pa.opt_algo == un) { // univariate
         univariate_optimization unopt(opt_params);
-        metapop_moses_results_a(unopt, bases, tt, si_ca, si_kb, sc, bsc,
-                                meta_params, moses_params, pa);
+
+        metapopulation<Score, BScore, univariate_optimization>
+            metapop(bases, tt, si_ca, si_kb, sc, bsc, unopt, meta_params);
+
+        metapop_moses_results_a(metapop, moses_params, pa);
     }
     else {
         std::cerr << "Unknown optimization algo " << pa.opt_algo
