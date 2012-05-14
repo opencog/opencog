@@ -37,7 +37,6 @@
 #include "InferenceCache.h"
 
 #include <opencog/server/CogServer.h>
-#include <opencog/util/copyif.h>
 #include <opencog/util/ansi.h>
 #include <opencog/util/exceptions.h>
 
