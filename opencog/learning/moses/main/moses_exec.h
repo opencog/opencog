@@ -227,17 +227,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const moses_parameters& moses_params,
                              const metapop_moses_results_parameters& pa)
 {
-    if (pa.opt_algo == un) { // univariate
-        univariate_optimization unopt(opt_params);
-        metapop_moses_results_a(unopt, bases, tt, si_ca, si_kb, sc, bsc,
-                                meta_params, moses_params, pa);
-    }
-    else if (pa.opt_algo == sa) { // simulated annealing
-        simulated_annealing annealer(opt_params);
-        metapop_moses_results_a(annealer, bases, tt, si_ca, si_kb, sc, bsc,
-                                meta_params, moses_params, pa);
-    }
-    else if (pa.opt_algo == hc) { // exhaustive neighborhood search
+    if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hc_parameters hc_params(pa.hc_widen_search,
                                 pa.hc_single_step,
                                 pa.hc_crossover);
@@ -255,6 +245,16 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                 << climber.scores[i];
         }
 #endif
+    }
+    else if (pa.opt_algo == sa) { // simulated annealing
+        simulated_annealing annealer(opt_params);
+        metapop_moses_results_a(annealer, bases, tt, si_ca, si_kb, sc, bsc,
+                                meta_params, moses_params, pa);
+    }
+    else if (pa.opt_algo == un) { // univariate
+        univariate_optimization unopt(opt_params);
+        metapop_moses_results_a(unopt, bases, tt, si_ca, si_kb, sc, bsc,
+                                meta_params, moses_params, pa);
     }
     else {
         std::cerr << "Unknown optimization algo " << pa.opt_algo
@@ -282,8 +282,8 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     bscore_based_score<BScore> bb_score(bsc);
 
     // update terminate_if_gte and max_score criteria
-    score_t bps = bb_score.best_possible_score(),
-        target_score = std::min(moses_params.max_score, bps);
+    score_t bps = bb_score.best_possible_score();
+    score_t target_score = std::min(moses_params.max_score, bps);
     opt_params.terminate_if_gte = target_score;
     // update minimum score improvement
     opt_params.set_min_score_improv(bb_score.min_improv());
