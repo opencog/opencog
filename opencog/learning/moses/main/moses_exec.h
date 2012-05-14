@@ -132,58 +132,59 @@ struct metapop_moses_results_parameters
 };
 
 /**
- * 1) run moses
- * 2) print the results
+ * Run moses
  */
 template<typename Score, typename BScore, typename Optimization>
-void metapop_moses_results_a(metapopulation<Score, BScore, Optimization> &metapop,
-                             const moses_parameters& moses_params,
-                             const metapop_moses_results_parameters& pa)
+void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
+                             const moses_parameters& moses_params)
 {
-    // run moses, either on localhost, or distributed.
+    // Run moses, either on localhost, or distributed.
     if (moses_params.only_local)
         moses::moses(metapop, moses_params);
     else
         moses::distributed_moses(metapop, moses_params);
-
-    // output result
-    {
-        stringstream ss;
-        metapop.ostream(ss,
-                        pa.result_count, pa.output_score,
-                        pa.output_complexity,
-                        pa.output_bscore,
-                        pa.output_dominated,
-                        pa.output_python); 
-
-        if (pa.output_eval_number)
-            ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
-        string res = (pa.output_with_labels && !pa.labels.empty()?
-                      ph2l(ss.str(), pa.labels) : ss.str());
-        if (pa.output_file.empty())
-            std::cout << res;
-        else {
-            ofstream of(pa.output_file.c_str());
-            of << res;
-            of.close();
-        }
-    }
-
-    // Log the best candidate
-    {
-        stringstream ss;
-        metapop.ostream(ss, 1, true, true);
-        string res = (pa.output_with_labels && !pa.labels.empty()?
-                      ph2l(ss.str(), pa.labels) : ss.str());
-        if (res.empty())
-            logger().info("No candidate is good enough to be returned. Yeah that's bad!");
-        else
-            logger().info("Best candidate (preceded by its score and complexity): %s", res.c_str());
-    }
 }
 
 /**
- * like above but takes the algo type instead of the algo template
+ * Print metapopulation summary.
+ */
+template<typename Score, typename BScore, typename Optimization>
+void print_metapop(metapopulation<Score, BScore, Optimization> &metapop,
+                             const metapop_moses_results_parameters& pa)
+{
+    stringstream ss;
+    metapop.ostream(ss,
+                    pa.result_count, pa.output_score,
+                    pa.output_complexity,
+                    pa.output_bscore,
+                    pa.output_dominated,
+                    pa.output_python); 
+
+    if (pa.output_eval_number)
+        ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
+    string res = (pa.output_with_labels && !pa.labels.empty()?
+                  ph2l(ss.str(), pa.labels) : ss.str());
+    if (pa.output_file.empty())
+        std::cout << res;
+    else {
+        ofstream of(pa.output_file.c_str());
+        of << res;
+        of.close();
+    }
+
+    // Log the best candidate
+    stringstream ssb;
+    metapop.ostream(ssb, 1, true, true);
+    string resb = (pa.output_with_labels && !pa.labels.empty()?
+                  ph2l(ssb.str(), pa.labels) : ssb.str());
+    if (resb.empty())
+        logger().info("No candidate is good enough to be returned. Yeah that's bad!");
+    else
+        logger().info("Best candidate (preceded by its score and complexity): %s", res.c_str());
+}
+
+/**
+ * Create metapopulation, run moses, print results.
  */
 template<typename Score, typename BScore>
 void metapop_moses_results_b(const std::vector<combo_tree>& bases,
@@ -203,7 +204,8 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         metapopulation<Score, BScore, hill_climbing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, climber, meta_params);
 
-        metapop_moses_results_a(metapop, moses_params, pa);
+        run_moses(metapop, moses_params);
+        print_metapop(metapop, pa);
 #ifdef GATHER_STATS
         climber.hiscore /= climber.hicount;
         for (unsigned i=0; i< climber.scores.size(); i++) {
@@ -222,7 +224,8 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         metapopulation<Score, BScore, simulated_annealing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, annealer, meta_params);
 
-        metapop_moses_results_a(metapop, moses_params, pa);
+        run_moses(metapop, moses_params);
+        print_metapop(metapop, pa);
     }
     else if (pa.opt_algo == un) { // univariate
         univariate_optimization unopt(opt_params);
@@ -230,7 +233,8 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         metapopulation<Score, BScore, univariate_optimization>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, unopt, meta_params);
 
-        metapop_moses_results_a(metapop, moses_params, pa);
+        run_moses(metapop, moses_params);
+        print_metapop(metapop, pa);
     }
     else {
         std::cerr << "Unknown optimization algo " << pa.opt_algo
