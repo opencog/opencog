@@ -61,7 +61,10 @@ int main(int argc, char** argv)
     univariate_optimization univ;
     metapopulation<ann_pole2nv_score, ann_pole2nv_bscore, univariate_optimization>
         metapop_pole2(tr, tt, *si, p2_score, p2_bscore, univ);
-    moses_parameters moses_param(max_evals);
+
+    boost::program_options::variables_map vm;
+    jobs_t jobs;
+    moses_parameters moses_param(vm, jobs, true, max_evals);
     moses::moses(metapop_pole2, moses_param);
 
     //change best combo tree back into ANN

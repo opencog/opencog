@@ -24,6 +24,8 @@
 #ifndef _MOSES_MOSES_H
 #define _MOSES_MOSES_H
 
+#include <map>
+#include <boost/program_options/variables_map.hpp>
 #include "metapopulation.h"
 #include "../optimization/optimization.h"
 
@@ -35,7 +37,7 @@ using namespace combo;
 static const operator_set empty_ignore_ops = operator_set();
 
 /// A map between hostname and number of jobs allocated.
-typedef map<string, unsigned> jobs_t;
+typedef std::map<string, unsigned> jobs_t;
 
 
 /**
@@ -43,8 +45,9 @@ typedef map<string, unsigned> jobs_t;
  */
 struct moses_parameters
 {
-    moses_parameters(const boost::program_options::variables_map& _vm,
-                     const jobs_t& _jobs,
+    moses_parameters(const boost::program_options::variables_map& _vm =
+                           boost::program_options::variables_map(),
+                     const jobs_t& _jobs = jobs_t(),
                      bool _only_local = true,
                      int _max_evals = 10000,
                      int _max_gens = -1,

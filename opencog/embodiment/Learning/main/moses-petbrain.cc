@@ -79,7 +79,9 @@ int main(int argc, char** argv)
     perceptions.insert(combo_tree(ant_combo::get_instance(id::is_food_ahead)));
 
 
-    moses_parameters moses_param(max_evals, -1, 0,
+    boost::program_options::variables_map vm;
+    jobs_t jobs;
+    moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0,
                                  ignore_ops, &perceptions, &actions);
 
     //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous

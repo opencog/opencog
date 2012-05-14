@@ -107,7 +107,10 @@ int main(int argc,char** argv) {
       metapop(combo_tree(id::sequential_and), tt, action_reduction(),
               scorer, bscorer, hc);
   
-  moses_parameters moses_param(max_evals, -1, 0,
+  boost::program_options::variables_map vm;
+  jobs_t jobs;
+
+  moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0,
                                ignore_ops, &perceptions, &actions);
   moses::moses(metapop, moses_param);
 }

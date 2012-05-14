@@ -69,7 +69,10 @@ int main(int argc, char** argv)
     univariate_optimization univ;
     metapopulation<ann_score, ann_bscore, univariate_optimization>
         metapop(tr, tt, *si, score, bscore, univ);
-    moses_parameters moses_param(max_evals);
+
+    boost::program_options::variables_map vm;
+    jobs_t jobs;
+    moses_parameters moses_param(vm, jobs, true, max_evals);
     moses::moses(metapop, moses_param);
 
     //transform the best combo tree into an ANN

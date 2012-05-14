@@ -65,8 +65,8 @@ public:
         distance_based_scorer scorer(fs, target_inst);
         // Local search optimization
         optim_parameters op_param(20, 1);
-        hc_parameters hc_param(false); // do not terminate if improvement
-        hill_climbing hc(op_param, hc_param);
+        op_param.hc_params = hc_parameters(false); // do not terminate if improvement
+        hill_climbing hc(op_param);
         // empty deme
         instance_set<composite_score> deme(fs);
         // perform the search

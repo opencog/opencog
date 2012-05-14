@@ -275,11 +275,11 @@ void feature_selection(Table& table,
     } else if (fs_params.algorithm == hc) {
         // setting moses optimization parameters
         optim_parameters op_param(20, fs_params.hc_max_score, 4, 0.0);
-        hc_parameters hc_param(true, // widen distance if no improvement
+        op_param.hc_params = hc_parameters(true, // widen distance if no improvement
                                false,
                                false, // crossover
                                fs_params.hc_fraction_of_remaining);
-        hill_climbing hc(op_param, hc_param);
+        hill_climbing hc(op_param);
         moses_feature_selection(table, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
         incremental_feature_selection(table, fs_params);
