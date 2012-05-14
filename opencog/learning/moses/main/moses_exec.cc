@@ -843,7 +843,9 @@ int moses_exec(int argc, char** argv)
     opt_params.hc_params.crossover = hc_crossover;
 
     // Set moses_parameters.
-    moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
+    moses_parameters moses_params(
+        vm, jobs, only_local,
+        max_evals, max_gens, max_score, ignore_ops);
 
     // Find the column number of the target feature in the data file,
     // if any.
@@ -859,14 +861,14 @@ int moses_exec(int argc, char** argv)
         labels = readInputLabels(input_data_files.front(), target_column);
 
     // Set metapop_moses_results_parameters.
-    metapop_moses_results_parameters mmr_pa(vm, result_count,
+    metapop_moses_results_parameters mmr_pa(result_count,
                                             output_score, output_complexity,
                                             output_bscore,
                                             output_dominated,
                                             output_eval_number,
                                             output_with_labels, opt_algo,
                                             enable_cache, labels,
-                                            output_file, jobs, only_local,
+                                            output_file,
                                             output_python);
 
     // Continuous reduction rules used during search and representation

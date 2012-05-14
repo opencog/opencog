@@ -94,8 +94,7 @@ int moses_exec(const vector<string>& argv);
 // Parameters controlling output printing and display.
 struct metapop_moses_results_parameters
 {
-    metapop_moses_results_parameters(const variables_map& _vm,
-                                     long _result_count,
+    metapop_moses_results_parameters(long _result_count,
                                      bool _output_score,
                                      bool _output_complexity,
                                      bool _output_bscore,
@@ -106,10 +105,8 @@ struct metapop_moses_results_parameters
                                      bool _enable_cache,
                                      const vector<string>& _labels,
                                      const string& _output_file,
-                                     const jobs_t& _jobs,
-                                     bool _only_local,
                                      bool _output_python) :
-        vm(_vm), result_count(_result_count), output_score(_output_score),
+        result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
         output_dominated(_output_dominated),
@@ -118,10 +115,8 @@ struct metapop_moses_results_parameters
         opt_algo(_opt_algo),
         enable_cache(_enable_cache), labels(_labels),
         output_file(_output_file),
-        jobs(_jobs), only_local(_only_local),
         output_python(_output_python) {}
 
-    const variables_map& vm;
     long result_count;
     bool output_score;
     bool output_complexity;
@@ -133,8 +128,6 @@ struct metapop_moses_results_parameters
     bool enable_cache;
     const vector<string>& labels;
     string output_file;
-    const jobs_t& jobs;
-    bool only_local;
     bool output_python;
 };
 
@@ -148,10 +141,10 @@ void metapop_moses_results_a(metapopulation<Score, BScore, Optimization> &metapo
                              const metapop_moses_results_parameters& pa)
 {
     // run moses, either on localhost, or distributed.
-    if (pa.only_local)
+    if (moses_params.only_local)
         moses::moses(metapop, moses_params);
     else
-        moses::distributed_moses(metapop, pa.vm, pa.jobs, moses_params);
+        moses::distributed_moses(metapop, moses_params);
 
     // output result
     {
@@ -285,8 +278,9 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             metapop_moses_results_b(bases, tt, si_ca, si_kb,
                                     score_acache, bsc,
                                     opt_params, meta_params, moses_params, pa);
-            // log the number of cache failures
-            if (pa.only_local) { // do not print if using distributed moses
+            // Log the number of cache failures.
+            // Do not print if using distributed moses.
+            if (moses_params.only_local) {
                 logger().info("Score cache hits=%u misses=%u",
                               score_acache.get_hits(),
                               score_acache.get_failures());
@@ -307,8 +301,9 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             metapop_moses_results_b(bases, tt, si_ca, si_kb,
                                     score_acache, bscore_acache,
                                     opt_params, meta_params, moses_params, pa);
-            // log the number of cache failures
-            if (pa.only_local) { // do not print if using distributed moses
+            // Log the number of cache failures.
+            // Do not print if using distributed moses.
+            if (moses_params.only_local) {
                 logger().info("Score cache hits=%u misses=%u",
                               score_acache.get_hits(),
                               score_acache.get_failures());

@@ -34,20 +34,34 @@ using namespace combo;
 
 static const operator_set empty_ignore_ops = operator_set();
 
+/// A map between hostname and number of jobs allocated.
+typedef map<string, unsigned> jobs_t;
+
+
 /**
  * parameters to decide how to run moses
  */
 struct moses_parameters
 {
-    moses_parameters(int _max_evals = 10000,
+    moses_parameters(const boost::program_options::variables_map& _vm,
+                     const jobs_t& _jobs,
+                     bool _only_local = true,
+                     int _max_evals = 10000,
                      int _max_gens = -1,
                      score_t _max_score = 0,
                      const operator_set& _ignore_ops = empty_ignore_ops,
                      const combo_tree_ns_set* _perceptions = NULL,
                      const combo_tree_ns_set* _actions = NULL)
-        : max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score),
+        : only_local(_only_local), jobs(_jobs), vm(_vm),
+          max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score),
           ignore_ops(_ignore_ops), perceptions(_perceptions),
           actions(_actions) {}
+
+    // Distributed solver control.
+    bool only_local;
+    const jobs_t& jobs;
+    const boost::program_options::variables_map& vm;
+
     // total maximun number of evals
     int max_evals;
     // the max number of demes to create and optimize, if negative,
@@ -61,6 +75,7 @@ struct moses_parameters
     const combo_tree_ns_set* perceptions;
     // the set of actions of an optional interactive agent
     const combo_tree_ns_set* actions;
+
 };
 
 /**

@@ -133,12 +133,14 @@ bool all_resources_free(const host_proc_map& hpm);
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
-                       const variables_map& vm, const jobs_t& jobs,
-                       const moses_parameters& pa = moses_parameters())
+                       const moses_parameters& pa)
 {
     // Logger
     logger().info("Distributed MOSES starts");
     // ~Logger
+
+    const variables_map& vm = pa.vm;
+    const jobs_t& jobs = pa.jobs;
 
     typedef typename metapopulation<Scoring, BScoring,
                                     Optimization>::const_iterator mp_cit;

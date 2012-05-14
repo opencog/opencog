@@ -33,9 +33,6 @@ namespace opencog { namespace moses {
 
 using namespace std;
 
-// a map btw host name and number of jobs allocated
-typedef map<string, unsigned> jobs_t;
-
 // number of evals string
 static const string number_of_evals_str = "n_evals";
 
