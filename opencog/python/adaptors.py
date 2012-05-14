@@ -46,7 +46,9 @@ class ForestExtractor:
             'night',
             'actionFailed','decreased',
             'food_bowl', # redundant with is_edible
-            'foodState','egg','dish'])
+            'foodState','egg','dish',
+            # The can_do predicate is useful but should be in an AtTimeLink
+            'can_do'])
         
         # state
         self.all_objects  = set()# all objects in the AtomSpace
@@ -108,7 +110,7 @@ class ForestExtractor:
                 continue
             # fishgram wants objects as trees for consistency, but
             # gephi output class wants atoms...
-            #objects = tuple(map(Tree,objects))
+            objects = tuple(map(Tree,objects))
             
             #print tree,  [str(o) for o in objects]
             
@@ -121,8 +123,8 @@ class ForestExtractor:
                 self.bindings.append(objects)
                 
                 for obj in objects:
-                    #if obj.get_type() != t.TimeNode:
-                    if obj.t != t.TimeNode:
+                    if obj.get_type() != t.TimeNode:
+                    #if obj.t != t.TimeNode:
                         self.all_objects.add(obj)
                     else:
                         self.all_timestamps.add(obj)
@@ -177,7 +179,8 @@ class ForestExtractor:
         self.writer.stop()
 
     def is_object(self, atom):
-        return atom.name.startswith('at ')
+        # only useful for pathfinding visualization!
+        #return atom.name.startswith('at ')
         return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) or atom.name.startswith('at ') # or self.is_action_instance(atom)# or self.is_action_element(atom)
         
     def is_action_instance(self, atom):        
@@ -186,8 +189,8 @@ class ForestExtractor:
 #    def is_action_element(self, atom):
 #        return ':' in atom.name
     
-    def is_important_atom(self, atom):
-        return atom.name in ['actionFailed', 'actionDone'] or "DemandGoal" in atom.name
+    #def is_important_atom(self, atom):
+    #    return atom.name in ['actionFailed', 'actionDone'] or "DemandGoal" in atom.name
     
     def object_label(self,  atom):
         return 'some_'+atom.type_name
@@ -202,7 +205,8 @@ class ForestExtractor:
         else:            
             if any([atom.is_a(ty) for ty in 
                     [t.SimultaneousEquivalenceLink, t.SimilarityLink, # t.ImplicationLink,
-                     t.ReferenceLink] ]):
+                     t.ReferenceLink,
+                     t.ForAllLink, t.AverageLink, t.PredictiveImplicationLink] ]):
                 return False
 
         return True
@@ -221,15 +225,11 @@ class ForestExtractor:
         # work around hacks in other modules
         if any([i.is_a(t.AtTimeLink) for i in link.incoming]):
             return False
-        if link.is_a(t.ExecutionLink):
+        if link.is_a(t.ExecutionLink) or link.is_a(t.ForAllLink) or link.is_a(t.AndLink):
             return False        
-        # Throw away the AtTimeLink that just contains the Action ID. But in the new format,
-        # there's an AndLink containing ALL the details of the action - so this policy would
-        # delete all actions recorded by Shujing's code!
-        #if link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
-        #    return False
-        #else:
-        #    return True
+        if link.is_a(t.AtTimeLink) and self.is_action_instance(link.out[1]):
+            return False
+
         return True
 
     # tr = fish.forest.all_trees[0]
@@ -244,7 +244,7 @@ class ForestExtractor:
 
     def lookup_embeddings_helper(self, conj, bound_conj_so_far, s, all_bound_trees):
 
-        if conj == ():            
+        if len(conj) == 0:
             return [s]
 
         # Find all compatible embeddings. Then commit to that tree

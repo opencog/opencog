@@ -76,93 +76,91 @@ class FishgramTest(TestCase):
     def test_notice_changes(self):
         pass
 
-    def test_make_psi_rule(self):
-        T = tree.T
-        a = self.space.add
-        t = types
-        
-        bark =  T('ExecutionLink',
-                    a(t.GroundedSchemaNode, name='bark'), 
-                    T('ListLink')
-                )
-        
-        goal = T('EvaluationLink',
-                                a(t.PredicateNode, name = 'EnergyDemandGoal'), 
-                                T('ListLink')
-                )
-        
-        action = T('AtTimeLink', 1,
-                    T('EvaluationLink',
-                        a(t.PredicateNode, name='actionDone'),
-                        T('ListLink',
-                           bark
-                         )
-                    )
-                )
-        seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
-        result =    T('AtTimeLink',
-                        2,
-                        T('EvaluationLink',
-                            a(t.PredicateNode, name='increased'),
-                            T('ListLink',
-                                goal
-                            )
-                        )
-                    )
-        
-        premises = (action, seq_and)
-        conclusion = result
-        
-        print 'premises, conclusion:'
-        print premises
-        print conclusion
-        premises2, conclusion2 = self.fishgram.make_psi_rule(premises, conclusion)
-        print premises2, conclusion2
-        
-        ideal_premises = (bark, )
-        ideal_conclusion =  goal
-        
-        self.assertEquals(premises2, ideal_premises)
-        self.assertEquals(conclusion2, ideal_conclusion)
-
-    def test_lookup_causal_patterns(self):
-        T = tree.T
-        a = self.space.add
-        t = types
-        
-        bark =  T('ExecutionLink',
-            a(t.GroundedSchemaNode, name='bark'), 
-            T('ListLink')
-        )
-        
-        action = T('AtTimeLink', 1,
-                        T('EvaluationLink',
-                            a(t.PredicateNode, name='actionDone'),
-                            T('ListLink',
-                               bark
-                             )
-                        )
-                    )
-        seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
-        increase = T('AtTimeLink',
-                     2,
-                     T('EvaluationLink',
-                            a(t.PredicateNode, name='increased'),
-                            T('ListLink',
-                                T('EvaluationLink',
-                                    a(t.PredicateNode, name = 'EnergyDemandGoal'),
-                                    T('ListLink')
-                                )
-                            )
-                        )
-                     )
-        
-        # Add the pattern (still with some variables) into the ForestExtractor results, then see if it can be looked up correclty
-        ideal_result = (action, seq_and, increase)
-        for x in ideal_result:
-            # No embedding actually needs to be recorded, as long as the tree itself is there
-            self.fishgram.forest.tree_embeddings[x] = []
-        
-        result = next(self.fishgram.lookup_causal_patterns())
-        print result
-        assert tree.isomorphic_conjunctions(result, ideal_result)
+    #def test_make_psi_rule(self):
+    #    T = tree.T
+    #    a = self.space.add
+    #    t = types
+    #    
+    #    bark =  T('ExecutionLink',
+    #                a(t.GroundedSchemaNode, name='bark'), 
+    #                T('ListLink')
+    #            )
+    #    
+    #    goal = T('EvaluationLink',
+    #                            a(t.PredicateNode, name = 'EnergyDemandGoal')
+    #            )
+    #    
+    #    action = T('AtTimeLink', 1,
+    #                T('EvaluationLink',
+    #                    a(t.PredicateNode, name='actionDone'),
+    #                    T('ListLink',
+    #                       bark
+    #                     )
+    #                )
+    #            )
+    #    seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
+    #    result =    T('AtTimeLink',
+    #                    2,
+    #                    T('EvaluationLink',
+    #                        a(t.PredicateNode, name='increased'),
+    #                        T('ListLink',
+    #                            goal
+    #                        )
+    #                    )
+    #                )
+    #    
+    #    premises = (action, seq_and)
+    #    conclusion = result
+    #    
+    #    print 'premises, conclusion:'
+    #    print premises
+    #    print conclusion
+    #    premises2, conclusion2 = self.fishgram.make_psi_rule(premises, conclusion)
+    #    print premises2, conclusion2
+    #    
+    #    ideal_premises = (bark, )
+    #    ideal_conclusion =  goal
+    #    
+    #    self.assertEquals(premises2, ideal_premises)
+    #    self.assertEquals(conclusion2, ideal_conclusion)
+    #
+    #def test_lookup_causal_patterns(self):
+    #    T = tree.T
+    #    a = self.space.add
+    #    t = types
+    #    
+    #    bark =  T('ExecutionLink',
+    #        a(t.GroundedSchemaNode, name='bark'), 
+    #        T('ListLink')
+    #    )
+    #    
+    #    action = T('AtTimeLink', 1,
+    #                    T('EvaluationLink',
+    #                        a(t.PredicateNode, name='actionDone'),
+    #                        T('ListLink',
+    #                           bark
+    #                         )
+    #                    )
+    #                )
+    #    seq_and = T('SequentialAndLink', 1, 2) # two TimeNodes
+    #    increase = T('AtTimeLink',
+    #                 2,
+    #                 T('EvaluationLink',
+    #                        a(t.PredicateNode, name='increased'),
+    #                        T('ListLink',
+    #                            T('EvaluationLink',
+    #                                a(t.PredicateNode, name = 'EnergyDemandGoal')
+    #                            )
+    #                        )
+    #                    )
+    #                 )
+    #    
+    #    # Add the pattern (still with some variables) into the ForestExtractor results, then see if it can be looked up correclty
+    #    ideal_result = (action, seq_and, increase)
+    #    for x in ideal_result:
+    #        # No embedding actually needs to be recorded, as long as the tree itself is there
+    #        self.fishgram.forest.tree_embeddings[x] = []
+    #    
+    #    result = next(self.fishgram.lookup_causal_patterns())
+    #    print result
+    #    assert tree.isomorphic_conjunctions(result, ideal_result)

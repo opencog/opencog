@@ -521,7 +521,7 @@ def get_varlist(t):
             ret+=([x for x in get_varlist(arg) if x not in ret])
         return ret
     # Representing a conjunction as a tuple of trees.
-    elif isinstance(t, tuple):
+    elif isinstance(t, (tuple, list)):
         ret = []
         for arg in t:
             ret+=([x for x in get_varlist(arg) if x not in ret])
