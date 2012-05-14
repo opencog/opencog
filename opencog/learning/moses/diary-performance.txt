@@ -1559,7 +1559,7 @@ Basic command line:
 moses -i iris.data -u5  -n sin -n log -n exp -n div
 i.e. we don't want any of the higher math functions.
 
-           -m10000        -m20000         -m40000          -m80000
+           -m10K           -m20K           -m40K            -m80K
 :     time scor plex   time scor plex  time scor plex   time scor plex
 -r0:    63    5   8     143    5   8    305   5    8     695    5   8
 -r1:    53   11   9     183   11   9    438  11    9    1021   11   9
@@ -1573,11 +1573,20 @@ i.e. we don't want any of the higher math functions.
 -r9:    55    6   7     128    6   7    282   6    7     645    6   7
 
 
-         -m160000      
+          -m160K           -m320K
 :     time scor plex   time scor plex  time scor plex   time scor plex
--r0:  1463    5   8     
+-r0:  1463    5   8    2945    5   8
 -r1:  2070   11   9     
 -r2:  2272    7  10     
+-r3:  3170    8  13     
+-r4:  2179   13  13     
+-r5:  2054    6   7     
+-r6:   884   50   4     
+-r7:  1856   50   5     
+-r8:  3238   40  13     
+-r9:  1513    6   7     
+
+Wow.. the lack of forward progress is stunning.
 
 
 Idea: If the leading conditions in a cond acheive perfect score on

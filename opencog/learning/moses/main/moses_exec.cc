@@ -961,7 +961,12 @@ int moses_exec(int argc, char** argv)
 
                 // --------- Enumerated output type
                 else if (output_type == id::enum_type) {
-                    // much like the boolean type above, just a
+#if 0
+                    // This is ifdef'd out, replaced by the
+                    // "leave well-enough alone" algorithm. It gives
+                    // a hint at the original, but dumb, implementation.
+                    //
+                    // Much like the boolean type above, just a
                     // slightly different scorer.
                     typedef enum_table_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
@@ -969,12 +974,16 @@ int moses_exec(int argc, char** argv)
                         bscores.push_back(new BScore(ctable, as, noise));
                     multibscore_based_bscore<BScore> bscore(bscores);
                     metapop_moses_results(exemplars, table_tt,
-                                          contin_reduct, contin_reduct, bscore,
-                                          opt_params, meta_params, moses_params,
-                                          mmr_pa);
+                               contin_reduct, contin_reduct, bscore,
+                               opt_params, meta_params, moses_params,
+                               mmr_pa);
 
-                    partial_solver pc(ctables);
-                    pc.solve();
+#endif
+                    partial_solver well(ctables, as, noise, table_tt,
+                                        exemplars, contin_reduct,
+                                        opt_params, meta_params,
+                                        moses_params, mmr_pa);
+                    well.solve();
                 }
 
                 // --------- Contin output type
