@@ -159,7 +159,7 @@ struct metapopulation : public bscored_combo_tree_set
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        _bases(bases), type(tt), simplify_candidate(&si_ca),
+        _bases(bases), _type_sig(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
@@ -175,7 +175,7 @@ struct metapopulation : public bscored_combo_tree_set
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         _bases(std::vector<combo_tree>(1, base)),
-        type(tt), simplify_candidate(&si),
+        _type_sig(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
@@ -194,7 +194,7 @@ struct metapopulation : public bscored_combo_tree_set
     metapopulation<score_base, bscore_base, Optimization> downcase()
     {
         return metapopulation<score_base, bscore_base, Optimization>(
-            _bases, type, *simplify_candidate, *simplify_knob_building, 
+            _bases, _type_sig, *simplify_candidate, *simplify_knob_building, 
             (score_base&) score, (bscore_base&) bscore,
             optimize, params);
     }
@@ -536,7 +536,7 @@ struct metapopulation : public bscored_combo_tree_set
             // creating a field set, and a mapping from field set to knobs.
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
-                                      _exemplar->first, type,
+                                      _exemplar->first, _type_sig,
                                       ignore_ops, perceptions, actions);
 
             // If the representation is empty, try the next
@@ -1248,7 +1248,7 @@ struct metapopulation : public bscored_combo_tree_set
     // Keep a copy around for downcase()
     const std::vector<combo_tree>& _bases;
 
-    combo::type_tree type;
+    const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule* simplify_candidate; // to simplify candidates
     const reduct::rule* simplify_knob_building; // during knob building
     const Scoring& score;
