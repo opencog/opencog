@@ -161,7 +161,8 @@ struct metapopulation : public bscored_combo_tree_set
                    const type_tree& tt,
                    const reduct::rule& si_ca,
                    const reduct::rule& si_kb,
-                   const Scoring& sc, const BScoring& bsc,
+                   const Scoring& sc,
+                   const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         _bases(bases), _type_sig(tt), simplify_candidate(&si_ca),
@@ -196,9 +197,9 @@ struct metapopulation : public bscored_combo_tree_set
 
     /// Like a copy constructor, but down-casting the two scorers
     /// to their base classes.
-    metapopulation<score_base, bscore_base, Optimization> downcase()
+    metapopulation<score_base, bscore_base, Optimization>* downcase()
     {
-        return metapopulation<score_base, bscore_base, Optimization>(
+        return new metapopulation<score_base, bscore_base, Optimization>(
             _bases, _type_sig, *simplify_candidate, *simplify_knob_building, 
             (score_base&) score, (bscore_base&) bscore,
             optimize, params);

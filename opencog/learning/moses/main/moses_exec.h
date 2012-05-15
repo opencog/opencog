@@ -96,57 +96,111 @@ int moses_exec(const vector<string>& argv);
  * (Perhaps this structure belongs in metapopulation.h?)
  */
 template<typename BScore, typename Optimization>
-metapopulation<score_base, bscore_base, Optimization>
-cached_metapop(Optimization opt,
-               const std::vector<combo_tree>& bases,
-               const opencog::combo::type_tree& tt,
-               const reduct::rule& si_ca,
-               const reduct::rule& si_kb,
-               const bscore_based_score<BScore> &bb_score,
-               const BScore& bsc,
-               const metapop_parameters& meta_params)
+struct cached_metapop
 {
-    if (meta_params.enable_cache) {
-#if 0
-        static const unsigned initial_cache_size = 1000000;
-        
-        if (meta_params.include_dominated) {
-            typedef bscore_based_score<BScore> Score;
-            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
-            Score score(bsc);
-            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
-            ScoreACache score_acache(score_cache, "scores");
+    // Wrapper, so that the virtual methods show up.
+    struct rebase : public score_base
+    {
+        typedef bscore_based_score<BScore> Score;
+        typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+        ScoreACache _cache;
+        Score _scorer;
+        rebase(const ScoreACache& cache, const Score& scorer)
+            : _cache(cache), _scorer(scorer) {}
+        virtual score_t operator()(const combo_tree& tr) const
+        { return _cache(tr); }
+        virtual score_t best_possible_score() const
+        { return _scorer.best_possible_score(); }
+        virtual score_t min_improv() const
+        { return _scorer.min_improv(); }
+    };
 
-            metapopulation<ScoreACache, BScore, Optimization> metapop
-                (bases, tt, si_ca, si_kb, score_acache, bsc, opt, meta_params);
-
-            return metapop.downcase();
-        }
-        else {
-            // We put the cache on the bscore as well because then it
-            // is reused later (for metapopulation merging)
-            typedef prr_cache_threaded<BScore> BScoreCache;
-            typedef adaptive_cache<BScoreCache> BScoreACache;
-            typedef bscore_based_score<BScoreACache> Score;
-            BScoreCache bscore_cache(initial_cache_size, bsc);
-            BScoreACache bscore_acache(bscore_cache, "behavioural scores");
-            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
-            Score score(bscore_acache);
-            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
-            ScoreACache score_acache(score_cache, "scores");
-
-            metapopulation<ScoreACache, BScoreACache, Optimization> metapop
-                (bases, tt, si_ca, si_kb, score_acache, bscore_acache, opt, meta_params);
-            return metapop.downcase();
-        }
-#endif
+    metapopulation<score_base, bscore_base, Optimization>& get_base()
+    {
+        return *_baser;
     }
 
-    // No caching
-    metapopulation<bscore_based_score<BScore>, BScore, Optimization> metapop
-        (bases, tt, si_ca, si_kb, bb_score, bsc, opt, meta_params);
-    return metapop.downcase();
-}
+    cached_metapop(Optimization opt,
+                   const std::vector<combo_tree>& bases,
+                   const opencog::combo::type_tree& tt,
+                   const reduct::rule& si_ca,
+                   const reduct::rule& si_kb,
+                   const bscore_based_score<BScore> &bb_score,
+                   const BScore& bsc,
+                   const metapop_parameters& meta_params)
+    {
+        _rebaser = NULL;
+
+        if (meta_params.enable_cache) {
+            static const unsigned initial_cache_size = 1000000;
+            
+            if (meta_params.include_dominated) {
+                typedef bscore_based_score<BScore> Score;
+                typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+
+                Score score(bsc);
+                prr_cache_threaded<Score> score_cache(initial_cache_size, score);
+                ScoreACache score_acache(score_cache, "scores");
+
+                _rebaser = new rebase(score_acache, score);
+
+                metapopulation<rebase, BScore, Optimization> metapop
+                    (bases, tt, si_ca, si_kb, *_rebaser, bsc, opt, meta_params);
+
+                _baser = metapop.downcase();
+            }
+            else {
+                // Turning on dominated metapop management causes the 
+                // metapop weed out perfectly good exemplars ... and
+                // also, computing the domination a huge CPU-eater.
+                // Therefore, we've got it disabled by default.
+                //
+                // It's partially implemented below. To full implement,
+                // we just need to make bscore_acache not live on the
+                // stack (as it will reference bad memory if we leave it
+                // there.)
+                OC_ASSERT(false, "Dominated caching not implemented");
+#if 0
+                // We put the cache on the bscore as well because then it
+                // is reused later (for metapopulation merging)
+                typedef prr_cache_threaded<BScore> BScoreCache;
+                typedef adaptive_cache<BScoreCache> BScoreACache;
+                typedef bscore_based_score<BScoreACache> Score;
+                BScoreCache bscore_cache(initial_cache_size, bsc);
+                BScoreACache bscore_acache(bscore_cache, "behavioural scores");
+                typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+                Score score(bscore_acache);
+                prr_cache_threaded<Score> score_cache(initial_cache_size, score);
+                ScoreACache score_acache(score_cache, "scores");
+
+                _rebaser = new rebase(score_acache, score);
+
+                // XXX TODO: bscore_acache must not live on stack!
+                metapopulation<ScoreACache, BScoreACache, Optimization> metapop
+                    (bases, tt, si_ca, si_kb, *_+dominator, bscore_acache, opt, meta_params);
+                _baser = metapop.downcase();
+#endif
+            }
+        }
+
+        // No caching
+        metapopulation<bscore_based_score<BScore>, BScore, Optimization>
+            metapop(bases, tt, si_ca, si_kb, bb_score, bsc, opt, meta_params);
+        _baser = metapop.downcase();
+    }
+
+    ~cached_metapop()
+    {
+        if (_rebaser) delete _rebaser;
+        delete _baser;
+    }
+private:
+
+    // We're usng pointers here only because otherwise, the constructor
+    // gets even gnarlier.  Oh well. Fix this later.
+    metapopulation<score_base, bscore_base, Optimization> *_baser;
+    rebase *_rebaser;
+};
 
 /**
  * Run moses
@@ -269,9 +323,10 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
 
-        metapopulation<score_base, bscore_base, hill_climbing>
-            metapop = cached_metapop(climber, bases, tt, si_ca, si_kb,
-                                     bb_score, bsc, meta_params);
+        cached_metapop<BScore, hill_climbing> capop
+           (climber, bases, tt, si_ca, si_kb, bb_score, bsc, meta_params);
+        metapopulation<score_base, bscore_base, hill_climbing>&
+            metapop = capop.get_base();
 
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
@@ -290,9 +345,10 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     else if (pa.opt_algo == sa) { // simulated annealing
         simulated_annealing annealer(opt_params);
 
-        metapopulation<score_base, bscore_base, simulated_annealing>
-            metapop = cached_metapop(annealer, bases, tt, si_ca, si_kb,
-                                     bb_score, bsc, meta_params);
+        cached_metapop<BScore, simulated_annealing> capop
+           (annealer, bases, tt, si_ca, si_kb, bb_score, bsc, meta_params);
+        metapopulation<score_base, bscore_base, simulated_annealing>&
+            metapop = capop.get_base();
 
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
@@ -300,9 +356,10 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     else if (pa.opt_algo == un) { // univariate
         univariate_optimization unopt(opt_params);
 
-        metapopulation<score_base, bscore_base, univariate_optimization>
-            metapop = cached_metapop(unopt, bases, tt, si_ca, si_kb,
-                                     bb_score, bsc, meta_params);
+        cached_metapop<BScore, univariate_optimization> capop
+           (unopt, bases, tt, si_ca, si_kb, bb_score, bsc, meta_params);
+        metapopulation<score_base, bscore_base, univariate_optimization>&
+            metapop = capop.get_base();
 
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
