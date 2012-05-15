@@ -325,9 +325,9 @@ int moses_exec(int argc, char** argv)
     vector<string> exemplars_str;
     int reduct_candidate_effort;
     int reduct_knob_building_effort;
-    bool enable_cache;
     vector<string> jobs_str;
     bool weighted_accuracy;
+
     // metapop_param
     int max_candidates;
     bool reduce_all;
@@ -335,6 +335,8 @@ int moses_exec(int argc, char** argv)
     bool include_dominated;
     score_t complexity_temperature = 4.0f;
     score_t complexity_ratio = 3.5f;
+    bool enable_cache;
+
     // optim_param
     double pop_size_ratio;
     score_t max_score;
@@ -834,6 +836,7 @@ int moses_exec(int argc, char** argv)
                                    revisit, include_dominated, 
                                    complexity_temperature,
                                    complexity_ratio,
+                                   enable_cache,
                                    jobs[localhost]);
 
     // Set optim_parameters.
@@ -867,7 +870,7 @@ int moses_exec(int argc, char** argv)
                                             output_dominated,
                                             output_eval_number,
                                             output_with_labels, opt_algo,
-                                            enable_cache, labels,
+                                            labels,
                                             output_file,
                                             output_python);
 

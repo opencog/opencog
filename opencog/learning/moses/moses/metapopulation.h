@@ -68,6 +68,7 @@ struct metapop_parameters
                        bool _include_dominated = true,
                        score_t _complexity_temperature = 3.0f,
                        score_t _complexity_ratio = 4.0f,
+                       bool _enable_cache = false,
                        unsigned _jobs = 1) :
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
@@ -75,6 +76,7 @@ struct metapop_parameters
         include_dominated(_include_dominated),
         complexity_temperature(_complexity_temperature),
         complexity_ratio(_complexity_ratio),
+        enable_cache(_enable_cache),
         jobs(_jobs) {}
 
     // The max number of candidates considered to be added to the
@@ -94,6 +96,9 @@ struct metapop_parameters
 
     score_t complexity_temperature;
     score_t complexity_ratio;
+
+    // Enable caching of scores.
+    bool enable_cache;
 
     // Number of jobs for metapopulation maintenance such as merging
     // candidates to the metapopulation.

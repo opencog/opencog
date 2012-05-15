@@ -102,7 +102,6 @@ struct metapop_moses_results_parameters
                                      bool _output_eval_number,
                                      bool _output_with_labels,
                                      const string& _opt_algo,
-                                     bool _enable_cache,
                                      const vector<string>& _labels,
                                      const string& _output_file,
                                      bool _output_python) :
@@ -113,7 +112,7 @@ struct metapop_moses_results_parameters
         output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
         opt_algo(_opt_algo),
-        enable_cache(_enable_cache), labels(_labels),
+        labels(_labels),
         output_file(_output_file),
         output_python(_output_python) {}
 
@@ -125,7 +124,6 @@ struct metapop_moses_results_parameters
     bool output_eval_number;
     bool output_with_labels;
     string opt_algo;
-    bool enable_cache;
     const vector<string>& labels;
     string output_file;
     bool output_python;
@@ -195,10 +193,9 @@ cached_metapop(Optimization opt,
                const reduct::rule& si_kb,
                bscore_based_score<BScore> &bb_score,
                const BScore& bsc,
-               const metapop_parameters& meta_params,
-               const metapop_moses_results_parameters& pa)
+               const metapop_parameters& meta_params)
 {
-    if (pa.enable_cache) {
+    if (meta_params.enable_cache) {
         static const unsigned initial_cache_size = 1000000;
         
         if (meta_params.include_dominated) {
@@ -278,7 +275,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
 
         metapopulation<score_base, bscore_base, hill_climbing>
             metapop = cached_metapop(climber, bases, tt, si_ca, si_kb,
-                                     bb_score, bsc, meta_params, pa);
+                                     bb_score, bsc, meta_params);
 
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
@@ -299,7 +296,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
 
         metapopulation<score_base, bscore_base, simulated_annealing>
             metapop = cached_metapop(annealer, bases, tt, si_ca, si_kb,
-                                     bb_score, bsc, meta_params, pa);
+                                     bb_score, bsc, meta_params);
 
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
@@ -309,7 +306,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
 
         metapopulation<score_base, bscore_base, univariate_optimization>
             metapop = cached_metapop(unopt, bases, tt, si_ca, si_kb,
-                                     bb_score, bsc, meta_params, pa);
+                                     bb_score, bsc, meta_params);
 
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
