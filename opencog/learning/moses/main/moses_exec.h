@@ -184,69 +184,71 @@ void print_metapop(metapopulation<Score, BScore, Optimization> &metapop,
 }
 
 /**
- * Create metapopulation, run moses, print results.
+ * Wrap the metapopulation with caching scorers.
  */
-template<typename Score, typename BScore>
-void metapop_moses_results_b(const std::vector<combo_tree>& bases,
-                             const opencog::combo::type_tree& tt,
-                             const reduct::rule& si_ca,
-                             const reduct::rule& si_kb,
-                             const Score& sc,
-                             const BScore& bsc,
-                             const optim_parameters& opt_params,
-                             const metapop_parameters& meta_params,
-                             const moses_parameters& moses_params,
-                             const metapop_moses_results_parameters& pa)
+template<typename BScore, typename Optimization>
+metapopulation<score_base, bscore_base, Optimization>
+cached_metapop(Optimization opt,
+               const std::vector<combo_tree>& bases,
+               const opencog::combo::type_tree& tt,
+               const reduct::rule& si_ca,
+               const reduct::rule& si_kb,
+               bscore_based_score<BScore> &bb_score,
+               const BScore& bsc,
+               const metapop_parameters& meta_params,
+               const metapop_moses_results_parameters& pa)
 {
-    if (pa.opt_algo == hc) { // exhaustive neighborhood search
-        hill_climbing climber(opt_params);
+    if (pa.enable_cache) {
+        static const unsigned initial_cache_size = 1000000;
+        
+        if (meta_params.include_dominated) {
+            typedef bscore_based_score<BScore> Score;
+            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+            Score score(bsc);
+            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
+            ScoreACache score_acache(score_cache);
 
-        metapopulation<Score, BScore, hill_climbing>
-            metapop(bases, tt, si_ca, si_kb, sc, bsc, climber, meta_params);
+            metapopulation<ScoreACache, BScore, Optimization> metapop
+                (bases, tt, si_ca, si_kb, score_acache, bsc, opt, meta_params);
 
-        run_moses(metapop, moses_params);
-        print_metapop(metapop, pa);
-#ifdef GATHER_STATS
-        climber.hiscore /= climber.hicount;
-        for (unsigned i=0; i< climber.scores.size(); i++) {
-            climber.scores[i] /= climber.counts[i];
-            logger().info() << "Avg Scores: "
-                << i << "\t"
-                << climber.hiscore << "\t"
-                << climber.counts[i] << "\t"
-                << climber.scores[i];
+            return metapop.downcase();
+        }
+        else {
+            // We put the cache on the bscore as well because then it
+            // is reused later (for metapopulation merging)
+            typedef prr_cache_threaded<BScore> BScoreCache;
+            typedef adaptive_cache<BScoreCache> BScoreACache;
+            typedef bscore_based_score<BScoreACache> Score;
+            BScoreCache bscore_cache(initial_cache_size, bsc);
+            BScoreACache bscore_acache(bscore_cache);
+            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
+            Score score(bscore_acache);
+            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
+            ScoreACache score_acache(score_cache);
+
+            metapopulation<ScoreACache, BScoreACache, Optimization> metapop
+                (bases, tt, si_ca, si_kb, score_acache, bscore_acache, opt, meta_params);
+            return metapop.downcase();
+        }
+#if 0
+        // Log the number of cache failures.
+        // Do not print if using distributed moses.
+        if (moses_params.only_local) {
+            logger().info("Score cache hits=%u misses=%u",
+                          score_acache.get_hits(),
+                          score_acache.get_failures());
         }
 #endif
     }
-    else if (pa.opt_algo == sa) { // simulated annealing
-        simulated_annealing annealer(opt_params);
 
-        metapopulation<Score, BScore, simulated_annealing>
-            metapop(bases, tt, si_ca, si_kb, sc, bsc, annealer, meta_params);
-
-        run_moses(metapop, moses_params);
-        print_metapop(metapop, pa);
-    }
-    else if (pa.opt_algo == un) { // univariate
-        univariate_optimization unopt(opt_params);
-
-        metapopulation<Score, BScore, univariate_optimization>
-            metapop(bases, tt, si_ca, si_kb, sc, bsc, unopt, meta_params);
-
-        run_moses(metapop, moses_params);
-        print_metapop(metapop, pa);
-    }
-    else {
-        std::cerr << "Unknown optimization algo " << pa.opt_algo
-                  << ". Supported algorithms are un (for univariate),"
-                  << " sa (for star-shaped search) and hc (for local search)"
-                  << std::endl;
-        exit(1);
-    }
+    // No caching
+    metapopulation<bscore_based_score<BScore>, BScore, Optimization> metapop
+        (bases, tt, si_ca, si_kb, bb_score, bsc, opt, meta_params);
+    return metapop.downcase();
 }
 
 /**
- * like above, but assumes that the score is bscore based
+ * Create metapopulation, run moses, print results.
  */
 template<typename BScore>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
@@ -265,60 +267,62 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     score_t bps = bb_score.best_possible_score();
     score_t target_score = std::min(moses_params.max_score, bps);
     opt_params.terminate_if_gte = target_score;
+
     // update minimum score improvement
     opt_params.set_min_score_improv(bb_score.min_improv());
     moses_params.max_score = target_score;
     logger().info("Target score = %f", target_score);
 
-    if (pa.enable_cache) {
-        static const unsigned initial_cache_size = 1000000;
-        
-        if(meta_params.include_dominated) {
-            typedef bscore_based_score<BScore> Score;
-            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
-            Score score(bsc);
-            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
-            ScoreACache score_acache(score_cache);
-            metapop_moses_results_b(bases, tt, si_ca, si_kb,
-                                    score_acache, bsc,
-                                    opt_params, meta_params, moses_params, pa);
-            // Log the number of cache failures.
-            // Do not print if using distributed moses.
-            if (moses_params.only_local) {
-                logger().info("Score cache hits=%u misses=%u",
-                              score_acache.get_hits(),
-                              score_acache.get_failures());
-            }
+    if (pa.opt_algo == hc) { // exhaustive neighborhood search
+        hill_climbing climber(opt_params);
+
+        metapopulation<score_base, bscore_base, hill_climbing>
+            metapop = cached_metapop(climber, bases, tt, si_ca, si_kb,
+                                     bb_score, bsc, meta_params, pa);
+
+        run_moses(metapop, moses_params);
+        print_metapop(metapop, pa);
+#ifdef GATHER_STATS
+        climber.hiscore /= climber.hicount;
+        for (unsigned i=0; i< climber.scores.size(); i++) {
+            climber.scores[i] /= climber.counts[i];
+            logger().info() << "Avg Scores: "
+                << i << "\t"
+                << climber.hiscore << "\t"
+                << climber.counts[i] << "\t"
+                << climber.scores[i];
         }
-        else {
-            // We put the cache on the bscore as well because then it
-            // is reused later (for metapopulation merging)
-            typedef prr_cache_threaded<BScore> BScoreCache;
-            typedef adaptive_cache<BScoreCache> BScoreACache;
-            typedef bscore_based_score<BScoreACache> Score;
-            BScoreCache bscore_cache(initial_cache_size, bsc);
-            BScoreACache bscore_acache(bscore_cache);
-            typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
-            Score score(bscore_acache);
-            prr_cache_threaded<Score> score_cache(initial_cache_size, score);
-            ScoreACache score_acache(score_cache);
-            metapop_moses_results_b(bases, tt, si_ca, si_kb,
-                                    score_acache, bscore_acache,
-                                    opt_params, meta_params, moses_params, pa);
-            // Log the number of cache failures.
-            // Do not print if using distributed moses.
-            if (moses_params.only_local) {
-                logger().info("Score cache hits=%u misses=%u",
-                              score_acache.get_hits(),
-                              score_acache.get_failures());
-            }
-        }
+#endif
+    }
+    else if (pa.opt_algo == sa) { // simulated annealing
+        simulated_annealing annealer(opt_params);
+
+        metapopulation<score_base, bscore_base, simulated_annealing>
+            metapop = cached_metapop(annealer, bases, tt, si_ca, si_kb,
+                                     bb_score, bsc, meta_params, pa);
+
+        run_moses(metapop, moses_params);
+        print_metapop(metapop, pa);
+    }
+    else if (pa.opt_algo == un) { // univariate
+        univariate_optimization unopt(opt_params);
+
+        metapopulation<score_base, bscore_base, univariate_optimization>
+            metapop = cached_metapop(unopt, bases, tt, si_ca, si_kb,
+                                     bb_score, bsc, meta_params, pa);
+
+        run_moses(metapop, moses_params);
+        print_metapop(metapop, pa);
     }
     else {
-        metapop_moses_results_b(bases, tt, si_ca, si_kb, bb_score, bsc,
-                                opt_params, meta_params, moses_params, pa);
+        std::cerr << "Unknown optimization algo " << pa.opt_algo
+                  << ". Supported algorithms are un (for univariate),"
+                  << " sa (for star-shaped search) and hc (for local search)"
+                  << std::endl;
+        exit(1);
     }
 }
+
 
 } // ~namespace moses
 } // ~namespace opencog

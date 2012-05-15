@@ -159,12 +159,12 @@ struct metapopulation : public bscored_combo_tree_set
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        type(tt), simplify_candidate(&si_ca),
+        _bases(bases), type(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
-        init(bases);
+        init(_bases);
     }
 
     // Like above but using a single base, and a single reduction rule.
@@ -174,13 +174,13 @@ struct metapopulation : public bscored_combo_tree_set
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
+        _bases(std::vector<combo_tree>(1, base)),
         type(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
-        std::vector<combo_tree> bases(1, base);
-        init(bases);
+        init(_bases);
     }
 
     ~metapopulation()
@@ -188,6 +188,17 @@ struct metapopulation : public bscored_combo_tree_set
         if (_rep) delete _rep;
         if (_deme) delete _deme;
     }
+
+    /// Like a copy constructor, but down-casting the two scorers
+    /// to their base classes.
+    metapopulation<score_base, bscore_base, Optimization> downcase()
+    {
+        return metapopulation<score_base, bscore_base, Optimization>(
+            _bases, type, *simplify_candidate, *simplify_knob_building, 
+            (score_base&) score, (bscore_base&) bscore,
+            optimize, params);
+    }
+        
 
     /**
      * Return reference to the number of evaluations.
@@ -1234,15 +1245,19 @@ struct metapopulation : public bscored_combo_tree_set
                 output_bscore, output_only_bests);
     }
 
+    // Keep a copy around for downcase()
+    const std::vector<combo_tree>& _bases;
+
     combo::type_tree type;
     const reduct::rule* simplify_candidate; // to simplify candidates
     const reduct::rule* simplify_knob_building; // during knob building
     const Scoring& score;
     const BScoring& bscore; // behavioral score
     Optimization &optimize;
-    metapop_parameters params;
+    const metapop_parameters &params;
 
 protected:
+
     int _n_evals;
     int _evals_before_this_deme;
 
