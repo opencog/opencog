@@ -91,98 +91,9 @@ int moses_exec(int argc, char** argv);
 // the name of the supposed executable
 int moses_exec(const vector<string>& argv);
 
-// Parameters controlling output printing and display.
-struct metapop_moses_results_parameters
-{
-    metapop_moses_results_parameters(long _result_count,
-                                     bool _output_score,
-                                     bool _output_complexity,
-                                     bool _output_bscore,
-                                     bool _output_dominated,
-                                     bool _output_eval_number,
-                                     bool _output_with_labels,
-                                     const string& _opt_algo,
-                                     const vector<string>& _labels,
-                                     const string& _output_file,
-                                     bool _output_python) :
-        result_count(_result_count), output_score(_output_score),
-        output_complexity(_output_complexity),
-        output_bscore(_output_bscore),
-        output_dominated(_output_dominated),
-        output_eval_number(_output_eval_number),
-        output_with_labels(_output_with_labels),
-        opt_algo(_opt_algo),
-        labels(_labels),
-        output_file(_output_file),
-        output_python(_output_python) {}
-
-    long result_count;
-    bool output_score;
-    bool output_complexity;
-    bool output_bscore;
-    bool output_dominated;
-    bool output_eval_number;
-    bool output_with_labels;
-    string opt_algo;
-    const vector<string>& labels;
-    string output_file;
-    bool output_python;
-};
-
-/**
- * Run moses
- */
-template<typename Score, typename BScore, typename Optimization>
-void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
-                             const moses_parameters& moses_params)
-{
-    // Run moses, either on localhost, or distributed.
-    if (moses_params.only_local)
-        moses::moses(metapop, moses_params);
-    else
-        moses::distributed_moses(metapop, moses_params);
-}
-
-/**
- * Print metapopulation summary.
- */
-template<typename Score, typename BScore, typename Optimization>
-void print_metapop(metapopulation<Score, BScore, Optimization> &metapop,
-                             const metapop_moses_results_parameters& pa)
-{
-    stringstream ss;
-    metapop.ostream(ss,
-                    pa.result_count, pa.output_score,
-                    pa.output_complexity,
-                    pa.output_bscore,
-                    pa.output_dominated,
-                    pa.output_python); 
-
-    if (pa.output_eval_number)
-        ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
-    string res = (pa.output_with_labels && !pa.labels.empty()?
-                  ph2l(ss.str(), pa.labels) : ss.str());
-    if (pa.output_file.empty())
-        std::cout << res;
-    else {
-        ofstream of(pa.output_file.c_str());
-        of << res;
-        of.close();
-    }
-
-    // Log the best candidate
-    stringstream ssb;
-    metapop.ostream(ssb, 1, true, true);
-    string resb = (pa.output_with_labels && !pa.labels.empty()?
-                  ph2l(ssb.str(), pa.labels) : ssb.str());
-    if (resb.empty())
-        logger().info("No candidate is good enough to be returned. Yeah that's bad!");
-    else
-        logger().info("Best candidate (preceded by its score and complexity): %s", res.c_str());
-}
-
 /**
  * Wrap the metapopulation with caching scorers.
+ * (Perhaps this structure belongs in metapopulation.h?)
  */
 template<typename BScore, typename Optimization>
 metapopulation<score_base, bscore_base, Optimization>
@@ -233,6 +144,98 @@ cached_metapop(Optimization opt,
     metapopulation<bscore_based_score<BScore>, BScore, Optimization> metapop
         (bases, tt, si_ca, si_kb, bb_score, bsc, opt, meta_params);
     return metapop.downcase();
+}
+
+/**
+ * Run moses
+ * (This could be moved to moses.h, except for a header-include order
+ * clash with distributed_moses.)
+ */
+template<typename Score, typename BScore, typename Optimization>
+void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
+                             const moses_parameters& moses_params)
+{
+    // Run moses, either on localhost, or distributed.
+    if (moses_params.only_local)
+        moses::moses(metapop, moses_params);
+    else
+        moses::distributed_moses(metapop, moses_params);
+}
+
+/// Parameters controlling output printing and display.
+struct metapop_moses_results_parameters
+{
+    metapop_moses_results_parameters(long _result_count,
+                                     bool _output_score,
+                                     bool _output_complexity,
+                                     bool _output_bscore,
+                                     bool _output_dominated,
+                                     bool _output_eval_number,
+                                     bool _output_with_labels,
+                                     const string& _opt_algo,
+                                     const vector<string>& _labels,
+                                     const string& _output_file,
+                                     bool _output_python) :
+        result_count(_result_count), output_score(_output_score),
+        output_complexity(_output_complexity),
+        output_bscore(_output_bscore),
+        output_dominated(_output_dominated),
+        output_eval_number(_output_eval_number),
+        output_with_labels(_output_with_labels),
+        opt_algo(_opt_algo),
+        labels(_labels),
+        output_file(_output_file),
+        output_python(_output_python) {}
+
+    long result_count;
+    bool output_score;
+    bool output_complexity;
+    bool output_bscore;
+    bool output_dominated;
+    bool output_eval_number;
+    bool output_with_labels;
+    string opt_algo;
+    const vector<string>& labels;
+    string output_file;
+    bool output_python;
+};
+
+/**
+ * Print metapopulation summary.
+ */
+template<typename Score, typename BScore, typename Optimization>
+void print_metapop(metapopulation<Score, BScore, Optimization> &metapop,
+                             const metapop_moses_results_parameters& pa)
+{
+    stringstream ss;
+    metapop.ostream(ss,
+                    pa.result_count, pa.output_score,
+                    pa.output_complexity,
+                    pa.output_bscore,
+                    pa.output_dominated,
+                    pa.output_python); 
+
+    if (pa.output_eval_number)
+        ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
+    string res = (pa.output_with_labels && !pa.labels.empty()?
+                  ph2l(ss.str(), pa.labels) : ss.str());
+    if (pa.output_file.empty())
+        std::cout << res;
+    else {
+        ofstream of(pa.output_file.c_str());
+        of << res;
+        of.close();
+    }
+
+    // Log the best candidate
+    stringstream ssb;
+    metapop.ostream(ssb, 1, true, true);
+    string resb = (pa.output_with_labels && !pa.labels.empty()?
+                  ph2l(ssb.str(), pa.labels) : ssb.str());
+    if (resb.empty())
+        logger().info("No candidate is good enough to be returned. Yeah that's bad!");
+    else
+        logger().info("Best candidate (preceded by its score and complexity): %s", res.c_str());
 }
 
 /**
