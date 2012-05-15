@@ -863,16 +863,16 @@ int moses_exec(int argc, char** argv)
     if (output_with_labels && !input_data_files.empty())
         labels = readInputLabels(input_data_files.front(), target_column);
 
-    // Set metapop_moses_results_parameters.
-    metapop_moses_results_parameters mmr_pa(result_count,
-                                            output_score, output_complexity,
-                                            output_bscore,
-                                            output_dominated,
-                                            output_eval_number,
-                                            output_with_labels, opt_algo,
-                                            labels,
-                                            output_file,
-                                            output_python);
+    // Set metapop_print_parameters.
+    metapop_print_parameters mmr_pa(result_count,
+                                    output_score, output_complexity,
+                                    output_bscore,
+                                    output_dominated,
+                                    output_eval_number,
+                                    output_with_labels, opt_algo,
+                                    labels,
+                                    output_file,
+                                    output_python);
 
     // Continuous reduction rules used during search and representation
     // building.

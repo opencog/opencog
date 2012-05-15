@@ -219,19 +219,19 @@ void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
 }
 
 /// Parameters controlling output printing and display.
-struct metapop_moses_results_parameters
+struct metapop_print_parameters
 {
-    metapop_moses_results_parameters(long _result_count,
-                                     bool _output_score,
-                                     bool _output_complexity,
-                                     bool _output_bscore,
-                                     bool _output_dominated,
-                                     bool _output_eval_number,
-                                     bool _output_with_labels,
-                                     const string& _opt_algo,
-                                     const vector<string>& _labels,
-                                     const string& _output_file,
-                                     bool _output_python) :
+    metapop_print_parameters(long _result_count,
+                             bool _output_score,
+                             bool _output_complexity,
+                             bool _output_bscore,
+                             bool _output_dominated,
+                             bool _output_eval_number,
+                             bool _output_with_labels,
+                             const string& _opt_algo,
+                             const vector<string>& _labels,
+                             const string& _output_file,
+                             bool _output_python) :
         result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
@@ -259,9 +259,9 @@ struct metapop_moses_results_parameters
 /**
  * Print metapopulation summary.
  */
-template<typename Score, typename BScore, typename Optimization>
-void print_metapop(metapopulation<Score, BScore, Optimization> &metapop,
-                             const metapop_moses_results_parameters& pa)
+template<typename Optimization>
+void print_metapop(metapopulation<score_base, bscore_base, Optimization> &metapop,
+                             const metapop_print_parameters& pa)
 {
     stringstream ss;
     metapop.ostream(ss,
@@ -299,14 +299,14 @@ void print_metapop(metapopulation<Score, BScore, Optimization> &metapop,
  */
 template<typename BScore>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
-                           const opencog::combo::type_tree& tt,
+                           const opencog::combo::type_tree& type_sig,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            const BScore& bsc,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
-                           const metapop_moses_results_parameters& pa)
+                           const metapop_print_parameters& pa)
 {
     bscore_based_score<BScore> bb_score(bsc);
 
@@ -324,7 +324,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         hill_climbing climber(opt_params);
 
         cached_metapop<BScore, hill_climbing> capop
-           (climber, bases, tt, si_ca, si_kb, bb_score, bsc, meta_params);
+           (climber, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
         metapopulation<score_base, bscore_base, hill_climbing>&
             metapop = capop.get_base();
 
@@ -346,7 +346,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         simulated_annealing annealer(opt_params);
 
         cached_metapop<BScore, simulated_annealing> capop
-           (annealer, bases, tt, si_ca, si_kb, bb_score, bsc, meta_params);
+           (annealer, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
         metapopulation<score_base, bscore_base, simulated_annealing>&
             metapop = capop.get_base();
 
@@ -357,7 +357,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         univariate_optimization unopt(opt_params);
 
         cached_metapop<BScore, univariate_optimization> capop
-           (unopt, bases, tt, si_ca, si_kb, bb_score, bsc, meta_params);
+           (unopt, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
         metapopulation<score_base, bscore_base, univariate_optimization>&
             metapop = capop.get_base();
 
