@@ -102,11 +102,12 @@ cached_metapop(Optimization opt,
                const opencog::combo::type_tree& tt,
                const reduct::rule& si_ca,
                const reduct::rule& si_kb,
-               bscore_based_score<BScore> &bb_score,
+               const bscore_based_score<BScore> &bb_score,
                const BScore& bsc,
                const metapop_parameters& meta_params)
 {
     if (meta_params.enable_cache) {
+#if 0
         static const unsigned initial_cache_size = 1000000;
         
         if (meta_params.include_dominated) {
@@ -138,6 +139,7 @@ cached_metapop(Optimization opt,
                 (bases, tt, si_ca, si_kb, score_acache, bscore_acache, opt, meta_params);
             return metapop.downcase();
         }
+#endif
     }
 
     // No caching

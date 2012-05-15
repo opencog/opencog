@@ -92,24 +92,11 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
  * features, that is:
  * score = sum_f BScore(f),
  */
-/// @todo Inheriting that class from score_base raises a compile error
-/// because in moses_exec.h some code attempts to use BScore that does
-/// does not contain best_possible_bscore(). Specifically, the 
-/// BScoreACache and ScoreACache typedefs do this. However, this begs
-/// a question: why do we need a base class anyway, if we're not going
-/// to need it? ??
-/// The answer:
-/// First we do use it in other bscores such as
-/// multiscore_based_bscore.
-/// Second after fixing the cache API (that is having the function
-/// being cached being inherited by the cache that compile error will
-/// go away and we can have bscore_based_score inherit it)
-
 template<typename BScore>
-struct bscore_based_score : public unary_function<combo_tree, score_t>
+struct bscore_based_score : public score_base
 {
     bscore_based_score(const BScore& bs) : bscore(bs) {}
-    score_t operator()(const combo_tree& tr) const
+    virtual score_t operator()(const combo_tree& tr) const
     {
         try {
             behavioral_score bs = bscore(tr);
@@ -146,13 +133,13 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
 
     // Returns the best score reachable for that problem. Used as
     // termination condition.
-    score_t best_possible_score() const
+    virtual score_t best_possible_score() const
     {
         return boost::accumulate(bscore.best_possible_bscore(), 0.0);
     }
 
     // Return the minimum value considered for improvement
-    score_t min_improv() const
+    virtual score_t min_improv() const
     {
         return bscore.min_improv();
     }
