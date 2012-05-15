@@ -175,14 +175,14 @@ struct multiscore_based_bscore : public bscore_base
     multiscore_based_bscore(const ScoreSeq& scores_) : scores(scores_) {}
 
     // main operator
-    behavioral_score operator()(const combo_tree& tr) const
+    virtual behavioral_score operator()(const combo_tree& tr) const
     {
         behavioral_score bs(scores.size());
         boost::transform(scores, bs.begin(), [&](const Score& sc){return sc(tr);});
         return bs;
     }
 
-    behavioral_score best_possible_bscore() const
+    virtual behavioral_score best_possible_bscore() const
     {
         behavioral_score bs;
         foreach(const Score& sc, scores) {
@@ -192,7 +192,7 @@ struct multiscore_based_bscore : public bscore_base
     }
 
     // return the min of all min_improv
-    score_t min_improv() const
+    virtual score_t min_improv() const
     {
         score_t res = best_score;
         foreach(const Score& s, scores)
@@ -218,7 +218,7 @@ struct multibscore_based_bscore : public bscore_base
     multibscore_based_bscore(const BScoreSeq& bscores_) : bscores(bscores_) {}
 
     // main operator
-    behavioral_score operator()(const combo_tree& tr) const
+    virtual behavioral_score operator()(const combo_tree& tr) const
     {
         behavioral_score bs;
         foreach(const BScore& bsc, bscores)
@@ -226,7 +226,7 @@ struct multibscore_based_bscore : public bscore_base
         return bs;
     }
 
-    behavioral_score best_possible_bscore() const
+    virtual behavioral_score best_possible_bscore() const
     {
         behavioral_score bs;
         foreach(const BScore& bsc, bscores)
@@ -235,7 +235,7 @@ struct multibscore_based_bscore : public bscore_base
     }
 
     // return the min of all min_improv
-    score_t min_improv() const
+    virtual score_t min_improv() const
     {
         score_t res = best_score;
         foreach(const BScore& bs, bscores)
@@ -259,11 +259,11 @@ struct logical_bscore : public bscore_base
     logical_bscore(const combo_tree& tr, int a)
             : target(tr, a), arity(a) {}
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    virtual behavioral_score operator()(const combo_tree& tr) const;
 
-    behavioral_score best_possible_bscore() const;
+    virtual behavioral_score best_possible_bscore() const;
 
-    score_t min_improv() const;
+    virtual score_t min_improv() const;
 
     complete_truth_table target;
     int arity;
@@ -322,13 +322,13 @@ struct precision_bscore : public bscore_base
                      bool positive = true,
                      bool worst_norm = false);
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    virtual behavioral_score operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
-    behavioral_score best_possible_bscore() const;
+    virtual behavioral_score best_possible_bscore() const;
 
-    score_t min_improv() const;
+    virtual score_t min_improv() const;
 
     CTable ctable;
     unsigned ctable_usize;                  // uncompressed size of ctable
@@ -370,14 +370,14 @@ struct discretize_contin_bscore : public bscore_base
     //                          bool weighted_average,
     //                          float alphabet_size, float p);
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    virtual behavioral_score operator()(const combo_tree& tr) const;
 
     // The best possible bscore is a vector of zeros. That's probably
     // not quite true, because there could be duplicated inputs, but
     // that's acceptable for now.
-    behavioral_score best_possible_bscore() const;
+    virtual behavioral_score best_possible_bscore() const;
 
-    score_t min_improv() const;
+    virtual score_t min_improv() const;
     
     OTable target;
     ITable cit;
@@ -490,14 +490,14 @@ struct contin_bscore : public bscore_base
         init(alphabet_size, stdev, eft);
     }
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    virtual behavioral_score operator()(const combo_tree& tr) const;
 
     // The best possible bscore is a vector of zeros. That's probably
     // not quite true, because there could be duplicated inputs, but
     // that's acceptable for now.
-    behavioral_score best_possible_bscore() const;
+    virtual behavioral_score best_possible_bscore() const;
 
-    score_t min_improv() const;
+    virtual score_t min_improv() const;
     
     OTable target;
     ITable cti;
@@ -550,13 +550,13 @@ struct ctruth_table_bscore : public bscore_base
     }
     ctruth_table_bscore(const CTable& _ctt, float alphabet_size, float p);
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    virtual behavioral_score operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
-    behavioral_score best_possible_bscore() const;
+    virtual behavioral_score best_possible_bscore() const;
 
-    score_t min_improv() const;
+    virtual score_t min_improv() const;
 
 private:
     void set_complexity_coef(float alphabet_size, float p);
@@ -592,13 +592,13 @@ struct enum_table_bscore : public bscore_base
     }
     enum_table_bscore(const CTable& _ctt, float alphabet_size, float p);
 
-    behavioral_score operator()(const combo_tree& tr) const;
+    virtual behavioral_score operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
-    behavioral_score best_possible_bscore() const;
+    virtual behavioral_score best_possible_bscore() const;
 
-    score_t min_improv() const;
+    virtual score_t min_improv() const;
 
 private:
     void set_complexity_coef(float alphabet_size, float p);
@@ -647,13 +647,14 @@ struct interesting_predicate_bscore : public bscore_base
                                  bool positive = true,
                                  bool abs_skewness = false,
                                  bool decompose_kld = false);
-    behavioral_score operator()(const combo_tree& tr) const;
+
+    virtual behavioral_score operator()(const combo_tree& tr) const;
 
     // the KLD has no upper boundary so the best of possible score is
     // the maximum value a behavioral_score can represent
-    behavioral_score best_possible_bscore() const;
+    virtual behavioral_score best_possible_bscore() const;
 
-    score_t min_improv() const;
+    virtual score_t min_improv() const;
 
     counter_t counter; // counter of the unconditioned distribution
     pdf_t pdf;     // pdf of the unconditioned distribution
