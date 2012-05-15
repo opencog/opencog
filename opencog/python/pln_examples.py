@@ -12,6 +12,7 @@ future_fc/7_test.conf
 future_fc/InheritanceOsamaAbu_test.conf
 future_fc/6_test.conf
 future_fc/InheritanceMuhammadTerrorist_test.conf
+psi/water_test.conf
 psi/psi_planning_one_step_test.conf
 psi/psi_planning_two_step_test.conf
 # The obsolete agisim tests are known not to work.
@@ -47,7 +48,7 @@ bc/plus_test.conf
 bc/new/pathfinding_test.conf
 ''')
 
-files_list = '''bc/new/pathfinding_test.conf'''
+files_list = '''psi/water_test.conf'''
 
 #files_list = '''bc/plus_test.conf'''
 #files_list ='''
@@ -75,6 +76,8 @@ def run_pln_example(a, f):
     a.clear()
     
     testdir = '../tests/reasoning/pln/targets/'
+    datadirs = ['../tests/reasoning/pln/scm/',
+                '../opencog/']
     fname = testdir+f
     config = ConfigParser.ConfigParser()
     read_files = config.read(fname)
@@ -87,14 +90,21 @@ def run_pln_example(a, f):
 
     print f
     
-    #kf = 'tests/reasoning/pln/json/'+get('load')+'.json'
-    #util.load_atomspace_json(a,kf)    
-    #util.load_atomspace_json(a,kf)
-    #json_target = '{"truthvalue": {"simple": {"count": 0, "str": 0.0}}, "outgoing": [{"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [{"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [], "type": "ConceptNode", "name": "toy_6"}, {"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [], "type": "ConceptNode", "name": "toy"}], "type": "InheritanceLink", "name": ""}, {"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [{"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [], "type": "ConceptNode", "name": "red_bucket_6"}, {"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [], "type": "ConceptNode", "name": "bucket"}], "type": "InheritanceLink", "name": ""}, {"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [{"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [], "type": "PredicateNode", "name": "placed_under"}, {"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [{"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [], "type": "ConceptNode", "name": "toy_6"}, {"truthvalue": {"simple": {"count": 0, "str": 1.0}}, "outgoing": [], "type": "ConceptNode", "name": "red_bucket_6"}], "type": "ListLink", "name": ""}], "type": "EvaluationLink", "name": ""}], "type": "AndLink", "name": ""}'
-    #target = util._atom_from_json(a,json_target)
-    
-    kf = '../tests/reasoning/pln/scm/'+get('load')+'.scm'
-    scheme_wrapper.load_scm(a, kf)
+    def load_axioms(fname):
+        for d in datadirs:
+            kf = d+fname+'.scm'
+            try:
+                tmp = open(kf,'r')
+                scheme_wrapper.load_scm(a, kf)
+                print kf
+                return
+            except IOError:
+                continue
+        raise IOError("missing data file: "+kf)
+        
+    data_files = get('load').replace(' ','').split(',')
+    for fname in data_files:
+        load_axioms(fname)
     scm_target = '(cog-handle %s)' % (get('target'),)
     print scm_target
     handle_str = scheme_wrapper.scheme_eval(scm_target)
@@ -103,17 +113,18 @@ def run_pln_example(a, f):
     except ValueError:
         print handle_str
         raise Exception("Scheme error in target")
+
+    nsteps = int(get('max_steps'))
     
     target = Atom(Handle(h), a)
     
-    print kf
     print target
     
     import logic
     import tree
     c = logic.Chainer(a)
     target_tr = tree.tree_from_atom(target)
-    res = c.bc(target_tr)
+    res = c.bc(target_tr, nsteps)
     
     if len(res):
         print 'PASSED'

@@ -1,4 +1,7 @@
-from atomspace_remote import count_to_confidence, confidence_to_count
+try:
+    from opencog.atomspace import count_to_confidence, confidence_to_count
+except ImportError:
+    from atomspace_remote import count_to_confidence, confidence_to_count
 
 import operator, functools, itertools
 

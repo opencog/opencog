@@ -53,43 +53,43 @@ def rules(a, deduction_types):
     #                  match=match_axiom)
     #rules.append(r)
 
-    #r = Rule(T('EvaluationLink',
-    #           a.add(t.PredicateNode,'+'),
-    #           T('ListLink',
-    #             Var(1),
-    #             Var(2),
-    #             Var(3))),
-    #         [],
-    #         name='PredicateEvaluation',
-    #         match=match_predicate)
-    #rules.append(r)
-    #
-    ## Deduction
-    #for type in deduction_types:
-    #    rules.append(Rule(T(type, 1,3), 
-    #                                 [T(type, 1, 2),
-    #                                  T(type, 2, 3), 
-    #                                  Var(1),
-    #                                  Var(2), 
-    #                                  Var(3)],
-    #                                name='Deduction', 
-    #                                formula = formulas.deductionSimpleFormula))
-    #
+    r = Rule(T('EvaluationLink',
+               a.add(t.PredicateNode,'+'),
+               T('ListLink',
+                 Var(1),
+                 Var(2),
+                 Var(3))),
+             [],
+             name='PredicateEvaluation',
+             match=match_predicate)
+    rules.append(r)
+    
+    # Deduction
+    for type in deduction_types:
+        rules.append(Rule(T(type, 1,3), 
+                                     [T(type, 1, 2),
+                                      T(type, 2, 3), 
+                                      Var(1),
+                                      Var(2), 
+                                      Var(3)],
+                                    name='Deduction', 
+                                    formula = formulas.deductionSimpleFormula))
+    
     # Inversion
-    #for type in deduction_types:
-    #    rules.append(Rule( T(type, 2, 1), 
-    #                                 [T(type, 1, 2),
-    #                                  Var(1),
-    #                                  Var(2)], 
-    #                                 name='Inversion', 
-    #                                 formula = formulas.inversionFormula))
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1), 
+                                     [T(type, 1, 2),
+                                      Var(1),
+                                      Var(2)], 
+                                     name='Inversion', 
+                                     formula = formulas.inversionFormula))
     
     # ModusPonens
-    for type in ['ImplicationLink']:
+    for ty in ['ImplicationLink', 'PredictiveImplicationLink']:
         rules.append(Rule(Var(2), 
-                                     [T(type, 1, 2),
+                                     [T(ty, 1, 2),
                                       Var(1) ], 
-                                      name='ModusPonens', 
+                                      name='ModusPonens '+ty,
                                       formula = formulas.modusPonensFormula))
 
 #       # MP for AndLink as a premise
@@ -131,25 +131,25 @@ def rules(a, deduction_types):
                            type[:-4], 
                            formula = formulas.andSymmetricFormula))
     
-    #type = 'OrLink'
-    #for size in xrange(2):
-    #    args = [new_var() for i in xrange(size+1)]
-    #    rules.append(Rule(T(type, args),
-    #                       args,
-    #                       type[:-4], 
-    #                       formula = formulas.orFormula))
-    #
-    ## Adding a NOT
-    #rules.append(Rule(T('NotLink', 1),
-    #                   [ Var(1) ],
-    #                   name = 'Not', 
-    #                   formula = formulas.notFormula))
-    #
-    ## Link conversion
-    #rules.append(Rule(T('InheritanceLink', 1, 2),
-    #                   [ T('SubsetLink', 1, 2) ],
-    #                   name = 'SubsetLink=>InheritanceLink', 
-    #                   formula = formulas.ext2InhFormula))
+    type = 'OrLink'
+    for size in xrange(2):
+        args = [new_var() for i in xrange(size+1)]
+        rules.append(Rule(T(type, args),
+                           args,
+                           type[:-4], 
+                           formula = formulas.orFormula))
+    
+    # Adding a NOT
+    rules.append(Rule(T('NotLink', 1),
+                       [ Var(1) ],
+                       name = 'Not', 
+                       formula = formulas.notFormula))
+    
+    # Link conversion
+    rules.append(Rule(T('InheritanceLink', 1, 2),
+                       [ T('SubsetLink', 1, 2) ],
+                       name = 'SubsetLink=>InheritanceLink', 
+                       formula = formulas.ext2InhFormula))
 
     # In planning, assume that an ExecutionLink (action) will be performed
     r = Rule(T('ExecutionLink', 1, 2),

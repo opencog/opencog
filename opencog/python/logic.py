@@ -71,7 +71,7 @@ class Chainer:
         #profiler.add_function(self.bc)
 
     #@profile
-    def bc(self, target):
+    def bc(self, target, nsteps = 2000):
         #import prof3d; prof3d.profile_me()
         
         #try:
@@ -95,8 +95,9 @@ class Chainer:
         self.viz.outputTarget(target, None, 0, 'TARGET')
 
         start = time()
-        while self.bc_later and not self.results:
+        while self.bc_later and not self.results and nsteps > 0:
             self.bc_step()
+            nsteps -= 1
 
             msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
             log.info(format_log(msg))
@@ -278,7 +279,7 @@ class Chainer:
         itself is responsible for finding specific enough apps.'''
         input_tvs = [self.get_tvs(input) for input in app.goals]
         res = all(tvs != [] for tvs in input_tvs)
-        print '########check_premises',repr(app),res
+        #print '########check_premises',repr(app),res
         return res
     
     def compute_and_add_tv(self, app):
@@ -287,7 +288,7 @@ class Chainer:
         input_tvs = [self.get_tvs(g) for g in app.goals]
         if all(input_tvs):
             input_tvs = [tvs[0] for tvs in input_tvs]
-            input_tvs = [(tv.mean, tv.count) for tv in input_tvs]
+            input_tvs = [(float(tv.mean), float(tv.count)) for tv in input_tvs]
             tv_tuple = app.formula(input_tvs,  None)
             app.tv = TruthValue(tv_tuple[0], tv_tuple[1])
             #atom_from_tree(app.head, self.space).tv = app.tv            
@@ -384,7 +385,7 @@ class Chainer:
     def propogate_result(self, orig_app):
         # app was already precise enough to look up this axiom exactly.
         # Attempt to apply the app using the new TV for the premise
-        print(format_log('propogate_result',repr(orig_app)))
+        log.info(format_log('propogate_result',repr(orig_app)))
         app = orig_app
         got_result = self.check_premises(app)
         if got_result:
@@ -584,7 +585,7 @@ class Chainer:
             self.add_rule(r)
 
     def extract_plan(self, trail):
-        # The list of actions in an ImplicationLink. Sometimes there are none,
+        # The list of actions in a PredictiveImplicationLink. Sometimes there are none,
         # sometimes one; if there is a SequentialAndLink then it can be more than one.
         def actions(proofnode):            
             target = proofnode.op
@@ -730,7 +731,7 @@ class Chainer:
         
         # TODO will return very low, uniform scores for anything other
         # than pathfinding!
-        print '>>>',-worst_distance, expr
+        #print '>>>',-worst_distance, expr
         return -worst_distance
 
     def get_fittest(self, queue):
@@ -746,7 +747,7 @@ class Chainer:
         # PDNs with the same score will be explored in the order they were added,
         # ie breadth-first search
         best = max(queue, key = get_score)
-        print best
+        #print best
         queue.remove(best)
         
         return best
