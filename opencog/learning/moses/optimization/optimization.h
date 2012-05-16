@@ -236,16 +236,33 @@ private:
     score_t min_score_improvement;
 };
 
+// Enable some additional algorithm-dependent statistics gathering.
+// Turned off by default because it's a CPU-waster.
+// #define GATHER_STATS 1
+
 /// Statistics obtained during optimization run, useful for tuning.
 struct optim_stats
 {
     optim_stats()
-        : nsteps(0), deme_count(0), total_steps(0), total_evals(0), over_budget(false) {}
+        : nsteps(0), deme_count(0), total_steps(0), total_evals(0), 
+          over_budget(false)
+#ifdef GATHER_STATS
+          , hiscore(0.0), hicount(0.0)
+#endif
+    {}
     unsigned nsteps;
     unsigned deme_count;
     unsigned total_steps;
     unsigned total_evals;
     bool over_budget;
+
+    // Additional stats.
+#ifdef GATHER_STATS
+    vector<double> scores;
+    vector<double> counts;
+    double hiscore;
+    double hicount;
+#endif
 };
 
 /// Base class for all optimizers.
@@ -389,17 +406,12 @@ struct univariate_optimization : optim_base, optim_stats
  * with a deceptive scoring function (e.g. polynomial factoring, -Hsr)
  * seem to work better with -L1 -T1 -I0.
  */
-// #define GATHER_STATS 1
 struct hill_climbing : optim_base, optim_stats
 {
     hill_climbing(const optim_parameters& op = optim_parameters())
         : opt_params(op)
     {
         hc_params = opt_params.hc_params;
-#ifdef GATHER_STATS
-        hiscore = 0.0;
-        hicount = 0.0;
-#endif
     }
 
     /**
@@ -994,12 +1006,6 @@ struct hill_climbing : optim_base, optim_stats
 
     optim_parameters opt_params;
     hc_parameters hc_params;
-#ifdef GATHER_STATS
-    vector<double> scores;
-    vector<double> counts;
-    double hiscore;
-    double hicount;
-#endif
 };
 
 /////////////////////////

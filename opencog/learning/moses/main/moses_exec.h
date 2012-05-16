@@ -292,6 +292,18 @@ void print_metapop(metapopulation<score_base, bscore_base, Optimization> &metapo
         logger().info("No candidate is good enough to be returned. Yeah that's bad!");
     else
         logger().info("Best candidate (preceded by its score and complexity): %s", res.c_str());
+
+#ifdef GATHER_STATS
+    metapop.optimize.hiscore /= metapop.optimize.hicount;
+    for (unsigned i=0; i< metapop.optimize.scores.size(); i++) {
+        metapop.optimize.scores[i] /= metapop.optimize.counts[i];
+        logger().info() << "Avg Scores: "
+            << i << "\t"
+            << metapop.optimize.hiscore << "\t"
+            << metapop.optimize.counts[i] << "\t"
+            << metapop.optimize.scores[i];
+    }
+#endif
 }
 
 /**
@@ -330,17 +342,6 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
 
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
-#ifdef GATHER_STATS
-        climber.hiscore /= climber.hicount;
-        for (unsigned i=0; i< climber.scores.size(); i++) {
-            climber.scores[i] /= climber.counts[i];
-            logger().info() << "Avg Scores: "
-                << i << "\t"
-                << climber.hiscore << "\t"
-                << climber.counts[i] << "\t"
-                << climber.scores[i];
-        }
-#endif
     }
     else if (pa.opt_algo == sa) { // simulated annealing
         simulated_annealing annealer(opt_params);
