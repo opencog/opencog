@@ -340,40 +340,81 @@ void print_metapop(metapopulation<score_base, bscore_base, Optimization> &metapo
 }
 
 /**
- * Create metapopulation, run moses, print results.
+ * Create metapopulation, run moses, return the metapopulation
  */
+template<typename BScore>
+struct moses_algo
+{
+    moses_algo(const std::vector<combo_tree>& bases,
+               const opencog::combo::type_tree& type_sig,
+               const reduct::rule& si_ca,
+               const reduct::rule& si_kb,
+               const BScore& bsc,
+               const optim_parameters& op,
+               const metapop_parameters& meta_params,
+               const moses_parameters& mp)
+        :_opt_params(op), _moses_params(mp)
+    {
+        bscore_based_score<BScore> bb_score(bsc);
+
+        // update terminate_if_gte and max_score criteria
+        score_t bps = bb_score.best_possible_score();
+        score_t target_score = std::min(_moses_params.max_score, bps);
+        _opt_params.terminate_if_gte = target_score;
+
+        // update minimum score improvement
+        _opt_params.set_min_score_improv(bb_score.min_improv());
+        _moses_params.max_score = target_score;
+        logger().info("Target score = %f", target_score);
+
+        // Pick out one of the optimization algos.
+        _algo = new optim_algo(_opt_params);
+
+        _capop = new cached_metapop<BScore>
+           ((optim_base &)*_algo, bases, type_sig, 
+            si_ca, si_kb, bb_score, bsc, meta_params);
+
+        _metapop = &_capop->get_base();
+    }
+
+    ~moses_algo()
+    {
+        delete _metapop;
+        delete _capop;
+        delete _algo;
+    }
+
+    metapopulation<score_base, bscore_base, optim_base>& run()
+    {
+        run_moses(*_metapop, _moses_params);
+        return *_metapop;
+    }
+
+    private:
+        optim_parameters _opt_params;
+        moses_parameters _moses_params;
+        optim_algo *_algo;
+        cached_metapop<BScore>* _capop;
+        metapopulation<score_base, bscore_base, optim_base>* _metapop;
+};
+
 template<typename BScore>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const opencog::combo::type_tree& type_sig,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            const BScore& bsc,
-                           optim_parameters opt_params,
+                           const optim_parameters &opt_params,
                            const metapop_parameters& meta_params,
-                           moses_parameters moses_params,
+                           const moses_parameters &moses_params,
                            const metapop_print_parameters& pa)
 {
-    bscore_based_score<BScore> bb_score(bsc);
+    moses_algo<BScore> moses(bases, type_sig, si_ca, si_kb, bsc,
+        opt_params, meta_params, moses_params);
 
-    // update terminate_if_gte and max_score criteria
-    score_t bps = bb_score.best_possible_score();
-    score_t target_score = std::min(moses_params.max_score, bps);
-    opt_params.terminate_if_gte = target_score;
+    metapopulation<score_base, bscore_base, optim_base>& metapop = 
+        moses.run();
 
-    // update minimum score improvement
-    opt_params.set_min_score_improv(bb_score.min_improv());
-    moses_params.max_score = target_score;
-    logger().info("Target score = %f", target_score);
-
-    // Pick out one of the optimization aglos.
-    optim_algo algo(opt_params);
-
-    cached_metapop<BScore> capop
-       (algo, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
-    metapopulation<score_base, bscore_base, optim_base>&
-        metapop = capop.get_base();
-
-    run_moses(metapop, moses_params);
     print_metapop(metapop, pa);
 }
 
