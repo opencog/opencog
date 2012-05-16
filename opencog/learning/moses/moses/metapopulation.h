@@ -133,6 +133,7 @@ struct metapopulation : public bscored_combo_tree_set
     void init(const std::vector<combo_tree>& exemplars)
     {
         metapop_candidates candidates;
+
         foreach (const combo_tree& base, exemplars) {
             combo_tree si_base(base);
             (*simplify_candidate)(si_base);
@@ -180,7 +181,7 @@ struct metapopulation : public bscored_combo_tree_set
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        _bases(std::vector<combo_tree>(1, base)),
+        _uno(std::vector<combo_tree>(1, base)), _bases(_uno),
         _type_sig(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
@@ -1252,6 +1253,7 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     // Keep a copy around for downcase()
+    std::vector<combo_tree> _uno;
     const std::vector<combo_tree>& _bases;
 
     const combo::type_tree& _type_sig;    // type signature of the exemplar
