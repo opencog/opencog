@@ -863,16 +863,16 @@ int moses_exec(int argc, char** argv)
     if (output_with_labels && !input_data_files.empty())
         labels = readInputLabels(input_data_files.front(), target_column);
 
-    // Set metapop_moses_results_parameters.
-    metapop_moses_results_parameters mmr_pa(result_count,
-                                            output_score, output_complexity,
-                                            output_bscore,
-                                            output_dominated,
-                                            output_eval_number,
-                                            output_with_labels, opt_algo,
-                                            labels,
-                                            output_file,
-                                            output_python);
+    // Set metapop_print_parameters.
+    metapop_print_parameters mmr_pa(result_count,
+                                    output_score, output_complexity,
+                                    output_bscore,
+                                    output_dominated,
+                                    output_eval_number,
+                                    output_with_labels, opt_algo,
+                                    labels,
+                                    output_file,
+                                    output_python);
 
     // Continuous reduction rules used during search and representation
     // building.
@@ -1042,7 +1042,7 @@ int moses_exec(int argc, char** argv)
             type_tree tt = gen_signature(id::boolean_type, arity);
 
             // determine the default exemplar to start with
-            if(exemplars.empty())
+            if (exemplars.empty())
                 exemplars.push_back(type_to_exemplar(id::boolean_type));
 
             int as = alphabet_size(tt, ignore_ops);
@@ -1070,7 +1070,8 @@ int moses_exec(int argc, char** argv)
         else if (problem == ann_it)
         {
 
-            // if no exemplar has been provided in option insert the default one
+            // If no exemplar has been provided in the options,
+            // insert the default.
             if (exemplars.empty()) {
                 exemplars.push_back(ann_exemplar(arity));
             }
@@ -1112,7 +1113,8 @@ int moses_exec(int argc, char** argv)
 
             type_node output_type = get_type_node(type_tree_output_type_tree(tt));
 
-            // If no exemplar has been provided in option, use the default one
+            // If no exemplar has been provided in the options, use the
+            // default one.
             if (exemplars.empty()) {
                 exemplars.push_back(type_to_exemplar(output_type));
             }
@@ -1174,7 +1176,8 @@ int moses_exec(int argc, char** argv)
             type_tree tt = gen_signature(id::ann_type, 0);
             int as = alphabet_size(tt, ignore_ops);
 
-            // if no exemplar has been provided in option use the default one
+            // If no exemplar has been provided in the options,
+            // use the default.
             if (exemplars.empty()) {
                 exemplars.push_back(ann_exemplar(arity));
             }
@@ -1200,8 +1203,8 @@ int moses_exec(int argc, char** argv)
     {
         even_parity func;
 
-        // if no exemplar has been provided in option use the default
-        // contin_type exemplar (and)
+        // If no exemplar has been provided in the options, use the
+        // default boolean_type exemplar (which is 'and').
         if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
@@ -1223,8 +1226,8 @@ int moses_exec(int argc, char** argv)
         // @todo: for the moment occam's razor and partial truth table are ignored
         disjunction func;
 
-        // if no exemplar has been provided in option use the default
-        // contin_type exemplar (and)
+        // If no exemplar has been provided in the options, use the
+        // default boolean_type exemplar (which is 'and').
         if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
@@ -1246,8 +1249,8 @@ int moses_exec(int argc, char** argv)
         // arity = problem_size + 1<<problem_size
         multiplex func(problem_size);
 
-        // if no exemplar has been provided in option use the default
-        // contin_type exemplar (and)
+        // If no exemplar has been provided in the options, use the
+        // default boolean_type exemplar (which is 'and').
         if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
@@ -1268,8 +1271,9 @@ int moses_exec(int argc, char** argv)
     // arithmetical notation).
     else if (problem == sr)
     { // simple regression of f(x)_o = sum_{i={1,o}} x^i
-        // if no exemplar has been provided in option use the default
-        // contin_type exemplar (+)
+
+        // If no exemplar has been provided in the options, use the
+        // default contin_type exemplar (+)
         if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::contin_type));
         }

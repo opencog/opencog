@@ -91,20 +91,36 @@ int moses_exec(int argc, char** argv);
 // the name of the supposed executable
 int moses_exec(const vector<string>& argv);
 
-// Parameters controlling output printing and display.
-struct metapop_moses_results_parameters
+/**
+ * Run moses
+ * (This could be moved to moses.h, except for a header-include order
+ * clash with distributed_moses.)
+ */
+template<typename Score, typename BScore, typename Optimization>
+void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
+                             const moses_parameters& moses_params)
 {
-    metapop_moses_results_parameters(long _result_count,
-                                     bool _output_score,
-                                     bool _output_complexity,
-                                     bool _output_bscore,
-                                     bool _output_dominated,
-                                     bool _output_eval_number,
-                                     bool _output_with_labels,
-                                     const string& _opt_algo,
-                                     const vector<string>& _labels,
-                                     const string& _output_file,
-                                     bool _output_python) :
+    // Run moses, either on localhost, or distributed.
+    if (moses_params.only_local)
+        moses::moses(metapop, moses_params);
+    else
+        moses::distributed_moses(metapop, moses_params);
+}
+
+/// Parameters controlling output printing and display.
+struct metapop_print_parameters
+{
+    metapop_print_parameters(long _result_count,
+                             bool _output_score,
+                             bool _output_complexity,
+                             bool _output_bscore,
+                             bool _output_dominated,
+                             bool _output_eval_number,
+                             bool _output_with_labels,
+                             const string& _opt_algo,
+                             const vector<string>& _labels,
+                             const string& _output_file,
+                             bool _output_python) :
         result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
@@ -130,25 +146,11 @@ struct metapop_moses_results_parameters
 };
 
 /**
- * Run moses
- */
-template<typename Score, typename BScore, typename Optimization>
-void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
-                             const moses_parameters& moses_params)
-{
-    // Run moses, either on localhost, or distributed.
-    if (moses_params.only_local)
-        moses::moses(metapop, moses_params);
-    else
-        moses::distributed_moses(metapop, moses_params);
-}
-
-/**
  * Print metapopulation summary.
  */
 template<typename Score, typename BScore, typename Optimization>
 void print_metapop(metapopulation<Score, BScore, Optimization> &metapop,
-                             const metapop_moses_results_parameters& pa)
+                             const metapop_print_parameters& pa)
 {
     stringstream ss;
     metapop.ostream(ss,
@@ -194,7 +196,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const optim_parameters& opt_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
-                             const metapop_moses_results_parameters& pa)
+                             const metapop_print_parameters& pa)
 {
     if (pa.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
@@ -248,14 +250,14 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
  */
 template<typename BScore>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
-                           const opencog::combo::type_tree& tt,
+                           const opencog::combo::type_tree& type_sig,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            const BScore& bsc,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
-                           const metapop_moses_results_parameters& pa)
+                           const metapop_print_parameters& pa)
 {
     bscore_based_score<BScore> bb_score(bsc);
 
@@ -277,7 +279,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             Score score(bsc);
             prr_cache_threaded<Score> score_cache(initial_cache_size, score);
             ScoreACache score_acache(score_cache, "scores");
-            metapop_moses_results_b(bases, tt, si_ca, si_kb,
+            metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                     score_acache, bsc,
                                     opt_params, meta_params, moses_params, pa);
         }
@@ -293,13 +295,13 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             Score score(bscore_acache);
             prr_cache_threaded<Score> score_cache(initial_cache_size, score);
             ScoreACache score_acache(score_cache, "scores");
-            metapop_moses_results_b(bases, tt, si_ca, si_kb,
+            metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                     score_acache, bscore_acache,
                                     opt_params, meta_params, moses_params, pa);
         }
     }
     else {
-        metapop_moses_results_b(bases, tt, si_ca, si_kb, bb_score, bsc,
+        metapop_moses_results_b(bases, type_sig, si_ca, si_kb, bb_score, bsc,
                                 opt_params, meta_params, moses_params, pa);
     }
 }
