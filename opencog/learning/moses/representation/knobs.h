@@ -368,12 +368,7 @@ struct logical_subtree_knob : public discrete_knob<3>
             : candidate.append_child(parent_dst, v);
         };
 
-        // XXX new_src may be returned un-initialized, and therefore
-        // may crash if used. Must call tree::is_valid() to determine
-        // if its good, before using it.  This seems sloppy; I think
-        // setting explcitly to something.end() would be cleaner.
-        // FIXME someday.
-        pre_it new_src;
+        pre_it new_src = parent_dst.end();
         if (idx == negated)
             parent_dst = append_child(parent_dst, id::logical_not);
         if (idx != absent) {
