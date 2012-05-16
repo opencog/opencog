@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/time.cc
+ * opencog/util/octime.cc
  *
  * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved
