@@ -126,14 +126,21 @@ struct hc_parameters
     double fraction_of_remaining;
 };
 
+// optimization algorithms
+static const std::string un("un"); // univariate
+static const std::string sa("sa"); // star-shaped search
+static const std::string hc("hc"); // local search
+
 // Parameters used mostly for EDA algorithms but also possibly by
 // other algo
 struct optim_parameters
 {
-    optim_parameters(double _pop_size_ratio = 20,
+    optim_parameters(const string& _opt_algo = hc,
+                     double _pop_size_ratio = 20,
                      score_t _terminate_if_gte = 0,
                      size_t _max_dist = 4,
                      score_t _min_score_improv = 0.5) :
+        opt_algo(_opt_algo),
         term_total(1.0),
         term_improv(1.0),
 
@@ -199,6 +206,8 @@ struct optim_parameters
     {
         return min_score_improvement;
     }
+
+    string opt_algo;
 
     // optimization is terminated after term_total*n generations, or
     // term_improv*sqrt(n/w) consecutive generations with no
