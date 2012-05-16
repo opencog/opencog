@@ -671,19 +671,25 @@ private:
 };
 
 // For testing only
-struct dummy_score : public unary_function<combo_tree, score_t>
+struct dummy_score : public score_base
 {
-    score_t operator()(const combo_tree& tr) const {
+    virtual score_t operator()(const combo_tree& tr) const {
         return score_t();
     }
+    virtual score_t best_possible_score() const { return 0; }
+    virtual score_t min_improv() const { return 0; }
 };
 
 // For testing only
-struct dummy_bscore : public unary_function<combo_tree, behavioral_score>
+struct dummy_bscore : public bscore_base
 {
     behavioral_score operator()(const combo_tree& tr) const {
         return behavioral_score();
     }
+    virtual behavioral_score best_possible_bscore() const {
+        return behavioral_score();
+    }
+    virtual score_t min_improv() const { return 0; }
 };
 
 /**
