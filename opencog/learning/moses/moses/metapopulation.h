@@ -144,13 +144,15 @@ struct metapopulation : public bscored_combo_tree_set
     /**
      *  Constuctor for the class metapopulation
      *
-     * @param bases   exemplars used to initialize the metapopulation
-     * @param tt      type of expression to be learned
-     * @param si      reduct rule for reducting
-     * @param sc      scoring function for scoring
-     * @param bsc     behavior scoring function
-     * @param opt     optimization should be providing for the learning
-     * @param pa      parameter for selecting the deme
+     * @param bases   Exemplars used to initialize the metapopulation
+     * @param tt      Type signature of expression to be learned.
+     *                That is, the expression must have this signature,
+     *                relating the argument variables, and the output type.
+     * @param si      Reduct rule for reducting
+     * @param sc      Scoring function for scoring
+     * @param bsc     Behavior scoring function
+     * @param opt     Optimization should be providing for the learning
+     * @param pa      Parameter for selecting the deme
      */
     metapopulation(const std::vector<combo_tree>& bases,
                    const type_tree& tt,
@@ -159,7 +161,7 @@ struct metapopulation : public bscored_combo_tree_set
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        type(tt), simplify_candidate(&si_ca),
+        _type_sig(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
@@ -174,7 +176,7 @@ struct metapopulation : public bscored_combo_tree_set
                    const Scoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        type(tt), simplify_candidate(&si),
+        _type_sig(tt), simplify_candidate(&si),
         simplify_knob_building(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
@@ -525,7 +527,7 @@ struct metapopulation : public bscored_combo_tree_set
             // creating a field set, and a mapping from field set to knobs.
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
-                                      _exemplar->first, type,
+                                      _exemplar->first, _type_sig,
                                       ignore_ops, perceptions, actions);
 
             // If the representation is empty, try the next
@@ -1234,7 +1236,7 @@ struct metapopulation : public bscored_combo_tree_set
                 output_bscore, output_only_bests);
     }
 
-    combo::type_tree type;
+    const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule* simplify_candidate; // to simplify candidates
     const reduct::rule* simplify_knob_building; // during knob building
     const Scoring& score;
