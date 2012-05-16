@@ -692,19 +692,27 @@ struct dummy_bscore : public bscore_base
     virtual score_t min_improv() const { return 0; }
 };
 
+// --------------------------------------------------------
+// Scorers for instances.
+
+struct instance_scorer : public unary_function<instance, composite_score>
+{
+    virtual composite_score operator()(const instance& inst) const = 0;
+};
+
 /**
  * Mostly for testing the optimization algos.  Returns minus the
  * hamming distance of the candidate to a given target instance and
  * constant null complexity.
  */
-struct distance_based_scorer : public unary_function<instance,
-                                                     composite_score>
+struct distance_based_scorer : public instance_scorer
 {
     distance_based_scorer(const field_set& _fs,
                           const instance& _target_inst)
         : fs(_fs), target_inst(_target_inst) {}
 
-    composite_score operator()(const instance& inst) const {
+    virtual composite_score operator()(const instance& inst) const
+    {
         score_t sc = -fs.hamming_distance(target_inst, inst);
         // Logger
         if(logger().isFineEnabled()) {
@@ -723,13 +731,12 @@ protected:
 };
 
 template<typename Scoring>
-struct complexity_based_scorer : public unary_function<instance,
-                                                       composite_score>
+struct complexity_based_scorer : public instance_scorer
 {
     complexity_based_scorer(const Scoring& s, representation& rep, bool reduce)
         : score(s), _rep(rep), _reduce(reduce) {}
 
-    composite_score operator()(const instance& inst) const
+    virtual composite_score operator()(const instance& inst) const
     {
         using namespace reduct;
 

@@ -42,6 +42,7 @@
 #include "../eda/optimize.h"
 #include "../representation/instance_set.h"
 #include "../moses/neighborhood_sampling.h"
+#include "../moses/scoring.h"
 
 // we choose the number 100 because below that multithreading is
 // disabled and it leads to some massive slow down because then most
@@ -235,7 +236,7 @@ private:
     score_t min_score_improvement;
 };
 
-// Statistics obtained during optimization run, useful for tuning.
+/// Statistics obtained during optimization run, useful for tuning.
 struct optim_stats
 {
     optim_stats()
@@ -245,6 +246,13 @@ struct optim_stats
     unsigned total_steps;
     unsigned total_evals;
     bool over_budget;
+};
+
+/// Base class for all optimizers.
+struct optim_base
+{
+    virtual unsigned operator()(instance_set<composite_score>& deme,
+                        const instance_scorer& scorer, unsigned max_evals) = 0;
 };
 
 // Parameters specific to EDA optimization
@@ -273,16 +281,15 @@ struct eda_parameters
     double model_complexity;
 };
 
-struct univariate_optimization : optim_stats
+struct univariate_optimization : optim_base, optim_stats
 {
     univariate_optimization(const optim_parameters& op = optim_parameters(),
                             const eda_parameters& ep = eda_parameters())
         : opt_params(op), eda_params(ep) {}
 
     //return # of evaluations actually performed
-    template<typename Scoring>
-    unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals)
+    virtual unsigned operator()(instance_set<composite_score>& deme,
+                        const instance_scorer& score, unsigned max_evals)
     {
         unsigned pop_size = opt_params.pop_size(deme.fields());
         unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
@@ -383,7 +390,7 @@ struct univariate_optimization : optim_stats
  * seem to work better with -L1 -T1 -I0.
  */
 // #define GATHER_STATS 1
-struct hill_climbing : optim_stats
+struct hill_climbing : optim_base, optim_stats
 {
     hill_climbing(const optim_parameters& op = optim_parameters())
         : opt_params(op)
@@ -978,9 +985,8 @@ struct hill_climbing : optim_stats
     // Like above but assumes that init_inst is null (backward compatibility)
     // XXX In fact, all of the current code uses this entry point, no one
     // bothers to supply an initial instance.
-    template<typename Scoring>
-    unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals)
+    virtual unsigned operator()(instance_set<composite_score>& deme,
+                        const instance_scorer& score, unsigned max_evals)
     {
         instance init_inst(deme.fields().packed_width());
         return operator()(deme, init_inst, score, max_evals);
@@ -1042,13 +1048,13 @@ struct sa_parameters
  * c) Goto step a).
  * but that's NOT AT ALL what this algo does.
  */
-struct simulated_annealing : optim_stats
+struct simulated_annealing : optim_base, optim_stats
 {
     typedef score_t energy_t;
 
     simulated_annealing(const optim_parameters& op = optim_parameters(),
                         const sa_parameters& sa = sa_parameters())
-        : opt_params(op), sa_params(sa) {}
+        : opt_params(op), sa_params(sa), max_distance(0) {}
 
     double accept_probability(energy_t energy_new, energy_t energy_old,
                               double temperature)
@@ -1200,12 +1206,11 @@ struct simulated_annealing : optim_stats
     }
 
     // like above but assumes that the initial instance is null
-    template<typename Scoring>
-    unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals)
+    virtual unsigned operator()(instance_set<composite_score>& deme,
+                        const instance_scorer& scorer, unsigned max_evals)
     {
         const instance init_inst(deme.fields().packed_width());
-        return operator()(deme, init_inst, score, max_evals);
+        return operator()(deme, init_inst, scorer, max_evals);
     }
 
     optim_parameters opt_params;
@@ -1215,7 +1220,11 @@ protected:
 };
 
 // for testing only
-struct dummy_optimization {
+struct dummy_optimization : optim_base
+{
+    virtual unsigned operator()(instance_set<composite_score>& deme,
+                        const instance_scorer& scorer, unsigned max_evals)
+    { return 0; }
 };
 
 } // ~namespace moses
