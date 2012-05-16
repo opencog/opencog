@@ -200,6 +200,13 @@ build_knobs::logical_probe_rec(pre_it subtree,
                                bool add_if_in_exemplar,
                                unsigned n_jobs) const
 {
+// XXX FIXME  For me, MOSESUTest crashes EVERY TIME that the recrusive
+// probe is done, and never crashes (out of 12 runs) when the recursion
+// is disabled.  Also, FWIW, Helgrind complains bitterly about the code
+// below, but ... I've stared at it hard, and I can't see anything racy
+// going on.  So, I dunno... I'm disabling this for now; this should be
+// figured out and fixed ... (linas, May 2012)
+n_jobs=1;
     if (n_jobs > 1) {
         auto s_jobs = split_jobs(n_jobs);
 
