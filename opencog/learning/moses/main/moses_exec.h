@@ -102,7 +102,6 @@ struct metapop_moses_results_parameters
                                      bool _output_eval_number,
                                      bool _output_with_labels,
                                      const string& _opt_algo,
-                                     bool _enable_cache,
                                      const vector<string>& _labels,
                                      const string& _output_file,
                                      bool _output_python) :
@@ -113,7 +112,7 @@ struct metapop_moses_results_parameters
         output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
         opt_algo(_opt_algo),
-        enable_cache(_enable_cache), labels(_labels),
+        labels(_labels),
         output_file(_output_file),
         output_python(_output_python) {}
 
@@ -125,7 +124,6 @@ struct metapop_moses_results_parameters
     bool output_eval_number;
     bool output_with_labels;
     string opt_algo;
-    bool enable_cache;
     const vector<string>& labels;
     string output_file;
     bool output_python;
@@ -270,7 +268,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     moses_params.max_score = target_score;
     logger().info("Target score = %f", target_score);
 
-    if (pa.enable_cache) {
+    if (meta_params.enable_cache) {
         static const unsigned initial_cache_size = 1000000;
         
         if(meta_params.include_dominated) {
