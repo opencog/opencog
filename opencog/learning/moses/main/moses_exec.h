@@ -276,17 +276,10 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
             Score score(bsc);
             prr_cache_threaded<Score> score_cache(initial_cache_size, score);
-            ScoreACache score_acache(score_cache);
+            ScoreACache score_acache(score_cache, "scores");
             metapop_moses_results_b(bases, tt, si_ca, si_kb,
                                     score_acache, bsc,
                                     opt_params, meta_params, moses_params, pa);
-            // Log the number of cache failures.
-            // Do not print if using distributed moses.
-            if (moses_params.only_local) {
-                logger().info("Score cache hits=%u misses=%u",
-                              score_acache.get_hits(),
-                              score_acache.get_failures());
-            }
         }
         else {
             // We put the cache on the bscore as well because then it
@@ -295,21 +288,14 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             typedef adaptive_cache<BScoreCache> BScoreACache;
             typedef bscore_based_score<BScoreACache> Score;
             BScoreCache bscore_cache(initial_cache_size, bsc);
-            BScoreACache bscore_acache(bscore_cache);
+            BScoreACache bscore_acache(bscore_cache, "behavioural scores");
             typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
             Score score(bscore_acache);
             prr_cache_threaded<Score> score_cache(initial_cache_size, score);
-            ScoreACache score_acache(score_cache);
+            ScoreACache score_acache(score_cache, "scores");
             metapop_moses_results_b(bases, tt, si_ca, si_kb,
                                     score_acache, bscore_acache,
                                     opt_params, meta_params, moses_params, pa);
-            // Log the number of cache failures.
-            // Do not print if using distributed moses.
-            if (moses_params.only_local) {
-                logger().info("Score cache hits=%u misses=%u",
-                              score_acache.get_hits(),
-                              score_acache.get_failures());
-            }
         }
     }
     else {

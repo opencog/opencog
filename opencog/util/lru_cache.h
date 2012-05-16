@@ -30,8 +30,9 @@
 #include <boost/thread.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "hashing.h"
 #include "exceptions.h"
+#include "hashing.h"
+#include "Logger.h"
 #include "oc_assert.h"
 #include "platform.h"
 
@@ -500,12 +501,21 @@ struct adaptive_cache {
     /// Try not to set ulimit above 90%, as otherwise, the Linux kernel
     /// obligingly tries to swap everything out to disk (see vm.swappiness
     /// setting & LKML discussions w/ AKPM)
-    adaptive_cache(Cache& cache, unsigned ncycles = 1000,
+    adaptive_cache(Cache& cache, 
+                   const std::string name = "",
+                   unsigned ncycles = 1000,
                    float llimit = 0.75, float lfact = 2,
                    float ulimit = 0.90, float ufrac = 2)
         : _cache(cache), _counter(0), _ncycles(ncycles),
           _llimit(llimit), _lfact(lfact),
-          _ulimit(ulimit), _ufrac(ufrac) {}
+          _ulimit(ulimit), _ufrac(ufrac),
+          _cache_name(name) {}
+
+    ~adaptive_cache()
+    {
+        logger().info("Cache %s hits=%u misses=%u", _cache_name.c_str(),
+                      get_hits(), get_failures());
+    }
 
     result_type operator()(const argument_type& x) const {
         using boost::numeric_cast;
@@ -544,6 +554,8 @@ private:
     float _lfact;
     float _ulimit;
     float _ufrac;
+
+    std::string _cache_name;
 };
 
 
