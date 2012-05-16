@@ -1305,7 +1305,7 @@ int moses_exec(const vector<string>& argvs)
         argv[i] = const_cast<char*>(argvs[i].c_str());
     }
     int res = moses_exec(argvs.size(), argv);
-    delete argv;
+    delete[] argv;
     return res;
 }
 
