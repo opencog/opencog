@@ -181,6 +181,7 @@ void Logger::writeMsg(std::string &msg)
         {
             fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n",
                     fileName.c_str());
+            pthread_mutex_unlock(&lock);
             disable();
             return;
         }
@@ -239,6 +240,7 @@ Logger& Logger::operator=(const Logger& log)
 
 void Logger::set(const Logger& log)
 {
+    pthread_mutex_lock(&lock);
     this->fileName.assign(log.fileName);
     this->currentLevel = log.currentLevel;
     this->backTraceLevel = log.backTraceLevel;
@@ -247,6 +249,7 @@ void Logger::set(const Logger& log)
 
     this->logEnabled = log.logEnabled;
     this->f = log.f;
+    pthread_mutex_unlock(&lock);
 
 #ifdef ASYNC_LOGGING
     startWriteLoop();
