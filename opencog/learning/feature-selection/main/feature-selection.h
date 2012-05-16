@@ -266,15 +266,15 @@ void max_mi_feature_selection(Table& table,
 void feature_selection(Table& table,
                        const feature_selection_parameters& fs_params)
 {
-    if (fs_params.algorithm == un)  {
+    if (fs_params.algorithm == moses::un)  {
         // XXX will we ever support this? I don't think so...
         OC_ASSERT(false, "TODO");
-    } else if (fs_params.algorithm == sa) {
+    } else if (fs_params.algorithm == moses::sa) {
         // XXX will we ever support this? I don't think so...
         OC_ASSERT(false, "TODO");        
-    } else if (fs_params.algorithm == hc) {
+    } else if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
-        optim_parameters op_param(20, fs_params.hc_max_score, 4, 0.0);
+        optim_parameters op_param(moses::hc, 20, fs_params.hc_max_score, 4, 0.0);
         op_param.hc_params = hc_parameters(true, // widen distance if no improvement
                                false,
                                false, // crossover

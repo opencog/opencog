@@ -64,7 +64,7 @@ public:
         // scorer
         distance_based_scorer scorer(fs, target_inst);
         // Local search optimization
-        optim_parameters op_param(20, 1);
+        optim_parameters op_param(hc, 20, 1);
         op_param.hc_params = hc_parameters(false); // do not terminate if improvement
         hill_climbing hc(op_param);
         // empty deme

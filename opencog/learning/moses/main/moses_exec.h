@@ -79,11 +79,6 @@ static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
 static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
-// optimization algorithms
-static const string un="un"; // univariate
-static const string sa="sa"; // star-shaped search
-static const string hc="hc"; // local search
-
 // used by the main function, it is included in the library for its
 // convenience
 int moses_exec(int argc, char** argv);
@@ -117,7 +112,6 @@ struct metapop_print_parameters
                              bool _output_dominated,
                              bool _output_eval_number,
                              bool _output_with_labels,
-                             const string& _opt_algo,
                              const vector<string>& _labels,
                              const string& _output_file,
                              bool _output_python) :
@@ -127,7 +121,6 @@ struct metapop_print_parameters
         output_dominated(_output_dominated),
         output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
-        opt_algo(_opt_algo),
         labels(_labels),
         output_file(_output_file),
         output_python(_output_python) {}
@@ -139,7 +132,6 @@ struct metapop_print_parameters
     bool output_dominated;
     bool output_eval_number;
     bool output_with_labels;
-    string opt_algo;
     const vector<string>& labels;
     string output_file;
     bool output_python;
@@ -210,7 +202,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const moses_parameters& moses_params,
                              const metapop_print_parameters& pa)
 {
-    if (pa.opt_algo == hc) { // exhaustive neighborhood search
+    if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
 
         metapopulation<Score, BScore, hill_climbing>
@@ -219,7 +211,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
     }
-    else if (pa.opt_algo == sa) { // simulated annealing
+    else if (opt_params.opt_algo == sa) { // simulated annealing
         simulated_annealing annealer(opt_params);
 
         metapopulation<Score, BScore, simulated_annealing>
@@ -228,7 +220,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         run_moses(metapop, moses_params);
         print_metapop(metapop, pa);
     }
-    else if (pa.opt_algo == un) { // univariate
+    else if (opt_params.opt_algo == un) { // univariate
         univariate_optimization unopt(opt_params);
 
         metapopulation<Score, BScore, univariate_optimization>
@@ -238,7 +230,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         print_metapop(metapop, pa);
     }
     else {
-        std::cerr << "Unknown optimization algo " << pa.opt_algo
+        std::cerr << "Unknown optimization algo " << opt_params.opt_algo
                   << ". Supported algorithms are un (for univariate),"
                   << " sa (for star-shaped search) and hc (for local search)"
                   << std::endl;

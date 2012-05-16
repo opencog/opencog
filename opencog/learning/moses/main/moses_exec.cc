@@ -840,7 +840,7 @@ int moses_exec(int argc, char** argv)
                                    jobs[localhost]);
 
     // Set optim_parameters.
-    optim_parameters opt_params(pop_size_ratio, max_score, max_dist);
+    optim_parameters opt_params(opt_algo, pop_size_ratio, max_score, max_dist);
     opt_params.hc_params.widen_search = hc_widen_search;
     opt_params.hc_params.single_step = hc_single_step;
     opt_params.hc_params.crossover = hc_crossover;
@@ -869,7 +869,7 @@ int moses_exec(int argc, char** argv)
                                     output_bscore,
                                     output_dominated,
                                     output_eval_number,
-                                    output_with_labels, opt_algo,
+                                    output_with_labels, 
                                     labels,
                                     output_file,
                                     output_python);
