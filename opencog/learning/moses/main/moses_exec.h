@@ -86,11 +86,52 @@ int moses_exec(int argc, char** argv);
 // the name of the supposed executable
 int moses_exec(const vector<string>& argv);
 
+/// Call one of the optimization algorithms, as appropriate.
+struct optim_algo : optim_base
+{
+    optim_algo(const optim_parameters &op)
+        : algo(NULL)
+    {
+        if (op.opt_algo == hc) { // exhaustive neighborhood search
+            algo = new hill_climbing(op);
+        } 
+        else
+        if (op.opt_algo == sa) { // star-search
+            algo = new simulated_annealing(op);
+        } 
+        else
+        if (op.opt_algo == un) { // univariate
+            algo = new univariate_optimization(op);
+        } 
+        else {
+            OC_ASSERT(false,
+              "Unknown optimization algo %s.\n"
+              "Supported algorithms are un (for univariate), "
+              "sa (for star-shaped search) and hc (for local search).\n",
+              op.opt_algo.c_str());
+        }
+    }
+
+    ~optim_algo()
+    {
+        if (algo) delete algo;
+    }
+
+    virtual unsigned operator()(instance_set<composite_score>& deme,
+                       const instance_scorer& scorer, unsigned max_evals)
+    {
+        return algo->operator()(deme, scorer, max_evals);
+    }
+
+private:
+    optim_base *algo;
+};
+
 /**
  * Wrap the metapopulation with caching scorers.
  * (Perhaps this structure belongs in metapopulation.h?)
  */
-template<typename BScore, typename Optimization>
+template<typename BScore>
 struct cached_metapop
 {
     // Wrapper, so that the virtual methods show up.
@@ -110,12 +151,12 @@ struct cached_metapop
         { return _scorer.min_improv(); }
     };
 
-    metapopulation<score_base, bscore_base, Optimization>& get_base()
+    metapopulation<score_base, bscore_base, optim_base>& get_base()
     {
         return *_baser;
     }
 
-    cached_metapop(Optimization opt,
+    cached_metapop(optim_base &opt,
                    const std::vector<combo_tree>& bases,
                    const opencog::combo::type_tree& tt,
                    const reduct::rule& si_ca,
@@ -139,7 +180,7 @@ struct cached_metapop
 
                 _rebaser = new rebase(score_acache, score);
 
-                metapopulation<rebase, BScore, Optimization> metapop
+                metapopulation<rebase, BScore, optim_base> metapop
                     (bases, tt, si_ca, si_kb, *_rebaser, bsc, opt, meta_params);
 
                 _baser = metapop.downcase();
@@ -179,7 +220,7 @@ struct cached_metapop
         }
 
         // No caching
-        metapopulation<bscore_based_score<BScore>, BScore, Optimization>
+        metapopulation<bscore_based_score<BScore>, BScore, optim_base>
             metapop(bases, tt, si_ca, si_kb, bb_score, bsc, opt, meta_params);
         _baser = metapop.downcase();
     }
@@ -193,7 +234,7 @@ private:
 
     // We're usng pointers here only because otherwise, the constructor
     // gets even gnarlier.  Oh well. Fix this later.
-    metapopulation<score_base, bscore_base, Optimization> *_baser;
+    metapopulation<score_base, bscore_base, optim_base> *_baser;
     rebase *_rebaser;
 };
 
@@ -324,46 +365,16 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     moses_params.max_score = target_score;
     logger().info("Target score = %f", target_score);
 
-    if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
-        hill_climbing climber(opt_params);
+    // Pick out one of the optimization aglos.
+    optim_algo algo(opt_params);
 
-        cached_metapop<BScore, hill_climbing> capop
-           (climber, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
-        metapopulation<score_base, bscore_base, hill_climbing>&
-            metapop = capop.get_base();
+    cached_metapop<BScore> capop
+       (algo, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
+    metapopulation<score_base, bscore_base, optim_base>&
+        metapop = capop.get_base();
 
-        run_moses(metapop, moses_params);
-        print_metapop(metapop, pa);
-    }
-    else if (opt_params.opt_algo == sa) { // simulated annealing
-        simulated_annealing annealer(opt_params);
-
-        cached_metapop<BScore, simulated_annealing> capop
-           (annealer, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
-        metapopulation<score_base, bscore_base, simulated_annealing>&
-            metapop = capop.get_base();
-
-        run_moses(metapop, moses_params);
-        print_metapop(metapop, pa);
-    }
-    else if (opt_params.opt_algo == un) { // univariate
-        univariate_optimization unopt(opt_params);
-
-        cached_metapop<BScore, univariate_optimization> capop
-           (unopt, bases, type_sig, si_ca, si_kb, bb_score, bsc, meta_params);
-        metapopulation<score_base, bscore_base, univariate_optimization>&
-            metapop = capop.get_base();
-
-        run_moses(metapop, moses_params);
-        print_metapop(metapop, pa);
-    }
-    else {
-        std::cerr << "Unknown optimization algo " << opt_params.opt_algo
-                  << ". Supported algorithms are un (for univariate),"
-                  << " sa (for star-shaped search) and hc (for local search)"
-                  << std::endl;
-        exit(1);
-    }
+    run_moses(metapop, moses_params);
+    print_metapop(metapop, pa);
 }
 
 
