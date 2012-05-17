@@ -201,7 +201,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const optim_parameters& opt_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
-                             const Printer& printer)
+                             Printer& printer)
 {
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
@@ -251,7 +251,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
-                           const Printer& printer)
+                           Printer& printer)
 {
     bscore_based_score<BScore> bb_score(bsc);
 

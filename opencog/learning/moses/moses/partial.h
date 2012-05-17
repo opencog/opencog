@@ -44,21 +44,37 @@ class partial_solver
                        const metapop_parameters&,
                        const moses_parameters&,
                        const metapop_printer&);
+        ~partial_solver();
+
         void solve();
 
-        void candidate (const combo_tree& cond);
+        /// The metapop "printer" callback.
+        /// This gives us an opportunity to get our hands on the best
+        /// exemplars that moses found, so that we can see if they are
+        /// "good enough".
+        template<typename Score, typename BScore, typename Optimization>
+        void operator()(metapopulation<Score, BScore, Optimization> &metapop)
+        {
+            candidate(metapop.best_tree());
+        }
+
+    protected:
+        void candidate (const combo_tree& cand);
 
     private:
         std::vector<CTable> _ctables;
         int _alf_sz;
         float _noise;
-        type_tree _table_tt;
+        type_tree _table_type_signature;
         std::vector<combo_tree> _exemplars;
         const rule& _contin_reduct;
         optim_parameters _opt_params;
         metapop_parameters _meta_params;
         moses_parameters _moses_params;
         metapop_printer _mmr_pa;
+
+        typedef enum_table_bscore BScore;
+        multibscore_based_bscore<BScore> *_bscore;
 };
 
 };};
