@@ -35,7 +35,7 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
                                const optim_parameters& opt_params,
                                const metapop_parameters& meta_params,
                                const moses_parameters& moses_params,
-                               const metapop_print_parameters& mmr_pa)
+                               const metapop_printer& mmr_pa)
 
     :_ctables(ctables), _alf_sz(as), _noise(noise), _table_tt(table_tt),
      _exemplars(exemplars), _contin_reduct(contin_reduct),

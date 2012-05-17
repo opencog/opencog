@@ -43,7 +43,7 @@ class partial_solver
                        const optim_parameters&,
                        const metapop_parameters&,
                        const moses_parameters&,
-                       const metapop_print_parameters&);
+                       const metapop_printer&);
         void solve();
 
         void candidate (const combo_tree& cond);
@@ -58,7 +58,7 @@ class partial_solver
         optim_parameters _opt_params;
         metapop_parameters _meta_params;
         moses_parameters _moses_params;
-        metapop_print_parameters _mmr_pa;
+        metapop_printer _mmr_pa;
 };
 
 };};
