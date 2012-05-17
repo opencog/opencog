@@ -48,7 +48,7 @@ bc/plus_test.conf
 bc/new/pathfinding_test.conf
 ''')
 
-files_list = '''psi/water_test.conf'''
+#files_list = '''psi/water_test.conf'''
 
 #files_list = '''bc/plus_test.conf'''
 #files_list ='''

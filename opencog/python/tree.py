@@ -155,6 +155,9 @@ class DAG(Tree):
         Tree.__init__(self,op,[])
         self.parents = []
         
+        self.depth = 0
+        self.best_conf_below = 0.0
+        
         for a in args:
             self.append(a)
     
@@ -162,6 +165,11 @@ class DAG(Tree):
         if self not in child.parents:
             child.parents.append(self)
             self.args.append(child)
+            
+            # if there are other parents for this child, this code is wrong
+            child.depth = self.depth + 1
+            
+            assert not self.any_path_up_contains([child])
     
     def __eq__(self,other):
         if type(self) != type(other):
@@ -178,7 +186,7 @@ class DAG(Tree):
         if self in targets:
             return True
         return any(p.any_path_up_contains(targets) for p in self.parents)
-        
+    
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():
         if atom.t in [types.VariableNode, types.FWVariableNode]:

@@ -47,7 +47,7 @@ class Chainer:
     _convert_atoms = False
 
     def __init__(self, space, planning_mode = False):
-        self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink']
+        self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
 
         self.pd = dict()
 
@@ -86,10 +86,11 @@ class Chainer:
 
         self.target = target
         # Have a sentinel application at the top
-        self.root = T('WIN')
+        # Cool idea but doesn't work yet
+        #self.root = T('WIN')
         
-        self.rules.append(rules.Rule(self.root,[target],name='producing target'))
-        self.bc_later = OrderedSet([self.root])
+        #self.rules.append(rules.Rule(self.root,[target],name='producing target'))
+        #self.bc_later = OrderedSet([self.root])
 
         # viz - visualize the root
         self.viz.outputTarget(target, None, 0, 'TARGET')
@@ -307,8 +308,9 @@ class Chainer:
                 continue
             assert r.match == None
             
-            if target == self.root and r.name != 'producing target':
-                continue
+            # So the dummy target 'WIN' can only be produced by the dummy app
+            #if target == self.root and r.name != 'producing target':
+            #    continue
             
             s = unify(r.head, target, {})
             if s != None:
@@ -323,7 +325,10 @@ class Chainer:
 
             def found_axiom(axiom_app, s):
                 if axiom_app != None:
-                    self.add_app_to_pd(axiom_app)
+                    (status, axiom_app_pdn) = self.add_app_to_pd(axiom_app)
+                    if status == 'CYCLE':
+                        return None
+                    
                     if axiom_app.tv.count > 0:
                         self.viz.outputTarget(None,axiom_app.head,0,axiom_app)
                         self.viz.declareResult(axiom_app.head)
@@ -335,8 +340,18 @@ class Chainer:
                     if len(s) == 0:
                         assert goal == axiom_app.head
                         self.propogate_result(app)
+                        
+                        # Record the best confidence score below a PDN. This can change
+                        # at any time.
+                        conf = axiom_app.tv.confidence
+                        if conf > 0.0:
+                            axiom_expr_pdn = self.expr2pdn(axiom_app.head)
+                            self.propogate_scores_upward(axiom_expr_pdn, conf)
                     else:
+                        # add specialized trees above this result (if necessary)
                         self.propogate_specialization(axiom_app.head, i, app)
+                    
+                    return None
 
             # For example, if you need Inh Mohammad $x, Inh $x terrorist, $x
             # this will avoid finding $x (which could be any atom in the system!) -
@@ -403,7 +418,8 @@ class Chainer:
             self.viz.declareResult(app.head)
             self.compute_and_add_tv(app)
 
-            if app.head == self.root:
+            #if app.head == self.root:
+            if app.head == self.target:
                 log.info(format_log('Target produced!', app.goals[0], self.get_tvs(app.goals[0])))
                 self.results.append(app.goals[0])
                 return
@@ -439,6 +455,12 @@ class Chainer:
         if self.reject_expression(new_result):
             return
         
+        (status, new_app_pdn) = self.add_app_to_pd(new_app)
+        # Sometimes new_app is actually 'EXISTING', and nothing will pass
+        # if you require it to be new here.
+        if status == 'CYCLE':
+            return
+        
         # After you finish specializing, it may be a usable rule app
         # (i.e. all premises have been found exactly).
         # This will check, and do nothing if it's not.
@@ -457,35 +479,6 @@ class Chainer:
         ng = new_app.goals[:i]+new_app.goals[i+1:]
         if any(old_goal != new_goal for (old_goal, new_goal) in zip(og, ng)):
             self.find_axioms_for_rule_app(new_app)
-            
-        ## Specialize the app using the new, more specific premise, and add
-        ## it to backward chaining
-        #new_app = orig_app.subst(s)
-        #print '>>>>propogate_result spec',repr(orig_app),repr(new_app)
-        #
-        ## old_result_pdn is the target for the application, before we found
-        ## more specific variable bindings in this premise.
-        #old_result_pdn = self.expr2pdn(app.head.canonical())
-        ## look at the rules you can apply using the new result as a premise
-        #upper_pdns = [app_pdn for app_pdn in result_pdn.parents]
-        #for app_pdn in upper_pdns:
-        #    
-        #    s = unify()
-        #
-        #if new_app.head == orig_app.head:
-        #    # Stop the recursion upwards - this rule app still produces the same
-        #    # thing, and has no new TV. But what if the other goals were changed?
-        #    return
-        #else:
-        #    
-        ##if new_app.head != orig_app.head:
-        ##    new_app.head = orig_app.head
-        #    #(status, new_app_pdn) = self.add_app_to_pd(new_app)
-        #    #(status2, orig_app_pdn) = self.add_app_to_pd(orig_app)
-        #    ## See the number of rules using each result expression
-        #    #print '##########WOWOWOWOWOWOW#############', len(orig_app_pdn.parents[0].parents), len(new_app_pdn.parents[0].parents)
-        ##if new_app.head == orig_app.head:
-        ##    self.add_queries(new_app)
 
     # used by forward chaining
     def find_new_rule_applications_by_premise(self,premise):
@@ -703,7 +696,30 @@ class Chainer:
     #    #print best
     #    return best
 
-    def bc_score(self, expr):
+    def propogate_scores_upward(self, expr_pdn, best_conf_below):
+        assert isinstance(expr_pdn, DAG)
+        assert isinstance(expr_pdn.op, Tree)
+        
+        # Record the highest confidence of a single expression below this one.
+        # This heuristic isn't used yet. It's not ideal - the idea is to estimate
+        # the confidence and/or mean that this expression will have, if you search
+        # for all ways of producing it. One better option:
+        # At each app, take the average "estimated TV" of its goals. And for each goal,
+        # take the summed confidence of its rules (or the best, or something - it depends
+        # on how you can combine the confidences using Revision)
+        expr_pdn.best_conf_below = max(expr_pdn.best_conf_below, best_conf_below)
+        
+        #print expr_pdn, expr_pdn.best_conf_below
+        
+        for parent_app_pdn in expr_pdn.parents:
+            assert isinstance(parent_app_pdn.op, rules.Rule)
+            
+            assert len(parent_app_pdn.parents) == 1
+            #assert not parent_app_pdn.any_path_up_contains([expr_pdn])
+            parent_expr_pdn = parent_app_pdn.parents[0]
+            self.propogate_scores_upward(parent_expr_pdn, best_conf_below)
+
+    def pathfinding_score(self, expr):
         def get_coords(expr):
             name = expr.op.name
             tuple_str = name[3:]
@@ -721,18 +737,36 @@ class Chainer:
             return dist
         
         worst_distance = 10**9
+        contains_coords = False
         # The greatest distance refered to in the expression
         for subtree in expr.flatten():
             if subtree.get_type() == t.ConceptNode and subtree.op.name.startswith('at '):
+                contains_coords = True
                 # Hack to skip messy useless Implications that just have
                 # the destination + a variable
                 if get_distance(subtree) != 0:
                     worst_distance = min(get_distance(subtree), worst_distance)
         
-        # TODO will return very low, uniform scores for anything other
-        # than pathfinding!
-        #print '>>>',-worst_distance, expr
-        return -worst_distance
+        if contains_coords:
+            expr_pdn = self.expr2pdn(expr)
+            # I'm not sure this is accurate
+            #distance_already = expr_pdn.depth
+            return worst_distance
+        else:
+            return None
+
+    def bc_score(self, expr):
+        tmp = self.pathfinding_score(expr)
+        
+        if not tmp is None:
+            return self.pathfinding_score(expr)
+        
+        expr_pdn = self.expr2pdn(expr)
+        
+        depth = expr_pdn.depth
+        num_vars = len([vertex for vertex in expr.flatten() if expr.is_variable()])
+        
+        return -10000.0*depth - 100*num_vars
 
     def get_fittest(self, queue):
         def get_score(expr):
@@ -868,7 +902,8 @@ class PLNviz:
             #link_id = str(hash(target_id+parent_id))
             parent_id = str(parent)
             #rule_app_id = 'rule '+repr(rule)+parent_id
-            rule_app_id = 'rule '+repr(rule)+parent_id
+            rule_app_id = str(rule.canonical_tuple())
+            #rule_app_id = 'rule '+repr(rule)+parent_id
             target_to_rule_id = rule_app_id+target_id
             parent_to_rule_id = rule_app_id+' parent'
 
@@ -880,6 +915,8 @@ class PLNviz:
             self.g.add_edge(parent_to_rule_id, rule_app_id, parent_id, directed=True, label='')
             # Link rule app to target
             self.g.add_edge(target_to_rule_id, target_id, rule_app_id, directed=True, label=str(index+1))
+        
+            self.declareResult(rule_app_id)
 
     @check_connected
     def declareResult(self, target):
