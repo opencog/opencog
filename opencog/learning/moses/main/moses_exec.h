@@ -191,7 +191,7 @@ private:
 /**
  * Create metapopulation, run moses, print results.
  */
-template<typename Score, typename BScore>
+template<typename Score, typename BScore, typename Printer>
 void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const opencog::combo::type_tree& tt,
                              const reduct::rule& si_ca,
@@ -201,7 +201,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const optim_parameters& opt_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
-                             const metapop_printer& printer)
+                             const Printer& printer)
 {
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
@@ -242,7 +242,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
 /**
  * like above, but assumes that the score is bscore based
  */
-template<typename BScore>
+template<typename BScore, typename Printer>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const opencog::combo::type_tree& type_sig,
                            const reduct::rule& si_ca,
@@ -251,7 +251,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
-                           const metapop_printer& printer)
+                           const Printer& printer)
 {
     bscore_based_score<BScore> bb_score(bsc);
 
