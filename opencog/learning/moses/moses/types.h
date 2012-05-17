@@ -45,8 +45,6 @@ using combo::vertex;
 using boost::indirect_iterator;
 using boost::transform_iterator;
 
-extern bool output_python;
-
 /////////////////
 // basic types //
 /////////////////
@@ -245,7 +243,7 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
                                 bool output_bscore = false,
                                 bool output_python = false)
 {
-    if(output_python)
+    if (output_python)
         return ostream_bscored_combo_tree_python(out, candidate, output_score,
                                                  output_complexity, output_bscore);
 

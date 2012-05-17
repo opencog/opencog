@@ -890,8 +890,8 @@ int moses_exec(int argc, char** argv)
     if (datafile_based_problem(problem)) {
 
         // Infer the signature based on the input table.
-        type_tree table_tt = infer_data_type_tree(input_data_files.front(), target_column);
-        logger().info() << "Inferred data signature " << table_tt;
+        type_tree table_type_signature = infer_data_type_tree(input_data_files.front(), target_column);
+        logger().info() << "Inferred data signature " << table_type_signature;
 
         // Read input data files
         vector<Table> tables;
@@ -912,7 +912,7 @@ int moses_exec(int argc, char** argv)
         if (problem == it || problem == pre) {
 
             // Infer the type of the input table
-            type_tree table_output_tt = type_tree_output_type_tree(table_tt);
+            type_tree table_output_tt = type_tree_output_type_tree(table_type_signature);
             type_node table_output_tn = get_type_node(table_output_tt);
 
             // Determine the default exemplar to start with
@@ -950,7 +950,7 @@ int moses_exec(int argc, char** argv)
             // problem == it  i.e. input-table based scoring.
             else {
                 OC_ASSERT(output_type == table_output_tn);
-                int as = alphabet_size(table_tt, ignore_ops);
+                int as = alphabet_size(table_type_signature, ignore_ops);
 
                 // --------- Boolean output type
                 if (output_type == id::boolean_type) {
@@ -959,7 +959,7 @@ int moses_exec(int argc, char** argv)
                     foreach(const CTable& ctable, ctables)
                         bscores.push_back(new BScore(ctable, as, noise));
                     multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(exemplars, table_tt,
+                    metapop_moses_results(exemplars, table_type_signature,
                                           bool_reduct, bool_reduct_rep, bscore,
                                           opt_params, meta_params, moses_params,
                                           mmr_pa);
@@ -979,13 +979,13 @@ int moses_exec(int argc, char** argv)
                     foreach(const CTable& ctable, ctables)
                         bscores.push_back(new BScore(ctable, as, noise));
                     multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(exemplars, table_tt,
+                    metapop_moses_results(exemplars, table_type_signature,
                                contin_reduct, contin_reduct, bscore,
                                opt_params, meta_params, moses_params,
                                mmr_pa);
 
 #endif
-                    partial_solver well(ctables, as, noise, table_tt,
+                    partial_solver well(ctables, as, noise, table_type_signature,
                                         exemplars, contin_reduct,
                                         opt_params, meta_params,
                                         moses_params, mmr_pa);
@@ -1003,7 +1003,7 @@ int moses_exec(int argc, char** argv)
                         foreach(const Table& table, tables)
                             bscores.push_back(new BScore(table, as, noise, eft));
                         multibscore_based_bscore<BScore> bscore(bscores);
-                        metapop_moses_results(exemplars, table_tt,
+                        metapop_moses_results(exemplars, table_type_signature,
                                               contin_reduct, contin_reduct, bscore,
                                               opt_params, meta_params, moses_params,
                                               mmr_pa);
@@ -1016,7 +1016,7 @@ int moses_exec(int argc, char** argv)
                                                          weighted_accuracy,
                                                          as, noise));
                         multibscore_based_bscore<BScore> bscore(bscores);
-                        metapop_moses_results(exemplars, table_tt,
+                        metapop_moses_results(exemplars, table_type_signature,
                                               contin_reduct, contin_reduct, bscore,
                                               opt_params, meta_params, moses_params,
                                               mmr_pa);
@@ -1035,7 +1035,7 @@ int moses_exec(int argc, char** argv)
             // ip assumes that the inputs are boolean and the output is contin
             type_tree ettt = gen_signature(id::boolean_type,
                                            id::contin_type, arity);
-            OC_ASSERT(ettt == table_tt,
+            OC_ASSERT(ettt == table_type_signature,
                       "The input table doesn't have the right data types."
                       " The output should be contin and the inputs should"
                       " be boolean");

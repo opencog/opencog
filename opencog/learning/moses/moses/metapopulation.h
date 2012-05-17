@@ -153,11 +153,14 @@ struct metapopulation : public bscored_combo_tree_set
      * @param tt      Type signature of expression to be learned.
      *                That is, the expression must have this signature,
      *                relating the argument variables, and the output type.
-     * @param si      Reduct rule for reducting
-     * @param sc      Scoring function for scoring
+     * @param si_ca   Reduct rule for reducing candidate combo trees.
+     * @param si_kb   Reduct rule for reducing trees decorated with
+     *                knobs.
+     * @param sc      Function for scoring combo trees.
      * @param bsc     Behavior scoring function
-     * @param opt     Optimization should be providing for the learning
-     * @param pa      Parameter for selecting the deme
+     * @param opt     Algorithm that find best knob settings for a given
+     *                exemplar decorated with knobs.
+     * @param pa      Control parameters for this class.
      */
     metapopulation(const std::vector<combo_tree>& bases,
                    const type_tree& tt,
@@ -218,7 +221,7 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     /**
-     * return the best score
+     * Return the best score.
      */
     score_t best_score() const
     {
@@ -226,7 +229,8 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     /**
-     * return the best candidates (with _best_cscore)
+     * Return the set of candidates with the highest composite
+     * scores.  These will all have the the same "best_composite_score".
      */
     const metapop_candidates& best_candidates() const
     {
@@ -234,7 +238,7 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     /**
-     * return the best combo tree (shortest best candidate)
+     * Return the best combo tree (shortest best candidate).
      */
     const combo_tree& best_tree() const
     {
@@ -1101,7 +1105,7 @@ struct metapopulation : public bscored_combo_tree_set
         return res;
     }
 
-    // Update the record of the best score seen, and the associate tree.
+    // Update the record of the best score seen, and the associated tree.
     void update_best_candidates(const bscored_combo_tree_set& candidates)
     {
         if (!candidates.empty()) {
@@ -1253,10 +1257,10 @@ protected:
     int _n_evals;
     int _evals_before_this_deme;
 
-    // the best score ever
+    // The best score ever found during search.
     composite_score _best_cscore;
 
-    // trees with composite score _best_cscore
+    // Trees with composite score equal to _best_cscore.
     metapop_candidates _best_candidates;
 
     // contains the exemplars of demes that have been searched so far
