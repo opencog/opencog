@@ -117,7 +117,7 @@ public:
 
     // Return the total number of observations (should be equal to the
     // size of the corresponding uncompressed table)
-    unsigned uncompressed_size() {
+    unsigned uncompressed_size() const {
         unsigned res = 0;
         foreach(const value_type& v, *this) {
             res += v.second.total_count();
