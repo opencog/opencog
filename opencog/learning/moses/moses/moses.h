@@ -92,7 +92,8 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            const moses_parameters& pa = moses_parameters())
 {
     // Logger
-    logger().info("MOSES starts");
+    logger().info("MOSES starts, max_evals=%d max_gens=%d", 
+                  pa.max_evals, pa.max_gens);
     // ~Logger
     int gen_idx = 0;
 
