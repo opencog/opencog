@@ -26,6 +26,7 @@
 
 #include <opencog/learning/feature-selection/feature_optimization.h>
 #include <opencog/learning/feature-selection/feature_scorer.h>
+#include <opencog/learning/feature-selection/main/feature-selection.h>
 
 #define FEATURE_SELECTION_TEST_DIR PROJECT_SOURCE_DIR"/tests/learning/feature-selection/"
 
@@ -35,14 +36,14 @@ using namespace std;
 using boost::counting_iterator;
 
 class feature_selectionUTest : public CxxTest::TestSuite {
-    Table table;
+    Table big_table, small_table;
 
 public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
 
-
     feature_selectionUTest() {        
-        table = istreamTable(FEATURE_SELECTION_TEST_DIR"dataset.csv");        
+        big_table = istreamTable(FEATURE_SELECTION_TEST_DIR"big-dataset.csv");
+        small_table = istreamTable(FEATURE_SELECTION_TEST_DIR"small-dataset.csv");
     }
 
     void test_incremental_selection_j1() {
@@ -57,16 +58,20 @@ public:
     void test_redundant_features_j4() {
         test_redundant_features(4);
     }
+    
+    void test_moses_based_feature_selection_j4() {
+        test_moses_based_feature_selection(4);
+    }
 
 private:
     
     void test_incremental_selection(unsigned n_jobs) {
         setting_omp(n_jobs);
 
-        CTable ctable = table.compress();
+        CTable ctable = big_table.compress();
         FeatureScorer fs(ctable);
         set<arity_t> features(counting_iterator<arity_t>(0),
-                              counting_iterator<arity_t>(table.get_arity()));
+                              counting_iterator<arity_t>(big_table.get_arity()));
         set<arity_t> selected_features = 
             incremental_selection(features, fs, 0.1, 1, false);
 
@@ -79,7 +84,7 @@ private:
     void test_redundant_features(unsigned n_jobs) {
         setting_omp(n_jobs);
 
-        CTable ctable = table.compress();
+        CTable ctable = big_table.compress();
         FeatureScorer fs(ctable);
         set<arity_t> features{3, 4, 10, 17};
         set<arity_t> redundant = redundant_features(features, fs, 0.001);
@@ -88,5 +93,34 @@ private:
         cout << endl;
 
         TS_ASSERT_EQUALS(redundant.size(), 2);        
+    }
+
+    void test_moses_based_feature_selection(unsigned n_jobs) {
+        // set feature selection parameters
+        feature_selection_parameters fsp;
+        fsp.algorithm = moses::hc;
+        fsp.max_evals = 10000;
+        char tempfile[] = "/tmp/feature_selectionUTestXXXXXX";
+        int fd = mkstemp(tempfile);
+        OC_ASSERT (fd != -1);
+        fsp.input_file = FEATURE_SELECTION_TEST_DIR"small-dataset.csv";
+        fsp.output_file = tempfile;
+        fsp.jobs = n_jobs;
+        setting_omp(n_jobs);
+        fsp.hc_confi = 1;
+        fsp.hc_cache_size = 100000;
+        fsp.hc_fraction_of_remaining = 0.1;
+
+        ostreamTable(std::cout << "small_table = ", small_table);
+        
+        // run feature selection (put the result into fsp.output_file)
+        feature_selection(small_table, fsp);
+
+        // check that the selected features are the expected ones
+        ifstream in(fsp.output_file);
+        string header;
+        in >> header;
+        std::cout << "header = " << header << std::endl;
+        TS_ASSERT_EQUALS(header, "target,f1,f2");
     }
 };

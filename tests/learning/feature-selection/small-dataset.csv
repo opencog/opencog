@@ -1,0 +1,12 @@
+# This small data set is used to set moses based feature selection.
+# target depends on f1 and f2 together but not f3, or f1 and f2
+# individually.
+target,f1,f2,f3
+1,1,0,0
+1,0,1,0
+1,1,0,1
+1,0,1,1
+0,0,0,0
+0,1,1,0
+0,0,0,1
+0,1,1,1
