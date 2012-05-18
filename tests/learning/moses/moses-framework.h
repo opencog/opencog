@@ -40,9 +40,7 @@ string build_arguments(vector<string>& arguments)
 pair<score_t, combo_tree> parse_result(const string& tempfile)
 {
     // open file
-    FILE* fp = fopen(tempfile.c_str(), "r");
-    __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
-    istream in(&pipe_buf);
+    ifstream in(tempfile);
 
     score_t hiscore = -1.0e37;
     combo_tree hitr;
@@ -60,8 +58,7 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
            cout << score << " " << tr << endl;
        }
     }
-    // close file and return result
-    pclose(fp);
+
     return {hiscore, hitr};
 }
 
