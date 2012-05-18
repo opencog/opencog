@@ -88,9 +88,13 @@ public:
     static std::string prefix() {
         return COMBO_ENUM_TYPE_PREFIX;
     }
-    static enum_t get_random_enum();
+    static const enum_t& get_random_enum();
     static size_t size() {
         return enum_map.size();
+    }
+    static const enum_t& invalid_enum() {
+        static enum_t bad("", -1);
+        return bad;
     }
 };
 

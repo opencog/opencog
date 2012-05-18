@@ -33,7 +33,7 @@ unsigned enum_t::enum_issued = 0;
 map<string, unsigned> enum_t::enum_map;
 boost::shared_mutex enum_t::id_mutex;
 
-enum_t enum_t::get_random_enum()
+const enum_t& enum_t::get_random_enum()
 {
     int r = randGen().randint(enum_issued);
 
