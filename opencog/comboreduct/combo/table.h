@@ -157,7 +157,7 @@ public:
            contin_t min_contin = -1.0, contin_t max_contin = 1.0);
 
     // set input labels
-    void set_labels(std::vector<std::string> il);
+    void set_labels(const std::vector<std::string>& il);
     const std::vector<std::string>& get_labels() const;
 
     // like get_labels but filter accordingly to a container of arity_t
@@ -215,7 +215,7 @@ public:
     }
 
 protected:
-    std::vector<std::string> labels; // list of input labels
+    mutable std::vector<std::string> labels; // list of input labels
 
 private:
     std::vector<std::string> get_default_labels() const

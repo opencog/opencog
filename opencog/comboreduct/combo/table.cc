@@ -85,17 +85,16 @@ ITable::ITable(const type_tree& tt, int nsamples,
     }
 }
 
-void ITable::set_labels(vector<string> il)
+void ITable::set_labels(const vector<string>& il)
 {
     labels = il;
 }
 
 const vector<string>& ITable::get_labels() const
 {
-    if (labels.empty() and !super::empty()) { // return default labels
-        static const vector<string> dl(get_default_labels());
-        return dl;
-    } else return labels;
+    if (labels.empty() and !super::empty()) // return default labels
+        labels = get_default_labels();
+    return labels;
 }
 
 // -------------------------------------------------------
@@ -605,8 +604,10 @@ Table istreamTable(const string& file_name, int pos)
 
 ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot)
 {
-    out << ot.get_label() << ",";
-    return ostreamlnContainer(out, it.get_labels(), ",");
+    out << ot.get_label();
+    if (it.get_arity() > 0)
+        ostreamlnContainer(out << ",", it.get_labels(), ",");
+    return out;
 }
 
 string vertex_to_str(const vertex& v)
@@ -627,15 +628,10 @@ ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot)
     OC_ASSERT(it.size() == ot.size());
     for(size_t row = 0; row < it.size(); ++row) {
         // print output
-        out << vertex_to_str(ot[row]) << ",";
+        out << vertex_to_str(ot[row]);
         // print inputs
-        const auto& irow = it[row];
-        for(unsigned i = 0; i < irow.size();) {
-            out << vertex_to_str(irow[i]);
-            ++i;
-            if(i < irow.size())
-                out << ",";
-        }
+        foreach(const vertex& v, it[row])
+            out << "," << vertex_to_str(v);
         out << endl;
     }
     return out;
