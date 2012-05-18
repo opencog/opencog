@@ -34,16 +34,16 @@ using namespace combo;
 class partial_solver
 {
     public:
-        partial_solver(const std::vector<CTable> &,
-                       int,
-                       float,
-                       const type_tree&,
-                       const std::vector<combo_tree>&,
-                       const rule&,
-                       const optim_parameters&,
-                       const metapop_parameters&,
-                       const moses_parameters&,
-                       const metapop_printer&);
+        partial_solver(const vector<CTable> &ctables,
+                       int as, float noise,
+                       const type_tree& table_tt,
+                       const vector<combo_tree>& exemplars,
+                       const rule& reduct,
+                       const optim_parameters& opt_params,
+                       const metapop_parameters& meta_params,
+                       const moses_parameters& moses_params,
+                       const metapop_printer& mmr_pa);
+
         ~partial_solver();
 
         void solve();
@@ -59,16 +59,24 @@ class partial_solver
         }
 
     protected:
-        void candidates (const metapop_candidates&);
-        bool candidate (const combo_tree&);
+        void candidates(const metapop_candidates&);
+        bool candidate(const combo_tree&);
+        bool recurse();
+        void trim_table(std::vector<CTable>&,
+                        const combo_tree::iterator,
+                        unsigned& deleted,   // return value
+                        unsigned& total);    // return value
 
     private:
+
+        // Copy, more or less, or arguments, so that moses
+        // can be called with these values.
         std::vector<CTable> _ctables;
         int _alf_sz;
         float _noise;
         const type_tree& _table_type_signature;
         const std::vector<combo_tree>& _exemplars;
-        const rule& _contin_reduct;
+        const rule& _reduct;
         optim_parameters _opt_params;
         const metapop_parameters& _meta_params;
         moses_parameters _moses_params;
@@ -77,7 +85,15 @@ class partial_solver
         typedef enum_filter_bscore BScore;
         multibscore_based_bscore<BScore> *_bscore;
 
+        // Score we want to get to, at each round.
         score_t _bad_score;
+        bool _done;   // Are we there, yet?
+
+        // Use recursion to narrow the failure cases.
+        unsigned _fail_recurse_count;
+        double _best_fail_ratio;
+        combo_tree _best_fail_tree;
+        combo_tree::iterator _best_fail_pred;
 };
 
 };};

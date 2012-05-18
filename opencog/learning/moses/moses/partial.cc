@@ -34,7 +34,7 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
                                int as, float noise,
                                const type_tree& table_tt,
                                const vector<combo_tree>& exemplars,
-                               const rule& contin_reduct,
+                               const rule& reduct,
                                const optim_parameters& opt_params,
                                const metapop_parameters& meta_params,
                                const moses_parameters& moses_params,
@@ -42,9 +42,12 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
 
     :_ctables(ctables), _alf_sz(as), _noise(noise),
      _table_type_signature(table_tt),
-     _exemplars(exemplars), _contin_reduct(contin_reduct),
+     _exemplars(exemplars), _reduct(reduct),
      _opt_params(opt_params), _meta_params(meta_params),
-     _moses_params(moses_params), _mmr_pa(mmr_pa)
+     _moses_params(moses_params), _mmr_pa(mmr_pa),
+     _fail_recurse_count(0), _best_fail_ratio(1.0e30),
+     _best_fail_tree(combo_tree()),
+     _best_fail_pred(_best_fail_tree.end())
 {
 }
 
@@ -56,37 +59,55 @@ partial_solver::~partial_solver()
 /// Implements the "leave well-enough alone" algorithm.
 void partial_solver::solve()
 {
+    _done = false;
+
+    unsigned tab_sz = 0;
     boost::ptr_vector<BScore> bscores;
     foreach(const CTable& ctable, _ctables) {
         // FYI, no mem-leak, as ptr_vector seems to call delete.
         bscores.push_back(new BScore(ctable, _alf_sz, _noise));
+
+        tab_sz += ctable.uncompressed_size();
     }
     _bscore = new multibscore_based_bscore<BScore>(bscores);
 
-    _bad_score = -75;
+#define FRACTION 0.5
+    _bad_score = - floor(FRACTION * score_t(tab_sz));
 
-    for(int i=0; i<10; i++) {
-cout <<"duuude start loop =================================="<<i<<endl;
+    for(int i=0; i<100; i++) {
         _opt_params.terminate_if_gte = _bad_score;
         _moses_params.max_score = _bad_score;
 
+cout <<"duuude start loop ===================== rec="<<_fail_recurse_count <<" ======= "<<i<<" ask="<<_bad_score<<endl;
         metapop_moses_results(_exemplars, _table_type_signature,
-                              _contin_reduct, _contin_reduct, *_bscore,
+                              _reduct, _reduct, *_bscore,
                               _opt_params, _meta_params, _moses_params,
                               *this);
+        if (_done) break;
     }
+cout<<"duuu YYYYYYYYYYYYYYYYYYYYYYYYYYYYY DONE !"<<endl;
 }
 
+/// Evaluate each of the candidate solutions, see if any of the leading
+/// predicates are "good enough".  If we find one that is, then trim
+/// the scoring tables, and return (so as to run moses on the smaller
+/// problem).
 void partial_solver::candidates(const metapop_candidates& cands)
 {
+cout<<"duuude got cands sz="<<cands.size()<<endl;
     foreach(auto &item, cands) {
         const combo_tree& cand = item.first;
         if (candidate(cand)) return;
     }
 
+    if (_best_fail_ratio < 0.2) {
+        if (recurse()) return;
+    }
+
     // If we are here, then none of the candidates were any good.
     // Tighten up the score, and try again.
-    _bad_score *= 0.85;
+    // XXX this is wrong, should be fraction of the max score.
+    _bad_score = ceil(0.8 *_bad_score);
 
     foreach(BScore& bs, _bscore->bscores)
         bs.punish += 1.0;
@@ -94,6 +115,32 @@ void partial_solver::candidates(const metapop_candidates& cands)
 cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
 }
 
+/// Remove all rows from the table that satisfy the predicate.
+void partial_solver::trim_table(std::vector<CTable>& tabs,
+                                const combo_tree::iterator predicate,
+                                unsigned& deleted,   // return value
+                                unsigned& total)    // return value
+
+{
+    foreach(CTable& ctable, tabs) {
+        for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); ) {
+            const vertex_seq& vs = cit->first;
+            const CTable::counter_t& c = cit->second;
+
+            unsigned tc = c.total_count();
+            total += tc;
+
+            vertex pr = eval_throws_binding(vs, predicate);
+            if (pr == id::logical_true) {
+                deleted += tc;
+                ctable.erase(cit++);
+            }
+            else cit++;
+        }
+    }
+}
+
+/// Evaluate a single candidate
 bool partial_solver::candidate (const combo_tree& cand)
 {
 std::cout<<"duude in the candy="<<cand<<std::endl;
@@ -105,8 +152,9 @@ std::cout<<"duude in the candy="<<cand<<std::endl;
         total_score += sc;
 
     // XXX replace  by the correct compare, i.e. the orig gte.
-    if (0.0 <= total_score) {
+    if (-0.5 <= total_score) {
 std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<"\n"<<std::endl;
+        _done = true;
         return true;
     }
 std::cout<<"duuude candy score total="<<total_score<<std::endl;
@@ -118,7 +166,7 @@ std::cout<<"duuude got a const\n"<<std::endl;
         return false;
     }
 
-    OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
+    OC_ASSERT(*it == id::cond, "Error: unexpected candidate!");
 
 int total;
     // Yank out the first effective predicate, and evaluate it's accuracy
@@ -128,6 +176,7 @@ int total;
     sib_it sib = it.begin();
     sib_it predicate = sib;
     unsigned fail_count = 0;
+    unsigned good_count = 0;
     while(1) {
 
         if (is_enum_type(*it)) {
@@ -144,7 +193,7 @@ std::cout<<"duuude got an ineffective const\n"<<std::endl;
 total = 0;
         // Count how many items the first predicate mis-identifies.
         fail_count = 0;
-        unsigned good_count = 0;
+        good_count = 0;
         foreach(CTable& ctable, _ctables) {
             for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
                 const vertex_seq& vs = cit->first;
@@ -170,6 +219,13 @@ std::cout<<"duuude tot="<<total<<" fail ="<<fail_count <<" good="<<good_count<<s
 
     // If the fail count isn't zero, then punish more strongly, and try again.
     if (fail_count) {
+        double fail_ratio = double(fail_count) / double(good_count);
+        if (fail_ratio < _best_fail_ratio) {
+            _best_fail_ratio = fail_ratio;
+            _best_fail_tree = cand;
+            _best_fail_pred = predicate;
+        }
+
 cout<<"duuude non zero fail count\n"<<endl;
         return false;
     }
@@ -177,30 +233,15 @@ cout<<"duuude non zero fail count\n"<<endl;
     // If we are here, the first predicate is correctly identifying
     // all cases; we can save it, and remove all table elements that
     // it correctly identified.
-
-    total = 0;
+    unsigned total_rows = 0;
     unsigned deleted = 0;
-    foreach(CTable& ctable, _ctables) {
-        for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); ) {
-            const vertex_seq& vs = cit->first;
-            const CTable::counter_t& c = cit->second;
+    trim_table(_ctables, predicate, deleted, total_rows);
 
-            unsigned tc = c.total_count();
-            total += tc;
-
-            vertex pr = eval_throws_binding(vs, predicate);
-            if (pr == id::logical_true) {
-                deleted += tc;
-                ctable.erase(cit++);
-            }
-            else cit++;
-        }
-    }
     // XXX replace 0.5 by parameter.
     // XXX should be, ummm, less than the number of a single type in the table,
     // else a constant beats this score...
-    _bad_score = -0.45 * (score_t(total) - score_t(deleted));
-cout<<"duude deleted="<<deleted <<" out of total="<<total<< " gonna ask for score of="<<_bad_score<<endl;
+    _bad_score = -0.45 * (score_t(total_rows) - score_t(deleted));
+cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for score of="<<_bad_score<<endl;
 
     // Redo the scoring tables, as they cache the score tables (why?)
     boost::ptr_vector<BScore> bscores;
@@ -214,6 +255,40 @@ cout<<"duude deleted="<<deleted <<" out of total="<<total<< " gonna ask for scor
 
 cout<<endl;
     return true;
+}
+
+/// Recurse, and try to weed out a few more cases.
+bool partial_solver::recurse()
+{
+    if (1 < _fail_recurse_count)
+        return false;
+
+    std::vector<CTable> tabs;
+
+    // Make a copy of the tables
+    foreach(CTable& ctable, _ctables) {
+        tabs.push_back(CTable(ctable));
+    }
+
+    // Remove unwanted rows from the copy
+    unsigned total_rows = 0;
+    unsigned deleted = 0;
+    trim_table(tabs, _best_fail_pred, deleted, total_rows);
+cout<<"duude before recusion, deleted="<< deleted<<" out of="<<total_rows<<endl;
+
+    // And lets try to find a predicate that does the trick.
+    vector<combo_tree> exs;
+    partial_solver ps(tabs, 
+                      _alf_sz, _noise, _table_type_signature,
+                      exs, _reduct, _opt_params, _meta_params,
+                      _moses_params, _mmr_pa);
+
+cout<<"duuu vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"<<endl;
+    ps._fail_recurse_count++;
+    ps.solve();
+cout<<"duu ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<endl;
+
+    return false;
 }
 
 };};
