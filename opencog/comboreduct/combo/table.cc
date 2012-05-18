@@ -646,20 +646,27 @@ ostream& ostreamTable(ostream& out, const Table& table)
     return ostreamTable(out, table.itable, table.otable);
 }
 
-void ostreamTable(const string& file_name, const ITable& it, const OTable& ot) {
+void ostreamTable(const string& file_name, const ITable& it, const OTable& ot)
+{
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ofstream out(file_name.c_str());
     OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
     ostreamTable(out, it, ot);
 }
-void ostreamTable(const string& file_name, const Table& table) {
+
+void ostreamTable(const string& file_name, const Table& table)
+{
     ostreamTable(file_name, table.itable, table.otable);
 }
-ostream& ostreamCTableHeader(ostream& out, const CTable& ct) {
+
+ostream& ostreamCTableHeader(ostream& out, const CTable& ct)
+{
     out << ct.olabel << ",";
     return ostreamlnContainer(out, ct.ilabels, ",");
 }
-ostream& ostreamCTable(ostream& out, const CTable& ct) {
+
+ostream& ostreamCTable(ostream& out, const CTable& ct)
+{
     // print header
     ostreamCTableHeader(out, ct);
     // print data
