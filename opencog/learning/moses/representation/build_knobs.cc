@@ -200,13 +200,6 @@ build_knobs::logical_probe_rec(pre_it subtree,
                                bool add_if_in_exemplar,
                                unsigned n_jobs) const
 {
-// XXX FIXME  For me, MOSESUTest crashes EVERY TIME that the recrusive
-// probe is done, and never crashes (out of 12 runs) when the recursion
-// is disabled.  Also, FWIW, Helgrind complains bitterly about the code
-// below, but ... I've stared at it hard, and I can't see anything racy
-// going on.  So, I dunno... I'm disabling this for now; this should be
-// figured out and fixed ... (linas, May 2012)
-n_jobs=1;
     if (n_jobs > 1) {
         auto s_jobs = split_jobs(n_jobs);
 
@@ -216,21 +209,21 @@ n_jobs=1;
         // Copy exemplar and it for the second recursive call (this
         // has to be put before the asyncronous call to avoid
         // read/write conflicts)
-        combo_tree exemplar_copy(exemplr);
-        pre_it it_copy = exemplar_copy.begin();
-        advance(it_copy, distance(exemplr.begin(), it));
+        combo_tree exemplr_cp(exemplr);
+        pre_it it_cp = next(exemplr_cp.begin(), distance(exemplr.begin(), it));
+        pre_it subtree_cp = next(exemplr_cp.begin(), distance(exemplr.begin(), subtree));
 
         // asynchronous recursive call for [from, mid)
         future<ptr_vector<logical_subtree_knob>> f_async =
             async(launch::async,
-                  [&]() {return this->logical_probe_rec(subtree,
-                                                        exemplr, it, from, mid,
+                  [&]() {return this->logical_probe_rec(subtree, exemplr, it,
+                                                        from, mid,
                                                         add_if_in_exemplar,
                                                         s_jobs.first);});
 
         // synchronous recursive call for [mid, to) on the copy
         ptr_vector<logical_subtree_knob> kb_copy_v =
-            logical_probe_rec(subtree, exemplar_copy, it_copy, mid, to,
+            logical_probe_rec(subtree_cp, exemplr_cp, it_cp, mid, to,
                               add_if_in_exemplar, s_jobs.second);
 
         // append kb_copy_v to kb_v
