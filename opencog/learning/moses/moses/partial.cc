@@ -64,18 +64,37 @@ void partial_solver::solve()
     _bscore = new multibscore_based_bscore<BScore>(bscores);
 
     _bad_score = -75;
-for(int i=0; i<10; i++) {
-    _opt_params.terminate_if_gte = _bad_score;
-    _moses_params.max_score = _bad_score;
 
-    metapop_moses_results(_exemplars, _table_type_signature,
-                          _contin_reduct, _contin_reduct, *_bscore,
-                          _opt_params, _meta_params, _moses_params,
-                          *this);
-}
+    for(int i=0; i<10; i++) {
+cout <<"duuude start loop =================================="<<i<<endl;
+        _opt_params.terminate_if_gte = _bad_score;
+        _moses_params.max_score = _bad_score;
+
+        metapop_moses_results(_exemplars, _table_type_signature,
+                              _contin_reduct, _contin_reduct, *_bscore,
+                              _opt_params, _meta_params, _moses_params,
+                              *this);
+    }
 }
 
-void partial_solver::candidate (const combo_tree& cand)
+void partial_solver::candidates(const metapop_candidates& cands)
+{
+    foreach(auto &item, cands) {
+        const combo_tree& cand = item.first;
+        if (candidate(cand)) return;
+    }
+
+    // If we are here, then none of the candidates were any good.
+    // Tighten up the score, and try again.
+    _bad_score *= 0.85;
+
+    foreach(BScore& bs, _bscore->bscores)
+        bs.punish += 1.0;
+
+cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
+}
+
+bool partial_solver::candidate (const combo_tree& cand)
 {
 std::cout<<"duude in the candy="<<cand<<std::endl;
 
@@ -87,53 +106,72 @@ std::cout<<"duude in the candy="<<cand<<std::endl;
 
     // XXX replace  by the correct compare, i.e. the orig gte.
     if (0.0 <= total_score) {
-std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<std::endl;
-        return;
+std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<"\n"<<std::endl;
+        return true;
     }
 std::cout<<"duuude candy score total="<<total_score<<std::endl;
 
-    // We don't want constants; try again, with a tighter score bound.
+    // We don't want constants; what else we got?
     pre_it it = cand.begin();
     if (is_enum_type(*it)) {
-        _bad_score *= 0.9;
-std::cout<<"duuude got a const, try again w new score="<<_bad_score<<"\n"<<std::endl;
-        return;
+std::cout<<"duuude got a const\n"<<std::endl;
+        return false;
     }
 
     OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
 
-    // Yank out the first predicate, and evaluate it's accuracy
+int total;
+    // Yank out the first effective predicate, and evaluate it's accuracy
+    // A predicate is effective if it makes at least one correct
+    // identification.  Otherwise, it may as well be "always false"
+    // and is ineffective at identifyng anything.
     sib_it sib = it.begin();
     sib_it predicate = sib;
-    sib++;
-    vertex consequent = *sib;
-
-int total = 0;
-    // Count how many items the first predicate mis-identifies.
     unsigned fail_count = 0;
-    foreach(CTable& ctable, _ctables) {
-        for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
-            const vertex_seq& vs = cit->first;
-            const CTable::counter_t& c = cit->second;
+    while(1) {
+
+        if (is_enum_type(*it)) {
+            // If we are here, all previous predicates were ineffective.
+std::cout<<"duuude got an ineffective const\n"<<std::endl;
+            return false;
+        }
+
+        predicate = sib;
+        sib++;
+        vertex consequent = *sib;
+        sib++;
+
+total = 0;
+        // Count how many items the first predicate mis-identifies.
+        fail_count = 0;
+        unsigned good_count = 0;
+        foreach(CTable& ctable, _ctables) {
+            for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
+                const vertex_seq& vs = cit->first;
+                const CTable::counter_t& c = cit->second;
 
 total += c.total_count();
-            vertex pr = eval_throws_binding(vs, predicate);
-            if (pr == id::logical_true) {
-                if (c.total_count() != c.get(consequent)) {
-                    fail_count++;
+                vertex pr = eval_throws_binding(vs, predicate);
+                if (pr == id::logical_true) {
+                    if (c.total_count() != c.get(consequent))
+                        fail_count++;
+                    else
+                        good_count++;
                 }
             }
         }
+std::cout<<"duuude tot="<<total<<" fail ="<<fail_count <<" good="<<good_count<<std::endl;
+
+        // XXX Ineffective predicates may be due to enums that have been
+        // completely accounted for ... not sure what to do about that...
+        if (0 < good_count)
+            break;
     }
-std::cout<<"duuude tot="<<total<<" fail ="<<fail_count<<std::endl;
 
     // If the fail count isn't zero, then punish more strongly, and try again.
     if (fail_count) {
-        foreach(BScore& bs, _bscore->bscores) {
-            bs.punish += 1.0;
-        }
-cout<<endl;
-        return;
+cout<<"duuude non zero fail count\n"<<endl;
+        return false;
     }
 
     // If we are here, the first predicate is correctly identifying
@@ -175,6 +213,7 @@ cout<<"duude deleted="<<deleted <<" out of total="<<total<< " gonna ask for scor
     _bscore = new multibscore_based_bscore<BScore>(bscores);
 
 cout<<endl;
+    return true;
 }
 
 };};

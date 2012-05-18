@@ -55,11 +55,12 @@ class partial_solver
         template<typename Score, typename BScore, typename Optimization>
         void operator()(metapopulation<Score, BScore, Optimization> &metapop)
         {
-            candidate(metapop.best_tree());
+            candidates(metapop.best_candidates());
         }
 
     protected:
-        void candidate (const combo_tree& cand);
+        void candidates (const metapop_candidates&);
+        bool candidate (const combo_tree&);
 
     private:
         std::vector<CTable> _ctables;
