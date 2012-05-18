@@ -25,6 +25,7 @@
 #define _OPENCOG_ARGUMENT_H
 
 #include "common_def.h"
+#include <boost/operators.hpp>
 
 namespace opencog { namespace combo {
 
@@ -38,6 +39,8 @@ namespace opencog { namespace combo {
     third argument of the function.
 */
 class argument
+    : boost::less_than_comparable<argument>, // generate >, <= and >= given <
+      boost::equality_comparable<argument>   // generate != given ==
 {
 public:
     explicit argument(arity_t i) : idx(i) {
@@ -51,10 +54,16 @@ public:
     bool is_negated() const {
         return idx < 0;
     }
-    bool operator<(argument rhs) const {
+
+    bool operator<(const argument& rhs) const {
         static opencog::absolute_value_order<int> comp;
         return comp(idx, rhs.idx);
     }
+
+    bool operator==(const argument& rhs) const {
+        return idx == rhs.idx;
+    }
+
     arity_t abs_idx() const {
         return idx < 0 ? -idx : idx;
     }
@@ -75,12 +84,6 @@ public:
     // else if a<0 then idx<-a
     bool is_idx_valid(arity_t a) const {
         return (idx == 0 ? false : (a > 0 ? abs_idx() <= a : abs_idx() < -a));
-    }
-    bool operator==(argument rhs) const {
-        return idx == rhs.idx;
-    }
-    bool operator!=(argument rhs) const {
-        return idx != rhs.idx;
     }
 };
 

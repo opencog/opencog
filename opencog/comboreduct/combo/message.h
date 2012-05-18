@@ -27,6 +27,7 @@
 #include <ostream>
 #include <set>
 #include <string>
+#include <boost/operators.hpp>
 
 #define COMBO_MESSAGE_PREFIX "message:"
 
@@ -35,11 +36,13 @@ namespace opencog { namespace combo {
 // message is essentially a string but is coded as a different type
 // than definite_object, because it semantically denotes something else.
 class message
+    : boost::less_than_comparable<message>, // generate >, <= and >= given <
+      boost::equality_comparable<message>   // generate != given ==
 {
 private:
     std::string _content;
 public:
-    message(std::string m) {
+    message(const std::string& m) {
         _content = m;
     }
 
@@ -47,26 +50,15 @@ public:
         return _content;
     }
 
-    // @todo: this operator is used for scoring, and so the string
-    // compare may make things slow... perhaps we should use a map
-    // the same way that enum_t does.
-    bool operator==(message m) const {
-        return _content==m.getContent();
+    /// @todo: this operator is used for scoring, and so the string
+    /// compare may make things slow... perhaps we should use a map
+    /// the same way that enum_t does.
+    bool operator==(const message& m) const {
+        return _content == m.getContent();
     }
-    bool operator!=(message m) const {
-        return _content!=m.getContent();
-    }
-    bool operator<(message m) const {
-        return _content<m.getContent();
-    }
-    bool operator<=(message m) const {
-        return _content<=m.getContent();
-    }
-    bool operator>(message m) const {
-        return _content>m.getContent();
-    }
-    bool operator>=(message m) const {
-        return _content>=m.getContent();
+
+    bool operator<(const message& m) const {
+        return _content < m.getContent();
     }
     
     static std::string prefix() {

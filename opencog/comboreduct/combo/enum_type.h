@@ -28,6 +28,7 @@
 #include <ostream>
 #include <string>
 #include <boost/thread.hpp>
+#include <boost/operators.hpp>
 
 #define COMBO_ENUM_TYPE_PREFIX "enum_type:"
 
@@ -37,6 +38,8 @@ namespace opencog { namespace combo {
 // than definite_object (or message), because it semantically denotes
 // something else.
 class enum_t
+    : boost::less_than_comparable<enum_t>, // generate >, <= and >= given <
+      boost::equality_comparable<enum_t> // generate != given ==
 {
 private:
     unsigned id;
@@ -73,23 +76,13 @@ public:
         return _content;
     }
 
-    bool operator==(enum_t m) const {
+    bool operator==(const enum_t& m) const {
         return id == m.id;
     }
-    bool operator!=(enum_t m) const {
-        return id != m.id;
-    }
-    bool operator<(enum_t m) const {
+
+    bool operator<(const enum_t& m) const {
+        /// XXX Why are we not using id?
         return _content < m.getContent();
-    }
-    bool operator<=(enum_t m) const {
-        return _content <= m.getContent();
-    }
-    bool operator>(enum_t m) const {
-        return _content > m.getContent();
-    }
-    bool operator>=(enum_t m) const {
-        return _content >= m.getContent();
     }
     
     static std::string prefix() {
