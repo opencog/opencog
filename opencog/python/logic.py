@@ -16,6 +16,8 @@ from pprint import pprint
 from util import log
 
 from collections import defaultdict
+import random
+random.seed(42)
 
 import formulas
 import rules
@@ -160,7 +162,8 @@ class Chainer:
         #print 'bcq', map(str, self.bc_later)
         #next_target = self.bc_later.pop_first() # Breadth-first search
         #next_target = self.bc_later.pop_last() # Depth-first search
-        next_target = self.get_fittest(self.bc_later) # Best-first search
+        #next_target = self.get_fittest(self.bc_later) # Best-first search
+        next_target = self.select_stochastic()
 
         next_target = standardize_apart(next_target)
 
@@ -785,6 +788,62 @@ class Chainer:
         queue.remove(best)
         
         return best
+
+    def select_stochastic(self):
+        '''Choose a PDN to explore next. Based on the first part of Monte Carlo Tree Search.
+        Currently only uses the best confidence found in a subtree - the things used in
+        bc_score are now redundant.'''
+        next_expr_pdn = self.select_stochastic_helper(self.expr2pdn(self.target))
+        return next_expr_pdn.op
+        
+    def select_stochastic_helper(self, expr_pdn):
+        if expr_pdn.is_leaf():
+            return expr_pdn
+        else:
+            sub_expr_pdns = []
+            for app_pdn in expr_pdn.args:
+                # This will automatically skip rules with no goals
+                # (e.g. the rule for just looking up an existing atom)
+                for subexpr_pdn in app_pdn.args:
+                    sub_expr_pdns.append(subexpr_pdn)
+            
+            # It has been expanded but either a) all the apps are axioms
+            # or b) it was impossible to produce it. The following while loop
+            # will continue trying out results until something useful is found.
+            # It might be simpler to record/update the "number of descendents" in each PDN
+            if len(sub_expr_pdns) == 0:
+                return None
+            
+            def get_score(pdn):
+                # The score needs to allow exploring things with no existing results
+                return pdn.best_conf_below + 1.0
+            
+            # The probability of choosing a subtree = the probability of it being the best one.
+            # You will usually need more than one subtree (because most rules require more than one goal,
+            # and you can also combine results using revision)
+            while len(sub_expr_pdns):
+                total_score = sum(get_score(s) for s in sub_expr_pdns)
+                probs = [get_score(s)/total_score for s in sub_expr_pdns]
+                # won't work because of floating point error
+                #assert sum(probs) == 1
+                
+                r = random.random()
+                index = 0
+                while (r > 0):
+                    r -= probs[index]
+                    index += 1
+                
+                # We want the last index it saw before r < 0
+                index -=1
+    
+                next_expr_pdn = sub_expr_pdns[index]
+                potential_result = self.select_stochastic_helper(next_expr_pdn)
+                if (potential_result is None):
+                    del sub_expr_pdns[index]
+                else:
+                    return potential_result
+            
+            return None
 
 def do_planning(space):
     try:
