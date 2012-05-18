@@ -447,13 +447,6 @@ void ctruth_table_bscore::set_complexity_coef(float alphabet_size, float p)
 // enum_table_bscore //
 /////////////////////////
         
-enum_table_bscore::enum_table_bscore(const CTable& _ctt,
-                                     float alphabet_size, float p)
-    : ctable(_ctt)
-{
-    set_complexity_coef(alphabet_size, p);
-}
-
 behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
 {
     behavioral_score bs;
@@ -511,10 +504,60 @@ void enum_table_bscore::set_complexity_coef(float alphabet_size, float p)
 {
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
-    // comment above enum_table_bscore definition)
+    // comment above ctruth_table_bscore definition)
     occam = p > 0.0f && p < 0.5f;
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
+}
+
+/////////////////////////
+// enum_filter_bscore //
+/////////////////////////
+        
+behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
+{
+    behavioral_score bs;
+
+    typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::iterator pre_it;
+
+    pre_it it = tr.begin();
+    if (is_enum_type(*it)) 
+        return enum_table_bscore::operator()(tr);
+
+    OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
+    sib_it sib = it.begin();
+    sib_it predicate = sib;
+    sib++;
+    vertex consequent = *sib;
+
+    // Evaluate the bscore components for all rows of the ctable
+    foreach (const CTable::value_type& vct, ctable) {
+        const vertex_seq& vs = vct.first;
+        const CTable::counter_t& c = vct.second;
+
+        unsigned total = c.total_count();
+
+        // The number that are wrong equals total minus num correct.
+        score_t sc = score_t(c.get(eval_binding(vs, tr)));
+        sc -= score_t(total);
+
+        // Punish the first predicate, if it is wrong.
+        vertex pr = eval_throws_binding(vs, predicate);
+        if (pr == id::logical_true) {
+            if (total != c.get(consequent)) sc -= punish;
+        }
+
+        bs.push_back(sc);
+    }
+
+    // Add the Occam's razor feature
+    if (occam)
+        bs.push_back(tree_complexity(tr) * complexity_coef);
+
+    log_candidate_bscore(tr, bs);
+
+    return bs;
 }
 
 //////////////////////////////////

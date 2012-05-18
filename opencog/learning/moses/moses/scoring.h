@@ -590,7 +590,12 @@ struct enum_table_bscore : public bscore_base
     {
         set_complexity_coef(alphabet_size, p);
     }
-    enum_table_bscore(const CTable& _ctt, float alphabet_size, float p);
+
+    enum_table_bscore(const CTable& _ctt, float alphabet_size, float p)
+        : ctable(_ctt)
+    {
+        set_complexity_coef(alphabet_size, p);
+    }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -600,12 +605,41 @@ struct enum_table_bscore : public bscore_base
 
     score_t min_improv() const;
 
-private:
+protected:
     void set_complexity_coef(float alphabet_size, float p);
     
     CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
+};
+
+/**
+ * Like enum_table_bscore but promotes accuracy of the first predicate.
+ *
+ * The goal of this scorer is to find predicates that act like filters:
+ * that is, the first pedicate of a condition statement must never be
+ * inaccurate (must never mis-identify its consequent; must never issue
+ * a false positive). The scorer accomplises this by adding a penalty
+ * to the score whenever the first predicate is inaccurate.  The penalty
+ * amount is user-adjustable.
+ */
+struct enum_filter_bscore : public enum_table_bscore
+{
+    template<typename Func>
+    enum_filter_bscore(const Func& func, arity_t arity,
+                      float alphabet_size, float p, int nsamples = -1)
+        : enum_table_bscore(func, arity, alphabet_size, p, nsamples),
+          punish(1.0)
+    {}
+
+    enum_filter_bscore(const CTable& _ctt, float alphabet_size, float p)
+        : enum_table_bscore(_ctt, alphabet_size, p),
+          punish(1.0)
+    {}
+
+    behavioral_score operator()(const combo_tree& tr) const;
+
+    score_t punish;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured
