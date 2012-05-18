@@ -179,27 +179,27 @@ inline bool operator!=(builtin h, const vertex& v)
 }
 
 //wild_card == vertex
-inline bool operator==(const vertex& v, wild_card w)
+inline bool operator==(const vertex& v, const wild_card& w)
 {
     if (const wild_card* vw = boost::get<wild_card>(&v))
         return (*vw == w);
     return false;
 }
-inline bool operator==(wild_card w, const vertex& v)
+inline bool operator==(const wild_card& w, const vertex& v)
 {
     return (w == v);
 }
-inline bool operator!=(const vertex& v, wild_card w)
+inline bool operator!=(const vertex& v, const wild_card& w)
 {
     return !(v == w);
 }
-inline bool operator!=(wild_card w, const vertex& v)
+inline bool operator!=(const wild_card& w, const vertex& v)
 {
     return !(v == w);
 }
 
 //action == vertex
-inline bool operator==(const vertex& v, action a)
+inline bool operator==(const vertex& v, const action& a)
 {
     if (const action* va = boost::get<action>(&v))
         return (*va == a);
@@ -259,22 +259,22 @@ inline bool operator!=(perception p, const vertex& v)
 }
 
 //definite_object == vertex
-inline bool operator==(const vertex& v, definite_object d)
+inline bool operator==(const vertex& v, const definite_object& d)
 {
     if (const definite_object*
             vd = boost::get<definite_object>(&v))
         return (*vd == d);
     return false;
 }
-inline bool operator==(definite_object d, const vertex& v)
+inline bool operator==(const definite_object& d, const vertex& v)
 {
     return (v == d);
 }
-inline bool operator!=(const vertex& v, definite_object d)
+inline bool operator!=(const vertex& v, const definite_object& d)
 {
     return !(v == d);
 }
-inline bool operator!=(definite_object d, const vertex& v)
+inline bool operator!=(const definite_object& d, const vertex& v)
 {
     return !(v == d);
 }
@@ -325,41 +325,41 @@ inline bool operator!=(ann_ids a,const vertex& v)
 */
 
 // enum_t == vertex
-inline bool operator==(const vertex& v, enum_t m)
+inline bool operator==(const vertex& v, const enum_t& m)
 {
     if (const enum_t* vm = boost::get<enum_t>(&v))
         return (*vm == m);
     return false;
 }
-inline bool operator==(enum_t m, const vertex& v)
+inline bool operator==(const enum_t& m, const vertex& v)
 {
     return (v == m);
 }
-inline bool operator!=(const vertex& v, enum_t m)
+inline bool operator!=(const vertex& v, const enum_t& m)
 {
     return !(v == m);
 }
-inline bool operator!=(enum_t m, const vertex& v)
+inline bool operator!=(const enum_t& m, const vertex& v)
 {
     return !(v == m);
 }
 
 // message == vertex
-inline bool operator==(const vertex& v, message m)
+inline bool operator==(const vertex& v, const message& m)
 {
     if (const message* vm = boost::get<message>(&v))
         return (*vm == m);
     return false;
 }
-inline bool operator==(message m, const vertex& v)
+inline bool operator==(const message& m, const vertex& v)
 {
     return (v == m);
 }
-inline bool operator!=(const vertex& v, message m)
+inline bool operator!=(const vertex& v, const message& m)
 {
     return !(v == m);
 }
-inline bool operator!=(message m, const vertex& v)
+inline bool operator!=(const message& m, const vertex& v)
 {
     return !(v == m);
 }
