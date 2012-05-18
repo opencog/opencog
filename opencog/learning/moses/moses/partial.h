@@ -65,16 +65,18 @@ class partial_solver
         std::vector<CTable> _ctables;
         int _alf_sz;
         float _noise;
-        type_tree _table_type_signature;
-        std::vector<combo_tree> _exemplars;
+        const type_tree& _table_type_signature;
+        const std::vector<combo_tree>& _exemplars;
         const rule& _contin_reduct;
         optim_parameters _opt_params;
-        metapop_parameters _meta_params;
+        const metapop_parameters& _meta_params;
         moses_parameters _moses_params;
-        metapop_printer _mmr_pa;
+        const metapop_printer& _mmr_pa;
 
         typedef enum_table_bscore BScore;
         multibscore_based_bscore<BScore> *_bscore;
+
+        score_t _bad_score;
 };
 
 };};
