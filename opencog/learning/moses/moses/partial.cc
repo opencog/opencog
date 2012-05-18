@@ -58,13 +58,13 @@ void partial_solver::solve()
 {
     boost::ptr_vector<BScore> bscores;
     foreach(const CTable& ctable, _ctables) {
-       // FYI, no mem-leak, as ptr_vector seems to call delete.
-       bscores.push_back(new BScore(ctable, _alf_sz, _noise));
+        // FYI, no mem-leak, as ptr_vector seems to call delete.
+        bscores.push_back(new BScore(ctable, _alf_sz, _noise));
     }
     _bscore = new multibscore_based_bscore<BScore>(bscores);
 
     _bad_score = -75;
-for(int i=0; i<5; i++) {
+for(int i=0; i<10; i++) {
     _opt_params.terminate_if_gte = _bad_score;
     _moses_params.max_score = _bad_score;
 
@@ -78,71 +78,98 @@ for(int i=0; i<5; i++) {
 void partial_solver::candidate (const combo_tree& cand)
 {
 std::cout<<"duude in the candy="<<cand<<std::endl;
-behavioral_score bsa = _bscore->operator()(cand);
-int total = 0;
-foreach(const score_t& sc, bsa) {
- total += sc;
-}
-std::cout<<"duuude candy score total="<<total<<std::endl;
 
-    combo_tree trim(cand);
+    // Are we done yet?
+    behavioral_score bs = _bscore->operator()(cand);
+    score_t total_score = 0.0;
+    foreach(const score_t& sc, bs)
+        total_score += sc;
 
-    // Trim down the candidate to just its first predicate.
-    pre_it it = trim.begin();
+    // XXX replace  by the correct compare, i.e. the orig gte.
+    if (0.0 <= total_score) {
+std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<std::endl;
+        return;
+    }
+std::cout<<"duuude candy score total="<<total_score<<std::endl;
+
+    // We don't want constants; try again, with a tighter score bound.
+    pre_it it = cand.begin();
+    if (is_enum_type(*it)) {
+        _bad_score *= 0.9;
+std::cout<<"duuude got a const, try again w new score="<<_bad_score<<"\n"<<std::endl;
+        return;
+    }
+
     OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
 
+    // Yank out the first predicate, and evaluate it's accuracy
     sib_it sib = it.begin();
+    sib_it predicate = sib;
     sib++;
-    sib_it rest = sib;
-    rest++;
-    while (rest != it.end()) {
-        trim.erase(rest++);
+    vertex consequent = *sib;
+
+int total = 0;
+    // Count how many items the first predicate mis-identifies.
+    unsigned fail_count = 0;
+    foreach(CTable& ctable, _ctables) {
+        for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
+            const vertex_seq& vs = cit->first;
+            const CTable::counter_t& c = cit->second;
+
+total += c.total_count();
+            vertex pr = eval_throws_binding(vs, predicate);
+            if (pr == id::logical_true) {
+                if (c.total_count() != c.get(consequent)) {
+                    fail_count++;
+                }
+            }
+        }
     }
-    // Replace the final consequent with a bogus value so that
-    // it always scores badly.
-    trim.insert_after(sib, enum_t::invalid_enum());
-cout<<"trim="<<trim<<endl;
+std::cout<<"duuude tot="<<total<<" fail ="<<fail_count<<std::endl;
 
-    behavioral_score bs = _bscore->operator()(trim);
+    // If the fail count isn't zero, then punish more strongly, and try again.
+    if (fail_count) {
+        foreach(BScore& bs, _bscore->bscores) {
+            bs.punish += 1.0;
+        }
+cout<<endl;
+        return;
+    }
 
-total = 0;
-foreach(const score_t& sc, bs) {
- total += sc;
-}
-std::cout<<"duuude trim score total="<<total<<std::endl;
+    // If we are here, the first predicate is correctly identifying
+    // all cases; we can save it, and remove all table elements that
+    // it correctly identified.
 
-    
-    // Evaluate the bscore components for all rows of the ctable
-    score_t deleted = 0;
     total = 0;
+    unsigned deleted = 0;
     foreach(CTable& ctable, _ctables) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); ) {
             const vertex_seq& vs = cit->first;
             const CTable::counter_t& c = cit->second;
-            total += c.total_count();
-            // The number that are wrong equals total minus num correct.
-            int sc = c.get(eval_binding(vs, trim));
-            sc -= c.total_count();
-            if (0 == sc) {
-                deleted += c.total_count();
+
+            unsigned tc = c.total_count();
+            total += tc;
+
+            vertex pr = eval_throws_binding(vs, predicate);
+            if (pr == id::logical_true) {
+                deleted += tc;
                 ctable.erase(cit++);
             }
             else cit++;
         }
     }
-std::cout<<"duuude tot="<<total<<" deleted ="<<deleted<<std::endl;
-
-    // XXX replace /2 by paramter.
-    _bad_score = -(total-deleted)/2;
-cout<<"duude gonna ask for score of="<<_bad_score<<endl;
+    // XXX replace 0.5 by parameter.
+    // XXX should be, ummm, less than the number of a single type in the table,
+    // else a constant beats this score...
+    _bad_score = -0.45 * (score_t(total) - score_t(deleted));
+cout<<"duude deleted="<<deleted <<" out of total="<<total<< " gonna ask for score of="<<_bad_score<<endl;
 
     // Redo the scoring tables, as they cache the score tables (why?)
     boost::ptr_vector<BScore> bscores;
     foreach(const CTable& ctable, _ctables) {
-cout<<"new table="<<ctable<<endl;
-       // FYI, no mem-leak, as ptr_vector seems to call delete.
-       // XXX !?!?! relly?  as we've got a lifetime problem here.
-       bscores.push_back(new BScore(ctable, _alf_sz, _noise));
+        // FYI, no mem-leak, as ptr_vector seems to call delete.
+        // XXX !?!?! relly?  as we've got a lifetime problem here.
+        bscores.push_back(new BScore(ctable, _alf_sz, _noise));
     }
     delete _bscore;
     _bscore = new multibscore_based_bscore<BScore>(bscores);
