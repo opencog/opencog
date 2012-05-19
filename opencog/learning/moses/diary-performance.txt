@@ -1607,22 +1607,24 @@ apart.  But in fact, case B has the more accurate predicate (even if
 its a tad ineffective), and so should be scored higher.  This is
 implemented in the 'enum_graded_bscore' function, and measured below.
 
-This is measuring the implementation of bzr rev 6932, 19 May 2012.
-Note: the 10K scores are *identical* to the pevious scores, and are
-obtained about 5% more slowly :-(
+Below is the measurement of the implementation of bzr rev 6933, on
+19 May 2012.  It uses the enum_graded_bscore scorer.  To make it
+directly comparable, the "straight score" was also computed via a
+hack tacked onto the code.
 
 
-           -m10K           -m20K           -m40K            -m80K
-:     time scor plex   time scor plex  time scor plex   time scor plex
--r0:    67    5   8    
--r1:    57   11   9     
--r2:    47   46   9     
--r3:    86   50   5     
--r4:    62   54   6     
--r5:    88    6   7     
--r6:    42   50   4      
--r7:    86   50   5     
--r8:    72   41  10     
--r9:    58    6   7     
+          -m10K      straight    -m20K    straight       -m40K   
+:    time  score plex  score time scor plex  score    time scor plex   
+-r0:  129  3.23   11    5     279  3.23  11    5
+-r1:   87  0.95   14    4     301  0.95  14    4
+-r2:  119  4.16   11    6     274  4.16  11    6
+-r3:   99  2.95   15   43     311  1.21  19   43
+-r4:   88  2.06   10    6     225  2.06  10    6
+-r5:   90  3.69   15   43     298  1.51  18   43
+-r6:  139  3.54   12    5 
+-r7:  151 17.28   12   27  
+-r8:   78  3.43   14   50  
+-r9:   92  2.00   10    5
+
 
 
