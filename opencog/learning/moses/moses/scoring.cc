@@ -526,10 +526,8 @@ behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
         return enum_table_bscore::operator()(tr);
 
     OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
-    sib_it sib = it.begin();
-    sib_it predicate = sib;
-    sib++;
-    vertex consequent = *sib;
+    sib_it predicate = it.begin();
+    vertex consequent = *next(predicate);
 
     // Evaluate the bscore components for all rows of the ctable
     foreach (const CTable::value_type& vct, ctable) {
@@ -545,9 +543,73 @@ behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
         // Punish the first predicate, if it is wrong.
         vertex pr = eval_throws_binding(vs, predicate);
         if (pr == id::logical_true) {
-            if (total != c.get(consequent)) sc -= punish;
+            if (total != c.get(consequent))
+                sc -= punish * total;
         }
 
+        bs.push_back(sc);
+    }
+
+    // Add the Occam's razor feature
+    if (occam)
+        bs.push_back(tree_complexity(tr) * complexity_coef);
+
+    log_candidate_bscore(tr, bs);
+
+    return bs;
+}
+
+/////////////////////////
+// enum_graded_bscore //
+/////////////////////////
+        
+behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
+{
+    behavioral_score bs;
+
+    typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::iterator pre_it;
+
+    pre_it it = tr.begin();
+    if (is_enum_type(*it)) 
+        return enum_table_bscore::operator()(tr);
+
+    OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
+
+    // Evaluate the bscore components for all rows of the ctable
+    foreach (const CTable::value_type& vct, ctable) {
+        const vertex_seq& vs = vct.first;
+        const CTable::counter_t& c = vct.second;
+
+        unsigned total = c.total_count();
+        score_t weight = 1.0;
+
+        sib_it predicate = it.begin();
+        // The number that are wrong equals total minus num correct.
+        score_t sc = -score_t(total);
+        while (1) {
+    
+            // The first true predicate terminates.
+            vertex pr = eval_throws_binding(vs, predicate);
+            if (pr == id::logical_true) {
+                vertex consequent = *next(predicate);
+                sc += c.get(consequent);
+                sc *= weight;
+                break;
+            }
+
+            // advance
+            predicate = next(predicate, 2);
+            weight *= grading;
+
+            // Is it the last one, the else clause?
+            if (is_enum_type(*predicate)) {
+                vertex consequent = *predicate;
+                sc += c.get(consequent);
+                sc *= weight;
+                break;
+            }
+        }
         bs.push_back(sc);
     }
 

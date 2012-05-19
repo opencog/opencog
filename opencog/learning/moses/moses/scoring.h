@@ -567,7 +567,16 @@ private:
 };
 
 /**
- * Like ctruth_bscore but for enums.
+ * Like ctruth_table_bscore, but for enums.
+ * That is, the output column of the table is assumed to be enum-valued.
+ * The only "tricky" thing here is to correctly count the number of
+ * wrong answers in a compressed enum table.
+ *
+ * Do not use this scorer with "cond" conditionals returning enum.
+ * It will work, but moses cannot learn efficiently with this scorer.
+ * That is because the "straight" scorring it performs does not provide
+ * any hints as to when a given predicate is correct or not.  Use the
+ * enum_graded_bascore instead; see there for further explanation.
  *
  * The CTable ctt holds the "compressed" data table, consisting of
  * rows of input (independent) variables, and a single output
@@ -607,14 +616,19 @@ struct enum_table_bscore : public bscore_base
 
 protected:
     void set_complexity_coef(float alphabet_size, float p);
-    
+
     CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
 };
 
 /**
- * Like enum_table_bscore but promotes accuracy of the first predicate.
+ * Like enum_table_bscore, but promotes accuracy of the first predicate.
+ * This scorer assumes that the output column of the table is
+ * enum-valued, and that the tree to be scored is a "cond" conditional.
+ *
+ * Recall: cond conditionals have the structure:
+ *   cond(pred_1 val_1 pred_2 val_2 ... pred_n val_n else_val)
  *
  * The goal of this scorer is to find predicates that act like filters:
  * that is, the first pedicate of a condition statement must never be
@@ -622,6 +636,11 @@ protected:
  * a false positive). The scorer accomplises this by adding a penalty
  * to the score whenever the first predicate is inaccurate.  The penalty
  * amount is user-adjustable.
+ *
+ * The enum_graded_bscore acheives the same effect as this scorer, but
+ * employs a superior algorithm: it promotes the accuracy of all
+ * predicates.  You probably want to use that one instead.  See the
+ * explanation there for more details.
  */
 struct enum_filter_bscore : public enum_table_bscore
 {
@@ -640,6 +659,58 @@ struct enum_filter_bscore : public enum_table_bscore
     behavioral_score operator()(const combo_tree& tr) const;
 
     score_t punish;
+};
+
+/**
+ * Like enum_filter_bscore, but encourages accuracy of all predicates.
+ * This scorer assumes that the output column of the table is
+ * enum-valued, and that the tree to be scored is a "cond" conditional.
+ *
+ * Recall: cond conditionals have the structure:
+ *   cond(pred_1 val_1 pred_2 val_2 ... pred_n val_n else_val)
+ *
+ * This scorer makes up for a deficiency with the enum_table_scorer
+ * with regards learning cond's.  Consider, for example, two different
+ * cond statements being evaluated on a single row.  Case A: pred_1
+ * evaluates to true, but val_1 gives the wrong answer.  Case B:
+ * pred_1 evaluates to false, thus 'feinting ignorance' of what to do,
+ * or 'punting', to the rest of the cond chain to sort it out. And
+ * suppose that the rest of the cond chain returns the wrong answer.
+ * If we were to score these equally, then MOSES cannot tell them apart,
+ * an exerts no selection pressure.  However, case B has a more accurate
+ * pred_1, in that it is not making any false-positive identiications.
+ *
+ * This scorer will assign a higher score to case B than to case A,
+ * thus encouraging a more accurate pred_1.  Likewise, whenever these
+ * two cases arise for pred_2..pred_n, this scorer will also encourage
+ * the more accurate case B.
+ *
+ * The enum_filter_bscore scorer also gave a higher score to case B, but
+ * only for pred_1; it did not distinguish the two cases for the other
+ * predicates in the chain.
+ *
+ * The value of 'grading' should lie between 0.0 and 1.0. Setting it to
+ * 1.0 recovers the behaviour of enum_table_score, exactly.  Values
+ * between 0.5 and 0.8 probably work best; but this needs experimental
+ * measurement.
+ */
+struct enum_graded_bscore : public enum_table_bscore
+{
+    template<typename Func>
+    enum_graded_bscore(const Func& func, arity_t arity,
+                      float alphabet_size, float p, int nsamples = -1)
+        : enum_table_bscore(func, arity, alphabet_size, p, nsamples),
+          grading(0.8)
+    {}
+
+    enum_graded_bscore(const CTable& _ctt, float alphabet_size, float p)
+        : enum_table_bscore(_ctt, alphabet_size, p),
+          grading(0.8)
+    {}
+
+    behavioral_score operator()(const combo_tree& tr) const;
+
+    score_t grading;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured
