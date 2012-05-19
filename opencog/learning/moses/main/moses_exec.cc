@@ -967,7 +967,7 @@ int moses_exec(int argc, char** argv)
 
                 // --------- Enumerated output type
                 else if (output_type == id::enum_type) {
-#if 0
+#if 1
                     // This is ifdef'd out, replaced by the
                     // "leave well-enough alone" algorithm. It gives
                     // a hint at the original, but dumb, implementation.
@@ -984,12 +984,14 @@ int moses_exec(int argc, char** argv)
                                opt_params, meta_params, moses_params,
                                mmr_pa);
 
-#endif
-                    partial_solver well(ctables, as, noise, table_type_signature,
+#else
+                    partial_solver well(ctables, as, noise,
+                                        table_type_signature,
                                         exemplars, contin_reduct,
                                         opt_params, meta_params,
                                         moses_params, mmr_pa);
                     well.solve();
+#endif
                 }
 
                 // --------- Contin output type

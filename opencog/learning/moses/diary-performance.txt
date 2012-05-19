@@ -1558,6 +1558,7 @@ based on the dimensions of their leaves, etc.
 Basic command line:
 moses -i iris.data -u5  -n sin -n log -n exp -n div
 i.e. we don't want any of the higher math functions.
+Data collected early May, circa bzr revision 6889 or a little earlier.
 
            -m10K           -m20K           -m40K            -m80K
 :     time scor plex   time scor plex  time scor plex   time scor plex
@@ -1592,8 +1593,36 @@ Wow.. the lack of forward progress is stunning.
 Idea: If the leading conditions in a cond acheive perfect score on
 their target, leave them alone, and stop evolving them.  Instead,
 focus on what's left.  This could/should improve convergence
-significantly.  .. Doesn't have to be perfect; jus better than
-some threshold...
+significantly.  .. Doesn't have to be perfect; just better than
+some threshold..
 
+Idea two: The scoring function 'enum_table_bscore' used for the above
+failed to promote accurate conditional statements.  That is, it gave
+exactly the same score to two inequivalent cases: case A, where a 
+predicate evals to true, but its consequent is wrong, and case B,
+where the predicate evaluates to false, leaving the final determination
+to the rest of the cond clauses, which also happen to provide a wrong
+answer.  By giving these two the same score, MOSES cannot tell them
+apart.  But in fact, case B has the more accurate predicate (even if
+its a tad ineffective), and so should be scored higher.  This is
+implemented in the 'enum_graded_bscore' function, and measured below.
+
+This is measuring the implementation of bzr rev 6932, 19 May 2012.
+Note: the 10K scores are *identical* to the pevious scores, and are
+obtained about 5% more slowly :-(
+
+
+           -m10K           -m20K           -m40K            -m80K
+:     time scor plex   time scor plex  time scor plex   time scor plex
+-r0:    67    5   8    
+-r1:    57   11   9     
+-r2:    47   46   9     
+-r3:    86   50   5     
+-r4:    62   54   6     
+-r5:    88    6   7     
+-r6:    42   50   4      
+-r7:    86   50   5     
+-r8:    72   41  10     
+-r9:    58    6   7     
 
 

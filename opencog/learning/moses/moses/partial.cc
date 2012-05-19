@@ -234,8 +234,8 @@ std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<"\n"<<std::endl;
 std::cout<<"duuude candy score total="<<total_score<<std::endl;
 
     // Next time around, we need to beat this best score.
-    if (_bad_score < total_score)
-        _bad_score = ceil (0.8*total_score);
+    if (_bad_score <= total_score)
+        _bad_score = ceil (0.9*total_score + 1.0);
 
     // We don't want constants; what else we got?
     pre_it it = cand.begin();

@@ -1151,7 +1151,7 @@ struct metapopulation : public bscored_combo_tree_set
         else {
             logger().info()
                << "The following candidate(s) have the best score "
-               << best_score();
+               << best_composite_score();
             foreach(const bscored_combo_tree& cand, best_candidates()) {
                 logger().info() << "" << get_tree(cand);
             }
