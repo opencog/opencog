@@ -117,14 +117,60 @@ cout<<"duuude got cands sz="<<cands.size()<<endl;
 #endif
 
     // If we are here, then none of the candidates were any good.
+#if 0
     // Tighten up the score, and try again.
     // XXX this is wrong, should be fraction of the max score.
+    // _bad_score = ceil(0.8 * _bad_score);
 
+    // XXX too much punishment just trains for ineffectual first predicates.
     foreach(BScore& bs, _bscore->bscores)
         bs.punish *= 1.5;
+#endif
+    // If we are here, then none of the candidates were any good.
+    // Try again, priming the metapop with the previous best.
+    _exemplars.clear();
+    foreach(auto &item, cands) {
+        const combo_tree& cand = item.first;
+        _exemplars.push_back(cand);
+    }
+
 
 cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
 }
+
+/// Compute the effectiveness of the predicate.
+/// That is, return how many answers it got right, and how many got
+/// flat-out wrong.
+void partial_solver::effective(combo_tree::iterator pred,
+                       unsigned& good_count,  // return value
+                       unsigned& fail_count)  //return value
+{
+    sib_it predicate = pred;
+    sib_it conq = next(predicate);
+    vertex consequent = *conq;
+
+int total=0;
+    // Count how many items the first predicate mis-identifies.
+    foreach(CTable& ctable, _ctables) {
+        for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
+            const vertex_seq& vs = cit->first;
+            const CTable::counter_t& c = cit->second;
+
+total += c.total_count();
+            vertex pr = eval_throws_binding(vs, predicate);
+            if (pr == id::logical_true) {
+                unsigned num_right = c.get(consequent);
+                unsigned num_total = c.total_count();
+                if (num_right != num_total)
+                    fail_count += num_total - num_right;
+                else
+                    good_count += num_right;
+            }
+        }
+    }
+std::cout<<"duuude effective tot="<<total<<" fail ="<<fail_count <<" good="<<good_count<<std::endl;
+}
+
 
 /// Remove all rows from the table that satisfy the predicate.
 void partial_solver::trim_table(std::vector<CTable>& tabs,
@@ -170,18 +216,19 @@ std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<"\n"<<std::endl;
     }
 std::cout<<"duuude candy score total="<<total_score<<std::endl;
 
+    // Next time around, we need to beat this best score.
+    if (_bad_score < total_score)
+        _bad_score = ceil (0.8*total_score);
+
     // We don't want constants; what else we got?
     pre_it it = cand.begin();
     if (is_enum_type(*it)) {
-        if (_bad_score < total_score)
-            _bad_score = total_score;
 std::cout<<"duuude got a const\n"<<std::endl;
         return false;
     }
 
     OC_ASSERT(*it == id::cond, "Error: unexpected candidate!");
 
-int total;
     // Yank out the first effective predicate, and evaluate it's accuracy
     // A predicate is effective if it makes at least one correct
     // identification.  Otherwise, it may as well be "always false"
@@ -192,7 +239,7 @@ int total;
     unsigned good_count = 0;
     while(1) {
 
-        if (is_enum_type(*it)) {
+        if (is_enum_type(*sib)) {
             // If we are here, all previous predicates were ineffective.
 std::cout<<"duuude got an ineffective const\n"<<std::endl;
             return false;
@@ -200,29 +247,12 @@ std::cout<<"duuude got an ineffective const\n"<<std::endl;
 
         predicate = sib;
         sib++;
-        vertex consequent = *sib;
         sib++;
 
-total = 0;
         // Count how many items the first predicate mis-identifies.
         fail_count = 0;
         good_count = 0;
-        foreach(CTable& ctable, _ctables) {
-            for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
-                const vertex_seq& vs = cit->first;
-                const CTable::counter_t& c = cit->second;
-
-total += c.total_count();
-                vertex pr = eval_throws_binding(vs, predicate);
-                if (pr == id::logical_true) {
-                    if (c.total_count() != c.get(consequent))
-                        fail_count++;
-                    else
-                        good_count++;
-                }
-            }
-        }
-std::cout<<"duuude tot="<<total<<" fail ="<<fail_count <<" good="<<good_count<<std::endl;
+        effective(predicate, good_count, fail_count);
 
         // XXX Ineffective predicates may be due to enums that have been
         // completely accounted for ... not sure what to do about that...
@@ -230,7 +260,8 @@ std::cout<<"duuude tot="<<total<<" fail ="<<fail_count <<" good="<<good_count<<s
             break;
     }
 
-    // If the fail count isn't zero, then punish more strongly, and try again.
+    // If the fail count isn't zero, at least try to find the most graceful
+    // winner.
     if (fail_count) {
         double fail_ratio = double(fail_count) / double(good_count);
         if (fail_ratio < _best_fail_ratio) {
@@ -265,6 +296,30 @@ cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for
     }
     delete _bscore;
     _bscore = new multibscore_based_bscore<BScore>(score_seq);
+
+    // Prime the pump with the remainder of what had been learned.
+    combo_tree fresh(cand);
+    pre_it fit = fresh.begin();
+    sib_it fsib = fit.begin();
+    sib_it fpred = next(fsib, distance(it.begin(), predicate));
+    while(1) {
+
+        if (is_enum_type(*fsib))
+            break;
+
+        if (fsib == fpred) {
+            fresh.erase(fsib++);
+            fresh.erase(fsib++);
+            break;
+        }
+
+        fresh.erase(fsib++);
+        fresh.erase(fsib++);
+    }
+cout<<"duuude resh exemplar="<<fresh<<endl;
+
+    _exemplars.clear();
+    _exemplars.push_back(fresh);
 
 cout<<endl;
     return true;

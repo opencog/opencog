@@ -74,6 +74,9 @@ class partial_solver
         void candidates(const metapop_candidates&);
         bool candidate(const combo_tree&);
         bool recurse();
+        void effective(combo_tree::iterator,
+                       unsigned& good_count,  // return value
+                       unsigned& fail_count); //return value
         void trim_table(std::vector<CTable>&,
                         const combo_tree::iterator,
                         unsigned& deleted,   // return value
@@ -87,7 +90,7 @@ class partial_solver
         int _alf_sz;
         float _noise;
         const type_tree& _table_type_signature;
-        const std::vector<combo_tree>& _exemplars;
+        std::vector<combo_tree> _exemplars;
         const rule& _reduct;
         optim_parameters _opt_params;
         const metapop_parameters& _meta_params;
