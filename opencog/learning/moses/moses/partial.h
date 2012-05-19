@@ -55,7 +55,19 @@ class partial_solver
         template<typename Score, typename BScore, typename Optimization>
         void operator()(metapopulation<Score, BScore, Optimization> &metapop)
         {
-            candidates(metapop.best_candidates());
+            _num_evals = metapop.n_evals();
+
+            if ((_moses_params.max_evals <= _num_evals) ||
+                metapop.empty())
+                _done = true;
+
+            // _num_gens = metapop.??? FIXME
+
+            if (!_done)
+                candidates(metapop.best_candidates());
+
+            if (_done)
+                _printer(metapop);
         }
 
     protected:
@@ -80,14 +92,18 @@ class partial_solver
         optim_parameters _opt_params;
         const metapop_parameters& _meta_params;
         moses_parameters _moses_params;
-        const metapop_printer& _mmr_pa;
+        const metapop_printer& _printer;
 
         typedef enum_filter_bscore BScore;
         multibscore_based_bscore<BScore> *_bscore;
 
-        // Score we want to get to, at each round.
-        score_t _bad_score;
+        score_t _bad_score; // Score we want to get to, at each round.
+        int _num_evals;  // number of evaluations
+        int _num_gens;   // number of generations
         bool _done;   // Are we there, yet?
+
+        // XXX object lifetime weirdness ... 
+        boost::ptr_vector<BScore> score_seq;
 
         // Use recursion to narrow the failure cases.
         unsigned _fail_recurse_count;

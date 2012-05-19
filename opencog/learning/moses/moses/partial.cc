@@ -44,7 +44,7 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _table_type_signature(table_tt),
      _exemplars(exemplars), _reduct(reduct),
      _opt_params(opt_params), _meta_params(meta_params),
-     _moses_params(moses_params), _mmr_pa(mmr_pa),
+     _moses_params(moses_params), _printer(mmr_pa),
      _fail_recurse_count(0), _best_fail_ratio(1.0e30),
      _best_fail_tree(combo_tree()),
      _best_fail_pred(_best_fail_tree.end())
@@ -59,26 +59,35 @@ partial_solver::~partial_solver()
 /// Implements the "leave well-enough alone" algorithm.
 void partial_solver::solve()
 {
+    _num_gens = 0;
     _done = false;
 
     unsigned tab_sz = 0;
-    boost::ptr_vector<BScore> bscores;
+    score_seq.clear();
     foreach(const CTable& ctable, _ctables) {
         // FYI, no mem-leak, as ptr_vector seems to call delete.
-        bscores.push_back(new BScore(ctable, _alf_sz, _noise));
+        // XXX??? That's just weird/wrong -- double check this.
+        score_seq.push_back(new BScore(ctable, _alf_sz, _noise));
 
         tab_sz += ctable.uncompressed_size();
     }
-    _bscore = new multibscore_based_bscore<BScore>(bscores);
+    _bscore = new multibscore_based_bscore<BScore>(score_seq);
 
 #define FRACTION 0.5
+    // XXX this is wrong, should be delta on best_possible score.
     _bad_score = - floor(FRACTION * score_t(tab_sz));
 
-    for(int i=0; i<100; i++) {
+int i=0;
+    while(1) {
+        if (_moses_params.max_evals <= _num_evals) break; 
+
         _opt_params.terminate_if_gte = _bad_score;
         _moses_params.max_score = _bad_score;
+        _moses_params.max_evals -= _num_evals;
+        _moses_params.max_gens -= _num_gens; // XXX wrong
 
-cout <<"duuude start loop ===================== rec="<<_fail_recurse_count <<" ======= "<<i<<" ask="<<_bad_score<<endl;
+cout <<"duuude start loop ===================== rec="<<_fail_recurse_count <<" ======= "<<i++<<" ask="<<_bad_score<<endl;
+cout <<"duuude ================= nev="<<_num_evals <<" max_ev= "<<_moses_params.max_evals<<endl;
         metapop_moses_results(_exemplars, _table_type_signature,
                               _reduct, _reduct, *_bscore,
                               _opt_params, _meta_params, _moses_params,
@@ -100,17 +109,19 @@ cout<<"duuude got cands sz="<<cands.size()<<endl;
         if (candidate(cand)) return;
     }
 
+#if 0
+// XXX disable recursion for now, its actually harder than it seems.
     if (_best_fail_ratio < 0.2) {
         if (recurse()) return;
     }
+#endif
 
     // If we are here, then none of the candidates were any good.
     // Tighten up the score, and try again.
     // XXX this is wrong, should be fraction of the max score.
-    _bad_score = ceil(0.8 *_bad_score);
 
     foreach(BScore& bs, _bscore->bscores)
-        bs.punish += 1.0;
+        bs.punish *= 1.5;
 
 cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
 }
@@ -162,6 +173,8 @@ std::cout<<"duuude candy score total="<<total_score<<std::endl;
     // We don't want constants; what else we got?
     pre_it it = cand.begin();
     if (is_enum_type(*it)) {
+        if (_bad_score < total_score)
+            _bad_score = total_score;
 std::cout<<"duuude got a const\n"<<std::endl;
         return false;
     }
@@ -240,18 +253,18 @@ cout<<"duuude non zero fail count\n"<<endl;
     // XXX replace 0.5 by parameter.
     // XXX should be, ummm, less than the number of a single type in the table,
     // else a constant beats this score...
-    _bad_score = -0.45 * (score_t(total_rows) - score_t(deleted));
+    _bad_score = -floor(0.45 * (score_t(total_rows) - score_t(deleted)));
 cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for score of="<<_bad_score<<endl;
 
     // Redo the scoring tables, as they cache the score tables (why?)
-    boost::ptr_vector<BScore> bscores;
+    score_seq.clear();
     foreach(const CTable& ctable, _ctables) {
         // FYI, no mem-leak, as ptr_vector seems to call delete.
         // XXX !?!?! relly?  as we've got a lifetime problem here.
-        bscores.push_back(new BScore(ctable, _alf_sz, _noise));
+        score_seq.push_back(new BScore(ctable, _alf_sz, _noise));
     }
     delete _bscore;
-    _bscore = new multibscore_based_bscore<BScore>(bscores);
+    _bscore = new multibscore_based_bscore<BScore>(score_seq);
 
 cout<<endl;
     return true;
@@ -277,11 +290,14 @@ bool partial_solver::recurse()
 cout<<"duude before recusion, deleted="<< deleted<<" out of="<<total_rows<<endl;
 
     // And lets try to find a predicate that does the trick.
-    vector<combo_tree> exs;
+    combo_tree tr(id::cond);
+    tr.append_child(tr.begin(), enum_t::get_random_enum());
+    vector<combo_tree> exempls;
+    exempls.push_back(tr);
     partial_solver ps(tabs, 
                       _alf_sz, _noise, _table_type_signature,
-                      exs, _reduct, _opt_params, _meta_params,
-                      _moses_params, _mmr_pa);
+                      exempls, _reduct, _opt_params, _meta_params,
+                      _moses_params, _printer);
 
 cout<<"duuu vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"<<endl;
     ps._fail_recurse_count++;
