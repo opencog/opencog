@@ -106,7 +106,10 @@ void partial_solver::candidates(const metapop_candidates& cands)
 cout<<"duuude got cands sz="<<cands.size()<<endl;
     foreach(auto &item, cands) {
         const combo_tree& cand = item.first;
-        if (candidate(cand)) return;
+        if (candidate(cand)) {
+            refresh(cands, cand);
+            return;
+        }
     }
 
 #if 0
@@ -194,6 +197,20 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
             }
             else cit++;
         }
+    }
+}
+
+/// Refresh the exemplars list.
+/// We assume the previous list wasn't bad, but since we've handled the
+/// leading predicate already, we don't need it.  Chop it off.
+void partial_solver::refresh(const metapop_candidates& cands,
+                             const combo_tree& curr_cand)
+{
+    foreach(auto &item, cands) {
+        const combo_tree& cand = item.first;
+        if (cand == curr_cand)
+             continue;  // We already trimmed this one down, earlier.
+        _exemplars.push_back(cand);
     }
 }
 

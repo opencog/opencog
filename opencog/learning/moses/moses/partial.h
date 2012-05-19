@@ -81,6 +81,8 @@ class partial_solver
                         const combo_tree::iterator,
                         unsigned& deleted,   // return value
                         unsigned& total);    // return value
+        void refresh(const metapop_candidates&,
+                     const combo_tree&);
 
     private:
 
