@@ -509,11 +509,28 @@ Recommended values lie in the range of 1 to 10, with a default of 4.
 .TP
 .BI \-z\  ratio \fR,\ \fB\-\-complexity\-ratio= ratio
 Fix the ratio of raw score to complexity, when ranking the 
-metapopulation for fitness.  Setting this ratio too low causes the 
-complexity to dominate ranking, possibly trapping the algorithm in a 
-local maximum.  Setting this ratio too high will add too much noise to the 
-metapopulation, preventing a solution from being found.  Recommended
-values would be in the range from 1 to 5; with 3.5 as the default.
+metapopulation for fitness.  Typically, improving the raw score by
+one point requires that the complexity of the model to improve by 
+(approximately) \fIN\fR bits. The algorithm will learn most easily
+if this value of \fIN\fR is declared with this option.
+
+Setting the ratio too low causes the algorithm to ignore the more 
+complex solutions, ranking them in a way so that they are not much
+explored. Thus, the algorithm may get trapped examining only the
+simplest solutions, which are probably inappropriate.
+
+Setting this ratio too high will add too much noise to the 
+metapopulation, preventing a solution from being found.  That is, the
+algorithm may spend too much time evaluating overly-complex solutions,
+being unaware of good, simple solutions. 
+
+The relationship between the score change and the complexity change
+is very strongly data-dependent, and must (currently) be manually
+determined (although it might be possible to measure it automatically).
+Input data tables with lots of almost-duplicate data may have very low
+ratios; complex problems with sparse data may have very high ratios.
+Initial recommended values would be in the range from 1 to 5;
+with 3.5 as the default.
 .TP
 .BI \-Z1\fR,\ \fB\-\-hc\-crossover=1
 Controls hill-climbing algorithm behaviour.  If false (the default),

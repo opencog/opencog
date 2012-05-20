@@ -490,7 +490,7 @@ behavioral_score enum_table_bscore::best_possible_bscore() const
               });
 
     // add the Occam's razor feature
-    if(occam)
+    if (occam)
         bs.push_back(0);
     return bs;
 }

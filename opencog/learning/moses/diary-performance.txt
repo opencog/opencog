@@ -1613,18 +1613,65 @@ directly comparable, the "straight score" was also computed via a
 hack tacked onto the code.
 
 
-          -m10K      straight    -m20K    straight       -m40K   
-:    time  score plex  score time scor plex  score    time scor plex   
--r0:  129  3.23   11    5     279  3.23  11    5
--r1:   87  0.95   14    4     301  0.95  14    4
--r2:  119  4.16   11    6     274  4.16  11    6
--r3:   99  2.95   15   43     311  1.21  19   43
--r4:   88  2.06   10    6     225  2.06  10    6
--r5:   90  3.69   15   43     298  1.51  18   43
--r6:  139  3.54   12    5 
--r7:  151 17.28   12   27  
--r8:   78  3.43   14   50  
--r9:   92  2.00   10    5
+          -m10K    straight      -m20K    straight     -m40K     straight
+:    time  score plex score  time score plex score  time score plex score   
+-r0:  129  3.23   11    5     279  3.23  11    5     610  3.23  11    5
+-r1:   87  0.95   14    4     301  0.95  14    4     759  0.95  14    4
+-r2:  119  4.16   11    6     274  4.16  11    6     605  4.16  11    6
+-r3:   99  2.95   15   43     311  1.21  19   43     821  1.12  19   50
+-r4:   88  2.06   10    6     225  2.06  10    6     521  2.16   9    6
+-r5:   90  3.69   15   43     298  1.51  18   43     787  1.12  19   50
+-r6:  139  3.54   12    5     326  3.54  12    5     721  3.54  12    5
+-r7:  151 17.28   12   27     360 17.28  12   27     839 17.28  12   27
+-r8:   78  3.43   14   50     301  1.33  19   20     829  0.34  18    5
+-r9:   92  2.01   10    5     224  2.01  10    5     512  2.01  10    5
+
+Some amount of forward progress is seen.  Biggest problem seems to be
+that complexity-ratio works funny on this, since the scoring steps
+vary in size.  The complexity should probably be scored using the same
+grading ratio, in order to keep things constant... XXX TODO this.
+
+Yeah, that's gotta be it ... a good start, and then lack of progress: 
+which means the complexity is too expensive for a given small score step,
+so the complexity measure is not allowing the complexity to get larger
+for the later terms...
+
+I also suspect some of these have completely ineffective clauses ...
+e.g. -r3 !?  ... Hmmm... If these occur early in the cond clause sequence,
+they do nothing but drop the score ... but if one day, they mutate to get
+a few things right, well, that's mostly harmlesss, yeah?
+
+          -m80K    straight               straight               straight
+:    time  score plex score  time score plex score  time score plex score   
+-r0: 1329  3.23   11    5     
+-r1: 1704  0.95   14    4     
+-r2: 1327  4.16   11    6     
+-r3: 2058  1.40   18   50     
+-r4: 1248  2.06   10    6     
+-r5: 2179  0.24   22   11     
+-r6: 1687  3.54   12    5     
+-r7: 2005 10.72   12   14     
+-r8: 1912  0.37   17    5     
+-r9: 1228  2.01   10    5     
 
 
+OK, so how the hell does occam work? For boolean:
+http://groups.google.com/group/opencog/browse_thread/thread/a4771ecf63d38df
+
+ * Briefly after reduction of
+ * LL(M) = -|M|*log(|A|) + Sum_{x\in D1} log(p) + Sum_{x\in D2} log(1-p)
+ *
+ * one gets the following log-likelihood
+ * |M|*log|A|/log(p/(1-p)) - |D1|
+ * with p<0.5 and |D1| the number of outputs that match
+
+Given 
+probability p that "one datum is wrong"
+float alphabet_size = 3+arity for boolean.
+
+bool occam = p > 0.0f && p < 0.5f;
+complexity_coef = discrete_complexity_coef(alphabet_size, p);
+                = -log((double)alphabet_size) / log(p/(1-p));
+
+score += tree_complexity(tr) * complexity_coef
 

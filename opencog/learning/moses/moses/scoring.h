@@ -60,7 +60,7 @@ struct score_base : public unary_function<combo_tree, score_t>
 {
     // Evaluate the candidate tr
     virtual score_t operator()(const combo_tree& tr) const = 0;
-    
+
     // Return the best possible score achievable with that fitness
     // function. This is useful in order to stop running MOSES when
     // the best possible score is reached.
@@ -75,13 +75,13 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
 {
     // Evaluate the candidate tr
     virtual behavioral_score operator()(const combo_tree& tr) const = 0;
-    
+
     // Return the best possible bscore achievable with that fitness
     // function. This is useful in order to stop running MOSES when
     // the best possible score is reached
     virtual behavioral_score best_possible_bscore() const = 0;
 
-    // Return the minimum value considered for improvement    
+    // Return the minimum value considered for improvement
     virtual score_t min_improv() const = 0;
 };
 
@@ -94,7 +94,7 @@ struct bscore_base : public unary_function<combo_tree, behavioral_score>
  */
 /// @todo Inheriting that class from score_base raises a compile error
 /// because in moses_exec.h some code attempts to use BScore that does
-/// does not contain best_possible_bscore(). Specifically, the 
+/// does not contain best_possible_bscore(). Specifically, the
 /// BScoreACache and ScoreACache typedefs do this. However, this begs
 /// a question: why do we need a base class anyway, if we're not going
 /// to need it? ??
@@ -156,7 +156,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     {
         return bscore.min_improv();
     }
-    
+
     const BScore& bscore;
 };
 
@@ -242,7 +242,7 @@ struct multibscore_based_bscore : public bscore_base
             res = min(res, bs.min_improv());
         return res;
     }
-    
+
     BScoreSeq bscores;
 };
 
@@ -378,7 +378,7 @@ struct discretize_contin_bscore : public bscore_base
     behavioral_score best_possible_bscore() const;
 
     score_t min_improv() const;
-    
+
     OTable target;
     ITable cit;
     vector<contin_t> thresholds;
@@ -428,7 +428,7 @@ protected:
  * constant we can ignore P(D), so:
  *
  *    LL(M) = log(dP(D|M)) + log(P(M))
- * 
+ *
  * Assume the output of M on input x has a Guassian noise of mean M(x)
  * and variance v, so dP(D|M) (the density probability)
  *
@@ -466,8 +466,8 @@ struct contin_bscore : public bscore_base
         default:
             OC_ASSERT(false);
         }
-    };        
-    
+    };
+
     template<typename Scoring>
     contin_bscore(const Scoring& score, const ITable& r,
                   float alphabet_size, float stdev,
@@ -498,7 +498,7 @@ struct contin_bscore : public bscore_base
     behavioral_score best_possible_bscore() const;
 
     score_t min_improv() const;
-    
+
     OTable target;
     ITable cti;
     bool occam;
@@ -527,17 +527,88 @@ private:
  *
  * Regarding the program size penalty, instead of considering a
  * standard deviation of the output, the probability p that one datum
- * is wrong is used.
+ * is wrong is used.  Note that we expect p to be small; certainly
+ * much less than 1/2 (as p=1/2 means half our data is wrong!)
  *
- * The details are in this thread
+ * To summarize, the end result is the log-likelihood LL(M) that the
+ * model M is correct:
+ *
+ *     LL(M) = -|M|*log(|A|) + |D_ne| log(p/(1-p)) + |D| log(1-p)
+ *
+ * which may be re-interpreted as a score:
+ *
+ *     score(M) = - [ LL(M) - |D| log(1-p) ] / log(p/(1-p))
+ *              = -|D_ne| + |M|*log|A| / log(p/(1-p))
+ *
+ * where |D_ne| is the number of outputs that are incorrect, and |M| is
+ * the complexity of the model, and |A| is the alphabets size employed
+ * in the model.
+ *
+ * -------------------------------------------------------------------
+ * To summarize, if any of the entries in the data table are incorrect,
+ * with some probability p, this is equivalent to raising the score by
+ * an amount proportional to the model complexity.
+ * -------------------------------------------------------------------
+ *
+ * The details were originally reported in this thread,
  * http://groups.google.com/group/opencog/browse_thread/thread/a4771ecf63d38df
+ * and are restated, cleaned up, below:
  *
- * Briefly after reduction of
- * LL(M) = -|M|*log(|A|) + Sum_{x\in D1} log(p) + Sum_{x\in D2} log(1-p)
+ * M is the model (the combo program)
+ * D is the data, a table of n inputs i_k and one output o
+ *     i_1 ... i_n o
  *
- * one gets the following log-likelihood
- * |M|*log|A|/log(p/(1-p)) - |D1|
- * with p<0.5 and |D1| the number of outputs that match
+ * where i_k is the k'th input and o the output.  We want to assess
+ * P(M|D) and, in particular, maximize it, as it is the fitness function.
+ * According to Bayes
+ *
+ *     P(M|D) = P(D|M) * P(M) / P(D)
+ *
+ * Consider the log likelihood of M knowing D.  Since D is constant,
+ * we can ignore P(D), so:
+ *
+ *     LL(M) = log(P(D|M)) + log(P(M))
+ *
+ * Assume each output of M on input x has probability p to be wrong.  So,
+ *
+ *     P(D|M) = Prod_{x\in D} [p*(M(x) != D(x)) + (1-p)*(M(x) == D(x))]
+ *
+ * where D(x) the observed result given input x.  Then,
+ *
+ *     log P(D|M) = Sum_{x\in D} log[p*(M(x) != D(x)) + (1-p)*(M(x) == D(x))]
+ *
+ * Let D = D_eq \cup D_ne  where D_eq and D_ne are the sets
+ *
+ *     D_eq = {x \in D | M(x) == D(x) }
+ *     D_ne = {x \in D | M(x) != D(x) }
+ *
+ * Then
+ *
+ *     log P(D|M) = Sum_{x\in D_ne} log(p) + Sum_{x\in D_eq} log(1-p)
+ *                = |D_ne| log(p) + |D_eq| log(1-p)
+ *                = |D_ne| log(p) + |D| log(1-p) - |D_ne| log(1-p)
+ *                = |D_ne| log(p/(1-p)) + |D| log(1-p)
+ *
+ * Here, |D| is simply the size of set D, etc.  Assuming that p is
+ * small, i.e. much less than one, then, to second order in p:
+ *
+ *    log(1-p) = -p + p^2/2 + O(p^3)
+ *
+ * So:
+ *
+ *    log P(D|M) = |D_ne| log(p) - p (|D| - |D_ne|) + O(p^2)
+ *
+ * Next, assume P(M) is distributed according to Solomonoff's Universal
+ * Distribution, approximated by (for now)
+ *
+ *     P(M) = |A|^-|M|
+ *          = exp(-|M|*log(|A|))
+ *
+ * where A is the alphabet of the model, and |M| is the complexity of
+ * the model.  Putting it all together, the log-likelihood of M is:
+ *
+ *     LL(M) = -|M|*log(|A|) + |D_ne| log(p/(1-p)) + |D| log(1-p)
+ *
  */
 struct ctruth_table_bscore : public bscore_base
 {
@@ -560,7 +631,7 @@ struct ctruth_table_bscore : public bscore_base
 
 private:
     void set_complexity_coef(float alphabet_size, float p);
-    
+
     CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.
     score_t complexity_coef;
@@ -820,7 +891,7 @@ struct distance_based_scorer : public unary_function<instance,
         // Logger
         if(logger().isFineEnabled()) {
             stringstream ss;
-            ss << "distance_based_scorer - Evaluate instance: " 
+            ss << "distance_based_scorer - Evaluate instance: "
                << fs.stream(inst) << std::endl << "Score = " << sc << std::endl;
             logger().fine(ss.str());
         }
@@ -847,7 +918,7 @@ struct complexity_based_scorer : public unary_function<instance,
         // Logger
         if (logger().isFineEnabled()) {
             stringstream ss;
-            ss << "complexity_based_scorer - Evaluate instance: " 
+            ss << "complexity_based_scorer - Evaluate instance: "
                << _rep.fields().stream(inst);
             logger().fine(ss.str());
         }
@@ -858,7 +929,7 @@ struct complexity_based_scorer : public unary_function<instance,
             return composite_score(score(tr), tree_complexity(tr));
         } catch (...) {
             stringstream ss;
-            ss << "The following instance has failed to be evaluated: " 
+            ss << "The following instance has failed to be evaluated: "
                << _rep.fields().stream(inst);
             logger().fine(ss.str());
             return worst_composite_score;
