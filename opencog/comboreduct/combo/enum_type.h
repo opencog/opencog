@@ -91,7 +91,7 @@ public:
     }
 
     /// Return some randome enum out of the pool of all of them.
-    static const enum_t& get_random_enum();
+    static enum_t get_random_enum();
     static size_t size() {
         return enum_map.size();
     }
