@@ -156,42 +156,71 @@ static bool contains_type(const type_tree_pre_it it, id::type_node ty)
 
 /**
  * Determine the alphabet size given the type_tree of the problem and
- * a list of operators to ignore.
+ * a list of operators to ignore.  This is a somewhat ad-hoc value,
+ * meant to help compute the complexity ratio.
  */
-int alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
+unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
 {
+    unsigned as = 0;
     // arity will be zero for anything that isn't a lambda_type.
     // However, all tables will be lambda_type ...
     combo::arity_t arity = type_tree_arity(tt);
-
     type_node output_type = get_type_node(type_tree_output_type_tree(tt));
-    if (output_type == id::boolean_type) {
-        return 3 + arity;
-    } else if (output_type == id::contin_type) {
-        // Set alphabet size, 8 is roughly the number of operators
-        // in contin formula, it will have to be adapted
-        // Well, there could be a mix of booleans too.
-        return 8 + arity - ignore_ops.size();
-    } else if (output_type == id::enum_type) {
 
-        // Try to take into account a table with both booleans and
-        // contins.
-        type_tree_pre_it ttl = tt.begin();
+    switch (output_type) {
+        case id::boolean_type:
+            // 3 operators: and, or, not
+            as = 3 + arity;
+            break;
 
-        if (contains_type(ttl, id::contin_type))
-            arity += 8 - ignore_ops.size();
+        case id::contin_type:
+            // Set alphabet size, 8 is roughly the number of operators
+            // in contin formula, it will have to be adapted
+            // Well, there could be a mix of booleans too.
+            as = 8 + arity - ignore_ops.size();
+            break;
 
-        if (contains_type(ttl, id::boolean_type)) 
-            arity += 3;
+        case id::enum_type: {
 
-        return arity;
+            // Try to take into account a table with both booleans and
+            // contins.
+            type_tree_pre_it ttl = tt.begin();
 
-    } else if (output_type == id::ann_type) {
-        return 2 + arity*arity; // to account for hidden neurons, very roughly
-    } else {
-        unsupported_type_exit(tt);
-        return 0;
+            as = arity + enum_t::size();
+
+            if (contains_type(ttl, id::contin_type))
+                as += 8 - ignore_ops.size();
+
+            if (contains_type(ttl, id::boolean_type)) 
+                as += 3;
+
+            break;
+        }
+        case id::ann_type:
+
+            as = 2 + arity*arity; // to account for hidden neurons, very roughly
+            break;
+
+        case id::lambda_type:
+        case id::application_type:
+        case id::union_type:
+        case id::arg_list_type:
+        case id::action_result_type:
+        case id::definite_object_type:
+        case id::action_definite_object_type:
+        case id::indefinite_object_type:
+        case id::message_type:
+        case id::action_symbol_type:
+        case id::wild_card_type:
+        case id::unknown_type:
+        case id::ill_formed_type:
+        default:
+            unsupported_type_exit(tt);
     }
+
+    logger().info() << "Alphabet size = " << as
+                    << " output = " << output_type;
+    return as;
 }
 
 //* Convert string to a combo_tree
@@ -288,6 +317,7 @@ combo::arity_t infer_arity(const string& problem,
         return -1;
     }
 }
+
 
 int moses_exec(int argc, char** argv)
 {
@@ -974,7 +1004,7 @@ int moses_exec(int argc, char** argv)
                     //
                     // Much like the boolean type above, just a
                     // slightly different scorer.
-                    typedef enum_table_bscore BScore;
+                    typedef enum_graded_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
                     foreach(const CTable& ctable, ctables)
                         bscores.push_back(new BScore(ctable, as, noise));
@@ -1212,11 +1242,15 @@ int moses_exec(int argc, char** argv)
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
-        type_tree tt = gen_signature(id::boolean_type, arity);
+        type_tree sig = gen_signature(id::boolean_type, arity);
+        unsigned as = alphabet_size(sig, ignore_ops); 
+
+        // XXX would it be faster to use ctruth ??
+        // ctruth_table_bscore bscore(func, arity, as, noise, 1<<arity);
         logical_bscore bscore(func, arity);
-        // int as = alphabet_size(tt, ignore_ops); // TODO can be simplified
-        // ctruth_table_bscore bscore(func, arity, as, noise, nsamples);
-        metapop_moses_results(exemplars, tt,
+        bscore.set_complexity_coef(as, noise);
+
+        metapop_moses_results(exemplars, sig,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);
     }

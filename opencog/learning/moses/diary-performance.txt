@@ -1641,37 +1641,123 @@ e.g. -r3 !?  ... Hmmm... If these occur early in the cond clause sequence,
 they do nothing but drop the score ... but if one day, they mutate to get
 a few things right, well, that's mostly harmlesss, yeah?
 
-          -m80K    straight               straight               straight
-:    time  score plex score  time score plex score  time score plex score   
--r0: 1329  3.23   11    5     
--r1: 1704  0.95   14    4     
--r2: 1327  4.16   11    6     
--r3: 2058  1.40   18   50     
--r4: 1248  2.06   10    6     
--r5: 2179  0.24   22   11     
--r6: 1687  3.54   12    5     
--r7: 2005 10.72   12   14     
--r8: 1912  0.37   17    5     
--r9: 1228  2.01   10    5     
+          -m80K    straight       -m160K   straight               straight
+:    time  score plex score  time  score plex score  time score plex score   
+-r0: 1329  3.23   11    5    2939  3.23   11    5 
+-r1: 1704  0.95   14    4    3657  0.99   13    4
+-r2: 1327  4.16   11    6    2907  4.16   11    6
+-r3: 2058  1.40   18   50    4340  0.94   16   11
+-r4: 1248  2.06   10    6    2745  2.29    8    6
+-r5: 2179  0.24   22   11    4846  0.75   17   11
+-r6: 1687  3.54   12    5    3557  3.54   12    5 
+-r7: 2005 10.72   12   14    3885 10.72   12   14
+-r8: 1912  0.37   17    5    3700  1.15   12    5
+-r9: 1228  2.01   10    5    2570  2.01   10    5 
 
 
 OK, so how the hell does occam work? For boolean:
 http://groups.google.com/group/opencog/browse_thread/thread/a4771ecf63d38df
+OK, a better explanation now in moses/scoring.h
 
- * Briefly after reduction of
- * LL(M) = -|M|*log(|A|) + Sum_{x\in D1} log(p) + Sum_{x\in D2} log(1-p)
- *
- * one gets the following log-likelihood
- * |M|*log|A|/log(p/(1-p)) - |D1|
- * with p<0.5 and |D1| the number of outputs that match
+ *     score(M) = - [ LL(M) - |D| log(1-p) ] / log(p/(1-p))
+ *              = -|D_ne| + |M|*log|A| / log(p/(1-p))
 
-Given 
-probability p that "one datum is wrong"
-float alphabet_size = 3+arity for boolean.
+Note that log(p) is negative, so the total contribution to the score is
+negative: more complex models are penalized.   But this is exactly
+opposite from what we want:  we want to encourage more complex models
+to be explored, as these are the most likely to be mutated into good
+models.  So, although the math derivation is "interesting", it fails
+completely to give us the correct guidance for training.  Sigh. 
 
-bool occam = p > 0.0f && p < 0.5f;
-complexity_coef = discrete_complexity_coef(alphabet_size, p);
-                = -log((double)alphabet_size) / log(p/(1-p));
+Anyway: the 'occam bias' code in moses/scoring.cc:
 
-score += tree_complexity(tr) * complexity_coef
+    complexity_coef = discrete_complexity_coef(alphabet_size, p);
+                    = -log((double)alphabet_size) / log(p/(1-p));
+
+    score += tree_complexity(tr) * complexity_coef
+
+Compare to complexity temperature:  in moses/metapopulation.h:
+
+     composite_score::weight = params.complexity_ratio;
+
+and in moses/types.cc:
+
+     // compare weight*score + complexity
+
+Based on this, we have: 
+
+     complexity-ratio = -log(p/(1-p)) / log |A|
+
+as the equivalent to the -z flag for moses-exec.  For p small this is
+
+     complexity-ratio = -log(p) / log|A|
+
+The way I use it/describe this, is "the model has to get N bits more
+complex to improve the score by 1 point"  where N == complexity_ratio
+In the metapop, during exemplar selection, this means that badly-scoring,
+more complex exemplars the same as well-scoring, low-complexity exemplars.
+The hope was that, magically, the crappy, complex exemplar can be mutated
+into a high-scoring one.
+
+==========
+Regression test: parity performance complexity-ratio vs. occam.
+
+Goal is to verify that the occam code is really doing what we expect it
+to do.  Which means that running with with the -z flag and the -p flag
+should give the same results, for appropriate values.
+
+So:
+     complexity-ratio = -log(p/(1-p)) / log |A|    == 3.5
+
+     p/(1-p) = exp (-complexity-ratio log |A| )    == 0.001101937
+
+     p = exp / (1+exp)                             == 0.001100724
+
+Where: alphabet_size = 3+arity for boolean = 7 for parity-4
+double-check: log 7 = 1.9459  ln p/1-p = −6.811786852
+
+Need to adjust temperature as well: 
+Currently:
+      prob = exp (weighted_score *100 / temp);
+           = exp ((weight * raw_score + complexity) * 100 / temp)
+           = exp ((raw_score + complexity/weight) * 100 * weight / temp)
+           = exp ( occam_score * 100 */ (temp/weight))
+
+so temp should be 5/3.5 = 1.428571429
+
+
+"rech" is bzr rev 6666; its copied from tables above.
+       As above, moses-perf -Hpa -k4 -z3.5 -v5 -m350000
+
+"r6935" is bzr rev 6935; not sure why average performance is so much
+       worse;  there's no obvious reason for the regression.
+       As above, moses-perf -Hpa -k4 -z3.5 -v5 -m350000
+
+"occam" is bzr rev 6935, with scoring hacks, with the altered command line:
+       moses-perf -Hpa -k4 -m350000 -z"-0.1" -v1.428571429 -p0.001100724
+
+       rech  r6935  occam
+-r0:     22    305
+-r1:     58     40
+-r2:     88    407
+-r3:    167     25
+-r4:     43     28
+-r5:     21     27
+-r6:    111     29
+-r7:    191    232
+-r8:    193     42
+-r9:     75    360
+-r10:    33     79
+-r11:   134     66
+-r12:    20    151
+-r13:   120     23
+-r14:   115    132
+-r15:    71    357
+-r16:    49    136
+-r17:   246    136
+-r18:   100    172
+-r19:     5    179
+
+avg:     93    146
+
 
