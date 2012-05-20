@@ -265,8 +265,15 @@ struct logical_bscore : public bscore_base
 
     score_t min_improv() const;
 
+    void set_complexity_coef(unsigned alphabet_size, float p);
+    void set_complexity_coef(score_t complexity_ratio);
+
+private:
     complete_truth_table target;
     int arity;
+
+    bool occam; // If true, then Occam's razor is taken into account.
+    score_t complexity_coef;
 };
 
 // Used to define the complexity scoring component given that p is the
@@ -452,7 +459,7 @@ struct contin_bscore : public bscore_base
         abs_error
     };
 
-    void init(float alphabet_size, float stdev,
+    void init(unsigned alphabet_size, float stdev,
               err_function_type eft = squared_error) {
         occam = stdev > 0;
         set_complexity_coef(alphabet_size, stdev);
@@ -505,7 +512,7 @@ struct contin_bscore : public bscore_base
     score_t complexity_coef;
 
 private:
-    void set_complexity_coef(float alphabet_size, float stdev);
+    void set_complexity_coef(unsigned alphabet_size, float stdev);
 
     // for a given data point calculate the error of the target
     // compared to the candidate output
@@ -513,7 +520,7 @@ private:
 };
 
 /**
- * Like contin_bscore but for boolean.
+ * ctruth_table_bscore -- compute behavioral score for boolean truth tables.
  *
  * The CTable ctt holds the "compressed" data table, consisting of
  * rows of input (independent) variables, and a single output
@@ -614,12 +621,12 @@ struct ctruth_table_bscore : public bscore_base
 {
     template<typename Func>
     ctruth_table_bscore(const Func& func, arity_t arity,
-                        float alphabet_size, float p, int nsamples = -1)
+                        unsigned alphabet_size, float p, int nsamples = -1)
         : ctable(func, arity, nsamples)
     {
         set_complexity_coef(alphabet_size, p);
     }
-    ctruth_table_bscore(const CTable& _ctt, float alphabet_size, float p);
+    ctruth_table_bscore(const CTable& _ctt, unsigned alphabet_size, float p);
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -629,8 +636,10 @@ struct ctruth_table_bscore : public bscore_base
 
     score_t min_improv() const;
 
+    void set_complexity_coef(score_t complexity_ratio);
+    void set_complexity_coef(unsigned alphabet_size, float p);
+
 private:
-    void set_complexity_coef(float alphabet_size, float p);
 
     CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.
@@ -665,13 +674,13 @@ struct enum_table_bscore : public bscore_base
 {
     template<typename Func>
     enum_table_bscore(const Func& func, arity_t arity,
-                      float alphabet_size, float p, int nsamples = -1)
+                      unsigned alphabet_size, float p, int nsamples = -1)
         : ctable(func, arity, nsamples)
     {
         set_complexity_coef(alphabet_size, p);
     }
 
-    enum_table_bscore(const CTable& _ctt, float alphabet_size, float p)
+    enum_table_bscore(const CTable& _ctt, unsigned alphabet_size, float p)
         : ctable(_ctt)
     {
         set_complexity_coef(alphabet_size, p);
@@ -686,7 +695,7 @@ struct enum_table_bscore : public bscore_base
     score_t min_improv() const;
 
 protected:
-    void set_complexity_coef(float alphabet_size, float p);
+    void set_complexity_coef(unsigned alphabet_size, float p);
 
     CTable ctable;
     bool occam; // If true, then Occam's razor is taken into account.

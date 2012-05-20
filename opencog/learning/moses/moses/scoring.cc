@@ -78,16 +78,39 @@ behavioral_score logical_bscore::operator()(const combo_tree& tr) const
     boost::transform(tt, target, bs.begin(), [](bool b1, bool b2) {
             return -score_t(b1 != b2); });
 
+    if (occam)
+        bs.push_back(tree_complexity(tr) * complexity_coef);
+
     return bs;
 }
 
-behavioral_score logical_bscore::best_possible_bscore() const {
+behavioral_score logical_bscore::best_possible_bscore() const
+{
     return behavioral_score(target.size(), 0);
 }
 
 score_t logical_bscore::min_improv() const
 {
     return 0.5;
+}
+
+void logical_bscore::set_complexity_coef(unsigned alphabet_size, float p)
+{
+    // Both p==0.0 and p==0.5 are singularities in the forumla.
+    // See the explanation in the comment above ctruth_table_bscore.
+    complexity_coef = 0.0;
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
+        complexity_coef = discrete_complexity_coef(alphabet_size, p);
+
+    logger().info() << "Boolean complexity ratio = " << 1.0/complexity_coef;
+}
+
+void logical_bscore::set_complexity_coef(score_t complexity_ratio)
+{
+    complexity_coef = 1.0 / complexity_ratio;
+    occam = complexity_coef > 0.0;
+    logger().info() << "Boolean complexity ratio = " << 1.0/complexity_coef;
 }
 
 ///////////////////
@@ -143,7 +166,7 @@ score_t contin_bscore::min_improv() const
     return -1.0e-4;
 }
         
-void contin_bscore::set_complexity_coef(float alphabet_size, float stdev)
+void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 {
     if(occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
@@ -436,7 +459,7 @@ behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) cons
 /////////////////////////
         
 ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
-                                         float alphabet_size, float p)
+                                         unsigned alphabet_size, float p)
     : ctable(_ctt)
 {
     set_complexity_coef(alphabet_size, p);
@@ -489,14 +512,23 @@ score_t ctruth_table_bscore::min_improv() const
     return 0.5;
 }
 
-void ctruth_table_bscore::set_complexity_coef(float alphabet_size, float p)
+void ctruth_table_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 {
-    // Both p==0.0 and p==0.5 are singularity points in the Occam's
-    // razor formula for discrete outputs (see the explanation in the
-    // comment above ctruth_table_bscore definition)
+    // Both p==0.0 and p==0.5 are singularities in the forumla.
+    // See the explanation in the comment above ctruth_table_bscore.
+    complexity_coef = 0.0;
     occam = p > 0.0f && p < 0.5f;
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
+
+    logger().info() << "Truth Table complexity ratio = " << 1.0/complexity_coef;
+}
+
+void ctruth_table_bscore::set_complexity_coef(score_t complexity_ratio)
+{
+    complexity_coef = 1.0 / complexity_ratio;
+    occam = complexity_coef > 0.0;
+    logger().info() << "Truth Table complexity ratio = " << 1.0/complexity_coef;
 }
 
 /////////////////////////
@@ -556,7 +588,7 @@ score_t enum_table_bscore::min_improv() const
     return 0.5;
 }
 
-void enum_table_bscore::set_complexity_coef(float alphabet_size, float p)
+void enum_table_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 {
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
