@@ -52,7 +52,7 @@ private:
     static boost::shared_mutex id_mutex;
 
 protected:
-    // Issue a unique id number.
+    // Issue a unique id number for each unique string.
     unsigned get_id(const std::string& token);
 
     enum_t(const std::string &m, unsigned i)
@@ -77,21 +77,26 @@ public:
     }
 
     bool operator==(const enum_t& m) const {
+        // Compare Id's, not strings, because that just faster.
         return id == m.id;
     }
 
+    /// Lexicographic ordering on the enum string names.
     bool operator<(const enum_t& m) const {
-        /// XXX Why are we not using id?
         return _content < m.getContent();
     }
     
     static std::string prefix() {
         return COMBO_ENUM_TYPE_PREFIX;
     }
+
+    /// Return some randome enum out of the pool of all of them.
     static const enum_t& get_random_enum();
     static size_t size() {
         return enum_map.size();
     }
+
+    /// Return an enum that is gaurenteed to be not equal to any other.
     static const enum_t& invalid_enum() {
         static enum_t bad("", -1);
         return bad;
