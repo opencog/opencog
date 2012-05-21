@@ -833,7 +833,7 @@ int moses_exec(int argc, char** argv)
     
     // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,
-                                   revisit, include_dominated, 
+                                   revisit, include_dominated,
                                    complexity_temperature,
                                    complexity_ratio,
                                    enable_cache,
