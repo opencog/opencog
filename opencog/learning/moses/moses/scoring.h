@@ -116,10 +116,8 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             score_t res = boost::accumulate(bs, 0.0);
 
             if (logger().isFineEnabled()) {
-                stringstream ss;
-                ss << "bscore_based_score: " << res;
-                ss << " for candidate: " << tr;
-                logger().fine(ss.str());
+                logger().fine() << "bscore_based_score: " << res
+                                << " for candidate: " << tr;
             }
 
             return res;
@@ -133,12 +131,11 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             // because its happens very often when learning continuous
             // functions, and it gets too much in the way if logged at
             // a lower level.
-            stringstream ss;
-            ss << "The following candidate: " << tr << "\n";
-            ss << "has failed to be evaluated, "
+            logger().fine()
+               << "The following candidate: " << tr << "\n"
+               << "has failed to be evaluated, "
                << "raising the following exception: "
                << ee.get_message() << " " << ee.get_vertex();
-            logger().fine(ss.str());
 
             return get_score(worst_composite_score);
         }
@@ -166,10 +163,10 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
  * the multiple scores have the same type as defined by the template
  * argument Score.
  */
-template<typename Score>
+template<typename Scorer>
 struct multiscore_based_bscore : public bscore_base
 {
-    typedef boost::ptr_vector<Score> ScoreSeq;
+    typedef boost::ptr_vector<Scorer> ScoreSeq;
 
     // ctors
     multiscore_based_bscore(const ScoreSeq& scores_) : scores(scores_) {}
@@ -178,14 +175,14 @@ struct multiscore_based_bscore : public bscore_base
     behavioral_score operator()(const combo_tree& tr) const
     {
         behavioral_score bs(scores.size());
-        boost::transform(scores, bs.begin(), [&](const Score& sc){return sc(tr);});
+        boost::transform(scores, bs.begin(), [&](const Scorer& sc){return sc(tr);});
         return bs;
     }
 
     behavioral_score best_possible_bscore() const
     {
         behavioral_score bs;
-        foreach(const Score& sc, scores) {
+        foreach(const Scorer& sc, scores) {
             bs.push_back(sc.best_possible_score());
         }
         return bs;
@@ -195,7 +192,7 @@ struct multiscore_based_bscore : public bscore_base
     score_t min_improv() const
     {
         score_t res = best_score;
-        foreach(const Score& s, scores)
+        foreach(const Scorer& s, scores)
             res = min(res, s.min_improv());
         return res;
     }
