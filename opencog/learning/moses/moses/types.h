@@ -80,22 +80,28 @@ static const score_t worst_score = score_t(1) - best_score;
 struct composite_score:
      public boost::less_than_comparable<composite_score>
 {
-    score_t first;        // XXX hack; change name later
-    complexity_t second;  // hack, change name later.
-    score_t heat;
-
+    composite_score(score_t s, complexity_t c, score_t h);
     composite_score(score_t s, complexity_t c);
-    // composite_score(const std::pair<score_t, complexity_t> &p);
     composite_score();    // build the worst score
     composite_score& operator=(const composite_score &r);
 
-    // compare weight*score + complexity
+    score_t get_score() const { return score; }
+    complexity_t get_complexity() const { return complexity; }
+    score_t get_hot_score() const { return hot_score; }
+    score_t get_heat() const { return hot_score - score; }
+
+    // compare weight*score + complexity XXX hot_score FIXME
     //
     // Additionally we assume that nan is always smaller than
     // anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
 
-    static float weight;
+    static float weight;   // XXX kill this real soonn now
+protected:
+    score_t score;
+    complexity_t complexity;
+    score_t hot_score;
+
 };
 
 // bool operator<(const composite_score &l, const composite_score &r) {
@@ -120,8 +126,8 @@ inline score_t get_weighted_score(const composite_score &sc)
 {
    score_t w = composite_score::weight;
 // XXX hack remove me when done with conversion
-if (w <= 0.00000001) return sc.first;
-   return (w*sc.first + sc.second) / (w + 1.0f);
+if (w <= 0.00000001) return sc.get_hot_score();
+   return (w*sc.get_score() + sc.get_complexity()) / (w + 1.0f);
 }
 
 inline const combo::combo_tree& get_tree(const scored_combo_tree& st)
@@ -151,7 +157,7 @@ inline score_t get_weighted_score(const bscored_combo_tree& bsct)
 
 inline complexity_t get_complexity(const composite_score& ts)
 {
-    return ts.second;
+    return ts.get_complexity();
 }
 
 inline complexity_t get_complexity(const composite_behavioral_score& ts)
@@ -171,7 +177,7 @@ inline complexity_t get_complexity(const scored_combo_tree& st)
 
 inline score_t get_score(const composite_score& ts)
 {
-    return ts.first;
+    return ts.get_score();
 }
 
 inline score_t get_score(const composite_behavioral_score& ts)
@@ -312,8 +318,10 @@ inline std::ostream& operator<<(std::ostream& out,
 {
     return out << "[score="
                << std::setprecision(moses::io_score_precision)
-               << ts.first
-               << ", complexity=" << ts.second << "]";
+               << ts.get_score()
+               << ", complexity=" << ts.get_complexity()
+               << ", heat=" << ts.get_heat()
+               << "]";
 }
 
 inline std::ostream& operator<<(std::ostream& out,

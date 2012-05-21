@@ -42,28 +42,31 @@ const composite_score worst_composite_score = composite_score();
 
 score_t composite_score::weight = 4.0f;
 
+composite_score::composite_score(score_t s, complexity_t c, score_t h)
+    : score(s), complexity(c), hot_score(h) {}
+
 composite_score::composite_score(score_t s, complexity_t c)
-    : first(s), second(c), heat(0) {}
+    : score(s), complexity(c), hot_score(s) {}
 
 composite_score::composite_score()
-    : first(worst_score), second(worst_complexity), heat(0) {}
+    : score(worst_score), complexity(worst_complexity), hot_score(worst_score) {}
 
 composite_score& composite_score::operator=(const composite_score &r)
 {
-    first = r.first;
-    second = r.second;
-    heat = r.heat;
+    score = r.score;
+    complexity = r.complexity;
+    hot_score = r.hot_score;
     return *this;
 }
 bool composite_score::operator<(const composite_score &r) const {
 
 
-    score_t lef = weight*first + second;
-    score_t rig = weight*r.first + r.second;
+    score_t lef = weight*score + complexity;
+    score_t rig = weight*r.score + r.complexity;
 // XXX hack remove me when done with conversion.
 if (weight <= 0.00000001) {
-lef = first;
-rig = r.first;
+lef = hot_score;
+rig = r.hot_score;
 }
 
     if (isnan(lef))
