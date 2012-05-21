@@ -87,10 +87,14 @@ struct composite_score:
 
     score_t get_score() const { return score; }
     complexity_t get_complexity() const { return complexity; }
-    score_t get_hot_score() const { return hot_score; }
-    score_t get_heat() const { return hot_score - score; }
+    score_t get_penalized_score() const { return penalized_score; }
 
-    // compare weight*score + complexity XXX hot_score FIXME
+    // Sign convention: the penalty is positive, it is subtracted from
+    // the "raw" score to get the penalized score.
+    score_t get_penalty() const { return score - penalized_score; }
+    void set_penalty(score_t penalty) { penalized_score = score - penalty; }
+
+    // compare weight*score + complexity XXX penalized_score FIXME
     //
     // Additionally we assume that nan is always smaller than
     // anything (including -inf) except nan
@@ -100,7 +104,7 @@ struct composite_score:
 protected:
     score_t score;
     complexity_t complexity;
-    score_t hot_score;
+    score_t penalized_score;
 
 };
 
@@ -126,7 +130,7 @@ inline score_t get_weighted_score(const composite_score &sc)
 {
    score_t w = composite_score::weight;
 // XXX hack remove me when done with conversion
-if (w <= 0.00000001) return sc.get_hot_score();
+if (w <= 0.00000001) return sc.get_penalized_score();
    return (w*sc.get_score() - sc.get_complexity()) / (w + 1.0f);
 }
 
@@ -320,7 +324,7 @@ inline std::ostream& operator<<(std::ostream& out,
                << std::setprecision(moses::io_score_precision)
                << ts.get_score()
                << ", complexity=" << ts.get_complexity()
-               << ", heat=" << ts.get_heat()
+               << ", penalty=" << ts.get_penalty()
                << "]";
 }
 

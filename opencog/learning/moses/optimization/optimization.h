@@ -904,7 +904,7 @@ struct hill_climbing : optim_stats
                     << best_score - prev_hi << "\t"  /* previous weighted */
                     << best_raw_score << "\t"     /* non-weighted, raw score */
                     << best_raw_score - prev_best_raw << "\t"
-                    << -get_complexity(best_cscore);
+                    << get_complexity(best_cscore);
             }
 
             /* If this is the first time through the loop, then
