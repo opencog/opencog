@@ -217,7 +217,7 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
             istreamContainer(in, std::back_inserter(bscore), "[", "]");
             // insert read element in candidates
             bscored_combo_tree candidate =
-                make_pair(tr, make_pair(bscore, make_pair(score, complexity)));
+                make_pair(tr, make_pair(bscore, composite_score(score, complexity)));
             candidates.insert(candidate);
             // Logger
             if (logger().isFineEnabled()) {

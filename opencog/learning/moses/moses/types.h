@@ -77,18 +77,21 @@ static const score_t worst_score = score_t(1) - best_score;
 // Define composite_score as a pair:
 // typedef std::pair<score_t, complexity_t> composite_score;
 // But modify the default sort ordering for these objects.
-struct composite_score: public std::pair<score_t, complexity_t>,
-                        boost::less_than_comparable<composite_score>
+struct composite_score:
+     public boost::less_than_comparable<composite_score>
 {
-    typedef std::pair<score_t, complexity_t> super;
+    score_t first;        // XXX hack; change name later
+    complexity_t second;  // hack, change name later.
+    score_t heat;
+
     composite_score(score_t s, complexity_t c);
-    composite_score(const std::pair<score_t, complexity_t> &p);
+    // composite_score(const std::pair<score_t, complexity_t> &p);
     composite_score();    // build the worst score
     composite_score& operator=(const composite_score &r);
 
     // compare weight*score + complexity
     //
-    // Additionally we assume that nan is always more little than
+    // Additionally we assume that nan is always smaller than
     // anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
 
@@ -116,6 +119,8 @@ typedef tagged_item<combo::combo_tree,
 inline score_t get_weighted_score(const composite_score &sc)
 {
    score_t w = composite_score::weight;
+// XXX hack remove me when done with conversion
+if (w <= 0.00000001) return sc.first;
    return (w*sc.first + sc.second) / (w + 1.0f);
 }
 
