@@ -31,15 +31,28 @@ namespace opencog { namespace moses {
 using namespace opencog::combo;
 
 // For a Boolean formula, the complexity is the neg(# of literals)
-// XXX  .. but why?  What is the complexity of contin expressions?
+// That is, a Boolean formula can always be reduced to CNF or DNF,
+// and, in that case, the complexity is "almost" a linear function
+// of the number of arguments -- well, at least, its sub-quadratic,
+// if we did decide to count the operators.  (XXX But why  not count
+// the operators?  For ENF (elegant normal form) there should be even
+// fewer operators than either CNF or DNF, so counting operators
+// doesn't seem wrong to me ...)
+//
+// XXX What is the complexity of contin expressions?
 // Expressions containining greater_than_zero, impulse, cond?  I'm
-// somwhere confused about how thigs are being measured.   Note that
+// somwhat confused about how thigs are being measured.   Note that
 // when we calculate the complexity of a field_set, then contins
 // count for more than one, depending on the number of "digits" in them.
+// And, in a field set, operators are disc_knobs, and so they are
+// counted there ...
 //
 // Soooo... Is this complexity supposed to mirror that of the field
 // set -- i.e. lots-of-knobs==higher-complexity?  That probably means
 // we should count logical and, logical_or, below ..!?!? TODO, clarify.
+// (grep for "information_theoretic_bits" in optimization.h)
+//
+// Note Bene: this function returns a POSITIVE number!
 complexity_t tree_complexity(combo_tree::iterator it)
 {
     // base cases
@@ -53,7 +66,7 @@ complexity_t tree_complexity(combo_tree::iterator it)
         || is_builtin_action(*it)
         || is_ann_type(*it)
         || is_action_result(*it))
-        return -1;
+        return 1;
 
     // recursive cases
     if (*it == id::logical_not)
@@ -63,7 +76,7 @@ complexity_t tree_complexity(combo_tree::iterator it)
     // But greatere_than_zero, impulse, plus, times are all treated
     // with complexity zero.  Why?  I dunno; maybe because impulse is
     // like an unavoidable type conversion?  Kind of like id::not above ???
-    int c = -int(*it==id::div
+    int c = int(*it==id::div
                  || *it==id::exp
                  || *it==id::log
                  || *it==id::sin

@@ -118,9 +118,10 @@ struct disc_knob_base : public knob_base
     // Arity based on whatever knobs are currently allowed.
     virtual int multiplicity() const = 0;
 
-    // Expected complexity based on whatever the knob is currently
-    // turned to.
-    virtual int complexity_bound() const = 0;
+    /// Expected complexity based on whatever the knob is currently
+    /// turned to.   XXX This method is never called by anyone, at this
+    /// time ...
+    virtual complexity_t complexity_bound() const = 0;
 };
 
 struct contin_knob : public knob_base
@@ -306,7 +307,7 @@ struct logical_subtree_knob : public discrete_knob<3>
         _tr.append_child(_loc, subtree);
     }
 
-    int complexity_bound() const
+    complexity_t complexity_bound() const
     {
         return (_current == absent ? 0 : tree_complexity(_loc));
     }
@@ -460,7 +461,7 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
         _loc = _tr.append_child(tgt, id::null_vertex);
     }
 
-    int complexity_bound() const {
+    complexity_t complexity_bound() const {
         return tree_complexity(_loc);
     }
 
@@ -525,7 +526,7 @@ struct simple_action_subtree_knob : public discrete_knob<2>
         _default = present;
     }
 
-    int complexity_bound() const {
+    complexity_t complexity_bound() const {
         return (_current == absent ? 0 : tree_complexity(_loc));
     }
 

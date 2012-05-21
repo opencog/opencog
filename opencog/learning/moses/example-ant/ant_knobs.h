@@ -50,8 +50,8 @@ struct ant_action_subtree_knob : public discrete_knob<4> {
         _tr.append_child(_loc, subtree);
     }
 
-    int complexity_bound() const {
-        return complexity(_loc);
+    complexity_t complexity_bound() const {
+        return tree_complexity(_loc);
     }
 
     void clear_exemplar() {

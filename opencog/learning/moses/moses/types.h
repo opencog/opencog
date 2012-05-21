@@ -127,7 +127,7 @@ inline score_t get_weighted_score(const composite_score &sc)
    score_t w = composite_score::weight;
 // XXX hack remove me when done with conversion
 if (w <= 0.00000001) return sc.get_hot_score();
-   return (w*sc.get_score() + sc.get_complexity()) / (w + 1.0f);
+   return (w*sc.get_score() - sc.get_complexity()) / (w + 1.0f);
 }
 
 inline const combo::combo_tree& get_tree(const scored_combo_tree& st)

@@ -895,14 +895,14 @@ struct distance_based_scorer : public unary_function<instance,
                           const instance& _target_inst)
         : fs(_fs), target_inst(_target_inst) {}
 
-    composite_score operator()(const instance& inst) const {
+    composite_score operator()(const instance& inst) const
+    {
         score_t sc = -fs.hamming_distance(target_inst, inst);
         // Logger
-        if(logger().isFineEnabled()) {
-            stringstream ss;
-            ss << "distance_based_scorer - Evaluate instance: "
-               << fs.stream(inst) << std::endl << "Score = " << sc << std::endl;
-            logger().fine(ss.str());
+        if (logger().isFineEnabled()) {
+            logger().fine() << "distance_based_scorer - Evaluate instance: "
+                            << fs.stream(inst) << "\n"
+                            << "Score = " << sc << std::endl;
         }
         // ~Logger
         return composite_score(sc, 0);
@@ -926,10 +926,8 @@ struct complexity_based_scorer : public unary_function<instance,
 
         // Logger
         if (logger().isFineEnabled()) {
-            stringstream ss;
-            ss << "complexity_based_scorer - Evaluate instance: "
-               << _rep.fields().stream(inst);
-            logger().fine(ss.str());
+            logger().fine() << "complexity_based_scorer - Evaluate instance: "
+                            << _rep.fields().stream(inst);
         }
         // ~Logger
 
@@ -937,10 +935,8 @@ struct complexity_based_scorer : public unary_function<instance,
             combo_tree tr = _rep.get_candidate(inst, _reduce);
             return composite_score(score(tr), tree_complexity(tr));
         } catch (...) {
-            stringstream ss;
-            ss << "The following instance has failed to be evaluated: "
-               << _rep.fields().stream(inst);
-            logger().fine(ss.str());
+            logger().debug() << "Warning: The following instance has failed to be evaluated: "
+                             << _rep.fields().stream(inst);
             return worst_composite_score;
         }
     }

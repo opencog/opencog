@@ -60,10 +60,8 @@ inline void log_candidate_bscore(const combo_tree& tr,
     if (!logger().isFineEnabled())
         return;
 
-    stringstream ss;
-    ss << "Evaluate candidate: " << tr << "\n";
-    ss << "\tBScored: " << bs;
-    logger().fine(ss.str());
+    logger().fine() << "Evaluate candidate: " << tr << "\n"
+                    << "\tBScored: " << bs;
 }
 
 ////////////////////
@@ -117,9 +115,11 @@ void logical_bscore::set_complexity_coef(score_t complexity_ratio)
 // contin_bscore //
 ///////////////////
 
+// Note that this returns a NEGATIVE number, so that when multiplied
+// against a postive cmplexity, the net result is a penalty.
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev)
 {
-    return log(alphabet_size) * 2 * sq(stdev);
+    return -log(alphabet_size) * 2 * sq(stdev);
 }
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
@@ -369,8 +369,10 @@ score_t precision_bscore::min_improv() const
 // discretize_contin_bscore //
 //////////////////////////////
         
-score_t discrete_complexity_coef(unsigned alphabet_size, double p) {
-    return -log((double)alphabet_size) / log(p/(1-p));
+// Note that this function returns a NEGATIVE number, since  p < 1.
+score_t discrete_complexity_coef(unsigned alphabet_size, double p)
+{
+    return log((double)alphabet_size) / log(p/(1-p));
 }
 
 discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
@@ -872,7 +874,7 @@ behavioral_score interesting_predicate_bscore::best_possible_bscore() const
 void interesting_predicate_bscore::set_complexity_coef(float alphabet_size,
                                                        float stdev)
 {
-    if(occam)
+    if (occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
 }
 

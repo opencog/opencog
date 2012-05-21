@@ -288,10 +288,9 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
         combo_tree tmp(subtree); // make a copy -- caution, expensive!
         _rep.clean_combo_tree(tmp, true, true);
 
-        // Note that complexity is negative, with -inf being highest,
-        // 0 lowest, which is why this conditional is taken if tmp is
-        // simpler after reduction
-        if (initial_c < tree_complexity(tmp)) {
+        // Note that complexity is positive, with 0 being the simplest
+        // possible tree (the empty tree).
+        if (initial_c > tree_complexity(tmp)) {
             to_disallow.push_back(idx);
         }
     }

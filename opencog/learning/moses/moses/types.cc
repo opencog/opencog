@@ -61,8 +61,8 @@ composite_score& composite_score::operator=(const composite_score &r)
 bool composite_score::operator<(const composite_score &r) const {
 
 
-    score_t lef = weight*score + complexity;
-    score_t rig = weight*r.score + r.complexity;
+    score_t lef = weight*score - complexity;
+    score_t rig = weight*r.score - r.complexity;
 // XXX hack remove me when done with conversion.
 if (weight <= 0.00000001) {
 lef = hot_score;

@@ -1663,11 +1663,9 @@ OK, a better explanation now in moses/scoring.h
  *              = -|D_ne| + |M|*log|A| / log(p/(1-p))
 
 Note that log(p) is negative, so the total contribution to the score is
-negative: more complex models are penalized.   But this is exactly
-opposite from what we want:  we want to encourage more complex models
-to be explored, as these are the most likely to be mutated into good
-models.  So, although the math derivation is "interesting", it fails
-completely to give us the correct guidance for training.  Sigh. 
+negative: more complex models are penalized.  This works, I guess,
+because it prevents the algorithm from exploring complex systems, which
+I guess are unlikely to evolve into high-scoring ones..
 
 Anyway: the 'occam bias' code in moses/scoring.cc:
 
@@ -1675,6 +1673,9 @@ Anyway: the 'occam bias' code in moses/scoring.cc:
                     = -log((double)alphabet_size) / log(p/(1-p));
 
     score += tree_complexity(tr) * complexity_coef
+
+Note: at this time, tree_complexity returns a negative number, so
+complex trees are penalized.
 
 Compare to complexity temperature:  in moses/metapopulation.h:
 
@@ -1694,10 +1695,6 @@ as the equivalent to the -z flag for moses-exec.  For p small this is
 
 The way I use it/describe this, is "the model has to get N bits more
 complex to improve the score by 1 point"  where N == complexity_ratio
-In the metapop, during exemplar selection, this means that badly-scoring,
-more complex exemplars the same as well-scoring, low-complexity exemplars.
-The hope was that, magically, the crappy, complex exemplar can be mutated
-into a high-scoring one.
 
 ==========
 Regression test: parity performance complexity-ratio vs. occam.
@@ -1732,32 +1729,45 @@ so temp should be 5/3.5 = 1.428571429
 "r6935" is bzr rev 6935; not sure why average performance is so much
        worse;  there's no obvious reason for the regression.
        As above, moses-perf -Hpa -k4 -z3.5 -v5 -m350000
+       r6666 -- OK
+       r6867 -- (pre-rand-gen change) -- about 30% slower, entry for
+                entry except for one, which is faster: net: 25% slower
+                (what change made things slower??)
+                 r0-r19 avg: 116
+                r20-r39 avg: 109
+       r6873 -- identical to r6935 -- that confirms that the rand-gen
+                is behind things.
+
+       Perhaps it's just an outlier?  Again:
+                 r0-r19 avg: 146 secs
+                r20-r39 avg: 111 secs
+                r40-r59 avg: 121 secs
 
 "occam" is bzr rev 6935, with scoring hacks, with the altered command line:
        moses-perf -Hpa -k4 -m350000 -z"-0.1" -v1.428571429 -p0.001100724
 
-       rech  r6935  occam
--r0:     22    305
--r1:     58     40
--r2:     88    407
--r3:    167     25
--r4:     43     28
--r5:     21     27
--r6:    111     29
--r7:    191    232
--r8:    193     42
--r9:     75    360
--r10:    33     79
--r11:   134     66
--r12:    20    151
--r13:   120     23
--r14:   115    132
--r15:    71    357
--r16:    49    136
--r17:   246    136
--r18:   100    172
--r19:     5    179
+       rech  r6935  r6867  r6873  occam
+-r0:     22    305    30     306       
+-r1:     58     40    75     
+-r2:     88    407   114
+-r3:    167     25   215
+-r4:     43     28    56
+-r5:     21     27    27
+-r6:    111     29   146
+-r7:    191    232   258
+-r8:    193     42   253
+-r9:     75    360    99
+-r10:    33     79    42
+-r11:   134     66   173
+-r12:    20    151    26
+-r13:   120     23   160
+-r14:   115    132   146
+-r15:    71    357    90
+-r16:    49    136    63
+-r17:   246    136   211
+-r18:   100    172   130
+-r19:     5    179     6
 
-avg:     93    146
+avg:     93    146   116
 
 
