@@ -234,7 +234,7 @@ int main(int argc, char** argv)
          "evaluations.\n")
 
         (opt_desc_str(hc_fraction_of_remaining_opt).c_str(),
-         value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.1),
+         value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.5),
          "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
 

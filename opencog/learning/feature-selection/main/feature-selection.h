@@ -30,6 +30,7 @@
 #include <boost/range/irange.hpp>
 
 #include <opencog/util/oc_omp.h>
+#include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/representation/instance_set.h>
 #include <opencog/learning/moses/moses/scoring.h>
@@ -101,17 +102,21 @@ void moses_feature_selection(Table& table,
                              Optimize& optimize, const Scorer& scorer,
                              const feature_selection_parameters& fs_params)
 {
+    composite_score::weight = 1000000; // ignore complexity_ratio
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
     unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
+
     // get the best one
     boost::sort(deme, std::greater<scored_instance<composite_score> >());
     instance best_inst = evals > 0 ? *deme.begin_instances() : init_inst;
     composite_score best_score =
         evals > 0 ? *deme.begin_scores() : worst_composite_score;
+
     // get the best feature set
     std::set<arity_t> best_fs = get_feature_set(fields, best_inst);
     Table ftable = table.filter(best_fs);
+
     // Logger
     log_selected_features(table.get_arity(), ftable);
     {
@@ -130,6 +135,7 @@ void moses_feature_selection(Table& table,
         logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
     }
     // ~Logger
+
     // write the filtered table
     write_results(ftable, fs_params);
 }
@@ -168,7 +174,6 @@ template<typename Optimize>
 void moses_feature_selection(Table& table,
                              Optimize& optimize,
                              const feature_selection_parameters& fs_params) {
-    /// @todo do the compression
     arity_t arity = table.get_arity();
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);
@@ -237,7 +242,7 @@ void incremental_feature_selection(Table& table,
 }
 
 void max_mi_feature_selection(Table& table,
-                                  const feature_selection_parameters& fs_params)
+                              const feature_selection_parameters& fs_params)
 {
     if (fs_params.target_size > 0) {
         CTable ctable = table.compress();
@@ -274,11 +279,15 @@ void feature_selection(Table& table,
         OC_ASSERT(false, "TODO");        
     } else if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
-        optim_parameters op_param(moses::hc, 20, fs_params.hc_max_score, 4, 0.0);
+        double pop_size_ratio = 20;
+        size_t max_dist = 4;
+        score_t min_score_improv = 0.0;
+        optim_parameters op_param(moses::hc, pop_size_ratio, fs_params.hc_max_score,
+                                  max_dist, min_score_improv);
         op_param.hc_params = hc_parameters(true, // widen distance if no improvement
-                               false,
-                               false, // crossover
-                               fs_params.hc_fraction_of_remaining);
+                                           false, // step (backward compatibility)
+                                           false, // crossover
+                                           fs_params.hc_fraction_of_remaining);
         hill_climbing hc(op_param);
         moses_feature_selection(table, hc, fs_params);
     } else if (fs_params.algorithm == inc) {

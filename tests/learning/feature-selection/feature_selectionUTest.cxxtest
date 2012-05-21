@@ -42,6 +42,9 @@ public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
 
     feature_selectionUTest() {        
+        logger().setPrintToStdoutFlag(true);
+        logger().setLevel(Logger::FINE);
+
         big_table = istreamTable(FEATURE_SELECTION_TEST_DIR"big-dataset.csv");
         small_table = istreamTable(FEATURE_SELECTION_TEST_DIR"small-dataset.csv");
     }
@@ -59,8 +62,8 @@ public:
         test_redundant_features(4);
     }
     
-    void test_moses_based_feature_selection_j4() {
-        test_moses_based_feature_selection(4);
+    void test_moses_based_feature_selection_j1() {
+        test_moses_based_feature_selection(1);
     }
 
 private:
@@ -109,7 +112,8 @@ private:
         setting_omp(n_jobs);
         fsp.hc_confi = 1;
         fsp.hc_cache_size = 100000;
-        fsp.hc_fraction_of_remaining = 0.1;
+        fsp.hc_max_score = 1;
+        fsp.hc_fraction_of_remaining = 1;
 
         ostreamTable(std::cout << "small_table = ", small_table);
         
