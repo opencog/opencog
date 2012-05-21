@@ -188,7 +188,7 @@ struct optim_parameters
 
     inline unsigned max_distance(const field_set& fs)
     {
-        return max_dist;
+        return std::min(max_dist, fs.dim_size());
     }
 
     // If used with weighted_score, then must correct for weight.
@@ -907,11 +907,16 @@ struct hill_climbing : optim_stats
                     << -get_complexity(best_cscore);
             }
 
-            /* If this is the first time through the loop, then distance
-             * was zero, there was only one instance at dist=0, and we
-             * just scored it. Be sure to go around and do at least the
-             * distance == 1 nearest-neighbor exploration. */
-            if (1 == number_of_new_instances) continue;
+            /* If this is the first time through the loop, then
+             * distance was zero, there was only one instance at
+             * dist=0, and we just scored it. Be sure to go around and
+             * do at least the distance == 1 nearest-neighbor
+             * exploration.  Note that it is possible to have only 1
+             * neighbor with a distance greater than 0 (when the
+             * distance has reached the deme dimension), which is why
+             * we check that distance == 1 as well.
+             */
+            if (number_of_new_instances == 1 && distance == 1) continue;
 
             /* If we've blown our budget for evaluating the scorer,
              * then we are done. */
