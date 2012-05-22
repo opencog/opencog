@@ -194,14 +194,15 @@ bool is_running(const proc_map::value_type& pmv) {
     return is_being_written(get_tmp(pmv), get_pid(pmv));
 }
 
-void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
+void parse_result(istream& in, metapop_candidates& candidates, int& evals)
+{
     in.seekg(0);
-    while(!in.eof()) {
+    while (!in.eof()) {
         string s;
         in >> s;
-        if(s.empty())
+        if (s.empty())
             continue;
-        else if(s == string(number_of_evals_str).append(":")) {
+        else if (s == string(number_of_evals_str).append(":")) {
             in >> evals;
         } else {
             // read score
@@ -209,15 +210,24 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
             // read complexity
             complexity_t complexity;
             in >> complexity;
+            // read penalty
+            score_t penalty;
+            in >> penalty;
             // read candidate
             combo_tree tr;
             in >> tr;
-            // read bscore
-            behavioral_score bscore;
+            // read bscore, which is preceeded by the bscore penalty
+            score_t bpenalty;
+            in >> bpenalty;
+            OC_ASSERT(bpenalty == penalty);
+
+            penalized_behavioral_score pbs;
+            behavioral_score &bscore = pbs.first;
             istreamContainer(in, std::back_inserter(bscore), "[", "]");
+            pbs.second = bpenalty;
             // insert read element in candidates
             bscored_combo_tree candidate =
-                make_pair(tr, make_pair(bscore, composite_score(score, complexity)));
+                make_pair(tr, make_pair(pbs, composite_score(score, complexity, penalty)));
             candidates.insert(candidate);
             // Logger
             if (logger().isFineEnabled()) {
@@ -230,8 +240,10 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
         }
     }
 };
+
 void parse_result(const proc_map::value_type& pmv, 
-                  metapop_candidates& candidates, int& evals) {
+                  metapop_candidates& candidates, int& evals)
+{
     FILE* fp = get_file(pmv);
     // build istream from fp
     __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
@@ -243,7 +255,8 @@ void parse_result(const proc_map::value_type& pmv,
 }
 
 
-host_proc_map init(const jobs_t& jobs) {
+host_proc_map init(const jobs_t& jobs)
+{
     host_proc_map hpm;
     foreach(const jobs_t::value_type job, jobs) {
         hpm.insert(make_pair(job.first, proc_map()));
@@ -251,14 +264,16 @@ host_proc_map init(const jobs_t& jobs) {
     return hpm;
 }
 
-proc_map::iterator remove_proc(proc_map& pm,  proc_map::iterator it) {
+proc_map::iterator remove_proc(proc_map& pm,  proc_map::iterator it)
+{
     proc_map::iterator next_it(it);
     next_it++;
     pm.erase(it);
     return next_it;
 }
 
-void killall(proc_map& pm) {
+void killall(proc_map& pm)
+{
     for(proc_map::iterator it = pm.begin(); it != pm.end();) {
         if(is_running(*it))
             kill(get_pid(*it), 15); // send a TERM signal
@@ -266,13 +281,15 @@ void killall(proc_map& pm) {
     }
 }
 
-void killall(host_proc_map& hpm) {
+void killall(host_proc_map& hpm)
+{
     foreach(host_proc_map::value_type& hpmv, hpm)
         killall(hpmv.second);
 }
 
 host_proc_map::iterator find_free_resource(host_proc_map& hpm,
-                                           const jobs_t& jobs) {
+                                           const jobs_t& jobs)
+{
     host_proc_map::iterator hpm_it = hpm.begin();
     for(jobs_t::const_iterator jit = jobs.begin(); jit != jobs.end();
         ++jit, ++hpm_it) {
@@ -284,7 +301,8 @@ host_proc_map::iterator find_free_resource(host_proc_map& hpm,
     return hpm_it;
 }
 
-bool all_resources_free(const host_proc_map& hpm) {
+bool all_resources_free(const host_proc_map& hpm)
+{
     foreach(const host_proc_map::value_type& hpmv, hpm) {
         if(!hpmv.second.empty())
             return false;

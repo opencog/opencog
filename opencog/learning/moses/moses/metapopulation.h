@@ -39,6 +39,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/oc_omp.h>
 
+#include <opencog/comboreduct/combo/combo.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include "../representation/instance_set.h"
@@ -117,12 +118,13 @@ struct metapop_parameters
  * metapopulation)
  *
  * NOTE:
+ *   CScoring = scoring function (output composite scores)
  *   BScoring = behavioral scoring function (output behaviors)
  */
-template<typename Scoring, typename BScoring, typename Optimization>
+template<typename CScoring, typename BScoring, typename Optimization>
 struct metapopulation : public bscored_combo_tree_set
 {
-    typedef metapopulation<Scoring, BScoring, Optimization> self;
+    typedef metapopulation<CScoring, BScoring, Optimization> self;
     typedef bscored_combo_tree_set super;
     typedef super::value_type value_type;
 
@@ -136,9 +138,15 @@ struct metapopulation : public bscored_combo_tree_set
         foreach (const combo_tree& base, exemplars) {
             combo_tree si_base(base);
             (*simplify_candidate)(si_base);
-            composite_score csc(score(si_base), tree_complexity(si_base));
-            behavioral_score bsc(bscore(si_base));
-            candidates[si_base] = composite_behavioral_score(bsc, csc);
+
+            penalized_behavioral_score pbs(_bscorer(si_base));
+            // XXX Compute the bscore a second time.   The first time
+            // was immediately above.  We do it again, because the
+            // caching scorer lacks the correct signature.
+            // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
+            composite_score csc(_cscorer(si_base));
+
+            candidates[si_base] = composite_behavioral_score(pbs, csc);
         }
 
         bscored_combo_tree_set mps(candidates.begin(), candidates.end());
@@ -166,12 +174,12 @@ struct metapopulation : public bscored_combo_tree_set
                    const type_tree& tt,
                    const reduct::rule& si_ca,
                    const reduct::rule& si_kb,
-                   const Scoring& sc, const BScoring& bsc,
+                   const CScoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         _type_sig(tt), simplify_candidate(&si_ca),
-        simplify_knob_building(&si_kb), score(sc),
-        bscore(bsc), optimize(opt), params(pa), _n_evals(0),
+        simplify_knob_building(&si_kb), _cscorer(sc),
+        _bscorer(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
@@ -181,12 +189,12 @@ struct metapopulation : public bscored_combo_tree_set
     metapopulation(const combo_tree& base,
                    const type_tree& tt,
                    const reduct::rule& si,
-                   const Scoring& sc, const BScoring& bsc,
+                   const CScoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         _type_sig(tt), simplify_candidate(&si),
-        simplify_knob_building(&si), score(sc),
-        bscore(bsc), optimize(opt), params(pa), _n_evals(0),
+        simplify_knob_building(&si), _cscorer(sc),
+        _bscorer(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         std::vector<combo_tree> bases(1, base);
@@ -529,7 +537,7 @@ struct metapopulation : public bscored_combo_tree_set
                 combo_tree tr(get_tree(*_exemplar));
                 logger().debug()
                     << "Attempt to build rep from exemplar: " << tr
-                    << "\nScored: " << score(tr);
+                    << "\nScored: " << _cscorer(tr);
             }
 
             // Build a representation by adding knobs to the exemplar,
@@ -575,9 +583,9 @@ struct metapopulation : public bscored_combo_tree_set
                << max_evals;
         }
 
-        complexity_based_scorer<Scoring> scorer =
-            complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all);
-        return optimize(*_deme, scorer, max_evals);
+        complexity_based_scorer<CScoring> cpx_scorer =
+            complexity_based_scorer<CScoring>(_cscorer, *_rep, params.reduce_all);
+        return optimize(*_deme, cpx_scorer, max_evals);
     }
 
     /**
@@ -690,15 +698,8 @@ struct metapopulation : public bscored_combo_tree_set
 
                 // update the set of potential exemplars
                 if (not_already_visited && thread_safe_tr_not_found()) {
-                    // recompute the complexity if the candidate has
-                    // not been previously reduced
-                    // composite_score csc = this->params.reduce_all?
-                    //    inst_csc : make_pair(inst_sc, complexity(tr));
-                    composite_score csc = inst_csc;
-                    if (!this->params.reduce_all)
-                        csc = composite_score(inst_sc, tree_complexity(tr));
-                    behavioral_score bsc; // empty bscore till it gets computed
-                    composite_behavioral_score cbsc(bsc, csc);
+                    penalized_behavioral_score pbs; // empty bscore till it gets computed
+                    composite_behavioral_score cbsc(pbs, inst_csc);
                     {
                         unique_lock lock(pot_cnd_mutex);
                         pot_candidates[tr] = cbsc;
@@ -728,8 +729,8 @@ struct metapopulation : public bscored_combo_tree_set
 
             auto compute_bscore = [this](metapop_candidates::value_type& cand) {
                 composite_score csc = get_composite_score(cand.second);
-                behavioral_score bsc = this->bscore(cand.first);
-                cand.second = composite_behavioral_score(bsc, csc);
+                penalized_behavioral_score pbs = this->_bscorer(cand.first);
+                cand.second = composite_behavioral_score(pbs, csc);
             };
             OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
                                compute_bscore);
@@ -956,7 +957,7 @@ struct metapopulation : public bscored_combo_tree_set
             bool it1_insert = true; // whether *it1 is to be inserted
                                     // in bcv_res1
             for (; it2 != bcv2.end(); ++it2) {
-                tribool dom = dominates(get_bscore(**it1), get_bscore(**it2));
+                tribool dom = dominates(get_pbscore(**it1).first, get_pbscore(**it2).first);
                 if (!dom) {
                     it1_insert = false;
                     bcv_res2.insert(bcv_res2.end(), it2, bcv2.end());
@@ -1248,8 +1249,8 @@ struct metapopulation : public bscored_combo_tree_set
     const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule* simplify_candidate; // to simplify candidates
     const reduct::rule* simplify_knob_building; // during knob building
-    const Scoring& score;
-    const BScoring& bscore; // behavioral score
+    const CScoring& _cscorer; // composite score
+    const BScoring& _bscorer; // behavioral score
     Optimization &optimize;
     metapop_parameters params;
 

@@ -1733,18 +1733,22 @@ so temp should be 5/3.5 = 1.428571429
        r6867 -- (pre-rand-gen change) -- about 30% slower, entry for
                 entry except for one, which is faster: net: 25% slower
                 (what change made things slower??)
-                 r0-r19 avg: 116
-                r20-r39 avg: 109
-                r40-r59 avg: 117
-                r60-r79 avg: 111
+                 r0-r19 avg: 116   \
+                r20-r39 avg: 109    \
+                r40-r59 avg: 117     >--  grand avg = 109 secs
+                r60-r79 avg: 111    /
+                r80-r99 avg:  94   /
 
        r6873 -- identical to r6935 -- that confirms that the rand-gen
-                is behind things.
+                is behind things.  Perhaps it's just an outlier?  Again:
 
-       Perhaps it's just an outlier?  Again:
-                 r0-r19 avg: 146 secs
-                r20-r39 avg: 111 secs
-                r40-r59 avg: 121 secs
+                 r0-r19 avg: 146 secs  \
+                r20-r39 avg: 111 secs   \
+                r40-r59 avg: 121 secs    >-- grand avg = 146 secs
+                r60-r79 avg: 180 secs   /
+                r80-r99 avg: 174 secs  /
+ 
+                wtf .. so its not an outlier... try disabling the new rand gen..
 
 "occam" is bzr rev 6935, with scoring hacks, with the altered command line:
        moses-perf -Hpa -k4 -m350000 -z"-0.1" -v1.428571429 -p0.001100724

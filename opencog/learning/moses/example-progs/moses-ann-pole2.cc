@@ -29,7 +29,6 @@
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
 #include "../moses/moses.h"
-#include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 
@@ -78,12 +77,12 @@ int main(int argc, char** argv)
     if(!reduce)
         si = &(clean_reduction());
     
-    ann_pole2_score p2_score;
+    ann_pole2_cscore p2_cscore;
     ann_pole2_bscore p2_bscore; 
 
     univariate_optimization univ;
-    metapopulation<ann_pole2_score, ann_pole2_bscore, univariate_optimization>
-        metapop_pole2(tr, tt, *si, p2_score, p2_bscore, univ);
+    metapopulation<ann_pole2_cscore, ann_pole2_bscore, univariate_optimization>
+        metapop_pole2(tr, tt, *si, p2_cscore, p2_bscore, univ);
 
     moses::moses(metapop_pole2);
 

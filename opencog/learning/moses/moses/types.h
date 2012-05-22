@@ -2,9 +2,10 @@
  * opencog/learning/moses/moses/types.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings
  * All Rights Reserved
  *
- * Written by Moshe Looks
+ * Written by Moshe Looks, Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -123,7 +124,7 @@ typedef std::vector<score_t> behavioral_score;
 typedef tagged_item<behavioral_score,
                     score_t> penalized_behavioral_score;
 
-typedef tagged_item<behavioral_score,
+typedef tagged_item<penalized_behavioral_score,
                     composite_score> composite_behavioral_score;
 typedef tagged_item<combo::combo_tree,
                     composite_behavioral_score> bscored_combo_tree;
@@ -162,26 +163,6 @@ inline score_t get_weighted_score(const bscored_combo_tree& bsct)
     return get_weighted_score(get_composite_score(bsct));
 }
 
-inline complexity_t get_complexity(const composite_score& ts)
-{
-    return ts.get_complexity();
-}
-
-inline complexity_t get_complexity(const composite_behavioral_score& ts)
-{
-    return get_complexity(ts.second);
-}
-
-inline complexity_t get_complexity(const bscored_combo_tree& bst)
-{
-    return get_complexity(bst.second);
-}
-
-inline complexity_t get_complexity(const scored_combo_tree& st)
-{
-    return get_complexity(st.second);
-}
-
 inline score_t get_score(const composite_score& ts)
 {
     return ts.get_score();
@@ -202,14 +183,54 @@ inline score_t get_score(const scored_combo_tree& st)
     return get_score(st.second);
 }
 
-inline const behavioral_score& get_bscore(const composite_behavioral_score& ts)
+inline complexity_t get_complexity(const composite_score& ts)
+{
+    return ts.get_complexity();
+}
+
+inline complexity_t get_complexity(const composite_behavioral_score& ts)
+{
+    return get_complexity(ts.second);
+}
+
+inline complexity_t get_complexity(const bscored_combo_tree& bst)
+{
+    return get_complexity(bst.second);
+}
+
+inline complexity_t get_complexity(const scored_combo_tree& st)
+{
+    return get_complexity(st.second);
+}
+
+inline score_t get_penalty(const composite_score& ts)
+{
+    return ts.get_penalty();
+}
+
+inline score_t get_penalty(const composite_behavioral_score& ts)
+{
+    return get_penalty(ts.second);
+}
+
+inline score_t get_penalty(const bscored_combo_tree& bst)
+{
+    return get_penalty(bst.second);
+}
+
+inline score_t get_penalty(const scored_combo_tree& st)
+{
+    return get_penalty(st.second);
+}
+
+inline const penalized_behavioral_score& get_pbscore(const composite_behavioral_score& ts)
 {
     return ts.first;
 }
 
-inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
+inline const penalized_behavioral_score& get_pbscore(const bscored_combo_tree& bst)
 {
-    return get_bscore(bst.second);
+    return get_pbscore(bst.second);
 }
 
 /**
@@ -235,6 +256,9 @@ typedef std::set<bscored_combo_tree,
 typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
 typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 
+// XXX TODO: the only difference between metapop_candidates and
+// bscored_combo_tree_set is that the later is a set, the former is an
+// unordered map.  So, get rid of metapop_candidates.
 typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score,
                              boost::hash<combo::combo_tree> > metapop_candidates;
 typedef metapop_candidates::value_type metapop_candidate;
@@ -251,7 +275,7 @@ Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
 template<typename Out>
 Out& ostream_penalized_behavioral_score(Out& out, const penalized_behavioral_score& pbs)
 {
-    out << "penalty=" << pbs.second;
+    out << pbs.second << " ";
     return ostreamContainer(out, pbs.first, " ", "[", "]");
 }
 
@@ -272,14 +296,18 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
         return ostream_bscored_combo_tree_python(out, candidate, output_score,
                                                  output_complexity, output_bscore);
 
-    if(output_score)
+    if (output_score)
         out << std::setprecision(io_score_precision)
             << get_score(candidate) << " ";
-    if(output_complexity)
-        out << get_complexity(candidate) << " ";
+
+    if (output_complexity)
+        out << get_complexity(candidate) << " "
+            << get_penalty(candidate) << " ";
+
     out << get_tree(candidate) << std::endl;
-    if(output_bscore) {
-        ostream_behavioral_score(out, get_bscore(candidate));
+
+    if (output_bscore) {
+        ostream_penalized_behavioral_score(out, get_pbscore(candidate));
         out << std::endl;
     }
     return out;
@@ -307,20 +335,21 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
         << "    return all(args)" << std::endl
         << std::endl;
  
-    if(output_score) {
+    if (output_score) {
         out << "#score: " << std::setprecision(io_score_precision) << get_score(candidate) << std::endl;
     }
-    if(output_complexity) {
+    if (output_complexity) {
         out << " #complexity: " << get_complexity(candidate) << std::endl;
+        out << " #penalty: " << get_penalty(candidate) << std::endl;
     }
     
     out << std::endl << "def moses_eval(i):" << std::endl << "    return ";
     ostream_combo_tree(out, get_tree(candidate), combo::fmt::python);
     out << std::endl;
     
-    if(output_bscore) {    
+    if (output_bscore) {    
         out << std::endl<< "#bscore: " ;
-        ostream_behavioral_score(out, get_bscore(candidate));
+        ostream_penalized_behavioral_score(out, get_pbscore(candidate));
         out << std::endl;
     }
     return out;

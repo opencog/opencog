@@ -74,7 +74,7 @@ moses_learning::moses_learning(int nepc,
     for (combo_tree_ns_set_it i = actions.begin(); i != actions.end(); ++i)
         std::cout << "action: " << *i << endl;
 
-    score = new petaverse_score(_fitness_estimator);
+    cscore = new petaverse_cscore(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);
     climber = new hill_climbing;
 
@@ -89,7 +89,7 @@ moses_learning::moses_learning(int nepc,
 
 moses_learning::~moses_learning()
 {
-    delete score;
+    delete cscore;
     delete bscore;
     delete climber;
     if (metapop)
@@ -145,10 +145,10 @@ void moses_learning::operator()()
         if (metapop)
             delete metapop;
 
-        metapop = new metapopulation<petaverse_score, petaverse_bscore,
+        metapop = new metapopulation<petaverse_cscore, petaverse_bscore,
                                      hill_climbing>
             (_center, tt, action_reduction(),
-             *score, *bscore, *climber);
+             *cscore, *bscore, *climber);
 
         _hcState = HC_BUILD_CANDIDATES;
         break;
@@ -302,10 +302,10 @@ void moses_learning::reset_estimator()
 {
     std::cout << "########################### LS RESET : " << _best_program << std::endl;
 
-    delete score;
+    delete cscore;
     delete bscore;
 
-    score = new petaverse_score(_fitness_estimator);
+    cscore = new petaverse_cscore(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);
 
     //we get restarted from the best program so far

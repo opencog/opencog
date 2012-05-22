@@ -3,7 +3,6 @@
 #include <iostream>
 #include "../moses/moses.h"
 #include "../optimization/optimization.h"
-#include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 
@@ -40,13 +39,13 @@ int main(int argc, char** argv)
 
 
     //DOUBLE MARKOVIAN POLE TASK`
-    ann_pole2_score p2_score;
+    ann_pole2_cscore p2_cscore;
     ann_pole2_bscore p2_bscore;
 
     hill_climbing hc;
-    metapopulation<ann_pole2_score, ann_pole2_bscore, hill_climbing>
+    metapopulation<ann_pole2_cscore, ann_pole2_bscore, hill_climbing>
         metapop_pole2(tr, tt, clean_reduction(),
-                      p2_score, p2_bscore, hc);
+                      p2_cscore, p2_bscore, hc);
 
     moses::moses(metapop_pole2);
 

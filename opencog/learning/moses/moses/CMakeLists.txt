@@ -5,7 +5,7 @@ INSTALL(FILES
     moses.h
     partial.h
     scoring.h
-    scoring_functions.h
+    # scoring_functions.h -- dead code, remove this entirely someday.
     types.h
     using.h
 

@@ -55,11 +55,13 @@ namespace opencog { namespace moses {
 
 typedef float fitness_t; /// @todo is that really useful?
 
+#if 0
 // Abstract scoring function class to implement
-struct score_base : public unary_function<combo_tree, score_t>
+// XXX currently, not used anywhere
+struct cscore_base : public unary_function<combo_tree, composite_score>
 {
     // Evaluate the candidate tr
-    virtual score_t operator()(const combo_tree& tr) const = 0;
+    virtual composite_score operator()(const combo_tree& tr) const = 0;
 
     // Return the best possible score achievable with that fitness
     // function. This is useful in order to stop running MOSES when
@@ -69,6 +71,7 @@ struct score_base : public unary_function<combo_tree, score_t>
     // Return the minimum value considered for improvement
     virtual score_t min_improv() const = 0;
 };
+#endif
 
 // Abstract bscoring function class to implement
 struct bscore_base : public unary_function<combo_tree, penalized_behavioral_score>
@@ -86,7 +89,7 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
 };
 
 /**
- * Score calculated from the behavioral score.
+ * Composite score calculated from the behavioral score.
  *
  * The score is calculated as the sum of the bscore over all features:
  *      score = sum_f BScore(f) + penalty
@@ -95,39 +98,17 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
  * 1)  avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
  */
-/// @todo Inheriting that class from score_base raises a compile error
-/// because in moses_exec.h some code attempts to use BScore that does
-/// does not contain best_possible_bscore(). Specifically, the
-/// BScoreACache and ScoreACache typedefs do this. However, this begs
-/// a question: why do we need a base class anyway, if we're not going
-/// to need it? ??
-/// The answer:
-/// First we do use it in other bscores such as
-/// multiscore_based_bscore.
-/// Second after fixing the cache API (that is having the function
-/// being cached being inherited by the cache that compile error will
-/// go away and we can have bscore_based_score inherit it)
 
 template<typename PBScorer>
-struct bscore_based_score : public unary_function<combo_tree, score_t>
+struct bscore_based_cscore : public unary_function<combo_tree, composite_score>
 {
-    bscore_based_score(const PBScorer& sr) : pbscorer(sr) {}
-    score_t operator()(const combo_tree& tr) const
+    bscore_based_cscore(const PBScorer& sr) : _pbscorer(sr) {}
+
+    composite_score operator()(const combo_tree& tr) const
     {
         try {
-            penalized_behavioral_score pbs = pbscorer(tr);
-            behavioral_score &bs = pbs.first;
-            score_t res = boost::accumulate(bs, 0.0);
-
-            res -= pbs.second;  // subtract the penalty!
-
-            if (logger().isFineEnabled()) {
-                logger().fine() << "bscore_based_score: " << res
-                                << " penalty: " << pbs.second
-                                << " for candidate: " << tr;
-            }
-
-            return res;
+            penalized_behavioral_score pbs = _pbscorer(tr);
+            return operator()(pbs, tree_complexity(tr));
         }
         catch (EvalException& ee)
         {
@@ -144,24 +125,41 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
                << "raising the following exception: "
                << ee.get_message() << " " << ee.get_vertex();
 
-            return get_score(worst_composite_score);
+            return worst_composite_score;
         }
     }
+
+    // Hmm, this could be static, actually ... 
+    composite_score operator()(const penalized_behavioral_score& pbs, complexity_t cpxy) const
+    {
+        const behavioral_score &bs = pbs.first;
+        score_t res = boost::accumulate(bs, 0.0);
+
+        res -= pbs.second;  // subtract the penalty!
+
+        if (logger().isFineEnabled()) {
+            logger().fine() << "bscore_based_cscore: " << res
+                            << " penalty: " << pbs.second;
+        }
+
+        return composite_score(res, cpxy, pbs.second);
+    }
+
 
     // Returns the best score reachable for that problem. Used as
     // termination condition.
     score_t best_possible_score() const
     {
-        return boost::accumulate(pbscorer.best_possible_bscore(), 0.0);
+        return boost::accumulate(_pbscorer.best_possible_bscore(), 0.0);
     }
 
     // Return the minimum value considered for improvement
     score_t min_improv() const
     {
-        return pbscorer.min_improv();
+        return _pbscorer.min_improv();
     }
 
-    const PBScorer& pbscorer;
+    const PBScorer& _pbscorer;
 };
 
 #ifdef THIS_IS_DEAD_CODE
@@ -885,25 +883,6 @@ private:
     score_t get_activation_penalty(score_t activation) const;
 };
 
-// For testing only
-struct dummy_score : public unary_function<combo_tree, score_t>
-{
-    score_t operator()(const combo_tree& tr) const {
-        return score_t();
-    }
-};
-
-// For testing only
-struct dummy_bscore : public unary_function<combo_tree, penalized_behavioral_score>
-{
-    penalized_behavioral_score operator()(const combo_tree& tr) const
-    {
-        penalized_behavioral_score pbs;
-        pbs.second = 0;
-        return pbs;
-    }
-};
-
 /**
  * Mostly for testing the optimization algos.  Returns minus the
  * hamming distance of the candidate to a given target instance and
@@ -934,36 +913,34 @@ protected:
     const instance& target_inst;
 };
 
-template<typename Scoring>
+template<typename CScoring>
 struct complexity_based_scorer : public unary_function<instance,
                                                        composite_score>
 {
-    complexity_based_scorer(const Scoring& s, representation& rep, bool reduce)
-        : score(s), _rep(rep), _reduce(reduce) {}
+    complexity_based_scorer(const CScoring& s, representation& rep, bool reduce)
+        : _cscorer(s), _rep(rep), _reduce(reduce) {}
 
     composite_score operator()(const instance& inst) const
     {
         using namespace reduct;
 
-        // Logger
         if (logger().isFineEnabled()) {
             logger().fine() << "complexity_based_scorer - Evaluate instance: "
                             << _rep.fields().stream(inst);
         }
-        // ~Logger
 
         try {
             combo_tree tr = _rep.get_candidate(inst, _reduce);
-            return composite_score(score(tr), tree_complexity(tr));
+            return _cscorer(tr);
         } catch (...) {
             logger().debug() << "Warning: The following instance has failed to be evaluated: "
                              << _rep.fields().stream(inst);
-            return worst_composite_score;
         }
+        return worst_composite_score;
     }
 
 protected:
-    const Scoring& score;
+    const CScoring& _cscorer;
     representation& _rep;
     bool _reduce; // whether the exemplar is reduced before being
                   // evaluated, this may be advantagous if Scoring is

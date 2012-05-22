@@ -32,7 +32,6 @@
 #include <opencog/comboreduct/reduct/ann_rules.h>
 
 #include "scoring.h"
-#include "scoring_functions.h" 
 #include "pole_balancing.h"
 
 using namespace opencog;
@@ -41,8 +40,10 @@ using namespace std;
 using namespace moses;
 #define MIN_FITNESS -1.0e10
 
-struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, double> {
-    result_type operator()(argument_type tr) const {
+struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, double>
+{
+    result_type operator()(argument_type tr) const
+    {
         bool velocity = false;
         if (tr.empty())
             return MIN_FITNESS;
@@ -58,8 +59,10 @@ struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, double> {
 
 };
 
-struct AnnPole2FitnessFunction : public unary_function<combo_tree, double> {
-    result_type operator()(argument_type tr) const {
+struct AnnPole2FitnessFunction : public unary_function<combo_tree, double>
+{
+    result_type operator()(argument_type tr) const
+    {
         bool velocity = true;
         if (tr.empty())
             return MIN_FITNESS;
@@ -74,8 +77,10 @@ struct AnnPole2FitnessFunction : public unary_function<combo_tree, double> {
     }
 };
 
-struct AnnPoleFitnessFunction : public unary_function<combo_tree, double> {
-    result_type operator()(argument_type tr) const {
+struct AnnPoleFitnessFunction : public unary_function<combo_tree, double>
+{
+    result_type operator()(argument_type tr) const
+    {
         if (tr.empty())
             return MIN_FITNESS;
         
@@ -200,12 +205,13 @@ struct AnnPoleFitnessFunction : public unary_function<combo_tree, double> {
     }
 };
 
-struct AnnFitnessFunction : public unary_function<combo_tree, double> {
-
+struct AnnFitnessFunction : public unary_function<combo_tree, double>
+{
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;
 
-    result_type operator()(argument_type tr) const {
+    result_type operator()(argument_type tr) const
+    {
         if (tr.empty())
             return MIN_FITNESS;
 
@@ -239,84 +245,112 @@ struct AnnFitnessFunction : public unary_function<combo_tree, double> {
 
 namespace opencog { namespace moses {
 
-struct ann_pole2nv_score : public unary_function<combo_tree, double> {
-    ann_pole2nv_score() { }
-    double operator()(const combo_tree& tr) const {
-        return p2ff(tr);
+// This is what the original zource had this as, but its not
+// obviously correct, to me.
+#define CPXY_RATIO 1.0
+
+struct ann_pole2nv_cscore : public unary_function<combo_tree, composite_score>
+{
+    ann_pole2nv_cscore() { }
+    composite_score operator()(const combo_tree& tr) const
+    {
+        complexity_t cpxy = tr.size();
+        return composite_score(p2ff(tr), cpxy, cpxy/CPXY_RATIO);
     }
     AnnPole2NVFitnessFunction p2ff;
 };
 
-struct ann_pole2nv_bscore : public unary_function<combo_tree, behavioral_score> {
+struct ann_pole2nv_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+{
     ann_pole2nv_bscore( ) { }
     
-    behavioral_score operator()(const combo_tree& tr) const {
-        behavioral_score bs(2);
-        bs[0] = moses::ann_pole2nv_score()(tr);
-        bs[1] = tr.size();
-        
-        return bs;
+    result_type operator()(const combo_tree& tr) const
+    {
+        composite_score cs(ann_pole2nv_cscore()(tr));
+
+        penalized_behavioral_score pbs;
+        pbs.first[0] = get_score(cs);
+        pbs.second = get_penalty(cs);
+        return pbs;
     }
 };
 
-struct ann_pole2_score : public unary_function<combo_tree, double> {
-   ann_pole2_score() { }
-   double operator()(const combo_tree& tr) const {
-      return p2ff(tr);
+struct ann_pole2_cscore : public unary_function<combo_tree, composite_score>
+{
+   ann_pole2_cscore() { }
+   result_type operator()(const combo_tree& tr) const
+   {
+      complexity_t sz = tr.size();
+      return composite_score(p2ff(tr), sz, sz/CPXY_RATIO);
    }
    AnnPole2FitnessFunction p2ff;
 };
 
-struct ann_pole2_bscore : public unary_function<combo_tree, behavioral_score> {
+struct ann_pole2_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+{
     ann_pole2_bscore( ) { }
 
-    behavioral_score operator()(const combo_tree& tr) const {
-        behavioral_score bs(2);
-        bs[0] = moses::ann_pole2_score()(tr);
-        bs[1] = tr.size();
+    result_type operator()(const combo_tree& tr) const
+    {
+        composite_score cs(ann_pole2_cscore()(tr));
 
-        return bs;
+        penalized_behavioral_score pbs;
+        pbs.first[0] = get_score(cs);
+        pbs.second = get_penalty(cs);
+        return pbs;
     }
 };
 
-struct ann_pole_score  : public unary_function<combo_tree, double> {
-    ann_pole_score() { }
-    double operator()(const combo_tree& tr) const {
-        return pff(tr);
+struct ann_pole_cscore  : public unary_function<combo_tree, composite_score>
+{
+    ann_pole_cscore() { }
+    composite_score operator()(const combo_tree& tr) const
+    {
+        complexity_t cpxy = tr.size();
+        return composite_score(pff.operator()(tr), cpxy, cpxy/CPXY_RATIO);
     }
     AnnPoleFitnessFunction pff;
 };
 
-struct ann_pole_bscore : public unary_function<combo_tree, behavioral_score> {
+struct ann_pole_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+{
     ann_pole_bscore( ) { }
 
-    behavioral_score operator()(const combo_tree& tr) const {
-        behavioral_score bs(2);
-        bs[0] = moses::ann_pole_score()(tr);
-        bs[1] = tr.size();
+    penalized_behavioral_score operator()(const combo_tree& tr) const
+    {
+        composite_score cs(ann_pole_cscore()(tr));
 
-        return bs;
+        penalized_behavioral_score pbs;
+        pbs.first[0] = get_score(cs);
+        pbs.second = get_penalty(cs);
+        return pbs;
     }
 };
 
-struct ann_score  : public unary_function<combo_tree, double> {
-   ann_score() { }
-   double operator()(const combo_tree& tr) const {
-       return aff(tr);
-   }
+struct ann_cscore  : public unary_function<combo_tree, composite_score>
+{
+    ann_cscore() { }
+    composite_score operator()(const combo_tree& tr) const
+    {
+        complexity_t cpxy = tr.size();
+        // Note minus sign!
+        return composite_score(-aff.operator()(tr), cpxy, cpxy/CPXY_RATIO);
+    }
 
-   AnnFitnessFunction aff;
+    AnnFitnessFunction aff;
 };
 
-struct ann_bscore : public unary_function<combo_tree, behavioral_score> {
+struct ann_bscore : public unary_function<combo_tree, penalized_behavioral_score> {
     ann_bscore( ) { }
 
-    behavioral_score operator()(const combo_tree& tr) const {
-        behavioral_score bs(2);
-        bs[0] = -moses::ann_score()(tr);
-        bs[1] = tr.size();
+    penalized_behavioral_score operator()(const combo_tree& tr) const
+    {
+        composite_score cs(ann_cscore()(tr));
 
-        return bs;
+        penalized_behavioral_score pbs;
+        pbs.first[0] = get_score(cs);
+        pbs.second = get_penalty(cs);
+        return pbs;
     }
 };
 

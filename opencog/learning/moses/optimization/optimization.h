@@ -306,9 +306,9 @@ struct univariate_optimization : optim_stats
         : opt_params(op), eda_params(ep) {}
 
     //return # of evaluations actually performed
-    template<typename Scoring>
+    template<typename CScoring>
     unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals)
+                        const CScoring& cscorer, unsigned max_evals)
     {
         unsigned pop_size = opt_params.pop_size(deme.fields());
         unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
@@ -333,7 +333,7 @@ struct univariate_optimization : optim_stats
         if (eda_params.is_tournament_selection()) {
             cout_log_best_and_gen logger;
             return optimize
-                   (deme, n_select, n_generate, max_gens_total, score,
+                   (deme, n_select, n_generate, max_gens_total, cscorer,
                     terminate_if_gte_or_no_improv<composite_score>
                     (composite_score(opt_params.terminate_if_gte,
                                       get_complexity(worst_composite_score)),
@@ -542,11 +542,11 @@ struct hill_climbing : optim_stats
      * search is exhaustive if the local neighborhood is small; else
      * the local neighborhood is randomly sampled.
      *
-     * @param deme     Where to store the candidates searched. The deme
-     *                 is assumed to be empty.  If it is not empty, it
-     *                 will be overwritten.
+     * @param deme      Where to store the candidates searched. The deme
+     *                  is assumed to be empty.  If it is not empty, it
+     *                  will be overwritten.
      * @prama init_inst Start the seach from this instance.
-     * @param score the Scoring function.
+     * @param cscorer   the Scoring function.
      * @param max_evals The maximum number of evaluations to eperform.
      * @param eval_best returned: The number of evaluations performed
      *                  to reach the best solution.
@@ -554,10 +554,10 @@ struct hill_climbing : optim_stats
      *         be equal or larger than the eval_best return, as not all
      *         evaluations lead to the best solution.
      */
-    template<typename Scoring>
+    template<typename CScoring>
     unsigned operator()(instance_set<composite_score>& deme,
                         const instance& init_inst,
-                        const Scoring& score, unsigned max_evals,
+                        const CScoring& cscorer, unsigned max_evals,
                         unsigned* eval_best = NULL)
     {
         logger().debug("Local Search Optimization");
@@ -795,7 +795,7 @@ struct hill_climbing : optim_stats
                  deme.begin_scores() + current_number_of_instances,
                  // using bind cref so that score is passed by
                  // ref instead of by copy
-                 boost::bind(boost::cref(score), _1));
+                 boost::bind(boost::cref(cscorer), _1));
 
             // Check if there is an instance in the deme better than
             // the best candidate
@@ -1004,12 +1004,12 @@ struct hill_climbing : optim_stats
     // Like above but assumes that init_inst is null (backward compatibility)
     // XXX In fact, all of the current code uses this entry point, no one
     // bothers to supply an initial instance.
-    template<typename Scoring>
+    template<typename CScoring>
     unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals)
+                        const CScoring& cscorer, unsigned max_evals)
     {
         instance init_inst(deme.fields().packed_width());
-        return operator()(deme, init_inst, score, max_evals);
+        return operator()(deme, init_inst, cscorer, max_evals);
     }
 
     optim_parameters opt_params;
@@ -1113,10 +1113,10 @@ struct simulated_annealing : optim_stats
                            (max_distance - 1) + 1 );
     }
 
-    template<typename Scoring>
+    template<typename CScoring>
     unsigned operator()(instance_set<composite_score>& deme,
                         const instance& init_inst,
-                        const Scoring& score, unsigned max_evals)
+                        const CScoring& cscorer, unsigned max_evals)
     {
         const field_set& fields = deme.fields();
         max_distance = opt_params.max_distance(fields);
@@ -1137,7 +1137,7 @@ struct simulated_annealing : optim_stats
         // Score the initial instance
         instance center_instance(init_inst);
         scored_instance<composite_score> scored_center_inst =
-            score_instance(center_instance, score);
+            score_instance(center_instance, cscorer);
         energy_t center_instance_energy = energy(scored_center_inst);
         double current_temp = sa_params.init_temp;
 
@@ -1176,7 +1176,7 @@ struct simulated_annealing : optim_stats
             OMP_ALGO::transform(deme.begin() + current_number_of_instances,
                                 deme.end(),
                                 deme.begin_scores() + current_number_of_instances,
-                                boost::bind(boost::cref(score), _1));
+                                boost::bind(boost::cref(cscorer), _1));
 
             // get the best instance
             scored_instance<composite_score>& best_scored_instance =
@@ -1220,22 +1220,18 @@ struct simulated_annealing : optim_stats
     }
 
     // like above but assumes that the initial instance is null
-    template<typename Scoring>
+    template<typename CScoring>
     unsigned operator()(instance_set<composite_score>& deme,
-                        const Scoring& score, unsigned max_evals)
+                        const CScoring& cscorer, unsigned max_evals)
     {
         const instance init_inst(deme.fields().packed_width());
-        return operator()(deme, init_inst, score, max_evals);
+        return operator()(deme, init_inst, cscorer, max_evals);
     }
 
     optim_parameters opt_params;
     sa_parameters sa_params;
 protected:
     unsigned max_distance;
-};
-
-// for testing only
-struct dummy_optimization {
 };
 
 } // ~namespace moses

@@ -30,6 +30,8 @@
 
 namespace opencog { namespace moses {
 
+#ifdef DEAD_CODE
+Nothing seems to make use f the code below .. !?!?
 // ///////////////////// Scoring for truth table data /////////////////////////
 
 struct ConfusionMatrix {
@@ -154,34 +156,9 @@ private:
 
     struct CaseBasedBoolean *c;
 };
+#endif /* DEAD_CODE */
 
 // ////////////// End of scoring for truth table ///////////////
-
-struct interactive_score : public unary_function<combo_tree, score_t>
-{
-    interactive_score() {  }
-
-    score_t operator()(const combo_tree& tr) const
-    {
-        cout << "Fitness Function of : " << tr << " enter the score :" << endl;
-        score_t score = 0.0;
-        cin >> score;
-        return score;
-    }
-};
-
-
-struct interactive_bscore : public unary_function<combo_tree, behavioral_score>
-{
-    interactive_bscore() {  }
-
-    behavioral_score  operator()(const combo_tree& tr) const
-    {
-        behavioral_score bs(0);
-        return bs;
-    }
-};
-
 
 } // ~namespace moses
 } // ~namespace opencog

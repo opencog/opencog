@@ -36,7 +36,6 @@
 
 #include "../moses/moses.h"
 #include "../optimization/optimization.h"
-#include "../moses/scoring_functions.h"
 #include "ant_scoring.h"
 
 

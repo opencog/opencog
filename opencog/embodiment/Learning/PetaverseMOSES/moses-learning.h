@@ -82,7 +82,7 @@ public:
     void reset_estimator();
 
 private:
-    struct petaverse_score  *score;
+    struct petaverse_cscore *cscore;
     struct petaverse_bscore *bscore;
     struct hill_climbing *climber;
     const FE& _fitness_estimator;
@@ -110,23 +110,32 @@ private:
 
     const score_t max_score;
 
-    typedef metapopulation<petaverse_score, petaverse_bscore, hill_climbing> metapop_t;
+    typedef metapopulation<petaverse_cscore, petaverse_bscore, hill_climbing> metapop_t;
     metapop_t *metapop;
 };
 
-struct petaverse_score : public unary_function<combo_tree, score_t> {
-    petaverse_score(const FE& fitnessEstimator)
+struct petaverse_cscore : public unary_function<combo_tree, composite_score>
+{
+    petaverse_cscore(const FE& fitnessEstimator)
             : _fitnessEstimator(fitnessEstimator) {}
 
-    petaverse_score(const petaverse_score& ps)
+    petaverse_cscore(const petaverse_cscore& ps)
             : _fitnessEstimator(ps._fitnessEstimator) {}
 
-    int operator()(const combo_tree& tr) const {
+    composite_score operator()(const combo_tree& tr) const
+    {
         score_t score = _fitnessEstimator(tr);
         std::cout << "scoring " << tr << " score: " << score << endl;
-        return score;
+
+// This complexity ratio matches the original code, but it is not
+// obviously correct to me.
+#define CPXY_RATIO 1.0
+
+        complexity_t cpxy = tr.size();
+        composite_score cs(score, cpxy, cpxy / CPXY_RATIO);
+        return cs;
     }
-    ~petaverse_score() {}
+    ~petaverse_cscore() {}
 
 private:
     const FE& _fitnessEstimator;
@@ -135,18 +144,20 @@ private:
 // @todo: this is not a good behavioral score, it should rather be
 // such that each feature correspond to the dissimilarity of an action
 // in the action sequence to imitate
-struct petaverse_bscore : public unary_function<combo_tree, behavioral_score> {
+struct petaverse_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+{
     petaverse_bscore(const FE& fitnessEstimator)
             : _fitnessEstimator(fitnessEstimator) {}
 
     petaverse_bscore(const petaverse_bscore& ps)
             : _fitnessEstimator(ps._fitnessEstimator) {}
 
-    behavioral_score operator()(const combo_tree& tr) const {
-        behavioral_score bs(2);
-        bs[0] = _fitnessEstimator(tr);
-        bs[1] = tr.size();
-        return bs;
+    penalized_behavioral_score operator()(const combo_tree& tr) const
+    {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = _fitnessEstimator(tr);
+        pbs.second = tr.size();
+        return pbs;
     }
 
     ~petaverse_bscore() {}

@@ -41,6 +41,32 @@ using namespace reduct;
 using namespace boost;
 using namespace std;
 
+struct interactive_cscore : public unary_function<combo_tree,
+composite_score>
+{
+    interactive_cscore() {  }
+
+    composite_score operator()(const combo_tree& tr) const
+    {
+        cout << "Fitness Function of : " << tr << " enter the score :" << endl;
+        score_t score = 0.0;
+        cin >> score;
+        return composite_score(score, 0, 0);
+    }
+};
+
+struct interactive_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+{
+    interactive_bscore() {  }
+
+    result_type  operator()(const combo_tree& tr) const
+    {
+        result_type pbs;
+        return pbs;
+    }
+};
+
+
 int main(int argc, char** argv)
 {
     int max_evals;
@@ -58,13 +84,13 @@ int main(int argc, char** argv)
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::action_result_type, 1);
 
-    interactive_score scorer;
+    interactive_cscore cscorer;
     interactive_bscore bscorer;
     hill_climbing climber;
 
-    metapopulation<interactive_score, interactive_bscore, hill_climbing>
+    metapopulation<interactive_cscore, interactive_bscore, hill_climbing>
         metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-                scorer, bscorer, climber);
+                cscorer, bscorer, climber);
 
     cout << "build metapop" << endl;
 

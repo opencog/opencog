@@ -35,11 +35,34 @@ using namespace combo;
 using namespace reduct;
 using namespace moses;
 
+// For testing only
+struct dummy_cscore : public unary_function<combo_tree, composite_score>
+{
+    composite_score operator()(const combo_tree& tr) const {
+        return composite_score(0,0,0);
+    }
+};
+
+// For testing only
+struct dummy_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+{
+    penalized_behavioral_score operator()(const combo_tree& tr) const
+    {
+        penalized_behavioral_score pbs;
+        pbs.second = 0;
+        return pbs;
+    }
+};
+
+struct dummy_optimization {
+};
+
+
 class metapopulationUTest : public CxxTest::TestSuite {
-    typedef metapopulation<dummy_score,
+    typedef metapopulation<dummy_cscore,
                            dummy_bscore,
                            dummy_optimization> metapopulation_t;
-    dummy_score _dsc;
+    dummy_cscore _dcsc;
     dummy_bscore _dbsc;
     vertex_set ignore_ops;
     logical_reduction lred;
@@ -48,11 +71,11 @@ class metapopulationUTest : public CxxTest::TestSuite {
 
 public:
     metapopulationUTest()
-        : _dsc(), _dbsc(), ignore_ops(),
+        : _dcsc(), _dbsc(), ignore_ops(),
           lred(ignore_ops),
           _do(),
           _metapopulation(combo_tree(), type_tree(),
-                          lred.operator()(2), _dsc, _dbsc,
+                          lred.operator()(2), _dcsc, _dbsc,
                           _do)
     {
         logger().setPrintToStdoutFlag(true);
@@ -67,37 +90,47 @@ public:
         // dummy (1, 2, ...) as only their bscore matter
         bscored_combo_tree_set bcs;
         // 1
-        behavioral_score bsc1 = {-1, 0, -1, 0};
-        composite_score csc1(-2, -1);
-        composite_behavioral_score cbs1(bsc1, csc1);
+        penalized_behavioral_score pbs1;
+        pbs1.first = {-1, 0, -1, 0};
+        pbs1.second = 0;
+        composite_score csc1(-2, -1, pbs1.second);
+        composite_behavioral_score cbs1(pbs1, csc1);
         combo_tree tr1(1.0);
         bscored_combo_tree bct1(tr1, cbs1);
         bcs.insert(bct1);
         // 2
-        behavioral_score bsc2 = {-1, -1, -1, 0};
-        composite_score csc2(-3, -1);
-        composite_behavioral_score cbs2(bsc2, csc2);
+        penalized_behavioral_score pbs2;
+        pbs2.first = {-1, -1, -1, 0};
+        pbs1.second = 0;
+        composite_score csc2(-3, -1, pbs2.second);
+        composite_behavioral_score cbs2(pbs2, csc2);
         combo_tree tr2(2.0);
         bscored_combo_tree bct2(tr2, cbs2);
         bcs.insert(bct2);
         // 3
-        behavioral_score bsc3 = {-1, 0, -1, 0};
-        composite_score csc3(-2, -1);
-        composite_behavioral_score cbs3(bsc3, csc3);
+        penalized_behavioral_score pbs3;
+        pbs3.first = {-1, 0, -1, 0};
+        pbs3.second = 0;
+        composite_score csc3(-2, -1, pbs3.second);
+        composite_behavioral_score cbs3(pbs3, csc3);
         combo_tree tr3(3.0);
         bscored_combo_tree bct3(tr3, cbs3);
         bcs.insert(bct3);
         // 4
-        behavioral_score bsc4 = {0, -1, 0, -1};
-        composite_score csc4(-2, -1);
-        composite_behavioral_score cbs4(bsc4, csc4);
+        penalized_behavioral_score pbs4;
+        pbs4.first = {0, -1, 0, -1};
+        pbs4.second = 0;
+        composite_score csc4(-2, -1, pbs4.second);
+        composite_behavioral_score cbs4(pbs4, csc4);
         combo_tree tr4(4.0);
         bscored_combo_tree bct4(tr4, cbs4);
         bcs.insert(bct4);
         // 5
-        behavioral_score bsc5 = {0, -1, -1, -1};
-        composite_score csc5(-3, -1);
-        composite_behavioral_score cbs5(bsc5, csc5);
+        penalized_behavioral_score pbs5;
+        pbs5.first = {0, -1, -1, -1};
+        pbs5.second = 0;
+        composite_score csc5(-3, -1, pbs5.second);
+        composite_behavioral_score cbs5(pbs5, csc5);
         combo_tree tr5(5.0);
         bscored_combo_tree bct5(tr5, cbs5);
         bcs.insert(bct5);
@@ -117,27 +150,33 @@ public:
         // dummy (1, 2, ...) as only their bscore matter
         bscored_combo_tree_set bcs1, bcs2;
         // 4
-        behavioral_score bsc4 = {0, -1, 0, -1};
-        composite_score csc4(-2, -1);
-        composite_behavioral_score cbs4(bsc4, csc4);
+        penalized_behavioral_score pbs4;
+        pbs4.first = {0, -1, 0, -1};
+        pbs4.second = 0;
+        composite_score csc4(-2, -1, pbs4.second);
+        composite_behavioral_score cbs4(pbs4, csc4);
         combo_tree tr4(4.0);
         bscored_combo_tree bct4(tr4, cbs4);
         bcs1.insert(bct4);
         // 5
-        behavioral_score bsc5 = {0, -1, -1, -1};
-        composite_score csc5(-3, -1);
-        composite_behavioral_score cbs5(bsc5, csc5);
+        penalized_behavioral_score pbs5;
+        pbs5.first = {0, -1, -1, -1};
+        pbs5.second = 0;
+        composite_score csc5(-3, -1, pbs5.second);
+        composite_behavioral_score cbs5(pbs5, csc5);
         combo_tree tr5(5.0);
         bscored_combo_tree bct5(tr5, cbs5);
         bcs2.insert(bct5);
         // 2
-        behavioral_score bsc2 = {-1, -1, -1, 0};
-        composite_score csc2(-3, -1);
-        composite_behavioral_score cbs2(bsc2, csc2);
+        penalized_behavioral_score pbs2;
+        pbs2.first = {-1, -1, -1, 0};
+        pbs2.second = 0;
+        composite_score csc2(-3, -1, pbs2.second);
+        composite_behavioral_score cbs2(pbs2, csc2);
         combo_tree tr2(2.0);
         bscored_combo_tree bct2(tr2, cbs2);
         bcs2.insert(bct2);
-        typedef metapopulation<dummy_score, dummy_bscore, dummy_optimization>
+        typedef metapopulation<dummy_cscore, dummy_bscore, dummy_optimization>
             metapopulation_t;
 
         metapopulation_t::bscored_combo_tree_set_pair res_p =

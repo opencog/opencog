@@ -7,7 +7,6 @@
 #include <opencog/comboreduct/combo/eval.h>
 
 #include "../moses/moses.h"
-#include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 #include "../optimization/optimization.h"
@@ -59,7 +58,7 @@ int main(int argc, char** argv)
 
 
     // binary XOR task
-    ann_score score;
+    ann_cscore cscore;
     ann_bscore bscore;
 
     const reduct::rule* si = &(ann_reduction());
@@ -67,8 +66,8 @@ int main(int argc, char** argv)
         si = &(clean_reduction());
 
     univariate_optimization univ;
-    metapopulation<ann_score, ann_bscore, univariate_optimization>
-        metapop(tr, tt, *si, score, bscore, univ);
+    metapopulation<ann_cscore, ann_bscore, univariate_optimization>
+        metapop(tr, tt, *si, cscore, bscore, univ);
 
     boost::program_options::variables_map vm;
     jobs_t jobs;

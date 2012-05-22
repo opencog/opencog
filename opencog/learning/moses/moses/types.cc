@@ -32,7 +32,8 @@ bool bscored_combo_tree_greater::operator()(const bscored_combo_tree& bs_tr1,
     composite_score csc1 = get_composite_score(bs_tr1),
         csc2 = get_composite_score(bs_tr2);
     return (csc1 > csc2)
-        || (!(csc2 > csc1) &&
+        || (!(csc2 > csc1) &&       // XXX TODO I think this shoul be tree complexity, 
+                                    // and not "size tree order", yeah ??
             size_tree_order<vertex>()(get_tree(bs_tr1),
                                       get_tree(bs_tr2)));
 }

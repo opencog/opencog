@@ -221,26 +221,26 @@ private:
 };
 
 
-struct ant_score : public unary_function<combo_tree, score_t> {
+struct ant_score : public unary_function<combo_tree, composite_score> {
     ant_score() {}
 
-    int operator()(const combo_tree& tr) const {
-        return -1000 + aff(tr);
+    composite_score operator()(const combo_tree& tr) const {
+        return composite_score (-1000 + aff(tr), 0, 0);
     }
 
     AntFitnessFunction aff;
 };
 
 // @todo: it is probability not a good behavioral_score
-struct ant_bscore : public unary_function<combo_tree, behavioral_score> {
+struct ant_bscore : public unary_function<combo_tree, penalized_behavioral_score> {
     ant_bscore( ) { }
 
-    behavioral_score operator()(const combo_tree& tr) const {
-        behavioral_score bs(2);
-        bs[0] = ant_score()(tr);
-        bs[1] = tr.size();
+    penalized_behavioral_score operator()(const combo_tree& tr) const {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = get_score(ant_score()(tr));
+        pbs.second = tr.size();
 
-        return bs;
+        return pbs;
     }
 };
 

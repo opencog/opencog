@@ -25,7 +25,6 @@
 #include <opencog/comboreduct/combo/eval.h>
 
 #include "../moses/moses.h"
-#include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 #include "../representation/representation.h"
@@ -79,12 +78,12 @@ int main(int argc, char** argv)
         si = &(clean_reduction());
 
     //SINGLE MARKOVIAN POLE TASK
-    ann_pole_score p_score;
+    ann_pole_cscore p_cscore;
     ann_pole_bscore p_bscore; 
 
     univariate_optimization optim_algo;
-    metapopulation<ann_pole_score, ann_pole_bscore, univariate_optimization>
-        metapop_pole(tr, tt, *si, p_score, p_bscore, optim_algo);
+    metapopulation<ann_pole_cscore, ann_pole_bscore, univariate_optimization>
+        metapop_pole(tr, tt, *si, p_cscore, p_bscore, optim_algo);
 
     moses::moses(metapop_pole);
 
