@@ -121,6 +121,9 @@ typedef tagged_item<combo::combo_tree,
 typedef std::vector<score_t> behavioral_score;
 
 typedef tagged_item<behavioral_score,
+                    score_t> penalized_behavioral_score;
+
+typedef tagged_item<behavioral_score,
                     composite_score> composite_behavioral_score;
 typedef tagged_item<combo::combo_tree,
                     composite_behavioral_score> bscored_combo_tree;
@@ -245,6 +248,13 @@ Out& ostream_behavioral_score(Out& out, const behavioral_score& bs)
     return ostreamContainer(out, bs, " ", "[", "]");
 }
 
+template<typename Out>
+Out& ostream_penalized_behavioral_score(Out& out, const penalized_behavioral_score& pbs)
+{
+    out << "penalty=" << pbs.second;
+    return ostreamContainer(out, pbs.first, " ", "[", "]");
+}
+
 /**
  * stream out a candidate along with their scores (optionally
  * complexity and bscore).
@@ -340,6 +350,12 @@ inline std::ostream& operator<<(std::ostream& out,
                                 const moses::behavioral_score& s)
 {
     return moses::ostream_behavioral_score(out, s);
+}
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const moses::penalized_behavioral_score& s)
+{
+    return moses::ostream_penalized_behavioral_score(out, s);
 }
 
 } // ~namespace moses

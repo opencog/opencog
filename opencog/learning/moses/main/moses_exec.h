@@ -286,7 +286,11 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     if (meta_params.enable_cache) {
         static const unsigned initial_cache_size = 1000000;
         
-        if(meta_params.include_dominated) {
+        if (meta_params.include_dominated) {
+            // When the include_dominated flag is set, then trees are merged
+            // into the metapop based only on the score (and complexity),
+            // not on the behavioral score. So we can throw away the 
+            // behavioral score after computng it (we don't need to cche it).
             typedef bscore_based_score<BScore> Score;
             typedef adaptive_cache<prr_cache_threaded<Score> > ScoreACache;
             Score score(bsc);

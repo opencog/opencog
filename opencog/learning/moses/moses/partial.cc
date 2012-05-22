@@ -220,9 +220,9 @@ bool partial_solver::candidate (const combo_tree& cand)
 std::cout<<"duude in the candy="<<cand<<std::endl;
 
     // Are we done yet?
-    behavioral_score bs = _bscore->operator()(cand);
+    penalized_behavioral_score pbs = _bscore->operator()(cand);
     score_t total_score = 0.0;
-    foreach(const score_t& sc, bs)
+    foreach(const score_t& sc, pbs.first)
         total_score += sc;
 
     // XXX replace  by the correct compare, i.e. the orig gte.

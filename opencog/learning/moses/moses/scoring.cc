@@ -54,32 +54,33 @@ using boost::phoenix::arg_names::arg1;
 using namespace boost::accumulators;
 
 // helper to log a combo_tree and its behavioral score
-inline void log_candidate_bscore(const combo_tree& tr,
-                                 const behavioral_score& bs)
+inline void log_candidate_pbscore(const combo_tree& tr,
+                                  const penalized_behavioral_score& pbs)
 {
     if (!logger().isFineEnabled())
         return;
 
     logger().fine() << "Evaluate candidate: " << tr << "\n"
-                    << "\tBScored: " << bs;
+                    << "\tBScored: " << pbs;
 }
 
 ////////////////////
 // logical_bscore //
 ////////////////////
         
-behavioral_score logical_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 {
     combo::complete_truth_table tt(tr, arity);
-    behavioral_score bs(target.size());
+    penalized_behavioral_score pbs(
+        make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
 
-    boost::transform(tt, target, bs.begin(), [](bool b1, bool b2) {
+    boost::transform(tt, target, pbs.first.begin(), [](bool b1, bool b2) {
             return -score_t(b1 != b2); });
 
     if (occam)
-        bs.push_back(tree_complexity(tr) * complexity_coef);
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
-    return bs;
+    return pbs;
 }
 
 behavioral_score logical_bscore::best_possible_bscore() const
@@ -115,23 +116,22 @@ void logical_bscore::set_complexity_coef(score_t complexity_ratio)
 // contin_bscore //
 ///////////////////
 
-// Note that this returns a NEGATIVE number, so that when multiplied
-// against a postive cmplexity, the net result is a penalty.
+// Note that this returns a POSITIVE number.
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev)
 {
-    return -log(alphabet_size) * 2 * sq(stdev);
+    return log(alphabet_size) * 2 * sq(stdev);
 }
 
-behavioral_score contin_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
     // OTable target is the table of output we want to get.
-    behavioral_score bs;
+    penalized_behavioral_score pbs;
 
     // boost/range/algorithm/transform.
     // Take the input vectors cit, target, feed the elts to anon
     // funtion[] (which just computes square of the difference) and
     // put the results into bs.
-    boost::transform(cti, target, back_inserter(bs),
+    boost::transform(cti, target, back_inserter(pbs.first),
                      [&](const vertex_seq& vs, const vertex& v) {
                          contin_t tar = get_contin(v),
                              res = get_contin(eval_binding(vs, tr));
@@ -139,18 +139,18 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
                      });
     // add the Occam's razor feature
     if (occam)
-        bs.push_back(tree_complexity(tr) * complexity_coef);
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
     // Logger
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
     // ~Logger
 
-    return bs;
+    return pbs;
 }
 
 behavioral_score contin_bscore::best_possible_bscore() const
 {
-    return behavioral_score(target.size() + (occam?1:0), 0);
+    return behavioral_score(target.size(), 0);
 }
 
 score_t contin_bscore::min_improv() const
@@ -168,7 +168,7 @@ score_t contin_bscore::min_improv() const
         
 void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 {
-    if(occam)
+    if (occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
 }
 
@@ -233,9 +233,9 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     logger().fine("max_precision = %f", max_precision);
 }
 
-behavioral_score precision_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 {
-    behavioral_score bs;
+    penalized_behavioral_score pbs;
 
     /// associate sum of worst outputs with number of observations for
     /// that sum
@@ -286,21 +286,21 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     }
     
     logger().fine("precision = %f", precision);
-    bs.push_back(precision);
+    pbs.first.push_back(precision);
     
     // add activation_penalty
     score_t activation_penalty = get_activation_penalty(activation);
     logger().fine("activation = %f", activation);
     logger().fine("activation penalty = %e", activation_penalty);
-    bs.push_back(activation_penalty);
+    pbs.first.push_back(activation_penalty);
     
     // Add the Occam's razor
     if (occam)
-        bs.push_back(tree_complexity(tr) * complexity_coef);
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
 
-    return bs;
+    return pbs;
 }
 
 behavioral_score precision_bscore::best_possible_bscore() const
@@ -369,10 +369,10 @@ score_t precision_bscore::min_improv() const
 // discretize_contin_bscore //
 //////////////////////////////
         
-// Note that this function returns a NEGATIVE number, since  p < 1.
+// Note that this function returns a POSITIVE number, since  p < 1.
 score_t discrete_complexity_coef(unsigned alphabet_size, double p)
 {
-    return log((double)alphabet_size) / log(p/(1-p));
+    return -log((double)alphabet_size) / log(p/(1-p));
 }
 
 discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
@@ -390,16 +390,17 @@ discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
             return this->class_idx(get_contin(v)); });
     // precompute weights
     multiset<size_t> cs(classes.begin(), classes.end());
-    if(weighted_accuracy)
-        for(size_t i = 0; i < weights.size(); ++i)
+    if (weighted_accuracy)
+        for (size_t i = 0; i < weights.size(); ++i)
             weights[i] = classes.size() / (float)(weights.size() * cs.count(i));
     // precompute Occam's razor coefficient
     occam = p > 0 && p < 0.5;
-    if(occam)
+    if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);    
 }
 
-behavioral_score discretize_contin_bscore::best_possible_bscore() const {
+behavioral_score discretize_contin_bscore::best_possible_bscore() const
+{
     return behavioral_score(target.size(), 0);
 }
 
@@ -409,11 +410,12 @@ score_t discretize_contin_bscore::min_improv() const
                                 // backward behavior
 }
 
-size_t discretize_contin_bscore::class_idx(contin_t v) const {
-    if(v < thresholds[0])
+size_t discretize_contin_bscore::class_idx(contin_t v) const
+{
+    if (v < thresholds[0])
         return 0;
     size_t s = thresholds.size();
-    if(v >= thresholds[s - 1])
+    if (v >= thresholds[s - 1])
         return s;
     return class_idx_within(v, 1, s);
 }
@@ -434,26 +436,28 @@ size_t discretize_contin_bscore::class_idx_within(contin_t v,
         return class_idx_within(v, m_idx, u_idx);
 }
 
-behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
 {
     /// @todo could be optimized by avoiding computing the OTable and
     /// directly using the results on the fly. On really big table
     /// (dozens of thousands of data points and about 100 inputs, this
     /// has overhead of about 10% of the overall time)
     OTable ct(tr, cit);    
-    behavioral_score bs(target.size() + (occam?1:0));
-    boost::transform(ct, classes, bs.begin(), [&](const vertex& v, size_t c_idx) {
+    penalized_behavioral_score pbs(
+        make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
+    boost::transform(ct, classes, pbs.first.begin(), [&](const vertex& v, size_t c_idx) {
             return (c_idx != this->class_idx(get_contin(v))) * this->weights[c_idx];
         });
-    // add the Occam's razor feature
-    if(occam)
-        bs.back() = tree_complexity(tr) * complexity_coef;
+
+    // Add the Occam's razor feature
+    if (occam)
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
     // Logger
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
     // ~Logger
 
-    return bs;    
+    return pbs;    
 }
 
 /////////////////////////
@@ -467,24 +471,26 @@ ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
     set_complexity_coef(alphabet_size, p);
 }
 
-behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
-    behavioral_score bs;
+    //penalized_behavioral_score pbs(
+    //    make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
+    penalized_behavioral_score pbs;
 
     // Evaluate the bscore components for all rows of the ctable
     foreach (const CTable::value_type& vct, ctable) {
         const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
-        bs.push_back(-score_t(c.get(negate_vertex(eval_binding(vs, tr)))));
+        pbs.first.push_back(-score_t(c.get(negate_vertex(eval_binding(vs, tr)))));
     }
 
     // Add the Occam's razor feature
     if (occam)
-        bs.push_back(tree_complexity(tr) * complexity_coef);
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
 
-    return bs;
+    return pbs;
 }
 
 behavioral_score ctruth_table_bscore::best_possible_bscore() const
@@ -503,9 +509,6 @@ behavioral_score ctruth_table_bscore::best_possible_bscore() const
                                       c.get(id::logical_false)));
               });
 
-    // add the Occam's razor feature
-    if(occam)
-        bs.push_back(0);
     return bs;
 }
 
@@ -537,9 +540,9 @@ void ctruth_table_bscore::set_complexity_coef(score_t complexity_ratio)
 // enum_table_bscore //
 /////////////////////////
         
-behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
 {
-    behavioral_score bs;
+    penalized_behavioral_score pbs;
 
     // Evaluate the bscore components for all rows of the ctable
     foreach (const CTable::value_type& vct, ctable) {
@@ -548,16 +551,16 @@ behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
         // The number that are wrong equals total minus num correct.
         score_t sc = score_t(c.get(eval_binding(vs, tr)));
         sc -= score_t(c.total_count());
-        bs.push_back(sc);
+        pbs.first.push_back(sc);
     }
 
     // Add the Occam's razor feature
     if (occam)
-        bs.push_back(tree_complexity(tr) * complexity_coef);
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
 
-    return bs;
+    return pbs;
 }
 
 behavioral_score enum_table_bscore::best_possible_bscore() const
@@ -579,9 +582,6 @@ behavioral_score enum_table_bscore::best_possible_bscore() const
                   return score_t (most - c.total_count());
               });
 
-    // add the Occam's razor feature
-    if (occam)
-        bs.push_back(0);
     return bs;
 }
 
@@ -604,9 +604,9 @@ void enum_table_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 // enum_filter_bscore //
 /////////////////////////
         
-behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
 {
-    behavioral_score bs;
+    penalized_behavioral_score pbs;
 
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
@@ -637,25 +637,25 @@ behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
                 sc -= punish * total;
         }
 
-        bs.push_back(sc);
+        pbs.first.push_back(sc);
     }
 
     // Add the Occam's razor feature
     if (occam)
-        bs.push_back(tree_complexity(tr) * complexity_coef);
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
 
-    return bs;
+    return pbs;
 }
 
 /////////////////////////
 // enum_graded_bscore //
 /////////////////////////
         
-behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
 {
-    behavioral_score bs;
+    penalized_behavioral_score pbs;
 
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
@@ -700,16 +700,16 @@ behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
                 break;
             }
         }
-        bs.push_back(sc);
+        pbs.first.push_back(sc);
     }
 
     // Add the Occam's razor feature
     if (occam)
-        bs.push_back(tree_complexity(tr) * complexity_coef);
+        pbs.second = tree_complexity(tr) * complexity_coef;
 
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
 
-    return bs;
+    return pbs;
 }
 
 //////////////////////////////////
@@ -756,7 +756,7 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
     logger().fine("skewness = %f", skewness);
 }
 
-behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
+penalized_behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
     OTable pred_ot(tr, ctable);
 
@@ -776,7 +776,8 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
     logger().fine("total = %u", total);
     logger().fine("actives = %u", actives);
 
-    behavioral_score bs;
+    penalized_behavioral_score pbs;
+    behavioral_score &bs = pbs.first;
 
     // filter the output according to pred_ot
     counter_t pred_counter;     // map obvervation to occurence
@@ -796,7 +797,7 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
                                    // pred_skewness can be inf)
         // compute KLD
         if (kld_w > 0) {
-            if(decompose_kld) {
+            if (decompose_kld) {
                 klds(pred_counter, back_inserter(bs));
                 boost::transform(bs, bs.begin(), kld_w * arg1);
             } else {
@@ -853,17 +854,17 @@ behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) 
         bs.push_back(activation_penalty);
         
         // add the Occam's razor feature
-        if(occam)
-            bs.push_back(tree_complexity(tr) * complexity_coef);
+        if (occam)
+            pbs.second = tree_complexity(tr) * complexity_coef;
     } else {
-        bs.push_back(worst_score);
+        pbs.first.push_back(worst_score);
     }
 
     // Logger
-    log_candidate_bscore(tr, bs);
+    log_candidate_pbscore(tr, pbs);
     // ~Logger
 
-    return bs;
+    return pbs;
 }
 
 behavioral_score interesting_predicate_bscore::best_possible_bscore() const

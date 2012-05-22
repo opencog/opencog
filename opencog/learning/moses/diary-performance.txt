@@ -1735,6 +1735,9 @@ so temp should be 5/3.5 = 1.428571429
                 (what change made things slower??)
                  r0-r19 avg: 116
                 r20-r39 avg: 109
+                r40-r59 avg: 117
+                r60-r79 avg: 111
+
        r6873 -- identical to r6935 -- that confirms that the rand-gen
                 is behind things.
 
