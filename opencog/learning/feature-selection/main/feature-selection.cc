@@ -124,7 +124,7 @@ int main(int argc, char** argv)
              .append(sa).append(" for simulated annealing,\n")
              */
              .append(mmi).append(" for maximal mutual information,\n")
-             .append(moses::hc).append(" for hillclimbing (unsupported),\n")
+             .append(moses::hc).append(" for hillclimbing,\n")
              .append(inc).append(" for incremental mutual information.\n").c_str())
 
         // ======= File I/O opts =========
