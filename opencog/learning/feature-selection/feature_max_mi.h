@@ -75,14 +75,16 @@ FeatureSet max_mi_selection(const FeatureSet& features,
                          <<")";
     }
 
-
+    typedef typename FeatureSet::value_type feature_id;
+    typedef std::map<double, FeatureSet> ranks_t;
     typedef boost::shared_mutex shared_mutex;
     typedef boost::shared_lock<shared_mutex> shared_lock;
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 
     // Start with the empty set
-    std::map<double, FeatureSet> tops;
+    FeatureSet emptySet;
+    std::vector<std::pair<double, FeatureSet>> tops{{scorer(emptySet), emptySet}};
     double previous_high_score = -1.0;
 
     if (features.size() < num_features)
@@ -91,30 +93,29 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     // Randomize order, so that different redundant features
     // get a chance to show up in the final list. Copy set to
     // vector, then shuffle the vector.
-    std::vector<typename FeatureSet::value_type> shuffle;
-    foreach(typename FeatureSet::value_type v, features)
-        shuffle.push_back(v);
+    std::vector<feature_id> shuffle(features.begin(), features.end());
     auto shr = [&](ptrdiff_t i) { return randGen().randint(i); };
+    /// @todo should pass OpenCog's random generator so that it is
+    /// determined by its seed
     random_shuffle(shuffle.begin(), shuffle.end(), shr);
 
     // Repeat, until we've gotton the highest-ranked FeatueSet
     // that has at most 'num_features' in it.
     for (unsigned i = 1; i <= num_features; ++i) {
 
-        std::map<double, FeatureSet> ranks;
+        ranks_t ranks;
 
         // Add one feature at a time to fs, and score the
         // result.  Rank the result.
         auto rank_em = [&](const std::pair<double, FeatureSet> &pr)
         {
             const FeatureSet &fs = pr.second;
-            // typename FeatureSet::const_iterator fi;
-            for (auto fi = shuffle.begin(); fi != shuffle.end(); fi++) {
+            foreach (feature_id fid, shuffle) {
 
-                if (fs.end() != fs.find(*fi)) continue;
+                if (fs.end() != fs.find(fid)) continue;
 
                 FeatureSet prod = fs;
-                prod.insert(*fi);
+                prod.insert(fid);
 
                 double mi = scorer(prod);
 
@@ -123,33 +124,16 @@ FeatureSet max_mi_selection(const FeatureSet& features,
                 ranks.insert(std::pair<double, FeatureSet>(mi, prod));
             }
         };
+        // OMP_ALGO only works on random access iterators, which is
+        // why tops is a vector
         OMP_ALGO::for_each(tops.begin(), tops.end(), rank_em);
-
-        // First time through, only.  Just rank one feature.
-        if (1 == i) {
-            FeatureSet emptySet;
-            rank_em(std::pair<double, FeatureSet>(0.0, emptySet));
-        }
 
         // Discard all but the highest scorers.  When done, 'tops'
         // will hold FeatureSets with exactly 'i' elts each.
         tops.clear();
-        unsigned j = 0;
-        typename std::map<double, FeatureSet>::const_reverse_iterator mit;
-        for (mit = ranks.rbegin(); mit != ranks.rend(); mit++) {
-#if DEBUG
-            std::cout << "MI=" << mit->first << " feats=";
-            typename FeatureSet::const_iterator fi;
-            FeatureSet ff = mit->second;
-            for (fi = ff.begin(); fi != ff.end(); fi++) {
-                std::cout << "-" << *fi;
-             }
-             std::cout << std::endl;
-#endif
-            tops.insert(*mit);
-            j++;
-            if (top_size < j) break;
-        }
+        auto rb = ranks.rbegin(),
+            re = std::next(rb, std::min(top_size, (unsigned)ranks.size()));
+        tops.insert(tops.begin(), rb, re);
 
         OC_ASSERT (!ranks.empty(), "Fatal Error: no ranked feature sets");
 
