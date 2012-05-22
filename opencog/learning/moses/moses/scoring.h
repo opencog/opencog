@@ -86,11 +86,14 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
 };
 
 /**
- * score calculated based on the behavioral score. Useful to avoid
- * redundancy of code and computation in case there is a cache over
- * bscore. The score is calculated as the sum of the bscore over all
- * features, that is:
- * score = sum_f BScore(f),
+ * Score calculated from the behavioral score.
+ *
+ * The score is calculated as the sum of the bscore over all features:
+ *      score = sum_f BScore(f) + penalty
+ *
+ * This is a "minor" helper class, and exists for two reasons:
+ * 1)  avoids some redundancy of having the summation in many places
+ * 2) Helps with keeping the score-caching code cleaner.
  */
 /// @todo Inheriting that class from score_base raises a compile error
 /// because in moses_exec.h some code attempts to use BScore that does
@@ -105,18 +108,22 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
 /// being cached being inherited by the cache that compile error will
 /// go away and we can have bscore_based_score inherit it)
 
-template<typename BScore>
+template<typename PBScorer>
 struct bscore_based_score : public unary_function<combo_tree, score_t>
 {
-    bscore_based_score(const BScore& bs) : bscore(bs) {}
+    bscore_based_score(const PBScorer& sr) : pbscorer(sr) {}
     score_t operator()(const combo_tree& tr) const
     {
         try {
-            behavioral_score bs = bscore(tr);
+            penalized_behavioral_score pbs = pbscorer(tr);
+            behavioral_score &bs = pbs.first;
             score_t res = boost::accumulate(bs, 0.0);
+
+            res -= pbs.second;  // subtract the penalty!
 
             if (logger().isFineEnabled()) {
                 logger().fine() << "bscore_based_score: " << res
+                                << " penalty: " << pbs.second
                                 << " for candidate: " << tr;
             }
 
@@ -145,16 +152,16 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     // termination condition.
     score_t best_possible_score() const
     {
-        return boost::accumulate(bscore.best_possible_bscore(), 0.0);
+        return boost::accumulate(pbscorer.best_possible_bscore(), 0.0);
     }
 
     // Return the minimum value considered for improvement
     score_t min_improv() const
     {
-        return bscore.min_improv();
+        return pbscorer.min_improv();
     }
 
-    const BScore& bscore;
+    const PBScorer& pbscorer;
 };
 
 #ifdef THIS_IS_DEAD_CODE
@@ -181,7 +188,7 @@ struct multiscore_based_bscore : public bscore_base
 
         behavioral_score &bs = pbs.first;
         boost::transform(scores, bs.begin(), [&](const Scorer& sc){return sc(tr);});
-        XXX what about the penalty ??  we need to handle that too...
+// XXX what about the penalty ??  we need to handle that too...
         return pbs;
     }
 
