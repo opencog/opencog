@@ -739,7 +739,7 @@ inline definite_object get_definite_object(const vertex& v)
 }
 
 // -------------------------------------------------------
-// Bollean utility functions
+// Boolean utility functions
 
 inline vertex bool_to_vertex(bool b)
 {

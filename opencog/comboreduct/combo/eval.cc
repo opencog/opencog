@@ -225,7 +225,16 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
         case id::greater_than_zero : {
             sib_it sib = it.begin();
-            vertex x = eval_throws_binding(bmap, sib, pe);
+            vertex x;
+            try {
+                // A divide-by-zero in the contin could throw. We want
+                // to return a boolean in this case, anyway.  Values
+                // might be +inf -inf or nan and we can still get a
+                // sign bit off two of these cases...
+                x = eval_throws_binding(bmap, sib, pe);
+            } catch (EvalException e) {
+                x = e.get_vertex();
+            }
             return bool_to_vertex(0 < get_contin(x));
         }
 
