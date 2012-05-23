@@ -64,13 +64,12 @@ struct moses_based_scorer : public unary_function<instance, composite_score> {
      */
     composite_score operator()(const instance& inst) const {
         std::set<arity_t> fs = get_feature_set(_fields, inst);
-        composite_score csc(_fs_scorer(fs), -fs.size());
+        composite_score csc(_fs_scorer(fs), fs.size(), fs.size());
         // Logger
         if (logger().isFineEnabled()) {
-            stringstream ss;
-            ss << "moses_based_scorer - Evaluate instance: " 
+            logger().fine()
+               << "moses_based_scorer - Evaluate instance: " 
                << _fields.stream(inst) << " " << csc;
-            logger().fine(ss.str());
         }
         // ~Logger
         return csc;

@@ -75,14 +75,21 @@ static const score_t best_score = std::numeric_limits<score_t>::max();
 // possible representable value
 static const score_t worst_score = score_t(1) - best_score;
 
-// Define composite_score as a pair:
-// typedef std::pair<score_t, complexity_t> composite_score;
 // But modify the default sort ordering for these objects.
 struct composite_score:
      public boost::less_than_comparable<composite_score>
 {
-    composite_score(score_t s, complexity_t c, score_t h);
-    composite_score(score_t s, complexity_t c);
+    /// By convention, we expect score to be negative (so that 
+    /// higher scores==better scores) while cpxy and penalty are both
+    /// positive.  This, higher complexity==larger number, and 
+    /// bigger penalty==bigger number. The penalty is *SUBTRACTED*
+    /// from the score during evaluation!
+    //
+    // Note: we keep penalized_score, in order to avoid a subtraction
+    // in the comparison operator.
+    composite_score(score_t scor, complexity_t cpxy, score_t penalty)
+       : score(scor), complexity(cpxy), penalized_score(scor-penalty) {}
+
     composite_score();    // build the worst score
     composite_score& operator=(const composite_score &r);
 
@@ -90,15 +97,16 @@ struct composite_score:
     complexity_t get_complexity() const { return complexity; }
     score_t get_penalized_score() const { return penalized_score; }
 
-    // Sign convention: the penalty is positive, it is subtracted from
-    // the "raw" score to get the penalized score.
+    /// Sign convention: the penalty is positive, it is subtracted from
+    /// the "raw" score to get the penalized score.
     score_t get_penalty() const { return score - penalized_score; }
     void set_penalty(score_t penalty) { penalized_score = score - penalty; }
 
-    // compare weight*score + complexity XXX penalized_score FIXME
-    //
-    // Additionally we assume that nan is always smaller than
-    // anything (including -inf) except nan
+    /// Compare penalized scores.  That is, we compare score-penalty
+    /// on the right to score-penalty on the left.
+    ///
+    /// Additionally we assume that nan is always smaller than
+    /// anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
 
     static float weight;   // XXX kill this real soonn now

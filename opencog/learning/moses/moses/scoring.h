@@ -135,10 +135,9 @@ struct bscore_based_cscore : public unary_function<combo_tree, composite_score>
         const behavioral_score &bs = pbs.first;
         score_t res = boost::accumulate(bs, 0.0);
 
-        res -= pbs.second;  // subtract the penalty!
-
         if (logger().isFineEnabled()) {
             logger().fine() << "bscore_based_cscore: " << res
+                            << " complexity: " << cpxy
                             << " penalty: " << pbs.second;
         }
 
@@ -905,7 +904,7 @@ struct distance_based_scorer : public unary_function<instance,
                             << "Score = " << sc << std::endl;
         }
         // ~Logger
-        return composite_score(sc, 0);
+        return composite_score(sc, 0, 0);
     }
 
 protected:

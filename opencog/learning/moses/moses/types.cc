@@ -43,12 +43,6 @@ const composite_score worst_composite_score = composite_score();
 
 score_t composite_score::weight = 4.0f;
 
-composite_score::composite_score(score_t s, complexity_t c, score_t h)
-    : score(s), complexity(c), penalized_score(h) {}
-
-composite_score::composite_score(score_t s, complexity_t c)
-    : score(s), complexity(c), penalized_score(s) {}
-
 composite_score::composite_score()
     : score(worst_score), complexity(worst_complexity), penalized_score(worst_score) {}
 
