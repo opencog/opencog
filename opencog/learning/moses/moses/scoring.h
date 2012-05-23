@@ -2,9 +2,10 @@
  * opencog/learning/moses/moses/scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings
  * All Rights Reserved
  *
- * Written by Moshe Looks, Nil Geisweiller
+ * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -342,7 +343,6 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 struct precision_bscore : public bscore_base
 {
     precision_bscore(const CTable& _ctable,
-                     float alphabet_size, float p,
                      float min_activation, float max_activation,
                      float penalty,
                      bool positive = true,
@@ -356,6 +356,10 @@ struct precision_bscore : public bscore_base
 
     score_t min_improv() const;
 
+    virtual void set_complexity_coef(score_t complexity_ratio);
+    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+
+protected:
     CTable ctable;
     unsigned ctable_usize;                  // uncompressed size of ctable
     score_t min_activation, max_activation;
@@ -384,8 +388,7 @@ struct discretize_contin_bscore : public bscore_base
 {
     discretize_contin_bscore(const OTable& ot, const ITable& it,
                              const vector<contin_t>& thres,
-                             bool weighted_average,
-                             float alphabet_size, float p);
+                             bool weighted_average);
 
     // @todo when switching to gcc 4.6 use constructor delagation to
     // simplify that
@@ -403,13 +406,13 @@ struct discretize_contin_bscore : public bscore_base
 
     score_t min_improv() const;
 
+protected:
     OTable target;
     ITable cit;
     vector<contin_t> thresholds;
     bool weighted_accuracy;     // Whether the bscore is weighted to
                                 // deal with unbalanced data.
 
-protected:
     // Return the index of the class of value v.
     size_t class_idx(contin_t v) const;
     // Like class_idx but assume that the value v is within the class
@@ -474,10 +477,8 @@ struct contin_bscore : public bscore_base
         abs_error
     };
 
-    void init(unsigned alphabet_size, float stdev,
-              err_function_type eft = squared_error) {
-        occam = stdev > 0;
-        set_complexity_coef(alphabet_size, stdev);
+    void init(err_function_type eft = squared_error)
+    {
         switch (eft) {
         case squared_error:
             err_func = [](contin_t y1, contin_t y2) { return sq(y1 - y2); };
@@ -492,24 +493,23 @@ struct contin_bscore : public bscore_base
 
     template<typename Scoring>
     contin_bscore(const Scoring& score, const ITable& r,
-                  float alphabet_size, float stdev,
                   err_function_type eft = squared_error)
-        : target(score, r), cti(r) {
-        init(alphabet_size, stdev, eft);
+        : target(score, r), cti(r)
+    {
+        init(eft);
     }
 
     contin_bscore(const OTable& t, const ITable& r,
-                  float alphabet_size, float stdev,
                   err_function_type eft = squared_error)
-        : target(t), cti(r) {
-        init(alphabet_size, stdev, eft);
+        : target(t), cti(r)
+    {
+        init(eft);
     }
 
     contin_bscore(const Table& table,
-                  float alphabet_size, float stdev,
                   err_function_type eft = squared_error)
         : target(table.otable), cti(table.itable) {
-        init(alphabet_size, stdev, eft);
+        init(eft);
     }
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
@@ -651,13 +651,12 @@ private:
 struct ctruth_table_bscore : public bscore_base
 {
     template<typename Func>
-    ctruth_table_bscore(const Func& func, arity_t arity,
-                        unsigned alphabet_size, float p, int nsamples = -1)
+    ctruth_table_bscore(const Func& func,
+                        arity_t arity,
+                        int nsamples = -1)
         : ctable(func, arity, nsamples)
-    {
-        set_complexity_coef(alphabet_size, p);
-    }
-    ctruth_table_bscore(const CTable& _ctt, unsigned alphabet_size, float p);
+    {}
+    ctruth_table_bscore(const CTable& _ctt) : ctable(_ctt) {}
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
 
@@ -697,19 +696,7 @@ protected:
  */
 struct enum_table_bscore : public bscore_base
 {
-    template<typename Func>
-    enum_table_bscore(const Func& func, arity_t arity,
-                      unsigned alphabet_size, float p, int nsamples = -1)
-        : ctable(func, arity, nsamples)
-    {
-        set_complexity_coef(alphabet_size, p);
-    }
-
-    enum_table_bscore(const CTable& _ctt, unsigned alphabet_size, float p)
-        : ctable(_ctt)
-    {
-        set_complexity_coef(alphabet_size, p);
-    }
+    enum_table_bscore(const CTable& _ctt) : ctable(_ctt) {}
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
 
@@ -745,16 +732,8 @@ protected:
  */
 struct enum_filter_bscore : public enum_table_bscore
 {
-    template<typename Func>
-    enum_filter_bscore(const Func& func, arity_t arity,
-                      float alphabet_size, float p, int nsamples = -1)
-        : enum_table_bscore(func, arity, alphabet_size, p, nsamples),
-          punish(1.0)
-    {}
-
-    enum_filter_bscore(const CTable& _ctt, float alphabet_size, float p)
-        : enum_table_bscore(_ctt, alphabet_size, p),
-          punish(1.0)
+    enum_filter_bscore(const CTable& _ctt)
+        : enum_table_bscore(_ctt), punish(1.0)
     {}
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
@@ -797,16 +776,8 @@ struct enum_filter_bscore : public enum_table_bscore
  */
 struct enum_graded_bscore : public enum_table_bscore
 {
-    template<typename Func>
-    enum_graded_bscore(const Func& func, arity_t arity,
-                      float alphabet_size, float p, int nsamples = -1)
-        : enum_table_bscore(func, arity, alphabet_size, p, nsamples),
-          grading(0.8)
-    {}
-
-    enum_graded_bscore(const CTable& _ctt, float alphabet_size, float p)
-        : enum_table_bscore(_ctt, alphabet_size, p),
-          grading(0.8)
+    enum_graded_bscore(const CTable& _ctt)
+        : enum_table_bscore(_ctt), grading(0.8)
     {}
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
@@ -842,7 +813,6 @@ struct interesting_predicate_bscore : public bscore_base
                                                      >, contin_t> accumulator_t;
 
     interesting_predicate_bscore(const CTable& ctable,
-                                 float alphabet_size, float stdev,
                                  weight_t kld_weight = 1.0,
                                  weight_t skewness_weight = 1.0,
                                  weight_t stdU_weight = 1.0,
@@ -861,6 +831,10 @@ struct interesting_predicate_bscore : public bscore_base
 
     score_t min_improv() const;
 
+    // Hmmm, not picked up from base class, for some reason...
+    virtual void set_complexity_coef(score_t complexity_ratio) {
+        bscore_base::set_complexity_coef(complexity_ratio);
+    }
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:

@@ -271,8 +271,6 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            moses_parameters moses_params,
                            Printer& printer)
 {
-    bscorer.set_complexity_coef(meta_params.complexity_ratio);
-
     bscore_based_cscore<BScorer> c_scorer(bscorer);
 
     // update terminate_if_gte and max_score criteria

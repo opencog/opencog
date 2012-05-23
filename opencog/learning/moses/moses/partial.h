@@ -35,7 +35,6 @@ class partial_solver
 {
     public:
         partial_solver(const vector<CTable> &ctables,
-                       int as, float noise,
                        const type_tree& table_tt,
                        const vector<combo_tree>& exemplars,
                        const rule& reduct,
@@ -89,8 +88,6 @@ class partial_solver
         // Copy, more or less, or arguments, so that moses
         // can be called with these values.
         std::vector<CTable> _ctables;
-        int _alf_sz;
-        float _noise;
         const type_tree& _table_type_signature;
         std::vector<combo_tree> _exemplars;
         const rule& _reduct;

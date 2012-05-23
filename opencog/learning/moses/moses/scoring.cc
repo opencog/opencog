@@ -2,9 +2,10 @@
  * opencog/learning/moses/moses/scoring.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings
  * All Rights Reserved
  *
- * Written by Moshe Looks, Nil Geisweiller
+ * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -73,13 +74,18 @@ void bscore_base::set_complexity_coef(unsigned alphabet_size, float p)
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
 
-    logger().info() << "BScore complexity ratio = " << 1.0/complexity_coef;
+    logger().info() << "BScore noise = " << p
+                    << " alphabest size = " << alphabet_size
+                    << " complexity ratio = " << 1.0/complexity_coef;
 }
 
 void bscore_base::set_complexity_coef(score_t complexity_ratio)
 {
-    complexity_coef = 1.0 / complexity_ratio;
+    complexity_coef = 0.0;
     occam = complexity_coef > 0.0;
+    if (occam)
+        complexity_coef = 1.0 / complexity_ratio;
+
     logger().info() << "BScore complexity ratio = " << 1.0/complexity_coef;
 }
 
@@ -168,8 +174,14 @@ score_t contin_bscore::min_improv() const
         
 void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 {
+    occam = (stdev > 0.0);
+    complexity_coef = 0.0;
     if (occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
+
+    logger().info() << "contin_bscore noise = " << stdev
+                    << " alphabest size = " << alphabet_size
+                    << " complexity ratio = " << 1.0/complexity_coef;
 }
 
 //////////////////////
@@ -177,7 +189,6 @@ void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 //////////////////////
 
 precision_bscore::precision_bscore(const CTable& _ctable,
-                                   float alphabet_size, float p,
                                    float min_activation_, float max_activation_,
                                    float penalty_,
                                    bool positive_,
@@ -186,16 +197,6 @@ precision_bscore::precision_bscore(const CTable& _ctable,
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_)
 {
-    // Both p==0.0 and p==0.5 are singularity points in the Occam's
-    // razor formula for discrete outputs (see the explanation in the
-    // comment above ctruth_table_bscore)
-    occam = p > 0.0f && p < 0.5f;
-    if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p)
-            / ctable_usize;     // normalized by the size of the table
-                                // because the precision is normalized
-                                // as well
-
     type_node output_type = *type_tree_output_type_tree(ctable.tt).begin();
     if (output_type == id::boolean_type) {
         vertex target = bool_to_vertex(positive);
@@ -231,6 +232,34 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     foreach(const auto& cr, ctable)
         max_precision = std::max(max_precision, tcf(cr.second));
     logger().fine("max_precision = %f", max_precision);
+}
+
+void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
+{
+    complexity_coef = 0.0;
+    // Both p==0.0 and p==0.5 are singularity points in the Occam's
+    // razor formula for discrete outputs (see the explanation in the
+    // comment above ctruth_table_bscore)
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
+        complexity_coef = discrete_complexity_coef(alphabet_size, p)
+            / ctable_usize;     // normalized by the size of the table
+                                // because the precision is normalized
+                                // as well
+
+    logger().info() << "precision_bscore noise = " << p
+                    << " alphabest size = " << alphabet_size
+                    << " complexity ratio = " << 1.0/complexity_coef;
+}
+
+void precision_bscore::set_complexity_coef(score_t ratio)
+{
+    complexity_coef = 0.0;
+    occam = (ratio > 0);
+    if (occam)
+        complexity_coef = 1.0 / (ctable_usize * ratio);
+
+    logger().info() << "precision_bcore complexity ratio = " << 1.0/complexity_coef;
 }
 
 penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) const
@@ -378,9 +407,7 @@ score_t discrete_complexity_coef(unsigned alphabet_size, double p)
 discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
                                                    const ITable& it,
                                                    const vector<contin_t>& thres,
-                                                   bool wa,
-                                                   float alphabet_size,
-                                                   float p)
+                                                   bool wa)
     : target(ot), cit(it), thresholds(thres), weighted_accuracy(wa),
       classes(ot.size()), weights(thresholds.size() + 1, 1) {
     // enforce that thresholds is sorted
@@ -393,10 +420,6 @@ discretize_contin_bscore::discretize_contin_bscore(const OTable& ot,
     if (weighted_accuracy)
         for (size_t i = 0; i < weights.size(); ++i)
             weights[i] = classes.size() / (float)(weights.size() * cs.count(i));
-    // precompute Occam's razor coefficient
-    occam = p > 0 && p < 0.5;
-    if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p);    
 }
 
 behavioral_score discretize_contin_bscore::best_possible_bscore() const
@@ -406,8 +429,8 @@ behavioral_score discretize_contin_bscore::best_possible_bscore() const
 
 score_t discretize_contin_bscore::min_improv() const
 {
-    return 0.0;                 // not necessarily right, just the
-                                // backward behavior
+    // not necessarily right, just the backwards-compat behavior
+    return 0.0;
 }
 
 size_t discretize_contin_bscore::class_idx(contin_t v) const
@@ -464,13 +487,6 @@ penalized_behavioral_score discretize_contin_bscore::operator()(const combo_tree
 // ctruth_table_bscore //
 /////////////////////////
         
-ctruth_table_bscore::ctruth_table_bscore(const CTable& _ctt,
-                                         unsigned alphabet_size, float p)
-    : ctable(_ctt)
-{
-    set_complexity_coef(alphabet_size, p);
-}
-
 penalized_behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
     //penalized_behavioral_score pbs(
@@ -689,8 +705,6 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
 //////////////////////////////////
 
 interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_,
-                                                           float alphabet_size,
-                                                           float stdev,
                                                            weight_t kld_w_,
                                                            weight_t skewness_w_,
                                                            weight_t stdU_w_,
@@ -707,10 +721,6 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
       max_activation(max_activation_), penalty(penalty_), positive(positive_),
       decompose_kld(decompose_kld_)
 {
-    // initialize Occam's razor
-    occam = stdev > 0;
-    if (occam)
-        set_complexity_coef(alphabet_size, stdev);
     // define counter (mapping between observation and its number of occurences)
     boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
@@ -847,8 +857,14 @@ behavioral_score interesting_predicate_bscore::best_possible_bscore() const
 void interesting_predicate_bscore::set_complexity_coef(unsigned alphabet_size,
                                                        float stdev)
 {
+    complexity_coef = 0.0;
+    occam = stdev > 0;
     if (occam)
         complexity_coef = contin_complexity_coef(alphabet_size, stdev);
+
+    logger().info() << "intersting_predicate_bscore noise = " << stdev
+                    << " alphabest size = " << alphabet_size
+                    << " complexity ratio = " << 1.0/complexity_coef;
 }
 
 score_t interesting_predicate_bscore::get_activation_penalty(score_t activation) const

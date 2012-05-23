@@ -223,6 +223,16 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
     return as;
 }
 
+// set the complexity ratio.
+template <typename BScorer>
+void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio)
+{
+    if (noise > 0.0)
+        scorer.set_complexity_coef(as, noise);
+    else
+        scorer.set_complexity_coef(ratio);
+}
+
 //* Convert string to a combo_tree
 combo_tree str_to_combo_tree(const string& combo_str)
 {
@@ -318,7 +328,6 @@ combo::arity_t infer_arity(const string& problem,
     }
 }
 
-
 int moses_exec(int argc, char** argv)
 {
     // for(int i = 0; i < argc; ++i)
@@ -363,7 +372,7 @@ int moses_exec(int argc, char** argv)
     bool reduce_all;
     bool revisit = false;
     bool include_dominated;
-    score_t complexity_temperature = 4.0f;
+    score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     bool enable_cache;
 
@@ -545,10 +554,6 @@ int moses_exec(int argc, char** argv)
                     " This option is overwritten by %s.\n")
              % log_file_dep_opt_opt.first).c_str())
 
-        (opt_desc_str(noise_opt).c_str(),
-         value<float>(&noise)->default_value(0),
-         "Assume that the data are noisy. This is a way to control the Occam's razor, the noisier the data the stronger the model complexity penalty. If the target feature is discrete, it corresponds to the probability p that an output datum is wrong (returns false while it should return true or the other way around), only values 0 < p < 0.5 are meaningful. If the target feature is continuous, it corresponds to the standard deviation of the (Gaussian) noise centered around each candidate's output, 0 or negative means no Occam's razor.\n")
-
         (opt_desc_str(include_only_ops_str_opt).c_str(),
          value<vector<string> >(&include_only_ops_str),
          "Include this operator, but exclude others, in the solution.  "
@@ -654,7 +659,7 @@ int moses_exec(int argc, char** argv)
          "this may lead to poorer performance.\n")
 
         (opt_desc_str(complexity_temperature_opt).c_str(),
-         value<score_t>(&complexity_temperature)->default_value(4.0),
+         value<score_t>(&complexity_temperature)->default_value(6.0),
          "Set the \"temperature\" of the Boltzmann-like distribution "
          "used to select the next exemplar out of the metapopulaton. "
          "A temperature that is too high or too low will make it likely "
@@ -664,11 +669,32 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(complexity_ratio_opt).c_str(),
          value<score_t>(&complexity_ratio)->default_value(3.5),
          "Fix the ratio of raw score to complexity, when ranking the "
-         "metapopulation for fitness.  Setting this ratio too low causes "
-         "the complexity to dominate ranking, possibly trapping the "
-         "algorithm in a local maximum.  Setting this ratio too high "
-         "will add too much noise to the metapopulation, preventing "
-         "a solution from being found.\n")
+         "metapopulation for fitness.  The complexity penalty is the "
+         "inverse of the complexity ratio.  Setting this ratio too low "
+         "(complexity penalty too high) causes the complexity to "
+         "dominate ranking, probably trapping the algorithm in a "
+         "local maximum.  Setting this ratio too high (complexity "
+         "penalty too low) will waste time exploring unproductive "
+         "solutions, adversely lengthening solution times.  "
+         "Suggest setting this to a value that is 1x to 2x larger than "
+         "the ratio of change in complexity to score improvement (as "
+         "determined by earlier runs). \n")
+
+        (opt_desc_str(noise_opt).c_str(),
+         value<float>(&noise)->default_value(0),
+         "Alternative way to set the ratio of raw score to complexity.  "
+         "Setting this option over-rides the complexity ratio, above.  "
+         "Assumes that the data is noisy.   The noisier the data, the "
+         "stronger the model complexity penalty.  If the target feature "
+         "is discrete, the setting should correspond to the fraction of "
+         "the input data that might be wrong (i.e. the probability p "
+         "that an output datum (row) is wrong).   In this case, only "
+         "values 0 < p < 0.5 are meaningful (i.e. less than half the "
+         "data can be wrong). Suggested values are in the range 0.01 to "
+         "0.001.  If the target feature is continuous, the value sepcified "
+         "should correspond to the standard deviation of the (Gaussian) "
+         "noise centered around each candidate's output. A value of zero "
+         "or less cedes this setting to complexity-ratio flag, above.\n")
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t> >(&discretize_thresholds),
@@ -863,9 +889,8 @@ int moses_exec(int argc, char** argv)
     
     // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,
-                                   revisit, include_dominated,
+                                   revisit, include_dominated, 
                                    complexity_temperature,
-                                   complexity_ratio,
                                    enable_cache,
                                    jobs[localhost]);
 
@@ -964,12 +989,15 @@ int moses_exec(int argc, char** argv)
                 int as = alphabet_size(cand_tt, ignore_ops);
                 typedef precision_bscore BScore;
                 boost::ptr_vector<BScore> bscores;
-                foreach(const CTable& ctable, ctables)
-                    bscores.push_back(new BScore(ctable, as, noise,
-                                                 min_rand_input,
-                                                 max_rand_input,
-                                                 abs(alpha), alpha >= 0,
-                                                 pre_worst_norm));
+                foreach(const CTable& ctable, ctables) {
+                    BScore* r = new BScore(ctable,
+                                           min_rand_input,
+                                           max_rand_input,
+                                           abs(alpha), alpha >= 0,
+                                           pre_worst_norm);
+                    set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                    bscores.push_back(r);
+                }
                 multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(exemplars, cand_tt,
                                       bool_reduct, bool_reduct_rep, bscore,
@@ -986,8 +1014,11 @@ int moses_exec(int argc, char** argv)
                 if (output_type == id::boolean_type) {
                     typedef ctruth_table_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
-                    foreach(const CTable& ctable, ctables)
-                        bscores.push_back(new BScore(ctable, as, noise));
+                    foreach(const CTable& ctable, ctables) {
+                        BScore *r = new BScore(ctable);
+                        set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                        bscores.push_back(r);
+                    }
                     multibscore_based_bscore<BScore> bscore(bscores);
                     metapop_moses_results(exemplars, table_type_signature,
                                           bool_reduct, bool_reduct_rep, bscore,
@@ -1006,8 +1037,11 @@ int moses_exec(int argc, char** argv)
                     // slightly different scorer.
                     typedef enum_graded_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
-                    foreach(const CTable& ctable, ctables)
-                        bscores.push_back(new BScore(ctable, as, noise));
+                    foreach(const CTable& ctable, ctables) {
+                        BScore *r = new BScore(ctable);
+                        set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                        bscores.push_back(r);
+                    }
                     multibscore_based_bscore<BScore> bscore(bscores);
                     metapop_moses_results(exemplars, table_type_signature,
                                contin_reduct, contin_reduct, bscore,
@@ -1015,7 +1049,7 @@ int moses_exec(int argc, char** argv)
                                mmr_pa);
 
 #else
-                    partial_solver well(ctables, as, noise,
+                    partial_solver well(ctables,
                                         table_type_signature,
                                         exemplars, contin_reduct,
                                         opt_params, meta_params,
@@ -1032,8 +1066,11 @@ int moses_exec(int argc, char** argv)
                         contin_bscore::err_function_type eft =
                             it_abs_err ? contin_bscore::abs_error :
                             contin_bscore::squared_error;
-                        foreach(const Table& table, tables)
-                            bscores.push_back(new BScore(table, as, noise, eft));
+                        foreach(const Table& table, tables) {
+                            BScore *r = new BScore(table, eft);
+                            set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                            bscores.push_back(r);
+                        }
                         multibscore_based_bscore<BScore> bscore(bscores);
                         metapop_moses_results(exemplars, table_type_signature,
                                               contin_reduct, contin_reduct, bscore,
@@ -1042,11 +1079,13 @@ int moses_exec(int argc, char** argv)
                     } else {
                         typedef discretize_contin_bscore BScore;
                         boost::ptr_vector<BScore> bscores;
-                        foreach(const Table& table, tables)
-                            bscores.push_back(new BScore(table.otable, table.itable,
-                                                         discretize_thresholds,
-                                                         weighted_accuracy,
-                                                         as, noise));
+                        foreach(const Table& table, tables) {
+                            BScore *r = new BScore(table.otable, table.itable,
+                                                   discretize_thresholds,
+                                                   weighted_accuracy);
+                            set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                            bscores.push_back(r);
+                        }
                         multibscore_based_bscore<BScore> bscore(bscores);
                         metapop_moses_results(exemplars, table_type_signature,
                                               contin_reduct, contin_reduct, bscore,
@@ -1083,14 +1122,16 @@ int moses_exec(int argc, char** argv)
             typedef interesting_predicate_bscore BScore;
             boost::ptr_vector<BScore> bscores;
             foreach(const CTable& ctable, ctables) {
-                bscores.push_back(new BScore(ctable, as, noise,
-                                             ip_kld_weight,
-                                             ip_skewness_weight,
-                                             ip_stdU_weight,
-                                             ip_skew_U_weight,
-                                             min_rand_input,
-                                             max_rand_input,
-                                             alpha, alpha >= 0));
+                BScore *r = new BScore(ctable,
+                                       ip_kld_weight,
+                                       ip_skewness_weight,
+                                       ip_stdU_weight,
+                                       ip_skew_U_weight,
+                                       min_rand_input,
+                                       max_rand_input,
+                                       alpha, alpha >= 0);
+                set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                bscores.push_back(r);
             }
             multibscore_based_bscore<BScore> bscore(bscores);
             metapop_moses_results(exemplars, tt,
@@ -1113,7 +1154,8 @@ int moses_exec(int argc, char** argv)
 
             int as = alphabet_size(tt, ignore_ops);
 
-            contin_bscore bscore(tables.front(), as, noise);
+            contin_bscore bscore(tables.front());
+            set_noise_or_ratio(bscore, as, noise, complexity_ratio);
             metapop_moses_results(exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -1193,7 +1235,8 @@ int moses_exec(int argc, char** argv)
 
                 int as = alphabet_size(tt, ignore_ops);
 
-                contin_bscore bscore(ot, it, as, noise);
+                contin_bscore bscore(ot, it);
+                set_noise_or_ratio(bscore, as, noise, complexity_ratio);
                 metapop_moses_results(exemplars, tt,
                                       contin_reduct, contin_reduct, bscore,
                                       opt_params, meta_params, moses_params,
@@ -1222,7 +1265,8 @@ int moses_exec(int argc, char** argv)
             ITable it(tt, nsamples, max_rand_input, min_rand_input);
             OTable ot(tr, it);
  
-            contin_bscore bscore(ot, it, as, noise);
+            contin_bscore bscore(ot, it);
+            set_noise_or_ratio(bscore, as, noise, complexity_ratio);
             metapop_moses_results(exemplars, tt,
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, meta_params, moses_params, mmr_pa);
@@ -1245,10 +1289,8 @@ int moses_exec(int argc, char** argv)
         type_tree sig = gen_signature(id::boolean_type, arity);
         unsigned as = alphabet_size(sig, ignore_ops); 
 
-        // XXX would it be faster to use ctruth ??
-        // ctruth_table_bscore bscore(func, arity, as, noise, 1<<arity);
         logical_bscore bscore(func, arity);
-        bscore.set_complexity_coef(as, noise);
+        set_noise_or_ratio(bscore, as, noise, complexity_ratio);
 
         metapop_moses_results(exemplars, sig,
                               bool_reduct, bool_reduct_rep, bscore,
@@ -1325,7 +1367,8 @@ int moses_exec(int argc, char** argv)
             it_abs_err ? contin_bscore::abs_error :
             contin_bscore::squared_error;
         contin_bscore bscore(simple_symbolic_regression(problem_size),
-                             it, as, noise, eft);
+                             it, eft);
+        set_noise_or_ratio(bscore, as, noise, complexity_ratio);
         metapop_moses_results(exemplars, tt,
                               contin_reduct, contin_reduct, bscore,
                               opt_params, meta_params, moses_params, mmr_pa);

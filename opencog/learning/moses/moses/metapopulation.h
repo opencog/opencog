@@ -68,7 +68,6 @@ struct metapop_parameters
                        bool _revisit = false,
                        bool _include_dominated = true,
                        score_t _complexity_temperature = 3.0f,
-                       score_t _complexity_ratio = 4.0f,
                        bool _enable_cache = false,
                        unsigned _jobs = 1) :
         max_candidates(_max_candidates),
@@ -76,7 +75,6 @@ struct metapop_parameters
         revisit(_revisit),
         include_dominated(_include_dominated),
         complexity_temperature(_complexity_temperature),
-        complexity_ratio(_complexity_ratio),
         enable_cache(_enable_cache),
         jobs(_jobs) {}
 
@@ -96,7 +94,6 @@ struct metapop_parameters
     bool include_dominated;
 
     score_t complexity_temperature;
-    score_t complexity_ratio;
 
     // Enable caching of scores.
     bool enable_cache;

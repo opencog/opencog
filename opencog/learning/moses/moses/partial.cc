@@ -31,7 +31,6 @@ typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
 partial_solver::partial_solver(const vector<CTable> &ctables,
-                               int as, float noise,
                                const type_tree& table_tt,
                                const vector<combo_tree>& exemplars,
                                const rule& reduct,
@@ -40,7 +39,7 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
                                const moses_parameters& moses_params,
                                const metapop_printer& mmr_pa)
 
-    :_ctables(ctables), _alf_sz(as), _noise(noise),
+    :_ctables(ctables),
      _table_type_signature(table_tt),
      _exemplars(exemplars), _reduct(reduct),
      _opt_params(opt_params), _meta_params(meta_params),
@@ -67,7 +66,7 @@ void partial_solver::solve()
     foreach(const CTable& ctable, _ctables) {
         // FYI, no mem-leak, as ptr_vector seems to call delete.
         // XXX??? That's just weird/wrong -- double check this.
-        score_seq.push_back(new BScore(ctable, _alf_sz, _noise));
+        score_seq.push_back(new BScore(ctable));
 
         tab_sz += ctable.uncompressed_size();
     }
@@ -309,7 +308,7 @@ cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for
     foreach(const CTable& ctable, _ctables) {
         // FYI, no mem-leak, as ptr_vector seems to call delete.
         // XXX !?!?! relly?  as we've got a lifetime problem here.
-        score_seq.push_back(new BScore(ctable, _alf_sz, _noise));
+        score_seq.push_back(new BScore(ctable));
     }
     delete _bscore;
     _bscore = new multibscore_based_bscore<BScore>(score_seq);
@@ -367,7 +366,7 @@ cout<<"duude before recusion, deleted="<< deleted<<" out of="<<total_rows<<endl;
     vector<combo_tree> exempls;
     exempls.push_back(tr);
     partial_solver ps(tabs, 
-                      _alf_sz, _noise, _table_type_signature,
+                      _table_type_signature,
                       exempls, _reduct, _opt_params, _meta_params,
                       _moses_params, _printer);
 
