@@ -187,8 +187,6 @@ precision_bscore::precision_bscore(const CTable& _ctable,
             return (this->positive? res : -res);
         };
     }
-
-    std::cout << "ctable = " << ctable << std::endl;
     
     // max precision
     auto tcf = [&](const CTable::counter_t& c) -> score_t {
