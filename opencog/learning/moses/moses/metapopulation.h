@@ -459,10 +459,6 @@ struct metapopulation : public bscored_combo_tree_set
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL)
     {
-        // Ranking of exemplars in the deme will be controlled by the
-        // ratio of raw score to complexity.
-        composite_score::weight = params.complexity_ratio;
-
         if (!create_deme(ignore_ops, perceptions, actions))
             return false;
 

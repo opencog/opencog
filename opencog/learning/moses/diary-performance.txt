@@ -1716,11 +1716,11 @@ double-check: log 7 = 1.9459  ln p/1-p = −6.811786852
 Need to adjust temperature as well: 
 Currently:
       prob = exp (weighted_score *100 / temp);
-           = exp ((weight * raw_score + complexity) * 100 / temp)
-           = exp ((raw_score + complexity/weight) * 100 * weight / temp)
-           = exp ( occam_score * 100 */ (temp/weight))
+           = exp ((weight * raw_score + complexity) * 100 / (temp*(weight+1)))
+           = exp ((raw_score + complexity/weight) * 100 * weight / (temp*(weight+1)))
+           = exp ( occam_score * 100 */ (temp*(weight+1)/weight))
 
-so temp should be 5/3.5 = 1.428571429
+so temp should be 5*4.5/3.5 = 6.428571429
 
 
 "rech" is bzr rev 6666; its copied from tables above.
@@ -1751,7 +1751,7 @@ so temp should be 5/3.5 = 1.428571429
                 wtf .. so its not an outlier... try disabling the new rand gen..
 
 "occam" is bzr rev 6935, with scoring hacks, with the altered command line:
-       moses-perf -Hpa -k4 -m350000 -z"-0.1" -v1.428571429 -p0.001100724
+       moses-perf -Hpa -k4 -m350000 -z3.5 -v6.428571429 
 
        rech  r6935  r6867  r6873  occam
 -r0:     22    305    30     306       

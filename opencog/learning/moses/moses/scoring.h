@@ -76,6 +76,9 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
 // Abstract bscoring function class to implement
 struct bscore_base : public unary_function<combo_tree, penalized_behavioral_score>
 {
+    bscore_base() : occam(false), complexity_coef(0.0) {};
+    virtual ~bscore_base() {};
+
     // Evaluate the candidate tr
     virtual penalized_behavioral_score operator()(const combo_tree& tr) const = 0;
 
@@ -86,6 +89,13 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
 
     // Return the minimum value considered for improvement
     virtual score_t min_improv() const = 0;
+
+    virtual void set_complexity_coef(score_t complexity_ratio);
+    virtual void set_complexity_coef(unsigned alphabet_size, float p);
+
+protected:
+    bool occam; // If true, then Occam's razor is taken into account.
+    score_t complexity_coef;
 };
 
 /**
@@ -129,7 +139,7 @@ struct bscore_based_cscore : public unary_function<combo_tree, composite_score>
         }
     }
 
-    // Hmm, this could be static, actually ... 
+    // Hmmm, this could be static, actually ... 
     composite_score operator()(const penalized_behavioral_score& pbs, complexity_t cpxy) const
     {
         const behavioral_score &bs = pbs.first;
@@ -277,15 +287,9 @@ struct logical_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    void set_complexity_coef(unsigned alphabet_size, float p);
-    void set_complexity_coef(score_t complexity_ratio);
-
-private:
+protected:
     complete_truth_table target;
     int arity;
-
-    bool occam; // If true, then Occam's razor is taken into account.
-    score_t complexity_coef;
 };
 
 /// Used to define the complexity scoring component given that p is the
@@ -354,8 +358,6 @@ struct precision_bscore : public bscore_base
 
     CTable ctable;
     unsigned ctable_usize;                  // uncompressed size of ctable
-    bool occam; // If true, then Occam's razor is taken into account.
-    score_t complexity_coef;
     score_t min_activation, max_activation;
     score_t max_precision; // uppper bound of the maximum denormalized
                            // precision for that CTable
@@ -406,8 +408,6 @@ struct discretize_contin_bscore : public bscore_base
     vector<contin_t> thresholds;
     bool weighted_accuracy;     // Whether the bscore is weighted to
                                 // deal with unbalanced data.
-    bool occam;                 // Whether Occam's razor is enabled
-    score_t complexity_coef;
 
 protected:
     // Return the index of the class of value v.
@@ -523,12 +523,14 @@ struct contin_bscore : public bscore_base
 
     OTable target;
     ITable cti;
-    bool occam;
-    score_t complexity_coef;
+
+    // Hmmm, not picked up from base class, for some reason...
+    virtual void set_complexity_coef(score_t complexity_ratio) {
+        bscore_base::set_complexity_coef(complexity_ratio);
+    }
+    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
 
 private:
-    void set_complexity_coef(unsigned alphabet_size, float stdev);
-
     // for a given data point calculate the error of the target
     // compared to the candidate output
     std::function<score_t(contin_t, contin_t)> err_func;
@@ -651,14 +653,8 @@ struct ctruth_table_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    void set_complexity_coef(score_t complexity_ratio);
-    void set_complexity_coef(unsigned alphabet_size, float p);
-
-private:
-
+protected:
     CTable ctable;
-    bool occam; // If true, then Occam's razor is taken into account.
-    score_t complexity_coef;
 };
 
 /**
@@ -710,11 +706,7 @@ struct enum_table_bscore : public bscore_base
     score_t min_improv() const;
 
 protected:
-    void set_complexity_coef(unsigned alphabet_size, float p);
-
     CTable ctable;
-    bool occam; // If true, then Occam's razor is taken into account.
-    score_t complexity_coef;
 };
 
 /**
@@ -855,12 +847,14 @@ struct interesting_predicate_bscore : public bscore_base
 
     score_t min_improv() const;
 
+    virtual void set_complexity_coef(unsigned alphabet_size, float p);
+
+protected:
+
     counter_t counter; // counter of the unconditioned distribution
     pdf_t pdf;     // pdf of the unconditioned distribution
     mutable KLDS<contin_t> klds; /// @todo dangerous: not thread safe!!!
     CTable ctable;
-    bool occam;
-    score_t complexity_coef;
     contin_t skewness;   // skewness of the unconditioned distribution
 
     // weights of the various features
@@ -878,7 +872,6 @@ struct interesting_predicate_bscore : public bscore_base
     bool decompose_kld;
 
 private:
-    void set_complexity_coef(float alphabet_size, float stdev);
     score_t get_activation_penalty(score_t activation) const;
 };
 

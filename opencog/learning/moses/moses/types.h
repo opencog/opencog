@@ -109,18 +109,12 @@ struct composite_score:
     /// anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
 
-    static float weight;   // XXX kill this real soonn now
 protected:
     score_t score;
     complexity_t complexity;
     score_t penalized_score;
 
 };
-
-// bool operator<(const composite_score &l, const composite_score &r) {
-//     std::cout << "ZOZO THE CLOWN" << std::endl;
-//     return l.operator<(r);
-// }
 
 extern const composite_score worst_composite_score;
 
@@ -140,10 +134,7 @@ typedef tagged_item<combo::combo_tree,
 // convenience accessors
 inline score_t get_weighted_score(const composite_score &sc)
 {
-   score_t w = composite_score::weight;
-// XXX hack remove me when done with conversion
-if (w <= 0.00000001) return sc.get_penalized_score();
-   return (w*sc.get_score() - sc.get_complexity()) / (w + 1.0f);
+   return sc.get_penalized_score();
 }
 
 inline const combo::combo_tree& get_tree(const scored_combo_tree& st)

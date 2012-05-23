@@ -41,8 +41,6 @@ bool bscored_combo_tree_greater::operator()(const bscored_combo_tree& bs_tr1,
 // the empty composite_score ctor returns the worst composite score
 const composite_score worst_composite_score = composite_score();
 
-score_t composite_score::weight = 4.0f;
-
 composite_score::composite_score()
     : score(worst_score), complexity(worst_complexity), penalized_score(worst_score) {}
 
@@ -53,16 +51,11 @@ composite_score& composite_score::operator=(const composite_score &r)
     penalized_score = r.penalized_score;
     return *this;
 }
-bool composite_score::operator<(const composite_score &r) const {
 
-
-    score_t lef = weight*score - complexity;
-    score_t rig = weight*r.score - r.complexity;
-// XXX hack remove me when done with conversion.
-if (weight <= 0.00000001) {
-lef = penalized_score;
-rig = r.penalized_score;
-}
+bool composite_score::operator<(const composite_score &r) const
+{
+    score_t lef = penalized_score;
+    score_t rig = r.penalized_score;
 
     if (isnan(lef))
         return !isnan(rig);
