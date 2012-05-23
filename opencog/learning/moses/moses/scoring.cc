@@ -188,15 +188,27 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         };
     }
 
+    std::cout << "ctable = " << ctable << std::endl;
+    
     // max precision
-    auto tcf = [this](const CTable::counter_t& c) {
-        return sum_outputs(c) / c.total_count();
+    auto tcf = [&](const CTable::counter_t& c) -> score_t {
+        if (output_type == id::boolean_type)
+            return 1.0;
+        else if (output_type == id::contin_type) {
+            score_t res = worst_score;
+            foreach(const auto& cv, c)
+                res = std::max(res, score_t(std::abs(get_contin(cv.first))));
+            return res;
+        } else {
+            OC_ASSERT(false);
+            return 0.0;
+        }
     };
-    // @todo could be done in a line if boost::max_element did support
-    // C++ anonymous functions
+    /// @todo could be done in a line if boost::max_element did
+    /// support C++ anonymous functions
     max_precision = worst_score;
     foreach(const auto& cr, ctable)
-        max_precision = max(max_precision, tcf(cr.second));
+        max_precision = std::max(max_precision, tcf(cr.second));
     logger().fine("max_precision = %f", max_precision);
 }
 
@@ -265,9 +277,48 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 
 behavioral_score precision_bscore::best_possible_bscore() const
 {
-    // we do not take into account activation penalty nor Occam's
-    // razor
-    return {1};
+    /// @todo doesn't treat the case with worst_norm
+    
+    // for each input map the maximum precision it can get. We also
+    // store sumo and total count not to recompute it again
+    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
+                                               contin_t, // sum_outputs
+                                               unsigned> // total count
+                          > max_precisions_t;
+    max_precisions_t max_precisions;
+    for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
+        const CTable::counter_t& c = it->second;
+        contin_t sumo = sum_outputs(c);
+        unsigned total = c.total_count();
+        contin_t precision = sumo / total;
+        auto lmnt = std::make_pair(precision, std::make_tuple(it, sumo, total));
+        max_precisions.insert(lmnt);
+    }
+
+    // Compute best precision till minimum activation is reached. Note
+    // that the best precision (sao / active) decreases for each new
+    // mpv, but we want at least min_activation to be reached. It's
+    // not sure this actually gives the best score one can get if
+    // min_activation isn't reached. But we don't want that anyway so
+    // it's an acceptable inacurracy. Clearly it would matter only if
+    // activation constraint is set very loose.
+    unsigned active = 0;
+    score_t sao = 0.0, activation = 0.0;
+    reverse_foreach (const auto& mpv, max_precisions) {
+        sao += std::get<1>(mpv.second);        
+        active += std::get<2>(mpv.second);
+        activation = active / (score_t)ctable_usize;
+        if (min_activation < activation)
+            break;
+    }
+    score_t precision = (sao / active) / max_precision,
+        activation_penalty = get_activation_penalty(activation);
+
+    logger().fine("best precision = %f", precision);
+    logger().fine("activation for best precision = %f", activation);
+    logger().fine("activation penalty for best precision = %f", activation_penalty);
+    
+    return {precision, activation_penalty};
 }
 
 score_t precision_bscore::get_activation_penalty(score_t activation) const
