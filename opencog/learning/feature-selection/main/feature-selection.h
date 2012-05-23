@@ -102,7 +102,6 @@ void moses_feature_selection(Table& table,
                              Optimize& optimize, const Scorer& scorer,
                              const feature_selection_parameters& fs_params)
 {
-    composite_score::weight = 1000000; // ignore complexity_ratio
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
     unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
