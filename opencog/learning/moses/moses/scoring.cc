@@ -70,7 +70,7 @@ void bscore_base::set_complexity_coef(unsigned alphabet_size, float p)
     // Both p==0.0 and p==0.5 are singularities in the forumla.
     // See the explanation in the comment above ctruth_table_bscore.
     complexity_coef = 0.0;
-    occam = p > 0.0f && p < 0.5f;
+    occam = (p > 0.0f && p < 0.5f);
     if (occam)
         complexity_coef = discrete_complexity_coef(alphabet_size, p);
 
@@ -82,7 +82,7 @@ void bscore_base::set_complexity_coef(unsigned alphabet_size, float p)
 void bscore_base::set_complexity_coef(score_t complexity_ratio)
 {
     complexity_coef = 0.0;
-    occam = complexity_coef > 0.0;
+    occam = (complexity_ratio > 0.0);
     if (occam)
         complexity_coef = 1.0 / complexity_ratio;
 
