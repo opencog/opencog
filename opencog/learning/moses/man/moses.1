@@ -558,9 +558,25 @@ quotes.  This option does not work with ANN.
 Controls amount of time spent on a deme. Default value is 20.
 .TP
 .BI \-p\  fraction \fR,\ \fB\-\-noise= fraction
-This option provides an alternative
+This option provides an alternative means of setting the complexity
+ratio.  If specified, it over-rides the \fB\-z\fR option.  For
+discrete problems, \fIfraction\fR can be interpreted as being
+the fraction of score values that are incorrect (e.g. due to 
+noisy data).  As such, only values in the range 0 < \fIfraction\fR
+< 0.5 are meaningful (i.e. less than half of the data values are
+incorrect).  Typical recommended values are in the range of 0.001
+to 0.05.  For continuous-valued problems, it can be interpreted
+as the standard deviation of a Gaussian noise in the dependent
+variable.
 
-axxxxxxxxxxxxxxxxxxx
+For the discrete problem, the complexity ratio is related to the
+\fIfraction\fR  p by the explicit formula:
+
+    complexity_ratio = - log(p/(1-p)) / log |A|
+
+where |A| is the (problem-dependent) alphabet size.  See below for a
+detailed explanation.
+
 .TP
 .BI \-T1\fR,\ \fB\-\-hc\-widen\-search=1
 Controls hill-climbing algorithm behaviour.  If false (the default),
@@ -716,6 +732,100 @@ specifies that the two-input conjunction is to be learned.  Keep in mind
 that $ is a reserved character in many shells, and thus must be escaped
 with a backslash in order to be passed to moses.
 .PP
+.\" ============================================================
+.SH Complexity Penalty
+The speed with which the search algorithm can find a reasonable solution
+is significantly affected by the complexity ratio specified with the 
+\fB\-z\fR or \fB\-p\fR options. This section provides the theoretical
+underpinning for the meaning of these flags, and how they affect the
+the algorithm.
+
+Let M be the model to be learned (the combo program).  Let D be the
+data, assumed to be a table of n inputs i_k and one output o, with
+each row in the form:
+
+    i_1 ... i_n o
+
+Here, i_k is the k'th input and o the output.  In the below, we write
+o = D(x) where x=(i_1, ..., i_n) is an input data row.
+
+We want to assess the probability P(M|D) of the model M conditioned
+on the data D.  In particular, we wish to maximize this, as it
+provides the fitness function for the model.  According to Bayes
+theorem,
+
+    P(M|D) = P(D|M) * P(M) / P(D)
+
+Consider the log likelihood LL(M) of M knowing D.  Since D is constant,
+we can ignore P(D), so:
+
+    LL(M) = log(P(D|M)) + log(P(M))
+
+Assume each output of M on row x has probability p of being wrong.  So,
+
+    P(D|M) = Prod_{x\\in D} [p*(M(x) != D(x)) + (1-p)*(M(x) == D(x))]
+
+where D(x) the observed result given input x.  Then,
+
+    log P(D|M) = Sum_{x\\in D} log[p*(M(x) != D(x)) + (1-p)*(M(x) == D(x))]
+
+Let D = D_eq \\cup D_ne  where D_eq and D_ne are the sets
+
+    D_eq = {x \\in D | M(x) == D(x) }
+    D_ne = {x \\in D | M(x) != D(x) }
+
+Then
+
+    log P(D|M) = Sum_{x\\in D_ne} log(p) + Sum_{x\\in D_eq} log(1-p)
+               = |D_ne| log(p) + |D_eq| log(1-p)
+               = |D_ne| log(p) + |D| log(1-p) - |D_ne| log(1-p)
+               = |D_ne| log(p/(1-p)) + |D| log(1-p)
+
+Here, |D| is simply the size of set D, etc.  Assuming that p is
+small, i.e. much less than one, then, to second order in p:
+
+   log(1-p) = -p + p^2/2 + O(p^3)
+
+So:
+
+   log P(D|M) = |D_ne| log(p) - p (|D| - |D_ne|) + O(p^2)
+
+Next, assume P(M) is distributed according to Solomonoff's Universal
+Distribution, approximated by (for now)
+
+    P(M) = |A|^-|M|
+         = exp(-|M|*log(|A|))
+
+where A is the alphabet of the model, |A| is the alphabet size, 
+and |M| is the complexity of the model.  Putting it all together,
+the log-likelihood of M is:
+
+    LL(M) = -|M|*log(|A|) + |D_ne| log(p/(1-p)) + |D| log(1-p)
+
+To get an expression usable for a scoring function, just bring
+out the |D_ne| by dividing by -log(p/(1-p)), to get
+
+    score(M) = - [ LL(M) - |D| log(1-p) ] / log(p/(1-p))
+             = -|D_ne| + |M|*log|A| / log(p/(1-p))
+             = -|D_ne| - |M| |C_coef|
+
+Note that, since p<1, that log(p) is negative, and so the second
+term is negative.  It can be understood as a \fBcomplexity penalty\fR.
+That is, we define the complexity penalty as
+
+   complexity_penalty = |M| |C_coef|
+
+The complexity ratio, as set by the \fB\-z\fR option, is given by
+
+   complexity_ratio = 1 / |C_coef|
+
+By contrast, the \fB\-p\fR option may be used to set p directly, as
+given in the formulas above.  The value of |A| is computed internally,
+depending on the specific problem type (discrete vs. continuous, 
+number of included-excluded operators, etc.)  The complexity of each
+solution is also computed, using an ad-hoc complexity measure.
+
+
 .\" ============================================================
 .SH TODO
 Finish documenting these algo flags:  -M
