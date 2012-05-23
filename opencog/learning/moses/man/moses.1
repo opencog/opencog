@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "May 4, 2012" "3.0.14" "OpenCog Learning"
+.TH MOSES 1 "May 23, 2012" "3.1.2" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -78,6 +78,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR output_file ]
 .RB [ \-P
 .IR pop_size_ratio ]
+.RB [ \-p
+.IR probability ]
 .RB [ \-q
 .IR min ]
 .RB [ \-R
@@ -339,7 +341,7 @@ input file must contain column labels.
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
 The most important of these, for controlling behaviour, are the 
-\fB\-a\fR, \fB\-m\fR, \fB\-r\fR, \fB\-v\fR and \fB\-z\fR flags.
+\fB-A\fR, \fB\-a\fR, \fB\-m\fR, \fB\-r\fR, \fB\-v\fR and \fB\-z\fR flags.
 .TP
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
 Select the algorithm to apply to a single deme.  This is the algorithm
@@ -401,6 +403,93 @@ search.  If the maximum number of evaluations has not yet elasped
 (set with the \fB\-m\fR option), and a candidate solution is found
 that has at least this score, then search is terminated.
 .TP
+.BI \-m\  num \fR,\ \fB\-\-max\-evals= num
+Perform no more than \fInum\fR evaluations of the scoring function.
+Default value is 10000.
+.TP
+.BI \-n\  oper \fR,\ \fB\-\-ignore\-operator= oper
+Exclude the operator \fIoper\fP from the program solution.
+This option may be used several times.  Currently, \fIoper\fP
+may be one of \fBdiv\fP, \fBsin\fP, \fBexp\fP, \fBlog\fP,
+\fBimpulse\fP
+or a variable \fB#\fP\fIn\fP.
+You may need to put variables under double quotes.
+This option has the priority over the \-N option.
+That is, if an operator is both be included and ignored,
+then it is ignored.  This option does not work with ANN.
+.TP
+.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
+Use \fIseed\fR as the seed value for the pseudo-random number generator.
+.TP
+.BI \-s1\fR,\ \fB\-\-enable\-cache=1
+Enable memoization of candidate scores.  This allows the number of scoring
+function evaluations to be reduced, by maintaining a cache of recently
+scored candidates. If a new candidate is found in the cache, that score
+is used, instead of a scoring function evaluation.  The effectiveness of
+memoization is greatly increased by also using the \fB\-d1\fR flag.
+.TP
+.BI \-v\  temperature \fR,\ \fB\-\-complexity\-temperature= temperature
+Set the "temperature" of the Boltzmann-like distribution used to 
+select the next exemplar out of the metapopulaton. A temperature that
+is too high or too low will make it likely that poor exemplars will be
+chosen for exploration, thus resulting in excessively long search times.
+Recommended values lie in the range of 2 to 10, with a default of 6.
+.TP
+.BI \-z\  ratio \fR,\ \fB\-\-complexity\-ratio= ratio
+Fix the ratio of score to complexity, to be used as a penalty, 
+when ranking the metapopulation for fitness.  Typically, improving
+the score by one point requires that the complexity of the model to
+increase by (approximately) \fIN\fR bits; the value of \fIN\fR being
+data-dependent.   The algorithm will usually learn most easily
+if the complexity ratio is set between 1 and 2 times the value of
+\fIN\fR.
+
+The complexity ratio is used to calculate a scoring penalty; the
+penalty lowers the score in proportion to the solution complexity;
+specifically, the penalty is set to the complexity divided by the 
+complexity ratio.
+
+Setting the ratio too low causes the algorithm to ignore the more 
+complex solutions, ranking them in a way so that they are not much
+explored. Thus, the algorithm may get trapped examining only the
+simplest solutions, which are probably inappropriate.
+
+Setting this ratio too high will add too much noise to the 
+metapopulation, preventing a solution from being found.  That is, the
+algorithm may spend too much time evaluating overly-complex solutions,
+being unaware of good, simple solutions. 
+
+The relationship between the score change and the complexity change
+is very strongly data-dependent, and must (currently) be manually
+determined (although it might be possible to measure it automatically).
+Input data tables with lots of almost-duplicate data may have very low
+ratios; complex problems with sparse data may have very high ratios.
+Initial recommended values would be in the range from 1 to 5;
+with 3.5 as the default.
+
+.TP
+.BI \-Z1\fR,\ \fB\-\-hc\-crossover=1
+Controls hill-climbing algorithm behaviour.  If false (the default),
+then the entire local neighborhood of the current center instance is
+explored. The highest-scoring instance is then chosen as the new center
+instance, and the process is repeated.  For many datasets, however, 
+the highest-scoring instances tend to cluster together, and so an
+exhaustive search may not be required. When this option is specified,
+a handful of the highest-scoring instances are crossed-over (in the
+genetic sense of cross-over) to create new instances.  Only these are
+evaluated for fitness; the exhaustive search step is skipped.  For many
+problem types, especialy those with large neighborhoods (i.e. those with
+high prorgram complexity), this can lead to an order-of-magnitude
+speedup, or more.  For other problem types, especially those with 
+deceptive scoring functions, this can hurt performance.
+
+.\" ============================================================
+.SS "Algorithm tuning options"
+These options allow the operation of the algorithm to be fine-tuned
+for specific applications.  These are "advanced" options; changing
+these from the default is likely to worsen algorithm behaviour in
+all but certain special cases.
+.TP
 .BI \-B\  effort \fR,\ \fB\-\-reduct\-knob\-building\-effort= effort
 Effort allocated for reduction during the knob-building stage.
 Valid values are in the range 0-3, with 0 standing for minimum effort,
@@ -452,10 +541,6 @@ usig the \fB\-T1\fR flag to allow the search to be widened, so that
 if the initial exemplar is already at the top of a local hill, a search
 is made for a different (taller) hill.
 .TP
-.BI \-m\  num \fR,\ \fB\-\-max\-evals= num
-Perform no more than \fInum\fR evaluations of the scoring function.
-Default value is 10000.
-.TP
 .BI \-N\  oper \fR,\ \fB\-\-include\-only\-operator= oper
 Include the operator \fIoper\fP, but exclude others, in the solution.
 This option may be used several times to specify multiple
@@ -469,29 +554,13 @@ variables, and including only some variables still include
 all operators).  You may need to put variables under double
 quotes.  This option does not work with ANN.
 .TP
-.BI \-n\  oper \fR,\ \fB\-\-ignore\-operator= oper
-Exclude the operator \fIoper\fP from the program solution.
-This option may be used several times.  Currently, \fIoper\fP
-may be one of \fBdiv\fP, \fBsin\fP, \fBexp\fP, \fBlog\fP,
-\fBimpulse\fP
-or a variable \fB#\fP\fIn\fP.
-You may need to put variables under double quotes.
-This option has the priority over the \-N option.
-That is, if an operator is both be included and ignored,
-then it is ignored.  This option does not work with ANN.
-.TP
 .BI \-P\  num \fR,\ \fB\-\-pop\-size\-ratio= num
 Controls amount of time spent on a deme. Default value is 20.
 .TP
-.BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
-Use \fIseed\fR as the seed value for the pseudo-random number generator.
-.TP
-.BI \-s1\fR,\ \fB\-\-enable\-cache=1
-Enable memoization of candidate scores.  This allows the number of scoring
-function evaluations to be reduced, by maintaining a cache of recently
-scored candidates. If a new candidate is found in the cache, that score
-is used, instead of a scoring function evaluation.  The effectiveness of
-memoization is greatly increased by also using the \fB\-d1\fR flag.
+.BI \-p\  fraction \fR,\ \fB\-\-noise= fraction
+This option provides an alternative
+
+axxxxxxxxxxxxxxxxxxx
 .TP
 .BI \-T1\fR,\ \fB\-\-hc\-widen\-search=1
 Controls hill-climbing algorithm behaviour.  If false (the default),
@@ -499,53 +568,6 @@ then deme search terminates when a local hilltop is found. If true,
 then the search radius is progressively widened, until another
 termination condition is met.  Consider using the \fB\-D\fR flag to
 set the maximum search radius.
-.TP
-.BI \-v\  temperature \fR,\ \fB\-\-complexity\-temperature= temperature
-Set the "temperature" of the Boltzmann-like distribution used to 
-select the next exemplar out of the metapopulaton. A temperature that
-is too high or too low will make it likely that poor exemplars will be
-chosen for exploration, thus resulting in excessively long search times.
-Recommended values lie in the range of 1 to 10, with a default of 4.
-.TP
-.BI \-z\  ratio \fR,\ \fB\-\-complexity\-ratio= ratio
-Fix the ratio of raw score to complexity, when ranking the 
-metapopulation for fitness.  Typically, improving the raw score by
-one point requires that the complexity of the model to improve by 
-(approximately) \fIN\fR bits. The algorithm will learn most easily
-if this value of \fIN\fR is declared with this option.
-
-Setting the ratio too low causes the algorithm to ignore the more 
-complex solutions, ranking them in a way so that they are not much
-explored. Thus, the algorithm may get trapped examining only the
-simplest solutions, which are probably inappropriate.
-
-Setting this ratio too high will add too much noise to the 
-metapopulation, preventing a solution from being found.  That is, the
-algorithm may spend too much time evaluating overly-complex solutions,
-being unaware of good, simple solutions. 
-
-The relationship between the score change and the complexity change
-is very strongly data-dependent, and must (currently) be manually
-determined (although it might be possible to measure it automatically).
-Input data tables with lots of almost-duplicate data may have very low
-ratios; complex problems with sparse data may have very high ratios.
-Initial recommended values would be in the range from 1 to 5;
-with 3.5 as the default.
-.TP
-.BI \-Z1\fR,\ \fB\-\-hc\-crossover=1
-Controls hill-climbing algorithm behaviour.  If false (the default),
-then the entire local neighborhood of the current center instance is
-explored. The highest-scoring instance is then chosen as the new center
-instance, and the process is repeated.  For many datasets, however, 
-the highest-scoring instances tend to cluster together, and so an
-exhaustive search may not be required. When this option is specified,
-a handful of the highest-scoring instances are crossed-over (in the
-genetic sense of cross-over) to create new instances.  Only these are
-evaluated for fitness; the exhaustive search step is skipped.  For many
-problem types, especialy those with large neighborhoods (i.e. those with
-high prorgram complexity), this can lead to an order-of-magnitude
-speedup, or more.  For other problem types, especially those with 
-deceptive scoring functions, this can hurt performance.
 
 .\" ============================================================
 .SS "Output control options"
@@ -701,8 +723,6 @@ Finish documenting these algo flags:  -M
 These input flags: -G
 .PP
 These output flags: --python
-.PP
-These operator/problem type flags: -p
 .PP
 Other mystery flags: -J -K -U -X -Q
 
