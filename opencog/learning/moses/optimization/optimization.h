@@ -191,14 +191,9 @@ struct optim_parameters
         return std::min(max_dist, fs.dim_size());
     }
 
-    // If used with weighted_score, then must correct for weight.
-    // Failure to do so will result in bad performance, due to
-    // premature termination of the search.  See bzr rev 6613
-    // for experimental results, details.
     inline void set_min_score_improv(score_t s)
     {
-        min_score_improvement = s * composite_score::weight
-                         / (composite_score::weight + 1.0);
+        min_score_improvement = s;
     }
 
     inline score_t min_score_improv()

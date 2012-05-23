@@ -563,10 +563,15 @@ private:
  *
  *     score(M) = - [ LL(M) - |D| log(1-p) ] / log(p/(1-p))
  *              = -|D_ne| + |M|*log|A| / log(p/(1-p))
+ *              = -|D_ne| - |M| |C_coef|
  *
  * where |D_ne| is the number of outputs that are incorrect, and |M| is
  * the complexity of the model, and |A| is the alphabets size employed
  * in the model.
+ *
+ * The coeffcient |C_coef| can be fixed in several different ways, and
+ * not just relying on estimates of p and |A|. It is set by calling
+ * bscore_base::set_complexity_coeff()
  *
  * -------------------------------------------------------------------
  * To summarize, if any of the entries in the data table are incorrect,
@@ -633,6 +638,15 @@ private:
  *
  *     LL(M) = -|M|*log(|A|) + |D_ne| log(p/(1-p)) + |D| log(1-p)
  *
+ * To get an expression usable for the score, just brnig out the |D_ne|
+ * by dividing by -log(p/(1-p)), to get
+ *
+ *     score(M) = - [ LL(M) - |D| log(1-p) ] / log(p/(1-p))
+ *              = -|D_ne| + |M|*log|A| / log(p/(1-p))
+ *              = -|D_ne| - |M| |C_coef|
+ *
+ * Note that, since p<1, that log(p) is negative, and so the second
+ * term is negative.  It can be understood as a "complexity penalty".
  */
 struct ctruth_table_bscore : public bscore_base
 {

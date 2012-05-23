@@ -1748,33 +1748,43 @@ so temp should be 5*4.5/3.5 = 6.428571429
                 r60-r79 avg: 180 secs   /
                 r80-r99 avg: 174 secs  /
  
-                wtf .. so its not an outlier... try disabling the new rand gen..
+                wtf .. so its not an outlier... try disabling the new
+                rand gen.. see next...
 
-"occam" is bzr rev 6935, with scoring hacks, with the altered command line:
-       moses-perf -Hpa -k4 -m350000 -z3.5 -v6.428571429 
+"deran" is bzr rev 6873, but with the std:mt19337 reverted to ise the
+       internal implmentation.  And we seem to get exactly the same
+       numbers as r6867 .. which is not surprising.  What is surprising
+       is why std::mt19337 is so much more noticably slower!?!?  That
+       is... bizarre .. 
 
-       rech  r6935  r6867  r6873  occam
--r0:     22    305    30     306       
--r1:     58     40    75     
--r2:     88    407   114
--r3:    167     25   215
--r4:     43     28    56
--r5:     21     27    27
--r6:    111     29   146
--r7:    191    232   258
--r8:    193     42   253
--r9:     75    360    99
--r10:    33     79    42
--r11:   134     66   173
--r12:    20    151    26
--r13:   120     23   160
--r14:   115    132   146
--r15:    71    357    90
--r16:    49    136    63
--r17:   246    136   211
--r18:   100    172   130
--r19:     5    179     6
+"occam" is bzr rev 6957, with scoring hacks, with the altered command line:
+       moses-perf -Hpa -k4 -m350000 -z3.5 -v6.428571429 -x1
+       Curious -- scores are sometimes identical to r6935 and sometimes not.
+       Scores kind suck, not sure why...
 
-avg:     93    146   116
+
+       rech  r6935  r6867  deran  occam
+-r0:     22    305    30     30    137  
+-r1:     58     40    75     73     62
+-r2:     88    407   114    112    304
+-r3:    167     25   215    212     25
+-r4:     43     28    56     57     28
+-r5:     21     27    27     27     28
+-r6:    111     29   146            30
+-r7:    191    232   258           236
+-r8:    193     42   253            42
+-r9:     75    360    99           216
+-r10:    33     79    42           258
+-r11:   134     66   173           220
+-r12:    20    151    26           155 
+-r13:   120     23   160            24
+-r14:   115    132   146           135 
+-r15:    71    357    90           329 
+-r16:    49    136    63           138 
+-r17:   246    136   211           304 
+-r18:   100    172   130           213 
+-r19:     5    179     6           182
+
+avg:     93    146   116           153
 
 

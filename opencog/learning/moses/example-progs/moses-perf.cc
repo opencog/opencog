@@ -28,12 +28,13 @@ void measure(vector<string> arguments)
 
     double tsq = 0.0; // for computing variance
 
+    int nstart = 20;
     int nreps = 20;
 
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);
 
-    for (int i=0; i<nreps; i++)
+    for (int i=nstart; i<nstart+nreps; i++)
     {
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
@@ -49,7 +50,7 @@ void measure(vector<string> arguments)
 #if 1
         // Do NOT include a blank space after -f !!
         stringstream fss;
-        fss << "-fmoses-perf-pa-k4-r" << i << ".log";
+        fss << "-fmoses-perf-pa-k4-occam-r" << i << ".log";
         // fss << "-fmoses-perf-bank-nn30-m" << nrep << ".log";
         // fss << "-fmoses-perf-iris-r" << i << ".log";
         args.push_back(fss.str());
