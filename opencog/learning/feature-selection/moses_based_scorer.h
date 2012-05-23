@@ -64,7 +64,7 @@ struct moses_based_scorer : public unary_function<instance, composite_score> {
      */
     composite_score operator()(const instance& inst) const {
         std::set<arity_t> fs = get_feature_set(_fields, inst);
-        composite_score csc(_fs_scorer(fs), fs.size(), fs.size());
+        composite_score csc(_fs_scorer(fs), fs.size(), 0);
         // Logger
         if (logger().isFineEnabled()) {
             logger().fine()
