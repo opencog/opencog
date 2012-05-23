@@ -214,7 +214,9 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
 {
     behavioral_score bs;
 
-    map<contin_t, unsigned> worst_deciles;
+    /// associate sum of worst outputs with number of observations for
+    /// that sum
+    multimap<contin_t, unsigned> worst_deciles;
     
     // compute active and sum of all active outputs
     unsigned active = 0;   // total number of active outputs by tr
@@ -228,7 +230,7 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
             sao += sumo;
             active += totalc;
             if (worst_norm && sumo < 0)
-                worst_deciles[sumo] = totalc;
+                worst_deciles.insert({sumo, totalc});
         }
     }
 
@@ -238,22 +240,27 @@ behavioral_score precision_bscore::operator()(const combo_tree& tr) const
     if (worst_norm) {
         unsigned worst_count = 0,
             n_deciles = active / 10;
-        auto from = worst_deciles.begin(), to = worst_deciles.end();
-        for (; from != to && worst_count <= n_deciles; ++from) {
-            worst_count += from->second;
-            avg_worst_deciles += from->first * from->second;
+        foreach (const auto& pr, worst_deciles) {
+            worst_count += pr.second;
+            avg_worst_deciles += pr.first;
+            if (worst_count > n_deciles)
+                break;
         }
-        worst_deciles.erase(from, to);
         avg_worst_deciles /= worst_count;
     }
     
     // add (normalized) precision
     score_t precision = (sao / active) / max_precision,
         activation = (score_t)active / ctable_usize;
-
+    
     // normalize precision w.r.t. worst deciles
-    if (worst_norm && avg_worst_deciles < 0)
+    if (worst_norm && avg_worst_deciles < 0) {
+        logger().fine("precision before worst_norm = %f", precision);
+        logger().fine("abs(avg_worst_deciles) = %f", -avg_worst_deciles);
         precision /= -avg_worst_deciles;
+        if (avg_worst_deciles >= 0)
+            logger().fine("Weird: worst_norm (%f) is positive, maybe the activation is really low", avg_worst_deciles);
+    }
     
     logger().fine("precision = %f", precision);
     bs.push_back(precision);
