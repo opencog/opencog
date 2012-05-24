@@ -32,14 +32,9 @@
 
 namespace opencog { namespace moses {
 
-    // stl_pair.h uses lexicographic ordering, so that
-    //
-    // (a1,b1) < (a2,b2) if b1 < b2 when a1==a2
-    //
-    // Thus. it is easier to assume a negative complexity, so the lower
-    // the value of complexity_t the higher the complexity. That way
-    // comparing composite_scores is automatically provided by
-    // stl_pair.h
+    // Right now, the algorithmic complexity of any combo program
+    // is always an (unsigned) int.  I guess it could be made a float,
+    // if need be... there's no fundamental reason for an int here.
     typedef int complexity_t;
 
     static const complexity_t worst_complexity =
