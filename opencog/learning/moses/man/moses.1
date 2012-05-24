@@ -738,7 +738,16 @@ The speed with which the search algorithm can find a reasonable solution
 is significantly affected by the complexity ratio specified with the 
 \fB\-z\fR or \fB\-p\fR options. This section provides the theoretical
 underpinning for the meaning of these flags, and how they affect the
-the algorithm.
+the algorithm.  The coplexity penalty has two slightly different
+interpretations, depending on whether one is considering learning
+a discretely-valued problem (i.e. boolean-valued) or a continously-valued
+problem.  The general structure of the argument is broadly similar
+for both cases; they are presented below.  Similar arguments
+apply for classification problems (learning to classify data into
+one of N categories), and for precision maximization.
+
+.\" ============================================================
+.SS "Discrete case"
 
 Let M be the model to be learned (the combo program).  Let D be the
 data, assumed to be a table of n inputs i_k and one output o, with
@@ -824,6 +833,44 @@ given in the formulas above.  The value of |A| is computed internally,
 depending on the specific problem type (discrete vs. continuous, 
 number of included-excluded operators, etc.)  The complexity of each
 solution is also computed, using an ad-hoc complexity measure.
+
+.\" ============================================================
+.SS "Continuous case"
+
+A similar argument to the above holds for the case of a 
+continously-valued observable.
+
+Let dP(..) be the notation for a probability density (or measure).
+As before, start with Bayes theorem:
+
+    dP(M|D) = dP(D|M) * P(M) / P(D)
+
+Since D is constant, one may ignore the prior P(D), and write the
+log likelihood of M knowing D as:
+
+    LL(M) = log(dP(D|M)) + log(P(M))
+
+Assume the output of of the model M on input x has a Guassian 
+distributions, of mean M(x) and variance V, so that dP(D|M),
+the probability density of the data D given the modem M is:
+
+    dP(D|M) = Prod_{x\\in D} (2*Pi*V)^(-1/2) exp(-(M(x)-D(x))^2/(2*V))
+
+As before, assume a model distribution of
+
+    P(M) = |A|^-|M|
+
+where |A| is the alphabet size and |M| the complexity of the model.
+After simplification, and dropping a constant term that does not depend
+on either the model complexity or the dataset itself (the dataset size is a
+constant), one then can deduce a scoring function:
+
+    score(M) = -|M|*log(|A|)*2*V - Sum_{x\in D} (M(x)-D(x))^2
+
+As before, |M|*log(|A|)*2*V can be interpeted as a scoring penalty.
+Alternately, one may interpret each row x as a feature; then the
+penatly term |M|*log(|A|)*2*V can be interpreted as an additional
+feature that must be fit.
 
 
 .\" ============================================================

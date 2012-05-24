@@ -638,7 +638,7 @@ private:
  *
  *     LL(M) = -|M|*log(|A|) + |D_ne| log(p/(1-p)) + |D| log(1-p)
  *
- * To get an expression usable for the score, just brnig out the |D_ne|
+ * To get an expression usable for the score, just bring out the |D_ne|
  * by dividing by -log(p/(1-p)), to get
  *
  *     score(M) = - [ LL(M) - |D| log(1-p) ] / log(p/(1-p))
