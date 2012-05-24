@@ -1827,3 +1827,20 @@ The "new-10K" is one scoring method, clearly dudnt work to well.
 -r8: 3700  1.15   12    5      78  3.43   14   50     157  2.15  28    10
 -r9: 2570  2.01   10    5      92  2.01   10    5     119  5.37  26    50
 
+
+"alt-m10K": new, graded complexity scorer.  Hmm, a bit disappointing out
+      of the gate;  will it do better on the longer runs?
+
+       alt-m10K    straight     alt-m20K   straight     alt-m40K  straight
+:    time  score plex score  time  score plex score  time score plex score   
+-r0:  136   2.40   16   5
+-r1:   88   5.37   14  50
+-r2:  119   4.16   11   6
+-r3:  105   4.62   13  43
+-r4:  101   5.37   16  50
+-r5:  104   4.61   15  43
+-r6:  136   3.54   11   5
+-r7:  121   4.16   11   6
+-r8:   77   3.44   15  50
+-r9:  122   5.73   17  28
+
