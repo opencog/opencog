@@ -1831,16 +1831,53 @@ The "new-10K" is one scoring method, clearly dudnt work to well.
 "alt-m10K": new, graded complexity scorer.  Hmm, a bit disappointing out
       of the gate;  will it do better on the longer runs?
 
-       alt-m10K    straight     alt-m20K   straight     alt-m40K  straight
-:    time  score plex score  time  score plex score  time score plex score   
--r0:  136   2.40   16   5
--r1:   88   5.37   14  50
--r2:  119   4.16   11   6
--r3:  105   4.62   13  43
--r4:  101   5.37   16  50
--r5:  104   4.61   15  43
--r6:  136   3.54   11   5
--r7:  121   4.16   11   6
--r8:   77   3.44   15  50
--r9:  122   5.73   17  28
+OK, what it's doing is inserting ineffective predicates, which lengthens
+the cond and thus improves the score simply from the grading effect.
+Conclude: should only grade the score if there's been an effective
+predicate before-hand.  This way, such chains do get a complexity penalty.
+
+However, inserting an ineffective predicate can lower the overally
+complexity when a late predicate has a large complexity B.  Then 
+
+    delta_cmplexity = (2 + 0.8 B) - B
+
+where 0.8 is the graing, and 2 is the complexity of the ineffective pred.
+then delta_complexity < 0 when 10 < B.   Yuck. 
+
+Whoa .. maybe we had the grading going the wrong way the entire time?
+Try grading=1.2 instead of 0.8, so earlier predicates get rewarded for
+getting more things correct, and later predicates get punished.  This
+also avoids inneffective predicates, no matter what the complexity
+penalty used.
+
+"tro-m10K" uses the retro-grade grading, i.e. grading=1.2 instead of 
+       the previous 0.8 used for all eearlier measurements.
+
+
+       alt-m10K    straight     alt-m20K   straight     tro-m10K  straight
+:    time  score plex score  time  score plex score  time  score plex score   
+-r0:  136   2.40   16   5     368   0.34  20    5      47   8.16   6    6
+-r1:   88   5.37   14  50     300   2.75  17   50      46  57.20   7   50 
+-r2:  119   4.16   11   6     272   4.16  11    6      51  50.00   5   50
+-r3:  105   4.62   13  43     340   1.21  21   43      52  54.60   6   54
+-r4:  101   5.37   16  50     289   0.88  15    6      51  61.80   5   61
+-r5:  104   4.61   15  43     336   2.36  17   43      34  53.40   5   53
+-r6:  136   3.54   11   5     307   3.54  11    5      35  50.00   4   50
+-r7:  121   4.16   11   6     276   4.16  11    6      50  50.00   5   50
+-r8:   77   3.44   15  50     275   0.35  21    8      54  55.40   6   50
+-r9:  122   5.73   17  28     331   3.54  18   33      53  55.4    6   50
+
+
+       tro-m20K    straight     alt-m20K   straight     tro-m10K  straight
+:    time  score plex score  time  score plex score  time  score plex score   
+-r0:  
+-r1:  
+-r2:  
+-r3:  
+-r4:  
+-r5:  
+-r6:  
+-r7:  
+-r8:  
+-r9:  
 

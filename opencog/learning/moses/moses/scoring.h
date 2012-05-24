@@ -778,12 +778,14 @@ struct enum_filter_bscore : public enum_table_bscore
 struct enum_graded_bscore : public enum_table_bscore
 {
     enum_graded_bscore(const CTable& _ctt)
-        : enum_table_bscore(_ctt), grading(0.8)
+        : enum_table_bscore(_ctt), grading(1.2)
     {}
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
 
     score_t grading;
+protected:
+    score_t graded_complexity(combo_tree::iterator) const;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured

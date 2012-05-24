@@ -640,6 +640,31 @@ penalized_behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) 
 /////////////////////////
 // enum_graded_bscore //
 /////////////////////////
+
+/// OK, the goal here is to compute the "graded" tree complexity.
+/// Much the same way as the score is graded below, we want to do
+/// the same for the complexity, so that complex later predicates
+/// don't (do?) dominate the the penalty.
+score_t enum_graded_bscore::graded_complexity(combo_tree::iterator it) const
+{
+    typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::iterator pre_it;
+    sib_it predicate = it.begin();
+    score_t cpxy = 0.0;
+    score_t weight = 1.0;
+    while (1) {
+        cpxy += weight * tree_complexity((pre_it) predicate);
+
+        // advance
+        predicate = next(predicate, 2);
+        weight *= grading;
+
+        // Is it the last one, the else clause?
+        if (is_enum_type(*predicate))
+            break;
+    }
+    return cpxy;
+}
         
 penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
 {
@@ -694,26 +719,8 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
     // Add the Occam's razor feature
     pbs.second = 0.0;
     if (occam) {
-        // OK, the goal here is to compute the "graded" tree complexity.
-        // Much the same way as the score is graded above, we want to do
-        // the same for the complexity, so that complex later predicates
-        // don't dominate the the penalty.
-        sib_it predicate = it.begin();
-        score_t cpxy = 0.0;
-        score_t weight = 1.0;
-        while (1) {
-            cpxy += weight * tree_complexity((pre_it) predicate);
-
-            // advance
-            predicate = next(predicate, 2);
-            weight *= grading;
-
-            // Is it the last one, the else clause?
-            if (is_enum_type(*predicate))
-                break;
-        }
-
-        pbs.second = cpxy * complexity_coef;
+        // pbs.second = tree_complexity(tr) * complexity_coef;
+        pbs.second = graded_complexity(it) * complexity_coef;
     }
 
     log_candidate_pbscore(tr, pbs);
