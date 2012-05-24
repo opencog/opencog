@@ -654,6 +654,25 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
 
     OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
 
+    // Pre-compute the complexity of each predicate, so that we don't
+    // avaluate this inside the main loop.
+    std::vector<complexity_t> pred_cpxy;
+    if (occam) {
+        sib_it predicate = it.begin();
+        while (1) {
+            pred_cpxy.push_back(tree_complexity((pre_it) predicate));
+
+            // advance
+            predicate = next(predicate, 2);
+
+            // Is it the last one, the else clause?
+            if (is_enum_type(*predicate))
+                break;
+        }
+    }
+
+    score_t cpxy = 0;
+
     // Evaluate the bscore components for all rows of the ctable
     foreach (const CTable::value_type& vct, ctable) {
         const vertex_seq& vs = vct.first;
@@ -663,6 +682,9 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
         score_t weight = 1.0;
 
         sib_it predicate = it.begin();
+        std::vector<complexity_t>::const_iterator 
+            pcpxy = pred_cpxy.begin();
+
         // The number that are wrong equals total minus num correct.
         score_t sc = -score_t(total);
         while (1) {
@@ -673,12 +695,17 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
                 vertex consequent = *next(predicate);
                 sc += c.get(consequent);
                 sc *= weight;
+
+                if (occam)
+                    cpxy += total * weight * (*pcpxy);
                 break;
             }
 
             // advance
             predicate = next(predicate, 2);
             weight *= grading;
+            cpxy += total * weight;  // minor penalty for later preds.
+            pcpxy ++;
 
             // Is it the last one, the else clause?
             if (is_enum_type(*predicate)) {
@@ -692,8 +719,10 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
     }
 
     // Add the Occam's razor feature
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    pbs.second = 0.0;
+    if (occam) {
+        pbs.second = cpxy * complexity_coef / ctable_usize;
+    }
 
     log_candidate_pbscore(tr, pbs);
 

@@ -361,7 +361,7 @@ struct precision_bscore : public bscore_base
 
 protected:
     CTable ctable;
-    unsigned ctable_usize;                  // uncompressed size of ctable
+    size_t ctable_usize;   // uncompressed size of ctable
     score_t min_activation, max_activation;
     score_t max_output; // max output one gets (1 in case it is
                         // boolean). This is used to normalized the
@@ -778,12 +778,15 @@ struct enum_filter_bscore : public enum_table_bscore
 struct enum_graded_bscore : public enum_table_bscore
 {
     enum_graded_bscore(const CTable& _ctt)
-        : enum_table_bscore(_ctt), grading(0.8)
+        : enum_table_bscore(_ctt), grading(0.8),
+          ctable_usize(_ctt.uncompressed_size())
     {}
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
 
     score_t grading;
+protected:
+    size_t ctable_usize;   // uncompressed size of ctable
 };
 
 // Bscore to find interesting predicates. Interestingness is measured

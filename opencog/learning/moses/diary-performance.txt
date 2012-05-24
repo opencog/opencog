@@ -1696,12 +1696,16 @@ as the equivalent to the -z flag for moses-exec.  For p small this is
 The way I use it/describe this, is "the model has to get N bits more
 complex to improve the score by 1 point"  where N == complexity_ratio
 
-==========
+=============================================================
 Regression test: parity performance complexity-ratio vs. occam.
 
 Goal is to verify that the occam code is really doing what we expect it
 to do.  Which means that running with with the -z flag and the -p flag
 should give the same results, for appropriate values.
+
+Summary: all code was converted over to the occam-style, during
+19-23 May 2012.  It all works.  The new random-number generator is
+giving me fits.
 
 So:
      complexity-ratio = -log(p/(1-p)) / log |A|    == 3.5
@@ -1798,4 +1802,28 @@ so temp should be 5*4.5/3.5 = 6.428571429
 
 avg:     93    146   116           153   121
 
+===========================================================
+Resume with Iris clustering dataset, May 2012
+
+OK, the new restructured occam-razor code now allows a custom scoring
+penalty to be written for the enum_graded_scorer. So will it do better?
+
+The "old-10K" and "old-m160K" columns are the previous bests: graded 
+scorer, but ungraded complexity penalty. 
+
+The "new-10K" is one scoring method, clearly dudnt work to well.
+
+
+       old-m160K   straight     old-m10K   straight     new-m10K  straight
+:    time  score plex score  time  score plex score  time score plex score   
+-r0: 2939  3.23   11    5     129  3.23   11    5     110  5.37  27    50 
+-r1: 3657  0.99   13    4      87  0.95   14    4     106  8.95  30    57
+-r2: 2907  4.16   11    6     119  4.16   11    6     172  7.36  10    10 
+-r3: 4340  0.94   16   11      99  2.95   15   43     145  5.37  32    50  
+-r4: 2745  2.29    8    6      88  2.06   10    6     186  4.61  31    43  
+-r5: 4846  0.75   17   11      90  3.69   15   43     102  4.29  25    50
+-r6: 3557  3.54   12    5     139  3.54   12    5     190  3.32  15     6
+-r7: 3885 10.72   12   14     151 17.28   12   27     161 32.00   9    50
+-r8: 3700  1.15   12    5      78  3.43   14   50     157  2.15  28    10
+-r9: 2570  2.01   10    5      92  2.01   10    5     119  5.37  26    50
 
