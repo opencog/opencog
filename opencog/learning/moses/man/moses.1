@@ -203,17 +203,16 @@ a program are taken as the arguments to the program. The program
 is evaluated by supplying explicit values for the variables,
 and then applying operations until the root node is reached.
 .PP
-By convention, variables are denoted by a hash-mark followed by
+By convention, variables are denoted by a dollar-sign followed by
 a number, although they may also be named. Variables are not 
 explicitly typed; they are only implicitly typed during program
 evaluation. Thus, for example, \fIor ($1 $2)\fP is a combo
 program that represents the boolean-or of two inputs,
-\fI$1\fP and \fI$2\fP.
+\fI$1\fP and \fI$2\fP.   Built-in constants inlcude \fItrue\fR and 
+\fIfalse\fR; numbers may be written with or without a decimal point.
 .PP
 Logical operators include \fIand\fR, \fIor\fR and \fInot\fR.
-The boolean \fIif\fR operator takes three arguments: if the first
-argument evaluates to true, then the \fIif\fR evalues to the second
-argument, else it evaluates to the third.
+.PP
 Arithmetic operators include +, - * and / for addition, subtraction,
 multiplication and division. Additional arithmetic operators
 include \fIsin\fR, \fIlog\fR, \fIexp\fR and \fIrand\fR. The \fIrand\fR
@@ -222,8 +221,11 @@ operator \fI0<\fR (greater than zero) takes a single continuous-valued
 expression, and returns a boolean. The operator \fIimpulse\fR does 
 the opposite: it takes a single boolean-valued expression, and returns
 0.0 or 1.0, depending on whether the argument evaluates to false or true.
-The continuous-valued \fIif\fR operator functions analogously to the
-boolean \fIif\fR, but takes continuous-valued arguements.
+.PP
+The \fIcond\fR operator takes an alternating sequence of predicates and
+values, terminated by an 'else' value.  It evaluates as a chain of 
+if-then-else statements, so that it returns teh value following the first
+predicate to evaluate to \fItrue\fR.
 .PP
 Thus, as an example, the expression \fIand( 0<( +($x 3))  0<($y))\fR
 evaluates to \fItrue\fR if \fI$x\fR is greater than -3 and \fI$y\fR
