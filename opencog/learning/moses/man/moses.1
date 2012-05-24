@@ -634,7 +634,7 @@ of *($3 $4). This option is effective only when the data file
 contains labels in its header.
 .TP
 .BI \-x1\fR,\ \fB\-\-output\-complexity=1
-Print the complexity score.
+Print the complexity measure of the model, and the scoring penalty.
 
 .\" ============================================================
 .SS "Contin options"
@@ -865,7 +865,7 @@ After simplification, and dropping a constant term that does not depend
 on either the model complexity or the dataset itself (the dataset size is a
 constant), one then can deduce a scoring function:
 
-    score(M) = -|M|*log(|A|)*2*V - Sum_{x\in D} (M(x)-D(x))^2
+    score(M) = -|M|*log(|A|)*2*V - Sum_{x\\in D} (M(x)-D(x))^2
 
 As before, |M|*log(|A|)*2*V can be interpeted as a scoring penalty.
 Alternately, one may interpret each row x as a feature; then the
