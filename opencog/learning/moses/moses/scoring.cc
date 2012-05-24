@@ -644,7 +644,8 @@ penalized_behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) 
 /// OK, the goal here is to compute the "graded" tree complexity.
 /// Much the same way as the score is graded below, we want to do
 /// the same for the complexity, so that complex later predicates
-/// don't (do?) dominate the the penalty.
+/// don't (do?) dominate the the penalty.  Actually, this is
+/// retro-graded: punish more complex, later predicates...
 score_t enum_graded_bscore::graded_complexity(combo_tree::iterator it) const
 {
     typedef combo_tree::sibling_iterator sib_it;
@@ -657,7 +658,7 @@ score_t enum_graded_bscore::graded_complexity(combo_tree::iterator it) const
 
         // advance
         predicate = next(predicate, 2);
-        weight *= grading;
+        weight /= grading;
 
         // Is it the last one, the else clause?
         if (is_enum_type(*predicate))
@@ -719,13 +720,21 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
     // Add the Occam's razor feature
     pbs.second = 0.0;
     if (occam) {
-        // pbs.second = tree_complexity(tr) * complexity_coef;
-        pbs.second = graded_complexity(it) * complexity_coef;
+        pbs.second = tree_complexity(tr) * complexity_coef;
+        // pbs.second = graded_complexity(it) * complexity_coef;
     }
 
     log_candidate_pbscore(tr, pbs);
 
     return pbs;
+}
+
+score_t enum_graded_bscore::min_improv() const
+{
+    // Negative values are interpreted as percentages by the optimizer.
+    // So -0.05 means "a 5% improvement".  Problem is, the grading
+    // wrecks any sense of an absolute score improvement...
+    return -0.05;
 }
 
 //////////////////////////////////

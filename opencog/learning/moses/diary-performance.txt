@@ -1851,7 +1851,8 @@ also avoids inneffective predicates, no matter what the complexity
 penalty used.
 
 "tro-m10K" uses the retro-grade grading, i.e. grading=1.2 instead of 
-       the previous 0.8 used for all eearlier measurements.
+       the previous 0.8 used for all eearlier measurements.  This
+       includes a graded complexity, too.
 
 
        alt-m10K    straight     alt-m20K   straight     tro-m10K  straight
@@ -1867,12 +1868,57 @@ penalty used.
 -r8:   77   3.44   15  50     275   0.35  21    8      54  55.40   6   50
 -r9:  122   5.73   17  28     331   3.54  18   33      53  55.4    6   50
 
+"ung-m10K" -- go back to the regular complexity scorer, but keep the
+        grading at 1.2. This made no diff.
 
-       tro-m20K    straight     alt-m20K   straight     tro-m10K  straight
+"pun-m10K" -- go back to grading=0.8 and but use a retrograde complexity
+        scorer.  The goal is to get back to using the grading to
+        encourage the precision of the predicates, while using the
+        penalty to .. I dunno. something... it actually improves on the
+        runtime of the old best... one case ran faster, another discovered
+        a better scorer.  Not clear if the same thing couldn't have been
+        acheived with a different complexity temp and/or complexity ratio.
+        But lest run with this and see where it goes.
+
+        Certainly, this scorer could start pushing the complexity penalty
+        enough so that its cheaper to have early predicates make mistakes,
+        in exchange for less complex later predicates.  Hmm. 
+
+        Lowering the temperature may work too .. making temp proportional
+        to min_score_improve.. oh wait ..!? min_score_improv is ??
+
+
+       tro-m20K    straight     ung-m10K   straight     pun-m10K  straight
 :    time  score plex score  time  score plex score  time  score plex score   
--r0:  
--r1:  
--r2:  
+-r0:  112   8.16   6    6      49   8.16   6    6      86   3.92   7    5
+-r1:  168  52.80  10   52      46  52.40   6   50      86   0.95  14    4
+-r2:   99  50.00   5   50      51  50.00   5   50     114   4.16  11    6
+-r3:  117  54.60   6   54      52  54.60   6   54     101   5.77  12   43
+-r4:  113  61.80   5   61      51  61.8    5   61      86   2.16   9    6
+-r5:   76  53.40   5   53      35  53.4    5   53      92   7.21  11   43
+-r6:   81  50.00   4   50      42  50.0    4   50     136   3.53  12    5
+-r7:  114  50.00   5   50      56  50      5   50     149  17.28  12   27
+-r8:  124  55.40   6   50      54  55.4    6   50      79   0.80  14    4
+-r9:  131  53.20   8   50      53  55.4    6   50      89   2.25   9    5
+
+main/moses_exec.h:    opt_params.set_min_score_improv(c_scorer.min_improv());
+optimization/optimization.h:    inline void set_min_score_improv(score_t s)
+        min_score_improvement = s;
+
+Negative values indicate a percent improvement:
+         big_step = (best_score >  prev_hi + imp * fabs(prev_hi));
+
+OK, some buginess in the min_score_improv area now fixed.
+
+"msc-10K": min_score_improv fixes, per bzr rev 6978.  This is using the
+      ordinary, non-graded complexity, and the grading=0.8 as before.
+      Expect little or no change from baseline ... yeah??
+
+       msc-m10K    straight     ung-m10K   straight     pun-m10K  straight
+:    time  score plex score  time  score plex score  time  score plex score   
+-r0:  125   3.23  11    5
+-r1:   91   0.95  14    4
+-r2:  115   4.16  11    6
 -r3:  
 -r4:  
 -r5:  

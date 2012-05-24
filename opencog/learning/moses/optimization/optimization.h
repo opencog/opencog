@@ -191,6 +191,10 @@ struct optim_parameters
         return std::min(max_dist, fs.dim_size());
     }
 
+    /// The score must improve by at least 's' to be considered; else
+    /// the search is terminated.  If 's' is negative, then it is
+    /// interpreted as a fraction: so 's=0.05' means 'the score must
+    /// improve 5 percent'.  
     inline void set_min_score_improv(score_t s)
     {
         min_score_improvement = s;
@@ -201,6 +205,25 @@ struct optim_parameters
         return min_score_improvement;
     }
 
+    inline bool score_improved(score_t best_score, score_t prev_hi)
+    {
+        bool big_step = false;
+        score_t imp = min_score_improv();
+
+        if (0.0 <= imp)
+             big_step = (best_score >  prev_hi + imp);
+        else {
+             // Score has improved if it increased by 0.5, or if it
+             // increased by |imp| percent.  One extra minus sign
+             // because imp is negative...
+             big_step = (best_score >  prev_hi - imp * fabs(prev_hi));
+             // big_step | = (best_score >  prev_hi + 0.5);
+        }
+
+        return big_step;
+    }
+
+    // String name of the optimization algo to employ
     string opt_algo;
 
     // optimization is terminated after term_total*n generations, or
@@ -232,10 +255,6 @@ private:
     // the search from a new exemplar rather wasting time climbing a
     // near-plateau. Most problems have 1.0 as the smallest meaningful
     // score change, so 0.5 as default seems reasonable...
-    //
-    // Note Bene: the initial value is appropriate for the true score,
-    // not the weighted score.  Thus, we re-weight, in the
-    // constructor, for use with the weighted score.
     score_t min_score_improvement;
 };
 
@@ -820,12 +839,11 @@ struct hill_climbing : optim_stats
                 }
             }
 
+            bool has_improved = opt_params.score_improved(best_score, prev_hi);
+
             // Make a copy of the best instance.
-            bool has_improved = false;
-            if (best_score >  prev_hi) {
-                has_improved = true;
+            if (has_improved)
                 center_inst = deme[ibest].first;
-            }
 
 #ifdef GATHER_STATS
             if (iteration > 1) {
@@ -939,13 +957,7 @@ struct hill_climbing : optim_stats
                  * re-survey the immediate local neighborhood.  We may get
                  * lucky.
                  */
-                bool big_step;
-                score_t imp = opt_params.min_score_improv();
-                if (0.0 <= imp)
-                     big_step = (best_score >  prev_hi + imp);
-                else
-                     big_step = (best_score >  prev_hi - imp * fabs(prev_hi));
-
+                bool big_step = opt_params.score_improved(best_score, prev_hi);
                 if (!big_step && !last_chance) {
 
                     /* If we've been using the simplex extrapolation
