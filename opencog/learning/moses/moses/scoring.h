@@ -363,8 +363,9 @@ protected:
     CTable ctable;
     unsigned ctable_usize;                  // uncompressed size of ctable
     score_t min_activation, max_activation;
-    score_t max_precision; // uppper bound of the maximum denormalized
-                           // precision for that CTable
+    score_t max_output; // max output one gets (1 in case it is
+                        // boolean). This is used to normalized the
+                        // precision in case the output isn't boolean.
     score_t penalty;
     bool positive, worst_norm;
 

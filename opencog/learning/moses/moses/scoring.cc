@@ -212,7 +212,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         };
     }
     
-    // max precision
+    // max output
     auto tcf = [&](const CTable::counter_t& c) -> score_t {
         if (output_type == id::boolean_type)
             return 1.0;
@@ -228,10 +228,10 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     };
     /// @todo could be done in a line if boost::max_element did
     /// support C++ anonymous functions
-    max_precision = worst_score;
+    max_output = worst_score;
     foreach(const auto& cr, ctable)
-        max_precision = std::max(max_precision, tcf(cr.second));
-    logger().fine("max_precision = %f", max_precision);
+        max_output = std::max(max_output, tcf(cr.second));
+    logger().fine("max_output = %f", max_output);
 }
 
 void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
@@ -302,7 +302,7 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     }
     
     // add (normalized) precision
-    score_t precision = (sao / active) / max_precision,
+    score_t precision = (sao / active) / max_output,
         activation = (score_t)active / ctable_usize;
     
     // normalize precision w.r.t. worst deciles
@@ -357,8 +357,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // mpv, but we want at least min_activation to be reached. It's
     // not sure this actually gives the best score one can get if
     // min_activation isn't reached. But we don't want that anyway so
-    // it's an acceptable inacurracy. Clearly it would matter only if
-    // activation constraint is set very loose.
+    // it's an acceptable inacurracy. It would be a problem only if
+    // activation constraint is very loose.
     unsigned active = 0;
     score_t sao = 0.0, activation = 0.0;
     reverse_foreach (const auto& mpv, max_precisions) {
@@ -368,7 +368,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
         if (min_activation < activation)
             break;
     }
-    score_t precision = (sao / active) / max_precision,
+    score_t precision = (sao / active) / max_output,
         activation_penalty = get_activation_penalty(activation);
 
     logger().fine("best precision = %f", precision);
