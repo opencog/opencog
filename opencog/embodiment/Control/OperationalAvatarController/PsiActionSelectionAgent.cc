@@ -190,33 +190,6 @@ bool PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace)
     return true; 
 }
 
-void PsiActionSelectionAgent::getPlan(AtomSpace & atomSpace, Handle hPlanning)
-{
-    std::vector<Handle> resultHandleSet = atomSpace.getOutgoing(hPlanning); 
-
-    Handle planRuleListReferenceLink = resultHandleSet[0]; 
-    Handle planContextListReferenceLink = resultHandleSet[1]; 
-    Handle planActionListReferenceLink = resultHandleSet[2];
-    Handle planSelectedDemandGoalReferenceLink = resultHandleSet[3]; 
-
-    this->plan_selected_demand_goal =
-        atomSpace.getOutgoing(planSelectedDemandGoalReferenceLink, 1); 
-
-    this->plan_rule_list = atomSpace.getOutgoing(
-                               atomSpace.getOutgoing(planRuleListReferenceLink, 1)
-                                                ); 
-
-    this->plan_context_list = atomSpace.getOutgoing(
-                                  atomSpace.getOutgoing(planContextListReferenceLink, 1)
-                                                   ); 
-
-    this->plan_action_list = atomSpace.getOutgoing(
-                                 atomSpace.getOutgoing(planActionListReferenceLink, 1)
-                                                  );
-    this->temp_action_list = this->plan_action_list; 
-
-}
-
 void PsiActionSelectionAgent::printPlan(AtomSpace & atomSpace)
 {
     std::cout<<std::endl<<"Selected Demand Goal [cycle = "<<this->cycleCount<<"]:"
@@ -714,27 +687,10 @@ std::cout<<"current action is still running [SchemaId = "
 
     }// if (this->currentSchemaId != 0)
 
-#if HAVE_GUILE    
     // If we've used up the current plan, do a new planning
     if ( this->temp_action_list.empty() && this->current_actions.empty() ) {
-        // Initialize scheme evaluator
-        SchemeEval & evaluator = SchemeEval::instance();    
-        std::string scheme_expression, scheme_return_value;
-
-        scheme_expression = "( do_planning )";
-
-        // Run the Procedure that do planning
-        scheme_return_value = evaluator.eval(scheme_expression);
-
-        if ( evaluator.eval_error() ) {
-            logger().error( "PsiActionSelectionAgent::%s - Failed to execute '%s'", 
-                             __FUNCTION__, 
-                             scheme_expression.c_str() 
-                          );
-
-            return; 
-        }
-
+        // Hope that PLN planning (running in a separate, Python MindAgent) has created a new plan.
+        
         // Try to get the plan stored in AtomSpace
         if ( !this->getPlan(atomSpace) ) {
             logger().warn("PsiActionSelectionAgent::%s - "
@@ -766,7 +722,6 @@ std::cout<<"'do_planning' can not find any suitable plan for the selected demand
                         this->cycleCount
                       );
     }
-#endif // HAVE_GUILE    
 
     // Get next action from current plan
     if ( !this->current_actions.empty() ) {
