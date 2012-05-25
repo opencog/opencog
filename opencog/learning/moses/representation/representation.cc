@@ -220,13 +220,17 @@ void representation::clean_combo_tree(combo_tree &tr,
 
     if (reduce) { //reduce
         if (logger().isFineEnabled()) {
-            logger().fine() << "Reduce (knob=" << knob_building
-                            << ") candidate: " << tr;
+            logger().fine() << "Reduce "
+                            << (knob_building? "(knob_building)" : "")
+                            << " candidate: " << tr;
         }
         if (knob_building)
             (*get_simplify_knob_building())(tr);
         else
             (*get_simplify_candidate())(tr);
+        if (logger().isFineEnabled()) {
+            logger().fine() << "Reduced candidate:" << tr;
+        }
     }
 }
 
