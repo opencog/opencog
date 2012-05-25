@@ -146,14 +146,14 @@ struct metapop_printer
 // XXX TEMPORARY HACK for perf measurements, remove me after June 2012
         extern std::vector<CTable> gtables;
 
-        enum_table_bscore etb(gtables[0], 12, 0);
-        bscore_based_score<enum_table_bscore> straight(etb);
+        enum_table_bscore etb(gtables[0]);
+        bscore_based_cscore<enum_table_bscore> straight(etb);
 
         // const bscored_combo_tree& candidate = begin();
         auto cit = metapop.begin();
     
         for (int i=0; i<10; i++) {
-            score_t sc = straight(get_tree(*cit));
+            composite_score sc = straight(get_tree(*cit));
             ss << "Sraight: " << sc 
                << " Graded: " << get_composite_score(*cit) << std::endl;
             cit++;

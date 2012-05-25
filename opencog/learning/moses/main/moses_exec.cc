@@ -668,11 +668,12 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(complexity_ratio_opt).c_str(),
          value<score_t>(&complexity_ratio)->default_value(3.5),
-         "Fix the ratio of raw score to complexity, when ranking the "
-         "metapopulation for fitness.  The complexity penalty is the "
-         "inverse of the complexity ratio.  Setting this ratio too low "
-         "(complexity penalty too high) causes the complexity to "
-         "dominate ranking, probably trapping the algorithm in a "
+         "Fix the ratio of the score to complexity, to be used as a "
+         "penalty, when ranking the metapopulation for fitness.  "
+         "The complexity penalty is "
+         "the inverse of the complexity ratio.  Setting this ratio "
+         "too low (complexity penalty too high) causes the complexity "
+         "to dominate ranking, probably trapping the algorithm in a "
          "local maximum.  Setting this ratio too high (complexity "
          "penalty too low) will waste time exploring unproductive "
          "solutions, adversely lengthening solution times.  "
