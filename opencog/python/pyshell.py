@@ -6,6 +6,7 @@ ipshell = None
 
 # A nice IPython shell that runs within the CogServer.
 # NOTE: it uses the CogServer input/output, not the telnet shell
+
 class shell(opencog.cogserver.Request):
     
     def run(self,args,atomspace):
@@ -21,9 +22,9 @@ class shell(opencog.cogserver.Request):
         doc = """OpenCog Python Shell. Access the main AtomSpace as 'space' or 'a'."""
         try: 
             import sys; sys.argv = ['', '-noconfirm_exit', '-p', 'sh']
-            from IPython.Shell import IPShellEmbed     
+            from IPython import embed
             if ipshell == None:
-                ipshell = IPShellEmbed(user_ns = namespace)
+                ipshell = embed(user_ns = namespace)
             ipshell()
         except Exception,  e:
             print e
