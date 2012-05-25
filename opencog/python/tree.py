@@ -157,6 +157,8 @@ class DAG(Tree):
         
         self.depth = 0
         self.best_conf_below = 0.0
+        self.path_axiom = None
+        self.path_pre = None
         
         for a in args:
             self.append(a)

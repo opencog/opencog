@@ -210,7 +210,7 @@ def path_rules(a):
                     )
                 )
     
-    print template
+    #print template
     
     def change_position(coords):
         s = {Var(i+1):T(a.add(t.NumberNode, str(c))) for (i, c) in enumerate(coords)}
@@ -229,7 +229,7 @@ def path_rules(a):
     
     lls = a.get_atoms_by_type(t.LatestLink)
     pls = find_tree(template,lls)
-    print len(pls)
+    #print len(pls)
     
     taken_grids = set()
     # Find any objects/blocks and assume they are obstacles.
@@ -237,9 +237,9 @@ def path_rules(a):
         #if is_block(pl):
         #    continue
         (x,y,z) = get_position(pl)
-        print (x,y,z), get_name(pl)
+        #print (x,y,z), get_name(pl)
         (x,y,z) = tuple(map(math.floor,(x,y,z)))
-        print (x,y,z), get_name(pl)
+        #print (x,y,z), get_name(pl)
         taken_grids.add((x,y,z))
     
     # add in the ground blocks.
@@ -252,7 +252,7 @@ def path_rules(a):
             p1c = (x,y,z)
             
             if (x,y,z+1) in taken_grids:
-                print 'occupied'
+                #print 'occupied'
                 continue
             
             ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)] #,(x,y,z-1),(x,y,z+1)]
@@ -383,9 +383,9 @@ def match_neighbors(space,target):
 def match_predicate(space,target):
     # Actually it would be much better to use the standard target for this rule
     # + unify to find the places
-    print 'match_predicate',target
+    #print 'match_predicate',target
     ll = target.args[1]
-    print ll
+    #print ll
     (n1,n2,n3) = ll.args
     
     candidates = []
@@ -402,9 +402,12 @@ def match_predicate(space,target):
     
     return candidates
 
+## @} 
 class Rule :
+
     def __init__ (self, head, goals, name, tv = TruthValue(0, 0),
                   formula = None, match = None):
+	''' head, goals : tree '''
         self.head = head
         self.goals = goals
 
@@ -412,6 +415,8 @@ class Rule :
         self.tv = tv
         self.match = match
         self.formula = if_(formula, formula, formulas.identityFormula)
+	self.path_pre = None
+	self.path_axiom = None
 
         if name == 'Lookup':
             assert len(goals) == 0
@@ -419,23 +424,20 @@ class Rule :
         #self.bc_depth = 0
 
     def __str__(self):
-        return self.name
-
-#    def __repr__ (self) :
-#        rep = str(self.head)
-#        sep = " :- "
-#        for goal in self.goals :
-#            rep += sep + str(goal)
-#            sep = ","
-#        return rep
-
-    def __repr__ (self) :
-        rep = self.name + ' '  + str(self.head) + ' ' + str(self.tv)
-        #rep += ' '*self.bc_depth*3
+        #rep = self.name + ' '  + str(self.head) + ' ' + str(self.tv)
+        rep = self.name + ' '  + str(self.head) 
         rep += ' :- '
         for goal in self.goals :
             #rep += ' '*(self.bc_depth*3+3)
-            rep += str(goal) + ' //'
+            rep += str(goal) + ','
+        return rep
+
+    def __repr__ (self) :
+        rep = self.name + ' '  + str(self.head) + ' ' + str(self.tv)
+        rep += ' :- '
+        for goal in self.goals :
+            #rep += ' '*(self.bc_depth*3+3)
+            rep += str(goal) + ','
         return rep
 
     def standardize_apart(self):
@@ -464,24 +466,17 @@ class Rule :
             return self._tuple
 
     def unifies(self, other):
+	'''return true if could be unified to tree other '''
         self_conj = (self.head,)+tuple(self.goals)
         other_conj = (other.head,)+tuple(other.goals)
 
         return unify(self_conj, other_conj, {}) != None
 
     def subst(self, s):
+	'''return new substitued rule '''
         new_head = subst(s, self.head)
         new_goals = list(subst_conjunction(s, self.goals))
         new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv,
                         formula = self.formula, match = self.match)
         return new_rule
 
-#    def category(self):
-#        '''Returns the category of this rule. It can be either an axiom, a PLN Rule (e.g. Modus Ponens), or an
-#        application. An application is a PLN Rule applied to specific arguments.'''
-#        if self.name == '[axiom]':
-#            return 'axiom'
-#        elif self.name.startswith('[application]'):
-#            return 'application'
-#        else:
-#            return 'rule'

@@ -74,68 +74,139 @@ class Chainer:
 
     #@profile
     def bc(self, target, nsteps = 2000):
-        #import prof3d; prof3d.profile_me()
+        try:
+            #import prof3d; prof3d.profile_me()
+            
+            #try:
+            tvs = self.get_tvs(target)
+            print "Existing target truth values:", map(str, tvs)
+            #if len(tvs):
+            #    raise NotImplementedError('Cannot revise multiple TruthValues, so no point in doing this search')
+            
+            log.info(format_log('bc', target))
+            self.bc_later = OrderedSet([target])
+            self.results = []
+    
+            self.target = target
+            # Have a sentinel application at the top
+            # Cool idea but doesn't work yet
+            #self.root = T('WIN')
+            
+            #self.rules.append(rules.Rule(self.root,[target],name='producing target'))
+            #self.bc_later = OrderedSet([self.root])
+    
+            # viz - visualize the root
+            self.viz.outputTarget(target, None, 0, 'TARGET')
+    
+            start = time()
+            while self.bc_later and not self.results and nsteps > 0:
+                self.bc_step()
+                nsteps -= 1
+    
+                msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
+                log.info(format_log(msg))
+                log.info(format_log('time taken', time() - start))
+                #log.info(format_log('PD:'))
+                #for pdn in self.pd:
+                #    log.info(format_log(len(pdn.args),str(pdn)))
+            
+            # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
+            print msg
+    
+            for res in self.results:
+                print 'Inference trail:'
+                trail = self.trail(res)
+                self.print_tree(trail)
+                print 'Action plan (if applicable):'
+                print self.extract_plan(trail)
+    #            for res in self.results:
+    #                self.viz_proof_tree(self.trail(res))
+
+            viz_path_graph = Viz_Graph()
+            self.dsp_search_path(self.expr2pdn(self.target),{},{},viz_path_graph)
+            viz_path_graph.write_dot('path_result.dot')
+    
+            viz_space_graph = Viz_Graph()
+            self.dsp_search_space(self.expr2pdn(self.target),viz_space_graph)
+            viz_space_graph.write_dot('space_result.dot')
+            
+            viz_path_graph = Viz_Graph()
+            self.dsp_search_path(self.expr2pdn(self.target),{ },{ }, viz_path_graph,True)
+            viz_path_graph.write_dot('valid_path_result.dot')
+    
+            #return self.results
+            ret = []
+            for tr in self.results:
+                atom = atom_from_tree(tr, self.space)
+                # haxx
+                atom.tv = self.get_tvs(tr)[0]
+                ret.append(atom.h)
+            return ret
+        except Exception, e:
+            import traceback, pdb
+            #pdb.set_trace()
+            print traceback.format_exc(10)
+            # Start the post-mortem debugger
+            #pdb.pm()
+            return []
+
+    def dsp_search_space(self, dag, viz_graph):
+        '''dag : DAG node '''
+        # output current node
+        for parent in dag.parents:
+            parent_id = str(parent)
+            target_id = str(dag)
+            viz_graph.add_edge(parent_id,target_id)
+        # output children
+        for arg in dag.args:
+            self.dsp_search_space(arg,viz_graph)
+
+
+    def dsp_search_path(self,dag, dic_count, dic_dag, viz_graph, dsp_valid = False):
+        '''dag : DAG node '''
+        # output current node
         
-        #try:
-        tvs = self.get_tvs(target)
-        print "Existing target truth values:", map(str, tvs)
-        #if len(tvs):
-        #    raise NotImplementedError('Cannot revise multiple TruthValues, so no point in doing this search')
-        
-        log.info(format_log('bc', target))
-        self.bc_later = OrderedSet([target])
-        self.results = []
+        dag_id = str(dag)
+        # the map from arg_id to new_arg_id
+        new_dic_dag = { }
 
-        self.target = target
-        # Have a sentinel application at the top
-        # Cool idea but doesn't work yet
-        #self.root = T('WIN')
-        
-        #self.rules.append(rules.Rule(self.root,[target],name='producing target'))
-        #self.bc_later = OrderedSet([self.root])
+        if dsp_valid and dag.path_axiom:
+            try:
+                viz_graph.add_edge(str(dag.path_axiom),dic_dag[dag_id])
+                viz_graph.add_edge(str(dag.path_pre),dic_dag[dag_id])
+            except Exception:
+                viz_graph.add_edge(str(dag.path_axiom),dag_id)
+                viz_graph.add_edge(str(dag.path_pre),dag_id)
+            print "****" 
+            print dag.path_pre
+            print dag.path_axiom
+        for arg in dag.args:
+            #print dag
+            #print "***" + str(dag.path_pre)
+            if  not dsp_valid or (type(arg.op) == Tree or arg.op.tv.count > 0):
+                #self.viz.outputTreeNode(dag,parent,1)
+                arg_id = str(arg)
+                new_arg_id = None
+                try:
+                    dic_count[arg_id] += 1
+                    new_arg_id = arg_id + str(dic_count[arg_id])
+                    new_dic_dag[arg_id] = new_arg_id
+                except Exception:
+                    dic_count[arg_id] = 1
 
-        # viz - visualize the root
-        self.viz.outputTarget(target, None, 0, 'TARGET')
+                if not new_arg_id:
+                   new_arg_id = arg_id 
 
-        start = time()
-        while self.bc_later and not self.results and nsteps > 0:
-            self.bc_step()
-            nsteps -= 1
+                try:
+                    # dag id has been replaced by parent
+                    viz_graph.add_edge(dic_dag[dag_id],new_arg_id)
+                except Exception:
+                    viz_graph.add_edge(dag_id,new_arg_id)
+            # output children
+        for arg in dag.args:
+            if not dsp_valid or (type(arg.op) == Tree or arg.op.tv.count > 0):
+                self.dsp_search_path(arg, dic_count, new_dic_dag, viz_graph, dsp_valid)
 
-            msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
-            log.info(format_log(msg))
-            log.info(format_log('time taken', time() - start))
-            #log.info(format_log('PD:'))
-            #for pdn in self.pd:
-            #    log.info(format_log(len(pdn.args),str(pdn)))
-        
-        # Always print it at the end, so you can easily check the (combinatorial) efficiency of all tests after a change
-        print msg
-
-        for res in self.results:
-            print 'Inference trail:'
-            trail = self.trail(res)
-            self.print_tree(trail)
-            print 'Action plan (if applicable):'
-            print self.extract_plan(trail)
-#            for res in self.results:
-#                self.viz_proof_tree(self.trail(res))
-
-        #return self.results
-        ret = []
-        for tr in self.results:
-            atom = atom_from_tree(tr, self.space)
-            # haxx
-            atom.tv = self.get_tvs(tr)[0]
-            ret.append(atom.h)
-        return ret
-        #except Exception, e:
-        #    import traceback, pdb
-        #    #pdb.set_trace()
-        #    print traceback.format_exc(10)
-        #    # Start the post-mortem debugger
-        #    #pdb.pm()
-        #    return []
 
     #def fc(self):
     #    axioms = [r.head for r in self.rules if r.tv.count > 0]
@@ -162,8 +233,8 @@ class Chainer:
         #print 'bcq', map(str, self.bc_later)
         #next_target = self.bc_later.pop_first() # Breadth-first search
         #next_target = self.bc_later.pop_last() # Depth-first search
-        #next_target = self.get_fittest(self.bc_later) # Best-first search
-        next_target = self.select_stochastic()
+        next_target = self.get_fittest(self.bc_later) # Best-first search
+        #next_target = self.select_stochastic() # A better version of best-first search (still a prototype)
 
         next_target = standardize_apart(next_target)
 
@@ -301,6 +372,9 @@ class Chainer:
             self.set_tv(app, app.tv)
             
             log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
+            
+            # make the app red, not only the expression
+            self.viz.declareResult(str(rule.canonical_tuple()))
 
     def find_rule_applications(self, target):
         '''The main 'meat' of the chainer. Finds all possible rule-applications matching your criteria.
@@ -444,7 +518,10 @@ class Chainer:
 
         log.info(format_log('propogate_specialization',new_premise,i,repr(orig_app)))
         
-        new_app = orig_app.subst(s)
+        new_app = orig_app.subst(s)        
+        new_app.path_pre = orig_app
+        new_app.path_axiom = standardize_apart(new_premise)
+        
         # Stop if it's a cycle or already exists
         if not self.add_queries(new_app):
             return
@@ -587,7 +664,21 @@ class Chainer:
             target = proofnode.op
             if isinstance(target, rules.Rule):
                 return []
-            if target.op in ['ExecutionLink',  'SequentialAndLink']:
+            elif target.op == 'EvaluationLink':
+                tr = target.args[0]
+                if tr.op.name == 'agent_location':
+                    def get_position(position_name):
+                        return tuple(float(s[Var(i)].op.name) for i in [1,2,3])
+                    
+                    pos_str = target.args[1].args[0].op.name
+                    (x,y, _) = get_position(pos_str)
+                    return [T('ExecutionLink', self.space.add('goto_obj'),
+                                T('ListLink',
+                                    "%{x} %{y}" % locals()
+                                    )
+                             )
+                            ]
+            elif target.op in ['ExecutionLink',  'SequentialAndLink']:
                 return [pn.op]
             else:
                 return []
@@ -896,9 +987,11 @@ def do_planning(space):
             ps_a.tv = TruthValue(1.0, count_from_confidence(1.0))
             
             print ps_a.tv
+        
+        return result_atoms
 
     except Exception, e:
-        print e
+        log.info(format_log(e))
 
 from urllib2 import URLError
 def check_connected(method):
@@ -974,8 +1067,6 @@ class PLNviz:
             self.g.add_edge(parent_to_rule_id, rule_app_id, parent_id, directed=True, label='')
             # Link rule app to target
             self.g.add_edge(target_to_rule_id, target_id, rule_app_id, directed=True, label=str(index+1))
-        
-            self.declareResult(rule_app_id)
 
     @check_connected
     def declareResult(self, target):
@@ -1003,6 +1094,27 @@ class PLNviz:
 
             self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
             self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
+
+import networkx as nx
+class Viz_Graph(object):
+    """ draw the graph """
+    def __init__(self):
+        self._nx_graph = nx.DiGraph()
+
+    def add_edge(self, source, target):
+        """docstring for add_edge"""
+        self._nx_graph.add_edge(source,target)
+
+    def write_dot(self, filename):
+        """docstring for write_dot"""
+        try:
+            nx.write_dot(self._nx_graph, filename)
+        except Exception, e:
+            print e
+            raise e
+    def clear(self):
+        """docstring for clear"""
+        self._nx_graph.clear()
 
 class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
     '''This agent should be run every cycle to cooperate with the C++
