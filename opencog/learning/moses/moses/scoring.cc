@@ -289,7 +289,7 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     // remove all observations from worst_norm so that only the worst
     // n_deciles or less remains and compute its average
     contin_t avg_worst_deciles = 0.0;
-    if (worst_norm) {
+    if (worst_norm and sao > 0) {
         unsigned worst_count = 0,
             n_deciles = active / 10;
         foreach (const auto& pr, worst_deciles) {
@@ -306,7 +306,7 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
         activation = (score_t)active / ctable_usize;
     
     // normalize precision w.r.t. worst deciles
-    if (worst_norm && avg_worst_deciles < 0) {
+    if (avg_worst_deciles < 0) {
         logger().fine("precision before worst_norm = %f", precision);
         logger().fine("abs(avg_worst_deciles) = %f", -avg_worst_deciles);
         precision /= -avg_worst_deciles;
@@ -398,7 +398,7 @@ score_t precision_bscore::min_improv() const
 // discretize_contin_bscore //
 //////////////////////////////
         
-// Note that this function returns a POSITIVE number, since  p < 1.
+// Note that this function returns a POSITIVE number, since p < 0.5
 score_t discrete_complexity_coef(unsigned alphabet_size, double p)
 {
     return -log((double)alphabet_size) / log(p/(1-p));
