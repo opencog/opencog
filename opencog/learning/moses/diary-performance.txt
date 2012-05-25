@@ -1851,7 +1851,7 @@ also avoids inneffective predicates, no matter what the complexity
 penalty used.
 
 "tro-m10K" uses the retro-grade grading, i.e. grading=1.2 instead of 
-       the previous 0.8 used for all eearlier measurements.  This
+       the previous 0.8 used for all earlier measurements.  This
        includes a graded complexity, too.
 
 
@@ -1941,17 +1941,43 @@ OK, some buginess in the min_score_improv area now fixed.
 
 "v4-retro": as above, but with retrograde penalty. Disappointing.
 
+"v4-g0.9": as above but with grading=0.9. Much better. This is forward
+        progress.
 
-        v4-m40K    straight      v4-retro   straight      v2-m10K   straight
+
+        v4-m40K    straight      v4-retro   straight      v4-g0.9  straight
 :    time  score plex score  time  score plex score  time  score plex score   
--r0:  650   3.23  11    5     387   3.92   7    5
--r1:  685   1.24  12    4     663   1.86  11    4
--r2:  572   4.16  11    6     587   4.16  11    6
--r3:  822   1.41  18   50     583   7.21  11   43
--r4:  501   2.82   9    5     533   7.21  11   43
--r5:  775   1.15  19   51     506   7.62  11   44
--r6:  690   3.53  12    5     655   3.53  12    5
--r7:  806  17.28  12   27     801  17.28  12   27
--r8:  790   1.41  18   50     478   2.25   9    5
--r9:  498   2.25   9    5     402   3.52   7    5
+-r0:  650   3.23  11    5     387   3.92   7    5     540   4.43   9    5
+-r1:  685   1.24  12    4     663   1.86  11    4     647   3.09  10    4
+-r2:  572   4.16  11    6     587   4.16  11    6     581   5.04  11    6
+-r3:  822   1.41  18   50     583   7.21  11   43     455  22.68   6   28
+-r4:  501   2.82   9    5     533   7.21  11   43     489   4.83   8    7
+-r5:  775   1.15  19   51     506   7.62  11   44     529   4.70   8    6
+-r6:  690   3.53  12    5     655   3.53  12    5     686   4.19  12    5
+-r7:  806  17.28  12   27     801  17.28  12   27     780  21.87  12   27
+-r8:  790   1.41  18   50     478   2.25   9    5     804   2.30  14    4
+-r9:  498   2.25   9    5     402   3.52   7    5     426   4.23   7    5
+
+
+"v6-g0.9": as above, but with temperature -v6 (the default).  Wow. OK,
+      that's the best yet, right? So retro-complexity scoring is the best. 
+
+"probe-m10K": as above, but with a fix to disc_probe. and -m10K
+       (to recap: grading=0.9 and retrograde complexity penalty.)
+       (which are now permanent in the code as of bzr rev 6985)
+
+"probe-m40K": as above, but -m40K
+
+        v6-g0.9    straight    probe-m10K  straight    probe-m40K  straight
+:    time  score plex score  time  score plex score  time  score plex score   
+-r0:  531   4.43   9    5     96    4.43   9    5     483   4.43   9    5
+-r1:  655   2.78  11    4     56   21.52  10   50     629   2.02  14    4
+-r2:  590   5.60  10    6     99    5.04  11    6     552   5.04  11    6
+-r3:  435  22.70   6   28     75   22.68   7   28     
+-r4:  505   4.83   8    7     67    4.47   9    7     
+-r5:  559   5.08   8    6     72    4.63  11    8     
+-r6:  700   4.18  12    5    112    4.19  12    5      
+-r7:  576   5.04  11    6    113    5.04  11    6     
+-r8:  886   1.86  16    4     84   19.37  13   50     
+-r9:  415   4.23   7    5     70    3.43   9    5     
 

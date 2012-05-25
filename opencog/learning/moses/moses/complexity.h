@@ -40,9 +40,11 @@ namespace opencog { namespace moses {
     static const complexity_t worst_complexity =
         std::numeric_limits<complexity_t>::min();
 
-    complexity_t tree_complexity(combo::combo_tree::iterator);
+    complexity_t tree_complexity(combo::combo_tree::iterator, 
+                        bool (*)(const combo::combo_tree::iterator&) = NULL);
 
-    complexity_t tree_complexity(const combo::combo_tree&);
+    complexity_t tree_complexity(const combo::combo_tree&,
+                        bool (*)(const combo::combo_tree::iterator&) = NULL);
 
 } //~namespace moses
 } //~namespace opencog

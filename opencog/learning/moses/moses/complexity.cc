@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/util/exceptions.h>
+#include <opencog/comboreduct/combo/combo.h>
 
 #include "complexity.h"
 #include "using.h"
@@ -53,16 +54,33 @@ using namespace opencog::combo;
 // (grep for "information_theoretic_bits" in optimization.h)
 //
 // Note Bene: this function returns a POSITIVE number!
-complexity_t tree_complexity(combo_tree::iterator it)
+complexity_t tree_complexity(combo_tree::iterator it,
+                             bool (*stopper)(const combo_tree::iterator&))
 {
     // base cases
+    // null_vertex marks the location of a logical knob.  Halt 
+    // recursion past logical knobs.
     if (*it == id::logical_true
         || *it == id::logical_false
         || *it == id::null_vertex)
         return 0;
 
+    // If the stopper function is defined, and it returns true, we halt
+    // recursion.  This is needed for knob-probing across boundaries
+    // between logical and contin expressions.
+    if (stopper && stopper(it)) return 0;
+
+    // *(0 stuff) marks the location of a contin knob.  Halt recursion
+    // past contin knobs.  This is for knob-probing.
+    if ((*it==id::times) && is_contin(*it.begin()) && 
+        (0 == get_contin(*it.begin())))
+        return 0;
+
+    // Contins get a complexity of 1. But perhaps, contins should
+    // get a complexity of 2 or more, if they are very large, or 
+    // require many digits of precision.
     if (is_argument(*it)
-        || is_contin(*it)    // XXX Why !?
+        || is_contin(*it)
         || is_builtin_action(*it)
         || is_ann_type(*it)
         || is_action_result(*it))
@@ -70,9 +88,13 @@ complexity_t tree_complexity(combo_tree::iterator it)
 
     // recursive cases
     if (*it == id::logical_not)
-        return tree_complexity(it.begin());
+        return tree_complexity(it.begin(), stopper);
 
-    // div and trigonometric functions have complexity -1
+    // If an operator is not listed below, it has a complexity of zero.
+    // Note that logical_and, logical_or are not listed, these have a
+    // complexity of zero.
+    //
+    // div and trigonometric functions have complexity one.
     // But greatere_than_zero, impulse, plus, times are all treated
     // with complexity zero.  Why?  I dunno; maybe because impulse is
     // like an unavoidable type conversion?  Kind of like id::not above ???
@@ -85,16 +107,17 @@ complexity_t tree_complexity(combo_tree::iterator it)
                  || *it==id::cond);
 
     for (combo_tree::sibling_iterator sib = it.begin(); sib != it.end(); ++sib)
-        c += tree_complexity(sib);
+        c += tree_complexity(sib, stopper);
     return c;
 }
 
-complexity_t tree_complexity(const combo_tree& tr)
+complexity_t tree_complexity(const combo_tree& tr,
+                             bool (*stopper)(const combo_tree::iterator&))
 {
     combo_tree::iterator it = tr.begin();
     if (it == tr.end()) return 0;
 
-    return tree_complexity(tr.begin());
+    return tree_complexity(tr.begin(), stopper);
 }
 
 } // ~namespace moses

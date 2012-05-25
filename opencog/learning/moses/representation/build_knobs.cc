@@ -281,11 +281,14 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
         /// @todo could use kb.complexity_bound() to be faster, but
         /// there is a strange thing with kb.complexity_bound()
         /// because apparently when it is 0 it actually makes
-        /// _exemplar simpler
-        //
-        // XXX we can pull this out of the loop, right?
-        // Since turning the knob won't change the complexity..?
-        complexity_t initial_c = tree_complexity(subtree);
+        /// _exemplar simpler (??? XXX ??? huh?)
+
+        // We halt complexity searches underneath contins, since anything
+        // down there will be preceeded by contin knobs, which are
+        // mis-understood by tree complexity (i.e. tree_complexity halts
+        // recurision when it sees a null_vertex, which denotes a logical
+        // knob, but fails to spot *(0 stuff) which is a contin knob.)
+        complexity_t initial_c = tree_complexity(subtree, is_predicate);
 
         // get cleaned and reduced (according to
         // _simplify_knob_building) exemplar
@@ -295,7 +298,7 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
         // Note that complexity is positive, with 0 being the simplest
         // possible tree (the empty tree).   We disallow settings that
         // reduce the complexity of the tree.
-        if (initial_c > tree_complexity(tmp)) {
+        if (initial_c > tree_complexity(tmp, is_predicate)) {
             to_disallow.push_back(idx);
         }
     }
