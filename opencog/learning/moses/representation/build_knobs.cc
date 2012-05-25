@@ -2,9 +2,10 @@
  * opencog/learning/moses/representation/build_knobs.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings
  * All Rights Reserved
  *
- * Written by Moshe Looks, Predrag Janicic
+ * Written by Moshe Looks, Predrag Janicic, Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -281,6 +282,9 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
         /// there is a strange thing with kb.complexity_bound()
         /// because apparently when it is 0 it actually makes
         /// _exemplar simpler
+        //
+        // XXX we can pull this out of the loop, right?
+        // Since turning the knob won't change the complexity..?
         complexity_t initial_c = tree_complexity(subtree);
 
         // get cleaned and reduced (according to
@@ -289,14 +293,16 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
         _rep.clean_combo_tree(tmp, true, true);
 
         // Note that complexity is positive, with 0 being the simplest
-        // possible tree (the empty tree).
+        // possible tree (the empty tree).   We disallow settings that
+        // reduce the complexity of the tree.
         if (initial_c > tree_complexity(tmp)) {
             to_disallow.push_back(idx);
         }
     }
     kb.turn(0);
 
-    // if some settings aren't disallowed, make a knob
+    // If any settings aren't disallowed, make a knob.
+    // If all settings are disallowed, there will be no knob.
     if (int(to_disallow.size()) < kb.multiplicity() - 1) {
         foreach (int idx, to_disallow)
             kb.disallow(idx);
@@ -454,6 +460,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
 {
     // If the node is not a logic op, then bail.  That is, we don't want
     // to insert any kind of boolean knobs into other kinds of ops.
+    // We should probably OC_ASSERT here ... TODO
     if (!is_logical_operator(*it))
        return;
 
@@ -470,11 +477,12 @@ void build_knobs::add_logical_knobs(pre_it subtree,
 }
 
 /**
- * build_logical -- add knobs to an exemplar that contains only boolean
- * and logic terms, and no other kinds of terms.
+ * build_logical -- add knobs to an exemplar that contains boolean
+ * and logic terms, and predicates.  If a predicate is found, it is
+ * cannonized, and knobs are added to that.
  *
  * @subtree -- pointer to a subtree of the exemplar that consists of 
- *             of "purely" logical elements.
+ *             logical elements.
  * @it -- an iterator pointing into the the subtree
  */
 void build_knobs::build_logical(pre_it subtree, pre_it it)
@@ -485,7 +493,7 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
     {
         // We allow not's, but only if they preceed a predicate. This
         // is similar to the case with arguments: not's are allowed
-        // only if they immediate preceed a boolean-typed argument.
+        // only if they immediately preceed a boolean-typed argument.
         OC_ASSERT(is_predicate(it.begin()),
               "ERROR: the tree is supposed to be in normal form; "
               "and thus must not contain logical_not nodes.");
@@ -499,44 +507,48 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
         flip = id::logical_and;
     }
 
-    if (flip != id::null_vertex)
+    // Hmm .. must not have been canonical. Nothing to do.  I guess we
+    // *could* insert knobs into the predicate, but really we should
+    // have gotten a canonized logical tree, yeah?  So we could (should?)
+    // OC_ASSERT here, as well...
+    if (flip == id::null_vertex)
+        return;
+
+    add_logical_knobs(subtree, it);
+    for (sib_it sib = it.begin(); sib != it.end(); ++sib)
     {
-        add_logical_knobs(subtree, it);
-        for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-        {
-            // Insert logical and/or knobs above arguments and predicates.
-            if (is_argument(*sib)) {
-                add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
-            }
-            else if (is_predicate(sib)) {
-                add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
-
-                // At this time, we assume that the only predicate is
-                // "greater_than_zero", and it has a single arg, which
-                // is either contin or an argument, or any function
-                // returning contin ... So, go and insert contin knobs
-                // into that expression.
-                pre_it pit = sib;
-                if (*pit == id::logical_not)  // skip over the not.
-                    pit = pit.begin();
-                pre_it cit = pit.begin();  // get the arg of predicate.
-
-                OC_ASSERT((is_argument(*cit) || is_contin_expr(*cit)),
-                          "Error: predicate term must be made of contin");
-
-                // contin_canonize() creates a big pre-knob expr at @it.
-                // build_contin() does the actual knob insertion into
-                // the field set.
-                contin_canonize(cit);
-                build_contin(pit.begin());
-            }
-            else if (*sib == id::null_vertex)
-                break;
-            else
-                build_logical(subtree, sib);
+        // Insert logical and/or knobs above arguments and predicates.
+        if (is_argument(*sib)) {
+            add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
         }
-        add_logical_knobs(subtree, _exemplar.append_child(it, flip));
+        else if (is_predicate(sib)) {
+            add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
+
+            // At this time, we assume that the only predicate is
+            // "greater_than_zero", and it has a single arg, which
+            // is either contin or an argument, or any function
+            // returning contin ... So, go and insert contin knobs
+            // into that expression.
+            pre_it pit = sib;
+            if (*pit == id::logical_not)  // skip over the not.
+                pit = pit.begin();
+            pre_it cit = pit.begin();  // get the arg of predicate.
+
+            OC_ASSERT((is_argument(*cit) || is_contin_expr(*cit)),
+                      "Error: predicate term must be made of contin");
+
+            // contin_canonize() creates a big pre-knob expr at @it.
+            // build_contin() does the actual knob insertion into
+            // the field set.
+            contin_canonize(cit);
+            build_contin(pit.begin());
+        }
+        else if (*sib == id::null_vertex)
+            break;
+        else
+            build_logical(subtree, sib);
     }
+    add_logical_knobs(subtree, _exemplar.append_child(it, flip));
 }
 
 // ***********************************************************************

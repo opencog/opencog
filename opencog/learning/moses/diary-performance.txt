@@ -1910,20 +1910,48 @@ Negative values indicate a percent improvement:
 
 OK, some buginess in the min_score_improv area now fixed.
 
-"msc-10K": min_score_improv fixes, per bzr rev 6978.  This is using the
-      ordinary, non-graded complexity, and the grading=0.8 as before.
-      Expect little or no change from baseline ... yeah??
+"msc-m10K": min_score_improv fixes, per bzr rev 6978.  This is using the
+       ordinary, non-graded complexity, and the grading=0.8 as before.
+       Expect little or no change from baseline ... and there is none.
+       Default temp of -v6
 
-       msc-m10K    straight     ung-m10K   straight     pun-m10K  straight
+"v4-m10K": as above, but -v4 for the complexity temperature.
+       One score improved: -r4
+
+"v2-m10K": as above, but -v2 for the complexity temperature.
+       One score worsened: -r4
+
+       msc-m10K    straight      v4-m10K   straight      v2-m10K   straight
 :    time  score plex score  time  score plex score  time  score plex score   
--r0:  125   3.23  11    5
--r1:   91   0.95  14    4
--r2:  115   4.16  11    6
--r3:  
--r4:  
--r5:  
--r6:  
--r7:  
--r8:  
--r9:  
+-r0:  125   3.23  11    5     125   3.23  11    5     119   3.23  11    5
+-r1:   91   0.95  14    4      92   0.95  14    4      90   0.95  15    4
+-r2:  115   4.16  11    6     117   4.16  11    6     114   4.16  11    6
+-r3:  107   2.95  15   43     101   2.95  15   43      96   2.95  15   43
+-r4:   93   2.28  10    8      93   2.82   9    5      87   4.62  13   43
+-r5:   98   3.36  15   44      92   3.36  15   44      87   3.36  15   44
+-r6:  138   3.54  12    5     138   3.54  12    5     136   3.54  12    5
+-r7:  148  17.28  12   27     151  17.28  12   27     149  17.28  12   27
+-r8:   85   3.44  14   50      88   3.44  14   50      82   3.44  14   50
+-r9:   90   2.25   9    5      92   2.25   9    5      90   2.25   9    5
+
+
+"v4-m40K": as above, but -v4 for the complexity temperature.
+       The back-slide in scores suggests that the complexity ratio should
+       go down, i.e. the complexity penalty should go up.
+
+"v4-retro": as above, but with retrograde penalty. Disappointing.
+
+
+        v4-m40K    straight      v4-retro   straight      v2-m10K   straight
+:    time  score plex score  time  score plex score  time  score plex score   
+-r0:  650   3.23  11    5     387   3.92   7    5
+-r1:  685   1.24  12    4     663   1.86  11    4
+-r2:  572   4.16  11    6     587   4.16  11    6
+-r3:  822   1.41  18   50     583   7.21  11   43
+-r4:  501   2.82   9    5     533   7.21  11   43
+-r5:  775   1.15  19   51     506   7.62  11   44
+-r6:  690   3.53  12    5     655   3.53  12    5
+-r7:  806  17.28  12   27     801  17.28  12   27
+-r8:  790   1.41  18   50     478   2.25   9    5
+-r9:  498   2.25   9    5     402   3.52   7    5
 

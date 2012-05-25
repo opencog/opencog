@@ -720,8 +720,8 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
     // Add the Occam's razor feature
     pbs.second = 0.0;
     if (occam) {
-        pbs.second = tree_complexity(tr) * complexity_coef;
-        // pbs.second = graded_complexity(it) * complexity_coef;
+        // pbs.second = tree_complexity(tr) * complexity_coef;
+        pbs.second = graded_complexity(it) * complexity_coef;
     }
 
     log_candidate_pbscore(tr, pbs);
