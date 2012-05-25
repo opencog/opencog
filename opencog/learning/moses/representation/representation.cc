@@ -229,7 +229,7 @@ void representation::clean_combo_tree(combo_tree &tr,
         else
             (*get_simplify_candidate())(tr);
         if (logger().isFineEnabled()) {
-            logger().fine() << "Reduced candidate:" << tr;
+            logger().fine() << "Reduced candidate: " << tr;
         }
     }
 }
