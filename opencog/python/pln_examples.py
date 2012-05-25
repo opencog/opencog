@@ -48,7 +48,7 @@ bc/plus_test.conf
 #bc/new/pathfinding_test.conf
 ''')
 
-#files_list = '''psi/water_test.conf'''
+#files_list = '''psi/psi_planning_two_step_test.conf'''
 
 #files_list = '''bc/plus_test.conf'''
 #files_list ='''
@@ -122,9 +122,14 @@ def run_pln_example(a, f):
     
     import logic
     import tree
-    c = logic.Chainer(a)
-    target_tr = tree.tree_from_atom(target)
-    res = c.bc(target_tr, nsteps)
+    # hack - won't work if the Scheme target is some variable that doesn't contain "Demand"
+    if "Demand" in scm_target:
+        # superhack - doesn't care which target you say
+        res = logic.do_planning(a)
+    else:
+        c = logic.Chainer(a)
+        target_tr = tree.tree_from_atom(target)
+        res = c.bc(target_tr, nsteps)
     
     if len(res):
         print 'PASSED'
