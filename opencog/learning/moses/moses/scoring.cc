@@ -737,6 +737,99 @@ score_t enum_graded_bscore::min_improv() const
     return -0.05;
 }
 
+// Much like enum_graded_score, above, except that we exchange the 
+// inner and outer loops.  This makes the algo slower and bulkier, but
+// it does allow the effectiveness of predicates to be tracked.
+//
+penalized_behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
+{
+    penalized_behavioral_score pbs;
+
+    typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::iterator pre_it;
+
+    pre_it it = tr.begin();
+    if (is_enum_type(*it)) 
+        return enum_table_bscore::operator()(tr);
+
+    OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
+
+    size_t csize = ctable.uncompressed_size();
+    pbs.first = behavioral_score (csize);
+    foreach (score_t& sc, pbs.first) sc = 0.0;
+
+    // Are we done yet?
+    vector<bool> done(csize);
+    vector<bool>::iterator dit = done.begin();
+    for (; dit != done.end(); dit++) *dit = false;
+
+    sib_it predicate = it.begin();
+    score_t weight = 1.0;
+    while (1) {
+        vertex consequent = *next(predicate);
+
+        // Evaluate the bscore components for all rows of the ctable
+        behavioral_score::iterator bit = pbs.first.begin();
+        vector<bool>::iterator dit = done.begin();
+
+        bool effective = false;
+        foreach (const CTable::value_type& vct, ctable) {
+            if (*dit == false) {
+                const vertex_seq& vs = vct.first;
+                const CTable::counter_t& c = vct.second;
+
+                vertex pr = eval_throws_binding(vs, predicate);
+                if (pr == id::logical_true) {
+                    // The number that are wrong equals total minus num correct.
+                    score_t sc = -score_t(c.total_count());
+                    sc += c.get(consequent);
+                    *bit += weight * sc;
+                    effective = true;
+                    *dit = true;
+                }
+            }
+            bit++;
+            dit++;
+        }
+
+        // advance
+        predicate = next(predicate, 2);
+        if (effective) weight *= grading;
+
+        // Is it the last one, the else clause?
+        if (is_enum_type(*predicate)) {
+            vertex consequent = *predicate;
+
+            behavioral_score::iterator bit = pbs.first.begin();
+            vector<bool>::iterator dit = done.begin();
+            foreach (const CTable::value_type& vct, ctable) {
+                if (*dit == false) {
+                    const CTable::counter_t& c = vct.second;
+
+                    // The number that are wrong equals total minus num correct.
+                    score_t sc = -score_t(c.total_count());
+                    sc += c.get(consequent);
+                    *bit += weight * sc;
+                }
+                bit++;
+                dit++;
+            }
+            break;
+        }
+    }
+
+    // Add the Occam's razor feature
+    pbs.second = 0.0;
+    if (occam) {
+        // pbs.second = tree_complexity(tr) * complexity_coef;
+        pbs.second = graded_complexity(it) * complexity_coef;
+    }
+
+    log_candidate_pbscore(tr, pbs);
+
+    return pbs;
+}
+
 //////////////////////////////////
 // interesting_predicate_bscore //
 //////////////////////////////////

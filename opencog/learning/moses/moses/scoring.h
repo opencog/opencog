@@ -790,6 +790,25 @@ protected:
     score_t graded_complexity(combo_tree::iterator) const;
 };
 
+/** 
+ * Much like enum_graded_score, above, except this does not grade a
+ * predicate if it is ineffective. 
+ * 
+ * A predicate is considered to be "ineffective" if it evaluates to
+ * false for every row on the table.  Ineffective predicates just
+ * waste time and space, and therefore, there score should not be
+ * rewarded by grading (since the grading reward is stronger than
+ * the complexity punishment).
+ */
+struct enum_effective_bscore : public enum_graded_bscore
+{
+    enum_effective_bscore(const CTable& _ctt)
+        : enum_graded_bscore(_ctt)
+    {}
+
+    penalized_behavioral_score operator()(const combo_tree& tr) const;
+};
+
 // Bscore to find interesting predicates. Interestingness is measured
 // in terms of several features such as
 //
