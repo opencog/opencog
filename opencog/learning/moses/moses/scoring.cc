@@ -780,11 +780,15 @@ penalized_behavioral_score enum_effective_bscore::operator()(const combo_tree& t
 
                 vertex pr = eval_throws_binding(vs, predicate);
                 if (pr == id::logical_true) {
+                    int sc = c.get(consequent);
+                    // A predicate is effective if it evaluates to true,
+                    // and at least gets a right answr when it does...
+                    if (0 != sc) effective = true;
+
                     // The number that are wrong equals total minus num correct.
-                    score_t sc = -score_t(c.total_count());
-                    sc += c.get(consequent);
-                    *bit += weight * sc;
-                    effective = true;
+                    sc -= c.total_count();
+                    *bit += weight * score_t(sc);
+
                     *dit = true;
                 }
             }
