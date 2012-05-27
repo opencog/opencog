@@ -90,6 +90,7 @@ class partial_solver
         std::vector<CTable> _ctables;
         const type_tree& _table_type_signature;
         std::vector<combo_tree> _exemplars;
+        std::vector<combo_tree> _fresh_exemplars;
         const rule& _reduct;
         optim_parameters _opt_params;
         const metapop_parameters& _meta_params;
@@ -97,7 +98,8 @@ class partial_solver
         const metapop_printer& _printer;
 
         // typedef enum_filter_bscore BScore;
-        typedef enum_graded_bscore BScore;
+        // typedef enum_graded_bscore BScore;
+        typedef enum_effective_bscore BScore;
         multibscore_based_bscore<BScore> *_bscore;
 
         score_t _bad_score; // Score we want to get to, at each round.

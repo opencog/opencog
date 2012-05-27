@@ -86,7 +86,7 @@ int i=0;
         _moses_params.max_gens -= _num_gens; // XXX wrong
 
 cout <<"duuude start loop ===================== rec="<<_fail_recurse_count <<" ======= "<<i++<<" ask="<<_bad_score<<endl;
-cout <<"duuude ================= nev="<<_num_evals <<" max_ev= "<<_moses_params.max_evals<<endl;
+cout <<"duuude ================= nevals="<<_num_evals <<" max_evals= "<<_moses_params.max_evals<<endl;
         metapop_moses_results(_exemplars, _table_type_signature,
                               _reduct, _reduct, *_bscore,
                               _opt_params, _meta_params, _moses_params,
@@ -131,11 +131,14 @@ cout<<"duuude got cands sz="<<cands.size()<<endl;
     // If we are here, then none of the candidates were any good.
     // Try again, priming the metapop with the previous best.
     _exemplars.clear();
+    _exemplars = _fresh_exemplars;  // copy them.
+cout<<"duuude copied fresh exemps num="<<_fresh_exemplars.size()<<endl;
+    _fresh_exemplars.clear();
+
     foreach(auto &item, cands) {
         const combo_tree& cand = item.first;
         _exemplars.push_back(cand);
     }
-
 
 cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
 }
@@ -216,7 +219,7 @@ void partial_solver::refresh(const metapop_candidates& cands,
 /// Evaluate a single candidate
 bool partial_solver::candidate (const combo_tree& cand)
 {
-std::cout<<"duude in the candy="<<cand<<std::endl;
+std::cout<<"duude eval the candy="<<cand<<std::endl;
 
     // Are we done yet?
     penalized_behavioral_score pbs = _bscore->operator()(cand);
@@ -225,7 +228,7 @@ std::cout<<"duude in the candy="<<cand<<std::endl;
         total_score += sc;
 
     // XXX replace  by the correct compare, i.e. the orig gte.
-    if (-0.5 <= total_score) {
+    if (-0.05 <= total_score) {
 std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<"\n"<<std::endl;
         _done = true;
         return true;
@@ -272,13 +275,24 @@ std::cout<<"duuude got an ineffective const\n"<<std::endl;
 
         // XXX Ineffective predicates may be due to enums that have been
         // completely accounted for ... not sure what to do about that...
-        if (0 < good_count)
+        if ((0 < good_count) || (0 < fail_count))
             break;
     }
 
     // If the fail count isn't zero, at least try to find the most graceful
     // winner.
     if (fail_count) {
+
+        // Yes, this can happen ...
+        if (0 == good_count) {
+            combo_tree fresh(cand);
+            pre_it fit = fresh.begin();
+            sib_it fsib = fit.begin();
+            fresh.erase(fsib++);
+            fresh.erase(fsib++);
+            _fresh_exemplars.push_back(fresh);
+        }
+
         double fail_ratio = double(fail_count) / double(good_count);
         if (fail_ratio < _best_fail_ratio) {
             _best_fail_ratio = fail_ratio;
@@ -299,7 +313,7 @@ cout<<"duuude non zero fail count\n"<<endl;
 
     // XXX replace 0.5 by parameter.
     // XXX should be, ummm, less than the number of a single type in the table,
-    // else a constant beats this score...
+    // else a constant beats this score... err, and weighted too!?
     _bad_score = -floor(0.45 * (score_t(total_rows) - score_t(deleted)));
 cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for score of="<<_bad_score<<endl;
 
@@ -329,10 +343,11 @@ cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for
             break;
         }
 
+        // If we are here, the predicate was ineffective, so erase it.
         fresh.erase(fsib++);
         fresh.erase(fsib++);
     }
-cout<<"duuude resh exemplar="<<fresh<<endl;
+cout<<"duuude fresh exemplar="<<fresh<<endl;
 
     _exemplars.clear();
     _exemplars.push_back(fresh);
