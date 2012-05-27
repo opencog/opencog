@@ -1981,3 +1981,45 @@ OK, some buginess in the min_score_improv area now fixed.
 -r8:  886   1.86  16    4     84   19.37  13   50     786   1.51   8    4
 -r9:  415   4.23   7    5     70    3.43   9    5     376   3.81   8    5
 
+
+"eff-m10K": using the enum_effective_score, which does not weight
+       ineffective predicates.  (as before: grading=0.9 and retrograde
+       complexity penalty.)  The score are not quite as good as before,
+       but wow, the results are much, much nicer, the innefective 
+       predicates are now gone!.
+
+"eff-m40K": as above but -m40K.
+"eff-m160K": as above but -m160K.  Clearly got stuck.
+
+         eff-m10K  straight      eff-m40K  straight     eff-m160K  straight
+:    time  score plex score  time  score plex score  time  score plex score   
+-r0:   46   5.05   6    6     250   4.23   8    5    1308   4.23   8    5
+-r1:   50  45.87  12   55     380   4.23   9    5    1921   4.23   9    5
+-r2:   61  10.3    9   11     340  10.3    8   11    1697  10.3    8   11
+-r3:  109   3.90  10    4     546   3.90  10    4    2707   3.90  10    4
+-r4:   74  26.64  12   28     535   3.90  10    4    2995   3.90  10    4
+-r5:   82  42.78  10   50     343   5.22   6    6    1872   5.22   6    6
+-r6:   68  10.3    9   11     402  10.30   9   11    2274  10.3    9   11
+-r7:  144   5.5   10    6     670   5.5   10    6    3670   5.5   10    6
+-r8:  107   3.81  10    4     496   3.81  10    4    2607   3.81  10    4
+-r9:   59   5.05   7    6     292   5.05   7    6    1578   5.05   7    6
+
+Damn. Should have been setting the -Z1 flag to enable cross-over.
+How could I have forgotten?  The results are completely different!
+
+"cro-m10K": as above but with -Z1 flag.  Instantly better than before.
+"cro-m40K": as above, 40K
+
+         cro-m10K  straight      cro-m40K  straight     eff-m160K  straight
+:    time  score plex score  time  score plex score  time  score plex score   
+-r0:   54   7.43   6    8
+-r1:   71   4.43   9    5
+-r2:   68   9.10   7   10
+-r3:   69   4.32   8    5
+-r4:  176   8.24  13    9
+-r5:   95  56.6   12   57 
+-r6:   52   9.10   6   10
+-r7:  147   5.5   10    6
+-r8:  111   3.81  10    4
+-r9:   61   5.05   7    6
+

@@ -946,12 +946,6 @@ struct hill_climbing : optim_stats
                 break;
             }
 
-            /* If we've widened the search out to the max distance, we're done. */
-            if (max_distance < distance) {
-                logger().debug("Terminate Local Search: Max search distance exceeded");
-                break;
-            }
-
             if (hc_params.crossover) {
                 /* If the score hasn't taken a big step recently, then 
                  * re-survey the immediate local neighborhood.  We may get
@@ -988,6 +982,12 @@ struct hill_climbing : optim_stats
                 has_improved = big_step;
                 rescan = false;
                 last_chance = false;
+            }
+
+            /* If we've widened the search out to the max distance, we're done. */
+            if (max_distance < distance) {
+                logger().debug("Terminate Local Search: Max search distance exceeded");
+                break;
             }
 
             /* If things haven't improved, we must be at the top of the hill.
