@@ -427,7 +427,7 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(output_complexity_opt).c_str(),
          value<bool>(&output_complexity)->default_value(false),
-         "If 1, output the complexity before each candidate (at the right of the score).\n")
+         "If 1, output the complexity and the scoring penalty before each candidate (after the score).\n")
 
         (opt_desc_str(output_bscore_opt).c_str(),
          value<bool>(&output_bscore)->default_value(false),
