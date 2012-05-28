@@ -228,14 +228,42 @@ inline bool message_str_to_vertex(const std::string& str, vertex& v)
         m_str.erase(--m_str.end());
         message m(m_str);
         v = m;
-    } else {
-        std::cerr << "WARNING : You probably forgot to place your "
-                     "message between doubles quotes, string was: "
-                  << str << std::endl;
+        return true;
+    } 
+
+    std::cerr << "WARNING : You probably forgot to place your "
+                 "message between doubles quotes, string was: "
+              << str << std::endl;
+    return false;
+}
+
+//* Convert string to enum vertex.
+//* Return false if the string is not an enum.
+//*
+//* enum strings must begin with the prefix "enum:"
+//* The enum itself may or may not be in quotes, so, for example:
+//*     enum:"this is an enum with whitespace"
+//*     enum:this_is_an_enum_without_whitespace
+//
+inline bool enum_str_to_vertex(const std::string& str, vertex& v)
+{
+    // It starts with message:
+    if (str.find(enum_t::prefix())) 
         return false;
-    }
+
+    std::string m_str = str.substr(enum_t::prefix().size());
+    // Check that the first and the last character are \"
+    // and take them off
+    if (m_str.find('\"') == 0 && m_str.rfind('\"') == m_str.size() - 1) {
+        m_str.erase(m_str.begin());
+        m_str.erase(--m_str.end());
+    } 
+
+    enum_t e(m_str);
+    v = e;
     return true;
 }
+
 
 template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
 void str_to_vertex(const std::string& str, vertex& v)
@@ -246,6 +274,7 @@ void str_to_vertex(const std::string& str, vertex& v)
     if(builtin_str_to_vertex(str, v)
        || argument_str_to_vertex(str, v)
        || contin_str_to_vertex(str, v)
+       || enum_str_to_vertex(str, v)
        || ann_str_to_vertex(str, v)
        || message_str_to_vertex(str, v)) {
         return;
