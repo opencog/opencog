@@ -542,8 +542,9 @@ void reduce_type_tree(type_tree& tt,
 {
     if (!tt.empty()) {
         reduce_type_tree(tt, tt.begin(), arg_types, tr, tr.begin(), proc_name);
-    } else cout << "Warning : you're trying to reduce an empty type_tree"
-                << endl;
+        return;
+    }
+    logger().warn() << "Warning : you're trying to reduce an empty type_tree";
 }
 
 void reduce_type_tree(type_tree& tt,
@@ -612,20 +613,33 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             //cia stands for current input argument
             type_tree_pre_it cia_it = it_child.begin();
 
-            //number of input arguments the function takes
+            // number of input arguments the function takes
             int arg_count = it_child.number_of_children() - 1;
-            //number of arguments applied to that function
+
+            // number of arguments applied to that function
             int arg_count_app = tt.number_of_siblings(it_child);
-            //check whether the last input argument under the lambda
-            //is arg_list
+
+            // check whether the last input argument, or the
+            // second-from-last input argument, under the lambda,
+            // is arg_list
             type_tree_sib_it last_arg_sib = it_child.last_child();
             --last_arg_sib;
-            //ila is true if the last input argument under lambda is arg_list
+
+            type_tree_sib_it second_last_arg_sib = last_arg_sib;
+            --second_last_arg_sib;
+
+            // ila is true if the last input argument under lambda is arg_list
             bool ila = tt.is_valid(last_arg_sib)
                 && *last_arg_sib == id::arg_list_type;
-            //check if the number of applied arguments are incorrect
-            if ((ila && arg_count_app < arg_count - 1)
-                    || (!ila && arg_count_app != arg_count)) {
+
+            // ils is true if the second-from-last input argument
+            // under lambda is arg_list. Need this for the cond signature.
+            bool ils = tt.is_valid(second_last_arg_sib)
+                && *second_last_arg_sib == id::arg_list_type;
+
+            // Check if the number of applied arguments are incorrect
+            if (((ila || ils) && arg_count_app < arg_count - 1)
+                    || (!ila && !ils && arg_count_app != arg_count)) {
 
                 //log message
                 stringstream message;
@@ -649,8 +663,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 else
                     message << arg_count << " arguments.";
 
-                opencog::logger().error(
-                                message.str().c_str());
+                logger().error(message.str().c_str());
                 //~log message
 
                 *it = id::ill_formed_type;
@@ -688,9 +701,8 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                         //then check if the ouput argument of arg_app inherits
                         //from cia_it (or cia_it child if cia_it is arg_list)
                         if (*arg_app == id::lambda_type) {
-                            OC_ASSERT(
-                                              !arg_app.is_childless(),
-                                              "lambda must have at least one child");
+                            OC_ASSERT(!arg_app.is_childless(),
+                                      "lambda must have at least one child");
                             type_tree_pre_it output_it = arg_app.last_child();
                             if (inherit_type_tree(tt, output_it,
                                                   tt, input_arg_it)) {
@@ -814,7 +826,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             message << "is not typed as a function (that is lambda)"
                     << " but is typed "
                     << type_tree(it_child);
-            opencog::logger().error(message.str().c_str());
+            logger().error(message.str().c_str());
             //~log message
 
             *it = id::ill_formed_type;
