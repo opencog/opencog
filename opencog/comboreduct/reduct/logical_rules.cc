@@ -2,9 +2,11 @@
  * opencog/comboreduct/reduct/logical_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings
  * All Rights Reserved
  *
  * Written by Moshe Looks
+ * Bug fixes by Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -39,9 +41,16 @@ typedef combo_tree::iterator pre_it;
 void insert_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if ((is_argument(*it) || *it == id::logical_or) &&
-        (!tr.is_valid(tr.parent(it)) || *tr.parent(it) != id::logical_and)) {
+        // If it's got a parent, then it better be something boolean
+        // valued.  We don't want to insert ands in front of contin
+        // valued args... 
+        (!tr.is_valid(tr.parent(it)) || 
+         *tr.parent(it) == id::logical_or ||
+         *tr.parent(it) == id::impulse ||
+         *tr.parent(it) == id::logical_not) )
+    {
         tr.prepend_child(it, *it);
-        *it=id::logical_and;
+        *it = id::logical_and;
         tr.reparent(it.begin(), ++it.begin(), it.end());
     }
 }
