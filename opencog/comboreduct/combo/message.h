@@ -29,8 +29,6 @@
 #include <string>
 #include <boost/operators.hpp>
 
-#define COMBO_MESSAGE_PREFIX "message:"
-
 namespace opencog { namespace combo {
 
 // message is essentially a string but is coded as a different type
@@ -61,8 +59,9 @@ public:
         return _content < m.getContent();
     }
     
+    /// This is used by message_str_to_vertex() to identify a message.
     static std::string prefix() {
-        return COMBO_MESSAGE_PREFIX;
+        return "message:";
     }
 };
 

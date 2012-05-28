@@ -30,8 +30,6 @@
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>
 
-#define COMBO_ENUM_TYPE_PREFIX "enum_type:"
-
 namespace opencog { namespace combo {
 
 // enum_t is essentially a string but is coded as a different type
@@ -86,8 +84,9 @@ public:
         return _content < m.getContent();
     }
     
+    /// This is used by enum_str_to_vertex() to identify enums.
     static std::string prefix() {
-        return COMBO_ENUM_TYPE_PREFIX;
+        return "enum:";
     }
 
     /// Return some randome enum out of the pool of all of them.
