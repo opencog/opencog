@@ -86,13 +86,12 @@ static const builtin_description bd[] =
 
     // cond primitive, in the style of lisp/sheme: so
     //     cond(p1 v1 p2 v2 .. pn vn y) 
-    // means:
+    // means pattern matching:
     //     if (p1) v1; else if (p2) v2; else if ... else y
     // XXX For just right now, 'value' will be an enum, but really,
     // it should be union(bool, contin, enum, etc). FIXME later.
     //
-    // { id::cond,               "->(arg_list(boolean enum) enum)" },
-    { id::cond,               "->(boolean enum enum enum)" },
+    { id::cond,               "->(arg_list(boolean enum) enum enum)" },
 
     // Tests for equality. XXX Someday, we should also allow equality
     // testing for booleans, contin as well, but not today. 

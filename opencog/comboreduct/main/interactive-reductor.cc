@@ -120,7 +120,7 @@ const rule* select_rule(string rule_ref_str)
                           "level"))
         ("EC", make_pair(new upwards(eval_constants()),
                          "eval_constants"));
-    if (rule_ref_str == "h") {
+    if ((rule_ref_str == "h") || (rule_ref_str == "?")) {
         for (ref_rule_map_const_it cit = ref_rules.begin();
             cit != ref_rules.end(); ++cit) {
             cout << cit->first << "\t" << cit->second.second << endl;
@@ -155,14 +155,14 @@ int main()
         if (!cin.good())
             break;
 
-        //determine the type of tr
+        // determine the type signature of tr
         type_tree tt = infer_type_tree(tr);
-        //cout << "Type : " << tr_type << endl;
+        cout << "Signature: " << tt << endl;
         
         bool ct = is_well_formed(tt);
         
         if (!ct) {
-            cout << "Bad type" << endl;
+            cout << "Ill-formed type tree -- Bad type" << endl;
             break;
         }
 
