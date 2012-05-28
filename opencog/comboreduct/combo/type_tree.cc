@@ -528,11 +528,15 @@ bool inherit_type_tree(const type_tree& ty1, type_tree_pre_it it1,
     //----------
     //base cases
     //----------
+    // Nothing can inherit or be inherited from an ill-formed type
     else if (*it1 == id::ill_formed_type || *it2 == id::ill_formed_type)
-        return false;//nothing can inherit or be inherited from a ill formed type
-    else if (*it2 == id::unknown_type) //everything but ill_formed_type inherits from unknown_type
+        return false;
+    // Everything except ill_formed_type inherits from unknown_type
+    else if (*it2 == id::unknown_type)
         return true;
-    else return *it1 == *it2; //all other cases
+    // All other cases.
+    else 
+        return *it1 == *it2;
 }
 
 void reduce_type_tree(type_tree& tt,
@@ -712,7 +716,18 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                     if (is_arg_list_reached)
                         input_arg_it = input_arg_it.begin();
 
-                    if (!inherit_type_tree(tt, arg_app, tt, input_arg_it))
+                    bool arg_inherits = inherit_type_tree(tt, arg_app, tt, input_arg_it);
+                    // Check for a funky special case, occuring for the
+                    // cond operator: the arg_list is empty, but the input
+                    // might still match the last argument (the "else"
+                    // clause, which comes after the arg_list, but before
+                    // the output type).
+                    if (!arg_inherits && ils)
+                    {
+                        arg_inherits = inherit_type_tree(tt, arg_app, tt, last_arg_sib);
+                    }
+
+                    if (!arg_inherits)
                     {
                         // Check if the ouput argument of arg_app inherits
                         // from cia_it (or cia_it child if cia_it is arg_list)
@@ -760,17 +775,6 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                 tt.erase_children(it);
                                 return;
                             }
-                        }
-                        // Check for a funky special case, occuring for
-                        // cond operator: the arg_list is empty, we might
-                        // match the last argument (which comes after the
-                        // arg_list.
-                        else if (false) 
-                        {
-cout<<"duuude ola "<<tt<<endl;
-cout<<"duude *arg_app="<<*arg_app<<endl;
-cout<<"duude *cia_it="<<*cia_it<<endl;
-cout<<"duude *input_arg_it="<<*input_arg_it<<endl;
                         }
                         // If it's not a lambda then it is ill formed,
                         // because arg_app does not inherits input_arg_it
