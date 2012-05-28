@@ -6,7 +6,7 @@
  * All Rights Reserved
  *
  * Written by Moshe Looks
- * Bug fixes by Linas Vepstas
+ * Add boolean-valued predicate support -- Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -439,7 +439,7 @@ void subtree_to_enf::reduce_to_enf::operator()(sib_it it)
 
     tr.sort_on_subtrees(it.begin(), it.end(), comp, true);
     for (up_it p = ++tr.begin_upwards(it);
-         p!=tr.end_upwards() && is_logical_operator(*p); ++p)
+         p != tr.end_upwards() && is_logical_operator(*p); ++p)
     {
         if (!opencog::is_sorted(make_counting_iterator(p.begin()),
                                 make_counting_iterator(p.end()), comp))
@@ -484,7 +484,10 @@ bool subtree_to_enf::reduce_to_enf::and_cut(sib_it child)
         // just one child, then flatten and pull it up to our level.
         if (is_logical_operator(*gchild))
         {
-            if (gchild.has_one_child())
+            // Well, if may have one child, and that child is the 
+            // logical_not in front of a predicate. Rule that out.
+            if (gchild.has_one_child() &&
+                (*gchild == id::logical_and || *gchild == id::logical_or))
             {
                 if (*gchild.begin() == id::logical_or)
                 {
@@ -577,9 +580,11 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
                                       const subtree_set& dominant,
                                       const subtree_set& command)
 {
-    // XXX for performance, skip this check ...
+#if DEBUG
+    // For performance, skip this check ...
     OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
+#endif
 
     // First, remove duplicate children.  This loop assumes that
     // current is in sorted order, and thus, duplicate children are
@@ -598,10 +603,13 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
         }
     }
 
+#if DEBUG
+    // We skip this to improve performance.
     OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
     OC_ASSERT(opencog::is_sorted(command.begin(), command.end(), comp),
               "command subtree_set should be sorted (reduce).");
+#endif
 
     if (*current == id::logical_and)
         return reduce_and(current, dominant, command);
@@ -648,8 +656,11 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
             std::list<sib_it>(make_counting_iterator(current.begin()),
                               make_counting_iterator(current.end()));
 
+#if DEBUG
+        // stub out, for performance.
         OC_ASSERT(opencog::is_sorted(dominant.begin(),dominant.end(), comp),
                   "dominant subtree_set should be sorted (reduce_and)");
+#endif
 
         if (!opencog::is_sorted(make_counting_iterator(current.begin()),
                                 make_counting_iterator(current.end()), comp))
@@ -675,10 +686,13 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
             tr.validate(child);
             tr.validate();
 
+#if DEBUG
+            // stubbed out for performance
             OC_ASSERT(opencog::is_sorted(command.begin(),command.end(),comp),
                       "command subtree_set should be sorted (reduce_and)");
             OC_ASSERT(opencog::is_sorted(handle_set.begin(),handle_set.end(),comp),
                       "handle_set subtree_set should be sorted (reduce_and)");
+#endif
             subtree_set::iterator tmp_it = handle_set.find(child);
             sib_it tmp;
             bool addIt = true;
