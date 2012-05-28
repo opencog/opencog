@@ -146,36 +146,57 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
-//* Return false if str has no ann matches.
+//* Concvert ANN string to vertex.
+//* Return false if str is not of ANN type.
+//*
+//* ANN strings must begin with $N or $I
+//* $Nxxx are ann_nodes and $Ixxx are ann_inputs
+//
 inline bool ann_str_to_vertex(const std::string& str, vertex& v)
 {
-    if (str[0] == '$' && str[1]=='N') {
+    if (str[0] != '$')
+        return false;
+
+    if (str[1]=='N') {
         int arg = boost::lexical_cast<int>(str.substr(2));
-        v=ann_type(arg,id::ann_node);
+        v = ann_type(arg,id::ann_node);
+        return true;
     }
-    else if (str[0] == '$' && str[1]=='I') {
+    if (str[1]=='I') {
         int arg = boost::lexical_cast<int>(str.substr(2));
-        v=ann_type(arg,id::ann_input);
-    } else return false;
-    return true;
+        v = ann_type(arg,id::ann_input);
+        return true;
+    }
+    return false;
 }
 
-// return false if str has no argument matches
+//* Convert argument string to vertex.
+//* Return false if str is not an argument.
+//*
+//* Arguments come in two forms: $n and !$n where n is an integer.
+//
 inline bool argument_str_to_vertex(const std::string& str, vertex& v)
 {
     if (str[0] == '$') {
         arity_t arg = boost::lexical_cast<arity_t>(str.substr(1));
         OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(arg);
-    } else if (str[0] == '!' && str[1] == '$') {
+        return true;
+    }
+    if (str[0] == '!' && str[1] == '$') {
         arity_t arg = boost::lexical_cast<arity_t>(str.substr(2));
         OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(-arg);
-    } else return false;
-    return true;
+        return true;
+    }
+    return false;
 }
 
-// return false if no contin matches
+//* Convert string to a contin vertex.
+//* Return false if the string is not a contin.
+//*
+//* A contin is any naked number, with or without a decimal point.
+//
 inline bool contin_str_to_vertex(const std::string& str, vertex& v)
 {
     try {
@@ -186,23 +207,33 @@ inline bool contin_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
-// return false if no message matches
+//* Convert string to message vertex.
+//* Return false if the string is not a message.
+//*
+//* message strings must begin with the prefix "message:"
+//* and the message itself must be in quotes, so, for example:
+//*     message:"this is a message"
+//
 inline bool message_str_to_vertex(const std::string& str, vertex& v)
 {
-    if(str.find(message::prefix()) == 0) { //it starts with message:
-        std::string m_str = str.substr(message::prefix().size());
-        //check that the first and the last character are \"
-        //and take them off
-        if (m_str.find('\"') == 0 && m_str.rfind('\"') == m_str.size() - 1) {
-            m_str.erase(m_str.begin());
-            m_str.erase(--m_str.end());
-            message m(m_str);
-            v = m;
-        } else {
-            std::cerr << "WARNING : " << "You probably forgot to place your message between doubles quotes in " << str << std::endl;
-            return false;
-        }
-    } else return false;
+    // It starts with message:
+    if (str.find(message::prefix())) 
+        return false;
+
+    std::string m_str = str.substr(message::prefix().size());
+    // Check that the first and the last character are \"
+    // and take them off
+    if (m_str.find('\"') == 0 && m_str.rfind('\"') == m_str.size() - 1) {
+        m_str.erase(m_str.begin());
+        m_str.erase(--m_str.end());
+        message m(m_str);
+        v = m;
+    } else {
+        std::cerr << "WARNING : You probably forgot to place your "
+                     "message between doubles quotes, string was: "
+                  << str << std::endl;
+        return false;
+    }
     return true;
 }
 
@@ -213,9 +244,9 @@ void str_to_vertex(const std::string& str, vertex& v)
     // builtin, ann, argument, constant and message
     // the order may matter
     if(builtin_str_to_vertex(str, v)
-       || ann_str_to_vertex(str, v)
        || argument_str_to_vertex(str, v)
        || contin_str_to_vertex(str, v)
+       || ann_str_to_vertex(str, v)
        || message_str_to_vertex(str, v)) {
         return;
     }
