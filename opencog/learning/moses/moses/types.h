@@ -103,7 +103,10 @@ struct composite_score:
     void set_penalty(score_t penalty) { penalized_score = score - penalty; }
 
     /// Compare penalized scores.  That is, we compare score-penalty
-    /// on the right to score-penalty on the left.
+    /// on the right to score-penalty on the left. If the 2
+    /// score-penalty qre equal then we compare by complexity
+    /// (decreasing order, as complexity is positive). We do that in
+    /// case no score penalty has been set.
     ///
     /// Additionally we assume that nan is always smaller than
     /// anything (including -inf) except nan

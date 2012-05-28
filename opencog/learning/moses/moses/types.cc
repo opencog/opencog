@@ -60,7 +60,16 @@ bool composite_score::operator<(const composite_score &r) const
     if (isnan(lef))
         return !isnan(rig);
     else
-        return (lef < rig);
+        return (lef < rig)
+                // Note: I've tried to see if the addition below
+                // increases the performance when there is no
+                // complexity penalty and it doesn't, over 100 runs
+                // solving 3-parity is actually .5s slower (which
+                // probably has no statistical significance given it
+                // takes 13s in average). But I don't want to conclude
+                // too fast, it could have an impact on other
+                // problems.
+                or (lef == rig and complexity > r.complexity);
 }
 
 } // ~namespace moses

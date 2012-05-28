@@ -227,7 +227,7 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
 template <typename BScorer>
 void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio)
 {
-    if (noise > 0.0)
+    if (noise >= 0.0)
         scorer.set_complexity_coef(as, noise);
     else
         scorer.set_complexity_coef(ratio);
@@ -682,7 +682,7 @@ int moses_exec(int argc, char** argv)
          "determined by earlier runs). \n")
 
         (opt_desc_str(noise_opt).c_str(),
-         value<float>(&noise)->default_value(0),
+         value<float>(&noise)->default_value(-1),
          "Alternative way to set the ratio of raw score to complexity.  "
          "Setting this option over-rides the complexity ratio, above.  "
          "Assumes that the data is noisy.   The noisier the data, the "
@@ -690,12 +690,12 @@ int moses_exec(int argc, char** argv)
          "is discrete, the setting should correspond to the fraction of "
          "the input data that might be wrong (i.e. the probability p "
          "that an output datum (row) is wrong).   In this case, only "
-         "values 0 < p < 0.5 are meaningful (i.e. less than half the "
+         "values 0 <= p < 0.5 are meaningful (i.e. less than half the "
          "data can be wrong). Suggested values are in the range 0.01 to "
-         "0.001.  If the target feature is continuous, the value sepcified "
+         "0.001.  If the target feature is continuous, the value specified "
          "should correspond to the standard deviation of the (Gaussian) "
-         "noise centered around each candidate's output. A value of zero "
-         "or less cedes this setting to complexity-ratio flag, above.\n")
+         "noise centered around each candidate's output. A negative "
+         "value cedes this setting to complexity-ratio flag, above.\n")
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t> >(&discretize_thresholds),
