@@ -587,26 +587,35 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //----------------
     //application case
     //----------------
-    else if (*it == id::application_type) {
+    else if (*it == id::application_type)
+    {
         OC_ASSERT(!it.is_childless(),
-                          "application_type must have at least a child");
+                  "application_type must have at least a child");
+
         type_tree_pre_it it_child = it.begin();
-        //if application has only one child
-        //them reduce application(X) -> X
-        if (it.has_one_child()) {
+
+        // If application has only one child, then a trivial reduction
+        // application(X) -> X
+        if (it.has_one_child())
+        {
             *it = *it_child;
             tt.erase(tt.flatten(it_child));
             reduce_type_tree(tt, it, arg_types, tr, ct_it, proc_name);
-        } else if (*it_child == id::lambda_type) {
-
-            //check if the output type of all siblings of it_child
-            //inherit from all children but the last of it_child
-            //or, if the previous last child of it_child is arg_list,
-            //inherit from the children before that arg_list and
-            //all next inherit from the child of arg_list
-            //that is for instance in
-            //application(lambda(T1 arg_list(T2) T3) a1 a2 a3 a4)
-            //check that a1 inherits from T1, a2 a3 and a4 inherit from T2
+        }
+        else if (*it_child == id::lambda_type)
+        {
+            // Check if the output type of all sibilings of it_child
+            // inherit from the children of it_child.  All but the
+            // last, that is, because it is the output.   If the
+            // next-to-last child of it_child is arg_list, then the
+            // eaerlier siblings shoul inherit from the earlier children,
+            // and all of the rest inherit from the children of arg_list.
+            // Note, typically, arg_list will have only one child.
+            //
+            // For example, say we have:
+            //    application(lambda(T1 arg_list(T2) T3) a1 a2 a3 a4)
+            // then check that a1 inherits from T1, and that a2, a3
+            // and a4 inherit from T2.  T3 is the output type.
 
             OC_ASSERT(!it_child.is_childless(),
                               "it_child must have at least one child");
@@ -669,9 +678,11 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 *it = id::ill_formed_type;
                 tt.erase_children(it);
                 return;
-            } else { //the number of applied arguments is correct
-
-                //will be set to true if at some point arg_list is reached
+            }
+            // The number of applied arguments is correct
+            else
+            {
+                // Will be set to true if at some point arg_list is reached
                 bool is_arg_list_reached = false;
 
                 // this is done so that ct_it can move over its arguments
@@ -680,39 +691,46 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 if(!tr.empty()) 
                     ct_it_child = ct_it.begin();
 
-                //iterate over the applied arguments
-                //and possibly over the operand of tr in case tr is not empty
+                // Iterate over the applied arguments, and possibly
+                // over the operand of tr in case tr is not empty.
                 for (type_tree_sib_it arg_app = tt.next_sibling(it_child);
-                     arg_app != it.end(); ++arg_app) {
-                    //check if cia_it is arg_list(T)
+                     arg_app != it.end(); ++arg_app)
+                {
+                    // Check if cia_it is arg_list(T)
                     if (*cia_it == id::arg_list_type)
                         is_arg_list_reached = true;
-                    //reduce both input and applied arguments
+
+                    // Reduce both input and applied arguments
                     reduce_type_tree(tt, arg_app, arg_types,
                                      tr, ct_it_child, proc_name);
                     reduce_type_tree(tt, cia_it, arg_types,
                                      tr, ct_it, proc_name);
-                    //input_arg_it is either cia_it
-                    //or cia_it.begin() if cia_it is arg_list
+
+                    // input_arg_it is either cia_it
+                    // or cia_it.begin() if cia_it is arg_list
                     type_tree_pre_it input_arg_it = cia_it;
                     if (is_arg_list_reached)
                         input_arg_it = input_arg_it.begin();
-                    if (!inherit_type_tree(tt, arg_app, tt, input_arg_it)) {
-                        //then check if the ouput argument of arg_app inherits
-                        //from cia_it (or cia_it child if cia_it is arg_list)
-                        if (*arg_app == id::lambda_type) {
+
+                    if (!inherit_type_tree(tt, arg_app, tt, input_arg_it))
+                    {
+                        // Check if the ouput argument of arg_app inherits
+                        // from cia_it (or cia_it child if cia_it is arg_list)
+                        if (*arg_app == id::lambda_type)
+                        {
                             OC_ASSERT(!arg_app.is_childless(),
                                       "lambda must have at least one child");
                             type_tree_pre_it output_it = arg_app.last_child();
                             if (inherit_type_tree(tt, output_it,
                                                   tt, input_arg_it)) {
-                                //insert all inputs before cia_it
+                                // insert all inputs before cia_it
                                 for (type_tree_sib_it input_sib = arg_app.begin();
                                      input_sib != arg_app.last_child(); ++input_sib)
                                     tt.insert_subtree(cia_it, input_sib);
                             }
-                            //if it does not inherit then there is type checker
-                            //error and the resulting type is ill_formed
+                            // If it does not inherit, then the type checker
+                            // has found an error, and the resulting type 
+                            // is ill_formed
                             else {
                                 
                                 //log message
@@ -743,8 +761,19 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                 return;
                             }
                         }
-                        //if it's not a lambda then it is ill formed
-                        //because arg_app does not inherits input_arg_it
+                        // Check for a funky special case, occuring for
+                        // cond operator: the arg_list is empty, we might
+                        // match the last argument (which comes after the
+                        // arg_list.
+                        else if (false) 
+                        {
+cout<<"duuude ola "<<tt<<endl;
+cout<<"duude *arg_app="<<*arg_app<<endl;
+cout<<"duude *cia_it="<<*cia_it<<endl;
+cout<<"duude *input_arg_it="<<*input_arg_it<<endl;
+                        }
+                        // If it's not a lambda then it is ill formed,
+                        // because arg_app does not inherits input_arg_it
                         else {
                             
                             //log message
@@ -775,11 +804,12 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                             return;
                         }
                     }
-                    //if cia_it is not an arg_list
-                    //then erase it and its children
-                    //because this input has been substituted by the inputs
-                    //of the application (if there are some)
-                    //and cia_it will now points to the next input argument
+
+                    // if cia_it is not an arg_list
+                    // then erase it and its children
+                    // because this input has been substituted by the inputs
+                    // of the application (if there are some)
+                    // and cia_it will now points to the next input argument
                     if (!is_arg_list_reached) {
                         cia_it = tt.erase(cia_it);
                     }
