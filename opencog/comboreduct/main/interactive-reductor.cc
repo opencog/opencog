@@ -27,6 +27,7 @@
 #include <opencog/util/mt19937ar.h>
 
 #include "../reduct/reduct.h"
+#include "../reduct/branch_rules.h"
 #include "../reduct/meta_rules.h"
 #include "../reduct/logical_rules.h"
 #include "../reduct/contin_rules.h"
@@ -74,7 +75,7 @@ const rule* select_rule(string rule_ref_str)
         ("ENF", make_pair(new subtree_to_enf(),
                           "subtree_to_enf"))
 
-        // Contin buried in logical exprs.
+        // Contin buried in below greater_than_zero predicate.
         ("PRD", make_pair(new simplify_predicates(reduct_effort, ignore_ops),
                           "simplify_predicates"))
         // Contin rules
@@ -104,13 +105,23 @@ const rule* select_rule(string rule_ref_str)
                          "reduce_exp_div"))
         ("SIN", make_pair(new downwards(reduce_sin()),
                           "reduce_sin"))
+
+        // Branching and conditional rules
+        ("BRA", make_pair(new downwards(reduce_cond_adjacent()),
+                          "reduce_cond_adjacent"))
+        ("BRC", make_pair(new downwards(reduce_cond_const()),
+                          "reduce_cond_const"))
+        ("BRE", make_pair(new downwards(reduce_cond_else()),
+                          "reduce_cond_else"))
+        ("BRP", make_pair(new reduce_cond_arg(reduct_effort, ignore_ops),
+                          "reduce_cond_arg"))
         // General rules
         ("LEV", make_pair(new downwards(level()),
                           "level"))
         ("EC", make_pair(new upwards(eval_constants()),
                          "eval_constants"));
-    if(rule_ref_str == "h") {
-        for(ref_rule_map_const_it cit = ref_rules.begin();
+    if (rule_ref_str == "h") {
+        for (ref_rule_map_const_it cit = ref_rules.begin();
             cit != ref_rules.end(); ++cit) {
             cout << cit->first << "\t" << cit->second.second << endl;
         }
@@ -118,7 +129,7 @@ const rule* select_rule(string rule_ref_str)
     }
     else {
         ref_rule_map_const_it res = ref_rules.find(rule_ref_str);
-        if(res == ref_rules.end()) {
+        if (res == ref_rules.end()) {
             cout << "Invalid rule (enter h for list of rules)"
                  << endl;
             return NULL;
@@ -203,5 +214,6 @@ int main()
             }
         }
     }
+    cout << endl;
     return 0;
 }

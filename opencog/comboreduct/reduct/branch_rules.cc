@@ -32,12 +32,12 @@ typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
 
-// Apply boolean reduction to the argument of impulse.
+// Apply boolean reduction to the predicates in a cond
 void reduce_cond_arg::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it != id::cond) return;
 
-    // Every other one is a condition, except for the last one.
+    // Every other one is a predicate, except for the last one.
     size_t nc = tr.number_of_children(it);
     for (sib_it sib = it.begin(); 3 <= nc; nc -= 2) {
         logical_reduce(reduct_effort, tr, sib, ignore_ops);
