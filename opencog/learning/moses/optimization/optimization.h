@@ -29,6 +29,7 @@
 #ifndef _MOSES_OPTIMIZATION_H
 #define _MOSES_OPTIMIZATION_H
 
+#include <math.h>   // for sqrtf, cbrtf
 #include <opencog/util/selection.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
@@ -465,13 +466,17 @@ struct hill_climbing : optim_stats
     {
         if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
 
-        // We to access the high-scorers.
-        // XXX We don't actually need them all sorted; we only need
+        // We need to access the high-scorers.
+        // We don't actually need them all sorted; we only need
         // the highest-scoring num_to_make+1 to appear first, and
         // after that, we don't care about the ordering.
-        std::sort(deme.begin() + sample_start,
-                  deme.begin() + sample_start + sample_size,
-                  std::greater<scored_instance<composite_score> >());
+        // std::sort(next(deme.begin(), sample_start),
+        //          next(deme.begin(), sample_start + sample_size),
+        //          std::greater<scored_instance<composite_score> >());
+        std::partial_sort(next(deme.begin(), sample_start),
+                          next(deme.begin(), sample_start + num_to_make+1),
+                          next(deme.begin(), sample_start + sample_size),
+                          std::greater<scored_instance<composite_score> >());
 
         deme.resize(deme_size + num_to_make);
 
@@ -498,9 +503,16 @@ struct hill_climbing : optim_stats
         unsigned max = sample_size * (sample_size-1) / 2;
         if (max < num_to_make) num_to_make = max;
 
-        std::sort(deme.begin() + sample_start,
-                  deme.begin() + sample_start + sample_size,
-                  std::greater<scored_instance<composite_score> >());
+        // std::sort(next(deme.begin(), sample_start),
+        //          next(deme.begin(), sample_start + sample_size),
+        //          std::greater<scored_instance<composite_score> >());
+        //
+        unsigned num_to_sort = sqrtf(2*num_to_make) + 3;
+        if (sample_size < num_to_sort) num_to_sort = sample_size;
+        std::partial_sort(next(deme.begin(), sample_start),
+                          next(deme.begin(), sample_start + num_to_sort),
+                          next(deme.begin(), sample_start + sample_size),
+                          std::greater<scored_instance<composite_score> >());
 
         deme.resize(deme_size + num_to_make);
 
@@ -510,8 +522,9 @@ struct hill_climbing : optim_stats
             for (unsigned j = 0; j < i; j++) {
                 unsigned n = i*(i-1)/2 + j;
                 if (num_to_make <= n) return num_to_make;
-                deme[deme_size + n] = deme[sample_start + j];
-                deme.fields().merge_instance(deme[n], base, reference);
+                unsigned ntgt = deme_size + n;
+                deme[ntgt] = deme[sample_start + j];
+                deme.fields().merge_instance(deme[ntgt], base, reference);
             }
         }
         return num_to_make;
@@ -529,10 +542,16 @@ struct hill_climbing : optim_stats
         unsigned max = sample_size * (sample_size-1) * (sample_size-2) / 6;
         if (max < num_to_make) num_to_make = max;
 
-        std::sort(deme.begin() + sample_start,
-                  deme.begin() + sample_start + sample_size,
-                  std::greater<scored_instance<composite_score> >());
+        // std::sort(next(deme.begin(), sample_start),
+        //           next(deme.begin(), sample_start + sample_size),
+        //           std::greater<scored_instance<composite_score> >());
 
+        unsigned num_to_sort = cbrtf(6*num_to_make) + 3;
+        if (sample_size < num_to_sort) num_to_sort = sample_size;
+        std::partial_sort(next(deme.begin(), sample_start),
+                          next(deme.begin(), sample_start + num_to_make),
+                          next(deme.begin(), sample_start + sample_size),
+                          std::greater<scored_instance<composite_score> >());
         deme.resize(deme_size + num_to_make);
 
         // Summation is over a 3-simplex
@@ -543,9 +562,10 @@ struct hill_climbing : optim_stats
                 for (unsigned k = 0; k < i; k++) {
                     unsigned n = i*(i-1)*(i-2)/6 + j*(j-1)/2 + k;
                     if (num_to_make <= n) return num_to_make;
-                    deme[deme_size + n] = deme[sample_start + k];
-                    deme.fields().merge_instance(deme[n], base, iref);
-                    deme.fields().merge_instance(deme[n], base, jref);
+                    unsigned ntgt = deme_size + n;
+                    deme[ntgt] = deme[sample_start + k];
+                    deme.fields().merge_instance(deme[ntgt], base, iref);
+                    deme.fields().merge_instance(deme[ntgt], base, jref);
                 }
             }
         }
@@ -795,7 +815,6 @@ struct hill_climbing : optim_stats
                                   current_number_of_instances + number_of_new_instances,
                                   TOP_POP_SIZE,
                                   prev_start, prev_size, prev_center);
-
             }
             prev_start = current_number_of_instances;
             prev_size = number_of_new_instances;
@@ -806,8 +825,8 @@ struct hill_climbing : optim_stats
 
             // score all new instances in the deme
             OMP_ALGO::transform
-                (deme.begin() + current_number_of_instances, deme.end(),
-                 deme.begin_scores() + current_number_of_instances,
+                (next(deme.begin(), current_number_of_instances), deme.end(),
+                 next(deme.begin_scores(), current_number_of_instances),
                  // using bind cref so that score is passed by
                  // ref instead of by copy
                  boost::bind(boost::cref(cscorer), _1));
@@ -859,9 +878,9 @@ struct hill_climbing : optim_stats
 
                 // Gather statistics: compute the average distribution
                 // of scores, as compared to the previous high score.
-                sort(deme.begin()+current_number_of_instances,
-                     deme.end(),
-                     std::greater<scored_instance<composite_score> >());
+                std::sort(next(deme.begin(), current_number_of_instances),
+                          deme.end(),
+                          std::greater<scored_instance<composite_score> >());
                 for (unsigned i = current_number_of_instances;
                      deme.begin() + i != deme.end(); ++i)
                 {
@@ -1181,15 +1200,14 @@ struct simulated_annealing : optim_stats
              }
 
             // score all new instances in the deme
-            OMP_ALGO::transform(deme.begin() + current_number_of_instances,
+            OMP_ALGO::transform(next(deme.begin(), current_number_of_instances),
                                 deme.end(),
-                                deme.begin_scores() + current_number_of_instances,
+                                next(deme.begin_scores(), current_number_of_instances),
                                 boost::bind(boost::cref(cscorer), _1));
 
             // get the best instance
             scored_instance<composite_score>& best_scored_instance =
-                *OMP_ALGO::max_element(deme.begin()
-                                       + current_number_of_instances,
+                *OMP_ALGO::max_element(next(deme.begin(), current_number_of_instances),
                                        deme.end());
 
             instance& best_instance = best_scored_instance.first;

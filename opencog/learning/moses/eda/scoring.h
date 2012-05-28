@@ -40,6 +40,15 @@ struct scored_instance : public tagged_item<instance, ScoreT>
     scored_instance() { }
     template<class T1, class T2>
     scored_instance(const std::pair<T1, T2>& p) : super(p) { }
+
+    bool operator<(const scored_instance& other) const
+    {
+        return this->second < other.second;
+    }
+    bool operator>(const scored_instance& other) const
+    {
+        return this->second > other.second;
+    }
 };
 
 /**

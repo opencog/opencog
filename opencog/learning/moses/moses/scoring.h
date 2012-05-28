@@ -937,7 +937,7 @@ struct complexity_based_scorer : public unary_function<instance,
             combo_tree tr = _rep.get_candidate(inst, _reduce);
             return _cscorer(tr);
         } catch (...) {
-            logger().debug() << "Warning: The following instance has failed to be evaluated: "
+            logger().info() << "Warning: The following instance has failed to be evaluated: "
                              << _rep.fields().stream(inst);
         }
         return worst_composite_score;
