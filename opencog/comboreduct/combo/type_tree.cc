@@ -686,23 +686,45 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             // The number of applied arguments is correct
             else
             {
-                // Will be set to true if at some point arg_list is reached
-                bool is_arg_list_reached = false;
-
                 // this is done so that ct_it can move over its arguments
                 // along the arg_app (see below)
                 combo_tree::iterator ct_it_child;
-                if(!tr.empty()) 
+                if (!tr.empty()) 
                     ct_it_child = ct_it.begin();
+
+                // Will be set to true if at some point arg_list is reached
+                bool is_arg_list_reached = false;
+
+                // input_arg_it is either cia_it, or if it is arg_list,
+                // then it will cycle over the arg_list contents.
+                type_tree_sib_it input_arg_it = cia_it;
 
                 // Iterate over the applied arguments, and possibly
                 // over the operand of tr in case tr is not empty.
                 for (type_tree_sib_it arg_app = tt.next_sibling(it_child);
                      arg_app != it.end(); ++arg_app)
                 {
+                    // Advance the arg list counter.  In almost all
+                    // cases, the arglist has just one child total, and
+                    // so the below will loop back to that child. But...
+                    // for teh cond statement, we have a pair of
+                    // alternating types we must cycle through.  So do
+                    // this below.
+                    if (is_arg_list_reached) {
+                        ++input_arg_it;
+                        // If at the end of the list, start again at
+                        // the begining.
+                        if (input_arg_it == cia_it.end()) {
+                             input_arg_it = cia_it;
+                             input_arg_it = input_arg_it.begin();
+                        }
+                    }
+
                     // Check if cia_it is arg_list(T)
-                    if (*cia_it == id::arg_list_type)
+                    else if (*cia_it == id::arg_list_type) {
                         is_arg_list_reached = true;
+                        input_arg_it = input_arg_it.begin();
+                    }
 
                     // Reduce both input and applied arguments
                     reduce_type_tree(tt, arg_app, arg_types,
@@ -710,21 +732,19 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                     reduce_type_tree(tt, cia_it, arg_types,
                                      tr, ct_it, proc_name);
 
-                    // input_arg_it is either cia_it
-                    // or cia_it.begin() if cia_it is arg_list
-                    type_tree_pre_it input_arg_it = cia_it;
-                    if (is_arg_list_reached)
-                        input_arg_it = input_arg_it.begin();
-
                     bool arg_inherits = inherit_type_tree(tt, arg_app, tt, input_arg_it);
                     // Check for a funky special case, occuring for the
                     // cond operator: the arg_list is empty, but the input
                     // might still match the last argument (the "else"
                     // clause, which comes after the arg_list, but before
                     // the output type).
-                    if (!arg_inherits && ils)
+                    if (!arg_inherits && is_arg_list_reached && ils)
                     {
                         arg_inherits = inherit_type_tree(tt, arg_app, tt, last_arg_sib);
+                        // And if it matches, then we've moved past the
+                        // end of the arg_list.
+                        if (arg_inherits)
+                            is_arg_list_reached = false;
                     }
 
                     if (!arg_inherits)
@@ -821,18 +841,21 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                     if (!tr.empty()) //to move the operands of tr to the next
                         ct_it_child = tr.next_sibling(ct_it_child);
                 }
-                //remove a possibly remaining arg_list(T) in the input arguments
+
+                // Remove a possibly remaining arg_list(T) in the input arguments
                 if (is_arg_list_reached || ila) {
                     tt.erase(cia_it);
                 }
-                //remove application_type and its argument now that the
-                //substitution has been done
+
+                // Remove application_type and its argument now that the
+                // substitution has been done.
                 for (type_tree_sib_it sib = tt.next_sibling(it_child);
                      sib != it.end();)
                     sib = tt.erase(sib);
                 *it = *it_child;
                 tt.erase(tt.flatten(it_child));
-                //check if it is in the form lambda(X) and remove lambda if so
+
+                // Check if it is in the form lambda(X) and remove lambda if so
                 if (it.has_one_child()) {
                     type_tree_pre_it it_child = it.begin();
                     *it = *it_child;
@@ -905,17 +928,12 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //arg_list case
     //-------------
     else if (*it == id::arg_list_type) {
-        if (it.has_one_child()) {
-            reduce_type_tree(tt, type_tree_pre_it(it.begin()), arg_types,
-                             tr, ct_it, proc_name);
+        // Usually, an arg_list will have only one type in it.
+        // However, the cond statement can have a repeated list of two
+        // alternating types.
+        for (type_tree_pre_it tit = it.begin(); tit != it.end(); tit++) {
+            reduce_type_tree(tt, tit, arg_types, tr, ct_it, proc_name);
         }
-        else {
-            for (type_tree_pre_it tit = it.begin(); tit != it.end(); tit++) {
-                reduce_type_tree(tt, tit, arg_types,
-                                 tr, ct_it, proc_name);
-            }
-        }
-           // OC_ASSERT(false, "arg_list_type must have one or two children");
     }
 
     //----------------
