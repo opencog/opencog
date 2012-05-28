@@ -281,16 +281,17 @@ const type_tree& get_arg_type(type_node arg,
 const type_tree& get_arg_type(unsigned int idx,
                               const type_tree_seq& arg_types);
 
-// generate type tree from a combo_tree,
-// does not perform any type check or reduction at that stage
+/// Generate type tree from a combo_tree.
+/// does not perform any type checking or reduction.
 type_tree get_type_tree(const combo_tree& tr);
+
 // like above but consider it as root of tr
 type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it);
 
-// infer_type_tree generate the type signature (i.e. in reduced form)
-// of a given combo_tree.
-// If a type error is detected then the type_tree will contain
-// ill_formed_type
+/// infer_type_tree generate the type signature (i.e. in reduced form)
+/// of a given combo_tree.
+/// If a type error is detected then the type_tree will contain
+/// ill_formed_type
 type_tree infer_type_tree(const combo_tree& tr);
 
 // return the number of arguments of type contin

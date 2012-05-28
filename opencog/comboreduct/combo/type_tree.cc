@@ -147,10 +147,17 @@ type_tree get_type_tree(const argument& a)
 {
     return type_tree((type_node)((int)id::argument_type + a.abs_idx_from_zero()));
 }
+
 type_tree get_type_tree(contin_t t)
 {
     return type_tree(id::contin_type);
 }
+
+type_tree get_type_tree(const enum_t& m)
+{
+    return type_tree(id::enum_type);
+}
+
 type_tree get_type_tree(const definite_object& d)
 {
     if (is_action_definite_object(d))
@@ -158,10 +165,12 @@ type_tree get_type_tree(const definite_object& d)
     else
         return type_tree(id::definite_object_type);
 }
+
 type_tree get_type_tree(indefinite_object i)
 {
     return type_tree(id::indefinite_object_type);
 }
+
 type_tree get_type_tree(const message& m)
 {
     return type_tree(id::message_type);
@@ -170,12 +179,13 @@ type_tree get_type_tree(action_symbol as)
 {
     return type_tree(id::action_symbol_type);
 }
+
 type_tree get_type_tree(wild_card wc)
 {
     return type_tree(id::wild_card_type);
 }
 
-
+// Giant case statement.
 type_tree get_type_tree(const vertex& v)
 {
     //builtin
@@ -187,6 +197,9 @@ type_tree get_type_tree(const vertex& v)
     //contin_t
     else if (is_contin(v))
         return get_type_tree(get_contin(v));
+    //enum_t
+    else if (is_enum_type(v))
+        return get_type_tree(get_enum_type(v));
     //action
     else if (is_action(v))
         return get_type_tree(get_action(v));
@@ -846,10 +859,17 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
     //arg_list case
     //-------------
     else if (*it == id::arg_list_type) {
-        OC_ASSERT(it.has_one_child(),
-                          "arg_list_type must have exactly one child");
-        reduce_type_tree(tt, type_tree_pre_it(it.begin()), arg_types,
-                         tr, ct_it, proc_name);
+        if (it.has_one_child()) {
+            reduce_type_tree(tt, type_tree_pre_it(it.begin()), arg_types,
+                             tr, ct_it, proc_name);
+        }
+        else {
+            for (type_tree_pre_it tit = it.begin(); tit != it.end(); tit++) {
+                reduce_type_tree(tt, tit, arg_types,
+                                 tr, ct_it, proc_name);
+            }
+        }
+           // OC_ASSERT(false, "arg_list_type must have one or two children");
     }
 
     //----------------
@@ -1088,6 +1108,7 @@ void insert_arg_type_tree(const type_tree_seq& arg_types,
     }
 }
 
+// Return type tree corresponding to the combo tree.
 type_tree get_type_tree(const combo_tree& tr)
 {
     type_tree tmp;
@@ -1119,6 +1140,7 @@ type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it)
     }
 }
 
+// Infer the type signature corresponding to the tree.
 type_tree infer_type_tree(const combo_tree& tr)
 {
     type_tree tt = get_type_tree(tr);
