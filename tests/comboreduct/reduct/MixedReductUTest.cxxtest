@@ -22,7 +22,6 @@ public:
         stringstream ss(tree_str);
         combo_tree tr;
         ss >> tr;
-        cout << "Tree: " << tr << endl;
         
         type_tree tt = infer_type_tree(tr);
         
@@ -36,12 +35,13 @@ public:
             OTable mt1(tr, cti);
             size_before = tr.size();
 
+            cout << "Before reduction: " << tr << endl;
             mixed_reduce(tr);
 
             size_after = tr.size();
             OTable mt2(tr, cti);
             
-            cout << "After reduction: " << tr << endl;
+            cout << "After  reduction: " << tr << endl;
 
             TS_ASSERT_LESS_THAN(size_after, size_before);
             TS_ASSERT_EQUALS(mt1, mt2);
@@ -180,13 +180,4 @@ public:
         string tree_str="and(not(0<(+(*(7 $1) *(3 $2) 6))) 0<(+(*(-2 $1) -2)) not(0<(+($1 $2 1))))";
         base_test(__FUNCTION__, tree_str);
     }
-
-    // test_simplify16 :
-    // and(or(not(0<($1)) not(0<($2))))
-    // This was buggy, earlier, the not's were getting stripped out.
-    void test_simplify16() {
-        string tree_str="and(or(not(0<($2)) not(0<(+($1 0)))))";
-        base_test(__FUNCTION__, tree_str);
-    }
-
 };

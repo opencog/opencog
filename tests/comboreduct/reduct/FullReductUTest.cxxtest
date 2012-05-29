@@ -157,5 +157,14 @@ public:
         string tree_str="0<( +(1 impulse(and(or($1 and($1))))))";
         base_test(tree_str);
     }
+ 
+    // test_simplify15 :
+    // and(or(not(0<($1)) not(0<($2))))
+    // Previously, the not's were getting accidentally stripped out.
+    // Just make sure they are not.
+    void test_simplify15() {
+        string tree_str="and(or(not(0<($2)) not(0<(+($1 0)))))";
+        base_test(tree_str);
+    }
 
 };
