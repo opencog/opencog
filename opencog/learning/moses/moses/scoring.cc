@@ -362,7 +362,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     unsigned active = 0;
     score_t sao = 0.0, activation = 0.0;
     reverse_foreach (const auto& mpv, max_precisions) {
-        sao += std::get<1>(mpv.second);        
+        sao += std::get<1>(mpv.second);
         active += std::get<2>(mpv.second);
         activation = active / (score_t)ctable_usize;
         if (min_activation < activation)

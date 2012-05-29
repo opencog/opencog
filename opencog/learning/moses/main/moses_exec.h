@@ -95,7 +95,7 @@ void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
                              const moses_parameters& moses_params)
 {
     // Run moses, either on localhost, or distributed.
-    if (moses_params.only_local)
+    if (moses_params.local)
         moses::moses(metapop, moses_params);
     else
         moses::distributed_moses(metapop, moses_params);

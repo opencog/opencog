@@ -48,20 +48,20 @@ struct moses_parameters
     moses_parameters(const boost::program_options::variables_map& _vm =
                            boost::program_options::variables_map(),
                      const jobs_t& _jobs = jobs_t(),
-                     bool _only_local = true,
+                     bool _local = true,
                      int _max_evals = 10000,
                      int _max_gens = -1,
                      score_t _max_score = 0,
                      const operator_set& _ignore_ops = empty_ignore_ops,
                      const combo_tree_ns_set* _perceptions = NULL,
                      const combo_tree_ns_set* _actions = NULL)
-        : only_local(_only_local), jobs(_jobs), vm(_vm),
+        : local(_local), jobs(_jobs), vm(_vm),
           max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score),
           ignore_ops(_ignore_ops), perceptions(_perceptions),
           actions(_actions) {}
 
     // Distributed solver control.
-    bool only_local;
+    bool local;
     const jobs_t& jobs;
     const boost::program_options::variables_map& vm;
 

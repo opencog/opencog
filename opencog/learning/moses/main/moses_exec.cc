@@ -873,14 +873,14 @@ int moses_exec(int argc, char** argv)
 
     // Fill jobs
     jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
-    bool only_local = true;
+    bool local = true;
     foreach(const string& js, jobs_str) {
         size_t pos = js.find(job_seperator);
         if (pos != string::npos) {
             unsigned int nj = boost::lexical_cast<unsigned int>(js.substr(0, pos));
             string host_name = js.substr(pos + 1);
             jobs[host_name] = nj;
-            only_local = false;
+            local = false;
         } else {
             jobs[localhost] = boost::lexical_cast<unsigned int>(js);
         }
@@ -903,7 +903,7 @@ int moses_exec(int argc, char** argv)
 
     // Set moses_parameters.
     moses_parameters moses_params(
-        vm, jobs, only_local,
+        vm, jobs, local,
         max_evals, max_gens, max_score, ignore_ops);
 
     // Find the column number of the target feature in the data file,
