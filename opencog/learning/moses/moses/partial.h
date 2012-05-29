@@ -99,8 +99,10 @@ class partial_solver
         std::vector<combo_tree> _exemplars;
         std::vector<combo_tree> _fresh_exemplars;
         combo_tree _leader;
+        unsigned _prefix_count;
         const rule& _reduct;
         optim_parameters _opt_params;
+        score_t _orig_terminate_if_gte;
         const metapop_parameters& _meta_params;
         moses_parameters _moses_params;
         const metapop_printer& _printer;

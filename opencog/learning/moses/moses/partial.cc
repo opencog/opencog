@@ -43,8 +43,11 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _orig_ctables(ctables),
      _table_type_signature(table_tt),
      _exemplars(exemplars), _leader(id::cond),
+     _prefix_count(0),
      _reduct(reduct),
-     _opt_params(opt_params), _meta_params(meta_params),
+     _opt_params(opt_params),
+     _orig_terminate_if_gte(_opt_params.terminate_if_gte),
+     _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
      _bscore(NULL), _done(false), _print(false)
 
@@ -122,6 +125,9 @@ void partial_solver::solve()
         }
     }
     logger().info() << "well-enough good-bye!";
+unsigned tcount = 0;
+foreach(CTable& ctable, _ctables) tcount += ctable.uncompressed_size();
+cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcount << endl;
 }
 
 /// Evaluate each of the candidate solutions, see if any of the leading
@@ -170,7 +176,8 @@ void partial_solver::candidates(const metapop_candidates& cands)
 void partial_solver::final_cleanup(const metapop_candidates& cands)
 {
     logger().info() << "well-enough ending with " << cands.size()
-                    << " exemplars. Prefix=" << _leader;
+                    << " exemplars. Prefix count= " << _prefix_count
+                    << " prefix=" << _leader;
 
     // Prefix the leading clauses in front of the best candidates,
     // and feed them back in as exemplars, for scoring.
@@ -285,8 +292,8 @@ bool partial_solver::candidate (const combo_tree& cand)
 
     logger().info() << "well-enough candidate=" << total_score
                     << " " << cand;
-    // XXX replace  by the correct compare, i.e. the orig gte.
-    if (-0.05 <= total_score) {
+
+    if (_orig_terminate_if_gte <= total_score) {
         _done = true;
         return true;
     }
@@ -370,12 +377,14 @@ bool partial_solver::candidate (const combo_tree& cand)
                     << " rows out of total " << total_rows;
 
     // Save the predicate itself
+    _prefix_count++;
     sib_it ldr = _leader.begin();
     _leader.insert_subtree(ldr.end(), predicate);
     _leader.insert_subtree(ldr.end(), ++predicate);
-    logger().info() << "well-enough prefix=" << _leader;
+    logger().info() << "well-enough " << _prefix_count
+                    << " prefix=" << _leader;
 
-    // XXX replace 0.5 by parameter.
+    // XXX replace 0.45 by parameter.
     // XXX should be, ummm, less than the number of a single type in the table,
     // else a constant beats this score... err, and weighted too!?
     _bad_score = -floor(0.45 * (score_t(total_rows) - score_t(deleted)));
