@@ -82,7 +82,7 @@ void partial_solver::solve()
     // XXX this is wrong, should be delta on best_possible score.
     _bad_score = - floor(FRACTION * score_t(tab_sz));
 
-int i=0;
+    unsigned loop_count = 0;
     while(1) {
         if (_moses_params.max_evals <= _num_evals) break; 
 
@@ -91,8 +91,11 @@ int i=0;
         _moses_params.max_evals -= _num_evals;
         _moses_params.max_gens -= _num_gens; // XXX wrong
 
-cout <<"duuude start loop ============================ "<<i++<<" ask="<<_bad_score<<endl;
-cout <<"duuude ================= nevals="<<_num_evals <<" max_evals= "<<_moses_params.max_evals<<endl;
+        logger().info() << "well-enough start loop " << loop_count++
+                        << " ask for=" << _bad_score
+                        << " num_evals so far=" << _num_evals
+                        << " max_evals= " << _moses_params.max_evals;
+
         metapop_moses_results(_exemplars, _table_type_signature,
                               _reduct, _reduct, *_bscore,
                               _opt_params, _meta_params, _moses_params,
@@ -109,7 +112,7 @@ cout <<"duuude ================= nevals="<<_num_evals <<" max_evals= "<<_moses_p
             _moses_params.max_evals = 0;
             _moses_params.max_gens = 0;
 
-cout<<"duuu AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA DONE !"<<endl;
+            logger().info() << "well-enough DONE!";
             metapop_moses_results(_exemplars, _table_type_signature,
                                   _reduct, _reduct, *_bscore,
                                   _opt_params, _meta_params, _moses_params,
@@ -118,7 +121,7 @@ cout<<"duuu AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA DONE !"<<endl;
             break;
         }
     }
-cout<<"duuu YYYYYYYYYYYYYYYYYYYYYYYYYYYYY DONE !"<<endl;
+    logger().info() << "well-enough good-bye!";
 }
 
 /// Evaluate each of the candidate solutions, see if any of the leading
@@ -127,7 +130,7 @@ cout<<"duuu YYYYYYYYYYYYYYYYYYYYYYYYYYYYY DONE !"<<endl;
 /// problem).
 void partial_solver::candidates(const metapop_candidates& cands)
 {
-cout<<"duuude got cands sz="<<cands.size()<<endl;
+    logger().info() << "well-enough found " << cands.size() << " candidates";
     foreach(auto &item, cands) {
         const combo_tree& cand = item.first;
         if (candidate(cand)) {
@@ -147,7 +150,6 @@ cout<<"duuude got cands sz="<<cands.size()<<endl;
     // Try again, priming the metapop with the previous best.
     _exemplars.clear();
     _exemplars = _fresh_exemplars;  // copy them.
-cout<<"duuude copied fresh exemps num="<<_fresh_exemplars.size()<<endl;
     _fresh_exemplars.clear();
 
     foreach(auto &item, cands) {
@@ -155,7 +157,8 @@ cout<<"duuude copied fresh exemps num="<<_fresh_exemplars.size()<<endl;
         _exemplars.push_back(cand);
     }
 
-cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
+    logger().info() << "well-enough no acceptable candidates.  "
+        "Try again, asking for score = " << _bad_score;
 }
 
 /// Final cleanup, before termination.
@@ -166,10 +169,10 @@ cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
 /// it will just score these, print them, and then all is done.
 void partial_solver::final_cleanup(const metapop_candidates& cands)
 {
-cout<<"duuude ITS THE FINAL COUNTDOWN  Who will it be?"<<endl;
-cout<<"duude leader="<<_leader<<endl;
+    logger().info() << "well-enough ending with " << cands.size()
+                    << " exemplars. Prefix=" << _leader;
 
-    // Put the leading clauses in front of the best candidates,
+    // Prefix the leading clauses in front of the best candidates,
     // and feed them back in as exemplars, for scoring.
     _exemplars.clear();
     foreach(auto &item, cands) {
@@ -207,14 +210,14 @@ void partial_solver::effective(combo_tree::iterator pred,
     sib_it conq = next(predicate);
     vertex consequent = *conq;
 
-int total=0;
+    unsigned total_count = 0;
     // Count how many items the first predicate mis-identifies.
     foreach(CTable& ctable, _ctables) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
             const vertex_seq& vs = cit->first;
             const CTable::counter_t& c = cit->second;
 
-total += c.total_count();
+            total_count += c.total_count();
             vertex pr = eval_throws_binding(vs, predicate);
             if (pr == id::logical_true) {
                 unsigned num_right = c.get(consequent);
@@ -226,7 +229,9 @@ total += c.total_count();
             }
         }
     }
-std::cout<<"duuude effective tot="<<total<<" fail ="<<fail_count <<" good="<<good_count<<std::endl;
+    logger().info() << "well-enough leading predicate fail=" << fail_count
+                    << " good=" << good_count
+                    << " out of total=" << total_count;
 }
 
 
@@ -272,21 +277,19 @@ void partial_solver::refresh(const metapop_candidates& cands,
 /// Evaluate a single candidate
 bool partial_solver::candidate (const combo_tree& cand)
 {
-std::cout<<"duude eval the candy="<<cand<<std::endl;
-
     // Are we done yet?
     penalized_behavioral_score pbs = _bscore->operator()(cand);
     score_t total_score = 0.0;
     foreach(const score_t& sc, pbs.first)
         total_score += sc;
 
+    logger().info() << "well-enough candidate=" << total_score
+                    << " " << cand;
     // XXX replace  by the correct compare, i.e. the orig gte.
     if (-0.05 <= total_score) {
-std::cout<<"duuude DOOOOOOOOOONE! ="<<total_score<<"\n"<<std::endl;
         _done = true;
         return true;
     }
-std::cout<<"duuude candy score total="<<total_score<<std::endl;
 
     // Next time around, we need to beat this best score.
     if (_bad_score <= total_score)
@@ -295,7 +298,6 @@ std::cout<<"duuude candy score total="<<total_score<<std::endl;
     // We don't want constants; what else we got?
     pre_it it = cand.begin();
     if (is_enum_type(*it)) {
-std::cout<<"duuude got a const\n"<<std::endl;
         return false;
     }
 
@@ -313,7 +315,7 @@ std::cout<<"duuude got a const\n"<<std::endl;
 
         if (is_enum_type(*sib)) {
             // If we are here, all previous predicates were ineffective.
-std::cout<<"duuude got an ineffective const\n"<<std::endl;
+            logger().info() << "well-enough reject constant preceeded by ineffective clause";
             return false;
         }
 
@@ -355,8 +357,6 @@ std::cout<<"duuude got an ineffective const\n"<<std::endl;
             _best_fail_pred = predicate;
         }
 #endif
-
-cout<<"duuude non zero fail count\n"<<endl;
         return false;
     }
 
@@ -366,18 +366,19 @@ cout<<"duuude non zero fail count\n"<<endl;
     unsigned total_rows = 0;
     unsigned deleted = 0;
     trim_table(_ctables, predicate, deleted, total_rows);
+    logger().info() << "well-enough deleted " << deleted
+                    << " rows out of total " << total_rows;
 
     // Save the predicate itself
     sib_it ldr = _leader.begin();
     _leader.insert_subtree(ldr.end(), predicate);
     _leader.insert_subtree(ldr.end(), ++predicate);
-cout<<"duuude leader is now="<<_leader<<endl;
+    logger().info() << "well-enough prefix=" << _leader;
 
     // XXX replace 0.5 by parameter.
     // XXX should be, ummm, less than the number of a single type in the table,
     // else a constant beats this score... err, and weighted too!?
     _bad_score = -floor(0.45 * (score_t(total_rows) - score_t(deleted)));
-cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for score of="<<_bad_score<<endl;
 
     // Redo the scoring tables, as they cache the score tables (why?)
     score_seq.clear();
@@ -409,12 +410,11 @@ cout<<"duude deleted="<<deleted <<" out of total="<<total_rows<< " gonna ask for
         fresh.erase(fsib++);
         fresh.erase(fsib++);
     }
-cout<<"duuude fresh exemplar="<<fresh<<endl;
+    logger().info() << "well-enough fresh exemplar=" << fresh;
 
     _exemplars.clear();
     _exemplars.push_back(fresh);
 
-cout<<endl;
     return true;
 }
 
