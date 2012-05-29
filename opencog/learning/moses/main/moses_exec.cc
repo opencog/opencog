@@ -937,7 +937,8 @@ int moses_exec(int argc, char** argv)
     // Read labels contained in the data file.
     vector<string> labels;
     if (output_with_labels && !input_data_files.empty())
-        labels = readInputLabels(input_data_files.front(), target_column);
+        labels = readInputLabels(input_data_files.front(), target_column,
+                                 ignore_features);
 
     // Set metapop printer parameters.
     metapop_printer mmr_pa(result_count,

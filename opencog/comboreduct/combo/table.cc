@@ -343,12 +343,13 @@ ifstream* open_data_file(const string& fileName)
     return in;
 }
 
-vector<string> readInputLabels(const string& file, int pos)
+vector<string> readInputLabels(const string& file, int pos,
+                               vector<int> ignore_features)
 {
     auto_ptr<ifstream> in(open_data_file(file));
     string line;
     get_data_line(*in, line);
-    return tokenizeRowIO<string>(line, pos).first;
+    return tokenizeRowIO<string>(line, pos, ignore_features).first;
 }
 
 arity_t dataFileArity(const string& fileName)
@@ -625,7 +626,7 @@ Table istreamTable(const string& file_name, int pos, vector<int> ignore_col_nums
 {
     Table res;
     res.tt = infer_data_type_tree(file_name, pos, ignore_col_nums);
-    istreamTable(file_name, res.itable, res.otable, res.tt, pos);
+    istreamTable(file_name, res.itable, res.otable, res.tt, pos, ignore_col_nums);
     return res;
 }
 

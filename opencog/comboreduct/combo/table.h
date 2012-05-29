@@ -801,7 +801,9 @@ typedef contin_matrix::const_iterator const_cm_it;
 /**
  * if the DSV data file has a header with labels
  */
-std::vector<std::string> readInputLabels(const std::string& file, int pos = 0);
+std::vector<std::string> readInputLabels(const std::string& file, int pos = 0,
+                                         std::vector<int> ignore_features
+                                         = std::vector<int>());
 
 std::ifstream* open_data_file(const std::string& fileName);
 

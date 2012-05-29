@@ -39,7 +39,7 @@ class MOSESUTest : public CxxTest::TestSuite
 {
 public:
     MOSESUTest() {
-        // opencog::logger().setPrintToStdoutFlag(true);
+        opencog::logger().setPrintToStdoutFlag(true);
         // to control the log level use option -l
     }
 
@@ -77,6 +77,14 @@ public:
         string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
         string max_evals("-m1000");
         moses_test_score({data_file_path, max_evals}, -3);
+    }
+    void test_it_target_ignore() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        // try to predict arg1 given arg2
+        string data_file_path("-i" + MOSESUTest_dir + "dataset.csv"),
+            max_evals("-m1000"), target("-uarg2"), ignore_feature("-Yres");
+        moses_test_score({data_file_path, max_evals, target, ignore_feature},
+                         -3);
     }
 
     /* SR is polynomial regression; it has a very deceptive scoring
