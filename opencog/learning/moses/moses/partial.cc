@@ -172,17 +172,20 @@ void partial_solver::final_cleanup(const metapop_candidates& cands)
 {
 cout<<"duuude ITS THE FINAL COUNTDOWN  Who will it be?"<<endl;
 cout<<"duude leader="<<_leader<<endl;
+
+    // Put the leading clauses in front of the best candidates,
+    // and feed them back in as exemplars, for scoring.
     _exemplars.clear();
     foreach(auto &item, cands) {
         combo_tree cand = item.first;
-        sib_it lit = _leader.begin();
-        pre_it cit = cand.begin();
-cout<<"duude cand before="<<cand<<endl;
-        for (;lit != _leader.end(); lit++) {
-            cit = cand.insert(cit, *lit);
+        sib_it ldr = _leader.begin();
+        sib_it cit = cand.begin();
+        cit = cit.begin();
+        for (sib_it lit = ldr.begin(); lit != ldr.end(); lit++) {
+            cit = cand.insert_subtree(cit, lit);
             cit++;
         }
-cout<<"duude cand after="<<cand<<endl;
+        _reduct(cand);
         _exemplars.push_back(cand);
     }
 }
@@ -359,8 +362,9 @@ cout<<"duuude non zero fail count\n"<<endl;
     trim_table(_ctables, predicate, deleted, total_rows);
 
     // Save the predicate itself
-    _leader.prepend_child(_leader.end(), *predicate);
-    _leader.prepend_child(_leader.end(), *(++predicate));
+    sib_it ldr = _leader.begin();
+    _leader.insert_subtree(ldr.end(), predicate);
+    _leader.insert_subtree(ldr.end(), ++predicate);
 cout<<"duuude leader is now="<<_leader<<endl;
 
     // XXX replace 0.5 by parameter.
