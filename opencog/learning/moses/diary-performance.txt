@@ -1277,6 +1277,11 @@ There was a change in the loop termination criteria.  -r1 -Z1
 -m160k:  -102  14427  120      -121  20186  127
 -m320k:  -101  41033  121      -121  45621  125
 
+Note: the 2-simplex and 3-simplex cross-over code had a bug in it, which
+got fixed in bzr rev 6996.  Data above that relies on 2- and 3-simplex may
+improve; on the other hand, the 2- and 3-simplex code was corrupting the
+deme, and so who knows what was really happening, or how big the effect is.
+(The bug was fixed on 27 May 2012)
 
 ======================================================================
 Regression test parity performance
@@ -2007,21 +2012,33 @@ OK, some buginess in the min_score_improv area now fixed.
 Damn. Should have been setting the -Z1 flag to enable cross-over.
 How could I have forgotten?  The results are completely different!
 
+BUG FIXES:
+
+Major bug fix in bzr rev 7009: sometimes, during reduction, the 
+logical_not in front of a pred was being incorrectly stripped out.
+In addition, the cross-over in the metapopulatino was buggy, and
+that was fixed in bzr rev 6996.  And knob-probing was wrong, that was
+fixed in bzr rev 6985. So that's three fairly serius bug fixes.
+
+The result: some of the ABOVE DATA MAY BE INVALID!
+The data below contains these bug fixes.
+
 "cro-m10K": as above but with -Z1 flag.  Instantly better than before.
+       Using bzr rev 7009, with notable bug fixes described above.
 
-"cro-m40K": as above, 40K.  No improvement. There seems to be a problem
-       both with knob building, and a different problem with scoring...
+"cro-m40K": as above, 40K.  One tough case improved!  This is unique,
+       quite different than past experience.
 
-         cro-m10K  straight      cro-m40K  straight     eff-m160K  straight
+         cro-m10K  straight      cro-m40K  straight     cro-m160K  straight
 :    time  score plex score  time  score plex score  time  score plex score   
--r0:   54   7.43   6    8     269   7.43   6    8
--r1:   71   4.43   9    5     358   4.43   9    5
--r2:   68   9.10   7   10     372   9.10   6   10
--r3:   69   4.32   8    5     337   4.32   8    5
--r4:  176   8.24  13    9     767   8.24  13    9
--r5:   95  56.6   12   57     464  56.6   11   57
--r6:   52   9.10   6   10     315   9.10   6   10
--r7:  147   5.5   10    6     717   5.5   10    6
--r8:  111   3.81  10    4     
--r9:   61   5.05   7    6     
+-r0:   52   7.43   6    8     302   7.43   6    8
+-r1:   86   5.24  10    6     432   5.24  10    6
+-r2:   85   9.10   7   10     495   9.10   7   10
+-r3:  115   3.90  10    4     672   3.90  10    4
+-r4:  171   8.24  13    9     822   8.24  13    9
+-r5:   64  43.05   8   50     384  24.29   9   26
+-r6:   49   9.10   6   10     346   4.00  11    4
+-r7:  154   5.5   10    6     806   5.5   10    6
+-r8:   43  43.05   8   50     345  24.29   9   26
+-r9:   56   5.05   7    6     314   5.05   7    6
 
