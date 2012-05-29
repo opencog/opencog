@@ -1036,7 +1036,7 @@ int moses_exec(int argc, char** argv)
                     //
                     // Much like the boolean type above, just a
                     // slightly different scorer.
-                    typedef enum_graded_bscore BScore;
+                    typedef enum_effective_bscore BScore;
                     boost::ptr_vector<BScore> bscores;
                     foreach(const CTable& ctable, ctables) {
                         BScore *r = new BScore(ctable);

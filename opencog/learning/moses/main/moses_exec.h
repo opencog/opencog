@@ -149,13 +149,23 @@ struct metapop_printer
         enum_table_bscore etb(gtables[0]);
         bscore_based_cscore<enum_table_bscore> straight(etb);
 
+        enum_graded_bscore etg(gtables[0]);
+        bscore_based_cscore<enum_graded_bscore> regrade(etg);
+
+        enum_effective_bscore etf(gtables[0]);
+        bscore_based_cscore<enum_effective_bscore> effect(etf);
+
         // const bscored_combo_tree& candidate = begin();
         auto cit = metapop.begin();
     
         for (int i=0; i<10; i++) {
             composite_score sc = straight(get_tree(*cit));
             ss << "Sraight: " << sc 
-               << " Graded: " << get_composite_score(*cit) << std::endl;
+               << "\n Graded: " << get_composite_score(*cit);
+
+            ss << "\nRegrade: " << regrade(get_tree(*cit));
+            ss << "\nEffecti: " << effect(get_tree(*cit));
+            ss << std::endl;
             cit++;
         }
 #endif

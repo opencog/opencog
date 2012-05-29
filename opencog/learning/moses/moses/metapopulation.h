@@ -269,9 +269,9 @@ struct metapopulation : public bscored_combo_tree_set
      * a Solomonoff-like distribution (2^{-complexity/temperature})
      * and the exemplar is selected accordingly.
      *
-     * Current experimental evidence seems to show that a temperature
-     * of 2 works best for the 4-parity problem. Both T=1 and T=3 perform
-     * considerably slower.
+     * Current experimental evidence shows that temperatures in the
+     * range of 3-8 work best for most problems, both discrete
+     * (e.g. 4-parity) and conintuous.
      *
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
@@ -307,8 +307,9 @@ struct metapopulation : public bscored_combo_tree_set
                 found_exemplar = true;
                 if (highest_score < sc) highest_score = sc;
             } else // hack: if the tree is visited then put a positive
-                   // complexity so we know it must be ignored
-                probs.push_back(1.0e38);
+                   // score so we know it must be ignored
+#define SKIP_OVER_ME (1.0e38)
+                probs.push_back(SKIP_OVER_ME);
         }
 
         // Nothing found, we've already tried them all.
@@ -326,7 +327,7 @@ struct metapopulation : public bscored_combo_tree_set
         foreach (score_t& p, probs) {
             // In case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p > 1.0e35 ? 0.0f : expf((p - highest_score) * inv_temp));
+            p = (p > (0.1*SKIP_OVER_ME) ? 0.0f : expf((p - highest_score) * inv_temp));
             sum += p;
         }
 
@@ -599,11 +600,11 @@ struct metapopulation : public bscored_combo_tree_set
         logger().debug("Actual number of evaluations during that expansion: %d",
                            eval_during_this_deme);
 
-        //mark the exemplar so we won't expand it again
+        // Mark the exemplar so we won't expand it again
         _visited_exemplars.insert(get_tree(*_exemplar));
 
-        //add (as potential exemplars for future demes) all unique non-dominated
-        //trees in the final deme
+        // Add, as potential exemplars for future demes, all unique
+        // trees in the final deme.
         metapop_candidates pot_candidates;
 
         logger().debug("Sort the deme");
