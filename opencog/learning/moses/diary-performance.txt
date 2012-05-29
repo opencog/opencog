@@ -2029,16 +2029,39 @@ The data below contains these bug fixes.
 "cro-m40K": as above, 40K.  One tough case improved!  This is unique,
        quite different than past experience.
 
+"cro-160K": as above, 160K. No improvement, disappointing. Perhaps
+       the complexity penalty is too high. Or the temperature is too low.
+       Or need to use well-enough algo.
+
          cro-m10K  straight      cro-m40K  straight     cro-m160K  straight
 :    time  score plex score  time  score plex score  time  score plex score   
--r0:   52   7.43   6    8     302   7.43   6    8
--r1:   86   5.24  10    6     432   5.24  10    6
--r2:   85   9.10   7   10     495   9.10   7   10
--r3:  115   3.90  10    4     672   3.90  10    4
--r4:  171   8.24  13    9     822   8.24  13    9
--r5:   64  43.05   8   50     384  24.29   9   26
--r6:   49   9.10   6   10     346   4.00  11    4
--r7:  154   5.5   10    6     806   5.5   10    6
--r8:   43  43.05   8   50     345  24.29   9   26
--r9:   56   5.05   7    6     314   5.05   7    6
+-r0:   52   7.43   6    8     302   7.43   6    8    1428   7.43   6    8
+-r1:   86   5.24  10    6     432   5.24  10    6    2007   5.24  10    6
+-r2:   85   9.10   7   10     495   9.10   7   10    2398   9.10   7   10
+-r3:  115   3.90  10    4     672   3.90  10    4    3391   3.90  10    4
+-r4:  171   8.24  13    9     822   8.24  13    9    4124   8.24  13    9
+-r5:   64  43.05   8   50     384  24.29   9   26    2183  24.29   9   26
+-r6:   49   9.10   6   10     346   4.00  11    4    3175   4.00  11    4
+-r7:  154   5.5   10    6     806   5.5   10    6    4200   5.5   10    6
+-r8:   43  43.05   8   50     345  24.29   9   26    2076  24.29   9   26
+-r9:   56   5.05   7    6     314   5.05   7    6    1663   5.05   7    6
+        avg time==88===       avg time===492===       ag time===2664===
 
+"well-m10K":  The well-enough alone algo. Not expecting much, but lets
+        give it a whirl.  This includes the -Z1 flag.
+
+"well-m40K":  As above.
+
+              well-m10K     straight              well-m40K     straight  
+:    time  pfx tbl  score plex score     time  pfx tbl  score plex score 
+-r0:   41   1  100  45     20   50        359   1  100   8.64  27   10
+-r1:  224   -   -    3.62  21    4       1304   -   -    3.62  30    4
+-r2:  151   -   -    5.60  22    6       1064   -   -    5.6   27    6
+-r3:  111   -   -    7.05  21    8
+-r4:  106   -   -   57.5   17   58        
+-r5:   56   -   -   54.8   13   55        
+-r6:   41   -   -  100     14  100        
+-r7:   99   -   -   50     18   50        
+-r8:   63   2   71  17.01  27   21        
+-r9:  124   -   -    9.24  20   10        
+           avg time===102====

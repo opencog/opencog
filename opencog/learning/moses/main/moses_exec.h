@@ -159,6 +159,7 @@ struct metapop_printer
         auto cit = metapop.begin();
     
         for (int i=0; i<10; i++) {
+            if (cit == metapop.end()) break;
             composite_score sc = straight(get_tree(*cit));
             ss << "Sraight: " << sc 
                << "\n Graded: " << get_composite_score(*cit);

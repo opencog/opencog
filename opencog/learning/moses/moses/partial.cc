@@ -49,7 +49,9 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _orig_terminate_if_gte(_opt_params.terminate_if_gte),
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
-     _bscore(NULL), _done(false), _print(false)
+     _bscore(NULL), 
+     _num_evals(0), _num_gens(0),
+     _done(false), _print(false)
 
 #ifdef TRY_DOING_RECURSION
      _fail_recurse_count(0), _best_fail_ratio(1.0e30),
@@ -96,7 +98,7 @@ void partial_solver::solve()
 
         logger().info() << "well-enough start loop " << loop_count++
                         << " ask for=" << _bad_score
-                        << " num_evals so far=" << _num_evals
+                        << " previous num_evals=" << _num_evals
                         << " max_evals= " << _moses_params.max_evals;
 
         metapop_moses_results(_exemplars, _table_type_signature,
