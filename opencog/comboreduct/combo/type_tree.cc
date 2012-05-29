@@ -696,36 +696,37 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
 
                 // Will be set to true if at some point arg_list is reached
                 bool is_arg_list_reached = false;
-
-                // input_arg_it is either cia_it, or if it is arg_list,
-                // then it will cycle over the arg_list contents.
-                type_tree_sib_it input_arg_it = cia_it;
+                type_tree_sib_it arg_list_head;
 
                 // Iterate over the applied arguments, and possibly
                 // over the operand of tr in case tr is not empty.
                 for (type_tree_sib_it arg_app = tt.next_sibling(it_child);
                      arg_app != it.end(); ++arg_app)
                 {
+                    // input_arg_it is either cia_it, or if it is arg_list,
+                    // then it will cycle over the arg_list contents.
+                    type_tree_sib_it input_arg_it = cia_it;
+
                     // Advance the arg list counter.  In almost all
                     // cases, the arglist has just one child total, and
                     // so the below will loop back to that child. But...
-                    // for teh cond statement, we have a pair of
+                    // for the cond statement, we have a pair of
                     // alternating types we must cycle through.  So do
                     // this below.
                     if (is_arg_list_reached) {
                         ++input_arg_it;
                         // If at the end of the list, start again at
                         // the begining.
-                        if (input_arg_it == cia_it.end()) {
-                             input_arg_it = cia_it;
-                             input_arg_it = input_arg_it.begin();
+                        if (input_arg_it == arg_list_head.end()) {
+                             input_arg_it = arg_list_head.begin();
                         }
                     }
 
                     // Check if cia_it is arg_list(T)
                     else if (*cia_it == id::arg_list_type) {
                         is_arg_list_reached = true;
-                        input_arg_it = input_arg_it.begin();
+                        arg_list_head = cia_it;
+                        input_arg_it = arg_list_head.begin();
                     }
 
                     // Reduce both input and applied arguments
