@@ -328,6 +328,8 @@ combo::arity_t infer_arity(const string& problem,
     }
 }
 
+
+        
 int moses_exec(int argc, char** argv)
 {
     // for(int i = 0; i < argc; ++i)
@@ -360,6 +362,7 @@ int moses_exec(int argc, char** argv)
     float noise;
     vector<string> include_only_ops_str;
     vector<string> ignore_ops_str;
+    vector<string> ignore_features_str;
     string opt_algo; //optimization algorithm
     vector<string> exemplars_str;
     int reduct_candidate_effort;
@@ -465,8 +468,14 @@ int moses_exec(int argc, char** argv)
          "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
 
         (opt_desc_str(input_data_file_opt).c_str(),
-         value<vector<string> >(&input_data_files),
-         "Input table file in DSV format (with comma, whitespace and tabulation as seperator). Colums correspond to features and rows to observations. Can be used several times, in such a case the behavioral score of the whole problem is the concatenation of the behavioral scores of the sub-problems associated with the files. Each file must have the same number of features in the same order.\n")
+         value<vector<string>>(&input_data_files),
+         "Input table file in DSV format (with comma, whitespace "
+         "and tabulation as seperator). Colums correspond to features "
+         "and rows to observations. Can be used several times, in such "
+         "a case the behavioral score of the whole problem is the "
+         "concatenation of the behavioral scores of the sub-problems "
+         "associated with the files. Each file must have the same number "
+         "of features in the same order.\n")
 
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&target_feature),
@@ -555,28 +564,28 @@ int moses_exec(int argc, char** argv)
              % log_file_dep_opt_opt.first).c_str())
 
         (opt_desc_str(include_only_ops_str_opt).c_str(),
-         value<vector<string> >(&include_only_ops_str),
+         value<vector<string>>(&include_only_ops_str),
          "Include this operator, but exclude others, in the solution.  "
          "This option may be used several times to specify multiple "
          "operators.  Currently, only these operators are "
-         "supported: plus, times, div, sin, exp, log and variables ($n). "
-         "Note that variables and operators are treated separately, so "
-         "that including only some operators will still include all "
-         "variables, and including only some variables still include "
-         "all operators).  You may need to put variables under double "
-         "quotes.  This option does not work with ANN.\n")
+         "supported: plus, times, div, sin, exp, log. "
+         "This option does not work with ANN.\n")
 
         (opt_desc_str(ignore_ops_str_opt).c_str(),
-         value<vector<string> >(&ignore_ops_str),
+         value<vector<string>>(&ignore_ops_str),
          str(format("Ignore the following operator in the program solution.  "
                     "This option may be used several times.  Currently, only div, "
-                    "sin, exp, log  and variables ($n) can be ignored.  "
-                    "You may need to put variables under double quotes.  "
-                    "This option has the priority over --%s.  "
+                    "sin, exp, log can be ignored. "
+                    "This option has the priority over --%s. "
                     "That is, if an operator is both be included and ignored, "
-                    "then it is ignored.  This option does not work with ANN.\n")
+                    "then it is ignored. This option does not work with ANN.\n")
              % include_only_ops_str_opt.first).c_str())
 
+        (opt_desc_str(ignore_feature_str_opt).c_str(),
+         value<vector<string>>(&ignore_features_str),
+         "Ignore feature from the datasets. Can be used several times "
+         "to ignore several features.\n")
+        
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
          str(format("Optimization algorithm, supported algorithms are"
@@ -585,7 +594,7 @@ int moses_exec(int argc, char** argv)
              % un % sa % hc).c_str())
 
         (opt_desc_str(exemplars_str_opt).c_str(),
-         value<vector<string> >(&exemplars_str),
+         value<vector<string>>(&exemplars_str),
          "Start the search with a given exemplar, can be used several times.\n")
 
         (opt_desc_str(max_candidates_opt).c_str(),
@@ -615,7 +624,7 @@ int moses_exec(int argc, char** argv)
          "adjusted to fit in the RAM.\n")
 
         (opt_desc_str(jobs_opt).c_str(),
-         value<vector<string> >(&jobs_str),
+         value<vector<string>>(&jobs_str),
          str(format("Number of jobs allocated for deme optimization."
                     " Jobs can be executed on a remote machine as well,"
                     " in such case the notation -%1% N:REMOTE_HOST is used,"
@@ -645,7 +654,11 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_score_opt).c_str(),
          value<score_t>(&max_score)->default_value(best_score),
-         "The max score to reach, once reached MOSES halts. MOSES is sometimes able to calculate the max score that can be reached for a particular problem, in such case the max_score is automatically reset of the minimum between MOSES's calculation and the user's option.\n")
+         "The max score to reach, once reached MOSES halts. MOSES is"
+         " sometimes able to calculate the max score that can be reached"
+         " for a particular problem, in such case the max_score is"
+         " automatically reset of the minimum between MOSES's calculation"
+         " and the user's option.\n")
 
         (opt_desc_str(max_dist_opt).c_str(),
          value<size_t>(&max_dist)->default_value(4),
@@ -698,8 +711,11 @@ int moses_exec(int argc, char** argv)
          "value cedes this setting to complexity-ratio flag, above.\n")
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
-         value<vector<contin_t> >(&discretize_thresholds),
-         "If the domain is continuous, discretize the target feature. A unique used of that option produces 2 classes, x < thresold and x >= threshold. The option can be used several times (n-1) to produce n classes and the thresholds are automatically sorted.\n")
+         value<vector<contin_t>>(&discretize_thresholds),
+         "If the domain is continuous, discretize the target feature. "
+         "A unique used of that option produces 2 classes, x < thresold "
+         "and x >= threshold. The option can be used several times (n-1) "
+         "to produce n classes and the thresholds are automatically sorted.\n")
 
         (opt_desc_str(hc_widen_search_opt).c_str(),
          value<bool>(&hc_widen_search)->default_value(false),
@@ -758,7 +774,12 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&alpha)->default_value(0.0),
-         "If problem pre is used then if alpha is negative (any negative value), precision is replaced by negative predictive value. And then alpha plays the role of the activation constrain penalty from 0 to inf, 0 being no activation penalty at all, inf meaning hard constraint penalty (that is if the candidate is not in the range it has -inf activation penalty.)\n")
+         "If problem pre is used then if alpha is negative (any negative value), "
+         "precision is replaced by negative predictive value. And then alpha "
+         "plays the role of the activation constrain penalty from 0 to inf, "
+         "0 being no activation penalty at all, inf meaning hard constraint "
+         "penalty (that is if the candidate is not in the range it has -inf "
+         "activation penalty.)\n")
 
         ("pre-worst-norm",
          value<bool>(&pre_worst_norm)->default_value(false),
@@ -835,7 +856,6 @@ int moses_exec(int argc, char** argv)
     // ignore.
     vertex_set ignore_ops;
     if (vm.count(include_only_ops_str_opt.first.c_str())) {
-        bool ignore_arguments = false;
         bool ignore_operators = false;
         foreach (const string& s, include_only_ops_str) {
             vertex v;
@@ -846,21 +866,13 @@ int moses_exec(int argc, char** argv)
                     ignore_operators = true;
                 }
                 ignore_ops.erase(v);
-            } else if (argument_str_to_vertex(s, v)) {
-                if (!ignore_arguments) {
-                    for (combo::arity_t arg = 1; arg <= arity; ++arg)
-                        ignore_ops.insert(argument(arg));
-                    ignore_arguments = true;
-                }
-                ignore_ops.erase(v);
             } else not_recognized_combo_operator(s);
         }
     }
-
     // Convert ignore_ops_str to the set of actual operators to ignore.
     foreach (const string& s, ignore_ops_str) {
         vertex v;
-        if(builtin_str_to_vertex(s, v) || argument_str_to_vertex(s, v))
+        if(builtin_str_to_vertex(s, v))
             ignore_ops.insert(v);
         else not_recognized_combo_operator(s);
     }
@@ -903,16 +915,24 @@ int moses_exec(int argc, char** argv)
 
     // Set moses_parameters.
     moses_parameters moses_params(
-        vm, jobs, local,
-        max_evals, max_gens, max_score, ignore_ops);
+        vm, jobs, local, max_evals, max_gens, max_score, ignore_ops);
 
     // Find the column number of the target feature in the data file,
     // if any.
     int target_column = 0;
     if (!target_feature.empty() && !input_data_files.empty())
-        target_column = findTargetFeaturePosition(input_data_files.front(),
-                                               target_feature);
-    logger().info("Target column is %d", target_column);
+        target_column = find_feature_position(input_data_files.front(),
+                                              target_feature);
+    logger().info("Target column is %u", target_column);
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_features;
+    if (!input_data_files.empty()) {
+        ignore_features = find_features_positions(input_data_files.front(),
+                                                  ignore_features_str);
+        ostreamContainer(logger().info() << "Ignore the following columns: ",
+                         ignore_features);
+    }
 
     // Read labels contained in the data file.
     vector<string> labels;
@@ -933,7 +953,8 @@ int moses_exec(int argc, char** argv)
 
     // Continuous reduction rules used during search and representation
     // building.
-    const rule& contin_reduct = contin_reduction(reduct_candidate_effort, ignore_ops);
+    const rule& contin_reduct = contin_reduction(reduct_candidate_effort,
+                                                 ignore_ops);
 
     // Logical reduction rules used during search.
     logical_reduction r(ignore_ops);
@@ -946,7 +967,9 @@ int moses_exec(int argc, char** argv)
     if (datafile_based_problem(problem)) {
 
         // Infer the signature based on the input table.
-        type_tree table_type_signature = infer_data_type_tree(input_data_files.front(), target_column);
+        type_tree table_type_signature =
+            infer_data_type_tree(input_data_files.front(), target_column,
+                                 ignore_features);
         logger().info() << "Inferred data signature " << table_type_signature;
 
         // Read input data files
@@ -954,7 +977,7 @@ int moses_exec(int argc, char** argv)
         vector<CTable> ctables;
         foreach (const string& idf, input_data_files) {
             logger().debug("Read data file %s", idf.c_str());
-            Table table = istreamTable(idf, target_column);
+            Table table = istreamTable(idf, target_column, ignore_features);
             // possible subsample the table
             if (nsamples > 0)
                 subsampleTable(table, nsamples);

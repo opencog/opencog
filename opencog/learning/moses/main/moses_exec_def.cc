@@ -25,7 +25,10 @@
 namespace opencog { namespace moses {
 
 string opt_desc_str(const pair<string, string>& opt) {
-    return string(opt.first).append(",").append(opt.second);
+    string res = string(opt.first);
+    if (!opt.second.empty())
+        res += string(",") + opt.second;
+    return res;
 }
 
 } // ~namespace moses

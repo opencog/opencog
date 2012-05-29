@@ -314,8 +314,8 @@ int main(int argc, char** argv)
 
     // Find the position of the target feature (the first one by default)
     int target_pos = fs_params.target_feature.empty()? 0
-        : findTargetFeaturePosition(fs_params.input_file,
-                                    fs_params.target_feature);
+        : find_feature_position(fs_params.input_file,
+                                fs_params.target_feature);
     // Read input_data_file file
     Table table = istreamTable(fs_params.input_file, target_pos);
 

@@ -34,11 +34,14 @@ class tableUTest : public CxxTest::TestSuite {
 private:
     template<typename IT, typename OT>
     void testIStreamTable(const string& ts, const IT& it, const OT& ot,
-                          bool has_header, const type_tree& tt) {
+                          bool has_header, const type_tree& tt,
+                          int target_col = 0,
+                          std::vector<int> ignore_cols= std::vector<int>()) {
         stringstream ss(ts);
         IT it_test;
         OT ot_test;
-        istreamTable(ss, it_test, ot_test, has_header, tt);
+        istreamTable(ss, it_test, ot_test, has_header, tt,
+                     target_col, ignore_cols);
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;
@@ -51,6 +54,12 @@ private:
         TS_ASSERT_EQUALS(ot, ot_test);
     }
 public:
+    
+    tableUTest() {
+        logger().setPrintToStdoutFlag(true);
+        logger().setLevel(Logger::DEBUG);
+    }
+
     void test_TruthTable() {
         vertex_seq o{id::logical_true, id::logical_false};
         OTable ot(o);
@@ -108,6 +117,21 @@ public:
                          "troc,truc\n"
                          "1,1\n"
                          "0,0\n");
+    }
+    // Set target Price, and ignore column Temperature
+    void test_target_col_ignore_col() {
+        vertex_seq o{0.4, 9.5}; // price column
+        OTable ot(o, label1);
+        ITable it;
+        it.push_back({10.1});
+        it.push_back({6.5});
+        vector<string> il{olabel};
+        it.set_labels(il);
+        testIStreamTable("happiness,price,temperature\n"
+                         "10.1,0.4,244.2\n"
+                         "6.5,9.5,4.2\n", it, ot, true,
+                         gen_signature(id::contin_type, 1),
+                         1, {2});
     }
     void test_mutualInformation() {
         Table tt = istreamTable(tableUTest_dir + "dataset.csv");

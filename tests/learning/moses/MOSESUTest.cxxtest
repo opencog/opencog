@@ -22,6 +22,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <opencog/learning/moses/main/moses_exec.h>
+#include <opencog/util/Logger.h>
 #include <boost/current_function.hpp>
 #include "moses-framework.h"
 
@@ -38,7 +39,7 @@ class MOSESUTest : public CxxTest::TestSuite
 {
 public:
     MOSESUTest() {
-        // logger().setPrintToStdoutFlag(true);
+        // opencog::logger().setPrintToStdoutFlag(true);
         // to control the log level use option -l
     }
 

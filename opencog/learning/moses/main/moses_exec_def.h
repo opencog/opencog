@@ -36,8 +36,11 @@ using namespace std;
 // number of evals string
 static const string number_of_evals_str = "n_evals";
 
-// program option names and abbreviations
-// for their meanings see options_description in moses-exec.cc
+// program option names and abbreviations (one letter). If the
+// abbreviation is empty there is none. For their meanings see
+// options_description in moses-exec.cc.
+//
+// Available abbreviations are: O and Y
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
@@ -66,6 +69,7 @@ static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "F");
 static const pair<string, string> noise_opt("noise", "p");
 static const pair<string, string> include_only_ops_str_opt("include-only-operator", "N");
 static const pair<string, string> ignore_ops_str_opt("ignore-operator", "n");
+static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 static const pair<string, string> opt_algo_opt("opt-algo", "a");
 static const pair<string, string> exemplars_str_opt("exemplar", "e");
 static const pair<string, string> reduct_candidate_effort_opt("reduct-candidate-effort", "E");

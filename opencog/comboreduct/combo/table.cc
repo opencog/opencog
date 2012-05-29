@@ -404,38 +404,50 @@ type_node infer_type_from_token(const string& token)
 }
 
 /**
- * Find the column number associated with the name "target"
+ * Find the column numbers associated with the names features
  * 
  * If the target begins with an alpha character, it is assumed to be a
  * column label. We return the column number; 0 is the left-most column.
  *
- * If the targt is numeric, just assum that it is a column number.
+ * If the target is numeric, just assum that it is a column number.
  */
-int findTargetFeaturePosition(const string& fileName, const string& target)
+vector<int> find_features_positions(const string& fileName,
+                                    const vector<string>& features)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
     get_data_line(*in, line);
     vector<string> labels = tokenizeRow<string>(line);
-
-    // If its just numeric, go with it; double-check the value.
-    if (isdigit(target[0])) {
-        int pos = atoi(target.c_str());
-        pos --;  // let users number columns starting at 1.
-        OC_ASSERT((pos < (int) labels.size()) || (pos < 0),
-            "ERROR: The column number \"%s\" doesn't exist in data file %s",
-            target.c_str(), fileName.c_str());
-        return pos;
+    vector<int> positions;
+    
+    foreach (const string& f, features) {
+        // If its just numeric, go with it; double-check the value.
+        int pos;
+        if (isdigit(f[0])) {
+            pos = atoi(f.c_str());
+            pos --;  // let users number columns starting at 1.
+            OC_ASSERT((pos < (int)labels.size()) || (pos < 0),
+                      "ERROR: The column number \"%s\" doesn't exist in data file %s",
+                      f.c_str(), fileName.c_str());
+            positions.push_back(pos);
+        }
+        else {
+            // Not numeric; search for the column name
+            pos = distance(labels.begin(), find(labels, f));
+            OC_ASSERT(pos < (int)labels.size(),
+                      "ERROR: There is no column labelled \"%s\" in data file %s",
+                      f.c_str(), fileName.c_str());
+        }
+        positions.push_back(pos);
     }
-
-    // Not numeric; search for the column name
-    unsigned pos = distance(labels.begin(), find(labels, target));
-    OC_ASSERT(pos < labels.size(),
-              "ERROR: There is no column labelled \"%s\" in data file %s",
-              target.c_str(), fileName.c_str());
-    return pos;
+    return positions;
 }
-
+// like above but takes only a single feature
+int find_feature_position(const string& fileName, const string& feature) {
+    vector<string> features{feature};
+    return find_features_positions(fileName, features).back();
+}
+        
 type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 {
     type_tree tt(id::lambda_type);
@@ -458,16 +470,26 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 }
 
 /// Create a type tree describing the types of the input columns
-/// and the output column.  "output_col_num" is the column we expect
-/// to use as the output (the dependent variable).
-type_tree infer_data_type_tree(const string& fileName, int output_col_num)
+/// and the output column.
+///        
+/// @param output_col_num is the column we expect to use as the output
+/// (the dependent variable)
+///
+/// @param ignore_col_nums are a list of column to ignore
+///
+/// @return type_tree infered
+type_tree infer_data_type_tree(const string& fileName,
+                               int output_col_num,
+                               vector<int> ignore_col_nums)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
     get_data_line(*in, line);
     if (has_header(fileName))
         get_data_line(*in, line);
-    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line, output_col_num));
+    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line,
+                                                              output_col_num,
+                                                              ignore_col_nums));
     OC_ASSERT(is_well_formed(res),
               "Cannot deduce data types of some columns in line=%s\n",
               line.c_str());
@@ -530,14 +552,16 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 }
 
 istream& istreamTable(istream& in, ITable& it, OTable& ot,
-                      bool has_header, const type_tree& tt, int pos)
+                      bool has_header, const type_tree& tt, int pos,
+                      vector<int> ignore_col_nums)
 {
     string line;
     arity_t arity = type_tree_arity(tt);
 
     if (has_header) {
         get_data_line(in, line);
-        pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, pos);
+        pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, pos,
+                                                                 ignore_col_nums);
         it.set_labels(ioh.first);
         ot.set_label(ioh.second);
         OC_ASSERT(arity == (arity_t)ioh.first.size(),
@@ -568,7 +592,8 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     
     auto parse_line = [&](int i) {
         // tokenize the line and fill the input vector and output
-        pair<vector<string>, string> io = tokenizeRowIO<string>(lines[i], pos);
+        pair<vector<string>, string> io = tokenizeRowIO<string>(lines[i], pos,
+                                                                ignore_col_nums);
 
         // check arity
         OC_ASSERT(arity == (arity_t)io.first.size(),
@@ -588,18 +613,18 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
 }
 
 void istreamTable(const string& file_name, ITable& it, OTable& ot,
-                  const type_tree& tt, int pos)
+                  const type_tree& tt, int pos, vector<int> ignore_col_nums)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable(in, it, ot, has_header(file_name), tt, pos);
+    istreamTable(in, it, ot, has_header(file_name), tt, pos, ignore_col_nums);
 }
 
-Table istreamTable(const string& file_name, int pos)
+Table istreamTable(const string& file_name, int pos, vector<int> ignore_col_nums)
 {
     Table res;
-    res.tt = infer_data_type_tree(file_name, pos);
+    res.tt = infer_data_type_tree(file_name, pos, ignore_col_nums);
     istreamTable(file_name, res.itable, res.otable, res.tt, pos);
     return res;
 }

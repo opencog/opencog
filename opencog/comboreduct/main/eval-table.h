@@ -112,8 +112,8 @@ void read_eval_output_results(const evalTableParameters& pa) {
     // find the position of the target feature of the data file if any
     int target_pos = 0;
     if(!pa.target_feature.empty() && !pa.input_table_file.empty())
-        target_pos = findTargetFeaturePosition(pa.input_table_file,
-                                               pa.target_feature);
+        target_pos = find_feature_position(pa.input_table_file,
+                                           pa.target_feature);
 
     // read data table
     Table table = istreamTable(pa.input_table_file, target_pos);

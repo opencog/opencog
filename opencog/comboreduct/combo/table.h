@@ -28,6 +28,7 @@
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/range/algorithm/find.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -160,7 +161,9 @@ public:
     void set_labels(const std::vector<std::string>& il);
     const std::vector<std::string>& get_labels() const;
 
-    // like get_labels but filter accordingly to a container of arity_t
+    // like get_labels but filtered accordingly to a container of
+    // arity_t. Each value of that container corresponds to the column
+    // index of the ITable (starting from 0).
     template<typename F>
     std::vector<std::string> get_filtered_labels(const F& filter)
     {
@@ -199,7 +202,8 @@ public:
     }
 
     /// return a copy of the input table filtered according to a given
-    /// container of arity_t
+    /// container of arity_t. Each value of that container corresponds
+    /// to the column index of the ITable (starting from 0).
     template<typename F>
     ITable filter(const F& f)
     {
@@ -316,6 +320,9 @@ struct Table
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
+    // Filter according to a container of arity_t. Each value of that
+    // container corresponds to the column index of the ITable
+    // (starting from 0).
     template<typename F> Table filter(const F& f) {
         Table res;
         res.itable = itable.filter(f);
@@ -512,17 +519,32 @@ type_node infer_type_from_token(const std::string& token);
 type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
                                         std::string>& row);
 
-/**
- * Infer the type_tree of the function given underlying the data file
- */
-type_tree infer_data_type_tree(const std::string& dataFileName, int pos = 0);
+/// Create a type tree describing the types of the input columns
+/// and the output column.
+///        
+/// @param output_col_num is the column we expect to use as the output
+/// (the dependent variable)
+///
+/// @param ignore_col_nums are a list of column to ignore
+///
+/// @return type_tree infered
+type_tree infer_data_type_tree(const std::string& fileName,
+                               int output_col_num = 0,
+                               std::vector<int> ignore_col_nums
+                               = std::vector<int>());
 
 /**
- * return the position of the target in the DSV data file fileName. If
- * none raise an assert.
+ * Find the column numbers associated with the names features
+ * 
+ * If the target begins with an alpha character, it is assumed to be a
+ * column label. We return the column number; 0 is the left-most column.
+ *
+ * If the target is numeric, just assum that it is a column number.
  */
-int findTargetFeaturePosition(const std::string& fileName,
-                              const std::string& target);
+std::vector<int> find_features_positions(const std::string& fileName,
+                                         const std::vector<std::string>& features);
+int find_feature_position(const std::string& fileName,
+                          const std::string& feature);
 
 /**
  * Take a row, strip away any nnon-ASCII chars and trailing carriage
@@ -559,24 +581,27 @@ std::vector<T> tokenizeRow(std::string& line)
  * as well as stripping of any carriage-returns.
  */
 template<typename T>
-std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
+std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0,
+                                           std::vector<int> ignore_col_nums
+                                           = std::vector<int>())
 {
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> inputs;
     T output;
     int i = 0;
     foreach (const std::string& t, tok) {
-        if (i++ != pos)
-            inputs.push_back(boost::lexical_cast<T>(t));
-        else output = boost::lexical_cast<T>(t);
+        if (boost::find(ignore_col_nums, i) == ignore_col_nums.end()) {
+            if (i != pos)
+                inputs.push_back(boost::lexical_cast<T>(t));
+            else output = boost::lexical_cast<T>(t);
+        }
+        i++;
     }
     if (pos < 0) {
         output = inputs.back();
         inputs.pop_back();
     }
 
-    // The following assert is to guaranty that the output has been filled
-    OC_ASSERT((int)inputs.size() == i-1);
     return {inputs, output};
 }
 
@@ -592,17 +617,20 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0)
  * position. The default position is 0, the first column.
  */
 std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
-                           bool has_header, const type_tree& tt, int pos = 0);
+                           bool has_header, const type_tree& tt, int pos = 0,
+                           std::vector<int> ignore_col_nums = std::vector<int>());
 /**
  * like above but take an string (file name) instead of istream. If
  * the file name is not correct then an OC_ASSERT is raised.
  */
 void istreamTable(const std::string& file_name,
-                  ITable& it, OTable& ot, const type_tree& tt, int pos = 0);
+                  ITable& it, OTable& ot, const type_tree& tt, int pos = 0,
+                  std::vector<int> ignore_col_nums = std::vector<int>());
 /**
  * like above but return an object Table.
  */
-Table istreamTable(const std::string& file_name, int pos = 0);
+Table istreamTable(const std::string& file_name, int pos = 0,
+                   std::vector<int> ignore_col_nums = std::vector<int>());
 
 //////////////////
 // ostreamTable //
