@@ -54,25 +54,27 @@ class partial_solver
         template<typename Score, typename BScore, typename Optimization>
         void operator()(metapopulation<Score, BScore, Optimization> &metapop)
         {
-            _num_evals = metapop.n_evals();
+            if (_print) {
+                _printer(metapop);
+                return;
+            }
 
+            _num_evals = metapop.n_evals();
             if ((_moses_params.max_evals <= _num_evals) ||
                 metapop.empty())
                 _done = true;
 
-            // _num_gens = metapop.??? FIXME
+            // _num_gens = metapop.??? FIXME check this termination condition too.
 
             if (!_done)
                 candidates(metapop.best_candidates());
-
-            if (_done)
-                _printer(metapop);
+            else
+                final_cleanup(metapop.best_candidates());
         }
 
     protected:
         void candidates(const metapop_candidates&);
         bool candidate(const combo_tree&);
-        bool recurse();
         void effective(combo_tree::iterator,
                        unsigned& good_count,  // return value
                        unsigned& fail_count); //return value
@@ -83,14 +85,20 @@ class partial_solver
         void refresh(const metapop_candidates&,
                      const combo_tree&);
 
+        void final_cleanup(const metapop_candidates&);
+#ifdef TRY_DOING_RECURSION
+        bool recurse();
+#endif
     private:
 
         // Copy, more or less, or arguments, so that moses
         // can be called with these values.
         std::vector<CTable> _ctables;
+        std::vector<CTable> _orig_ctables;
         const type_tree& _table_type_signature;
         std::vector<combo_tree> _exemplars;
         std::vector<combo_tree> _fresh_exemplars;
+        combo_tree _leader;
         const rule& _reduct;
         optim_parameters _opt_params;
         const metapop_parameters& _meta_params;
@@ -103,18 +111,21 @@ class partial_solver
         multibscore_based_bscore<BScore> *_bscore;
 
         score_t _bad_score; // Score we want to get to, at each round.
-        int _num_evals;  // number of evaluations
-        int _num_gens;   // number of generations
-        bool _done;   // Are we there, yet?
+        int _num_evals;     // number of evaluations
+        int _num_gens;      // number of generations
+        bool _done;         // Are we there, yet?
+        bool _print;        // Report results only.
 
         // XXX object lifetime weirdness ... 
         boost::ptr_vector<BScore> score_seq;
 
+#ifdef TRY_DOING_RECURSION
         // Use recursion to narrow the failure cases.
         unsigned _fail_recurse_count;
         double _best_fail_ratio;
         combo_tree _best_fail_tree;
         combo_tree::iterator _best_fail_pred;
+#endif
 };
 
 };};

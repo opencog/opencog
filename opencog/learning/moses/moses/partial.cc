@@ -40,13 +40,19 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
                                const metapop_printer& mmr_pa)
 
     :_ctables(ctables),
+     _orig_ctables(ctables),
      _table_type_signature(table_tt),
-     _exemplars(exemplars), _reduct(reduct),
+     _exemplars(exemplars), _leader(id::cond),
+     _reduct(reduct),
      _opt_params(opt_params), _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
+     _bscore(NULL), _done(false), _print(false)
+
+#ifdef TRY_DOING_RECURSION
      _fail_recurse_count(0), _best_fail_ratio(1.0e30),
      _best_fail_tree(combo_tree()),
      _best_fail_pred(_best_fail_tree.end())
+#endif
 {
 }
 
@@ -85,13 +91,32 @@ int i=0;
         _moses_params.max_evals -= _num_evals;
         _moses_params.max_gens -= _num_gens; // XXX wrong
 
-cout <<"duuude start loop ===================== rec="<<_fail_recurse_count <<" ======= "<<i++<<" ask="<<_bad_score<<endl;
+cout <<"duuude start loop ============================ "<<i++<<" ask="<<_bad_score<<endl;
 cout <<"duuude ================= nevals="<<_num_evals <<" max_evals= "<<_moses_params.max_evals<<endl;
         metapop_moses_results(_exemplars, _table_type_signature,
                               _reduct, _reduct, *_bscore,
                               _opt_params, _meta_params, _moses_params,
                               *this);
-        if (_done) break;
+
+        // If done, one more time, but only to invoke the printer.
+        if (_done) {
+            _print = true;
+            _opt_params.terminate_if_gte = _bad_score;
+            _moses_params.max_score = _bad_score;
+
+            // This should cause the metapop to terminate immediately,
+            // doing nothing other than to invoke the final score printer.
+            _moses_params.max_evals = 0;
+            _moses_params.max_gens = 0;
+
+cout<<"duuu AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA DONE !"<<endl;
+            metapop_moses_results(_exemplars, _table_type_signature,
+                                  _reduct, _reduct, *_bscore,
+                                  _opt_params, _meta_params, _moses_params,
+                                  *this);
+
+            break;
+        }
     }
 cout<<"duuu YYYYYYYYYYYYYYYYYYYYYYYYYYYYY DONE !"<<endl;
 }
@@ -141,6 +166,25 @@ cout<<"duuude copied fresh exemps num="<<_fresh_exemplars.size()<<endl;
     }
 
 cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
+}
+
+void partial_solver::final_cleanup(const metapop_candidates& cands)
+{
+cout<<"duuude ITS THE FINAL COUNTDOWN  Who will it be?"<<endl;
+cout<<"duude leader="<<_leader<<endl;
+    _exemplars.clear();
+    foreach(auto &item, cands) {
+        combo_tree cand = item.first;
+        sib_it lit = _leader.begin();
+        pre_it cit = cand.begin();
+cout<<"duude cand before="<<cand<<endl;
+        for (;lit != _leader.end(); lit++) {
+            cit = cand.insert(cit, *lit);
+            cit++;
+        }
+cout<<"duude cand after="<<cand<<endl;
+        _exemplars.push_back(cand);
+    }
 }
 
 /// Compute the effectiveness of the predicate.
@@ -279,11 +323,10 @@ std::cout<<"duuude got an ineffective const\n"<<std::endl;
             break;
     }
 
-    // If the fail count isn't zero, at least try to find the most graceful
-    // winner.
     if (fail_count) {
 
-        // Yes, this can happen ...
+        // Yes, this can happen ... a clause that fails, and gets
+        // nothing right.
         if (0 == good_count) {
             combo_tree fresh(cand);
             pre_it fit = fresh.begin();
@@ -293,12 +336,16 @@ std::cout<<"duuude got an ineffective const\n"<<std::endl;
             _fresh_exemplars.push_back(fresh);
         }
 
+#ifdef TRY_DOING_RECURSION
+        // If the fail count isn't zero, at least try to find the most
+        // graceful winner.
         double fail_ratio = double(fail_count) / double(good_count);
         if (fail_ratio < _best_fail_ratio) {
             _best_fail_ratio = fail_ratio;
             _best_fail_tree = cand;
             _best_fail_pred = predicate;
         }
+#endif
 
 cout<<"duuude non zero fail count\n"<<endl;
         return false;
@@ -310,6 +357,11 @@ cout<<"duuude non zero fail count\n"<<endl;
     unsigned total_rows = 0;
     unsigned deleted = 0;
     trim_table(_ctables, predicate, deleted, total_rows);
+
+    // Save the predicate itself
+    _leader.prepend_child(_leader.end(), *predicate);
+    _leader.prepend_child(_leader.end(), *(++predicate));
+cout<<"duuude leader is now="<<_leader<<endl;
 
     // XXX replace 0.5 by parameter.
     // XXX should be, ummm, less than the number of a single type in the table,
@@ -356,7 +408,9 @@ cout<<endl;
     return true;
 }
 
+#ifdef TRY_DOING_RECURSION
 /// Recurse, and try to weed out a few more cases.
+// XXX this is definitely not working right now.
 bool partial_solver::recurse()
 {
     if (1 < _fail_recurse_count)
@@ -392,5 +446,6 @@ cout<<"duu ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<endl;
 
     return false;
 }
+#endif
 
 };};
