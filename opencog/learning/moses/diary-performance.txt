@@ -2008,18 +2008,20 @@ Damn. Should have been setting the -Z1 flag to enable cross-over.
 How could I have forgotten?  The results are completely different!
 
 "cro-m10K": as above but with -Z1 flag.  Instantly better than before.
-"cro-m40K": as above, 40K
+
+"cro-m40K": as above, 40K.  No improvement. There seems to be a problem
+       both with knob building, and a different problem with scoring...
 
          cro-m10K  straight      cro-m40K  straight     eff-m160K  straight
 :    time  score plex score  time  score plex score  time  score plex score   
--r0:   54   7.43   6    8
--r1:   71   4.43   9    5
--r2:   68   9.10   7   10
--r3:   69   4.32   8    5
--r4:  176   8.24  13    9
--r5:   95  56.6   12   57 
--r6:   52   9.10   6   10
--r7:  147   5.5   10    6
--r8:  111   3.81  10    4
--r9:   61   5.05   7    6
+-r0:   54   7.43   6    8     269   7.43   6    8
+-r1:   71   4.43   9    5     358   4.43   9    5
+-r2:   68   9.10   7   10     372   9.10   6   10
+-r3:   69   4.32   8    5     337   4.32   8    5
+-r4:  176   8.24  13    9     767   8.24  13    9
+-r5:   95  56.6   12   57     464  56.6   11   57
+-r6:   52   9.10   6   10     315   9.10   6   10
+-r7:  147   5.5   10    6     717   5.5   10    6
+-r8:  111   3.81  10    4     
+-r9:   61   5.05   7    6     
 
