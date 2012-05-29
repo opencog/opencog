@@ -136,23 +136,13 @@ cout<<"duuude got cands sz="<<cands.size()<<endl;
         }
     }
 
-#if 0
-// XXX disable recursion for now, its actually harder than it seems.
+#ifdef TRY_DOING_RECURSION
+    // XXX disable recursion for now, its actually harder than it seems.
     if (_best_fail_ratio < 0.2) {
         if (recurse()) return;
     }
 #endif
 
-    // If we are here, then none of the candidates were any good.
-#if 0
-    // Tighten up the score, and try again.
-    // XXX this is wrong, should be fraction of the max score.
-    // _bad_score = ceil(0.8 * _bad_score);
-
-    // XXX too much punishment just trains for ineffectual first predicates.
-    foreach(BScore& bs, _bscore->bscores)
-        bs.punish *= 1.5;
-#endif
     // If we are here, then none of the candidates were any good.
     // Try again, priming the metapop with the previous best.
     _exemplars.clear();
@@ -168,6 +158,12 @@ cout<<"duuude copied fresh exemps num="<<_fresh_exemplars.size()<<endl;
 cout <<"duuude nothing good, try aaing with score="<<_bad_score<<endl;
 }
 
+/// Final cleanup, before termination.
+///
+/// We've run out of time. So assemble the best possible exemplars out
+/// of the pieces we've accumulated, and feed those back into the main
+/// algo as exemplars.  The main algo will realize that it's out of time,
+/// it will just score these, print them, and then all is done.
 void partial_solver::final_cleanup(const metapop_candidates& cands)
 {
 cout<<"duuude ITS THE FINAL COUNTDOWN  Who will it be?"<<endl;
@@ -188,6 +184,16 @@ cout<<"duude leader="<<_leader<<endl;
         _reduct(cand);
         _exemplars.push_back(cand);
     }
+
+    // Recreate the original scoring tables, too.
+    score_seq.clear();
+    foreach(const CTable& ctable, _orig_ctables) {
+        // FYI, no mem-leak, as ptr_vector seems to call delete.
+        // XXX !?!?! relly?  as we've got a lifetime problem here.
+        score_seq.push_back(new BScore(ctable));
+    }
+    delete _bscore;
+    _bscore = new multibscore_based_bscore<BScore>(score_seq);
 }
 
 /// Compute the effectiveness of the predicate.
