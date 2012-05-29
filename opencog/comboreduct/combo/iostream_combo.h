@@ -178,7 +178,15 @@ inline bool ann_str_to_vertex(const std::string& str, vertex& v)
 inline bool argument_str_to_vertex(const std::string& str, vertex& v)
 {
     if (str[0] == '$') {
-        arity_t arg = boost::lexical_cast<arity_t>(str.substr(1));
+        arity_t arg = 0;
+        try {
+            arg = boost::lexical_cast<arity_t>(str.substr(1));
+        } catch (boost::bad_lexical_cast&) {
+            // The ANN types start with a dollar sign too, but those
+            // dollar signs are followed by not-a-number.
+            return false;
+        }
+
         OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(arg);
         return true;
