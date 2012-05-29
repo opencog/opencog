@@ -69,7 +69,6 @@ static const builtin_description bd[] =
     { id::logical_not,          "->(boolean boolean)" },
     { id::logical_true,         "boolean" },
     { id::logical_false,        "boolean" },
-    { id::contin_if,            "->(boolean contin contin contin)" },
     { id::plus,                 "->(arg_list(contin) contin)" },
     { id::times,                "->(arg_list(contin) contin)" },
     { id::div,                  "->(contin contin contin)" },
@@ -88,10 +87,12 @@ static const builtin_description bd[] =
     //     cond(p1 v1 p2 v2 .. pn vn y) 
     // means pattern matching:
     //     if (p1) v1; else if (p2) v2; else if ... else y
-    // XXX For just right now, 'value' will be an enum, but really,
-    // it should be union(bool, contin, enum, etc). FIXME later.
     //
-    { id::cond,               "->(arg_list(boolean enum) enum enum)" },
+    // The 'value' is marked unknown, as it can be of any type.
+    { id::cond,               "->(arg_list(boolean unknown) unknown unknown)" },
+
+    // Someday, contin_if will be obsolted/equivalent to above cond ...
+    { id::contin_if,            "->(boolean contin contin contin)" },
 
     // Tests for equality. XXX Someday, we should also allow equality
     // testing for booleans, contin as well, but not today. 

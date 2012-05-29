@@ -76,7 +76,7 @@ const rule* select_rule(string rule_ref_str)
                           "subtree_to_enf"))
 
         // Contin buried in below greater_than_zero predicate.
-        ("PRD", make_pair(new simplify_predicates(reduct_effort, ignore_ops),
+        ("PRD", make_pair(new downwards(simplify_predicates(reduct_effort, ignore_ops)),
                           "simplify_predicates"))
         // Contin rules
         ("PZ", make_pair(new downwards(reduce_plus_zero()),

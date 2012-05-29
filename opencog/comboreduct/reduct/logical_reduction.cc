@@ -60,15 +60,15 @@ logical_reduction::logical_reduction(const vertex_set& ignore_ops)
     int reduct_effort = 2;
 
     // Can't be static, due to ignore_ops argument
-    medium = new
-        sequential(downwards(simplify_predicates(reduct_effort, ignore_ops), id::boolean_type),
-                   downwards(reduce_nots(), id::boolean_type),
+    medium = new sequential(
+        downwards(simplify_predicates(reduct_effort, ignore_ops), id::boolean_type),
+        downwards(reduce_nots(), id::boolean_type),
                    
-                   iterative(sequential(pre_subtree_to_enf,
-                                        subtree_to_enf(),
-                                        post_subtree_to_enf)),
-                   downwards(remove_unary_junctors(), id::boolean_type),
-                   "medium");
+        iterative(sequential(pre_subtree_to_enf,
+                             subtree_to_enf(),
+                             post_subtree_to_enf)),
+        downwards(remove_unary_junctors(), id::boolean_type),
+        "medium");
 
     // complexe
     complexe = new
