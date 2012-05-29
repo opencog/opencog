@@ -697,6 +697,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 // Will be set to true if at some point arg_list is reached
                 bool is_arg_list_reached = false;
                 type_tree_sib_it arg_list_head;
+                type_tree_sib_it input_arg_it = cia_it;
 
                 // Iterate over the applied arguments, and possibly
                 // over the operand of tr in case tr is not empty.
@@ -705,7 +706,8 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 {
                     // input_arg_it is either cia_it, or if it is arg_list,
                     // then it will cycle over the arg_list contents.
-                    type_tree_sib_it input_arg_it = cia_it;
+                    if (!is_arg_list_reached)
+                        input_arg_it = cia_it;
 
                     // Advance the arg list counter.  In almost all
                     // cases, the arglist has just one child total, and
@@ -789,7 +791,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                 }
                                 message << "has type "
                                         << type_tree(output_it)
-                                        << " which does not inherits from "
+                                        << " which does not inherit from "
                                         << type_tree(input_arg_it);
                                 logger().error(message.str().c_str());
                                 //~log message
@@ -821,7 +823,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                             }
                             message << "has type "
                                     << type_tree(arg_app)
-                                    << " which does not inherits from "
+                                    << " which does not inherit from "
                                     << type_tree(input_arg_it);
                             logger().error(message.str().c_str());
                             //~log message
