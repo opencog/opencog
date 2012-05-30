@@ -50,6 +50,7 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
      _bscore(NULL), 
+     _straight_bscore(NULL), 
      _num_evals(0), _num_gens(0),
      _done(false)
 
@@ -64,6 +65,7 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
 partial_solver::~partial_solver()
 {
     delete _bscore;
+    delete _straight_bscore;
 }
 
 /// Implements the "leave well-enough alone" algorithm.
@@ -111,7 +113,7 @@ void partial_solver::solve()
 
             logger().info() << "well-enough DONE!";
             metapop_moses_results(_exemplars, _table_type_signature,
-                                  _reduct, _reduct, *_bscore,
+                                  _reduct, _reduct, *_straight_bscore,
                                   _opt_params, _meta_params, _moses_params,
                                   _printer);
 
@@ -172,14 +174,15 @@ void partial_solver::final_cleanup(const bscored_combo_tree_set& cands)
     }
 
     // Recreate the original scoring tables, too.
-    score_seq.clear();
+    // This time, use the non-graded (flat) scorer, that simply counts
+    // the number of right & wrong, without weighting.
+    straight_score_seq.clear();
     foreach(const CTable& ctable, _orig_ctables) {
         // FYI, no mem-leak, as ptr_vector seems to call delete.
         // XXX !?!?! relly?  as we've got a lifetime problem here.
-        score_seq.push_back(new BScore(ctable));
+        straight_score_seq.push_back(new StraightBScore(ctable));
     }
-    delete _bscore;
-    _bscore = new multibscore_based_bscore<BScore>(score_seq);
+    _straight_bscore = new multibscore_based_bscore<StraightBScore>(straight_score_seq);
 }
 
 /// Compute the effectiveness of the predicate.

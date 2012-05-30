@@ -109,13 +109,18 @@ class partial_solver
         typedef enum_effective_bscore BScore;
         multibscore_based_bscore<BScore> *_bscore;
 
+        typedef enum_table_bscore StraightBScore;
+        multibscore_based_bscore<StraightBScore> *_straight_bscore;
+
         int _num_evals;     // number of evaluations
         int _num_gens;      // number of generations
         bool _done;         // Are we there, yet?
         bool _print;        // Report results only.
 
-        // XXX object lifetime weirdness ... 
+        // XXX keep these here due object lifetime weirdness ... 
+        // There is something bizarre/wrong with how ptr_vector works!?!?
         boost::ptr_vector<BScore> score_seq;
+        boost::ptr_vector<StraightBScore> straight_score_seq;
 };
 
 };};
