@@ -115,12 +115,8 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info("Deme generation: %i", gen_idx);
 
         // Run a generation
-        bool more = mp.expand(pa.max_evals - mp.n_evals(), pa.ignore_ops,
+        bool done = mp.expand(pa.max_evals - mp.n_evals(), pa.ignore_ops,
                       pa.perceptions, pa.actions);
-
-        // In iterative hillclimbing, it is possible (but not likely)
-        // that the metapop gets empty and expand returns false.
-        if (!more) break;
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
@@ -138,12 +134,17 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             logger().info(ss.str());
         }
 
+        // In iterative hillclimbing, it is possible (but not likely)
+        // that the metapop gets empty and expand returns false.
+        // Alternately, the candidate callback may urge a premature
+        // termination.
+        if (done) break;
+
         if (mp.best_score() >= pa.max_score || mp.empty())
             break;
     }
-    // Logger
+
     logger().info("MOSES ends");
-    // ~Logger
 }
 
 } // ~namespace moses

@@ -76,7 +76,10 @@ struct metapop_parameters
         include_dominated(_include_dominated),
         complexity_temperature(_complexity_temperature),
         enable_cache(_enable_cache),
-        jobs(_jobs) {}
+        jobs(_jobs),
+        merge_callback(NULL),
+        callback_user_data(NULL)
+        {}
 
     // The max number of candidates considered to be added to the
     // metapopulation, if negative then all candidates are considered.
@@ -101,6 +104,9 @@ struct metapop_parameters
     // Number of jobs for metapopulation maintenance such as merging
     // candidates to the metapopulation.
     unsigned jobs;
+
+    bool (*merge_callback)(bscored_combo_tree_set&, void*);
+    void *callback_user_data;
 };
 
 /**
@@ -168,15 +174,19 @@ struct metapopulation : public bscored_combo_tree_set
      * @param pa      Control parameters for this class.
      */
     metapopulation(const std::vector<combo_tree>& bases,
-                   const type_tree& tt,
+                   const type_tree& type_signature,
                    const reduct::rule& si_ca,
                    const reduct::rule& si_kb,
-                   const CScoring& sc, const BScoring& bsc,
+                   const CScoring& sc,
+                   const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        _type_sig(tt), simplify_candidate(&si_ca),
-        simplify_knob_building(&si_kb), _cscorer(sc),
-        _bscorer(bsc), optimize(opt), params(pa), _n_evals(0),
+        _type_sig(type_signature),
+        simplify_candidate(&si_ca),
+        simplify_knob_building(&si_kb),
+        _cscorer(sc),
+        _bscorer(bsc), optimize(opt), params(pa),
+        _n_evals(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
@@ -352,9 +362,11 @@ struct metapopulation : public bscored_combo_tree_set
         return params.complexity_temperature * 30.0 / 100.0;
     }
 
-    /// Merge candidates in to the metapopulation. The set of
-    /// candidates might be changed during merge, with the dominated
-    /// candidates removed during the merge.
+    /// Merge candidates in to the metapopulation. 
+    /// If the include-dominated flag is not set, the set of candidates
+    /// might be changed during merge, with the dominated candidates
+    /// removed during the merge. XXX Really?  It looks like the code
+    /// does this culling *before* this method is called ...
     template<typename Candidates>
     void merge_candidates(Candidates& candidates)
     {
@@ -439,10 +451,13 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     /**
-     * expand -- Do representation-building and create a deme first, and
-     * then do some optimization according to the scoring function,
-     * and add all unique non-dominated trees in the final deme as
-     * potential exemplars for future demes.
+     * expand -- Run one deme-creation and optimization step.
+     *
+     * A single step consists of representation-building, to create
+     * a deme, followed by optimization, (according to the specified
+     * optimizer and scoring function), and finally, a merger of
+     * the unique (and possibly non-dominated) trees back into the
+     * metapopulation, for potential use as exemplars for futre demes.
      *
      * @param max_evals    the max evals
      * @param ignore_ops   the operator set to ignore
@@ -462,7 +477,7 @@ struct metapopulation : public bscored_combo_tree_set
 
         _n_evals += optimize_deme(max_evals);
 
-        close_deme();
+        bool done = close_deme();
 
         if (logger().isInfoEnabled()) {
             logger().info()
@@ -471,7 +486,7 @@ struct metapopulation : public bscored_combo_tree_set
         }
 
         // Might be empty, if the eval fails and throws an exception
-        return !empty();
+        return done || empty();
     }
 
     /**
@@ -587,11 +602,12 @@ struct metapopulation : public bscored_combo_tree_set
      * 1) mark the current deme exemplar to not explore it again,
      * 2) merge non-dominated candidates in the metapopulation,
      * 3) delete the deme instance from memory.
+     * Return true if further deme exploration should be halted.
      */
-    void close_deme()
+    bool close_deme()
     {
         if (_rep == NULL || _deme == NULL)
-            return;
+            return false;
 
         int eval_during_this_deme = std::min(n_evals() - _evals_before_this_deme,
                                              (int)_deme->size());
@@ -729,6 +745,7 @@ struct metapopulation : public bscored_combo_tree_set
             OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
                                compute_bscore);
         }
+
         bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
         if (!params.include_dominated) {
 
@@ -769,6 +786,9 @@ struct metapopulation : public bscored_combo_tree_set
             }
         }
 
+        bool done = false;
+        if (params.merge_callback)
+            done = (*params.merge_callback)(candidates, params.callback_user_data);
         merge_candidates(candidates);
 
         if (logger().isDebugEnabled()) {
@@ -784,6 +804,8 @@ struct metapopulation : public bscored_combo_tree_set
         delete _rep;
         _deme = NULL;
         _rep = NULL;
+
+        return done;
     }
 
     // Return the set of candidates not present in the metapopulation.
@@ -1247,7 +1269,6 @@ struct metapopulation : public bscored_combo_tree_set
     const BScoring& _bscorer; // behavioral score
     Optimization &optimize;
     metapop_parameters params;
-
 protected:
     int _n_evals;
     int _evals_before_this_deme;
