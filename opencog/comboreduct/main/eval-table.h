@@ -78,11 +78,12 @@ struct evalTableParameters {
 template<typename Out>
 Out& output_results(Out& out, const evalTableParameters& pa,
                     const ITable& it, const OTable& ot, const OTable& ot_tr) {
-    if (pa.display_output)
+    if (pa.display_output) {
         if (pa.display_inputs)
             ostreamTable(out, it, ot_tr, pa.target_feature); // print table
         else
             out << ot_tr; // print output table
+    }
     if (pa.display_RMSE)
         out << "Root mean square error = "
             << ot.root_mean_square_error(ot_tr) << endl;

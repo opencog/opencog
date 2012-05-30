@@ -107,7 +107,7 @@ int main(int argc,char** argv) {
         (opt_desc_str(display_output_opt).c_str(), value<bool>(&pa.display_output)->default_value(true),
          "Display the output column resulting from applying the combo program on the input table.\n")
         
-        (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(true),
+        (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
          "Display the inputs as well.\n")
 
         (opt_desc_str(display_RMSE_opt).c_str(), value<bool>(&pa.display_RMSE)->default_value(false),
