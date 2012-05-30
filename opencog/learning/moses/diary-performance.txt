@@ -2047,8 +2047,13 @@ The data below contains these bug fixes.
 -r9:   56   5.05   7    6     314   5.05   7    6    1663   5.05   7    6
         avg time==88===       avg time===492===       ag time===2664===
 
-"well-m10K":  The well-enough alone algo. Not expecting much, but lets
-        give it a whirl.  This includes the -Z1 flag.
+"well-m10K":  The well-enough alone algo. At bzr rev 7025. 
+        Not expecting much, but lets give it a whirl.  This includes
+        the -Z1 flag.  However, this data includes a bug and a "feature":
+        the bug is that best candidates were sorted by complexity, in
+        the wrong direction.  The "feature" is that only the best candidates
+        were considered; in fact, we should consider all of them.
+        These are fixed in bzr rev 7026 and 7028, respectively.
 
 "well-m40K":  As above.
 
@@ -2057,11 +2062,13 @@ The data below contains these bug fixes.
 -r0:   41   1  100  45     20   50        359   1  100   8.64  27   10
 -r1:  224   -   -    3.62  21    4       1304   -   -    3.62  30    4
 -r2:  151   -   -    5.60  22    6       1064   -   -    5.6   27    6
--r3:  111   -   -    7.05  21    8
--r4:  106   -   -   57.5   17   58        
--r5:   56   -   -   54.8   13   55        
--r6:   41   -   -  100     14  100        
--r7:   99   -   -   50     18   50        
--r8:   63   2   71  17.01  27   21        
--r9:  124   -   -    9.24  20   10        
-           avg time===102====
+-r3:  111   -   -    7.05  21    8        934   -   -    7.05  30    8
+-r4:  106   -   -   57.5   17   58        822   -   -    7.05  35    8
+-r5:   56   -   -   54.8   13   55        490   -   -   54.8   22   55
+-r6:   41   -   -  100     14  100        566   1  100   4.97  30    6
+-r7:   99   -   -   50     18   50        644   -   -   50     25   50
+-r8:   63   2   71  17.01  27   21        337   2   71  17.01  31   21
+-r9:  124   -   -    9.24  20   10        691   -   -    9.24  24   10
+           avg time===102====                 avg time===721===
+
+

@@ -67,13 +67,13 @@ class partial_solver
             // _num_gens = metapop.??? FIXME check this termination condition too.
 
             if (!_done)
-                candidates(metapop.best_candidates());
+                candidates(metapop);
             else
-                final_cleanup(metapop.best_candidates());
+                final_cleanup(metapop);
         }
 
     protected:
-        void candidates(const metapop_candidates&);
+        void candidates(const bscored_combo_tree_set&);
         bool candidate(const combo_tree&);
         void effective(combo_tree::iterator,
                        unsigned& good_count,  // return value
@@ -82,10 +82,10 @@ class partial_solver
                         const combo_tree::iterator,
                         unsigned& deleted,   // return value
                         unsigned& total);    // return value
-        void refresh(const metapop_candidates&,
+        void refresh(const bscored_combo_tree_set&,
                      const combo_tree&);
 
-        void final_cleanup(const metapop_candidates&);
+        void final_cleanup(const bscored_combo_tree_set&);
 #ifdef TRY_DOING_RECURSION
         bool recurse();
 #endif

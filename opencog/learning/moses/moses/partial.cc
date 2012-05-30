@@ -136,7 +136,7 @@ cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcoun
 /// predicates are "good enough".  If we find one that is, then trim
 /// the scoring tables, and return (so as to run moses on the smaller
 /// problem).
-void partial_solver::candidates(const metapop_candidates& cands)
+void partial_solver::candidates(const bscored_combo_tree_set& cands)
 {
     logger().info() << "well-enough found " << cands.size() << " candidates";
     foreach(auto &item, cands) {
@@ -175,7 +175,7 @@ void partial_solver::candidates(const metapop_candidates& cands)
 /// of the pieces we've accumulated, and feed those back into the main
 /// algo as exemplars.  The main algo will realize that it's out of time,
 /// it will just score these, print them, and then all is done.
-void partial_solver::final_cleanup(const metapop_candidates& cands)
+void partial_solver::final_cleanup(const bscored_combo_tree_set& cands)
 {
     logger().info() << "well-enough ending with " << cands.size()
                     << " exemplars. Prefix count= " << _prefix_count
@@ -272,7 +272,7 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 /// Refresh the exemplars list.
 /// We assume the previous list wasn't bad, but since we've handled the
 /// leading predicate already, we don't need it.  Chop it off.
-void partial_solver::refresh(const metapop_candidates& cands,
+void partial_solver::refresh(const bscored_combo_tree_set& cands,
                              const combo_tree& curr_cand)
 {
     foreach(auto &item, cands) {
