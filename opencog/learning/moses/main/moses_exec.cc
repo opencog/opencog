@@ -932,6 +932,10 @@ int moses_exec(int argc, char** argv)
                                                   ignore_features_str);
         ostreamContainer(logger().info() << "Ignore the following columns: ",
                          ignore_features);
+        OC_ASSERT(boost::find(ignore_features, target_column)
+                  == ignore_features.end(),
+                  "You cannot ignore the target feature (column %d)",
+                  target_column);
     }
 
     // Read labels contained in the data file.
