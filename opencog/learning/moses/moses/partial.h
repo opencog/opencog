@@ -55,15 +55,18 @@ class partial_solver
         void operator()(metapopulation<Score, BScore, Optimization> &metapop)
         {
             _num_evals = metapop.n_evals();
-            if ((_moses_params.max_evals <= _num_evals) ||
-                metapop.empty())
-                _done = true;
 
-            // XXX we should also check max_gens above ...
-            // _num_gens = metapop.??? FIXME check this termination condition too.
+            // If _most_good is zero, then we are here because the
+            // metapopulation came to a natural end. We are done, in
+            // that case.  Otherwise, restart the search where we left
+            // off.
+            if (0 == _most_good)
+                _done = true;
 
             if (_done)
                 final_cleanup(metapop);
+            else
+                refresh(metapop);
         }
 
         static bool check_candidates(bscored_combo_tree_set& cands, void *ud)
@@ -74,7 +77,8 @@ class partial_solver
 
     protected:
         bool eval_candidates(const bscored_combo_tree_set&);
-        bool candidate(const combo_tree&);
+        void eval_candidate(const combo_tree&);
+        void record_prefix();
         void effective(combo_tree::iterator,
                        unsigned& good_count,  // return value
                        unsigned& fail_count); //return value
@@ -82,8 +86,7 @@ class partial_solver
                         const combo_tree::iterator,
                         unsigned& deleted,   // return value
                         unsigned& total);    // return value
-        void refresh(const bscored_combo_tree_set&,
-                     const combo_tree&);
+        void refresh(const bscored_combo_tree_set&);
 
         void final_cleanup(const bscored_combo_tree_set&);
     private:
@@ -94,12 +97,10 @@ class partial_solver
         std::vector<CTable> _orig_ctables;
         const type_tree& _table_type_signature;
         std::vector<combo_tree> _exemplars;
-        std::vector<combo_tree> _fresh_exemplars;
         combo_tree _leader;
         unsigned _prefix_count;
         const rule& _reduct;
         optim_parameters _opt_params;
-        score_t _orig_terminate_if_gte;
         metapop_parameters _meta_params;
         moses_parameters _moses_params;
         const metapop_printer& _printer;
@@ -115,7 +116,9 @@ class partial_solver
         int _num_evals;     // number of evaluations
         int _num_gens;      // number of generations
         bool _done;         // Are we there, yet?
-        bool _print;        // Report results only.
+
+        unsigned _most_good;
+        combo_tree::iterator _best_predicate;
 
         // XXX keep these here due object lifetime weirdness ... 
         // There is something bizarre/wrong with how ptr_vector works!?!?

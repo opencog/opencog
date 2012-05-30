@@ -46,19 +46,13 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _prefix_count(0),
      _reduct(reduct),
      _opt_params(opt_params),
-     _orig_terminate_if_gte(_opt_params.terminate_if_gte),
      _meta_params(meta_params),
      _moses_params(moses_params), _printer(mmr_pa),
      _bscore(NULL), 
      _straight_bscore(NULL), 
      _num_evals(0), _num_gens(0),
-     _done(false)
-
-#ifdef TRY_DOING_RECURSION
-     _fail_recurse_count(0), _best_fail_ratio(1.0e30),
-     _best_fail_tree(combo_tree()),
-     _best_fail_pred(_best_fail_tree.end())
-#endif
+     _done(false),
+     _most_good(0)
 {
 }
 
@@ -93,7 +87,10 @@ void partial_solver::solve()
         if (_moses_params.max_evals <= _num_evals) break; 
 
         _moses_params.max_evals -= _num_evals;
-        _moses_params.max_gens -= _num_gens; // XXX wrong
+        // XXX TODO: we need to get the actual number of gens run, back
+        // from moses, and subtract it here.  But there's no easy way
+        // to get this number ...
+        _moses_params.max_gens -= _num_gens;
 
         logger().info() << "well-enough start loop " << loop_count++
                         << " previous num_evals=" << _num_evals
@@ -133,16 +130,18 @@ cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcoun
 bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
 {
     logger().info() << "well-enough received " << cands.size() << " candidates";
+    _most_good = 0;
     foreach(auto &item, cands) {
         const combo_tree& cand = item.first;
-        if (candidate(cand)) {
-            refresh(cands, cand);
-            return true;   
-        }
+        eval_candidate(cand);
     }
 
-    // If we are here, then none of the candidates were any good.
-    return false;
+    // If none of the candidates were any good, we are done.
+    if (0 == _most_good)  return false;
+
+    // Make note of the best one found, and restart the metapop.
+    record_prefix();
+    return true;   
 }
 
 /// Final cleanup, before termination.
@@ -246,22 +245,18 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
     }
 }
 
-/// Refresh the exemplars list.
-/// We assume the previous list wasn't bad, but since we've handled the
-/// leading predicate already, we don't need it.  Chop it off.
-void partial_solver::refresh(const bscored_combo_tree_set& cands,
-                             const combo_tree& curr_cand)
+/// Refresh the exemplars list.  Basically, just copy the entire
+/// metapopulation from the previous run.
+void partial_solver::refresh(const bscored_combo_tree_set& cands)
 {
     foreach(auto &item, cands) {
         const combo_tree& cand = item.first;
-        if (cand == curr_cand)
-             continue;  // We already trimmed this one down, earlier.
         _exemplars.push_back(cand);
     }
 }
 
 /// Evaluate a single candidate
-bool partial_solver::candidate (const combo_tree& cand)
+void partial_solver::eval_candidate (const combo_tree& cand)
 {
     // Are we done yet?
     penalized_behavioral_score pbs = _bscore->operator()(cand);
@@ -272,16 +267,10 @@ bool partial_solver::candidate (const combo_tree& cand)
     logger().debug() << "well-enough candidate=" << total_score
                      << " " << cand;
 
-    if (_orig_terminate_if_gte <= total_score) {
-        _done = true;
-        return true;
-    }
-
     // We don't want constants; what else we got?
     pre_it it = cand.begin();
-    if (is_enum_type(*it)) {
-        return false;
-    }
+    if (is_enum_type(*it))
+        return;
 
     OC_ASSERT(*it == id::cond, "Error: unexpected candidate!");
 
@@ -298,7 +287,7 @@ bool partial_solver::candidate (const combo_tree& cand)
         if (is_enum_type(*sib)) {
             // If we are here, all previous predicates were ineffective.
             logger().debug() << "well-enough reject constant preceeded by ineffective clause";
-            return false;
+            return;
         }
 
         predicate = sib;
@@ -316,46 +305,36 @@ bool partial_solver::candidate (const combo_tree& cand)
             break;
     }
 
-    if (fail_count) {
+    // Predicate must have perfect accuracy to be acceptable to us.
+    if (fail_count)
+        return;
 
-        // Yes, this can happen ... a clause that fails, and gets
-        // nothing right.
-        if (0 == good_count) {
-            combo_tree fresh(cand);
-            pre_it fit = fresh.begin();
-            sib_it fsib = fit.begin();
-            fresh.erase(fsib++);
-            fresh.erase(fsib++);
-            _fresh_exemplars.push_back(fresh);
-        }
+    // ... and it must be better than what we already know of.
+    if (good_count <= _most_good)
+        return;
 
-#ifdef TRY_DOING_RECURSION
-        // If the fail count isn't zero, at least try to find the most
-        // graceful winner.
-        double fail_ratio = double(fail_count) / double(good_count);
-        if (fail_ratio < _best_fail_ratio) {
-            _best_fail_ratio = fail_ratio;
-            _best_fail_tree = cand;
-            _best_fail_pred = predicate;
-        }
-#endif
-        return false;
-    }
+    logger().info() << "well-enough found a good predicate good_count=" << good_count;
+    // If we are here, we found something...
+    _most_good = good_count;
+    _best_predicate = predicate;
+}
 
     // If we are here, the first predicate is correctly identifying
     // all cases; we can save it, and remove all table elements that
     // it correctly identified.
+void partial_solver::record_prefix()
+{
     unsigned total_rows = 0;
     unsigned deleted = 0;
-    trim_table(_ctables, predicate, deleted, total_rows);
+    trim_table(_ctables, _best_predicate, deleted, total_rows);
     logger().info() << "well-enough deleted " << deleted
                     << " rows out of total " << total_rows;
 
     // Save the predicate itself
     _prefix_count++;
     sib_it ldr = _leader.begin();
-    _leader.insert_subtree(ldr.end(), predicate);
-    _leader.insert_subtree(ldr.end(), ++predicate);
+    _leader.insert_subtree(ldr.end(), _best_predicate);
+    _leader.insert_subtree(ldr.end(), ++_best_predicate);
     logger().info() << "well-enough " << _prefix_count
                     << " prefix=" << _leader;
 
@@ -368,33 +347,6 @@ bool partial_solver::candidate (const combo_tree& cand)
     }
     delete _bscore;
     _bscore = new multibscore_based_bscore<BScore>(score_seq);
-
-    // Prime the pump with the remainder of what had been learned.
-    combo_tree fresh(cand);
-    pre_it fit = fresh.begin();
-    sib_it fsib = fit.begin();
-    sib_it fpred = next(fsib, distance(it.begin(), predicate));
-    while(1) {
-
-        if (is_enum_type(*fsib))
-            break;
-
-        if (fsib == fpred) {
-            fresh.erase(fsib++);
-            fresh.erase(fsib++);
-            break;
-        }
-
-        // If we are here, the predicate was ineffective, so erase it.
-        fresh.erase(fsib++);
-        fresh.erase(fsib++);
-    }
-    logger().info() << "well-enough fresh exemplar=" << fresh;
-
-    _exemplars.clear();
-    _exemplars.push_back(fresh);
-
-    return true;
 }
 
 
