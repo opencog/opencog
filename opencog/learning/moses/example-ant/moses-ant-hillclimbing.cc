@@ -46,14 +46,8 @@ using namespace boost;
 using namespace ant_combo;
 using namespace std;
 
-
-//typedef std::set<combo::vertex> operator_set;
-//typedef operator_set::iterator operator_set_it;  
-
-//typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> > 
-//    combo_tree_ns_set;
-
-int main(int argc,char** argv) { 
+int main(int argc,char** argv) 
+{
   int max_evals,rand_seed;
   try {
     if (argc!=3)
@@ -72,7 +66,6 @@ int main(int argc,char** argv) {
   ant_score scorer;
   ant_bscore bscorer;
 
-  operator_set ignore_ops;
   combo_tree_ns_set perceptions;
   combo_tree_ns_set actions;
 
@@ -82,35 +75,19 @@ int main(int argc,char** argv) {
 
   perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
 
-/*
-  metapopulation<ant_score,ant_bscore,iterative_hillclimbing> 
-    metapop(combo_tree(id::sequential_and),tt,action_reduction(),
-	    scorer,
-	    bscorer,
-            iterative_hillclimbing());
-  //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
-  moses::moses(metapop,max_evals,0,&os,&perceptions,&actions,op);
-*/
-
-/*
-  metapopulation<ant_score,ant_bscore,univariate_optimization> 
-    metapop(combo_tree(id::sequential_and),tt,action_reduction(),
-	    scorer,
-	    bscorer,
-            univariate_optimization());
-  moses::moses(metapop,max_evals,0,&os,&perceptions,&actions,op);
-*/
+  metapop_parameters metaparms;
+  metaparms.perceptions = &perceptions;
+  metaparms.actions = &actions;
 
   hill_climbing hc;
   metapopulation<ant_score, ant_bscore, hill_climbing> 
       metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-              scorer, bscorer, hc);
+              scorer, bscorer, hc, metaparms);
   
   boost::program_options::variables_map vm;
   jobs_t jobs;
 
-  moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0,
-                               ignore_ops, &perceptions, &actions);
+  moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
   moses::moses(metapop, moses_param);
 }
 

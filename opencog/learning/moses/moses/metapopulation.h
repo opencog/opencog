@@ -58,6 +58,8 @@ using boost::logic::tribool;
 using boost::logic::indeterminate;
 using namespace combo;
 
+static const operator_set empty_ignore_ops = operator_set();
+
 /**
  * parameters about deme management
  */
@@ -68,15 +70,21 @@ struct metapop_parameters
                        bool _revisit = false,
                        bool _include_dominated = true,
                        score_t _complexity_temperature = 3.0f,
+                       const operator_set& _ignore_ops = empty_ignore_ops,
                        bool _enable_cache = false,
-                       unsigned _jobs = 1) :
+                       unsigned _jobs = 1,
+                       const combo_tree_ns_set* _perceptions = NULL,
+                       const combo_tree_ns_set* _actions = NULL) :
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         revisit(_revisit),
         include_dominated(_include_dominated),
         complexity_temperature(_complexity_temperature),
+        ignore_ops(_ignore_ops),
         enable_cache(_enable_cache),
         jobs(_jobs),
+        perceptions(_perceptions),
+        actions(_actions),
         merge_callback(NULL),
         callback_user_data(NULL)
         {}
@@ -96,7 +104,11 @@ struct metapop_parameters
     // performance by avoiding local maxima.
     bool include_dominated;
 
+    // Boltzmann temperature ...
     score_t complexity_temperature;
+
+    // the set of operators to ignore
+    operator_set ignore_ops;
 
     // Enable caching of scores.
     bool enable_cache;
@@ -104,6 +116,11 @@ struct metapop_parameters
     // Number of jobs for metapopulation maintenance such as merging
     // candidates to the metapopulation.
     unsigned jobs;
+
+    // the set of perceptions of an optional interactive agent
+    const combo_tree_ns_set* perceptions;
+    // the set of actions of an optional interactive agent
+    const combo_tree_ns_set* actions;
 
     bool (*merge_callback)(bscored_combo_tree_set&, void*);
     void *callback_user_data;
@@ -460,19 +477,13 @@ struct metapopulation : public bscored_combo_tree_set
      * metapopulation, for potential use as exemplars for futre demes.
      *
      * @param max_evals    the max evals
-     * @param ignore_ops   the operator set to ignore
-     * @param perceptions  set of perceptions of an interactive agent
-     * @param actions      set of actions of an interactive agent
      *
      * @return return true if expansion has succeeded, false otherwise
      *
      */
-    bool expand(int max_evals,
-                const operator_set& ignore_ops = operator_set(),
-                const combo_tree_ns_set* perceptions = NULL,
-                const combo_tree_ns_set* actions = NULL)
+    bool expand(int max_evals)
     {
-        if (!create_deme(ignore_ops, perceptions, actions))
+        if (!create_deme())
             return false;
 
         _n_evals += optimize_deme(max_evals);
@@ -492,16 +503,10 @@ struct metapopulation : public bscored_combo_tree_set
     /**
      * Create the deme
      *
-     * @param ignore_ops   the operators to ignore
-     * @param perceptions  a set of perceptions of an interactive agent
-     * @param actions      a set of actions of an interactive agent
-     *
      * @return return true if it creates deme successfully,otherwise false.
      */
-    bool create_deme(const operator_set& ignore_ops = operator_set(),
-                     const combo_tree_ns_set* perceptions = NULL,
-                     const combo_tree_ns_set* actions = NULL)  {
-
+    bool create_deme()
+    {
         using namespace reduct;
 
         if (_rep != NULL || _deme != NULL)
@@ -554,7 +559,9 @@ struct metapopulation : public bscored_combo_tree_set
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
                                       _exemplar->first, _type_sig,
-                                      ignore_ops, perceptions, actions);
+                                      params.ignore_ops, 
+                                      params.perceptions,
+                                      params.actions);
 
             // If the representation is empty, try the next
             // best-scoring exemplar.

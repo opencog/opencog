@@ -34,11 +34,8 @@ namespace opencog {
 
 using namespace combo;
 
-static const operator_set empty_ignore_ops = operator_set();
-
 /// A map between hostname and number of jobs allocated.
 typedef std::map<string, unsigned> jobs_t;
-
 
 /**
  * parameters to decide how to run moses
@@ -51,14 +48,10 @@ struct moses_parameters
                      bool _local = true,
                      int _max_evals = 10000,
                      int _max_gens = -1,
-                     score_t _max_score = 0,
-                     const operator_set& _ignore_ops = empty_ignore_ops,
-                     const combo_tree_ns_set* _perceptions = NULL,
-                     const combo_tree_ns_set* _actions = NULL)
+                     score_t _max_score = 0)
         : local(_local), jobs(_jobs), vm(_vm),
-          max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score),
-          ignore_ops(_ignore_ops), perceptions(_perceptions),
-          actions(_actions) {}
+          max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score)
+    {}
 
     // Distributed solver control.
     bool local;
@@ -72,13 +65,6 @@ struct moses_parameters
     int max_gens;
     // the max score
     score_t max_score;
-    // the set of operators to ignore
-    operator_set ignore_ops;
-    // the set of perceptions of an optional interactive agent
-    const combo_tree_ns_set* perceptions;
-    // the set of actions of an optional interactive agent
-    const combo_tree_ns_set* actions;
-
 };
 
 /**
@@ -115,8 +101,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info("Deme generation: %i", gen_idx);
 
         // Run a generation
-        bool done = mp.expand(pa.max_evals - mp.n_evals(), pa.ignore_ops,
-                      pa.perceptions, pa.actions);
+        bool done = mp.expand(pa.max_evals - mp.n_evals());
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)

@@ -91,6 +91,7 @@ private:
     const operator_set& _ignore_ops;
     const combo_tree_ns_set& _perceptions;
     const combo_tree_ns_set& _actions;
+    metapop_parameters *_metaparms;
 
     fitness_t _current_fitness; //real fitness of current program
     fitness_t _current_fitness_estimated;//estimated fitness of current program

@@ -77,6 +77,11 @@ moses_learning::moses_learning(int nepc,
     cscore = new petaverse_cscore(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);
     climber = new hill_climbing;
+    _metaparms = new metapop_parameters;
+
+    _metaparms->perceptions = &perceptions;
+    _metaparms->actions = &_actions;
+    _metaparms->ignore_ops = _ignore_ops;
 
     metapop = NULL;
 
@@ -148,7 +153,7 @@ void moses_learning::operator()()
         metapop = new metapopulation<petaverse_cscore, petaverse_bscore,
                                      hill_climbing>
             (_center, tt, action_reduction(),
-             *cscore, *bscore, *climber);
+             *cscore, *bscore, *climber, *_metaparms);
 
         _hcState = HC_BUILD_CANDIDATES;
         break;
@@ -158,7 +163,7 @@ void moses_learning::operator()()
     case HC_BUILD_CANDIDATES:  {
 
         std::cout << "BUILD" << std::endl;
-        if (metapop->create_deme(_ignore_ops, &_perceptions, &_actions))
+        if (metapop->create_deme())
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;

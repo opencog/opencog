@@ -913,6 +913,7 @@ int moses_exec(int argc, char** argv)
     metapop_parameters meta_params(max_candidates, reduce_all,
                                    revisit, include_dominated, 
                                    complexity_temperature,
+                                   ignore_ops,
                                    enable_cache,
                                    jobs[localhost]);
 
@@ -924,7 +925,7 @@ int moses_exec(int argc, char** argv)
 
     // Set moses_parameters.
     moses_parameters moses_params(
-        vm, jobs, local, max_evals, max_gens, max_score, ignore_ops);
+        vm, jobs, local, max_evals, max_gens, max_score);
 
     // Find the column number of the target feature in the data file,
     // if any.

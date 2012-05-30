@@ -88,13 +88,6 @@ int main(int argc, char** argv)
     interactive_bscore bscorer;
     hill_climbing climber;
 
-    metapopulation<interactive_cscore, interactive_bscore, hill_climbing>
-        metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-                cscorer, bscorer, climber);
-
-    cout << "build metapop" << endl;
-
-    operator_set ignore_ops;
     combo_tree_ns_set perceptions;
     combo_tree_ns_set actions;
 
@@ -104,11 +97,20 @@ int main(int argc, char** argv)
 
     perceptions.insert(combo_tree(ant_combo::get_instance(id::is_food_ahead)));
 
+    metapop_parameters metaparms;
+    metaparms.perceptions = &perceptions;
+    metaparms.actions = &actions;
+
+    metapopulation<interactive_cscore, interactive_bscore, hill_climbing>
+        metapop(combo_tree(id::sequential_and), tt, action_reduction(),
+                cscorer, bscorer, climber, metaparms);
+
+    cout << "build metapop" << endl;
+
 
     boost::program_options::variables_map vm;
     jobs_t jobs;
-    moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0,
-                                 ignore_ops, &perceptions, &actions);
+    moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
 
     //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
     moses::moses(metapop, moses_param);
