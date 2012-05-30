@@ -2053,7 +2053,7 @@ The data below contains these bug fixes.
         the bug is that best candidates were sorted by complexity, in
         the wrong direction.  The "feature" is that only the best candidates
         were considered; in fact, we should consider all of them.
-        These are fixed in bzr rev 7026 and 7028, respectively.
+        These are fixed in bzr rev 7038 and 7040, respectively.
 
 "well-m40K":  As above.
 
@@ -2070,5 +2070,25 @@ The data below contains these bug fixes.
 -r8:   63   2   71  17.01  27   21        337   2   71  17.01  31   21
 -r9:  124   -   -    9.24  20   10        691   -   -    9.24  24   10
            avg time===102====                 avg time===721===
+
+
+"rewell-m10K": As above, but using all candidates, not just top scorers.
+          Remarkably little change.
+
+"rewell-m40K": As above.  A touch better.
+
+            rewell-m10K     straight              well-m40K     straight  
+:    time  pfx tbl  score plex score     time  pfx tbl  score plex score 
+-r0:   74   1  100  21.87  11   26        643   1  100  21.87  11   26
+-r1:  183   -   -    3.81  10    4       1217   -   -    3.81  10    4
+-r2:  176   -   -    3.80  17    4       1410   -   -    3.8   16    4
+-r3:   80   -   -   49.8    6   55        749   -   -    7.05  10    8
+-r4:  117   1  100   6.75   9    8        617   1  100   6.75   8    8
+-r5:   60   -   -   54.8    6   55        580   -   -   54.8    6   55
+-r6:   49   -   -  100      0  100        997   1  100   5.4   17    6
+-r7:  117   -   -   50      5   50        795   -   -   50      5   50
+-r8:  101   2   71  17.01  12   21        702   2   71  17.01  12   21
+-r9:  139   -   -    9.24   9   10        691   -   -    5.62  11    6
+           avg time===110====                 avg time===872===
 
 
