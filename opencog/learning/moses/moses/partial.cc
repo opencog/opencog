@@ -51,7 +51,7 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
      _moses_params(moses_params), _printer(mmr_pa),
      _bscore(NULL), 
      _num_evals(0), _num_gens(0),
-     _done(false), _print(false)
+     _done(false)
 
 #ifdef TRY_DOING_RECURSION
      _fail_recurse_count(0), _best_fail_ratio(1.0e30),
@@ -83,21 +83,17 @@ void partial_solver::solve()
     }
     _bscore = new multibscore_based_bscore<BScore>(score_seq);
 
-#define FRACTION 0.5
-    // XXX this is wrong, should be delta on best_possible score.
-    _bad_score = - floor(FRACTION * score_t(tab_sz));
-
+    _meta_params.merge_callback = check_candidates;
+    _meta_params.callback_user_data = (void *) this;
+    
     unsigned loop_count = 0;
     while(1) {
         if (_moses_params.max_evals <= _num_evals) break; 
 
-        _opt_params.terminate_if_gte = _bad_score;
-        _moses_params.max_score = _bad_score;
         _moses_params.max_evals -= _num_evals;
         _moses_params.max_gens -= _num_gens; // XXX wrong
 
         logger().info() << "well-enough start loop " << loop_count++
-                        << " ask for=" << _bad_score
                         << " previous num_evals=" << _num_evals
                         << " max_evals= " << _moses_params.max_evals;
 
@@ -106,12 +102,8 @@ void partial_solver::solve()
                               _opt_params, _meta_params, _moses_params,
                               *this);
 
-        // If done, one more time, but only to invoke the printer.
+        // If done, one more time, but only to invoke the original printer.
         if (_done) {
-            _print = true;
-            _opt_params.terminate_if_gte = _bad_score;
-            _moses_params.max_score = _bad_score;
-
             // This should cause the metapop to terminate immediately,
             // doing nothing other than to invoke the final score printer.
             _moses_params.max_evals = 0;
@@ -121,7 +113,7 @@ void partial_solver::solve()
             metapop_moses_results(_exemplars, _table_type_signature,
                                   _reduct, _reduct, *_bscore,
                                   _opt_params, _meta_params, _moses_params,
-                                  *this);
+                                  _printer);
 
             break;
         }
@@ -136,37 +128,19 @@ cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcoun
 /// predicates are "good enough".  If we find one that is, then trim
 /// the scoring tables, and return (so as to run moses on the smaller
 /// problem).
-void partial_solver::candidates(const bscored_combo_tree_set& cands)
+bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
 {
-    logger().info() << "well-enough found " << cands.size() << " candidates";
+    logger().info() << "well-enough received " << cands.size() << " candidates";
     foreach(auto &item, cands) {
         const combo_tree& cand = item.first;
         if (candidate(cand)) {
             refresh(cands, cand);
-            return;
+            return true;   
         }
     }
 
-#ifdef TRY_DOING_RECURSION
-    // XXX disable recursion for now, its actually harder than it seems.
-    if (_best_fail_ratio < 0.2) {
-        if (recurse()) return;
-    }
-#endif
-
     // If we are here, then none of the candidates were any good.
-    // Try again, priming the metapop with the previous best.
-    _exemplars.clear();
-    _exemplars = _fresh_exemplars;  // copy them.
-    _fresh_exemplars.clear();
-
-    foreach(auto &item, cands) {
-        const combo_tree& cand = item.first;
-        _exemplars.push_back(cand);
-    }
-
-    logger().info() << "well-enough no acceptable candidates.  "
-        "Try again, asking for score = " << _bad_score;
+    return false;
 }
 
 /// Final cleanup, before termination.
@@ -238,9 +212,9 @@ void partial_solver::effective(combo_tree::iterator pred,
             }
         }
     }
-    logger().info() << "well-enough leading predicate fail=" << fail_count
-                    << " good=" << good_count
-                    << " out of total=" << total_count;
+    logger().debug() << "well-enough leading predicate fail=" << fail_count
+                     << " good=" << good_count
+                     << " out of total=" << total_count;
 }
 
 
@@ -292,17 +266,13 @@ bool partial_solver::candidate (const combo_tree& cand)
     foreach(const score_t& sc, pbs.first)
         total_score += sc;
 
-    logger().info() << "well-enough candidate=" << total_score
-                    << " " << cand;
+    logger().debug() << "well-enough candidate=" << total_score
+                     << " " << cand;
 
     if (_orig_terminate_if_gte <= total_score) {
         _done = true;
         return true;
     }
-
-    // Next time around, we need to beat this best score.
-    if (_bad_score <= total_score)
-        _bad_score = ceil (0.9*total_score + 1.0);
 
     // We don't want constants; what else we got?
     pre_it it = cand.begin();
@@ -324,7 +294,7 @@ bool partial_solver::candidate (const combo_tree& cand)
 
         if (is_enum_type(*sib)) {
             // If we are here, all previous predicates were ineffective.
-            logger().info() << "well-enough reject constant preceeded by ineffective clause";
+            logger().debug() << "well-enough reject constant preceeded by ineffective clause";
             return false;
         }
 
@@ -386,11 +356,6 @@ bool partial_solver::candidate (const combo_tree& cand)
     logger().info() << "well-enough " << _prefix_count
                     << " prefix=" << _leader;
 
-    // XXX replace 0.45 by parameter.
-    // XXX should be, ummm, less than the number of a single type in the table,
-    // else a constant beats this score... err, and weighted too!?
-    _bad_score = -floor(0.45 * (score_t(total_rows) - score_t(deleted)));
-
     // Redo the scoring tables, as they cache the score tables (why?)
     score_seq.clear();
     foreach(const CTable& ctable, _ctables) {
@@ -429,44 +394,5 @@ bool partial_solver::candidate (const combo_tree& cand)
     return true;
 }
 
-#ifdef TRY_DOING_RECURSION
-/// Recurse, and try to weed out a few more cases.
-// XXX this is definitely not working right now.
-bool partial_solver::recurse()
-{
-    if (1 < _fail_recurse_count)
-        return false;
-
-    std::vector<CTable> tabs;
-
-    // Make a copy of the tables
-    foreach(CTable& ctable, _ctables) {
-        tabs.push_back(CTable(ctable));
-    }
-
-    // Remove unwanted rows from the copy
-    unsigned total_rows = 0;
-    unsigned deleted = 0;
-    trim_table(tabs, _best_fail_pred, deleted, total_rows);
-cout<<"duude before recusion, deleted="<< deleted<<" out of="<<total_rows<<endl;
-
-    // And lets try to find a predicate that does the trick.
-    combo_tree tr(id::cond);
-    tr.append_child(tr.begin(), enum_t::get_random_enum());
-    vector<combo_tree> exempls;
-    exempls.push_back(tr);
-    partial_solver ps(tabs, 
-                      _table_type_signature,
-                      exempls, _reduct, _opt_params, _meta_params,
-                      _moses_params, _printer);
-
-cout<<"duuu vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"<<endl;
-    ps._fail_recurse_count++;
-    ps.solve();
-cout<<"duu ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<endl;
-
-    return false;
-}
-#endif
 
 };};
