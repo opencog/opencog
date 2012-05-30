@@ -80,9 +80,15 @@ static const pair<string, string> hc_max_score_opt("max-score", "A");
 static const pair<string, string> hc_confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
 static const pair<string, string> hc_cache_size_opt("cache-size", "s");
+static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 
+// Returns a string interpretable by Boost.Program_options
+// "name,abbreviation"
 string opt_desc_str(const pair<string, string>& opt) {
-    return string(opt.first).append(",").append(opt.second);
+    string res = string(opt.first);
+    if (!opt.second.empty())
+        res += string(",") + opt.second;
+    return res;
 }
 
 /**
@@ -106,6 +112,8 @@ int main(int argc, char** argv)
     string log_file;
     bool log_file_dep_opt;
     feature_selection_parameters fs_params;
+    string target_feature_str;
+    vector<string> ignore_features_str;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -133,8 +141,13 @@ int main(int argc, char** argv)
          "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
 
         (opt_desc_str(target_feature_opt).c_str(),
-         value<string>(&fs_params.target_feature),
+         value<string>(&target_feature_str),
          "Label of the target feature to fit. If none is given the first one is used.\n")
+
+        (opt_desc_str(ignore_feature_str_opt).c_str(),
+         value<vector<string>>(&ignore_features_str),
+         "Ignore feature from the datasets. Can be used several times "
+         "to ignore several features.\n")
 
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&fs_params.output_file),
@@ -277,10 +290,6 @@ int main(int argc, char** argv)
                     std::string(".").append(default_log_file_suffix));
     }
 
-    type_tree inferred_tt = infer_data_type_tree(fs_params.input_file);
-    type_tree output_tt = type_tree_output_type_tree(inferred_tt);
-    type_node inferred_type = *output_tt.begin();
-
     // Remove any existing log files.
     remove(log_file.c_str());
     logger().setFilename(log_file);
@@ -313,11 +322,31 @@ int main(int argc, char** argv)
     // ~Logger
 
     // Find the position of the target feature (the first one by default)
-    int target_pos = fs_params.target_feature.empty()? 0
-        : find_feature_position(fs_params.input_file,
-                                fs_params.target_feature);
+    fs_params.target_feature = target_feature_str.empty()? 0
+        : find_feature_position(fs_params.input_file, target_feature_str);
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_features;
+    fs_params.ignore_features = find_features_positions(fs_params.input_file,
+                                                        ignore_features_str);
+    ostreamContainer(logger().info() << "Ignore the following columns: ",
+                     fs_params.ignore_features);
+
+    OC_ASSERT(boost::find(fs_params.ignore_features, fs_params.target_feature)
+              == fs_params.ignore_features.end(),
+              "You cannot ignore the target feature (column %d)",
+              fs_params.target_feature);
+    
     // Read input_data_file file
-    Table table = istreamTable(fs_params.input_file, target_pos);
+    Table table = istreamTable(fs_params.input_file,
+                               fs_params.target_feature,
+                               fs_params.ignore_features);
+
+    type_tree inferred_tt = infer_data_type_tree(fs_params.input_file,
+                                                 fs_params.target_feature,
+                                                 fs_params.ignore_features);
+    type_tree output_tt = type_tree_output_type_tree(inferred_tt);
+    type_node inferred_type = *output_tt.begin();
 
     // Go and do it.
     if(inferred_type == id::boolean_type) {

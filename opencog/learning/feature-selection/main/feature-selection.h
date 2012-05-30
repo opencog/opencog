@@ -79,7 +79,8 @@ struct feature_selection_parameters
     std::string algorithm;
     unsigned int max_evals;
     std::string input_file;
-    std::string target_feature;
+    int target_feature;
+    std::vector<int> ignore_features;
     std::string output_file;
     unsigned target_size;
     double threshold;
@@ -143,7 +144,9 @@ void moses_feature_selection(Table& table,
 instance initial_instance(const feature_selection_parameters& fs_params,
                           const field_set& fields) {
     instance res(fields.packed_width());
-    vector<std::string> labels = readInputLabels(fs_params.input_file);
+    vector<std::string> labels = readInputLabels(fs_params.input_file,
+                                                 fs_params.target_feature,
+                                                 fs_params.ignore_features);
     vector<std::string> vif; // valid initial features, used for logging
     foreach(const std::string& f, fs_params.hc_initial_features) {
         size_t idx = std::distance(labels.begin(), boost::find(labels, f));
