@@ -64,6 +64,7 @@ static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> algo_opt("algo", "a");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
+static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> log_level_opt("log-level", "l");
@@ -80,7 +81,6 @@ static const pair<string, string> hc_max_score_opt("max-score", "A");
 static const pair<string, string> hc_confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
 static const pair<string, string> hc_cache_size_opt("cache-size", "s");
-static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 
 // Returns a string interpretable by Boost.Program_options
 // "name,abbreviation"

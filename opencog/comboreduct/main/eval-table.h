@@ -37,6 +37,7 @@ using namespace opencog::combo;
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_opt("input-table", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
+static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "l");
@@ -61,7 +62,10 @@ struct evalTableParameters {
     string input_table_file;
     vector<string> combo_programs;
     string combo_programs_file;
-    string target_feature;
+    string target_feature_str;
+    int target_feature;
+    vector<string> ignore_features_str;
+    vector<int> ignore_features;
     bool has_labels;
     vector<string> features;
     string features_file;
@@ -108,15 +112,26 @@ void eval_output_results(const evalTableParameters& pa,
     }
 }
 
-void read_eval_output_results(const evalTableParameters& pa) {
+void read_eval_output_results(evalTableParameters& pa) {
     // find the position of the target feature of the data file if any
-    int target_pos = 0;
-    if(!pa.target_feature.empty() && !pa.input_table_file.empty())
-        target_pos = find_feature_position(pa.input_table_file,
-                                           pa.target_feature);
+    pa.target_feature = 0;
+    if(!pa.target_feature_str.empty() && !pa.input_table_file.empty())
+        pa.target_feature = find_feature_position(pa.input_table_file,
+                                                  pa.target_feature_str);
 
+    // Get the list of indexes of features to ignore
+    pa.ignore_features = find_features_positions(pa.input_table_file,
+                                                 pa.ignore_features_str);
+
+    OC_ASSERT(boost::find(pa.ignore_features, pa.target_feature)
+              == pa.ignore_features.end(),
+              "You cannot ignore the target feature (column %d)",
+              pa.target_feature);
+    
     // read data table
-    Table table = istreamTable(pa.input_table_file, target_pos);
+    Table table = istreamTable(pa.input_table_file,
+                               pa.target_feature,
+                               pa.ignore_features);
 
     // read combo programs
     vector<combo_tree> trs;
