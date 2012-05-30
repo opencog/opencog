@@ -1118,10 +1118,10 @@ struct metapopulation : public bscored_combo_tree_set
                 score_t sc = get_score(cit);
                 complexity_t cpx = get_complexity(cit);
                 if ((sc > best_score) ||
-                    ((sc == best_score) && (cpx >= best_cpx)))
+                    ((sc == best_score) && (cpx <= best_cpx)))
                 {
                     if ((sc > best_score) ||
-                        ((sc == best_score) && (cpx > best_cpx)))
+                        ((sc == best_score) && (cpx < best_cpx)))
                     {
                         _best_cscore = cit;
                         best_score = get_score(_best_cscore);
