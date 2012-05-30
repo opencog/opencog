@@ -84,9 +84,11 @@ void partial_solver::solve()
     
     unsigned loop_count = 0;
     while(1) {
-        if (_moses_params.max_evals <= _num_evals) break; 
+        OC_ASSERT(_moses_params.max_evals > _num_evals,
+            "well-enough: I'm confused. What happened?");
 
         _moses_params.max_evals -= _num_evals;
+        
         // XXX TODO: we need to get the actual number of gens run, back
         // from moses, and subtract it here.  But there's no easy way
         // to get this number ...
@@ -94,14 +96,16 @@ void partial_solver::solve()
 
         logger().info() << "well-enough start loop " << loop_count++
                         << " previous num_evals=" << _num_evals
-                        << " max_evals= " << _moses_params.max_evals;
+                        << " max_evals= " << _moses_params.max_evals
+                        << " num exemplars=" << _exemplars.size();
 
         metapop_moses_results(_exemplars, _table_type_signature,
                               _reduct, _reduct, *_bscore,
                               _opt_params, _meta_params, _moses_params,
                               *this);
 
-        // If done, one more time, but only to invoke the original printer.
+        // If done, then we run one last time, but only to invoke the
+        // original printer.
         if (_done) {
             // This should cause the metapop to terminate immediately,
             // doing nothing other than to invoke the final score printer.
@@ -333,8 +337,9 @@ void partial_solver::record_prefix()
     // Save the predicate itself
     _prefix_count++;
     sib_it ldr = _leader.begin();
-    _leader.insert_subtree(ldr.end(), _best_predicate);
-    _leader.insert_subtree(ldr.end(), ++_best_predicate);
+    sib_it prd = _best_predicate;
+    _leader.insert_subtree(ldr.end(), prd);
+    _leader.insert_subtree(ldr.end(), ++prd);
     logger().info() << "well-enough " << _prefix_count
                     << " prefix=" << _leader;
 

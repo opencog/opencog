@@ -63,6 +63,11 @@ class partial_solver
             if (0 == _most_good)
                 _done = true;
 
+            // Well, the clock may have run out, and yet some perfect
+            // scorers were found.  Ignore them. We are done, anyway.
+            if (_moses_params.max_evals <= _num_evals)
+                _done = true;
+
             if (_done)
                 final_cleanup(metapop);
             else

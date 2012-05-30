@@ -2055,6 +2055,10 @@ The data below contains these bug fixes.
         were considered; in fact, we should consider all of them.
         These are fixed in bzr rev 7038 and 7040, respectively.
 
+        pfx == number of prefixes found (i.e. perfectly accurate clauses)
+        tbl == size of scoring table, after trimming away everything that
+               the perfect scorer got right.
+
 "well-m40K":  As above.
 
               well-m10K     straight              well-m40K     straight  
@@ -2090,5 +2094,26 @@ The data below contains these bug fixes.
 -r8:  101   2   71  17.01  12   21        702   2   71  17.01  12   21
 -r9:  139   -   -    9.24   9   10        691   -   -    5.62  11    6
            avg time===110====                 avg time===872===
+
+
+"newell-m10K":  All new, simplified algorithm as of bzr rev 7045.
+       This should be competitive with the regular code, when
+       perfectly accurate predicates cannot be found, and superior
+       when they can be.  *should be* ....  But seems to be
+       struggling.  Why?
+
+            newell-m10K                  newell-m40K
+:    time  pfx tbl  plex score     time  pfx tbl  plex score 
+-r0:   94   1  100   11   22
+-r1:  280   -   -     8   50
+-r2:  163   1  106   12    6
+-r3:   76   -   -     3   56
+-r4:  104   -   -    10   51
+-r5:   60   -   -     6   55 
+-r6:   50   -   -     0  100
+-r7:  108   -   -     6   50
+-r8:  154   1  100   21    5
+-r9:  139   -   -     9   10
+        avg time===123====                 avg time===xx===
 
 
