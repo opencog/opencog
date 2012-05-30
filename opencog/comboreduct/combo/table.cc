@@ -344,7 +344,7 @@ ifstream* open_data_file(const string& fileName)
 }
 
 vector<string> readInputLabels(const string& file, int pos,
-                               vector<int> ignore_features)
+                               const vector<int>& ignore_features)
 {
     auto_ptr<ifstream> in(open_data_file(file));
     string line;
@@ -481,7 +481,7 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 /// @return type_tree infered
 type_tree infer_data_type_tree(const string& fileName,
                                int output_col_num,
-                               vector<int> ignore_col_nums)
+                               const vector<int>& ignore_col_nums)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
@@ -554,7 +554,7 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 
 istream& istreamTable(istream& in, ITable& it, OTable& ot,
                       bool has_header, const type_tree& tt, int pos,
-                      vector<int> ignore_col_nums)
+                      const vector<int>& ignore_col_nums)
 {
     string line;
     arity_t arity = type_tree_arity(tt);
@@ -614,7 +614,8 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
 }
 
 void istreamTable(const string& file_name, ITable& it, OTable& ot,
-                  const type_tree& tt, int pos, vector<int> ignore_col_nums)
+                  const type_tree& tt, int pos,
+                  const vector<int>& ignore_col_nums)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
@@ -622,7 +623,8 @@ void istreamTable(const string& file_name, ITable& it, OTable& ot,
     istreamTable(in, it, ot, has_header(file_name), tt, pos, ignore_col_nums);
 }
 
-Table istreamTable(const string& file_name, int pos, vector<int> ignore_col_nums)
+Table istreamTable(const string& file_name, int pos,
+                   const vector<int>& ignore_col_nums)
 {
     Table res;
     res.tt = infer_data_type_tree(file_name, pos, ignore_col_nums);

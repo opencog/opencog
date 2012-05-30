@@ -519,6 +519,9 @@ type_node infer_type_from_token(const std::string& token);
 type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
                                         std::string>& row);
 
+// used as default of infer_data_type_tree and other IO function
+static const std::vector<int> empty_int_vec;
+
 /// Create a type tree describing the types of the input columns
 /// and the output column.
 ///        
@@ -530,8 +533,8 @@ type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
 /// @return type_tree infered
 type_tree infer_data_type_tree(const std::string& fileName,
                                int output_col_num = 0,
-                               std::vector<int> ignore_col_nums
-                               = std::vector<int>());
+                               const std::vector<int>& ignore_col_nums
+                               = empty_int_vec);
 
 /**
  * Find the column numbers associated with the names features
@@ -581,9 +584,10 @@ std::vector<T> tokenizeRow(std::string& line)
  * as well as stripping of any carriage-returns.
  */
 template<typename T>
-std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0,
-                                           std::vector<int> ignore_col_nums
-                                           = std::vector<int>())
+std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
+                                           int pos = 0,
+                                           const std::vector<int>& ignore_col_nums
+                                           = empty_int_vec)
 {
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> inputs;
@@ -618,19 +622,20 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line, int pos = 0,
  */
 std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
                            bool has_header, const type_tree& tt, int pos = 0,
-                           std::vector<int> ignore_col_nums = std::vector<int>());
+                           const std::vector<int>& ignore_col_nums
+                           = empty_int_vec);
 /**
  * like above but take an string (file name) instead of istream. If
  * the file name is not correct then an OC_ASSERT is raised.
  */
 void istreamTable(const std::string& file_name,
                   ITable& it, OTable& ot, const type_tree& tt, int pos = 0,
-                  std::vector<int> ignore_col_nums = std::vector<int>());
+                  const std::vector<int>& ignore_col_nums = empty_int_vec);
 /**
  * like above but return an object Table.
  */
 Table istreamTable(const std::string& file_name, int pos = 0,
-                   std::vector<int> ignore_col_nums = std::vector<int>());
+                   const std::vector<int>& ignore_col_nums = empty_int_vec);
 
 //////////////////
 // ostreamTable //
@@ -802,8 +807,8 @@ typedef contin_matrix::const_iterator const_cm_it;
  * if the DSV data file has a header with labels
  */
 std::vector<std::string> readInputLabels(const std::string& file, int pos = 0,
-                                         std::vector<int> ignore_features
-                                         = std::vector<int>());
+                                         const std::vector<int>& ignore_features
+                                         = empty_int_vec);
 
 std::ifstream* open_data_file(const std::string& fileName);
 

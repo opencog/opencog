@@ -23,6 +23,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
+#include <opencog/comboreduct/combo/table.h>
 
 #include "moses_exec.h"
 #include "../moses/partial.h"
@@ -274,6 +275,7 @@ bool combo_based_problem(const string& problem)
 combo::arity_t infer_arity(const string& problem,
                            unsigned int problem_size,
                            const vector<string>& input_table_files,
+                           const vector<int>& ignore_features,
                            const string& combo_str)
 {
     if (datafile_based_problem(problem)) {
@@ -293,7 +295,7 @@ combo::arity_t infer_arity(const string& problem,
                 }
             }
         }
-        return arity;
+        return arity - ignore_features.size();
     }
     else if (combo_based_problem(problem))
     {
@@ -847,11 +849,6 @@ int moses_exec(int argc, char** argv)
     // Init random generator.
     randGen().seed(rand_seed);
 
-    // Infer arity
-    combo::arity_t arity = infer_arity(problem, problem_size,
-                                       input_data_files, combo_str);
-    logger().info("Inferred arity = %d", arity);
-
     // Convert include_only_ops_str to the set of actual operators to
     // ignore.
     vertex_set ignore_ops;
@@ -937,6 +934,12 @@ int moses_exec(int argc, char** argv)
                   "You cannot ignore the target feature (column %d)",
                   target_column);
     }
+
+    // Infer arity
+    combo::arity_t arity = infer_arity(problem, problem_size,
+                                       input_data_files, ignore_features,
+                                       combo_str);
+    logger().info("Inferred arity = %d", arity);
 
     // Read labels contained in the data file.
     vector<string> labels;
