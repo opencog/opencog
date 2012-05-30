@@ -398,6 +398,9 @@ int moses_exec(int argc, char** argv)
     bool hc_single_step;
     bool hc_crossover;
 
+    // classifier paramters
+    bool use_well_enough = false;
+
     // pre params
     bool pre_worst_norm;
 
@@ -758,6 +761,15 @@ int moses_exec(int argc, char** argv)
                     "scoring functions, this can hurt performance.\n"
                     ) % hc).c_str())
 
+        ("well-enough",
+         value<bool>(&use_well_enough)->default_value(false),
+         "If 1, use the \"leave well-enough alone\" algorithm for "
+         "classification problems. This algorithm, after finding a "
+         "clause that has perfect accuracy, will stop mutating that "
+         "clause any further. In princple, this should speed "
+         "convergence.  In practice, not so much; it can hurt "
+         "performance.\n")
+
         (opt_desc_str(ip_kld_weight_opt).c_str(),
          value<double>(&ip_kld_weight)->default_value(1.0),
          str(format("Interesting patterns (%s). Weight of the KLD.\n") % ip).c_str())
@@ -1060,34 +1072,32 @@ int moses_exec(int argc, char** argv)
 
                 // --------- Enumerated output type
                 else if (output_type == id::enum_type) {
-#if 1
-                    // This is ifdef'd out, replaced by the
-                    // "leave well-enough alone" algorithm. It gives
-                    // a hint at the original, but dumb, implementation.
-                    //
-                    // Much like the boolean type above, just a
-                    // slightly different scorer.
-                    typedef enum_effective_bscore BScore;
-                    boost::ptr_vector<BScore> bscores;
-                    foreach(const CTable& ctable, ctables) {
-                        BScore *r = new BScore(ctable);
-                        set_noise_or_ratio(*r, as, noise, complexity_ratio);
-                        bscores.push_back(r);
-                    }
-                    multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(exemplars, table_type_signature,
-                               contin_reduct, contin_reduct, bscore,
-                               opt_params, meta_params, moses_params,
-                               mmr_pa);
-
-#else
-                    partial_solver well(ctables,
+                    if (use_well_enough) {
+                        // The "leave well-enough alone" algorithm.
+                        // Works. Kind of. Not as well as hoped.
+                        // Might be good for some problem. See diary.
+                        partial_solver well(ctables,
                                         table_type_signature,
                                         exemplars, contin_reduct,
                                         opt_params, meta_params,
                                         moses_params, mmr_pa);
-                    well.solve();
-#endif
+                        well.solve();
+                    } else {
+                        // Much like the boolean-output-type above,
+                        // just uses a slightly different scorer.
+                        typedef enum_effective_bscore BScore;
+                        boost::ptr_vector<BScore> bscores;
+                        foreach(const CTable& ctable, ctables) {
+                            BScore *r = new BScore(ctable);
+                            set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                            bscores.push_back(r);
+                        }
+                        multibscore_based_bscore<BScore> bscore(bscores);
+                        metapop_moses_results(exemplars, table_type_signature,
+                                   contin_reduct, contin_reduct, bscore,
+                                   opt_params, meta_params, moses_params,
+                                   mmr_pa);
+                    }
                 }
 
                 // --------- Contin output type
