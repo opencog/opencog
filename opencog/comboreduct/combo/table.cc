@@ -632,12 +632,19 @@ Table istreamTable(const string& file_name, int pos,
     return res;
 }
 
-ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot)
+ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot,
+                            int target_pos)
 {
-    out << ot.get_label();
-    if (it.get_arity() > 0)
-        ostreamlnContainer(out << ",", it.get_labels(), ",");
-    return out;
+    const auto& ils = it.get_labels();
+    const string& ol = ot.get_label();
+    int is = ils.size();
+    vector<string> header = ils;
+    OC_ASSERT(target_pos <= is);
+    if (target_pos < 0)
+        header.push_back(ol);
+    else
+        header.insert(header.begin() + target_pos, ol);
+    return ostreamContainer(out, header, ",") << endl;
 }
 
 string vertex_to_str(const vertex& v)
@@ -650,39 +657,43 @@ string vertex_to_str(const vertex& v)
     return ss.str();
 }
 
-ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot)
+ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
+                      int target_pos)
 {
     // print header
-    ostreamTableHeader(out, it, ot);
+    ostreamTableHeader(out, it, ot, target_pos);
     // print data
     OC_ASSERT(it.size() == ot.size());
     for(size_t row = 0; row < it.size(); ++row) {
-        // print output
-        out << vertex_to_str(ot[row]);
-        // print inputs
-        foreach(const vertex& v, it[row])
-            out << "," << vertex_to_str(v);
-        out << endl;
+        vector<string> content;
+        boost::transform(it[row], back_inserter(content), vertex_to_str);
+        string oc = vertex_to_str(ot[row]);
+        if (target_pos < 0)
+            content.push_back(oc);
+        else
+            content.insert(content.begin() + target_pos, oc);
+        ostreamContainer(out, content, ",") << endl;
     }
     return out;
 }
 
-ostream& ostreamTable(ostream& out, const Table& table)
+ostream& ostreamTable(ostream& out, const Table& table, int target_pos)
 {
-    return ostreamTable(out, table.itable, table.otable);
+    return ostreamTable(out, table.itable, table.otable, target_pos);
 }
 
-void ostreamTable(const string& file_name, const ITable& it, const OTable& ot)
+void ostreamTable(const string& file_name, const ITable& it, const OTable& ot,
+                  int target_pos)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ofstream out(file_name.c_str());
     OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, it, ot);
+    ostreamTable(out, it, ot, target_pos);
 }
 
-void ostreamTable(const string& file_name, const Table& table)
+void ostreamTable(const string& file_name, const Table& table, int target_pos)
 {
-    ostreamTable(file_name, table.itable, table.otable);
+    ostreamTable(file_name, table.itable, table.otable, target_pos);
 }
 
 ostream& ostreamCTableHeader(ostream& out, const CTable& ct)

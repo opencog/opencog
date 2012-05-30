@@ -641,22 +641,29 @@ Table istreamTable(const std::string& file_name, int pos = 0,
 // ostreamTable //
 //////////////////
 
-// output the header of a data table in CSV format.
+// output the header of a data table in CSV format. target_pos is the
+// column index of the target. If -1 then it is the last one.
 std::ostream& ostreamTableHeader(std::ostream& out,
-                                 const ITable& it, const OTable& ot);
+                                 const ITable& it, const OTable& ot,
+                                 int target_pos = 0);
 
 // output a data table in CSV format. Boolean values are output in
-// binary form (0 for false, 1 for true)
+// binary form (0 for false, 1 for true). target_pos is the column
+// index of the target. If -1 then it is the last one.
 std::ostream& ostreamTable(std::ostream& out,
-                           const ITable& it, const OTable& ot);
+                           const ITable& it, const OTable& ot,
+                           int target_pos = 0);
 // like above but take a table instead of an input and output table
-std::ostream& ostreamTable(std::ostream& out, const Table& table);
+std::ostream& ostreamTable(std::ostream& out, const Table& table,
+                           int target_pos = 0);
 
 // like above but takes the file name where to write the table
 void ostreamTable(const std::string& file_name,
-                  const ITable& it, const OTable& ot);
+                  const ITable& it, const OTable& ot,
+                  int target_pos = 0);
 // like above but take a table instead of a input and output table
-void ostreamTable(const std::string& file_name, const Table& table);
+void ostreamTable(const std::string& file_name, const Table& table,
+                  int target_pos = 0);
 
 // like ostreamTableHeader but on a compressed table
 std::ostream& ostreamCTableHeader(std::ostream& out, const CTable& ct);
