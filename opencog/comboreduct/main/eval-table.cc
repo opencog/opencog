@@ -89,7 +89,7 @@ int main(int argc,char** argv) {
         (opt_desc_str(ignore_feature_str_opt).c_str(),
          value<vector<string>>(&pa.ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
-         "to ignore several features.\n")
+         "to ignore several features. ON SECOND THOUGHT THAT OPTION IS PROBLABLY USELESS BUT I LET IT TILL IT BECOMES MORE APPARENT. \n")
 
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
@@ -104,11 +104,14 @@ int main(int argc,char** argv) {
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
         
-        (opt_desc_str(display_output_table_opt).c_str(), value<bool>(&pa.display_output_table)->default_value(true),
+        (opt_desc_str(display_output_opt).c_str(), value<bool>(&pa.display_output)->default_value(true),
          "Display the output column resulting from applying the combo program on the input table.\n")
         
+        (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(true),
+         "Display the inputs as well.\n")
+
         (opt_desc_str(display_RMSE_opt).c_str(), value<bool>(&pa.display_RMSE)->default_value(false),
-         "Display the root mean square error.\n")
+         "Display the root mean squared error.\n")
         
         (opt_desc_str(display_STD_opt).c_str(), value<bool>(&pa.display_STD)->default_value(false),
          "Display the standard deviation of the target feature of the data file.\n")

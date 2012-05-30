@@ -69,4 +69,3 @@ std::list<typename Function::result_type> list_comp(const Container& c,
 
 #endif // _OPENCOG_COMPREHENSION_H
 
-

@@ -42,10 +42,9 @@ static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "l");
 static const pair<string, string> output_file_opt("output-file", "o");
-static const pair<string, string> feature_opt("feature", "f");
-static const pair<string, string> features_file_opt("features-file", "F");
 static const pair<string, string> compute_MI_opt("compute-MI", "m");
-static const pair<string, string> display_output_table_opt("display-output-table", "d");
+static const pair<string, string> display_output_opt("display-output", "O");
+static const pair<string, string> display_inputs_opt("display-inputs", "I");
 static const pair<string, string> display_RMSE_opt("display-RMSE", "R");
 static const pair<string, string> display_STD_opt("display-STD", "S");
 
@@ -69,7 +68,8 @@ struct evalTableParameters {
     bool has_labels;
     vector<string> features;
     string features_file;
-    bool display_output_table;
+    bool display_output;
+    bool display_inputs;
     bool display_RMSE;
     bool display_STD;
     string output_file;
@@ -77,25 +77,28 @@ struct evalTableParameters {
 
 template<typename Out>
 Out& output_results(Out& out, const evalTableParameters& pa,
-                    const OTable& ot, const OTable& ot_tr) {
-    if(pa.display_output_table)
-        out << ot_tr; // print output table
-    if(pa.display_RMSE)
+                    const ITable& it, const OTable& ot, const OTable& ot_tr) {
+    if (pa.display_output)
+        if (pa.display_inputs)
+            ostreamTable(out, it, ot_tr, pa.target_feature); // print table
+        else
+            out << ot_tr; // print output table
+    if (pa.display_RMSE)
         out << "Root mean square error = "
             << ot.root_mean_square_error(ot_tr) << endl;
-    if(pa.display_STD)
+    if (pa.display_STD)
         out << "Standard deviation of the target feature = "
             << "TODO" << endl;
     return out;
 }
 
 void output_results(const evalTableParameters& pa,
-                    const OTable& ot, const OTable& ot_tr) {
+                    const ITable& it, const OTable& ot, const OTable& ot_tr) {
     if(pa.output_file.empty())
-        output_results(cout, pa, ot, ot_tr);
+        output_results(cout, pa, it, ot, ot_tr);
     else {
         ofstream of(pa.output_file.c_str(), ios_base::app);
-        output_results(of, pa, ot, ot_tr);
+        output_results(of, pa, it, ot, ot_tr);
         of.close();        
     }
 }
@@ -108,7 +111,7 @@ void eval_output_results(const evalTableParameters& pa,
         OTable ot_tr(tr, it);        
         ot_tr.set_label(ot.get_label());
         // print results
-        output_results(pa, ot, ot_tr);
+        output_results(pa, it, ot, ot_tr);
     }
 }
 
