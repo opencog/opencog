@@ -50,6 +50,9 @@ public:
     SimpleTruthValue(strength_t mean, count_t count);
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(SimpleTruthValue const&);
+#ifdef ZMQ_EXPERIMENT
+    SimpleTruthValue(const ZMQSingleTruthValueMessage& singleTruthValue);
+#endif
 
     SimpleTruthValue* clone() const;
     SimpleTruthValue& operator=(const TruthValue& rhs)
@@ -81,6 +84,9 @@ public:
     void setMean(strength_t);
     void setCount(count_t);
     void setConfidence(confidence_t);
+#ifdef ZMQ_EXPERIMENT
+	void writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage);
+#endif
 };
 
 } // namespace opencog

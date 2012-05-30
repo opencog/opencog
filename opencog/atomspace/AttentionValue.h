@@ -31,6 +31,10 @@
 
 #include <opencog/atomspace/types.h>
 
+#ifdef ZMQ_EXPERIMENT
+	#include <opencog/atomspace/ZMQMessages.pb.h>
+#endif
+
 namespace opencog
 {
 
@@ -85,6 +89,10 @@ public:
                    lti_t LTI = DEFAULTATOMLTI,
                    vlti_t VLTI = DEFAULTATOMVLTI);
 
+#ifdef ZMQ_EXPERIMENT
+    AttentionValue(const ZMQAttentionValueHolderMessage &attentionValueHolderMessage);
+#endif
+
     // PUBLIC GET/SET PROPERTIES
 
     // return STI property value
@@ -132,6 +140,10 @@ public:
         virtual bool test(const Atom& h1, const Atom& h2);
     };
 
+#ifdef ZMQ_EXPERIMENT
+    void writeToZMQMessage(ZMQAttentionValueHolderMessage* attentionValueHolderMessage);
+#endif
+
     // STATIC METHODS
 
     // Returns a shared AttentionValue with default STI, LTI, VLTI values
@@ -161,10 +173,19 @@ protected:
 
 
 public:
+#ifdef ZMQ_EXPERIMENT
+    AttentionValueHolder() {}
+    AttentionValueHolder(const ZMQAttentionValueHolderMessage& attentionValueHolderMessage):attentionValue(attentionValueHolderMessage) {}
+#endif
+
     /** Returns the AttentionValue object */
     virtual const AttentionValue& getAttentionValue() const {
         return attentionValue;
     }
+
+#ifdef ZMQ_EXPERIMENT
+    void writeToZMQMessage(ZMQAttentionValueHolderMessage *attentionValueHolderMessage);
+#endif
 };
 
 } // namespace opencog 

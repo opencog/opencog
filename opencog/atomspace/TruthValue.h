@@ -30,6 +30,9 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
+#ifdef ZMQ_EXPERIMENT
+	#include <opencog/atomspace/ZMQMessages.pb.h>
+#endif
 
 class TruthValueUTest;
 
@@ -160,6 +163,10 @@ public:
     inline bool operator!=(const TruthValue& rhs) const 
          { return !(*this == rhs); }
 
+#ifdef ZMQ_EXPERIMENT
+	virtual void writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage)=0;
+#endif
+
 // VIRTUAL METHODS:
 
     /**
@@ -199,6 +206,11 @@ public:
     static TruthValue* factory(const char*);
     static TruthValue* factory(TruthValueType, const char*)
     throw (InvalidParamException);
+#ifdef ZMQ_EXPERIMENT
+	static TruthValue* factory(const ZMQTruthValueMessage& truthValueMessage);
+	static TruthValue* factory(const ZMQSingleTruthValueMessage& singleTruthValueMessage);
+#endif
+
 
 protected:
 

@@ -79,6 +79,9 @@ public:
      */
     CompositeTruthValue(const TruthValue&, VersionHandle);
     CompositeTruthValue(CompositeTruthValue const&);
+#ifdef ZMQ_EXPERIMENT
+    CompositeTruthValue(const ZMQTruthValueMessage& truthValueMessage);
+#endif
     ~CompositeTruthValue();
 
     CompositeTruthValue* clone() const;
@@ -171,6 +174,10 @@ public:
      * @param atomspace The AtomSpace to check the handles against
      */
     void removeInvalidTVs(AtomSpace& atomspace);
+
+#ifdef ZMQ_EXPERIMENT
+	void writeToZMQMessage(ZMQTruthValueMessage * truthValueMessage);
+#endif
 
     // iterator over VersionHandles
 private:

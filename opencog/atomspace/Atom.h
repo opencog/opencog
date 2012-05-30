@@ -37,6 +37,9 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/exceptions.h>
+#ifdef ZMQ_EXPERIMENT
+	#include <opencog/atomspace/ZMQMessages.pb.h>
+#endif
 
 class AtomUTest;
 
@@ -114,6 +117,10 @@ protected:
     void removeIncomingHandle(Handle) throw (RuntimeException);
 
 public:
+
+#ifdef ZMQ_EXPERIMENT
+    Atom(const ZMQAtomMessage& atomMessage);
+#endif
 
     virtual ~Atom();
 
@@ -212,6 +219,12 @@ public:
     virtual size_t hashCode(void) const = 0;
 
     virtual Atom* clone() const = 0;
+
+#ifdef ZMQ_EXPERIMENT
+    static Atom* factory(const ZMQAtomMessage& atomMessage);
+
+    virtual void writeToZMQMessage(ZMQAtomMessage* atomMessage);
+#endif
 };
 
 } // namespace opencog

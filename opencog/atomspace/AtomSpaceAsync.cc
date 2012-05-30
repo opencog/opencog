@@ -1,11 +1,18 @@
 #include "AtomSpaceAsync.h"
 #include "TimeServer.h"
 
-
 using namespace opencog;
+
+#ifdef ZMQ_EXPERIMENT
+zmq::context_t* AtomSpaceAsync::zmqContext= new zmq::context_t(1);
+#endif
 
 AtomSpaceAsync::AtomSpaceAsync()
 {
+#ifdef ZMQ_EXPERIMENT
+	zmqClientEnabled = false;
+	zmqServerEnabled = false;
+#endif
     processingRequests = false;
     counter = 0;
     spaceServer = new SpaceServer(*this);
@@ -18,6 +25,14 @@ AtomSpaceAsync::AtomSpaceAsync()
 
 AtomSpaceAsync::~AtomSpaceAsync()
 {
+#ifdef ZMQ_EXPERIMENT
+	if(zmqServerEnabled)
+	{
+		//TODO send signal to exit gracefully
+		//zmqServerThread.join();
+	}
+#endif
+
     stopEventLoop();
     spaceServer->setTimeServer(NULL);
     delete timeServer;
@@ -28,10 +43,6 @@ void AtomSpaceAsync::startEventLoop()
 {
     processingRequests = true;
     m_Thread = boost::thread(&AtomSpaceAsync::eventLoop, this);
-#ifdef ZMQ_EXPERIMENT
-    zmq_context = new zmq::context_t(1);
-    m_zmq_Thread = boost::thread(&AtomSpaceAsync::zmqLoop, this);
-#endif
 }
 
 void AtomSpaceAsync::stopEventLoop()
@@ -41,52 +52,107 @@ void AtomSpaceAsync::stopEventLoop()
     requestQueue.cancel();
     // rejoin thread
     m_Thread.join();
-#ifdef ZMQ_EXPERIMENT
-    delete zmq_context;
-    m_zmq_Thread.join();
-#endif
 
 }
 
 #ifdef ZMQ_EXPERIMENT
-void AtomSpaceAsync::zmqLoop()
+
+void AtomSpaceAsync::enableZMQClient(string networkAddress)
 {
-    //  Prepare our context and socket
-    zmq::socket_t socket (*zmq_context, ZMQ_REP);
-    socket.bind ("inproc://gettv");
+	assert(!zmqClientEnabled && "EnableZMQClient can only be called once.");
+	zmqClientEnabled = true;
+    zmqClientSocket = new zmq::socket_t(*zmqContext, ZMQ_REQ);
+    zmqClientSocket->connect (networkAddress.c_str());
+}
 
-    while (processingRequests)
+void AtomSpaceAsync::enableZMQServer(string networkAddress)
+{
+	assert(!zmqServerEnabled && "EnableZMQServer can only be called once.");
+	zmqServerEnabled = true;
+    zmqServerThread = boost::thread(boost::bind(&AtomSpaceAsync::zmqLoop, this, networkAddress));
+}
+
+void AtomSpaceAsync::zmqLoop(string networkAddress)
+{
+	//  Prepare our context and socket
+    zmq::socket_t zmqServerSocket (*zmqContext, ZMQ_REP);
+    zmqServerSocket.bind (networkAddress.c_str());
+
+    while (zmqServerEnabled)
     {
-        zmq::message_t request;
-
         //  Wait for next request from client
-        if (!socket.recv (&request, ZMQ_NOBLOCK)) {
-            sleep(1);
-            continue;
-        }
-        printf ("Received request");
-        // Here we should interpret the type of the request and then dispatch
-        // to the appropriate worker
+        zmq::message_t request;
+ cout<<"Server listening..." << endl;
+        zmqServerSocket.recv (&request);
+ cout<<"Message received..." << endl;
+        //TODO check for exit signal
+ 	 	//TODO check for errors, log and retry?
+        ZMQRequestMessage requestMessage;
+		requestMessage.ParseFromArray(request.data(), request.size());
 
+		ZMQReplyMessage replyMessage;
+		switch(requestMessage.function())
+		{
+			case ZMQgetAtom:
+			{
+				boost::shared_ptr<Atom> atom = getAtom(Handle(requestMessage.handle()))->get_result();
+				atom->writeToZMQMessage(replyMessage.mutable_atom());
+				break;
+			}
+			case ZMQgetName:
+			{
+				string name = getName(Handle(requestMessage.handle()))->get_result();
+				replyMessage.set_str(name);
+				break;
+			}
+				//TODO add other functions
+			default:
+				assert(!"Invalid ZMQ function");
+		}
 
-        //  Send reply back to client
-        zmq::message_t reply (5);
-        memcpy ((void *) reply.data (), "World", 5);
-        socket.send (reply);
+		// Send reply back to client
+		string strReply = replyMessage.SerializeAsString();
+		zmq::message_t reply (strReply.size());
+		memcpy ((void *) reply.data (), strReply.c_str(), strReply.size()); //TODO in place init
+		zmqServerSocket.send (reply);
     }
 }
 #endif
 
 void AtomSpaceAsync::eventLoop()
 {
-    try
+try
     {
         while (processingRequests)
         {
             boost::shared_ptr<ASRequest> req;
             requestQueue.wait_and_get(req);
             counter++;
-            req->run();
+#ifdef ZMQ_EXPERIMENT
+			if(zmqClientEnabled)
+			{
+				ZMQRequestMessage requestMessage;
+				req->copyParametersToZMQRequest(requestMessage);
+
+				// Send request to server
+				string strRequest = requestMessage.SerializeAsString();
+				zmq::message_t request(strRequest.size());
+				memcpy((void *) request.data (), strRequest.c_str(), strRequest.size()); //TODO use copyless init from data
+				zmqClientSocket->send(request);
+
+				// Wait for reply
+				zmq::message_t reply;
+				zmqClientSocket->recv(&reply);
+				ZMQReplyMessage replyMessage;
+				replyMessage.ParseFromArray(reply.data(), reply.size());
+
+				req->copyResultFromZMQReply(replyMessage);
+			}
+			else
+				req->run();
+#else
+			req->run();
+#endif
             requestQueue.pop();
         }
     }

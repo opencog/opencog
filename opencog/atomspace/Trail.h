@@ -30,6 +30,9 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
+#ifdef ZMQ_EXPERIMENT
+	#include <opencog/atomspace/ZMQMessages.pb.h>
+#endif
 
 namespace opencog
 {
@@ -48,6 +51,9 @@ public:
     Trail() throw (InvalidParamException, std::bad_exception);
     Trail(int) throw (InvalidParamException, std::bad_exception);
     Trail(int, int) throw (InvalidParamException, std::bad_exception);
+#ifdef ZMQ_EXPERIMENT
+    Trail(const ZMQTrailMessage& trailMessage);
+#endif
 
     ~Trail();
 
@@ -63,6 +69,11 @@ public:
     void print(FILE*);
 
     Handle getElement(int) throw (IndexErrorException, std::bad_exception);
+
+#ifdef ZMQ_EXPERIMENT
+    void writeToZMQMessage(ZMQTrailMessage* trailMessage);
+#endif
+
 };
 
 } // namespace opencog

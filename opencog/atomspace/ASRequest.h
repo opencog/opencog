@@ -15,10 +15,12 @@ using namespace std;
 namespace opencog {
 
 class ASRequest {
-    //! Overkill, but doing atomic operations on bool is not technically threadsafe
+
+protected:
+	//! Overkill, but doing atomic operations on bool is not technically threadsafe
     mutable boost::mutex complete_mutex;
     bool completed;
-protected:
+
     //! For signalling that the request has been completed
     boost::condition_variable complete_cond;
     //! For blocking while fulfilling the request
@@ -49,6 +51,11 @@ public:
         boost::mutex::scoped_lock lock(complete_mutex);
         return completed;
     }
+
+#ifdef ZMQ_EXPERIMENT
+    virtual void copyParametersToZMQRequest(ZMQRequestMessage& req) {}; //TODO make this pure when done
+    virtual void copyResultFromZMQReply(const ZMQReplyMessage& rep) {}; //TODO make this pure when done
+#endif
 };
 
 class AtomSpace;
@@ -63,6 +70,17 @@ class GenericASR: public ASRequest {
 protected:
     T result;
     void set_result(T _result) { result = _result; }
+
+#ifdef ZMQ_EXPERIMENT
+    void set_result_completed(T _result)
+    {
+    	result = _result;
+    	boost::mutex::scoped_lock lock(complete_mutex);
+    	completed = true;
+    	complete_cond.notify_all();
+    }
+#endif
+
 public:
     GenericASR(AtomSpaceImpl* a){ set_atomspace(a); };
 
@@ -317,6 +335,19 @@ public:
     virtual void do_work() {
         set_result(atomspace->getName(p1));
     };
+
+#ifdef ZMQ_EXPERIMENT
+    void copyParametersToZMQRequest(ZMQRequestMessage& req)
+    {
+    	req.set_function(ZMQgetName);
+    	req.set_handle(p1.value());
+    };
+
+    void copyResultFromZMQReply(const ZMQReplyMessage& rep)
+    {
+    	set_result_completed(rep.str());
+    };
+#endif
     
 };
 
@@ -329,6 +360,19 @@ public:
         set_result(atomspace->cloneAtom(p1));
     };
     
+#ifdef ZMQ_EXPERIMENT
+    void copyParametersToZMQRequest(ZMQRequestMessage& req)
+    {
+    	req.set_function(ZMQgetAtom);
+    	req.set_handle(p1.value());
+    };
+
+    void copyResultFromZMQReply(const ZMQReplyMessage& rep)
+    {
+    	set_result_completed(boost::shared_ptr<Atom>(Atom::factory(rep.atom())));
+    };
+#endif
+
 };
 
 class CommitAtomASR : public GenericASR <bool> {
@@ -421,69 +465,6 @@ public:
     };
     
 };
-
-#ifdef ZMQ_EXPERIMENT
-class GetTruthValueZmq {
-    Handle h;
-    VersionHandle vh;
-
-    //! For signalling that the request has been completed
-    boost::condition_variable complete_cond;
-    mutable boost::mutex complete_mutex;
-    //! For blocking while fulfilling the request
-    mutable boost::mutex the_mutex;
-    TruthValue* result;
-    bool completed;
-public:
-    GetTruthValueZmq (Handle _h, VersionHandle& _vh) : h(_h), vh(_vh), completed(false) {
-        result = NULL;
-    };
-    ~GetTruthValueZmq() {
-        if (result && *result != TruthValue::DEFAULT_TV()) delete result;
-    }
-
-    TruthValue* get_result() {
-        boost::mutex::scoped_lock lock(the_mutex);
-        if (!is_complete()) complete_cond.wait(lock);
-        return result;
-    }
-
-    bool is_complete() {
-        // Rely on separate mutex for complete, since we don't want to stall
-        // if the do_work method takes a while.
-        boost::mutex::scoped_lock lock(complete_mutex);
-        return completed;
-    }
-    
-    virtual void do_work() {
-        //result = atomspace->getTV(h,vh).clone();
-        boost::mutex::scoped_lock lock2(complete_mutex);
-        completed = true;
-        complete_cond.notify_all();
-    };
-    
-};
-
-class GetTruthValueASR : public GenericASR <tv_summary_t> {
-    Handle h;
-    VersionHandle vh;
-public:
-    GetTruthValueASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
-        GenericASR<tv_summary_t> (a)  {
-        h=_h; vh=_vh;
-    };
-    
-    virtual void do_work() {
-        const TruthValue& tv = atomspace->getTV(h,vh);
-        tv_summary_t a;
-        a.mean = tv.getMean();
-        a.confidence = tv.getConfidence();
-        a.count = tv.getCount();
-        set_result(a);
-    };
-    
-};
-#endif
 
 class GetTruthValueMeanASR : public GenericASR <float> {
     Handle h;
@@ -1065,11 +1046,6 @@ public:
         atomspace->getSortedHandleSet(back_inserter(result),type,subclass,compare,vh);
     }
 };
-
-#ifdef ZMQ_EXPERIMENT
-// Testing ZeroMQ
-typedef boost::shared_ptr< GetTruthValueZmq > TruthValueZmqRequest;
-#endif
 
 // Requests are based on their parent class that defines the return type
 typedef boost::shared_ptr< GenericASR<Handle> > HandleRequest;

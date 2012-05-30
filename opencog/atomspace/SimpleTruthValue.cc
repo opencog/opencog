@@ -56,6 +56,14 @@ SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
     count = source.count;
 }
 
+#ifdef ZMQ_EXPERIMENT
+SimpleTruthValue::SimpleTruthValue(const ZMQSingleTruthValueMessage& singleTruthValue)
+{
+	mean=singleTruthValue.mean();
+	count=singleTruthValue.count();
+}
+#endif
+
 void SimpleTruthValue::setMean(strength_t m)
 {
     mean = m;
@@ -171,3 +179,14 @@ SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
     return new SimpleTruthValue(static_cast<strength_t>(mean),
                                 static_cast<count_t>(count));
 }
+
+
+#ifdef ZMQ_EXPERIMENT
+void SimpleTruthValue::writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage)
+{
+	ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
+	singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeSimple);
+	singleTruthValue->set_mean(mean);
+	singleTruthValue->set_count(count);
+}
+#endif

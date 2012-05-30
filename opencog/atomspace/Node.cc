@@ -43,6 +43,13 @@ throw (InvalidParamException, AssertionException)
     name = cname;
 }
 
+#ifdef ZMQ_EXPERIMENT
+Node::Node(const ZMQAtomMessage &atomMessage):Atom(atomMessage)
+{
+	name=atomMessage.name();
+}
+#endif
+
 Node::~Node()
 {
 }
@@ -116,4 +123,14 @@ Atom* Node::clone() const
     return a;
 }
 
+#ifdef ZMQ_EXPERIMENT
+void Node::writeToZMQMessage(ZMQAtomMessage* atomMessage)
+{
+	Atom::writeToZMQMessage(atomMessage);
+
+	atomMessage->set_atomtype(ZMQAtomTypeNode);
+
+	atomMessage->set_name(name);
+}
+#endif
 

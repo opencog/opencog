@@ -502,10 +502,6 @@ public:
      */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
-#ifdef ZMQ_EXPERIMENT
-    TruthValue* getTVZmq(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
-#endif
-
     strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
     confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
 
