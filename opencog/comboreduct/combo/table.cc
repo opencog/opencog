@@ -613,9 +613,9 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     return in;
 }
 
-void istreamTable(const string& file_name, ITable& it, OTable& ot,
-                  const type_tree& tt, int pos,
-                  const vector<int>& ignore_col_nums)
+void loadTable(const string& file_name, ITable& it, OTable& ot,
+               const type_tree& tt, int pos,
+               const vector<int>& ignore_col_nums)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
@@ -623,15 +623,39 @@ void istreamTable(const string& file_name, ITable& it, OTable& ot,
     istreamTable(in, it, ot, has_header(file_name), tt, pos, ignore_col_nums);
 }
 
-Table istreamTable(const string& file_name, int pos,
-                   const vector<int>& ignore_col_nums)
+Table loadTable(const string& file_name, int pos,
+                const vector<int>& ignore_col_nums)
 {
     Table res;
     res.tt = infer_data_type_tree(file_name, pos, ignore_col_nums);
-    istreamTable(file_name, res.itable, res.otable, res.tt, pos, ignore_col_nums);
+    loadTable(file_name, res.itable, res.otable, res.tt, pos, ignore_col_nums);
     return res;
 }
 
+istream& istreamITable(istream& in, ITable& it,
+                       bool has_header, const type_tree& tt)
+{
+    // TODO
+}
+
+void loadITable(const string& file_name, ITable& it, const type_tree& tt)
+{
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+    istreamITable(in, it, has_header(file_name), tt);
+}
+    
+ITable loadITable(const string& file_name)
+{
+    ITable res;
+    type_tree tt = infer_data_type_tree(file_name, -1);
+    // append an unknown type child at the end for the output
+    tt.append_child(tt.begin(), id::unknown_type);
+    loadITable(file_name, res, tt);
+    return res;
+}
+        
 ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot,
                             int target_pos)
 {
@@ -682,8 +706,8 @@ ostream& ostreamTable(ostream& out, const Table& table, int target_pos)
     return ostreamTable(out, table.itable, table.otable, target_pos);
 }
 
-void ostreamTable(const string& file_name, const ITable& it, const OTable& ot,
-                  int target_pos)
+void saveTable(const string& file_name, const ITable& it, const OTable& ot,
+               int target_pos)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ofstream out(file_name.c_str());
@@ -691,9 +715,9 @@ void ostreamTable(const string& file_name, const ITable& it, const OTable& ot,
     ostreamTable(out, it, ot, target_pos);
 }
 
-void ostreamTable(const string& file_name, const Table& table, int target_pos)
+void saveTable(const string& file_name, const Table& table, int target_pos)
 {
-    ostreamTable(file_name, table.itable, table.otable, target_pos);
+    saveTable(file_name, table.itable, table.otable, target_pos);
 }
 
 ostream& ostreamCTableHeader(ostream& out, const CTable& ct)

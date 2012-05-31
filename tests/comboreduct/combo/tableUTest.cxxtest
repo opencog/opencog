@@ -134,7 +134,7 @@ public:
                          1, {2});
     }
     void test_mutualInformation() {
-        Table tt = istreamTable(tableUTest_dir + "dataset.csv");
+        Table tt = loadTable(tableUTest_dir + "dataset.csv");
         set<arity_t> fs{0, 1};
         CTable ctt = tt.compress();
         double mi = mutualInformation(ctt, fs);

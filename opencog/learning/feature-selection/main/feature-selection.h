@@ -206,7 +206,7 @@ void write_results(const Table& table,
     if(fs_params.output_file.empty())
         ostreamTable(std::cout, table);
     else
-        ostreamTable(fs_params.output_file, table);
+        saveTable(fs_params.output_file, table);
 }
 
 void incremental_feature_selection(Table& table,

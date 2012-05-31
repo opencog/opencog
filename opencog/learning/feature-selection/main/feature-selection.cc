@@ -338,9 +338,9 @@ int main(int argc, char** argv)
               fs_params.target_feature);
     
     // Read input_data_file file
-    Table table = istreamTable(fs_params.input_file,
-                               fs_params.target_feature,
-                               fs_params.ignore_features);
+    Table table = loadTable(fs_params.input_file,
+                            fs_params.target_feature,
+                            fs_params.ignore_features);
 
     type_tree inferred_tt = infer_data_type_tree(fs_params.input_file,
                                                  fs_params.target_feature,

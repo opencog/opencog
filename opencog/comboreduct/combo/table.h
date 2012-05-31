@@ -610,6 +610,25 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
 }
 
 /**
+ * Fill an input table give an istream of DSV file format, where
+ * delimiters are ',',' ' or '\t'.
+ */
+std::istream& istreamITable(std::istream& in, ITable& it,
+                            bool has_header, const type_tree& tt);
+
+/**
+ * Like above but takes a file_name instead of a istream and
+ * automatically infer whether it has header.
+ */
+void loadITable(const std::string& file_name, ITable& it, const type_tree& tt);
+
+/**
+ * Like above but return an ITable and automatically infer the tree
+ * tree.
+ */
+ITable loadITable(const std::string& file_name);
+
+/**
  * Fill an input table and output table given a DSV
  * (delimiter-seperated values) file format, where delimiters are ',',
  * ' ' or '\t'.
@@ -624,9 +643,11 @@ std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
                            bool has_header, const type_tree& tt, int pos = 0,
                            const std::vector<int>& ignore_col_nums
                            = empty_int_vec);
+
 /**
- * like above but take an string (file name) instead of istream. If
- * the file name is not correct then an OC_ASSERT is raised.
+ * like istreamTable above but take an string (file name) instead of
+ * istream. If the file name is not correct then an OC_ASSERT is
+ * raised.
  */
 void istreamTable(const std::string& file_name,
                   ITable& it, OTable& ot, const type_tree& tt, int pos = 0,
@@ -634,8 +655,8 @@ void istreamTable(const std::string& file_name,
 /**
  * like above but return an object Table.
  */
-Table istreamTable(const std::string& file_name, int pos = 0,
-                   const std::vector<int>& ignore_col_nums = empty_int_vec);
+Table loadTable(const std::string& file_name, int pos = 0,
+                const std::vector<int>& ignore_col_nums = empty_int_vec);
 
 //////////////////
 // ostreamTable //
@@ -658,12 +679,12 @@ std::ostream& ostreamTable(std::ostream& out, const Table& table,
                            int target_pos = 0);
 
 // like above but takes the file name where to write the table
-void ostreamTable(const std::string& file_name,
-                  const ITable& it, const OTable& ot,
-                  int target_pos = 0);
+void saveTable(const std::string& file_name,
+               const ITable& it, const OTable& ot,
+               int target_pos = 0);
 // like above but take a table instead of a input and output table
-void ostreamTable(const std::string& file_name, const Table& table,
-                  int target_pos = 0);
+void saveTable(const std::string& file_name, const Table& table,
+               int target_pos = 0);
 
 // like ostreamTableHeader but on a compressed table
 std::ostream& ostreamCTableHeader(std::ostream& out, const CTable& ct);

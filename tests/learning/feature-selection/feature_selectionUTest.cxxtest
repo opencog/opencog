@@ -45,8 +45,8 @@ public:
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);
 
-        big_table = istreamTable(FEATURE_SELECTION_TEST_DIR"big-dataset.csv");
-        small_table = istreamTable(FEATURE_SELECTION_TEST_DIR"small-dataset.csv");
+        big_table = loadTable(FEATURE_SELECTION_TEST_DIR"big-dataset.csv");
+        small_table = loadTable(FEATURE_SELECTION_TEST_DIR"small-dataset.csv");
     }
 
     void test_incremental_selection_j1() {

@@ -998,7 +998,7 @@ int moses_exec(int argc, char** argv)
         vector<CTable> ctables;
         foreach (const string& idf, input_data_files) {
             logger().debug("Read data file %s", idf.c_str());
-            Table table = istreamTable(idf, target_column, ignore_features);
+            Table table = loadTable(idf, target_column, ignore_features);
             // possible subsample the table
             if (nsamples > 0)
                 subsampleTable(table, nsamples);

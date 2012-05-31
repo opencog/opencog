@@ -152,7 +152,7 @@ void eval_output_results(const eval_features_parameters& pa,
 }
 
 void read_eval_output_results(const eval_features_parameters& pa) {
-    Table table = istreamTable(pa.input_table_file);
+    Table table = loadTable(pa.input_table_file);
 
     // determine labels
     vector<string> labels = readInputLabels(pa.input_table_file);
