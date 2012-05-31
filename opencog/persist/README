@@ -1,10 +1,12 @@
 
-               AtomSpace Communications and Persistence
-               -----------------------------------------
+            AtomSpace Serializers and Deserializers (SerDes)
+                 AKA "Communications and Persistence"
+             -------------------------------------------
 
-Various different systems used for the persistence of atoms to disk,
-database or remote locations. Some of these systems are also general
-systems for communicating atoms between servers.
+The AtomSpace may be converted from its native, in-memory C++ object
+format, into any one of a number of "flattened", non-object formats.
+These formats allow atoms to be sent to and received from remote systems,
+as well as to be saved and restored from disk, file, database, network.
 
 Systems include:
 
@@ -13,4 +15,9 @@ hypertable -- experimental HyperTable support.
 memcache -- experimental/broken, uses memcached for persistence.
 sql -- works well for most uses -- with caveats
 xml -- XML-based file storage
+
+
+The hypertable, memcache and sql systems all support networked,
+peer-to-peer communications between cogservers.  (Although both 
+hypertable and sql are currently buggy).
 
