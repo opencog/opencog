@@ -34,11 +34,11 @@ enum type_node {
     lambda_type,      // Example : lambda_type(T1 T2 T3)
                       // represents a function that takes arguments of
                       // type T1 and T2, and returns an output of type T3
-    application_type, // Represents the application of a function with
+    application_type, // Represents the application of a function to
                       // its arguments
     union_type,
-    arg_list_type,    // Denotes a list of zero or more arguments of
-                      // a given type.
+    arg_list_type,    // Denotes a var-args style list of zero or more
+                      // arguments of a given type.
                       // Example : arg_list(T) corresponds to a list of
                       // zero or more elements of type T
 

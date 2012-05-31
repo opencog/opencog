@@ -2100,20 +2100,31 @@ The data below contains these bug fixes.
        This should be competitive with the regular code, when
        perfectly accurate predicates cannot be found, and superior
        when they can be.  *should be* ....  But seems to be
-       struggling.  Why?
+       struggling.  Why?   The test cases could maybe run a little
+       longer, due to the need to evaluate pre-merge candidates. 
+       But overall, if no prefixes are dound, results should be 
+       identical, yeah?  But they're not...
+
+       Should be similar to cro-m10K above, but its not ...
+       Instead it resembles the other well-enough profiles. WTF.
+       I realllly don't get it.  Is this a RandGen effect?
+
+"newall-m40K": as above. Could probably improve run-time a lot by
+       not evaluating all of the candidates, but only those that
+       won't be trimmed away after merging.
 
             newell-m10K                  newell-m40K
 :    time  pfx tbl  plex score     time  pfx tbl  plex score 
--r0:   94   1  100   11   22
--r1:  280   -   -     8   50
--r2:  163   1  106   12    6
--r3:   76   -   -     3   56
--r4:  104   -   -    10   51
--r5:   60   -   -     6   55 
--r6:   50   -   -     0  100
--r7:  108   -   -     6   50
--r8:  154   1  100   21    5
--r9:  139   -   -     9   10
-        avg time===123====                 avg time===xx===
+-r0:   94   1  100   11   22       1211   1  100   25    8
+-r1:  280   -   -     8   50       1611   1  100   19    4
+-r2:  163   1  106   12    6       1343   1  106   12    6
+-r3:   76   -   -     3   56        509   -   -     3   56
+-r4:  104   -   -    10   51       1427   -   -     9   51
+-r5:   60   -   -     6   55        598   -   -    14   54
+-r6:   50   -   -     0  100       1097   1  106   17    6
+-r7:  108   -   -     6   50        768   -   -    14    6
+-r8:  154   1  100   21    5       1156   1  100   19    5
+-r9:  139   -   -     9   10        647   -   -    18    7
+        avg time===123====            avg time===1028===
 
 
