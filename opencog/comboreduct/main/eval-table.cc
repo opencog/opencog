@@ -86,11 +86,6 @@ int main(int argc,char** argv) {
          value<string>(&pa.target_feature_str),
          "Label of the target feature to fit. If none is given the first one is used.\n")
         
-        (opt_desc_str(ignore_feature_str_opt).c_str(),
-         value<vector<string>>(&pa.ignore_features_str),
-         "Ignore feature from the datasets. Can be used several times "
-         "to ignore several features. ON SECOND THOUGHT THAT OPTION IS PROBLABLY USELESS BUT I LET IT TILL IT BECOMES MORE APPARENT. \n")
-
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
          "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
@@ -99,7 +94,7 @@ int main(int argc,char** argv) {
          value<string>(&pa.combo_programs_file),
          "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
         
-        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program \"and($large $tall)\" instead of \"and($24 $124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
+        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program 'and($large $tall)' instead of 'and($24 $124)'. In such a case it is expected that the input data file contains the labels as first row.\n")
         
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
@@ -109,12 +104,6 @@ int main(int argc,char** argv) {
         
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
          "Display the inputs as well.\n")
-
-        (opt_desc_str(display_RMSE_opt).c_str(), value<bool>(&pa.display_RMSE)->default_value(false),
-         "Display the root mean squared error.\n")
-        
-        (opt_desc_str(display_STD_opt).c_str(), value<bool>(&pa.display_STD)->default_value(false),
-         "Display the standard deviation of the target feature of the data file.\n")
         ;
 
     variables_map vm;

@@ -37,7 +37,6 @@ using namespace opencog::combo;
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_opt("input-table", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
-static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "l");
@@ -45,8 +44,6 @@ static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> compute_MI_opt("compute-MI", "m");
 static const pair<string, string> display_output_opt("display-output", "O");
 static const pair<string, string> display_inputs_opt("display-inputs", "I");
-static const pair<string, string> display_RMSE_opt("display-RMSE", "R");
-static const pair<string, string> display_STD_opt("display-STD", "S");
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -70,8 +67,6 @@ struct evalTableParameters {
     string features_file;
     bool display_output;
     bool display_inputs;
-    bool display_RMSE;
-    bool display_STD;
     string output_file;
 };
 
@@ -84,12 +79,6 @@ Out& output_results(Out& out, const evalTableParameters& pa,
         else
             out << ot_tr; // print output table
     }
-    if (pa.display_RMSE)
-        out << "Root mean square error = "
-            << ot.root_mean_square_error(ot_tr) << endl;
-    if (pa.display_STD)
-        out << "Standard deviation of the target feature = "
-            << "TODO" << endl;
     return out;
 }
 
