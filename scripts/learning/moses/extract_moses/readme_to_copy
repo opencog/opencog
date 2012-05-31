@@ -3,6 +3,11 @@ DESCRIPTION
 
 Standalone version of MOSES under Apache license.
 
+REQUIREMENTS
+------------
+
+You need libboost 1.46 or more.
+
 INSTALLATION
 ------------
 
