@@ -41,8 +41,6 @@ static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "l");
 static const pair<string, string> output_file_opt("output-file", "o");
-static const pair<string, string> compute_MI_opt("compute-MI", "m");
-static const pair<string, string> display_output_opt("display-output", "O");
 static const pair<string, string> display_inputs_opt("display-inputs", "I");
 
 string opt_desc_str(const pair<string, string>& opt) {
@@ -65,72 +63,67 @@ struct evalTableParameters {
     bool has_labels;
     vector<string> features;
     string features_file;
-    bool display_output;
     bool display_inputs;
     string output_file;
 };
 
 template<typename Out>
-Out& output_results(Out& out, const evalTableParameters& pa,
-                    const ITable& it, const OTable& ot, const OTable& ot_tr) {
-    if (pa.display_output) {
-        if (pa.display_inputs)
-            ostreamTable(out, it, ot_tr, pa.target_feature); // print table
-        else
-            out << ot_tr; // print output table
-    }
+Out& output_results(Out& out, const evalTableParameters& pa, const ITable& it,
+                    const OTable& ot_tr) {
+    if (pa.display_inputs)
+        ostreamTable(out, it, ot_tr, pa.target_feature); // print io table
+    else
+        out << ot_tr; // print output table
     return out;
 }
 
-void output_results(const evalTableParameters& pa,
-                    const ITable& it, const OTable& ot, const OTable& ot_tr) {
+void output_results(const evalTableParameters& pa, const ITable& it,
+                    const OTable& ot_tr) {
     if(pa.output_file.empty())
-        output_results(cout, pa, it, ot, ot_tr);
+        output_results(cout, pa, it, ot_tr);
     else {
         ofstream of(pa.output_file.c_str(), ios_base::app);
-        output_results(of, pa, it, ot, ot_tr);
-        of.close();        
+        output_results(of, pa, it, ot_tr);
+        of.close();
     }
 }
 
-void eval_output_results(const evalTableParameters& pa,
-                         const vector<combo_tree>& trs,
-                         ITable& it, const OTable& ot) {
+void eval_output_results(const evalTableParameters& pa, ITable& it,
+                         const vector<combo_tree>& trs) {
     foreach(const combo_tree& tr, trs) {
         // evaluated tr over input table
-        OTable ot_tr(tr, it);        
-        ot_tr.set_label(ot.get_label());
+        OTable ot_tr(tr, it);
+        if (!pa.target_feature_str.empty())
+            ot_tr.set_label(pa.target_feature_str);
         // print results
-        output_results(pa, it, ot, ot_tr);
+        output_results(pa, it, ot_tr);
     }
 }
 
 void read_eval_output_results(evalTableParameters& pa) {
     // find the position of the target feature of the data file if any
-    pa.target_feature = 0;
-    if(!pa.target_feature_str.empty() && !pa.input_table_file.empty())
+    if(!pa.target_feature_str.empty())
         pa.target_feature = find_feature_position(pa.input_table_file,
                                                   pa.target_feature_str);
-
-    // Get the list of indexes of features to ignore
-    pa.ignore_features = find_features_positions(pa.input_table_file,
-                                                 pa.ignore_features_str);
-
-    OC_ASSERT(boost::find(pa.ignore_features, pa.target_feature)
-              == pa.ignore_features.end(),
-              "You cannot ignore the target feature (column %d)",
-              pa.target_feature);
     
-    // read data table
-    Table table = istreamTable(pa.input_table_file,
-                               pa.target_feature,
-                               pa.ignore_features);
+    // read data ITable
+    Table table;
+    if(pa.target_feature_str.empty())
+        table.itable = loadITable(pa.input_table_file);
+    else {
+        pa.target_feature = find_feature_position(pa.input_table_file,
+                                                  pa.target_feature_str);
+        table = loadTable(pa.input_table_file, pa.target_feature);
+    }
 
+    ITable& it = table.itable;
+    
     // read combo programs
     vector<combo_tree> trs;
+    // from command line
     foreach(const string& tr_str, pa.combo_programs)
-        trs += str2combo_tree_label(tr_str, pa.has_labels,
-                                    table.itable.get_labels());
+        trs += str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
+    // from a file
     if(!pa.combo_programs_file.empty()) {
         ifstream in(pa.combo_programs_file.c_str());
         while(in.good()) {
@@ -138,12 +131,12 @@ void read_eval_output_results(evalTableParameters& pa) {
             getline(in, line);
             if(line.empty())
                 continue;
-            trs += str2combo_tree_label(line, pa.has_labels,
-                                        table.itable.get_labels());
+            trs += str2combo_tree_label(line, pa.has_labels, it.get_labels());
         }
     }
+    
     // eval and output the results
-    eval_output_results(pa, trs, table.itable, table.otable);
+    eval_output_results(pa, it, trs);
 }
 
 #endif // _OPENCOG_EVAL_TABLE_H

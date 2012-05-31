@@ -35,8 +35,7 @@ using namespace opencog;
 
 /**
  * Program to output the result of a combo program given input data
- * described in DSV format. It has a few additional options to
- * compute the mutual information, and more to add.
+ * described in DSV format.
  */
 
 /**
@@ -84,7 +83,7 @@ int main(int argc,char** argv) {
         
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature_str),
-         "Label of the target feature to fit. If none is given the first one is used.\n")
+         "Target feature name.\n")
         
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
@@ -94,16 +93,13 @@ int main(int argc,char** argv) {
          value<string>(&pa.combo_programs_file),
          "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
         
-        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program 'and($large $tall)' instead of 'and($24 $124)'. In such a case it is expected that the input data file contains the labels as first row.\n")
+        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program 'and($large $tall)' instead of 'and($24 $124)'. In such a case it is expected that the input data file contains the labels as first row. TODO could be detected automatically.\n")
         
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
-        
-        (opt_desc_str(display_output_opt).c_str(), value<bool>(&pa.display_output)->default_value(true),
-         "Display the output column resulting from applying the combo program on the input table.\n")
-        
+                
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
-         "Display the inputs as well.\n")
+         "Display the inputs as well as the output, the feature order is preserved.\n")
         ;
 
     variables_map vm;
