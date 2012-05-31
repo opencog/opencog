@@ -2127,4 +2127,42 @@ The data below contains these bug fixes.
 -r9:  139   -   -     9   10        647   -   -    18    7
         avg time===123====            avg time===1028===
 
+I give up.  I suspect that the contin canonical form is not very good,
+or incomplete.  Or something; its not exploring as widely as it should.
 
+========================================================================
+Other datasets:
+
+These should work with PM, as designed:
+ * Wine Quality  5K records
+   http://archive.ics.uci.edu/ml/datasets/Wine+Quality
+   Purely numeric, predict rating 1-10
+
+ * DBWorld email abg of words, classify, is it announce, or not?
+   4.7K attributes (features) but only 64 records.
+   http://archive.ics.uci.edu/ml/datasets/DBWorld+e-mails
+
+
+These should work with the enum classifier:
+ * Breast Cancer: 569 records. 
+   http://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29
+   Linearly sperable, 97% accuracy
+
+ * Yeast  1.5K records
+   http://archive.ics.uci.edu/ml/datasets/Yeast
+   Need to ignore one column.
+   Other systems get 55% accuracy.
+
+ * Wine
+   http://archive.ics.uci.edu/ml/datasets/Wine   178 records. Small...
+
+These require sparse input support:
+ * Farm Ads   4K records 55K features
+   needs   SVMlight sparse vector format
+   http://archive.ics.uci.edu/ml/datasets/Farm+Ads
+
+These require support for equ, for enum inputs:
+http://archive.ics.uci.edu/ml/datasets/Adult    49K tabular records
+http://archive.ics.uci.edu/ml/datasets/Car+Evaluation  1728 records
+http://archive.ics.uci.edu/ml/datasets/Abalone           4K records
+http://archive.ics.uci.edu/ml/datasets/Bank+Marketing   45K records
