@@ -580,10 +580,11 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     // Copy the input types to a vector; we need this to pass as an
     // argument to boost::transform, below.
     vector<type_node> vin_types;   // vector of input types
-    transform(type_tree_input_arg_types(tt),
+    transform(get_signature_inputs(tt),
               back_inserter(vin_types), get_type_node);
-    type_node out_type =            // dependent column type
-        get_type_node(type_tree_output_type_tree(tt));
+
+    // Dependent column type.
+    type_node out_type = get_type_node(get_signature_output(tt));
 
     std::vector<string> lines; 
     while (get_data_line(in, line))
@@ -655,7 +656,7 @@ istream& istreamITable(istream& in, ITable& it,
     // Copy the input types to a vector; we need this to pass as an
     // argument to boost::transform, below.
     vector<type_node> vin_types;   // vector of input types
-    transform(type_tree_input_arg_types(tt),
+    transform(get_signature_inputs(tt),
               back_inserter(vin_types), get_type_node);
 
     std::vector<string> lines; 

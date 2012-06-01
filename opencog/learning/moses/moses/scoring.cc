@@ -197,7 +197,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_)
 {
-    output_type = *type_tree_output_type_tree(ctable.tt).begin();
+    output_type = get_type_node(get_signature_output(ctable.tt));
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score

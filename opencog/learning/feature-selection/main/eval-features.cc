@@ -113,8 +113,8 @@ int main(int argc,char** argv) {
 
     // read input_table_file file
     type_tree data_tt = infer_data_type_tree(pa.input_table_file);
-    type_tree output_tt = type_tree_output_type_tree(data_tt);
-    type_node data_type = *output_tt.begin();
+    type_tree output_tt = get_signature_output(data_tt);
+    type_node data_type = get_type_node(output_tt);
 
     if(data_type == id::boolean_type) {
         read_eval_output_results(pa);

@@ -110,9 +110,9 @@ void avatar_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_
             //setting arity
             _arity = type_tree_arity(_type_tree);
             //setting output type
-            _output_type = type_tree_output_type_tree(_type_tree);
+            _output_type = get_signature_output(_type_tree);
             //setting input argument type trees
-            _arg_type_tree = type_tree_input_arg_types(_type_tree);
+            _arg_type_tree = get_signature_inputs(_type_tree);
         }
     }
     OC_ASSERT(found,

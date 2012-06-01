@@ -365,23 +365,6 @@ type_node get_type_node(const type_tree& tt)
     return *tt.begin();
 }
 
-type_tree_seq type_tree_input_arg_types(const type_tree& ty)
-{
-    OC_ASSERT(!ty.empty(),
-              "Not sure this assert should not be replaced by a conditional");
-    type_tree_seq res;
-    type_tree_pre_it ty_it = ty.begin();
-    if (*ty_it == id::lambda_type) {
-        OC_ASSERT(!ty_it.is_childless(), "Lambda must not be childless");
-        type_tree_sib_it sib = ty_it.begin();
-        // setting input argument type trees
-        for (; sib != type_tree_sib_it(ty.last_child(ty_it)); ++sib) {
-            res.push_back(type_tree(*sib == id::arg_list_type ? sib.begin() : sib));
-        }
-    }
-    return res;
-}
-
 arity_t convert_index(arity_t arity, arity_t index)
 {
     arity_t ap = -arity;
@@ -405,7 +388,7 @@ const type_tree& argument_type_list_input_type(const type_tree_seq& atl,
     return atl[convert_index(arity, index)];
 }
 
-type_tree type_tree_output_type_tree(const type_tree& ty)
+type_tree get_signature_output(const type_tree& ty)
 {
     OC_ASSERT(!ty.empty(), "ty must not be empty");
     type_tree_pre_it ty_it = ty.begin();
@@ -415,17 +398,22 @@ type_tree type_tree_output_type_tree(const type_tree& ty)
         return type_tree(ty_it);
 }
 
-type_tree_seq signature_inputs(const type_tree& ty)
+type_tree_seq get_signature_inputs(const type_tree& ty)
 {
-    typedef type_tree_sib_it sib_it;
     OC_ASSERT(!ty.empty(), "ty must not be empty");
     type_tree_pre_it ty_it = ty.begin();
-    OC_ASSERT(*ty_it == id::lambda_type);
+
     type_tree_seq tts;
+    if (*ty_it != id::lambda_type)
+        return tts;
+
+    OC_ASSERT(!ty_it.is_childless(), "Lambda must not be childless");
+    typedef type_tree_sib_it sib_it;
     for(sib_it sib = ty_it.begin(); sib != ty_it.last_child(); ++sib)
-        tts.push_back(type_tree(sib));
+        tts.push_back(type_tree(*sib == id::arg_list_type ? sib.begin() : sib));
     return tts;
 }
+
 
 arity_t get_arity(const vertex& v)
 {

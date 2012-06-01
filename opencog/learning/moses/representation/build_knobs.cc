@@ -61,8 +61,8 @@ build_knobs::build_knobs(combo_tree& exemplar,
       _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
-    type_tree ot = type_tree_output_type_tree(types);
-    type_node output_type = *ot.begin();
+    type_tree ot = get_signature_output(types);
+    type_node output_type = get_type_node(ot);
 
     // If there are perceptions/actions, then output had better be
     // an action result.

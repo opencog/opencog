@@ -2134,6 +2134,7 @@ or incomplete.  Or something; its not exploring as widely as it should.
 Other datasets:
 
 These should work with PM, as designed:
+
  * Wine Quality  5K records
    http://archive.ics.uci.edu/ml/datasets/Wine+Quality
    Purely numeric, predict rating 1-10
@@ -2166,3 +2167,20 @@ http://archive.ics.uci.edu/ml/datasets/Adult    49K tabular records
 http://archive.ics.uci.edu/ml/datasets/Car+Evaluation  1728 records
 http://archive.ics.uci.edu/ml/datasets/Abalone           4K records
 http://archive.ics.uci.edu/ml/datasets/Bank+Marketing   45K records
+
+========================================================================
+
+1 June 2012:
+magic04.data
+ * Precision test (i.e. minimize false positives)
+   11 features 19K records.  All numeric inputs, enum output.
+   enum is acutally boolean, so remap g(gamma)->T  h(hadron)->F
+
+   http://archive.ics.uci.edu/ml/datasets/MAGIC+Gamma+Telescope
+
+Run as:
+moses -i magic04.data -u11  -n sin -n log -n exp -x1 -Z1 
+took 270 secs, to get score=-4767  complexity=33
+
+But should be precision, so:
+

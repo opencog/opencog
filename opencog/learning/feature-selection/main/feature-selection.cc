@@ -345,8 +345,8 @@ int main(int argc, char** argv)
     type_tree inferred_tt = infer_data_type_tree(fs_params.input_file,
                                                  fs_params.target_feature,
                                                  fs_params.ignore_features);
-    type_tree output_tt = type_tree_output_type_tree(inferred_tt);
-    type_node inferred_type = *output_tt.begin();
+    type_tree output_tt = get_signature_output(inferred_tt);
+    type_node inferred_type = get_type_node(output_tt);
 
     // Go and do it.
     if(inferred_type == id::boolean_type) {

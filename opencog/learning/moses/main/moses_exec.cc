@@ -166,7 +166,7 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
     // arity will be zero for anything that isn't a lambda_type.
     // However, all tables will be lambda_type ...
     combo::arity_t arity = type_tree_arity(tt);
-    type_node output_type = get_type_node(type_tree_output_type_tree(tt));
+    type_node output_type = get_type_node(get_signature_output(tt));
 
     switch (output_type) {
         case id::boolean_type:
@@ -985,8 +985,8 @@ int moses_exec(int argc, char** argv)
     const rule& bool_reduct_rep = r(reduct_knob_building_effort);
 
     // Problem based on input table.
-    if (datafile_based_problem(problem)) {
-
+    if (datafile_based_problem(problem))
+    {
         // Infer the signature based on the input table.
         type_tree table_type_signature =
             infer_data_type_tree(input_data_files.front(), target_column,
@@ -997,7 +997,7 @@ int moses_exec(int argc, char** argv)
         vector<Table> tables;
         vector<CTable> ctables;
         foreach (const string& idf, input_data_files) {
-            logger().debug("Read data file %s", idf.c_str());
+            logger().info("Read data file %s", idf.c_str());
             Table table = loadTable(idf, target_column, ignore_features);
             // possible subsample the table
             if (nsamples > 0)
@@ -1012,7 +1012,7 @@ int moses_exec(int argc, char** argv)
         if (problem == it || problem == pre) {
 
             // Infer the type of the input table
-            type_tree table_output_tt = type_tree_output_type_tree(table_type_signature);
+            type_tree table_output_tt = get_signature_output(table_type_signature);
             type_node table_output_tn = get_type_node(table_output_tt);
 
             // Determine the default exemplar to start with
@@ -1022,13 +1022,16 @@ int moses_exec(int argc, char** argv)
                 exemplars.push_back(type_to_exemplar(
                     problem == pre? id::boolean_type : table_output_tn));
 
+            // XXX This seems strange to me .. when would the exemplar output
+            // type ever differ from the table?  Well,, it could for pre problem,
+            // but that's over-ridden later, anyway...
             type_node output_type =
                 get_type_node(get_output_type_tree(*exemplars.begin()->begin()));
             if (output_type == id::unknown_type)
                 output_type = table_output_tn;
 
             logger().info() << "Inferred output type: " << output_type;
-            
+
             // problem == pre  precision-based scoring
             if (problem == pre) {
                 type_tree cand_tt = gen_signature(id::boolean_type, arity);
@@ -1230,7 +1233,7 @@ int moses_exec(int argc, char** argv)
             // Get the combo_tree and infer its type
             type_tree tt = infer_type_tree(tr);
 
-            type_node output_type = get_type_node(type_tree_output_type_tree(tt));
+            type_node output_type = get_type_node(get_signature_output(tt));
 
             // If no exemplar has been provided in the options, use the
             // default one.

@@ -320,12 +320,6 @@ arity_t type_tree_arity(const type_tree& ty);
 // assumes that the type is elementary
 type_node get_type_node(const type_tree& tt);
 
-// return a vector containing the type of each input argument given a
-// reduced type tree signature if there is an arg_list(T) at last
-// argument then it fills the last element of the vector directly with
-// T
-type_tree_seq type_tree_input_arg_types(const type_tree& ty);
-
 // takes in argument the arity of an operator (or procedure) and an
 // index and convert that index such that if the arity is positive
 // then the index is unchanged and if it's negative (i.e. arg_list is
@@ -346,8 +340,16 @@ const type_tree& argument_type_list_input_type(const type_tree_seq& atl,
                                                arity_t arity,
                                                arity_t index);
 
-// return the type tree of the output given the function signature ty
-type_tree type_tree_output_type_tree(const type_tree& ty);
+/// Return the type tree of the output given the function signature ty
+type_tree     get_signature_output(const type_tree& ty);
+
+/// Return a sequence of type trees of the inputs of the signature ty
+/// return a vector of the types of each input argument, given a
+/// reduced signature (i.e. a lambda).  If there is an arg_list(T)
+/// as the last argument, then the last element of the vector is
+/// filled directly with T.
+type_tree_seq get_signature_inputs(const type_tree& ty);
+
 
 // return the arity of a vertex, -1 if the arity is an arg_list 0 if
 // it is a constant
