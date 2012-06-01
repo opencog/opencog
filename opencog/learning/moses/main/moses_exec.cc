@@ -1034,8 +1034,12 @@ int moses_exec(int argc, char** argv)
 
             // problem == pre  precision-based scoring
             if (problem == pre) {
-                type_tree cand_tt = gen_signature(id::boolean_type, arity);
-                int as = alphabet_size(cand_tt, ignore_ops);
+                // Keep the table input signature, just make sure the
+                // output is a boolean.
+                type_tree cand_sig = gen_signature(
+                    get_signature_inputs(table_type_signature),
+                    type_tree(id::boolean_type));
+                int as = alphabet_size(cand_sig, ignore_ops);
                 typedef precision_bscore BScore;
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables) {
@@ -1048,7 +1052,7 @@ int moses_exec(int argc, char** argv)
                     bscores.push_back(r);
                 }
                 multibscore_based_bscore<BScore> bscore(bscores);
-                metapop_moses_results(exemplars, cand_tt,
+                metapop_moses_results(exemplars, cand_sig,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
