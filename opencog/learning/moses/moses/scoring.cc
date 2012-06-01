@@ -197,7 +197,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_)
 {
-    type_node output_type = *type_tree_output_type_tree(ctable.tt).begin();
+    output_type = *type_tree_output_type_tree(ctable.tt).begin();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score
@@ -218,6 +218,13 @@ precision_bscore::precision_bscore(const CTable& _ctable,
             return (this->positive? res : -res);
         };
     } else {
+        OC_ASSERT((0.0 < min_activation) && (max_activation < 1.0),
+            "Precision scorer, must bound the min and max activation");
+        return;
+    }
+
+    // Verify that the penaly is sane
+    if (0.0 < penalty) {
         OC_ASSERT(false, "Precision scorer, unsupported output type");
         return;
     }
@@ -256,7 +263,7 @@ void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
                                 // because the precision is normalized
                                 // as well
 
-    logger().info() << "precision_bscore noise = " << p
+    logger().info() << "Precision scorer, noise = " << p
                     << " alphabest size = " << alphabet_size
                     << " complexity ratio = " << 1.0/complexity_coef;
 }
@@ -265,10 +272,16 @@ void precision_bscore::set_complexity_coef(score_t ratio)
 {
     complexity_coef = 0.0;
     occam = (ratio > 0);
+
+    // The complexity coeff is normalized by the size of the table,
+    // because the precision is normalized as well.  So e.g. 
+    // max precision for boolean problems is 1.0.  However...
+    // umm XXX I think the normalization here should be the
+    // best-possible activation, not the usize, right?
     if (occam)
         complexity_coef = 1.0 / (ctable_usize * ratio);
 
-    logger().info() << "precision_bcore complexity ratio = " << 1.0/complexity_coef;
+    logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
 }
 
 penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) const
@@ -357,46 +370,66 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
 
 behavioral_score precision_bscore::best_possible_bscore() const
 {
-    /// @todo doesn't treat the case with worst_norm
+    score_t precision = 1.0f;
+    score_t activation = 1.0f / (score_t)ctable_usize;
+    score_t activation_penalty = 0.0;
+
+    if (output_type == id::contin_type) {
+        // @todo doesn't treat the case with worst_norm
     
-    // for each input map the maximum precision it can get. We also
-    // store sumo and total count not to recompute it again
-    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
+        // For each row, compute the maximum precision it can get.  Typically,
+        // this is 0 or 1 for nondegenerate boolean tables.  Also store the
+        // sumo and total, so that they don't need to be recomputed later.
+        // XXX why bother? this routine is not performance critical?
+        // Lets just make the code  simple, eh?
+        typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
                                                contin_t, // sum_outputs
                                                unsigned> // total count
                           > max_precisions_t;
-    max_precisions_t max_precisions;
-    for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
-        const CTable::counter_t& c = it->second;
-        contin_t sumo = sum_outputs(c);
-        unsigned total = c.total_count();
-        contin_t precision = sumo / total;
-        auto lmnt = std::make_pair(precision, std::make_tuple(it, sumo, total));
-        max_precisions.insert(lmnt);
+        max_precisions_t max_precisions;
+        for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
+            const CTable::counter_t& c = it->second;
+            contin_t sumo = sum_outputs(c);
+            unsigned total = c.total_count();
+            contin_t precision = sumo / total;
+            auto lmnt = std::make_pair(precision, std::make_tuple(it, sumo, total));
+            max_precisions.insert(lmnt);
+        }
+
+        // Compute best precision till minimum activation is reached. Note
+        // that the best precision (sao / active) decreases for each new
+        // mpv, but we want at least min_activation to be reached. It's
+        // not sure this actually gives the best score one can get if
+        // min_activation isn't reached. But we don't want that anyway so
+        // it's an acceptable inacurracy. It would be a problem only if
+        // activation constraint is very loose.
+        //
+        // For (non-degenerate) boolean tables, the activation will be 
+    
+        unsigned active = 0;
+        score_t sao = 0.0;
+        activation = 0.0;
+        reverse_foreach (const auto& mpv, max_precisions) {
+            sao += std::get<1>(mpv.second);
+            active += std::get<2>(mpv.second);
+            activation = active / (score_t)ctable_usize;
+            if (min_activation < activation)
+                break;
+        }
+
+        precision = (sao / active) / max_output;
     }
 
-    // Compute best precision till minimum activation is reached. Note
-    // that the best precision (sao / active) decreases for each new
-    // mpv, but we want at least min_activation to be reached. It's
-    // not sure this actually gives the best score one can get if
-    // min_activation isn't reached. But we don't want that anyway so
-    // it's an acceptable inacurracy. It would be a problem only if
-    // activation constraint is very loose.
-    unsigned active = 0;
-    score_t sao = 0.0, activation = 0.0;
-    reverse_foreach (const auto& mpv, max_precisions) {
-        sao += std::get<1>(mpv.second);
-        active += std::get<2>(mpv.second);
-        activation = active / (score_t)ctable_usize;
-        if (min_activation < activation)
-            break;
-    }
-    score_t precision = (sao / active) / max_output;
-    score_t activation_penalty = get_activation_penalty(activation);
+    // Avoid divide-by-zero, NaN when activation bounds are not set.
+    if (0.0 < penalty)
+        activation_penalty = get_activation_penalty(activation);
 
     logger().info("Precision scorer, best precision = %f", precision);
-    logger().info("Precision scorer, activation for best precision = %f", activation);
-    logger().info("Precision scorer, activation penalty for best precision = %f", activation_penalty);
+    logger().info("Precision scorer, minimum activation = %f", activation);
+    if (0.0 < penalty)
+        logger().info("Precision scorer, activation penalty for best precision = %f", activation_penalty);
+    else
+        logger().info("Precision scorer, no activation penalty");
     
     return {precision, activation_penalty};
 }

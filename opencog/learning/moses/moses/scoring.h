@@ -380,6 +380,8 @@ protected:
     score_t penalty;
     bool positive, worst_norm;
 
+    type_node output_type;
+
 private:
     score_t get_activation_penalty(score_t activation) const;
     // function to calculate the total weight of the observations
