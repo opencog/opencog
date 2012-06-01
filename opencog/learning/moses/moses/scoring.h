@@ -950,8 +950,12 @@ struct complexity_based_scorer : public unary_function<instance,
             combo_tree tr = _rep.get_candidate(inst, _reduce);
             return _cscorer(tr);
         } catch (...) {
-            logger().info() << "Warning: The following instance has failed to be evaluated: "
-                             << _rep.fields().stream(inst);
+            combo_tree raw_tr = _rep.get_candidate(inst, false);
+            combo_tree red_tr = _rep.get_candidate(inst, true);
+            logger().warn() << "The following instance could not be evaluated: "
+                            << _rep.fields().stream(inst)
+                            << "\nUnreduced tree: " << raw_tr
+                            << "\nreduced tree: "<< red_tr;
         }
         return worst_composite_score;
     }
