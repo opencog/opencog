@@ -388,33 +388,6 @@ const type_tree& argument_type_list_input_type(const type_tree_seq& atl,
     return atl[convert_index(arity, index)];
 }
 
-type_tree get_signature_output(const type_tree& ty)
-{
-    OC_ASSERT(!ty.empty(), "ty must not be empty");
-    type_tree_pre_it ty_it = ty.begin();
-    if (*ty_it == id::lambda_type)
-        return type_tree(ty_it.last_child());
-    else
-        return type_tree(ty_it);
-}
-
-type_tree_seq get_signature_inputs(const type_tree& ty)
-{
-    OC_ASSERT(!ty.empty(), "ty must not be empty");
-    type_tree_pre_it ty_it = ty.begin();
-
-    type_tree_seq tts;
-    if (*ty_it != id::lambda_type)
-        return tts;
-
-    OC_ASSERT(!ty_it.is_childless(), "Lambda must not be childless");
-    typedef type_tree_sib_it sib_it;
-    for(sib_it sib = ty_it.begin(); sib != ty_it.last_child(); ++sib)
-        tts.push_back(type_tree(*sib == id::arg_list_type ? sib.begin() : sib));
-    return tts;
-}
-
-
 arity_t get_arity(const vertex& v)
 {
     if (is_builtin(v))
@@ -1270,6 +1243,33 @@ arity_t explicit_arity(const combo_tree& tr)
     return res;
 }
 
+type_tree get_signature_output(const type_tree& ty)
+{
+    OC_ASSERT(!ty.empty(), "ty must not be empty");
+    type_tree_pre_it ty_it = ty.begin();
+    if (*ty_it == id::lambda_type)
+        return type_tree(ty_it.last_child());
+    else
+        return type_tree(ty_it);
+}
+
+type_tree_seq get_signature_inputs(const type_tree& ty)
+{
+    OC_ASSERT(!ty.empty(), "ty must not be empty");
+    type_tree_pre_it ty_it = ty.begin();
+
+    type_tree_seq tts;
+    if (*ty_it != id::lambda_type)
+        return tts;
+
+    OC_ASSERT(!ty_it.is_childless(), "Lambda must not be childless");
+    typedef type_tree_sib_it sib_it;
+    for(sib_it sib = ty_it.begin(); sib != ty_it.last_child(); ++sib)
+        tts.push_back(type_tree(*sib == id::arg_list_type ? sib.begin() : sib));
+    return tts;
+}
+
+
 type_tree gen_signature(const type_tree& itype, const type_tree& otype,
                         arity_t arity)
 {
@@ -1293,10 +1293,24 @@ type_tree gen_signature(const type_tree& iotype, arity_t arity)
 {
     return gen_signature(iotype, iotype, arity);
 }
+
 type_tree gen_signature(type_node iotype, arity_t arity)
 {
     type_tree tt(iotype);
     return gen_signature(tt, arity);
+}
+
+type_tree gen_signature(const type_tree_seq& inputs, const type_tree& otype)
+{
+    type_tree res(id::lambda_type);
+    type_tree_pre_it root = res.begin();
+    res.append_children(root, inputs.size() + 1);
+    type_tree_sib_it sib = root.begin();
+    type_tree_seq::const_iterator vi = inputs.begin();
+    for(; sib!= root.last_child(); ++sib, ++vi)
+        sib = res.replace(sib, (*vi).begin());
+    res.replace(sib, otype.begin());
+    return res;
 }
 
 } // ~namespace combo

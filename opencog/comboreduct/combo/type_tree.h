@@ -340,17 +340,6 @@ const type_tree& argument_type_list_input_type(const type_tree_seq& atl,
                                                arity_t arity,
                                                arity_t index);
 
-/// Return the type tree of the output given the function signature ty
-type_tree     get_signature_output(const type_tree& ty);
-
-/// Return a sequence of type trees of the inputs of the signature ty
-/// return a vector of the types of each input argument, given a
-/// reduced signature (i.e. a lambda).  If there is an arg_list(T)
-/// as the last argument, then the last element of the vector is
-/// filled directly with T.
-type_tree_seq get_signature_inputs(const type_tree& ty);
-
-
 // return the arity of a vertex, -1 if the arity is an arg_list 0 if
 // it is a constant
 arity_t get_arity(const vertex& v);
@@ -371,18 +360,35 @@ arity_t infer_arity(const combo_tree& tr);
 // for instance if tr == +($1 $5) it returns 5
 arity_t explicit_arity(const combo_tree& tr);
 
-// helpers to defined type_trees
+/// Return the type tree of the output given the function signature ty
+type_tree     get_signature_output(const type_tree& ty);
 
-// given a type (of both inputs and output) define a type tree as a
-// function with arity iotype inputs and iotype output
-// for instance declare_function(type_tree(id::boolean_type, 4)) returns
-// ->(boolean boolean boolean boolean boolean)
-type_tree gen_signature(const type_tree& iotype, arity_t arity);
-type_tree gen_signature(type_node iotype, arity_t arity);
-// Like above but specify the input type as well as the output
+/// Return a sequence of type trees of the inputs of the signature ty
+/// return a vector of the types of each input argument, given a
+/// reduced signature (i.e. a lambda).  If there is an arg_list(T)
+/// as the last argument, then the last element of the vector is
+/// filled directly with T.
+type_tree_seq get_signature_inputs(const type_tree& ty);
+
+
+/// Given the arity, the types of the inputs and the output, create
+/// a corresponding function signature, that is, a lambda type tree 
+/// with that signature.  So, for example:
+///      gen_signature(id::contin_type, id::boolean_type, 3)
+/// returns
+///     ->(contin contin contin boolean)
+type_tree gen_signature(type_node itype, type_node otype, arity_t arity);
+
+/// Same as above, but taking trees not nodes.
 type_tree gen_signature(const type_tree& itype, const type_tree& otype,
                         arity_t arity);
-type_tree gen_signature(type_node itype, type_node otype, arity_t arity);
+
+/// Same as above, but using the same type for input and output.
+type_tree gen_signature(type_node iotype, arity_t arity);
+type_tree gen_signature(const type_tree& iotype, arity_t arity);
+
+/// As above, except using a vector of input types.
+type_tree gen_signature(const type_tree_seq& inputs, const type_tree& output);
 
 } // ~namespace combo
 } // ~namespace opencog
