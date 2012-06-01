@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "May 23, 2012" "3.1.2" "OpenCog Learning"
+.TH MOSES 1 "June 1, 2012" "3.1.7" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -80,6 +80,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR pop_size_ratio ]
 .RB [ \-p
 .IR probability ]
+.RB [ \-\-python=1 ]
 .RB [ \-q
 .IR min ]
 .RB [ \-R
@@ -98,6 +99,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-W1 ]
 .RB [ \-w
 .IR max ]
+.RB [ \-\-well\-enough=1 ]
 .RB [ \-x1 ]
 .RB [ \-y
 .IR combo_program ]
@@ -129,7 +131,7 @@ As an example, the input file of comma-separated values:
 \& 1,1,1
 .fi
 
-when run with the flags \fI\-u\ out\ \-W1\fR will generate the combo
+when run with the flags \fI\-Hit\ \-u\ out\ \-W1\fR will generate the combo
 program \fIand($a\ $b)\fR. This program indicates that the third column
 can be modelled as the boolean-and of the first two.  The \fI\-u\fR option
 specifies that it is the third column that should be modelled, and the
@@ -273,6 +275,48 @@ the remote machines.
 Print program version, and exit.
 .PP
 .\" ============================================================
+.SS "Problem-type options"
+MOSES is able to handle a variety of different 'problem types',
+such as regression, categorization and clustering, as well as a number
+of demo problems, such as parity and factorization.  The \fB\-H\fR
+option is used to specify the problem type; the demo problem types are
+listed in a later section.
+
+.TP
+.BI \-H\  type \fR,\ \fB\-\-problem\-type= type
+The 
+.I type
+of problem may be one of:
+.TS
+tab (@);
+l lx.
+\fBit\fR@T{
+Regression on an input table.  That is, the input table consists of a set
+of columns, all but one consisdered 'inputs', and one is considered an
+output.  The goal of regression is to learn a combo program that most
+accurately predicts the output.  For boolean-valued and enumerated
+outputs, the scoring function simply counts the number of incorrect
+answers, and tries to minimize this score.  For contin-valued outputs,
+the mean-square variation is minimized.
+T}
+\fBpre\fR@T{
+Regression on an input table, maximizing precision instead of accuracy
+(that is, minimizing the number of false positives, at the risk of
+sometimes failing to identify true positives).
+T}
+\fBkl\fR@T{
+Clustering on an input table, by maximizing the Kullback-Leibler
+divergence between the distribution of the outputs.  That is, the
+output must still be well-scored, but it is assumed that there are
+many possible maxima.  (XXX???) Huh?
+T}
+\fBann-it\fR@T{
+Regression on an input table, using a neural network.  (kind-of-like
+a hidden markov model-sih, kind of. XXX Huh???)
+T}
+.TE
+.PP
+.\" ============================================================
 .SS "Input specification options"
 These options control how input data is specified and interpreted.
 In its primary mode of operation, \fBmoses\fR performs regression on a
@@ -298,27 +342,6 @@ to reach this size.
 .TP
 .BI \-G\  num \fR,\ \fB\-\-weighted\-accuracy= num
 Huh ???
-.TP
-.BI \-H\  type \fR,\ \fB\-\-problem\-type= type
-A number of
-.I type
-may be one of:
-.TS
-tab (@);
-l lx.
-\fBann-it\fR@T{
-Regression on an input table, using a neural network.
-T}
-\fBit\fR@T{
-Regression on an input table.
-T}
-\fBkl\fR@T{
-Regression on an input table, by maximizing the Kullback-Leibler
-divergence between the distribution of the outputs.  That is, the
-output must still be well-scored, but it is assumed that there are
-many possible maxima. (XXX ???)
-T}
-.TE
 .TP
 .BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
 The \fIfilename\fR specifies the input data file. The input table must
@@ -587,6 +610,21 @@ then the search radius is progressively widened, until another
 termination condition is met.  Consider using the \fB\-D\fR flag to
 set the maximum search radius.
 
+.TP
+.BI \-\-well\-enough=1
+For prolems with an enumerated ('nominal') output, the learned combo
+program is always of the form \fBcond\fR\fI(pred_1 value_1 pred_2 value_2 ... 
+pred_n value_n else_val)\fR  where \fIpred_1\fR is a predicate, which,
+if true, causes the output to be \fIvalue_1\fR.  If false, then
+\fIpred_2\fR is tested, and so on.  If none of the predicates evalue to
+true, then the value of the \fBcond\fR expression is the \fIelse_val\fR.
+The well-enough algorithm attempts to find predicates that maximize
+precision, the point being that if a perfectly precise \fIpred_1\fR
+can be found, then it can be left alone ('leave well-enough alone'),
+thus simplifying the remainder of the search problem.  Performing this
+evaluation is costly, and may lead to a slow-down, without improving
+overall accuracy.
+
 .\" ============================================================
 .SS "Output control options"
 These options control the displayed output.
@@ -619,6 +657,9 @@ program slowdown.
 .BI \-o\  filename \fR,\ \fB\-\-output\-file= filename
 Write results to \fIfilename\fR. If not specified, results are written to
 \fBstdout\fR.
+.TP
+.BI \-\-python=1
+Output the highest-scoring programs as python snippets, instead of combo.
 .TP
 .BI \-S0\fR,\ \fB\-\-output\-score=0
 Prevent printing of the score.
@@ -880,8 +921,6 @@ feature that must be fit.
 Finish documenting these algo flags:  -M
 .PP
 These input flags: -G
-.PP
-These output flags: --python
 .PP
 Other mystery flags: -J -K -U -X -Q
 
