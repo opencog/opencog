@@ -788,7 +788,7 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&alpha)->default_value(0.0),
-         "If problem pre is used then if alpha is negative (any negative value), "
+         "If problem pre is used, then if alpha is negative (any negative value), "
          "precision is replaced by negative predictive value. And then alpha "
          "plays the role of the activation constrain penalty from 0 to inf, "
          "0 being no activation penalty at all, inf meaning hard constraint "
@@ -1006,9 +1006,9 @@ int moses_exec(int argc, char** argv)
             ctables.push_back(table.compress());
         }
 
-        // 'it' means regression based on input table.
-        // 'pre' means we must maximize precision (that is, negative
-        // predictive value), instead of accuracy.
+        // 'it' means regression based on input table; we maximimze accuracy.
+        // 'pre' means we must maximize precision (i.e minimize the number of
+        // false positives.)
         if (problem == it || problem == pre) {
 
             // Infer the type of the input table
@@ -1017,6 +1017,7 @@ int moses_exec(int argc, char** argv)
 
             // Determine the default exemplar to start with
             // problem == pre  precision-based scoring
+            // precision combo trees always return booleans.
             if (exemplars.empty())
                 exemplars.push_back(type_to_exemplar(
                     problem == pre? id::boolean_type : table_output_tn));

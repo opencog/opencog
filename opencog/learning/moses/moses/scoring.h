@@ -308,31 +308,41 @@ score_t discrete_complexity_coef(unsigned alphabet_size, double p);
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 
 /**
- * Fitness function based on binary precision
+ * Fitness function for maximizing binary precision, that is, for
+ * minimizing false positives.   This scorer works for both boolean
+ * regression and contin regression.  For contin regression, the
+ * learned combo program still returns a boolean T/F, which is then
+ * used to sum the values of the contin output value.  That is, if
+ * the combo returns T for a given row, then we add the contin value
+ * in that row.  If the combo returns false for that row, we do nothing. 
+ *
+ * For contin tables, if 'positive' is false, then the negative of
+ * the contin value is used for all calculations.
+ *
  * http://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
  *
- * This bscore has 3 components:
+ * This bscore has 2 components:
  *
- * 1) the precision (or the negative predictive value if positive is
- * false). Note that candidates are active when they output true (even
- * if they try to maximize negative predictive value);
+ * 1) The precision.  That is, the number of true positives divided
+ *    by the sum of true and false positives.  If the paramter 'positive'
+ *    is set to false, then the 'negative prdictive value' is computed
+ *    (i.e. maximing the true negatives, minimizing false negatives).
+
+ * 2) a penalty depending on whether a constraint is met, explained
+ *    below.
  *
- * 2) a penalty depending on whether the constraint explained below is
- * met;
- *
- * 3) and possibly the occam's razor.
+ * The scorer counts the total number of rows for which the sombo program
+ * returned 'true'. This is defined as the 'activation'.  For boolean tables,
+ * the activation is just the number of true positives plus the number of 
+ * false positives.
  *
  * There's a constraint that the activation must be within the
  * interval [min_activation, max_activation]. If the constraint is not
- * met and penality is non null then the second component of the
+ * met and penality is non-zero, then the second component of the
  * bscore takes the value:
- * log( (1 - dst(activation, [min_activation, max_activation])) ^ penalty )
+ *     log( (1 - dst(activation, [min_activation, max_activation])) ^ penalty )
  * where dst(x, I) is defined as
- * dst(x, I) = max(min(I.min - x, 0) / I.min, min(x - I.max,0)/(1 - I.max))
- *
- * If the CTable output type is contin instead of boolean then the hit
- * count is replaced by the sum of the outputs (or minus that sum if
- * this->positive == false)
+ *     dst(x, I) = max(min(I.min - x, 0) / I.min, min(x - I.max,0)/(1 - I.max))
  *
  * If worst_norm is true then the percision is divided by the absolute
  * average of the negative lower (resp. positive upper if
@@ -343,8 +353,9 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 struct precision_bscore : public bscore_base
 {
     precision_bscore(const CTable& _ctable,
-                     float min_activation, float max_activation,
-                     float penalty,
+                     float min_activation = 0.0f,
+                     float max_activation = 1.0f,
+                     float penalty = 0.0f,
                      bool positive = true,
                      bool worst_norm = false);
 
