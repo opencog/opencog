@@ -358,13 +358,18 @@ arity_t dataFileArity(const string& fileName)
     return istreamArity(*in);
 }
 
-//* Return true if the table seems to have a header line in it.
-bool has_header(const string& dataFileName)
+vector<string> loadHeader(const string& file_name)
 {
-    unique_ptr<ifstream> in(open_data_file(dataFileName));
+    unique_ptr<ifstream> in(open_data_file(file_name));
     string line;
     get_data_line(*in, line);
-    type_node n = infer_type_from_token(tokenizeRow<string>(line).front());
+    return tokenizeRow<string>(line);
+}
+
+//* Return true if the table seems to have a header line in it.
+bool hasHeader(const string& dataFileName)
+{
+    type_node n = infer_type_from_token(loadHeader(dataFileName).front());
 
     // Well, first row might be enums, or headers...
     return (n == id::ill_formed_type) || (n == id::enum_type);
@@ -486,7 +491,7 @@ type_tree infer_data_type_tree(const string& fileName,
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
     get_data_line(*in, line);
-    if (has_header(fileName))
+    if (hasHeader(fileName))
         get_data_line(*in, line);
     type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line,
                                                               output_col_num,
@@ -604,15 +609,13 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
                   i + 1, io.first.size(), arity);
 
         // fill table, based on the types passed in the type-tree
-        vertex_seq ivs(arity);
-        transform(vin_types, io.first, ivs.begin(), token_to_vertex);
-        it[i] = ivs;
+        transform(vin_types, io.first, back_inserter(it[i]), token_to_vertex);
         ot[i] = token_to_vertex(out_type, io.second);
     };
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
     return in;
 }
-
+        
 void loadTable(const string& file_name, ITable& it, OTable& ot,
                const type_tree& tt, int pos,
                const vector<int>& ignore_col_nums)
@@ -620,7 +623,7 @@ void loadTable(const string& file_name, ITable& it, OTable& ot,
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable(in, it, ot, has_header(file_name), tt, pos, ignore_col_nums);
+    istreamTable(in, it, ot, hasHeader(file_name), tt, pos, ignore_col_nums);
 }
 
 Table loadTable(const string& file_name, int pos,
@@ -635,7 +638,52 @@ Table loadTable(const string& file_name, int pos,
 istream& istreamITable(istream& in, ITable& it,
                        bool has_header, const type_tree& tt)
 {
-    // TODO
+    string line;
+    arity_t arity = type_tree_arity(tt);
+
+    if (has_header) {
+        get_data_line(in, line);
+        vector<string> h = tokenizeRow<string>(line);
+        it.set_labels(h);
+        OC_ASSERT(arity == (arity_t)h.size(),
+                  "ERROR: Input file header/data declaration mismatch: "
+                  "The header has %u columns while the first row has "
+                  "%d columns.\n",
+                  h.size(), arity);
+    }
+
+    // Copy the input types to a vector; we need this to pass as an
+    // argument to boost::transform, below.
+    vector<type_node> vin_types;   // vector of input types
+    transform(type_tree_input_arg_types(tt),
+              back_inserter(vin_types), get_type_node);
+
+    std::vector<string> lines; 
+    while (get_data_line(in, line))
+        lines.push_back(line);
+    int ls = lines.size();
+    it.resize(ls);
+
+    // vector of indices [0, lines.size())
+    auto ir = boost::irange(0, ls);
+    vector<size_t> indices(ir.begin(), ir.end());
+    
+    auto parse_line = [&](int i) {
+        // tokenize the line and fill the input vector and output
+        vector<string> vs = tokenizeRow<string>(lines[i]);
+
+        // check arity
+        OC_ASSERT(arity == (arity_t)vs.size(),
+                  "ERROR: Input file inconsistent: the %uth row has %u "
+                  "columns while the first row has %d columns.  All "
+                  "rows should have the same number of columns.\n",
+                  i + 1, vs.size(), arity);
+
+        // fill table, based on the types passed in the type-tree
+        transform(vin_types, vs, back_inserter(it[i]), token_to_vertex);
+    };
+    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
+    return in;
 }
 
 void loadITable(const string& file_name, ITable& it, const type_tree& tt)
@@ -643,7 +691,7 @@ void loadITable(const string& file_name, ITable& it, const type_tree& tt)
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamITable(in, it, has_header(file_name), tt);
+    istreamITable(in, it, hasHeader(file_name), tt);
 }
     
 ITable loadITable(const string& file_name)

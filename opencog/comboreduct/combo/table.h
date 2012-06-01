@@ -497,11 +497,13 @@ arity_t istreamArity(std::istream& in);
  */
 arity_t dataFileArity(const std::string& dataFileName);
 
+std::vector<std::string> loadHeader(const std::string& file_name);
+
 /**
  * check if the data file has a header. That is whether the first row
  * starts with a sequence of output and input labels
  */
-bool has_header(const std::string& dataFileName);
+bool hasHeader(const std::string& dataFileName);
 
 /**
  * Check the token, if it is "0" or "1" then it is boolean, otherwise

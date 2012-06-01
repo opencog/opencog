@@ -101,19 +101,21 @@ void eval_output_results(const evalTableParameters& pa, ITable& it,
 }
 
 void read_eval_output_results(evalTableParameters& pa) {
-    // find the position of the target feature of the data file if any
-    if(!pa.target_feature_str.empty())
-        pa.target_feature = find_feature_position(pa.input_table_file,
-                                                  pa.target_feature_str);
-    
     // read data ITable
     Table table;
     if(pa.target_feature_str.empty())
         table.itable = loadITable(pa.input_table_file);
     else {
-        pa.target_feature = find_feature_position(pa.input_table_file,
-                                                  pa.target_feature_str);
-        table = loadTable(pa.input_table_file, pa.target_feature);
+        // check that the target feature is in the data file, and load
+        // the whole table if it is, instead of the itable
+        auto header = loadHeader(pa.input_table_file);
+        if(boost::find(header, pa.target_feature_str) == header.end())
+            table.itable = loadITable(pa.input_table_file);
+        else {
+            pa.target_feature = find_feature_position(pa.input_table_file,
+                                                      pa.target_feature_str);
+            table = loadTable(pa.input_table_file, pa.target_feature);
+        }
     }
 
     ITable& it = table.itable;

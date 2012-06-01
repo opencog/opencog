@@ -93,7 +93,9 @@ int main(int argc,char** argv) {
          value<string>(&pa.combo_programs_file),
          "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
         
-        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program 'and($large $tall)' instead of 'and($24 $124)'. In such a case it is expected that the input data file contains the labels as first row. TODO could be detected automatically.\n")
+        (opt_desc_str(labels_opt).c_str(),
+         value<bool>(&pa.has_labels)->default_value(true),
+         "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program 'and($large $tall)' instead of 'and($24 $124)'. In such a case it is expected that the input data file contains the labels as first row. TODO could be detected automatically.\n")
         
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
