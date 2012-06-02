@@ -80,10 +80,20 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
     // We pass an empty vertex sequence, as there should be no
     // arguments in the tree below 'it'.  Viz, the only things we
     // expect to evaluate are things like 'not(true)', '*(-1.75 1)'
-    // '+(2 0 6)' and so on.  If there are args, then hopefully and
+    // '+(2 0 6)' and so on.  If there are args, then hopefully an
     // exception will be thrown :-)
+    //
+    // Err, well, its common for knob-building to generate things
+    // log(0) or /(1 0) and so we want to catch that inf, and 
+    // propagate it along.  (later on, there may be a divde-by-inf
+    // or maybe a 0<(-inf) predicate, etc. all of which can be legally
+    // evaluated to return valid results.
     vertex_seq empty;
-    *it = eval_throws_binding(empty, it, evaluator);
+    try {
+        *it = eval_throws_binding(empty, it, evaluator);
+    } catch (EvalException e) {
+        *it = e.get_vertex();
+    };
     tr.erase_children(it);
 }
 
