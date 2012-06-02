@@ -325,37 +325,51 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  *
  * 1) The precision.  That is, the number of true positives divided
  *    by the sum of true and false positives.  If the paramter 'positive'
- *    is set to false, then the 'negative prdictive value' is computed
+ *    is set to false, then the 'negative predictive value' is computed
  *    (i.e. maximing the true negatives, minimizing false negatives).
-
- * 2) a penalty depending on whether a constraint is met, explained
- *    below.
  *
- * The scorer counts the total number of rows for which the sombo program
+ * 2) a penalty ensuring that at least some true positives are found,
+ *    as otherwise one can get perfect precision by always answering
+ *    false (and thus there would be zero false poitives).  The penalty
+ *    is explained below.
+ *
+ * The scorer counts the total number of rows for which the combo program
  * returned 'true'. This is defined as the 'activation'.  For boolean tables,
  * the activation is just the number of true positives plus the number of 
- * false positives.
+ * false positives.  
  *
- * There's a constraint that the activation must be within the
- * interval [min_activation, max_activation]. If the constraint is not
- * met and penality is non-zero, then the second component of the
- * bscore takes the value:
- *     log( (1 - dst(activation, [min_activation, max_activation])) ^ penalty )
- * where dst(x, I) is defined as
- *     dst(x, I) = max(min(I.min - x, 0) / I.min, min(x - I.max,0)/(1 - I.max))
+ * Note that an activation of zero corresponds to perfect precision:
+ * there were no false positives.  Thus, to get reasonable results, one
+ * wants to learn a function that predicts at least a few true postives,
+ * i.e. has an activation greater than zero.  This is done by applying a
+ * penalty when the activation is outside of the range of an interval
+ * [min_activation, max_activation].  If the penalty coefficient is
+ * non-zero, then the final component of the bscore takes the value:
  *
- * If worst_norm is true then the percision is divided by the absolute
+ *    penalty * log(1 - dst(activation, [min_activation, max_activation])) 
+ *
+ * where dst(x, I) is defined as being zero on the interval I and ramping
+ * up to one if x lies outside the interval I.
+ *
+ *                            {  1 - x/x_min         if x < x_min 
+ *    dst(x, [x_min,x_max]) = {    0                 if x_min < x < x_max
+ *                            { (x-x_max)/(1-x_max)  if x_max < x
+ *
+ * Note that the logarithm is negative, and thus the total score derating
+ * is negative.
+ *
+ * If worst_norm is true, then the percision is divided by the absolute
  * average of the negative lower (resp. positive upper if
  * this->positive is false) decile or less. If there is no negative
  * (resp. positive if this->positive is false) values then it is not
- * normalized.
+ * normalized. (??)
  */
 struct precision_bscore : public bscore_base
 {
     precision_bscore(const CTable& _ctable,
-                     float min_activation = 0.0f,
+                     float penalty = 1.0f,
+                     float min_activation = 0.5f,
                      float max_activation = 1.0f,
-                     float penalty = 0.0f,
                      bool positive = true,
                      bool worst_norm = false);
 

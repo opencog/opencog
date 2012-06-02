@@ -1044,9 +1044,10 @@ int moses_exec(int argc, char** argv)
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables) {
                     BScore* r = new BScore(ctable,
+                                           abs(alpha), 
                                            min_rand_input,
                                            max_rand_input,
-                                           abs(alpha), alpha >= 0,
+                                           alpha >= 0,
                                            pre_worst_norm);
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);

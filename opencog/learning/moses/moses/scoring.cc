@@ -189,8 +189,9 @@ void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 //////////////////////
 
 precision_bscore::precision_bscore(const CTable& _ctable,
-                                   float min_activation_, float max_activation_,
                                    float penalty_,
+                                   float min_activation_,
+                                   float max_activation_,
                                    bool positive_,
                                    bool worst_norm_)
     : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
@@ -218,16 +219,16 @@ precision_bscore::precision_bscore(const CTable& _ctable,
             return (this->positive? res : -res);
         };
     } else {
-        OC_ASSERT((0.0 < min_activation) && (max_activation < 1.0),
-            "Precision scorer, must bound the min and max activation");
+        OC_ASSERT(false, "Precision scorer, unsupported output type");
         return;
     }
 
     // Verify that the penaly is sane
-    if (0.0 < penalty) {
-        OC_ASSERT(false, "Precision scorer, unsupported output type");
-        return;
-    }
+    OC_ASSERT((0.0 < penalty) && (0.0 < min_activation) && (min_activation <= max_activation),
+        "Precision scorer, invalid activation bounds.  "
+        "The penalty must be non-zero, the minimum activation must be "
+        "greater than zero, and the maximum activation must be greater "
+        "than or equal to the minimum activation.\n");
     
     // For boolean tables, the highest possible precision is 1.0 (of course)
     if (output_type == id::boolean_type)
@@ -247,6 +248,10 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         }
     }
 
+    logger().info("Precision scorer, penalty = %f, "
+                  "min_activation = %f, "
+                  "max_activation = %f", 
+                  penalty, min_activation, max_activation);
     logger().info("Precision scorer, max_output = %f", max_output);
 }
 
@@ -327,15 +332,12 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
         avg_worst_deciles /= worst_count;
     }
     
-    // add (normalized) precision
-    score_t precision = (sao / active) / max_output;
+    // Compute normalized precision.  No hits means perfect precision :)
+    // Yes, zero hits is common, early on.
+    score_t precision = 1.0;
+    if (0 < active) 
+        precision = (sao / active) / max_output;
 
-    // For boolean tables, activation sum of true and false positives
-    // i.e. the sum of all positives.   For contin tables, the activation
-    // is likewise: the number of rows for which the combo tree returned
-    // true (positive).
-    score_t activation = (score_t)active / ctable_usize;
-    
     // normalize precision w.r.t. worst deciles
     if (avg_worst_deciles < 0) {
         logger().fine("precision before worst_norm = %f", precision);
@@ -347,18 +349,17 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     
     pbs.first.push_back(precision);
     
-    // add activation_penalty
-    score_t activation_penalty = 0.0;
-    if (penalty > 0.0) {
-        activation_penalty = get_activation_penalty(activation);
-        pbs.first.push_back(activation_penalty);
-    }
-
-    if (logger().isFineEnabled()) {
-       logger().fine("precision = %f  activation=%f  activation penalty=%e",
+    // For boolean tables, activation sum of true and false positives
+    // i.e. the sum of all positives.   For contin tables, the activation
+    // is likewise: the number of rows for which the combo tree returned
+    // true (positive).
+    score_t activation = (score_t)active / ctable_usize;
+    score_t activation_penalty = get_activation_penalty(activation);
+    pbs.first.push_back(activation_penalty);
+    if (logger().isFineEnabled()) 
+        logger().fine("precision = %f  activation=%f  activation penalty=%e",
                      precision, activation, activation_penalty);
-    }
-    
+ 
     // Add the Complexity penalty
     if (occam)
         pbs.second = tree_complexity(tr) * complexity_coef;
@@ -370,88 +371,75 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
 
 behavioral_score precision_bscore::best_possible_bscore() const
 {
-    score_t precision = 1.0f;
-    score_t activation = 1.0f / (score_t)ctable_usize;
-    score_t activation_penalty = 0.0;
+    // @todo doesn't treat the case with worst_norm
 
-    if (output_type == id::contin_type) {
-        // @todo doesn't treat the case with worst_norm
-    
-        // For each row, compute the maximum precision it can get.  Typically,
-        // this is 0 or 1 for nondegenerate boolean tables.  Also store the
-        // sumo and total, so that they don't need to be recomputed later.
-        // XXX why bother? this routine is not performance critical?
-        // Lets just make the code  simple, eh?
-        typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
-                                               contin_t, // sum_outputs
-                                               unsigned> // total count
+    // For each row, compute the maximum precision it can get.  Typically,
+    // this is 0 or 1 for nondegenerate boolean tables.  Also store the
+    // sumo and total, so that they don't need to be recomputed later.
+    // XXX why bother? this routine is not performance critical?
+    // Lets just make the code  simple, eh?
+    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
+                                           contin_t, // sum_outputs
+                                           unsigned> // total count
                           > max_precisions_t;
-        max_precisions_t max_precisions;
-        for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
-            const CTable::counter_t& c = it->second;
-            contin_t sumo = sum_outputs(c);
-            unsigned total = c.total_count();
-            contin_t precision = sumo / total;
-            auto lmnt = std::make_pair(precision, std::make_tuple(it, sumo, total));
-            max_precisions.insert(lmnt);
-        }
-
-        // Compute best precision till minimum activation is reached. Note
-        // that the best precision (sao / active) decreases for each new
-        // mpv, but we want at least min_activation to be reached. It's
-        // not sure this actually gives the best score one can get if
-        // min_activation isn't reached. But we don't want that anyway so
-        // it's an acceptable inacurracy. It would be a problem only if
-        // activation constraint is very loose.
-        //
-        // For (non-degenerate) boolean tables, the activation will be 
-    
-        unsigned active = 0;
-        score_t sao = 0.0;
-        activation = 0.0;
-        reverse_foreach (const auto& mpv, max_precisions) {
-            sao += std::get<1>(mpv.second);
-            active += std::get<2>(mpv.second);
-            activation = active / (score_t)ctable_usize;
-            if (min_activation < activation)
-                break;
-        }
-
-        precision = (sao / active) / max_output;
+    max_precisions_t max_precisions;
+    for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
+        const CTable::counter_t& c = it->second;
+        contin_t sumo = sum_outputs(c);
+        unsigned total = c.total_count();
+        contin_t precision = sumo / total;
+        auto lmnt = std::make_pair(precision, std::make_tuple(it, sumo, total));
+        max_precisions.insert(lmnt);
     }
 
-    // Avoid divide-by-zero, NaN when activation bounds are not set.
-    if (0.0 < penalty)
-        activation_penalty = get_activation_penalty(activation);
+    // Compute best precision till minimum activation is reached. Note
+    // that the best precision (sao / active) can never increase for each
+    // new mpv.  Despite this, we keep going until at least min_activation
+    // is reached. It's not clear this actually gives the best score one
+    // can get if min_activation isn't reached, but we don't want to go
+    // below min activation anyway, so it's an acceptable inacurracy. 
+    // (It would be a problem only if activation constraint is very loose.)
+    //
+    unsigned active = 0;
+    score_t sao = 0.0;
+    score_t activation = 0.0;
+    reverse_foreach (const auto& mpv, max_precisions) {
+        sao += std::get<1>(mpv.second);
+        active += std::get<2>(mpv.second);
+        activation = active / (score_t)ctable_usize;
+        if (min_activation <= activation)
+            break;
+    }
+
+    score_t precision = (sao / active) / max_output;
+
+    score_t activation_penalty = get_activation_penalty(activation);
 
     logger().info("Precision scorer, best precision = %f", precision);
-    logger().info("Precision scorer, minimum activation = %f", activation);
-    if (0.0 < penalty)
-        logger().info("Precision scorer, activation penalty for best precision = %f", activation_penalty);
-    else
-        logger().info("Precision scorer, no activation penalty");
+    logger().info("Precision scorer, activation at best precision = %f", activation);
+    logger().info("Precision scorer, activation penalty at best precision = %f", activation_penalty);
     
     return {precision, activation_penalty};
 }
 
+// Note that the logarithm is always negative, so this fmethod always
+// returns a value that is zeo or negative.
 score_t precision_bscore::get_activation_penalty(score_t activation) const
 {
-    // Note that the default min activation == 0.0 and the default
-    // max_activation == 1.0, so the below will result in TWO 
-    // divide-by-zeros, if the defaults are taken!
-    score_t dst = max(max(min_activation - activation, score_t(0))
-                      / min_activation,
-                      max(activation - max_activation, score_t(0))
-                      / (1.0f - max_activation));
-    logger().fine("activation penalty = %f", dst);
-    // return log(pow((1 - dst), penalty));
+    score_t dst = 0.0;
+    if (activation < min_activation)
+        dst = 1.0 - activation/min_activation;
+    
+    if (max_activation < activation)
+        dst = (activation - max_activation) / (1.0 - max_activation);
+
+    // logger().fine("activation penalty = %f", dst);
     return penalty * log(1.0 - dst);
 }
 
 score_t precision_bscore::min_improv() const
 {
-    return 0.0;                 // not necessarily right, just the
-                                // backward behavior
+    return 1.0 / ctable_usize;
 }
         
 //////////////////////////////
@@ -1024,8 +1012,8 @@ penalized_behavioral_score interesting_predicate_bscore::operator()(const combo_
         }
             
         // add activation_penalty component
-        score_t activation = actives / (score_t) total,
-            activation_penalty = get_activation_penalty(activation);
+        score_t activation = actives / (score_t) total;
+        score_t activation_penalty = get_activation_penalty(activation);
         logger().fine("activation = %f", activation);
         logger().fine("activation penalty = %e", activation_penalty);
         bs.push_back(activation_penalty);
