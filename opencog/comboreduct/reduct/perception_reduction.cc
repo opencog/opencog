@@ -21,6 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <mutex>
 #include "reduct.h"
 #include "meta_rules.h"
 #include "general_rules.h"
@@ -30,10 +31,27 @@
 
 namespace opencog { namespace reduct {
 
-const rule& perception_reduction() {
-    static assum_iterative r;
+const rule& perception_reduction()
+{
+    // A note about the locking below, and the *pr pointer.  It can (and
+    // does!) happen that two different threads may enter this routine
+    // simltaneously.  Because c++ will defer running static initializers
+    // until they are needed, then, if we did not lock below, then both
+    // threads will start running the static initializers (constructors). 
+    // The faster thread would have returned a rule, while the slower 
+    // thread clobbered it, causing destructors to run on that rule.
+    // As a result, the faster thread was found to be accessing freed
+    // memory!  Ouch.  So a lock is needed.  To avoid locking *every*
+    // time, the 'static rule *pr' is used to avoid locking if the
+    // initializers have run at least once.
+    static rule *pr = NULL;
+    if (pr != NULL) return *pr;
 
-    r = assum_iterative(sequential(downwards(level()),
+    static std::mutex m;
+    std::lock_guard<std::mutex> static_ctor_lock(m);
+
+    static assum_iterative r =
+       assum_iterative(sequential(downwards(level()),
                                    //simple perception rules
                                    downwards(reduce_irreflexive()),
                                    downwards(reduce_reflexive()),
@@ -55,7 +73,8 @@ const rule& perception_reduction() {
                                    )
                         );
 
-    return r;
+    if (pr == NULL) pr = &r;
+    return *pr;
 }
 
 } // ~namespace reduct

@@ -28,11 +28,29 @@
 #include "logical_rules.h"
 #include "contin_rules.h"
 #include "mixed_rules.h"
+#include <mutex>
 
 namespace opencog { namespace reduct {
 
 const rule& mixed_reduction()
 {
+    // A note about the locking below, and the *pr pointer.  It can (and
+    // does!) happen that two different threads may enter this routine
+    // simltaneously.  Because c++ will defer running static initializers
+    // until they are needed, then, if we did not lock below, then both
+    // threads will start running the static initializers (constructors). 
+    // The faster thread would have returned a rule, while the slower 
+    // thread clobbered it, causing destructors to run on that rule.
+    // As a result, the faster thread was found to be accessing freed
+    // memory!  Ouch.  So a lock is needed.  To avoid locking *every*
+    // time, the 'static rule *pr' is used to avoid locking if the
+    // initializers have run at least once.
+    static rule *pr = NULL;
+    if (pr != NULL) return *pr;
+
+    static std::mutex m;
+    std::lock_guard<std::mutex> static_ctor_lock(m);
+
     static sequential non_recursive = 
         sequential(// General
                    downwards(level()),
@@ -64,11 +82,10 @@ const rule& mixed_reduction()
                    downwards(reduce_contin_if_substitute_cond()),
                    downwards(reduce_junction_gt_zero_sum_constant()));
 
-    static iterative r_without_reduce_gt_zero_prod;
 
     // This set of rules is defined to avoid infinite recursion of the
     // rule reduce_gt_zero_prod
-    r_without_reduce_gt_zero_prod =
+    static iterative r_without_reduce_gt_zero_prod =
         iterative(sequential(non_recursive,
 
                              // Very complex recursive mixed
@@ -96,8 +113,7 @@ const rule& mixed_reduction()
                              // downwards(reduce_or_assumptions(r))
                              ));
     
-    static iterative r;
-    r = iterative(sequential(non_recursive,
+    static iterative r = iterative(sequential(non_recursive,
 
                              // Very complex mixed
                              downwards(reduce_from_assumptions(r)),
@@ -116,7 +132,8 @@ const rule& mixed_reduction()
                              // and it leads to infinite recursion.
                              // downwards(reduce_or_assumptions(r))
                              ));
-    return r;
+    if (pr == NULL) pr = &r;
+    return *pr;
 }
 
 } // ~namespace reduct

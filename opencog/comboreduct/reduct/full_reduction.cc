@@ -21,6 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <mutex>
 #include "reduct.h"
 #include "meta_rules.h"
 #include "general_rules.h"
@@ -33,11 +34,26 @@ namespace opencog { namespace reduct {
 
 const rule& full_reduction()
 {
-    static iterative r_without_reduce_gt_zero_prod;
+    // A note about the locking below, and the *pr pointer.  It can (and
+    // does!) happen that two different threads may enter this routine
+    // simltaneously.  Because c++ will defer running static initializers
+    // until they are needed, then, if we did not lock below, then both
+    // threads will start running the static initializers (constructors). 
+    // The faster thread would have returned a rule, while the slower 
+    // thread clobbered it, causing destructors to run on that rule.
+    // As a result, the faster thread was found to be accessing freed
+    // memory!  Ouch.  So a lock is needed.  To avoid locking *every*
+    // time, the 'static rule *pr' is used to avoid locking if the
+    // initializers have run at least once.
+    static rule *pr = NULL;
+    if (pr != NULL) return *pr;
 
-    //This set of rule is defined to avoid infinit recursion of the rule
-    //reduce_gt_zero_prod
-    r_without_reduce_gt_zero_prod =
+    static std::mutex m;
+    std::lock_guard<std::mutex> static_ctor_lock(m);
+
+    // This set of rule is defined to avoid infinit recursion of the rule
+    // reduce_gt_zero_prod
+    static iterative r_without_reduce_gt_zero_prod =
         iterative
         (sequential(
                     //general
@@ -131,10 +147,7 @@ const rule& full_reduction()
                     )
          );
     
-    static iterative r;
-    r =
-        iterative
-        (sequential(
+    static iterative r = iterative (sequential(
                     //general
                     downwards(level()),
                     upwards(eval_constants()),
@@ -217,7 +230,8 @@ const rule& full_reduction()
                     downwards(reduce_or_assumptions(r))
                     )
          );
-    return r;
+    if (pr == NULL) pr = &r;
+    return *pr;
 }
 
 } // ~namespace reduct

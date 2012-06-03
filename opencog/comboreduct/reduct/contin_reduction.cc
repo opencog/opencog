@@ -21,6 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <mutex>
 #include "reduct.h"
 #include "meta_rules.h"
 #include "general_rules.h"
@@ -35,6 +36,23 @@ namespace opencog { namespace reduct {
 const rule& contin_reduction(int reduct_effort,
                              const vertex_set& ignore_ops)
 {
+    // A note about the locking below, and the *pr pointer.  It can (and
+    // does!) happen that two different threads may enter this routine
+    // simltaneously.  Because c++ will defer running static initializers
+    // until they are needed, then, if we did not lock below, then both
+    // threads will start running the static initializers (constructors). 
+    // The faster thread would have returned a rule, while the slower 
+    // thread clobbered it, causing destructors to run on that rule.
+    // As a result, the faster thread was found to be accessing freed
+    // memory!  Ouch.  So a lock is needed.  To avoid locking *every*
+    // time, the 'static rule *pr' is used to avoid locking if the
+    // initializers have run at least once.
+    static rule *pr = NULL;
+    if (pr != NULL) return *pr;
+
+    static std::mutex m;
+    std::lock_guard<std::mutex> static_ctor_lock(m);
+
     // Rules that do not involve factorizing or distributing
     static sequential seq_without_factorize_distribute =
         sequential(// These next two below are performed first, because
@@ -110,7 +128,9 @@ const rule& contin_reduction(int reduct_effort,
                              //                                 complete_distribute)),
                              ignore_size_increase(sequential(complete_distribute,
                                                              complete_factorize))));
-    return res;
+
+    if (pr == NULL) pr = &res;
+    return *pr;
 }
 
 } // ~namespace reduct

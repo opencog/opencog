@@ -21,6 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <mutex>
+
 #include "reduct.h"
 #include "meta_rules.h"
 #include "general_rules.h"
@@ -28,10 +30,26 @@
 
 namespace opencog { namespace reduct {
 
-const rule& action_reduction() {
-    static iterative r;
+const rule& action_reduction()
+{
+    // A note about the locking below, and the *pr pointer.  It can (and
+    // has!) happened that two different threads may enter this routine
+    // simltaneously.  Because c++ will defer running static initializers
+    // until they are needed, then, if we did not lock below, then both
+    // threads will start running the static initializers (constructors). 
+    // The faster thread would have returned a rule, while the slower 
+    // thread clobbered it, causing destructors to run on that rule.
+    // As a result, the faster thread was found to be accessing freed
+    // memory!  Ouch.  So a lock is needed.  To avoid locking *every*
+    // time, the 'static rule *pr' is used to avoid locking if the
+    // initializers have run at least once.
+    static rule *pr = NULL;
+    if (pr != NULL) return *pr;
 
-    r =
+    static std::mutex m;
+    std::lock_guard<std::mutex> static_ctor_lock(m);
+
+    static iterative r =
         iterative(sequential(//general reduction
                              downwards(level()),
 	   
@@ -59,7 +77,8 @@ const rule& action_reduction() {
 
                              ));
 
-    return r;
+    if (pr == NULL) pr = &r;
+    return *pr;
 }
 
 } // ~namespace reduct
