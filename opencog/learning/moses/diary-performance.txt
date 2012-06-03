@@ -2183,4 +2183,28 @@ moses -i magic04.data -u11  -n sin -n log -n exp -x1 -Z1
 took 270 secs, to get score=-4767  complexity=33
 
 But should be precision, so:
+moses -i magic04.data -u11  -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0
+took 339 secs, got accuracy of 0.84857
+
+
+time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data
+-u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 | tee magic-m10K.out; 
+
+"magic-10K": magic dataset, above command line.  i.e. the minimum
+        activation is 0.5. (i.e. reject no more than half of true events)
+
+
+          magic-m10K              magic-m40K
+:     time  score   cpxy      time  score   cpxy
+-r0:   218  0.7877   13       3182  0.8068   81
+-r1:   341  0.8486   20       2265  0.8606   32
+-r2:   234  0.8181   14       1965  0.8216   29
+-r3:   306  0.7991   34       2552  0.8115   41
+-r4:   232  0.7415   16       1684  0.7901   24
+-r5:   381  0.8231   31       3011  0.8270   37
+-r6:   245  0.7852   22       1862  0.8320   42
+-r7:   274  0.7363   25       2217  0.7708   36
+-r8:   181  0.6983    7       2547  0.7984   44
+-r9:   338  0.7651   25       2354  0.8535   43
+      avg time===275====     avg time===2364===
 
