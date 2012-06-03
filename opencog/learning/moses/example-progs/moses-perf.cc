@@ -31,15 +31,26 @@ void measure(vector<string> arguments)
     int nstart = 0;
     int nreps = 10;
 
+#if DO_THREADING
+    double baseline = 0;
+    nstart = 1;
+    nreps = 15;
+    printf("Will run test with 1 to %d threads\n", nstart+nreps);
+    fflush (stdout);
+
+#else
     printf("Will run %d repetitions with different random seeds\n", nreps);
     fflush (stdout);
+#endif
 
     for (int i=nstart; i<nstart+nreps; i++)
     {
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
         stringstream ss;
-#if 1
+#if DO_THREADING
+        ss << "-j" << i;
+#elif 1
         ss << "-r" << i;
 #else
         int nrep = 10000*(1<<i);
@@ -65,6 +76,13 @@ void measure(vector<string> arguments)
 
         timeradd(&total, &elapsed, &total);
         printf("Run %d Time %ld.%06ld seconds\n", i, elapsed.tv_sec, elapsed.tv_usec);
+#if DO_THREADING
+        double felapsed = elapsed.tv_sec + elapsed.tv_usec / 1000000.0;
+        if (i==1) baseline = felapsed;
+        double normed = felapsed * (double) i;
+        double slowdown = 100.0 * (normed-baseline) / baseline;
+        printf("Run %d Normalized Time %f seconds slowdown=%f percent\n", i, normed, slowdown);
+#endif
         fflush (stdout);
 
         // We also want the variance...

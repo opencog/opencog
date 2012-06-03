@@ -80,8 +80,12 @@ struct logical_reduction
 
     const rule& operator()(int effort = 2);
 private:
-    const rule *medium;
-    const rule *complexe;
+    void do_init();
+    const rule *p_medium;
+    const rule *p_complexe;
+public:
+    static rule *p_extra_simple;
+    static rule *p_simple;
 };
 
 // @ignore_ops is the set of operators to ignore
