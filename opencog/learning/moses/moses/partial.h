@@ -24,7 +24,10 @@
 #include <opencog/comboreduct/combo/table.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 #include <opencog/comboreduct/combo/vertex.h>
-#include "../main/moses_exec.h"
+#include <opencog/comboreduct/reduct/reduct.h>
+
+#include "metapopulation.h"
+#include "moses_main.h"
 
 namespace opencog { namespace moses {
 

@@ -14,6 +14,7 @@
  */
 
 #include <math.h>
+#include <sstream>
 #include <sys/time.h>
 #include "../main/moses_exec.h"
 

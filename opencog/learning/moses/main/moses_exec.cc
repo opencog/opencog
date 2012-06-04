@@ -30,7 +30,11 @@
 #include <opencog/comboreduct/combo/table.h>
 
 #include "moses_exec.h"
+#include "moses_exec_def.h"
+#include "../moses/moses_main.h"
+#include "../moses/moses.h"
 #include "../moses/partial.h"
+#include "../optimization/optimization.h"
 #include "../example-progs/scoring_iterators.h"
 
 namespace opencog { namespace moses {
@@ -42,8 +46,6 @@ using namespace boost::program_options;
 using boost::lexical_cast;
 using namespace std;
 using namespace reduct;
-using namespace ant_combo;
-
 
 static const unsigned int max_filename_size = 255;
 

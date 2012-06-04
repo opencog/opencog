@@ -20,11 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/learning/moses/main/moses_exec.h>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <opencog/util/oc_assert.h>
+
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/main/moses_exec.h>
 
 using namespace opencog::moses;
+using namespace opencog::combo;
 using namespace boost::posix_time;
 
 string build_arguments(vector<string>& arguments)
