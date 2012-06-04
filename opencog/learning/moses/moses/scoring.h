@@ -339,7 +339,10 @@ struct discriminator
 
 protected:
     CTable _ctable;
-    type_node output_type;
+    type_node _output_type;
+    score_t _positive_total;
+    score_t _negative_total;
+
     std::function<score_t(const CTable::counter_t&)> sum_outputs;
 };
 

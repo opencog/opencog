@@ -191,15 +191,15 @@ void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 discriminator::discriminator(const CTable& ct)
     : _ctable(ct)
 {
-    output_type = get_type_node(get_signature_output(ct.tt));
-    if (output_type == id::boolean_type) {
+    _output_type = get_type_node(get_signature_output(ct.tt));
+    if (_output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output. 
         sum_outputs = [](const CTable::counter_t& c)->score_t
         {
             return c.get(id::logical_true);
         };
-    } else if (output_type == id::contin_type) {
+    } else if (_output_type == id::contin_type) {
         // For contin tables, we return the sum of the row values.
         sum_outputs = [](const CTable::counter_t& c)->score_t
         {
@@ -209,9 +209,29 @@ discriminator::discriminator(const CTable& ct)
             return res;
         };
     } else {
-        OC_ASSERT(false, "Precision scorer, unsupported output type");
+        OC_ASSERT(false, "Discriminator, unsupported output type");
         return;
     }
+
+    _positive_total = 0.0;
+    _negative_total = 0.0;
+    foreach(const CTable::value_type& vct, _ctable) {
+        // vct.first = input vector
+        // vct.second = counter of outputs
+
+        contin_t sum_pos = sum_outputs(vct.second);
+        contin_t sum_neg;
+        unsigned totalc = vct.second.total_count();
+        if (_output_type == id::boolean_type) {
+            sum_neg = totalc - sum_pos;
+        } else {
+            sum_neg = -sum_pos;
+        }
+        _positive_total += sum_pos;
+        _negative_total += sum_neg;
+    }
+    logger().info() << "Discriminator: num_positive=" << _positive_total
+                    << " num_negative=" << _negative_total;
 }
 
 
@@ -236,7 +256,7 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
         contin_t sum_pos = sum_outputs(vct.second);
         contin_t sum_neg;
         unsigned totalc = vct.second.total_count();
-        if (output_type == id::boolean_type) {
+        if (_output_type == id::boolean_type) {
             sum_neg = totalc - sum_pos;
         } else {
             sum_neg = -sum_pos;
@@ -285,11 +305,11 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
         "than or equal to the minimum threshold.\n");
 
     // For boolean tables, the highest possible output is 1.0 (of course)
-    if (output_type == id::boolean_type) {
+    if (_output_type == id::boolean_type) {
         _max_output = 1.0;
         _min_output = 0.0;
     }
-    else if (output_type == id::contin_type)
+    else // if (_output_type == id::contin_type)
     {
         // For contin tables, we search for the largest value in the table.
         _max_output = worst_score;
@@ -323,7 +343,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
         unsigned total = c.total_count();
         contin_t sum_pos = sum_outputs(c);
         contin_t sum_neg;
-        if (output_type == id::boolean_type) {
+        if (_output_type == id::boolean_type) {
             sum_neg = total - sum_pos;
         } else {
             sum_neg = -sum_pos;
@@ -455,7 +475,7 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
 /// Return the precision for this ctable row.
 score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t precision = pos / (cnt * _ctable_usize);
+    contin_t precision = pos / (cnt * _positive_total);
     return precision;
 }
 
@@ -463,7 +483,7 @@ score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 /// XXX I think this is correct, double check... TODO.
 score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t recall = fabs(pos - neg) / (cnt * _ctable_usize);
+    contin_t recall = 1.0 / _ctable_usize;
     return recall;
 }
 
