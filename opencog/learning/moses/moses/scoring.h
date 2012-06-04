@@ -342,8 +342,9 @@ protected:
 };
 
 /**
- * base class for precision, recall, senstivity, spcificty, F-score,
- * etc. type discriminator scorers.
+ * discriminating_bscore -- Base class for precision, recall,
+ * senstivity, spcificty, F-score, etc. type discriminator scorers.
+ * Provides all the generic, common functions such scorer might need.
  */
 struct discriminating_bscore : public bscore_base, discriminator
 {
@@ -352,19 +353,70 @@ struct discriminating_bscore : public bscore_base, discriminator
                   float max_threshold = 1.0,
                   float hardness = 1.0f);
 
+    // Return the best possible bscore. Used as one of the
+    // termination conditions (when the best bscore is reached).
+    virtual behavioral_score best_possible_bscore();
     virtual score_t min_improv() const;
 
+    /// Over-ride the default complexity setters, since our scoring is
+    /// normalized to 1.0, unlike other scorers.
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
 
 protected:
+    //* The two functions below are used to implement a generic
+    //* best_possible_bscore() method.  They should return values
+    //* the the thing being held fixed, and the thing being maximized,
+    //* given a particular row of the ctable.
+    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) = 0;
+    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) = 0;
+    /**
+     * This is a base class for scorers that try to maximize one quantity
+     * while holding another constant; or rather, attempting to hold 
+     * another constant.  This may be done by applying a penalty when
+     * the held quantity wanders out of bounds.  This methods computes
+     * such a penalty, based on the min and max thresholds provided
+     * in the constructor, as well as the "hardness" with which the
+     * penalty should be applied.  The penatly takes the form:
+     *
+     *    hardness * log(1 - dst(value, [min_threshold, max_threshold])) 
+     *
+     * where dst(x, I) is defined as being zero on the interval I and ramping
+     * up to one if x lies outside the interval I.
+     *
+     *                            {  1 - x/x_min         if x < x_min 
+     *    dst(x, [x_min,x_max]) = {    0                 if x_min < x < x_max
+     *                            { (x-x_max)/(1-x_max)  if x_max < x
+     *
+     * Note that the logarithm is negative, and thus the total score derating
+     * is negative.
+     */
     score_t get_threshold_penalty(score_t) const;
     size_t _ctable_usize;
+    score_t _max_output;
+    score_t _min_output;
     float _min_threshold;
     float _max_threshold;
     float _hardness;
 };
 
+/**
+ * recall_bscore -- scorer that attempts to maximize recall, while
+ * holding precision at or above a minimum acceptable value.
+ */
+struct recall_bscore : public discriminating_bscore
+{
+    recall_bscore(const CTable& _ctable,
+                  float min_precision = 0.5f,
+                  float max_precision = 1.0f,
+                  float hardness = 1.0f);
+
+    penalized_behavioral_score operator()(const combo_tree& tr);
+
+protected:
+    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt);
+    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt);
+};
 
 /**
  * Fitness function for maximizing binary precision, that is, for
@@ -402,26 +454,19 @@ protected:
  * wants to learn a function that predicts at least a few true postives,
  * i.e. has an activation greater than zero.  This is done by applying a
  * penalty when the activation is outside of the range of an interval
- * [min_activation, max_activation].  If the penalty coefficient is
- * non-zero, then the final component of the bscore takes the value:
- *
- *    penalty * log(1 - dst(activation, [min_activation, max_activation])) 
- *
- * where dst(x, I) is defined as being zero on the interval I and ramping
- * up to one if x lies outside the interval I.
- *
- *                            {  1 - x/x_min         if x < x_min 
- *    dst(x, [x_min,x_max]) = {    0                 if x_min < x < x_max
- *                            { (x-x_max)/(1-x_max)  if x_max < x
- *
- * Note that the logarithm is negative, and thus the total score derating
- * is negative.
+ * [min_activation, max_activation].  See the desciption of 
+ * discriminating_bscore::get_threshold_penalty() for details.
  *
  * If worst_norm is true, then the percision is divided by the absolute
  * average of the negative lower (resp. positive upper if
  * this->positive is false) decile or less. If there is no negative
  * (resp. positive if this->positive is false) values then it is not
  * normalized. (??)
+ *
+ * XXX This class should be reworked to derive from discriminating_bscore.
+ * This would allow us to get rid of duplicate code for sec_complexity_coef()
+ * and for get_activation_penalty() and min_improv() and sum_outputs(). TODO
+ * In fact everything could be replaced, if it were not for the worst_deciles stuff.
  */
 struct precision_bscore : public bscore_base
 {

@@ -266,6 +266,90 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
     _max_threshold(min_threshold),
     _hardness(hardness)
 {
+    // Verify that the thresholds are sane
+    OC_ASSERT((0.0 < hardness) && (0.0 < min_threshold) && (min_threshold <= max_threshold),
+        "Discriminating scorer, invalid thresholds.  "
+        "The hardness must be positive, the minimum threshold must be "
+        "greater than zero, and the maximum threshold must be greater "
+        "than or equal to the minimum threshold.\n");
+
+    // For boolean tables, the highest possible output is 1.0 (of course)
+    if (output_type == id::boolean_type) {
+        _max_output = 1.0;
+        _min_output = 0.0;
+    }
+    else if (output_type == id::contin_type)
+    {
+        // For contin tables, we search for the largest value in the table.
+        _max_output = worst_score;
+        _min_output = -worst_score;
+        foreach(const auto& cr, _ctable) {
+            const CTable::counter_t& c = cr.second;
+            foreach(const auto& cv, c) {
+                score_t val = get_contin(cv.first);
+                _max_output = std::max(_max_output, val);
+                _min_output = std::min(_min_output, val);
+            }
+        }
+    }
+
+    logger().info("Discriminating scorer, hardness = %f, "
+                  "min_threshold = %f, "
+                  "max_threshold = %f",
+                  _hardness, _min_threshold, _max_threshold);
+    logger().info("Discriminating scorer, min_output = %f, "
+                  "max_output = %f", _min_output, _max_output);
+}
+
+behavioral_score discriminating_bscore::best_possible_bscore()
+{
+    // create a list, maintained in sorted order.
+    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
+                                           contin_t, // variable
+                                           contin_t> // fixed
+                          > max_vary_t;
+    max_vary_t max_vary;
+    for (CTable::const_iterator it = _ctable.begin(); it != _ctable.end(); ++it)
+    {
+        const CTable::counter_t& c = it->second;
+
+        unsigned total = c.total_count();
+        contin_t sum_pos = sum_outputs(c);
+        contin_t sum_neg;
+        if (output_type == id::boolean_type) {
+            sum_neg = total - sum_pos;
+        } else {
+            sum_neg = -sum_pos;
+        }
+
+        contin_t vary = get_variable(sum_pos, sum_neg, total);
+        contin_t fix = get_fixed(sum_pos, sum_neg, total);
+        auto lmnt = std::make_pair(vary, std::make_tuple(it, vary, fix));
+        max_vary.insert(lmnt);
+    }
+
+    // Sum up the best score, until the minimum fixed threshold is
+    // reached.  It's not clear this actually gives the best score one
+    // can get if min_threshold isn't reached, but we don't want to go
+    // below min_threshold anyway, so it's an acceptable inacurracy.
+    // (It would be a problem only if the threshold constraint is very loose.)
+    //
+    score_t fix_sum = 0;
+    score_t best_score = 0.0;
+    reverse_foreach (const auto& mpv, max_vary) {
+        best_score += std::get<1>(mpv.second);
+        fix_sum += std::get<2>(mpv.second);
+        if (_min_threshold <= fix_sum)
+            break;
+    }
+
+    score_t fixation_penalty = get_threshold_penalty(fix_sum);
+
+    logger().info("Discriminating scorer, best score = %f", best_score);
+    logger().info("Discriminating scorer, fixed component at threshold = %f", fix_sum);
+    logger().info("Discriminating scorer, fixation penalty at threshold = %f", fixation_penalty);
+
+    return {best_score, fixation_penalty};
 }
 
 score_t discriminating_bscore::min_improv() const
@@ -321,6 +405,60 @@ void discriminating_bscore::set_complexity_coef(score_t ratio)
     logger().info() << "Discriminating scorer, complexity ratio = " << 1.0f/complexity_coef;
 }
 
+
+///////////////////
+// recall_bscore //
+///////////////////
+
+recall_bscore::recall_bscore(const CTable& ct,
+                  float min_precision,
+                  float max_precision,
+                  float hardness) 
+    : discriminating_bscore(ct, min_precision, max_precision, hardness)
+{
+}
+
+penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr)
+{
+    count(tr);
+
+    // Compute normalized precision and recall.
+    score_t precision = true_positive_sum / (true_positive_sum + false_positive_sum);
+    score_t recall = true_positive_sum / (true_positive_sum + false_negative_sum);
+
+    // We are maximizing recall, so that is the first part of the score.
+    penalized_behavioral_score pbs;
+    pbs.first.push_back(recall);
+    
+    score_t precision_penalty = get_threshold_penalty(precision);
+    pbs.first.push_back(precision_penalty);
+    if (logger().isFineEnabled()) 
+        logger().fine("precision = %f  recall=%f  precision penalty=%e",
+                     precision, recall, precision_penalty);
+ 
+    // Add the Complexity penalty
+    if (occam)
+        pbs.second = tree_complexity(tr) * complexity_coef;
+
+    log_candidate_pbscore(tr, pbs);
+
+    return pbs;
+}
+
+/// Return the precision for this ctable row.
+score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt)
+{
+    contin_t precision = pos / (cnt * _ctable_usize);
+    return precision;
+}
+
+/// Return the recall for this ctable row.
+/// XXX I think this is correct, double check... TODO.
+score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt)
+{
+    contin_t recall = fabs(pos - neg) / (cnt * _ctable_usize);
+    return recall;
+}
 
 //////////////////////
 // precision_bscore //
@@ -540,17 +678,16 @@ behavioral_score precision_bscore::best_possible_bscore() const
     //
     unsigned active = 0;
     score_t sao = 0.0;
-    score_t activation = 0.0;
     reverse_foreach (const auto& mpv, max_precisions) {
         sao += std::get<1>(mpv.second);
         active += std::get<2>(mpv.second);
-        activation = active / (score_t)ctable_usize;
-        if (min_activation <= activation)
+        if (ctable_usize * min_activation <= active)
             break;
     }
 
     score_t precision = (sao / active) / max_output;
 
+    score_t activation = active / (score_t)ctable_usize;
     score_t activation_penalty = get_activation_penalty(activation);
 
     logger().info("Precision scorer, best precision = %f", precision);
