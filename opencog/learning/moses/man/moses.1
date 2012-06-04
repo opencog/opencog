@@ -81,6 +81,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .RB [ \-p
 .IR probability ]
 .RB [ \-\-python=1 ]
+.RB [ \-Q
+.IR hardness ]
 .RB [ \-q
 .IR min ]
 .RB [ \-R
@@ -301,9 +303,23 @@ answers, and tries to minimize this score.  For contin-valued outputs,
 the mean-square variation is minimized.
 T}
 \fBpre\fR@T{
-Regression on an input table, maximizing precision instead of accuracy
+Regression on an input table, maximizing precision, instead of accuracy
 (that is, minimizing the number of false positives, at the risk of
-sometimes failing to identify true positives).
+sometimes failing to identify true positives).  Maximization is done
+while holding activation (the hit rate) constant.
+T}
+\fBprerec\fR@T{
+Regression on an input table, maximizing precision, while holding the
+recall (sensitivity) at a given level.  Recall, also known as senstivity,
+is the ratio of true positives to the sum of true positives and false negatives.
+T}
+\fBrecall\fR@T{
+Regression on an input table, maximizing recall while holding
+precision constant.  This scorer is most commonly used when it is
+important to gaurantee a certain level of precision, even if it
+means rejecting most events. In medicine and physics/radio applications,
+recall is exactly the same thing as sensitivity: this option searches
+for the most sensitive test while holding to a minimum level of precision.
 T}
 \fBip\fR@T{
 Clustering ("interesting patterns") on an input table. XXX more detail,
@@ -685,36 +701,81 @@ contains labels in its header.
 Print the complexity measure of the model, and the scoring penalty.
 
 .\" ============================================================
-.SS "Precision problem type"
+.SS "Precision, recall and prerec problem types"
+The precision, recall and prerec types are used to solve binary
+classification problems:  problems where the goal is to sort inputs
+into one of two sets, while maximizing either the precision or the 
+sensitivity of the test.
+.PP
+In \fBmoses\fR, precision and recall (senstivity) are defined as usual.
 Precision is defined as the number of true positives, divded by the number
-of true positives plus the number of false positives.  Precision may 
-thus range from 1.0, indicating perfect precision, to 0.0.  The \fB\-Hpre\fR
-option tells \fBmoses\fR to maximize precision.
+of true positives plus the number of false positives.  Classifiers 
+with a high precision make very few mistakes identifiying postives:
+they have very few or no false positives.  However, precise classifiers
+may completely fail to identify many, if not most positives; they just
+don't make mistakes when they do identify them.
 .PP
-One triivially stupid way to maximize precision, out of a training dataset
-of \fIN\fR rows, is to guess exactly one correctly, and ignore the rest,
-thus leading to perfect precision.  Thus, in practical applications, one
-wishes to maximize both precision, and activation.  Here, activation is
-defined as the fraction of rows for which the trial combo program returned 
+Recall, also known as senstivity, is defined as the number of true
+positives divided by the sum of the number of true positives and false
+negatives.  Classifiers with high recall will identify most, or maybe
+even all positives; however, they may also identify many negatives,
+thus ruining precision.
+.PP
+A trivial way to maximize precision is to have a very low recall rate,
+and conversely, one can very easily have a good recall rate if one
+does not mind a poor precision.  Thus a common goal is to maximize
+one, while holding the other to a minimum standard.  One of the most
+common problems is find a classifier with the highest possible recall,
+while holding precision to a fixed minimum level; this may be accomplished
+with the \fB\-Hrecall\fR option.  The reversed situation is somewhat
+less common: to find the most precise test that gaurantees a certain
+minimum sensitivity; this may be accomplished with the \fB\-Hprerec\fR
+option.
+.PP
+\fBmoses\fR also provides a second way of maximizing precision, using
+the \fB\-Hpre\fR option.  This option searches for the test with the
+highest precision, while holding the 'activation' in a bounded range.
+The definition of 'activation' is idiosyncratic to moses; it is defined
+as the sum of true positives plus false positives: that is, it is 
+the fraction of rows for which the trial combo program returned 
 a positive answer, regardless of whether this was the right answer.
-Activation ranges from 0.0, to 1.0.
+Activation ranges from 0.0, to 1.0.  It is never desirable to maximize
+activation; rather, most commonly, one wants to peg activation at
+exactly the fraction of positives in the training set.
 .PP
-XXX We need to change the code to use recall, not activation !?
+The minimum level to which a fixed component should be held may be
+specified with the \fB\-q\fR or \fB\-\-min\-rand\-input\fR option.
+For the \fB\-Hpre\fR problem, the  \fB\-w\fR or 
+\fB\-\-max\-rand\-input\fR option should be used to make sure the
+activation does not get too high.
+.PP
+Adherence to the minumum or bounds is done by means of a scoring
+penalty;  combo programs that fail to lie within bounds are penalized.
+The harshness or hardness of the penalty may be specified by means
+of the \fB\-Q\fR or \fB\-\-alpha\fR option. 
+
 
 .\" ============================================================
 .SS "Contin options"
 Options that affect the usage of continuously-valued variables.
+These options specify values that are used in a variety of different
+ways, depending on the chosen problem type.  See appropriate sections
+for more details.
+.TP
+.BI \-Q\  hardness \fR,\ \fB\-\-alpha= hardness
+The harshness of hardness of a limit that must be adhered to.
+Default 0.0 (limits disabled).
 .TP
 .BI \-q\  num \fR,\ \fB\-\-min\-rand\-input= num
 Minimum value for continuous variables. Default 0.0.
+.TP
+.BI \-w\  num \fR,\ \fB\-\-max\-rand\-input= num
+Maximum value for continuous variables.  Default 1.0.
 .TP
 .BI \-R\  num \fR,\ \fB\-\-discretize\-threshold= num
 Split a continuous domain into two pieces. This option maybe be used
 multiple times to split a continuous domain into multiple peices:
 that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
-.TP
-.BI \-w\  num \fR,\ \fB\-\-max\-rand\-input= num
-Maximum value for continuous variables.  Default 1.0.
 
 .\" ============================================================
 .SS "Demo options"
@@ -944,7 +1005,7 @@ Finish documenting these algo flags:  -M
 .PP
 These input flags: -G
 .PP
-Other mystery flags: -J -K -U -X -Q
+Other mystery flags: -J -K -U -X
 
 .SH SEE ALSO
 .br
