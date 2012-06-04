@@ -325,17 +325,19 @@ struct discriminator
 {
     discriminator(const CTable&);
 
+    struct d_counts {
+        d_counts();
+        score_t true_positive_sum;
+        score_t false_positive_sum;
+        score_t positive_count;
+
+        score_t true_negative_sum;
+        score_t false_negative_sum;
+        score_t negative_count;
+    };
+    d_counts count(const combo_tree&) const;
+
 protected:
-    void count(const combo_tree&);
-
-    score_t true_positive_sum;
-    score_t false_positive_sum;
-    score_t positive_count;
-
-    score_t true_negative_sum;
-    score_t false_negative_sum;
-    score_t negative_count;
-
     CTable _ctable;
     type_node output_type;
     std::function<score_t(const CTable::counter_t&)> sum_outputs;
@@ -355,7 +357,7 @@ struct discriminating_bscore : public bscore_base, discriminator
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
-    virtual behavioral_score best_possible_bscore();
+    virtual behavioral_score best_possible_bscore() const;
     virtual score_t min_improv() const;
 
     /// Over-ride the default complexity setters, since our scoring is
@@ -368,8 +370,8 @@ protected:
     //* best_possible_bscore() method.  They should return values
     //* the the thing being held fixed, and the thing being maximized,
     //* given a particular row of the ctable.
-    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) = 0;
-    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) = 0;
+    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const = 0;
+    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) const = 0;
     /**
      * This is a base class for scorers that try to maximize one quantity
      * while holding another constant; or rather, attempting to hold 
@@ -411,11 +413,11 @@ struct recall_bscore : public discriminating_bscore
                   float max_precision = 1.0f,
                   float hardness = 1.0f);
 
-    penalized_behavioral_score operator()(const combo_tree& tr);
+    penalized_behavioral_score operator()(const combo_tree& tr) const;
 
 protected:
-    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt);
-    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt);
+    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
+    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) const;
 };
 
 /**

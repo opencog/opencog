@@ -214,7 +214,8 @@ discriminator::discriminator(const CTable& ct)
     }
 }
 
-void discriminator::count(const combo_tree& tr)
+
+discriminator::d_counts::d_counts()
 {
     true_positive_sum = 0.0;
     false_positive_sum = 0.0;
@@ -222,7 +223,11 @@ void discriminator::count(const combo_tree& tr)
     true_negative_sum = 0.0;
     false_negative_sum = 0.0;
     negative_count = 0.0;
+};
 
+discriminator::d_counts discriminator::count(const combo_tree& tr) const
+{
+    d_counts ctr;
 
     foreach(const CTable::value_type& vct, _ctable) {
         // vct.first = input vector
@@ -239,17 +244,18 @@ void discriminator::count(const combo_tree& tr)
 
         if (eval_binding(vct.first, tr) == id::logical_true)
         {
-            true_positive_sum += sum_pos;
-            false_positive_sum += sum_neg;
-            positive_count += totalc;
+            ctr.true_positive_sum += sum_pos;
+            ctr.false_positive_sum += sum_neg;
+            ctr.positive_count += totalc;
         }
         else
         {
-            true_negative_sum += sum_neg;
-            false_negative_sum += sum_pos;
-            negative_count += totalc;
+            ctr.true_negative_sum += sum_neg;
+            ctr.false_negative_sum += sum_pos;
+            ctr.negative_count += totalc;
         }
     }
+    return ctr;
 }
 
 //////////////////////////
@@ -301,7 +307,7 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
                   "max_output = %f", _min_output, _max_output);
 }
 
-behavioral_score discriminating_bscore::best_possible_bscore()
+behavioral_score discriminating_bscore::best_possible_bscore() const
 {
     // create a list, maintained in sorted order.
     typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
@@ -418,13 +424,13 @@ recall_bscore::recall_bscore(const CTable& ct,
 {
 }
 
-penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr)
+penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
 {
-    count(tr);
+    d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = true_positive_sum / (true_positive_sum + false_positive_sum);
-    score_t recall = true_positive_sum / (true_positive_sum + false_negative_sum);
+    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
+    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
 
     // We are maximizing recall, so that is the first part of the score.
     penalized_behavioral_score pbs;
@@ -446,7 +452,7 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr)
 }
 
 /// Return the precision for this ctable row.
-score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt)
+score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
     contin_t precision = pos / (cnt * _ctable_usize);
     return precision;
@@ -454,7 +460,7 @@ score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt)
 
 /// Return the recall for this ctable row.
 /// XXX I think this is correct, double check... TODO.
-score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt)
+score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
     contin_t recall = fabs(pos - neg) / (cnt * _ctable_usize);
     return recall;
