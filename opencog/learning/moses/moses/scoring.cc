@@ -184,6 +184,75 @@ void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
                     << " complexity ratio = " << 1.0/complexity_coef;
 }
 
+///////////////////
+// discriminator //
+///////////////////
+
+discriminator::discriminator(const CTable& ct)
+    : _ctable(ct)
+{
+    output_type = get_type_node(get_signature_output(ct.tt));
+    if (output_type == id::boolean_type) {
+        // For boolean tables, sum the total number of 'T' values
+        // in the output. 
+        sum_outputs = [](const CTable::counter_t& c)->score_t
+        {
+            return c.get(id::logical_true);
+        };
+    } else if (output_type == id::contin_type) {
+        // For contin tables, we return the sum of the row values.
+        sum_outputs = [](const CTable::counter_t& c)->score_t
+        {
+            score_t res = 0.0;
+            foreach(const CTable::counter_t::value_type& cv, c)
+                res += get_contin(cv.first) * cv.second;
+            return res;
+        };
+    } else {
+        OC_ASSERT(false, "Precision scorer, unsupported output type");
+        return;
+    }
+}
+
+void discriminator::count(const combo_tree& tr)
+{
+    true_positive_sum = 0.0;
+    false_positive_sum = 0.0;
+    positive_count = 0.0;
+    true_negative_sum = 0.0;
+    false_negative_sum = 0.0;
+    negative_count = 0.0;
+
+
+    foreach(const CTable::value_type& vct, _ctable) {
+        // vct.first = input vector
+        // vct.second = counter of outputs
+
+        contin_t sum_pos = sum_outputs(vct.second);
+        contin_t sum_neg;
+        unsigned totalc = vct.second.total_count();
+        if (output_type == id::boolean_type) {
+            sum_neg = totalc - sum_pos;
+        } else {
+            sum_neg = -sum_pos;
+        }
+
+        if (eval_binding(vct.first, tr) == id::logical_true)
+        {
+            true_positive_sum += sum_pos;
+            false_positive_sum += sum_neg;
+            positive_count += totalc;
+        }
+        else
+        {
+            true_negative_sum += sum_neg;
+            false_negative_sum += sum_pos;
+            negative_count += totalc;
+        }
+    }
+}
+
+
 //////////////////////
 // precision_bscore //
 //////////////////////
@@ -229,7 +298,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         "The penalty must be non-zero, the minimum activation must be "
         "greater than zero, and the maximum activation must be greater "
         "than or equal to the minimum activation.\n");
-    
+
     // For boolean tables, the highest possible precision is 1.0 (of course)
     if (output_type == id::boolean_type)
         max_output = 1.0;
@@ -250,7 +319,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
 
     logger().info("Precision scorer, penalty = %f, "
                   "min_activation = %f, "
-                  "max_activation = %f", 
+                  "max_activation = %f",
                   penalty, min_activation, max_activation);
     logger().info("Precision scorer, max_output = %f", max_output);
 }
@@ -279,7 +348,7 @@ void precision_bscore::set_complexity_coef(score_t ratio)
     occam = (ratio > 0);
 
     // The complexity coeff is normalized by the size of the table,
-    // because the precision is normalized as well.  So e.g. 
+    // because the precision is normalized as well.  So e.g.
     // max precision for boolean problems is 1.0.  However...
     // umm XXX I think the normalization here should be the
     // best-possible activation, not the usize, right?
@@ -296,7 +365,7 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     // associate sum of worst outputs with number of observations for
     // that sum
     multimap<contin_t, unsigned> worst_deciles;
-    
+
     // compute active and sum of all active outputs
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
@@ -308,7 +377,7 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
             unsigned totalc = vct.second.total_count();
             // For boolean tables, sao == sum of all true positives,
             // and active == sum of true+false positives.
-            // For contin tables, sao = sum of contin values, and 
+            // For contin tables, sao = sum of contin values, and
             // active == count of rows.
             sao += sumo;
             active += totalc;
@@ -331,11 +400,11 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
         }
         avg_worst_deciles /= worst_count;
     }
-    
+
     // Compute normalized precision.  No hits means perfect precision :)
     // Yes, zero hits is common, early on.
     score_t precision = 1.0;
-    if (0 < active) 
+    if (0 < active)
         precision = (sao / active) / max_output;
 
     // normalize precision w.r.t. worst deciles
@@ -346,9 +415,9 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
         if (avg_worst_deciles >= 0)
             logger().fine("Weird: worst_norm (%f) is positive, maybe the activation is really low", avg_worst_deciles);
     }
-    
+
     pbs.first.push_back(precision);
-    
+
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
@@ -356,10 +425,10 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     score_t activation = (score_t)active / ctable_usize;
     score_t activation_penalty = get_activation_penalty(activation);
     pbs.first.push_back(activation_penalty);
-    if (logger().isFineEnabled()) 
+    if (logger().isFineEnabled())
         logger().fine("precision = %f  activation=%f  activation penalty=%e",
                      precision, activation, activation_penalty);
- 
+
     // Add the Complexity penalty
     if (occam)
         pbs.second = tree_complexity(tr) * complexity_coef;
@@ -397,7 +466,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // new mpv.  Despite this, we keep going until at least min_activation
     // is reached. It's not clear this actually gives the best score one
     // can get if min_activation isn't reached, but we don't want to go
-    // below min activation anyway, so it's an acceptable inacurracy. 
+    // below min activation anyway, so it's an acceptable inacurracy.
     // (It would be a problem only if activation constraint is very loose.)
     //
     unsigned active = 0;
@@ -418,18 +487,18 @@ behavioral_score precision_bscore::best_possible_bscore() const
     logger().info("Precision scorer, best precision = %f", precision);
     logger().info("Precision scorer, activation at best precision = %f", activation);
     logger().info("Precision scorer, activation penalty at best precision = %f", activation_penalty);
-    
+
     return {precision, activation_penalty};
 }
 
-// Note that the logarithm is always negative, so this fmethod always
-// returns a value that is zeo or negative.
+// Note that the logarithm is always negative, so this method always
+// returns a value that is zero or negative.
 score_t precision_bscore::get_activation_penalty(score_t activation) const
 {
     score_t dst = 0.0;
     if (activation < min_activation)
         dst = 1.0 - activation/min_activation;
-    
+
     if (max_activation < activation)
         dst = (activation - max_activation) / (1.0 - max_activation);
 
@@ -441,11 +510,11 @@ score_t precision_bscore::min_improv() const
 {
     return 1.0 / ctable_usize;
 }
-        
+
 //////////////////////////////
 // discretize_contin_bscore //
 //////////////////////////////
-        
+
 // Note that this function returns a POSITIVE number, since p < 0.5
 score_t discrete_complexity_coef(unsigned alphabet_size, double p)
 {
@@ -513,7 +582,7 @@ penalized_behavioral_score discretize_contin_bscore::operator()(const combo_tree
     /// directly using the results on the fly. On really big table
     /// (dozens of thousands of data points and about 100 inputs, this
     /// has overhead of about 10% of the overall time)
-    OTable ct(tr, cit);    
+    OTable ct(tr, cit);
     penalized_behavioral_score pbs(
         make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
     boost::transform(ct, classes, pbs.first.begin(), [&](const vertex& v, size_t c_idx) {

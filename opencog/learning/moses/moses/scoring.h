@@ -307,6 +307,40 @@ score_t discrete_complexity_coef(unsigned alphabet_size, double p);
 /// Note: this returns NEGATIVE values.
 score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
 
+/// Perform summations commonly used in binary discriminators.
+/// These may be used to obtain precision, recall, specificty,
+/// sensitivity, fall-out, F-score, etc.
+///
+/// The count() method performs the actual counting.  It zeroes out
+/// the eight sums/counts below, before starting.  Once it returns,
+/// the eight sums/counts are all valid for the peviously given combo
+/// tree.
+///
+/// For boolean problems, the *_sum and *_count values are identical.
+/// For contin problems, they are not.
+/// Note that ctable_usize == number of rows in the uncompressed table,
+/// it is equal to:  true_positive_count + false_positive_count +
+/// true_negative_count + false_negative_count.
+struct discriminator
+{
+    discriminator(const CTable&);
+
+protected:
+    void count(const combo_tree&);
+
+    score_t true_positive_sum;
+    score_t false_positive_sum;
+    score_t positive_count;
+
+    score_t true_negative_sum;
+    score_t false_negative_sum;
+    score_t negative_count;
+
+    const CTable &_ctable;
+    type_node output_type;
+    std::function<score_t(const CTable::counter_t&)> sum_outputs;
+};
+
 /**
  * Fitness function for maximizing binary precision, that is, for
  * minimizing false positives.   This scorer works for both boolean
@@ -314,7 +348,7 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev);
  * learned combo program still returns a boolean T/F, which is then
  * used to sum the values of the contin output value.  That is, if
  * the combo returns T for a given row, then we add the contin value
- * in that row.  If the combo returns false for that row, we do nothing. 
+ * in that row.  If the combo returns false for that row, we do nothing.
  *
  * For contin tables, if 'positive' is false, then the negative of
  * the contin value is used for all calculations.
