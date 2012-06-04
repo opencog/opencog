@@ -268,8 +268,8 @@ bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
               "WorldWrapperUtil - Null handle for definite objetc %s.",
               get_definite_object(v).c_str());
 
-    return sm.containsObject(as.getName(toHandle(as, get_definite_object(v),
-                                        self_id, owner_id)));
+    return sm.containsObject(toHandle(as, get_definite_object(v),
+                                        self_id, owner_id));
 }
 
 vertex WorldWrapperUtil::evalIndefiniteObject(
@@ -307,6 +307,7 @@ throw (opencog::ComboException,
 {
 
     std::string res;
+    /*
     SpaceServer::SpaceMapPoint selfLoc;
 
     OC_ASSERT(
@@ -315,7 +316,7 @@ throw (opencog::ComboException,
     const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
 
     try {
-        selfLoc = getLocation(sm, atomSpace, self_id);
+        selfLoc = getLocation(sm, atomSpace, selfHandle(atomSpace,self_id));
 
     } catch (...) {
         // TODO: check if it is necessary to catch the exceptions separately.
@@ -763,7 +764,7 @@ vu))));
 
     std::stringstream ss;
     ss << io;
-
+*/
     if (res == "")
         res = id::null_obj;
     //if(res==self_id)
@@ -771,9 +772,9 @@ vu))));
     //else if(res==owner_id)
     //  res = id::owner;
 
-    logger().debug(
-                 "WorldWrapperUtil - Analyzing '%s'. Result: '%s'.",
-                 ss.str().c_str(), res.c_str());
+//    logger().debug(
+//                 "WorldWrapperUtil - Analyzing '%s'. Result: '%s'.",
+//                 ss.str().c_str(), res.c_str());
 
     return vertex(res);
 }
@@ -918,18 +919,22 @@ combo::vertex WorldWrapperUtil::evalPerception(
         predicate pred(name, argument);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
+        Handle handle = atomSpace.getHandle(OBJECT_NODE,
+                                            def_obj);
+
         bool result;
         if (data != CACHE_MISS) {
             result = (data == 1.0f);
         } else {
-            try {
+
                 // if the definite object exists inside the latest map it exists
-                atomSpace.getSpaceServer().getLatestMap( ).getEntity( def_obj );
+                bool isExist = atomSpace.getSpaceServer().getLatestMap( ).containsObject(handle);
+                if (isExist)
                 result = true;
-            } catch ( opencog::NotFoundException& ex ) {
+                else
                 // wheter not found inside map, it doesn't exists
                 result = false;
-            } // catch
+            }
 
             // cache miss, compute value and cache it
             if (result) {
@@ -937,10 +942,11 @@ combo::vertex WorldWrapperUtil::evalPerception(
             } else {
                 WorldWrapperUtil::cache.add(time, pred, 0.0f);
             } // else
+
+            return combo::bool_to_vertex(result);
         } // else
 
-        return combo::bool_to_vertex(result);
-    }
+
     case id::is_pet: { //handle directly via type inference
         assert(it.number_of_children() == 1);
         vertex vo = *it.begin();
@@ -1118,7 +1124,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         }
 
         //is_moving predicate
-    case id::is_moving: {
+    /*case id::is_moving: {
         if (isInThePast) {
             OC_ASSERT(it.number_of_children() == 1);
             vertex vo = *it.begin();
@@ -1188,7 +1194,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         }
     }
     break; //if not in the past then get off the case
-
+    */
     case id::is_holding_something: {
         OC_ASSERT(it.number_of_children() == 1,
                          "is_holding_something perception takes"
@@ -2838,6 +2844,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
     }
 }
 
+/*
 SpaceServer::SpaceMapPoint
 WorldWrapperUtil::getLocation(const SpaceServer::SpaceMap& sm,
                               const AtomSpace& atomSpace,
@@ -2872,16 +2879,20 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
     const spatial::EntityPtr& entity = sm.getEntity( handleName );
     return SpaceServer::SpaceMapPoint(entity->getPosition( ).x, entity->getPosition( ).y );
 }
+*/
 
 SpaceServer::SpaceMapPoint
 WorldWrapperUtil::getLocation(const SpaceServer::SpaceMap& sm,
                               const AtomSpace& atomSpace,
                               Handle h)
 {
-    std::string handleName = atomSpace.getName(h);
-    return getLocation(sm, atomSpace, handleName);
-}
+    const spatial::Entity3D* entity = sm.getEntity( h );
+    if (entity == 0)
+        return SpaceServer::SpaceMapPoint::ZERO;
 
+    return SpaceServer::SpaceMapPoint(entity->getPosition());
+}
+/*
 double
 WorldWrapperUtil::getAltitude(const SpaceServer::SpaceMap& sm,
                               const AtomSpace& atomSpace,
@@ -2898,7 +2909,7 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
     const spatial::EntityPtr& entity = sm.getEntity( handleName );
     return entity->getPosition().z;
 }
-
+*/
 double
 WorldWrapperUtil::getOrientation(const SpaceServer::SpaceMap& sm,
                                  const AtomSpace& atomSpace,
@@ -2906,13 +2917,13 @@ WorldWrapperUtil::getOrientation(const SpaceServer::SpaceMap& sm,
 {
     std::string handleName = atomSpace.getName(h);
 
-    if (!sm.containsObject(handleName)) {
+    if (!sm.containsObject(h)) {
         throw opencog::InvalidParamException(TRACE_INFO,
                                              "WorldWrapperUtil - Space map does not contain '%s'.", handleName.c_str());
     }
 
     //const SpaceServer::ObjectMetadata& md = sm.getMetaData(handleName);
-    return sm.getEntity( handleName )->getOrientation( ).getRoll( );
+    return sm.getEntity( h )->getYaw();
     //return md.yaw;
 }
 

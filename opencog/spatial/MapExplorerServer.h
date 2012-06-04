@@ -24,7 +24,7 @@
 #ifndef MAPEXPLORERSERVER_H
 #define MAPEXPLORERSERVER_H
 
-#include <opencog/spatial/LocalSpaceMap2D.h>
+#include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
@@ -88,7 +88,7 @@ namespace opencog
              * 
              * @param map A new LocalSpaceMap
              */
-            void sendMap( const spatial::LocalSpaceMap2D& map );
+            void sendMap( const spatial::Octree3DMapManager& map );
             
         private:
             typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;

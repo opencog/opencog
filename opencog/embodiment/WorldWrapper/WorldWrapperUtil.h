@@ -355,16 +355,16 @@ public:
     static SpaceServer::SpaceMapPoint getLocation(const SpaceServer::SpaceMap& sm,
             const AtomSpace& as,
             Handle h);
-
+/*
     static SpaceServer::SpaceMapPoint getLocation(const SpaceServer::SpaceMap& sm,
             const AtomSpace& as,
             const std::string& handleName)
-    throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception);
+    throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception);*/
 
-    static double getAltitude(const SpaceServer::SpaceMap& sm,
-            const AtomSpace& as,
-            const std::string& handleName)
-    throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception);
+//    static double getAltitude(const SpaceServer::SpaceMap& sm,
+//            const AtomSpace& as,
+//            const std::string& handleName)
+//    throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception);
 
     static double getOrientation(const SpaceServer::SpaceMap& sm,
                                  const AtomSpace& as,

@@ -22,14 +22,18 @@
  */
 
 #include <opencog/spatial/MapExplorer.h>
+#include <opencog/spatial/3DSpaceMap/Entity3D.h>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+
+#include <opencog/atomspace/SpaceServer.h>
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_gfxPrimitives_font.h>
+
 
 using namespace opencog;
 using namespace opencog::spatial;
@@ -42,7 +46,7 @@ using namespace opencog::spatial;
 void MapExplorer::selectEntity( void ) 
 {
     std::vector<std::string> entities;
-    map->getAllObjects(std::back_inserter(entities));
+    map->findAllEntities(std::back_inserter(entities));
     
     // use the GL_SELECT mode to get the nearest entity
     // that was hit by the cross at the screen center
@@ -75,7 +79,7 @@ void MapExplorer::selectEntity( void )
     // give a GL_SELECT name for each entity
     unsigned int i;
     for( i = 0; i < entities.size( ); ++i ) {
-        const EntityPtr& entity = map->getEntity( entities[i] );
+        const Entity3D* entity = map->getEntity( entities[i] );
         glPushName(i+1);
         renderEntity( *entity, 0x000000ff );
         glPopName();
@@ -104,11 +108,11 @@ void MapExplorer::selectEntity( void )
             cursor += name + 2;
         } // for
         
-        const EntityPtr& entity = map->getEntity( entities[*chosenEntity - 1] );
-        if ( this->selectedEntity == entity->getName( ) ) {
+        const Entity3D* entity = map->getEntity( entities[*chosenEntity - 1] );
+        if ( this->selectedEntity == entity->getEntityName( ) ) {
             this->selectedEntity = "";
         } else {
-            this->selectedEntity = entity->getName( );
+            this->selectedEntity = entity->getEntityName( );
         } // else
         
     } // if    
@@ -207,16 +211,16 @@ void MapExplorer::renderText(const std::string& text, const math::Rectangle& are
 void MapExplorer::renderEntities( void ) 
 {
     std::vector<std::string> entities;
-    map->getAllObjects(std::back_inserter(entities));
+    map->findAllEntities(std::back_inserter(entities));
 
-    std::list<EntityPtr> obstacles;
+    std::list<const Entity3D*> obstacles;
     
     unsigned int i;
     for( i = 0; i < entities.size( ); ++i ) {
-        const EntityPtr& entity = map->getEntity( entities[i] );
+        const Entity3D* entity = map->getEntity( entities[i] );
 
         // draw the entity id above the object
-        double radius = entity->getExpansionRadius( );
+        double radius = (entity->getWidth() + entity->getLength())/ 2.0;
         double lowerZ = entity->getPosition( ).z + entity->getHeight( )/2 + ( radius * 2.0);
         
         double panelWidth = entity->getWidth( ) / 2;
@@ -227,10 +231,10 @@ void MapExplorer::renderEntities( void )
             math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y + panelWidth/2.0, lowerZ + panelHeight ),
             math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y + panelWidth/2.0, lowerZ )
         );
-        renderText( entity->getName( ), panel , 0xff0000ff, 0xffffffff, true );
+        renderText( entity->getEntityName( ), panel , 0xff0000ff, 0xffffffff, true );
 
 
-        if ( entity->getBooleanProperty( Entity::OBSTACLE ) ) {
+        if ( entity->getIsObstacle() ) {
             obstacles.push_back( entity );
         } else {
             glEnable (GL_BLEND);
@@ -239,7 +243,7 @@ void MapExplorer::renderEntities( void )
     } // for
 
     // obstacles must be rendered after non obstacles
-    std::list<EntityPtr>::const_iterator it;
+    std::list<const Entity3D*>::const_iterator it;
     for( it = obstacles.begin( ); it != obstacles.end( ); ++it ) {
         glEnable (GL_BLEND);
         renderEntity( **it, 0x0000ff4c );
@@ -248,9 +252,9 @@ void MapExplorer::renderEntities( void )
 
 }
 
-void MapExplorer::renderEntity( const Entity& entity, unsigned int color )
+void MapExplorer::renderEntity( const Entity3D& entity, unsigned int color )
 {
-    const std::vector<math::Vector3>& corners = entity.getBoundingBox( ).getAllCorners( );    
+    const std::vector<BlockVector> corners = entity.getBoundingBox( ).getAllCorners( );
 
     unsigned char red = getRed(color);
     unsigned char green = getGreen(color);
@@ -258,9 +262,9 @@ void MapExplorer::renderEntity( const Entity& entity, unsigned int color )
     unsigned char alpha = getAlpha(color);
 
     // draw an orientation pointer
-    math::Vector3 direction = entity.getOrientation( ).rotate( math::Vector3::X_UNIT );
-    math::Vector3 arrowStart = entity.getPosition( ) + ( direction * (entity.getLength()/2 + entity.getExpansionRadius( )) );
-    math::Vector3 arrowEnd = arrowStart + ( direction * entity.getHeight( )/2.0 );
+    BlockVector direction = entity.getDirection();
+    BlockVector arrowStart = entity.getPosition( );
+    math::Vector3 arrowEnd(arrowStart.x + direction.x, arrowStart.y + direction.y, arrowStart.z + direction.z);
 
     glLineWidth( 50 );
     glBegin( GL_LINES );
@@ -323,15 +327,15 @@ void MapExplorer::renderEntity( const Entity& entity, unsigned int color )
     glEnd( );
       
 
-    if ( entity.getName( ) == this->selectedEntity ) {
+    if ( entity.getEntityName()  == this->selectedEntity ) {
         renderEntitySelection( entity );
     } // if
 
 }
 
-void MapExplorer::renderEntitySelection( const Entity& entity )
+void MapExplorer::renderEntitySelection( const Entity3D& entity )
 {
-    const std::vector<math::Vector3>& corners = entity.getBoundingBox( ).getAllCorners( );    
+    const std::vector<BlockVector> corners = entity.getBoundingBox( ).getAllCorners( );
 
     // draw the edges of the object if it was selected by the user
     glLineWidth(5);
@@ -429,39 +433,30 @@ void MapExplorer::renderHUD( void ) {
 
         if ( this->selectedEntity.length( ) > 0 ) {
             // draw the current selected entity info
-            const EntityPtr& entity = map->getEntity( this->selectedEntity );
+            const Entity3D* entity = map->getEntity( this->selectedEntity );
             std::stringstream info;
             info << std::endl;
-            info << "  Entity: " << entity->getName( ) << std::endl;
+            info << "  Entity: " << entity->getEntityName() << std::endl;
             info << std::endl;
-            info << "  Obstacle: " << ( entity->getBooleanProperty( Entity::OBSTACLE ) ? "yes" : "no" ) << std::endl;
+            info << "  Obstacle: " << ( entity->getIsObstacle() ? "yes" : "no" ) << std::endl;
             info << std::endl;
             info << "  <Position>" << std::endl;
             info << "  x[" << entity->getPosition( ).x << "]" << std::endl;
             info << "  y[" << entity->getPosition( ).y << "]" << std::endl;
-            info << "  z[" << entity->getPosition( ).z << "]" << std::endl;
-            info << std::endl;
-            info << "  <Orientation>" << std::endl;
-            info << "  x[" << entity->getOrientation( ).x << "]" << std::endl;
-            info << "  y[" << entity->getOrientation( ).y << "]" << std::endl;
-            info << "  z[" << entity->getOrientation( ).z << "]" << std::endl;
-            info << "  w[" << entity->getOrientation( ).w << "]" << std::endl;
-            info << "  roll[" << entity->getOrientation( ).getRoll() << "]" << std::endl;
-            info << "  pitch[" << entity->getOrientation( ).getPitch() << "]" << std::endl;
-            info << "  yaw[" << entity->getOrientation( ).getYaw() << "]" << std::endl;            
+            info << "  z[" << entity->getPosition( ).z << "]" << std::endl;   
             info << std::endl;
             info << "  <Direction>" << std::endl;
             info << "  x[" << entity->getDirection( ).x << "]" << std::endl;
             info << "  y[" << entity->getDirection( ).y << "]" << std::endl;
             info << "  z[" << entity->getDirection( ).z << "]" << std::endl;
-            info << std::endl;
-            info << "  <Dimension>" << std::endl;
-            info << "  width[" << entity->getDimension( ).width << "]"<< std::endl;
-            info << "  height[" << entity->getDimension( ).height << "]"<< std::endl;
-            info << "  length[" << entity->getDimension( ).length << "]"<< std::endl;
+//            info << std::endl;
+//            info << "  <Dimension>" << std::endl;
+//            info << "  width[" << entity->getDimension( ).width << "]"<< std::endl;
+//            info << "  height[" << entity->getDimension( ).height << "]"<< std::endl;
+//            info << "  length[" << entity->getDimension( ).length << "]"<< std::endl;
             info << std::endl;
             info << "  --------------------------- " << std::endl;
-            info << "  Expansion radius: " << entity->getExpansionRadius( ) << std::endl;
+            info << "  Expansion radius: " << (entity->getWidth() + entity->getLength()) / 2 << std::endl;
             info << "  Up axis: +Z" << std::endl;
             info << "  Front axis: +X" << std::endl;
             info << "  Right axis: +Y" << std::endl;

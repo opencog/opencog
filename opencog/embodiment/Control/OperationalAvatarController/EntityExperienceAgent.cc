@@ -49,7 +49,7 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         return;
     } // if
 
-    const spatial::LocalSpaceMap2D& map = atomSpace->getSpaceServer( ).getLatestMap( );
+    const SpaceServer::SpaceMap& map = atomSpace->getSpaceServer( ).getLatestMap( );
 
     HandleSeq semeNodes;
     {
@@ -104,7 +104,7 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         mean = static_cast<strength_t>( count ) / 
             static_cast<strength_t>( this->elapsedMoments );
 
-        bool containsObject = map.containsObject( name );
+        bool containsObject = map.containsObject( semeNodes[i] );
         if ( containsObject ) {
             // ok. it was perceived by the agent, so its strength
             // will be increased

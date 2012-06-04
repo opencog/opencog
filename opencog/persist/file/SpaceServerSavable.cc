@@ -59,34 +59,56 @@ void SpaceServerSavable::saveRepository(FILE * fp) const
     logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
     unsigned int mapSize = server->spaceMaps.size();
     fwrite(&mapSize, sizeof(unsigned int), 1, fp);
-    for (std::vector<Handle>::const_iterator itr = server->sortedMapHandles.begin(); itr != server->sortedMapHandles.end(); itr++) {
-        Handle mapHandle = *itr;
+    std::map<Handle, SpaceServer::SpaceMap*>::iterator itr;
+    for (itr = server->spaceMaps.begin(); itr != server->spaceMaps.end(); itr++) {
+        Handle mapHandle = (Handle)(itr->first);
         fwrite(&mapHandle, sizeof(Handle), 1, fp);
-        SpaceServer::SpaceMap* map = server->spaceMaps.find(mapHandle)->second;
-        float xMin, xMax, yMin, yMax, radius;
-        unsigned int xDim, yDim;
+        SpaceServer::SpaceMap* map = itr->second;
+        int xMin,yMin, zMin,floorHeight;
+        unsigned int xDim, yDim, zDim;
+
+        std::string mapName;
+        mapName = map->getMapName();
+
+        // the map name should be shorter than 128
+        assert(strlen(mapName.c_str()) < 128);
+
+        char charMapName[128];
+
+        memset(charMapName, '\0',strlen(mapName.c_str()));
+        strcpy(charMapName,mapName.c_str());
+
         xMin = map->xMin();
-        xMax = map->xMax();
         yMin = map->yMin();
-        yMax = map->yMax();
-        radius = map->radius();
+        zMin = map->zMin();
+
         xDim = map->xDim();
         yDim = map->yDim();
-        fwrite(&xMin, sizeof(float), 1, fp);
-        fwrite(&xMax, sizeof(float), 1, fp);
-        fwrite(&yMin, sizeof(float), 1, fp);
-        fwrite(&yMax, sizeof(float), 1, fp);
-        fwrite(&radius, sizeof(float), 1, fp);
+        zDim = map->zDim();
+
+        floorHeight = map->getFloorHeight();
+
+        fwrite(&charMapName, 128,1,fp);
+        fwrite(&xMin, sizeof(int), 1, fp);
+        fwrite(&yMin, sizeof(int), 1, fp);
+        fwrite(&zMin, sizeof(int), 1, fp);
+
         fwrite(&xDim, sizeof(unsigned int), 1, fp);
         fwrite(&yDim, sizeof(unsigned int), 1, fp);
+        fwrite(&zDim, sizeof(unsigned int), 1, fp);
+
+        fwrite(&floorHeight, sizeof(int), 1, fp);
+
         map->save(fp);
     }
+    /*
     unsigned int persistentHandlesSize = server->persistentMapHandles.size();
     fwrite(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
     for (std::set<Handle>::const_iterator itr = server->persistentMapHandles.begin(); itr != server->persistentMapHandles.end(); itr++) {
         Handle mapHandle = *itr;
         fwrite(&mapHandle, sizeof(Handle), 1, fp);
     }
+    */
 }
 
 void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::Atom*> *conv)
@@ -98,24 +120,33 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
     for (unsigned int i = 0; i < mapSize; i++) {
         Handle mapHandle;
         fread(&mapHandle, sizeof(Handle), 1, fp);
-        float xMin, xMax, yMin, yMax, radius;
-        unsigned int xDim, yDim;
-        fread(&xMin, sizeof(float), 1, fp);
-        fread(&xMax, sizeof(float), 1, fp);
-        fread(&yMin, sizeof(float), 1, fp);
-        fread(&yMax, sizeof(float), 1, fp);
-        fread(&radius, sizeof(float), 1, fp);
+        int xMin,yMin, zMin,floorHeight;
+        unsigned int xDim, yDim, zDim;
+
+        char charMapName[128];
+
+        fread(&charMapName, 128, 1, fp);
+        std::string mapName(charMapName);
+
+        fread(&xMin, sizeof(int), 1, fp);
+        fread(&yMin, sizeof(int), 1, fp);
+        fread(&zMin, sizeof(int), 1, fp);
+
         fread(&xDim, sizeof(unsigned int), 1, fp);
         fread(&yDim, sizeof(unsigned int), 1, fp);
-        SpaceServer::SpaceMap *map = new SpaceServer::SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, radius);
+        fread(&zDim, sizeof(unsigned int), 1, fp);
+
+        fread(&floorHeight, sizeof( int), 1, fp);
+
+        SpaceServer::SpaceMap *map = new SpaceServer::SpaceMap(mapName,xMin,yMin,zMin,xDim,yDim,zDim,floorHeight);
         map->load(fp);
 
         OC_ASSERT(conv->contains(mapHandle),
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
         Handle newMapHandle = conv->get(mapHandle)->getHandle();
         server->spaceMaps[newMapHandle] = map;
-        server->sortedMapHandles.push_back(newMapHandle);
     }
+    /*
     unsigned int persistentHandlesSize;
     fread(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
     for (unsigned int i = 0; i < persistentHandlesSize; i++) {
@@ -125,7 +156,7 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
         Handle newMapHandle = conv->get(mapHandle)->getHandle();
         server->persistentMapHandles.insert(newMapHandle);
-    }
+    }*/
 }
 
 void SpaceServerSavable::clear()

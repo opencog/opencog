@@ -27,7 +27,7 @@ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 # SET(CMAKE_BUILD_TYPE Release)
 
 # uncomment to build in debug mode
-# SET(CMAKE_BUILD_TYPE Debug)
+ SET(CMAKE_BUILD_TYPE Debug)
 
 # uncomment to be in coverage testing mode
 # SET(CMAKE_BUILD_TYPE Coverage)

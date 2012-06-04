@@ -85,7 +85,7 @@ public:
     virtual void getAllActionsDoneInATrickAtTime(const Temporal& recentPeriod, HandleSeq& actionsDone) = 0;
     virtual void getAllObservedActionsDoneAtTime(const Temporal& recentPeriod, HandleSeq& behaviourDescriptions) = 0;
     virtual bool isNear(const Handle& objectHandle) = 0;
-    virtual bool getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity) = 0;
+   // virtual bool getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity) = 0;
     virtual void getHighLTIObjects(HandleSeq& highLTIObjects) = 0;
 
     /**
@@ -93,12 +93,12 @@ public:
      * when building a goto plan
      * @param target Object name amn it's position on LocalSpaceMap
      */
-    virtual void setLatestGotoTarget( const std::pair<std::string, spatial::Point>& target ) = 0;
+    virtual void setLatestGotoTarget( const std::pair<std::string, SpaceServer::SpaceMapPoint>& target ) = 0;
     /**
      * Returns the latest object name used by goto_obj or gonear_obj
      * @return Object name and it's position
      */
-    virtual const std::pair<std::string, spatial::Point>& getLatestGotoTarget( void ) = 0;
+    virtual const std::pair<std::string, SpaceServer::SpaceMapPoint>& getLatestGotoTarget( void ) = 0;
 
     /**
      * When an avatar requests the pet to execute a trick, this

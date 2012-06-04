@@ -69,7 +69,7 @@ MapTools::MapTools( unsigned int videoMode ) :
 
 int MapTools::runLocalMode( const std::string& fileName ) 
 {
-    spatial::LocalSpaceMap2D* map = NULL;
+    spatial::Octree3DMapManager* map = NULL;
     std::ifstream file( fileName.c_str( ) );
     if ( !file.good( ) ) {
         std::cerr << "Cannot open file '" << fileName << "'" << std::endl;
@@ -79,7 +79,7 @@ int MapTools::runLocalMode( const std::string& fileName )
     std::stringstream text;
     text << file.rdbuf( );
     file.close( );
-    map = spatial::LocalSpaceMap2D::fromString( text.str( ) );
+    map = spatial::Octree3DMapManager::fromString( text.str( ) );
     
     try {
         MapExplorer explorer( map, windowWidth, windowHeight, fullScreen );
@@ -111,7 +111,7 @@ int MapTools::runRemoteMode( const std::string& host, const std::string& port, b
         } // if
         
         MapExplorer* explorer = NULL;
-        spatial::LocalSpaceMap2D* oldMap = NULL;
+        spatial::Octree3DMapManager* oldMap = NULL;
         bool running = true;
         while( running && !externalInterruption ) {
 
@@ -127,7 +127,7 @@ int MapTools::runRemoteMode( const std::string& host, const std::string& port, b
                     throw boost::system::system_error(error); // Some other error.
                 } // else if
                 
-                spatial::LocalSpaceMap2D* incomingMap = spatial::LocalSpaceMap2D::fromString( buffer );  
+                spatial::Octree3DMapManager* incomingMap = spatial::Octree3DMapManager::fromString( buffer );
                 if ( explorer == NULL ) {
                     explorer = new MapExplorer( incomingMap, windowWidth, windowHeight, fullScreen );
                     explorer->start( );
@@ -191,7 +191,7 @@ int MapTools::runServerMode( const std::string& host, const std::string& port,
         return 1;
     } // if
     
-    std::vector<spatial::LocalSpaceMap2D*> maps( mapFileNames.size( ) );
+    std::vector<spatial::Octree3DMapManager*> maps( mapFileNames.size( ) );
     unsigned int i;
     for( i = 0; i < mapFileNames.size( ); ++i ) {
         std::ifstream file( mapFileNames[i].c_str( ) );
@@ -203,7 +203,7 @@ int MapTools::runServerMode( const std::string& host, const std::string& port,
         std::stringstream text;
         text << file.rdbuf( );
         file.close( );
-        maps[i] = spatial::LocalSpaceMap2D::fromString( text.str( ) );
+        maps[i] = spatial::Octree3DMapManager::fromString( text.str( ) );
     } // for
 
     std::cout << "Number of successfully loaded maps: " << maps.size( ) << std::endl;

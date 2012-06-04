@@ -861,9 +861,8 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
              "Pet - Exemplar start should be smaller than exemplar end.");
         return;
     }
-
-    Handle spaceMapNode = atomSpace->addNode(CONCEPT_NODE,
-                          SpaceServer::SPACE_MAP_NODE_NAME);
+/*
+    Handle spaceMapNode = atomSpace->getSpaceServer().getLatestMapHandle();
 
     // getting all HandleTemporalPairs associated with the SpaceMap
     // concept node within the exemplar timestamped sections
@@ -890,6 +889,7 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
             atomSpace->removeAtom(mapHandle, true);
         }
     }
+    */
 }
 bool Pet::isNear(const Handle& objectHandle)
 {
@@ -906,6 +906,7 @@ Handle Pet::getMyHandle() const
     return h;
 }
 
+/*
 bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
 {
     vector<string> entitiesInVicinity;
@@ -937,7 +938,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
     }
     return true;
 }
-
+*/
 void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 {
     atomSpace->getHandleSet(back_inserter(highLTIObjects), OBJECT_NODE, true);
@@ -1081,7 +1082,7 @@ void Pet::stopVisualDebuggerServer( void )
     } // if
 }
 
-void Pet::sendMapToVisualDebuggerClients( const spatial::LocalSpaceMap2D& map )
+void Pet::sendMapToVisualDebuggerClients( const SpaceServer::SpaceMap & map )
 {
     if ( this->visualDebuggerServer != NULL && this->visualDebuggerServer->isRunning( ) ) {
         this->visualDebuggerServer->sendMap( map );

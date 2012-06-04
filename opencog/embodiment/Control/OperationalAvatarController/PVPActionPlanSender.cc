@@ -76,5 +76,14 @@ bool PVPActionPlanSender::sendEmotionalFeelings(const std::string& feelings)
     return ne->sendMessage(msg);
 }
 
+bool PVPActionPlanSender::sendSingleActionCommand(const std::string& action)
+{
+    StringMessage msg(ne->getID(), config().get("PROXY_ID"), action);
+    if (logPVPMessage) {
+        logger().info("PVPActionPlanSender::sendSingleActionCommand():\n%s\n", msg.getPlainTextRepresentation());
+    }
+    return ne->sendMessage(msg);
+}
+
 } // ~namespace oac
 } // ~namespace opencog

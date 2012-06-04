@@ -60,6 +60,7 @@ void OACMock::setConfig() {
     config().set("RUN_OAC_DEBUGGER", "false"); 
     config().set("MANUAL_OAC_LAUNCH", "false"); 
     config().set("ENABLE_UNITY_CONNECTOR", "false"); 
+    //config().set("USE_3D_MAP", "false");
 
     // OAC fails to create the log file in /tmp/... during unit test (why?), so
     // we change the log file to user's home directory and also print log to 

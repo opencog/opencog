@@ -176,8 +176,8 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
             //get current time and a spaceMapHandle associated
             unsigned long time = cbd.getIndexStartTime(index);
             Handle smh =
-                AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_wp.getAtomSpace(),
-                                                            time);
+                AtomSpaceUtil::getCurrentSpaceMapHandle(_wp.getAtomSpace());
+
             OC_ASSERT(smh != Handle::UNDEFINED,
                              "There must be a SpaceMap, ask Nil for more.");
             generatePossibleActions(act_set, h, al, smh, time);

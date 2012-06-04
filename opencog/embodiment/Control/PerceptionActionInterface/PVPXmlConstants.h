@@ -57,6 +57,11 @@
 #define PROPERTY_ELEMENT         "property"
 #define STATE_INFO_ELEMENT         "state-info"
 #define STATE_VALUE_ELEMENT         "state-value"
+#define BLOCK_STRUCTURE_SIGNAL_ELEMENT    "block-structure-signal"
+#define FINISHED_FIRST_TIME_PERCEPT_TERRIAN_SIGNAL_ELEMENT    "finished-first-time-percept-terrian-signal"
+
+#define SINGLE_ACTION_COMMAND_ELEMENT     "single-action-command"
+
 
 // xml attributes
 #define PET_ID_ATTRIBUTE                     "id"
@@ -112,11 +117,24 @@
 #define NULL_ATTRIBUTE          "null"
 
 #define PRIORITY_ATTRIBUTE       "priority" // Note from Tristan: this is actually used only when actions are sent from Proxy to SL. 
+#define MAP_NAME_ATTRIBUTE       "map-name"
 #define GLOBAL_POS_X_ATTRIBUTE   "global-position-x"
 #define GLOBAL_POS_Y_ATTRIBUTE   "global-position-y"
+#define GLOBAL_POS_Z_ATTRIBUTE   "global-position-z"
 #define GLOBAL_POS_OFFSET_ATTRIBUTE   "global-position-offset"
+#define GLOBAL_POS_OFFSET_X_ATTRIBUTE   "global-position-offset-x"
+#define GLOBAL_POS_OFFSET_Y_ATTRIBUTE   "global-position-offset-y"
+#define GLOBAL_POS_OFFSET_Z_ATTRIBUTE   "global-position-offset-z"
 #define GLOBAL_FLOOR_HEIGHT_ATTRIBUTE "global-floor-height"
+#define IS_FIRST_TIME_PERCEPT_WORLD   "is-first-time-percept-world"
 #define STATE_NAME_ATTRIBUTE "state-name"
+
+#define RECOGNIZE_STRUCTURE   "recognize-structure"
+#define START_BLOCK_X         "startblock-x"
+#define START_BLOCK_Y         "startblock-y"
+#define START_BLOCK_Z         "startblock-z"
+
+#define BLOCK_LIST            "block-list" // all the unit block nodes in an entity
 
 // xml object types
 #define PET_OBJECT_TYPE          "pet"
@@ -125,6 +143,7 @@
 #define AVATAR_OBJECT_TYPE       "avatar"
 #define ACCESSORY_OBJECT_TYPE    "accessory"
 #define ORDINARY_OBJECT_TYPE     "object"
+#define BLOCK_ENTITY_TYPE        "block-entity"
 #define UNKNOWN_OBJECT_TYPE      "unknown"
 
 // known parameter names

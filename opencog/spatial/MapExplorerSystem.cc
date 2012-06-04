@@ -35,7 +35,7 @@ using namespace opencog;
 using namespace opencog::spatial;
 
 
-MapExplorer::MapExplorer( LocalSpaceMap2D* map, unsigned int screenWidth,
+MapExplorer::MapExplorer( Octree3DMapManager* map, unsigned int screenWidth,
     unsigned int screenHeight, bool fullScreen ) 
         throw(opencog::RuntimeException) : 
              map( map ), mapUpdated( false ), screenWidth(screenWidth), screenHeight(screenHeight), 
@@ -242,7 +242,7 @@ bool MapExplorer::update( long elapsedTime )
 }
 
 
-void MapExplorer::updateMap( LocalSpaceMap2D* map )
+void MapExplorer::updateMap( Octree3DMapManager* map )
 {
     boost::mutex::scoped_lock lock( this->mapUpdateMutex );
     this->map = map;
@@ -399,6 +399,7 @@ void MapExplorer::resetFrustum( void )
 void MapExplorer::generateFloorTextures( void )
 {
     bool occupancyActive = this->floorTextureId == this->floorTextureOccupancyId;
+    int z = this->map->getFloorHeight();
 
     if ( this->floorTextureChecker != NULL ) {
         glDeleteTextures(1, &this->floorTextureCheckerId );
@@ -427,7 +428,7 @@ void MapExplorer::generateFloorTextures( void )
         for (j = 0; j < this->map->yDim( ); ++j) {
             colState = (j%checkerGranularity) == 0 ? !colState : colState;                
             {
-                int c =  this->map->gridOccupied( i, j ) ? 128 : 255;
+                int c =  this->map->checkStandable( i, j ,z) ? 128 : 255;
                 *cursorOccupancy++ = (unsigned char)c;
                 *cursorOccupancy++ = (unsigned char)c;
                 *cursorOccupancy++ = (unsigned char)c;

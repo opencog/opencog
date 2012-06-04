@@ -44,6 +44,7 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
                                      unsigned long timestamp
                                     )
 {
+    /*
 //struct timeval timer_start, timer_end;
 //time_t elapsed_time = 0;
 //gettimeofday(&timer_start, NULL);
@@ -91,6 +92,8 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
 //               __FUNCTION__, 
 //               1.0 * elapsed_time/1000000
 //             );
+
+*/
 }
 
 SpatialPredicateUpdater::SPATIAL_RELATION_VECTOR SpatialPredicateUpdater::
@@ -126,9 +129,9 @@ computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
                                         Handle observer, 
                                         unsigned long timestamp
                                        )
-{
+{/*
     const std::string & observerName = atomSpace.getName(observer); 
-    const spatial::EntityPtr & observerEntity = spaceMap.getEntity(observerName);
+    const spatial::EntityPtr & observerEntity = spaceMap.getEntity(observer);
     int numRelations = 0;
 
     foreach (const std::string & entityID_B, entities) {
@@ -187,6 +190,7 @@ computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
     logger().debug("%s - Finished evaluating: %d observer involved spatial relations", 
                    __FUNCTION__, numRelations
                   );
+                  */
 }
 
 void SpatialPredicateUpdater::
@@ -197,6 +201,7 @@ compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
                              unsigned long timestamp
                             )
 {
+    /*
     double besideDistance = spaceMap.getNextDistance();
 
     try {
@@ -245,6 +250,7 @@ compute2SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
         // quite often for consumable objects, such as FoodCube
         return;
     } // try
+    */
 }
 
 void SpatialPredicateUpdater::
@@ -254,7 +260,7 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
                              Handle observer, 
                              unsigned long timestamp
                             )
-{
+{/*
     spaceMap.getNextDistance();
 
     try
@@ -317,12 +323,14 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
         // quite often for consumable objects, such as FoodCube
         return;
     } // try
+    */
 }
 
 bool SpatialPredicateUpdater::isBetween(const SPATIAL_RELATION_VECTOR & relationsAB, 
                                         const SPATIAL_RELATION_VECTOR & relationsAC
                                        )
 {
+    /*
     bool bLeftAB   = false, 
          bRightAB  = false,
          bAboveAB  = false, 
@@ -367,6 +375,7 @@ bool SpatialPredicateUpdater::isBetween(const SPATIAL_RELATION_VECTOR & relation
            (bBelowAB  && bAboveAC)  ||
            (bFrontAB  && bBehindAC) ||
            (bBehindAB && bFrontAC); 
+           */
 }
 
 void SpatialPredicateUpdater::
@@ -375,6 +384,7 @@ addSpatialRelations(const SPATIAL_RELATION_VECTOR & relations,
                     Handle objectA, Handle objectB, Handle objectC 
                    )
 {
+
     // Clear all the relations firstly
     if ( objectC == Handle::UNDEFINED ) {
         for (int rel = 0; rel < (int)Entity::TOTAL_RELATIONS; ++ rel) {

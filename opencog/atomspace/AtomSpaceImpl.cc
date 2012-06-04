@@ -140,7 +140,7 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
     else if ( classserver().isA(type, OBJECT_NODE) ) {
         // TODO remove this and we can remove spaceServer from the
         // AtomSpaceImpl class
-        spaceServer->removeObject(getName(h));
+        spaceServer->removeSpaceInfo(h);
     } // else if
 }
 

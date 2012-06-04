@@ -253,7 +253,7 @@ void LearnMessage::setSchemaArguments(const std::vector<std::string> &argumentsL
 
 bool LearnMessage::populateAtomSpace(AtomSpace &atomSpace)
 {
-
+/*
     // load AtomSpace
     std::vector<XMLBufferReader *> reader(1, new StringXMLBufferReader(behaviorDescriptions.c_str()));
     try {
@@ -273,7 +273,7 @@ bool LearnMessage::populateAtomSpace(AtomSpace &atomSpace)
         return false;
     }
 
-    delete reader[0];
+    delete reader[0];*/
     return true;
 }
 

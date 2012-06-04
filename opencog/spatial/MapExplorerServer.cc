@@ -182,9 +182,9 @@ void MapExplorerServer::clientLoop( SocketPtr socket )
 }
 
 
-void MapExplorerServer::sendMap( const spatial::LocalSpaceMap2D& map )
+void MapExplorerServer::sendMap( const spatial::Octree3DMapManager&  map )
 {
     boost::mutex::scoped_lock lock( this->mapMutex );
-    this->latestMapString = LocalSpaceMap2D::toString( map );
+    this->latestMapString = Octree3DMapManager::toString( map );
     this->latestMapHash = boost::hash_value( this->latestMapString );
 }

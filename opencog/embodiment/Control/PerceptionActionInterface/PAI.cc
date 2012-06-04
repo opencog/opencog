@@ -38,6 +38,8 @@
 #include <cstdlib>
 #include <sstream>
 #include <stdlib.h>
+#include <vector>
+#include <iterator>
 
 #include <boost/regex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -84,18 +86,16 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 {
     assert(&atomSpace != NULL);
     PAIUtils::initializeXMLPlatform();
-    xMin = -1;
-    yMin = -1;
-    xMax = -1;
-    yMax = -1;
-    agentRadius = -1;
-    agentHeight = -1;
-    floorHeight = 0;
 
 #ifdef HAVE_LIBPTHREAD
     pthread_mutex_init(&plock, NULL);
 #endif
+
     latestSimWorldTimestamp = 0;
+
+    isFirstPerceptTerrian = false;
+
+    blockNum = 0;
 
     // Set up the xml parser
     parser = new EmbodimentDOMParser();
@@ -130,6 +130,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
 
     enableCollectActions = config().get_bool("ENABLE_ACTION_COLLECT");
+
 }
 
 PAI::~PAI()
@@ -378,6 +379,103 @@ void PAI::sendDemandSatisfactions(const std::string& petId, const std::map<std::
     doc->release();
 }
 
+void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionParamStruct> & paraList)
+{
+    // creating XML DOC
+    XMLCh namespaceURI[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLCh qualifiedName[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLString::transcode("http://www.opencog.org/brain", namespaceURI, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(SINGLE_ACTION_COMMAND_ELEMENT, qualifiedName, PAIUtils::MAX_TAG_LENGTH);
+    DOMDocument* doc = PAIUtils::getDOMImplementation()->createDocument(
+                namespaceURI,
+                qualifiedName,
+                NULL
+            );
+
+    if (!doc) {
+        throw opencog::XMLException(TRACE_INFO, "ActionPlan - Error creating DOMDocument.");
+    }
+
+    XMLCh tmpStr[PAIUtils::MAX_TAG_LENGTH+1];
+    // Set encoding
+    XMLString::transcode("UTF-8", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    doc->setEncoding(tmpStr);
+    // Set version
+    XMLString::transcode("1.0", tmpStr, PAIUtils::MAX_TAG_LENGTH);
+    doc->setVersion(tmpStr);
+
+    // filling single action command element with pet id
+    DOMElement *singleActionElement = doc->getDocumentElement();
+
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+
+    XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLCh* actionNameStr = XMLString::transcode(actionName.c_str());
+    singleActionElement->setAttribute(tag, actionNameStr);
+    XMLString::release(&actionNameStr);
+
+    // adding all parameters
+    std::vector<ActionParamStruct>::iterator it;
+
+    for (it = paraList.begin(); it != paraList.end(); it++)
+    {
+        XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+        DOMElement *paraElement = doc->createElement(tag);
+
+        ActionParamStruct paraStruct = (ActionParamStruct)(*it);
+
+        // the name of this parameter
+        XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLCh* paraNameStr = XMLString::transcode(paraStruct.paramName.c_str());
+        paraElement->setAttribute(tag, paraNameStr);
+        XMLString::release(&paraNameStr);
+
+        // the value of this parameter
+        XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        XMLCh* paraValueStr = XMLString::transcode(paraStruct.paramValue.c_str());
+        paraElement->setAttribute(tag, paraValueStr);
+        XMLString::release(&paraValueStr);
+                // todo:
+        // the type of this parameter
+        switch (paraStruct.paramType)
+        {
+        case BOOLEAN_CODE:
+            break;
+        case INT_CODE:
+        {
+            XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+            XMLCh* paraTypeStr = XMLString::transcode("int");
+            paraElement->setAttribute(tag, paraTypeStr);
+            XMLString::release(&paraTypeStr);
+            break;
+        }
+        case FLOAT_CODE:
+            break;
+        case STRING_CODE:
+            break;
+        case VECTOR_CODE:
+        {
+
+
+            break;
+        }
+        case ROTATION_CODE:
+            break;
+        case ENTITY_CODE:
+            break;
+        }
+
+        singleActionElement->appendChild(paraElement);
+    }
+
+    // sending message
+    string result = PAIUtils::getSerializedXMLString(doc);
+    actionSender.sendSingleActionCommand(result);
+
+    // free memory of the DomDocument
+    doc->release();
+}
+
 ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     ActionID result = Handle::UNDEFINED;
@@ -619,6 +717,26 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d state-info done", list->getLength());
+
+    // getting <block-structure-signal> elements from the XML message
+    XMLString::transcode(BLOCK_STRUCTURE_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    list = doc->getElementsByTagName(tag);
+
+    for (unsigned int i = 0; i < list->getLength(); i++) {
+        processBlockStructureSignal((DOMElement *)list->item(i));
+    }
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d block-structure-signal done", list->getLength());
+
+    // getting <finished-first-time-percept-terrian-signal> elements from the XML message
+    XMLString::transcode(FINISHED_FIRST_TIME_PERCEPT_TERRIAN_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    list = doc->getElementsByTagName(tag);
+
+    for (unsigned int i = 0; i < list->getLength(); i++) {
+        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i));
+    }
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d finished-first-time-percept-terrian-signal done", list->getLength());
 }
 
 void PAI::processAvatarSignal(DOMElement * element)
@@ -1323,7 +1441,6 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
 
-
     // if this is a statechage action, add the new value of this state into the atomspace
     if (nameStr == "state_change")
     {
@@ -1922,6 +2039,8 @@ Type PAI::getSLObjectNodeType(const char* objectType)
         result = ACCESSORY_NODE;
     } else if (strcmp(objectType, UNKNOWN_OBJECT_TYPE) == 0){
         result = UNKNOWN_OBJECT_NODE;
+    } else if (strcmp(objectType, BLOCK_ENTITY_TYPE) == 0){
+        result = BLOCK_ENTITY_NODE;
     } else {
         result = OBJECT_NODE;
     }
@@ -1941,6 +2060,32 @@ double PAI::getPositionAttribute(DOMElement * element, const char* tagName)
     return result;
 }
 
+int PAI::getIntAttribute(DOMElement * element, const char* tagName)
+{
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLString::transcode(tagName, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* strvalue = XMLString::transcode(element->getAttribute(tag));
+    if (!strlen(strvalue)) {
+        logger().error("PAI - getIntAttribute(): got no %s attribute", tagName);
+    }
+    int result = atoi(strvalue);
+    XMLString::release(&strvalue);
+    return result;
+}
+
+string PAI::getStringAttribute(DOMElement * element, const char* tagName)
+{
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+    XMLString::transcode(tagName, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* strvalue = XMLString::transcode(element->getAttribute(tag));
+    if (!strlen(strvalue)) {
+        logger().error("PAI - getStringAttribute(): got no %s attribute", tagName);
+    }
+    string result(strvalue);
+    XMLString::release(&strvalue);
+    return result;
+}
+/*
 void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 {
     struct timeval timer_start, timer_end;
@@ -1950,9 +2095,9 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
     logger().debug("PAI - processMapInfo(): init.");
 
     // Set the space map boundary.
-    addSpaceMapBoundary(element);
+    // addSpaceMapBoundary(element);
 
-    bool keepPreviousMap = avatarInterface.isExemplarInProgress();
+    // bool keepPreviousMap = avatarInterface.isExemplarInProgress();
     // Gets each blip element
     XMLString::transcode(BLIP_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList * blipList = element->getElementsByTagName(tag);
@@ -2185,7 +2330,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
         addPropertyPredicate(std::string("exist"), objectNode, !objRemoval, false);
 
         if (objRemoval) {
-            atomSpace.getSpaceServer().removeSpaceInfo(keepPreviousMap, objectNode, tsValue);
+            atomSpace.getSpaceServer().removeSpaceInfo(objectNode ,tsValue);
 
             // check if the object to be removed is marked as grabbed in
             // AvatarInterface. If so grabbed status should be unset.
@@ -2222,7 +2367,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
 //      logger().log(Util::Logger::INFO, "PAI - processMapInfo(): before addSpacePredicates");
 
             // TODO: velocity vector is not being added to SpaceMaps. Add it when needed.
-            addSpacePredicates(keepPreviousMap, objectNode, tsValue,
+            addSpacePredicates(objectNode, tsValue,
                                positionElement, rotationElement,
                                length, width, height, isTerrainObject);
 
@@ -2320,7 +2465,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             addInheritanceLink(std::string("water_bowl"), objectNode, waterBowl);
 
             // Add frame into atomspace to represent the entity.
-            addSemanticStructure(objectNode, internalEntityId, entityClass, entityType);
+            addSemanticStructure(objectNode, internalEntityId, "", entityType);
         }// if (objRemoval)
 
         XMLString::release(&entityId);
@@ -2337,15 +2482,59 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
     if (!keepPreviousMap) atomSpace.getSpaceServer().cleanupSpaceServer();
     // --
 
-    this->avatarInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
+  this->avatarInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
 
+}
+*/
+void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
+{
+    // The incoming XML DOM element should contain following attributes:
+    //          <element-tag map-name = "xxxxx" global-position-x="24" global-position-y="24" global-position-z="24"
+    //              global-position-offset-x="96" global-position-offset-y="96" global-position-offset-z="96"
+    //              global-floor-height="99" is-first-time-percept-world="true" >
+    //          </element-tag>
+    static int unknownMapNameCount = 0;
+
+    string mapName = getStringAttribute(element, MAP_NAME_ATTRIBUTE);
+    if (mapName == "")
+    {
+        // got a unknown map name
+        mapName = "unknown-map-name" + opencog::toString(++unknownMapNameCount);
+    }
+    // the size of x side in this map
+    int offsetx = getIntAttribute(element, GLOBAL_POS_OFFSET_X_ATTRIBUTE);
+
+    // the size of y side in this map
+    int offsety = getIntAttribute(element, GLOBAL_POS_OFFSET_Y_ATTRIBUTE);
+
+    // the size of z side in this map
+    int offsetz = getIntAttribute(element, GLOBAL_POS_OFFSET_Z_ATTRIBUTE);
+
+    logger().fine("PAI - addSpaceMap: map size - x = %d, y = %d, z = %d", offsetx, offsety, offsetz);
+
+    // gets the minimal global position x
+    int xMin = getIntAttribute(element, GLOBAL_POS_X_ATTRIBUTE);
+    // gets the minimal global position y
+    int yMin = getIntAttribute(element, GLOBAL_POS_Y_ATTRIBUTE);
+
+    // gets the minimal global position z
+    int zMin = getIntAttribute(element, GLOBAL_POS_Z_ATTRIBUTE);
+
+    logger().fine("PAI - addSpaceMap: map start position - x = %d, y = %d, z = %d", xMin, yMin, zMin);
+
+    // gets the global floor height
+    int floorHeight = getIntAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
+    logger().fine("PAI - addSpaceMap: global floor height = %d", floorHeight);
+
+    SpaceServer& spaceServer = atomSpace.getSpaceServer();
+    spaceServer.addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
 }
 
 void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool useProtoBuf)
 {
     if (!useProtoBuf) {
         // Use the old parser to handle XML document.
-        processMapInfo(element, toUpdateHandles);
+        logger().error("PAI - processMapInfo: ProtoBuf not found!");
         return;
     }
 
@@ -2353,14 +2542,30 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
     // Use protobuf to process the map info sequence.
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    // Add the space map boundary.
-    addSpaceMapBoundary(element);
+    // Get timestamp
+    unsigned long timestamp = getTimestampFromElement(element);
+    if (!setLatestSimWorldTimestamp(timestamp)) {
+        logger().error("PAI - processMapInfo() - Received old timestamp in map data => Message discarded!");
+        return;
+    }
+
+    char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
+    string isFirstPerceptStr(isFirstPercept);
+    bool isFirstPerceptWorld;
+    if (isFirstPerceptStr == "true")
+        isFirstPerceptWorld = true;
+    else
+        isFirstPerceptWorld = false;
+
+    if (isFirstPerceptWorld)
+        addSpaceMap(element, timestamp);
 
     // Get the terrain info elements from dom.
     XMLString::transcode(MAP_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList* dataList = element->getElementsByTagName(tag);
 
-    for (unsigned int i = 0; i < dataList->getLength(); i++) {
+    for (unsigned int i = 0; i < dataList->getLength(); i++)
+    {
         DOMElement* dataElement = (DOMElement*) dataList->item(i);
         std::string msg(XMLString::transcode(dataElement->getTextContent()));
 
@@ -2368,40 +2573,40 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         unsigned int length = (unsigned int)msg.size();
         XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
 
-        // Get timestamp
-        unsigned long timestamp = getTimestampFromElement(dataElement);
-        if (!setLatestSimWorldTimestamp(timestamp)) {
-            logger().error("PAI - Received old timestamp in terrain data => Message discarded!");
-            continue;
-        }
-
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
         logger().debug("PAI - processMapInfo recieved mapinfos information: %s", mapinfoSeq.DebugString().c_str());
         
-        for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++) {
+        for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++)
+        {
             const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);
 
             bool isRemoved = getBooleanProperty(getPropertyMap(mapinfo), REMOVE_ATTRIBUTE);
-            if (!isRemoved) {
-                Handle objectNode = addEntityToAtomSpace(mapinfo, timestamp);
+            Handle objectNode;
+
+            if (!isRemoved)
+            {
+                objectNode = addEntityToAtomSpace(mapinfo, timestamp, isFirstPerceptWorld);
                 // Mark the entity as to be updated.
                 toUpdateHandles.push_back(objectNode);
-            } else {
-                Handle objectNode = removeEntityFromAtomSpace(mapinfo, timestamp);
+            } else
+            {
+                objectNode = removeEntityFromAtomSpace(mapinfo, timestamp);
                 if (objectNode != Handle::UNDEFINED)
                     toUpdateHandles.push_back(objectNode);
             }
+
         }
         
         XMLString::release(&binary);
     }
-
+/*
     bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
     if (!keepPreviousMap) atomSpace.getSpaceServer().cleanupSpaceServer();
 
     this->avatarInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
+    */
 #endif
 }
 
@@ -2714,6 +2919,7 @@ void PAI::addInheritanceLink(Handle fatherNodeHandle, Handle subNodeHandle)
     AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
 }
 
+/*
 void PAI::addSpaceMapBoundary(DOMElement * element)
 {
     // TODO change the data wrapper once XML is completely replaced.
@@ -2748,10 +2954,11 @@ void PAI::addSpaceMapBoundary(DOMElement * element)
     SpaceServer& spaceServer = atomSpace.getSpaceServer();
     spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim, floorHeight);
 }
-
-bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
+*/
+/*
+bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
                              DOMElement* positionElement, DOMElement* rotationElement,
-                             double length, double width, double height, bool isTerrainObject)
+                             double length, double width, double height, bool isTerrainObject,bool isFirstTimePercept)
 {
 
     bool isSelfObject = (avatarInterface.getPetId() == atomSpace.getName(objectNode));
@@ -2852,9 +3059,10 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
         entityClass = "block";
     }
 
-    return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle, entityClass);
+    return atomSpace.getSpaceServer().addSpaceInfo(objectNode, timestamp, (int)position.x, (int)position.y, (int)position.z,
+                                                   (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept);
 }
-
+*/
 void PAI::addSemanticStructure(Handle objectNode, 
         const std::string& entityId, 
         const std::string& entityClass,
@@ -2940,7 +3148,6 @@ void PAI::addSemanticStructure(Handle objectNode,
         atomSpace.setLTI(referenceLink, 1);
     }
 }
-
 
 
 Handle PAI::addPhysiologicalFeeling(const string petID,
@@ -3179,27 +3386,46 @@ std::string PAI::camelCaseToUnderscore(const char* s)
  */
 void PAI::processTerrainInfo(DOMElement * element)
 {
+
     // XML is to be replaced by protobuf, but currently, we use it to wrap a
     // base64 string that can be interpreted into binary and then be deserialized 
     // by protobuf.
     // The XML format of terrain info is:
     //      <?xml version="1.0" encoding="UTF-8"?>
     //      <oc:embodiment-msg xsi:schemaLocation="..." xmlns:xsi="..." xmlns:pet="...">
-    //          <terrain-info global-position-x="24" global-position-y="24" 
-    //              global-position-offset="96" global-floor-height="99">
+    //          <terrain-info global-position-x="24" global-position-y="24" global-position-z="24"
+    //              global-position-offset-x="96" global-position-offset-y="96" global-position-offset-z="96" global-floor-height="99" is-first-time-percept-world="true" >
     //              <terrain-data timestamp="...">packed message stream</terrain-data>
     //          </terrain-info>
     //      </oc:embodiment-msg>
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    // Add the space map boundary.
-    addSpaceMapBoundary(element);
+    // Get timestamp
+    unsigned long timestamp = getTimestampFromElement(element);
+    if (!setLatestSimWorldTimestamp(timestamp)) {
+        logger().error("PAI - processTerrainInfo() - Received old timestamp in terrain => Message discarded!");
+        return;
+    }
 
     // Get the terrain info elements from dom.
     XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList* dataList = element->getElementsByTagName(tag);
 
-    for (unsigned int i = 0; i < dataList->getLength(); i++) {
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
+    string isFirstPerceptStr(isFirstPercept);
+
+    if (isFirstPerceptStr == "true" && ! isFirstPerceptTerrian )
+    {
+        isFirstPerceptTerrian = true;
+        perceptTerrianBeginTime = time(NULL);
+        printf("Begin the first time percept the terrain! Begin time: %d. Wait...\n",perceptTerrianBeginTime);
+        addSpaceMap(element,timestamp);
+        blockNum = 0;
+    }
+
+    for (unsigned int i = 0; i < dataList->getLength(); i++)
+    {
         DOMElement* dataElement = (DOMElement*) dataList->item(i);
         std::string msg(XMLString::transcode(dataElement->getTextContent()));
 
@@ -3207,36 +3433,75 @@ void PAI::processTerrainInfo(DOMElement * element)
         unsigned int length = (unsigned int)msg.size();
         XMLByte* binary = Base64::decode((XMLByte*)msg.c_str(), &length);
 
-        // Get timestamp
-        unsigned long timestamp = getTimestampFromElement(dataElement);
-        if (!setLatestSimWorldTimestamp(timestamp)) {
-            logger().error("PAI - Received old timestamp in terrain data => Message discarded!");
-            continue;
-        }
-
         Chunk chunk;
         chunk.ParseFromArray((void*)binary, length);
         logger().debug("PAI - processTerrainInfo recieved blocks information: %s", chunk.DebugString().c_str());
 
-        for (int j = 0; j < chunk.blocks_size(); j++) {
+        for (int j = 0; j < chunk.blocks_size(); j++)
+        {
             const MapInfo& block = chunk.blocks(j);
 
+            Handle objectNode;
             bool isRemoved = getBooleanProperty(getPropertyMap(block), REMOVE_ATTRIBUTE);
             if (!isRemoved) {
-                addEntityToAtomSpace(block, timestamp);
+                addEntityToAtomSpace(block, timestamp,isFirstPerceptTerrian);
             } else {
                 removeEntityFromAtomSpace(block, timestamp);
             }
+
+            if (!isFirstPerceptTerrian)
+            {
+                // maybe it has created new BlockEntities, add them to the atomspace
+                atomSpace.getSpaceServer().addBlockEntityNodes();
+
+                // todo: how to represent the disappear of a BlockEntity,
+                // Since sometimes it's not really disappear, just be added into a bigger entity
+                atomSpace.getSpaceServer().updateBlockEntitiesProperties(timestamp);
+            }
+            if (isFirstPerceptTerrian)
+                blockNum ++;
         }
         
         XMLString::release(&binary);
     }
+
 }
 
-
-Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp)
+/*
+void PAI::process3DSpaceTerrainInfo(Handle objectNode, const MapInfo& mapinfo, bool isFirstTimePerceptWorld, unsigned long tsValue)
 {
-    bool keepPreviousMap = avatarInterface.isExemplarInProgress();
+    bool isRemoved = getBooleanProperty(getPropertyMap(mapinfo), REMOVE_ATTRIBUTE);
+    opencog::spatial::BlockVector pos((int)mapinfo.position().x(), (int)mapinfo.position().y(), (int)mapinfo.position().z());
+    opencog::spatial::BlockEntity* entity;
+
+    if (!isRemoved)
+    {
+        // add a block in the 3D space map
+        entity = octree3DMap->addSolidUnitBlock(pos, objectNode); // todo: process the material and color
+
+        if (isFirstTimePerceptWorld)
+            return;
+
+        addBlockEntityNodes();
+    }
+    else
+    {
+        entity = octree3DMap->removeSolidUnitBlock(pos);
+    }
+
+    // maybe it has created new BlockEntities, add them to the atomspace
+    addBlockEntityNodes();
+
+    // todo: how to represent the disappear of a BlockEntity,
+    // Since sometimes it's not really disappear, just be added into a bigger entity
+    updateBlockEntitiesProperties(tsValue);
+}
+*/
+
+
+Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp, bool isFirstTimePercept)
+{
+    // bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
     std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
     std::string entityType = mapinfo.type();
@@ -3274,7 +3539,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     addEntityProperties(objectNode, isSelfObject, mapinfo);
 
     // Add space predicate.
-    addSpacePredicates(keepPreviousMap, objectNode, mapinfo, timestamp);
+    addSpacePredicates(objectNode, mapinfo, timestamp,isFirstTimePercept);
 
     //addPropertyPredicate(std::string("is_moving"), objectNode, moving);
     
@@ -3291,8 +3556,9 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
     Type nodeType = getSLObjectNodeType(entityType.c_str());
     Handle objectNode = atomSpace.getHandle(nodeType, internalEntityId);
 
-    bool keepPreviousMap = avatarInterface.isExemplarInProgress();
-    atomSpace.getSpaceServer().removeSpaceInfo(keepPreviousMap, objectNode, timestamp);
+    //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
+
+    atomSpace.getSpaceServer().removeSpaceInfo(objectNode, timestamp);
 
     addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate 
 
@@ -3306,9 +3572,10 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
     return objectNode;
 }
 
-bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp)
+bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp,bool isFirstTimePercept)
 {
-    bool isSelfObject = (avatarInterface.getPetId() == atomSpace.getName(objectNode));
+    std::string objectName = atomSpace.getName(objectNode);
+    bool isSelfObject = (avatarInterface.getPetId() == objectName);
 
     // Position predicate
     Vector position(mapinfo.position().x(), mapinfo.position().y(), mapinfo.position().z());
@@ -3332,10 +3599,9 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapI
 
         // If the object is the Pet, save its radius for new space maps
         if (isSelfObject) {
-            agentRadius = sqrt(length * length + width * width) / 2;
-            agentHeight = height;
-            atomSpace.getSpaceServer().setAgentRadius(agentRadius);
-            atomSpace.getSpaceServer().setAgentHeight(agentHeight);
+            unsigned int agentRadius = sqrt(length * length + width * width) / 2;
+            atomSpace.getSpaceServer().setAgentRadius((unsigned int)agentRadius);
+            atomSpace.getSpaceServer().setAgentHeight((unsigned int)height);
         }
     } else {
         // Get the length, width and height of the object
@@ -3396,14 +3662,16 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapI
 
     }
 
-
     // Entity class
     std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
     // Check if it is an obstacle
     bool isObstacle = isObjectAnObstacle(objectNode, entityClass, mapinfo);
 
+    std::string material = getStringProperty(getPropertyMap(mapinfo), MATERIAL_ATTRIBUTE);
+
     // Space server insertion
-    return atomSpace.getSpaceServer().addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle, entityClass);
+    return atomSpace.getSpaceServer().addSpaceInfo(objectNode, timestamp, (int)position.x, (int)position.y, (int)position.z,
+                                    (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass,objectName,material);
 
 }
 
@@ -3456,7 +3724,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
     // Add material property predicate
     if (material != NULL_ATTRIBUTE){
-        printf("Material found: %s\n",material.c_str());
+       // printf("Material found: %s\n",material.c_str());
         
         Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
         Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
@@ -3881,4 +4149,119 @@ Handle PAI::getParmValueHanleFromXMLDoc(DOMElement* paramElement)
     XMLString::release(&paramValue);
 
     return resultHandle;
+}
+
+void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element)
+{
+    unsigned long timestamp = getTimestampFromElement(element);
+    // if it's the first time percept this world, then we should find out all the possible existing block-entities
+    if (isFirstPerceptTerrian)
+    {
+        printf("Finished the first time percept the terrain - %d blocks in total!\n Now finding all the BlockEntities in the world...! \n", blockNum);
+
+        atomSpace.getSpaceServer().findAllBlockEntitiesOnTheMap();
+
+        // maybe it has created new BlockEntities, add them to the atomspace
+        atomSpace.getSpaceServer().addBlockEntityNodes();
+
+        // todo: how to represent the disappear of a BlockEntity,
+        // Since sometimes it's not really disappear, just be added into a bigger entity
+        atomSpace.getSpaceServer().updateBlockEntitiesProperties(timestamp);
+
+        int t2 = time(NULL);
+
+        atomSpace.getSpaceServer().markCurMapPerceptedForFirstTime();
+
+        isFirstPerceptTerrian = false;
+        printf("FirstPerceptWorld finished! Finish time: %d. Costed %d seconds. \n", t2, t2 - perceptTerrianBeginTime);
+    }
+
+}
+
+void PAI::processBlockStructureSignal(DOMElement* element)
+{
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+
+    XMLString::transcode(RECOGNIZE_STRUCTURE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* isToRecognize = XMLString::transcode(element->getAttribute(tag));
+
+    if (strcmp(isToRecognize, "true") == 0)
+    {
+        // this signal is to ask robot to recognize a structure
+        // first we get the first block of this structure
+        XMLString::transcode(START_BLOCK_X, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* xchar = XMLString::transcode(element->getAttribute(tag));
+
+        XMLString::transcode(START_BLOCK_Y, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* ychar = XMLString::transcode(element->getAttribute(tag));
+
+        XMLString::transcode(START_BLOCK_Z, tag, PAIUtils::MAX_TAG_LENGTH);
+        char* zchar = XMLString::transcode(element->getAttribute(tag));
+
+        int x = atoi(xchar);
+        int y = atoi(ychar);
+        int z = atoi(zchar);
+
+        opencog::spatial::BlockVector pos(x, y, z);
+        opencog::spatial::BlockEntity* entity = atomSpace.getSpaceServer().getLatestMap().getEntityInPos(pos);
+        if (entity == 0)
+        {
+            return;
+        }
+
+        // Currently, for demo, once the oac figure out an blockEnity,
+        // It will go to a random near place to build a same blockEnity by blocks.
+        opencog::spatial::BlockVector offsetPos = atomSpace.getSpaceServer().getLatestMap().getBuildEnityOffsetPos(entity);
+        opencog::spatial::BlockVector entityPos = entity->getBoundingBox().nearLeftBottomConer;
+
+        // move to a pos near the building pos
+        vector<ActionParamStruct> paralist;
+        ActionParamStruct para;
+        para.paramName = "x";
+        para.paramType = INT_CODE;
+        para.paramValue = toString(entityPos.x + offsetPos.x - 1);
+        paralist.push_back(para);
+
+        para.paramName = "y";
+        para.paramType = INT_CODE;
+        para.paramValue = toString(entityPos.y + offsetPos.y - 1);
+        paralist.push_back(para);
+
+        para.paramName = "z";
+        para.paramType = INT_CODE;
+        para.paramValue = toString(entityPos.z);
+        paralist.push_back(para);
+
+        std::string moveActionName("MoveToCoordinate");
+        sendSingleActionCommand(moveActionName, paralist);
+
+        // then build all the blocks for the new entity
+        vector<opencog::spatial::Block3D*> blocklist = entity->getBlockList();
+        vector<opencog::spatial::Block3D*>::iterator iter;
+
+        for (iter = blocklist.begin(); iter != blocklist.end(); iter ++)
+        {
+            opencog::spatial::Block3D* b = *iter;
+            ActionParamStruct para;
+            para.paramName = "x";
+            para.paramType = INT_CODE;
+            para.paramValue = toString(b->getPosition().x + offsetPos.x);
+            paralist.push_back(para);
+
+            para.paramName = "y";
+            para.paramType = INT_CODE;
+            para.paramValue = toString(b->getPosition().y + offsetPos.y);
+            paralist.push_back(para);
+
+            para.paramName = "z";
+            para.paramType = INT_CODE;
+            para.paramValue = toString(b->getPosition().z);
+            paralist.push_back(para);
+
+            std::string buildActionName("BuildBlockAtPosition");
+            sendSingleActionCommand(buildActionName, paralist);
+        }
+
+    }
+
 }

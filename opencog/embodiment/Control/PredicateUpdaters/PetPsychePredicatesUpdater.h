@@ -37,7 +37,7 @@ class PetPsychePredicatesUpdater : public BasicPredicateUpdater
 
 private:
     unsigned long latestSimWorldTimestamp;
-    spatial::math::Triangle createFieldOfViewTriangle(Handle agent);
+    //spatial::math::Triangle createFieldOfViewTriangle(Handle agent);
 
 public:
 

@@ -380,17 +380,19 @@ public:
                                             double &z,
                                             Handle &o);
 
-    /**
-     * Gets the spaceMapHandle which is either stamped at time t or
-     * just preceeding t.
-     * If there no such spaceMapHandle then return Handle::UNDEFINED
-     *
-     * @param atomSpace The AtomSpace with the spaceServer where the spaceMap is
-     * @param t  The timestamp to look at
-     * @return The spaceMapHandle at time t or if none the first one before t
-     */
-    static Handle getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
-            unsigned long t);
+//    /**
+//     * Gets the spaceMapHandle which is either stamped at time t or
+//     * just preceeding t.
+//     * If there no such spaceMapHandle then return Handle::UNDEFINED
+//     *
+//     * @param atomSpace The AtomSpace with the spaceServer where the spaceMap is
+//     * @param t  The timestamp to look at
+//     * @return The spaceMapHandle at time t or if none the first one before t
+//     */
+//    static Handle getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
+//            unsigned long t);
+
+    static Handle getCurrentSpaceMapHandle(const AtomSpace &atomSpace);
 
     /**
      * Gets the value of the predicate at a spaceMap in the past. Based
@@ -408,20 +410,20 @@ public:
                                             const SpaceServer::SpaceMap& sm,
                                             Handle obj1, Handle obj2);
 
-    /**
-     * Gets the value of the predicate at a given timestamp in the past. Based
-     * on SpaceMap.
-     *
-     * @param predicate The predicate to be checked: near, above, inside, below.
-     * @param timestamp The timestamp used to search for the SpaceMap.
-     * @param objectA   The handle of the first object to be used in the predicate.
-     * @param objectB   The handle of the second object to be used in the
-     * predicate.
-     */
-    static bool getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
-            const std::string& predicate,
-            unsigned long timestamp,
-            Handle objectA, Handle objectB);
+//    /**
+//     * Gets the value of the predicate at a given timestamp in the past. Based
+//     * on SpaceMap.
+//     *
+//     * @param predicate The predicate to be checked: near, above, inside, below.
+//     * @param timestamp The timestamp used to search for the SpaceMap.
+//     * @param objectA   The handle of the first object to be used in the predicate.
+//     * @param objectB   The handle of the second object to be used in the
+//     * predicate.
+//     */
+//    static bool getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
+//            const std::string& predicate,
+//            unsigned long timestamp,
+//            Handle objectA, Handle objectB);
 
     /**
      * Check whether an avatar has said a given message between

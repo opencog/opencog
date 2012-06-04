@@ -99,8 +99,7 @@ EntropyFilter::EntropyFilter(const std::string& self_id,
 
     //init spaceMapNode
 
-    _spaceMapNode = _atomSpace.getHandle(CONCEPT_NODE,
-                                         SpaceServer::SPACE_MAP_NODE_NAME);
+    _spaceMapNode = _atomSpace.getSpaceServer().getLatestMapHandle();
     OC_ASSERT(_spaceMapNode != Handle::UNDEFINED,
                      "There must a be a map node in the atomSpace");
 }

@@ -96,6 +96,7 @@ public:
      */
     bool sendEmotionalFeelings(const std::string& emotionalFeelings);
 
+    bool sendSingleActionCommand(const std::string& action);
 };
 
 } } // namespace opencog::oac

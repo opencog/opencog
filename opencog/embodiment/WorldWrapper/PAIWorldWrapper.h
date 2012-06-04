@@ -86,7 +86,7 @@ private:
      * @param petLocation current pet location
      * @return a valid pet location
      */
-    spatial::Point getValidPosition( const spatial::Point& location );
+    //spatial::Point getValidPosition( const spatial::Point& location );
 
     /**
      * This method will try to make path even smoother, reducing the number of
@@ -95,10 +95,10 @@ private:
      * @param startPoint Current pet position
      * @param endPoint Goal position
      */
-    void clearPlan( std::vector<spatial::Point>& actions,
+    /*void clearPlan( std::vector<spatial::Point>& actions,
                     const spatial::Point& startPoint,
                     const spatial::Point& endPoint );
-
+    */
     /**
      * Given a start and an end point, return the waypoints necessary to travel between them
      *
@@ -106,7 +106,7 @@ private:
      * @param endPoint End point
      * @param actions Return vector actions
      */
-    void getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions );
+    //void getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions );
 
     /**
      * Given a start and an end point, return the 3D waypoints necessary to
@@ -116,15 +116,8 @@ private:
      * @param endPoint End point
      * @param actions Return the vector of 3d points.
      */
-    void get3DWaypoints( const spatial::Point3D& startPoint, const spatial::Point3D& endPoint, std::vector<spatial::Point3D>& actions);
+    void get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint, const SpaceServer::SpaceMapPoint& endPoint, std::vector<SpaceServer::SpaceMapPoint>& actions);
 
-    /**
-     * Uses the current PathPlanner (HPA, Astar, TangentBUG, etc.) to build
-     * a path to achieve a given position
-     * @param position Goal position
-     * @return false if path planning has failed and true if successfull
-     */
-    bool buildGotoPlan( const spatial::Point3D& position, float customSpeed = 0 );
 
     /**
      * Create a walk planning action that will be sent to OAC
@@ -134,10 +127,10 @@ private:
      * @param tuNudge nudge actions will be added to walk plan if it is
      *                not null
      */
-    bool createWalkPlanAction( std::vector<spatial::Point>& actions,
-                               bool useExistingID = false,
-                               Handle toNudge = Handle::UNDEFINED,
-                               float customSpeed = 0);
+//    bool createWalkPlanAction( std::vector<spatial::Point>& actions,
+//                               bool useExistingID = false,
+//                               Handle toNudge = Handle::UNDEFINED,
+//                               float customSpeed = 0);
 
     /**
      * Create a navigation planning action sequence(including walk, jump 
@@ -147,14 +140,13 @@ private:
      * var is true, the new walks will be added to the same navigation plan
      * @param tuNudge nudge actions will be added to walk plan if it is not null
      */
-    bool createNavigationPlanAction( std::vector<spatial::Point3D>& actions,
+    bool createNavigationPlanAction( std::vector<SpaceServer::SpaceMapPoint>& actions,
                                      bool useExistingID = false,
                                      Handle toNudge = Handle::UNDEFINED,
                                      float customSpeed = 0);
 
     //! Builds plans for actions relying on goto (goto_obj, follow, etc)
-    bool build_goto_plan(Handle, bool useExistingID = false,
-                         Handle nudgeHandle = Handle::UNDEFINED,
+    bool build_goto_plan(Handle goalHandle,
                          Handle goBehind = Handle::UNDEFINED,
                          float walkSpeed = 0);
 

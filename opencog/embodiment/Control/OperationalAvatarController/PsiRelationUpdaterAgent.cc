@@ -574,7 +574,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     }
 
     // Check if the pet spatial info is already received
-    if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(petId) ) {
+    if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(petHandle ))  {
         logger().warn("PsiRelationUpdaterAgent::%s - Pet was not inserted in the space map yet [ cycle = %d ]", 
                       __FUNCTION__, 
                       this->cycleCount

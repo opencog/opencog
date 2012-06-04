@@ -310,21 +310,21 @@ public:
     void getAllObservedActionsDoneAtTime(const Temporal& time,
             HandleSeq& actionsDone);
     bool isNear(const Handle& objectHandle);
-    bool getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity);
+    //bool getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity);
     void getHighLTIObjects(HandleSeq& highLTIObjects);
 
     /**
      * @see AvatarInterface::setLatestGotoTarget
      */
     void setLatestGotoTarget(
-            const std::pair<std::string, spatial::Point>& target ) {
+            const std::pair<std::string, SpaceServer::SpaceMapPoint>& target ) {
         this->targetObject = target;
     };
 
     /**
      * @see AvatarInterface::getLatestGotoTarget
      */
-    const std::pair<std::string, spatial::Point>& getLatestGotoTarget( void ) {
+    const std::pair<std::string, SpaceServer::SpaceMapPoint>& getLatestGotoTarget( void ) {
         return this->targetObject;
     };
 
@@ -379,7 +379,7 @@ public:
     unsigned long latestPunishmentTimestamp;
 
     // target object used by goto and gonear combo functions
-    std::pair<std::string, spatial::Point> targetObject;
+    std::pair<std::string, SpaceServer::SpaceMapPoint> targetObject;
 
     /**
      * Visual debugger is a service that let the user to see, through a 3D client,
@@ -402,7 +402,7 @@ public:
      *
      * @param map Latest LocalSpaceMap
      */
-    void sendMapToVisualDebuggerClients( const spatial::LocalSpaceMap2D& map );
+    void sendMapToVisualDebuggerClients( const SpaceServer::SpaceMap & map );
 
 }; // class
 

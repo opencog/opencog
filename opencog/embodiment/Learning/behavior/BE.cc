@@ -171,7 +171,7 @@ void BehaviorEncoder::onBD(Handle bd, Handle timed_bd)
  * goto_obj are generated out of walk commands
  */
 void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
-{
+{/*
     double dist_ratio_threshold = opencog::config().get_double("DIST_PERCENTAGE_THRESHOLD_WALK_TO_GOTO") / (double)100;
 
     AtomSpace& as = wp->getAtomSpace();
@@ -482,7 +482,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 previous_tu = tu;
             }
         }
-    }
+    }*/
 }
 
 //perform a loop of updates from the beginning of the exemplar until the end

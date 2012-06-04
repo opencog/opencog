@@ -317,7 +317,7 @@ public:
     {
         Temporal t(startMoment, endMoment);
         std::vector<HandleTemporalPair> pairs;
-        Handle spaceMapNode = atomspace->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
+        Handle spaceMapNode = spaceServer->getLatestMapHandle();
         if (spaceMapNode != Handle::UNDEFINED) {
             // Gets the first map before the given interval, if any
             getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::PREVIOUS_BEFORE_START_OF);

@@ -39,7 +39,6 @@
 #include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
-
 #include <map>
 #include <vector>
 #include <exception>
@@ -151,41 +150,6 @@ private:
 
     LanguageComprehension * languageTool;
 
-    /**
-     * Current xMin
-     */
-    double xMin;
-
-    /**
-     * Current yMin
-     */
-    double yMin;
-
-    /**
-     * Current xMax
-     */
-    double xMax;
-
-    /**
-     * Current yMax
-     */
-    double yMax;
-
-    /**
-     * Current agent radius
-     */
-    double agentRadius;
-
-    /**
-     * Current agent height
-     */
-    double agentHeight;
-
-    /**
-     * Current floor height
-     */
-    double floorHeight;
-
 #ifdef HAVE_LIBPTHREAD
     /**
      * A mutex variable to control the increment of action plan IDs.
@@ -208,6 +172,12 @@ private:
     bool logPVPMessage;
 
     bool enableCollectActions;
+
+    bool isFirstPerceptTerrian;
+
+    int perceptTerrianBeginTime;
+
+    int blockNum;
 
 public:
 
@@ -354,6 +324,10 @@ public:
      * @return true iff planId corresponds to an empty plan or no plan at all
      */
     bool isActionPlanEmpty(const ActionPlanID& planId);
+
+    // send a single action command to the virtual world
+    // not in a plan
+    void sendSingleActionCommand(std::string& actionName, std::vector<ActionParamStruct> & paraList);
 
     /**
      * Process a XML message comming from PVP by adding the corresponding
@@ -522,6 +496,11 @@ private:
      */
     void processExistingStateInfo(DOMElement* element);
 
+    void processBlockStructureSignal(DOMElement* element);
+
+    void processFinishedFirstTimePerceptTerrianSignal(DOMElement* element);
+
+
     /**
      * @param element The param element to be processed.
      *
@@ -537,12 +516,26 @@ private:
     double getPositionAttribute(DOMElement * element, const char* tagName);
 
     /**
+     * Extract int attributes from XML message.
+     * @param tagName the name of the attribute.
+     * @return the value of the attribute parsed as a int.
+     */
+    int getIntAttribute(DOMElement * element, const char* tagName);
+
+    /**
+     * Extract string attributes from XML message.
+     * @param tagName the name of the attribute.
+     * @return the value of the attribute parsed as a string.
+     */
+    string getStringAttribute(DOMElement * element, const char* tagName);
+
+    /**
      * @param element The map-info element to be processed
      * @param toUpdateHandles a vector where the handles of all objects
      * added/update by the processing of a PVPMessage. This information is used
      * to update is_X predicates in the OAC (by PredicatesUpdater class).
      */
-    void processMapInfo(DOMElement* element, HandleSeq& toUpdateHandles);
+    //void processMapInfo(DOMElement* element, HandleSeq& toUpdateHandles);
 
     /**
      * Override processMapInfo to support features of protobuf. If protobuf is
@@ -586,13 +579,16 @@ private:
     Handle addActionPredicate(const char* predicateName, const PetAction&
             action, unsigned long timestamp, ActionID actionId);
 
-    /**
-     * Get the global space map information from network stream and set it into
-     * space server.
-     *
-     * @param element the XML Dom element that contains the information
-     */
-    void addSpaceMapBoundary(DOMElement * element);
+//    /**
+//     * Get the global space map information from network stream and set it into
+//     * space server.
+//     *
+//     * @param element the XML Dom element that contains the information
+//     */
+//    void addSpaceMapBoundary(DOMElement * element);
+
+    // when first time enter a new map, all the spaceServer to add a new spaceMap
+    void addSpaceMap(DOMElement * element,unsigned long timestamp);
 
     /**
      * Adds the representation of the predicates about space info of a given
@@ -611,10 +607,10 @@ private:
      * @param isTerrainObject if the object is a terrain object.
      * @return true if any property of the object has changed (or it's a new object). False, otherwise.
      */
-    bool addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
+   /* bool addSpacePredicates(Handle objectNode, unsigned long timestamp,
                             DOMElement* positionElement, DOMElement* rotationElement,
-                            double length, double width, double height, bool isTerrainObject);
-
+                            double length, double width, double height, bool isTerrainObject,bool isFirstTimePercept);
+    */
     /**
      * Add a property predicate in atomSpace
      *
@@ -690,6 +686,9 @@ private:
      */
     void addSemanticStructure(Handle objectNode, const std::string& entityId, 
             const std::string& entityClass, const std::string& entityType);
+
+
+
 
     /**
      * Adds a physiological feeling into the AtomSpace
@@ -779,6 +778,15 @@ private:
      * result is then stored in local space map.
      */
     void processTerrainInfo(DOMElement * element);
+
+    /**
+     * The 2D local space map is now to be replaced by 3D block-octree map.
+     * Currently, since we haven't finish all the functions of the 3D map, we still keep 2D map working as well.
+     * Process the terrain information from minecraft-like world. The processed
+     * result is then stored in Octree3DMapManager.
+     * In this function, we only process the changes of blocks
+     */
+    void process3DSpaceTerrainInfo(Handle objectNode, const MapInfo& mapinfo, bool isFirstTimePerceptWorld, unsigned long tsValue);
  
     /**
      * Adds the entity information processed from map info into atomspace, the
@@ -793,7 +801,7 @@ private:
      *
      * @return handle of the entity node after insertion.
      */
-    Handle addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp);
+    Handle addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp, bool isFirstTimePercept);
 
     /**
      * Remove entity information from space server and mark it as non-existent
@@ -806,7 +814,7 @@ private:
      */
     Handle removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long timestamp);
 
-    bool addSpacePredicates(bool keepPreviousMap, Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp);
+    bool addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp,bool isFirstTimePercept);
 
     /**
      * Add property predicates of an entity such as edible, drinkable, material 

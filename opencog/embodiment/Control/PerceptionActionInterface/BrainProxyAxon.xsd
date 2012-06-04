@@ -40,6 +40,8 @@
                 <xsd:element name="communication" type="oc:CommunicationType" minOccurs="1" maxOccurs="1"/>
                 <xsd:element name="terrain-info" type="oc:TerrainInfoType" minOccurs="1" maxOccurs="1"/>
 		<xsd:element name="state-info" type="oc:StateInfoType" minOccurs="1" maxOccurs="1"/>
+		<xsd:element name="block-structure-signal" type="oc:BlockStructureSignalType" minOccurs="1" maxOccurs="1"/>
+		<xsd:element name="finished-first-time-percept-terrian-signal" type="oc:FinishedFirstTimePerceptTerrianSignalType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
@@ -217,17 +219,22 @@
             <xsd:element name="blip" type="oc:BlipType" minOccurs="0" maxOccurs="unbounded"/>
             <xsd:element name="map-data" type="oc:MapDataType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
+	<xsd:attribute name="map-name" type="xsd:string" use="optional"/>
         <xsd:attribute name="global-position-x" type="xsd:int" use="required"/>
-        <xsd:attribute name="global-position-y" type="xsd:int" use="required"/>        
-        <xsd:attribute name="global-position-offset" type="xsd:int" use="required"/>
+        <xsd:attribute name="global-position-y" type="xsd:int" use="required"/> 
+	<xsd:attribute name="global-position-z" type="xsd:int" use="optional"/>              
+        <xsd:attribute name="global-position-offset" type="xsd:int" use="optional"/>
+	<xsd:attribute name="global-position-offset-x" type="xsd:int" use="optional"/>
+	<xsd:attribute name="global-position-offset-y" type="xsd:int" use="optional"/>
+	<xsd:attribute name="global-position-offset-z" type="xsd:int" use="optional"/>
         <xsd:attribute name="global-floor-height" type="xsd:int" use="optional"/>
         <xsd:attribute name="gridParcel" type="xsd:string" use="optional"/>
+	<xsd:attribute name="is-first-time-percept-world" type="xsd:boolean" use="required"/>
     </xsd:complexType>
 
     <xsd:complexType name="MapDataType">
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
-                <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -249,17 +256,23 @@
             </xsd:annotation>
             <xsd:element name="terrain-data" type="oc:TerrainDataType" minOccurs="1" maxOccurs="unbounded"/>
         </xsd:sequence>
+	<xsd:attribute name="map-name" type="xsd:string" use="optional"/>
         <xsd:attribute name="global-position-x" type="xsd:int" use="required"/>
-        <xsd:attribute name="global-position-y" type="xsd:int" use="required"/>        
-        <xsd:attribute name="global-position-offset" type="xsd:int" use="required"/>
+        <xsd:attribute name="global-position-y" type="xsd:int" use="required"/> 
+	<xsd:attribute name="global-position-z" type="xsd:int" use="optional"/>              
+        <xsd:attribute name="global-position-offset" type="xsd:int" use="optional"/>
+	<xsd:attribute name="global-position-offset-x" type="xsd:int" use="optional"/>
+	<xsd:attribute name="global-position-offset-y" type="xsd:int" use="optional"/>
+	<xsd:attribute name="global-position-offset-z" type="xsd:int" use="optional"/>
         <xsd:attribute name="global-floor-height" type="xsd:int" use="optional"/>
         <xsd:attribute name="gridParcel" type="xsd:string" use="optional"/>
+	<xsd:attribute name="is-first-time-percept-world" type="xsd:boolean" use="required"/>
+	<xsd:attribute name="timestamp" type="xsd:string" use="required"/>
     </xsd:complexType>
 
     <xsd:complexType name="TerrainDataType">
         <xsd:simpleContent>
             <xsd:extension base="xsd:string">
-                <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
             </xsd:extension>
         </xsd:simpleContent>
     </xsd:complexType>
@@ -471,5 +484,34 @@
 	<xsd:attribute name="state-name" type="xsd:string" use="required"/>  
 	<xsd:attribute name="timestamp" type="xsd:string" use="required"/>
     </xsd:complexType>
+
+    <!-- block-structure-signal -->
+    <xsd:element name="block-structure-signal" type="oc:BlockStructureSignalType"/>
+
+    <xsd:annotation>
+        <xsd:documentation>
+        Deal with the block structures.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType name="BlockStructureSignalType">
+	<xsd:attribute name="recognize-structure" type="xsd:boolean" use="optional"/> 
+        <xsd:attribute name="startblock-x" type="xsd:int" use="optional"/>      
+	<xsd:attribute name="startblock-y" type="xsd:int" use="optional"/>
+	<xsd:attribute name="startblock-z" type="xsd:int" use="optional"/>
+	<xsd:attribute name="timestamp" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <!-- finished-first-time-percept-terrian-signal -->
+    <xsd:element name="finished-first-time-percept-terrian-signal" type="oc:FinishedFirstTimePerceptTerrianSignalType"/>
+
+    <xsd:annotation>
+        <xsd:documentation>
+        Notification of finishing the first time percept terrian
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType name="FinishedFirstTimePerceptTerrianSignalType">
+	<xsd:attribute name="timestamp" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
 
 </xsd:schema>

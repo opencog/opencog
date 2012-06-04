@@ -101,8 +101,7 @@ Handle NoSpaceLife::getCurrentMapHandle()
 {
     if (_hasTimeChanged) {
         _currentMapHandle
-        = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_atomSpace,
-                _currentTime);
+        = AtomSpaceUtil::getCurrentSpaceMapHandle(_atomSpace);
         _hasTimeChanged = false;
     }
     return _currentMapHandle;

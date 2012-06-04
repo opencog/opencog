@@ -61,6 +61,8 @@ public:
      */
     virtual bool sendEmotionalFeelings(const std::string& emotionalFeelings) = 0;
 
+    virtual bool sendSingleActionCommand(const std::string& action) = 0;
+
 };
 
 } } // namespace opencog::pai

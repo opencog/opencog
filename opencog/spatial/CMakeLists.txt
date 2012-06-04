@@ -7,9 +7,9 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 ADD_LIBRARY(SpaceMap SHARED
-    LocalSpaceMap2DUtil
-    LocalSpaceMap2D
-    VisibilityMap
+  LocalSpaceMap2DUtil
+  LocalSpaceMap2D
+  VisibilityMap
     math/BoundingBox.cc  
     math/MathCommon.cc  
     math/Matrix4.cc  
@@ -19,17 +19,24 @@ ADD_LIBRARY(SpaceMap SHARED
     math/Plane.cc    
     math/Rectangle.cc
 
-    Entity.cc
-    SuperEntity.cc
-    MovableEntity.cc
-    Block.cc
+   Entity.cc
+   SuperEntity.cc
+   MovableEntity.cc
+   Block.cc
+
+    3DSpaceMap/Block3DMapUtil.cc
+    3DSpaceMap/Block3D.cc
+    3DSpaceMap/Octree.cc
+    3DSpaceMap/Octree3DMapManager.cc
+    3DSpaceMap/Entity3D.cc
+    3DSpaceMap/BlockEntity.cc
 
     MapExplorerServer.cc
 )
 
-ADD_DEPENDENCIES(SpaceMap
+ ADD_DEPENDENCIES(SpaceMap
     opencog_atom_types
-)
+ )
 
 TARGET_LINK_LIBRARIES(SpaceMap
     ${Boost_THREAD_LIBRARY}

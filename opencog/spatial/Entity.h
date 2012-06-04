@@ -41,8 +41,6 @@
 
 namespace opencog
 {
-    class Handle;
-    class AtomSpace;
 
     namespace spatial
     {

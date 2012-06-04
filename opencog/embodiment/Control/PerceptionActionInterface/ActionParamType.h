@@ -126,6 +126,14 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const ActionParamType& arg);
 
+
+struct ActionParamStruct
+{
+    std::string paramName;
+    ActionParamTypeCode paramType;
+    std::string paramValue;
+};
+
 } } // namespace opencog::pai
 
 #endif //_ACTION_PARAM_TYPE_H_

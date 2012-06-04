@@ -24,7 +24,8 @@
 #ifndef MAPEXPLORER_H
 #define MAPEXPLORER_H
 
-#include <opencog/spatial/LocalSpaceMap2D.h>
+#include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
+#include <opencog/spatial/math/Quaternion.h>
 #include <opencog/spatial/math/Rectangle.h>
 
 #include <boost/thread/thread.hpp>
@@ -44,13 +45,13 @@ namespace opencog
         class MapExplorer 
         {
         public:
-            MapExplorer( spatial::LocalSpaceMap2D* map, unsigned int screenWidth, 
+            MapExplorer( spatial::Octree3DMapManager* map, unsigned int screenWidth,
                          unsigned int screenHeight, bool fullScreen = false ) 
                 throw(opencog::RuntimeException);
             
             virtual ~MapExplorer( void );
             
-            void updateMap( spatial::LocalSpaceMap2D* map );
+            void updateMap( spatial::Octree3DMapManager* map );
             
             // SDL key/mouse functions
             void keyPressed( int key );
@@ -106,14 +107,14 @@ namespace opencog
              * @param entity The entity that will be rendered
              * @param color the color used to render the entity
              */
-            void renderEntity( const spatial::Entity& entity, unsigned int color );
+            void renderEntity( const spatial::Entity3D& entity, unsigned int color );
 
             /**
              * Render a border of the entity to highlight it
              * 
              * @param entity The entity that will be highlighted
              */
-            void renderEntitySelection( const spatial::Entity& entity );
+            void renderEntitySelection( const spatial::Entity3D& entity );
 
             /**
              * Render a given text on a flat quad defined by a given
@@ -199,7 +200,7 @@ namespace opencog
              */
             void generateFloorTextures( void );
 
-            spatial::LocalSpaceMap2D* map;
+            spatial::Octree3DMapManager* map;
             bool mapUpdated;
 
             unsigned int screenWidth;
