@@ -19,8 +19,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <boost/format.hpp>
+
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/program_options.hpp>
+
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
 #include <opencog/comboreduct/combo/table.h>
@@ -34,8 +38,42 @@ namespace opencog { namespace moses {
 using boost::format;
 using boost::trim;
 using boost::str;
+using namespace boost::program_options;
+using boost::lexical_cast;
+using namespace std;
+using namespace reduct;
+using namespace ant_combo;
+
 
 static const unsigned int max_filename_size = 255;
+
+// default number of samples to describe a problem
+static const unsigned int default_nsamples = 20;
+
+
+// problems
+static const string it="it"; // regression based on input table
+
+static const string recall="recall"; // regression based on input table,
+                                  // maximize recall, while holding
+                                  // precision const.
+
+static const string pre="pre";    // regression based on input table by
+                                  // maximizing precision (or negative
+                                  // predictive value), holding activation
+                                  // const.
+
+static const string ip="ip"; // find interesting patterns
+static const string cp="cp"; // regression based on combo program to fit
+static const string pa="pa"; // even parity
+static const string dj="dj"; // disjunction
+static const string mux="mux"; // multiplex
+static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
+static const string ann_it="ann-it"; // regression based on input table using ann
+static const string ann_cp="ann-cp"; // regression based on combo program using ann
+static const string ann_xor="ann-xor"; // binary-xor problem using ann
+static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
+static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
 /**
  * Display error message about unspecified combo tree and exit
@@ -262,7 +300,7 @@ contin_t largest_const_in_tree(const combo_tree &tr)
 //* return true iff the problem is based on data file
 bool datafile_based_problem(const string& problem)
 {
-    return problem == it || problem == pre || problem == ann_it || problem == ip;
+    return problem == it || problem == pre || problem == recall || problem == ann_it || problem == ip;
 }
 
 //* return true iff the problem is based on a combo tree
@@ -391,8 +429,8 @@ int moses_exec(int argc, char** argv)
     double ip_skewness_weight;
     double ip_stdU_weight;
     double ip_skew_U_weight;
-    score_t alpha;              // weight of the activation range
-                                // constraint for problem pre
+    score_t hardness;              // hardness of the activation range
+                                // constraint for problems pre, recall
     // hc_param
     bool hc_widen_search;
     bool hc_single_step;
@@ -490,7 +528,8 @@ int moses_exec(int argc, char** argv)
          value<string>(&problem)->default_value(it),
          str(format("Problem to solve, supported problems are:\n"
                     "%s, regression based on input table\n"
-                    "%s, regression based on input table but maximizing precision instead of accuracy\n"
+                    "%s, regression based on input table, maximizing precision instead of accuracy\n"
+                    "%s, regression based on input table, maximizing recall while holding precision fixed\n"
                     "%s, search interesting patterns, where interestingness"
                     " is defined in terms of several features such as maximizing"
                     " the Kullback-Leibler"
@@ -505,7 +544,7 @@ int moses_exec(int argc, char** argv)
                     "%s, disjunction\n"
                     "%s, multiplex\n"
                     "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
-             % it % pre % ip % ann_it % cp % pa % dj % mux % sr).c_str())
+             % it % pre % recall % ip % ann_it % cp % pa % dj % mux % sr).c_str())
 
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
@@ -532,7 +571,7 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0.0),
-         "Minimum value of a sampled coninuous input.  The cp, ip, and "
+         "Minimum value of a sampled coninuous input.  The cp, ip, recall and "
          "pre problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low end of the sampled range. In the case of "
@@ -541,7 +580,7 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1.0),
-         "Maximum value of a sampled coninuous input.  The cp, ip, and "
+         "Maximum value of a sampled coninuous input.  The cp, ip, recall and "
          "pre problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low high of the sampled range. In the case of "
@@ -787,8 +826,8 @@ int moses_exec(int argc, char** argv)
          str(format("Interesting patterns (%s). Weight of skew_U.\n") % ip).c_str()) 
 
         (opt_desc_str(alpha_opt).c_str(),
-         value<score_t>(&alpha)->default_value(0.0),
-         "If problem pre is used, then if alpha is negative (any negative value), "
+         value<score_t>(&hardness)->default_value(0.0),
+         "If problems recall or pre are specified, then if alpha is negative (any negative value), "
          "precision is replaced by negative predictive value. And then alpha "
          "plays the role of the activation constrain penalty from 0 to inf, "
          "0 being no activation penalty at all, inf meaning hard constraint "
@@ -1008,8 +1047,9 @@ int moses_exec(int argc, char** argv)
 
         // 'it' means regression based on input table; we maximimze accuracy.
         // 'pre' means we must maximize precision (i.e minimize the number of
-        // false positives.)
-        if (problem == it || problem == pre) {
+        // false positives) while holding activation fixed.
+        // 'recall' means we must maximize recall while holding precision fixed.
+        if (problem == it || problem == recall || problem == pre) {
 
             // Infer the type of the input table
             type_tree table_output_tt = get_signature_output(table_type_signature);
@@ -1044,11 +1084,38 @@ int moses_exec(int argc, char** argv)
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables) {
                     BScore* r = new BScore(ctable,
-                                           abs(alpha), 
+                                           abs(hardness), 
                                            min_rand_input,
                                            max_rand_input,
-                                           alpha >= 0,
+                                           hardness >= 0,
                                            pre_worst_norm);
+                    set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                    bscores.push_back(r);
+                }
+                multibscore_based_bscore<BScore> bscore(bscores);
+                metapop_moses_results(exemplars, cand_sig,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
+            } 
+
+            // problem == recall  maximize recall, holding precision const.
+            // Very nearly identical to above, just uses a different
+            // scorer.
+            else if (problem == recall) {
+                // Keep the table input signature, just make sure the
+                // output is a boolean.
+                type_tree cand_sig = gen_signature(
+                    get_signature_inputs(table_type_signature),
+                    type_tree(id::boolean_type));
+                int as = alphabet_size(cand_sig, ignore_ops);
+                typedef recall_bscore BScore;
+                boost::ptr_vector<BScore> bscores;
+                foreach(const CTable& ctable, ctables) {
+                    BScore* r = new BScore(ctable,
+                                           abs(hardness), 
+                                           min_rand_input,
+                                           max_rand_input);
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
                 }
@@ -1181,7 +1248,7 @@ int moses_exec(int argc, char** argv)
                                        ip_skew_U_weight,
                                        min_rand_input,
                                        max_rand_input,
-                                       alpha, alpha >= 0);
+                                       hardness, hardness >= 0);
                 set_noise_or_ratio(*r, as, noise, complexity_ratio);
                 bscores.push_back(r);
             }

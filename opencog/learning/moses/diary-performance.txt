@@ -2268,5 +2268,25 @@ cache size      : 1024 KB
 cpu cores       : 2
 
 
+nohup time ./opencog/learning/moses/main/moses -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 -r0 -m40000 -j12 -j12:10.1.1.2 | tee magic-rem2.out
+
+
+Below is a run with escalating m values, to see how/if score improves
+with more effort.  Command line is:
+    nohup time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 -r1 -j12 | tee magic-j12-m.out
+
+
+-m      time  score   cpxy
+10K:      28  0.8486   20
+20K:      74  0.8492   21
+40K:     179  0.8606   32
+80K:     404  0.8626   36
+160K:    848  0.8626   36
+320K:   1873  0.8670   35
+640K:   4131  0.8670   35
+1.28M:  9088  0.8673   28
+2.56M: 20318  0.8676   38
+5.12M:
+10.2M:
 
 

@@ -29,6 +29,7 @@
 namespace opencog { namespace moses {
 
 using namespace combo;
+using namespace reduct;
 
 /// Implements the "leave well-enough alone" algorithm.
 class partial_solver

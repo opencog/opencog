@@ -28,9 +28,6 @@
 #include <memory>
 #include <stdio.h>
 
-#include <boost/program_options.hpp>
-#include <boost/lexical_cast.hpp>
-
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/lru_cache.h>
@@ -48,35 +45,10 @@
 #include "../optimization/optimization.h"
 #include "../moses/metapopulation.h"
 #include "../moses/scoring.h"
-#include "moses_exec_def.h"
 
 namespace opencog { namespace moses {
 
-using namespace boost::program_options;
-using boost::lexical_cast;
 using namespace std;
-using namespace reduct;
-using namespace ant_combo;
-
-// default number of samples to describe a problem
-static const unsigned int default_nsamples = 20;
-
-// problems
-static const string it="it"; // regression based on input table
-static const string pre="pre"; // regression based on input table by
-                               // maximizing precision (or negative
-                               // predictive value)
-static const string ip="ip"; // find interesting patterns
-static const string cp="cp"; // regression based on combo program to fit
-static const string pa="pa"; // even parity
-static const string dj="dj"; // disjunction
-static const string mux="mux"; // multiplex
-static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
-static const string ann_it="ann-it"; // regression based on input table using ann
-static const string ann_cp="ann-cp"; // regression based on combo program using ann
-static const string ann_xor="ann-xor"; // binary-xor problem using ann
-static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
-static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
 // used by the main function, it is included in the library for its
 // convenience

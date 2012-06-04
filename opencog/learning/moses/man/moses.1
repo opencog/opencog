@@ -265,8 +265,9 @@ For instance, one can enter the options
 run the remote jobs under a different user name),
 meaning that 4 jobs are allocated on the local machine
 and 16 jobs are allocated on my_server.org.
-The assumption is that moses must be on the remote
-machine and is located in a directory included in the
+Communications is done via \fBssh\fR, so passwd prompts will appear
+unless \fBssh\-agent\fR is being used.  The \fBmoses\fR executable must
+be on the remote machine(s), and located in a directory included in the
 \fBPATH\fR environment variable. Beware that a lot of log
 files are going to be generated when using this option on
 the remote machines.
