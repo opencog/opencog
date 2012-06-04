@@ -336,10 +336,35 @@ protected:
     score_t false_negative_sum;
     score_t negative_count;
 
-    const CTable &_ctable;
+    CTable _ctable;
     type_node output_type;
     std::function<score_t(const CTable::counter_t&)> sum_outputs;
 };
+
+/**
+ * base class for precision, recall, senstivity, spcificty, F-score,
+ * etc. type discriminator scorers.
+ */
+struct discriminating_bscore : public bscore_base, discriminator
+{
+    discriminating_bscore(const CTable& _ctable,
+                  float min_threshold = 0.5f,
+                  float max_threshold = 1.0,
+                  float hardness = 1.0f);
+
+    virtual score_t min_improv() const;
+
+    virtual void set_complexity_coef(score_t complexity_ratio);
+    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+
+protected:
+    score_t get_threshold_penalty(score_t) const;
+    size_t _ctable_usize;
+    float _min_threshold;
+    float _max_threshold;
+    float _hardness;
+};
+
 
 /**
  * Fitness function for maximizing binary precision, that is, for

@@ -252,6 +252,75 @@ void discriminator::count(const combo_tree& tr)
     }
 }
 
+//////////////////////////
+// disciminating_bscore //
+/////////////////////////
+
+discriminating_bscore::discriminating_bscore(const CTable& ct,
+                  float min_threshold,
+                  float max_threshold,
+                  float hardness) 
+    : discriminator(ct),
+    _ctable_usize(ct.uncompressed_size()),
+    _min_threshold(min_threshold),
+    _max_threshold(min_threshold),
+    _hardness(hardness)
+{
+}
+
+score_t discriminating_bscore::min_improv() const
+{
+    return 1.0 / _ctable_usize;
+}
+
+// Note that the logarithm is always negative, so this method always
+// returns a value that is zero or negative.
+score_t discriminating_bscore::get_threshold_penalty(score_t value) const
+{
+    score_t dst = 0.0;
+    if (value < _min_threshold)
+        dst = 1.0 - value / _min_threshold;
+    
+    if (_max_threshold < value)
+        dst = (value - _max_threshold) / (1.0 - _max_threshold);
+
+    return _hardness * log(1.0 - dst);
+}
+
+void discriminating_bscore::set_complexity_coef(unsigned alphabet_size, float p)
+{
+    complexity_coef = 0.0;
+    // Both p==0.0 and p==0.5 are singularity points in the Occam's
+    // razor formula for discrete outputs (see the explanation in the
+    // comment above ctruth_table_bscore)
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
+        complexity_coef = discrete_complexity_coef(alphabet_size, p)
+            / _ctable_usize;     // normalized by the size of the table
+                                // because the precision is normalized
+                                // as well
+
+    logger().info() << "Discriminiating scorer, noise = " << p
+                    << " alphabest size = " << alphabet_size
+                    << " complexity ratio = " << 1.0/complexity_coef;
+}
+
+void discriminating_bscore::set_complexity_coef(score_t ratio)
+{
+    complexity_coef = 0.0;
+    occam = (ratio > 0);
+
+    // The complexity coeff is normalized by the size of the table,
+    // because the precision is normalized as well.  So e.g.
+    // max precision for boolean problems is 1.0.  However...
+    // umm XXX I think the normalization here should be the
+    // best-possible activation, not the usize, right?
+    if (occam)
+        complexity_coef = 1.0 / (_ctable_usize * ratio);
+
+    logger().info() << "Discriminating scorer, complexity ratio = " << 1.0f/complexity_coef;
+}
+
 
 //////////////////////
 // precision_bscore //
