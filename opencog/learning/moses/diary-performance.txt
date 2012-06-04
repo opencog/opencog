@@ -2208,3 +2208,65 @@ time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data
 -r9:   338  0.7651   25       2354  0.8535   43
       avg time===275====     avg time===2364===
 
+
+Run multi-threading tests on the Cray.  This machine has 12-core Xeon,
+and 24GB RAM.  Will repeat tests for -j1, -j2, etc. through -j16.
+
+nohup time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 -r0  -m40000 | tee magic-j-r0.out
+
+"threading": multi-threading test.  Captions: "time", raw time in secs.
+       "slow": slowdown, percent.  For N threads, this is just 
+        100* (N * jN_time - j1_time) / j1_time, i.e. the perceived
+        parallelizable fraction of the algo.  score and cpxy as usual.
+        Looks like exactly the same exemplars were found each time, so
+        looks like none of the random-number generation stuff sits in
+        a thread.
+
+"thead-r1" as above, but with -r1 random seed.  Seems to find same
+    exemplars, score as the AMD results above.
+    "pfrac" == parallelizable fraction == (1-1/su) / (1-1/N)
+         where su == measured speedup == baseline_time / run_time
+    "maxsu" == speedup for N=infty processors
+            == 1/(1-p)
+
+Oddities: there seems to be a bit of a penalty associated with an odd
+number of threads.  There seems to be some strange contention when
+num threads excedes num cpus.
+
+
+              threading                     thread-r1
+        time   slow  score   cpxy    time   slow    su  maxsu
+-j1:    3077    -    0.8068   81     1845     -      -     -
+-j2:    1575   2.36  0.8068   81      938   1.77   1.96   56
+-j3:    1071   4.44  0.8068   81      633   2.94   2.91   68
+-j4:     811   5.50  0.8068   81      481   4.45   3.83   67
+-j5:     650   5.62  0.8068   81      386   4.63   4.78   86
+-j6:     542   5.79    "      "       326   6.07   5.66   82
+-j7:     466   6.19    "      "       285   8.31   6.46   72
+-j8:     413   7.49    "      "       247   7.25   7.46   96
+-j9:     386  12.87    "      "       226  10.60   8.14   75
+-j10:    337   9.59    "      "       200   8.81   9.19  102
+-j11:    367  31.23    "      "       202  20.83   9.10   48
+-j12:    295  15.31    "      "       175  14.29  10.50   77
+-j13:    433  83.84    "      "       274  93      6.73   13
+-j14:    447 103.65    "      "       267 102      6.90   13
+-j15:    426 108.85    "      "       252 105      7.30   13
+-j16:    424 120.65    "      "       246 114      7.48   13
+
+
+Note that the Cray is almost the same speed as the 5-year-old AMD
+Athalon: -m40K took 3182 on the Ath, and 3077 seconds on the Cray.
+Wow!.  The Intel Xeon is ...!?
+
+model name      : Intel(R) Xeon(R) CPU   X5650  @ 2.67GHz
+cache size      : 12288 KB
+cpu cores       : 6
+
+vs.
+model name      : AMD Athlon(tm) 64 X2 Dual Core Processor 6000+
+cache size      : 1024 KB
+cpu cores       : 2
+
+
+
+

@@ -34,8 +34,8 @@ void measure(vector<string> arguments)
 #if DO_THREADING
     double baseline = 0;
     nstart = 1;
-    nreps = 15;
-    printf("Will run test with 1 to %d threads\n", nstart+nreps);
+    nreps = 16;
+    printf("Will run test with 1 to %d threads\n", nreps);
     fflush (stdout);
 
 #else
@@ -82,6 +82,14 @@ void measure(vector<string> arguments)
         double normed = felapsed * (double) i;
         double slowdown = 100.0 * (normed-baseline) / baseline;
         printf("Run %d Normalized Time %f seconds slowdown=%f percent\n", i, normed, slowdown);
+        if (1 < i) {
+            double speedup = baseline / felapsed;
+            double parallel = (1.0 - 1.0/speedup) / (1.0 - 1.0/double(i));
+            double max_speed = 1.0 / (1.0-parallel);
+            printf("speedup = %f parallelizable fraction = %f max speedup = %f\n",
+                speedup, parallel, max_speed);
+                
+        }
 #endif
         fflush (stdout);
 

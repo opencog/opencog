@@ -684,6 +684,23 @@ contains labels in its header.
 Print the complexity measure of the model, and the scoring penalty.
 
 .\" ============================================================
+.SS "Precision problem type"
+Precision is defined as the number of true positives, divded by the number
+of true positives plus the number of false positives.  Precision may 
+thus range from 1.0, indicating perfect precision, to 0.0.  The \fB\-Hpre\fR
+option tells \fBmoses\fR to maximize precision.
+.PP
+One triivially stupid way to maximize precision, out of a training dataset
+of \fIN\fR rows, is to guess exactly one correctly, and ignore the rest,
+thus leading to perfect precision.  Thus, in practical applications, one
+wishes to maximize both precision, and activation.  Here, activation is
+defined as the fraction of rows for which the trial combo program returned 
+a positive answer, regardless of whether this was the right answer.
+Activation ranges from 0.0, to 1.0.
+.PP
+XXX We need to change the code to use recall, not activation !?
+
+.\" ============================================================
 .SS "Contin options"
 Options that affect the usage of continuously-valued variables.
 .TP
