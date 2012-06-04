@@ -412,8 +412,26 @@ protected:
 struct recall_bscore : public discriminating_bscore
 {
     recall_bscore(const CTable& _ctable,
-                  float min_precision = 0.5f,
+                  float min_precision = 0.8f,
                   float max_precision = 1.0f,
+                  float hardness = 1.0f);
+
+    penalized_behavioral_score operator()(const combo_tree& tr) const;
+
+protected:
+    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
+    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) const;
+};
+
+/**
+ * prerec_bscore -- scorer that attempts to maximize precision, while
+ * holding recall at or above a minimum acceptable value.
+ */
+struct prerec_bscore : public discriminating_bscore
+{
+    prerec_bscore(const CTable& _ctable,
+                  float min_recall = 0.5f,
+                  float max_recall = 1.0f,
                   float hardness = 1.0f);
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;

@@ -60,6 +60,10 @@ static const string recall="recall"; // regression based on input table,
                                   // maximize recall, while holding
                                   // precision const.
 
+static const string prerec="prerec"; // regression based on input table,
+                                  // maximize precision, while holding
+                                  // recall const.
+
 static const string pre="pre";    // regression based on input table by
                                   // maximizing precision (or negative
                                   // predictive value), holding activation
@@ -184,13 +188,13 @@ combo_tree ann_exemplar(combo::arity_t arity)
         ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
     // input nodes' weights
     ann_tr.append_children(output_node, 0.0, arity + 1);
- 
+
     return ann_tr;
 }
 
 static bool contains_type(const type_tree_pre_it it, id::type_node ty)
 {
-    for (type_tree_sib_it tts = it.begin(); tts != it.end(); tts++) 
+    for (type_tree_sib_it tts = it.begin(); tts != it.end(); tts++)
         if (*tts == ty) return true;
     return false;
 }
@@ -232,7 +236,7 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
             if (contains_type(ttl, id::contin_type))
                 as += 8 - ignore_ops.size();
 
-            if (contains_type(ttl, id::boolean_type)) 
+            if (contains_type(ttl, id::boolean_type))
                 as += 3;
 
             break;
@@ -302,7 +306,8 @@ contin_t largest_const_in_tree(const combo_tree &tr)
 //* return true iff the problem is based on data file
 bool datafile_based_problem(const string& problem)
 {
-    return problem == it || problem == pre || problem == recall || problem == ann_it || problem == ip;
+    return problem == it || problem == pre || problem == recall ||
+        problem == prerec || problem == ann_it || problem == ip;
 }
 
 //* return true iff the problem is based on a combo tree
@@ -371,7 +376,7 @@ combo::arity_t infer_arity(const string& problem,
 }
 
 
-        
+
 int moses_exec(int argc, char** argv)
 {
     // for(int i = 0; i < argc; ++i)
@@ -425,14 +430,15 @@ int moses_exec(int argc, char** argv)
     double pop_size_ratio;
     score_t max_score;
     size_t max_dist;
+
     // continuous optimization
     vector<contin_t> discretize_thresholds;
     double ip_kld_weight;
     double ip_skewness_weight;
     double ip_stdU_weight;
     double ip_skew_U_weight;
-    score_t hardness;              // hardness of the activation range
-                                // constraint for problems pre, recall
+    score_t hardness;       // hardness of the activation range
+                            // constraint for problems pre, recall, prerec
     // hc_param
     bool hc_widen_search;
     bool hc_single_step;
@@ -530,7 +536,8 @@ int moses_exec(int argc, char** argv)
          value<string>(&problem)->default_value(it),
          str(format("Problem to solve, supported problems are:\n"
                     "%s, regression based on input table\n"
-                    "%s, regression based on input table, maximizing precision instead of accuracy\n"
+                    "%s, regression based on input table, maximizing precision, while holding activation fixed\n"
+                    "%s, regression based on input table, maximizing precision, while holding recall fixed\n"
                     "%s, regression based on input table, maximizing recall while holding precision fixed\n"
                     "%s, search interesting patterns, where interestingness"
                     " is defined in terms of several features such as maximizing"
@@ -546,7 +553,7 @@ int moses_exec(int argc, char** argv)
                     "%s, disjunction\n"
                     "%s, multiplex\n"
                     "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
-             % it % pre % recall % ip % ann_it % cp % pa % dj % mux % sr).c_str())
+             % it % pre % prerec % recall % ip % ann_it % cp % pa % dj % mux % sr).c_str())
 
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
@@ -573,8 +580,8 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0.0),
-         "Minimum value of a sampled coninuous input.  The cp, ip, recall and "
-         "pre problems all require a range of values to be sampled in "
+         "Minimum value of a sampled coninuous input.  The cp, ip, recall, pre "
+         "and prerec problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low end of the sampled range. In the case of "
          "fitness function pre, the range corresponds to the activation "
@@ -582,8 +589,8 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1.0),
-         "Maximum value of a sampled coninuous input.  The cp, ip, recall and "
-         "pre problems all require a range of values to be sampled in "
+         "Maximum value of a sampled coninuous input.  The cp, ip, recall, pre "
+         "and prerec problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low high of the sampled range. In the case of "
          "fitness function pre, the range corresponds to the activation "
@@ -631,7 +638,7 @@ int moses_exec(int argc, char** argv)
          value<vector<string>>(&ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
          "to ignore several features.\n")
-        
+
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
          str(format("Optimization algorithm, supported algorithms are"
@@ -825,16 +832,18 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(ip_skew_U_weight_opt).c_str(),
          value<double>(&ip_skew_U_weight)->default_value(1.0),
-         str(format("Interesting patterns (%s). Weight of skew_U.\n") % ip).c_str()) 
+         str(format("Interesting patterns (%s). Weight of skew_U.\n") % ip).c_str())
 
         (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&hardness)->default_value(0.0),
-         "If problems recall or pre are specified, then if alpha is negative (any negative value), "
-         "precision is replaced by negative predictive value. And then alpha "
-         "plays the role of the activation constrain penalty from 0 to inf, "
-         "0 being no activation penalty at all, inf meaning hard constraint "
-         "penalty (that is if the candidate is not in the range it has -inf "
-         "activation penalty.)\n")
+         "If problems pre, prerec or recall are specified, this "
+         "option is used to set the 'hardness' of the constraint, "
+         "with larger values corresponding to a harder constraint "
+         "(i.e. punishing the score more strongly if the contraint "
+         "is not met.)  For the 'pre' problem, if alpha is negative, "
+         "then its absolute value is used for the hardness, and "
+         "the negative predictive value is maximized (instead of "
+         "the precision).\n")
 
         ("pre-worst-norm",
          value<bool>(&pre_worst_norm)->default_value(false),
@@ -856,7 +865,7 @@ int moses_exec(int argc, char** argv)
 
     // set flags
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
- 
+
     if (vm.count("help") || argc == 1) {
         cout << desc << endl;
         return 1;
@@ -949,10 +958,10 @@ int moses_exec(int argc, char** argv)
     }
 
     setting_omp(jobs[localhost]);
-    
+
     // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,
-                                   revisit, include_dominated, 
+                                   revisit, include_dominated,
                                    complexity_temperature,
                                    ignore_ops,
                                    enable_cache,
@@ -1008,7 +1017,7 @@ int moses_exec(int argc, char** argv)
                            output_bscore,
                            output_dominated,
                            output_eval_number,
-                           output_with_labels, 
+                           output_with_labels,
                            labels,
                            output_file,
                            output_python);
@@ -1050,9 +1059,12 @@ int moses_exec(int argc, char** argv)
         // 'it' means regression based on input table; we maximimze accuracy.
         // 'pre' means we must maximize precision (i.e minimize the number of
         // false positives) while holding activation fixed.
+        // 'prerec' means we must maximize precision (i.e minimize the number of
+        // false positives) while holding recall fixed.
         // 'recall' means we must maximize recall while holding precision fixed.
-        if (problem == it || problem == recall || problem == pre) {
-
+        if (problem == it || problem == pre || 
+            problem == prerec || problem == recall)
+        {
             // Infer the type of the input table
             type_tree table_output_tt = get_signature_output(table_type_signature);
             type_node table_output_tn = get_type_node(table_output_tt);
@@ -1086,7 +1098,7 @@ int moses_exec(int argc, char** argv)
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables) {
                     BScore* r = new BScore(ctable,
-                                           abs(hardness), 
+                                           abs(hardness),
                                            min_rand_input,
                                            max_rand_input,
                                            hardness >= 0,
@@ -1099,11 +1111,37 @@ int moses_exec(int argc, char** argv)
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
-            } 
+            }
 
-            // problem == recall  maximize recall, holding precision const.
+            // problem == prerec  maximize precision, holding recall const.
             // Very nearly identical to above, just uses a different
             // scorer.
+            else if (problem == prerec) {
+                // Keep the table input signature, just make sure the
+                // output is a boolean.
+                type_tree cand_sig = gen_signature(
+                    get_signature_inputs(table_type_signature),
+                    type_tree(id::boolean_type));
+                int as = alphabet_size(cand_sig, ignore_ops);
+                typedef prerec_bscore BScore;
+                boost::ptr_vector<BScore> bscores;
+                foreach(const CTable& ctable, ctables) {
+                    BScore* r = new BScore(ctable,
+                                           min_rand_input,
+                                           max_rand_input,
+                                           abs(hardness));
+                    set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                    bscores.push_back(r);
+                }
+                multibscore_based_bscore<BScore> bscore(bscores);
+                metapop_moses_results(exemplars, cand_sig,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
+            }
+
+            // problem == recall  maximize recall, holding precision const.
+            // Identical to above, just uses a different scorer.
             else if (problem == recall) {
                 // Keep the table input signature, just make sure the
                 // output is a boolean.
@@ -1126,7 +1164,7 @@ int moses_exec(int argc, char** argv)
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
                                       mmr_pa);
-            } 
+            }
 
             // problem == it  i.e. input-table based scoring.
             else {
@@ -1221,7 +1259,7 @@ int moses_exec(int argc, char** argv)
                 }
             }
         }
-        
+
         // Find interesting patterns
         else if (problem == ip) {
             // ip assumes that the inputs are boolean and the output is contin
@@ -1293,7 +1331,7 @@ int moses_exec(int argc, char** argv)
         // If the user specifies the combo program from bash or similar
         // shells, and forgets to escape the $ in the variable names,
         // then the resulting combo program will be garbage.  Try to
-        // sanity-check this, so as to avoid user frustration. 
+        // sanity-check this, so as to avoid user frustration.
         // A symptom of this error is that the arity will be -1.
         if (-1 == arity || NULL == strchr(combo_str.c_str(), '$')) {
             cerr << "Error: the combo program " << tr << "\n"
@@ -1336,7 +1374,7 @@ int moses_exec(int argc, char** argv)
                 if ((0.0 == min_rand_input) && (1.0 == max_rand_input)) {
                     max_rand_input = 2.0 * largest_const_in_tree(tr);
                     min_rand_input = -max_rand_input;
-                    if ((nsamples <= 0) && 
+                    if ((nsamples <= 0) &&
                         (default_nsamples < 2 * arity * max_rand_input)) {
                         nsamples = 2 * arity * max_rand_input;
                     }
@@ -1378,14 +1416,14 @@ int moses_exec(int argc, char** argv)
             if (exemplars.empty()) {
                 exemplars.push_back(ann_exemplar(arity));
             }
- 
+
             // @todo: introduce some noise optionally
             if (nsamples <= 0)
                 nsamples = default_nsamples;
 
             ITable it(tt, nsamples, max_rand_input, min_rand_input);
             OTable ot(tr, it);
- 
+
             contin_bscore bscore(ot, it);
             set_noise_or_ratio(bscore, as, noise, complexity_ratio);
             metapop_moses_results(exemplars, tt,
@@ -1408,7 +1446,7 @@ int moses_exec(int argc, char** argv)
         }
 
         type_tree sig = gen_signature(id::boolean_type, arity);
-        unsigned as = alphabet_size(sig, ignore_ops); 
+        unsigned as = alphabet_size(sig, ignore_ops);
 
         logical_bscore bscore(func, arity);
         set_noise_or_ratio(bscore, as, noise, complexity_ratio);
@@ -1477,13 +1515,13 @@ int moses_exec(int argc, char** argv)
         if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::contin_type));
         }
- 
+
         type_tree tt = gen_signature(id::contin_type, arity);
 
         ITable it(tt, (nsamples>0 ? nsamples : default_nsamples));
 
         int as = alphabet_size(tt, ignore_ops);
-        
+
         contin_bscore::err_function_type eft =
             it_abs_err ? contin_bscore::abs_error :
             contin_bscore::squared_error;

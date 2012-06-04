@@ -487,6 +487,62 @@ score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) cons
     return recall;
 }
 
+///////////////////
+// prerec_bscore //
+///////////////////
+
+prerec_bscore::prerec_bscore(const CTable& ct,
+                  float min_recall,
+                  float max_recall,
+                  float hardness) 
+    : discriminating_bscore(ct, min_recall, max_recall, hardness)
+{
+}
+
+// Nearly identical to recall_bscore, except that the roles of precision
+// and recall are switched.
+penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
+{
+    d_counts ctr = count(tr);
+
+    // Compute normalized precision and recall.
+    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
+    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+
+    // We are maximizing recall, so that is the first part of the score.
+    penalized_behavioral_score pbs;
+    pbs.first.push_back(precision);
+    
+    score_t recall_penalty = get_threshold_penalty(recall);
+    pbs.first.push_back(recall_penalty);
+    if (logger().isFineEnabled()) 
+        logger().fine("precision = %f  recall=%f  recall penalty=%e",
+                     precision, recall, recall_penalty);
+ 
+    // Add the Complexity penalty
+    if (occam)
+        pbs.second = tree_complexity(tr) * complexity_coef;
+
+    log_candidate_pbscore(tr, pbs);
+
+    return pbs;
+}
+
+/// Return the precision for this ctable row.
+score_t prerec_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
+{
+    contin_t precision = pos / (cnt * _positive_total);
+    return precision;
+}
+
+/// Return the recall for this ctable row.
+/// XXX I think this is correct, double check... TODO.
+score_t prerec_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
+{
+    contin_t recall = 1.0 / _ctable_usize;
+    return recall;
+}
+
 //////////////////////
 // precision_bscore //
 //////////////////////
