@@ -269,9 +269,14 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
     : discriminator(ct),
     _ctable_usize(ct.uncompressed_size()),
     _min_threshold(min_threshold),
-    _max_threshold(min_threshold),
+    _max_threshold(max_threshold),
     _hardness(hardness)
 {
+    logger().info("Discriminating scorer, hardness = %f, "
+                  "min_threshold = %f, "
+                  "max_threshold = %f",
+                  _hardness, _min_threshold, _max_threshold);
+
     // Verify that the thresholds are sane
     OC_ASSERT((0.0 < hardness) && (0.0 < min_threshold) && (min_threshold <= max_threshold),
         "Discriminating scorer, invalid thresholds.  "
@@ -299,10 +304,6 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
         }
     }
 
-    logger().info("Discriminating scorer, hardness = %f, "
-                  "min_threshold = %f, "
-                  "max_threshold = %f",
-                  _hardness, _min_threshold, _max_threshold);
     logger().info("Discriminating scorer, min_output = %f, "
                   "max_output = %f", _min_output, _max_output);
 }
@@ -351,7 +352,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
 
     score_t fixation_penalty = get_threshold_penalty(fix_sum);
 
-    logger().info("Discriminating scorer, best score = %f", best_score);
+    logger().info("Discriminating scorer, score at threshold = %f", best_score);
     logger().info("Discriminating scorer, fixed component at threshold = %f", fix_sum);
     logger().info("Discriminating scorer, fixation penalty at threshold = %f", fixation_penalty);
 
@@ -505,6 +506,11 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         return;
     }
 
+    logger().info("Precision scorer, penalty = %f, "
+                  "min_activation = %f, "
+                  "max_activation = %f",
+                  penalty, min_activation, max_activation);
+
     // Verify that the penaly is sane
     OC_ASSERT((0.0 < penalty) && (0.0 < min_activation) && (min_activation <= max_activation),
         "Precision scorer, invalid activation bounds.  "
@@ -530,10 +536,6 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         }
     }
 
-    logger().info("Precision scorer, penalty = %f, "
-                  "min_activation = %f, "
-                  "max_activation = %f",
-                  penalty, min_activation, max_activation);
     logger().info("Precision scorer, max_output = %f", max_output);
 }
 
@@ -696,9 +698,9 @@ behavioral_score precision_bscore::best_possible_bscore() const
     score_t activation = active / (score_t)ctable_usize;
     score_t activation_penalty = get_activation_penalty(activation);
 
-    logger().info("Precision scorer, best precision = %f", precision);
-    logger().info("Precision scorer, activation at best precision = %f", activation);
-    logger().info("Precision scorer, activation penalty at best precision = %f", activation_penalty);
+    logger().info("Precision scorer, precision at min activation = %f", precision);
+    logger().info("Precision scorer, activation at above precision = %f", activation);
+    logger().info("Precision scorer, activation penalty at above precision = %f", activation_penalty);
 
     return {precision, activation_penalty};
 }
