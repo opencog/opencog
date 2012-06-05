@@ -96,7 +96,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info(ss.str());
     }
 
-    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++))
+    while ((int(mp.n_evals()) < pa.max_evals) && (pa.max_gens != gen_idx++))
     {
         logger().info("Deme generation: %i", gen_idx);
 

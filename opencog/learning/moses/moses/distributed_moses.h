@@ -149,15 +149,15 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     host_proc_map hpm = init(jobs);
 
-    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx) 
+    while ((int(mp.n_evals()) < pa.max_evals) && (pa.max_gens != gen_idx) 
            && (mp.best_score() < pa.max_score)) {
         // if there exists free resource, launch a process
         host_proc_map::iterator hpm_it = find_free_resource(hpm, jobs);
-        if(hpm_it != hpm.end()) {
+        if (hpm_it != hpm.end()) {
             const string& hostname = get_hostname(*hpm_it);
             unsigned n_jobs = jobs.find(hostname)->second;
             mp_cit exemplar = mp.select_exemplar();
-            if(exemplar != mp.end()) {
+            if (exemplar != mp.end()) {
                 const combo_tree& tr = get_tree(*mp.select_exemplar());
                 mp.visited().insert(tr);
 
@@ -174,7 +174,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 logger().info("corresponding to PID = %d", get_pid(pmv));
                 // ~Logger
                 gen_idx++;
-            } else if(all_resources_free(hpm)) { // can't find any
+            } else if (all_resources_free(hpm)) { // can't find any
                                              // available exemplar and
                                              // there is no hope that
                                              // one will come

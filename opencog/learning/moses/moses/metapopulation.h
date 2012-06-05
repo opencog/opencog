@@ -204,6 +204,7 @@ struct metapopulation : public bscored_combo_tree_set
         _cscorer(sc),
         _bscorer(bsc), optimize(opt), params(pa),
         _n_evals(0),
+        _n_expansions(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
@@ -218,7 +219,8 @@ struct metapopulation : public bscored_combo_tree_set
                    const metapop_parameters& pa = metapop_parameters()) :
         _type_sig(tt), simplify_candidate(&si),
         simplify_knob_building(&si), _cscorer(sc),
-        _bscorer(bsc), optimize(opt), params(pa), _n_evals(0),
+        _bscorer(bsc), optimize(opt), params(pa),
+        _n_evals(0), _n_expansions(0),
         _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
     {
         std::vector<combo_tree> bases(1, base);
@@ -233,13 +235,14 @@ struct metapopulation : public bscored_combo_tree_set
 
     /**
      * Return reference to the number of evaluations.
-     * Its a reference, because distributed moses increments it directly.
+     * Its a non-const reference, because distributed moses increments it directly.
      */
-    const int& n_evals() const
+    const size_t& n_evals() const
     {
         return _n_evals;
     }
-    int& n_evals()
+
+    size_t& n_evals()
     {
         return _n_evals;
     }
@@ -413,28 +416,13 @@ struct metapopulation : public bscored_combo_tree_set
         // applying more and more stringent bounds on the allowable scores.
         // The current implementation of useful_score_range() returns a
         // value a bit on the large size, by a factor of 2 or so, so its
-        // quite OK to cut back on this value.  We do this in half-tones
-        // (twelfth root of 2).
+        // quite OK to cut back on this value. 
 
 #define MIN_POOL_SIZE 250
         if (size() < MIN_POOL_SIZE) return;
 
         score_t top_score = get_weighted_score(*begin());
         score_t range = useful_score_range();
-        size_t popsz = size();
-#define HALFTONE 0.943874313
-        if (10000 < popsz) range *= HALFTONE;
-        if (20000 < popsz) range *= HALFTONE;
-        if (30000 < popsz) range *= HALFTONE*HALFTONE;
-        if (40000 < popsz) range *= HALFTONE*HALFTONE;
-        if (50000 < popsz) range *= HALFTONE*HALFTONE*HALFTONE;
-        if (60000 < popsz) range *= HALFTONE*HALFTONE;
-        if (70000 < popsz) range *= HALFTONE;
-        if (80000 < popsz) range *= HALFTONE;
-        if (90000 < popsz) range *= HALFTONE;
-        if (100000 < popsz) range *= HALFTONE;
-        if (110000 < popsz) range *= HALFTONE;
-        if (120000 < popsz) range *= HALFTONE;
         score_t worst_score = top_score - range;
 
 #if 0
@@ -464,6 +452,23 @@ struct metapopulation : public bscored_combo_tree_set
         }
 
         erase(it, end());
+
+        // Is the population still too large?  Yes, it is, if it is more
+        // than 100 times the size of the current number of generations.
+        // Realisitically, we could never explore more than 1% of a pool
+        // that size.
+        // XXX This one-at-a-time erase loop might be slow, could be parallelized.
+        if (_n_expansions < 10) return;
+#define POPSIZE_RATIO 100
+        size_t popsz = size();
+        while (POPSIZE_RATIO * _n_expansions < popsz)
+        {
+            // Leave the first 50 alone.
+#define OFFSET 50
+            int which = OFFSET + randGen().randint(popsz-OFFSET);
+            erase(next(begin(), which));
+            popsz = size();
+        } 
 #endif
     }
 
@@ -486,13 +491,15 @@ struct metapopulation : public bscored_combo_tree_set
         if (!create_deme())
             return false;
 
+        _n_expansions ++;
         _n_evals += optimize_deme(max_evals);
 
         bool done = close_deme();
 
         if (logger().isInfoEnabled()) {
             logger().info()
-               << "Total number of evaluations so far: " << _n_evals;
+               << "Expansion " << _n_expansions
+               << " total number of evaluations so far: " << _n_evals;
             log_best_candidates();
         }
 
@@ -616,11 +623,10 @@ struct metapopulation : public bscored_combo_tree_set
         if (_rep == NULL || _deme == NULL)
             return false;
 
-        int eval_during_this_deme = std::min(n_evals() - _evals_before_this_deme,
-                                             (int)_deme->size());
+        size_t eval_during_this_deme = std::min(n_evals() - _evals_before_this_deme,
+                                             _deme->size());
 
-        logger().debug("Close deme");
-        logger().debug("Actual number of evaluations during that expansion: %d",
+        logger().debug("Close deme; evaluations performed: %d",
                            eval_during_this_deme);
 
         // Mark the exemplar so we won't expand it again
@@ -660,7 +666,7 @@ struct metapopulation : public bscored_combo_tree_set
             }
 
             eval_during_this_deme =
-                std::min(eval_during_this_deme, (int)_deme->size());
+                std::min(eval_during_this_deme, _deme->size());
         }
 
         ///////////////////////////////////////////////////////////////
@@ -1277,8 +1283,9 @@ struct metapopulation : public bscored_combo_tree_set
     Optimization &optimize;
     metapop_parameters params;
 protected:
-    int _n_evals;
-    int _evals_before_this_deme;
+    size_t _n_evals;
+    size_t _n_expansions;
+    size_t _evals_before_this_deme;
 
     // The best score ever found during search.
     composite_score _best_cscore;
