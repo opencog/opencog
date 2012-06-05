@@ -457,17 +457,17 @@ struct metapopulation : public bscored_combo_tree_set
         // than 100 times the size of the current number of generations.
         // Realisitically, we could never explore more than 1% of a pool
         // that size.
-        // XXX This one-at-a-time erase loop might be slow, could be parallelized.
-        if (_n_expansions < 10) return;
 #define POPSIZE_RATIO 100
+        size_t popsz_cap = POPSIZE_RATIO * (_n_expansions + 1);
+        popsz_cap *= 1 + 10.0*exp(- double(_n_expansions) / 100.0);
         size_t popsz = size();
-        while (POPSIZE_RATIO * _n_expansions < popsz)
+        while (popsz_cap < popsz)
         {
             // Leave the first 50 alone.
 #define OFFSET 50
             int which = OFFSET + randGen().randint(popsz-OFFSET);
             erase(next(begin(), which));
-            popsz = size();
+            popsz --;
         } 
 #endif
     }
