@@ -426,6 +426,9 @@ void discriminating_bscore::set_complexity_coef(score_t ratio)
     // max precision for boolean problems is 1.0.  However...
     // umm XXX I think the normalization here should be the
     // best-possible activation, not the usize, right?
+    //
+    // @todo Sounds good too, as long as it's constant, so you would
+    // replace _ctable_usize by _ctable_usize * max_activation?
     if (occam)
         complexity_coef = 1.0 / (_ctable_usize * ratio);
 
