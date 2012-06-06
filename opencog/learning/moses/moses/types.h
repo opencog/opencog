@@ -235,6 +235,21 @@ inline const penalized_behavioral_score& get_pbscore(const bscored_combo_tree& b
     return get_pbscore(bst.second);
 }
 
+inline const behavioral_score& get_bscore(const penalized_behavioral_score& pbs)
+{
+    return pbs.first;
+}
+
+inline const behavioral_score& get_bscore(const composite_behavioral_score& cbs)
+{
+    return get_bscore(cbs.first);
+}
+
+inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
+{
+    return get_bscore(bst.second);
+}
+
 /**
  * greater_than operator for bscored_combo_tree.  The order is as
  * follow 1 the score matter, then complexity, then the combo_tree
@@ -257,6 +272,55 @@ typedef std::set<bscored_combo_tree,
                  bscored_combo_tree_greater> bscored_combo_tree_set;
 typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
 typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
+
+/// Compute the distance between two vectors, using the lp norm.
+static inline
+score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double p=1.0)
+{
+    OC_ASSERT (a.size() == b.size(), "Cannot compare unequal-sized vectors!\n");
+
+    behavioral_score::const_iterator ia = a.begin();
+    behavioral_score::const_iterator ib = b.begin();
+
+    score_t sum = 0.0;
+    // Special case Manhattan distance.
+    if (1.0 == p) {
+        for (; ia != a.end(); ia++, ib++) {
+            sum += fabs (*ia - *ib);
+        }
+        return sum;
+    }
+    // Special case Euclidean distance.
+    if (2.0 == p) {
+        for (; ia != a.end(); ia++, ib++) {
+            score_t diff = *ia - *ib;
+            sum += diff*diff;
+        }
+        return sqrt(sum);
+    }
+    for (; ia != a.end(); ia++, ib++) {
+        sum += pow(log (fabs (*ia - *ib)), p);
+    }
+    return pow(sum, 1.0/p);
+}
+
+static inline
+score_t lp_distance(const penalized_behavioral_score& a, const penalized_behavioral_score& b, double p=1.0)
+{
+    return lp_distance(a.first, b.first, p);
+}
+
+static inline
+score_t lp_distance(const composite_behavioral_score& a, const composite_behavioral_score& b, double p=1.0)
+{
+    return lp_distance(a.first, b.first, p);
+}
+
+static inline
+score_t lp_distance(const bscored_combo_tree& a, const bscored_combo_tree& b, double p=1.0)
+{
+    return lp_distance(a.second, b.second, p);
+}
 
 // XXX TODO: the only difference between metapop_candidates and
 // bscored_combo_tree_set is that the later is a set, the former is an
