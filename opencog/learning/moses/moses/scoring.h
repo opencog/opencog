@@ -149,10 +149,10 @@ struct bscore_based_cscore : public unary_function<combo_tree, composite_score>
         if (logger().isFineEnabled()) {
             logger().fine() << "bscore_based_cscore: " << res
                             << " complexity: " << cpxy
-                            << " penalty: " << pbs.second;
+                            << " complexity penalty: " << pbs.second;
         }
 
-        return composite_score(res, cpxy, pbs.second);
+        return composite_score(res, cpxy, pbs.second, 0.0);
     }
 
 
@@ -1063,7 +1063,7 @@ struct distance_based_scorer : public unary_function<instance,
                             << "Score = " << sc << std::endl;
         }
         // ~Logger
-        return composite_score(sc, 0, 0);
+        return composite_score(sc, 0, 0, 0);
     }
 
 protected:

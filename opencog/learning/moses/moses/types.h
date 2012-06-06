@@ -87,8 +87,13 @@ struct composite_score:
     //
     // Note: we keep penalized_score, in order to avoid a subtraction
     // in the comparison operator.
-    composite_score(score_t scor, complexity_t cpxy, score_t penalty)
-       : score(scor), complexity(cpxy), penalized_score(scor-penalty) {}
+    composite_score(score_t scor, complexity_t cpxy, 
+                    score_t complexity_penalty_ = 0.0,
+                    score_t diversity_penalty_ = 0.0)
+       : score(scor), complexity(cpxy), 
+         complexity_penalty(complexity_penalty_),
+         diversity_penalty(diversity_penalty_),
+         penalized_score(score - complexity_penalty - diversity_penalty) {}
 
     composite_score();    // build the worst score
     composite_score& operator=(const composite_score &r);
@@ -99,8 +104,19 @@ struct composite_score:
 
     /// Sign convention: the penalty is positive, it is subtracted from
     /// the "raw" score to get the penalized score.
-    score_t get_penalty() const { return score - penalized_score; }
-    void set_penalty(score_t penalty) { penalized_score = score - penalty; }
+    score_t get_complexity_penalty() const { return complexity_penalty; }
+    void set_complexity_penalty(score_t penalty)
+    {
+        complexity_penalty = penalty;
+        penalized_score = score - complexity_penalty - diversity_penalty;
+    }
+    score_t get_diversity_penalty() const { return diversity_penalty; }
+    void set_diversity_penalty(score_t penalty)
+    {
+        diversity_penalty = penalty;
+        penalized_score = score - complexity_penalty - diversity_penalty;
+    }
+    score_t get_penalty() const { return complexity_penalty + diversity_penalty; }
 
     /// Compare penalized scores.  That is, we compare score-penalty
     /// on the right to score-penalty on the left. If the 2
@@ -115,8 +131,9 @@ struct composite_score:
 protected:
     score_t score;
     complexity_t complexity;
+    score_t complexity_penalty;
+    score_t diversity_penalty;
     score_t penalized_score;
-
 };
 
 extern const composite_score worst_composite_score;
@@ -203,6 +220,46 @@ inline complexity_t get_complexity(const bscored_combo_tree& bst)
 inline complexity_t get_complexity(const scored_combo_tree& st)
 {
     return get_complexity(st.second);
+}
+
+inline score_t get_complexity_penalty(const composite_score& ts)
+{
+    return ts.get_complexity_penalty();
+}
+
+inline score_t get_complexity_penalty(const composite_behavioral_score& ts)
+{
+    return get_complexity_penalty(ts.second);
+}
+
+inline score_t get_complexity_penalty(const bscored_combo_tree& bst)
+{
+    return get_complexity_penalty(bst.second);
+}
+
+inline score_t get_complexity_penalty(const scored_combo_tree& st)
+{
+    return get_complexity_penalty(st.second);
+}
+
+inline score_t get_diversity_penalty(const composite_score& ts)
+{
+    return ts.get_diversity_penalty();
+}
+
+inline score_t get_diversity_penalty(const composite_behavioral_score& ts)
+{
+    return get_diversity_penalty(ts.second);
+}
+
+inline score_t get_diversity_penalty(const bscored_combo_tree& bst)
+{
+    return get_diversity_penalty(bst.second);
+}
+
+inline score_t get_diversity_penalty(const scored_combo_tree& st)
+{
+    return get_diversity_penalty(st.second);
 }
 
 inline score_t get_penalty(const composite_score& ts)
@@ -368,7 +425,8 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
 
     if (output_complexity)
         out << get_complexity(candidate) << " "
-            << get_penalty(candidate) << " ";
+            << get_complexity_penalty(candidate) << " "
+            << get_diversity_penalty(candidate) << " ";
 
     out << get_tree(candidate) << std::endl;
 
@@ -406,7 +464,8 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
     }
     if (output_complexity) {
         out << " #complexity: " << get_complexity(candidate) << std::endl;
-        out << " #penalty: " << get_penalty(candidate) << std::endl;
+        out << " #complexity_penalty: " << get_complexity_penalty(candidate) << std::endl;
+        out << " #diversity_penalty: " << get_diversity_penalty(candidate) << std::endl;
     }
     
     out << std::endl << "def moses_eval(i):" << std::endl << "    return ";
@@ -429,7 +488,8 @@ inline std::ostream& operator<<(std::ostream& out,
                << std::setprecision(moses::io_score_precision)
                << ts.get_score()
                << ", complexity=" << ts.get_complexity()
-               << ", penalty=" << ts.get_penalty()
+               << ", complexity penalty=" << ts.get_complexity_penalty()
+               << ", diversity penalty=" << ts.get_diversity_penalty()
                << "]";
 }
 

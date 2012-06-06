@@ -2279,10 +2279,13 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 
 "longrun": As above. Note improvement completely stalls.
 
-"temp-v12": As above, but with higher temperature: -v12
+"temp-v12": As above, but with higher temperature: -v12  Note an
+        immediate improvement in scores.
 
 "v12-popsz": As above, but with much much smaller popsize
-        (i.e. bzr rev 7079)
+        (i.e. bzr rev 7079)  A slight regression in scores, but
+        perhaps this is just random chance.  Some minor speed
+        improvement, initially.
 
              longrun               temp-v12            v12-popsz
 -m      time  score   cpxy    time  score   cpxy    time  score   cpxy
@@ -2292,10 +2295,32 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 80K:     404  0.8626   36      437  0.8658   34     351   0.8618   14
 160K:    848  0.8626   36      952  0.8659   34     923   0.8624   19
 320K:   1873  0.8670   35     2291  0.8738   61    2625   0.8624   19 
-640K:   4131  0.8670   35     6260  0.8768   66      
+640K:   4131  0.8670   35     6260  0.8768   66    7616   0.8643   82 
 1.28M:  9088  0.8673   28      
 2.56M: 20318  0.8676   38      
 5.12M: 47993  0.8676   38      
+10.2M:
+
+"v24-newsz": as above but -v24 and also a less cramped posize (bzr rev
+           7081) 
+
+"v36-newsz": as above but -v36
+
+"v12-newsz": as above but -v12
+         Footprint: 8.5GB/48605 = 175KB/instance at cpxy avg=100 maybe..
+
+            v24-newsz            v36-newsz             v12-newsz
+-m      time  score   cpxy    time  score   cpxy    time  score   cpxy
+10K:      23  0.8080   19       28  0.7775   28       26  0.8618   14 
+20K:      57  0.8136   25       56  0.7775   28       63  0.8618   14
+40K:     132  0.8299   29      144  0.8299   34      142  0.8641   23
+80K:     343  0.8643   40      373  0.8330   44      333  0.8641   23
+160K:    939  0.8659   46      814  0.8437   42      743  0.8641   23
+320K:   2342  0.8659   46     2089  0.8437   42     1978  0.8641   23
+640K:   5525  0.8703   48     5599  0.8499   75     6599  0.8660   93 
+1.28M:                                             24057  0.8816  129
+2.56M: 
+5.12M: 
 10.2M:
 
 

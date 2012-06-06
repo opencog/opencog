@@ -42,13 +42,18 @@ bool bscored_combo_tree_greater::operator()(const bscored_combo_tree& bs_tr1,
 const composite_score worst_composite_score = composite_score();
 
 composite_score::composite_score()
-    : score(worst_score), complexity(worst_complexity), penalized_score(worst_score) {}
+    : score(worst_score), complexity(worst_complexity),
+      complexity_penalty(0.0), diversity_penalty(0.0),
+      penalized_score(worst_score)
+{}
 
 composite_score& composite_score::operator=(const composite_score &r)
 {
     score = r.score;
     complexity = r.complexity;
     penalized_score = r.penalized_score;
+    complexity_penalty = r.complexity_penalty;
+    diversity_penalty = r.diversity_penalty;
     return *this;
 }
 
