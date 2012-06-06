@@ -454,12 +454,23 @@ struct metapopulation : public bscored_combo_tree_set
         erase(it, end());
 
         // Is the population still too large?  Yes, it is, if it is more
-        // than 100 times the size of the current number of generations.
-        // Realisitically, we could never explore more than 1% of a pool
-        // that size.
-#define POPSIZE_RATIO 100
-        size_t popsz_cap = POPSIZE_RATIO * (_n_expansions + 1);
-        popsz_cap *= 1 + 10.0*exp(- double(_n_expansions) / 100.0);
+        // than 50 times the size of the current number of generations.
+        // Realisitically, we could never explore more than 2% of a pool
+        // that size.  For 10Bytes per table row, 20K rows, generation=500
+        // this will still eat up tens of GBytes of RAM, and so is a
+        // relatively lenient cap.
+        // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
+        // This cap is huge, when the behavioral scores are small; it
+        // really only comes into play when the behavioral scores are
+        // large.  Essentially, its engineered to limit RAM usage to 
+        // tens of GBytes for any problem size that takes a cpu-week
+        // to run.  This should be fine for PC's and small supercomputers,
+        // solving "typical" problem sizes.
+        size_t nbelts = get_bscore(*begin()).size();
+        double cap = 1.0e6 / double(nbelts);
+        cap *= _n_expansions + 250.0;
+        cap *= 1 + 2.0*exp(- double(_n_expansions) / 500.0);
+        size_t popsz_cap = cap;
         size_t popsz = size();
         while (popsz_cap < popsz)
         {
