@@ -119,7 +119,6 @@ IF (TCL_TCLSH)
             PythonEval
 		    PythonModule
             logic_wrapper
-            pln
             atomspace
             util
 		    ${PYTHON_LIBRARIES})

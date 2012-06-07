@@ -43,18 +43,17 @@ SET(OAC_LINK_LIBS
     MessagingSystem
     Procedure
     savable
-    pln
     attention
 )
 
-#IF (HAVE_CYTHON)
-#    SET(OAC_LINK_LIBS
-#        ${OAC_LINK_LIBS}
-#        PythonEval
-#		PythonModule
+IF (HAVE_CYTHON)
+    SET(OAC_LINK_LIBS
+        ${OAC_LINK_LIBS}
+        PythonEval
+		PythonModule
 #        logic_wrapper
-#		${PYTHON_LIBRARIES})
-#ENDIF (HAVE_CYTHON)    
+		${PYTHON_LIBRARIES})
+ENDIF (HAVE_CYTHON)    
 
 IF (HAVE_ZMQ)
     SET(OAC_LINK_LIBS ${OAC_LINK_LIBS} ${ZMQ_LIBRARIES})
