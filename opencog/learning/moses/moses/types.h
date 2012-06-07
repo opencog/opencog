@@ -334,7 +334,9 @@ typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 static inline
 score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double p=1.0)
 {
-    OC_ASSERT (a.size() == b.size(), "Cannot compare unequal-sized vectors!\n");
+    OC_ASSERT (a.size() == b.size(), 
+        "Cannot compare unequal-sized vectors!  %d %d\n",
+         a.size(), b.size());
 
     behavioral_score::const_iterator ia = a.begin();
     behavioral_score::const_iterator ib = b.begin();

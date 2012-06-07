@@ -493,12 +493,23 @@ type_tree infer_data_type_tree(const string& fileName,
     get_data_line(*in, line);
     if (hasHeader(fileName))
         get_data_line(*in, line);
+
+    OC_ASSERT(1 < line.size(),
+        "Error: the data file %s appears to be empty!?\n",
+        fileName.c_str());
+
     type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line,
                                                               output_col_num,
                                                               ignore_col_nums));
+
+    if (!is_well_formed(res)) {
+        logger().error() << "Error: Cannot infer type tree for this line: "
+            << line << "\nType tree is " <<  res;
+    }
     OC_ASSERT(is_well_formed(res),
-              "Cannot deduce data types of some columns in line=%s\n",
-              line.c_str());
+        "Error: In file %s, cannot deduce data types of some of the "
+        "columns in this line=%s\nSee log file for  more info.",
+        fileName.c_str(), line.c_str());
     return res;
 }
 
