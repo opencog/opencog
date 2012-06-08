@@ -2324,3 +2324,49 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 10.2M:
 
 
+"v12-accu": traidional -Hit accuracy maximization.  On Cray, using:
+        moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hit -r1 -j12 -v12 
+
+"bisect": using the bisected data. On localhost.
+        moses-perf -imagic-bisect.data -u1 -x1 -Z1 -Hit
+        Clearly more than one orders-of-magnitude faster than contin,
+        at first, but bogs down.   But coparable complexity... 
+        scoring contins takes 12x longer !?  Or are there more
+        cands, so merge takes much much longer!?
+
+"bisect-v12": using the bisected data. On localhost.  As above, but v12.
+
+
+            v12-accu               bisect              bisect-v12
+-m      time  score   cpxy    time  score  cpxy    time  score   cpxy
+10K:      28  4717     31       18   4083   28       18   4084    27
+20K:      80  4421     49       62   4054   37       64   4054    39
+40K:     250  4039     91      181   3995   54      188   4018    55
+80K:     794  3735    109      573   3980   71      536   3984    68
+160K:   2058  3669    119     1789   3974   75     1725   3982    71
+320K:   4934  3656    126                          4357   3982    70     
+640K:  11001  3652    131                         10546   3965    78
+1.28M: 24055  3651    133                         25971   3965    77
+2.56M:     
+5.12M: 
+10.2M:
+
+"trisect-v12": using the trisected data. On localhost.  As above, but v12.
+     Note that the trisected data score is beating the contin variant. :-(
+
+"quadsect-v12": using the quadsected data. On localhost.  As above, but v12.
+
+           trisect-v12           quadsect-v12        hexsect-v12
+-m      time  score   cpxy   time  score  cpxy    time  score   cpxy
+10K:      30   3808    36      54   3701   21
+20K:      79   3748    50     138   3537   36
+40K:     242   3718    60     383   3429   47
+80K:     656   3681    76    1086   3364   76
+160K:   1966   3654    95
+320K:   7040   3629   119
+640K:  
+1.28M: 
+2.56M:     
+5.12M: 
+10.2M:
+
