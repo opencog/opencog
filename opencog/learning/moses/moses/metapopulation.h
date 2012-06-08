@@ -460,14 +460,12 @@ struct metapopulation : public bscored_combo_tree_set
         // this will still eat up tens of GBytes of RAM, and so is a
         // relatively lenient cap.
         // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
-        // This cap is huge, when the behavioral scores are small; it
-        // really only comes into play when the behavioral scores are
-        // large.  Essentially, its engineered to limit RAM usage to 
-        // tens of GBytes for any problem size that takes a cpu-week
-        // to run.  This should be fine for PC's and small supercomputers,
-        // solving "typical" problem sizes.
-        size_t nbelts = get_bscore(*begin()).size();
-        double cap = 1.0e6 / double(nbelts);
+        //
+        // XXX TODO fix the cap so its more sensitive to the size of 
+        // each exemplar, right!?
+        // size_t nbelts = get_bscore(*begin()).size();
+        // double cap = 1.0e6 / double(nbelts);
+        double cap = 50.0;
         cap *= _n_expansions + 250.0;
         cap *= 1 + 2.0*exp(- double(_n_expansions) / 500.0);
         size_t popsz_cap = cap;
