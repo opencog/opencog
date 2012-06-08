@@ -39,6 +39,12 @@ void DestinData::LoadFile(const char* sFileName)
 
 	std::ifstream stmIn;
 	stmIn.open(sFileName,ios::in | ios::binary );
+	if(stmIn.is_open()){
+		cout << "Found input file." << endl;
+	}else{
+		cout << "Did not find input file." << endl;
+		return;
+	}
 
 	int iSignals;
 	stmIn.read( (char*)&iSignals,sizeof(iSignals));
