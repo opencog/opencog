@@ -8,14 +8,32 @@ from tree import *
 import math
 
 def rules(a, deduction_types):
+    '''This function sets up all the Rules available in PLN. The concept of a Rule is the same as
+    in higher-order logic. For example, Modus Ponens requires an ImplicationLink $1->$2 as well as the
+    premise of the ImplicationLink ($1) and will produce $2. Every Rule comes with its own formula
+    for calculating TruthValues. PLN works by applying a series of Rules to some Atoms to create new
+    ones.'''
+    
+    # This function creates a list of Rules using the Rule constructor.
+    # See the Rule class for more explanation of the arguments used.
+    # In every step of chaining, the backward chainer has a target Atom (usually with some variables)
+    # it is trying to find. It will apply any Rule whose head unifies with the target.
+    # The function is called every time a Chainer is constructed.
     rules = []
 
     #path_rules(a)
 
+    # PLN is able to do pathfinding (experimental). In the Minecraft world, there is a 3D grid
+    # similar to that used by A*. This Rule determines the grid squares (or rather grid cubes)
+    # that are next to a specified grid cube (i.e. the neighborhood, in the A* sense).
+    # You can represent the grid as a network of OpenCog links, which is more suitable for PLN
+    # than having an array (and more versatile in general).
+    # This version of the Rule calculates the neighborhood dynamically. The function path_rules()
+    # uses the simpler but much slower approach of adding thousands of links to the AtomSpace in advance.
     r = Rule(T('EvaluationLink',
                 a.add(t.PredicateNode,'neighbor'),
                 T('ListLink',
-                    Var(1),
+                    Var(1), # a ConceptNode representing the coordinates in a tacky format
                     Var(2)
                 )),
              [],
@@ -31,7 +49,10 @@ def rules(a, deduction_types):
     #         match=match_neighbors)
     #rules.append(r)
 
-    # All existing Atoms
+    # You can add a separate Rule for every axiom (i.e. every Atom which has a TruthValue when PLN starts).
+    # It won't add a new Rule for atoms that are created during the inference, rather they will be added to
+    # the Proof DAG. It's simple to have a separate Rule for each axiom, but it's slow because the chainer
+    # will try to unify a target against every axiom Rule.
     for obj in a.get_atoms_by_type(t.Atom):
         # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
         if obj.tv.count > 0 and obj.tv.mean > 0:
@@ -53,6 +74,11 @@ def rules(a, deduction_types):
     #                  match=match_axiom)
     #rules.append(r)
 
+    # A simple example Rule to test the mechanism. You're allowed to add a Rule which calls
+    # any Python function to decide one of the Atoms. This one does the plus calculation.
+    # The first two variables are the numbers to be added, and the third variable is the result.
+    # i.e. the last variable is the return-value for the '+' function. This is a common pattern in
+    # Prolog.
     r = Rule(T('EvaluationLink',
                a.add(t.PredicateNode,'+'),
                T('ListLink',
@@ -63,8 +89,18 @@ def rules(a, deduction_types):
              name='PredicateEvaluation',
              match=match_predicate)
     rules.append(r)
+
+    # The three main logical rules in PLN. The code creates different versions of the Rule
+    # for different kinds of Links.
+    # The classic Modus Ponens rule, used (and over-emphasized) in classical logic everywhere.
+    for ty in ['ImplicationLink', 'PredictiveImplicationLink']:
+        rules.append(Rule(Var(2), 
+                                     [T(ty, 1, 2),
+                                      Var(1) ], 
+                                      name='ModusPonens '+ty,
+                                      formula = formulas.modusPonensFormula))
     
-    # Deduction
+    # The PLN DeductionRule. Not to be confused with ModusPonens.
     for type in deduction_types:
         rules.append(Rule(T(type, 1,3), 
                                      [T(type, 1, 2),
@@ -75,7 +111,7 @@ def rules(a, deduction_types):
                                     name='Deduction', 
                                     formula = formulas.deductionSimpleFormula))
     
-    # Inversion
+    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
     for type in deduction_types:
         rules.append(Rule( T(type, 2, 1), 
                                      [T(type, 1, 2),
@@ -83,46 +119,9 @@ def rules(a, deduction_types):
                                       Var(2)], 
                                      name='Inversion', 
                                      formula = formulas.inversionFormula))
-    
-    # ModusPonens
-    for ty in ['ImplicationLink', 'PredictiveImplicationLink']:
-        rules.append(Rule(Var(2), 
-                                     [T(ty, 1, 2),
-                                      Var(1) ], 
-                                      name='ModusPonens '+ty,
-                                      formula = formulas.modusPonensFormula))
 
-#       # MP for AndLink as a premise
-#        for type in ['ImplicationLink']:
-#            for size in xrange(5):
-#                args = [new_var() for i in xrange(size+1)]
-#                andlink = T('AndLink', args)
-#
-#                rules.append(Rule(Var(2), 
-#                                             [T(type, andlink, 2),
-#                                              andlink ], 
-#                                              name='TheoremRule'))
-    
-   # ModusPonens for EvaluationLinks only
-#        for type in ['ImplicationLink']:
-#            conc = T('EvaluationLink', new_var(), new_var())
-#            prem = T('EvaluationLink', new_var(), new_var())
-#            imp = T('ImplicationLink', prem, conc)
-#            
-#            rules.append(Rule(conc, 
-#                                         [imp, prem], 
-#                                          name='ModusPonens_Eval'))
-
-#        for type in ['ImplicationLink']:
-#            conc = T('EvaluationLink', a.add_node(t.PredicateNode, 'B'))
-#            prem = T('EvaluationLink', a.add_node(t.PredicateNode, 'A'))
-#            imp = T('ImplicationLink', prem, conc)
-#            
-#            rules.append(Rule(conc, 
-#                                         [imp, prem], 
-#                                          name='ModusPonens_AB'))
-
-    # AND/OR
+    # Calculating logical And/Or/Not. These have probabilities attached,
+    # but they work similarly to the Boolean versions.
     type = 'AndLink'
     for size in xrange(5):                
         args = [new_var() for i in xrange(size+1)]
@@ -139,26 +138,29 @@ def rules(a, deduction_types):
                            type[:-4], 
                            formula = formulas.orFormula))
     
-    # Adding a NOT
+    # Calculate (NotLink A) using A. There's currently no Rule to find A using (NotLink A)
     rules.append(Rule(T('NotLink', 1),
                        [ Var(1) ],
                        name = 'Not', 
                        formula = formulas.notFormula))
     
-    # Link conversion
+    # PLN's heuristic Rules to convert one kind of link to another. There are other
+    # variations on this Rule defined in the PLN book, but not implemented yet.
     rules.append(Rule(T('InheritanceLink', 1, 2),
                        [ T('SubsetLink', 1, 2) ],
                        name = 'SubsetLink=>InheritanceLink', 
                        formula = formulas.ext2InhFormula))
 
-    # In planning, assume that an ExecutionLink (action) will be performed
+    # Used by planning. An ExecutionLink indicates an action being performed, so we can
+    # assume that the action will be performed as part of the plan (i.e. if any action
+    # occurs in the plan, set the TV to full probability and confidence).
     r = Rule(T('ExecutionLink', 1, 2),
                        [],
                        name = 'PerformAction',
                        tv = TruthValue(1.0,confidence_to_count(1.0)))
     rules.append(r)
 
-#        # Producing ForAll/Bind/AverageLinks?
+#        # Producing ForAll/Bind/AverageLinks.
 #        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
 #            rules.append(Rule(T(type, 1, 2),
 #                               [ Var(2) ],
@@ -177,6 +179,9 @@ def rules(a, deduction_types):
 #        r.tv = True
 #        rules.append(r)
 
+    # If an Atom is available in an Average/ForAll quantifier, you want to be
+    # able to produce the Atom itself and send it through the other steps of the
+    # inference.
     for atom in a.get_atoms_by_type(t.AverageLink):
         # out[0] is the ListLink of VariableNodes, out[1] is the expression
         tr = tree_from_atom(atom.out[1])
@@ -191,10 +196,11 @@ def rules(a, deduction_types):
         r.tv = atom.tv
         rules.append(r)
 
+    # Return every Rule specified above.
     return rules
 
 def path_rules(a):
-    # Pathfinding experiments
+    # These are some tacky and inefficient (but conceptually interesting) pathfinding experiments.
     template =  T('LatestLink',
                     T('AtTimeLink',
                         Var(-1),
@@ -323,7 +329,7 @@ def path_rules(a):
     #    
     #    block = T(obj)
 
-
+# See how they are used in rules() above.
 def match_axiom(space,target):
     if isinstance(target.op, Atom):
         candidates = [target.op]
@@ -407,7 +413,20 @@ class Rule :
 
     def __init__ (self, head, goals, name, tv = TruthValue(0, 0),
                   formula = None, match = None):
-	''' head, goals : tree '''
+        '''@head is a Tree representing the structure of Atom (usually a Link)
+    to be produced by this Rule. If it's a variable then any kind of Atom
+    can be produced.
+    @goals (list of Trees) specifies what kinds of Atoms
+    are necessary to produce it. There should be variables used in the head
+    that also appear in the goals. This means they will be the same atom.
+    It's OK to reuse the same variable numbers in different Rules - they'll
+    be converted to unique variables automatically.
+    The @name of the Rule is just for logging/visualizing the inference process.
+    You can use either @formula or @tv. If you specify a formula method from formulas.py
+    it will be called with the TVs of the relevant Atoms, to calculate the TruthValue for
+    the resulting Atom. If you set the tv parameter of the Rule, it will always use that TV.
+    @match lets you use custom code to decide which atoms are produced (or used). The API for that
+    is still in flux so not documented.'''
         self.head = head
         self.goals = goals
 
@@ -415,8 +434,9 @@ class Rule :
         self.tv = tv
         self.match = match
         self.formula = if_(formula, formula, formulas.identityFormula)
-	self.path_pre = None
-	self.path_axiom = None
+        # Dingjie's tracing experiments
+        self.path_pre = None
+        self.path_axiom = None
 
         if name == 'Lookup':
             assert len(goals) == 0
@@ -441,6 +461,8 @@ class Rule :
         return rep
 
     def standardize_apart(self):
+        '''Create a new version of the Rule where both the head and goals use new
+        variables. Important for unification.'''
         head_goals = (self.head,)+tuple(self.goals)
         tmp = standardize_apart(head_goals)
         new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv,
@@ -449,6 +471,9 @@ class Rule :
         return new_version
 
     def isomorphic(self, other):
+        '''Check if both self and other are the same. Renaming a variable doesn't affect it.
+        It's possible for the same target to be produced multiple times by the backward chainer,
+        so this enables you to reuse the existing one.'''
         # One way: make conjunctions out of the rules to make
         # sure variable renamings are consistent across both
         # conclusion and premises
@@ -473,7 +498,7 @@ class Rule :
         return unify(self_conj, other_conj, {}) != None
 
     def subst(self, s):
-	'''return new substitued rule '''
+	'''Create a new Rule where substitution s has been substituted into both the head and goals.'''
         new_head = subst(s, self.head)
         new_goals = list(subst_conjunction(s, self.goals))
         new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv,
