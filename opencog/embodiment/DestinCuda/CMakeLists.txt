@@ -12,7 +12,7 @@ FIND_PACKAGE(CUDA 4.0)
 if(CUDA_FOUND)
     #Enable debug for CUDA and set Tesla build command
     #Change the 20 for the type of you card: (CUDA computable of 1.3 = 13)
-    set(CUDA_NVCC_FLAGS -g -G -gencode arch=compute_20,code=sm_20)
+    set(CUDA_NVCC_FLAGS -g -G -gencode arch=compute_30,code=sm_30)
     
     #Add Pugi XML
 	add_subdirectory( pugixml )
@@ -32,9 +32,10 @@ if(CUDA_FOUND)
  	FIND_LIBRARY(lib_highgui highgui )
 
 	if(lib_highgui)
+		set(cv_libs /usr/lib/libcv.so /usr/lib/libcxcore.so ) 
 		set(cudadest_source ${cudadest_source} VideoSource)
 		ADD_EXECUTABLE(testvideo TestVideo VideoSource)
- 		target_link_libraries(testvideo ${lib_highgui} )
+ 		target_link_libraries(testvideo ${lib_highgui} ${cv_libs} )
 	else()
 		message("OpenCV highgui lib not found, not building video input capabilities or java wrappers.")
 		set(lib_highgui "") #set it to nothing so it wont complain about it being set to NOTFOUND
