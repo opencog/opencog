@@ -141,7 +141,6 @@ struct optim_parameters
                      size_t _max_dist = 4,
                      score_t _min_score_improv = 0.5) :
         opt_algo(_opt_algo),
-        term_total(1.0),
         term_improv(1.0),
 
         window_size_pop(0.05), //window size for RTR is
@@ -163,16 +162,7 @@ struct optim_parameters
                      pow(information_theoretic_bits(fs), 1.05));
     }
 
-    // term_total * n
-    // XXX term_total always seems to be 1.0, its cruft, remove it.
-    // XXX I don't understand what number of info theo bits  has to do with
-    // "max_gens" ?? what is "max_gens" ???
-    inline unsigned max_gens_total(const field_set& fs)
-    {
-        return ceil(term_total * information_theoretic_bits(fs));
-    }
-
-    // term_improv*sqrt(n/w)
+    // term_improv*sqrt(n/w)  Huh?
     inline unsigned max_gens_improv(const field_set& fs)
     {
         return ceil(term_improv*
@@ -227,10 +217,9 @@ struct optim_parameters
     // String name of the optimization algo to employ
     string opt_algo;
 
-    // optimization is terminated after term_total*n generations, or
+    // optimization is terminated after n generations, or
     // term_improv*sqrt(n/w) consecutive generations with no
     // improvement (w=windowsize)
-    double term_total;
     double term_improv;
 
     double window_size_pop;
@@ -326,7 +315,7 @@ struct univariate_optimization : optim_stats
                         const CScoring& cscorer, unsigned max_evals)
     {
         unsigned pop_size = opt_params.pop_size(deme.fields());
-        unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
+        unsigned max_gens_total = information_theoretic_bits(deme.fields());
         unsigned max_gens_improv = opt_params.max_gens_improv(deme.fields());
         unsigned n_select = double(pop_size) * eda_params.selection_ratio;
         unsigned n_generate = double(pop_size) * eda_params.replacement_ratio;
@@ -626,23 +615,23 @@ struct hill_climbing : optim_stats
         const field_set& fields = deme.fields();
 
         // Estimate the number of nearest neighbors.
-        deme_size_t nn_estimate =
-                information_theoretic_bits(deme.fields());
+        deme_size_t nn_estimate = information_theoretic_bits(fields);
+        logger().info("Field set contains %d bits", nn_estimate);
 
-        // XXX The two functions below recompute nn_estimate, twice,
-        // again.  This is wasteful, and should be fixed ...
+        // XXX The function below recomputes nn_estimate again.
+        // This is wasteful, and should be fixed ...
         // pop_size == 20 * number of info-theoretic-bits in the field.
-        // max_gens_total == number of info-theoretic-bits in the field.
         unsigned pop_size = opt_params.pop_size(fields);
-        unsigned max_gens_total = opt_params.max_gens_total(fields);
 
         deme_size_t current_number_of_instances = 0;
 
         // max_number_of_instances == 20 * info-theo-bits squared.
         // XXX This math seems crazy/wonky to me. Review, and
         // eliminate, as needed.
+        // I'm not sure why we are clamping -- is this a mem usage issue?
+        // a run-time issue ??  Why this number and not some other number?
         deme_size_t max_number_of_instances =
-            (deme_size_t)max_gens_total * (deme_size_t)pop_size;
+            (deme_size_t) nn_estimate * (deme_size_t)pop_size;
 
         // Clamp to the maximal # of evaluations allowed.
         // Note that for most short-running problems, that max_evals
@@ -774,9 +763,9 @@ struct hill_climbing : optim_stats
                 "Budget %u samples out of estimated %u neighbours",
                 number_of_new_instances, total_number_of_neighbours);
 
-            // The first few times through, (or if we decided on a full
-            // rescan), explore the entire nearest neighborhood.
-            // Otherwise make some optimistic assumptions about where
+            // The first few times through, (or, if we decided on a
+            // full rescan), explore the entire nearest neighborhood.
+            // Otherwise, make some optimistic assumptions about where
             // the best new instances are likely to be, and go there.
             //
             // If the size of the nearest neighborhood is small enough,
@@ -1150,7 +1139,7 @@ struct simulated_annealing : optim_stats
 
         // @todo this should be adapted for SA
         unsigned pop_size = opt_params.pop_size(fields);
-        // unsigned max_gens_total = opt_params.max_gens_total(deme.fields());
+        // unsigned max_gens_total = information_theoretic_bits(deme.fields());
         deme_size_t max_number_of_instances =
             /*(deme_size_t)max_gens_total * */
             (deme_size_t)pop_size;
