@@ -514,14 +514,47 @@ Out vary_n_knobs(const field_set& fs,
     {
         field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
         itd += fs.raw_to_disc_idx(starting_index);
-        disc_t tmp_val = *itd;
 
+#define UNROLL_TAIL_CALL_DISC 1
+#ifdef UNROLL_TAIL_CALL_DISC
+        // For distance == 1, it will be much faster and easier if we
+        // just take the tail call and explicitly turn it into a loop.
+        // (This avoids insanely deep stacks, too.)
+        // Note, however, the recursive call starts at end, and works
+        // backwards, so this loop is not exactly the same...
+        if (1 == dist) {
+            unsigned end_idx = fs.end_disc_raw_idx();
+
+            // Recursive call, do the bit knobs first (just like below).
+            out = vary_n_knobs(fs, tmp_inst, dist, end_idx, out, end);
+
+            for ( ; starting_index < end_idx; starting_index++) {
+                OC_ASSERT(out != end, "Write past end of array!");
+
+                disc_t tmp_val = *itd;
+                for (unsigned i = 1; i <= itd.multy() - 1; ++i) {
+                    // Vary to all legal values.  The neighborhood should
+                    // not equal to itself, so if it is same, set it to 0.
+                    if (tmp_val == i)
+                        *itd = 0;
+                    else
+                        *itd = i;
+                    *out++ = tmp_inst; // record the resulting inst.
+                }
+                *itd = tmp_val;        // put the bit back.
+                itd ++;                // move to the next disc.
+            }
+            return out;
+        }
+#endif
         // Recursive call, moved for one position.
-        // XXX TODO, unroll the last tail call, just like the single-bit
-        // knob case, below.
+        // Note this steps past all the disc knobs, and goes to do the 
+        // the single-bit knobs.  Only after returning from that,
+        // does it do the disc knobs, below.
         out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
 
-        // modify the disc and recursive call, moved for one position
+        // Modify the disc and recursive call, moved for one position
+        disc_t tmp_val = *itd;
         for (unsigned i = 1; i <= itd.multy() - 1; ++i) {
             // Vary to all legal values.  The neighborhood should
             // not equal to itself, so if it is same, set it to 0.
