@@ -483,6 +483,8 @@ Out vary_n_knobs(const field_set& fs,
         else
         {
             // Recursive call, moved for one position
+            // XXX TODO, unroll the last tail call, just like the single-bit
+            // knob case, below.
             out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
             // Left<->Right
             *itr = field_set::contin_spec::switchLR(*itr);
@@ -515,6 +517,8 @@ Out vary_n_knobs(const field_set& fs,
         disc_t tmp_val = *itd;
 
         // Recursive call, moved for one position.
+        // XXX TODO, unroll the last tail call, just like the single-bit
+        // knob case, below.
         out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
 
         // modify the disc and recursive call, moved for one position
@@ -536,6 +540,25 @@ Out vary_n_knobs(const field_set& fs,
         field_set::bit_iterator itb = fs.begin_bit(tmp_inst);
         itb += starting_index - fs.begin_bit_raw_idx();
 
+#define UNROLL_TAIL_CALL 1
+#ifdef UNROLL_TAIL_CALL
+        // For distance == 1, it will be much faster and easier if we
+        // just take the tail call and explicitly turn it into a loop.
+        // (This avoids insanely deep stacks, too.)
+        // Note, however, the recursive call starts at end, and works
+        // backwards, so this loop is not exactly the same...
+        if (1 == dist) {
+            unsigned end_idx = fs.end_bit_raw_idx();
+            for ( ; starting_index < end_idx; starting_index++) {
+                OC_ASSERT(out != end, "Write past end of array!");
+                *itb = !(*itb);       // change one bit.
+                *out++ = tmp_inst;    // record the resulting inst.
+                *itb = !(*itb);       // put the bit back.
+                itb ++;               // move to the next bit.
+            }
+            return out;
+        }
+#endif
         // Recursive call, moved for one position.
         out = vary_n_knobs(fs, tmp_inst, dist, starting_index + 1, out, end);
 
