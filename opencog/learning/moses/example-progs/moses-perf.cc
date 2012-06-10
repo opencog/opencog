@@ -51,7 +51,7 @@ void measure(vector<string> arguments)
         stringstream ss;
 #if DO_THREADING
         ss << "-j" << i;
-#elif 1
+#elif 0
         ss << "-r" << i;
 #else
         int nrep = 10000*(1<<i);
@@ -64,7 +64,8 @@ void measure(vector<string> arguments)
         stringstream fss;
         // fss << "-fmoses-perf-pa-k4-occam-r" << i << ".log";
         // fss << "-fmoses-perf-bank-nn30-m" << nrep << ".log";
-        fss << "-fmoses-perf-iris-r" << i << ".log";
+        // fss << "-fmoses-perf-iris-r" << i << ".log";
+        fss << "-fmoses-perf-magic-bi-m" << i << ".log";
         args.push_back(fss.str());
 #endif
 
