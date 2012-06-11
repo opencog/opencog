@@ -1,4 +1,5 @@
-/** feature_optimization.h ---
+/** 
+ * feature_optimization.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -103,6 +104,9 @@ FeatureSet incremental_selection(const FeatureSet& features,
         FeatureSet tf = set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
 
+        logger().debug("Iteration %d feature set size=%d powerset size=%d",
+            i, tf.size(), fss.size());
+
         // Add the set of relevant features for that iteration in rel
         rel.clear();
         auto fss_view = random_access_view(fss);
@@ -113,6 +117,8 @@ FeatureSet incremental_selection(const FeatureSet& features,
                 rel.insert(fs->begin(), fs->end());
             }};
         OMP_ALGO::for_each(fss_view.begin(), fss_view.end(), filter_relevant);
+        logger().debug("Iteration %d relevant features=%d",
+            i, rel.size());
 
         if (red_threshold > 0) {
             // Define the set of set of features to test for redundancy
@@ -134,16 +140,21 @@ FeatureSet incremental_selection(const FeatureSet& features,
             auto nrfss_view = random_access_view(nrfss);
             OMP_ALGO::for_each(nrfss_view.begin(), nrfss_view.end(),
                                filter_redundant);
+
+            logger().debug("Iteration %d redundant features=%d",
+                i, red.size());
             // add in res the relevant non-redundant features
             std::set_difference(rel.begin(), rel.end(), red.begin(), red.end(),
                                 std::inserter(res, res.begin()));
         } else {
             res.insert(rel.begin(), rel.end());
         }
+        logger().debug("Iteration %d finished with %d features\n",
+            i, res.size());
     }
 
     // Log what it is that we actually got.
-    if (logger().isDebugEnabled()) {
+    if (logger().isInfoEnabled()) {
         std::stringstream ss;
         ss << "Exit incremental_selection(), selected: ";
         typename FeatureSet::const_iterator fi;
@@ -152,7 +163,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
         }
         double mi = scorer(res);
         ss << " MI=" << mi;
-        logger().debug() << ss.str();
+        logger().info() << ss.str();
     }
 
     return res;

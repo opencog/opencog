@@ -1,4 +1,5 @@
-/** feature-selection.h --- 
+/**
+ * main/feature-selection.h --- 
  *
  * Copyright (C) 2011 OpenCog Foundation
  *

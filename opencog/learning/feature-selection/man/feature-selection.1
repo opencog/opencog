@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH FEATURE-SELECTION 1 "May 2, 2012" "3.0.12" "OpenCog Learning"
+.TH FEATURE-SELECTION 1 "June 11, 2012" "3.1.8" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -242,6 +242,10 @@ Two features are considered redundant if they are highly correlated,
 so that adding either one of the two may improve MI a lot, but adding
 the second will not.  Thus, only one is really needed; using the 
 \fB\-T\fP option helps eliminate redundant features.
+
+Note that when the number of desired features is large, this algo can
+take a very long time to complete.  Although it can be much more accurate
+than \fBinc\fP described below, it can be much much slower.
 T}
 
 \fBinc\fR@T{
@@ -320,6 +324,8 @@ feature and the target).  Specifying a number greater than one will
 consider the mutual information between multiple features and the
 target.  Note that using this calculation is combinatorially more 
 computationally expensive, as all possible choices are considered.
+That is, (n choose k) choices are considered, where n==number of
+features, and k==number of interaction terms.
 .PP
 .\" ============================================================
 .SH TODO
