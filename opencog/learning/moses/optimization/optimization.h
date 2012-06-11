@@ -257,7 +257,7 @@ struct optim_stats
 {
     optim_stats()
         : nsteps(0), deme_count(0), total_steps(0), total_evals(0),
-        over_budget(false)
+        field_set_size(0), over_budget(false)
 #ifdef GATHER_STATS
           , hiscore(0.0), hicount(0.0)
 #endif
@@ -266,6 +266,7 @@ struct optim_stats
     unsigned deme_count;
     unsigned total_steps;
     unsigned total_evals;
+    unsigned field_set_size;
     bool over_budget;
 
     // Additional stats.
@@ -616,7 +617,7 @@ struct hill_climbing : optim_stats
 
         // Estimate the number of nearest neighbors.
         deme_size_t nn_estimate = information_theoretic_bits(fields);
-        logger().info("Field set contains %d bits", nn_estimate);
+        field_set_size = nn_estimate;  // optim stats, printed by moses.
 
         // XXX The function below recomputes nn_estimate again.
         // This is wasteful, and should be fixed ...

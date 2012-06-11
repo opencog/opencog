@@ -88,9 +88,19 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     // Print legend for the columns of the stats.
     if (logger().isInfoEnabled()) {
         stringstream ss;
+        ss << "Stats:# gen is the generation number.\n"
+           << "Stats:# num_evals is the number of scoring function evaluations so far.\n"
+           << "Stats:# metapop_size is the size of the metapopulation.\n"
+           << "Stats:# best_score is the highest raw score seen, of all exemplars.\n"
+           << "Stats:# complexity is in bits, of the highest-composite score exemplar.\n";
+        if (os) {
+           ss << "Stats:# field_set_size is the number of bits in all the knobs.\n"
+              << "Stats:# optim_steps is the number of steps the optimizer took.\n"
+              << "Stats:# over_budget is bool, T if search exceeded scoring func eval budget.\n";
+        }
         ss << "Stats:# gen\tnum_evals\tmetapop_size\tbest_score\tcomplexity";
         if (os) {
-            ss << "\toptim_steps\tover_budget";
+            ss << "\tfield_set_size\toptim_steps\tover_budget";
         }
         ss << endl;
         logger().info(ss.str());
@@ -113,6 +123,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
             ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
             if (os) {
+                ss << "\t" << os->field_set_size;  // number of bits in the knobs
                 ss << "\t" << os->nsteps;  // number of iterations of optimizer
                 ss << "\t" << os->over_budget;  // exceeded max_evals
             }

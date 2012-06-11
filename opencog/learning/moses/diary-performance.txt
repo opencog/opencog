@@ -2407,10 +2407,12 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
         Crashes on the third, I think the stack recursion for 
         vary_n_knobs goes to 61K stack frames deep and croaks.
 
-        After first bug fix, still croaks. Slightly different
-        results: second run goes 126 steps, not 105, and so
-        the new exemplar is: 70479 bits
-   
+        After first bug fix (bzr rev 7091), still croaks. Slightly 
+        different results: second run goes 126 steps, not 105, and so
+        the new exemplar is: 70479 bits  
+
+        second fix: bzr rev 7092, Field set contains 57124 bits,
+        optim steps: 113
 
 "16-sect-C48-j12: One the cray, pick out 48 features out of the 150
         (the hexsect raw had 47 features).  Do this with
@@ -2433,8 +2435,8 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 80K:     176   3158    49     158   2905   70       
 160K:    459   3082    69     428   2751  120 
 320K:   1157   2789   114    1193   2684  155
-640K:                        3404   2534  236
-1.28M:                       9316   2434  310
+640K:   3212   2718   136    3404   2534  236
+1.28M:  7919   2530   197    9316   2434  310
 2.56M:     
 5.12M: 
 10.2M:
