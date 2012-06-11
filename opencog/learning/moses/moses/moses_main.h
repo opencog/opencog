@@ -154,6 +154,13 @@ struct metapop_printer
     
     #ifdef GATHER_STATS
         metapop.optimize.hiscore /= metapop.optimize.hicount;
+        metapop.optimize.num_improved /= metapop.optimize.count_improved;
+        logger().info() << "Avg number of improved scores = "
+                        << metapop.optimize.num_improved;
+        logger().info() << "Avg improved as percentage= "
+                        << 100.0 * metapop.optimize.num_improved /
+                               metapop.optimize.scores.size();
+
         for (unsigned i=0; i< metapop.optimize.scores.size(); i++) {
             metapop.optimize.scores[i] /= metapop.optimize.counts[i];
             logger().info() << "Avg Scores: "

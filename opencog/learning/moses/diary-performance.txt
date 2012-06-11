@@ -2382,19 +2382,44 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
          equal, or even better (initially, at least), but that run times
          are halved.
 
-"hexsect-inc-C24": as above, but uses the -ainc algo infeature-selection
+"hexsect-inc-C24": as above, but uses the -ainc algo in feature-selection
          to trim 47 to 24 features.   Feature selection took 35 seconds.
          So that's wayyy faster, but significantly crappier score.
 
-          hexsect-mmi-C24     hexsect-inc-C24 
+"hex-inc-U2-C24": as above, but used -ainc -U2 for feature selection.
+         Well, its a little better, but nothing to write home about.
+
+          hexsect-mmi-C24     hexsect-inc-C24       hex-inc-U2-C24
 -m      time  score   cpxy   time  score  cpxy    time  score   cpxy
-10K:      49   3314    27      33   3570   25
-20K:     137   3221    40     102   3552   37
-40K:     404   3180    55     250   3509   50
-80K:    1048   3125    86     656   3478   70
-160K:   2919   3057   127    1968   3456   84
-320K:                        5277   3374  110
-640K:                       16467   3274  145
+10K:      49   3314    27      33   3570   25       42   3486    29
+20K:     137   3221    40     102   3552   37      106   3441    46
+40K:     404   3180    55     250   3509   50      355   3422    62
+80K:    1048   3125    86     656   3478   70      
+160K:   2919   3057   127    1968   3456   84      
+320K:                        5277   3374  110      
+640K:                       16467   3274  145      
+
+
+"hex-inc-U3-C24": as above, but used -ainc -U3 for feature selection.
+
+          hex-inc-U3-C24
+-m      time  score   cpxy   time  score  cpxy    time  score   cpxy
+10K:      
+20K:     
+40K:     
+80K:    
+160K:   
+320K:      
+640K:      
+
+Time to perform feature selection, using -ainc -Unn.  The code is supposed
+to be such that the higher the -Unn the better the feature selection.  Why
+the heck is -U2 faster!?
+
+-U1:   0m34.902s
+-U2:   0m23.298s
+-U3:   5m0.509s
+-U4:
 
 
 "16-sect-v12-j12": as above, but with 16 sections, on the cray (-j12)
@@ -2412,7 +2437,9 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
         the new exemplar is: 70479 bits  
 
         second fix: bzr rev 7092, Field set contains 57124 bits,
-        optim steps: 113
+        optim steps: 113  Uhh, wait .. if its 57124 bits, then
+        why does full search take 71698 evals? Ohhh because its an
+        estimate!   Fourth Field set contains 141546 bits
 
 "16-sect-C48-j12: One the cray, pick out 48 features out of the 150
         (the hexsect raw had 47 features).  Do this with
@@ -2426,18 +2453,25 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
         Field set contains 30868 bits
         Field set contains 45600 bits
 
+"16-sect-clamp": same as 16-sect-v12-j12, except that NN exploration
+        is clamped to 20K nearest neighbors.  Since the second 
+        generation has only 18K neighbors (actual, not estimated),
+        the results will be identical until the third gen, which
+        kicks in at -m640K ... Well, they're not identical, there'd
+        been some screwing around, before. But close enough.
 
-         16-sect-v12-j12      16-sect-C48-j12
+
+         16-sect-v12-j12      16-sect-C48-j12       16-sect-clamp
 -m      time  score   cpxy   time  score  cpxy    time  score   cpxy
-10K:       9   3706    12       8   3378   19
-20K:      24   3403    26      21   3157   31
-40K:      73   3362    28      58   3069   53
-80K:     176   3158    49     158   2905   70       
-160K:    459   3082    69     428   2751  120 
-320K:   1157   2789   114    1193   2684  155
-640K:   3212   2718   136    3404   2534  236
-1.28M:  7919   2530   197    9316   2434  310
-2.56M:     
+10K:       9   3706    12       8   3378   19        9   3706    12
+20K:      24   3403    26      21   3157   31       24   3403    26
+40K:      73   3362    28      58   3069   53       72   3362    28
+80K:     176   3158    49     158   2905   70      175   3211    42
+160K:    459   3082    69     428   2751  120      454   3098    66
+320K:   1157   2789   114    1193   2684  155     1150   2886   103
+640K:   3212   2718   136    3404   2534  236     3239   2718   136 
+1.28M:  7919   2530   197    9316   2434  310       
+2.56M: 21671   2430   268
 5.12M: 
 10.2M:
 

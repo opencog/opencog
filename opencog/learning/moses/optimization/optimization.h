@@ -105,10 +105,12 @@ struct hc_parameters
     hc_parameters(bool widen = false,
                   bool step = false,
                   bool cross = false,
-                  double _fraction_of_remaining = 1.0)
+                  double _fraction_of_remaining = 1.0,
+                  unsigned max_evals = 20000)   // XXX max-evals should be moses opt!
         : widen_search(widen),
           single_step(step),
           crossover(cross),
+          max_nn_evals (max_evals),
           fraction_of_remaining(_fraction_of_remaining)
     {
         OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
@@ -118,11 +120,26 @@ struct hc_parameters
     bool single_step;
     bool crossover;
 
+    // Evaluate no more than this number of instances per iteration.
+    // Problems with 100 or more features easily lead to exemplars with
+    // complexity in excess of 100; these in turn, after decorating with
+    // knobs, can have 20K or more nearest neighbors.  Doing a full
+    // nearest neighbor scan for such cases will eat up a huge amount of
+    // RAM in the instance_set, and its not currently obvious that a full
+    // scan is that much better than a random sampling.  XXX Or is it?
+    //
+    // XXX This parameter should probably be automatically adjusted with
+    // free RAM availability!?  Or something like that !?
+    unsigned max_nn_evals;
+
     // One should probably try first to tweak pop_size_ratio to
     // control the allocation of resources. However in some cases (for
     // instance when hill_climbing is used for feature-selection),
     // there is only one deme to explore and tweaking that parameter
     // can make a difference (breadth vs depth)
+    // XXX pop_size_ratio disabled in hill-climbing, since its definition
+    // was insane/non-sensical.  I can't figure out how it was supposed
+    // to work.
     double fraction_of_remaining;
 };
 
@@ -259,7 +276,8 @@ struct optim_stats
         : nsteps(0), deme_count(0), total_steps(0), total_evals(0),
         field_set_size(0), over_budget(false)
 #ifdef GATHER_STATS
-          , hiscore(0.0), hicount(0.0)
+          , hiscore(0.0), hicount(0.0), 
+          num_improved(0.0), count_improved(0.0)
 #endif
     {}
     unsigned nsteps;
@@ -275,6 +293,8 @@ struct optim_stats
     vector<double> counts;
     double hiscore;
     double hicount;
+    double num_improved;
+    double count_improved;
 #endif
 };
 
@@ -619,28 +639,7 @@ struct hill_climbing : optim_stats
         deme_size_t nn_estimate = information_theoretic_bits(fields);
         field_set_size = nn_estimate;  // optim stats, printed by moses.
 
-        // XXX The function below recomputes nn_estimate again.
-        // This is wasteful, and should be fixed ...
-        // pop_size == 20 * number of info-theoretic-bits in the field.
-        unsigned pop_size = opt_params.pop_size(fields);
-
         deme_size_t current_number_of_instances = 0;
-
-        // max_number_of_instances == 20 * info-theo-bits squared.
-        // XXX This math seems crazy/wonky to me. Review, and
-        // eliminate, as needed.
-        // I'm not sure why we are clamping -- is this a mem usage issue?
-        // a run-time issue ??  Why this number and not some other number?
-        deme_size_t max_number_of_instances =
-            (deme_size_t) nn_estimate * (deme_size_t)pop_size;
-
-        // Clamp to the maximal # of evaluations allowed.
-        // Note that for most short-running problems, that max_evals
-        // will be *much* smaller than the product above, and so will
-        // always be clamped.  Note also that 'max_evals' is actually
-        // 'number of evals remaining', and so is constantly shrinking.
-        if (max_number_of_instances > max_evals)
-            max_number_of_instances = max_evals;
 
         unsigned max_distance = opt_params.max_distance(fields);
 
@@ -690,9 +689,16 @@ struct hill_climbing : optim_stats
                 // fraction_of_remaining is 1 by default
                 number_of_new_instances *= hc_params.fraction_of_remaining;
 
+                // Clamp the number of nearest-neighbor evaluations
+                // we'll do.  This is necessitated because some systems
+                // have a vast number of nearest neighbors, and searching
+                // them all explodes the RAM usage, for no gain.
+                if (number_of_new_instances > hc_params.max_nn_evals)
+                    number_of_new_instances = hc_params.max_nn_evals;
+
                 // avoid overflow.
                 deme_size_t nleft =
-                    max_number_of_instances - current_number_of_instances;
+                    max_evals - current_number_of_instances;
                 if (nleft < number_of_new_instances)
                     number_of_new_instances = nleft;
 
@@ -723,8 +729,15 @@ struct hill_climbing : optim_stats
                 for (unsigned k=0; k<distance; k++)
                    number_of_new_instances *= hc_params.fraction_of_remaining;
 
+                // Clamp the number of nearest-neighbor evaluations
+                // we'll do.  This is necessitated because some systems
+                // have a vast number of nearest neighbors, and searching
+                // them all explodes the RAM usage, for no gain.
+                if (number_of_new_instances > hc_params.max_nn_evals)
+                    number_of_new_instances = hc_params.max_nn_evals;
+
                 deme_size_t nleft =
-                    max_number_of_instances - current_number_of_instances;
+                    max_evals - current_number_of_instances;
 
                 // If fraction is small, just use up the rest of the cycles.
                 if (number_of_new_instances < MINIMUM_DEME_SIZE)
@@ -734,31 +747,6 @@ struct hill_climbing : optim_stats
                 if (nleft < number_of_new_instances)
                     number_of_new_instances = nleft;
 
-                // Estimate the probability of an improvement and halt if too low
-                // XXX This estimate is pretty hokey... should probably be removed.
-                // If its based on something empirical, I don't know what that is...
-                float p_improv = 1.0;
-                if (number_of_new_instances < total_number_of_neighbours) {
-                    // Number of better candidates in the neighborhood.
-                    // This number is a big lie!
-                    double NB = 10000;
-
-                    // Proportion of good candidates in the neighborhood.
-                    double T = total_number_of_neighbours;
-                    double B = std::min(1.0, NB / T);
-                    double N = number_of_new_instances;
-                    p_improv = 1.0 - pow(1.0 - B, double(N));
-                }
-
-                logger().debug(
-                    "Estimated probability to find an improvement = %f",
-                    p_improv);
-
-                if (p_improv < 0.01) {
-                    logger().debug("The probability is too low to pursue the search",
-                                   p_improv);
-                    break;
-                }
             }
             logger().debug(
                 "Budget %u samples out of estimated %u neighbours",
@@ -766,12 +754,18 @@ struct hill_climbing : optim_stats
 
             // The first few times through, (or, if we decided on a
             // full rescan), explore the entire nearest neighborhood.
-            // Otherwise, make some optimistic assumptions about where
-            // the best new instances are likely to be, and go there.
+            // Otherwise, make the optimistic assumption that the best
+            // the best new instances are likely to be genric cross-overs
+            // of the current top-scoring instances.  This assumption 
+            // seems to work really quite well.
+            //
+            // Based on experiments, crossing over the 40 highest-scoring
+            // instances seems to offer plenty of luck, to TOP_POP_SIZE
+            // is currently defined to be 40.
             //
             // If the size of the nearest neighborhood is small enough,
             // then don't bother with the optimistic guessing.  The
-            // optimistic guessing will generate 3*TOP_POP_SIZE
+            // cross-over guessing will generate 3*TOP_POP_SIZE
             // instances.  Our guestimate for number of neighbors
             // intentionally over-estimates by a factor of two. So the
             // breakeven point would be 6*TOP_POP_SIZE, and we pad this
@@ -872,16 +866,19 @@ struct hill_climbing : optim_stats
                           deme.end(),
                           std::greater<scored_instance<composite_score> >());
                 for (unsigned i = current_number_of_instances;
-                     deme.begin() + i != deme.end(); ++i)
+                     next(deme.begin(), i) != deme.end(); ++i)
                 {
                     composite_score inst_cscore = deme[i].second;
                     score_t iscore = get_weighted_score(inst_cscore);
                     unsigned j = i - current_number_of_instances;
                     scores[j] += iscore;
                     counts[j] += 1.0;
+
+                    if (prev_hi < iscore) num_improved += 1.0;
                 }
                 hiscore += prev_hi;
                 hicount += 1.0;
+                count_improved += 1.0;
             }
 #endif
             current_number_of_instances += number_of_new_instances;
@@ -943,7 +940,7 @@ struct hill_climbing : optim_stats
 
             /* If we've blown our budget for evaluating the scorer,
              * then we are done. */
-            if (max_number_of_instances <= current_number_of_instances) {
+            if (max_evals <= current_number_of_instances) {
                 over_budget = true;
                 logger().debug("Terminate Local Search: Over budget");
                 break;

@@ -94,7 +94,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            << "Stats:# best_score is the highest raw score seen, of all exemplars.\n"
            << "Stats:# complexity is in bits, of the highest-composite score exemplar.\n";
         if (os) {
-           ss << "Stats:# field_set_size is the number of bits in all the knobs.\n"
+           ss << "Stats:# field_set_size is the ESTIMATED number of bits in all the knobs.\n"
               << "Stats:# optim_steps is the number of steps the optimizer took.\n"
               << "Stats:# over_budget is bool, T if search exceeded scoring func eval budget.\n";
         }
