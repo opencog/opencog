@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "June 1, 2012" "3.1.7" "OpenCog Learning"
+.TH MOSES 1 "June 11, 2012" "3.2.0" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -528,7 +528,31 @@ problem types, especialy those with large neighborhoods (i.e. those with
 high prorgram complexity), this can lead to an order-of-magnitude
 speedup, or more.  For other problem types, especially those with 
 deceptive scoring functions, this can hurt performance.
-
+.PP
+.\" ============================================================
+.SS "Large problem parameters"
+Problems with a large number of features (100 and above) often 
+evolve exemplars with a complexity of 100 or more, which in turn
+may have instances with hundreds of thousands of nearest neighbors.
+Exploring one nearest neighbor requires one evaluation of the 
+scoring function, and so an exhaustive search can be prohibitive.  
+A partial search can often work quite well, especially when 
+cross-over is enabled.  The following falgs cnotrol such partial
+seaches.
+.TP
+.BI \-\-hc\-max\-nn\-evals= num
+Controls hill-climbing algorithm behaviour.  When exploring the
+nearest neighborhood of an instance, \fInum\fP specifies 
+the maximum number of nearest neighbors to explore.  An 
+exhaustive search of the nearest neighborhood is performed 
+when the number of nearest neighbors is less than this value.  
+.TP
+.BI \-\-hc\-fraction\-of\-nn= frac
+Controls hill-climbing algorithm behaviour.   When exploring the
+nearest neighborhood of an instance,  \fIfrac\fP specifies 
+the fraction of nearest neighborhood to explore.  When set 
+to 1.0, an exhaustive search of the entire neighborhood is made.
+.PP
 .\" ============================================================
 .SS "Algorithm tuning options"
 These options allow the operation of the algorithm to be fine-tuned
@@ -582,7 +606,7 @@ a single uphill step is taken, and the resulting best demes are folded
 back into the metapopulation.  Solving then continues as usual. By
 default, the hillclimbing algorithm does not single-step; it instead
 continues to the top of the local hill, before folding the resulting
-demes back into the metapopulation.  If using this flag, condiser
+demes back into the metapopulation.  If using this flag, consider
 usig the \fB\-T1\fR flag to allow the search to be widened, so that
 if the initial exemplar is already at the top of a local hill, a search
 is made for a different (taller) hill.

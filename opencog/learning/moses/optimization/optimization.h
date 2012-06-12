@@ -105,15 +105,15 @@ struct hc_parameters
     hc_parameters(bool widen = false,
                   bool step = false,
                   bool cross = false,
-                  double _fraction_of_remaining = 1.0,
+                  double _fraction_of_nn = 1.0,
                   unsigned max_evals = 20000)   // XXX max-evals should be moses opt!
         : widen_search(widen),
           single_step(step),
           crossover(cross),
           max_nn_evals (max_evals),
-          fraction_of_remaining(_fraction_of_remaining)
+          fraction_of_nn(_fraction_of_nn)
     {
-        OC_ASSERT(isBetween(fraction_of_remaining, 0.0, 1.0));
+        OC_ASSERT(isBetween(fraction_of_nn, 0.0, 1.0));
     }
     
     bool widen_search;
@@ -132,6 +132,15 @@ struct hc_parameters
     // free RAM availability!?  Or something like that !?
     unsigned max_nn_evals;
 
+    // fraction_of_nn is the fraction of the nearest-neighbrohood (NN)
+    // that should be searched.  For exhaustive NN search, this fraction
+    // should be 1.0.  However, setting this lower seems to be OK,
+    // especially when used with cross-over, since a fraction seems enough
+    // to discover some decent instances that can be crossed-over.  And,
+    // by not doing an exhaustive search, the run-time can be significantly
+    // improved.
+    //
+    // XXX I don't understand what the below is saying.
     // One should probably try first to tweak pop_size_ratio to
     // control the allocation of resources. However in some cases (for
     // instance when hill_climbing is used for feature-selection),
@@ -140,7 +149,7 @@ struct hc_parameters
     // XXX pop_size_ratio disabled in hill-climbing, since its definition
     // was insane/non-sensical.  I can't figure out how it was supposed
     // to work.
-    double fraction_of_remaining;
+    double fraction_of_nn;
 };
 
 // optimization algorithms
@@ -686,8 +695,8 @@ struct hill_climbing : optim_stats
                 total_number_of_neighbours = 2*nn_estimate;
                 number_of_new_instances = 2*nn_estimate;
 
-                // fraction_of_remaining is 1 by default
-                number_of_new_instances *= hc_params.fraction_of_remaining;
+                // fraction_of_nn is 1 by default
+                number_of_new_instances *= hc_params.fraction_of_nn;
 
                 // Clamp the number of nearest-neighbor evaluations
                 // we'll do.  This is necessitated because some systems
@@ -727,7 +736,7 @@ struct hill_climbing : optim_stats
                 // the power distance. So throttle back by fraction raised
                 // to power dist.
                 for (unsigned k=0; k<distance; k++)
-                   number_of_new_instances *= hc_params.fraction_of_remaining;
+                   number_of_new_instances *= hc_params.fraction_of_nn;
 
                 // Clamp the number of nearest-neighbor evaluations
                 // we'll do.  This is necessitated because some systems

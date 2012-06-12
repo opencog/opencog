@@ -2394,22 +2394,23 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 10K:      49   3314    27      33   3570   25       42   3486    29
 20K:     137   3221    40     102   3552   37      106   3441    46
 40K:     404   3180    55     250   3509   50      355   3422    62
-80K:    1048   3125    86     656   3478   70      
-160K:   2919   3057   127    1968   3456   84      
+80K:    1048   3125    86     656   3478   70      898   3393    79
+160K:   2919   3057   127    1968   3456   84     2316   3364    99
 320K:                        5277   3374  110      
 640K:                       16467   3274  145      
 
 
 "hex-inc-U3-C24": as above, but used -ainc -U3 for feature selection.
+         Remarkably crappier than the above.  How can that be?
 
           hex-inc-U3-C24
 -m      time  score   cpxy   time  score  cpxy    time  score   cpxy
-10K:      
-20K:     
-40K:     
-80K:    
-160K:   
-320K:      
+10K:      30   3525    27 
+20K:      88   3499    40
+40K:     239   3470    52  
+80K:     608   3441    69
+160K:   1715   3410    88
+320K:   5454   3254   120   
 640K:      
 
 Time to perform feature selection, using -ainc -Unn.  The code is supposed
@@ -2460,6 +2461,10 @@ the heck is -U2 faster!?
         kicks in at -m640K ... Well, they're not identical, there'd
         been some screwing around, before. But close enough.
 
+        Afterwards ... seems to be even slightly better.  Is this
+        because an exhaustive search is not needed to get good
+        cross-over results?
+
 
          16-sect-v12-j12      16-sect-C48-j12       16-sect-clamp
 -m      time  score   cpxy   time  score  cpxy    time  score   cpxy
@@ -2468,9 +2473,9 @@ the heck is -U2 faster!?
 40K:      73   3362    28      58   3069   53       72   3362    28
 80K:     176   3158    49     158   2905   70      175   3211    42
 160K:    459   3082    69     428   2751  120      454   3098    66
-320K:   1157   2789   114    1193   2684  155     1150   2886   103
-640K:   3212   2718   136    3404   2534  236     3239   2718   136 
-1.28M:  7919   2530   197    9316   2434  310       
+320K:   1157   2789   114    1193   2684  155     1136   2886   103
+640K:   3212   2718   136    3404   2534  236     3260   2661   158
+1.28M:  7919   2530   197    9316   2434  310    13333   2285   356
 2.56M: 21671   2430   268
 5.12M: 
 10.2M:

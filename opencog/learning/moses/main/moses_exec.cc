@@ -443,6 +443,8 @@ int moses_exec(int argc, char** argv)
     bool hc_widen_search;
     bool hc_single_step;
     bool hc_crossover;
+    unsigned hc_max_nn;
+    double   hc_frac_of_nn;
 
     // classifier paramters
     bool use_well_enough = false;
@@ -770,22 +772,6 @@ int moses_exec(int argc, char** argv)
          "and x >= threshold. The option can be used several times (n-1) "
          "to produce n classes and the thresholds are automatically sorted.\n")
 
-        (opt_desc_str(hc_widen_search_opt).c_str(),
-         value<bool>(&hc_widen_search)->default_value(false),
-         str(format("Hillclimbing parameter (%s). If false, then deme search "
-                    "terminates when a local hilltop is found. If true, "
-                    "then the search radius is progressively widened, "
-                    "until another termination condition is met.\n") % hc).c_str())
-
-        (opt_desc_str(hc_single_step_opt).c_str(),
-         value<bool>(&hc_single_step)->default_value(false),
-         str(format("Hillclimbing parameter (%s). If false, then the normal "
-                    "hillclimbing algorithm is used.  If true, then only one "
-                    "step is taken towards the hilltop, and the results are "
-                    "promptly folded back into the metapopulation. If this "
-                    "flag is set, then consider using the widen-search flag "
-                    "as well, so as to make forward progress.\n") % hc).c_str())
-
         (opt_desc_str(hc_crossover_opt).c_str(),
          value<bool>(&hc_crossover)->default_value(false),
          str(format("Hillclimbing parameter (%s). If false, then the entire "
@@ -808,6 +794,52 @@ int moses_exec(int argc, char** argv)
                     "problem types, especially those with deceptive "
                     "scoring functions, this can hurt performance.\n"
                     ) % hc).c_str())
+
+        ("hc-max-nn-evals",
+         value<unsigned>(&hc_max_nn)->default_value(20000),
+         str(format("Hillclimbing parameter (%s).  When exploring the "
+         "nearest neighborhood of an instance, this number specifies "
+         "the maximum number of nearest neighbors to explore.  An "
+         "exhaustive search of the nearest neighborhood is performed "
+         "when the number of nearest neighbors is less than this value.  "
+         "Problems with a large number of features (100 and above) often "
+         "evolve exemplars with a complexity of 100 or more, which in turn "
+         "may have instances with hundreds of thousands of nearest neighbors.  "
+         "Exploring one nearest neighbor requires one evaluation of the "
+         "scoring function, and so an exhaustive search can be prohibitive.  "
+         "A partial search can often work quite well, especially when "
+         "cross-over is enabled.\n") % hc).c_str())
+
+        ("hc-fraction-of-nn",
+         value<double>(&hc_frac_of_nn)->default_value(1.0),
+         str(format("Hillclimbing parameter (%s).  When exploring the "
+         "nearest neighborhood of an instance, this number specifies "
+         "the fraction of nearest neighborhood to explore.  When set "
+         "to 1.0, an exhaustive search of the entire neighborhood is made.  "
+         "Problems with a large number of features (100 and above) often "
+         "evolve exemplars with a complexity of 100 or more, which in turn "
+         "may have instances with hundreds of thousands of nearest neighbors.  "
+         "Exploring one nearest neighbor requires one evaluation of the "
+         "scoring function, and so an exhaustive search can be prohibitive.  "
+         "A partial search can often work quite well, especially when "
+         "cross-over is enabled.\n") % hc).c_str())
+
+
+        (opt_desc_str(hc_widen_search_opt).c_str(),
+         value<bool>(&hc_widen_search)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If false, then deme search "
+                    "terminates when a local hilltop is found. If true, "
+                    "then the search radius is progressively widened, "
+                    "until another termination condition is met.\n") % hc).c_str())
+
+        (opt_desc_str(hc_single_step_opt).c_str(),
+         value<bool>(&hc_single_step)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If false, then the normal "
+                    "hillclimbing algorithm is used.  If true, then only one "
+                    "step is taken towards the hilltop, and the results are "
+                    "promptly folded back into the metapopulation. If this "
+                    "flag is set, then consider using the widen-search flag "
+                    "as well, so as to make forward progress.\n") % hc).c_str())
 
         ("well-enough",
          value<bool>(&use_well_enough)->default_value(false),
@@ -972,6 +1004,10 @@ int moses_exec(int argc, char** argv)
     opt_params.hc_params.widen_search = hc_widen_search;
     opt_params.hc_params.single_step = hc_single_step;
     opt_params.hc_params.crossover = hc_crossover;
+    opt_params.hc_params.max_nn_evals = hc_max_nn;
+    if (hc_frac_of_nn < 0.0) hc_frac_of_nn = 0.001;
+    if (1.0 < hc_frac_of_nn) hc_frac_of_nn = 1.0;
+    opt_params.hc_params.fraction_of_nn = hc_frac_of_nn;
 
     // Set moses_parameters.
     moses_parameters moses_params(
