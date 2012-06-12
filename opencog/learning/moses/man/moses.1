@@ -549,9 +549,13 @@ when the number of nearest neighbors is less than this value.
 .TP
 .BI \-\-hc\-fraction\-of\-nn= frac
 Controls hill-climbing algorithm behaviour.   When exploring the
-nearest neighborhood of an instance,  \fIfrac\fP specifies 
-the fraction of nearest neighborhood to explore.  When set 
-to 1.0, an exhaustive search of the entire neighborhood is made.
+nearest neighborhood of an instance,  \fIfrac\fP specifies
+the fraction of nearest neighborhood to explore.  As currently
+implemented, only an estimate of the nearest-neighborhood size
+is used, not the true size.  However, this estimate is accurate
+to within a factor of 2.  Thus, to obtain an exhaustive search
+of the entire neighborhood, set this to 2.0 or larger.
+
 .PP
 .\" ============================================================
 .SS "Algorithm tuning options"

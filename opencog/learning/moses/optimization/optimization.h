@@ -105,15 +105,15 @@ struct hc_parameters
     hc_parameters(bool widen = false,
                   bool step = false,
                   bool cross = false,
-                  double _fraction_of_nn = 1.0,
-                  unsigned max_evals = 20000)   // XXX max-evals should be moses opt!
+                  unsigned max_evals = 20000,
+                  double _fraction_of_nn = 2.0) // > 1.0 since works on estimate only.
         : widen_search(widen),
           single_step(step),
           crossover(cross),
           max_nn_evals (max_evals),
           fraction_of_nn(_fraction_of_nn)
     {
-        OC_ASSERT(isBetween(fraction_of_nn, 0.0, 1.0));
+        OC_ASSERT(0.0 < fraction_of_nn);
     }
     
     bool widen_search;

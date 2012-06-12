@@ -811,11 +811,14 @@ int moses_exec(int argc, char** argv)
          "cross-over is enabled.\n") % hc).c_str())
 
         ("hc-fraction-of-nn",
-         value<double>(&hc_frac_of_nn)->default_value(1.0),
+         value<double>(&hc_frac_of_nn)->default_value(2.0),
          str(format("Hillclimbing parameter (%s).  When exploring the "
          "nearest neighborhood of an instance, this number specifies "
-         "the fraction of nearest neighborhood to explore.  When set "
-         "to 1.0, an exhaustive search of the entire neighborhood is made.  "
+         "the fraction of nearest neighborhood to explore.  As currently "
+         "implemented, only an estimate of the nearest-neighborhood size "
+         "is used, not the true size.  However, this estimate is accurate "
+         "to within a factor of 2.  Thus, to obtain an exhaustive search "
+         "of the entire neighborhood, set this to 2.0 or larger.  "
          "Problems with a large number of features (100 and above) often "
          "evolve exemplars with a complexity of 100 or more, which in turn "
          "may have instances with hundreds of thousands of nearest neighbors.  "
@@ -823,7 +826,6 @@ int moses_exec(int argc, char** argv)
          "scoring function, and so an exhaustive search can be prohibitive.  "
          "A partial search can often work quite well, especially when "
          "cross-over is enabled.\n") % hc).c_str())
-
 
         (opt_desc_str(hc_widen_search_opt).c_str(),
          value<bool>(&hc_widen_search)->default_value(false),
@@ -1005,8 +1007,6 @@ int moses_exec(int argc, char** argv)
     opt_params.hc_params.single_step = hc_single_step;
     opt_params.hc_params.crossover = hc_crossover;
     opt_params.hc_params.max_nn_evals = hc_max_nn;
-    if (hc_frac_of_nn < 0.0) hc_frac_of_nn = 0.001;
-    if (1.0 < hc_frac_of_nn) hc_frac_of_nn = 1.0;
     opt_params.hc_params.fraction_of_nn = hc_frac_of_nn;
 
     // Set moses_parameters.
