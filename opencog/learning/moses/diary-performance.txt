@@ -32,7 +32,7 @@ these.
 
    By bzr rev 6522, the algo was refactored to implement "true
    hillclimbing".  A portion of the nearest neighbors are searched. If
-   improvement is found, the the best instance is defined as the new
+   improvement is found, the best instance is defined as the new
    center, and it's nearest neighbors are searched. This process is
    repeated until there is no improvement, and only then does control
    return to the metapop outer loop.  The "true hillclimbing" algo
@@ -58,8 +58,8 @@ these.
    metapop select_exemplar() routine to use an annealing-style
    temperature.  Thus, some fraction of the time, a lower-scoring
    exemplar would be used as the starting place for knob-building.
-   Additional performance is gained by weighting the complexity into the
-   selection: that is, a lower-scored, but also lower complexity
+   Additional performance is gained by weighting the complexity into
+   the selection: that is, a lower-scored, but also lower complexity
    exemplar may be a better starting place than a high-score,
    high-complexity exemplar.  The discovery & solution of this behaviour
    is documented on the opencog blog; the blog page captured in the
@@ -75,34 +75,40 @@ these.
    win. 
 
    BTW, its not just the temperature that does this, but also a better
-   control over the metapopulation size.  The metapop size is managed
-   by refering to the score of exemplars; this obviates the need for
-   the "dominated merge" logic.  The dominated merge logic is very
-   complicated and quite slow; skipping this accounts for a large
-   performance boost. (In addition, domination had a way of knocking
-   out exemplars with decent scores, needed for the annealing
-   choice).
+   control over the metapopulation size.  See below.
 
+   Occam's Razor:  The old code did have a so-called "Occam's Razor"
+   feature, which was effectively quite similar to the above, except
+   that 1) it was undocumented so I didn't get it, and 2) it had a 
+   hard-coded temperature that was inapropriate and 3) it had a
+   profusion of minus signs that confused me.  Eventually realizing
+   that the complexity temperature and penalty were the same concept,
+   the two were merged, and code cleaned up by bzr rev 6971, with
+   final cleanups by bzr rev 6990.
 
-++ Exhaustive neighborhood search. The moses algo needs to apportion
-   cpu cycles between the outer, metapop loop, and the inner, deme
-   exploration loop.  The old algo, circa 6582, did this via a fraction
-   of the remaining cycles. If the max allowed cycles (-m flag) was too
-   low, the nearest neighbor exploration would be subsampled (instead of
-   an exhaustive search). Altering the nearest neighbor search (when the
-   hamming distance really is just one) to be an exhaustive search seems
-   to improve things.  Note this affects just the ban.csv dataset, as
-   this was not an issue for 4-parity. Part of the problem with the bank
-   dataset is that it jumps from relatively simple exemplars in the
-   first round, to very complex (squared) exemplars in later
-   knob-building rounds; these later exemplars are very expensive to
-   evaluate, so it makes sense to exhaust the simple cases first.
-   Fixed by bzr rev 6590.  See "budge" column in "regression" section
-   below.
+   The original Occam temperature was not recognized as a temperature,
+   but instead appealled to a concept of Solomonoff prior distribution
+   probbility.  The distribution was 2^-complexity, with complexity
+   meaured in bits.  By contrast, the current code uses a distribution
+   of exp(-beta * complexity).  Solomonoff would be regained if
+   beta==log2==0.69 but instead, current experimental evidence suggests
+   that a beta==2.4 works quite well.   Note tha the equivalent
+   temperature is 3 or 4 times lower than what Solomonoff suggests.
+   But perhaps we could/should raise the temperature a tad, and the
+   complexity penalty a tad... still experimentally unclear.  The
+   current beta is beta=100/(12*3.5)=2.4  with 100==hard-coded,
+   12==used with the "magic" dataset, with -v12 flag and 3.5==the -z
+   option default.   Note also, the man page gives probablistic 
+   argument for the correct prior value of complexity coeff.  It is
+   also possible that the moses code is significantly under-estimating
+   the true complexity; if so, the Solomonoff prior would be closer
+   to the experimentally optimal temperature.  But it is hard to say,
+   at this point.
+   
 
-++ Better population control, skip behavioral score computation.
+++ Better population control; skip behavioral score computation.
    Older code kept an excessively bloated metapopulation, members of
-   which were astronomically unikely to be choosen as futre
+   which were astronomically unikely to be choosen as future
    exemplars.  This gets fixed. In addition, old code was computing
    behavioral scores, even though domination-merging is no longer
    used. (Domination merging is a pig). Skipping this provides a huge
@@ -112,13 +118,113 @@ these.
    of the last several changes are about 3x to 4x, changing times for
    4-parity from about 300 sconds in rev 6582 to 72 secons in rev 6617.
 
-++ Correlated knob-turning.  Explores the hypothesis that
-   high-scoring instances are highly correlated.  This does indeed
+   The metapopulation size is managed by refering to the score of
+   exemplars; this obviates the need for the "dominated merge" logic.
+   The dominated merge logic is very complicated and quite slow;
+   skipping this accounts for a large performance boost.  In addition,
+   domination had a way of knocking out exemplars with decent scores,
+   needed for the annealing choice.
+
+   That is, by using a temperature during selection, we mean that the
+   exemplars are choosen with a Boltzmann distribution, with exemplar x
+   being choosen with probability p(x) ~ exp(-E(x)/kT) where E(x) is the
+   score of exemplar x. Because of the rapid fall-off of the
+   exponential,  exemplars with scores that are worse than 20 ro 30
+   times kT are very very unlikely to be chosen (since exp(-20) or
+   exp(-30) is so very tiny).   Thus, it is quite reasonable to cull
+   exemplars with scores worse than this from the metapopulation.  This
+   will dramatically decrease the size of the metapopulation to a more
+   manageable level.  In particular, it will discard many non-dominated
+   exemplars, while also keeping many dominated exmplars.  The net
+   result is that the domination computations, slow and cpu-intensive
+   to begin with, are proven to be ineffective, and are rendered obsolete.
+
+
+++ Exhaustive neighborhood search. The moses algo needs to apportion
+   cpu cycles between the outer, metapop loop, and the inner, deme
+   exploration loop.  The old algo, circa 6582, did this via a fraction
+   of the remaining cycles. If the max allowed cycles (-m flag) was too
+   low, the nearest neighbor exploration would be subsampled (instead of
+   an exhaustive search). Altering the nearest neighbor search (when the
+   hamming distance really is just one) to be an exhaustive search seems
+   to improve things.  Note this affects just the bank.csv dataset, as
+   this was not an issue for 4-parity. Part of the problem with the bank
+   dataset is that it jumps from relatively simple exemplars in the
+   first round, to very complex (squared) exemplars in later
+   knob-building rounds; these later exemplars are very expensive to
+   evaluate, so it makes sense to exhaust the simple cases first.
+   Fixed by bzr rev 6590.  See "budge" column in "regression" section
+   below.
+
+   However, an exhaustive neighborhood search is not always needed;
+   in fact, for some problems, a non-exhaustive search can provide a big
+   win.  This occurs for problems with a large feature set, such as 30 or
+   more.  As an example, the "magic-16-sect" dataset, described below,
+   has 150 features.  In the first generation, the field set contained
+   about 2K bits.  That is, the initial exemplar had enough knobs that
+   the size of the nearest neighborhood of a given exemplar was about
+   2K.  Such a nieghborhood can be productively searched exhaustively.
+   However, the second generation exemplar had a neighborhood size of
+   15K, the third generation 61K and the fourth generation had 141K.
+   Exploring these exhaustively seems pointless: even if only 0.1% of
+   the neighborhood had scores better than the starting point, an
+   exhaustive search would produce 15, 61 or 141 improvements.  For
+   hill-climbing, only 1 better score is needed; thus, exhaustive
+   search was oversupplying candidates, at a rather expensive cost.
+   Furthermore, by employing cross-over (see below), even more viable
+   instances are generated.   Thus, performance can be significantly
+   improved by sub-sampling the neighborhood.  Dramatic improvements
+   can be seen by searching as little as 1% of the neighborhood.  Use
+   the --hc-fraction-of-nn and --hc-max-nn-evals options from bzr rev
+   7099.  Its probably better to use --hc-max-nn-evals alone, so that
+   small neighborhoods are exhaustively searched, while the search of
+   large neighborhoods is clamps to a fixed size.
+
+
+++ Correlated knob-turning ("Cross-over").  Explores the hypothesis
+   that high-scoring instances are highly correlated.  This does indeed
    seem to be the case for the bank.csv dataset, and so the best new 
    instances are mergers of the previous high scorers.  This seems
    to offer a huge win, by offering much of the benefit of EDA/BOA
-   with none of the cost. Research ongoing, will be checked in after
-   bzr 6617.
+   with none of the cost. Research cmpleted, was checked in sometime
+   after bzr 6617.
+
+   Result: A genetic cross-over algorithm was implmenented.  That is,
+   by taking two high-scoring instances, and crossing them to have a
+   new instance sharing both their traits, one often gets a new instance
+   that is fitter than either of the parents.  Cross-over is done by
+   comparing each instance to its common ancestor, to see what knobs
+   have changed, and then, for the child, taking the union of the 
+   knob changes.   Since the hill-climber nearest-neighbor search always
+   tweaks just one knob, each parent will have just a one-knob
+   difference, and the child will thus be at Hamming distance two from
+   the common ancestor.  Likewise, one can take the union of knobs from
+   the highest-scoring 3 or 4 instances, to create children at distance
+   3 or 4.  The current hillclimber will first attempt an exhaustive 
+   search, and then create 40 cross-overs at distance 2, 40 more at
+   distance 3 and 40 more at distance 4.  Very often, one or more of
+   these 120 instance will have an improved score.
+
+   In a certain sense, the above mimics the best aspects of an EDA/BOA
+   algorithm, without the overheads.  That is, it assumes a correlation
+   of knob settings, and assumes a perfect correlation for the top-40.
+   It took no effort to make this assumption; yet it appears to usually
+   be true, and the rewards of assuming it are quickly reaped.
+
+
+++ Contin learning vs. discretization.  Currently, learning from
+   continuous-valued datasets works.  However, it doesn't work very
+   well; it is significantly out-performed by discretizing the dataset
+   into many binary-valued features.  Using 4 or 6 booleans for each
+   oringial contin feature seems to work best.  Improving this situation
+   is TBD.
+   
+   For the above problem discretizing contin variables, it seems that
+   feature selection is useless or even worse-than-useless.  Compare,
+   e.g. 16-sect-nn-5K to 16-sect-C48-j12, below. Research is ongoing.
+   
+
+
 
 =======================================================================
 Major Studies
@@ -2463,7 +2569,9 @@ the heck is -U2 faster!?
 
         Afterwards ... seems to be even slightly better.  Is this
         because an exhaustive search is not needed to get good
-        cross-over results?
+        cross-over results?  And at 1.28M it holds the all-time record!
+
+       Note clamping is equivalent to --hc-max-nn-evals=20000
 
 
          16-sect-v12-j12      16-sect-C48-j12       16-sect-clamp
@@ -2479,4 +2587,28 @@ the heck is -U2 faster!?
 2.56M: 21671   2430   268
 5.12M: 
 10.2M:
+
+"16-sect-nn-10K": as above, but with --hc-fraction-of-nn=0.5 and
+        --hc-max-nn-evals=10000   Wow! kickbutt!  Anyway, the frac=0.5
+        has little effect, since gen 1 is done by -m22K and gen 2 has 
+        18K NN and so is promptly clamped.
+
+"16-sect-nn-5K": as above, but without the frac, and with 
+        --hc-max-nn-evals=5000 It is setting all new word records.
+
+
+         16-sect-nn-10K        16-sect-nn-5K
+-m      time  score   cpxy   time  score  cpxy    time  score   cpxy
+10K:      10   3711    23       9   3706   12
+20K:      27   3388    29      24   3403   26
+40K:      81   3311    35      79   3171   38
+80K:     193   3005    58     217   2990   84 
+160K:    493   2877   101    1006   2824  149 
+320K:   1736   2662   156    2735   2436  326
+640K:
+1.28M:
+2.56M:
+5.12M:
+10.2M:
+
 
