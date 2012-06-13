@@ -3,7 +3,6 @@ SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 ADD_LIBRARY (ubigraph SHARED
     UbigraphModule
     Ubigrapher
-    BITUbigrapher
     client
 )
 
@@ -25,6 +24,5 @@ INSTALL (FILES
     UbigraphAPI.h
     UbigraphModule.h
     Ubigrapher.h
-    BITUbigrapher.h
     DESTINATION "include/${PROJECT_NAME}/ubigraph"
 )
