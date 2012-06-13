@@ -23,10 +23,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <mutex>
 #include <boost/thread.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 
 #include <opencog/util/lazy_random_selector.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/reduct/meta_rules.h>
@@ -133,26 +135,49 @@ representation::representation(const reduct::rule& simplify_candidate,
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
-    // build mapping from combo tree iterator to knobs and idx
-    for (pre_it it = _exemplar.begin(); it != _exemplar.end(); ++it) {
-        // find disc knobs
+    std::mutex disc_mutex;
+    std::mutex contin_mutex;
+
+    // Build mapping from combo tree iterator to knobs and idx
+    // Do this using a lambda, so as to allow parallelization.  For
+    // small fields sets (less than a few thousand knobs) this is
+    // not important; however, for combo trees with > 100K nodes in
+    // them, this can take huge amounts of time.  This is because the
+    // find_if is essentially a linear search.
+    // XXX TODO: Can we improve on this, e.g. by recording it during
+    // knob creation?
+    auto make_it_map = [&](const pre_it &it)
+    {
+        // Find disc knobs
         disc_map_cit d_cit = boost::find_if(disc, [&it](const disc_v& v) {
                 return v.second->get_loc() == it; });
         if (d_cit != disc.end()) {
+            size_t offset = distance(disc.cbegin(), d_cit);
+            std::lock_guard<std::mutex> lock(disc_mutex);
             it_disc_knob[it] = d_cit;
-            it_disc_idx[it] = _fields.begin_disc_raw_idx()
-                + distance(disc.cbegin(), d_cit);
+            it_disc_idx[it] = _fields.begin_disc_raw_idx() + offset;
         } else {
-            // find contin knobs
+            // Find contin knobs
             contin_map_cit c_cit =
                 boost::find_if(contin, [&it](const contin_v& v) {
                         return v.second.get_loc() == it; });
             if (c_cit != contin.end()) {
+                size_t offset = distance(contin.cbegin(), c_cit);
+                std::lock_guard<std::mutex> lock(contin_mutex);
                 it_contin_knob[it] = c_cit;
-                it_contin_idx[it] = distance(contin.cbegin(), c_cit);
+                it_contin_idx[it] = offset;
             }
         }
-    }
+    };
+
+    // Make a copy, argh, because of the stupid for_each semantics.
+    vector<pre_it> itv;
+    for (pre_it it = _exemplar.begin(); it != _exemplar.end(); ++it)
+        itv.push_back(it);
+
+    vector<pre_it>::const_iterator exbeg = itv.begin();
+    vector<pre_it>::const_iterator exend = itv.end();
+    OMP_ALGO::for_each(exbeg, exend, make_it_map);
 
     if (logger().isDebugEnabled()) {
         std::stringstream ss;
@@ -171,7 +196,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 #endif // EXEMPLAR_INST_IS_UNDEAD
 }
 
-/// Turn the knobs on the representation, so thaat the knob settings match
+/// Turn the knobs on the representation, so that the knob settings match
 /// the instance supplied as the argument.
 void representation::transform(const instance& inst)
 {

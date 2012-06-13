@@ -2593,8 +2593,17 @@ the heck is -U2 faster!?
         has little effect, since gen 1 is done by -m22K and gen 2 has 
         18K NN and so is promptly clamped.
 
+        N.B.: These flags were added in bzr rev 6099.
+
 "16-sect-nn-5K": as above, but without the frac, and with 
         --hc-max-nn-evals=5000 It is setting all new word records.
+        Note: big jump in time between -m80K and -m160K seems to
+        be due to some single-threaded bottleneck in the code;
+        it happens in between demes (during either deme close, or
+        during knob-building, or somewhere nearby).  Hmm. Parallism
+        does not immediately drop to 1x. For a while, it runs at 7x to
+        9x, so I guess lock contention?  And then, maybe there is one 
+        single very-long-running thread that everything else waits on?
 
 
          16-sect-nn-10K        16-sect-nn-5K
@@ -2605,10 +2614,20 @@ the heck is -U2 faster!?
 80K:     193   3005    58     217   2990   84 
 160K:    493   2877   101    1006   2824  149 
 320K:   1736   2662   156    2735   2436  326
-640K:
-1.28M:
+640K:                       38720   2092  651
+1.28M: 13334   2285   356
 2.56M:
 5.12M:
 10.2M:
+
+
+2417-- 4076 owww disaster!
+
+Attempt to build rep-> Building  0 seconds
+Building rep -> After knob 4 mins multi-threaded but weakly.
+After knob -> Created proto takes 1:45   single-threaded.
+Down to 9 secs. 1:45==105secs /12 = 8.75 secs
+
+
 
 

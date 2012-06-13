@@ -644,6 +644,9 @@ safe_binomial_coefficient(unsigned k, unsigned n)
  * To avoid wasting cpu cycles, counting is stopped when 'max_count'
  * is exceeded.
  *
+ * XXX/TODO: the performance of this thing can be strongly improved
+ * by looping on the tail-call, just as in the xxx routine...
+ *
  * @param fs              deme
  * @param inst            centeral instance
  * @param dist            distance
