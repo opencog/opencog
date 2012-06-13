@@ -25,13 +25,18 @@
 #define _OPENCOG_OC_OMP_H
 
 /**
- * file containing definitions to ease multi-threading support. The
- * eaisest way I found to is to use paralllel versions of STL
- * algorithms. To use them include that file and put the namespace
- * OMP_ALGO in front of the algorithm, for instance
- * OMP_ALGO::tranform(...). That way a simple flag, OC_OMP can enable
- * or disable them (convenient to compile with the compiler that
- * doesn't implement OMP such as clang)
+ * File containing definitions to ease multi-threading support.
+ *
+ * The easiest way I found to do this is to use the parallel versions
+ * of the STL algorithms.  To use them, include this file and put the
+ * namespace OMP_ALGO in front of the algorithm.  For example,
+ * OMP_ALGO::for_each(...) provides the parallel version of
+ * std::for_each().  
+ *
+ * If the cpp define OC_OMP is defined, the parallel versions of the
+ * std algorithms are used.   Disabling this define allows code to be
+ * compiled with compilers that do not (yet) implement OMP, such as 
+ * LLVM clang.
  */
 
 // compile with multithread support
