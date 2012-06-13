@@ -2605,14 +2605,24 @@ the heck is -U2 faster!?
         9x, so I guess lock contention?  And then, maybe there is one 
         single very-long-running thread that everything else waits on?
 
+        The single-theaded part is in between -lDEBUG prints
+        "After knob" -> "Created proto" takes 1:45  single-threaded.
+        Fixed this in representation.cc in bzr commit 7129
 
-         16-sect-nn-10K        16-sect-nn-5K
+"16-sect-nn-2K": as above, but --hc-max-nn-evals=2000  and with the
+        single-threaded fix of bzr rev 7129.  The fix won't affect the
+        scores, it will affect the run-times.  It is now clear that
+        knob-building is now a major bottleneck, as evidenced at the
+        huge jump between -m40K and -m80K in this dataset (previously
+        seen in the -m80K-m160K jump for -nn=5K)
+
+         16-sect-nn-10K        16-sect-nn-5K        16-sect-nn-2K
 -m      time  score   cpxy   time  score  cpxy    time  score   cpxy
-10K:      10   3711    23       9   3706   12
-20K:      27   3388    29      24   3403   26
-40K:      81   3311    35      79   3171   38
-80K:     193   3005    58     217   2990   84 
-160K:    493   2877   101    1006   2824  149 
+10K:      10   3711    23       9   3706   12       10   3721    19
+20K:      27   3388    29      24   3403   26       26   3404    28
+40K:      81   3311    35      79   3171   38       86   3114    69
+80K:     193   3005    58     217   2990   84      489   2757   156
+160K:    493   2877   101    1006   2824  149     3063   2453   350
 320K:   1736   2662   156    2735   2436  326
 640K:                       38720   2092  651
 1.28M: 13334   2285   356
@@ -2620,13 +2630,6 @@ the heck is -U2 faster!?
 5.12M:
 10.2M:
 
-
-2417-- 4076 owww disaster!
-
-Attempt to build rep-> Building  0 seconds
-Building rep -> After knob 4 mins multi-threaded but weakly.
-After knob -> Created proto takes 1:45   single-threaded.
-Down to 9 secs. 1:45==105secs /12 = 8.75 secs
 
 
 
