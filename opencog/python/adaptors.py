@@ -37,7 +37,7 @@ class ForestExtractor:
             'is_movable', 'is_noisy', 'null', 'id_null', 'Object',
             'exist', # 'decreased','increased',
             # Not useful e.g. because they contain numbers
-            #"AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
+            "AGISIM_rotation", "AGISIM_position", "AGISIM_velocity", "SpaceMap", "inside_pet_fov", 'turn', 'walk',
             'move:actor', 'is_moving', 
             # These ones make it ignore physiological feelings; it'll only care about the corresponding DemandGoals
             'pee_urgency', 'poo_urgency', 'energy', 'fitness', 'thirst',
@@ -198,7 +198,7 @@ class ForestExtractor:
     def include_atom(self,  atom):
         """Whether to include a given atom in the results. If it is not included, all trees containing it will be ignored as well."""
         if atom.is_node():
-            if (atom.name in self.unwanted_atoms or #atom.name.startswith('id_CHUNK') or
+            if (atom.name in self.unwanted_atoms or atom.name.startswith('id_CHUNK') or
                 atom.name.endswith('Stimulus') or atom.name.endswith('Modulator') or
                 atom.is_a(t.VariableNode)):
                 return False

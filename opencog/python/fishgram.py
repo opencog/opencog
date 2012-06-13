@@ -609,15 +609,26 @@ class Fishgram:
             conclusion = seqs[-1]
             other = seqs[:-1]
             assert len(other)
-            if len(other) > 1:
+
+            # Remove all of the AtTimeLinks from inside the sequence - just leave
+            # the EvaluationLinks/ExecutionLinks. The AtTimeLinks are not
+            # required/allowed if you have SequentialAndLinks etc. This won't change
+            # the Pattern that Fishgram is storing - Fishgram's search does need
+            # the AtTimeLinks.            
+            conclusion_stripped = conclusion.args[1]
+            other_stripped = [attime.args[1] for attime in other]
+            
+            # There are several special cases to simplify the Link produced.
+            
+            if len(other_stripped) > 1:
                 # NOTE: this won't work if some of the things are simultaneous
-                initial = Tree('SequentialAndLink',other)
+                initial = Tree('SequentialAndLink',other_stripped)
             else:
-                initial = other[0]
+                initial = other_stripped[0]
             
             predimp = T     ('PredictiveImplicationLink',
                                 initial,
-                                conclusion
+                                conclusion_stripped
                             )
             
             if len(conj) > 0:
@@ -628,13 +639,15 @@ class Fishgram:
             else:
                 payload = predimp
             
-            vars = get_varlist( conj + seqs )
+            vars = get_varlist( conj + other_stripped + [conclusion_stripped] )
             assert len(vars)
             rule = T('AverageLink',
                      T('ListLink',vars),
                      payload
                     )
-            
+
+            # Calculate the frequency. Looking up embeddings only works if you keep the
+            # AtTimeLinks.
             premises = conj + other
             premises_embs = self.forest.lookup_embeddings(premises)
             
