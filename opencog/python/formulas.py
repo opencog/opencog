@@ -90,12 +90,16 @@ def andSymmetricFormula(tvs, U):
     return (total_strength, confidence_to_count(total_confidence))
 
 def orFormula(tvs, U):
-    (sA, nA), (sB, nB) = tvs
-    
     N = len(tvs)
+    
+    if N == 1:
+        return tvs[0]
+    
     if N > 2:
         # TODO handle via divide-and-conquer or something
-        pass
+        raise NotImplementedError("OR calculation not supported for arity > 2")
+
+    (sA, nA), (sB, nB) = tvs
     
     A = sA * nB
     B = sB * nA

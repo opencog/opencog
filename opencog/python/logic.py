@@ -15,7 +15,7 @@ from pprint import pprint
 #except ImportError:
 from util import log
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 import random
 random.seed(42)
 
@@ -62,6 +62,10 @@ class Chainer:
         self.setup_rules()
 
         self.bc_later = OrderedSet()
+        
+        # simple statistics
+        self.num_app_pdns_per_level = Counter()
+        self.num_uses_per_rule_per_level = defaultdict(Counter)
 
         global _line
         _line = 1
@@ -95,13 +99,14 @@ class Chainer:
             # viz - visualize the root
             self.viz.outputTarget(target, None, 0, 'TARGET')
     
+            steps_so_far = 0
             start = time()
-            while self.bc_later and not self.results and nsteps > 0:
+            while self.bc_later and not self.results and steps_so_far < nsteps:
                 self.bc_step()
-                nsteps -= 1
+                steps_so_far += 1
     
                 #msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
-                msg = '%s goals remaining, %s Proof DAG Nodes' % (len(self.bc_later), len(self.pd))
+                msg = 'done %s steps, %s goals remaining, %s Proof DAG Nodes' % (steps_so_far, len(self.bc_later), len(self.pd))
                 log.info(format_log(msg))
                 log.info(format_log('time taken', time() - start))
                 #log.info(format_log('PD:'))
@@ -139,6 +144,10 @@ class Chainer:
                 # haxx
                 atom.tv = self.get_tvs(tr)[0]
                 ret.append(atom.h)
+            
+            pprint(self.num_app_pdns_per_level)
+            pprint(self.num_uses_per_rule_per_level)
+            
             return ret
         except Exception, e:
             import traceback, pdb
@@ -282,11 +291,16 @@ class Chainer:
                         for type_name in self.deduction_types)
 
         # Nested ImplicationLinks
-        # skip Implications between InheritanceLinks etc as well
+        # skip Implications between InheritanceLinks etc as well.
+        # Allow an ImplicationLink that implies a PredictiveImplicationLink though.
         types = map(get_type, self.deduction_types)
         if (goal.get_type() in types and len(goal.args) == 2 and
                 (goal.args[0].get_type() in types or
-                 goal.args[1].get_type() in types) ):
+                 goal.args[1].get_type() in types)
+                and not (goal.get_type() == t.ImplicationLink
+                and goal.args[1].get_type() == t.PredictiveImplicationLink
+                )
+                ):
             return True
 
         try:
@@ -322,6 +336,9 @@ class Chainer:
         s = unify(template, expr, {})
         if s == None:
             return True
+        # Policy: don't allow the predicate to be a variable
+        if s[pred].is_variable():
+            return False
         pred_name = s[pred].op.name
         args_trees = s[argument_list].args
         if pred_name == 'neighbor':
@@ -344,6 +361,9 @@ class Chainer:
             # viz
             for (i, input) in enumerate(app.goals):
                 self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app)
+
+        self.num_app_pdns_per_level[app_pdn.depth] += 1
+        self.num_uses_per_rule_per_level[app_pdn.depth][app.name] += 1
 
         if status == 'CYCLE' or status == 'EXISTING':
             return
@@ -683,6 +703,10 @@ class Chainer:
     def add_rule(self, rule):
         self.rules.append(rule)
         
+        # If there's a TruthValue then you can produce the head without requiring any goals.
+        # This check should only be done here because a Rule object can also be an app
+        assert len(rule.goals) == 0 or rule.tv.confidence == 0
+        
         # This is necessary so get_tvs will work
         # Only relevant to generators or axioms
         if rule.tv.confidence > 0:
@@ -716,8 +740,10 @@ class Chainer:
                            ]
                 else:
                     return []
-            elif target.op in ['ExecutionLink',  'SequentialAndLink']:
-                return [pn.op]
+            #elif target.op in ['ExecutionLink',  'SequentialAndLink']:
+            #    return [target]
+            elif rules.actionDone_template().unifies(target):
+                return target
             else:
                 return []
         # Extract all the targets in best-first order
@@ -907,7 +933,7 @@ class Chainer:
             return None
 
 def do_planning(space, target):
-    a = space        
+    a = space
 
     rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
     atom_from_tree(rl, a)
@@ -922,7 +948,7 @@ def do_planning(space, target):
     
     chainer = Chainer(a, planning_mode = True)        
 
-    result_atoms = chainer.bc(target)
+    result_atoms = chainer.bc(target, 2000)
     
     print "planning result: ",  result_atoms
     
@@ -1083,6 +1109,8 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
         self.cycles = 0
 
     def run(self,atomspace):
+        # Currently it has to find the whole plan in one cycle, but that computation
+        # should be split into several cycles.
         self.cycles += 1
         
         # hack. don't wait until the plan failed/succeeded, just run planning every
@@ -1091,17 +1119,22 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
         
         # ReferenceLink ConceptNode:'psi_demand_goal_list' (ListLink stuff)
         # or use a hack
-        target_PredicateNodes = [x for x in space.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
-        atom = target_PredicateNodes[0]
+        #target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
+        target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" == x.name]
+        goal_atom = target_PredicateNodes[0]
 
-        # Here be DRAGONS!
-        #target = Tree('EvaluationLink', atom, Tree('ListLink'))
-        target = T('EvaluationLink', atom)
+        #target = T('EvaluationLink', goal_atom)
+        target =    T('EvaluationLink',
+                        atomspace.add(t.PredicateNode, name='increased'),
+                        T('ListLink',
+                            T('EvaluationLink', goal_atom)
+                        )
+                    )
     
-        try:
-            do_planning(atomspace, target)
-        except Exception, e:
-            log.info(format_log(e))
+        #try:
+        do_planning(atomspace, target)
+        #except Exception, e:
+        #    log.info(format_log(e))
 
 if __name__ == '__main__':
     a = AtomSpace()

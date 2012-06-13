@@ -7,6 +7,24 @@ import formulas
 from tree import *
 import math
 
+def evaluation_link_template(predicate = None, arguments = None):
+    if predicate == None:
+        predicate = new_var()
+    if arguments == None:
+        args_tree = new_var()
+    else:
+        args_tree = T('ListLink', arguments)
+    
+    return T('EvaluationLink',
+                predicate,
+                args_tree)
+
+def actionDone_template(atomspace):
+    return evaluation_link_template(
+                            atomspace.add(t.PredicateNode, name='actionDone'),
+                            [new_var()]
+                        )
+
 def rules(a, deduction_types):
     '''This function sets up all the Rules available in PLN. The concept of a Rule is the same as
     in higher-order logic. For example, Modus Ponens requires an ImplicationLink $1->$2 as well as the
@@ -53,26 +71,27 @@ def rules(a, deduction_types):
     # It won't add a new Rule for atoms that are created during the inference, rather they will be added to
     # the Proof DAG. It's simple to have a separate Rule for each axiom, but it's slow because the chainer
     # will try to unify a target against every axiom Rule.
-    for obj in a.get_atoms_by_type(t.Atom):
-        # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-        if obj.tv.count > 0 and obj.tv.mean > 0:
-            tr = tree_from_atom(obj)
-            # A variable with a TV could just prove anything; that's evil!
-            if not tr.is_variable():
-                
-                # tacky filter
-                if 'CHUNK' in str(tr):
-                    continue
-                
-                r = Rule(tr, [], '[axiom]', tv = obj.tv)
-                rules.append(r)
+    #for obj in a.get_atoms_by_type(t.Atom):
+    #    # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+    #    if obj.tv.count > 0 and obj.tv.mean > 0:
+    #        tr = tree_from_atom(obj)
+    #        # A variable with a TV could just prove anything; that's evil!
+    #        if not tr.is_variable():
+    #            
+    #            # tacky filter
+    #            if 'CHUNK' in str(tr):
+    #                continue
+    #            
+    #            r = Rule(tr, [], '[axiom]', tv = obj.tv)
+    #            rules.append(r)
 
     # Just lookup the rule rather than having separate rules. Would be faster
-    # with a large number of atoms (i.e. more scalable)
-    #r = Rule(Var(123),[],
-    #                  name='Lookup',
-    #                  match=match_axiom)
-    #rules.append(r)
+    # with a large number of atoms (i.e. more scalable). Some examples will break if
+    # you use it due to bugs in the backward chainer.
+    r = Rule(Var(123),[],
+                      name='Lookup',
+                      match=match_axiom)
+    rules.append(r)
 
     # A simple example Rule to test the mechanism. You're allowed to add a Rule which calls
     # any Python function to decide one of the Atoms. This one does the plus calculation.
@@ -100,25 +119,25 @@ def rules(a, deduction_types):
                                       name='ModusPonens '+ty,
                                       formula = formulas.modusPonensFormula))
     
-    # The PLN DeductionRule. Not to be confused with ModusPonens.
-    for type in deduction_types:
-        rules.append(Rule(T(type, 1,3), 
-                                     [T(type, 1, 2),
-                                      T(type, 2, 3), 
-                                      Var(1),
-                                      Var(2), 
-                                      Var(3)],
-                                    name='Deduction', 
-                                    formula = formulas.deductionSimpleFormula))
-    
-    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
-    for type in deduction_types:
-        rules.append(Rule( T(type, 2, 1), 
-                                     [T(type, 1, 2),
-                                      Var(1),
-                                      Var(2)], 
-                                     name='Inversion', 
-                                     formula = formulas.inversionFormula))
+    ## The PLN DeductionRule. Not to be confused with ModusPonens.
+    #for type in deduction_types:
+    #    rules.append(Rule(T(type, 1,3), 
+    #                                 [T(type, 1, 2),
+    #                                  T(type, 2, 3), 
+    #                                  Var(1),
+    #                                  Var(2), 
+    #                                  Var(3)],
+    #                                name='Deduction', 
+    #                                formula = formulas.deductionSimpleFormula))
+    #
+    ## PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
+    #for type in deduction_types:
+    #    rules.append(Rule( T(type, 2, 1), 
+    #                                 [T(type, 1, 2),
+    #                                  Var(1),
+    #                                  Var(2)], 
+    #                                 name='Inversion', 
+    #                                 formula = formulas.inversionFormula))
 
     # Calculating logical And/Or/Not. These have probabilities attached,
     # but they work similarly to the Boolean versions.
@@ -131,7 +150,7 @@ def rules(a, deduction_types):
                            formula = formulas.andSymmetricFormula))
     
     type = 'OrLink'
-    for size in xrange(2):
+    for size in xrange(1,2):
         args = [new_var() for i in xrange(size+1)]
         rules.append(Rule(T(type, args),
                            args,
@@ -154,10 +173,34 @@ def rules(a, deduction_types):
     # Used by planning. An ExecutionLink indicates an action being performed, so we can
     # assume that the action will be performed as part of the plan (i.e. if any action
     # occurs in the plan, set the TV to full probability and confidence).
-    r = Rule(T('ExecutionLink', 1, 2),
-                       [],
-                       name = 'PerformAction',
-                       tv = TruthValue(1.0,confidence_to_count(1.0)))
+    #r = Rule(T('ExecutionLink', 1, 2),
+    #                   [],
+    #                   name = 'PerformAction',
+    #                   tv = TruthValue(1.0,confidence_to_count(1.0)))
+    #rules.append(r)
+    # TOdo this should be actionSuccess not just actionDone
+    r = Rule(actionDone_template(a),
+                [],
+                name = 'PerformAction',
+                tv = TruthValue(1.0,confidence_to_count(1.0)))
+    rules.append(r)
+
+    # If something is true at the current time, you can use it as the start of the plan.
+    # First find the latest time (hack)
+    current_time = 0
+    for time in a.get_atoms_by_type(t.TimeNode):
+        timestamp = int(time.name)
+        if timestamp > current_time:
+            current_time = timestamp
+    current_time_node = a.add(t.TimeNode, str(current_time))
+    # Then create the Rule
+    # It's essential to store the template so it will have the same variables in both
+    # the head and the goal
+    template = evaluation_link_template()
+    r = Rule(template,
+                [T('AtTimeLink', current_time_node, template)],
+                name = 'AtCurrentTime'
+                )
     rules.append(r)
 
 #        # Producing ForAll/Bind/AverageLinks.
