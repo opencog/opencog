@@ -2,17 +2,24 @@
 Diary of performance measurements and tuning for MOSES
 ------------------------------------------------------
 
-Maintained by Linas Vepstas. The contents below are not going to be
-explained in terribly great detail; this is for my personal use, and
-not a tutorial for the general public.  If you are a moses hacker,
-maybe this data will be interesting.  I'm only checking this into bzr
-so that I don't accidentally loose this data.  
+Maintained by Linas Vepstas.  Started January 2012.  A summary
+of lessons learned is immediately below.   The rest is a diary,
+and is not meant for general reading;  it won't be explained for
+the general public, either you'll get it or you won't.  This is 
+for my personal use, to take notes.  If you are a moses hacker,
+maybe this data will be interesting.  I'm only checking this into
+bzr so that I can go back & double-check things & have a record of
+progress.
 
-Timing measurements are very specific for my own computer; your results
-will be different.  Results will change as algorithms are modified; the
-below is being used to help me get baseline performance numbers, to
-understand how modifications affect performance, and to help make sure
-there are no regressions.
+Timing measurements are very specific for my current setup.   Your
+results will be different.  Results will change as algorithms are
+modified; the below is being used to help me get baseline performance
+numbers, to understand how modifications affect performance, and to 
+help make sure there are no regressions.
+
+Most of these were done on an AMD Athlon 64 X2 dual core (usually
+running on a single core only), clocked at 3GHz. This has a 1MB cache,
+and 8GBytes unbuffered ECC DDR2-266(???) RAM.
 
 =======================================================================
 Lessons learned
@@ -232,13 +239,19 @@ Major Studies
 Diary contains these major sections, below.
 
 -- Study of parity problem perforrmance, Jan-Feb 2012
-   (discrete logic problem)
+   (discrete logic problem, w 3/4/5 features, and 8/16/32 rows)
 
 -- Study of bank dataset  Feb-March 2012
    (learning of continuous-valued function)
+   (38 features, 90 rows)
 
 -- Study of Iris dataset  May 2012
-   (clustering/categorization problem)
+   (clustering/categorization problem, 4 continuous features, 150 rows.
+   Want one of 3 output enums.)
+
+-- Study of MAGIC (atmospheric gamma ray) dataset  May-June 2012
+   (event identification/rejection problem, 19K rows, 11 contin-valued 
+   features.  When discretized, 150 binary fetures.)
 
 =======================================================================
 Diary started in January 2012
@@ -410,10 +423,11 @@ than the "old-style" behaviour.
 
 The "old-style" algorithm is this: (-L1 -T1)
 -- step 1. construct representation by adding knobs
--- twiddle one knob at a time, till one knob causing greatest improvement is found.
+-- twiddle one knob at a time, till one knob causing greatest
+   improvement is found.
 -- if there's improvement, go to step 1.
--- if no improvement, twiddle two knobs simultaneously, and either go to step 1 or try 3
-knobs. 
+-- if no improvement, twiddle two knobs simultaneously, and either go
+   to step 1 or try 3 knobs.
 -- try up to five knobs, then go to step 1.
 
 Now, all over again but with -L1 -T1
@@ -584,7 +598,7 @@ p = (p > 0 ? 0 : pow2((p - highest_comp)/T));
 
 450K == 1/2 hour
 
-re-sorting first ten by runtime:
+sorting first ten by runtime:
 
 # first column: original data
 # second column: a 10% performance speedbump due to logging.
@@ -600,7 +614,7 @@ re-sorting first ten by runtime:
 8  2367.365400 2150  1134
 9  9752.876748 9752  1168
 
-restorting the first 20 by rutime:
+sorting the first 20 by rutime:
 
 #
 # moses performance data, runtime in seconds
@@ -647,7 +661,7 @@ long time, dependeing on the initial random seed.  I sent a graph
 before, and attached is a new one. As before, I've been focusing on the 
 4-parity problem.
 
-For those runs that tak huge amounts of time to solve, what appears to
+For those runs that take huge amounts of time to solve, what appears to
 be happening is that the algo quickly finds a fairly good solution,
 matching all but one of the posible outputs, and then gets hung up. It
 examines huge numbers of exemplars, attaching knobs to each, twiddling
@@ -828,7 +842,7 @@ mechanism that is the current default.)
 Third column is with -I1 spec'ed, so that metapop includes dominated
 exemplars.
 
-forth column: -P40 -- pop-size-ratio = 40
+Fourth column: -P40 -- pop-size-ratio = 40
 
        uncapped   capped   domin   P40    P10
 -r0:        8        8       8      9      8
@@ -953,7 +967,7 @@ tot:    5      7      8      7      8      8     13      9     9
 
 The tot bove is how many had perfect score, out of the 20.
 
-Again, but this time with longer tun-times, for the graphs:
+Again, but this time with longer run-times, for the graphs:
 -m45000
 
 z:        -z4     -z4
@@ -982,7 +996,7 @@ temp:     -v5     -v2
 avg:      161
 
 ==================================================================
-Above may bre non-reprodubile, due to changes in the max-pop-size logic.
+Above may be non-reproducible, due to changes in the max-pop-size logic.
 So restart data collection.
 
 As above -Hpa -k4 ...
@@ -1389,6 +1403,59 @@ improve; on the other hand, the 2- and 3-simplex code was corrupting the
 deme, and so who knows what was really happening, or how big the effect is.
 (The bug was fixed on 27 May 2012)
 
+================================================================
+
+BANK DATASET REGESSION TESTING
+------------------------------
+Trying to verify ongoing hapiness of the algos.
+
+Bank dataset measurements  columns are final score.
+This is circa bzr rev 6647 or so. (actually, 6647, with Nils most
+recent 12 changes removed).
+
+-mxx == different numbers of iterations.
+Conclude: very little variation due to random number gen. This is very
+different than the parity problem.
+
+           -m10000                -m20000            -m40000
+:      time  score  plex     time  score  plex    time  score  plex
+-r0:     65  255.8    50     250   229.8    53     741  187.1    64
+-r1:     65  255.8    51     246   229.8    53     771  187.1    64
+-r2:     65  255.8    51     248   231.65   54     745  187.1    64
+-r3:     64  255.8    50     247   229.8    53     749  187.1    65
+-r4:     65  256.1    49     247   230.3    52     758  186.5    66
+-r5:     65  257.5    51     248   230.3    53     760  184.1    67
+-r6:     65  256.1    49     248   232.06   53     784  186.5    65
+-r7:     66  259.8    51     249   230.3    54     743  184.5    67
+-r8:     65  256.1    50     248   230.8    52     771  186.5    66
+-r9:     64  255.8    48     247   229.87   53     793  186.1    65
+
+
+"bzr7131-5K" is bzr rev 7131 (13 June 2012), so with above-mentioned bug-fix,
+    and of course the new, rescaled, temperature scale (mmerged occam code),
+    also evaluation clamping to 5K evals per instance NN's.  This command line:
+    moses-perf -Hit -uQ3 -i bank.csv -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000  
+
+"bzr7131-1K" as above, but --hc-max-nn-evals=1000
+
+
+           bzr7131-5K             bzr7131-1K           bzr7131-2K
+         score  time  plex     score  time  plex     score  time  plex
+-m10k:   -249     64   58      -249     63   58      -249     65   58
+-m20k:   -205    314   72      -201    435  103      -202    410   98
+-m40k:   -138   1134  107      -187   2970  122      -175   2635  118
+-m80k:   -120   6130  131      -185   9714  122      -169   9022  126  
+-m160k:  -
+
+
+           bzr7131-10K             bzr7131-20K           
+         score  time  plex     score  time  plex     score  time  plex
+-m10k:   -249     65   58
+-m20k:   -205    314   72
+-m40k:   -138   1136  107
+-m80k:   -120   6077  131
+-m160k:  -
+
 ======================================================================
 Regression test parity performance
 
@@ -1631,29 +1698,6 @@ As above -Hpa -k4 -z3.5 -v5 -m350000
 
 avg:   112    318    93    111
 
-
-
-================================================================
-Bank dataset measurements  columns are final score.
-This is circa bzr rev 6647 or so. (actually, 6647, with Nils most
-recent 12 changes removed).
-
--mxx == different numbers of iterations.
-Conclude: very little variation due to random number gen. This is very
-different than the parity problem.
-
-           -m10000                -m20000            -m40000
-:      time  score  plex     time  score  plex    time  score  plex
--r0:     65  255.8    50     250   229.8    53     741  187.1    64
--r1:     65  255.8    51     246   229.8    53     771  187.1    64
--r2:     65  255.8    51     248   231.65   54     745  187.1    64
--r3:     64  255.8    50     247   229.8    53     749  187.1    65
--r4:     65  256.1    49     247   230.3    52     758  186.5    66
--r5:     65  257.5    51     248   230.3    53     760  184.1    67
--r6:     65  256.1    49     248   232.06   53     784  186.5    65
--r7:     66  259.8    51     249   230.3    54     743  184.5    67
--r8:     65  256.1    50     248   230.8    52     771  186.5    66
--r9:     64  255.8    48     247   229.87   53     793  186.1    65
 
 ===========================================================
 ===========================================================
@@ -2623,14 +2667,11 @@ the heck is -U2 faster!?
 40K:      81   3311    35      79   3171   38       86   3114    69
 80K:     193   3005    58     217   2990   84      489   2757   156
 160K:    493   2877   101    1006   2824  149     3063   2453   350
-320K:   1736   2662   156    2735   2436  326
+320K:   1736   2662   156    2735   2436  326    35775   2167   607
 640K:                       38720   2092  651
 1.28M: 13334   2285   356
 2.56M:
 5.12M:
 10.2M:
-
-
-
 
 
