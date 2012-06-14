@@ -90,7 +90,7 @@ def rules(a, deduction_types):
     # you use it due to bugs in the backward chainer.
     r = Rule(Var(123),[],
                       name='Lookup',
-                      match=match_axiom)
+                      match=match_axiom_slow)
     rules.append(r)
 
     # A simple example Rule to test the mechanism. You're allowed to add a Rule which calls
@@ -119,25 +119,25 @@ def rules(a, deduction_types):
                                       name='ModusPonens '+ty,
                                       formula = formulas.modusPonensFormula))
     
-    ## The PLN DeductionRule. Not to be confused with ModusPonens.
-    #for type in deduction_types:
-    #    rules.append(Rule(T(type, 1,3), 
-    #                                 [T(type, 1, 2),
-    #                                  T(type, 2, 3), 
-    #                                  Var(1),
-    #                                  Var(2), 
-    #                                  Var(3)],
-    #                                name='Deduction', 
-    #                                formula = formulas.deductionSimpleFormula))
-    #
-    ## PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
-    #for type in deduction_types:
-    #    rules.append(Rule( T(type, 2, 1), 
-    #                                 [T(type, 1, 2),
-    #                                  Var(1),
-    #                                  Var(2)], 
-    #                                 name='Inversion', 
-    #                                 formula = formulas.inversionFormula))
+    # The PLN DeductionRule. Not to be confused with ModusPonens.
+    for type in deduction_types:
+        rules.append(Rule(T(type, 1,3), 
+                                     [T(type, 1, 2),
+                                      T(type, 2, 3), 
+                                      Var(1),
+                                      Var(2), 
+                                      Var(3)],
+                                    name='Deduction', 
+                                    formula = formulas.deductionSimpleFormula))
+    
+    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1), 
+                                     [T(type, 1, 2),
+                                      Var(1),
+                                      Var(2)], 
+                                     name='Inversion', 
+                                     formula = formulas.inversionFormula))
 
     # Calculating logical And/Or/Not. These have probabilities attached,
     # but they work similarly to the Boolean versions.
@@ -184,7 +184,7 @@ def rules(a, deduction_types):
                 name = 'PerformAction',
                 tv = TruthValue(1.0,confidence_to_count(1.0)))
     rules.append(r)
-
+    
     # If something is true at the current time, you can use it as the start of the plan.
     # First find the latest time (hack)
     current_time = 0
@@ -239,141 +239,193 @@ def rules(a, deduction_types):
         r.tv = atom.tv
         rules.append(r)
 
+    rules += temporal_rules(a)
+
     # Return every Rule specified above.
     return rules
 
-def path_rules(a):
-    # These are some tacky and inefficient (but conceptually interesting) pathfinding experiments.
-    template =  T('LatestLink',
-                    T('AtTimeLink',
-                        Var(-1),
-                        T('EvaluationLink',
-                            T(a.add(t.PredicateNode, 'AGISIM_position')),
-                            T('ListLink',
-                                Var(0),
-                                Var(1),
-                                Var(2),
-                                Var(3)
-                            )
+def temporal_rules(atomspace):
+    rules = []
+    rules.append(Rule(T('BeforeLink', 1, 2),
+                        [ ],
+                        name='Before',
+                        match = create_temporal_matching_function(formulas.beforeFormula)
                         )
-                    )
                 )
+    return rules
+
+def lookup_times(tree, atomspace):
+    '''For the specified Tree (which can contain a Node or Link), search for
+    all the AtTimeLinks. Return a dictionary from timestamp (as a string) to
+    a float, representing the fuzzy truth value. (Ignore confidence which is
+    probably OK.)'''
+    template = T('AtTimeLink',
+                 Var(0),
+                 tree)
+    attimes = find(template, atomspace.get_atoms_by_type(t.AtTimeLink))
     
-    #print template
+    dist = {}
+    for link in attimes:
+        assert isinstance(link, Atom)
+        time = link.out[0].name
+        fuzzy_tv = link.out[1]
+        dist[time] = fuzzy_tv
     
-    def change_position(coords):
-        s = {Var(i+1):T(a.add(t.NumberNode, str(c))) for (i, c) in enumerate(coords)}
-        return subst(s, template)
-    
-    def get_position(tr):
-        s = unify(template, tr, {})
-        return tuple(float(s[Var(i)].op.name) for i in [1,2,3])
-    
-    def get_name(tr):
-        s = unify(template, tr, {})
-        return s[Var(0)].op.name
-    
-    def is_block(tr):        
-        return get_name(tr).startswith('id_CHUNK')
-    
-    lls = a.get_atoms_by_type(t.LatestLink)
-    pls = find_tree(template,lls)
-    #print len(pls)
-    
-    taken_grids = set()
-    # Find any objects/blocks and assume they are obstacles.
-    for pl in pls:
-        #if is_block(pl):
-        #    continue
-        (x,y,z) = get_position(pl)
-        #print (x,y,z), get_name(pl)
-        (x,y,z) = tuple(map(math.floor,(x,y,z)))
-        #print (x,y,z), get_name(pl)
-        taken_grids.add((x,y,z))
-    
-    # add in the ground blocks.
-    ground = []
-    z = 98
-    for x in xrange(0,100):
-        for y in xrange(0,100):
-            #p1 = change_position((x,y,z))
-            #ground.append(p1)
-            p1c = (x,y,z)
-            
-            if (x,y,z+1) in taken_grids:
-                #print 'occupied'
-                continue
-            
-            ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)] #,(x,y,z-1),(x,y,z+1)]
-            ns += [(x,y,z+1) for n in ns]
-            for n in ns:
-                #p2 = change_position((i,j,z))
-                
-                #r = T('ImplicationLink',
-                #    a.add(t.ConceptNode,'at %s' % str(p1c)),
-                #    a.add(t.ConceptNode,'at %s' % str(n))
-                #)
-                r = T('EvaluationLink',
-                    a.add(t.PredicateNode,'neighbor'),
-                    T('ListLink',
-                        a.add(t.ConceptNode,'at %s' % str(p1c)),
-                        a.add(t.ConceptNode,'at %s' % str(n))
-                    )
-                )
-                ra = atom_from_tree(r, a)
-                ra.tv = TruthValue(1,confidence_to_count(1.0))
-                #print ra
-    
-    # add in any other surfaces (made of blocks)
-    for pl in pls:
-        if not is_block(pl):
-            continue
+    return dist
+
+def create_temporal_matching_function(formula):
+    def match_temporal_relationship(space,target):
+        assert isinstance(target, Tree)
+        assert not target.args[0].is_variable()
+        assert not target.args[1].is_variable()
         
-        coords = get_position(pl)
-        #print coords
-        (x,y,z) = coords
-        (x,y,z) = (x-0.5,y-0.5,z)
+        distribution_event1 = lookup_times(target.args[0], space)
+        distribution_event2 = lookup_times(target.args[1], space)
         
-        if (x,y,z+1) in taken_grids:
-            print 'occupied'
-            continue
+        strength = formula(distribution_event2, distribution_event2)
         
-        ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)]
-        ns += [(x,y,z+1) for n in ns]
-        #print pl
-        for n in ns:
-            neighbor_block_template = change_position(n)
-            #print neighbor_block_template
-            tmp = find_tree(neighbor_block_template, pls)
-            # Pray there is nothing else at that exact coordinate
-            assert len(tmp) < 2
-            
-            if len(tmp):
-                # Can go straight from one block to another
-                #tr = T('ImplicationLink',
-                #    a.add(t.ConceptNode,'at %s' % str(coords)),
-                #    a.add(t.ConceptNode,'at %s' % str(n))
-                #)
-                tr = T('EvaluationLink',
-                    a.add(t.PredicateNode,'neighbor'),
-                    T('ListLink',
-                        a.add(t.ConceptNode,'at %s' % str(coords)),
-                        a.add(t.ConceptNode,'at %s' % str(n))
-                    )
-                )
-                #print tr
-                atom_from_tree(tr, a).tv = TruthValue(1,confidence_to_count(1.0))
-    
-    return []
-    
-    #for obj in a.get_atoms_by_type(t.ObjectNode):
-    #    if not obj.name.startswith('id_CHUNK'):
-    #        continue
-    #    
-    #    block = T(obj)
+        # I'm not sure what to choose for this
+        count = 1
+        tv = TruthValue(strength, count)
+        
+        return [(target,tv)]
+
+    return match_temporal_relationship
+
+#def path_rules(a):
+#    # These are some tacky and inefficient (but conceptually interesting) pathfinding experiments.
+#    template =  T('LatestLink',
+#                    T('AtTimeLink',
+#                        Var(-1),
+#                        T('EvaluationLink',
+#                            T(a.add(t.PredicateNode, 'AGISIM_position')),
+#                            T('ListLink',
+#                                Var(0),
+#                                Var(1),
+#                                Var(2),
+#                                Var(3)
+#                            )
+#                        )
+#                    )
+#                )
+#    
+#    #print template
+#    
+#    def change_position(coords):
+#        s = {Var(i+1):T(a.add(t.NumberNode, str(c))) for (i, c) in enumerate(coords)}
+#        return subst(s, template)
+#    
+#    def get_position(tr):
+#        s = unify(template, tr, {})
+#        return tuple(float(s[Var(i)].op.name) for i in [1,2,3])
+#    
+#    def get_name(tr):
+#        s = unify(template, tr, {})
+#        return s[Var(0)].op.name
+#    
+#    def is_block(tr):        
+#        return get_name(tr).startswith('id_CHUNK')
+#    
+#    lls = a.get_atoms_by_type(t.LatestLink)
+#    pls = find_tree(template,lls)
+#    #print len(pls)
+#    
+#    taken_grids = set()
+#    # Find any objects/blocks and assume they are obstacles.
+#    for pl in pls:
+#        #if is_block(pl):
+#        #    continue
+#        (x,y,z) = get_position(pl)
+#        #print (x,y,z), get_name(pl)
+#        (x,y,z) = tuple(map(math.floor,(x,y,z)))
+#        #print (x,y,z), get_name(pl)
+#        taken_grids.add((x,y,z))
+#    
+#    # add in the ground blocks.
+#    ground = []
+#    z = 98
+#    for x in xrange(0,100):
+#        for y in xrange(0,100):
+#            #p1 = change_position((x,y,z))
+#            #ground.append(p1)
+#            p1c = (x,y,z)
+#            
+#            if (x,y,z+1) in taken_grids:
+#                #print 'occupied'
+#                continue
+#            
+#            ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)] #,(x,y,z-1),(x,y,z+1)]
+#            ns += [(x,y,z+1) for n in ns]
+#            for n in ns:
+#                #p2 = change_position((i,j,z))
+#                
+#                #r = T('ImplicationLink',
+#                #    a.add(t.ConceptNode,'at %s' % str(p1c)),
+#                #    a.add(t.ConceptNode,'at %s' % str(n))
+#                #)
+#                r = T('EvaluationLink',
+#                    a.add(t.PredicateNode,'neighbor'),
+#                    T('ListLink',
+#                        a.add(t.ConceptNode,'at %s' % str(p1c)),
+#                        a.add(t.ConceptNode,'at %s' % str(n))
+#                    )
+#                )
+#                ra = atom_from_tree(r, a)
+#                ra.tv = TruthValue(1,confidence_to_count(1.0))
+#                #print ra
+#    
+#    # add in any other surfaces (made of blocks)
+#    for pl in pls:
+#        if not is_block(pl):
+#            continue
+#        
+#        coords = get_position(pl)
+#        #print coords
+#        (x,y,z) = coords
+#        (x,y,z) = (x-0.5,y-0.5,z)
+#        
+#        if (x,y,z+1) in taken_grids:
+#            print 'occupied'
+#            continue
+#        
+#        ns = [(x-1,y,z),(x+1,y,z),(x,y-1,z),(x,y+1,z)]
+#        ns += [(x,y,z+1) for n in ns]
+#        #print pl
+#        for n in ns:
+#            neighbor_block_template = change_position(n)
+#            #print neighbor_block_template
+#            tmp = find_tree(neighbor_block_template, pls)
+#            # Pray there is nothing else at that exact coordinate
+#            assert len(tmp) < 2
+#            
+#            if len(tmp):
+#                # Can go straight from one block to another
+#                #tr = T('ImplicationLink',
+#                #    a.add(t.ConceptNode,'at %s' % str(coords)),
+#                #    a.add(t.ConceptNode,'at %s' % str(n))
+#                #)
+#                tr = T('EvaluationLink',
+#                    a.add(t.PredicateNode,'neighbor'),
+#                    T('ListLink',
+#                        a.add(t.ConceptNode,'at %s' % str(coords)),
+#                        a.add(t.ConceptNode,'at %s' % str(n))
+#                    )
+#                )
+#                #print tr
+#                atom_from_tree(tr, a).tv = TruthValue(1,confidence_to_count(1.0))
+#    
+#    return []
+#    
+#    #for obj in a.get_atoms_by_type(t.ObjectNode):
+#    #    if not obj.name.startswith('id_CHUNK'):
+#    #        continue
+#    #    
+#    #    block = T(obj)
 
 # See how they are used in rules() above.
-def match_axiom(space,target):
+
+# The slow one but still used because match_axiom still has bugs
+def match_axiom_slow(space,target):
     if isinstance(target.op, Atom):
         candidates = [target.op]
     else:
@@ -385,6 +437,31 @@ def match_axiom(space,target):
     candidate_tvs = (c.tv for c in candidates)
     
     return zip(candidate_trees, candidate_tvs)
+
+def match_axiom(space,target):
+    if isinstance(target.op, Atom):
+        candidates = [target.op]
+    else:
+        # The nodes in the target, as Atoms
+        nodes = [tr.op for tr in target.flatten() if isinstance(tr.op, Atom) and tr.op.is_node()]
+
+        if not len(nodes):
+            return match_axiom_slow(target)
+        
+        # TODO choose the node with the smallest incoming set.
+        n = nodes[0]
+        candidates = find_links_upward(n)
+        
+    candidate_trees = (tree_from_atom(atom) for atom in candidates)
+    candidate_tvs = (c.tv for c in candidates)
+    
+    return zip(candidate_trees, candidate_tvs)
+
+def find_links_upward(atom):
+    level = [link for link in atom.incoming if link.tv.count > 0]
+    next_level = concat_lists([find_links_upward(link) for link in atom.incoming])
+    
+    return level + next_level
 
 def match_neighbors(space,target):
     print 'match_neighbors',target

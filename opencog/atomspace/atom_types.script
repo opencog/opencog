@@ -97,6 +97,8 @@ SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
 EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
 EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
 
+BEFORE_LINK <- ORDERED_LINK
+
 /// PLN types:
 // These are used in PLN currently, but can perhaps be replaced/removed
 HYPOTHETICAL_LINK <- ORDERED_LINK

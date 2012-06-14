@@ -46,9 +46,10 @@ both/AnotBdemo_partial_test.conf
 both/28_test.conf
 bc/plus_test.conf
 #bc/new/pathfinding_test.conf
+bc/new/before_test.conf
 ''')
 
-#files_list = '''psi/psi_planning_two_step_test.conf'''
+#files_list = '''bc/new/before_test.conf'''
 
 #files_list = '''bc/plus_test.conf'''
 #files_list ='''

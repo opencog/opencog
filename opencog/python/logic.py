@@ -129,9 +129,9 @@ class Chainer:
             self.dsp_search_path(self.expr2pdn(self.target),{},{},viz_path_graph)
             viz_path_graph.write_dot('path_result.dot')
     
-            viz_space_graph = Viz_Graph()
-            self.dsp_search_space(self.expr2pdn(self.target),viz_space_graph)
-            viz_space_graph.write_dot('space_result.dot')
+            #viz_space_graph = Viz_Graph()
+            #self.dsp_search_space(self.expr2pdn(self.target),viz_space_graph)
+            #viz_space_graph.write_dot('space_result.dot')
             
             viz_path_graph = Viz_Graph()
             self.dsp_search_path(self.expr2pdn(self.target),{ },{ }, viz_path_graph,True)
@@ -362,11 +362,11 @@ class Chainer:
             for (i, input) in enumerate(app.goals):
                 self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app)
 
-        self.num_app_pdns_per_level[app_pdn.depth] += 1
-        self.num_uses_per_rule_per_level[app_pdn.depth][app.name] += 1
-
         if status == 'CYCLE' or status == 'EXISTING':
             return
+
+        self.num_app_pdns_per_level[app_pdn.depth] += 1
+        self.num_uses_per_rule_per_level[app_pdn.depth][app.name] += 1
         
         assert app not in self.bc_later
         self.bc_later.append(app)
@@ -742,7 +742,7 @@ class Chainer:
                     return []
             #elif target.op in ['ExecutionLink',  'SequentialAndLink']:
             #    return [target]
-            elif rules.actionDone_template().unifies(target):
+            elif rules.actionDone_template(self.space).unifies(target):
                 return target
             else:
                 return []

@@ -118,3 +118,15 @@ def ext2InhFormula(tvs, U):
 
 def low(n):
     return max(n, 0.00001)
+
+# temporal formulas
+def beforeFormula(dist1, dist2):
+    times_event1 = [int(t) for t in dist1.keys()]
+    times_event2 = [int(t) for t in dist2.keys()]
+    
+    if all(t_event1 < t_event2 for t_event1 in times_event2 for t_event2 in times_event2):
+        strength = 1
+    else:
+        strength = 0
+    
+    return strength
