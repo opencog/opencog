@@ -1454,7 +1454,7 @@ different than the parity problem.
 -m20k:   -205    314   72
 -m40k:   -138   1136  107
 -m80k:   -120   6077  131
--m160k:  -
+-m160k:  -120  27310  131
 
 ======================================================================
 Regression test parity performance
@@ -2671,7 +2671,90 @@ the heck is -U2 faster!?
 640K:                       38720   2092  651
 1.28M: 13334   2285   356
 2.56M:
-5.12M:
-10.2M:
 
+Is ther overfitting?  Lets find out:
+../src/pm.py accuracy -f5 -dmagic04.data -ptarg -e80000 -n2 -s15 -M "-Z1 -v12 -j12 --hc-max-nn-evals=5000"
+Oddly enough, above creates only 87 features!? wtf?   Ohh, forgot the
+-D0.1 flag...  Anyway:
 
+    Train matrix:
+    Classifier results in columns, expected results in rows.
+    19209   7543
+    6421    42907
+    Accuracy: 0.816456361725 (62116 correct out of 76080 total)
+    ----
+    Test matrix:
+    Classifier results in columns, expected results in rows.
+    4745    1943
+    1646    10686
+    Accuracy: 0.811303890641 (15431 correct out of 19020 total)
+    ----
+
+Clearly, no over-fitting here.  The five folds had these scores &
+complexities, again, for 87 binary features, each fold is 4/5ths of
+the total dataset.
+
+score cpxy
+ 2854  56
+ 2698  55
+ 2828  70
+ 2798  65
+ 2778  68
+
+----------------------------------------------------------
+Do it again, this time -e160000 -s16 to get 81 features(!)
+
+score cpxy
+ 2951  82
+ 2902  82
+ 2971  76
+ 2972  64
+ 2905  80
+The above gives me:
+
+    Train matrix:
+    Classifier results in columns, expected results in rows.
+    16554	10198
+    4506	44822
+    Accuracy: 0.806729758149 (61376 correct out of 76080 total)
+    ----
+    Test matrix:
+    Classifier results in columns, expected results in rows.
+    4030	2658
+    1188	11144
+    Accuracy: 0.797791798107 (15174 correct out of 19020 total)
+    ----
+
+Pfft.
+
+----------------------------------------------------------
+Do it again, this time -e320000 -s15 -D0.1 to get 150 features, this
+time making it directly comparable to runs previous.  Wow. Scored below
+are record-setting.
+
+score cpxy
+ 1876  332
+ 1942  352
+ 1943  329
+ 2016  319
+ 1857  340
+
+These are great scores, better than any seen for this problem.
+I assume they're better because only 4/5ths of the data set is being
+used.  i.e. these should be 4/5/ths of the prvious best score,
+which was 2436 for -m320K -nn5K so yes, these are right.
+
+Train matrix:
+Classifier results in columns, expected results in rows.
+19644	7108
+2717	46611
+Accuracy: 0.870859621451 (66255 correct out of 76080 total)
+----
+Test matrix:
+Classifier results in columns, expected results in rows.
+4628	2060
+962	11370
+Accuracy: 0.841114616193 (15998 correct out of 19020 total)
+
+Very little evidence of overtraining in the above.  Clearly
+much more could be done.
