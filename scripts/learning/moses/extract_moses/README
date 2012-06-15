@@ -22,8 +22,18 @@ For example,
 It will create a directory moses-3.0.9 with a standalone version of
 MOSES in it.
 
-Installation
-------------
+RPM Build and Installation
+--------------------------
+The MOSES system may be built to create an RPM package, so as to ease
+installation and version management.  Be sure to create a ~/.rpmmacros
+file for yourself, and review general RPM build proceedures.  The spec
+file is called moses.spec.
+
+$ rpmbuild -ba moses.spec
+
+
+Manual Installation
+-------------------
 
 Enter that directory for the next steps to compile and install MOSES
 are
@@ -37,7 +47,7 @@ $ cd bin
 $ cmake ..
 $ make
 
-Install (may required root privilege)
+Install (requires root privilege)
 
 # make install
 # ldconfig

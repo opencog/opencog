@@ -63,7 +63,8 @@ done
 
 # Copy comboreduct, moses, feature-selection. While doing so, replace
 # any instance of opencog by moses, SHARED by STATIC in the CMake
-# files. Removed TARGETS (for installation) and WIN32
+# files. 
+# Removed TARGETS (for installation) and WIN32 (XXX Why?)
 cd "$OC_PATH/opencog"
 for dir in comboreduct learning/moses learning/feature-selection; do
     # Complicated find statement to remove large and unwanted diary
@@ -71,7 +72,8 @@ for dir in comboreduct learning/moses learning/feature-selection; do
     find $dir -path "*/diary" -prune , -path "*/sample" -prune , -not -name "*~" -and -not -name "*.bak.?" -and -type f > find.txt
     while read -r; do
         if [ $(basename $REPLY) == "CMakeLists.txt" ]; then
-            sed -e s/opencog/"$PROJECT"/g -e s/SHARED/STATIC/ "$REPLY" | grep -v "(WIN32)" | grep -v "TARGETS" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
+            # sed -e s/opencog/"$PROJECT"/g -e s/SHARED/STATIC/ "$REPLY" | grep -v "(WIN32)" | grep -v "TARGETS" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
+            sed -e s/opencog/"$PROJECT"/g  "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
         else
             sed s/opencog/"$PROJECT"/g "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
         fi
@@ -106,11 +108,13 @@ grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproje
 echo "ADD_SUBDIRECTORY($PROJECT)" >> "$ABS_MOSES_DIR/CMakeLists.txt"
 rm "$ABS_MOSES_DIR/CMakeLists.txt.orig"
 
+# ----------
 # $PROJECT CMakeLists.txt
 echo "ADD_SUBDIRECTORY(util)" > "$ABS_MOSES_DIR/$PROJECT/CMakeLists.txt"
 echo "ADD_SUBDIRECTORY(comboreduct)" >> "$ABS_MOSES_DIR/$PROJECT/CMakeLists.txt"
 echo "ADD_SUBDIRECTORY(learning)" >> "$ABS_MOSES_DIR/$PROJECT/CMakeLists.txt"
 
+# ----------
 # $PROJECT/learning/moses
 # fix MOSES_BZR_REVNO, set it manually
 ABS_PLM_DIR="$ABS_MOSES_DIR/$PROJECT/learning/moses/"
@@ -121,10 +125,12 @@ cd "$INIT_DIR"
 sed -i s/'EXECUTE_PROCESS(COMMAND bzr revno "${PROJECT_SOURCE_DIR}" OUTPUT_VARIABLE MOSES_BZR_REVNO)'/'# EXECUTE_PROCESS(COMMAND bzr revno OUTPUT_VARIABLE MOSES_BZR_REVNO)'/ "$ABS_PLM_DIR/CMakeLists.txt"
 sed -i "1i SET (MOSES_BZR_REVNO $REVNO)" "$ABS_PLM_DIR/CMakeLists.txt"
 
+# ----------
 # learning CMakeLists.txt
 echo "ADD_SUBDIRECTORY(moses)" > "$ABS_MOSES_DIR/$PROJECT/learning/CMakeLists.txt"
 echo "ADD_SUBDIRECTORY(feature-selection)" >> "$ABS_MOSES_DIR/$PROJECT/learning/CMakeLists.txt"
 
+# ----------
 # util CMakeLists.txt
 echo "ADD_LIBRARY(util STATIC algorithm based_variant digraph dorepeat exceptions functional.h iostreamContainer lazy_normal_selector lazy_random_selector lazy_selector random oc_assert Config Logger log_prog_name lru_cache mt19937ar platform tree oc_omp Counter KLD MannWhitneyU ranking)" > "$ABS_MOSES_DIR/$PROJECT/util/CMakeLists.txt"
 echo "TARGET_LINK_LIBRARIES(util \${Boost_FILESYSTEM_LIBRARY} \${Boost_SYSTEM_LIBRARY} \${Boost_REGEX_LIBRARY} \${Boost_THREAD_LIBRARY})" >> "$ABS_MOSES_DIR/$PROJECT/util/CMakeLists.txt"
@@ -142,6 +148,9 @@ mv "$ABS_MOSES_DIR/$PROJECT/learning/moses/LICENSE" "$ABS_MOSES_DIR"
 # Copy README #
 ###############
 cp "$PRG_DIR/readme_to_copy" "$ABS_MOSES_DIR/README"
+
+# The RPM build spec too.
+cp "$PRG_DIR/moses.spec" "$ABS_MOSES_DIR"
 
 ###########
 # Message #
