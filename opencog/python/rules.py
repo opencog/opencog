@@ -90,7 +90,7 @@ def rules(a, deduction_types):
     # you use it due to bugs in the backward chainer.
     r = Rule(Var(123),[],
                       name='Lookup',
-                      match=match_axiom_slow)
+                      match=match_axiom)
     rules.append(r)
 
     # A simple example Rule to test the mechanism. You're allowed to add a Rule which calls
@@ -120,24 +120,24 @@ def rules(a, deduction_types):
                                       formula = formulas.modusPonensFormula))
     
     # The PLN DeductionRule. Not to be confused with ModusPonens.
-    for type in deduction_types:
-        rules.append(Rule(T(type, 1,3), 
-                                     [T(type, 1, 2),
-                                      T(type, 2, 3), 
-                                      Var(1),
-                                      Var(2), 
-                                      Var(3)],
-                                    name='Deduction', 
-                                    formula = formulas.deductionSimpleFormula))
-    
-    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
-    for type in deduction_types:
-        rules.append(Rule( T(type, 2, 1), 
-                                     [T(type, 1, 2),
-                                      Var(1),
-                                      Var(2)], 
-                                     name='Inversion', 
-                                     formula = formulas.inversionFormula))
+    #for type in deduction_types:
+    #    rules.append(Rule(T(type, 1,3), 
+    #                                 [T(type, 1, 2),
+    #                                  T(type, 2, 3), 
+    #                                  Var(1),
+    #                                  Var(2), 
+    #                                  Var(3)],
+    #                                name='Deduction', 
+    #                                formula = formulas.deductionSimpleFormula))
+    #
+    ## PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
+    #for type in deduction_types:
+    #    rules.append(Rule( T(type, 2, 1), 
+    #                                 [T(type, 1, 2),
+    #                                  Var(1),
+    #                                  Var(2)], 
+    #                                 name='Inversion', 
+    #                                 formula = formulas.inversionFormula))
 
     # Calculating logical And/Or/Not. These have probabilities attached,
     # but they work similarly to the Boolean versions.
@@ -169,39 +169,6 @@ def rules(a, deduction_types):
                        [ T('SubsetLink', 1, 2) ],
                        name = 'SubsetLink=>InheritanceLink', 
                        formula = formulas.ext2InhFormula))
-
-    # Used by planning. An ExecutionLink indicates an action being performed, so we can
-    # assume that the action will be performed as part of the plan (i.e. if any action
-    # occurs in the plan, set the TV to full probability and confidence).
-    #r = Rule(T('ExecutionLink', 1, 2),
-    #                   [],
-    #                   name = 'PerformAction',
-    #                   tv = TruthValue(1.0,confidence_to_count(1.0)))
-    #rules.append(r)
-    # TOdo this should be actionSuccess not just actionDone
-    r = Rule(actionDone_template(a),
-                [],
-                name = 'PerformAction',
-                tv = TruthValue(1.0,confidence_to_count(1.0)))
-    rules.append(r)
-    
-    # If something is true at the current time, you can use it as the start of the plan.
-    # First find the latest time (hack)
-    current_time = 0
-    for time in a.get_atoms_by_type(t.TimeNode):
-        timestamp = int(time.name)
-        if timestamp > current_time:
-            current_time = timestamp
-    current_time_node = a.add(t.TimeNode, str(current_time))
-    # Then create the Rule
-    # It's essential to store the template so it will have the same variables in both
-    # the head and the goal
-    template = evaluation_link_template()
-    r = Rule(template,
-                [T('AtTimeLink', current_time_node, template)],
-                name = 'AtCurrentTime'
-                )
-    rules.append(r)
 
 #        # Producing ForAll/Bind/AverageLinks.
 #        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
@@ -240,8 +207,58 @@ def rules(a, deduction_types):
         rules.append(r)
 
     rules += temporal_rules(a)
+    
+    rules += planning_rules(a)
 
     # Return every Rule specified above.
+    return rules
+
+def planning_rules(atomspace):
+    rules = []
+    # Used by planning. An ExecutionLink indicates an action being performed, so we can
+    # assume that the action will be performed as part of the plan (i.e. if any action
+    # occurs in the plan, set the TV to full probability and confidence).
+    #r = Rule(T('ExecutionLink', 1, 2),
+    #                   [],
+    #                   name = 'PerformAction',
+    #                   tv = TruthValue(1.0,confidence_to_count(1.0)))
+    #rules.append(r)
+    # TOdo this should be actionSuccess not just actionDone
+    r = Rule(actionDone_template(atomspace),
+                [],
+                name = 'PerformAction',
+                tv = TruthValue(1.0,confidence_to_count(1.0)))
+    rules.append(r)
+    
+    # If something is true at the current time, you can use it as the start of the plan.
+    # First find the latest time (hack)
+    current_time = 0
+    for time in atomspace.get_atoms_by_type(t.TimeNode):
+        timestamp = int(time.name)
+        if timestamp > current_time:
+            current_time = timestamp
+    current_time_node = atomspace.add(t.TimeNode, str(current_time))
+    # Then create the Rule
+    # It's essential to store the template so it will have the same variables in both
+    # the head and the goal
+    template = evaluation_link_template()
+    r = Rule(template,
+                [T('AtTimeLink', current_time_node, template)],
+                name = 'AtCurrentTime'
+                )
+    rules.append(r)
+    
+    # A hacky rule for determining SequentialAndLinks. It doesn't check that the things
+    # happen after each other. It's just intended to find results from the PerformAction
+    # or AtCurrentTime rules.
+    type = 'SequentialAndLink'
+    for size in xrange(10):
+        args = [new_var() for i in xrange(size+1)]
+        rules.append(Rule(T(type, args),
+                           args,
+                           type[:-4], 
+                           formula = formulas.andSymmetricFormula))
+
     return rules
 
 def temporal_rules(atomspace):
@@ -424,12 +441,12 @@ def create_temporal_matching_function(formula):
 
 # See how they are used in rules() above.
 
-# The slow one but still used because match_axiom still has bugs
-def match_axiom_slow(space,target):
-    if isinstance(target.op, Atom):
-        candidates = [target.op]
-    else:
-        candidates = space.get_atoms_by_type(target.get_type())
+def match_axiom_slow(space,target,candidates = None):
+    #if isinstance(target.op, Atom):
+    #    candidates = [target.op]
+    #else:
+
+    candidates = space.get_atoms_by_type(target.get_type())
     
     candidates = [c for c in candidates if c.tv.count > 0]
     
@@ -447,11 +464,18 @@ def match_axiom(space,target):
 
         if not len(nodes):
             return match_axiom_slow(target)
+
+        links_of_type = space.get_atoms_by_type(target.get_type())
         
-        # TODO choose the node with the smallest incoming set.
-        n = nodes[0]
-        candidates = find_links_upward(n)
+        smallest_set = links_of_type
+        for n in nodes:
+            candidates = find_links_upward(n)
+            if len(candidates) < len(smallest_set):
+                smallest_set = candidates
         
+        print target, len(smallest_set)
+
+    # Then the chainer will try to unify against every candidate
     candidate_trees = (tree_from_atom(atom) for atom in candidates)
     candidate_tvs = (c.tv for c in candidates)
     
