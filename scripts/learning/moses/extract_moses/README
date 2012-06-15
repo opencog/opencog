@@ -9,16 +9,18 @@ Extraction
 
 To extract MOSES from OpenCog use the script OC2MOSES.sh. The usage is
 
-./OC2MOSES.sh MOSES_DIR
+   ./OC2MOSES.sh MOSES_DIR
 
-OC_PATH must be the path of the OpenCog project. MOSES_DIR is the name
-of the directory to create and put the MOSES project under. For
-example
+MOSES_DIR is the name of the directory to create and place the MOSES
+project.  Non-standard locations of the OpenCog project can be dealt
+with by hacking the OC_PATH setting in the shell script.
 
-$ ./OC2MOSES.sh moses-3.0.9
+For example,
+
+    $ ./OC2MOSES.sh moses-3.0.9
 
 It will create a directory moses-3.0.9 with a standalone version of
-MOSES under.
+MOSES in it.
 
 Installation
 ------------

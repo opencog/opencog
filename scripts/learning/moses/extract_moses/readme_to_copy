@@ -13,8 +13,8 @@ INSTALLATION
 
 To compile, from the root directory of MOSES:
 
-$ mkdir bin
-$ cd bin
+$ mkdir build
+$ cd build
 $ cmake ..
 $ make
 

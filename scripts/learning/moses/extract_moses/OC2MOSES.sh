@@ -68,7 +68,7 @@ cd "$OC_PATH/opencog"
 for dir in comboreduct learning/moses learning/feature-selection; do
     # Complicated find statement to remove large and unwanted diary
     # and sample directories, and also bzr grunge and backup files.
-    find $dir -path *diary* -prune -and -path *sample* -prune -or -not -name "*~" -and -not -name "*.bak.?" -and -type f > find.txt
+    find $dir -path "*/diary" -prune , -path "*/sample" -prune , -not -name "*~" -and -not -name "*.bak.?" -and -type f > find.txt
     while read -r; do
         if [ $(basename $REPLY) == "CMakeLists.txt" ]; then
             sed -e s/opencog/"$PROJECT"/g -e s/SHARED/STATIC/ "$REPLY" | grep -v "(WIN32)" | grep -v "TARGETS" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
