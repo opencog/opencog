@@ -1,24 +1,34 @@
 DESCRIPTION
 -----------
-
 Standalone version of MOSES under Apache license.
+
 
 REQUIREMENTS
 ------------
+You need libboost 1.46 or later.
 
-You need libboost 1.46 or more.
 
-INSTALLATION
-------------
+RPM Build and Installation
+--------------------------
+The MOSES system may be built to create an RPM package, so as to ease
+installation and version management.  Be sure to create a ~/.rpmmacros
+file for yourself, and review general RPM build proceedures.  The spec
+file is called moses.spec.
 
-To compile, from the root directory of MOSES:
+$ rpmbuild -bb moses.spec
+
+
+Manual Installation
+-------------------
+Alternately, one may manually compile and install.  To compile, go to
+the root directory of MOSES:
 
 $ mkdir build
 $ cd build
 $ cmake ..
 $ make
 
-Install (may required root privilege)
+Install (requires root privileges)
 
 # make install
 # ldconfig

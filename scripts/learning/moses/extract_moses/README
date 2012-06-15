@@ -1,8 +1,8 @@
 DESCRIPTION
 -----------
-
 Scripts to extract MOSES out of OpenCog project, and replace GPL
 license by Apache (MOSES has double licensing).
+
 
 Extraction
 ----------
@@ -22,6 +22,7 @@ For example,
 It will create a directory moses-3.0.9 with a standalone version of
 MOSES in it.
 
+
 RPM Build and Installation
 --------------------------
 The MOSES system may be built to create an RPM package, so as to ease
@@ -29,18 +30,17 @@ installation and version management.  Be sure to create a ~/.rpmmacros
 file for yourself, and review general RPM build proceedures.  The spec
 file is called moses.spec.
 
-$ rpmbuild -ba moses.spec
+$ rpmbuild -bb moses.spec
 
 
 Manual Installation
 -------------------
-
-Enter that directory for the next steps to compile and install MOSES
-are
+For a manual compile and install, perform the following from the 
+extracted directory:
 
 $ cd moses-3.0.9
 
-To compile, from the root directory of MOSES:
+To compile:
 
 $ mkdir bin
 $ cd bin

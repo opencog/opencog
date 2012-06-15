@@ -39,11 +39,14 @@ Headers and libraries needed to develop for MOSES
 %setup
 
 %build
-
 CFLAGS="$RPM_OPT_FLAGS" 
+# XXX LIB_DIR_SUFFIX is a hack, really, the CMakefile should have done
+# this, but OC2MOSES munged them.
+LIB_DIR_SUFFIX=64
+
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DLIB_DIR_SUFFIX=64 ..
 
 if [ "$SMP" != "" ]; then
   (%__make "MAKE=%__make -k -j $SMP"; exit 0)
@@ -52,16 +55,25 @@ else
 %__make
 fi
 
+
 %install
 cd build
 if [ -d $RPM_BUILD_ROOT ]; then rm -rf $RPM_BUILD_ROOT; fi
 %__make DESTDIR=$RPM_BUILD_ROOT install
 
+
 %files
 %defattr(644,root,root,755)
 %doc LICENSE README
 %attr(755,root,root)%{_bindir}/*
-%{_libdir}/lib*.so*
+%{_mandir}/man1/*
+
+
+%files devel
+%defattr(-,root,root)
+%{_libdir}/lib*.a
+%{_includedir}/moses3/*
+
 
 %clean
 %__rm -rf $RPM_BUILD_ROOT
@@ -71,11 +83,6 @@ if [ -d $RPM_BUILD_ROOT ]; then rm -rf $RPM_BUILD_ROOT; fi
 
 %postun
 /sbin/ldconfig
-
-%files devel
-%defattr(-,root,root)
-%{_libdir}/lib*.a
-%{_libdir}/lib*.la
 
 
 %changelog
