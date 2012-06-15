@@ -61,12 +61,14 @@ for f in ${UTIL_FILES[@]}; do
     sed s/opencog/"$PROJECT"/g "$OC_PATH"/opencog/util/$f > "$ABS_MOSES_DIR/$PROJECT/util/$f"
 done
 
-# copy ComboReduct, moses, feature-selection. While doing so replace
+# Copy comboreduct, moses, feature-selection. While doing so, replace
 # any instance of opencog by moses, SHARED by STATIC in the CMake
 # files. Removed TARGETS (for installation) and WIN32
 cd "$OC_PATH/opencog"
 for dir in comboreduct learning/moses learning/feature-selection; do
-    find $dir -type f > find.txt
+    # Complicated find statement to remove large and unwanted diary
+    # and sample directories, and also bzr grunge and backup files.
+    find $dir -path *diary* -prune -and -path *sample* -prune -or -not -name "*~" -and -not -name "*.bak.?" -and -type f > find.txt
     while read -r; do
         if [ $(basename $REPLY) == "CMakeLists.txt" ]; then
             sed -e s/opencog/"$PROJECT"/g -e s/SHARED/STATIC/ "$REPLY" | grep -v "(WIN32)" | grep -v "TARGETS" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
