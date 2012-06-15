@@ -73,7 +73,7 @@ for dir in comboreduct learning/moses learning/feature-selection; do
     while read -r; do
         if [ $(basename $REPLY) == "CMakeLists.txt" ]; then
             # sed -e s/opencog/"$PROJECT"/g -e s/SHARED/STATIC/ "$REPLY" | grep -v "(WIN32)" | grep -v "TARGETS" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
-            sed -e s/opencog/"$PROJECT"/g  "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
+            sed -e s/opencog/"$PROJECT"/g  -e s/SHARED/STATIC/ "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
         else
             sed s/opencog/"$PROJECT"/g "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
         fi
@@ -86,6 +86,10 @@ cp -fr "$OC_PATH/doc/comboreduct" "$ABS_MOSES_DIR/doc"
 
 # moses doc
 cp -fr "$OC_PATH/doc/moses" "$ABS_MOSES_DIR/doc"
+
+# misc hacks -- remove some large files.
+rm -f "$ABS_MOSES_DIR"/moses3/learning/moses/example-data/wine*
+rm -f "$ABS_MOSES_DIR"/moses3/learning/moses/example-data/magic*
 
 ##########################
 # Fix all CMakeLists.txt #
@@ -103,7 +107,7 @@ echo "SET(CMAKE_BUILD_TYPE Release)" >> "$ABS_MOSES_DIR/CMakeLists.txt"
 echo "SET(CMAKE_FIND_LIBRARY_SUFFIXES .a \${CMAKE_FIND_LIBRARY_SUFFIXES})" >> $ABS_MOSES_DIR/CMakeLists.txt
 
 # keep what's necessary and set options to be as standalone as possible
-grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproject_source_dir|dproject_binary_dir|boost|have_util|have_comboreduct|have_moses|have_feature_selection|summary_show|summary\.cmake' "$ABS_MOSES_DIR/CMakeLists.txt.orig" | sed s/opencog/$PROJECT/g | sed s/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")'/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector -static-libstdc++ -static-libgcc")'/ >> "$ABS_MOSES_DIR/CMakeLists.txt"
+grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproject_source_dir|dproject_binary_dir|man_install|boost|have_util|have_comboreduct|have_moses|have_feature_selection|summary_show|summary\.cmake' "$ABS_MOSES_DIR/CMakeLists.txt.orig" | sed s/opencog/$PROJECT/g | sed s/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")'/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector -static-libstdc++ -static-libgcc")'/ >> "$ABS_MOSES_DIR/CMakeLists.txt"
 
 echo "ADD_SUBDIRECTORY($PROJECT)" >> "$ABS_MOSES_DIR/CMakeLists.txt"
 rm "$ABS_MOSES_DIR/CMakeLists.txt.orig"
@@ -151,6 +155,9 @@ cp "$PRG_DIR/readme_to_copy" "$ABS_MOSES_DIR/README"
 
 # The RPM build spec too.
 cp "$PRG_DIR/moses.spec" "$ABS_MOSES_DIR"
+
+
+tar -jcf "$MOSES_DIR.tar.bz2" "$MOSES_DIR"
 
 ###########
 # Message #

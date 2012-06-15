@@ -67,5 +67,7 @@ TARGET_LINK_LIBRARIES (comboreduct
 IF (WIN32)
 	INSTALL(TARGETS comboreduct DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ELSE (WIN32)
-	INSTALL(TARGETS comboreduct LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL(TARGETS comboreduct
+           LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}"   # lib*.so files
+           ARCHIVE DESTINATION "lib${LIB_DIR_SUFFIX}")  # lib*.a files
 ENDIF (WIN32)
