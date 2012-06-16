@@ -7,7 +7,7 @@ Summary: MOSES automated program learning system
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Group: System Environment/Base
+Group: Applications/Engineering
 License: Apache2
 
 Source: %{name}-%{version}.tar.bz2
