@@ -151,11 +151,11 @@ class Tree (object):
         return [self]+concat_lists(map(Tree.flatten, self.args))
 
 class DAG(Tree):
-    def __init__(self,op,args):
+    def __init__(self,op,args, depth = 0):
         Tree.__init__(self,op,[])
         self.parents = []
         
-        self.depth = 0
+        self.depth = depth
         self.best_conf_below = 0.0
         self.path_axiom = None
         self.path_pre = None

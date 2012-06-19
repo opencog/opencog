@@ -48,6 +48,10 @@ class Chainer:
     # Convert Atoms into FakeAtoms for Pypy/Pickle/Multiprocessing compatibility
     _convert_atoms = False
 
+    # Useful for testing, where you make multiple Chainer objects for separate AtomSpaces
+    successful_num_app_pdns_per_level = Counter()
+    successful_num_uses_per_rule_per_level = defaultdict(Counter)
+
     def __init__(self, space, planning_mode = False):
         self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
 
@@ -120,6 +124,8 @@ class Chainer:
                 print 'Inference trail:'
                 trail = self.trail(res)
                 self.print_tree(trail)
+                
+                self.update_global_stats(trail)
                 #print 'Action plan (if applicable):'
                 #print self.extract_plan(trail)
     #            for res in self.results:
@@ -147,6 +153,9 @@ class Chainer:
             
             pprint(self.num_app_pdns_per_level)
             pprint(self.num_uses_per_rule_per_level)
+            
+            pprint(Chainer.successful_num_app_pdns_per_level)
+            pprint(Chainer.successful_num_uses_per_rule_per_level)
             
             return ret
         except Exception, e:
@@ -687,9 +696,11 @@ class Chainer:
             
             #print 'add_app_to_pd:',repr(app)
             
+            # Note: You must add the app pdn to the Proof DAG before adding its children, so the
+            # depth statistic will be recorded correctly.
+            head_pdn.append(app_pdn)
             for goal_pdn in goal_pdns:
                 app_pdn.append(goal_pdn)
-            head_pdn.append(app_pdn)
         
             #print 'add_app_to_pd adding %s for the first time' % (app_pdn,)
         
@@ -759,27 +770,38 @@ class Chainer:
         def recurse(rule_pdn):
             #print repr(rule_pdn.op),' PDN args', rule_pdn.args
             exprs = map(filter_expr,rule_pdn.args)
-            return DAG(rule_pdn.op, exprs)
+            ret = DAG(rule_pdn.op, exprs, rule_pdn.depth)
+            return ret
 
         def filter_expr(expr_pdn):
             #print expr_pdn.op, [repr(rpdn.op) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             #successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
-            return DAG(expr_pdn.op, successful_rules)
+            ret = DAG(expr_pdn.op, successful_rules, expr_pdn.depth)
+            return ret
         
         root = self.expr2pdn(target)
 
         return filter_expr(root)
-    
+
     def print_tree(self, tr, level = 1):
         #try:
         #    (tr.depth, tr.best_conf_above)
         #    print ' '*(level-1)*3, tr.op, tr.depth, tr.best_conf_above
         #except AttributeError:
-        print ' '*(level-1)*3, tr.op
-        
+        print ' '*(level-1)*3, tr.depth, tr.op
+
+
         for child in tr.args:
             self.print_tree(child, level+1)
+
+    def update_global_stats(self,tr):
+        if isinstance(tr.op, rules.Rule):
+            Chainer.successful_num_app_pdns_per_level[tr.depth] += 1
+            Chainer.successful_num_uses_per_rule_per_level[tr.depth][tr.op.name] += 1
+        
+        for subtree in tr.args:
+            self.update_global_stats(subtree)
 
     def propogate_scores_upward(self, expr_pdn, best_conf_below):
         assert isinstance(expr_pdn, DAG)
@@ -932,50 +954,50 @@ class Chainer:
             
             return None
 
-def do_planning(space, target):
-    a = space
-
-    rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
-    atom_from_tree(rl, a)
-    
-    # hack
-    print 'target'
-    target_a = atom_from_tree(target, a)
-    print target_a
-    print target_a.tv
-    target_a.tv = TruthValue(0,  0)
-    print target_a
-    
-    chainer = Chainer(a, planning_mode = True)        
-
-    result_atoms = chainer.bc(target, 2000)
-    
-    print "planning result: ",  result_atoms
-    
-    if result_atoms:
-        res_Handle = result_atoms[0]
-        res = tree_from_atom(Atom(res_Handle, a))
-        
-        trail = chainer.trail(res)
-        actions = chainer.extract_plan(trail)
-        
-        # set plan_success
-        ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
-        # set plan_action_list
-        pal = T('ReferenceLink',
-                    a.add_node(t.ConceptNode, 'plan_action_list'),
-                    T('ListLink', actions))
-        
-        ps_a  = atom_from_tree(ps, a)
-        pal_a = atom_from_tree(pal, a)
-        
-        print ps
-        print pal
-        ps_a.tv = TruthValue(1.0, confidence_to_count(1.0))
-        
-        print ps_a.tv
-    
-    return result_atoms
+#def do_planning(space, target):
+#    a = space
+#
+#    rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+#    atom_from_tree(rl, a)
+#    
+#    # hack
+#    print 'target'
+#    target_a = atom_from_tree(target, a)
+#    print target_a
+#    print target_a.tv
+#    target_a.tv = TruthValue(0,  0)
+#    print target_a
+#    
+#    chainer = Chainer(a, planning_mode = True)        
+#
+#    result_atoms = chainer.bc(target, 2000)
+#    
+#    print "planning result: ",  result_atoms
+#    
+#    if result_atoms:
+#        res_Handle = result_atoms[0]
+#        res = tree_from_atom(Atom(res_Handle, a))
+#        
+#        trail = chainer.trail(res)
+#        actions = chainer.extract_plan(trail)
+#        
+#        # set plan_success
+#        ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
+#        # set plan_action_list
+#        pal = T('ReferenceLink',
+#                    a.add_node(t.ConceptNode, 'plan_action_list'),
+#                    T('ListLink', actions))
+#        
+#        ps_a  = atom_from_tree(ps, a)
+#        pal_a = atom_from_tree(pal, a)
+#        
+#        print ps
+#        print pal
+#        ps_a.tv = TruthValue(1.0, confidence_to_count(1.0))
+#        
+#        print ps_a.tv
+#    
+#    return result_atoms
 
 from urllib2 import URLError
 def check_connected(method):
@@ -1107,6 +1129,7 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
     can take many cognitive cycles).'''
     def __init__(self):
         self.cycles = 0
+        self.chainer = None
 
     def run(self,atomspace):
         # Currently it has to find the whole plan in one cycle, but that computation
@@ -1132,9 +1155,55 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
                     )
     
         #try:
-        do_planning(atomspace, target)
+        self.do_planning(atomspace, target)
         #except Exception, e:
         #    log.info(format_log(e))
+
+    def do_planning(self, space, target):
+        a = space
+    
+        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+        atom_from_tree(rl, a)
+        
+        # hack
+        print 'target'
+        target_a = atom_from_tree(target, a)
+        print target_a
+        print target_a.tv
+        target_a.tv = TruthValue(0,  0)
+        print target_a
+        
+        if self.chainer is None:
+            chainer = Chainer(a, planning_mode = True)
+    
+        result_atoms = chainer.bc(target, 2000)
+        
+        print "planning result: ",  result_atoms
+        
+        if result_atoms:
+            res_Handle = result_atoms[0]
+            res = tree_from_atom(Atom(res_Handle, a))
+            
+            trail = chainer.trail(res)
+            actions = chainer.extract_plan(trail)
+            
+            # set plan_success
+            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
+            # set plan_action_list
+            pal = T('ReferenceLink',
+                        a.add_node(t.ConceptNode, 'plan_action_list'),
+                        T('ListLink', actions))
+            
+            ps_a  = atom_from_tree(ps, a)
+            pal_a = atom_from_tree(pal, a)
+            
+            print ps
+            print pal
+            ps_a.tv = TruthValue(1.0, confidence_to_count(1.0))
+            
+            print ps_a.tv
+        
+        return result_atoms
 
 if __name__ == '__main__':
     a = AtomSpace()
