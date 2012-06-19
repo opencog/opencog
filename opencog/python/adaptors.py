@@ -22,6 +22,8 @@ class ForestExtractor:
         self.a = atomspace
         self.writer = writer
         
+        self.attentional_focus = True
+        
         # policy
         # Whether to create miner-friendly output, rather than human-friendly output.
         # Makes it output all object-nodes with the same label. May be more useful for visualisation anyway.
@@ -96,6 +98,9 @@ class ForestExtractor:
         for link in initial_links:
                      #or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
                      #or x.is_a(t.AndLink)]: # temporary hack
+            if self.attentional_focus and link.av['sti'] <= -10:
+                continue
+            
             if not self.include_tree(link): continue
             #print link
             
