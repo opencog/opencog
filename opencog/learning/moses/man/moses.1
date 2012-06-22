@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "June 11, 2012" "3.2.0" "OpenCog Learning"
+.TH MOSES 1 "June 22, 2012" "3.2.1" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -103,6 +103,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR max ]
 .RB [ \-\-well\-enough=1 ]
 .RB [ \-x1 ]
+.RB [ \-Y
+.IR feature ]
 .RB [ \-y
 .IR combo_program ]
 .RB [ \-Z1 ]
@@ -354,16 +356,6 @@ labels. The target column may be
 specified using the \fB\-u\fR option with a column name. The printing of
 column names on output is controlled with the \fB\-W1\fR flag.
 .TP
-.BI \-b\  num \fR,\ \fB\-\-nsamples= num
-The number of samples to be taken from the input file. Valid values
-run between 1 and the number of rows in the data file; other values
-are ignored. If this option is absent, then all data rows are used.
-If this option is present, then the input table is sampled randomly
-to reach this size.
-.TP
-.BI \-G\  num \fR,\ \fB\-\-weighted\-accuracy= num
-Huh ???
-.TP
 .BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
 The \fIfilename\fR specifies the input data file. The input table must
 be in 'delimiter-separated value' (DSV) format.  Valid seperators 
@@ -380,8 +372,23 @@ is specified, then the first column is used.  The \fIcolumn\fR may be
 numeric, or it may be a column label.  If it is numeric, it is taken
 to be the number of the column, with column 1 being the left-most.
 If \fIcolumn\fR begins with an alphabetic character, it is taken to be
-a column label.  In this case, the very first row of the
+a column label.  In this case, the first non-comment row of the
 input file must contain column labels.
+.TP
+.BI \-Y\  column \fR,\ \fB\-\-ignore\-feature= column
+The \fIcolumn\fR should be ignored, and not used as input.  Columns
+are specified as above.  This option may be used multiple times, to
+ignore multiple columns.
+.TP
+.BI \-b\  num \fR,\ \fB\-\-nsamples= num
+The number of samples to be taken from the input file. Valid values
+run between 1 and the number of rows in the data file; other values
+are ignored. If this option is absent, then all data rows are used.
+If this option is present, then the input table is sampled randomly
+to reach this size.
+.TP
+.BI \-G\  num \fR,\ \fB\-\-weighted\-accuracy= num
+Huh ???
 
 .\" ============================================================
 .SS "Algorithm control options"

@@ -2285,24 +2285,24 @@ Other datasets:
 
 These should work with PM, as designed:
 
- * Wine Quality  5K records
+ * Wine Quality  5K records, 12 features
    http://archive.ics.uci.edu/ml/datasets/Wine+Quality
    Purely numeric, predict rating 1-10
 
- * DBWorld email abg of words, classify, is it announce, or not?
+ * DBWorld email bag of words, classify, is it announce, or not?
    4.7K attributes (features) but only 64 records.
    http://archive.ics.uci.edu/ml/datasets/DBWorld+e-mails
 
 
 These should work with the enum classifier:
- * Breast Cancer: 569 records. 
+ * Breast Cancer: 569 records, 32 features
    http://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29
-   Linearly sperable, 97% accuracy
+   Linearly seperable, 97% accuracy
 
- * Yeast  1.5K records
+ * Yeast  1.5K records, 8 features.
    http://archive.ics.uci.edu/ml/datasets/Yeast
    Need to ignore one column.
-   Other systems get 55% accuracy.
+   Other systems get 55% accuracy. (per ascii description)
 
  * Wine
    http://archive.ics.uci.edu/ml/datasets/Wine   178 records. Small...
@@ -2758,3 +2758,14 @@ Accuracy: 0.841114616193 (15998 correct out of 19020 total)
 
 Very little evidence of overtraining in the above.  Clearly
 much more could be done.
+=======================================================================
+
+Lets give this one a whirl:
+ * Yeast  1.5K records, 8 features.
+   http://archive.ics.uci.edu/ml/datasets/Yeast
+   Need to ignore one column.
+   Other systems get 55% accuracy. (per ascii description)
+
+
+ ./opencog/learning/moses/main/moses -Hit -Y1 -u10 -i yeast.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
+

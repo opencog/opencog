@@ -534,6 +534,11 @@ int moses_exec(int argc, char** argv)
          value<string>(&target_feature),
          "Label of the target feature to fit. If none is given the first one is used.\n")
 
+        (opt_desc_str(ignore_feature_str_opt).c_str(),
+         value<vector<string>>(&ignore_features_str),
+         "Ignore feature from the datasets. Can be used several times "
+         "to ignore several features.\n")
+
         (opt_desc_str(problem_opt).c_str(),
          value<string>(&problem)->default_value(it),
          str(format("Problem to solve, supported problems are:\n"
@@ -635,11 +640,6 @@ int moses_exec(int argc, char** argv)
                     "That is, if an operator is both be included and ignored, "
                     "then it is ignored. This option does not work with ANN.\n")
              % include_only_ops_str_opt.first).c_str())
-
-        (opt_desc_str(ignore_feature_str_opt).c_str(),
-         value<vector<string>>(&ignore_features_str),
-         "Ignore feature from the datasets. Can be used several times "
-         "to ignore several features.\n")
 
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
