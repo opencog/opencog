@@ -415,7 +415,7 @@ type_node infer_type_from_token(const string& token)
  * If the target begins with an alpha character, it is assumed to be a
  * column label. We return the column number; 0 is the left-most column.
  *
- * If the target is numeric, just assum that it is a column number.
+ * If the target is numeric, just assume that it is a column number.
  */
 vector<int> find_features_positions(const string& fileName,
                                     const vector<string>& features)
@@ -432,15 +432,14 @@ vector<int> find_features_positions(const string& fileName,
         if (isdigit(f[0])) {
             pos = atoi(f.c_str());
             pos --;  // let users number columns starting at 1.
-            OC_ASSERT((pos < (int)labels.size()) || (pos < 0),
+            OC_ASSERT((pos < (int)labels.size()) || (0 <= pos),
                       "ERROR: The column number \"%s\" doesn't exist in data file %s",
                       f.c_str(), fileName.c_str());
-            positions.push_back(pos);
         }
         else {
             // Not numeric; search for the column name
             pos = distance(labels.begin(), find(labels, f));
-            OC_ASSERT(pos < (int)labels.size(),
+            OC_ASSERT((pos < (int)labels.size()) || (0 <= pos),
                       "ERROR: There is no column labelled \"%s\" in data file %s",
                       f.c_str(), fileName.c_str());
         }
@@ -448,8 +447,10 @@ vector<int> find_features_positions(const string& fileName,
     }
     return positions;
 }
-// like above but takes only a single feature
-int find_feature_position(const string& fileName, const string& feature) {
+
+// Like above but takes only a single feature
+int find_feature_position(const string& fileName, const string& feature)
+{
     vector<string> features{feature};
     return find_features_positions(fileName, features).back();
 }
