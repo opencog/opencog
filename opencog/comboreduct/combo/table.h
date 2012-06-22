@@ -596,6 +596,12 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
     T output;
     int i = 0;
     foreach (const std::string& t, tok) {
+        // Some input files contain multiple delimiters between columns
+        // (e.g. two or three spaces between numeric columns).  This 
+        // results in empty columns.  Ignore these, and don't i++ either.
+        if (0 == t.size()) continue;
+
+        // Record a column, only if it's not to be ignored.
         if (boost::find(ignore_col_nums, i) == ignore_col_nums.end()) {
             if (i != pos)
                 inputs.push_back(boost::lexical_cast<T>(t));
