@@ -30,6 +30,9 @@ struct Node {
     float * beliefEuc;
     float * beliefMal;
     float * pBelief;
+
+    float * parent_pBelief;
+
     /* HOST VARIABLES END */
 
     /* DEVICE VARIABLES BEGIN */
@@ -64,6 +67,7 @@ struct CudaNode {
     float * beliefEuc;
     float * beliefMal;
     float * pBelief;
+    float * parent_pBelief;
 };
 /* Node Struct Definition End */
 

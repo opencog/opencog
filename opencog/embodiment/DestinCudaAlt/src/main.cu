@@ -64,7 +64,6 @@ int main(int argc, char **argv) {
 
     d = CreateDestin( argv[1] );
 
-    int i;
     // train network
     printf("training network...\n");
     RunDestin( d, argv[2], NULL, true );

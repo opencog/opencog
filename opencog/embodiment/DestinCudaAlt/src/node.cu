@@ -11,7 +11,8 @@
 
 #define ALPHA       0.01
 #define BETA        0.01
-#define LAMBDA      0.50
+#define LAMBDA      0
+#define GAMMA       0
 #define STARVCOEFF  0.05
 
 // Initialize a node
@@ -255,9 +256,13 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
     int mIdx;       // entry in the mu/sigma matrix to calculate delta
     int ns;         // node state size
     int ni;         // node input size
+    int np;         // node parent belief size
+    int nb;         // node belief size
 
     ns = n->ns;
     ni = n->ni;
+    nb = n->nb;
+    np = n->np;
 
     // maxNS is likely greater than n->ns.  don't execute if we're not in range.
     // we do this because the state dimensionalities differ between nodes, but
@@ -285,9 +290,16 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
                 delta = n->mu[mIdx] - n->input[threadIdx.x];
             }
         }
-        else
+        else if( threadIdx.x < ni + nb )
         {
             delta = (n->mu[mIdx] - n->pBelief[threadIdx.x-ni]) * LAMBDA;
+        }
+        else
+        {
+            if( np > 0 )
+            {
+                delta = (n->mu[mIdx] - n->parent_pBelief[threadIdx.x-ni-nb]) * GAMMA;
+            }
         }
 
         delta *= n->starv[blockIdx.y];
@@ -305,7 +317,6 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
         {
             sumMal[threadIdx.x] = delta / n->sigma[mIdx];
         }
-//        sumMal[threadIdx.x] = __fdividef( delta, n->sigma[mIdx] );
 
         // sync threads before summing up the columns
         syncthreads();
@@ -342,7 +353,6 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
             else
             {
                 n->beliefEuc[blockIdx.y] = 1 / sumEuc[0];
-                //n->beliefEuc[blockIdx.y] = __fdividef(1, sumEuc[0]);
             }
 
             if( sumMal[0] == 0 )
@@ -352,7 +362,6 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
             else
             {
                 n->beliefMal[blockIdx.y] = 1 / sumMal[0];
-                //n->beliefMal[blockIdx.y] = __fdividef(1, sumMal[0]);
             }
         }
     }
@@ -415,7 +424,6 @@ __global__ void NormalizeBelief(CudaNode *n)
         {
             // otherwise, normalize the sum to 1
             n->beliefMal[threadIdx.x] /= normMal[0];
-//            n->beliefMal[threadIdx.x] = __fdividef(n->beliefMal[threadIdx.x], normMal[0]);
         }
 
         // same behavior as malhanobis normalization, see above
@@ -426,7 +434,6 @@ __global__ void NormalizeBelief(CudaNode *n)
         else
         {
             n->beliefEuc[threadIdx.x] /= normEuc[0];
-//            n->beliefEuc[threadIdx.x] = __fdividef(n->beliefEuc[threadIdx.x], normEuc[0]);
         }
 
         // update belief
@@ -508,7 +515,6 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
         {
             // otherwise, normalize the sum to 1
             n->beliefMal[threadIdx.x] /= normMal[0];
-//            n->beliefMal[threadIdx.x] = __fdividef(n->beliefMal[threadIdx.x], normMal[0]);
         }
 
         // same behavior as malhanobis normalization, see above
@@ -519,7 +525,6 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
         else
         {
             n->beliefEuc[threadIdx.x] /= normEuc[0];
-//            n->beliefEuc[threadIdx.x] = __fdividef(n->beliefEuc[threadIdx.x], normEuc[0]);
         }
     }
 
@@ -551,10 +556,12 @@ __global__ void UpdateWinner( CudaNode *n, float *framePtr )
     int nb;         // number of centroids
     int ns;         // state dimensionality
     int ni;         // input dimensionality
+    int np;         // parent belief dimensionality
     int winner;     // winner idx
 
     nb = n->nb;
     ns = n->ns;
+    np = n->np;
     ni = n->ni;
     winner = n->winner;
 
@@ -580,9 +587,16 @@ __global__ void UpdateWinner( CudaNode *n, float *framePtr )
                 delta = n->mu[mIdx] - n->input[threadIdx.x];
             }
         }
-        else
+        else if( threadIdx.x < ni + nb )
         {
             delta = (n->mu[mIdx] - n->pBelief[threadIdx.x-ni])*LAMBDA;
+        }
+        else
+        {
+            if( np > 0 )
+            {
+                delta = (n->mu[mIdx] - n->parent_pBelief[threadIdx.x-ni-nb]) * GAMMA;
+            }
         }
         
         // update mu and sigma

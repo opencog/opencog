@@ -43,6 +43,11 @@ Destin * InitDestin(                    // initialize Destin.
                     int                 // number of movements per digit presentation
                 );
 
+void LinkParentBeliefToChildren(        // link the belief from a parent to the child for advice
+                    Destin *,           // initialized destin pointer
+                    int *               // number of beliefs per layer
+                );
+
 void RunDestin(                         // train destin.
                  Destin *,              // initialized destin pointer
                  char *,                // filename for data file
