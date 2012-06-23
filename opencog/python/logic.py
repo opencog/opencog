@@ -34,15 +34,28 @@ import exceptions
 
 t = types
 
-def format_log(*args):
-    global _line    
-    out = '['+str(_line) + '] ' + ' '.join(map(str, args))
-    #if _line == 104:
-    #    import pdb; pdb.set_trace()
-    _line+=1
-    return out
-_line = 1
+#def format_log(*args):
+    #global _line    
+    #out = '['+str(_line) + '] ' + ' '.join(map(str, args))
+    ##if _line == 104:
+    ##    import pdb; pdb.set_trace()
+    #_line+=1
+    #return out
+#_line = 1
 
+#log.setLevel(log.DEBUG)
+log.setLevel(log.INFO)
+#log.setLevel(log.WARNING)
+#log.setLevel(log.ERROR)
+log.use_stdout(True)
+log.trace = True
+class Trace_Chainer(object):
+    """docstring for Chainer_Trace"""
+    def __init__(self):
+        self.visit_order = 0
+        self.begin_propagating = False
+        self.step_count = 0
+        self.propagating = False
 class Chainer:
 
     # Convert Atoms into FakeAtoms for Pypy/Pickle/Multiprocessing compatibility
@@ -65,6 +78,7 @@ class Chainer:
         self.viz.connect()
         self.setup_rules()
 
+        self.trace = Trace_Chainer()
         self.bc_later = OrderedSet()
         
         # simple statistics
@@ -87,7 +101,7 @@ class Chainer:
             #if len(tvs):
             #    raise NotImplementedError('Cannot revise multiple TruthValues, so no point in doing this search')
             
-            log.info(format_log('bc', target))
+            #log.info(format_log('bc', target))
             self.bc_later = OrderedSet([target])
             self.results = []
     
@@ -111,8 +125,8 @@ class Chainer:
     
                 #msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
                 msg = 'done %s steps, %s goals remaining, %s Proof DAG Nodes' % (steps_so_far, len(self.bc_later), len(self.pd))
-                log.info(format_log(msg))
-                log.info(format_log('time taken', time() - start))
+                #log.info(format_log(msg))
+                #log.info(format_log('time taken', time() - start))
                 #log.info(format_log('PD:'))
                 #for pdn in self.pd:
                 #    log.info(format_log(len(pdn.args),str(pdn)))
@@ -131,19 +145,7 @@ class Chainer:
     #            for res in self.results:
     #                self.viz_proof_tree(self.trail(res))
 
-            viz_path_graph = Viz_Graph()
-            self.dsp_search_path(self.expr2pdn(self.target),{},{},viz_path_graph)
-            viz_path_graph.write_dot('path_result.dot')
     
-            #viz_space_graph = Viz_Graph()
-            #self.dsp_search_space(self.expr2pdn(self.target),viz_space_graph)
-            #viz_space_graph.write_dot('space_result.dot')
-            
-            viz_path_graph = Viz_Graph()
-            self.dsp_search_path(self.expr2pdn(self.target),{ },{ }, viz_path_graph,True)
-            viz_path_graph.write_dot('valid_path_result.dot')
-    
-            #return self.results
             ret = []
             for tr in self.results:
                 atom = atom_from_tree(tr, self.space)
@@ -166,62 +168,6 @@ class Chainer:
             #pdb.pm()
             return []
 
-    def dsp_search_space(self, dag, viz_graph):
-        '''dag : DAG node '''
-        # output current node
-        for parent in dag.parents:
-            parent_id = str(parent)
-            target_id = str(dag)
-            viz_graph.add_edge(parent_id,target_id)
-        # output children
-        for arg in dag.args:
-            self.dsp_search_space(arg,viz_graph)
-
-
-    def dsp_search_path(self,dag, dic_count, dic_dag, viz_graph, dsp_valid = False):
-        '''dag : DAG node '''
-        # output current node
-        
-        dag_id = str(dag)
-        # the map from arg_id to new_arg_id
-        new_dic_dag = { }
-
-        if dsp_valid and dag.path_axiom:
-            try:
-                viz_graph.add_edge(str(dag.path_axiom),dic_dag[dag_id])
-                viz_graph.add_edge(str(dag.path_pre),dic_dag[dag_id])
-            except Exception:
-                viz_graph.add_edge(str(dag.path_axiom),dag_id)
-                viz_graph.add_edge(str(dag.path_pre),dag_id)
-            print "****" 
-            print dag.path_pre
-            print dag.path_axiom
-        for arg in dag.args:
-            #print dag
-            #print "***" + str(dag.path_pre)
-            if  not dsp_valid or (type(arg.op) == Tree or arg.op.tv.count > 0):
-                #self.viz.outputTreeNode(dag,parent,1)
-                arg_id = str(arg)
-                new_arg_id = None
-                try:
-                    dic_count[arg_id] += 1
-                    new_arg_id = arg_id + str(dic_count[arg_id])
-                    new_dic_dag[arg_id] = new_arg_id
-                except Exception:
-                    dic_count[arg_id] = 1
-
-                if not new_arg_id:
-                   new_arg_id = arg_id 
-
-                try:
-                    # dag id has been replaced by parent
-                    viz_graph.add_edge(dic_dag[dag_id],new_arg_id)
-                except Exception:
-                    viz_graph.add_edge(dag_id,new_arg_id)
-            # output children
-        for arg in dag.args:
-            if not dsp_valid or (type(arg.op) == Tree or arg.op.tv.count > 0):
-                self.dsp_search_path(arg, dic_count, new_dic_dag, viz_graph, dsp_valid)
 
 
     #def fc(self):
@@ -256,6 +202,7 @@ class Chainer:
         # and not the original app.
         
         assert self.bc_later
+        self.trace.step_count += 1
         #print 'bcq', map(str, self.bc_later)
         #next_target = self.bc_later.pop_first() # Breadth-first search
         #next_target = self.bc_later.pop_last() # Depth-first search
@@ -263,8 +210,13 @@ class Chainer:
         #next_target = self.select_stochastic() # A better version of best-first search (still a prototype)
 
         next_app = self.get_fittest(self.bc_later) # Best-first search
-        log.info(format_log('-BCQ', next_app))
+        #log.info(format_log('-BCQ', next_app))
 
+        head = self.expr2pdn(next_app.head.canonical())
+        for arg in head.args:
+            if arg.op == next_app :
+                self.trace.visit_order += 1
+                arg.trace.visit_order = self.trace.visit_order
         # This step will also call propogate_results and propogate_specialization,
         # so it will check for premises, compute the TV if possible, etc.
         self.find_axioms_for_rule_app(next_app)
@@ -278,8 +230,9 @@ class Chainer:
             apps = self.find_rule_applications(goal)
     
             for a in apps:
-                a = a.standardize_apart()
-                self.add_app_if_good(a)
+                t = a.standardize_apart()
+                t.trace = a.trace
+                self.add_app_if_good(t)
     
         return None
 
@@ -439,7 +392,7 @@ class Chainer:
             
             self.set_tv(app, app.tv)
             
-            log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
+            #log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
             
             # make the app red, not only the expression
             self.viz.declareResult(str(app.canonical_tuple()))
@@ -462,6 +415,9 @@ class Chainer:
                 #if r.name == '[axiom]':
                 #    print '>>>>>',repr(r)
                 new_rule = r.subst(s)
+                new_rule.trace.path_pre = r
+                new_rule.trace.path_axiom = target
+                new_rule.trace.made_by_rule = True
                 ret.append(new_rule)
         return ret
 
@@ -536,7 +492,7 @@ class Chainer:
                             axiom_app.head = h
                             # If the Atom has variables, give them values from the target
                             # new_rule = new_rule.subst(s)
-                            log.info(format_log('##find_axioms_for_rule_app: printing new magic tv', axiom_app.head, tv))
+                            #log.info(format_log('##find_axioms_for_rule_app: printing new magic tv', axiom_app.head, tv))
                             if not tv is None:
                                 self.set_tv(axiom_app,tv)
                             
@@ -545,7 +501,7 @@ class Chainer:
     def propogate_result(self, orig_app):
         # app was already precise enough to look up this axiom exactly.
         # Attempt to apply the app using the new TV for the premise
-        log.info(format_log('propogate_result',repr(orig_app)))
+        #log.info(format_log('propogate_result',repr(orig_app)))
         app = orig_app
         got_result = self.check_goals_found_already(app)
         if got_result:
@@ -554,7 +510,7 @@ class Chainer:
             #    print 'WARNING: rejecting repeated result', app.head
             #    return
             
-            log.info(format_log('propogate_result',repr(app)))
+            #log.info(format_log('propogate_result',repr(app)))
             #if app.head.op == 'TARGET':
             #    target = app.goals[0]
             #    log.info(format_log('Target produced!', target))
@@ -565,7 +521,7 @@ class Chainer:
 
             if app.head == self.root:
             #if app.head == self.target:
-                log.info(format_log('Target produced!', app.goals[0], self.get_tvs(app.goals[0])))
+                #log.info(format_log('Target produced!', app.goals[0], self.get_tvs(app.goals[0])))
                 self.results.append(app.goals[0])
                 return
             
@@ -580,7 +536,8 @@ class Chainer:
         specialize other apps higher up in the PD (i.e. ones that use this app as their goal).
         new_premise is the new version of some goal in orig_app. It can have variables filled in.
         i is the index for the goal in orig_app matching new_premise.'''
-        orig_app = orig_app.standardize_apart()
+        # @@@
+        #orig_app = orig_app.standardize_apart()
         #new_premise = standardize_apart(new_premise)
         s = unify(orig_app.goals[i], new_premise, {})
         
@@ -588,12 +545,12 @@ class Chainer:
         if s == {}:
             return
 
-        log.info(format_log('propogate_specialization',new_premise,i,repr(orig_app)))
+        #log.info(format_log('propogate_specialization',new_premise,i,repr(orig_app)))
         
         new_app = orig_app.subst(s)        
-        new_app.path_pre = orig_app
-        new_app.path_axiom = standardize_apart(new_premise)
         
+        new_app.trace.path_pre = orig_app
+        new_app.trace.path_axiom = standardize_apart(new_premise)
         # Add the new app to the Proof DAG and the backward chaining queue.
         # Stop if it's a cycle or already exists.
         if not self.add_app_if_good(new_app):

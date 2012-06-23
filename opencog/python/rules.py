@@ -120,16 +120,16 @@ def rules(a, deduction_types):
                                       formula = formulas.modusPonensFormula))
     
     # The PLN DeductionRule. Not to be confused with ModusPonens.
-    #for type in deduction_types:
-    #    rules.append(Rule(T(type, 1,3), 
-    #                                 [T(type, 1, 2),
-    #                                  T(type, 2, 3), 
-    #                                  Var(1),
-    #                                  Var(2), 
-    #                                  Var(3)],
-    #                                name='Deduction', 
-    #                                formula = formulas.deductionSimpleFormula))
-    #
+    for type in deduction_types:
+        rules.append(Rule(T(type, 1,3), 
+                                     [T(type, 1, 2),
+                                      T(type, 2, 3), 
+                                      Var(1),
+                                      Var(2), 
+                                      Var(3)],
+                                    name='Deduction', 
+                                    formula = formulas.deductionSimpleFormula))
+    
     ## PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
     #for type in deduction_types:
     #    rules.append(Rule( T(type, 2, 1), 
@@ -579,8 +579,7 @@ class Rule :
         self.match = match
         self.formula = if_(formula, formula, formulas.identityFormula)
         # Dingjie's tracing experiments
-        self.path_pre = None
-        self.path_axiom = None
+        self.trace = Data_Trace()
 
         if name == 'Lookup':
             assert len(goals) == 0

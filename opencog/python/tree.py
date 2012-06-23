@@ -150,6 +150,15 @@ class Tree (object):
         # t=Tree('EvaluationLink',Tree(1),Tree('ListLink',Tree('cat'),Tree('dog')))
         return [self]+concat_lists(map(Tree.flatten, self.args))
 
+class Data_Trace(object):
+    """docstring for Data_Trace"""
+    def __init__(self,):
+        self.is_fact = False
+        self.path_pre = None
+        # could be a target or a axiom
+        self.path_axiom = None
+        self.visit_order = 0
+        self.made_by_rule = False
 class DAG(Tree):
     def __init__(self,op,args, depth = 0):
         Tree.__init__(self,op,[])
@@ -157,9 +166,12 @@ class DAG(Tree):
         
         self.depth = depth
         self.best_conf_below = 0.0
-        self.path_axiom = None
-        self.path_pre = None
-        
+        self.trace = Data_Trace()
+        self.tv = TruthValue(0,0)
+        try:
+           self.trace = op.trace
+        except Exception:
+            pass
         for a in args:
             self.append(a)
     

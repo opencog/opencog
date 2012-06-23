@@ -194,19 +194,72 @@ class OrderedSet(collections.OrderedDict, collections.MutableSet):
     symmetric_difference_update = property(lambda self: self.__ixor__)
     union = property(lambda self: self.__or__)
 
+def format_log(offset, dsp_suffix = True, *args):
+    suffix = "" 
+    if dsp_suffix:
+        #stack = inspect.stack()
+        #suffix = " -- %s %s" % (stack[1][2], stack[1][3])
+        pass
+    out =  ' ' * offset +  ' '.join(map(str, args)) + suffix
+    return out
+
 class Logger(object):
     def __init__(self, f = 'opencog-python.log'):
         self._file = open(f,'w')
+        self.to_stdout = False
+        self._leves = []
+        self.DEBUG = 0
+        self.INFO = 1
+        self.WARNING = 2
+        self.ERROR = 3
+        #
+        self.trace = False
+        self.ident = 0
     
+    def debug(self,msg):
+        """docstring for debug"""
+        if self.trace and self.DEBUG in self._leves:
+            print >>self._file, "[DEBUG]:"  + msg
+            if self.to_stdout:
+                print "[DEBUG]:" +  msg 
     def info(self, msg):
-        print >>self._file, msg
+        if self.trace and self.INFO in self._leves:
+            print >>self._file, "[INFO]:"  + msg
+            if self.to_stdout:
+                print "[INFO]:" +  msg 
+    def warning(self,msg):
+        """docstring for debug"""
+        if self.trace and self.WARNING in self._leves:
+            print >>self._file, "[WARNING]:"  + msg
+            if self.to_stdout:
+                print "[WARNING]:" +  msg 
+    def error(self, msg):
+        if self.trace and self.ERROR in self._leves:
+            print >>self._file, "[ERROR]:"  + msg
+            if self.to_stdout:
+                print "[ERROR]:" +  msg 
+    def flush(self):
         self._file.flush()
-        #pass
     
     def use_stdout(self, use):
-        pass
+        self.to_stdout = use
+    def setLevel(self, level):
+        self._leves.append(level)
 
 log = Logger()
+#class Logger(object):
+    #def __init__(self, f = 'opencog-python.log'):
+        #self._file = open(f,'w')
+    
+    #def info(self, msg):
+        #print >>self._file, msg
+        #self._file.flush()
+        ##pass
+    
+    #def use_stdout(self, use):
+        #pass
+
+#log = Logger()
 
 
 # Note. Due to various technical annoyances, the json save/load
