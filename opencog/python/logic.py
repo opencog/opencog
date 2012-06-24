@@ -119,7 +119,7 @@ class Chainer:
     
             steps_so_far = 0
             start = time()
-            while self.bc_later and not self.results and steps_so_far < nsteps:
+            while self.bc_later and steps_so_far < nsteps:
                 self.bc_step()
                 steps_so_far += 1
     
@@ -201,6 +201,22 @@ class Chainer:
         # And when it does happen, often you will find all the goals for a clone of the app,
         # and not the original app.
         
+        def proved_by_brother_app(app):
+            """  
+             this could happen because of pushing all app with the same head(brothers) in the stack,
+             and some of brother may prove the head already
+             """ 
+            #return False
+            if self.head_dag(app).tv.count > 0:
+                return True
+        def proved_by_axiom(goal):
+            """
+            It work because of the excution order in function @bc_step
+            """
+            #return False
+            goal_dag = self.expr2pdn(goal)
+            if goal_dag.tv.count > 0:
+                return True
         assert self.bc_later
         self.trace.step_count += 1
         #print 'bcq', map(str, self.bc_later)
@@ -217,18 +233,24 @@ class Chainer:
             if arg.op == next_app :
                 self.trace.visit_order += 1
                 arg.trace.visit_order = self.trace.visit_order
+
+        if proved_by_brother_app(next_app):
+            return
         # This step will also call propogate_results and propogate_specialization,
         # so it will check for premises, compute the TV if possible, etc.
         self.find_axioms_for_rule_app(next_app)
         
+        if proved_by_brother_app(next_app):
+            return
         # This should probably use the extra things in found_axiom
         self.propogate_result(next_app)
         
         #next_target = standardize_apart(next_target)
 
         for goal in next_app.goals:
+            if proved_by_axiom(goal):
+               continue 
             apps = self.find_rule_applications(goal)
-    
             for a in apps:
                 t = a.standardize_apart()
                 t.trace = a.trace
@@ -621,7 +643,11 @@ class Chainer:
         a = self.app2pdn(app)
         assert not a is None
         assert isinstance(a, DAG)
+        # actually a.tv is useless except for tracing
         a.tv = tv
+        # set the head
+        # if we permmit proving a node in multiple way, then head.tv may have been set before 
+        a.parents[0].tv = tv
 
     def add_app_to_pd(self,app):
         '''Add app to the Proof DAG. If it is already in the PD then return the existing PDN for that app.
@@ -685,6 +711,11 @@ class Chainer:
         for r in rules.rules(self.space, self.deduction_types):
             self.add_rule(r)
 
+    def head_dag(self, app):
+        """ a tree dag could have multiple parents,
+            but an app dag could only have one parent
+        """
+        return self.expr2pdn(app.head.canonical())
     def extract_plan(self, trail):
         # The list of actions in a PredictiveImplicationLink. Sometimes there are none,
         # sometimes one; if there is a SequentialAndLink then it can be more than one.
