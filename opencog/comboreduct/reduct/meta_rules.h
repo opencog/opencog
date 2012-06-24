@@ -73,17 +73,21 @@ protected:
 //subtrees before rightward subtrees) from a given node, to visit all
 //children in the given iterator's subtree (e.g., the node the iterator
 //points at gets visited first)
-struct downwards : public crule<downwards> {
+struct downwards : public crule<downwards>
+{
     explicit downwards(const rule& r_, string name = "downwards")
         : crule<downwards>::crule(name), r(r_.clone()),
           input(combo::id::unknown_type), output(combo::id::unknown_type) { }
+
     downwards(const rule& r_, combo::type_node t, string name = "downwards")
         : crule<downwards>::crule(name),
           r(r_.clone()), input(t), output(t) { }
+
     downwards(const rule& r_, combo::type_node input_, combo::type_node output_,
               string name = "downwards")
         : crule<downwards>::crule(name),
           r(r_.clone()), input(input_), output(output_) { }
+
     downwards(const downwards& d)
         : crule<downwards>::crule(d.get_name()),
           r(d.r->clone()), input(d.input), output(d.output) { }

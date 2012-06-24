@@ -77,35 +77,37 @@ void ignore_size_increase::operator()(combo_tree& tr, combo_tree::iterator it) c
     DEC_TAB
 }
 
-void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void downwards::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
     INC_TAB
-    combo_tree::iterator end=it;  
+    combo_tree::iterator end = it;  
     end.skip_children();
     ++end;
     
     static const type_tree unknown_type_tree = 
         type_tree(opencog::combo::id::unknown_type);
     
-    if (input==unknown_type_tree)
-        for(;it!=end;++it) {
+    if (input == unknown_type_tree)
+        for( ; it != end; ++it) {
             PRINT_DEBUG_STANDARD
-            (*r)(tr,it);
+            (*r)(tr, it);
         }
     else
-        for(;it!=end;++it) {
+        for( ; it != end; ++it) {
             PRINT_DEBUG_STANDARD
             if(// combo::get_argument_type_tree(*it, tr.sibling_index(it))==input
                // && 
                // @todo: checking that it inherits would be better
                // but has to be sure of it (Nil)
-               opencog::combo::get_output_type_tree(*it)==type_tree(output))
-                (*r)(tr,it);
+               opencog::combo::get_output_type_tree(*it) == type_tree(output))
+                (*r)(tr, it);
         }
     DEC_TAB
 }
 
 //apply rule from the leaves of the subtree rooted by it to it
-void upwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void upwards::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
     INC_TAB
     combo_tree::post_order_iterator at=it,end=it;
     ++end;

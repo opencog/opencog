@@ -406,8 +406,9 @@ inline size_t hash_value(const vertex& v)
     using boost::hash_combine;
 
     static const size_t c1 = size_t(id::builtin_count);
-    // It is likely that a combo will rarely have over 315 arguments
-    static const size_t c2 = c1 + 315;
+    // At this time, a combo will never have more 256K arguments...
+#define MAX_TREE_ARGS 256000
+    static const size_t c2 = c1 + MAX_TREE_ARGS;
     static const size_t c3 = c2 + size_t(id::action_count);
     static const size_t c_last = c3;
 
@@ -664,7 +665,7 @@ inline contin_t get_contin(const vertex& v)
  * return true if the vertex is an argument. Note, however, that
  * this does not take into account the type of the argument; thus,
  * any code that uses this blindly runs the risk of accepting arguments
- * of the wrong type (e.g. boolean instead of contin, oor v.v.).
+ * of the wrong type (e.g. boolean instead of contin, or v.v.).
  *
  * This should be fixed, but we don't have the infrastructure for this.
  */

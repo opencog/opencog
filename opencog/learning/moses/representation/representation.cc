@@ -283,6 +283,10 @@ combo_tree representation::get_candidate_lock(const instance& inst, bool reduce)
     return tr;
 }
 
+/// Create a combo tree that corresponds to the instance inst.
+///
+/// This function is thread-safe; it does not modify the rep at all.
+//
 // Same function as get_candidate_lock but doesn't use lock and does not
 // modify _exemplar, instead it build the combo tree from scratch
 combo_tree representation::get_candidate(const instance& inst, bool reduce) const
@@ -295,8 +299,8 @@ combo_tree representation::get_candidate(const instance& inst, bool reduce) cons
     return candidate;
 }
 
-// Append *src (turned according inst) as child of parent_dst and, in
-// case it's not null_vertex, repeat recursively using that appended
+/// Append *src (with knobs turned according inst) as child of parent_dst.
+/// In case it's not null_vertex, repeat recursively using that appended
 // child as new parent_dst. If candidate is empty (parent_dst is
 // invalid) then copy *src (turned according to inst) as root of
 // candidate

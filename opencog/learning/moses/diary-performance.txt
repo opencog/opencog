@@ -2767,5 +2767,34 @@ Lets give this one a whirl:
    Other systems get 55% accuracy. (per ascii description)
 
 
- ./opencog/learning/moses/main/moses -Hit -Y1 -u10 -i yeast.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
+./opencog/learning/moses/main/moses -Hit -Y1 -u10 -i yeast.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
 
+Dataset has 1484 rows.  The authors, in the "yeast.names" file state:
+  "Results: 55% for Yeast data with an ad hoc structured probability"
+  "model. Also similar accuracy for Binary Decision Tree and Bayesian"
+  "Classifier methods applied by the same authors in unpublished results."
+The above dates to 1996. Not clear how many 1996-era cpu-hours were
+spent on this, to obtain above results.  For us, a 55% accuracy score
+is then -668 or better.  We beat this on the 80K evaluation run, with
+almost 56% accuracy.  Yahoo!
+
+"yeast-nn-5K": As above, viz:  moses-perf -Hit -Y1 -u10 -i yeast.data
+         -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000
+         This is, of course, using the troubled cond scoring system.
+         And the troubled contin-learning system.  Nevertheless, a
+         baseline.  Note: this run truncates the first row, mis-interpret
+         first row as labels :-(
+
+"yeast-j12-nn-5K": As above, on Cray, -j12, fixed first row labels.
+
+         yeast-nn-5K         yeast-j12-nn-5K        16-sect-nn-2K
+-m      time  score  cpxy   time  score  cpxy    time  score   cpxy
+10K:      40   768     9       5   769     9
+20K:     160   768     9      16   768     9
+40K:     569   713    21      56   713    21
+80K:    1920   656    39     174   657    39
+160K:                        
+320K:                       
+640K:    
+1.28M: 
+2.56M:
