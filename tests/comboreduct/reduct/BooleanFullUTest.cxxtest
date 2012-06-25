@@ -43,20 +43,39 @@ public:
 
         TS_ASSERT(ct);
 
+        vertex_set ignore_ops;
+        logical_reduction r(ignore_ops);
+
         for (int reduct_effort = 0; reduct_effort <4; reduct_effort++) {
             combo_tree tr = tr_in;
             ITable cti(tt);
+            const rule& bool_reduct = r(reduct_effort);
 
             try {
                 OTable mt1(tr, cti);
                 std::cout << "effort = " << reduct_effort
                           << " tr before = " << tr << std::endl;
-                vertex_set ignore_ops;
-                logical_reduction r(ignore_ops);
-                const rule& bool_reduct = r(reduct_effort);
                 bool_reduct(tr);
                 std::cout << "effort = " << reduct_effort
                           << " tr  after = " << tr << std::endl;
+                std::cout << std::endl;
+                OTable mt2(tr, cti);
+
+                TS_ASSERT_EQUALS(mt1, mt2);
+            }
+            catch(EvalException& e) {
+                TS_ASSERT(true);
+            }
+
+            // Do it again .. reduct a tree that's already reduced, eh!?
+            try {
+                OTable mt1(tr, cti);
+                std::cout << " again = " << reduct_effort
+                          << " tr before = " << tr << std::endl;
+                bool_reduct(tr);
+                std::cout << " again = " << reduct_effort
+                          << " tr  after = " << tr << std::endl;
+                std::cout << std::endl;
                 OTable mt2(tr, cti);
 
                 TS_ASSERT_EQUALS(mt1, mt2);
