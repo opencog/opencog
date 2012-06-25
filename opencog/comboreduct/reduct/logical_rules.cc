@@ -434,7 +434,7 @@ void reduce_ands::operator()(combo_tree& tr, combo_tree::iterator it) const
 void subtree_to_enf::reduce_to_enf::operator()(sib_it it)
 {
     static const type_tree boolean_type_tree = type_tree(id::boolean_type);
-    if (*it == id::logical_true || *it == id::logical_false)
+    if (!is_logical_operator(*it))
         return;
 
     tr.sort_on_subtrees(it.begin(), it.end(), comp, true);
