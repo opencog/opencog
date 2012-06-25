@@ -12,16 +12,21 @@ using namespace opencog;
 using namespace reduct;
 using namespace ant_combo;
 
-class FullReductUTest : public CxxTest::TestSuite {
+class FullReductUTest : public CxxTest::TestSuite
+{
 public:
-    void base_test(const string& tree_str) {
+    FullReductUTest() : testno(0) {}
+    int testno;
+    void base_test(const string& tree_str)
+    {
         stringstream ss(tree_str);
         combo_tree tr;
         ss >> tr;
         
         type_tree tt = infer_type_tree(tr);
 
-        std::cout << "--------------------------------" << std::endl;
+        testno++;
+        std::cout << "-------------------------------- test " << testno << std::endl;
         std::cout << "type tree = " << tt << std::endl;
 
         bool ct = is_well_formed(tt);
@@ -158,11 +163,11 @@ public:
         base_test(tree_str);
     }
  
-    // test_simplify15 :
+    // test_simplify14 :
     // and(or(not(0<($1)) not(0<($2))))
     // Previously, the not's were getting accidentally stripped out.
     // Just make sure they are not.
-    void test_simplify15() {
+    void test_simplify14() {
         string tree_str="and(or(not(0<($2)) not(0<(+($1 0)))))";
         base_test(tree_str);
     }

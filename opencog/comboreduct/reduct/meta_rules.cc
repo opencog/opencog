@@ -129,14 +129,15 @@ void sequential::operator()(combo_tree& tr,combo_tree::iterator it) const {
     DEC_TAB
 }
 
-void iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void iterative::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     INC_TAB
     combo_tree tmp;
     do {
-        tmp=combo_tree(it);
+        tmp = combo_tree(it);
         PRINT_DEBUG_STANDARD
-        (*r)(tr,it);
-    } while (!tr.equal_subtree(it,tmp.begin()));
+        (*r)(tr, it);
+    } while (!tr.equal_subtree(it, tmp.begin()));
     DEC_TAB
 }
     
