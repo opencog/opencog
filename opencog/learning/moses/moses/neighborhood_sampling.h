@@ -275,16 +275,15 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
 
         for (unsigned i = 1; i <= dist; ) {
             size_t r = select();
-            field_set::bit_iterator itb = fs.begin_bit(new_inst);
-            field_set::disc_iterator itd = fs.begin_disc(new_inst);
-            field_set::contin_iterator itc = fs.begin_contin(new_inst);
             // modify bit
             if (r < fs.n_bits()) {
+                field_set::bit_iterator itb = fs.begin_bit(new_inst);
                 itb += r;
                 *itb = !(*itb);
                 i++;
             // modify disc
             } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc_fields()))) {
+                field_set::disc_iterator itd = fs.begin_disc(new_inst);
                 itd += r - fs.n_bits();
                 disc_t temp = 1 + randGen().randint(itd.multy() - 1);
                 if ( *itd == temp)
@@ -294,6 +293,7 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
                 i++;
             // modify contin
             } else if ( r >= (fs.n_bits() + fs.n_disc_fields())) {
+                field_set::contin_iterator itc = fs.begin_contin(new_inst);
                 //cout << "i = " << i << "  r = " << r << endl;
                 itc += r - fs.n_bits() - fs.n_disc_fields();
                 // @todo: now the distance is 1, choose the distance

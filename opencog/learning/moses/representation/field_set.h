@@ -25,6 +25,7 @@
 #define _REP_FIELD_SET_H
 
 #include <map>
+#include <boost/variant.hpp>
 
 #include <opencog/util/RandGen.h>
 #include <opencog/util/mt19937ar.h>
@@ -393,13 +394,15 @@ struct field_set
     disc_t get_raw(const instance& inst, size_t idx) const
     {
         const field& f = _fields[idx];
-        return (inst[f.major_offset] >> f.minor_offset)&packed_t((1 << f.width) - 1);
+        return (inst[f.major_offset] >> f.minor_offset) & ((packed_t(1) << f.width) - 1UL);
     }
-    void set_raw(instance& inst, size_t idx, disc_t v) const {
+
+    void set_raw(instance& inst, size_t idx, disc_t v) const
+    {
         const field& f = _fields[idx];
         inst[f.major_offset] ^= ((inst[f.major_offset] ^
-                                  packed_t(v << f.minor_offset)) &
-                                 ((packed_t(1) << f.width) - 1) << f.minor_offset);
+                                  (packed_t(v) << f.minor_offset)) &
+                                 ((packed_t(1) << f.width) - 1UL) << f.minor_offset);
     }
 
     // returns a reference of the term at idx, idx is relative to

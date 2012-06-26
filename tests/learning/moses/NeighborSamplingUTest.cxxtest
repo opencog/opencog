@@ -83,12 +83,12 @@ public:
         std::cout << "fs.pack_width = " << fs.packed_width()
                   << " bpp = " << bits_per_packed_t << std::endl;
 
-        foreach(const instance& inst, deme) {             
+        foreach (const instance& inst, deme) {             
             unsigned int distance = fs.hamming_distance(center_inst, inst);
-            if(distance > 0) {
-                if(distance > max_distance)
+            if (distance > 0) {
+                if (distance > max_distance)
                     max_distance = distance;
-                if(distance < min_distance)
+                if (distance < min_distance)
                     min_distance = distance;
                 sample_size++;
             }
@@ -169,9 +169,12 @@ public:
                                          sampled_size,
                                          sampled_max_distance,
                                          sampled_min_distance);
-            // cout << endl << "sample_size:" << sampled_size << "
-            //   max_distance:" << sampled_max_distance <<" min_distance
-            //   :"<< sampled_min_distance <<endl;
+            cout << endl;
+            cout << "test 1 -- sample_size: " << sample_size
+                 << " sampled_size: " << sampled_size
+                 << " max_distance: " << sampled_max_distance
+                 << " min_distance:" << sampled_min_distance
+                 << endl;
             TS_ASSERT(sample_size == sampled_size);
             TS_ASSERT(distance == sampled_max_distance);
             TS_ASSERT(distance == sampled_min_distance);
