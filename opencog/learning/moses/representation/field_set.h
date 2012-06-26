@@ -31,6 +31,7 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/Logger.h>
 
 #include "../eda/eda.h"
 
@@ -307,7 +308,10 @@ struct field_set
     typedef boost::variant<term_spec, contin_spec, disc_spec> spec;
 
     /// Default constructor for an empty field set
-    field_set() { }
+    field_set() : _nbool(0)
+    {
+        compute_starts();
+    }
 
     /// Copy constructor
     field_set(const field_set& x)

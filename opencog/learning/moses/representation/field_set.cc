@@ -44,10 +44,8 @@ field_set& field_set::operator=(const field_set& rhs)
     _contin = rhs._contin;
     _term = rhs._term;
     _nbool = rhs._nbool;
-    _contin_start = _fields.begin() + distance(rhs._fields.begin(),
-                                               rhs._contin_start);
-    _disc_start = _fields.begin() + distance(rhs._fields.begin(),
-                                             rhs._disc_start);
+
+    compute_starts();
     return *this;
 }
 bool field_set::operator==(const field_set& rhs) const
