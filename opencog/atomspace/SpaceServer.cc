@@ -669,6 +669,7 @@ void SpaceServer::addBlockEntityNodes()
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
         entity->mEntityNode = atomspace->addNode(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()))->get_result();
+        atomspace->setSTI(entity->mEntityNode, 1000);
     }
 
     SpaceMap::newAppearBlockEntityList.clear();

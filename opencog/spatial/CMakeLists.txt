@@ -19,10 +19,10 @@ ADD_LIBRARY(SpaceMap SHARED
     math/Plane.cc    
     math/Rectangle.cc
 
-   Entity.cc
-   SuperEntity.cc
-   MovableEntity.cc
-   Block.cc
+    Entity.cc
+    SuperEntity.cc
+    MovableEntity.cc
+    Block.cc
 
     3DSpaceMap/Block3DMapUtil.cc
     3DSpaceMap/Block3D.cc
@@ -150,5 +150,15 @@ INSTALL (FILES
     math/Vector3.h
     math/Vector4.h
     DESTINATION "include/${PROJECT_NAME}/spatial/math"
+)
+
+INSTALL (FILES
+    3DSpaceMap/Block3DMapUtil.h
+    3DSpaceMap/Block3D.h
+    3DSpaceMap/Octree.h
+    3DSpaceMap/Octree3DMapManager.h
+    3DSpaceMap/Entity3D.h
+    3DSpaceMap/BlockEntity.h
+    DESTINATION "include/${PROJECT_NAME}/spatial/3DSpaceMap"
 )
 

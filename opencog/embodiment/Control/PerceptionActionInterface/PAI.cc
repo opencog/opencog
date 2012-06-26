@@ -3465,6 +3465,9 @@ void PAI::processTerrainInfo(DOMElement * element)
         XMLString::release(&binary);
     }
 
+    if (isFirstPerceptTerrian)
+        printf("Processed %d blocks! \n", blockNum);
+
 }
 
 /*
