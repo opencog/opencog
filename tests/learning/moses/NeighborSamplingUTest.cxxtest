@@ -19,16 +19,50 @@ public:
     }
 
     /**
+     * Sample 'sample_size' instances from the neighborhood of the zero
+     * instance, at a distance 'dist' from zero.  That is, sample
+     * 'sample_size' instances which have 'dist' different knobs set to
+     * non-zero values.
+     *
+     * @param fs            deme
+     * @param dist          distance
+     * @param sample_size   number of instances to be generated
+     * @param out           deme iterator (where to store the instances)
+     * @param end           deme iterator, containing the end iterator,
+     *                      necessary to check that 'out' does not go out
+     *                      of the deme if it does so then an assert is raised
+     */
+    template<typename Out>
+    void z_sample_from_neighborhood(const field_set& fs, unsigned dist,
+                                  unsigned sample_size, Out out, Out end)
+    {
+        instance inst(fs.packed_width());
+    
+        // Reset all fields (zero them out).
+        // contin and term algebra fields are ignored... because
+        // the contin part of the tests don't call this. XXX Caution.
+        for (field_set::bit_iterator it = fs.begin_bit(inst);
+                it != fs.end_bit(inst); ++it)
+            *it = false;
+    
+        for (field_set::disc_iterator it = fs.begin_disc(inst);
+                it != fs.end_disc(inst); ++it)
+            *it = 0;
+    
+        sample_from_neighborhood(fs, dist, sample_size, out, end, inst);
+    }
+
+    /**
      * measure the hamming distance of any instance of the deme to
      * center_inst, except center_inst of course. And count the number
-     * of instances that at distance > 0 from center_inst.
+     * of instances that are at distance > 0 from center_inst.
      * 
-     * @param sample_size write the number of neighbors at 
+     * @param sample_size return the number of neighbors at 
      *                    distance > 0 from center_inst
-     * @param max_distance the distance maximum of a neighbor from
-     *                     center_inst
-     * @param min_distance the minimum distance of a neighbor from
-     *                     center_inst
+     * @param max_distance return the maximum distance of a neighbor
+     *                     from center_inst
+     * @param min_distance return the minimum distance of a neighbor
+     *                     from center_inst
      */
     template<typename ScoreT>
     void get_sample_size_and_distance(const instance_set<ScoreT>& deme, 
@@ -80,17 +114,17 @@ public:
     {
         int distance = 3;
         int depth = 8;
-        int fs_size = 4;
+        int num_fields = 4;
         int rand_seed = clock();
         opencog::MT19937RandGen rng(rand_seed);
-        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), fs_size);
+        field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, depth), num_fields);
         instance inst(fs.packed_width());
         randomize(fs, inst);
         
         instance new_inst(inst);
         
-        // choose randomly a contin among the fs_size ones
-        int rnd_idx = randGen().randint(fs_size);
+        // choose randomly a contin among the num_fields ones
+        int rnd_idx = randGen().randint(num_fields);
         field_set::contin_iterator it = fs.begin_contin(inst) + rnd_idx;
         cout << "before generate:" << fs.stream_raw(inst) << endl;
         generate_contin_neighbor(fs, new_inst, it, distance);
@@ -111,7 +145,7 @@ public:
     {    
         int rand_seed = clock();
         unsigned int distance;
-        size_t sample_size,fs_size;
+        size_t sample_size, num_fields;
         field_set::width_t width ;
         size_t sampled_size;
         unsigned int sampled_max_distance;
@@ -122,12 +156,12 @@ public:
         {
             distance  = 2;
             sample_size = 10;
-            fs_size = 20;
+            num_fields = 20;
             width = 5;
-            field_set fs(field_set::disc_spec(width), fs_size);
+            field_set fs(field_set::disc_spec(width), num_fields);
             instance_set<composite_score>  deme(100, fs);
 
-            sample_from_neighborhood(deme.fields(),
+            z_sample_from_neighborhood(deme.fields(),
                                      distance,
                                      sample_size,
                                      deme.begin(), deme.end());
@@ -147,9 +181,9 @@ public:
         {
             distance  = 1;
             sample_size = 8;
-            fs_size = 15;
+            num_fields = 15;
             width = 4;
-            field_set fs(field_set::disc_spec(width), fs_size);
+            field_set fs(field_set::disc_spec(width), num_fields);
             instance center_inst(fs.packed_width());
             randomize(fs, center_inst);
             instance_set<composite_score> 
@@ -180,14 +214,14 @@ public:
         {
             distance = 2;
             sample_size = 10;
-            fs_size = 2;
+            num_fields = 5;
             
-            field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), fs_size);
+            field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), num_fields);
             instance center_inst(fs.packed_width());
             randomize(fs, center_inst);
             instance_set<composite_score> deme(100, center_inst, fs);
             
-            cout << "the initial randomize instance:" << endl
+            cout << "the initial randomized contin_spec instance: "
                  << fs.stream_raw(center_inst) << endl;
             
             sample_from_neighborhood(deme.fields(),
@@ -206,11 +240,15 @@ public:
                  << " max_distance:" << sampled_max_distance
                  << " min_distance:"<< sampled_min_distance <<endl;
             
-            // The new contin sampling routine has a non-zero chance
-            // of returning zero-distance variants.  But this is no
-            // worse than returning duplicates...
-            // TS_ASSERT(sample_size == sampled_size);
-            TS_ASSERT(sample_size*3 <= 4*sampled_size);
+            // With only five contin fields to mess with, there is a
+            // small but finite chance that the contin sampling routine
+            // will pick a field, change it, then pick the same field,
+            // and put it back: viz. no change at all, aka a zero-distance
+            // change.  So tolerate this possibility ...
+            //
+            TS_ASSERT((sample_size == sampled_size) ||
+                      (sample_size-1 == sampled_size) ||
+                      (sample_size-2 == sampled_size));
             TS_ASSERT(sampled_min_distance <= sampled_max_distance);
             TS_ASSERT((1 <= sampled_min_distance) &&
                       (sampled_min_distance <= distance));
@@ -279,12 +317,12 @@ public:
 
     void test_generate_all_in_neighborhood3() 
     { 
-        // test all neighbors of a null center instance, fields
-        // are 2 contins of depth 4            
+        // test all neighbors of a null center instance.
+        // There are 2 contin fields of depth 4            
         unsigned int distance = 2;
         size_t depth = 4;
-        size_t fs_size = 2;
-        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), fs_size);
+        size_t num_fields = 2;
+        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), num_fields);
         instance center_inst(fs.packed_width());
         int rand_seed = clock();
         randGen().seed(rand_seed);

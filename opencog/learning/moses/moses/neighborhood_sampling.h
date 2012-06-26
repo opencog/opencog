@@ -248,9 +248,9 @@ inline void generate_contin_neighbor(const field_set& fs,
  * @param dist          distance
  * @param sample_size   number of instances to be generated
  * @param out           deme where to store the instances
- * @param end           deme iterator, containing the end iterator,
- *                      necessary to check that 'out' does not go out
- *                      of the deme if it does so then an assert is raised
+ * @param end           deme iterator, specifying the end of the deme.
+ *                      Used to check that 'out' does not go out of
+ *                      bounds.  If it does, an assert is raised.
  * @param center_inst   the center instance
  */
 template<typename Out>
@@ -307,42 +307,6 @@ void sample_from_neighborhood(const field_set& fs, unsigned dist,
         // cout << "********** Added instance:" << fs.stream(new_inst) << endl;
     }
 }
-
-
-/**
- * Sample 'sample_size' instances from the neighborhood of the zero
- * instance, at a distance 'dist' from zero.. That is, sample
- * 'sample_size' instances which have 'dist' different knobs set to
- * non-zero values.
- *
- * @param fs            deme
- * @param dist          distance
- * @param sample_size   number of instances to be generated
- * @param out           deme iterator (where to store the instances)
- * @param end           deme iterator, containing the end iterator,
- *                      necessary to check that 'out' does not go out
- *                      of the deme if it does so then an assert is raised
- */
-template<typename Out>
-void sample_from_neighborhood(const field_set& fs, unsigned dist,
-                              unsigned sample_size, Out out, Out end)
-{
-    instance inst(fs.packed_width());
-
-    // Reset all fields (zero them out).
-    // contin and term algebra fields are ignored. XXX Why?
-    // Don't we want to start with all-zero contins ??? XXX fixme...
-    for (field_set::bit_iterator it = fs.begin_bit(inst);
-            it != fs.end_bit(inst); ++it)
-        *it = false;
-
-    for (field_set::disc_iterator it = fs.begin_disc(inst);
-            it != fs.end_disc(inst); ++it)
-        *it = 0;
-
-    sample_from_neighborhood(fs, dist, sample_size, out, end, inst);
-}
-
 
 /**
  * Generates instances at distance 'dist' from an instance considered

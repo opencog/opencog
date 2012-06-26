@@ -302,13 +302,13 @@ struct field_set
         }
     };
 
-    // A spec, in general, is one of the above three specs.
+    /// A spec, in general, is one of the above three specs.
     typedef boost::variant<term_spec, contin_spec, disc_spec> spec;
 
-    // Default constructor for an empty field set
+    /// Default constructor for an empty field set
     field_set() { }
 
-    // Copy constructor
+    /// Copy constructor
     field_set(const field_set& x)
         : _fields(x._fields), _term(x._term), _contin(x._contin),
           _disc(x._disc), _nbool(x._nbool)
@@ -316,14 +316,14 @@ struct field_set
         compute_starts();
     }
 
-    // Constructor for a single spec, repeated n times
+    /// Constructor for a single spec, repeated n times
     field_set(const spec& s, size_t n) : _nbool(0)
     {
         build_spec(s, n);
         compute_starts();
     }
 
-    // Constructor for a range of specs.
+    /// Constructor for a range of specs.
     template<typename It>
     field_set(It from, It to) : _nbool(0)
     {
