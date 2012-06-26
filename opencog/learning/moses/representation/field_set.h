@@ -547,21 +547,21 @@ struct field_set
     //* i.e. not counting the 1-bit discrete fields.
     size_t n_disc_fields() const
     {
-        return distance(begin_disc_fields(), end_disc_fields());
+        return _n_disc_fields;
     }
 
     //* number of raw contin fields.  There are more of these
     //* than there are contin_specs.
     size_t n_contin_fields() const
     {
-        return distance(begin_contin_fields(), end_contin_fields());
+        return _n_contin_fields;
     }
 
     //* number of raw "term algebra" fields.  There are more of
     //* these than there are term_specs.
     size_t n_term_fields() const
     {
-        return distance(begin_term_fields(), end_term_fields());
+        return _n_term_fields;
     }
 
     /// Given an index into the contin_spec array, this returns an
@@ -698,6 +698,10 @@ protected:
     size_t _begin_bit_raw_idx;
     size_t _end_bit_raw_idx;
 
+    size_t _n_disc_fields;
+    size_t _n_contin_fields;
+    size_t _n_term_fields;
+
     // Figure out where, in the field array, the varous different
     // raw field types start. Cache these, as they're handy to have around.
     void compute_starts()
@@ -720,6 +724,10 @@ protected:
 
         _begin_bit_raw_idx    = distance(term_start, begin_bit_fields());
         _end_bit_raw_idx      = distance(term_start, end_bit_fields());
+
+        _n_disc_fields   = distance(begin_disc_fields(), end_disc_fields());
+        _n_contin_fields = distance(begin_contin_fields(), end_contin_fields());
+        _n_term_fields   = distance(begin_term_fields(), end_term_fields());
     }
 
     size_t back_offset() const
