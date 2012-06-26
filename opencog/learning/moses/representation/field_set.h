@@ -512,28 +512,28 @@ struct field_set
         return 0;
     }
     size_t end_term_raw_idx() const {
-        return distance(_fields.begin(), end_term_fields());
+        return _end_term_raw_idx;
     }
 
     size_t begin_contin_raw_idx() const {
-        return distance(_fields.begin(), begin_contin_fields());
+        return _begin_contin_raw_idx;
     }
     size_t end_contin_raw_idx() const {
-        return distance(_fields.begin(), end_contin_fields());
+        return _end_contin_raw_idx;
     }
 
     size_t begin_disc_raw_idx() const {
-        return distance(_fields.begin(), begin_disc_fields());
+        return _begin_disc_raw_idx;
     }
     size_t end_disc_raw_idx() const {
-        return distance(_fields.begin(), end_disc_fields());
+        return _end_disc_raw_idx;
     }
 
     size_t begin_bit_raw_idx() const {
-        return distance(_fields.begin(), begin_bit_fields());
+        return _begin_bit_raw_idx;
     }
     size_t end_bit_raw_idx() const {
-        return distance(_fields.begin(), end_bit_fields());
+        return _end_bit_raw_idx;
     }
 
     //* number of discrete fields that are single bits
@@ -690,6 +690,13 @@ protected:
     // scratch (below, with compute_starts()) and are cached here for
     // performance reasons.
     field_iterator _contin_start, _disc_start;
+    size_t _end_term_raw_idx;
+    size_t _begin_contin_raw_idx;
+    size_t _end_contin_raw_idx;
+    size_t _begin_disc_raw_idx;
+    size_t _end_disc_raw_idx;
+    size_t _begin_bit_raw_idx;
+    size_t _end_bit_raw_idx;
 
     // Figure out where, in the field array, the varous different
     // raw field types start. Cache these, as they're handy to have around.
@@ -701,6 +708,18 @@ protected:
         _disc_start = _contin_start;
         foreach(const contin_spec& c, _contin)
             _disc_start += c.depth;
+
+        field_iterator term_start = _fields.begin();
+        _end_term_raw_idx     = distance(term_start, end_term_fields());
+
+        _begin_contin_raw_idx = distance(term_start, begin_contin_fields());
+        _end_contin_raw_idx   = distance(term_start, end_contin_fields());
+
+        _begin_disc_raw_idx   = distance(term_start, begin_disc_fields());
+        _end_disc_raw_idx     = distance(term_start, end_disc_fields());
+
+        _begin_bit_raw_idx    = distance(term_start, begin_bit_fields());
+        _end_bit_raw_idx      = distance(term_start, end_bit_fields());
     }
 
     size_t back_offset() const

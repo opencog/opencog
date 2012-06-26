@@ -238,7 +238,7 @@ public:
                                          sampled_min_distance,
                                          center_inst);
             
-            cout << endl << "sample_size:" << sample_size
+            cout << endl << "test 3 -- sample_size:" << sample_size
                  << " sampled_size:" << sampled_size
                  << " max_distance:" << sampled_max_distance
                  << " min_distance:"<< sampled_min_distance <<endl;
