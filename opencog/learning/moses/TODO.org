@@ -33,7 +33,7 @@
 - [ ] refactore test_sample_from_neighborhood in NeighborSamplingUTest
 - [ ] there are possibly confusions between eda::field_set::width_t,
   multiplicity_t and combo::arity_t
-- [ ] there is a big mess between score_t fitness_t and contin_t, fix
+- [ ] there is a big mess between score_t and contin_t, fix
   that mess
 - [ ] refactore Pedrag slice moses code, optimization API should be
   simple and sliced for everyone

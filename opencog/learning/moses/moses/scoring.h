@@ -54,11 +54,10 @@
 
 namespace opencog { namespace moses {
 
-typedef float fitness_t; /// @todo is that really useful?
-
 #if 0
 // Abstract scoring function class to implement
-// XXX currently, not used anywhere
+// XXX currently, we don't use this, because it causes headaches with the
+// templated score cache functions.
 struct cscore_base : public unary_function<combo_tree, composite_score>
 {
     // Evaluate the candidate tr
