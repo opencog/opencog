@@ -909,7 +909,10 @@ int moses_exec(int argc, char** argv)
         cout << "moses " << MOSES_VERSION_MAJOR
              << "." << MOSES_VERSION_MINOR
              << "." << MOSES_VERSION_PATCH
-             << " (revno " << MOSES_BZR_REVNO << ")" << std::endl;;
+#ifdef MOSES_BZR_REVNO        
+             << " (revno " << MOSES_BZR_REVNO << ")"
+#endif
+             << std::endl;
         return 1;
     }
 
