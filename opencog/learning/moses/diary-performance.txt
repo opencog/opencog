@@ -2776,7 +2776,7 @@ Dataset has 1484 rows.  The authors, in the "yeast.names" file state:
 The above dates to 1996. Not clear how many 1996-era cpu-hours were
 spent on this, to obtain above results.  For us, a 55% accuracy score
 is then -668 or better.  We beat this on the 80K evaluation run, with
-almost 56% accuracy.  Yahoo!
+almost 56% accuracy.  Yahoo!  The 2.56M run is hitting 77% accuracy.
 
 "yeast-nn-5K": As above, viz:  moses-perf -Hit -Y1 -u10 -i yeast.data
          -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000
@@ -2787,14 +2787,14 @@ almost 56% accuracy.  Yahoo!
 
 "yeast-j12-nn-5K": As above, on Cray, -j12, fixed first row labels.
 
-         yeast-nn-5K         yeast-j12-nn-5K        16-sect-nn-2K
+         yeast-nn-5K         yeast-j12-nn-5K      yeast-j12-nn-10K
 -m      time  score  cpxy   time  score  cpxy    time  score   cpxy
 10K:      40   768     9       5   769     9
 20K:     160   768     9      16   768     9
-40K:     569   713    21      56   713    21
-80K:    1920   656    39     174   657    39
-160K:                        
-320K:                       
-640K:    
-1.28M: 
-2.56M:
+40K:     569   713    21      57   713    21
+80K:    1920   656    39     178   657    39
+160K:                        397   563    20
+320K:                       1147   425    42
+640K:                       3310   390    54
+1.28M:                      8831   379    56
+2.56M:                     23594   345    61
