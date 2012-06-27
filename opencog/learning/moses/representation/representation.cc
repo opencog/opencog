@@ -184,7 +184,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         ostream_prototype(ss << "Created prototype: ");
         logger().debug(ss.str());
     }
-    
+
 #ifdef EXEMPLAR_INST_IS_UNDEAD
     set_exemplar_inst();
 
@@ -271,7 +271,7 @@ void representation::clean_combo_tree(combo_tree &tr,
 combo_tree representation::get_candidate_lock(const instance& inst, bool reduce)
 {
     // In order to make this method thread-safe, a copy of the exemplar
-    // must be made under the lock, after the transform step. 
+    // must be made under the lock, after the transform step.
     // Unfortunately, copying the exemplar is expensive, but seemingly
     // unavoidable: the knob mapper only works for the member _exemplar.
     // Thus we cannot have "const combo_tree &tr = exemplar();"
@@ -299,11 +299,11 @@ combo_tree representation::get_candidate(const instance& inst, bool reduce) cons
     return candidate;
 }
 
-/// Append *src (with knobs turned according inst) as child of parent_dst.
-/// In case it's not null_vertex, repeat recursively using that appended
-// child as new parent_dst. If candidate is empty (parent_dst is
-// invalid) then copy *src (turned according to inst) as root of
-// candidate
+/// Copy (append) *src, with knobs turned according 'inst', to be a
+/// child of parent_dst.  If *src is not null_vertex, then repeat
+/// recursively, using the appended child as new parent_dst.  If
+/// 'candidate' is empty (i.e. parent_dst is invalid) then copy *src
+/// (turned according to inst) as root of candidate
 void representation::get_candidate_rec(const instance& inst,
                                        combo_tree::iterator src,
                                        combo_tree::iterator parent_dst,
@@ -316,8 +316,8 @@ void representation::get_candidate_rec(const instance& inst,
     auto recursive_call = [&inst, &candidate, this](pre_it new_parent_dst,
                                                     pre_it src)
     {
-        for(sib_it src_child = src.begin(); src_child != src.end(); ++src_child)
-            get_candidate_rec(inst, src_child, new_parent_dst, candidate);        
+        for (sib_it src_child = src.begin(); src_child != src.end(); ++src_child)
+            get_candidate_rec(inst, src_child, new_parent_dst, candidate);
     };
 
     // append v to parent_dst's children. If candidate is empty then
@@ -328,22 +328,25 @@ void representation::get_candidate_rec(const instance& inst,
             : candidate.append_child(parent_dst, v);
     };
 
-    // find the knob associated to src (if any)
+    // Find the knob associated to src (if any)
     disc_map_cit dcit = find_disc_knob(src);
-    if (dcit == disc.end()) {
-        contin_map_cit ccit = find_contin_knob(src);
-        if (ccit == contin.end()) // no knob found      
-            recursive_call(append_child(parent_dst, *src), src);
-        else { // contin knob found
-            contin_t c = _fields.get_contin(inst, it_contin_idx.find(src)->second);
-            ccit->second.append_to(candidate, parent_dst, c);
-        }
-    } else { // disc knob found
+    if (dcit != disc.end()) {
         int d = _fields.get_raw(inst, it_disc_idx.find(src)->second);
         pre_it new_src = dcit->second->append_to(candidate, parent_dst, d);
         if (_exemplar.is_valid(new_src))
             recursive_call(parent_dst, new_src);
+        return;
     }
+
+    contin_map_cit ccit = find_contin_knob(src);
+    if (ccit != contin.end()) {
+         contin_t c = _fields.get_contin(inst, it_contin_idx.find(src)->second);
+         ccit->second.append_to(candidate, parent_dst, c);
+         return;
+    }
+
+    // There was no knob.  Just copy.
+    recursive_call(append_child(parent_dst, *src), src);
 }
 
 #ifdef EXEMPLAR_INST_IS_UNDEAD
@@ -351,7 +354,7 @@ void representation::get_candidate_rec(const instance& inst,
 // looks inconsistent to me. I'm going to leave it here for a while, but
 // it should be removed by 2013 or 2014 if not sooner...
 
-// XXX why are we clearing this, instead of setting it back to the 
+// XXX why are we clearing this, instead of setting it back to the
 // _exemplar_inst ??? XXX is this broken??
 //
 // XXX Note that the clear_exemplar() methods on the knobs are probably

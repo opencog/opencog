@@ -111,7 +111,7 @@ struct disc_knob_base : public knob_base
     virtual combo_tree::iterator append_to(combo_tree& candidate,
                                            combo_tree::iterator& parent_dst,
                                            int idx) const = 0;
-    
+
     // Create a spec describing the space spanned by the knob.
     virtual field_set::disc_spec spec() const = 0;
 
@@ -167,7 +167,7 @@ struct contin_knob : public knob_base
 
     // Return the spec describing the space spanned by the knob
     // Note that this spec is *not* a part of the field set that is
-    // being used by the representation! 
+    // being used by the representation!
     const field_set::contin_spec& spec() const
     {
         return _spec;
@@ -199,11 +199,12 @@ struct discrete_knob : public disc_knob_base
     discrete_knob(combo_tree& tr)
         : disc_knob_base(tr), _default(0), _current(0) {}
 
-    void disallow(int idx) {
-        _disallowed[idx] = true;
+    /// Do not allow setting to be set.
+    void disallow(int setting) {
+        _disallowed[setting] = true;
     }
-    void allow(int idx) {
-        _disallowed[idx] = false;
+    void allow(int setting) {
+        _disallowed[setting] = false;
     }
 
     int multiplicity() const {
@@ -219,12 +220,13 @@ protected:
     int _default;
     int _current;   // The current knob setting.
 
-    // XXX Huh?? what does this do?? Why does shifting matter, 
-    // if the only thing done is to count the number of bits set ?? 
+    // XXX Huh?? what does this do?? Why does shifting matter,
+    // if the only thing done is to count the number of bits set ??
     // WTF ??  I think the shift is n the  wrong direction, yeah?
     // If the goal is to skip over index values that are disallowed, then
     // the shift is definitely in the wrong direction!! FIXME.
-    int map_idx(int idx) const {
+    int map_idx(int idx) const
+    {
         if (idx == _default)
             idx = 0;  // interpreted as "absent", as used below. XXX
         else if (idx == 0)
@@ -234,7 +236,7 @@ protected:
 };
 
 // A unary function knob: this knob negates (or not) a boolean-valued
-// tree underneath it. 
+// tree underneath it.
 //
 // XXX This uses reduct::logical_reduction rules; it is not clear if those
 // rules tolerate predicates.
@@ -250,7 +252,7 @@ protected:
 //
 // XXX Also -- I think I want to rename this to "logical unary knob",
 // or something like that, as it is a unary logical function ... err...
-// well, I guess all combo opers are unary, due to Currying. 
+// well, I guess all combo opers are unary, due to Currying.
 //
 // note - children aren't cannonized when parents are called (??? huh ???)
 struct logical_subtree_knob : public discrete_knob<3>
@@ -320,10 +322,10 @@ struct logical_subtree_knob : public discrete_knob<3>
             _tr.erase(_loc);
     }
 
-    void turn(int idx) 
+    void turn(int idx)
     {
         idx = map_idx(idx);
-        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 3.");
+        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
 
         if (idx == _current) // already set, nothing to do
             return;
@@ -356,9 +358,9 @@ struct logical_subtree_knob : public discrete_knob<3>
                                    int idx) const
     {
         typedef combo_tree::iterator pre_it;
-        
+
         idx = map_idx(idx);
-        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 3.");
+        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
 
         // append v to parent_dst's children. If candidate is empty
         // then set it as head. Return the iterator pointing to the
@@ -378,11 +380,11 @@ struct logical_subtree_knob : public discrete_knob<3>
         }
         return new_src;
     }
-    
+
     field_set::disc_spec spec() const {
         return field_set::disc_spec(multiplicity());
     }
- 
+
     std::string toStr() const
     {
         std::stringstream ss;
@@ -472,7 +474,8 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
             _tr.erase(_loc);
     }
 
-    void turn(int idx) {
+    void turn(int idx)
+    {
         idx = map_idx(idx);
         OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
 
@@ -540,7 +543,7 @@ struct simple_action_subtree_knob : public discrete_knob<2>
     void turn(int idx)
     {
         idx = map_idx(idx);
-        OC_ASSERT((idx < 2), "Index greater than 2.");
+        OC_ASSERT((idx < 2), "Index greater than 1.");
 
         if (idx == _current) //already set, nothing to
             return;
