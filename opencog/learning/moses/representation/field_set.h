@@ -96,7 +96,7 @@ struct field_set
 {
     // To avoid the accidental confusion between the multiplicity of
     // values that a variable can take, and the width of a bit-field,
-    // (which is ciel(log_2) of the former), we define two distinct
+    // (which is ciel(log_2()) of the former), we define two distinct
     // types.  A third type, combo::arity_t is reserved for the arity
     // of a function.  For binary trees, two more types are introduced:
     // depth_t and breadth_t, corresponding to the depth and breadth of
@@ -398,7 +398,7 @@ struct field_set
     disc_t get_raw(const instance& inst, size_t idx) const
     {
         const field& f = _fields[idx];
-        return (inst[f.major_offset] >> f.minor_offset) & ((packed_t(1) << f.width) - 1UL);
+        return ((inst[f.major_offset] >> f.minor_offset) & ((packed_t(1) << f.width) - 1UL));
     }
 
     void set_raw(instance& inst, size_t idx, disc_t v) const
@@ -406,7 +406,7 @@ struct field_set
         const field& f = _fields[idx];
         inst[f.major_offset] ^= ((inst[f.major_offset] ^
                                   (packed_t(v) << f.minor_offset)) &
-                                 ((packed_t(1) << f.width) - 1UL) << f.minor_offset);
+                                 (((packed_t(1) << f.width) - 1UL) << f.minor_offset));
     }
 
     // returns a reference of the term at idx, idx is relative to
@@ -1289,7 +1289,13 @@ contin_t >::reference::do_set(contin_t x)
     _it->_fs->set_contin(*_it->_inst, _idx, x);
 }
 
-// pack the data in [from,from+dof) according to our scheme, copy to out
+/// pack the data in [from,from+dof) according to our scheme, copy to out
+///
+/// 'It' is assumed to be an iterator over values (e.g. disc_t's, which
+/// are unsigned ints).
+/// 'Out' is assumed to be an iterator pointing at an instance.  Recall
+/// that the instance is a vector of packed_t, which may be 32 or 64-bit.
+//
 template<typename It, typename Out>
 Out field_set::pack(It from, Out out) const
 {
@@ -1300,7 +1306,7 @@ Out field_set::pack(It from, Out out) const
         size_t total_width = size_t((width * o.depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
         dorepeat (o.depth) {
-            *out |= (*from++) << offset;
+            *out |= packed_t(*from++) << offset;
             offset += width;
             if (offset == bits_per_packed_t) {
                 offset = 0;
@@ -1316,7 +1322,7 @@ Out field_set::pack(It from, Out out) const
 
     foreach(const contin_spec& c, _contin) {
         dorepeat (c.depth) {
-            *out |= (*from++) << offset;
+            *out |= packed_t(*from++) << offset;
             offset += 2;
             if (offset == bits_per_packed_t) {
                 offset = 0;
@@ -1326,7 +1332,7 @@ Out field_set::pack(It from, Out out) const
     }
 
     foreach(const disc_spec& d, _disc) {
-        *out |= (*from++) << offset;
+        *out |= packed_t(*from++) << offset;
         offset += nbits_to_pack(d.multy);
         if (offset == bits_per_packed_t) {
             offset = 0;
