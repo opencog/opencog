@@ -331,9 +331,8 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
 behavioral_score discriminating_bscore::best_possible_bscore() const
 {
     // create a list, maintained in sorted order.
-    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
-                                           contin_t, // variable
-                                           contin_t> // fixed
+    typedef std::multimap<contin_t, std::pair<contin_t, // variable
+                                              contin_t> // fixed
                           > max_vary_t;
     max_vary_t max_vary;
     for (CTable::const_iterator it = _ctable.begin(); it != _ctable.end(); ++it)
@@ -351,7 +350,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
 
         contin_t vary = get_variable(sum_pos, sum_neg, total);
         contin_t fix = get_fixed(sum_pos, sum_neg, total);
-        auto lmnt = std::make_pair(vary, std::make_tuple(it, vary, fix));
+        auto lmnt = std::make_pair(vary, std::make_pair(vary, fix));
         max_vary.insert(lmnt);
     }
 
@@ -364,8 +363,8 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     score_t fix_sum = 0;
     score_t best_score = 0.0;
     reverse_foreach (const auto& mpv, max_vary) {
-        best_score += std::get<1>(mpv.second);
-        fix_sum += std::get<2>(mpv.second);
+        best_score += mpv.second.first;
+        fix_sum += mpv.second.second;
         if (_min_threshold <= fix_sum)
             break;
     }
@@ -742,13 +741,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // recomputed later.  Note that this routine could be performance
     // critical if used as a fitness function for feature selection
     // (which is planned).
-    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator, // why
-                                                                       // do
-                                                                       // you
-                                                                       // need
-                                                                       // that?
-                                           contin_t, // sum_outputs
-                                           unsigned> // total count
+    typedef std::multimap<contin_t, std::pair<contin_t, // sum_outputs
+                                              unsigned> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
     for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
@@ -756,7 +750,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
         contin_t sumo = sum_outputs(c);
         unsigned total = c.total_count();
         contin_t precision = sumo / total;
-        auto lmnt = std::make_pair(precision, std::make_tuple(it, sumo, total));
+        auto lmnt = std::make_pair(precision, std::make_pair(sumo, total));
         max_precisions.insert(lmnt);
     }
 
@@ -771,8 +765,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
     unsigned active = 0;
     score_t sao = 0.0;
     reverse_foreach (const auto& mpv, max_precisions) {
-        sao += std::get<1>(mpv.second);
-        active += std::get<2>(mpv.second);
+        sao += mpv.second.first;
+        active += mpv.second.second;
         if (ctable_usize * min_activation <= active)
             break;
     }
