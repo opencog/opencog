@@ -11,23 +11,23 @@
 
 #define ALPHA       0.01
 #define BETA        0.01
-#define LAMBDA      0
-#define GAMMA       0
+#define LAMBDA      0.5
+#define GAMMA       1
 #define STARVCOEFF  0.05
 
 // Initialize a node
 void InitNode
     (
-    int         nodeIdx,
-    int         ni,
-    int         nb,
-    int         np,
+    uint         nodeIdx,
+    uint         ni,
+    uint         nb,
+    uint         np,
     float       starvCoeff,
     float       alpha,
     float       beta,
     Node        *node_host,
     CudaNode    *cudaNode_dev,
-    int         *inputOffsets,
+    uint         *inputOffsets,
     float       *input_dev,
     float       *belief_dev
     )
@@ -36,7 +36,7 @@ void InitNode
     CudaNode cudaNode_host;
     
     // calculate the state dimensionality (number of inputs + number of beliefs)
-    int ns = ni+nb+np;
+    uint ns = ni+nb+np;
 
     if( ns > THREADS_MAX )
     {
@@ -56,7 +56,7 @@ void InitNode
     node_host->starvCoeff    = starvCoeff;
     node_host->alpha         = alpha;
     node_host->beta          = beta;
-    node_host->winner        = -1;
+    node_host->winner        = 0;
 
     // allocate space on host
     MALLOC(node_host->mu,        float, nb*ns );
@@ -98,10 +98,10 @@ void InitNode
     // copy the input offset for the inputs (should be NULL for non-input nodes)
     if( inputOffsets != NULL )
     {
-        MALLOC(node_host->inputOffsets, int, ni);
-        memcpy(node_host->inputOffsets, inputOffsets, sizeof(int) * ni);
-        CUDAMALLOC( (void **) &cudaNode_host.inputOffsets, sizeof(int) * ni);
-        CUDAMEMCPY( cudaNode_host.inputOffsets, node_host->inputOffsets, sizeof(int) * ni, cudaMemcpyHostToDevice);
+        MALLOC(node_host->inputOffsets, uint, ni);
+        memcpy(node_host->inputOffsets, inputOffsets, sizeof(uint) * ni);
+        CUDAMALLOC( (void **) &cudaNode_host.inputOffsets, sizeof(uint) * ni);
+        CUDAMEMCPY( cudaNode_host.inputOffsets, node_host->inputOffsets, sizeof(uint) * ni, cudaMemcpyHostToDevice);
     }
     else
     {
@@ -113,7 +113,7 @@ void InitNode
     // set prior belief to block-allocated value
     cudaNode_host.pBelief = belief_dev;
 
-    int i,j;
+    uint i,j;
 
     for(i=0; i < nb; i++)
     {
@@ -252,12 +252,12 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
     // grab pointer to the node we want to get distances for
     n = &n[blockIdx.x];
 
-    int i;          // iterator for the reduction
-    int mIdx;       // entry in the mu/sigma matrix to calculate delta
-    int ns;         // node state size
-    int ni;         // node input size
-    int np;         // node parent belief size
-    int nb;         // node belief size
+    uint i;          // iterator for the reduction
+    uint mIdx;       // entry in the mu/sigma matrix to calculate delta
+    uint ns;         // node state size
+    uint ni;         // node input size
+    uint np;         // node parent belief size
+    uint nb;         // node belief size
 
     ns = n->ns;
     ni = n->ni;
@@ -380,12 +380,12 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
 __global__ void NormalizeBelief(CudaNode *n)
 {
     extern __shared__ float shared[];
-    int i;
+    uint i;
 
     // grab the node we want
     n = &n[blockIdx.x];
 
-    int nb;         // number of centroids
+    uint nb;         // number of centroids
 
     nb = n->nb;
 
@@ -457,15 +457,15 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
 {
     extern __shared__ float shared[];
     
-    int     i;
+    uint     i;
 
     float  *normEuc, *maxEuc, *normMal;
-    int    *maxIdx;
+    uint    *maxIdx;
 
     // pick our particular node
     n = &n[blockIdx.x];
 
-    int nb;         // number of centroids
+    uint nb;         // number of centroids
 
     nb = n->nb;
 
@@ -475,7 +475,7 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
         normEuc = (float *) &shared[nb*0];
         normMal = (float *) &shared[nb*1];
         maxEuc = (float *) &shared[nb*2];
-        maxIdx = (int *) &shared[nb*3];
+        maxIdx = (uint *) &shared[nb*3];
 
         // populate shared memory for reductions
         normEuc[threadIdx.x] = n->beliefEuc[threadIdx.x];
@@ -551,13 +551,13 @@ __global__ void UpdateWinner( CudaNode *n, float *framePtr )
     // grab pointer to the node we want to get distances for
     n = &n[blockIdx.x];
 
-    int mIdx;       // entry in the mu/sigma matrix to calculate delta
+    uint mIdx;       // entry in the mu/sigma matrix to calculate delta
 
-    int nb;         // number of centroids
-    int ns;         // state dimensionality
-    int ni;         // input dimensionality
-    int np;         // parent belief dimensionality
-    int winner;     // winner idx
+    uint nb;         // number of centroids
+    uint ns;         // state dimensionality
+    uint ni;         // input dimensionality
+    uint np;         // parent belief dimensionality
+    uint winner;     // winner idx
 
     nb = n->nb;
     ns = n->ns;

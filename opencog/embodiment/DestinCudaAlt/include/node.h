@@ -5,19 +5,19 @@
 struct Node {
     /* HOST VARIABLES BEGIN */
     // node identifier
-    int   * inputOffsets;
+    uint   * inputOffsets;
 
     // node parameters
-    int     nb;
-    int     ni;
-    int     ns;
-    int     np;
+    uint     nb;
+    uint     ni;
+    uint     ns;
+    uint     np;
     float   starvCoeff;
     float   alpha;
     float   beta;
     float   clustErr;
 
-    int     winner;
+    uint     winner;
 
 
     // node statistics
@@ -42,19 +42,19 @@ struct Node {
 
 struct CudaNode {
     // node identifier
-    int   * inputOffsets;
+    uint   * inputOffsets;
 
     // node parameters
-    int     nb;
-    int     ni;
-    int     ns;
-    int     np;
+    uint     nb;
+    uint     ni;
+    uint     ns;
+    uint     np;
     float   starvCoeff;
     float   alpha;
     float   beta;
     float   clustErr;
 
-    int     winner;
+    uint     winner;
 
     // node statistics
     float * mu;
@@ -74,16 +74,16 @@ struct CudaNode {
 
 /* Node Functions Begin */
 void   InitNode(                        // initialize a node.
-                 int,                   // node index
-                 int,                   // belief dimensionality (# centroids)
-                 int,                   // input dimensionality (# input values)
-                 int,                   // parent belief dimensionality
+                 uint,                   // node index
+                 uint,                   // belief dimensionality (# centroids)
+                 uint,                   // input dimensionality (# input values)
+                 uint,                   // parent belief dimensionality
                  float,                 // starvation coefficient
                  float,                 // alpha (mu step size)
                  float,                 // beta (sigma step size)
                  Node *,                // pointer node on host
                  CudaNode *,            // pointer to node on device
-                 int *,                 // input offsets from input image (NULL for any non-input node)
+                 uint *,                 // input offsets from input image (NULL for any non-input node)
                  float *,               // pointer to input on device
                  float *                // pointer to belief on device
                 );

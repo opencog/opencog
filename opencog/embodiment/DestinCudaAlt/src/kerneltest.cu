@@ -10,8 +10,8 @@ void KernelTest()
 {
     Node *n;
 
-    int nb, ni, ns;
-    int *inputOffsets = NULL;
+    uint nb, ni, ns;
+    uint *inputOffsets = NULL;
     float *input_dev, *belief_dev;
 
     float *input_host;
@@ -34,7 +34,7 @@ void KernelTest()
     // allocate input frame
     MALLOC( input_host, float, ni );
 
-    int i,j;
+    uint i,j;
     for( i=0; i < ni; i++ )
     {
         input_host[i] = (float) rand() / RAND_MAX;
@@ -105,7 +105,7 @@ void KernelTest()
 int main()
 {
     srand(time(NULL));
-    int i;
+    uint i;
     for( i=0; i < 10000; i++ )
     {
         KernelTest();

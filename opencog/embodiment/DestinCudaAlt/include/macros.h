@@ -7,6 +7,9 @@
 #define min(a,b) a < b ? a : b;
 #define max(a,b) a > b ? a : b;
 
+// unsigned int macro
+#define uint unsigned int
+
 // a few macros to make cluster_lib.c a bit more portable between C and MEX stuff
 /*
 #include "mex.h"

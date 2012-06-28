@@ -6,18 +6,19 @@
 /* Destin Struct Definition */
 struct Destin {
     /* HOST VARIABLES BEGIN */
-    int nNodes;                         // number of nodes
-    int nBeliefs;                       // number of beliefs
-    int nInputPipeline;                 // number of beliefs to copy to next nodes' input
-    int maxNs;                          // max number of states for all nodes (important for kernels)
-    int maxNb;                          // max number of beliefs for all nodes (important for kernels)
-    int nMovements;                     // number of movements per digit presentation
+    uint nNodes;                        // number of nodes
+    uint nBeliefs;                      // number of beliefs
+    uint nInputPipeline;                // number of beliefs to copy to next nodes' input
+    uint maxNs;                         // max number of states for all nodes (important for kernels)
+    uint maxNb;                         // max number of beliefs for all nodes (important for kernels)
+    uint nMovements;                    // number of movements per digit presentation
     
     Node     * nodes_host;              // pointer to list of host nodes
+    int     ** nodeRef;                 // allows easy indexing of nodes by layer, row, and col
     float    * inputPipeline;           // concatonated input for all internal layer nodes
     float    * belief;                  // concatonated belief vector for all nodes
-    int      * layerSize;               // size for each layer
-    int        nLayers;                 // number of layers in network
+    uint     * layerSize;               // size for each layer
+    uint       nLayers;                 // number of layers in network
     
     float    * dataSet;                 // pointer to dataset
 
@@ -37,21 +38,20 @@ struct Destin {
 
 /* Destin Functions Begin */
 Destin * InitDestin(                    // initialize Destin.
-                    int,                // input dimensionality for first layer
-                    int,                // number of layers
-                    int *,              // belief dimensionality for each layer
-                    int                 // number of movements per digit presentation
+                    uint,                // input dimensionality for first layer
+                    uint,                // number of layers
+                    uint *,              // belief dimensionality for each layer
+                    uint                 // number of movements per digit presentation
                 );
 
 void LinkParentBeliefToChildren(        // link the belief from a parent to the child for advice
                     Destin *,           // initialized destin pointer
-                    int *               // number of beliefs per layer
+                    uint *               // number of beliefs per layer
                 );
 
-void RunDestin(                         // train destin.
+float * RunDestin(                      // train destin.
                  Destin *,              // initialized destin pointer
                  char *,                // filename for data file
-                 char *,                // filename for belief file (only if in feed-forward)
                  bool                   // true: train. false: feed-forward
                 );
 
@@ -69,6 +69,12 @@ void CopyDestinFromDevice(              // copy Destin from device mem to host m
                     Destin *            // pointer to use for device->host copy
                 );
 
+Node *GetNodeFromDestin(
+              Destin *,                 // pointer to destin struct
+              uint,                     // layer to grab from
+              uint,                     // row to grab
+              uint                      // column to grab
+             );
 
 void DestroyDestin(
                     Destin *
