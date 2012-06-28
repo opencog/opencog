@@ -34,7 +34,6 @@ private:
     bool training;
     DestinIterationFinishedCallback * callback;
     RunningInfo ri;
-    std::vector< std::vector<float> > fakeBeliefs; //stubbed implementation
 public:
     destin_network_alt(SupportedImageWidths width, uint layers,
             uint centroid_counts [] ) :
@@ -69,15 +68,6 @@ public:
             }
         }else{
             throw std::logic_error("given image width is not supported.");
-        }
-
-        //allocate fake beliefs vector
-        for(l = 0 ; l < layers ; l++){
-            std::vector<float> v;
-            fakeBeliefs.push_back(v);
-            for(int i = 0 ; i < destin->nBeliefsPerNode[l] ; i++ ){
-                v.push_back(0.0);
-            }
         }
 
     }
@@ -130,7 +120,7 @@ public:
     }
 
     float * getNodeBeliefs(int layer, int row, int col){
-        return &(fakeBeliefs[layer][0]); //stub implementation
+        return GetNodeFromDestin(destin, layer, row, col)->beliefEuc;
     }
 };
 
