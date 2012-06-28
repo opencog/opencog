@@ -956,10 +956,12 @@ protected:
 struct enum_effective_bscore : public enum_graded_bscore
 {
     enum_effective_bscore(const CTable& _ctt)
-        : enum_graded_bscore(_ctt)
+        : enum_graded_bscore(_ctt), _ctable_usize(_ctt.uncompressed_size())
     {}
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
+protected:
+    size_t _ctable_usize;
 };
 
 // Bscore to find interesting predicates. Interestingness is measured

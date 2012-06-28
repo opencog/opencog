@@ -1158,9 +1158,7 @@ penalized_behavioral_score enum_effective_bscore::operator()(const combo_tree& t
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
 
-// XXX move this to the struct
-    size_t csize = ctable.uncompressed_size();
-    pbs.first = behavioral_score (csize);
+    pbs.first = behavioral_score(_ctable_usize);
 
     // Is this just a constant? Then just add them up.
     pre_it it = tr.begin();
@@ -1181,7 +1179,7 @@ penalized_behavioral_score enum_effective_bscore::operator()(const combo_tree& t
     foreach (score_t& sc, pbs.first) sc = 0.0;
 
     // Are we done yet?
-    vector<bool> done(csize);
+    vector<bool> done(_ctable_usize);
     vector<bool>::iterator dit = done.begin();
     for (; dit != done.end(); dit++) *dit = false;
 
