@@ -1158,14 +1158,26 @@ penalized_behavioral_score enum_effective_bscore::operator()(const combo_tree& t
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
 
+// XXX move this to the struct
+    size_t csize = ctable.uncompressed_size();
+    pbs.first = behavioral_score (csize);
+
+    // Is this just a constant? Then just add them up.
     pre_it it = tr.begin();
-    if (is_enum_type(*it)) 
-        return enum_table_bscore::operator()(tr);
+    if (is_enum_type(*it)) {
+        behavioral_score::iterator bit = pbs.first.begin();
+        foreach (const CTable::value_type& vct, ctable) {
+            const CTable::counter_t& c = vct.second;
+
+            // The number that are wrong equals total minus num correct.
+            *bit++ = c.get(*it) - score_t(c.total_count());
+        }
+        return pbs;
+    }
 
     OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
 
-    size_t csize = ctable.uncompressed_size();
-    pbs.first = behavioral_score (csize);
+    // Accumulate the score with multiple passes, so zero them out here.
     foreach (score_t& sc, pbs.first) sc = 0.0;
 
     // Are we done yet?
