@@ -14,9 +14,17 @@ if(CUDA_FOUND)
     set(CUDA_NVCC_FLAGS -g -G -gencode arch=compute_30,code=sm_30)
     
     INCLUDE_DIRECTORIES( include )
-    CUDA_ADD_EXECUTABLE(destin src/main.cu src/destin.cu src/node.cu )    
-    CUDA_ADD_EXECUTABLE(kerneltest src/kerneltest.cu src/destin.cu src/node.cu )    
-	
+
+    CUDA_ADD_EXECUTABLE(destin src/main.cu )    
+    CUDA_ADD_EXECUTABLE(kerneltest src/kerneltest.cu )    
+
+    CUDA_ADD_LIBRARY( destinalt SHARED src/destin.cu src/node.cu )
+
+    SET_TARGET_PROPERTIES(destinalt PROPERTIES LINKER_LANGUAGE CXX )
+
+    TARGET_LINK_LIBRARIES( destin destinalt )
+    TARGET_LINK_LIBRARIES( kerneltest destinalt )
+
     SET_TARGET_PROPERTIES( destin PROPERTIES RUNTIME_OUTPUT_DIRECTORY bin )
     SET_TARGET_PROPERTIES( kerneltest PROPERTIES RUNTIME_OUTPUT_DIRECTORY bin )
 	

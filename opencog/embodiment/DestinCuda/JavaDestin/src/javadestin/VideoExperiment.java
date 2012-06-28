@@ -5,6 +5,7 @@ package javadestin;
 public class VideoExperiment implements IExperiment {
 	static {
 		//load swig generated destin cuda c++ dynamic library 
+                System.loadLibrary("destinalt");
 		System.loadLibrary("destinjava");
 	}
 	
