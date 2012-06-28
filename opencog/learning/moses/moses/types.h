@@ -308,15 +308,14 @@ inline const behavioral_score& get_bscore(const bscored_combo_tree& bst)
 }
 
 /**
- * greater_than operator for bscored_combo_tree.  The order is as
- * follow 1 the score matter, then complexity, then the combo_tree
- * itself. This is done (formerly replacing
- * std::greater<bscored_combo_tree>) so that candidates of same score
- * and same complexity can be added in the metapopulation.
+ * greater_than operator for bscored_combo_tree.  The order is
+ * determined by the composite score; that is, the composite
+ * scores are compared to determin ordering.
  *
- * That function makes the non standard assumption that anything is
- * greater than nan. It is set so not to pollute the metapopulation or
- * the deme with undefined scored (usually very bad) candidates.
+ * FYI, this ordering makes the non-standard assumption that anything
+ * is greater than nan.   This is done so as to not pollute the
+ * metapopulation or the deme with candidates with undefined scores
+ * (as these are usually very bad candidates).
  */
 struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
                                                            bscored_combo_tree,
