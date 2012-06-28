@@ -541,10 +541,10 @@ struct metapopulation : bscored_combo_tree_set
         // Attempt to create a non-empty representation, by looping
         // over exemplars until we find one that expands.
         do {
-            _exemplar = select_exemplar();
+            const_iterator exemplar = select_exemplar();
 
             // Should have found something by now.
-            if (_exemplar == end()) {
+            if (exemplar == end()) {
 
                 // XXX There is currently no way to set the revisit flag
                 // using the command-line options...
@@ -570,18 +570,20 @@ struct metapopulation : bscored_combo_tree_set
                     return false;
                 }
             }
+
+            _exemplar = *exemplar;
+
             if (logger().isDebugEnabled()) {
-                combo_tree tr(get_tree(*_exemplar));
                 logger().debug()
-                    << "Attempt to build rep from exemplar: " << tr
-                    << "\nScored: " << _cscorer(tr);
+                    << "Attempt to build rep from exemplar: " << get_tree(_exemplar)
+                    << "\nScored: " << _cscorer(get_tree(_exemplar));
             }
 
             // Build a representation by adding knobs to the exemplar,
             // creating a field set, and a mapping from field set to knobs.
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
-                                      _exemplar->first, _type_sig,
+                                      get_tree(_exemplar), _type_sig,
                                       params.ignore_ops,
                                       params.perceptions,
                                       params.actions);
@@ -591,7 +593,7 @@ struct metapopulation : bscored_combo_tree_set
             if (_rep->fields().empty()) {
                 delete(_rep);
                 _rep = NULL;
-                _visited_exemplars.insert(get_tree(*_exemplar));
+                _visited_exemplars.insert(get_tree(_exemplar));
                 // Logger
                 logger().info("The representation is empty, perhaps the reduct "
                                "effort for knob building is too high");
@@ -646,7 +648,7 @@ struct metapopulation : bscored_combo_tree_set
                            eval_during_this_deme);
 
         // Mark the exemplar so we won't expand it again
-        _visited_exemplars.insert(get_tree(*_exemplar));
+        _visited_exemplars.insert(get_tree(_exemplar));
 
         // Add, as potential exemplars for future demes, all unique
         // trees in the final deme.
@@ -1318,7 +1320,9 @@ protected:
     typedef deme_t::iterator deme_it;
     typedef deme_t::const_iterator deme_cit;
     deme_t* _deme; // current deme
-    const_iterator _exemplar; // exemplar of the current deme
+
+    // exemplar of the current deme; a copy, not a reference.
+    bscored_combo_tree _exemplar;
 };
 
 } // ~namespace moses
