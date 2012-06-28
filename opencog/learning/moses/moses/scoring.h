@@ -485,10 +485,11 @@ protected:
  * (resp. positive if this->positive is false) values then it is not
  * normalized. (??)
  *
- * XXX This class should be reworked to derive from discriminating_bscore.
- * This would allow us to get rid of duplicate code for sec_complexity_coef()
- * and for get_activation_penalty() and min_improv() and sum_outputs(). TODO
- * In fact everything could be replaced, if it were not for the worst_deciles stuff.
+ * XXX This class should be reworked to derive from
+ * discriminating_bscore.  This would allow us to get rid of duplicate
+ * code for sec_complexity_coef() and for get_activation_penalty() and
+ * min_improv() and sum_outputs(). TODO In fact everything could be
+ * replaced, if it were not for the worst_deciles stuff.
  */
 struct precision_bscore : public bscore_base
 {
@@ -509,6 +510,29 @@ struct precision_bscore : public bscore_base
 
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+
+    /**
+     * This is a experimental feature, we generate a massive combo
+     * tree that is supposed to maximize the precision (keeping
+     * activation within acceptable boundaries). The plan is that
+     * because that combo tree is possibly (even certainly) overfit we
+     * evolve it to prune from it what contributes the least (via
+     * setting an adequate complexity penalty).
+     *
+     * The combo tree is a boolean formula, more specifically a
+     * disjunctive normal form, representing a decision tree
+     * maximizing the precision.
+     *
+     * Each active row corresponds to a conjunctive clauses where each
+     * literal is in a input value (positive if the input is
+     * id::logical_true, negative if the input is id::logical_false).
+     *
+     * The active rows are determined identically as in
+     * precision_bscore::best_possible_bscore(). That is the rows are
+     * sorted according to their individual precision, the first ones
+     * till the min activation is reached are active.
+     */
+    combo_tree gen_canonical_best_candidate() const;
 
 protected:
     CTable ctable;

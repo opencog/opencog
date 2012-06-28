@@ -736,12 +736,17 @@ behavioral_score precision_bscore::best_possible_bscore() const
 {
     // @todo doesn't treat the case with worst_norm
 
-    // For each row, compute the maximum precision it can get.  Typically,
-    // this is 0 or 1 for nondegenerate boolean tables.  Also store the
-    // sumo and total, so that they don't need to be recomputed later.
-    // XXX why bother? this routine is not performance critical?
-    // Lets just make the code  simple, eh?
-    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator,
+    // For each row, compute the maximum precision it can get.
+    // Typically, this is 0 or 1 for nondegenerate boolean tables.
+    // Also store the sumo and total, so that they don't need to be
+    // recomputed later.  Note that this routine could be performance
+    // critical if used as a fitness function for feature selection
+    // (which is planned).
+    typedef std::multimap<contin_t, std::tuple<CTable::const_iterator, // why
+                                                                       // do
+                                                                       // you
+                                                                       // need
+                                                                       // that?
                                            contin_t, // sum_outputs
                                            unsigned> // total count
                           > max_precisions_t;
@@ -802,6 +807,58 @@ score_t precision_bscore::get_activation_penalty(score_t activation) const
 score_t precision_bscore::min_improv() const
 {
     return 1.0 / ctable_usize;
+}
+
+combo_tree precision_bscore::gen_canonical_best_candidate() const
+{
+    // @todo doesn't treat the case with worst_norm
+
+    // For each row, compute the maximum precision it can get.
+    // Typically, this is 0 or 1 for nondegenerate boolean tables.
+    // Also store the sumo and total, so that they don't need to be
+    // recomputed later.  Note that this routine could be performance
+    // critical if used as a fitness function for feature selection
+    // (which is planned).
+    typedef std::multimap<contin_t, // precision
+                          std::pair<CTable::const_iterator,
+                                    unsigned> // total count
+                          > precision_to_count_t;
+    precision_to_count_t ptc;
+    for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
+        const CTable::counter_t& c = it->second;
+        unsigned total = c.total_count();
+        contin_t precision = sum_outputs(c) / total;
+        ptc.insert(std::make_pair(precision, std::make_pair(it, total)));
+    }
+
+    // Generate conjunctive clauses till minimum activation is
+    // reached. Note that the best precision (sao / active) can never
+    // increase for each new mpv.  Despite this, we keep going until
+    // at least min_activation is reached. It's not clear this
+    // actually gives the best candidate one can get if min_activation
+    // isn't reached, but we don't want to go below min activation
+    // anyway, so it's an acceptable inacurracy.  (It would be a
+    // problem only if activation constraint is very loose.)
+    //
+    unsigned active = 0;
+    combo_tree tr;
+    auto head = tr.set_head(id::logical_or);
+    reverse_foreach (const auto& v, ptc) {
+        active += v.second.second;
+
+        // build the disjunctive clause
+        auto dch = tr.append_children(head, id::logical_and);
+        arity_t idx = 1;
+        foreach(const auto& input, v.second.first->first) {
+            argument arg(input == id::logical_true? idx++ : -idx++);
+            tr.append_child(dch, arg);
+        }
+
+        // termination conditional
+        if (ctable_usize * min_activation <= active)
+            break;
+    }
+    return tr;
 }
 
 //////////////////////////////
