@@ -1,9 +1,6 @@
 package callbacks;
 
-import javadestin.DestinKernel;
-import javadestin.LayerFinishedCallback;
-import javadestin.RunningInfo;
-import javadestin.Util;
+import javadestin.*;
 
 
 /**
@@ -34,24 +31,20 @@ class ASCIIArt {
 }
 
 
-public class ShowBeliefsCallback extends LayerFinishedCallback {
+public class ShowBeliefsCallback extends DestinIterationFinishedCallback {
 
 	private FPSCallback fps = new FPSCallback();
 	
 	@Override
-	public void callback(RunningInfo info, DestinKernel layer) {
+	public void callback(RunningInfo info, INetwork network) {
 		//show frames per second
-		fps.callback(info, layer); 
-		
-		if (info.getLayer() != 7 ) {
-			return;
-		}
+		fps.callback(info, network); 
 
-		int states = layer.GetNumberOfStates();
+		int states = network.getBeliefsPerNode(7);
 		if(info.getSequence_step()==0){
 			System.out.println("-----------------------------------------------");
 		}
 			
-		ASCIIArt.printArray(Util.toJavaArray(layer.GetNodeBeliefVector(0, 0), states));
+		ASCIIArt.printArray(Util.toJavaArray(network.getNodeBeliefs(7, 0, 0) , states));
 	}
 }

@@ -104,6 +104,9 @@ void CopyNodeFromDevice(                // copy node from device mem to host mem
 
 /* CUDA device function definitions */
 //
+
+//make SWIG ignore these when generating the bindings.
+#ifdef __global__
 __global__ void CalculateDistances(
                     CudaNode *,         // pointer to the list of nodes
                     float *             // pointer to the frame
@@ -121,7 +124,7 @@ __global__ void UpdateWinner(
                     CudaNode *n,        // pointer to the list of nodes
                     float *framePtr     // pointer to the frame
                 );
-
+#endif
 void cudaPrintMemory();
 
 #endif

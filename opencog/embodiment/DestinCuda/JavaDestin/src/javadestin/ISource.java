@@ -1,6 +1,6 @@
 package javadestin;
 
-public interface Source {
+public interface ISource {
 
 	public boolean grab();
 	

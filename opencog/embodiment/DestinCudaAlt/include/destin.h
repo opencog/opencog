@@ -6,18 +6,20 @@
 /* Destin Struct Definition */
 struct Destin {
     /* HOST VARIABLES BEGIN */
-    uint nNodes;                        // number of nodes
-    uint nBeliefs;                      // number of beliefs
+
+    uint nNodes;                        // number of nodes in the entire destin network
+    uint nBeliefs;                      // number of beliefs ( sum over all layers of centroids per node * number of nodes per layer )
     uint nInputPipeline;                // number of beliefs to copy to next nodes' input
     uint maxNs;                         // max number of states for all nodes (important for kernels)
     uint maxNb;                         // max number of beliefs for all nodes (important for kernels)
     uint nMovements;                    // number of movements per digit presentation
     
+    int * nBeliefsPerNode;              // number of beliefs ( centroids or states ) per node for each layer
     Node     * nodes_host;              // pointer to list of host nodes
     int     ** nodeRef;                 // allows easy indexing of nodes by layer, row, and col
     float    * inputPipeline;           // concatonated input for all internal layer nodes
     float    * belief;                  // concatonated belief vector for all nodes
-    uint     * layerSize;               // size for each layer
+    uint     * layerSize;               // size for each layer ( nodes per layer )
     uint       nLayers;                 // number of layers in network
     
     float    * dataSet;                 // pointer to dataset
@@ -45,8 +47,7 @@ Destin * InitDestin(                    // initialize Destin.
                 );
 
 void LinkParentBeliefToChildren(        // link the belief from a parent to the child for advice
-                    Destin *,           // initialized destin pointer
-                    uint *               // number of beliefs per layer
+                    Destin *            // initialized destin pointer
                 );
 
 float * RunDestin(                      // train destin.

@@ -4,7 +4,7 @@
 #include "AdviceData.h"
 #include "DestinData.h"
 #include "DestinKernel.h"
-#include "LayerFinishedCallback.h"
+#include "DestinIterationFinishedCallback.h"
 
 //pugiXML read/writer
 #include "pugixml/pugixml.hpp"
@@ -47,7 +47,6 @@ class DestinCuda {
 private:
     DestinKernel * DKernel; //array of DestinKernel objects, one for each layer.
     
-    LayerFinishedCallback * callback;
     
     string GetNextFileForDiagnostic();
     
@@ -69,11 +68,6 @@ public:
     int parseCommandArgs( int argc, char* argv[], CommandArgsStuc &out);
 
     
-    DestinCuda() : callback(NULL){ }
-    
-
-    
-    void SetLayerFinishedCallback(LayerFinishedCallback * callback ){ this->callback = callback; }
     void PrintHelp();
     int MainDestinExperiments(CommandArgsStuc & argsOut);
 };      

@@ -1,12 +1,12 @@
 package javadestin;
 
 
-public interface Presentor {
+public interface IPresentor {
 	public void present();
 	
-	public void setNetwork(Network n);
+	public void setNetwork(INetwork n);
 	
-	public void setSource(Source s);
+	public void setSource(ISource s);
 	
 	public void setInputTransporter(Transporter t);
 	

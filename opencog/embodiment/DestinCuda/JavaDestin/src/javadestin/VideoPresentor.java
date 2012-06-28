@@ -1,8 +1,8 @@
 package javadestin;
 
-public class VideoPresentor implements Presentor {
-	private Source source;
-	private Network network;
+public class VideoPresentor implements IPresentor {
+	private ISource source;
+	private INetwork network;
 	private Transporter  inputTrans;
 	
 	private boolean isStopped;
@@ -44,12 +44,12 @@ public class VideoPresentor implements Presentor {
 	
 
 	@Override
-	public void setNetwork(Network n) {
+	public void setNetwork(INetwork n) {
 		this.network = n;
 	}
 
 	@Override
-	public void setSource(Source s) {
+	public void setSource(ISource s) {
 		this.source = s;
 	}
 

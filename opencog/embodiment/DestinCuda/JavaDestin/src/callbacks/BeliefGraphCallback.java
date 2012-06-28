@@ -1,26 +1,22 @@
 package callbacks;
 
-import javadestin.DestinKernel;
-import javadestin.LayerFinishedCallback;
-import javadestin.RunningInfo;
-import javadestin.Util;
+import javadestin.*;
 
 
-public class BeliefGraphCallback extends LayerFinishedCallback {
+public class BeliefGraphCallback extends DestinIterationFinishedCallback {
 	private FPSCallback fps = new FPSCallback();
 	
 @Override
-	public void callback(RunningInfo info, DestinKernel layer) {
-		if(info.getLayer()!=7) return;
-		
-		int states = layer.GetNumberOfStates();
-		float [] beliefs = Util.toJavaArray(layer.GetNodeBeliefVector(0, 0), states);
+	public void callback(RunningInfo info, INetwork network) {
+                
+		int states = network.getBeliefsPerNode(7);
+		float [] beliefs = Util.toJavaArray(network.getNodeBeliefs(7, 0, 0), states);
 		
 		int beliefWidth = 20;
-		System.out.print("\033[2J");
+		System.out.print("\033[2J");//clearscreen
 		System.out.flush();
 		
-		fps.callback(info, layer);
+		fps.callback(info, network);
 		
 		for(int s = 0 ; s < states; s++){
 			int b = (int)(beliefs[s] * beliefWidth);

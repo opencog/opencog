@@ -1,26 +1,27 @@
 package javadestin;
 
-import javadestin.Network.NetworkConfig;
-import callbacks.BeliefGraphCallback;
 
 
-
-public class VideoExperiment {
+public class VideoExperiment implements IExperiment {
 	static {
 		//load swig generated destin cuda c++ dynamic library 
 		System.loadLibrary("destinjava");
 	}
 	
-	private Presentor presentor;
-	private Network network;
+	private IPresentor presentor;
+	private INetwork network;
 	private Thread presentingThread;
 	
-	public VideoExperiment(){
+        private INetworkFactory networkFactory;
+        
+	public VideoExperiment(INetworkFactory factory){
+                networkFactory = factory;
 		VidSource s = new VidSource(true,"");
 		s.enableDisplayWindow();//shows the video to the screen while feeding to DeSTIN
 		
 		presentor = new VideoPresentor();
-		network = newNetwork();
+                
+                network = networkFactory.create();
 		presentor.setNetwork(network);
 		presentor.setSource(s);
 		
@@ -35,21 +36,17 @@ public class VideoExperiment {
 		presentor.setInputTransporter(new ImageTransporter(pixelCount, layerNodesWide ,layerNodesHigh , nodePixelWidth , nodePixelHeight));
 	}
 	
-	private Network newNetwork(){
-		NetworkConfig config = new NetworkConfig();
-		Network network = new Network(new int[]{20,16,14,12,10,8,6,2}, 16, config); //4,6,8,10,12,14,16,20
-		network.setLayerFinishedCallback( new BeliefGraphCallback() );
-		return network; 
-	}
+
 	/**
 	 * reset - the network looses all its training 
 	 * and centroids are randomized and PSSA tables 
 	 * are reset to uniform;
 	 */
+    @Override
 	public void reset(){
 		synchronized (presentor.getNetworkLock()) {
 			network.free();
-			network = newNetwork();
+			network = networkFactory.create();
 			presentor.setNetwork(network);
 		}
 	}
@@ -57,12 +54,14 @@ public class VideoExperiment {
 	/**
 	 * The video stream stops and network stops recieving input
 	 */
+    @Override
 	public void stop(){
 		presentor.stop();
 	}
 	/**
 	 * The video stream starts and is fed to the presentor
 	 */
+    @Override
 	public void start(){
 		if(presentingThread!=null && presentingThread.isAlive() ){
 			throw new IllegalStateException("The source is already being presented to the network");
@@ -79,20 +78,22 @@ public class VideoExperiment {
 		presentingThread.start();
 	}
 	
+    @Override
 	public void setPOSTraining(boolean training){
 		network.setIsPOSTraining(training);
 	}
+    @Override
 	public void setPSSATraining(boolean training){
 		network.setIsPSSATraining(training);
 	}
-	public static void main(String [] argv) throws InterruptedException{
-		try{
-			new VideoExperiment().start();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		System.gc();//let the c++ destructors be called... not sure that graphics card memory would be cleared properly when jvm exits immediatly.
-		Thread.sleep(1000);
-		System.out.print("Main exiting");
-	}
+    public static void main(String[] argv) throws InterruptedException {
+        try {
+            new VideoExperiment(new NetworkFactory(true)).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.gc();//let the c++ destructors be called... not sure that graphics card memory would be cleared properly when jvm exits immediatly.
+	Thread.sleep(1000);
+	System.out.print("Main exiting");
+    }
 }

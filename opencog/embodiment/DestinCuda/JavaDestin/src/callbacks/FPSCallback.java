@@ -1,18 +1,15 @@
 package callbacks;
 
-import javadestin.DestinKernel;
-import javadestin.LayerFinishedCallback;
+import javadestin.DestinIterationFinishedCallback;
+import javadestin.INetwork;
 import javadestin.RunningInfo;
 
-public class FPSCallback extends LayerFinishedCallback{
+public class FPSCallback extends DestinIterationFinishedCallback{
 	long lastTime =  System.currentTimeMillis();
 	long lastReportTime = lastTime;
 	
 	@Override
-	public void callback(RunningInfo info, DestinKernel layer) {
-		if(info.getLayer()!=7) {
-			return;
-		}
+	public void callback(RunningInfo info, INetwork network) {
 		
 		long time = System.currentTimeMillis();
 		long diff = time - lastReportTime; 

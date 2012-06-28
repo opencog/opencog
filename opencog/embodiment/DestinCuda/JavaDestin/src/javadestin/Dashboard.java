@@ -14,7 +14,7 @@
  */
 package javadestin;
 public class Dashboard extends javax.swing.JFrame {
-	VideoExperiment ve = new VideoExperiment();
+	IExperiment exp = new VideoExperiment( new NetworkFactory(false));
 	
 	/** Creates new form Dashboard */
 	public Dashboard() {
@@ -114,23 +114,23 @@ public class Dashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
 	private void btStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btStartActionPerformed
-		ve.start();
+		exp.start();
 	}//GEN-LAST:event_btStartActionPerformed
 
 	private void btStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btStopActionPerformed
-		ve.stop();
+		exp.stop();
 	}//GEN-LAST:event_btStopActionPerformed
 
 	private void chkPosTrainingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPosTrainingActionPerformed
-		ve.setPOSTraining(chkPosTraining.isSelected());
+		exp.setPOSTraining(chkPosTraining.isSelected());
 	}//GEN-LAST:event_chkPosTrainingActionPerformed
 
 	private void chkPSSATrainingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPSSATrainingActionPerformed
-		ve.setPSSATraining(chkPSSATraining.isSelected());
+		exp.setPSSATraining(chkPSSATraining.isSelected());
 	}//GEN-LAST:event_chkPSSATrainingActionPerformed
 
 	private void btResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btResetActionPerformed
-		ve.reset();
+		exp.reset();
 	}//GEN-LAST:event_btResetActionPerformed
 
 	/**

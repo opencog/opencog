@@ -1,6 +1,6 @@
 package javadestin;
 
-public class VidSource extends VideoSource implements Source {
+public class VidSource extends VideoSource implements ISource {
 
 	public VidSource(boolean use_device, String video_file) {
 		super(use_device, video_file);

@@ -19,6 +19,9 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
     // initialize a new Destin object
     MALLOC(d, Destin, 1);
 
+    MALLOC(d->nBeliefsPerNode, int, nl);
+    memcpy(d->nBeliefsPerNode, nb, nl*sizeof(int));
+
     d->nNodes = 0;
     d->nLayers = nl;
 
@@ -250,7 +253,7 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
         }
     }
     
-    LinkParentBeliefToChildren( d, nb );
+    LinkParentBeliefToChildren( d );
 
     // set up maximum state and belief sizes for kernel calling
     d->maxNs = maxNs;
@@ -268,7 +271,7 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
     return d;
 }
 
-void LinkParentBeliefToChildren( Destin *d, uint *nb )
+void LinkParentBeliefToChildren( Destin *d )
 {
     CudaNode cudaNode_host, cudaNodeParent_host;
 
@@ -436,7 +439,7 @@ float * RunDestin( Destin *d, char *dataFileName, bool isTrain )
 
     // get filesize
     fseek(dataFile, 0L, SEEK_END);
-    nFloats = ftell(dataFile) / 4;
+    nFloats = ftell(dataFile) / 4; //TODO: should this divide by sizeof(float) instead?
     fseek(dataFile, 0L, SEEK_SET);
 
     // get remaining memory on card
@@ -444,7 +447,7 @@ float * RunDestin( Destin *d, char *dataFileName, bool isTrain )
     cudaMemGetInfo(&deviceFree, &deviceTotal);
 
     size_t chunkSize;
-    size_t inputFrameSize = d->layerSize[0] * 16;
+    size_t inputFrameSize = d->layerSize[0] * 16; //TODO: replace magic number 16 with a constant variable
 
     uint nPresentations;
 
@@ -580,6 +583,7 @@ void DestroyDestin( Destin *d )
     FREE(d->nodes_host);
     FREE(d->inputPipeline);
     FREE(d->belief);
+    FREE(d->nBeliefsPerNode);
     FREE(d->layerSize);
 
     for( i=0; i < d->nLayers; i++ )

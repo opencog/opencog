@@ -16,18 +16,19 @@ if(CUDA_FOUND)
     
     #Add Pugi XML
 	add_subdirectory( pugixml )
-        
+            
 	#Add cuRAND libary of CUDA
-        if(WIN32)
+    if(WIN32)
 	        #find_library_local_first is nifty macro found in cmake's FindCUDA script 
 	        find_library_local_first(lib_curand curand "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v4.0/lib/win32")	
 	else()
        		 FIND_LIBRARY(lib_curand curand "/usr/local/cuda/lib64" )
 	endif()
-	#Make solution
+
+    include_directories( ../DestinCudaAlt/include )
+
+
 	set(cudadest_source DestinCuda.cu DestinData.cu AdviceData.cu DestinKernel.cu Transporter.h CurandGeneratorWrapper.h)
-
-
 
  	FIND_LIBRARY(lib_highgui highgui )
 
