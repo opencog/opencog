@@ -522,7 +522,6 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
     cout << "Images to be processed: " << argsStruc.MAX_CNT << endl;
     cout << "Each image moves: " << SEQ_LENGTH << " times." << endl;
 
-	RunningInfo run_info;
     double procces = 0.1;
     for(int i=0;i< argsStruc.MAX_CNT;i++)
     {
@@ -537,14 +536,11 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
         pair<int,int> element = vIndicesAndGTLabelToUse[i];
         int indexOfExample = element.first;
         int label = element.second;
-		run_info.image_label = label;
 		
         time_t iStart = time(NULL);
-		run_info.image_count = i;
 		
         for(int seq=0;seq<SEQ_LENGTH;seq++)
         {
-			run_info.sequence_step = seq;
             stringstream xmlLayer;
             // Run lowest layer (Kernel)
 
@@ -552,11 +548,9 @@ int DestinCuda::MainDestinExperiments(CommandArgsStuc & argsStruc)
 			
             DataSourceForTraining.SetShiftedDeviceImage(indexOfExample, SEQ[seq][0], SEQ[seq][1], ImageInput[0], ImageInput[1]);
             DKernel[0].DoDestin(DataSourceForTraining.GetPointerDeviceImage(),&xmlLayer);
-			run_info.layer = 0;
             //TODO: is the order of layer evaluation going in the right order?
             for(int l=1;l<NumberOfLayers;l++)
             {
-				run_info.layer = l;
                 DKernel[l].DoDestin(DKernel[l-1].GetDevicePointerBeliefs(),&xmlLayer);
             }
             time_t lStop = time(NULL);
