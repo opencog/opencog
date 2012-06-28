@@ -79,6 +79,7 @@ struct metapop_parameters
         reduce_all(_reduce_all),
         revisit(_revisit),
         include_dominated(_include_dominated),
+        use_diversity_penalty(false), // XXX should pass as arg ...
         complexity_temperature(_complexity_temperature),
         ignore_ops(_ignore_ops),
         enable_cache(_enable_cache),
@@ -103,6 +104,9 @@ struct metapop_parameters
     // the metapopulation.  Keeping dominated candidates improves
     // performance by avoiding local maxima.
     bool include_dominated;
+
+    // Enable forced diversification of the metapop.
+    bool use_diversity_penalty;
 
     // Boltzmann temperature ...
     score_t complexity_temperature;
@@ -310,7 +314,7 @@ struct metapopulation : bscored_combo_tree_set
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
      */
-    const_iterator select_exemplar() const
+    const_iterator select_exemplar()
     {
         OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
 
@@ -320,6 +324,35 @@ struct metapopulation : bscored_combo_tree_set
             const combo_tree& tr = get_tree(*begin());
             if (_visited_exemplars.find(tr) == _visited_exemplars.end())
                 return begin();
+        }
+
+        // If the diversity penalty is enabled, then punish the scores
+        // of those exemplars that are too similar to the previous one.
+        // This typically won't make  any difference for the first dozen
+        // exemplars choosen, but starts getting important once the 
+        // metapopulation gets large, and the search bogs down.
+        //
+        // XXX The implementation here results in a lot of copying of
+        // behavioral scores and combo trees, and thus could be hurt
+        // performance by quite a bit.  To avoid this, we'd need to
+        // change the use of bscored_combo_tree_set in this class.
+        if (params.use_diversity_penalty) {
+            bscored_combo_tree_set pool;
+            // Behavioral score of the (previous) exemplar.
+            const behavioral_score& exbs = get_bscore(_exemplar);
+            for (const_iterator it = pool.begin(); it != pool.end(); ++it) {
+                const behavioral_score &bs = get_bscore(*it);
+                OC_ASSERT(bs.size(), "Behavioral score is needed for diversity!");
+
+                score_t penalty = 1.0 / (1.0 + lp_distance(exbs, bs, 1.0));
+
+                composite_score cs = get_composite_score(*it);
+                cs.set_diversity_penalty(penalty);
+                pool.insert(bscored_combo_tree(get_tree(*it),
+                     composite_behavioral_score(get_pbscore(*it), cs)));
+            }
+            // Replace the existing metapopulation with the new one.
+            swap(pool);
         }
 
         vector<score_t> probs;
@@ -763,8 +796,9 @@ struct metapopulation : bscored_combo_tree_set
         OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
         // Behavioural scores are needed only if domination-based
-        // merging is asked for.  Save CPU time by not computing them.
-        if (!params.include_dominated) {
+        // merging is asked for, or if the diversity penalty is in use.
+        //  Save CPU time by not computing them.
+        if (!params.include_dominated || params.use_diversity_penalty) {
             logger().debug("Compute behavioral score of %d selected candidates",
                            pot_candidates.size());
 
