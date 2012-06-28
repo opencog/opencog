@@ -79,18 +79,18 @@ static const score_t worst_score = score_t(1) - best_score;
 struct composite_score:
      public boost::less_than_comparable<composite_score>
 {
-    /// By convention, we expect score to be negative (so that 
+    /// By convention, we expect score to be negative (so that
     /// higher scores==better scores) while cpxy and penalty are both
-    /// positive.  This, higher complexity==larger number, and 
+    /// positive.  This, higher complexity==larger number, and
     /// bigger penalty==bigger number. The penalty is *SUBTRACTED*
     /// from the score during evaluation!
     //
-    // Note: we keep penalized_score, in order to avoid a subtraction
-    // in the comparison operator.
-    composite_score(score_t scor, complexity_t cpxy, 
+    // Note: we cache the total penalized_score, in order to avoid a
+    // subtraction in the comparison operator.
+    composite_score(score_t scor, complexity_t cpxy,
                     score_t complexity_penalty_ = 0.0,
                     score_t diversity_penalty_ = 0.0)
-       : score(scor), complexity(cpxy), 
+       : score(scor), complexity(cpxy),
          complexity_penalty(complexity_penalty_),
          diversity_penalty(diversity_penalty_),
          penalized_score(score - complexity_penalty - diversity_penalty) {}
@@ -331,10 +331,13 @@ typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
 typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 
 /// Compute the distance between two vectors, using the lp norm.
+/// For p=2, this is the usual Eucliden distance, and for p=1, this
+/// is the Manhattan distance, and for p=0, this is the maximum
+/// difference for one element.
 static inline
 score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double p=1.0)
 {
-    OC_ASSERT (a.size() == b.size(), 
+    OC_ASSERT (a.size() == b.size(),
         "Cannot compare unequal-sized vectors!  %d %d\n",
          a.size(), b.size());
 
@@ -357,8 +360,20 @@ score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double
         }
         return sqrt(sum);
     }
+    // Special case max difference
+    if (0.0 == p) {
+        for (; ia != a.end(); ia++, ib++) {
+            score_t diff = fabs (*ia - *ib);
+            if (sum < diff) sum = diff;
+        }
+        return sum;
+    }
+
+    // General case.
     for (; ia != a.end(); ia++, ib++) {
-        sum += pow(log (fabs (*ia - *ib)), p);
+        score_t diff = fabs (*ia - *ib);
+        if (0.0 < diff)
+            sum += pow(log(diff), p);
     }
     return pow(sum, 1.0/p);
 }
@@ -381,9 +396,8 @@ score_t lp_distance(const bscored_combo_tree& a, const bscored_combo_tree& b, do
     return lp_distance(a.second, b.second, p);
 }
 
-// XXX TODO: the only difference between metapop_candidates and
-// bscored_combo_tree_set is that the later is a set, the former is an
-// unordered map.  So, get rid of metapop_candidates.
+/// metapop_candidates provides an O(1) way of determining if a combo
+/// tree is in the map, or not (and getting its score, if it is).
 typedef boost::unordered_map<combo::combo_tree, composite_behavioral_score,
                              boost::hash<combo::combo_tree> > metapop_candidates;
 typedef metapop_candidates::value_type metapop_candidate;
@@ -449,8 +463,8 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
                                 bool output_complexity = false,
                                 bool output_bscore = false)
 {
-    out << std::endl 
-        << "#!/usr/bin/python" << std::endl 
+    out << std::endl
+        << "#!/usr/bin/python" << std::endl
         << "from operator import *" << std::endl
         << std::endl
         << "#These functions allow multiple args instead of lists." << std::endl
@@ -460,7 +474,7 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
         << "def ands(*args):" << std::endl
         << "    return all(args)" << std::endl
         << std::endl;
- 
+
     if (output_score) {
         out << "#score: " << std::setprecision(io_score_precision) << get_score(candidate) << std::endl;
     }
@@ -469,12 +483,12 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
         out << " #complexity_penalty: " << get_complexity_penalty(candidate) << std::endl;
         out << " #diversity_penalty: " << get_diversity_penalty(candidate) << std::endl;
     }
-    
+
     out << std::endl << "def moses_eval(i):" << std::endl << "    return ";
     ostream_combo_tree(out, get_tree(candidate), combo::fmt::python);
     out << std::endl;
-    
-    if (output_bscore) {    
+
+    if (output_bscore) {
         out << std::endl<< "#bscore: " ;
         ostream_penalized_behavioral_score(out, get_pbscore(candidate));
         out << std::endl;

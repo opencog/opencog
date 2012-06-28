@@ -128,26 +128,27 @@ struct metapop_parameters
 
 /**
  * The metapopulation will store the expressions (as scored trees)
- * that were encountered during the learning process (which some of
- * them, dominated by exsiting ones, might be skipped as
- * non-promising)
+ * that were encountered during the learning process.  Only the
+ * highest-scoring trees are typically kept.
  *
  * The metapopulation is updated in iterations. In each iteration, one
  * of its elements is selected as an exemplar. The exemplar is then
- * used for building a new deme (that will, further, extend the
- * metapopulation)
+ * decorated with knobs and optimized, to create a new deme.  Members
+ * of the deme are then folded back into the metapopulation.
  *
  * NOTE:
  *   CScoring = scoring function (output composite scores)
  *   BScoring = behavioral scoring function (output behaviors)
  */
 template<typename CScoring, typename BScoring, typename Optimization>
-struct metapopulation : public bscored_combo_tree_set
+struct metapopulation : bscored_combo_tree_set
 {
     typedef metapopulation<CScoring, BScoring, Optimization> self;
     typedef bscored_combo_tree_set super;
     typedef super::value_type value_type;
 
+    // The goal of using unordered_set here is to have O(1) access time
+    // to see if a combo tree is in the set, or not.
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 
@@ -294,13 +295,16 @@ struct metapopulation : public bscored_combo_tree_set
     }
 
     /**
-     * Select the exemplar from the population. All candidates with
-     * the best score (if more that one) are distributed according to
-     * a Solomonoff-like distribution (2^{-complexity/temperature})
-     * and the exemplar is selected accordingly.
+     * Select the exemplar from the population. An exemplar is choosen
+     * from the pool of candidates using a Boltzmann distribution
+     * exp (-score / temperature).  Thus, they choosen exemplar will
+     * typically be high-scoring, but not necessarily the highest-scoring.
+     * This allows a range of reasonably-competitive candidates to be
+     * explored, and, in practice, prooves to be much more effective
+     * than a greedy algo which only selects the highest-scoring candidate.
      *
      * Current experimental evidence shows that temperatures in the
-     * range of 3-8 work best for most problems, both discrete
+     * range of 6-12 work best for most problems, both discrete
      * (e.g. 4-parity) and conintuous.
      *
      * @return the iterator of the selected exemplar, if no such
@@ -382,7 +386,7 @@ struct metapopulation : public bscored_combo_tree_set
         return params.complexity_temperature * 30.0 / 100.0;
     }
 
-    /// Merge candidates in to the metapopulation. 
+    /// Merge candidates in to the metapopulation.
     /// If the include-dominated flag is not set, the set of candidates
     /// might be changed during merge, with the dominated candidates
     /// removed during the merge. XXX Really?  It looks like the code
@@ -416,7 +420,7 @@ struct metapopulation : public bscored_combo_tree_set
         // applying more and more stringent bounds on the allowable scores.
         // The current implementation of useful_score_range() returns a
         // value a bit on the large size, by a factor of 2 or so, so its
-        // quite OK to cut back on this value. 
+        // quite OK to cut back on this value.
 
 #define MIN_POOL_SIZE 250
         if (size() < MIN_POOL_SIZE) return;
@@ -439,7 +443,7 @@ struct metapopulation : public bscored_combo_tree_set
 #else
         // Erase all the lowest scores.  The metapop is in quasi-sorted
         // order (since the deme was sorted before being appended), so
-        // this bulk remove mostly works "correctly". It is also 25% 
+        // this bulk remove mostly works "correctly". It is also 25%
         // faster than above. I think this is because the erase() above
         // causes the std::set to try to sort the contents, and this
         // ends up costing a lot.  I think... not sure.
@@ -461,7 +465,7 @@ struct metapopulation : public bscored_combo_tree_set
         // relatively lenient cap.
         // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
         //
-        // XXX TODO fix the cap so its more sensitive to the size of 
+        // XXX TODO fix the cap so its more sensitive to the size of
         // each exemplar, right!?
         // size_t nbelts = get_bscore(*begin()).size();
         // double cap = 1.0e6 / double(nbelts);
@@ -480,7 +484,7 @@ struct metapopulation : public bscored_combo_tree_set
             // only 32bit arch
             erase(std::next(begin(), which));
             popsz --;
-        } 
+        }
 #endif
     }
 
@@ -578,7 +582,7 @@ struct metapopulation : public bscored_combo_tree_set
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
                                       _exemplar->first, _type_sig,
-                                      params.ignore_ops, 
+                                      params.ignore_ops,
                                       params.perceptions,
                                       params.actions);
 
@@ -743,7 +747,7 @@ struct metapopulation : public bscored_combo_tree_set
             }
         };
 
-        // We use deme->begin() + eval_during_this_deme instead of 
+        // We use deme->begin() + eval_during_this_deme instead of
         // deme->end(), because we might have resized the deme to
         // something larger than the actual number of instances we
         // placed into it (XXX really? Does this ever happen?)
@@ -1152,7 +1156,7 @@ struct metapopulation : public bscored_combo_tree_set
     {
         if (!candidates.empty()) {
 
-            // Candidates are kept in weighted score order, not in 
+            // Candidates are kept in weighted score order, not in
             // absolute score order.  Thus, we need to search through
             // the first few to find the true best score.  Also, there
             // may be several candidates with the best score.
@@ -1275,7 +1279,7 @@ struct metapopulation : public bscored_combo_tree_set
     //                    n, output_score, output_complexity,
     //                    output_bscore, output_dominated);
     // }
-    
+
     // Like above, but using std::cout.
     void print(long n = -1,
                bool output_score = true,
@@ -1294,6 +1298,7 @@ struct metapopulation : public bscored_combo_tree_set
     const BScoring& _bscorer; // behavioral score
     Optimization &optimize;
     metapop_parameters params;
+
 protected:
     size_t _n_evals;
     size_t _n_expansions;
