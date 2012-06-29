@@ -333,14 +333,14 @@ struct metapopulation : bscored_combo_tree_set
         // metapopulation gets large, and the search bogs down.
         //
         // XXX The implementation here results in a lot of copying of
-        // behavioral scores and combo trees, and thus could be hurt
+        // behavioral scores and combo trees, and thus could hurt
         // performance by quite a bit.  To avoid this, we'd need to
         // change the use of bscored_combo_tree_set in this class.
         if (params.use_diversity_penalty) {
             bscored_combo_tree_set pool;
             // Behavioral score of the (previous) exemplar.
             const behavioral_score& exbs = get_bscore(_exemplar);
-            for (const_iterator it = pool.begin(); it != pool.end(); ++it) {
+            for (const_iterator it = begin(); it != end(); ++it) {
                 const behavioral_score &bs = get_bscore(*it);
                 OC_ASSERT(bs.size(), "Behavioral score is needed for diversity!");
 
@@ -351,6 +351,7 @@ struct metapopulation : bscored_combo_tree_set
                 pool.insert(bscored_combo_tree(get_tree(*it),
                      composite_behavioral_score(get_pbscore(*it), cs)));
             }
+
             // Replace the existing metapopulation with the new one.
             swap(pool);
         }
