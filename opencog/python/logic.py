@@ -201,15 +201,12 @@ class Chainer:
         # And when it does happen, often you will find all the goals for a clone of the app,
         # and not the original app.
         
-        def proved_by_brother_app(app):
-            """  
-             this could happen because of pushing all app with the same head(brothers) in the stack,
-             and some of brother may prove the head already
-             """ 
-            #return False
-            if self.head_dag(app).tv.count > 0:
+        def proved_app(app, planning_mode):
+            if planning_mode or self.head_dag(app).tv.count == 0:
+                return False
+            else:
                 return True
-        def proved_by_axiom(goal):
+        def proved_goal(goal):
             """
             It work because of the excution order in function @bc_step
             """
@@ -234,13 +231,15 @@ class Chainer:
                 self.trace.visit_order += 1
                 arg.trace.visit_order = self.trace.visit_order
 
-        if proved_by_brother_app(next_app):
+        # this could happen because of pushed all app with the same head(brothers) in the stack,
+        # and some of brother may proved the head already, it works only in depth first search!
+        if proved_app(next_app, self.planning_mode):
             return
         # This step will also call propogate_results and propogate_specialization,
         # so it will check for premises, compute the TV if possible, etc.
         self.find_axioms_for_rule_app(next_app)
-        
-        if proved_by_brother_app(next_app):
+        # it always work 
+        if proved_app(next_app, self.planning_mode):
             return
         # This should probably use the extra things in found_axiom
         self.propogate_result(next_app)
@@ -248,7 +247,10 @@ class Chainer:
         #next_target = standardize_apart(next_target)
 
         for goal in next_app.goals:
-            if proved_by_axiom(goal):
+            # if goal is proved with an axiom  then skip rules
+            # there may be some goal is proved in previous step, if not all of them.
+            # and the proving path to the goal is shorter than expanding it with rules.
+            if proved_goal(goal):
                continue 
             apps = self.find_rule_applications(goal)
             for a in apps:
