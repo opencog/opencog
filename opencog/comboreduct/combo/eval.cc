@@ -24,6 +24,7 @@
  */
 #include "eval.h"
 #include <iostream>
+#include <opencog/util/tree.h>
 
 namespace opencog { namespace combo {
 
@@ -310,6 +311,55 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::rand :
             return randGen().randfloat();
 
+	    //list primitive
+	case id::list:{
+	  string str =  "list(";
+	  stringstream ss;
+
+            for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
+                vertex vres = eval_throws_binding(bmap, sib, pe);
+		ss<<vres;
+		ss<<" ";
+            }
+	  str.append(ss.str());
+	  str.replace(str.length()-1, 1, ")");
+	  vertex vx = str;
+	  return vx;
+
+	}
+
+	  //car takes a list and returns head of the list
+	case id::car:{
+	  vertex vx = eval_throws_binding(bmap, it.begin().begin(), pe);
+	  return vx;
+	}
+
+	  //cdr takes a list and returns tail of the list
+	case id::cdr:{
+	  string str = "list(";
+	  stringstream ss;
+
+	  for(sib_it sib = ++it.begin().begin(); sib != it.end(); ++sib){
+	    vertex vres = eval_throws_binding(bmap, sib, pe);
+	    ss<<vres;
+	    ss<<" ";
+	  }
+
+	  str.append(ss.str());
+	  str.replace(str.length()-1, 1, ")");
+	  vertex vx = str;
+	  return vx;
+	}
+
+	  //cons takes an element and a list 
+	  //     and adds the element as the first one to the list
+	case id::cons:{
+	  vertex vx = eval_throws_binding(bmap, it.begin(), pe);
+	  combo_tree ct(it);
+	  ct.prepend_child(++it.begin(), vx);
+	  return eval_throws_binding(bmap, ++it.begin().begin(),pe);
+
+	}
 
         // Control operators
 

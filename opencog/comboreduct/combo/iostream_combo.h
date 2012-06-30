@@ -108,6 +108,14 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
         v = id::impulse;
     else if (str == "rand")
         v = id::rand;
+    else if (str == "list")
+        v = id::list;
+    else if (str == "car")
+        v = id::car;
+    else if (str == "cdr")
+        v = id::cdr;
+    else if (str == "cons")
+        v = id::cons;
     else if (str == "null_vertex")
         v = id::null_vertex;
     //wild_card

@@ -86,7 +86,8 @@ enum builtin
     greater_than_zero,
     impulse,
     rand,         // random contin_t in [0,1) FIXME TODO : update reduct rules
-
+    list,         
+    car, cdr, cons, //functions on lists
     // generic functions
     // Currently take enum as arg or return enum, but should
     // be generalized soon.  XXX do this...

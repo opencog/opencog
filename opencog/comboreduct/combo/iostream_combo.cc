@@ -85,7 +85,14 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
             return out << "impulse";
         case id::rand:
             return out << "rand";
-
+	case id::list:
+	    return out << "list";
+	case id::car:
+	    return out << "car";
+	case id::cdr:
+	    return out << "cdr";
+	case id::cons:
+	    return out << "cons";
         case id::contin_if:
             return out << "contin_if";
         case id::cond:
