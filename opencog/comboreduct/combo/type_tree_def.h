@@ -46,6 +46,11 @@ enum type_node {
     boolean_type,     // True or False, 1 or 0
     contin_type,      // continuously-valued (floating point)
     enum_type,        // alphanumeric string (& limited punctuation)
+    list_type,        // Denotes a list of zero or more items of a 
+                      // given type; list(T) corresponds to a list of
+                      // zero or more elements of type T.   This is like
+                      // arg_list, but is not used for var-args.
+
 
     // Types for motor control, sensory data.
     action_result_type,

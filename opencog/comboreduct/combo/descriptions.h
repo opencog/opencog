@@ -79,6 +79,11 @@ static const builtin_description bd[] =
     { id::impulse,              "->(boolean contin)" },
     { id::rand,                 "contin" },
 
+    { id::list,                 "->(arg_list(list) list)" },
+    { id::car,                  "->(arg_list(list) list)" },
+    { id::cdr,                  "->(arg_list(list) list)" },
+    { id::cons,                 "->(list list list)" },
+
     //{ id::ann,                  "->(arg_list(boolean))" },
     //{ id::ann_node,             "->(arg_list(boolean))" },
     //{ id::ann_input,           "boolean" },
@@ -89,6 +94,7 @@ static const builtin_description bd[] =
     //     if (p1) v1; else if (p2) v2; else if ... else y
     //
     // The 'value' is marked unknown, as it can be of any type.
+    // XXX Should probably be "union", yeah?
     { id::cond,               "->(arg_list(boolean unknown) unknown unknown)" },
 
     // Someday, contin_if will be obsolted/equivalent to above cond ...
@@ -132,11 +138,10 @@ private:
     id::type_node output_type[id::builtin_count];
     type_tree builtin_type_tree[id::builtin_count];
     type_tree argument[id::builtin_count][maximal_builtin_arity];
-    
-    
+
     // Constructor  
-    builtins_properties() {
-        
+    builtins_properties()
+    {
         // setting arities and other properties of single actions
         unsigned int number_of_builtin_descriptions = sizeof(bd)/sizeof(builtin_description);
         OC_ASSERT(number_of_builtin_descriptions==(unsigned int)id::builtin_count,
@@ -145,8 +150,8 @@ private:
         
         type_tree t; 
         
-        for(unsigned int i=0;i<number_of_builtin_descriptions;i++) { 
-            for(unsigned int j=0;j<i;j++) { 
+        for (unsigned int i=0; i<number_of_builtin_descriptions; i++) { 
+            for (unsigned int j=0; j<i; j++) { 
                 OC_ASSERT(bd[i].b!=bd[j].b, 
                           "there must not be two entries for one builtin.");           
                 // there must not be two entries for one builtin 

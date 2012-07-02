@@ -584,6 +584,13 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             // then check that a1 inherits from T1, and that a2, a3
             // and a4 inherit from T2.  T3 is the output type.
 
+            // XXX TODO the code below was modified to allow arg lists of
+            // mixed type, e.g. so that the cond primitive could be
+            // supported (as the current definition of cond alternates
+            // between boolean-valued predicates, and the result type).
+            // However, I'm not sure this was a wise design choice, and
+            // it should probably be reviewed... How does haskel do this?
+
             OC_ASSERT(!it_child.is_childless(),
                               "it_child must have at least one child");
             //cia stands for current input argument
@@ -1374,7 +1381,7 @@ istream& operator>>(istream& in, opencog::combo::type_node& n)
     in >> str;
     OC_ASSERT(!str.empty(),
                       "str representation must not be empty.");
-    //type operators
+    // Type operators
     if (str == "->" || str == "lambda" || str == "lambda_type")
         n = id::lambda_type;
     else if (str == "application" || str == "application_type")
@@ -1391,6 +1398,8 @@ istream& operator>>(istream& in, opencog::combo::type_node& n)
         n = id::contin_type;
     else if (str == "enum" || str == "enum_t" || str == "enum_type")
         n = id::enum_type;
+    else if (str == "list" || str == "list_t" || str == "list_type")
+        n = id::list_type;
 
     // Types for motor control, sensory data.
     else if (str == "action_result" || str == "action_result_type")
