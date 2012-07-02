@@ -194,7 +194,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     // {
     //     stringstream ss;
     //     ss << "eval_throws_binding: tr = " << combo_tree(it);
-    //     logger().fine(ss.str()); 
+    //     logger().fine(ss.str());
     // }
 
     typedef combo_tree::sibling_iterator sib_it;
@@ -225,7 +225,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 if (eval_throws_binding(bmap, sib, pe) == id::logical_true)
                     return id::logical_true;
-            return id::logical_false;                
+            return id::logical_false;
 
         case id::logical_not :
             return negate_vertex(eval_throws_binding(bmap, it.begin(), pe));
@@ -319,55 +319,54 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::rand :
             return randGen().randfloat();
 
-	    //list primitive
-	case id::list:{
-	  string str =  "list(";
-	  stringstream ss;
+        //list primitive
+        case id::list : {
+            string str =  "list(";
+            stringstream ss;
 
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws_binding(bmap, sib, pe);
-		ss<<vres;
-		ss<<" ";
+                ss<<vres;
+                ss<<" ";
             }
-	  str.append(ss.str());
-	  str.replace(str.length()-1, 1, ")");
-	  vertex vx = str;
-	  return vx;
+          str.append(ss.str());
+          str.replace(str.length()-1, 1, ")");
+          vertex vx = str;
+          return vx;
 
-	}
+        }
 
-	  //car takes a list and returns head of the list
-	case id::car:{
-	  vertex vx = eval_throws_binding(bmap, it.begin().begin(), pe);
-	  return vx;
-	}
+          //car takes a list and returns head of the list
+        case id::car : {
+            vertex vx = eval_throws_binding(bmap, it.begin().begin(), pe);
+            return vx;
+        }
 
-	  //cdr takes a list and returns tail of the list
-	case id::cdr:{
-	  string str = "list(";
-	  stringstream ss;
+          //cdr takes a list and returns tail of the list
+        case id::cdr : {
+            string str = "list(";
+            stringstream ss;
 
-	  for(sib_it sib = ++it.begin().begin(); sib != it.end(); ++sib){
-	    vertex vres = eval_throws_binding(bmap, sib, pe);
-	    ss<<vres;
-	    ss<<" ";
-	  }
+            for(sib_it sib = ++it.begin().begin(); sib != it.end(); ++sib){
+                vertex vres = eval_throws_binding(bmap, sib, pe);
+                ss<<vres;
+                ss<<" ";
+            }
 
-	  str.append(ss.str());
-	  str.replace(str.length()-1, 1, ")");
-	  vertex vx = str;
-	  return vx;
-	}
+            str.append(ss.str());
+            str.replace(str.length()-1, 1, ")");
+            vertex vx = str;
+            return vx;
+        }
 
-	  //cons takes an element and a list 
-	  //     and adds the element as the first one to the list
-	case id::cons:{
-	  vertex vx = eval_throws_binding(bmap, it.begin(), pe);
-	  combo_tree ct(it);
-	  ct.prepend_child(++it.begin(), vx);
-	  return eval_throws_binding(bmap, ++it.begin().begin(),pe);
-
-	}
+          //cons takes an element and a list
+          //     and adds the element as the first one to the list
+        case id::cons : {
+            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
+            combo_tree ct(it);
+            ct.prepend_child(++it.begin(), vx);
+            return eval_throws_binding(bmap, ++it.begin().begin(),pe);
+        }
 
         // Control operators
 
