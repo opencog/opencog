@@ -58,13 +58,16 @@ void InitNode
     node_host->beta          = beta;
     node_host->winner        = 0;
 
+
     // allocate space on host
-    MALLOC(node_host->mu,        float, nb*ns );
-    MALLOC(node_host->sigma,     float, nb*ns );
-    MALLOC(node_host->starv,     float, nb    );
-    MALLOC(node_host->pBelief,   float, nb    );
-    MALLOC(node_host->beliefEuc, float, nb    );
-    MALLOC(node_host->beliefMal, float, nb    );
+    MALLOC( node_host->memory_area , float , (nb * ns * 2 + nb * 4) );
+    //use pointer arithmetic to divide the memory
+    node_host->mu =         node_host->memory_area;
+    node_host->sigma =      node_host->mu         + nb*ns;
+    node_host->starv =      node_host->sigma      + nb*ns;
+    node_host->pBelief =    node_host->starv      + nb;
+    node_host->beliefEuc =  node_host->pBelief    + nb;
+    node_host->beliefMal =  node_host->beliefEuc  + nb;
 
     if( inputOffsets == NULL )
     {
@@ -84,13 +87,14 @@ void InitNode
     cudaNode_host.alpha         = alpha;
     cudaNode_host.beta          = beta;
 
-    // allocate node statistics on device 
-    CUDAMALLOC( (void **) &cudaNode_host.mu,            sizeof(float) * nb*ns);
-    CUDAMALLOC( (void **) &cudaNode_host.sigma,         sizeof(float) * nb*ns);
-    CUDAMALLOC( (void **) &cudaNode_host.starv,         sizeof(float) * nb);
-    CUDAMALLOC( (void **) &cudaNode_host.beliefEuc,     sizeof(float) * nb);
-    CUDAMALLOC( (void **) &cudaNode_host.beliefMal,     sizeof(float) * nb);
-    CUDAMALLOC( (void **) &cudaNode_host.dist,          sizeof(float) * nb);
+    // allocate node statistics on device using pointer arithmetic to divide up the memory
+    CUDAMALLOC( (void **) &cudaNode_host.memory_area , sizeof(float) * ( nb * ns * 2 + nb * 4 )  )
+    cudaNode_host.mu =          cudaNode_host.memory_area;
+    cudaNode_host.sigma =       cudaNode_host.mu        + nb*ns;
+    cudaNode_host.starv =       cudaNode_host.sigma     + nb*ns;
+    cudaNode_host.beliefEuc =   cudaNode_host.starv     + nb;
+    cudaNode_host.beliefMal =   cudaNode_host.beliefEuc + nb;
+    cudaNode_host.dist =        cudaNode_host.beliefMal + nb;
 
     // point to the space allocated for the input (should be NULL for input nodes)
     cudaNode_host.input = input_dev;
@@ -145,12 +149,8 @@ void InitNode
 void DestroyNode( Node *n )
 {
     // free host data
-    FREE(n->mu);
-    FREE(n->sigma);
-    FREE(n->starv);
-    FREE(n->pBelief);
-    FREE(n->beliefEuc);
-    FREE(n->beliefMal);
+    // free memory for mu, sigma, starv, pBelief, beliefEuc, beliefMal
+    FREE(n->memory_area);
 
     // if it is a zero-layer node, free the input offset array on the host
     if( n->inputOffsets != NULL)
@@ -165,14 +165,9 @@ void DestroyNode( Node *n )
     // free device data
     CudaNode cudaNode_host;
     CUDAMEMCPY( &cudaNode_host, n->node_dev, sizeof(CudaNode), cudaMemcpyDeviceToHost );
+    // free memory for mu, sigma, starv, beliefEuc, beliefMal, dist
+    CUDAFREE( cudaNode_host.memory_area );
 
-    CUDAFREE( cudaNode_host.mu );
-    CUDAFREE( cudaNode_host.sigma );
-    CUDAFREE( cudaNode_host.starv );
-    CUDAFREE( cudaNode_host.beliefEuc );
-    CUDAFREE( cudaNode_host.beliefMal );
-    CUDAFREE( cudaNode_host.dist );
-    
     // if it is a zero-layer node, free the input offset array on the device
     if( cudaNode_host.inputOffsets != NULL )
     {

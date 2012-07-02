@@ -20,6 +20,9 @@ struct Node {
     uint     winner;
 
 
+    //holds the memory for mu, sigma, starv, beliefEuc, beliefMal, pBelief
+    float * memory_area;
+
     // node statistics
     float * mu;
     float * sigma;
@@ -62,6 +65,10 @@ struct CudaNode {
     float * starv;
     float * dist;
     
+
+    //holds the memory for mu, sigma, starv, beliefEuc, beliefMal, dist
+    float * memory_area;
+
     // node beliefs
     float * input;
     float * beliefEuc;
