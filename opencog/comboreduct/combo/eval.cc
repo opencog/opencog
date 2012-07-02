@@ -24,12 +24,17 @@
  */
 #include "eval.h"
 #include <iostream>
-#include <opencog/util/tree.h>
 
 namespace opencog { namespace combo {
 
 using namespace std;
 
+#if ALMOST_DEAD_EVAL_CODE
+// @todo all users of the code below should switch to using
+// eval_throws_binding() instead.
+//
+// Right now, as far as I can tell, only embodiment code uses this.
+//
 void set_bindings(combo_tree& tr, combo_tree::iterator it,
                   const std::vector<vertex>& args, arity_t explicit_arity)
 {
@@ -166,12 +171,15 @@ void print_binding_map(const binding_map& bmap) {
     }
     std::cout << "}" << std::endl;
 }
+#endif /* ALMOST_DEAD_EVAL_CODE */
 
-/// Like above but ignore the variable_unifier and uses vertex_map
-/// (faster and more direct than binding_map as it is an information
-/// already computed in the ITable or CTable). It also removes any
-/// type checking as it is the job of static type checker. The
-/// Evaluator is ignored till vu is completely removed
+/// eval_throws_binding -- evaluate a combo tree, using the argument
+/// values supplied in the vertex_seq list.
+///
+/// This proceedure does not do any type-checking; the static type-checker
+/// should be used for this purpose.
+/// The Evaluator is currently unused; we're waiting for variable unification
+/// to be made obsolete (!?)
 vertex eval_throws_binding(const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe)
     throw(EvalException, ComboException,
@@ -444,6 +452,13 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     }
 }
 
+vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
+    throw (EvalException, ComboException, AssertionException, std::bad_exception)
+{
+    return eval_throws_binding(bmap, tr.begin());
+}
+
+
 vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
     throw (ComboException, AssertionException, std::bad_exception)
 {
@@ -459,12 +474,5 @@ vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
 {
     return eval_binding(bmap, tr.begin());
 }
-
-vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
-    throw (EvalException, ComboException, AssertionException, std::bad_exception)
-{
-    return eval_throws_binding(bmap, tr.begin());
-}
-
 
 }} // ~namespaces combo opencog

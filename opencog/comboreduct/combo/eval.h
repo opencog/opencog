@@ -56,6 +56,18 @@ struct Evaluator {
                                           variable_unifier&) = 0;
 };
 
+#define ALMOST_DEAD_EVAL_CODE 1
+#if ALMOST_DEAD_EVAL_CODE
+/// @todo all users of the code below should switch to using
+/// eval_throws_binding() instead.
+///
+/// Right now, as far as I can tell, only embodiment code uses this.
+/// I'm hoping that some embodiment re-write will make this go away.
+/// Note, however, emobodiment seems to use the variable unifiers, so
+/// I'm, not sure about that.
+/// Anyway, the code below is no longer maintained, and is missing 
+/// support for newer & better stuff.
+//
 // there are 2 ways of binding input arguments to a combo_tree
 //
 // 1) associate the variable arguments $1, $2, etc with there values
@@ -103,15 +115,6 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
 void set_bindings(combo_tree& tr, const std::vector<vertex>&);
 void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent);
 
-#define ALMOST_DEAD_EVAL_CODE 1
-#if ALMOST_DEAD_EVAL_CODE
-/// @todo that one should be removed and replaced by eval_throws_binding
-/// Right now, as far as I can tell, only embodiment code does this.
-/// I'm hoping that some embodiment re-write will make this go away.
-/// Note, however, emobodiment seems to use the variable unifiers, so
-/// I'm, not sure about that.
-/// Anyway, the code below is no longer maintained, and is missing 
-/// support for newer & better stuff.
 template<typename It>
 vertex eval_throws(It it, Evaluator* pe = NULL,
                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
@@ -454,28 +457,30 @@ vertex eval_throws(const tree<T>& tr)
 {
     return eval_throws(tr.begin());
 }
-#endif
+#endif /* ALMOST_DEAD_EVAL_CODE */
 
-/// Like above but ignore the variable_unifier and uses
-/// binding_map. It also removes any type checking as it is the job of
-/// static type checker. The Evaluator is ignored till vu is
-/// completely removed
-// vertex eval_throws_binding(binding_map& bmap,
-//                            combo_tree::iterator it, Evaluator* pe = NULL)
+/// eval_throws_binding -- evaluate a combo tree, using the argument
+/// values supplied in the vertex_seq list.
+///
+/// This proceedure does not do any type-checking; the static type-checker
+/// should be used for this purpose.
+/// The Evaluator is currently unused; we're waiting for variable unification
+/// to be made obsolete (!?)
 vertex eval_throws_binding(const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe = NULL)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception);
 
-vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
-     throw(ComboException, AssertionException, std::bad_exception);
-
-vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
-    throw(StandardException, std::bad_exception);
-
 vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
      throw(EvalException, ComboException, AssertionException,
            std::bad_exception);
+
+// As above, but EvalException is never thrown.
+vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
+    throw(ComboException, AssertionException, std::bad_exception);
+
+vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
+    throw(StandardException, std::bad_exception);
 
 // return the arity of a tree
 template<typename T>
