@@ -2672,6 +2672,28 @@ the heck is -U2 faster!?
 1.28M: 13334   2285   356
 2.56M:
 
+
+"16-diverse":  bzr rev 7178 with diversity penalty manually enabled.
+    Otherwise, as above, using the 16-sector dataset so that above
+    provides a baseline.
+    moses-perf -Hit -utarg -i magic-16-sect.data -W1 -x1 -n sin -n log
+    -n exp -Z1 -v12 --hc-max-nn-evals=5000 -j12 
+    Curious: up to -m320K, there is no diff from "16-sect-nn-5K" except
+    that run-times are longer, due to the copying of the metapop.
+
+            16-diverse
+-m      time  score   cpxy   time  score  cpxy    time  score   cpxy
+10K:       9   3706    12   
+20K:      26   3403    26
+40K:      87   3171    38 
+80K:     238   2990    84
+160K:   1058   2824   149
+320K:   2920   2436   326
+640K:   
+1.28M: 
+2.56M:
+
+
 Is ther overfitting?  Lets find out:
 ../src/pm.py accuracy -f5 -dmagic04.data -ptarg -e80000 -n2 -s15 -M "-Z1 -v12 -j12 --hc-max-nn-evals=5000"
 Oddly enough, above creates only 87 features!? wtf?   Ohh, forgot the
@@ -2787,15 +2809,20 @@ almost 56% accuracy.  Yahoo!  The 5.12M run is hitting 78% accuracy.
 
 "yeast-j12-nn-5K": As above, on Cray, -j12, fixed first row labels.
 
-         yeast-nn-5K         yeast-j12-nn-5K      yeast-j12-nn-10K
+"yeast-diverse": as above, but with a diversity penalty enabled.
+         A promising jump, and then it stalls. Hmm. Need to think
+         about this one... is this due to the cond structure?  
+         Perhaps the penalty is too large?
+
+         yeast-nn-5K         yeast-j12-nn-5K       yeast-diverse
 -m      time  score  cpxy   time  score  cpxy    time  score   cpxy
-10K:      40   768     9       5   769     9
-20K:     160   768     9      16   768     9
-40K:     569   713    21      57   713    21
-80K:    1920   656    39     178   657    39
-160K:                        397   563    20
-320K:                       1147   425    42
-640K:                       3310   390    54
-1.28M:                      8831   379    56
-2.56M:                     23594   345    61
+10K:      40   768     9       5   769     9        6   769      9
+20K:     160   768     9      16   769     9       22   769      9
+40K:     569   713    21      57   713    21       53   656     20
+80K:    1920   656    39     178   657    39      175   653     22
+160K:                        397   563    20      493   617     33
+320K:                       1147   425    42     1354   613     38
+640K:                       3310   390    54     3309   606     43
+1.28M:                      8831   379    56     7731   604     42
+2.56M:                     23594   345    61    17755   603     42
 5.12M:                     53584   330    63
