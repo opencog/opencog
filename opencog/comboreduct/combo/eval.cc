@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "eval.h"
+#include "list_type.h"
 #include <iostream>
 
 namespace opencog { namespace combo {
@@ -319,53 +320,69 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::rand :
             return randGen().randfloat();
 
-        //list primitive
+        // list constructor
         case id::list : {
-            string str =  "list(";
-            stringstream ss;
 
-            for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws_binding(bmap, sib, pe);
-                ss<<vres;
-                ss<<" ";
-            }
-          str.append(ss.str());
-          str.replace(str.length()-1, 1, ")");
-          vertex vx = str;
-          return vx;
+            combo_tree tr(id::list);
+            sib_it loc = tr.begin();
 
+            for (sib_it sib = it.begin(); sib != it.end(); sib++)
+                tr.append_child(loc, eval_throws_binding(bmap, sib, pe));
+
+            // list_ptr will take over ownership, using auto_ptr.
+            return list_ptr(new list_t(tr));
         }
 
-          //car takes a list and returns head of the list
+        // car takes a list and returns head of the list
         case id::car : {
-            vertex vx = eval_throws_binding(bmap, it.begin().begin(), pe);
-            return vx;
+            sib_it lp = it.begin();
+            // If the list is empty; then return empty list!
+            // That is, use an empty list to represent nil.
+            if (lp.begin() == lp.end())
+                return *it;
+            return eval_throws_binding(bmap, lp.begin(), pe);
         }
 
-          //cdr takes a list and returns tail of the list
+        // cdr takes a list and returns loc of the list
         case id::cdr : {
-            string str = "list(";
-            stringstream ss;
-
-            for(sib_it sib = ++it.begin().begin(); sib != it.end(); ++sib){
+            combo_tree tr(id::list);
+            sib_it loc = tr.begin();
+            sib_it sib = it.begin().begin();
+            sib++;
+            for (; sib != it.end(); sib++) {
                 vertex vres = eval_throws_binding(bmap, sib, pe);
-                ss<<vres;
-                ss<<" ";
+                tr.append_child(loc, vres);
             }
 
-            str.append(ss.str());
-            str.replace(str.length()-1, 1, ")");
-            vertex vx = str;
-            return vx;
+            // list_ptr will take over ownership, using auto_ptr.
+            return list_ptr(new list_t(tr));
         }
 
-          //cons takes an element and a list
-          //     and adds the element as the first one to the list
+        // cons takes an element and a list,
+        // and adds the element to the head of the list
         case id::cons : {
-            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
-            combo_tree ct(it);
-            ct.prepend_child(++it.begin(), vx);
-            return eval_throws_binding(bmap, ++it.begin().begin(),pe);
+            combo_tree tr(id::list);
+            sib_it loc = tr.begin();
+
+            sib_it head = it.begin();
+            tr.append_child (loc, eval_throws_binding(bmap, head, pe));
+
+            head++;
+            vertex vrest = eval_throws_binding(bmap, head, pe);
+
+            // At this point, we expect "rest" to be a list.
+            // Do some ugly casting to unwrap the tree that it holds.
+            const list_ptr* p = get<list_ptr>(&vrest);
+            OC_ASSERT (p, "Second arg of cons must be a list!");
+            const combo_tree& rest = dynamic_cast<const list_t*>(p->get())->get_tree();
+
+            sib_it lst = rest.begin();
+            for (sib_it sib = lst.begin(); sib != lst.end(); sib++)
+                // tr.append_child(loc, eval_throws_binding(bmap, sib, pe));
+                tr.append_child(loc, sib);
+
+            // list_ptr will take over ownership, using auto_ptr.
+            return list_ptr(new list_t(tr));
         }
 
         // Control operators

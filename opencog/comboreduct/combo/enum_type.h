@@ -89,7 +89,7 @@ public:
         return "enum:";
     }
 
-    /// Return some randome enum out of the pool of all of them.
+    /// Return some random enum out of the pool of all of them.
     static enum_t get_random_enum();
     static size_t size() {
         return enum_map.size();

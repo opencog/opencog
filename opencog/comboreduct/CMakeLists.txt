@@ -18,11 +18,12 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/eval
 	combo/indefinite_object
 	combo/iostream_combo
-	combo/procedure_call
-	combo/procedure_repository
-	combo/message	
+	combo/list_type
+	combo/message
 	combo/perception
 	combo/perception_eval
+	combo/procedure_call
+	combo/procedure_repository
 	combo/simple_nn
 	combo/table
 	combo/tree_generation

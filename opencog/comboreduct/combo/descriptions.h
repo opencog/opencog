@@ -79,10 +79,10 @@ static const builtin_description bd[] =
     { id::impulse,              "->(boolean contin)" },
     { id::rand,                 "contin" },
 
-    { id::list,                 "->(arg_list(list) list)" },
-    { id::car,                  "->(arg_list(list) list)" },
-    { id::cdr,                  "->(arg_list(list) list)" },
-    { id::cons,                 "->(list list list)" },
+    { id::list,                 "->(arg_list(union) list)" },
+    { id::car,                  "->(list union)" },
+    { id::cdr,                  "->(list list)" },
+    { id::cons,                 "->(union list list)" },
 
     //{ id::ann,                  "->(arg_list(boolean))" },
     //{ id::ann_node,             "->(arg_list(boolean))" },

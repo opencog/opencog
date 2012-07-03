@@ -27,7 +27,6 @@
 
 #include <boost/functional/hash.hpp>
 #include <boost/variant.hpp>
-// #include <boost/range.hpp>
 
 #include <opencog/util/tree.h>
 #include <opencog/util/numeric.h>
@@ -43,6 +42,7 @@
 #include "definite_object.h"
 #include "enum_type.h"
 #include "indefinite_object.h"
+#include "list_base.h"
 #include "message.h"
 #include "perception.h"
 
@@ -86,9 +86,11 @@ enum builtin
     greater_than_zero,
     impulse,
     rand,         // random contin_t in [0,1) FIXME TODO : update reduct rules
-    list,         
-    car, cdr, cons, //functions on lists
-    // generic functions
+
+    list,           // List constructor
+    car, cdr, cons, // Functions on lists
+
+    // Generic functions
     // Currently take enum as arg or return enum, but should
     // be generalized soon.  XXX do this...
     cond,
@@ -118,11 +120,12 @@ typedef id::wild_card wild_card;
 
 typedef double contin_t;
 
-// contants are put first to be in sync with
-// lexicographic_subtree_order, it is not mandatory but it should make
-// the reduct engine a bit faster
+// constants are put first, so as to be in sync with
+// lexicographic_subtree_order.  This is not mandatory, but it does make
+// the reduct engine just a bit faster.
 typedef boost::variant < contin_t,
                          enum_t,
+                         list_ptr,
                          builtin,
                          wild_card,
                          argument,

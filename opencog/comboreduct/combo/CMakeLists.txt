@@ -15,6 +15,8 @@ INSTALL(FILES
 	eval.h
 	indefinite_object.h
 	iostream_combo.h
+	list_base.h
+	list_type.h
 	message.h
 	operator_base.h
 	perception.h
