@@ -371,10 +371,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             vertex vrest = eval_throws_binding(bmap, head, pe);
 
             // At this point, we expect "rest" to be a list.
-            // Do some ugly casting to unwrap the tree that it holds.
-            const list_ptr* p = get<list_ptr>(&vrest);
-            OC_ASSERT (p, "Second arg of cons must be a list!");
-            const combo_tree& rest = dynamic_cast<const list_t*>(p->get())->get_tree();
+            const combo_tree& rest = get_list_tree(vrest);
 
             sib_it lst = rest.begin();
             for (sib_it sib = lst.begin(); sib != lst.end(); sib++)

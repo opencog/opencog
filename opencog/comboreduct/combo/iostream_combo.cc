@@ -137,8 +137,8 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
         return ostream_builtin(out, *h, f);
     if (const enum_t* m = get<enum_t>(&v))
         return out << m->getContent();
-    if (const list_ptr* p = get<list_ptr>(&v))
-        return out << dynamic_cast<const list_t*>(p->get())->get_tree();
+    if (is_list_type(v))
+        return out << get_list_tree(v);
 
     // XXX ?? Ahem, won't calling out<<(*m) just lead to infinite
     // recursion ?? 

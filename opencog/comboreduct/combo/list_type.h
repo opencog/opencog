@@ -30,7 +30,7 @@
 
 namespace opencog { namespace combo {
 
-// list_t is really just a combo tree. :-)
+/// list_t is really just a combo tree. :-)
 class list_t
     : public list_base,
       boost::less_than_comparable<list_t>, // generate >, <= and >= given <
@@ -70,6 +70,22 @@ private:
     combo_tree _tr;
 
 };
+
+inline bool is_list_type(const vertex& v)
+{
+    return boost::get<list_ptr>(&v);
+}
+
+inline const list_t& get_list_type(const vertex& v)
+{
+    const list_ptr* p = boost::get<list_ptr>(&v);
+    return *(dynamic_cast<const list_t*>(p->get()));
+}
+
+inline const combo_tree& get_list_tree(const vertex& v)
+{
+    return get_list_type(v).get_tree();
+}
 
 std::ostream& operator<<(std::ostream&, const opencog::combo::list_t&);
 
