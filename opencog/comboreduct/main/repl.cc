@@ -7,17 +7,18 @@ using namespace ant_combo;
 using namespace std;
 using namespace opencog;
 
-int main(){
+int main()
+{
+    combo_tree tr;
+    vertex_seq empty;
 
-  combo_tree tr;
-  vertex_seq empty;
-
-  while(cin.good()){
-    cout<<"combo_repl> ";
-    cin >> tr;
-    if(!cin.good())
-      break;
-  cout<<eval_throws_binding(empty, tr)<<endl;
+    while (cin.good()) {
+        cout<<"combo_repl> ";
+        cin >> tr;
+        if (!cin.good())
+            break;
+        vertex v = eval_throws_binding(empty, tr);
+        cout << v << endl;
   }
 
   return 0;
