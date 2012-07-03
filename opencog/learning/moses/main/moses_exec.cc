@@ -21,6 +21,7 @@
  */
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/range/algorithm/transform.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
@@ -451,7 +452,8 @@ int moses_exec(int argc, char** argv)
 
     // pre params
     bool pre_worst_norm;
-
+    bool gen_best_tree;
+    
     // it params
     bool it_abs_err;
 
@@ -886,6 +888,11 @@ int moses_exec(int argc, char** argv)
         ("it-abs-err",
          value<bool>(&it_abs_err)->default_value(false),
          "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
+
+        ("gen-best-tree",
+         value<bool>(&gen_best_tree)->default_value(false),
+         "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.")
+
        ;
 
     variables_map vm;
@@ -975,9 +982,7 @@ int moses_exec(int argc, char** argv)
 
     // Set the initial exemplars.
     vector<combo_tree> exemplars;
-    foreach(const string& exemplar_str, exemplars_str) {
-        exemplars.push_back(str_to_combo_tree(exemplar_str));
-    }
+    boost::transform(exemplars_str, std::back_inserter(exemplars), str_to_combo_tree);
 
     // Fill jobs
     jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
@@ -1144,6 +1149,13 @@ int moses_exec(int argc, char** argv)
                                            pre_worst_norm);
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
+                    if (gen_best_tree) {
+                        // experimental: use some canonically generated
+                        // candidate as exemplar seed
+                        combo_tree tr = r->gen_canonical_best_candidate();
+                        logger().info() << "Canonical program tree (non reduced) maximizing precision = " << tr;
+                        exemplars.push_back(tr);
+                    }
                 }
                 multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,

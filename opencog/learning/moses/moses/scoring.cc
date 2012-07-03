@@ -841,7 +841,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
         active += v.second.second;
 
         // build the disjunctive clause
-        auto dch = tr.append_children(head, id::logical_and);
+        auto dch = tr.append_child(head, id::logical_and);
         arity_t idx = 1;
         foreach(const auto& input, v.second.first->first) {
             argument arg(input == id::logical_true? idx++ : -idx++);
