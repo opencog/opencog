@@ -202,6 +202,8 @@ class Chainer:
         # and not the original app.
         
         def proved_app(app, planning_mode):
+            # swith the function off, as uncertainty inference required prove on goal in mutiple ways
+            return False
             if planning_mode or self.head_dag(app).tv.count == 0:
                 return False
             else:
@@ -210,7 +212,8 @@ class Chainer:
             """
             It work because of the excution order in function @bc_step
             """
-            #return False
+            # swith the function off
+            return False
             goal_dag = self.expr2pdn(goal)
             if goal_dag.tv.count > 0:
                 return True
