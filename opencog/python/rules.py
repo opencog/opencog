@@ -299,7 +299,7 @@ def create_temporal_matching_function(formula):
         distribution_event1 = lookup_times(target.args[0], space)
         distribution_event2 = lookup_times(target.args[1], space)
         
-        strength = formula(distribution_event2, distribution_event2)
+        strength = formula(distribution_event1, distribution_event2)
         
         # I'm not sure what to choose for this
         count = 1
@@ -442,11 +442,10 @@ def create_temporal_matching_function(formula):
 # See how they are used in rules() above.
 
 def match_axiom_slow(space,target,candidates = None):
-    #if isinstance(target.op, Atom):
-    #    candidates = [target.op]
-    #else:
-
-    candidates = space.get_atoms_by_type(target.get_type())
+    if isinstance(target.op, Atom):
+        candidates = [target.op]
+    else:
+        candidates = space.get_atoms_by_type(target.get_type())
     
     candidates = [c for c in candidates if c.tv.count > 0]
     
@@ -462,9 +461,6 @@ def match_axiom(space,target):
         # The nodes in the target, as Atoms
         nodes = [tr.op for tr in target.flatten() if isinstance(tr.op, Atom) and tr.op.is_node()]
 
-        if not len(nodes):
-            return match_axiom_slow(target)
-
         links_of_type = space.get_atoms_by_type(target.get_type())
         
         smallest_set = links_of_type
@@ -473,7 +469,7 @@ def match_axiom(space,target):
             if len(candidates) < len(smallest_set):
                 smallest_set = candidates
         
-        print target, len(smallest_set)
+        #print target, len(smallest_set)
 
     # Then the chainer will try to unify against every candidate
     candidate_trees = (tree_from_atom(atom) for atom in candidates)
