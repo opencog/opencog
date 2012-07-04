@@ -407,6 +407,11 @@ class Chainer:
     def compute_and_add_tv(self, app):
         # NOTE: assumes this is the real copy of the rule, not just a new one.
         #app.tv = True
+        
+        # In a plan, never create an Atom with a variable in it.
+        if self.planning_mode and any(expr.is_variable() for expr in app.head.flatten()):
+            return
+        
         input_tvs = [self.get_tvs(g) for g in app.goals]
         if all(input_tvs):
             input_tvs = [tvs[0] for tvs in input_tvs]
@@ -1129,7 +1134,6 @@ def do_planning(space, target, chainer = None):
     
     
     for res in chainer.results:
-        import pdb; pdb.set_trace()
         trail = chainer.trail(res)
         actions = chainer.extract_plan(trail)
         print actions
