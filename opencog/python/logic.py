@@ -58,9 +58,6 @@ class Trace_Chainer(object):
         self.propagating = False
 class Chainer:
 
-    # Convert Atoms into FakeAtoms for Pypy/Pickle/Multiprocessing compatibility
-    _convert_atoms = False
-
     # Useful for testing, where you make multiple Chainer objects for separate AtomSpaces
     successful_num_app_pdns_per_level = Counter()
     successful_num_uses_per_rule_per_level = defaultdict(Counter)
@@ -225,7 +222,8 @@ class Chainer:
         #next_target = self.get_fittest(self.bc_later) # Best-first search
         #next_target = self.select_stochastic() # A better version of best-first search (still a prototype)
 
-        next_app = self.get_fittest(self.bc_later) # Best-first search
+        next_app = self.bc_later.pop_first() # Breadth-first search
+        #next_app = self.get_fittest(self.bc_later) # Best-first search
         #log.info(format_log('-BCQ', next_app))
 
         head = self.expr2pdn(next_app.head.canonical())
@@ -238,6 +236,7 @@ class Chainer:
         # and some of brother may proved the head already, it works only in depth first search!
         if proved_app(next_app, self.planning_mode):
             return
+
         # This step will also call propogate_results and propogate_specialization,
         # so it will check for premises, compute the TV if possible, etc.
         self.find_axioms_for_rule_app(next_app)
@@ -471,10 +470,7 @@ class Chainer:
                         
                         # Record the best confidence score below a PDN. This can change
                         # at any time.
-                        conf = axiom_app.tv.confidence
-                        if conf > 0.0:
-                            axiom_expr_pdn = self.expr2pdn(axiom_app.head)
-                            self.propogate_scores_upward(axiom_expr_pdn, conf)
+                        #self.propogate_scores_upward(axiom_app_pdn)
                     else:
                         # add specialized trees above this result (if necessary)
                         self.propogate_specialization(axiom_app.head, i, app)
@@ -728,26 +724,28 @@ class Chainer:
             target = proofnode.op
             if isinstance(target, rules.Rule):
                 return []
-            elif target.op == 'EvaluationLink':
-                tr = target.args[0]
-                if tr.op.name == 'agent_location':
-                    def get_position(position_name):
-                        return tuple(float(s[Var(i)].op.name) for i in [1,2,3])
-                    
-                    pos_str = target.args[1].args[0].op.name
-                    (x,y, _) = get_position(pos_str)
-                    return [T('ExecutionLink', self.space.add('goto_obj'),
-                                T('ListLink',
-                                    "%{x} %{y}" % locals()
-                                    )
-                             )
-                           ]
-                else:
-                    return []
+            #elif target.op == 'EvaluationLink':
+            #    tr = target.args[0]
+            #    if tr.op.name == 'agent_location':
+            #        def get_position(position_name):
+            #            return tuple(float(s[Var(i)].op.name) for i in [1,2,3])
+            #        
+            #        pos_str = target.args[1].args[0].op.name
+            #        (x,y, _) = get_position(pos_str)
+            #        return [T('ExecutionLink', self.space.add('goto_obj'),
+            #                    T('ListLink',
+            #                        "%{x} %{y}" % locals()
+            #                        )
+            #                 )
+            #               ]
+            #    else:
+            #        return []
             #elif target.op in ['ExecutionLink',  'SequentialAndLink']:
             #    return [target]
             elif rules.actionDone_template(self.space).unifies(target):
-                return target
+                action = target.args[1].args[0]
+                print 'action found in trail:',action
+                return [action]
             else:
                 return []
         # Extract all the targets in best-first order
@@ -767,6 +765,7 @@ class Chainer:
             return ret
 
         def filter_expr(expr_pdn):
+            print 'trail', expr_pdn
             #print expr_pdn.op, [repr(rpdn.op) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             #successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
             successful_rules = [recurse(rpdn) for rpdn in expr_pdn.args if rule_found_result(rpdn)]
@@ -947,51 +946,6 @@ class Chainer:
             
             return None
 
-#def do_planning(space, target):
-#    a = space
-#
-#    rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
-#    atom_from_tree(rl, a)
-#    
-#    # hack
-#    print 'target'
-#    target_a = atom_from_tree(target, a)
-#    print target_a
-#    print target_a.tv
-#    target_a.tv = TruthValue(0,  0)
-#    print target_a
-#    
-#    chainer = Chainer(a, planning_mode = True)        
-#
-#    result_atoms = chainer.bc(target, 2000)
-#    
-#    print "planning result: ",  result_atoms
-#    
-#    if result_atoms:
-#        res_Handle = result_atoms[0]
-#        res = tree_from_atom(Atom(res_Handle, a))
-#        
-#        trail = chainer.trail(res)
-#        actions = chainer.extract_plan(trail)
-#        
-#        # set plan_success
-#        ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
-#        # set plan_action_list
-#        pal = T('ReferenceLink',
-#                    a.add_node(t.ConceptNode, 'plan_action_list'),
-#                    T('ListLink', actions))
-#        
-#        ps_a  = atom_from_tree(ps, a)
-#        pal_a = atom_from_tree(pal, a)
-#        
-#        print ps
-#        print pal
-#        ps_a.tv = TruthValue(1.0, confidence_to_count(1.0))
-#        
-#        print ps_a.tv
-#    
-#    return result_atoms
-
 from urllib2 import URLError
 def check_connected(method):
     '''A nice decorator for use in visualization classes that stream graphs to Gephi. It catches exceptions raised
@@ -1148,55 +1102,55 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
                     )
     
         #try:
-        self.do_planning(atomspace, target)
+        do_planning(atomspace, target, self.chainer)
         #except Exception, e:
         #    log.info(format_log(e))
 
-    def do_planning(self, space, target):
-        a = space
+def do_planning(space, target, chainer = None):
+    a = space
+
+    rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
+    atom_from_tree(rl, a)
     
-        rl = T('ReferenceLink', a.add_node(t.ConceptNode, 'plan_selected_demand_goal'), target)
-        atom_from_tree(rl, a)
-        
-        # hack
-        print 'target'
-        target_a = atom_from_tree(target, a)
-        print target_a
-        print target_a.tv
-        target_a.tv = TruthValue(0,  0)
-        print target_a
-        
-        if self.chainer is None:
-            chainer = Chainer(a, planning_mode = True)
+    # hack
+    print 'target'
+    target_a = atom_from_tree(target, a)
+    print target_a
+    print target_a.tv
+    target_a.tv = TruthValue(0,  0)
+    print target_a
     
-        result_atoms = chainer.bc(target, 2000)
+    if chainer is None:
+        chainer = Chainer(a, planning_mode = True)
+
+    result_atoms = chainer.bc(target, 2000)
+    
+    print "inference result: ",  result_atoms
+    
+    
+    for res in chainer.results:
+        import pdb; pdb.set_trace()
+        trail = chainer.trail(res)
+        actions = chainer.extract_plan(trail)
+        print actions
+
+        # set plan_success
+        ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
+        # set plan_action_list (but you should also delete the previous one! or is that done in C++?)
+        pal = T('ReferenceLink',
+                    a.add_node(t.ConceptNode, 'plan_action_list'),
+                    T('ListLink', actions))
         
-        print "planning result: ",  result_atoms
+        ps_a  = atom_from_tree(ps, a)
+        pal_a = atom_from_tree(pal, a)
         
-        if result_atoms:
-            res_Handle = result_atoms[0]
-            res = tree_from_atom(Atom(res_Handle, a))
-            
-            trail = chainer.trail(res)
-            actions = chainer.extract_plan(trail)
-            
-            # set plan_success
-            ps = T('EvaluationLink', a.add_node(t.PredicateNode, 'plan_success'), T('ListLink'))
-            # set plan_action_list
-            pal = T('ReferenceLink',
-                        a.add_node(t.ConceptNode, 'plan_action_list'),
-                        T('ListLink', actions))
-            
-            ps_a  = atom_from_tree(ps, a)
-            pal_a = atom_from_tree(pal, a)
-            
-            print ps
-            print pal
-            ps_a.tv = TruthValue(1.0, confidence_to_count(1.0))
-            
-            print ps_a.tv
+        print ps
+        print pal
+        ps_a.tv = TruthValue(1.0, confidence_to_count(1.0))
         
-        return result_atoms
+        print ps_a.tv
+    
+    return result_atoms
 
 if __name__ == '__main__':
     a = AtomSpace()
