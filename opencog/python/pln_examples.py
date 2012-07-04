@@ -1,6 +1,7 @@
 '''Runs PLN examples, similar to PLNUTest. Currently only works from the cogserver due
 to linking issues.'''
 import ConfigParser
+from time import time
 
 import util
 from opencog.atomspace import AtomSpace, Atom, Handle
@@ -14,7 +15,7 @@ future_fc/6_test.conf
 future_fc/InheritanceMuhammadTerrorist_test.conf
 #psi/water_test.conf
 psi/psi_planning_one_step_test.conf
-psi/psi_planning_two_step_test.conf
+#psi/psi_planning_two_step_test.conf
 # The obsolete agisim tests are known not to work.
 #agisim_planning/19_test.conf
 #agisim_planning/23_test.conf
@@ -60,6 +61,8 @@ bc/new/before_test.conf
 files = files_list.split('\n')
 
 def test_all(a):
+    start = time()
+    
     for f in files:
         if f != '' and not f.startswith('#'):
             run_pln_example(a, f)
@@ -69,6 +72,8 @@ def test_all(a):
         print 'Failed tests:'
         for f in failed:
             print f
+    
+    print "Total time:",time() - start
 
 passed = []
 failed = []
@@ -123,14 +128,14 @@ def run_pln_example(a, f):
     
     import logic
     import tree
+
+    c = logic.Chainer(a)
+    target_tr = tree.tree_from_atom(target)
+
     # hack - won't work if the Scheme target is some variable that doesn't contain "Demand"
     if "Demand" in scm_target:
-        # superhack - doesn't care which target you say
-        target_tr = tree.tree_from_atom(target)
-        res = logic.do_planning(a, target_tr)
+        res = logic.do_planning(a, target_tr,c)
     else:
-        c = logic.Chainer(a)
-        target_tr = tree.tree_from_atom(target)
         res = c.bc(target_tr, nsteps)
     
     if len(res):
