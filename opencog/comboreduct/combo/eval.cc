@@ -321,27 +321,10 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             return randGen().randfloat();
 
         // list constructor
-        case id::list : {
-
-            combo_tree tr(id::list);
-            sib_it loc = tr.begin();
-
-            for (sib_it sib = it.begin(); sib != it.end(); sib++)
-                tr.append_child(loc, eval_throws_binding(bmap, sib, pe));
-
-            // list_ptr will take over ownership, using auto_ptr.
-            return list_ptr(new list_t(tr));
-        }
-
-        // car takes a list and returns head of the list
-        case id::car : {
-            sib_it lp = it.begin();
-            // If the list is empty; then return empty list!
-            // That is, use an empty list to represent nil.
-            if (lp.begin() == lp.end())
-                return *it;
-            return eval_throws_binding(bmap, lp.begin(), pe);
-        }
+        case id::list :
+        case id::car : 
+            throw ComboException(TRACE_INFO,
+                "eval_throws_binding() cannot handle lists; use eval_throws_tree() instead.");
 
         // cdr takes a list and returns loc of the list
         case id::cdr : {
@@ -471,7 +454,6 @@ vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
     return eval_throws_binding(bmap, tr.begin());
 }
 
-
 vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
     throw (ComboException, AssertionException, std::bad_exception)
 {
@@ -487,5 +469,58 @@ vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
 {
     return eval_binding(bmap, tr.begin());
 }
+
+combo_tree eval_throws_tree(const vertex_seq& bmap, 
+                           combo_tree::iterator it, Evaluator* pe)
+    throw(EvalException, ComboException,
+          AssertionException, std::bad_exception)
+{
+    typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::iterator pre_it;
+    const vertex& v = *it;
+
+    if (const builtin* b = boost::get<builtin>(&v)) {
+        switch (*b) {
+
+        // list constructor
+        case id::list : {
+
+std::cout<<"ola "<<combo_tree(it) <<std::endl;;
+            combo_tree tr(id::list);
+            pre_it loc = tr.begin();
+
+            for (sib_it sib = it.begin(); sib != it.end(); sib++) {
+                // tr.append_child(loc, eval_throws_tree(bmap, sib, pe).begin());
+                combo_tree rr = eval_throws_tree(bmap, sib, pe);
+                tr.append_child(loc, rr.begin());
+             }
+
+            return tr;
+        }
+
+        // car takes a list and returns head of the list
+        case id::car : {
+            sib_it lp = it.begin();
+            // If the list is empty; then return empty list!
+            // That is, use an empty list to represent nil.
+            if (lp.begin() == lp.end())
+                return combo_tree(id::list);
+            return eval_throws_tree(bmap, lp.begin(), pe);
+        }
+        default:
+            break;
+        }
+    }
+
+    // If we got the here, the vertex returns a simple, non-list type.
+    return combo_tree(eval_throws_binding(bmap, it, pe));
+}
+
+combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)
+    throw (EvalException, ComboException, AssertionException, std::bad_exception)
+{
+    return eval_throws_tree(bmap, tr.begin());
+}
+
 
 }} // ~namespaces combo opencog

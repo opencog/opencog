@@ -13,12 +13,19 @@ int main()
     vertex_seq empty;
 
     while (cin.good()) {
-        cout<<"combo_repl> ";
+        cout << "combo_repl> ";
         cin >> tr;
         if (!cin.good())
             break;
-        vertex v = eval_throws_binding(empty, tr);
-        cout << v << endl;
+
+        combo_tree trv;
+        try {
+            trv = eval_throws_tree(empty, tr);
+        }
+        catch (StandardException e) {
+            cout << "Exception: " << e.what() << endl;
+        }
+        cout << trv << endl;
   }
 
   return 0;

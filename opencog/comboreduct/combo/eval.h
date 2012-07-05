@@ -475,6 +475,18 @@ vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
      throw(EvalException, ComboException, AssertionException,
            std::bad_exception);
 
+// As above, but returns combo tree instead ov vertex.  The above,
+// non-tree variants cannot be used when using lists, since the only
+// way to represent a list is as a tree.
+combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)
+     throw(EvalException, ComboException, AssertionException,
+           std::bad_exception);
+
+combo_tree eval_throws_tree(const vertex_seq& bmap,
+                           combo_tree::iterator it, Evaluator* pe = NULL)
+     throw(EvalException, ComboException, AssertionException,
+           std::bad_exception);
+
 // As above, but EvalException is never thrown.
 vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
     throw(ComboException, AssertionException, std::bad_exception);
