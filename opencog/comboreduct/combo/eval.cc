@@ -322,24 +322,10 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
         // list constructor
         case id::list :
-        case id::car : 
+        case id::car :
+        case id::cdr :
             throw ComboException(TRACE_INFO,
-                "eval_throws_binding() cannot handle lists; use eval_throws_tree() instead.");
-
-        // cdr takes a list and returns loc of the list
-        case id::cdr : {
-            combo_tree tr(id::list);
-            sib_it loc = tr.begin();
-            sib_it sib = it.begin().begin();
-            sib++;
-            for (; sib != it.end(); sib++) {
-                vertex vres = eval_throws_binding(bmap, sib, pe);
-                tr.append_child(loc, vres);
-            }
-
-            // list_ptr will take over ownership, using auto_ptr.
-            return list_ptr(new list_t(tr));
-        }
+                "Cannot handle lists; use eval_throws_tree() instead.");
 
         // cons takes an element and a list,
         // and adds the element to the head of the list
@@ -485,7 +471,6 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
         // list constructor
         case id::list : {
 
-std::cout<<"ola "<<combo_tree(it) <<std::endl;;
             combo_tree tr(id::list);
             pre_it loc = tr.begin();
 
@@ -507,6 +492,34 @@ std::cout<<"ola "<<combo_tree(it) <<std::endl;;
                 return combo_tree(id::list);
             return eval_throws_tree(bmap, lp.begin(), pe);
         }
+
+        // cdr takes a list and returns loc of the list
+        case id::cdr : {
+            sib_it top = it.begin();
+
+            combo_tree evo;
+            if (*top != id::list) {
+                evo = eval_throws_tree(bmap, top, pe);
+                top = evo.begin();
+            }
+            if (*top != id::list) 
+                throw ComboException(TRACE_INFO, "not a list!");
+
+            sib_it sib = top.begin();
+
+            // Skip over the first elt
+            sib ++;
+
+            combo_tree tr(id::list);
+            pre_it loc = tr.begin();
+            for (; sib != top.end(); sib++) {
+                combo_tree rest = eval_throws_tree(bmap, sib, pe);
+                tr.append_child(loc, rest.begin());
+            }
+
+            return tr;
+        }
+
         default:
             break;
         }
