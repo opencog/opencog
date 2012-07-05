@@ -649,20 +649,20 @@ Table loadTable(const string& file_name, int pos,
 }
 
 istream& istreamITable(istream& in, ITable& it,
-                       bool has_header, const type_tree& tt)
+                       bool has_header, const type_tree& tt,
+                       const vector<int>& ignore_col_nums)
 {
     string line;
     arity_t arity = type_tree_arity(tt);
 
     if (has_header) {
         get_data_line(in, line);
-        vector<string> h = tokenizeRow<string>(line);
+        vector<string> h = tokenizeRow<string>(line, ignore_col_nums);
         it.set_labels(h);
         OC_ASSERT(arity == (arity_t)h.size(),
-                  "ERROR: Input file header/data declaration mismatch: "
-                  "The header has %u columns while the first row has "
-                  "%d columns.\n",
-                  h.size(), arity);
+                  "Error: there must be a bug somewhere because the inferred "
+                  " arity (%d) doesn't match the number of columns (%u)",
+                  arity, h.size());
     }
 
     // Copy the input types to a vector; we need this to pass as an
@@ -671,19 +671,20 @@ istream& istreamITable(istream& in, ITable& it,
     transform(get_signature_inputs(tt),
               back_inserter(vin_types), get_type_node);
 
+    // Read all lines at once as it appears to be faster
     std::vector<string> lines; 
     while (get_data_line(in, line))
         lines.push_back(line);
     int ls = lines.size();
     it.resize(ls);
 
-    // vector of indices [0, lines.size())
+    // vector of indices [0, ls)
     auto ir = boost::irange(0, ls);
     vector<size_t> indices(ir.begin(), ir.end());
     
     auto parse_line = [&](int i) {
         // tokenize the line and fill the input vector and output
-        vector<string> vs = tokenizeRow<string>(lines[i]);
+        vector<string> vs = tokenizeRow<string>(lines[i], ignore_col_nums);
 
         // check arity
         OC_ASSERT(arity == (arity_t)vs.size(),
@@ -699,21 +700,22 @@ istream& istreamITable(istream& in, ITable& it,
     return in;
 }
 
-void loadITable(const string& file_name, ITable& it, const type_tree& tt)
+void loadITable(const string& file_name, ITable& it, const type_tree& tt,
+                const vector<int>& ignore_col_nums)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamITable(in, it, hasHeader(file_name), tt);
+    istreamITable(in, it, hasHeader(file_name), tt, ignore_col_nums);
 }
     
-ITable loadITable(const string& file_name)
+ITable loadITable(const string& file_name, const vector<int>& ignore_col_nums)
 {
     ITable res;
-    type_tree tt = infer_data_type_tree(file_name, -1);
+    type_tree tt = infer_data_type_tree(file_name, -1, ignore_col_nums);
     // append an unknown type child at the end for the output
     tt.append_child(tt.begin(), id::unknown_type);
-    loadITable(file_name, res, tt);
+    loadITable(file_name, res, tt, ignore_col_nums);
     return res;
 }
         

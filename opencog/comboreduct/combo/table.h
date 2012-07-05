@@ -36,6 +36,7 @@
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/Counter.h>
+#include <opencog/util/Logger.h>
 
 #include "eval.h"
 #include "vertex.h"
@@ -565,12 +566,18 @@ table_tokenizer get_row_tokenizer(std::string& line);
  * non-ASCII characters, as well as stripping of any carriage-returns.
  */
 template<typename T>
-std::vector<T> tokenizeRow(std::string& line)
+std::vector<T> tokenizeRow(std::string& line,
+                           const std::vector<int>& ignore_col_nums = empty_int_vec)
 {
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
-    foreach (const std::string& t, tok)
-        res.push_back(boost::lexical_cast<T>(t));
+    int i = 0;
+    foreach (const std::string& t, tok) {
+        // Record a column, only if it's not to be ignored.
+        if (boost::find(ignore_col_nums, i) == ignore_col_nums.end())
+            res.push_back(boost::lexical_cast<T>(t));
+        i++;
+    }
     return res;
 }
 
@@ -619,22 +626,26 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
 
 /**
  * Fill an input table give an istream of DSV file format, where
- * delimiters are ',',' ' or '\t'.
+ * delimiters are ',',' ' or '\t'. All columns, except the
+ * ignore_col_nums ones are considered for the ITable.
  */
 std::istream& istreamITable(std::istream& in, ITable& it,
-                            bool has_header, const type_tree& tt);
+                            bool has_header, const type_tree& tt,
+                            const std::vector<int>& ignore_col_nums = empty_int_vec);
 
 /**
  * Like above but takes a file_name instead of a istream and
  * automatically infer whether it has header.
  */
-void loadITable(const std::string& file_name, ITable& it, const type_tree& tt);
+void loadITable(const std::string& file_name, ITable& it, const type_tree& tt,
+                const std::vector<int>& ignore_col_nums = empty_int_vec);
 
 /**
  * Like above but return an ITable and automatically infer the tree
  * tree.
  */
-ITable loadITable(const std::string& file_name);
+ITable loadITable(const std::string& file_name,
+                  const std::vector<int>& ignore_col_nums = empty_int_vec);
 
 /**
  * Fill an input table and output table given a DSV
