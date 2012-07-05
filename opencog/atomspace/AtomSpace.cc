@@ -71,7 +71,8 @@ AtomSpace::AtomSpace(void)
     ownsAtomSpaceAsync = true;
     c_remove = atomSpaceAsync->removeAtomSignal(
             boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
-
+    c_add = atomSpaceAsync->addAtomSignal(
+            boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
 }
 
 AtomSpace::AtomSpace(const AtomSpace& other)
@@ -84,6 +85,8 @@ AtomSpace::AtomSpace(const AtomSpace& other)
     ownsAtomSpaceAsync = false;
     c_remove = atomSpaceAsync->removeAtomSignal(
             boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
+    c_add = atomSpaceAsync->addAtomSignal(
+            boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
 }
 
 
@@ -116,6 +119,12 @@ AtomSpace::~AtomSpace()
     // Will be unnecessary once GC is implemented
     if (ownsAtomSpaceAsync)
         delete atomSpaceAsync;
+}
+
+bool AtomSpace::handleAddSignal(AtomSpaceImpl *as, Handle h)
+{
+    addAtomSignalQueue.push_back(h);
+    return false;
 }
 
 bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)

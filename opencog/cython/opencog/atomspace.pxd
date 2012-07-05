@@ -1,4 +1,5 @@
 from libcpp.vector cimport vector
+from libcpp.list cimport list as cpplist
 
 # Basic OpenCog types
 ctypedef long UUID
@@ -153,6 +154,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         cTimeServer getTimeServer()
         void print_list "print" ()
+
+        cpplist[cHandle] addAtomSignalQueue
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 

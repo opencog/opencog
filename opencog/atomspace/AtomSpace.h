@@ -1221,6 +1221,10 @@ public:
         AttentionValue::lti_t threshold;
     };
 
+    // Provide access to the atom-added signal in Python, but using a queue instead
+    // of callbacks. It's accessible via the Cython wrapper.
+    std::list<Handle> addAtomSignalQueue;
+
 private:
     /**
      * Remove stimulus from atom, only should be used when Atom is deleted.
@@ -1249,6 +1253,8 @@ private:
         if (toRemove) delete toRemove;
         return result;
     }
+
+    bool handleAddSignal(AtomSpaceImpl *as, Handle h);
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     /** For monitoring removals to the AtomSpace so that cache entries can be
