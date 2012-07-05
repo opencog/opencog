@@ -40,7 +40,7 @@ static const string number_of_evals_str = "n_evals";
 // abbreviation is empty there is none. For their meanings see
 // options_description in moses-exec.cc.
 //
-// Available abbreviations are: O and Y
+// Available abbreviations are: O
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
