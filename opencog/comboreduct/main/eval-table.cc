@@ -22,6 +22,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/mt19937ar.h>
@@ -31,6 +32,7 @@
 
 using namespace boost::program_options;
 using boost::lexical_cast;
+using boost::trim;
 using namespace opencog;
 
 /**
@@ -85,6 +87,11 @@ int main(int argc,char** argv) {
          value<string>(&pa.target_feature_str),
          "Target feature name.\n")
         
+        (opt_desc_str(ignore_feature_str_opt).c_str(),
+         value<vector<string>>(&pa.ignore_features_str),
+         "Ignore feature from the datasets. Can be used several times "
+         "to ignore several features.\n")
+
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
          "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
@@ -102,6 +109,15 @@ int main(int argc,char** argv) {
                 
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
          "Display the inputs as well as the output, the feature order is preserved.\n")
+
+        (opt_desc_str(log_level_opt).c_str(),
+         value<string>(&pa.log_level)->default_value("INFO"),
+         "Log level, possible levels are NONE, ERROR, WARN, INFO, "
+         "DEBUG, FINE. Case does not matter.\n")
+
+        (opt_desc_str(log_file_opt).c_str(),
+         value<string>(&pa.log_file)->default_value(default_log_file),
+         "File name where to write the log.\n")
         ;
 
     variables_map vm;
@@ -112,6 +128,19 @@ int main(int argc,char** argv) {
         cout << desc << "\n";
         return 1;
     }
+
+    // Remove old log_file before setting the new one.
+    remove(pa.log_file.c_str());
+    logger().setFilename(pa.log_file);
+    trim(pa.log_level);
+    Logger::Level level = logger().getLevelFromString(pa.log_level);
+    if (level != Logger::BAD_LEVEL)
+        logger().setLevel(level);
+    else {
+        cerr << "Error: Log level " << pa.log_level << " is incorrect (see --help)." << endl;
+        exit(1);
+    }
+    logger().setBackTraceLevel(Logger::ERROR);
 
     // set variables
     pa.has_labels = vm.count("labels");

@@ -27,21 +27,29 @@
 #include <opencog/comboreduct/combo/table.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/numeric.h>
+#include <opencog/util/Logger.h>
 
 #include <boost/assign/std/vector.hpp>
 
 using namespace std;
 using namespace boost::assign;
-using namespace opencog::combo;
+using namespace opencog;
+using namespace combo;
 
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_opt("input-table", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
+static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "l");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> display_inputs_opt("display-inputs", "I");
+static const pair<string, string> log_level_opt("log-level", "l");
+static const pair<string, string> log_file_opt("log-file", "f");
+static const string default_log_file_prefix = "eval-table";
+static const string default_log_file_suffix = "log";
+static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
@@ -65,6 +73,8 @@ struct evalTableParameters {
     string features_file;
     bool display_inputs;
     string output_file;
+    string log_level;
+    string log_file;
 };
 
 template<typename Out>
@@ -101,20 +111,31 @@ void eval_output_results(const evalTableParameters& pa, ITable& it,
 }
 
 void read_eval_output_results(evalTableParameters& pa) {
+    // Get the list of indexes of features to ignore
+    pa.ignore_features = find_features_positions(pa.input_table_file,
+                                                 pa.ignore_features_str);
+    ostreamContainer(logger().info() << "Ignore the following columns: ",
+                     pa.ignore_features);
+    OC_ASSERT(boost::find(pa.ignore_features_str, pa.target_feature_str)
+              == pa.ignore_features_str.end(),
+              "You cannot ignore the target feature %s",
+              pa.target_feature_str.c_str());
+
     // read data ITable
     Table table;
     if(pa.target_feature_str.empty())
-        table.itable = loadITable(pa.input_table_file);
+        table.itable = loadITable(pa.input_table_file, pa.ignore_features);
     else {
         // check that the target feature is in the data file, and load
         // the whole table if it is, instead of the itable
         auto header = loadHeader(pa.input_table_file);
         if(boost::find(header, pa.target_feature_str) == header.end())
-            table.itable = loadITable(pa.input_table_file);
+            table.itable = loadITable(pa.input_table_file, pa.ignore_features);
         else {
             pa.target_feature = find_feature_position(pa.input_table_file,
                                                       pa.target_feature_str);
-            table = loadTable(pa.input_table_file, pa.target_feature);
+            table = loadTable(pa.input_table_file, pa.target_feature,
+                              pa.ignore_features);
         }
     }
 
