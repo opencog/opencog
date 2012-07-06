@@ -166,12 +166,16 @@ class DAG(Tree):
         
         self.depth = depth
         self.best_conf_below = 0.0
+
         self.trace = Data_Trace()
         self.tv = TruthValue(0,0)
         try:
            self.trace = op.trace
         except Exception:
             pass
+
+        self.bc_expanded = False
+
         for a in args:
             self.append(a)
     
