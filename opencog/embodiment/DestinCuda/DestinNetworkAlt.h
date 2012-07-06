@@ -33,7 +33,6 @@ private:
     Destin * destin;
     bool training;
     DestinIterationFinishedCallback * callback;
-    RunningInfo ri;
 public:
     destin_network_alt(SupportedImageWidths width, uint layers,
             uint centroid_counts [] ) :
@@ -43,11 +42,6 @@ public:
         bool supported = false;
         uint c, l;
         callback = NULL;
-
-        ri.image_count = -1;
-        ri.image_label = -1;
-        ri.layer = -1;
-        ri.sequence_step = -1;
 
         //figure out how many layers are needed to support the given
         //image width.
@@ -85,7 +79,7 @@ public:
         FormulateBelief(destin, training, input_dev);
 
         if(this->callback != NULL){
-            this->callback->callback(ri, *this );
+            this->callback->callback(*this );
         }
     }
 

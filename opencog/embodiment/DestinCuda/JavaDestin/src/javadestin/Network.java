@@ -7,9 +7,7 @@ public class Network extends INetwork {
 
     private DestinIterationFinishedCallback callback;
     private List<DestinKernel> layers = new ArrayList<DestinKernel>();
-    private RunningInfo ri = new RunningInfo();
     // how many times doDestin is called
-    private int callcount = 0;
 
     @Override
     public int getBeliefsPerNode(int layer) {
@@ -83,9 +81,7 @@ public class Network extends INetwork {
             throw new RuntimeException("dInput cannot be null");
         }
         DestinKernel layer;
-        ri.setImage_count(callcount);
         for (int l = layers.size() - 1; l >= 0; l--) {
-            ri.setLayer(l);
             layer = layers.get(l);
 
             if (l == 0) {
@@ -94,11 +90,10 @@ public class Network extends INetwork {
                 layer.DoDestin(layers.get(l - 1).GetDevicePointerBeliefs(),
                         null);
             }
-            if (callback != null) {
-                this.callback.callback(ri, this);
-            }
         }
-        callcount++;
+        if (callback != null) {
+            this.callback.callback(this);
+        }
     }
 
     @Override

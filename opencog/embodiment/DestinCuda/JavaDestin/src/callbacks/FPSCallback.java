@@ -2,14 +2,13 @@ package callbacks;
 
 import javadestin.DestinIterationFinishedCallback;
 import javadestin.INetwork;
-import javadestin.RunningInfo;
 
 public class FPSCallback extends DestinIterationFinishedCallback{
 	long lastTime =  System.currentTimeMillis();
 	long lastReportTime = lastTime;
 	
 	@Override
-	public void callback(RunningInfo info, INetwork network) {
+	public void callback(INetwork network) {
 		
 		long time = System.currentTimeMillis();
 		long diff = time - lastReportTime; 

@@ -638,7 +638,6 @@ void FormulateBelief(Destin *d, bool isTrain, float *image_dev)
     dim3 blockSize(d->nNodes, d->maxNb);
 
     CalculateDistances<<<blockSize,d->maxNs,sizeof(float)*d->maxNs*2>>>(d->nodes_dev, image_dev);
-
     if( isTrain )
     // normalize belief and update winner
     {
