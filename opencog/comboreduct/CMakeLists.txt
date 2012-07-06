@@ -18,7 +18,6 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/eval
 	combo/indefinite_object
 	combo/iostream_combo
-	combo/list_type
 	combo/message
 	combo/perception
 	combo/perception_eval

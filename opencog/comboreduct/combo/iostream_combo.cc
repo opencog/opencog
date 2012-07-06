@@ -22,7 +22,6 @@
  */
 
 #include "iostream_combo.h"
-#include "list_type.h"
 #include "procedure_call.h"
 #include <boost/range/algorithm/find.hpp>
 
@@ -137,8 +136,6 @@ ostream& ostream_vertex(ostream& out, const vertex& v, format f)
         return ostream_builtin(out, *h, f);
     if (const enum_t* m = get<enum_t>(&v))
         return out << m->getContent();
-    if (is_list_type(v))
-        return out << get_list_tree(v);
 
     // XXX ?? Ahem, won't calling out<<(*m) just lead to infinite
     // recursion ?? 

@@ -42,7 +42,6 @@
 #include "definite_object.h"
 #include "enum_type.h"
 #include "indefinite_object.h"
-#include "list_base.h"
 #include "message.h"
 #include "perception.h"
 
@@ -125,7 +124,6 @@ typedef double contin_t;
 // the reduct engine just a bit faster.
 typedef boost::variant < contin_t,
                          enum_t,
-                         list_ptr,
                          builtin,
                          wild_card,
                          argument,
