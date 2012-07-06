@@ -472,6 +472,15 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
         // car takes a list and returns head of the list
         case id::car : {
             sib_it lp = it.begin();
+
+	    combo_tree evo;
+	    if(*lp != id::list){
+	      evo = eval_throws_tree(bmap, lp, pe);
+	      lp = evo.begin();
+	    }
+	    if(*lp != id::list)
+	      throw ComboException(TRACE_INFO, "not a list!");
+
             // If the list is empty; then return empty list!
             // That is, use an empty list to represent nil.
             if (lp.begin() == lp.end())
