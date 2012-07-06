@@ -320,37 +320,24 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::rand :
             return randGen().randfloat();
 
-        // list constructor
+        // Almost all list ops are not supported by this function...
         case id::list :
-        case id::car :
         case id::cdr :
+        case id::cons :
             throw ComboException(TRACE_INFO,
                 "Cannot handle lists; use eval_throws_tree() instead.");
 
-        // cons takes an element and a list,
-        // and adds the element to the head of the list
-        case id::cons : {
-            combo_tree tr(id::list);
-            sib_it loc = tr.begin();
-
-            sib_it head = it.begin();
-            tr.append_child (loc, eval_throws_binding(bmap, head, pe));
-
-            head++;
-            vertex vrest = eval_throws_binding(bmap, head, pe);
-
-            // At this point, we expect "rest" to be a list.
-            const combo_tree& rest = get_list_tree(vrest);
-
-            sib_it lst = rest.begin();
-            for (sib_it sib = lst.begin(); sib != lst.end(); sib++)
-                // tr.append_child(loc, eval_throws_binding(bmap, sib, pe));
-                tr.append_child(loc, sib);
-
-            // list_ptr will take over ownership, using auto_ptr.
-            return list_ptr(new list_t(tr));
+        // car returns the first elt of a list. The list better not
+        // be empty, and it's first elt better not be a list...
+        case id::car : {
+            sib_it lp = it.begin();
+            // If the list is empty, throw; user should have called
+            // eval_throws_tree, and not this.
+            if (lp.begin() == lp.end())
+                throw ComboException(TRACE_INFO,
+                   "Must not pass empty list to eval_throws_binding().");
+            return eval_throws_binding(bmap, lp.begin(), pe);
         }
-
         // Control operators
 
         // XXX TODO: contin_if should go away.
@@ -520,12 +507,35 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return tr;
         }
 
+        // cons takes an element and a list,
+        // and adds the element to the head of the list
+        case id::cons : {
+            combo_tree tr(id::list);
+            pre_it loc = tr.begin();
+
+            sib_it head = it.begin();
+            combo_tree ht = eval_throws_tree(bmap, head, pe);
+            tr.append_child(loc, ht.begin());
+
+            head++;
+            combo_tree rest = eval_throws_tree(bmap, head, pe);
+
+            sib_it lst = rest.begin();
+            for (sib_it sib = lst.begin(); sib != lst.end(); sib++)
+                // tr.append_child(loc, eval_throws_tree(bmap, sib, pe).begin());
+                tr.append_child(loc, (pre_it) sib);
+
+            // list_ptr will take over ownership, using auto_ptr.
+            return tr;
+        }
+
         default:
             break;
         }
     }
 
-    // If we got the here, the vertex returns a simple, non-list type.
+    // If we got the here, its not a list operator, so just return 
+    // a tree with a lone, simple type in it.
     return combo_tree(eval_throws_binding(bmap, it, pe));
 }
 
