@@ -87,6 +87,7 @@ void   InitNode(                        // initialize a node.
                  Node *,                // pointer node on host
                  CudaNode *,            // pointer to node on device
                  uint *,                // input offsets from input image (NULL for any non-input node)
+                 uint *,                // chunk of preallocated cuda memory to put the input offsets
                  float *,               // pointer to input on device
                  float *,               // pointer to belief on device
                  float *                // pointer to stats memory area on device

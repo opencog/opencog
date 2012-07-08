@@ -32,7 +32,9 @@ void KernelTest()
     float * stat_mem;
     CUDAMALLOC( (void **)&stat_mem, sizeof(float) * NodeStatsSize(ni, nb, 0) );
 
-    InitNode( 0, ni, nb, 0, 0.1, 0.01, 0.1, n, n->node_dev, inputOffsets, input_dev, belief_dev, stat_mem);
+    uint * inputo_mem;
+    CUDAMALLOC((void**)&inputo_mem, sizeof(uint)*ni);
+    InitNode( 0, ni, nb, 0, 0.1, 0.01, 0.1, n, n->node_dev, inputOffsets, inputo_mem, input_dev, belief_dev, stat_mem);
 
     // allocate input frame
     MALLOC( input_host, float, ni );
@@ -103,6 +105,7 @@ void KernelTest()
     CUDAFREE( input_dev );
     CUDAFREE( belief_dev );
     CUDAFREE( stat_mem );
+    CUDAFREE( inputo_mem );
     DestroyNode( n );
 }
 

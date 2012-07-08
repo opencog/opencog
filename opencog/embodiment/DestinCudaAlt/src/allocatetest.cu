@@ -8,5 +8,5 @@ int main(int argc, char ** argv){
 
     Destin * d = InitDestin(16, 8, dims, 16);
     printf("Max number of beliefs: %i\n", d->maxNb);
-
+    DestroyDestin(d);
 }

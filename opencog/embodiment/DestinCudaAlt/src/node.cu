@@ -34,7 +34,8 @@ void InitNode
     float       beta,
     Node        *node_host,
     CudaNode    *cudaNode_dev,
-    uint         *inputOffsets,
+    uint        *inputOffsets,
+    uint        *inputOffsetMemory_dev,
     float       *input_dev,
     float       *belief_dev,
     float       *statsMemory_dev
@@ -112,7 +113,7 @@ void InitNode
     {
         MALLOC(node_host->inputOffsets, uint, ni);
         memcpy(node_host->inputOffsets, inputOffsets, sizeof(uint) * ni);
-        CUDAMALLOC( (void **) &cudaNode_host.inputOffsets, sizeof(uint) * ni);
+        cudaNode_host.inputOffsets = inputOffsetMemory_dev;
         CUDAMEMCPY( cudaNode_host.inputOffsets, node_host->inputOffsets, sizeof(uint) * ni, cudaMemcpyHostToDevice);
     }
     else
@@ -174,11 +175,6 @@ void DestroyNode( Node *n )
     CudaNode cudaNode_host;
     CUDAMEMCPY( &cudaNode_host, n->node_dev, sizeof(CudaNode), cudaMemcpyDeviceToHost );
 
-    // if it is a zero-layer node, free the input offset array on the device
-    if( cudaNode_host.inputOffsets != NULL )
-    {
-        CUDAFREE( cudaNode_host.inputOffsets);
-    }
 }
 
 // copy the node statistics from the host to the device.
