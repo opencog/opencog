@@ -65,10 +65,6 @@ struct CudaNode {
     float * starv;
     float * dist;
     
-
-    //holds the memory for mu, sigma, starv, beliefEuc, beliefMal, dist
-    float * memory_area;
-
     // node beliefs
     float * input;
     float * beliefEuc;
@@ -81,18 +77,19 @@ struct CudaNode {
 
 /* Node Functions Begin */
 void   InitNode(                        // initialize a node.
-                 uint,                   // node index
-                 uint,                   // belief dimensionality (# centroids)
-                 uint,                   // input dimensionality (# input values)
-                 uint,                   // parent belief dimensionality
+                 uint,                  // node index
+                 uint,                  // belief dimensionality (# centroids)
+                 uint,                  // input dimensionality (# input values)
+                 uint,                  // parent belief dimensionality
                  float,                 // starvation coefficient
                  float,                 // alpha (mu step size)
                  float,                 // beta (sigma step size)
                  Node *,                // pointer node on host
                  CudaNode *,            // pointer to node on device
-                 uint *,                 // input offsets from input image (NULL for any non-input node)
+                 uint *,                // input offsets from input image (NULL for any non-input node)
                  float *,               // pointer to input on device
-                 float *                // pointer to belief on device
+                 float *,               // pointer to belief on device
+                 float *                // pointer to stats memory area on device
                 );
 
 void DestroyNode(
@@ -107,6 +104,11 @@ void CopyNodeFromDevice(                // copy node from device mem to host mem
                  Node *                 // node pointer
                 );
 
+uint NodeStatsSize(                     // calculate the size of a node's stats memory area
+                int ni,                 // node input dimensionality
+                int nb,                 // number of node beliefs
+                int np                  // number of node's parent's beliefs
+               );
 /* Node Node Functions End */
 
 /* CUDA device function definitions */

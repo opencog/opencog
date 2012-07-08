@@ -31,6 +31,7 @@ struct Destin {
     float    * inputPipeline_dev;       // pointer to input block
     float    * belief_dev;              // pointer to belief block
     float    * dataSet_dev;             // pointer to dataset
+    float   ** stats_dev;               // pointer to stats block
     /* DEVICE VARIABLES END */
 };
 

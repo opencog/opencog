@@ -15,6 +15,13 @@
 #define GAMMA       1
 #define STARVCOEFF  0.05
 
+
+uint NodeStatsSize(int ni, int nb, int np)
+{
+    uint ns = ni + nb + np;
+    return nb * ns * 2 + nb * 4;
+}
+
 // Initialize a node
 void InitNode
     (
@@ -29,7 +36,9 @@ void InitNode
     CudaNode    *cudaNode_dev,
     uint         *inputOffsets,
     float       *input_dev,
-    float       *belief_dev
+    float       *belief_dev,
+    float       *statsMemory_dev
+
     )
 {
 
@@ -88,8 +97,7 @@ void InitNode
     cudaNode_host.beta          = beta;
 
     // allocate node statistics on device using pointer arithmetic to divide up the memory
-    CUDAMALLOC( (void **) &cudaNode_host.memory_area , sizeof(float) * ( nb * ns * 2 + nb * 4 )  )
-    cudaNode_host.mu =          cudaNode_host.memory_area;
+    cudaNode_host.mu =          statsMemory_dev;
     cudaNode_host.sigma =       cudaNode_host.mu        + nb*ns;
     cudaNode_host.starv =       cudaNode_host.sigma     + nb*ns;
     cudaNode_host.beliefEuc =   cudaNode_host.starv     + nb;
@@ -149,7 +157,7 @@ void InitNode
 void DestroyNode( Node *n )
 {
     // free host data
-    // free memory for mu, sigma, starv, pBelief, beliefEuc, beliefMal
+    // free host memory for mu, sigma, starv, pBelief, beliefEuc, beliefMal
     FREE(n->memory_area);
 
     // if it is a zero-layer node, free the input offset array on the host
@@ -165,8 +173,6 @@ void DestroyNode( Node *n )
     // free device data
     CudaNode cudaNode_host;
     CUDAMEMCPY( &cudaNode_host, n->node_dev, sizeof(CudaNode), cudaMemcpyDeviceToHost );
-    // free memory for mu, sigma, starv, beliefEuc, beliefMal, dist
-    CUDAFREE( cudaNode_host.memory_area );
 
     // if it is a zero-layer node, free the input offset array on the device
     if( cudaNode_host.inputOffsets != NULL )

@@ -176,13 +176,26 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
     d->nodeRef[l][0] = d->nNodes - 1;
 
     //printf("\n");
+
+
+    // create array of pointers, one pointer per layer. Each layer
+    // gets a memory block to hold all the nodes statistics for all nodes
+    // in the layer. pre allocate cuda memory for node statistics all at once
+    // ahead of time because cudaMalloc is very slow on some cards
+    MALLOC( d->stats_dev, float *, nl );
+
+    // allocate stats memory block for the input layer
+    uint statsSizePerNode;
+    statsSizePerNode = NodeStatsSize(ni, nb[0], nb[1]);
+    CUDAMALLOC((void **)&d->stats_dev[0], sizeof(float) * statsSizePerNode * d->layerSize[0]);
     // initialize zero-layer nodes
-    for( n=0, i=0; i < d->layerSize[0]; i++, n++)
+    float * statsOffset;
+    for( n=0, i=0, statsOffset = d->stats_dev[0] ; i < d->layerSize[0]; i++, n++, statsOffset += statsSizePerNode )
     {
         InitNode( n, ni, nb[0], nb[1],
                     starvCoeff, alpha, beta, 
                     &d->nodes_host[n], &d->nodes_dev[n],
-                    inputOffsets[n], NULL, &d->belief_dev[bOffset] );
+                    inputOffsets[n], NULL, &d->belief_dev[bOffset], statsOffset );
                     
 
         // increment belief offset
@@ -211,40 +224,23 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
             maxNb = nb[l];
         }
 
+        uint np = l == nl - 1 ? 0 : nb[l + 1];
         // update max state
-        if( l == nl - 1 )
+        if( nb[l] + 4 * nb[l-1] + np > maxNs )
         {
-            if( nb[l] + 4 * nb[l-1] > maxNs )
-            {
-                maxNs = nb[l] + 4 * nb[l-1];
-            }
-        }
-        else
-        {
-            if( nb[l] + 4 * nb[l-1] + nb[l+1] > maxNs )
-            {
-                maxNs = nb[l] + 4 * nb[l-1] + nb[l+1];
-            }
+            maxNs = nb[l] + 4 * nb[l-1] + np;
         }
 
-        for( i=0; i < d->layerSize[l]; i++, n++ )
+        statsSizePerNode = NodeStatsSize(nb[l-1]*4, nb[l], np);
+        CUDAMALLOC((void **)&d->stats_dev[l], sizeof(float) * statsSizePerNode * d->layerSize[l]);
+        for( i=0, statsOffset = d->stats_dev[l] ; i < d->layerSize[l]; i++, n++, statsOffset+=statsSizePerNode )
         {
-            if( l == nl - 1 )
-            {
-                InitNode( n, nb[l-1]*4, nb[l], 0,
-                        starvCoeff, alpha, beta,
-                        &d->nodes_host[n], &d->nodes_dev[n],
-                        NULL, &d->inputPipeline_dev[iOffset],
-                        &d->belief_dev[bOffset] );
-            }
-            else
-            {
-                InitNode( n, nb[l-1]*4, nb[l], nb[l+1],
-                        starvCoeff, alpha, beta,
-                        &d->nodes_host[n], &d->nodes_dev[n],
-                        NULL, &d->inputPipeline_dev[iOffset],
-                        &d->belief_dev[bOffset] );
-            }
+            InitNode( n, nb[l-1]*4, nb[l], np,
+                    starvCoeff, alpha, beta,
+                    &d->nodes_host[n], &d->nodes_dev[n],
+                    NULL, &d->inputPipeline_dev[iOffset],
+                    &d->belief_dev[bOffset], statsOffset );
+
             // increment previous belief offset (input to next node)
             iOffset += 4*nb[l-1];
 
@@ -589,9 +585,11 @@ void DestroyDestin( Destin *d )
     for( i=0; i < d->nLayers; i++ )
     {
         FREE( d->nodeRef[i] );
+        CUDAFREE( d->stats_dev[i] );
     }
 
     FREE( d->nodeRef );
+    FREE( d->stats_dev );
 
     CUDAFREE(d->nodes_dev);
     CUDAFREE(d->inputPipeline_dev);
