@@ -330,13 +330,23 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         // be empty, and it's first elt better not be a list...
         case id::car : {
             sib_it lp = it.begin();
+
+            combo_tree evo;
+            if (*lp != id::list) {
+                evo = eval_throws_tree(bmap, lp, pe);
+                lp = evo.begin();
+            }
+            if (*lp != id::list)
+                throw ComboException(TRACE_INFO, "not a list!");
+
             // If the list is empty, throw; user should have called
-            // eval_throws_tree, and not this.
+            // eval_throws_tree(), and not eval_throws_binding().
             if (lp.begin() == lp.end())
                 throw ComboException(TRACE_INFO,
                    "Must not pass empty list to eval_throws_binding().");
             return eval_throws_binding(bmap, lp.begin(), pe);
         }
+
         // Control operators
 
         // XXX TODO: contin_if should go away.
@@ -473,13 +483,13 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
         case id::car : {
             sib_it lp = it.begin();
 
-	    combo_tree evo;
-	    if(*lp != id::list){
-	      evo = eval_throws_tree(bmap, lp, pe);
-	      lp = evo.begin();
-	    }
-	    if(*lp != id::list)
-	      throw ComboException(TRACE_INFO, "not a list!");
+            combo_tree evo;
+            if (*lp != id::list) {
+                evo = eval_throws_tree(bmap, lp, pe);
+                lp = evo.begin();
+            }
+            if (*lp != id::list)
+                throw ComboException(TRACE_INFO, "not a list!");
 
             // If the list is empty; then return empty list!
             // That is, use an empty list to represent nil.
@@ -488,7 +498,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return eval_throws_tree(bmap, lp.begin(), pe);
         }
 
-        // cdr takes a list and returns loc of the list
+        // cdr takes a list and returns the tail of the list
         case id::cdr : {
             sib_it top = it.begin();
 
@@ -533,7 +543,6 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
                 // tr.append_child(loc, eval_throws_tree(bmap, sib, pe).begin());
                 tr.append_child(loc, (pre_it) sib);
 
-            // list_ptr will take over ownership, using auto_ptr.
             return tr;
         }
 
