@@ -47,3 +47,8 @@ TARGET_LINK_LIBRARIES(tableUTest
 	comboreduct
         util
 )
+ADD_CXXTEST(listUTest)
+TARGET_LINK_LIBRARIES(listUTest
+        comboreduct
+        util
+)

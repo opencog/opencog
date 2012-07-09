@@ -1,0 +1,21 @@
+#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+
+using namespace ant_combo;
+using namespace opencog;
+using namespace std;
+
+class listUTest :  public CxxTest::TestSuite {
+public:
+    void test_list(){
+        combo_tree tr;
+        stringstream ss("cdr(cons(car(list(1 4 5)) list(2 3)))");
+        ss >> tr;
+        vertex_seq empty;
+        stringstream ss_lst;
+        ss_lst << eval_throws_tree(empty, tr);
+        stringstream ss_expected("list(2 3) ");
+        TS_ASSERT_EQUALS(ss_lst.str(),ss_expected.str());
+    }
+
+};
