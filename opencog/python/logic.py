@@ -63,6 +63,7 @@ class Chainer:
     successful_num_uses_per_rule_per_level = defaultdict(Counter)
 
     def __init__(self, space, planning_mode = False):
+
         self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
 
         self.pd = dict()
@@ -116,7 +117,8 @@ class Chainer:
     
             steps_so_far = 0
             start = time()
-            while self.bc_later and steps_so_far < nsteps:
+
+            while self.bc_later and len(self.results) < 5 and steps_so_far < nsteps:
                 self.bc_step()
                 steps_so_far += 1
     
@@ -1084,6 +1086,9 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
         self.chainer = None
 
     def run(self,atomspace):
+        if self.chainer == None:
+            self.chainer = Chainer(atomspace, planning_mode = True)
+
         # Currently it has to find the whole plan in one cycle, but that computation
         # should be split into several cycles.
         self.cycles += 1
@@ -1095,8 +1100,8 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
         # ReferenceLink ConceptNode:'psi_demand_goal_list' (ListLink stuff)
         # or use a hack
         #target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "DemandGoal" in x.name]
-        target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" == x.name]
-        goal_atom = target_PredicateNodes[0]
+        target_PredicateNodes = [x for x in atomspace.get_atoms_by_type(t.PredicateNode) if "EnergyDemandGoal" in x.name]
+        goal_atom = random.choice(target_PredicateNodes)
 
         #target = T('EvaluationLink', goal_atom)
         target =    T('EvaluationLink',
