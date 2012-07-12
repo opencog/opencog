@@ -368,16 +368,14 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 	        itend--;
 	        return eval_throws_binding(bmap, itend, pe);
 	    }
-	  
-	    //replace list with its tail
-            sib_it head_list_it = itend.begin();
-	    tr.erase(head_list_it);
 
 	    //new tree: f(car foldr(f v cdr))
 	    sib_it f = it.begin();
 	    combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
 	    sib_it loc =cb_tr.begin();
+	    sib_it head_list_it = itend.begin();
 	    cb_tr.append_child(loc, head_list_it);
+	    tr.erase(head_list_it);
 	    sib_it it_begin = tr.begin();
 	    cb_tr.append_child(loc, it_begin);
 	  
@@ -595,19 +593,16 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
 	        itend--;
 	        return eval_throws_tree(bmap, itend, pe);
 	    }
-	  
-	    //replace list with its tail
-            sib_it head_list_it = itend.begin();
-	    tr.erase(head_list_it);
 
 	    //new tree: f(car foldr(f v cdr))
 	    sib_it f = it.begin();
 	    combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
 	    sib_it loc =cb_tr.begin();
+	    sib_it head_list_it = itend.begin();
 	    cb_tr.append_child(loc, head_list_it);
+	    tr.erase(head_list_it);
 	    sib_it it_begin = tr.begin();
 	    cb_tr.append_child(loc, it_begin);
-	  
 	    return eval_throws_tree(bmap, cb_tr);
     
 	}
