@@ -93,6 +93,8 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
             return out << "cdr";
         case id::cons:
             return out << "cons";
+	case id::foldr:
+	    return out << "foldr";
         case id::contin_if:
             return out << "contin_if";
         case id::cond:

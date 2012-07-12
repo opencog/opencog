@@ -88,7 +88,7 @@ enum builtin
 
     list,           // List constructor
     car, cdr, cons, // Functions on lists
-
+    foldr,
     // Generic functions
     // Currently take enum as arg or return enum, but should
     // be generalized soon.  XXX do this...

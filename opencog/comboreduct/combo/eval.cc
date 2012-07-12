@@ -215,18 +215,23 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::logical_true :
             return v;
 
-        case id::logical_and :
+        case id::logical_and : {
+	    if(it.begin() == it.end())
+	        return id::logical_and;
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 if (eval_throws_binding(bmap, sib, pe) == id::logical_false)
                     return id::logical_false;
             return id::logical_true;
+	}
 
-        case id::logical_or :
+        case id::logical_or : {
+	    if(it.begin() == it.end())
+	        return id::logical_or;
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 if (eval_throws_binding(bmap, sib, pe) == id::logical_true)
                     return id::logical_true;
             return id::logical_false;
-
+	}
         case id::logical_not :
             return negate_vertex(eval_throws_binding(bmap, it.begin(), pe));
 
@@ -256,6 +261,9 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         // Continuous operators
         case id::plus : {
             contin_t res = 0;
+            //if plus does not have any argument, return plus operator
+	    if(it.begin() == it.end())
+	        return v;
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws_binding(bmap, sib, pe);
@@ -266,6 +274,9 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
         case id::times : {
             contin_t res = 1;
+	    //if times does not have any argument, return times operator
+	    if(it.begin() == it.end())
+	        return v;
             //assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws_binding(bmap, sib, pe);
@@ -347,6 +358,31 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             return eval_throws_binding(bmap, lp.begin(), pe);
         }
 
+	case id::foldr :{
+	    combo_tree tr(it);
+	  
+	    //base case: foldr(f v list) = v
+	    sib_it itend = tr.begin().end();
+	    itend--;
+	    if(itend.begin() == itend.end()){
+	        itend--;
+	        return eval_throws_binding(bmap, itend, pe);
+	    }
+	  
+	    //replace list with its tail
+            sib_it head_list_it = itend.begin();
+	    tr.erase(head_list_it);
+
+	    //new tree: f(car foldr(f v cdr))
+	    sib_it f = it.begin();
+	    combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
+	    sib_it loc =cb_tr.begin();
+	    cb_tr.append_child(loc, head_list_it);
+	    sib_it it_begin = tr.begin();
+	    cb_tr.append_child(loc, it_begin);
+	  
+	    return eval_throws_binding(bmap, cb_tr);
+ 	}
         // Control operators
 
         // XXX TODO: contin_if should go away.
@@ -530,7 +566,10 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
         case id::cons : {
             combo_tree tr(id::list);
             pre_it loc = tr.begin();
-
+	    if(it.begin()==it.end()){
+	      vertex vx(id::cons);
+	      return combo_tree(vx);
+	    }  
             sib_it head = it.begin();
             combo_tree ht = eval_throws_tree(bmap, head, pe);
             tr.append_child(loc, ht.begin());
@@ -546,6 +585,32 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return tr;
         }
 
+	case id::foldr :{
+	    combo_tree tr(it);
+	  
+	    //base case: foldr(f v list) = v
+	    sib_it itend = tr.begin().end();
+	    itend--;
+	    if(itend.begin() == itend.end()){
+	        itend--;
+	        return eval_throws_tree(bmap, itend, pe);
+	    }
+	  
+	    //replace list with its tail
+            sib_it head_list_it = itend.begin();
+	    tr.erase(head_list_it);
+
+	    //new tree: f(car foldr(f v cdr))
+	    sib_it f = it.begin();
+	    combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
+	    sib_it loc =cb_tr.begin();
+	    cb_tr.append_child(loc, head_list_it);
+	    sib_it it_begin = tr.begin();
+	    cb_tr.append_child(loc, it_begin);
+	  
+	    return eval_throws_tree(bmap, cb_tr);
+    
+	}
         default:
             break;
         }
