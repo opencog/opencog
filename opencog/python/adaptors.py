@@ -7,6 +7,7 @@ from tree import *
 from util import *
 
 from pprint import pprint
+from collections import defaultdict
 
 # to debug within the cogserver, try these, inside the relevant function:
 #import code; code.interact(local=locals())
@@ -69,8 +70,8 @@ class ForestExtractor:
         self.tree_embeddings = {} 
         
         # The incoming links (or rather trees/predicates) for each object.
-        # For each object, for each predsize, for each slot, the list of preds. (Indexes into self.all_trees)
-        self.incoming = {}
+        # For each object, the list of unique trees using it.
+        self.incoming = defaultdict(list)
 
     class UnwantedAtomException(Exception):
         pass
@@ -140,7 +141,10 @@ class ForestExtractor:
                     self.tree_embeddings[tree] = []
                 substitution = subst_from_binding(objects)
                 self.tree_embeddings[tree].append(substitution)
-                
+
+                for obj in objects:
+                    self.incoming[obj].append(tree)
+
                 #size= len(objects)
                 #tree_id = len(self.all_trees) - 1
                 #for slot in xrange(size):

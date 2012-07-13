@@ -343,7 +343,21 @@ class Fishgram:
         
         for (prev_ptn,  prev_embeddings) in prev_layer:
 
-            for tr_, embs_ in self.forest.tree_embeddings.items():
+            # Faster option: get the set of unique trees extending any object in any embedding for the conjunction,
+            # and then do the remapping-checks etc
+            if len(prev_ptn.conj) or len(prev_ptn.seqs):
+                extensions = {}
+                for prev_emb in prev_embeddings:
+                    for obj in prev_emb.values():
+                        for tr_ in self.forest.incoming[obj]:
+                            extensions[tr_] = self.forest.tree_embeddings[tr_]
+            else:
+                extensions = self.forest.tree_embeddings
+
+            for tr_, embs_ in extensions.items():
+
+            # Simpler option: Just check all potential extensions
+            #for tr_, embs_ in self.forest.tree_embeddings.items():
 
 #                if prev_conj != () and tr_ < self.awkward[prev_conj]:
 #                    #print 'OUT_OF_ORDER', tr_
