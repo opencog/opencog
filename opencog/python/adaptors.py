@@ -22,7 +22,8 @@ class ForestExtractor:
         self.a = atomspace
         self.writer = writer
         
-        self.attentional_focus = True
+        #self.attentional_focus = True
+        self.attentional_focus = False
         
         # policy
         # Whether to create miner-friendly output, rather than human-friendly output.

@@ -64,7 +64,7 @@ class Fishgram:
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 100
+        self.max_per_layer = 200
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -72,8 +72,6 @@ class Fishgram:
         
         self.rules_output = []
         
-        self._is_running = False
-
     def run(self):
         '''The basic way to run Fishgram. It will find all the frequent conjunctions above min_frequency.'''
 
@@ -137,12 +135,14 @@ class Fishgram:
         # Less efficient but may be easier to debug
         next_layer = list(next_layer_iter)
 
-        #for (ptn, embs) in self.prune_frequency(next_layer):
-        for (ptn, embs) in self.prune_surprise(next_layer):
-            #print '***************', conj, len(embs)
-            #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
-            #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
-            yield (ptn, embs)
+#        #for (ptn, embs) in self.prune_frequency(next_layer):
+#        for (ptn, embs) in self.prune_surprise(next_layer):
+#            #print '***************', conj, len(embs)
+#            #self.viz.outputTreeNode(target=conj[-1], parent=conj[:-1], index=0)
+#            #self.viz.outputTreeNode(target=list(conj), parent=list(conj[:-1]), index=0)
+#            yield (ptn, embs)
+
+        return self.sort_surprise(next_layer)
 
     def closed_bfs_layers(self):
         '''Main function to run the breadth-first search. It yields results one layer at a time. A layer
@@ -161,10 +161,11 @@ class Fishgram:
         while len(prev_layer) > 0:
             # Mixing generator and list style because future results depend on previous results.
             # It's less efficient with memory but still allows returning results sooner.
-            new_layer = [ptn_embs for ptn_embs in self.closed_bfs_extend_layer(prev_layer)]
+            #new_layer = [ptn_embs for ptn_embs in self.closed_bfs_extend_layer(prev_layer)]
+            new_layer = self.closed_bfs_extend_layer(prev_layer)
             
             if len(new_layer):
-                
+
                 del new_layer[self.max_per_layer+1:]
                 
                 #conj_length = len(new_layer[0][0].conj)
@@ -422,6 +423,34 @@ class Fishgram:
             #if normalized_frequency > self.min_frequency:
                 #print pp(conj), normalized_frequency
                 yield (ptn, embeddings)
+
+    def sort_surprise(self, layer):
+        # layer is a list of tuples
+        sorted_layer = []
+
+        ptn2surprise = {}
+
+        for (ptn, embeddings) in layer:
+            if len(embeddings) >= self.min_embeddings:
+                tup = ptn.conj+ptn.seqs
+
+                if len(ptn.conj) + len(ptn.seqs) < 2:
+                    sorted_layer.append((ptn,embeddings))
+                    ptn2surprise[tup] = float('+inf')
+                else:
+                    surp = self.surprise(ptn)
+                    ptn2surprise[tup] = surp
+                    if len(ptn.conj) > 0 and surp > 0.9: # and len(get_varlist(ptn.conj)) == 1 and len(ptn.seqs) == 0:
+                        #print '\x1B[1;32m%.1f %s' % (surp, ptn)
+
+                        sorted_layer.append((ptn,embeddings))
+
+        sorted_layer.sort(key=lambda (ptn,embeddings): ptn2surprise[ptn.conj+ptn.seqs], reverse=True)
+
+        for (ptn, embeddings) in sorted_layer:
+            print '\x1B[1;32m%.1f %s' % (ptn2surprise[ptn.conj+ptn.seqs], ptn)
+
+        return sorted_layer
 
     def prune_surprise(self, layer):
         for (ptn, embeddings) in layer:
@@ -1105,8 +1134,8 @@ try:
     #                        print 'emb:',  pp(bound_tree)
             
             #fish.iterated_implications()
-            self.fish.implications()
-            #self.fish.run()
+            #self.fish.implications()
+            self.fish.run()
             print "Finished one Fishgram cycle"
             
             #fish.make_all_psi_rules()
