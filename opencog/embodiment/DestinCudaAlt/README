@@ -58,9 +58,16 @@ DESTIN:
     belief.
 
 Generating datasets for Destin:
-    Grab the MNIST binary dataset and put it in mnist_data.
+    
+    Grab the MNIST binary dataset (4 files) from http://yann.lecun.com/exdb/mnist/ and put it in a  
+    directory called "mnist_data". Also create a directory called "data" where the output of the script
+    will go. gunzip the files and rename 2 of the downloaded data files: t10k-images-idx3-ubyte to 
+    test-images-idx3-ubyte and t10k-labels-idx1-ubyte to test-labels-idx1-ubyte.
 
     There are two Matlab/Octave files: generate_mnist_set_16.m and generate_mnist_set_32.m
+    
+    The generated data from generate_mnist_set_32.m needs about 9GB of hard disk space and takes about 5 minutes to run.
+    The generated data from generate_mnist_set_16.m needs about 1GB of hard disk space and takes about 1 minute to run.
 
     The first generates a sequence of digit presentations.  Each presentation consists of a z-scan
     over the 28x28 MNIST raster.  generate_mnist_set_16 sweeps a 16x16 window over the 28x28 raster,
