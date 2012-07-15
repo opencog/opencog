@@ -8,10 +8,26 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #Searching CUDA
 FIND_PACKAGE(CUDA 4.0)
 
+
+# uncomment to be in Release mode
+# SET(CMAKE_BUILD_TYPE Release)
+
+# uncomment to build in debug mode
+# SET(CMAKE_BUILD_TYPE Debug)
+
+IF (CMAKE_BUILD_TYPE STREQUAL "")
+	SET(CMAKE_BUILD_TYPE Release)
+ENDIF()
+
+IF(CMAKE_BUILD_TYPE STREQUAL "Debug" )
+    SET(dbg_flags -g -G)
+ENDIF()
+
+
 if(CUDA_FOUND)
     #Enable debug for CUDA and set Tesla build command
     #Change the 20 for the type of you card: (CUDA computable of 1.3 = 13)
-    set(CUDA_NVCC_FLAGS -g -G -gencode arch=compute_30,code=sm_30)
+    set(CUDA_NVCC_FLAGS ${dbg_flags} -gencode arch=compute_30,code=sm_30)
     
     INCLUDE_DIRECTORIES( include )
 
