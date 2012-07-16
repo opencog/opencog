@@ -335,7 +335,10 @@ struct metapopulation : bscored_combo_tree_set
         // XXX The implementation here results in a lot of copying of
         // behavioral scores and combo trees, and thus could hurt
         // performance by quite a bit.  To avoid this, we'd need to
-        // change the use of bscored_combo_tree_set in this class.
+        // change the use of bscored_combo_tree_set in this class. This
+        // would be a fairly big task, and it's currently not clear that
+        // its worth the effort, as diversity_penalty is not yet showing
+        // promising results...
         if (params.use_diversity_penalty) {
             bscored_combo_tree_set pool;
             // Behavioral score of the (previous) exemplar.
