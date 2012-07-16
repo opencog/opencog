@@ -216,22 +216,22 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             return v;
 
         case id::logical_and : {
-	    if(it.begin() == it.end())
-	        return id::logical_and;
+            if (it.begin() == it.end()) // For correct foldr behaviour
+                return id::logical_and;
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 if (eval_throws_binding(bmap, sib, pe) == id::logical_false)
                     return id::logical_false;
             return id::logical_true;
-	}
+        }
 
         case id::logical_or : {
-	    if(it.begin() == it.end())
-	        return id::logical_or;
+            if (it.begin() == it.end())  // For correct foldr behaviour
+                return id::logical_or;
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 if (eval_throws_binding(bmap, sib, pe) == id::logical_true)
                     return id::logical_true;
             return id::logical_false;
-	}
+        }
         case id::logical_not :
             return negate_vertex(eval_throws_binding(bmap, it.begin(), pe));
 
@@ -260,10 +260,11 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
         // Continuous operators
         case id::plus : {
+            // if plus does not have any argument, return plus operator
+            if (it.begin() == it.end()) // For correct foldr behaviour
+                return v;
+
             contin_t res = 0;
-            //if plus does not have any argument, return plus operator
-	    if(it.begin() == it.end())
-	        return v;
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws_binding(bmap, sib, pe);
@@ -273,10 +274,11 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         }
 
         case id::times : {
+            //if times does not have any argument, return times operator
+            if (it.begin() == it.end())  // For correct foldr behaviour
+                return v;
+
             contin_t res = 1;
-	    //if times does not have any argument, return times operator
-	    if(it.begin() == it.end())
-	        return v;
             //assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws_binding(bmap, sib, pe);
@@ -334,6 +336,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::list :
         case id::cdr :
         case id::cons :
+        // case id::foldr :
             throw ComboException(TRACE_INFO,
                 "Cannot handle lists; use eval_throws_tree() instead.");
 
@@ -358,29 +361,30 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             return eval_throws_binding(bmap, lp.begin(), pe);
         }
 
-	case id::foldr :{
-	    combo_tree tr(it);
-	  
-	    //base case: foldr(f v list) = v
-	    sib_it itend = tr.begin().end();
-	    itend--;
-	    if(itend.begin() == itend.end()){
-	        itend--;
-	        return eval_throws_binding(bmap, itend, pe);
-	    }
+        case id::foldr : {
+            combo_tree tr(it);
 
-	    //new tree: f(car foldr(f v cdr))
-	    sib_it f = it.begin();
-	    combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
-	    sib_it loc =cb_tr.begin();
-	    sib_it head_list_it = itend.begin();
-	    cb_tr.append_child(loc, head_list_it);
-	    tr.erase(head_list_it);
-	    sib_it it_begin = tr.begin();
-	    cb_tr.append_child(loc, it_begin);
-	  
-	    return eval_throws_binding(bmap, cb_tr);
- 	}
+            // base case: foldr(f v list) = v
+            sib_it itend = tr.begin().end();
+            itend--;
+            if (itend.begin() == itend.end()){
+                itend--;
+                return eval_throws_binding(bmap, itend, pe);
+            }
+
+            // new tree: f(car foldr(f v cdr))
+            sib_it f = it.begin();
+            combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
+            sib_it loc =cb_tr.begin();
+            sib_it head_list_it = itend.begin();
+            cb_tr.append_child(loc, head_list_it);
+            tr.erase(head_list_it);
+            sib_it it_begin = tr.begin();
+            cb_tr.append_child(loc, it_begin);
+
+            return eval_throws_binding(bmap, cb_tr);
+         }
+
         // Control operators
 
         // XXX TODO: contin_if should go away.
@@ -486,7 +490,7 @@ vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
     return eval_binding(bmap, tr.begin());
 }
 
-combo_tree eval_throws_tree(const vertex_seq& bmap, 
+combo_tree eval_throws_tree(const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception)
@@ -541,7 +545,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
                 evo = eval_throws_tree(bmap, top, pe);
                 top = evo.begin();
             }
-            if (*top != id::list) 
+            if (*top != id::list)
                 throw ComboException(TRACE_INFO, "not a list!");
 
             sib_it sib = top.begin();
@@ -564,10 +568,10 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
         case id::cons : {
             combo_tree tr(id::list);
             pre_it loc = tr.begin();
-	    if(it.begin()==it.end()){
-	      vertex vx(id::cons);
-	      return combo_tree(vx);
-	    }  
+            if(it.begin()==it.end()){
+              vertex vx(id::cons);
+              return combo_tree(vx);
+            }
             sib_it head = it.begin();
             combo_tree ht = eval_throws_tree(bmap, head, pe);
             tr.append_child(loc, ht.begin());
@@ -583,35 +587,35 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return tr;
         }
 
-	case id::foldr :{
-	    combo_tree tr(it);
-	  
-	    //base case: foldr(f v list) = v
-	    sib_it itend = tr.begin().end();
-	    itend--;
-	    if(itend.begin() == itend.end()){
-	        itend--;
-	        return eval_throws_tree(bmap, itend, pe);
-	    }
+        case id::foldr : {
+            combo_tree tr(it);
+ 
+            // base case: foldr(f v list) = v
+            // i.e. list is empty list.
+            sib_it itend = tr.begin().end();
+            itend--;
+            if (itend.begin() == itend.end()) {
+                itend--;
+                return eval_throws_tree(bmap, itend, pe);
+            }
 
-	    //new tree: f(car foldr(f v cdr))
-	    sib_it f = it.begin();
-	    combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
-	    sib_it loc =cb_tr.begin();
-	    sib_it head_list_it = itend.begin();
-	    cb_tr.append_child(loc, head_list_it);
-	    tr.erase(head_list_it);
-	    sib_it it_begin = tr.begin();
-	    cb_tr.append_child(loc, it_begin);
-	    return eval_throws_tree(bmap, cb_tr);
-    
-	}
+            // new tree: f(car foldr(f v cdr))
+            sib_it f = it.begin();
+            combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
+            sib_it loc = cb_tr.begin();
+            sib_it head_list_it = itend.begin();
+            cb_tr.append_child(loc, head_list_it);
+            tr.erase(head_list_it);
+            sib_it it_begin = tr.begin();
+            cb_tr.append_child(loc, it_begin);
+            return eval_throws_tree(bmap, cb_tr);
+        }
         default:
             break;
         }
     }
 
-    // If we got the here, its not a list operator, so just return 
+    // If we got the here, its not a list operator, so just return
     // a tree with a lone, simple type in it.
     return combo_tree(eval_throws_binding(bmap, it, pe));
 }
