@@ -920,7 +920,7 @@ int moses_exec(int argc, char** argv)
              << " (revno " << MOSES_BZR_REVNO << ")"
 #endif
              << std::endl;
-        return 1;
+        return 0;
     }
 
     // Set log file.
