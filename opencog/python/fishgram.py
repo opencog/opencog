@@ -64,7 +64,7 @@ class Fishgram:
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 1000
+        self.max_per_layer = 200
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -360,6 +360,20 @@ class Fishgram:
             
         return conj2ptn_emblist.values()
 
+    def lookup_extending_rel_embeddings(self, prev_emb):
+        extensions = defaultdict(list)
+        for obj in prev_emb.values():
+            tree_embeddings_for_obj = self.forest.incoming[obj]
+            for tr_, embs_ in tree_embeddings_for_obj.items():
+                # add them into extensions
+                extensions[tr_]+= (s for s in embs_ if s not in extensions[tr_])
+
+        # you could also have an index for events being in the future
+        rels_bindingsets = extensions.items() + self.forest.event_embeddings.items()
+
+        return rels_bindingsets
+
+
     def find_extensions(self, prev_layer):
         '''Helper function for extensions_simple. It's a generator that finds all conjunctions (X,Y,Z) for (X,Y) in
         the previous layer. It returns a series of (conjunction, substitution) pairs. Where each substitution is
@@ -372,39 +386,50 @@ class Fishgram:
 
             # Faster option: get the set of unique trees extending any object in any embedding for the conjunction,
             # and then do the remapping-checks etc
-            if not firstlayer:
-                extensions = {}
-                for prev_emb in prev_embeddings:
-                    for obj in prev_emb.values():
-                        for tr_ in self.forest.incoming[obj]:
-                            extensions[tr_] = self.forest.tree_embeddings[tr_]
+#            if not firstlayer:
+##                extensions = {}
+##                for prev_emb in prev_embeddings:
+##                    for obj in prev_emb.values():
+##                        for tr_ in self.forest.incoming[obj]:
+##                            extensions[tr_] = self.forest.tree_embeddings[tr_]
+#
+##            extensions = defaultdict(list)
+##            for prev_emb in prev_embeddings:
+##                for obj in prev_emb.values():
+##                    tree_embeddings_for_obj = self.forest.incoming[obj]
+##                    for tr_, embs_ in tree_embeddings_for_obj.items():
+##                        # add them into extensions
+##                        extensions[tr_]+= (s for s in embs_ if s not in extensions[tr_])
+##
+##                # you could also have an index for events being in the future
+##                rels_bindingsets = extensions.items() + self.forest.event_embeddings.items()
+#                pass
+#            else:
+#                rels_bindingsets = self.forest.tree_embeddings.items() + self.forest.event_embeddings.items()
 
-                # you could also have an index for events being in the future
-                rels_bindingsets = extensions.items() + self.forest.event_embeddings.items()
-            else:
-                rels_bindingsets = self.forest.tree_embeddings.items() + self.forest.event_embeddings.items()
+            # They all have the same 'link label' (tree) but may be in different places.
+            for e in prev_embeddings:
+            # for each new var, if the object is in the previous embedding, then re-map them.
 
-            for rel_, rel_embs in rels_bindingsets:
+                if firstlayer:
+                    rels_bindingsets = self.forest.tree_embeddings.items() + self.forest.event_embeddings.items()
+                else:
+                    rels_bindingsets = self.lookup_extending_rel_embeddings(e) + self.forest.event_embeddings.items()
 
-            # Simpler option: Just check all potential extensions
-            #for rel_, rel_embs in self.forest.tree_embeddings.items():
+                for rel_, rel_embs in rels_bindingsets:
 
-#                if prev_conj != () and tr_ < self.awkward[prev_conj]:
-#                    #print 'OUT_OF_ORDER', tr_
-#                    continue
+                    rel, new_variables = self._create_new_variables_rel(rel_)
 
-                rel, new_variables = self._create_new_variables_rel(rel_)
+                    for rel_binding in rel_embs:
+                        # Give the tree new variables. Rewrite the embeddings to match.
+                        #rel, rel_binding_new_vars = self._create_new_variables(rel_, rel_binding)
 
-                for rel_binding in rel_embs:
-                    # Give the tree new variables. Rewrite the embeddings to match.
-                    #rel, rel_binding_new_vars = self._create_new_variables(rel_, rel_binding)
-                    rel_binding_new_vars = self._use_new_variables_in_binding(new_variables, rel_binding)
+                        rel_binding_with_new_vars = self._use_new_variables_in_binding(new_variables, rel_binding)
 
-                    # They all have the same 'link label' (tree) but may be in different places.
-                    for e in prev_embeddings:
-                        # for each new var, if the object is in the previous embedding, then re-map them.
-                        
-                        tmp = self._map_to_existing_variables(e, rel_binding_new_vars)
+
+
+
+                        tmp = self._map_to_existing_variables(e, rel_binding_with_new_vars)
                         if tmp == None:
                             continue
                         remapping, new_s = tmp
@@ -430,6 +455,7 @@ class Fishgram:
                             if len(remapping) or firstlayer:
                                 conj += (remapped_tree,)
                             else:
+                                print 'no connection:',prev_ptn,'-----',rel, e, rel_binding_with_new_vars
                                 continue
                         else:
                             if len(prev_ptn.seqs) == 0:

@@ -72,8 +72,8 @@ class ForestExtractor:
         self.tree_embeddings = defaultdict(list)
         
         # The incoming links (or rather trees/predicates) for each object.
-        # For each object, the list of unique trees using it.
-        self.incoming = defaultdict(list)
+        # For each object, a mapping from rel -> every embedding involving that object
+        self.incoming = defaultdict(lambda:defaultdict(list))
 
     class UnwantedAtomException(Exception):
         pass
@@ -145,7 +145,9 @@ class ForestExtractor:
                 else:
                     self.tree_embeddings[tree].append(substitution)
                     for obj in objects:
-                        self.incoming[obj].append(tree)
+                        tree_embeddings_for_obj = self.incoming[obj]
+                        if substitution not in tree_embeddings_for_obj[tree]:
+                            tree_embeddings_for_obj[tree].append(substitution)
 
                 #size= len(objects)
                 #tree_id = len(self.all_trees) - 1
