@@ -33,9 +33,9 @@ class ForestExtractor:
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
-        self.unwanted_atoms = set(['proximity', 'near', 'next',
+        self.unwanted_atoms = set(['proximity', 'next', 'near',
             'beside', 'left_of', 'right_of', 'far', 'behind', 'in_front_of',
-            'between', 'touching', 'inside', 'outside', 'below', 'above',
+            'between', 'touching', 'outside', 'above', 'below', # 'inside',
             # Useless stuff. null means the object class isn't specified (something that was used in the
             # Multiverse world but not in the Unity world. Maybe it should be?
             'is_movable', 'is_noisy', 'null', 'id_null', 'Object',
@@ -50,7 +50,7 @@ class ForestExtractor:
             'night',
             'actionFailed','decreased',
             'food_bowl', # redundant with is_edible
-            'foodState','egg','dish',
+            #'foodState','egg','dish',
             # The can_do predicate is useful but should be in an AtTimeLink
             'can_do'])
         
@@ -64,10 +64,12 @@ class ForestExtractor:
         # NOTE: If you set it to 0 here, it will give unique variables to every tree. BUT it will then count every occurrence of
         # a tree as different (because of the different variables!)
         #self.i = 0
+
+        self.event_embeddings = defaultdict(list)
         
         # fishgram-specific experiments. Refactor later
         # map from unique tree to set of embeddings. An embedding is a set of bindings. Maybe store the corresponding link too.
-        self.tree_embeddings = {} 
+        self.tree_embeddings = defaultdict(list)
         
         # The incoming links (or rather trees/predicates) for each object.
         # For each object, the list of unique trees using it.
@@ -137,13 +139,13 @@ class ForestExtractor:
                         self.all_timestamps.add(obj)
                     
                 # fishgram-specific
-                if tree not in self.tree_embeddings:
-                    self.tree_embeddings[tree] = []
                 substitution = subst_from_binding(objects)
-                self.tree_embeddings[tree].append(substitution)
-
-                for obj in objects:
-                    self.incoming[obj].append(tree)
+                if tree.op == 'AtTimeLink':
+                    self.event_embeddings[tree].append(substitution)
+                else:
+                    self.tree_embeddings[tree].append(substitution)
+                    for obj in objects:
+                        self.incoming[obj].append(tree)
 
                 #size= len(objects)
                 #tree_id = len(self.all_trees) - 1

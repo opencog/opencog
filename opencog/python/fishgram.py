@@ -64,7 +64,7 @@ class Fishgram:
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 200
+        self.max_per_layer = 1000
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -173,8 +173,8 @@ class Fishgram:
                 #print '\x1B[1;32m# Conjunctions of size', conj_length,':', len(new_layer), 'pruned', pruned,'\x1B[0m'
                 print format_log( '\x1B[1;32m# Conjunctions of size', conj_length, ':', len(new_layer), '\x1B[0m')
 
-                for ptn, embs in new_layer:
-                    print format_log(ptn, len(embs))
+                #for ptn, embs in new_layer:
+                #    print format_log(ptn, len(embs))
 
                 yield new_layer
             
@@ -351,20 +351,24 @@ class Fishgram:
                     for obj in prev_emb.values():
                         for tr_ in self.forest.incoming[obj]:
                             extensions[tr_] = self.forest.tree_embeddings[tr_]
+
+                # you could also have an index for events being in the future
+                rels_bindingsets = extensions.items() + self.forest.event_embeddings.items()
             else:
                 extensions = self.forest.tree_embeddings
+                rels_bindingsets = extensions.items()
 
-            for tr_, embs_ in extensions.items():
+            for rel_, rel_embs in rels_bindingsets:
 
             # Simpler option: Just check all potential extensions
-            #for tr_, embs_ in self.forest.tree_embeddings.items():
+            #for rel_, rel_embs in self.forest.tree_embeddings.items():
 
 #                if prev_conj != () and tr_ < self.awkward[prev_conj]:
 #                    #print 'OUT_OF_ORDER', tr_
 #                    continue
                 
                 # Give the tree new variables. Rewrite the embeddings to match.
-                tr, rebound_embs = self._create_new_variables(tr_, embs_)
+                rel, rebound_embs = self._create_new_variables(rel_, rel_embs)
                 
                 # They all have the same 'link label' (tree) but may be in different places.
                 for s in rebound_embs:
@@ -376,12 +380,12 @@ class Fishgram:
                             continue
                         remapping, new_s = tmp
                         
-                        remapped_tree = subst(remapping, tr)
+                        remapped_tree = subst(remapping, rel)
                         
                         if remapped_tree in prev_ptn.conj:
                             continue
                         
-                        if tr_.op == 'AtTimeLink' and prev_ptn.seqs:
+                        if rel_.op == 'AtTimeLink' and prev_ptn.seqs:
                             after = self._after_existing_actions(prev_ptn.seqs,remapped_tree,new_s)
 
                         # There needs to be a connection to the existing pattern.
@@ -394,7 +398,7 @@ class Fishgram:
                         #import pdb; pdb.set_trace()
                         
                         firstlayer = (prev_ptn.conj == () and prev_ptn.seqs == ())
-                        if tr_.op != 'AtTimeLink':
+                        if rel_.op != 'AtTimeLink':
                             if len(remapping) or firstlayer:
                                 conj += (remapped_tree,)
                             else:
