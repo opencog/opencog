@@ -182,19 +182,44 @@ class Fishgram:
 
     # Helper functions for extensions_simple
     # Code to handle variables. It's not important to understand this (to understand fishgram).
-    def _create_new_variables(self, tr, embeddings):
+
+    def _create_new_variables_rel(self, tr):
         sa_mapping = {}
         tr = standardize_apart(tr, sa_mapping)
-        
-        rebound_embs = []
-        for s in embeddings:
-            s2 = {}
-            for (old_var, new_var) in sa_mapping.items():
-                obj = s[old_var]
-                s2[new_var] = obj
-            rebound_embs.append(s2)
-        
-        return tr, rebound_embs
+
+        return tr, sa_mapping
+
+    def _use_new_variables_in_binding(self, sa_mapping, binding):
+        s2 = {}
+        for (old_var, new_var) in sa_mapping.items():
+            obj = binding[old_var]
+            s2[new_var] = obj
+
+        return s2
+
+            #    def _create_new_variables(self, tr, s):
+#        sa_mapping = {}
+#        tr = standardize_apart(tr, sa_mapping)
+#
+#        rebound_embs = []
+#        s2 = {}
+#        for (old_var, new_var) in sa_mapping.items():
+#            obj = s[old_var]
+#            s2[new_var] = obj
+#
+#        return tr, s2
+
+#    def _create_new_variables(self, tr, embeddings):
+#        sa_mapping = {}
+#        tr = standardize_apart(tr, sa_mapping)
+#
+#        rebound_embs = []
+#        for s in embeddings:
+#            s2 = {}
+#            for (old_var, new_var) in sa_mapping.items():
+#                obj = s[old_var]
+#                s2[new_var] = obj
+#            rebound_embs.append(s2)
 
     def _map_to_existing_variables(self, prev_binding, new_binding):
         # In this binding, a variable in the tree might fit an object that is already used.
@@ -343,9 +368,11 @@ class Fishgram:
         
         for (prev_ptn,  prev_embeddings) in prev_layer:
 
+            firstlayer = (prev_ptn.conj == () and prev_ptn.seqs == ())
+
             # Faster option: get the set of unique trees extending any object in any embedding for the conjunction,
             # and then do the remapping-checks etc
-            if len(prev_ptn.conj) or len(prev_ptn.seqs):
+            if not firstlayer:
                 extensions = {}
                 for prev_emb in prev_embeddings:
                     for obj in prev_emb.values():
@@ -355,8 +382,7 @@ class Fishgram:
                 # you could also have an index for events being in the future
                 rels_bindingsets = extensions.items() + self.forest.event_embeddings.items()
             else:
-                extensions = self.forest.tree_embeddings
-                rels_bindingsets = extensions.items()
+                rels_bindingsets = self.forest.tree_embeddings.items() + self.forest.event_embeddings.items()
 
             for rel_, rel_embs in rels_bindingsets:
 
@@ -366,16 +392,19 @@ class Fishgram:
 #                if prev_conj != () and tr_ < self.awkward[prev_conj]:
 #                    #print 'OUT_OF_ORDER', tr_
 #                    continue
-                
-                # Give the tree new variables. Rewrite the embeddings to match.
-                rel, rebound_embs = self._create_new_variables(rel_, rel_embs)
-                
-                # They all have the same 'link label' (tree) but may be in different places.
-                for s in rebound_embs:
+
+                rel, new_variables = self._create_new_variables_rel(rel_)
+
+                for rel_binding in rel_embs:
+                    # Give the tree new variables. Rewrite the embeddings to match.
+                    #rel, rel_binding_new_vars = self._create_new_variables(rel_, rel_binding)
+                    rel_binding_new_vars = self._use_new_variables_in_binding(new_variables, rel_binding)
+
+                    # They all have the same 'link label' (tree) but may be in different places.
                     for e in prev_embeddings:
                         # for each new var, if the object is in the previous embedding, then re-map them.
                         
-                        tmp = self._map_to_existing_variables(e, s)
+                        tmp = self._map_to_existing_variables(e, rel_binding_new_vars)
                         if tmp == None:
                             continue
                         remapping, new_s = tmp
@@ -396,8 +425,7 @@ class Fishgram:
                         conj = prev_ptn.conj
                         seqs = prev_ptn.seqs
                         #import pdb; pdb.set_trace()
-                        
-                        firstlayer = (prev_ptn.conj == () and prev_ptn.seqs == ())
+
                         if rel_.op != 'AtTimeLink':
                             if len(remapping) or firstlayer:
                                 conj += (remapped_tree,)
