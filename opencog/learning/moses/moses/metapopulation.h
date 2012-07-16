@@ -514,7 +514,7 @@ struct metapopulation : bscored_combo_tree_set
 #define OFFSET 50
             int which = OFFSET + randGen().randint(popsz-OFFSET);
             // using std is necessary to break the ambiguity between
-            // boost::next and std::next. Wierdly enough this appears
+            // boost::next and std::next. Weirdly enough this appears
             // only 32bit arch
             erase(std::next(begin(), which));
             popsz --;
