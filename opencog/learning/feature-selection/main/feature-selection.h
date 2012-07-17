@@ -30,6 +30,7 @@
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/binary_search.hpp>
 #include <boost/range/algorithm/adjacent_find.hpp>
+#include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/irange.hpp>
 
 #include <opencog/util/oc_omp.h>
@@ -227,10 +228,8 @@ Table add_force_features(const Table& table,
 
     // get the complementary of their positions
     std::vector<int> fnsel_pos_comp;
-    arity_t a = dataFileArity(fs_params.input_file);
-    for (int i = 0; i <= a; i++)
-        if (!boost::binary_search(fnsel_pos, i))
-            fnsel_pos_comp.push_back(i);
+    auto ir = boost::irange(0, dataFileArity(fs_params.input_file) + 1);
+    boost::set_difference(ir, fnsel_pos, back_inserter(fnsel_pos_comp));
 
     // get header of the input table
     auto header = loadHeader(fs_params.input_file);
