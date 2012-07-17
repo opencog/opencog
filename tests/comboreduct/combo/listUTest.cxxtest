@@ -5,9 +5,37 @@ using namespace ant_combo;
 using namespace opencog;
 using namespace std;
 
+string teval(string input)
+{
+    combo_tree tr;
+    stringstream ss(input);
+    ss >> tr;
+    vertex_seq empty;
+    stringstream ss_lst;
+    ss_lst << eval_throws_tree(empty, tr);
+    return ss_lst.str();
+}
+
 class listUTest :  public CxxTest::TestSuite {
 public:
-    void test_list(){
+    void test_list()
+    {
+        TS_ASSERT_EQUALS(teval("list(a b)"), string("list(a b) "));
+        TS_ASSERT_EQUALS(teval("list(a b c)"), string("list(a b c) "));
+        TS_ASSERT_EQUALS(teval("car(list(a b c))"), string("a "));
+        TS_ASSERT_EQUALS(teval("cdr(list(a b c))"), string("list(b c) "));
+        TS_ASSERT_EQUALS(teval("cons(a list)"), string("list(a) "));
+        TS_ASSERT_EQUALS(teval("cons(a cons(b list))"), string("list(a b) "));
+        TS_ASSERT_EQUALS(teval("cons(a cons(b cons (c list)))"), string("list(a b c) "));
+        TS_ASSERT_EQUALS(teval("car(cons(a cons(b cons (c list))))"), string("a "));
+        TS_ASSERT_EQUALS(teval("cdr(cons(a cons(b cons (c list))))"), string("list(b c) "));
+
+        TS_ASSERT_EQUALS(teval("list ( +(1 1)  *(2 2))"), string("list(2 4) "));
+        TS_ASSERT_EQUALS(teval("car( list ( +(1 1)  *(2 2)))"), string("2 "));
+    }
+
+    void test_list_stuff()
+    {
         combo_tree tr;
         stringstream ss("cdr(cons(car(list(1 4 5)) list(2 3)))");
         ss >> tr;
@@ -15,7 +43,7 @@ public:
         stringstream ss_lst;
         ss_lst << eval_throws_tree(empty, tr);
         stringstream ss_expected("list(2 3) ");
-        TS_ASSERT_EQUALS(ss_lst.str(),ss_expected.str());
+        TS_ASSERT_EQUALS(ss_lst.str(), ss_expected.str());
     }
 
 };
