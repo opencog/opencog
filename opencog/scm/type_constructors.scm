@@ -102,6 +102,8 @@
 	(apply cog-new-link (append (list 'EventualSequentialAND) x)))
 (define (EventualSequentialImplication . x)
 	(apply cog-new-link (append (list 'EventualSequentialImplication) x)))
+(define (BeforeLink . x)
+	(apply cog-new-link (append (list 'BeforeLink) x)))
 (define (HypotheticalLink . x)
 	(apply cog-new-link (append (list 'HypotheticalLink) x)))
 (define (MixedImplicationLink . x)
