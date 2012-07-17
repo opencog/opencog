@@ -111,6 +111,7 @@ class Chainer:
             # is this line necessary?
             self.rules.append(dummy_app)
             self.bc_later = OrderedSet([dummy_app])
+            self.add_app_to_pd(dummy_app)
     
             # viz - visualize the root
             self.viz.outputTarget(target, None, 0, 'TARGET')
@@ -200,22 +201,6 @@ class Chainer:
         # And when it does happen, often you will find all the goals for a clone of the app,
         # and not the original app.
         
-        def proved_app(app, planning_mode):
-            # swith the function off, as uncertainty inference required prove on goal in mutiple ways
-            return False
-            if planning_mode or self.head_dag(app).tv.count == 0:
-                return False
-            else:
-                return True
-        def proved_goal(goal):
-            """
-            It work because of the excution order in function @bc_step
-            """
-            # swith the function off
-            return False
-            goal_dag = self.expr2pdn(goal)
-            if goal_dag.tv.count > 0:
-                return True
         assert self.bc_later
         self.trace.step_count += 1
         #print 'bcq', map(str, self.bc_later)
@@ -224,44 +209,30 @@ class Chainer:
         #next_target = self.get_fittest(self.bc_later) # Best-first search
         #next_target = self.select_stochastic() # A better version of best-first search (still a prototype)
 
-        next_app = self.bc_later.pop_first() # Breadth-first search
-        #next_app = self.get_fittest(self.bc_later) # Best-first search
+        #next_app = self.bc_later.pop_first() # Breadth-first search
         #log.info(format_log('-BCQ', next_app))
 
-        head = self.expr2pdn(next_app.head.canonical())
-        for arg in head.args:
-            if arg.op == next_app :
-                self.trace.visit_order += 1
-                arg.trace.visit_order = self.trace.visit_order
+        #if len(self.bc_later) == 1:
+        #    next_apps = self.bc_later
+        #else:
+        next_apps = self.select_stochastic() # A better version of best-first search (still a prototype)
+        for next_app in next_apps:
+            # This step will also call propogate_results and propogate_specialization,
+            # so it will check for premises, compute the TV if possible, etc.
+            self.find_axioms_for_rule_app(next_app)
 
-        # this could happen because of pushed all app with the same head(brothers) in the stack,
-        # and some of brother may proved the head already, it works only in depth first search!
-        if proved_app(next_app, self.planning_mode):
-            return
+            # This should probably use the extra things in found_axiom
+            self.propogate_result(next_app)
 
-        # This step will also call propogate_results and propogate_specialization,
-        # so it will check for premises, compute the TV if possible, etc.
-        self.find_axioms_for_rule_app(next_app)
-        # it always work 
-        if proved_app(next_app, self.planning_mode):
-            return
-        # This should probably use the extra things in found_axiom
-        self.propogate_result(next_app)
-        
-        #next_target = standardize_apart(next_target)
+            #next_target = standardize_apart(next_target)
 
-        for goal in next_app.goals:
-            # if goal is proved with an axiom  then skip rules
-            # there may be some goal is proved in previous step, if not all of them.
-            # and the proving path to the goal is shorter than expanding it with rules.
-            if proved_goal(goal):
-               continue 
-            apps = self.find_rule_applications(goal)
-            for a in apps:
-                t = a.standardize_apart()
-                t.trace = a.trace
-                self.add_app_if_good(t)
-    
+            for goal in next_app.goals:
+                apps = self.find_rule_applications(goal)
+
+                for a in apps:
+                    a = a.standardize_apart()
+                    self.add_app_if_good(a)
+
         return None
 
     def contains_isomorphic_tree(self, tr, idx):        
@@ -802,23 +773,7 @@ class Chainer:
         for subtree in tr.args:
             self.update_global_stats(subtree)
 
-    def propogate_scores_upward(self, expr_pdn, best_conf_below):
-        assert isinstance(expr_pdn, DAG)
-        assert isinstance(expr_pdn.op, Tree)
-        
-        # Record the highest confidence of a single expression below this one.
-        # This heuristic isn't used yet. It's not ideal - the idea is to estimate
-        # the confidence and/or mean that this expression will have, if you search
-        # for all ways of producing it. One better option:
-        # At each app, take the average "estimated TV" of its goals. And for each goal,
-        # take the summed confidence of its rules (or the best, or something - it depends
-        # on how you can combine the confidences using Revision)
-        expr_pdn.best_conf_below = max(expr_pdn.best_conf_below, best_conf_below)
-        
-        #print expr_pdn, expr_pdn.best_conf_below
-        
-        #print '====='
-
+    def propogate_scores_upward(self, axiom_app_pdn):
         conf = axiom_app_pdn.tv.confidence
         axiom_app_pdn.conf_below = conf
 
