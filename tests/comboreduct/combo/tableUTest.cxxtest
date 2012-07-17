@@ -143,19 +143,26 @@ public:
     }
     void test_insert_get_pos() {
         ITable it;
-        vertex_seq col = {id::logical_true, id::logical_false};
-        it.insert_col("col_label", col);
+        vertex_seq col1 = {id::logical_true, id::logical_false};
+        it.insert_col("label1", col1);
         {
             stringstream ss_res;
             ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("col_label\n1\n0\n"));
+            TS_ASSERT_EQUALS(ss_res.str(), string("label1\n1\n0\n"));
         }
-        auto lc = it.get_col(0);
+        vertex_seq col2 = {id::logical_false, id::logical_true};
+        it.insert_col("label2", col2);
+        {
+            stringstream ss_res;
+            ss_res << it;
+            TS_ASSERT_EQUALS(ss_res.str(), string("label1,label2\n1,0\n0,1\n"));
+        }
+        auto lc = it.get_col(1);
         it.insert_col(lc.first, lc.second, 0);
         {
             stringstream ss_res;
             ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("col_label,col_label\n1,1\n0,0\n"));
+            TS_ASSERT_EQUALS(ss_res.str(), string("label2,label1,label2\n0,1,0\n1,0,1\n"));
         }
     }
 };

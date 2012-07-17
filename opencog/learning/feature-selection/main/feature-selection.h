@@ -28,6 +28,8 @@
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/binary_search.hpp>
+#include <boost/range/algorithm/adjacent_find.hpp>
 #include <boost/range/irange.hpp>
 
 #include <opencog/util/oc_omp.h>
@@ -204,9 +206,9 @@ void moses_feature_selection(Table& table,
 }
 
 /**
- * Add forced features to table
+ * Add forced features to table.
  *
- * TODO: update type_tree
+ * TODO: update type_tree (if ever needed)
  */
 Table add_force_features(const Table& table,
                          const feature_selection_parameters& fs_params) {
@@ -227,7 +229,7 @@ Table add_force_features(const Table& table,
     std::vector<int> fnsel_pos_comp;
     arity_t a = dataFileArity(fs_params.input_file);
     for (int i = 0; i <= a; i++)
-        if (boost::find(fnsel_pos, i) == fnsel_pos.end())
+        if (!boost::binary_search(fnsel_pos, i))
             fnsel_pos_comp.push_back(i);
 
     // get header of the input table
@@ -241,14 +243,9 @@ Table add_force_features(const Table& table,
     type_tree tt = gen_signature(id::definite_object_type, fnsel.size());
     loadITable(fs_params.input_file, fns_itable, tt, fnsel_pos_comp);
 
-    std::cout << "fns_itable\n" << fns_itable;
-
     // Find the positions of the selected features
     std::vector<int> fsel_pos =
         find_features_positions(fs_params.input_file, ilabels);
-
-    ostreamlnContainer(std::cout << "ilabels" << std::endl, ilabels) << std::endl;
-    ostreamlnContainer(std::cout << "fsel_pos" << std::endl, fsel_pos) << std::endl;
 
     // insert the forced features in the right order
     Table new_table;
@@ -258,26 +255,49 @@ Table add_force_features(const Table& table,
     for (auto lit = fnsel_pos.cbegin(), rit = fsel_pos.cbegin();
          lit != fnsel_pos.cend(); ++lit) {
         int lpos = distance(fnsel_pos.cbegin(), lit);
-        std::cout << "lpos = " << lpos << std::endl;
         auto lc = fns_itable.get_col(lpos);
         while(rit != fsel_pos.cend() && *lit > *rit) ++rit;
-        int rpos = rit == fsel_pos.cend() ? distance(fsel_pos.cbegin(), rit) : -1;
-        std::cout << "rpos = " << lpos << std::endl;
+        int rpos = rit != fsel_pos.cend() ? distance(fsel_pos.cbegin(), rit) : -1;
         new_table.itable.insert_col(lc.first, lc.second, rpos);
     }
 
     return new_table;
 }
 
+/**
+ * update fs_params.target_feature so that it keeps the same relative
+ * position with the selected features.
+ */
+int update_target_feature(const Table& table,
+                          const feature_selection_parameters& fs_params) {
+    int tfp = fs_params.target_feature;
+    if (tfp <= 0)               // it is either first or last
+        return tfp;
+    else {
+        // Find the positions of the selected features
+        std::vector<int> fsel_pos =
+            find_features_positions(fs_params.input_file,
+                                    table.itable.get_labels());
+        if (tfp < fsel_pos.front()) // it is first
+            return 0;
+        else if (tfp > fsel_pos.back()) // it is last
+            return -1;
+        else {                  // it is somewhere in between
+            auto it = boost::adjacent_find(fsel_pos, [tfp](int l, int r) {
+                    return l < tfp && tfp < r; });
+            return distance(fsel_pos.begin(), ++it);
+        }
+    }
+}
+
 void write_results(const Table& table,
                    const feature_selection_parameters& fs_params) {
-    if(fs_params.output_file.empty()) {
-        std::cout << "fs_params.force_features.empty()? " << fs_params.force_features_str.empty() << std::endl;
-        ostreamTable(std::cout,
-                     fs_params.force_features_str.empty()?
-                     table : add_force_features(table, fs_params));
-    } else
-        saveTable(fs_params.output_file, table);
+    Table table_wff = add_force_features(table, fs_params);
+    int tfp = update_target_feature(table_wff, fs_params);
+    if(fs_params.output_file.empty())
+        ostreamTable(std::cout, table_wff, tfp);
+    else
+        saveTable(fs_params.output_file, table_wff, tfp);
 }
 
 void incremental_feature_selection(Table& table,
