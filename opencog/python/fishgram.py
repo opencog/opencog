@@ -436,7 +436,7 @@ class Fishgram:
                         
                         remapped_tree = subst(remapping, rel)
                         
-                        if remapped_tree in prev_ptn.conj:
+                        if remapped_tree in prev_ptn.conj+prev_ptn.seqs:
                             continue
                         
                         if rel_.op == 'AtTimeLink' and prev_ptn.seqs:
