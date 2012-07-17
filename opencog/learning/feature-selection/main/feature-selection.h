@@ -227,8 +227,7 @@ Table add_force_features(const Table& table,
     std::vector<int> fnsel_pos_comp;
     arity_t a = dataFileArity(fs_params.input_file);
     for (int i = 0; i <= a; i++)
-        if (boost::find(fnsel_pos, i) == fnsel_pos.end()
-            && fs_params.target_feature != i)
+        if (boost::find(fnsel_pos, i) == fnsel_pos.end())
             fnsel_pos_comp.push_back(i);
 
     // get header of the input table
@@ -242,9 +241,14 @@ Table add_force_features(const Table& table,
     type_tree tt = gen_signature(id::definite_object_type, fnsel.size());
     loadITable(fs_params.input_file, fns_itable, tt, fnsel_pos_comp);
 
+    std::cout << "fns_itable\n" << fns_itable;
+
     // Find the positions of the selected features
     std::vector<int> fsel_pos =
         find_features_positions(fs_params.input_file, ilabels);
+
+    ostreamlnContainer(std::cout << "ilabels" << std::endl, ilabels) << std::endl;
+    ostreamlnContainer(std::cout << "fsel_pos" << std::endl, fsel_pos) << std::endl;
 
     // insert the forced features in the right order
     Table new_table;
@@ -252,13 +256,13 @@ Table add_force_features(const Table& table,
     new_table.itable = itable;
     // insert missing columns from fns_itable to new_table.itable
     for (auto lit = fnsel_pos.cbegin(), rit = fsel_pos.cbegin();
-         lit == fnsel_pos.cend(); ++lit) {
+         lit != fnsel_pos.cend(); ++lit) {
         int lpos = distance(fnsel_pos.cbegin(), lit);
+        std::cout << "lpos = " << lpos << std::endl;
         auto lc = fns_itable.get_col(lpos);
-        while(rit != fsel_pos.cend() && *lit > *rit) {
-            ++rit;
-        }
+        while(rit != fsel_pos.cend() && *lit > *rit) ++rit;
         int rpos = rit == fsel_pos.cend() ? distance(fsel_pos.cbegin(), rit) : -1;
+        std::cout << "rpos = " << lpos << std::endl;
         new_table.itable.insert_col(lc.first, lc.second, rpos);
     }
 

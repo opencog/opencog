@@ -225,7 +225,7 @@ public:
      */
     void insert_col(const std::string& l, const vertex_seq& col, int pos = -1) {
         // insert label
-        labels.insert(pos > 0 ? labels.begin() + pos : labels.end(), l);
+        labels.insert(pos >= 0 ? labels.begin() + pos : labels.end(), l);
 
         // insert values
         if (empty()) {
@@ -235,7 +235,7 @@ public:
         } else {
             for (unsigned i = 0; i < col.size(); i++) {
                 auto& row = (*this)[i];
-                row.insert(pos > 0 ? row.begin() + pos : row.end(), col[i]);
+                row.insert(pos >= 0 ? row.begin() + pos : row.end(), col[i]);
             }
         }
     }
