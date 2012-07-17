@@ -558,6 +558,10 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
             return enum_t(token);
         OC_ASSERT(false, "Enum type must begin with alphabetic char, but %s doesn't", token.c_str());
         break;
+
+    case id::definite_object_type:
+        return token;
+        break;
  
     default:
         stringstream ss;
@@ -841,13 +845,9 @@ ostream& operator<<(ostream& out, const ITable& it)
 {
     ostreamlnContainer(out, it.get_labels(), ",");
     foreach(const vertex_seq& row, it) {
-        for(unsigned i = 0; i < row.size();) {
-            out << vertex_to_str(row[i]);
-            ++i;
-            if(i < row.size())
-                out << ",";
-        }
-        out << endl;
+        vector<string> row_str;
+        boost::transform(row, back_inserter(row_str), vertex_to_str);
+        ostreamlnContainer(out, row_str, ",");
     }
     return out;
 }

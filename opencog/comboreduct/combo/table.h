@@ -140,9 +140,9 @@ class ITable : public std::vector<vertex_seq>
 {
 public:
     typedef std::vector<vertex_seq > super;
+    typedef std::vector<std::string> string_seq;
     ITable();
-    ITable(const super& mat,
-           std::vector<std::string> il = std::vector<std::string>());
+    ITable(const super& mat, string_seq il = string_seq());
     /**
      * generate an input table according to the signature tt.
      *
@@ -159,16 +159,16 @@ public:
            contin_t min_contin = -1.0, contin_t max_contin = 1.0);
 
     // set input labels
-    void set_labels(const std::vector<std::string>& il);
-    const std::vector<std::string>& get_labels() const;
+    void set_labels(const string_seq& il);
+    const string_seq& get_labels() const;
 
     // like get_labels but filtered accordingly to a container of
     // arity_t. Each value of that container corresponds to the column
     // index of the ITable (starting from 0).
     template<typename F>
-    std::vector<std::string> get_filtered_labels(const F& filter)
+    string_seq get_filtered_labels(const F& filter)
     {
-        std::vector<std::string> res;
+        string_seq res;
         foreach(arity_t a, filter)
             res.push_back(get_labels()[a]);
         return res;
@@ -219,13 +219,44 @@ public:
         return res;
     }
 
+    /**
+     * Insert a column col in the itable at position pos with label
+     * l. If pos is negative then it inserts after the last column.
+     */
+    void insert_col(const std::string& l, const vertex_seq& col, int pos = -1) {
+        // insert label
+        labels.insert(pos > 0 ? labels.begin() + pos : labels.end(), l);
+
+        // insert values
+        if (empty()) {
+            OC_ASSERT(pos < 0);
+            foreach (const auto& v, col)
+                push_back({v});
+        } else {
+            for (unsigned i = 0; i < col.size(); i++) {
+                auto& row = (*this)[i];
+                row.insert(pos > 0 ? row.begin() + pos : row.end(), col[i]);
+            }
+        }
+    }
+
+    /**
+     * Get the (pos+1)th column and its label
+     */
+    std::pair<std::string, vertex_seq> get_col(int pos) const {
+        vertex_seq col;
+        foreach (const auto& row, *this)
+            col.push_back(row[pos]);
+        return {labels[pos], col};
+    }
+
 protected:
-    mutable std::vector<std::string> labels; // list of input labels
+    mutable string_seq labels; // list of input labels
 
 private:
-    std::vector<std::string> get_default_labels() const
+    string_seq get_default_labels() const
     {
-        std::vector<std::string> res;
+        string_seq res;
         for(arity_t i = 1; i <= get_arity(); ++i)
             res.push_back(default_input_label
                           + boost::lexical_cast<std::string>(i));
