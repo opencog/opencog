@@ -477,7 +477,7 @@ class Chainer:
                         
                         # Record the best confidence score below a PDN. This can change
                         # at any time.
-                        #self.propogate_scores_upward(axiom_app_pdn)
+                        self.propogate_scores_upward(axiom_app_pdn)
                     else:
                         # add specialized trees above this result (if necessary)
                         self.propogate_specialization(axiom_app.head, i, app)
@@ -817,13 +817,57 @@ class Chainer:
         
         #print expr_pdn, expr_pdn.best_conf_below
         
+        #print '====='
+
+        conf = axiom_app_pdn.tv.confidence
+        axiom_app_pdn.conf_below = conf
+
+        #print axiom_app_pdn, axiom_app_pdn.conf_below
+
+        assert len(axiom_app_pdn.parents) == 1
+
+        for parent_expr_pdn in axiom_app_pdn.parents:
+            assert isinstance(parent_expr_pdn.op, Tree)
+
+            self.propogate_scores_upward_expr(parent_expr_pdn)
+
+    def propogate_scores_upward_app(self, app_pdn):
+        # The ability to use an app depends on the TruthValues found for all of its goals
+
+        confs_below = [child_expr_pdn.conf_below for child_expr_pdn in app_pdn.args]
+        average_conf_below = sum(confs_below)*1.0/len(confs_below)
+
+        app_pdn.conf_below = average_conf_below
+
+        #print app_pdn, app_pdn.conf_below
+
+        # propogate the scores upward through the expression that this app produces and
+        # all apps which use that expression as a goal
+        assert len(app_pdn.parents) == 1
+
+        for parent_expr_pdn in app_pdn.parents:
+            assert isinstance(parent_expr_pdn.op, Tree)
+
+            self.propogate_scores_upward_expr(parent_expr_pdn)
+
+
+    def propogate_scores_upward_expr(self, expr_pdn):
+        # The ability to produce an expression depends on the best app available for it.
+
+        confs_below = [child_app_pdn.conf_below for child_app_pdn in expr_pdn.args]
+        best_conf_below = max(confs_below)
+
+        expr_pdn.conf_below = best_conf_below
+
+        #print expr_pdn, expr_pdn.conf_below
+
+        # propogate the scores upward through all apps that use this expression as a goal
+
         for parent_app_pdn in expr_pdn.parents:
             assert isinstance(parent_app_pdn.op, rules.Rule)
-            
-            assert len(parent_app_pdn.parents) == 1
-            #assert not parent_app_pdn.any_path_up_contains([expr_pdn])
-            parent_expr_pdn = parent_app_pdn.parents[0]
-            self.propogate_scores_upward(parent_expr_pdn, best_conf_below)
+
+            self.propogate_scores_upward_app(parent_app_pdn)
+
 
     def pathfinding_score(self, expr):
         def get_coords(expr):
@@ -895,63 +939,69 @@ class Chainer:
         queue.remove(best)
         
         return best
-    
-    # TODO make it work now that the backward chaining queue is apps instead of targets.
+
     def select_stochastic(self):
-        '''Choose a PDN to explore next. Based on the first part of Monte Carlo Tree Search.
-        Currently only uses the best confidence found in a subtree - the things used in
-        bc_score are now redundant.'''
-        next_expr_pdn = self.select_stochastic_helper(self.expr2pdn(self.target))
-        return next_expr_pdn.op
-        
-    def select_stochastic_helper(self, expr_pdn):
-        if expr_pdn.is_leaf():
-            return expr_pdn
-        else:
-            sub_expr_pdns = []
-            for app_pdn in expr_pdn.args:
-                # This will automatically skip rules with no goals
-                # (e.g. the rule for just looking up an existing atom)
-                for subexpr_pdn in app_pdn.args:
-                    sub_expr_pdns.append(subexpr_pdn)
-            
-            # It has been expanded but either a) all the apps are axioms
-            # or b) it was impossible to produce it. The following while loop
-            # will continue trying out results until something useful is found.
-            # It might be simpler to record/update the "number of descendents" in each PDN
-            if len(sub_expr_pdns) == 0:
-                return None
-            
-            def get_score(pdn):
-                # The score needs to allow exploring things with no existing results
-                return pdn.best_conf_below + 1.0
-            
-            # The probability of choosing a subtree = the probability of it being the best one.
-            # You will usually need more than one subtree (because most rules require more than one goal,
-            # and you can also combine results using revision)
-            while len(sub_expr_pdns):
-                total_score = sum(get_score(s) for s in sub_expr_pdns)
-                probs = [get_score(s)/total_score for s in sub_expr_pdns]
-                # won't work because of floating point error
-                #assert sum(probs) == 1
-                
-                r = random.random()
-                index = 0
-                while (r > 0):
-                    r -= probs[index]
-                    index += 1
-                
-                # We want the last index it saw before r < 0
-                index -=1
-    
-                next_expr_pdn = sub_expr_pdns[index]
-                potential_result = self.select_stochastic_helper(next_expr_pdn)
-                if (potential_result is None):
-                    del sub_expr_pdns[index]
-                else:
-                    return potential_result
-            
-            return None
+        '''Choose a list of PDNs to explore next. Based on the first part of Monte Carlo Tree Search.
+        Most of the things used in bc_score are now redundant.'''
+        expr_pdns_to_explore = self.recurse_expr(self.expr2pdn(self.root))
+        return [ep.op for ep in expr_pdns_to_explore]
+
+    def recurse_app(self, app_pdn):
+        #print 'recurse_app', app_pdn
+        # You should try to produce every goal for an app.
+        # Let's say for simplicity, that you just expand one descendant
+        # of every goal (i.e. for every goal, you put in one step of effort)
+        # for proving it.
+
+        # If we've gone down to an axiom, give up. The axiom PDNs are added
+        # when an app is expanded by bc_step.
+        if len(app_pdn.op.goals) == 0:
+            return []
+
+        ## If some of the goals have no children currently, let's assume it hasn't
+        ## been expanded yet.
+        #if any(len(expr_pdn.args) == 0 for expr_pdn in app_pdn.args):
+        if app_pdn.bc_expanded == False:
+            app_pdn.bc_expanded = True
+            assert app_pdn.op in self.bc_later
+            return [app_pdn]
+
+        # Use a set because sometimes a goal will be used by more than one proof path.
+        return set(concat_lists(list(self.recurse_expr(expr_pdn)) for expr_pdn in app_pdn.args))
+
+    def recurse_expr(self, expr_pdn):
+        #print 'recurse_expr', expr_pdn
+        if not expr_pdn.args:
+            return []
+
+        # Choose an app below
+
+        def get_score(app_pdn):
+            #return 1.0
+            # You need to give everything some chance,even if its score is 0.0
+            # How much chance to give it is a parameter...
+            return app_pdn.conf_below + 1.5
+
+        app_pdns = expr_pdn.args
+        i = self.weighted_select(app_pdns, get_score)
+        chosen_app = app_pdns[i]
+
+        return self.recurse_app(chosen_app)
+
+    def weighted_select(self, items, score_function):
+        total_score = sum(score_function(s) for s in items)
+        probs = [score_function(s)/total_score for s in items]
+
+        r = random.random()
+        index = 0
+        while (r > 0):
+            r -= probs[index]
+            index += 1
+
+        # We want the last index it saw before r < 0
+        index -=1
+
+        return index
 
 from urllib2 import URLError
 def check_connected(method):
@@ -1110,8 +1160,8 @@ class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
                             T('EvaluationLink', goal_atom)
                         )
                     )
-    
-        #try:
+
+    #try:
         do_planning(atomspace, target, self.chainer)
         #except Exception, e:
         #    log.info(format_log(e))
@@ -1133,7 +1183,7 @@ def do_planning(space, target, chainer = None):
     if chainer is None:
         chainer = Chainer(a, planning_mode = True)
 
-    result_atoms = chainer.bc(target, 2000)
+    result_atoms = chainer.bc(target, 5000)
     
     print "inference result: ",  result_atoms
     

@@ -109,6 +109,13 @@ def orFormula(tvs, U):
     
     return (s_tot, n_tot)
 
+def andPartitionFormula(tvs, U):
+    [(sAndA, nAndA), (sAndB, nAndB)] = tvs
+
+    s = sAndA * sAndB
+    n = nAndA + nAndB
+    return (s, n)
+
 def ext2InhFormula(tvs, U):
     [(sAB, nAB)] = tvs
     

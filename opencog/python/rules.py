@@ -130,14 +130,14 @@ def rules(a, deduction_types):
                                     name='Deduction', 
                                     formula = formulas.deductionSimpleFormula))
     
-    ## PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
-    #for type in deduction_types:
-    #    rules.append(Rule( T(type, 2, 1), 
-    #                                 [T(type, 1, 2),
-    #                                  Var(1),
-    #                                  Var(2)], 
-    #                                 name='Inversion', 
-    #                                 formula = formulas.inversionFormula))
+    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1), 
+                                     [T(type, 1, 2),
+                                      Var(1),
+                                      Var(2)], 
+                                     name='Inversion', 
+                                     formula = formulas.inversionFormula))
 
     # Calculating logical And/Or/Not. These have probabilities attached,
     # but they work similarly to the Boolean versions.
@@ -162,7 +162,45 @@ def rules(a, deduction_types):
                        [ Var(1) ],
                        name = 'Not', 
                        formula = formulas.notFormula))
-    
+
+    # A rule to create an AndLink from two AndLinks.
+    # There's no point in using size 2 because the premises wouldn't be in AndLinks
+    for totalsize in xrange(4,11):
+        for size_a in xrange(2, totalsize-1):
+            size_b = totalsize - size_a
+
+            vars = [new_var() for x in xrange(totalsize)]
+            and_result = T('AndLink', vars)
+
+            and_a = T('AndLink', vars[0:size_a])
+            and_b = T('AndLink', vars[size_a:totalsize])
+
+            r = Rule(and_result,
+                     [and_a,
+                      and_b],
+                     name = 'AndPartition %s/%s' % (size_a, size_b),
+                     formula = formulas.andPartitionFormula
+                     )
+            rules.append(r)
+
+    # A rule to create an AndLink from an AndLink and a single premise
+    for totalsize in xrange(3,11):
+        size_b = totalsize-1
+
+        vars = [new_var() for x in xrange(totalsize)]
+        and_result = T('AndLink', vars)
+
+        thing_a = vars[0]
+        and_b = T('AndLink', vars[1:totalsize])
+
+        r = Rule(and_result,
+            [thing_a,
+             and_b],
+            name = 'AndBuilding %s' % (size_b,),
+            formula = formulas.andPartitionFormula
+        )
+        rules.append(r)
+
     # PLN's heuristic Rules to convert one kind of link to another. There are other
     # variations on this Rule defined in the PLN book, but not implemented yet.
     rules.append(Rule(T('InheritanceLink', 1, 2),

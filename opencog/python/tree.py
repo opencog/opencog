@@ -165,7 +165,6 @@ class DAG(Tree):
         self.parents = []
         
         self.depth = depth
-        self.best_conf_below = 0.0
 
         self.trace = Data_Trace()
         self.tv = TruthValue(0,0)
@@ -173,6 +172,8 @@ class DAG(Tree):
            self.trace = op.trace
         except Exception:
             pass
+
+        self.conf_below = 0.0
 
         self.bc_expanded = False
 
