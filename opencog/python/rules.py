@@ -19,11 +19,24 @@ def evaluation_link_template(predicate = None, arguments = None):
                 predicate,
                 args_tree)
 
-def actionDone_template(atomspace):
+def actionDone_template(atomspace, execution_link = None):
+    if execution_link == None:
+        execution_link = new_var()
     return evaluation_link_template(
                             atomspace.add(t.PredicateNode, name='actionDone'),
-                            [new_var()]
+                            [execution_link]
                         )
+
+def execution_link_template(schema, arguments = None):
+    if arguments == None:
+        args_tree = new_var()
+    else:
+        args_tree = T('ListLink', arguments)
+
+    return T('ExecutionLink',
+        schema,
+        args_tree)
+
 
 def rules(a, deduction_types):
     '''This function sets up all the Rules available in PLN. The concept of a Rule is the same as
@@ -163,43 +176,44 @@ def rules(a, deduction_types):
                        name = 'Not', 
                        formula = formulas.notFormula))
 
-    # A rule to create an AndLink from two AndLinks.
-    # There's no point in using size 2 because the premises wouldn't be in AndLinks
-    for totalsize in xrange(4,11):
-        for size_a in xrange(2, totalsize-1):
-            size_b = totalsize - size_a
+    for type in ['AndLink', 'SimultaneousAndLink']:
+        # A rule to create an AndLink from two AndLinks.
+        # There's no point in using size 2 because the premises wouldn't be in AndLinks
+        for totalsize in xrange(4,11):
+            for size_a in xrange(2, totalsize-1):
+                size_b = totalsize - size_a
+
+                vars = [new_var() for x in xrange(totalsize)]
+                and_result = T(type, vars)
+
+                and_a = T(type, vars[0:size_a])
+                and_b = T(type, vars[size_a:totalsize])
+
+                r = Rule(and_result,
+                         [and_a,
+                          and_b],
+                         name = type[:-4]+'Partition %s/%s' % (size_a, size_b),
+                         formula = formulas.andPartitionFormula
+                         )
+                rules.append(r)
+
+        # A rule to create an AndLink from an AndLink and a single premise
+        for totalsize in xrange(3,11):
+            size_b = totalsize-1
 
             vars = [new_var() for x in xrange(totalsize)]
-            and_result = T('AndLink', vars)
+            and_result = T(type, vars)
 
-            and_a = T('AndLink', vars[0:size_a])
-            and_b = T('AndLink', vars[size_a:totalsize])
+            thing_a = vars[0]
+            and_b = T(type, vars[1:totalsize])
 
             r = Rule(and_result,
-                     [and_a,
-                      and_b],
-                     name = 'AndPartition %s/%s' % (size_a, size_b),
-                     formula = formulas.andPartitionFormula
-                     )
+                [thing_a,
+                 and_b],
+                name = type[:-4]+'AndBuilding %s' % (size_b,),
+                formula = formulas.andPartitionFormula
+            )
             rules.append(r)
-
-    # A rule to create an AndLink from an AndLink and a single premise
-    for totalsize in xrange(3,11):
-        size_b = totalsize-1
-
-        vars = [new_var() for x in xrange(totalsize)]
-        and_result = T('AndLink', vars)
-
-        thing_a = vars[0]
-        and_b = T('AndLink', vars[1:totalsize])
-
-        r = Rule(and_result,
-            [thing_a,
-             and_b],
-            name = 'AndBuilding %s' % (size_b,),
-            formula = formulas.andPartitionFormula
-        )
-        rules.append(r)
 
     # PLN's heuristic Rules to convert one kind of link to another. There are other
     # variations on this Rule defined in the PLN book, but not implemented yet.
@@ -296,6 +310,16 @@ def planning_rules(atomspace):
                            args,
                            type[:-4], 
                            formula = formulas.andSymmetricFormula))
+
+    # A hacky rule for determining SimultaneousAndlinks.
+    type = 'SimultaneousAndLink'
+    for size in xrange(11):
+        args = [new_var() for i in xrange(size+1)]
+        rules.append(Rule(T(type, args),
+            args,
+            type[:-4],
+            formula = formulas.andSymmetricFormula))
+
 
     return rules
 
