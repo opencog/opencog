@@ -30,8 +30,15 @@ public:
         TS_ASSERT_EQUALS(teval("car(cons(a cons(b cons (c list))))"), string("a "));
         TS_ASSERT_EQUALS(teval("cdr(cons(a cons(b cons (c list))))"), string("list(b c) "));
 
+        // Should be able to eval list contents
         TS_ASSERT_EQUALS(teval("list ( +(1 1)  *(2 2))"), string("list(2 4) "));
         TS_ASSERT_EQUALS(teval("car( list ( +(1 1)  *(2 2)))"), string("2 "));
+        TS_ASSERT_EQUALS(teval("cdr( list ( +(1 1)  *(2 2)))"), string("list(4) "));
+
+        // Result of car should be usable in non-list structures
+        TS_ASSERT_EQUALS(teval("+(40 car( list ( +(1 1)  *(2 2))))"), string("42 "));
+        TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 20)"), string("42 "));
+        TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 car(cdr(list(50 20))))"), string("42 "));
     }
 
     void test_list_stuff()
