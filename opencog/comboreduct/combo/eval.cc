@@ -373,14 +373,26 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             }
 
             // new tree: f(car foldr(f v cdr))
+
             sib_it f = it.begin();
-            combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
-            sib_it loc =cb_tr.begin();
-            sib_it head_list_it = itend.begin();
-            cb_tr.append_child(loc, head_list_it);
-            tr.erase(head_list_it);
-            sib_it it_begin = tr.begin();
-            cb_tr.append_child(loc, it_begin);
+            combo_tree cb_tr(f);
+            sib_it loc = cb_tr.begin();
+            combo_tree car_lst(id::car); 
+            sib_it car_lst_it = car_lst.begin();
+            car_lst.append_child(car_lst_it, itend);
+            car_lst = eval_throws_tree(bmap,car_lst_it,pe);
+            car_lst_it = car_lst.begin();
+            cb_tr.append_child(loc, car_lst_it);
+
+            combo_tree cdr_lst(id::cdr);
+            sib_it cdr_lst_it = cdr_lst.begin();
+            cdr_lst.append_child(cdr_lst_it, itend);
+            tr.erase(itend);
+            sib_it tr_it = tr.begin();
+            cdr_lst = eval_throws_tree(bmap, cdr_lst_it,pe);
+            cdr_lst_it = cdr_lst.begin();
+            tr.append_child(tr_it, cdr_lst_it);
+            cb_tr.append_child(loc, tr_it);
 
             return eval_throws_binding(bmap, cb_tr);
          }
@@ -600,15 +612,28 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             }
 
             // new tree: f(car foldr(f v cdr))
+
             sib_it f = it.begin();
-            combo_tree cb_tr = eval_throws_tree(bmap, f, pe);
+            combo_tree cb_tr(f);
             sib_it loc = cb_tr.begin();
-            sib_it head_list_it = itend.begin();
-            cb_tr.append_child(loc, head_list_it);
-            tr.erase(head_list_it);
-            sib_it it_begin = tr.begin();
-            cb_tr.append_child(loc, it_begin);
-            return eval_throws_tree(bmap, cb_tr);
+            combo_tree car_lst(id::car); 
+            sib_it car_lst_it = car_lst.begin();
+            car_lst.append_child(car_lst_it, itend);
+            car_lst = eval_throws_tree(bmap,car_lst_it,pe);
+            car_lst_it = car_lst.begin();
+            cb_tr.append_child(loc, car_lst_it);
+
+            combo_tree cdr_lst(id::cdr);
+            sib_it cdr_lst_it = cdr_lst.begin();
+            cdr_lst.append_child(cdr_lst_it, itend);
+            tr.erase(itend);
+            sib_it tr_it = tr.begin();
+            cdr_lst = eval_throws_tree(bmap, cdr_lst_it,pe);
+            cdr_lst_it = cdr_lst.begin();
+            tr.append_child(tr_it, cdr_lst_it);
+            cb_tr.append_child(loc, tr_it);
+
+            return eval_throws_tree(bmap, cb_tr); 
         }
         default:
             break;
