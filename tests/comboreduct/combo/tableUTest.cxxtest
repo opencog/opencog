@@ -141,4 +141,21 @@ public:
         cout << "mi = " << mi << endl;
         TS_ASSERT_DELTA(0.419973, mi, 0.0001);
     }
+    void test_insert_get_pos() {
+        ITable it;
+        vertex_seq col = {id::logical_true, id::logical_false};
+        it.insert_col("col_label", col);
+        {
+            stringstream ss_res;
+            ss_res << it;
+            TS_ASSERT_EQUALS(ss_res.str(), string("col_label\n1\n0\n"));
+        }
+        auto lc = it.get_col(0);
+        it.insert_col(lc.first, lc.second, 0);
+        {
+            stringstream ss_res;
+            ss_res << it;
+            TS_ASSERT_EQUALS(ss_res.str(), string("col_label,col_label\n1,1\n0,0\n"));
+        }
+    }
 };
