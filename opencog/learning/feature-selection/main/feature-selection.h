@@ -82,6 +82,7 @@ struct feature_selection_parameters
     std::string input_file;
     int target_feature;
     std::vector<int> ignore_features;
+    std::vector<std::string> force_features_str;
     std::string output_file;
     unsigned target_size;
     double threshold;
@@ -202,11 +203,76 @@ void moses_feature_selection(Table& table,
     }
 }
 
+/**
+ * Add forced features to table
+ *
+ * TODO: update type_tree
+ */
+Table add_force_features(const Table& table,
+                         const feature_selection_parameters& fs_params) {
+    const ITable& itable = table.itable;
+    // get forced features that have not been selected
+    std::vector<std::string> fnsel;
+    const auto& ilabels = itable.get_labels();
+    foreach(const std::string& fn, fs_params.force_features_str)
+        if (boost::find(ilabels, fn) == ilabels.cend())
+            fnsel.push_back(fn);
+
+    // get their positions
+    std::vector<int> fnsel_pos =
+        find_features_positions(fs_params.input_file, fnsel);
+    boost::sort(fnsel_pos);
+
+    // get the complementary of their positions
+    std::vector<int> fnsel_pos_comp;
+    arity_t a = dataFileArity(fs_params.input_file);
+    for (int i = 0; i <= a; i++)
+        if (boost::find(fnsel_pos, i) == fnsel_pos.end()
+            && fs_params.target_feature != i)
+            fnsel_pos_comp.push_back(i);
+
+    // get header of the input table
+    auto header = loadHeader(fs_params.input_file);
+    
+    // load the table with force_non_selected features with all
+    // selected features with types definite_object (i.e. string) that
+    // way the content is unchanged (convenient when the data contains
+    // stuff that loadITable does not know how to interpret)
+    ITable fns_itable;          // ITable from fnsel (+ output)
+    type_tree tt = gen_signature(id::definite_object_type, fnsel.size());
+    loadITable(fs_params.input_file, fns_itable, tt, fnsel_pos_comp);
+
+    // Find the positions of the selected features
+    std::vector<int> fsel_pos =
+        find_features_positions(fs_params.input_file, ilabels);
+
+    // insert the forced features in the right order
+    Table new_table;
+    new_table.otable = table.otable;
+    new_table.itable = itable;
+    // insert missing columns from fns_itable to new_table.itable
+    for (auto lit = fnsel_pos.cbegin(), rit = fsel_pos.cbegin();
+         lit == fnsel_pos.cend(); ++lit) {
+        int lpos = distance(fnsel_pos.cbegin(), lit);
+        auto lc = fns_itable.get_col(lpos);
+        while(rit != fsel_pos.cend() && *lit > *rit) {
+            ++rit;
+        }
+        int rpos = rit == fsel_pos.cend() ? distance(fsel_pos.cbegin(), rit) : -1;
+        new_table.itable.insert_col(lc.first, lc.second, rpos);
+    }
+
+    return new_table;
+}
+
 void write_results(const Table& table,
                    const feature_selection_parameters& fs_params) {
-    if(fs_params.output_file.empty())
-        ostreamTable(std::cout, table);
-    else
+    if(fs_params.output_file.empty()) {
+        std::cout << "fs_params.force_features.empty()? " << fs_params.force_features_str.empty() << std::endl;
+        ostreamTable(std::cout,
+                     fs_params.force_features_str.empty()?
+                     table : add_force_features(table, fs_params));
+    } else
         saveTable(fs_params.output_file, table);
 }
 

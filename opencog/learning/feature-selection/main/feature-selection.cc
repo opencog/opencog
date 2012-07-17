@@ -60,11 +60,14 @@ static const string default_log_file_suffix = "log";
 static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
 
 // Program option names and abbreviations.
+// Available abbreviations:
+// b, d (TODO complete)
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> algo_opt("algo", "a");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
-static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
+static const pair<string, string> ignore_feature_opt("ignore-feature", "Y");
+static const pair<string, string> force_feature_opt("force-feature", "e");
 static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> log_level_opt("log-level", "l");
@@ -144,10 +147,17 @@ int main(int argc, char** argv)
          value<string>(&target_feature_str),
          "Label of the target feature to fit. If none is given the first one is used.\n")
 
-        (opt_desc_str(ignore_feature_str_opt).c_str(),
+        (opt_desc_str(ignore_feature_opt).c_str(),
          value<vector<string>>(&ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
          "to ignore several features.\n")
+
+        (opt_desc_str(force_feature_opt).c_str(),
+         value<vector<string>>(&fs_params.force_features_str),
+         "Force feature to be selected. Can be used several times "
+         "to force several features. Please note that those features "
+         "do not necessarily interact with the selected features, they are "
+         "simply added at the end whether or not they are in the selection.\n")
 
         (opt_desc_str(output_file_opt).c_str(),
          value<string>(&fs_params.output_file),
@@ -326,7 +336,6 @@ int main(int argc, char** argv)
         : find_feature_position(fs_params.input_file, target_feature_str);
 
     // Get the list of indexes of features to ignore
-    vector<int> ignore_features;
     fs_params.ignore_features = find_features_positions(fs_params.input_file,
                                                         ignore_features_str);
     ostreamContainer(logger().info() << "Ignore the following columns: ",
@@ -335,7 +344,7 @@ int main(int argc, char** argv)
     OC_ASSERT(boost::find(fs_params.ignore_features, fs_params.target_feature)
               == fs_params.ignore_features.end(),
               "You cannot ignore the target feature (column %d)",
-              fs_params.target_feature);
+              fs_params.target_feature);    
     
     // Read input_data_file file
     Table table = loadTable(fs_params.input_file,
