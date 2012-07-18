@@ -392,8 +392,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         // Actual number of pairs to create ...
         unsigned int n_pairs =
             _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
-        unsigned int count = 0;
-        while (count < n_pairs) {
+        dorepeat (n_pairs) {
             //while (!select.empty()) {
             combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
             int x = select();
@@ -438,7 +437,6 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
                     insert_typed_arg(v, type_b, arg_b);
                 }
                 perms.push_back(v);
-                count ++;
             }
         }
     }
