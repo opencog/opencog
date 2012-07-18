@@ -30,7 +30,7 @@
 #include "Logger.h"
 #include "Config.h"
 
-#ifndef WIN32
+#ifndef CYGWIN
 #include <cxxabi.h>
 #include <execinfo.h>
 #endif
@@ -62,7 +62,7 @@ using namespace opencog;
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
 const char* levelStrings[] = {"NONE", "ERROR", "WARN", "INFO", "DEBUG", "FINE"};
 
-#ifndef WIN32 /// @todo backtrace and backtrace_symbols is UNIX, we
+#ifndef CYGWIN /// @todo backtrace and backtrace_symbols is UNIX, we
               /// may need a WIN32 version
 static void prt_backtrace(std::ostringstream& oss)
 {
@@ -356,7 +356,7 @@ void Logger::log(Logger::Level level, const std::string &txt)
 
     if (level <= backTraceLevel)
     {
-#ifndef WIN32
+#ifndef CYGWIN
         prt_backtrace(oss);
 #endif
     }
