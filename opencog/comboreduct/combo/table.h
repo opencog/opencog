@@ -98,6 +98,7 @@ public:
     CTable(const std::string& _olabel, const std::vector<std::string>& _ilabels)
         : olabel(_olabel), ilabels(_ilabels) {}
 
+    arity_t get_arity() const { return ilabels.size(); }
 
     // TODO remove that junk  !?? Remove what junk ?? Huh ?? XXX
     binding_map get_binding_map(const vertex_seq& args) const
