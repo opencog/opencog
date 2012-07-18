@@ -209,7 +209,7 @@ void moses_feature_selection(Table& table,
 /**
  * Add forced features to table.
  *
- * TODO: update type_tree (if ever needed)
+ * @todo update type_tree (if ever needed)
  */
 Table add_force_features(const Table& table,
                          const feature_selection_parameters& fs_params) {
@@ -256,7 +256,8 @@ Table add_force_features(const Table& table,
         int lpos = distance(fnsel_pos.cbegin(), lit);
         auto lc = fns_itable.get_col(lpos);
         while(rit != fsel_pos.cend() && *lit > *rit) ++rit;
-        int rpos = rit != fsel_pos.cend() ? distance(fsel_pos.cbegin(), rit) : -1;
+        int rpos = rit != fsel_pos.cend() ?
+            distance(fsel_pos.cbegin(), rit) + lpos : -1;
         new_table.itable.insert_col(lc.first, lc.second, rpos);
     }
 
