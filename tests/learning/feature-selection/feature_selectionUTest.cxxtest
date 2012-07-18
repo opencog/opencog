@@ -108,6 +108,7 @@ private:
         OC_ASSERT (fd != -1);
         fsp.input_file = FEATURE_SELECTION_TEST_DIR"small-dataset.csv";
         fsp.output_file = tempfile;
+        fsp.target_feature = 0;
         fsp.jobs = n_jobs;
         setting_omp(n_jobs);
         fsp.hc_confi = 1;
