@@ -64,12 +64,10 @@ void GetMSE( Destin *d1, Destin *d2 )
             starvMSE += diff*diff;
         }
 
-/*
         printf("pBelief mse: %0.20f\n", pBeliefMSE / n1->nb);
         printf("mu mse: %0.20f\n", muMSE / (n1->ns*n1->nb));
         printf("sigma mse: %0.20f\n", sigmaMSE / (n1->ns*n1->nb));
         printf("starv mse: %0.20f\n", starvMSE / (n1->nb));
-*/
 
         pBeliefMSE_Sum += pBeliefMSE / n1->nb;
         muMSE_Sum += muMSE / (n1->ns * n1->nb);
@@ -104,8 +102,8 @@ int main()
     uint *dims = NULL;
     float *frame_host = NULL, *frame_dev = NULL;
 
-    nLayers = 7;
-    nIt = 1000;
+    nLayers = 3;
+    nIt = 200000;
     
     srand(0);
     MALLOC( dims, uint, nLayers );
@@ -133,7 +131,6 @@ int main()
 
     ClearBeliefs( d_cuda );
     ClearBeliefs( d_cpu );
-
 
     GenerateFrame( frame_host, frame_dev, frameSize );
     float cardStart = (float) clock() / CLOCKS_PER_SEC;
@@ -176,7 +173,6 @@ int main()
     CopyDestinFromDevice( d_cuda );
 
     GetMSE( d_cpu, d_cuda );
-
 /*
     for( i=0; i < nIt; i++ )
     {

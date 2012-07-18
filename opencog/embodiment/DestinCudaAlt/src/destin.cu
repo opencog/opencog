@@ -357,10 +357,23 @@ void PrintNetwork( Destin *d, float *inImg )
 
             printf("  node %d:\n", n);
             printf("OBSERVATION\n");
-            for( j=0; j < nPtr->ns; j++ )
+            for( j=0; j < nPtr->ni; j++ )
             {
-                printf("%0.3f ", nPtr->observation[j]);
+                printf("%0.3f ", (nPtr->input == NULL ? inImg[nPtr->inputOffsets[j]] : nPtr->input[j]));
             }
+
+            printf(" | ");
+            for( j=0; j < nPtr->nb; j++ )
+            {
+                printf("%0.3f ", nPtr->pBelief[j]);
+            }
+            
+            printf(" | ");
+            for( j=0; j < nPtr->np; j++ )
+            {
+                printf("%0.3f ", nPtr->parent_pBelief[j]);
+            }
+
             printf("\n\n");
             
             printf("STATISTICS\n");
@@ -506,7 +519,23 @@ float * RunDestin( Destin *d, char *dataFileName, bool isTrain )
             }
 
             // formulate belief/update on the presentation
+            //__CPU_FormulateBelief( d, isTrain, &d->dataSet[i*inputFrameSize] );
             FormulateBelief( d, isTrain, d->dataSet_dev + i*inputFrameSize );
+            CUDAMEMCPY( d->belief, d->belief_dev, sizeof(float) * d->nBeliefs, cudaMemcpyDeviceToHost );
+            
+            uint bIdx;
+            for( bIdx=0; bIdx < d->nBeliefs; bIdx++ )
+            {
+                if( isnan(d->belief[bIdx]) )
+                {
+                    printf("nan at iteration %d, belief %d\n", i, bIdx);
+
+                    CopyDestinFromDevice( d );
+                    PrintNetwork( d, d->dataSet );
+
+                    exit(1);
+                }
+            }
 
             // write out beliefs if we aren't training
             if( !isTrain )
@@ -516,6 +545,8 @@ float * RunDestin( Destin *d, char *dataFileName, bool isTrain )
                 if( iMod == 10 || iMod == 12 || iMod == 14 )
                 {
                     CUDAMEMCPY( &beliefOut[wIt*d->nBeliefs], d->belief_dev, sizeof(float) * d->nBeliefs, cudaMemcpyDeviceToHost );
+                    printf("%f %f %f %f\n", d->belief[0], d->belief[1], d->belief[2], d->belief[3]);
+
                     wIt++;
                 }
             }

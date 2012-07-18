@@ -14,8 +14,8 @@
 #define LAMBDA      0.5
 #define GAMMA       1
 #define STARVCOEFF  0.05
-#define EPSILON     1e-50
-#define LARGE_FLOAT 1000
+#define EPSILON     1e-25
+#define LARGE_FLOAT 10
 
 void PrintNode( Node *n )
 {
@@ -315,19 +315,9 @@ void __CPU_GetObservation( Node *n, float *framePtr, uint nIdx )
 
     uint i;
 
-    if( n->inputOffsets == NULL )
+    for( i=0; i < n->ni; i++ )
     {
-        for( i=0; i < n->ni; i++ )
-        {
-            n->observation[i] = n->input[i];
-        }
-    }
-    else
-    {
-        for( i=0; i < n->ni; i++ )
-        {
-            n->observation[i] = framePtr[n->inputOffsets[i]];
-        }
+        n->observation[i] = (n->inputOffsets == NULL) ? n->input[i] : framePtr[n->inputOffsets[i]];
     }
 
     for( i=n->ni; i < n->ni+n->nb; i++ )
@@ -365,7 +355,6 @@ __global__ void CalculateDistances( CudaNode *n )
 
     // grab pointer to the node we want to get distances for
     n = &n[blockIdx.x];
-
     uint i;          // iterator for the reduction
     uint mIdx;       // entry in the mu/sigma matrix to calculate delta
     uint ns;         // node state size
@@ -376,7 +365,7 @@ __global__ void CalculateDistances( CudaNode *n )
     // we do this because the state dimensionalities differ between nodes, but
     // we can't modify the size of the kernel that is called.  if the state
     // dimensionality is out of range, effectively execute a no-op.
-    if( threadIdx.x < ns && blockIdx.y < n->nb )
+    if( blockIdx.y < n->nb && threadIdx.x < ns )
     {
         // point euclidean and malhanobis arrays to shared mem
         sumEuc = (float *) &shared[ns*0];
@@ -393,10 +382,10 @@ __global__ void CalculateDistances( CudaNode *n )
         delta *= delta;
 
         sumEuc[threadIdx.x] = delta;
-        sumMal[threadIdx.x] = delta / n->sigma[mIdx];
+        sumMal[threadIdx.x] = (n->sigma[mIdx] < EPSILON) ? LARGE_FLOAT  : (delta / n->sigma[mIdx]);
 
         // sync threads before summing up the columns
-        syncthreads();
+        __syncthreads();
 
         // reduce euc and mal partial sums.  total sum will be in
         // sumEuc[0] and sumMal[0].
@@ -407,13 +396,18 @@ __global__ void CalculateDistances( CudaNode *n )
         {
             if( threadIdx.x % (i*2) == 0 && threadIdx.x + i < ns )
             {
+        /*
+        for( i = ns / 2; i > 0; i >>= 1 )
+        {
+            if( threadIdx.x < i && threadIdx.x+i < ns )
+            {
+        */
                 sumEuc[threadIdx.x] += sumEuc[threadIdx.x+i];
                 sumMal[threadIdx.x] += sumMal[threadIdx.x+i];
             }
-            syncthreads();
+            __syncthreads();
         }
         
-
         // get inverse of distance (provides "confidence" or a value of
         // closeness from the centroid to the observation)
         if( threadIdx.x == 0 )
@@ -421,8 +415,8 @@ __global__ void CalculateDistances( CudaNode *n )
             sumEuc[0] = sqrt(sumEuc[0]);
             sumMal[0] = sqrt(sumMal[0]);
 
-            n->beliefEuc[blockIdx.y] = 1 / sumEuc[0];
-            n->beliefMal[blockIdx.y] = 1 / sumMal[0];
+            n->beliefEuc[blockIdx.y] = (sumEuc[0] < EPSILON) ? 1 : (1 / sumEuc[0]);
+            n->beliefMal[blockIdx.y] = (sumMal[0] < EPSILON) ? 1 : (1 / sumMal[0]);
         }
     }
 }
@@ -492,7 +486,7 @@ __global__ void NormalizeBelief(CudaNode *n)
         normMal[threadIdx.x] = n->beliefMal[threadIdx.x];
 
         // make sure normEuc and normMal are completely populated
-        syncthreads();
+        __syncthreads();
 
         // calculate the normalization constant for the belief
         // this reduction is slow and awful, see above
@@ -500,13 +494,19 @@ __global__ void NormalizeBelief(CudaNode *n)
         {
             if( threadIdx.x % (i*2) == 0 && threadIdx.x + i < nb )
             {
+        /*
+        for( i = nb / 2; i > 0; i >>= 1 )
+        {
+            if( threadIdx.x < i && threadIdx.x+i < nb )
+            {
+        */
                 normEuc[threadIdx.x] += normEuc[threadIdx.x + i];
                 normMal[threadIdx.x] += normMal[threadIdx.x + i];
             }
 
-            syncthreads();
+            __syncthreads();
         }
-        
+
         n->beliefEuc[threadIdx.x] = ( normEuc[0] < EPSILON ) ? (1 / (float) n->nb) : (n->beliefEuc[threadIdx.x] / normEuc[0]);
         n->beliefMal[threadIdx.x] = ( normMal[0] < EPSILON ) ? (1 / (float) n->nb) : (n->beliefMal[threadIdx.x] / normMal[0]);
 
@@ -582,13 +582,19 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
         maxEuc[threadIdx.x] = n->beliefEuc[threadIdx.x];
         maxIdx[threadIdx.x] = threadIdx.x;
 
-        syncthreads();
+        __syncthreads();
 
         // this reduction is slow and awful, see above
         for( i=1; i < nb; i <<= 1 )
         {
             if( threadIdx.x % (i*2) == 0 && threadIdx.x + i < nb )
             {
+        /*
+        for( i = nb / 2; i > 0; i >>= 1 )
+        {
+            if( threadIdx.x < i && threadIdx.x+i < nb )
+            {
+        */
                 // reduce euclidean and malhanobis sums
                 normEuc[threadIdx.x] += normEuc[threadIdx.x + i];
                 normMal[threadIdx.x] += normMal[threadIdx.x + i];
@@ -601,7 +607,7 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
                 } 
             }
 
-            syncthreads();
+            __syncthreads();
         }
         
         n->beliefEuc[threadIdx.x] = ( normEuc[0] < EPSILON ) ? (1 / n->nb) : (n->beliefEuc[threadIdx.x] / normEuc[0]);
