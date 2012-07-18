@@ -35,7 +35,8 @@ namespace opencog {
 using namespace moses;
 
 /**
- * translate an instance into a feature set.
+ * translate an instance into a feature set. Each feature is
+ * represented by its index (the left most one is 0).
  */
 std::set<arity_t> get_feature_set(const field_set& fields,
                                   const instance& inst) {
