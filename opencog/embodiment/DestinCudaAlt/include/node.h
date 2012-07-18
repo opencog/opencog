@@ -4,37 +4,38 @@
 /* Node Struct Definition */
 struct Node {
     /* HOST VARIABLES BEGIN */
-    // node identifier
-    uint   * inputOffsets;
 
     // node parameters
-    uint     nb;
-    uint     ni;
-    uint     ns;
-    uint     np;
-    float   starvCoeff;
-    float   alpha;
-    float   beta;
-    float   clustErr;
+    uint     nb;            // number of beliefs
+    uint     ni;            // number of inputs
+    uint     ns;            // number of states
+    uint     np;            // number of beliefs for parent
+    float   starvCoeff;     // starvation coefficient
+    float   alpha;          // mu update weight (centroid location)
+    float   beta;           // sigma update weight (centroid variance)
 
-    uint     winner;
-
+    uint     winner;        // winning centroid index
 
     //holds the memory for mu, sigma, starv, beliefEuc, beliefMal, pBelief
     float * memory_area;
 
     // node statistics
-    float * mu;
-    float * sigma;
-    float * starv;
+    float * mu;             // centroid locations
+    float * sigma;          // centroid variances
+    float * starv;          // centroid starvation coefficients
+    
+    // node input
+    float * input;          // input pointer (null for input layer nodes)
+    uint  * inputOffsets;   // offsets for each pixel taken from framePtr for this node
+                            // (null for non-input layer nodes)
+    float * observation;    // contains the node's input, previous 
+                            // belief, and parent's previous belief
     
     // node beliefs
-    float * input;
-    float * beliefEuc;
-    float * beliefMal;
-    float * pBelief;
-
-    float * parent_pBelief;
+    float * beliefEuc;      // belief (euclidean distance)
+    float * beliefMal;      // belief (malhanobis distance)
+    float * pBelief;        // previous belief (euclidean)
+    float * parent_pBelief; // parent previous belief
 
     /* HOST VARIABLES END */
 
@@ -55,7 +56,6 @@ struct CudaNode {
     float   starvCoeff;
     float   alpha;
     float   beta;
-    float   clustErr;
 
     uint     winner;
 
@@ -63,10 +63,12 @@ struct CudaNode {
     float * mu;
     float * sigma;
     float * starv;
-    float * dist;
+    
+    // node input
+    float * observation;
+    float * input;
     
     // node beliefs
-    float * input;
     float * beliefEuc;
     float * beliefMal;
     float * pBelief;
@@ -76,6 +78,8 @@ struct CudaNode {
 
 
 /* Node Functions Begin */
+void   PrintNode( Node * );             // print the node!!!!
+
 void   InitNode(                        // initialize a node.
                  uint,                  // node index
                  uint,                  // belief dimensionality (# centroids)
@@ -89,7 +93,9 @@ void   InitNode(                        // initialize a node.
                  uint *,                // input offsets from input image (NULL for any non-input node)
                  uint *,                // chunk of preallocated cuda memory to put the input offsets
                  float *,               // pointer to input on device
+                 float *,               // pointer to input on host
                  float *,               // pointer to belief on device
+                 float *,               // pointer to belief on host
                  float *                // pointer to stats memory area on device
                 );
 
@@ -117,9 +123,14 @@ uint NodeStatsSize(                     // calculate the size of a node's stats 
 
 //make SWIG ignore these when generating the bindings.
 #ifdef __global__
-__global__ void CalculateDistances(
+
+__global__ void GetObservation(
                     CudaNode *,         // pointer to the list of nodes
-                    float *             // pointer to the frame
+                    float *             // pointer to input frame
+                );
+
+__global__ void CalculateDistances(
+                    CudaNode *          // pointer to the list of nodes
                 );
 
 __global__ void NormalizeBelief(
@@ -131,10 +142,36 @@ __global__ void NormalizeBeliefGetWinner(
                 );
 
 __global__ void UpdateWinner(
-                    CudaNode *n,        // pointer to the list of nodes
-                    float *framePtr     // pointer to the frame
+                    CudaNode *n         // pointer to the list of nodes
                 );
 #endif
 void cudaPrintMemory();
+
+/* CPU implementation of CUDA kernels */
+void __CPU_GetObservation(
+                    Node *,             // pointer to list of nodes
+                    float *,            // pointer to input frame
+                    uint                // node index
+                );
+
+void __CPU_CalculateDistances(
+                    Node *,             // pointer to list of nodes
+                    uint                // node index
+                );
+
+void __CPU_NormalizeBelief(
+                    Node *,             // pointer to list of nodes
+                    uint                // node index
+                );
+
+void __CPU_NormalizeBeliefGetWinner(
+                    Node *,             // pointer to list of nodes
+                    uint                // node index
+                );
+
+void __CPU_UpdateWinner(
+                    Node *,             // pointer to list of nodes
+                    uint                // node index
+                );
 
 #endif

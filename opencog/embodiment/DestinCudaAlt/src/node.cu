@@ -14,12 +14,58 @@
 #define LAMBDA      0.5
 #define GAMMA       1
 #define STARVCOEFF  0.05
+#define EPSILON     1e-50
+#define LARGE_FLOAT 1000
 
+void PrintNode( Node *n )
+{
+    CudaNode cn;
+
+    printf("node statistics\n");
+    printf("nb: 0x%x    ni: 0x%x    np: 0x%x    ns: 0x%x    nb*ns: 0x%x\n", n->nb, n->ni, n->np, n->ns, n->nb*n->ns);
+
+/*
+    printf("Host pointers:\n");
+    printf("mu: %p\n", n->mu);
+    printf("sigma: %p\n", n->sigma);
+    printf("starv: %p\n", n->starv);
+    printf("input: %p\n", n->input);
+    printf("inputOffsets: %p\n", n->inputOffsets);
+    printf("observation: %p\n", n->mu);
+    printf("beliefEuc: %p\n", n->beliefEuc);
+    printf("beliefMal: %p\n", n->beliefMal);
+    printf("pBelief: %p\n", n->pBelief);
+    printf("parent_pBelief: %p\n\n", n->parent_pBelief);
+*/
+
+    uint nb = n->nb;
+    uint ni = n->ni;
+    uint np = n->np;
+    uint ns = n->ns;
+
+    uint muSize = n->nb * n->ns;
+
+    CUDAMEMCPY( &cn, n->node_dev, sizeof(CudaNode), cudaMemcpyDeviceToHost );
+
+    printf("Device pointers:\n");
+    printf("mu: %p to %p\n", cn.mu, cn.mu + muSize);
+    printf("sigma: %p to %p\n", cn.sigma, &cn.sigma[muSize]);
+    printf("starv: %p to %p\n", cn.starv, &cn.starv[nb] );
+    printf("beliefEuc: %p to %p\n", cn.beliefEuc, &cn.beliefEuc[nb]);
+    printf("beliefMal: %p to %p\n", cn.beliefMal, &cn.beliefMal[nb]);
+    printf("observation: %p to %p\n", cn.observation, &cn.observation[ns] );
+
+    printf("input: %p to %p\n", cn.input, &cn.input[ni] );
+    printf("inputOffsets: %p to %p\n", cn.inputOffsets, &cn.inputOffsets[ni] );
+
+    printf("pBelief: %p to %p\n", cn.pBelief, &cn.pBelief[nb] );
+    printf("parent_pBelief: %p to %p\n", cn.parent_pBelief, &cn.parent_pBelief[np]);
+}
 
 uint NodeStatsSize(int ni, int nb, int np)
 {
     uint ns = ni + nb + np;
-    return nb * ns * 2 + nb * 4;
+    return nb * ns * 2 + nb * 3 + ns;
 }
 
 // Initialize a node
@@ -37,7 +83,9 @@ void InitNode
     uint        *inputOffsets,
     uint        *inputOffsetMemory_dev,
     float       *input_dev,
+    float       *input_host,
     float       *belief_dev,
+    float       *belief_host,
     float       *statsMemory_dev
 
     )
@@ -61,32 +109,27 @@ void InitNode
     // Initialize node parameters
     node_host->nb            = nb;
     node_host->ni            = ni;
-    node_host->ns            = ns;
     node_host->np            = np;
+    node_host->ns            = ns;
     node_host->starvCoeff    = starvCoeff;
     node_host->alpha         = alpha;
     node_host->beta          = beta;
     node_host->winner        = 0;
 
-
     // allocate space on host
-    MALLOC( node_host->memory_area , float , (nb * ns * 2 + nb * 4) );
-    //use pointer arithmetic to divide the memory
-    node_host->mu =         node_host->memory_area;
-    node_host->sigma =      node_host->mu         + nb*ns;
-    node_host->starv =      node_host->sigma      + nb*ns;
-    node_host->pBelief =    node_host->starv      + nb;
-    node_host->beliefEuc =  node_host->pBelief    + nb;
-    node_host->beliefMal =  node_host->beliefEuc  + nb;
+    MALLOC( node_host->memory_area , float , (nb * ns * 2 + nb * 3 + ns) );
 
-    if( inputOffsets == NULL )
-    {
-        MALLOC(node_host->input, float, ni);
-    }
-    else
-    {
-        node_host->input = NULL;
-    }
+    //use pointer arithmetic to divide the memory
+    node_host->mu =          node_host->memory_area;
+    node_host->sigma =       node_host->mu         + nb*ns;
+    node_host->starv =       node_host->sigma      + nb*ns;
+    node_host->beliefEuc =   node_host->starv      + nb;
+    node_host->beliefMal =   node_host->beliefEuc  + nb;
+    node_host->observation = node_host->beliefMal  + nb;
+
+    // point to the block-allocated space
+    node_host->input = input_host;
+    node_host->pBelief = belief_host;
 
     // Initialize node parameters
     cudaNode_host.nb            = nb;
@@ -96,6 +139,7 @@ void InitNode
     cudaNode_host.starvCoeff    = starvCoeff;
     cudaNode_host.alpha         = alpha;
     cudaNode_host.beta          = beta;
+    cudaNode_host.winner        = 0;
 
     // allocate node statistics on device using pointer arithmetic to divide up the memory
     cudaNode_host.mu =          statsMemory_dev;
@@ -103,16 +147,18 @@ void InitNode
     cudaNode_host.starv =       cudaNode_host.sigma     + nb*ns;
     cudaNode_host.beliefEuc =   cudaNode_host.starv     + nb;
     cudaNode_host.beliefMal =   cudaNode_host.beliefEuc + nb;
-    cudaNode_host.dist =        cudaNode_host.beliefMal + nb;
+    cudaNode_host.observation = cudaNode_host.beliefMal + nb;
 
-    // point to the space allocated for the input (should be NULL for input nodes)
+    // point to the block-allocated space 
     cudaNode_host.input = input_dev;
+    cudaNode_host.pBelief = belief_dev;
 
     // copy the input offset for the inputs (should be NULL for non-input nodes)
     if( inputOffsets != NULL )
     {
         MALLOC(node_host->inputOffsets, uint, ni);
         memcpy(node_host->inputOffsets, inputOffsets, sizeof(uint) * ni);
+
         cudaNode_host.inputOffsets = inputOffsetMemory_dev;
         CUDAMEMCPY( cudaNode_host.inputOffsets, node_host->inputOffsets, sizeof(uint) * ni, cudaMemcpyHostToDevice);
     }
@@ -122,16 +168,13 @@ void InitNode
         cudaNode_host.inputOffsets = NULL;
     }
 
-
-    // set prior belief to block-allocated value
-    cudaNode_host.pBelief = belief_dev;
-
     uint i,j;
-
-    for(i=0; i < nb; i++)
+    for( i=0; i < nb; i++ )
     {
         // init belief (node output)
-        node_host->pBelief[i] = 0;
+        node_host->pBelief[i] = 1 / nb;
+        node_host->beliefEuc[i] = 1 / nb;
+        node_host->beliefMal[i] = 1 / nb;
 
         // init starv trace to one
         node_host->starv[i] = 1.0f;
@@ -144,11 +187,17 @@ void InitNode
         }
     }
 
+    for( i=0; i < ns; i++ )
+    {
+        node_host->observation[i] = 0;
+    }
+
     // copy initialized statistics to device
-    CUDAMEMCPY( cudaNode_host.mu,       node_host->mu,      sizeof(float) * nb * ns,    cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.sigma,    node_host->sigma,   sizeof(float) * nb * ns,    cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.starv,    node_host->starv,   sizeof(float) * nb,         cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.pBelief,  node_host->pBelief, sizeof(float) * nb,         cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.mu,           node_host->mu,          sizeof(float) * nb * ns,    cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.sigma,        node_host->sigma,       sizeof(float) * nb * ns,    cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.starv,        node_host->starv,       sizeof(float) * nb,         cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.pBelief,      node_host->pBelief,     sizeof(float) * nb,         cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.observation,  node_host->observation, sizeof(float) * ns,         cudaMemcpyHostToDevice );
 
     // copy the node struct to the device
     CUDAMEMCPY( cudaNode_dev,           &cudaNode_host,     sizeof(CudaNode),           cudaMemcpyHostToDevice );
@@ -166,15 +215,10 @@ void DestroyNode( Node *n )
     {
         FREE(n->inputOffsets);
     }
-    else
-    {
-        FREE(n->input);
-    }
 
     // free device data
     CudaNode cudaNode_host;
     CUDAMEMCPY( &cudaNode_host, n->node_dev, sizeof(CudaNode), cudaMemcpyDeviceToHost );
-
 }
 
 // copy the node statistics from the host to the device.
@@ -188,12 +232,13 @@ void CopyNodeToDevice(Node *host)
     cudaNode_host.winner = host->winner;
 
     // copy to pointers given from the struct
-    CUDAMEMCPY( cudaNode_host.mu,        host->mu,           sizeof(float)*host->nb*host->ns,    cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.sigma,     host->sigma,        sizeof(float)*host->nb*host->ns,    cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.starv,     host->starv,        sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.beliefEuc, host->beliefEuc,    sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.beliefMal, host->beliefMal,    sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
-    CUDAMEMCPY( cudaNode_host.pBelief,   host->pBelief,      sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.mu,           host->mu,           sizeof(float)*host->nb*host->ns,    cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.sigma,        host->sigma,        sizeof(float)*host->nb*host->ns,    cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.starv,        host->starv,        sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.pBelief,      host->pBelief,      sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.beliefEuc,    host->beliefEuc,    sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.beliefMal,    host->beliefMal,    sizeof(float)*host->nb,             cudaMemcpyHostToDevice );
+    CUDAMEMCPY( cudaNode_host.observation,  host->observation,  sizeof(float)*host->ns,             cudaMemcpyHostToDevice );
 
     CUDAMEMCPY( host->node_dev,          &cudaNode_host,     sizeof(CudaNode),                   cudaMemcpyHostToDevice );
 }
@@ -207,7 +252,6 @@ void CopyNodeFromDevice(Node *host)
     CUDAMEMCPY( &cudaNode_host, host->node_dev, sizeof(CudaNode), cudaMemcpyDeviceToHost );
 
     host->winner = cudaNode_host.winner;
-    host->clustErr = cudaNode_host.clustErr;
 
     if( cudaNode_host.inputOffsets == NULL )
     {
@@ -215,13 +259,86 @@ void CopyNodeFromDevice(Node *host)
     }
 
     // copy from pointers given from the struct
-    CUDAMEMCPY( host->mu,        cudaNode_host.mu,           sizeof(float)*host->nb*host->ns,    cudaMemcpyDeviceToHost );
-    CUDAMEMCPY( host->sigma,     cudaNode_host.sigma,        sizeof(float)*host->nb*host->ns,    cudaMemcpyDeviceToHost );
-    CUDAMEMCPY( host->starv,     cudaNode_host.starv,        sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
-    CUDAMEMCPY( host->pBelief,   cudaNode_host.pBelief,      sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
-    CUDAMEMCPY( host->beliefEuc, cudaNode_host.beliefEuc,    sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
-    CUDAMEMCPY( host->beliefMal, cudaNode_host.beliefMal,    sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
-    CUDAMEMCPY( host->pBelief,   cudaNode_host.pBelief,      sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
+    CUDAMEMCPY( host->mu,           cudaNode_host.mu,           sizeof(float)*host->nb*host->ns,    cudaMemcpyDeviceToHost );
+    CUDAMEMCPY( host->sigma,        cudaNode_host.sigma,        sizeof(float)*host->nb*host->ns,    cudaMemcpyDeviceToHost );
+    CUDAMEMCPY( host->starv,        cudaNode_host.starv,        sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
+    CUDAMEMCPY( host->pBelief,      cudaNode_host.pBelief,      sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
+    CUDAMEMCPY( host->beliefEuc,    cudaNode_host.beliefEuc,    sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
+    CUDAMEMCPY( host->beliefMal,    cudaNode_host.beliefMal,    sizeof(float)*host->nb,             cudaMemcpyDeviceToHost );
+    CUDAMEMCPY( host->observation,  cudaNode_host.observation,  sizeof(float)*host->ns,             cudaMemcpyDeviceToHost );
+}
+
+// GetObservation:
+//      CUDA kernel that creates the observation for a node
+//      given its input (input image or a previous node's belief),
+//      previous belief, and parent's belief.
+__global__ void GetObservation( CudaNode *n, float *framePtr )
+{
+    n = &n[blockIdx.x];
+
+    uint ns = n->ns;
+    uint ni = n->ni;
+    uint nb = n->nb;
+    uint np = n->np;
+
+    if( threadIdx.x < ns )
+    {
+        if( threadIdx.x < ni )
+        {
+            if( n->inputOffsets == NULL )
+            {
+                n->observation[threadIdx.x] = n->input[threadIdx.x];
+            }
+            else
+            {
+                n->observation[threadIdx.x] = framePtr[n->inputOffsets[threadIdx.x]];
+            }
+        }
+        else if( threadIdx.x < ni + nb )
+        {
+            n->observation[threadIdx.x] = n->pBelief[threadIdx.x-ni];
+        }
+        else
+        {
+            if( np > 0 )
+            {
+                n->observation[threadIdx.x] = n->parent_pBelief[threadIdx.x-ni-nb];
+            }
+        }
+    }
+}
+
+// CPU implementation of GetObservation kernel
+void __CPU_GetObservation( Node *n, float *framePtr, uint nIdx )
+{
+    n = &n[nIdx];
+
+    uint i;
+
+    if( n->inputOffsets == NULL )
+    {
+        for( i=0; i < n->ni; i++ )
+        {
+            n->observation[i] = n->input[i];
+        }
+    }
+    else
+    {
+        for( i=0; i < n->ni; i++ )
+        {
+            n->observation[i] = framePtr[n->inputOffsets[i]];
+        }
+    }
+
+    for( i=n->ni; i < n->ni+n->nb; i++ )
+    {
+        n->observation[i] = n->pBelief[i-n->ni];
+    }
+
+    for( i=n->ni+n->nb; i < n->ns; i++ )
+    {
+        n->observation[i] = n->parent_pBelief[i-n->ni-n->nb];
+    }
 }
 
 //  CalculateDistances:
@@ -234,7 +351,7 @@ void CopyNodeFromDevice(Node *host)
 //             thread = (max state dimensionality) x 1
 //         shared mem = euclidean sum  (length: ns)
 //                      malhanobis sum (length: ns)
-__global__ void CalculateDistances( CudaNode *n, float *framePtr )
+__global__ void CalculateDistances( CudaNode *n )
 {
     // shared array -- includes the euclidean and malhanobis arrays for reduction
     extern __shared__ float shared[];
@@ -252,20 +369,14 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
     uint i;          // iterator for the reduction
     uint mIdx;       // entry in the mu/sigma matrix to calculate delta
     uint ns;         // node state size
-    uint ni;         // node input size
-    uint np;         // node parent belief size
-    uint nb;         // node belief size
 
     ns = n->ns;
-    ni = n->ni;
-    nb = n->nb;
-    np = n->np;
 
     // maxNS is likely greater than n->ns.  don't execute if we're not in range.
     // we do this because the state dimensionalities differ between nodes, but
     // we can't modify the size of the kernel that is called.  if the state
     // dimensionality is out of range, effectively execute a no-op.
-    if( threadIdx.x < ns )
+    if( threadIdx.x < ns && blockIdx.y < n->nb )
     {
         // point euclidean and malhanobis arrays to shared mem
         sumEuc = (float *) &shared[ns*0];
@@ -276,56 +387,26 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
 
         // get difference for each dimension between the input state (input + prev belief) and every
         // centroid location
-        if( threadIdx.x < ni )
-        {
-            if( n->inputOffsets != NULL )
-            {
-                delta = n->mu[mIdx] - framePtr[n->inputOffsets[threadIdx.x]];
-            }
-            else
-            {
-                delta = n->mu[mIdx] - n->input[threadIdx.x];
-            }
-        }
-        else if( threadIdx.x < ni + nb )
-        {
-            delta = (n->mu[mIdx] - n->pBelief[threadIdx.x-ni]) * LAMBDA;
-        }
-        else
-        {
-            if( np > 0 )
-            {
-                delta = (n->mu[mIdx] - n->parent_pBelief[threadIdx.x-ni-nb]) * GAMMA;
-            }
-        }
+        delta = n->mu[mIdx] - n->observation[threadIdx.x];
 
         delta *= n->starv[blockIdx.y];
         delta *= delta;
 
-        syncthreads();
-
         sumEuc[threadIdx.x] = delta;
-
-        if( n->sigma[mIdx] == 0 )
-        {
-            sumMal[threadIdx.x] = 0;
-        }
-        else
-        {
-            sumMal[threadIdx.x] = delta / n->sigma[mIdx];
-        }
+        sumMal[threadIdx.x] = delta / n->sigma[mIdx];
 
         // sync threads before summing up the columns
         syncthreads();
 
         // reduce euc and mal partial sums.  total sum will be in
         // sumEuc[0] and sumMal[0].
-
+        // ** THIS BLOCK NEEDS WORK **
+        // It is awful for two reasons -- it is highly divergent,
+        // and it causes a huge number of bank conflicts.
         for( i=1; i < ns; i <<= 1 )
         {
             if( threadIdx.x % (i*2) == 0 && threadIdx.x + i < ns )
             {
-                
                 sumEuc[threadIdx.x] += sumEuc[threadIdx.x+i];
                 sumMal[threadIdx.x] += sumMal[threadIdx.x+i];
             }
@@ -340,27 +421,42 @@ __global__ void CalculateDistances( CudaNode *n, float *framePtr )
             sumEuc[0] = sqrt(sumEuc[0]);
             sumMal[0] = sqrt(sumMal[0]);
 
-            // save the euclidean distance for cluster err calculation
-            n->dist[blockIdx.y] = sumEuc[0];
-
-            if( sumEuc[0] == 0 )
-            {
-                n->beliefEuc[blockIdx.y] = 1;
-            }
-            else
-            {
-                n->beliefEuc[blockIdx.y] = 1 / sumEuc[0];
-            }
-
-            if( sumMal[0] == 0 )
-            {
-                n->beliefMal[blockIdx.y] = 1;
-            }
-            else
-            {
-                n->beliefMal[blockIdx.y] = 1 / sumMal[0];
-            }
+            n->beliefEuc[blockIdx.y] = 1 / sumEuc[0];
+            n->beliefMal[blockIdx.y] = 1 / sumMal[0];
         }
+    }
+}
+
+// CPU implementation of CalculateDistances kernel
+void __CPU_CalculateDistances( Node *n, uint nIdx )
+{
+    float delta;
+    float sumEuc, sumMal;
+
+    n = &n[nIdx];
+
+    uint i, j;
+
+    // iterate over each belief
+    for( i=0; i < n->nb; i++ )
+    {
+        sumEuc = 0;
+        sumMal = 0;
+
+        // iterate over each state for belief
+        for( j=0; j < n->ns; j++ )
+        {
+            delta = n->mu[i*n->ns+j] - n->observation[j];
+
+            sumEuc += delta * delta * n->starv[i];
+            sumMal += delta * delta * n->starv[i] / n->sigma[i*n->ns+j];
+        }
+
+        sumEuc = sqrt(sumEuc);
+        sumMal = sqrt(sumMal);
+
+        n->beliefEuc[i] = ( sumEuc < EPSILON ) ? 1 : (1 / sumEuc);
+        n->beliefMal[i] = ( sumMal < EPSILON ) ? 1 : (1 / sumMal);
     }
 }
 
@@ -399,6 +495,7 @@ __global__ void NormalizeBelief(CudaNode *n)
         syncthreads();
 
         // calculate the normalization constant for the belief
+        // this reduction is slow and awful, see above
         for( i=1; i < nb; i <<= 1 )
         {
             if( threadIdx.x % (i*2) == 0 && threadIdx.x + i < nb )
@@ -409,33 +506,38 @@ __global__ void NormalizeBelief(CudaNode *n)
 
             syncthreads();
         }
-
-        // normalize the output
-        if( normMal[0] == 0 )
-        {
-            // if the normalization const is 0, the node should
-            // have no particular belief.
-            n->beliefMal[threadIdx.x] = 1 / nb;
-        }
-        else
-        {
-            // otherwise, normalize the sum to 1
-            n->beliefMal[threadIdx.x] /= normMal[0];
-        }
-
-        // same behavior as malhanobis normalization, see above
-        if( normEuc[0] == 0 )
-        {
-            n->beliefEuc[threadIdx.x] = 1 / nb;
-        }
-        else
-        {
-            n->beliefEuc[threadIdx.x] /= normEuc[0];
-        }
+        
+        n->beliefEuc[threadIdx.x] = ( normEuc[0] < EPSILON ) ? (1 / (float) n->nb) : (n->beliefEuc[threadIdx.x] / normEuc[0]);
+        n->beliefMal[threadIdx.x] = ( normMal[0] < EPSILON ) ? (1 / (float) n->nb) : (n->beliefMal[threadIdx.x] / normMal[0]);
 
         // update belief
         n->pBelief[threadIdx.x] = n->beliefMal[threadIdx.x];
     }
+}
+
+// CPU implementation of NormalizeBelief kernel
+void __CPU_NormalizeBelief( Node *n, uint nIdx )
+{
+    n = &n[nIdx];
+    
+    float normEuc = 0;
+    float normMal = 0;
+
+    uint i;
+
+    for( i=0; i < n->nb; i++ )
+    {
+        normEuc += n->beliefEuc[i];
+        normMal += n->beliefMal[i];
+    }
+
+    for( i=0; i < n->nb; i++ )
+    {
+        n->beliefEuc[i] = ( normEuc < EPSILON ) ? (1 / (float) n->nb) : (n->beliefEuc[i] / normEuc);
+        n->beliefMal[i] = ( normMal < EPSILON ) ? (1 / (float) n->nb) : (n->beliefMal[i] / normMal);
+        n->pBelief[i] = n->beliefMal[i];
+    }
+
 }
 
 
@@ -482,6 +584,7 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
 
         syncthreads();
 
+        // this reduction is slow and awful, see above
         for( i=1; i < nb; i <<= 1 )
         {
             if( threadIdx.x % (i*2) == 0 && threadIdx.x + i < nb )
@@ -501,37 +604,49 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
             syncthreads();
         }
         
-        // normalize the output
-        if( normMal[0] == 0 )
-        {
-            // if the normalization const is 0, the node should
-            // have no particular belief.
-            n->beliefMal[threadIdx.x] = 1 / nb;
-        }
-        else
-        {
-            // otherwise, normalize the sum to 1
-            n->beliefMal[threadIdx.x] /= normMal[0];
-        }
+        n->beliefEuc[threadIdx.x] = ( normEuc[0] < EPSILON ) ? (1 / n->nb) : (n->beliefEuc[threadIdx.x] / normEuc[0]);
+        n->beliefMal[threadIdx.x] = ( normMal[0] < EPSILON ) ? (1 / n->nb) : (n->beliefMal[threadIdx.x] / normMal[0]);
 
-        // same behavior as malhanobis normalization, see above
-        if( normEuc[0] == 0 )
+        if( threadIdx.x == 0 )
         {
-            n->beliefEuc[threadIdx.x] = 1 / nb;
-        }
-        else
-        {
-            n->beliefEuc[threadIdx.x] /= normEuc[0];
+            n->winner = maxIdx[0];
         }
     }
+}
 
-    syncthreads();
 
-    if( threadIdx.x == 0 )
+// CPU implementation of NormalizeBelief kernel
+void __CPU_NormalizeBeliefGetWinner( Node *n, uint nIdx )
+{
+    n = &n[nIdx];
+    
+    float normEuc = 0;
+    float normMal = 0;
+
+    float maxEucVal = n->beliefEuc[0];
+    uint maxEucIdx = 0;
+
+    uint i;
+
+    for( i=0; i < n->nb; i++ )
     {
-        n->clustErr = n->dist[maxIdx[0]];
-        n->winner = maxIdx[0];
+        normEuc += n->beliefEuc[i];
+        normMal += n->beliefMal[i];
+
+        if( n->beliefEuc[i] > maxEucVal )
+        {
+            maxEucVal = n->beliefEuc[i];
+            maxEucIdx = i;
+        }
     }
+
+    for( i=0; i < n->nb; i++ )
+    {
+        n->beliefEuc[i] = ( normEuc < EPSILON ) ? (1 / n->nb) : (n->beliefEuc[i] / normEuc);
+        n->beliefMal[i] = ( normMal < EPSILON ) ? (1 / n->nb) : (n->beliefMal[i] / normMal);
+    }
+
+    n->winner = maxEucIdx;
 }
 
 //  UpdateWinner:
@@ -539,7 +654,7 @@ __global__ void NormalizeBeliefGetWinner( CudaNode *n )
 //
 //              block = (number of nodes) x 1
 //             thread = (max state dimensionality) x 1
-__global__ void UpdateWinner( CudaNode *n, float *framePtr )
+__global__ void UpdateWinner( CudaNode *n )
 {
     // value for how far the observation (or collection of beliefs from a set of previous
     // nodes) deviates from each centroid
@@ -552,14 +667,10 @@ __global__ void UpdateWinner( CudaNode *n, float *framePtr )
 
     uint nb;         // number of centroids
     uint ns;         // state dimensionality
-    uint ni;         // input dimensionality
-    uint np;         // parent belief dimensionality
     uint winner;     // winner idx
 
     nb = n->nb;
     ns = n->ns;
-    np = n->np;
-    ni = n->ni;
     winner = n->winner;
 
     // maxNS is likely greater than ns.  don't execute if we're not in range.
@@ -570,53 +681,54 @@ __global__ void UpdateWinner( CudaNode *n, float *framePtr )
     {
         // get entry in the mu/sigma matrices to calculate for this thread
         mIdx = winner * ns + threadIdx.x;
-
+        
         // get difference for each dimension between the input state (input + prev belief) and every
         // centroid location
-        if( threadIdx.x < ni )
-        {
-            if( n->inputOffsets != NULL )
-            {
-                delta = n->mu[mIdx] - framePtr[n->inputOffsets[threadIdx.x]];
-            }
-            else
-            {
-                delta = n->mu[mIdx] - n->input[threadIdx.x];
-            }
-        }
-        else if( threadIdx.x < ni + nb )
-        {
-            delta = (n->mu[mIdx] - n->pBelief[threadIdx.x-ni])*LAMBDA;
-        }
-        else
-        {
-            if( np > 0 )
-            {
-                delta = (n->mu[mIdx] - n->parent_pBelief[threadIdx.x-ni-nb]) * GAMMA;
-            }
-        }
-        
+        delta = n->mu[mIdx] - n->observation[threadIdx.x];
+
         // update mu and sigma
         n->mu[mIdx] -= ALPHA*delta;
         n->sigma[mIdx] -= BETA*(n->sigma[mIdx] - delta*delta);
-
-        // update starv
-        if( threadIdx.x < nb )
-        {
-            n->starv[threadIdx.x] = (1 - STARVCOEFF) * n->starv[threadIdx.x];
-
-            if( threadIdx.x == n->winner )
-            {
-                n->starv[threadIdx.x] += STARVCOEFF;
-            }
-        }
     }
 
-    // update belief
+    // update starvation and belief
     if( threadIdx.x < nb )
     {
+        n->starv[threadIdx.x] *= 1 - STARVCOEFF;
+
+        if( threadIdx.x == n->winner )
+        {
+            n->starv[threadIdx.x] += STARVCOEFF;
+        }
+
         n->pBelief[threadIdx.x] = n->beliefMal[threadIdx.x];
     }
+}
+
+// CPU implementation for UpdateWinner kernel
+void __CPU_UpdateWinner( Node *n, uint nIdx )
+{
+    n = &n[nIdx];
+
+    uint i;
+    uint winnerOffset = n->winner*n->ns;
+    float delta;
+
+    for( i=0; i < n->ns; i++ )
+    {
+        delta = n->mu[winnerOffset+i] - n->observation[i];
+
+        n->mu[winnerOffset+i] -= ALPHA * delta;
+        n->sigma[winnerOffset+i] -= BETA * (n->sigma[winnerOffset+i] - delta*delta);
+    }
+
+    for( i=0; i < n->nb; i++ )
+    {
+        n->starv[i] *= 1 - STARVCOEFF;
+        n->pBelief[i] = n->beliefMal[i];
+    }
+
+    n->starv[n->winner] += STARVCOEFF;
 }
 
 // a quick function to print remaining memory on the card (helps to debug any

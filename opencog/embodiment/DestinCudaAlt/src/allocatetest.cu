@@ -1,5 +1,3 @@
-
-
 #include "destin.h"
 #include <stdio.h>
 

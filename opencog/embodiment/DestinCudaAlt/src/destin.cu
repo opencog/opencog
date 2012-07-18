@@ -68,12 +68,12 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
 
     // allocate space for inputs to nodes
 //    printf("allocating %d inputs\n", nInputPipeline);
-    MALLOC(d->inputPipeline, float, sizeof(float)*nInputPipeline);
+    MALLOC(d->inputPipeline, float, nInputPipeline);
     CUDAMALLOC( (void **) &d->inputPipeline_dev, sizeof(float)*nInputPipeline);
 
     // allocate space for beliefs for nodes on host and device
 //    printf("allocating %d beliefs\n", nBeliefs);
-    MALLOC(d->belief, float, sizeof(float)*nBeliefs);
+    MALLOC(d->belief, float, nBeliefs);
     CUDAMALLOC( (void **) &d->belief_dev, sizeof(float)*nBeliefs);
 
     d->nBeliefs = nBeliefs;
@@ -106,10 +106,10 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
     uint **inputOffsets;
     uint nInputNodes = pow(4,nl-1);
 
-    MALLOC(inputOffsets, uint *, sizeof(uint **) * d->layerSize[0]);
+    MALLOC(inputOffsets, uint *, d->layerSize[0]);
     for( i=0; i < nInputNodes; i++ )
     {
-        MALLOC(inputOffsets[i], uint, sizeof(uint) * nInputNodes);
+        MALLOC(inputOffsets[i], uint, nInputNodes);
     }
 
     // get integer sq root of layersize[0]
@@ -117,7 +117,6 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
 
     // get integer sq root of ni for lowest layer.  asssumes input is a square.
     uint inputSizeSqRoot = (uint) sqrt( ni );
-
 
     // get column size of input image (assuming it is square)
     uint nc = (uint) sqrt( d->layerSize[0] * ni );
@@ -149,7 +148,7 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
 
 
     int layerSize;
-    MALLOC( d->nodeRef, int *, sizeof(int **) * d->nLayers );
+    MALLOC( d->nodeRef, int *, d->nLayers );
 
     // set up layer/row/col references for nodes
     for( i=0, l=0; l < d->nLayers - 1; l++ )
@@ -157,7 +156,7 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
         layerSize = d->layerSize[l];
         layerSizeSqRoot = (uint) sqrt( layerSize );
 
-        MALLOC( d->nodeRef[l], int, sizeof(int *)*layerSize );
+        MALLOC( d->nodeRef[l], int, layerSize );
 
         for( m=0; m < layerSizeSqRoot; m+=2 )
         {
@@ -172,11 +171,10 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
     }
 
     // set up layer/row/col reference for top node
-    MALLOC( d->nodeRef[d->nLayers - 1], int, sizeof(int *) * 1 );
+    MALLOC( d->nodeRef[d->nLayers - 1], int, 1 );
     d->nodeRef[l][0] = d->nNodes - 1;
 
     //printf("\n");
-
 
     // create array of pointers, one pointer per layer. Each layer
     // gets a memory block to hold all the nodes statistics for all nodes
@@ -199,10 +197,24 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
             i < d->layerSize[0];
             i++, n++, statsOffset += statsSizePerNode, io_offset += ni )
     {
-        InitNode( n, ni, nb[0], nb[1],
-                    starvCoeff, alpha, beta, 
-                    &d->nodes_host[n], &d->nodes_dev[n], inputOffsets[n],
-                    io_offset, NULL, &d->belief_dev[bOffset], statsOffset );
+        InitNode( 
+                    n,
+                    ni,
+                    nb[0],
+                    nb[1],
+                    starvCoeff,
+                    alpha,
+                    beta,
+                    &d->nodes_host[n],
+                    &d->nodes_dev[n],
+                    inputOffsets[n],
+                    io_offset,
+                    NULL,
+                    NULL,
+                    &d->belief_dev[bOffset],
+                    &d->belief[bOffset],
+                    statsOffset
+                    );
 
         // increment belief offset
         bOffset += nb[0];
@@ -230,7 +242,7 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
             maxNb = nb[l];
         }
 
-        uint np = l == nl - 1 ? 0 : nb[l + 1];
+        uint np = (l == nl - 1) ? 0 : nb[l + 1];
         // update max state
         if( nb[l] + 4 * nb[l-1] + np > maxNs )
         {
@@ -241,11 +253,25 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
         CUDAMALLOC((void **)&d->stats_dev[l], sizeof(float) * statsSizePerNode * d->layerSize[l]);
         for( i=0, statsOffset = d->stats_dev[l] ; i < d->layerSize[l]; i++, n++, statsOffset+=statsSizePerNode )
         {
-            InitNode( n, nb[l-1]*4, nb[l], np,
-                    starvCoeff, alpha, beta,
-                    &d->nodes_host[n], &d->nodes_dev[n],
-                    NULL, NULL, &d->inputPipeline_dev[iOffset],
-                    &d->belief_dev[bOffset], statsOffset );
+            InitNode
+                    (   
+                        n, 
+                        nb[l-1]*4, 
+                        nb[l], 
+                        np,
+                        starvCoeff, 
+                        alpha, 
+                        beta,
+                        &d->nodes_host[n], 
+                        &d->nodes_dev[n],
+                        NULL, 
+                        NULL,
+                        &d->inputPipeline_dev[iOffset],
+                        &d->inputPipeline[iOffset],
+                        &d->belief_dev[bOffset], 
+                        &d->belief[bOffset],
+                        statsOffset 
+                    );
 
             // increment previous belief offset (input to next node)
             iOffset += 4*nb[l-1];
@@ -313,72 +339,34 @@ void PrintNetwork( Destin *d, float *inImg )
 {
     Node *nPtr;
 
-    CopyDestinFromDevice( d );
-
     uint i, j, l, n;
 
-/*
-    float avgClustErr;
-
-    printf("avg clustering err:\n");
     for( n=0, l=0; l < d->nLayers; l++ )
     {
-        avgClustErr = 0;
 
-        for( i=0; i < d->layerSize[l]; i++, n++ )
-        {
-            avgClustErr += d->nodes_host[i].clustErr;
-        }
-
-        printf("    layer[%d]: %0.10f\n", l, avgClustErr / d->layerSize[l]);
-    }
-    printf("\n");
-*/
-
-    for( n=0, l=0; l < d->nLayers; l++ )
-    {
         printf("layer %d:\n", l);
 
         for( i=0; i < d->layerSize[l]; i++, n++ )
         {
+        /*
+            printf("node %d\n", n);
+            PrintNode( &d->nodes_host[n] );
+            printf("\n");
+        */
             nPtr = &d->nodes_host[n];
 
-            printf("  node %d:\n", n, nPtr->ni);
-            printf("INPUTS\n");
-            if( nPtr->inputOffsets != NULL )
+            printf("  node %d:\n", n);
+            printf("OBSERVATION\n");
+            for( j=0; j < nPtr->ns; j++ )
             {
-                for( j=0; j < nPtr->ni; j++ )
-                {
-                    printf("%02.0f ", 100*inImg[ nPtr->inputOffsets[j] ] );
-                }
-            }
-            else
-            {
-                for( j=0 ; j < nPtr->ni; j++ )
-                {
-                    printf("%02.0f ", 100*nPtr->input[j]);
-                }
-            }
-
-            printf(" | ");
-
-            for( j=0; j < nPtr->nb; j++ )
-            {
-                printf("%02.0f ", 100*nPtr->pBelief[j]);
-            }
-            
-            printf(" | ");
-
-            for( j=0; j < nPtr->np; j++ )
-            {
-                printf("%02.0f ", 100*nPtr->parent_pBelief[j]);
+                printf("%0.3f ", nPtr->observation[j]);
             }
             printf("\n\n");
             
-            /*
             printf("STATISTICS\n");
             nPtr = &d->nodes_host[n];
 
+            uint b, s;
             printf("  mu:\n");
             for( b=0; b < nPtr->nb; b++ )
             {
@@ -410,7 +398,6 @@ void PrintNetwork( Destin *d, float *inImg )
                 printf("%0.2f ", nPtr->starv[b]);
             }
             printf("\n");
-            */
         }
     }
 }
@@ -635,18 +622,19 @@ Node *GetNodeFromDestin( Destin *d, uint l, uint r, uint c )
     return &d->nodes_host[nIdx];
 }
 
-// present the network with an image pointed to by image_dev.  update the network if doUpdate is true,
+// present the network with an image pointed to by image_dev.  update the network if isTrain is true,
 // otherwise just change the belief.
-void FormulateBelief(Destin *d, bool isTrain, float *image_dev)
+void FormulateBelief( Destin *d, bool isTrain, float *image_dev )
 {
     dim3 blockSize(d->nNodes, d->maxNb);
 
-    CalculateDistances<<<blockSize,d->maxNs,sizeof(float)*d->maxNs*2>>>(d->nodes_dev, image_dev);
+    GetObservation<<<d->nNodes,d->maxNs>>>(d->nodes_dev, image_dev);
+    CalculateDistances<<<blockSize,d->maxNs,sizeof(float)*d->maxNs*2>>>(d->nodes_dev);
     if( isTrain )
     // normalize belief and update winner
     {
         NormalizeBeliefGetWinner<<<d->nNodes,d->maxNb,sizeof(float)*d->maxNb*4>>>(d->nodes_dev);
-        UpdateWinner<<<d->nNodes,d->maxNs>>>(d->nodes_dev, image_dev);
+        UpdateWinner<<<d->nNodes,d->maxNs>>>(d->nodes_dev);
     }
     else
     // just normalize the belief
@@ -659,6 +647,30 @@ void FormulateBelief(Destin *d, bool isTrain, float *image_dev)
     CUDACHECKERROR();
 
     return;
+}
+
+// run an iteration with the CPU implementations of the kernels
+void __CPU_FormulateBelief( Destin *d, bool isTrain, float *image )
+{
+    uint i;
+
+    for( i=0; i < d->nNodes; i++ )
+    {
+        __CPU_GetObservation( d->nodes_host, image, i );
+        __CPU_CalculateDistances( d->nodes_host, i );
+        
+        if( isTrain )
+        {
+            __CPU_NormalizeBeliefGetWinner( d->nodes_host, i );
+            __CPU_UpdateWinner( d->nodes_host, i );
+        }
+        else
+        {
+            __CPU_NormalizeBelief( d->nodes_host, i );
+        }
+    }
+
+    memcpy( d->inputPipeline, d->belief, sizeof(float)*d->nInputPipeline );
 }
 
 // zeros-out the beliefs (and input registers) for each node.  useful for "restarting" the network

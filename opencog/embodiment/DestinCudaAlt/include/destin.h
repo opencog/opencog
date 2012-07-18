@@ -90,6 +90,12 @@ void FormulateBelief(                   // form belief operation.  gets the curr
                     float *             // input
                 );
 
+void __CPU_FormulateBelief(             // form belief operation for CPU implementation of kernels
+                    Destin *,           // network to obtain belief from
+                    bool,               // switch for training/feed-forward
+                    float *             // input
+                );
+
 void ClearBeliefs(                      // cleanse the pallette
                   Destin *              // pointer to destin object
                  );

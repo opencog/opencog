@@ -8,7 +8,7 @@ NVCCFLAGS = -arch=compute_13 -lm
 all: kerneltest destin alloctest
 
 destin:
-	$(NVCC) -I$(INCLUDE) $(NVCCFLAGS) -o bin/destin src/node.cu src/destin.cu src/main.cu
+	$(NVCC) -I$(INCLUDE) $(NVCCFLAGS) -o bin/destin src/node.cu src/destin.cu src/destin_mnist.cu
 
 kerneltest:
 	$(NVCC) -I$(INCLUDE) $(NVCCFLAGS) -o bin/kerneltest src/node.cu src/destin.cu src/kerneltest.cu

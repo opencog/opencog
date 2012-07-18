@@ -1,120 +1,202 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "macros.h"
 #include "node.h"
 #include "destin.h"
 
-void KernelTest()
+#define NLAYERS 3
+
+void GetMSE( Destin *d1, Destin *d2 )
 {
-    Node *n;
-
-    uint nb, ni, ns;
-    uint *inputOffsets = NULL;
-    float *input_dev, *belief_dev;
-
-    float *input_host;
-
-    // allocate node
-    MALLOC( n, Node, 1 );
-    CUDAMALLOC( (void **) &n->node_dev, sizeof(CudaNode) );
-
-    // give a random belief and input dimensionality
-    nb = rand() % 190 + 10;
-    ni = rand() % 190 + 10;
-    ns = nb + ni;
-
-    // allocate input and belief for node
-    CUDAMALLOC( (void **) &input_dev, sizeof(float) * ni );
-    CUDAMALLOC( (void **) &belief_dev, sizeof(float) * nb );
-
-    float * stat_mem;
-    CUDAMALLOC( (void **)&stat_mem, sizeof(float) * NodeStatsSize(ni, nb, 0) );
-
-    uint * inputo_mem;
-    CUDAMALLOC((void**)&inputo_mem, sizeof(uint)*ni);
-    InitNode( 0, ni, nb, 0, 0.1, 0.01, 0.1, n, n->node_dev, inputOffsets, inputo_mem, input_dev, belief_dev, stat_mem);
-
-    // allocate input frame
-    MALLOC( input_host, float, ni );
-
-    uint i,j;
-    for( i=0; i < ni; i++ )
+    if( d1->nNodes != d2->nNodes )
     {
-        input_host[i] = (float) rand() / RAND_MAX;
+        fprintf(stderr, "networks differ in # nodes!\n");
+        exit(1);
     }
 
-    CUDAMEMCPY( input_dev, input_host, sizeof(float) * ni, cudaMemcpyHostToDevice );
+    float muMSE, sigmaMSE, starvMSE, pBeliefMSE, diff;
+    float muMSE_Sum, sigmaMSE_Sum, starvMSE_Sum, pBeliefMSE_Sum;
 
-    dim3 blocksize( 1, nb );
+    uint n, i, j;
 
-    CalculateDistances<<< blocksize, ns, sizeof(float)*2*ns >>>( n->node_dev, NULL );
-    //NormalizeBelief<<< 1, nb, sizeof(float)*2*nb >>>( n->node_dev );
-    NormalizeBeliefGetWinner<<< 1, nb, sizeof(float)*4*nb >>>( n->node_dev );
-    CopyNodeFromDevice( n );
 
-    float delta;
-    float *dist;
+    Node *n1, *n2;
+    muMSE_Sum = sigmaMSE_Sum = starvMSE_Sum = pBeliefMSE_Sum = 0;
 
-    dist = (float *) malloc(sizeof(float) * nb);
-
-    float errSum = 0;
-    float distSum = 0;
-    float err;
-
-    for( i=0; i < nb; i++ )
+    for( n=0; n < d1->nNodes; n++ )
     {
-        dist[i] = 0;
-        for( j=0; j < ns; j++ )
-        {
-            if( j < ni )
-            {
-                delta = n->mu[i*ns+j] - input_host[j];
-            }
-            else
-            {
-                delta = (n->mu[i*ns+j] - n->pBelief[j - ni]) * 0.5;
-            }
+        n1 = &(d1->nodes_host[n]);
+        n2 = &(d2->nodes_host[n]);
 
-            dist[i] += delta * delta;
+        muMSE = sigmaMSE = starvMSE = pBeliefMSE = 0;
+
+        if( n1->nb != n2->nb || n1->ns != n2->ns )
+        {
+            fprintf(stderr, "node %d differ in dimensionality!\n", n);
+            exit(1);
         }
 
-        dist[i] = 1 / dist[i];
+        for( i=0; i < n1->nb; i++ )
+        {
+            diff = n1->pBelief[i] - n2->pBelief[i];
+            //diff = n1->pBelief[i];
 
-        distSum += dist[i];
+            pBeliefMSE += diff * diff;
+        }
 
-        err = (dist[i] - n->beliefEuc[i]) * (dist[i] - n->beliefEuc[i]);
-        errSum += err;
+        for( i=0; i < n1->nb; i++ )
+        {
+            for( j=0; j < n1->ns; j++ )
+            {
+                diff = n1->mu[n1->nb*i+j] - n2->mu[n1->nb*i+j];
+                //diff = n1->mu[n1->nb*i+j];
+                muMSE += diff*diff;
 
-        printf("  %0.3f\n", err);
+                diff = n1->sigma[n1->nb*i+j] - n2->sigma[n1->nb*i+j];
+                //diff = n1->sigma[n1->nb*i+j];
+                sigmaMSE += diff*diff;
+            }
+
+            diff = n1->starv[i] - n2->starv[i];
+            //diff = n1->starv[i];
+            starvMSE += diff*diff;
+        }
+
+/*
+        printf("pBelief mse: %0.20f\n", pBeliefMSE / n1->nb);
+        printf("mu mse: %0.20f\n", muMSE / (n1->ns*n1->nb));
+        printf("sigma mse: %0.20f\n", sigmaMSE / (n1->ns*n1->nb));
+        printf("starv mse: %0.20f\n", starvMSE / (n1->nb));
+*/
+
+        pBeliefMSE_Sum += pBeliefMSE / n1->nb;
+        muMSE_Sum += muMSE / (n1->ns * n1->nb);
+        sigmaMSE_Sum += sigmaMSE / (n1->ns * n1->nb);
+        starvMSE_Sum += starvMSE / n1->nb;
     }
 
-    float beliefEucSum = 0;
+    printf("pBelief mse: %0.20f\n", pBeliefMSE_Sum / d1->nNodes);
+    printf("mu mse: %0.20f\n", muMSE_Sum / d1->nNodes);
+    printf("sigma mse: %0.20f\n", sigmaMSE_Sum / d1->nNodes);
+    printf("starv mse: %0.20f\n", starvMSE_Sum / d1->nNodes);
 
-    for( i=0; i < nb; i++ ) 
+}
+
+void GenerateFrame( float * frame_host, float * frame_dev, uint frameSize )
+{
+    uint i;
+    for( i=0; i < frameSize; i++ )
     {
-        dist[i] /= distSum;
-        beliefEucSum += n->beliefEuc[i];
+        frame_host[i] = (float) rand() / RAND_MAX;
     }
 
-    printf("MSE: %0.2f\n", errSum / nb);
+    CUDAMEMCPY( frame_dev, frame_host, sizeof(float) * frameSize, cudaMemcpyHostToDevice );
 
-    free(dist);
- 
-    CUDAFREE( input_dev );
-    CUDAFREE( belief_dev );
-    CUDAFREE( stat_mem );
-    CUDAFREE( inputo_mem );
-    DestroyNode( n );
+    return;
 }
 
 int main()
 {
-    srand(time(NULL));
-    uint i;
-    for( i=0; i < 10000; i++ )
+    Destin *d_cuda, *d_cpu;
+    uint i, nLayers, nIt;
+    uint *dims = NULL;
+    float *frame_host = NULL, *frame_dev = NULL;
+
+    nLayers = 7;
+    nIt = 1000;
+    
+    srand(0);
+    MALLOC( dims, uint, nLayers );
+    for( i=0; i < nLayers; i++ )
     {
-        KernelTest();
+        dims[i] = rand() % 20 + 20;
     }
+    
+    uint frameSize = 1;
+    for( i=0; i < nLayers - 1; i++ )
+    {
+        frameSize *= 4;
+    }
+
+    frameSize *= 16;
+
+    MALLOC( frame_host, float, frameSize );
+    CUDAMALLOC( (void **) &frame_dev, sizeof(float) * frameSize );
+
+    srand(0);
+    d_cuda = InitDestin(16, nLayers, dims, 0);
+
+    srand(0);
+    d_cpu = InitDestin(16, nLayers, dims, 0);
+
+    ClearBeliefs( d_cuda );
+    ClearBeliefs( d_cpu );
+
+
+    GenerateFrame( frame_host, frame_dev, frameSize );
+    float cardStart = (float) clock() / CLOCKS_PER_SEC;
+    // do nIt training iterations on card
+    for( i=0; i < nIt; i++ )
+    {
+        FormulateBelief( d_cuda, true, frame_dev);
+    }
+
+    // do nIt feedforwards on card
+    for( i=0; i < nIt; i++ )
+    {
+        FormulateBelief( d_cuda, false, frame_dev);
+    }
+    float cardStop = (float) clock() / CLOCKS_PER_SEC;
+    
+    float tCard = cardStop - cardStart;
+    
+    printf("Card: %0.3f\n", tCard);
+
+    // do nIt training iterations on host
+    float hostStart = (float) clock() / CLOCKS_PER_SEC;
+    for( i=0; i < nIt; i++ )
+    {
+        __CPU_FormulateBelief( d_cpu, true, frame_host);
+    }
+
+    // do nIt feedforwards on host
+    for( i=0; i < nIt; i++ )
+    {
+        __CPU_FormulateBelief( d_cpu, false, frame_host);
+    }
+    float hostStop = (float) clock() / (CLOCKS_PER_SEC);
+
+    float tHost = hostStop - hostStart;
+    printf("Host: %0.3f\n", tHost);
+
+    printf("Speedup: %0.2fx\n", tHost / tCard);
+
+    CopyDestinFromDevice( d_cuda );
+
+    GetMSE( d_cpu, d_cuda );
+
+/*
+    for( i=0; i < nIt; i++ )
+    {
+        GenerateFrame( frame_host, frame_dev, frameSize );
+
+        FormulateBelief( d_cuda, true, frame_dev);
+        __CPU_FormulateBelief( d_cpu, true, frame_host);
+
+        CopyDestinFromDevice( d_cuda );
+
+        GetMSE( d_cpu, d_cuda );
+    }
+*/
+
+    DestroyDestin( d_cpu );
+    DestroyDestin( d_cuda );
+    
+    FREE( dims );
+    FREE( frame_host );
+    CUDAFREE( frame_dev );
+
+    return 0;
 }

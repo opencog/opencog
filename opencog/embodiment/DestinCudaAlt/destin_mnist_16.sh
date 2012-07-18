@@ -1,3 +1,3 @@
 #bin/bash
 
-bin/destin config_32 data/destin_train.bin data/destin_train_nn.bin data/destin_train_out.bin data/destin_test_nn.bin data/destin_test_out.bin
+bin/destin config_16 data/destin_train_16.bin data/destin_train_nn_16.bin data/destin_train_out_16.bin data/destin_test_nn_16.bin data/destin_test_out_16.bin
