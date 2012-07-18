@@ -39,18 +39,18 @@ public:
         TS_ASSERT_EQUALS(teval("+(40 car( list ( +(1 1)  *(2 2))))"), string("42 "));
         TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 20)"), string("42 "));
         TS_ASSERT_EQUALS(teval("+(5 car( list ( +(1 1)  *(2 2))) 15 car(cdr(list(50 20))))"), string("42 "));
+
+        //tests for foldr and foldl
+        TS_ASSERT_EQUALS(teval("foldr(+ 1 list(2 3))"), string("6 "));
+        TS_ASSERT_EQUALS(teval("foldr(cons list list(a b c))"), string("list(a b c) "));
+        TS_ASSERT_EQUALS(teval("foldr(+ car(list(1 2)) list(2 3))"), string("6 "));
+        TS_ASSERT_EQUALS(teval("foldr(+ 1 cdr(list(1 2 3)))"), string("6 "));
+        TS_ASSERT_EQUALS(teval("foldr(+ 1 cons(2 list(3)))"), string("6 "));
+        TS_ASSERT_EQUALS(teval("foldl(+ 1 list(2 3))"), string("6 "));
+        TS_ASSERT_EQUALS(teval("foldl(+ car(list(1 2)) list(2 3))"), string("6 "));
+        TS_ASSERT_EQUALS(teval("foldl(+ 1 cdr(list(1 2 3)))"), string("6 "));
+        TS_ASSERT_EQUALS(teval("foldl(+ 1 cons(2 list(3)))"), string("6 "));
     }
 
-    void test_list_stuff()
-    {
-        combo_tree tr;
-        stringstream ss("cdr(cons(car(list(1 4 5)) list(2 3)))");
-        ss >> tr;
-        vertex_seq empty;
-        stringstream ss_lst;
-        ss_lst << eval_throws_tree(empty, tr);
-        stringstream ss_expected("list(2 3) ");
-        TS_ASSERT_EQUALS(ss_lst.str(), ss_expected.str());
-    }
 
 };
