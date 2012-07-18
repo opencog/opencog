@@ -392,6 +392,8 @@ vertex eval_throws_binding(const vertex_seq& bmap,
             cdr_lst = eval_throws_tree(bmap, cdr_lst_it,pe);
             cdr_lst_it = cdr_lst.begin();
             tr.append_child(tr_it, cdr_lst_it);
+            tr = eval_throws_tree(bmap, tr_it, pe);
+            tr_it = tr.begin();
             cb_tr.append_child(loc, tr_it);
 
             return eval_throws_binding(bmap, cb_tr);
@@ -631,6 +633,8 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             cdr_lst = eval_throws_tree(bmap, cdr_lst_it,pe);
             cdr_lst_it = cdr_lst.begin();
             tr.append_child(tr_it, cdr_lst_it);
+            tr = eval_throws_tree(bmap, tr_it, pe);
+            tr_it = tr.begin();
             cb_tr.append_child(loc, tr_it);
 
             return eval_throws_tree(bmap, cb_tr); 
