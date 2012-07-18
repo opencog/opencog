@@ -336,7 +336,8 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::list :
         case id::cdr :
         case id::cons :
-        // case id::foldr :
+        case id::foldr :
+        case id::foldl :
             throw ComboException(TRACE_INFO,
                 "Cannot handle lists; use eval_throws_tree() instead.");
 
@@ -360,44 +361,6 @@ vertex eval_throws_binding(const vertex_seq& bmap,
                    "Must not pass empty list to eval_throws_binding().");
             return eval_throws_binding(bmap, lp.begin(), pe);
         }
-
-        case id::foldr : {
-            combo_tree tr(it);
-
-            // base case: foldr(f v list) = v
-            sib_it itend = tr.begin().end();
-            itend--;
-            if (itend.begin() == itend.end()){
-                itend--;
-                return eval_throws_binding(bmap, itend, pe);
-            }
-
-            // new tree: f(car foldr(f v cdr))
-
-            sib_it f = it.begin();
-            combo_tree cb_tr(f);
-            sib_it loc = cb_tr.begin();
-            combo_tree car_lst(id::car); 
-            sib_it car_lst_it = car_lst.begin();
-            car_lst.append_child(car_lst_it, itend);
-            car_lst = eval_throws_tree(bmap,car_lst_it,pe);
-            car_lst_it = car_lst.begin();
-            cb_tr.append_child(loc, car_lst_it);
-
-            combo_tree cdr_lst(id::cdr);
-            sib_it cdr_lst_it = cdr_lst.begin();
-            cdr_lst.append_child(cdr_lst_it, itend);
-            tr.erase(itend);
-            sib_it tr_it = tr.begin();
-            cdr_lst = eval_throws_tree(bmap, cdr_lst_it,pe);
-            cdr_lst_it = cdr_lst.begin();
-            tr.append_child(tr_it, cdr_lst_it);
-            tr = eval_throws_tree(bmap, tr_it, pe);
-            tr_it = tr.begin();
-            cb_tr.append_child(loc, tr_it);
-
-            return eval_throws_binding(bmap, cb_tr);
-         }
 
         // Control operators
 
@@ -637,8 +600,52 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             tr_it = tr.begin();
             cb_tr.append_child(loc, tr_it);
 
-            return eval_throws_tree(bmap, cb_tr); 
+            return eval_throws_tree(bmap, loc, pe); 
         }
+
+        case id::foldl : {
+            combo_tree tr(it);
+
+            // base case: foldl(f v list) = v
+            // i.e. list is empty list.
+            sib_it itend = tr.begin().end();
+            itend--;
+            if (itend.begin() == itend.end()) {
+                itend--;
+                return eval_throws_tree(bmap, itend, pe);
+            }
+
+            // new tree: foldl(f f(v car) cdr)
+            sib_it f = it.begin();
+            combo_tree lst = eval_throws_tree(bmap, itend, pe);
+            sib_it lst_it = lst.begin();
+            sib_it tr_it = tr.begin();
+            tr.erase(itend);
+            itend--;
+            tr.erase(itend);
+	    
+            combo_tree rec(f);
+            sib_it rec_it = rec.begin();
+            sib_it v = ++f;
+            rec.append_child(rec_it, v);
+            combo_tree car_lst(id::car);
+            sib_it car_lst_it = car_lst.begin();
+            car_lst.append_child(car_lst_it, lst_it);
+            car_lst = eval_throws_tree(bmap, car_lst_it, pe);
+            car_lst_it = car_lst.begin();
+            rec.append_child(rec_it, car_lst_it);  //f(v car)
+            tr.append_child(tr_it, rec_it);
+
+            combo_tree cdr_lst(id::cdr);
+            sib_it cdr_lst_it = cdr_lst.begin();
+            cdr_lst.append_child(cdr_lst_it, lst_it);
+            cdr_lst = eval_throws_tree(bmap, cdr_lst_it, pe);
+            cdr_lst_it = cdr_lst.begin();
+            tr.append_child(tr_it, cdr_lst_it);
+
+            return eval_throws_tree(bmap, tr_it , pe); 
+        }
+
         default:
             break;
         }
