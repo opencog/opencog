@@ -102,109 +102,6 @@ struct feature_selection_parameters
 
 typedef std::set<arity_t> feature_set;
 
-template<typename Table, typename Optimize, typename Scorer>
-feature_set moses_select_features(Table& table,
-                                  const field_set& fields,
-                                  instance_set<composite_score>& deme,
-                                  instance& init_inst,
-                                  Optimize& optimize, const Scorer& scorer,
-                                  const feature_selection_parameters& fs_params)
-{
-    // optimize feature set
-    unsigned ae; // actual number of evaluations to reached the best candidate
-    unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
-
-    // get the best one
-    boost::sort(deme, std::greater<scored_instance<composite_score> >());
-    instance best_inst = evals > 0 ? *deme.begin_instances() : init_inst;
-    composite_score best_score =
-        evals > 0 ? *deme.begin_scores() : worst_composite_score;
-
-    // get the best feature set
-    feature_set selected_features = get_feature_set(fields, best_inst);
-    // Logger
-    {
-        // log its score
-        stringstream ss;
-        ss << "Selected feature set has composite score: ";
-        if (evals > 0)
-            ss << best_score;
-        else
-            ss << "Unknown";
-        logger().info(ss.str());
-    }
-    {
-        // Log the actual number of evaluations
-        logger().info("Total number of evaluations performed: %u", evals);
-        logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
-    }
-    // ~Logger
-    return selected_features;
-}
-
-/** For the MOSES algo, generate the intial instance */
-instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields) {
-    instance res(fields.packed_width());
-    vector<std::string> labels = readInputLabels(fs_params.input_file,
-                                                 fs_params.target_feature,
-                                                 fs_params.ignore_features);
-    vector<std::string> vif; // valid initial features, used for logging
-    foreach(const std::string& f, fs_params.hc_initial_features) {
-        size_t idx = std::distance(labels.begin(), boost::find(labels, f));
-        if(idx < labels.size()) { // feature found
-            *(fields.begin_bit(res) + idx) = true;
-            // for logging
-            vif += f;
-        }
-        else // feature not found
-            logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
-    }
-    // Logger
-    if(vif.empty())
-        logger().info("The search will start with the empty feature set");
-    else {
-        stringstream ss;
-        ss << "The search will start with the following feature set: ";
-        ostreamContainer(ss, vif, ",");
-        logger().info(ss.str());
-    }
-    // ~Logger
-    return res;
-}
-
-// run feature selection given an moses optimizer
-template<typename Optimize>
-feature_set moses_select_features(Table& table,
-                                  Optimize& optimize,
-                                  const feature_selection_parameters& fs_params) {
-    arity_t arity = table.get_arity();
-    field_set fields(field_set::disc_spec(2), arity);
-    instance_set<composite_score> deme(fields);
-    // determine the initial instance given the initial feature set
-    instance init_inst = initial_instance(fs_params, fields);
-    // define feature set quality scorer
-    typedef MICScorerTable<set<arity_t> > FSScorer;
-    FSScorer fs_sc(table, fs_params.hc_confi);
-    typedef moses_based_scorer<FSScorer> MBScorer;
-    MBScorer mb_sc(fs_sc, fields);
-    // possibly wrap in a cache
-    if(fs_params.hc_cache_size > 0) {
-        typedef prr_cache_threaded<MBScorer> ScorerCache;
-        ScorerCache sc_cache(fs_params.hc_cache_size, mb_sc);
-        feature_set selected_features =
-            moses_select_features(table, fields, deme, init_inst, optimize,
-                                  sc_cache, fs_params);
-        // Logger
-        logger().info("Number of cache failures = %u", sc_cache.get_failures());
-        // ~Logger
-        return selected_features;
-    } else {
-        return moses_select_features(table, fields, deme, init_inst, optimize,
-                                     mb_sc, fs_params);
-    }
-}
-
 /**
  * Add forced features to table.
  *
@@ -299,13 +196,114 @@ void write_results(const Table& table,
         saveTable(fs_params.output_file, table_wff, tfp);
 }
 
-feature_set incremental_select_features(Table& table,
+template<typename Optimize, typename Scorer>
+feature_set moses_select_features(const field_set& fields,
+                                  instance_set<composite_score>& deme,
+                                  instance& init_inst,
+                                  Optimize& optimize, const Scorer& scorer,
+                                  const feature_selection_parameters& fs_params)
+{
+    // optimize feature set
+    unsigned ae; // actual number of evaluations to reached the best candidate
+    unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
+
+    // get the best one
+    boost::sort(deme, std::greater<scored_instance<composite_score> >());
+    instance best_inst = evals > 0 ? *deme.begin_instances() : init_inst;
+    composite_score best_score =
+        evals > 0 ? *deme.begin_scores() : worst_composite_score;
+
+    // get the best feature set
+    feature_set selected_features = get_feature_set(fields, best_inst);
+    // Logger
+    {
+        // log its score
+        stringstream ss;
+        ss << "Selected feature set has composite score: ";
+        if (evals > 0)
+            ss << best_score;
+        else
+            ss << "Unknown";
+        logger().info(ss.str());
+    }
+    {
+        // Log the actual number of evaluations
+        logger().info("Total number of evaluations performed: %u", evals);
+        logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
+    }
+    // ~Logger
+    return selected_features;
+}
+
+/** For the MOSES algo, generate the intial instance */
+instance initial_instance(const feature_selection_parameters& fs_params,
+                          const field_set& fields) {
+    instance res(fields.packed_width());
+    vector<std::string> labels = readInputLabels(fs_params.input_file,
+                                                 fs_params.target_feature,
+                                                 fs_params.ignore_features);
+    vector<std::string> vif; // valid initial features, used for logging
+    foreach(const std::string& f, fs_params.hc_initial_features) {
+        size_t idx = std::distance(labels.begin(), boost::find(labels, f));
+        if(idx < labels.size()) { // feature found
+            *(fields.begin_bit(res) + idx) = true;
+            // for logging
+            vif += f;
+        }
+        else // feature not found
+            logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
+    }
+    // Logger
+    if(vif.empty())
+        logger().info("The search will start with the empty feature set");
+    else {
+        stringstream ss;
+        ss << "The search will start with the following feature set: ";
+        ostreamContainer(ss, vif, ",");
+        logger().info(ss.str());
+    }
+    // ~Logger
+    return res;
+}
+
+// run feature selection given an moses optimizer
+template<typename Optimize>
+feature_set moses_select_features(CTable& ctable,
+                                  Optimize& optimize,
+                                  const feature_selection_parameters& fs_params) {
+    arity_t arity = ctable.get_arity();
+    field_set fields(field_set::disc_spec(2), arity);
+    instance_set<composite_score> deme(fields);
+    // determine the initial instance given the initial feature set
+    instance init_inst = initial_instance(fs_params, fields);
+    // define feature set quality scorer
+    typedef MICScorerCTable<set<arity_t> > FSScorer;
+    FSScorer fs_sc(ctable, fs_params.hc_confi);
+    typedef moses_based_scorer<FSScorer> MBScorer;
+    MBScorer mb_sc(fs_sc, fields);
+    // possibly wrap in a cache
+    if(fs_params.hc_cache_size > 0) {
+        typedef prr_cache_threaded<MBScorer> ScorerCache;
+        ScorerCache sc_cache(fs_params.hc_cache_size, mb_sc);
+        feature_set selected_features =
+            moses_select_features(fields, deme, init_inst, optimize,
+                                  sc_cache, fs_params);
+        // Logger
+        logger().info("Number of cache failures = %u", sc_cache.get_failures());
+        // ~Logger
+        return selected_features;
+    } else {
+        return moses_select_features(fields, deme, init_inst, optimize,
+                                     mb_sc, fs_params);
+    }
+}
+
+feature_set incremental_select_features(CTable& ctable,
                                         const feature_selection_parameters& fs_params)
 {
-    auto ir = boost::irange(0, table.get_arity());
+    auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end());
     if (fs_params.threshold > 0 || fs_params.target_size > 0) {
-        CTable ctable = table.compress();
         typedef MutualInformation<feature_set> FeatureScorer;
         FeatureScorer fsc(ctable);
         return fs_params.target_size > 0?
@@ -325,13 +323,12 @@ feature_set incremental_select_features(Table& table,
     }
 }
 
-feature_set max_mi_select_features(Table& table,
+feature_set max_mi_select_features(CTable& ctable,
                                    const feature_selection_parameters& fs_params)
 {
-    auto ir = boost::irange(0, table.get_arity());
+    auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end());
     if (fs_params.target_size > 0) {
-        CTable ctable = table.compress();
         typedef MutualInformation<feature_set> FeatureScorer;
         FeatureScorer fsc(ctable);
         return max_mi_selection(all_features, fsc,
@@ -346,7 +343,7 @@ feature_set max_mi_select_features(Table& table,
 /**
  * Select the features according to the method described in fs_params.
  */
-feature_set select_features(Table& table,
+feature_set select_features(CTable& ctable,
                             const feature_selection_parameters& fs_params) {
     if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
@@ -360,11 +357,11 @@ feature_set select_features(Table& table,
                                            false, // crossover
                                            fs_params.hc_fraction_of_remaining);
         hill_climbing hc(op_param);
-        return moses_select_features(table, hc, fs_params);
+        return moses_select_features(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
-        return incremental_select_features(table, fs_params);
+        return incremental_select_features(ctable, fs_params);
     } else if (fs_params.algorithm == mmi) {
-        return max_mi_select_features(table, fs_params);
+        return max_mi_select_features(ctable, fs_params);
     } else {
         std::cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
                   << "' is unknown, please consult the help for the "
@@ -372,6 +369,15 @@ feature_set select_features(Table& table,
         exit(1);
         return feature_set(); // to please Mr compiler
     }    
+}
+
+/**
+ * Like above but using Table instead of CTable
+ */
+feature_set select_features(Table& table,
+                            const feature_selection_parameters& fs_params) {
+    CTable ctable = table.compress();
+    return select_features(ctable, fs_params);
 }
 
 /**

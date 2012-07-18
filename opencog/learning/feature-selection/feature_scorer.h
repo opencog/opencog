@@ -93,12 +93,12 @@ struct MICScorer : public std::unary_function<FeatureSet, double>
     double _confi; //  confidence intensity
 };
 
-/// like above but using Table instead of input and output table
+/// like above but using CTable instead of input and output table
 template<typename FeatureSet>
-struct MICScorerTable : public std::unary_function<FeatureSet, double>
+struct MICScorerCTable : public std::unary_function<FeatureSet, double>
 {
-    MICScorerTable(const Table& table, double confi = 0)
-        : _table(table), _ctable(_table.compress()), _confi(confi) {}
+    MICScorerCTable(const CTable& ctable_, double confi_ = 0)
+        : ctable(ctable_), confi(confi_), usize(ctable.uncompressed_size()) {}
 
     /**
      * The feature set is represented by an eda::instance encoding a
@@ -107,17 +107,17 @@ struct MICScorerTable : public std::unary_function<FeatureSet, double>
      */
     double operator()(const FeatureSet& fs) const
     {
-        double MI = mutualInformation(_ctable, fs);
+        double MI = mutualInformation(ctable, fs);
         logger().fine("MI = %e", MI);
-        // double confidence = _table.size()/(_table.size() + _confi*fs.size());
-        double confidence = _table.size()/(_table.size() + exp(_confi*fs.size()));
+        // double confidence = usize / (usize + confi*fs.size());
+        double confidence = usize / (usize + exp(confi*fs.size()));
         logger().fine("confidence = %e", confidence);
         return MI * confidence;
     }
 
-    const Table& _table;
-    CTable _ctable;
-    double _confi; //  confidence intensity
+    const CTable& ctable;
+    double confi; //  confidence intensity
+    unsigned usize; // uncompressed size
 };
 
 } // ~namespace opencog
