@@ -7,9 +7,15 @@ INCLUDE_DIRECTORIES (
 	${ODBC_INCLUDE_DIRS}
 )
 
-INSTALL (TARGETS dimensionalembedding
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+IF (CYGWIN)
+	INSTALL (TARGETS dimensionalembedding
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
+ELSE (CYGWIN)
+	INSTALL (TARGETS dimensionalembedding
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
+ENDIF (CYGWIN)
 
 TARGET_LINK_LIBRARIES (dimensionalembedding
         util 
