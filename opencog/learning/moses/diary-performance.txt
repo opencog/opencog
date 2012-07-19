@@ -2840,9 +2840,15 @@ This translates to scor 569 x 2.5% = 14 or better
 wdbc-base:
     run as moses-perf -Hit -Y1 -u2 -i wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
 
-wdbc-base-j12: as above, but -j12 
+wdbc-base-j12: as above, but -j12  Clearly, this stalls out above
+    160K evals.  I think work on contin and linearization is needed.
 
 wdbc-div-j12: as above, but diversity penalty turned on (by mistake).
+
+wdbc-canon: bzr rev 7242, fix of the build_knobs::rec_canonize
+        warning for id::times canonization.  Doing this exhibits
+        an explosion of the size of an instance, and a resulting
+        slowdown of the search.
 
 
            wdbc-base          wdbc-div-j12         wdbc-base-j12
@@ -2853,6 +2859,19 @@ wdbc-div-j12: as above, but diversity penalty turned on (by mistake).
 80K:    1562    24    25     506    21    31       88    24     25
 160K:   3267    23    28    1411    20    32      224    23     28
 320K:                       2732    19    32      667    22     29  
-640K:                       4036    17    38        
-1.28M:                      6734    17    37        
+640K:                       4036    17    38     1590    22     29
+1.28M:                      6734    17    37     3516    22     29
+2.56M:                                           7559    22     29
+5.12M:                                          16033    22     29
+
+           wdbc-canon
+-m      time  score  cpxy   time  score  cpxy    time  score   cpxy
+10K:      44    37    13
+20K:     430    27    19
+40K:    4002    27    18
+80K:    6884    25    21
+160K:  24303    25    21
+320K:                       
+640K:                       
+1.28M:                      
 2.56M:       

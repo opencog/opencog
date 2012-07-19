@@ -744,6 +744,14 @@ void build_knobs::rec_canonize(pre_it it)
         linear_canonize(it.begin());
     }
     else if ((*it == id::times) || (*it == id::div)) {
+        // The code ifdef'ed out, below, "works" in the sense that it
+        // correctly adds knobs to the exemplar; however, in the one
+        // case tested so far, it slowed things down without improving
+        // the accuracy. That's because adding knobs here creaes a huge
+        // field set; the instances get larger, harder to explore.
+        // More work and thought is clearly needed.
+        logger().warn("TODO: handle case where it = id::times in build_knobs::rec_canonize");
+#ifdef LATER
         // The canonization used here raises the degree of polynomials.
         // This may not be desirable...!?  XXX some experimental validation
         // that this speeds convergence is needed.
@@ -757,6 +765,7 @@ void build_knobs::rec_canonize(pre_it it)
                 rec_canonize(sib);
             }
         }
+#endif
     }
     // functions that take a single boolean arg: canonize the arg.
     else if (*it == id::impulse) {

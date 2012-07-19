@@ -66,7 +66,8 @@ void measure(vector<string> arguments)
         // fss << "-fmoses-perf-bank-rev7131-m" << nrep << ".log";
         // fss << "-fmoses-perf-iris-r" << i << ".log";
         // fss << "-fmoses-perf-magic-bi-m" << i << ".log";
-        fss << "-fmoses-perf-yeast-m" << i << ".log";
+        // fss << "-fmoses-perf-yeast-m" << i << ".log";
+        fss << "-fmoses-perf-wdbc-m" << i << ".log";
         args.push_back(fss.str());
 #endif
 
