@@ -141,7 +141,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
 
 // run feature selection given an moses optimizer
 template<typename Optimize>
-feature_set moses_select_features(CTable& ctable,
+feature_set moses_select_features(const CTable& ctable,
                                   Optimize& optimize,
                                   const feature_selection_parameters& fs_params) {
     arity_t arity = ctable.get_arity();
@@ -171,28 +171,28 @@ feature_set moses_select_features(CTable& ctable,
     }
 }
 
-feature_set incremental_select_features(CTable& ctable,
+feature_set incremental_select_features(const CTable& ctable,
                                         const feature_selection_parameters& fs_params);
 
-feature_set max_mi_select_features(CTable& ctable,
+feature_set max_mi_select_features(const CTable& ctable,
                                    const feature_selection_parameters& fs_params);
 
 /**
  * Select the features according to the method described in fs_params.
  */
-feature_set select_features(CTable& ctable,
+feature_set select_features(const CTable& ctable,
                             const feature_selection_parameters& fs_params);
 
 /**
  * Like above but using Table instead of CTable
  */
-feature_set select_features(Table& table,
+feature_set select_features(const Table& table,
                             const feature_selection_parameters& fs_params);
 
 /**
  * Select the features, and output the table with the selected features
  */
-void feature_selection(Table& table,
+void feature_selection(const Table& table,
                        const feature_selection_parameters& fs_params);
 
 } // ~namespace opencog

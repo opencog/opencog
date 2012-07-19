@@ -184,7 +184,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
     return res;
 }
 
-feature_set incremental_select_features(CTable& ctable,
+feature_set incremental_select_features(const CTable& ctable,
                                         const feature_selection_parameters& fs_params)
 {
     auto ir = boost::irange(0, ctable.get_arity());
@@ -209,7 +209,7 @@ feature_set incremental_select_features(CTable& ctable,
     }
 }
 
-feature_set max_mi_select_features(CTable& ctable,
+feature_set max_mi_select_features(const CTable& ctable,
                                    const feature_selection_parameters& fs_params)
 {
     auto ir = boost::irange(0, ctable.get_arity());
@@ -226,7 +226,7 @@ feature_set max_mi_select_features(CTable& ctable,
     }
 }
 
-feature_set select_features(CTable& ctable,
+feature_set select_features(const CTable& ctable,
                             const feature_selection_parameters& fs_params) {
     if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
@@ -254,24 +254,23 @@ feature_set select_features(CTable& ctable,
     }    
 }
 
-feature_set select_features(Table& table,
+feature_set select_features(const Table& table,
                             const feature_selection_parameters& fs_params) {
     CTable ctable = table.compress();
     return select_features(ctable, fs_params);
 }
 
-void feature_selection(Table& table,
+void feature_selection(const Table& table,
                        const feature_selection_parameters& fs_params)
 {
     feature_set selected_features = select_features(table, fs_params);
     if (selected_features.empty())
         err_empty_features();
     else {
-        Table ftable = table.filter(selected_features);
+        Table ftable = table.filtered(selected_features);
         log_selected_features(table.get_arity(), ftable);
         write_results(ftable, fs_params);
     }
 }
 
 } // ~namespace opencog
-
