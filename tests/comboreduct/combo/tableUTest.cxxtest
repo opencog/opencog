@@ -102,7 +102,7 @@ public:
         vertex_seq o{id::logical_true, id::logical_false,};
         // ignore second argument trac
         vector<arity_t> args{0};
-        ITable fit = it.filter(args);
+        ITable fit = it.filtered(args);
         OTable ot(o);
         ot.set_label("troc");
         stringstream ss;

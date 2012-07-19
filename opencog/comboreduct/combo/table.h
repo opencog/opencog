@@ -167,7 +167,7 @@ public:
     // arity_t. Each value of that container corresponds to the column
     // index of the ITable (starting from 0).
     template<typename F>
-    string_seq get_filtered_labels(const F& filter)
+    string_seq get_filtered_labels(const F& filter) const
     {
         string_seq res;
         foreach(arity_t a, filter)
@@ -207,7 +207,7 @@ public:
     /// container of arity_t. Each value of that container corresponds
     /// to the column index of the ITable (starting from 0).
     template<typename F>
-    ITable filter(const F& f)
+    ITable filtered(const F& f) const
     {
         ITable res;
         res.set_labels(get_filtered_labels(f));
@@ -356,9 +356,9 @@ struct Table
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
     // (starting from 0).
-    template<typename F> Table filter(const F& f) {
+    template<typename F> Table filtered(const F& f) const {
         Table res;
-        res.itable = itable.filter(f);
+        res.itable = itable.filtered(f);
         res.otable = otable;
         return res;
     }
