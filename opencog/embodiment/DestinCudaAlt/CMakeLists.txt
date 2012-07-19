@@ -31,7 +31,7 @@ if(CUDA_FOUND)
     
     INCLUDE_DIRECTORIES( include )
 
-    CUDA_ADD_EXECUTABLE(destin src/main.cu )    
+    CUDA_ADD_EXECUTABLE(destin src/destin_mnist.cu )    
     CUDA_ADD_EXECUTABLE(kerneltest src/kerneltest.cu )    
 
     CUDA_ADD_LIBRARY( destinalt SHARED src/destin.cu src/node.cu )
