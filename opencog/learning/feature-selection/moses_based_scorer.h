@@ -29,24 +29,19 @@
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/eda/eda.h>
 #include <opencog/learning/moses/moses/types.h>
+#include <opencog/comboreduct/combo/common_def.h>
 
 namespace opencog {
 
 using namespace moses;
+using namespace combo;
 
 /**
  * translate an instance into a feature set. Each feature is
  * represented by its index (the left most one is 0).
  */
 std::set<arity_t> get_feature_set(const field_set& fields,
-                                  const instance& inst) {
-    std::set<arity_t> fs;
-    field_set::const_bit_iterator bit = fields.begin_bit(inst);
-    for(arity_t i = 0; bit != fields.end_bit(inst); bit++, i++)
-        if(*bit)
-            fs.insert(i);
-    return fs;
-}
+                                  const instance& inst);
 
 /**
  * Wrapper to use a feature set scorer with MOSES's optimization

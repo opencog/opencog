@@ -1,12 +1,13 @@
-# There is no cc files so no need to create a library for now
-# ADD_LIBRARY(feature_selection
-# 	feature_selection
-#     feature_scorer
-# )
-# 
-# TARGET_LINK_LIBRARIES(feature_selection
-# 	util
-# )
+ADD_LIBRARY(feature_selection SHARED
+    moses_based_scorer
+	main/feature-selection
+)
+
+TARGET_LINK_LIBRARIES(feature_selection
+	util
+    moses
+	${Boost_PROGRAM_OPTIONS_LIBRARY} 
+)
 
 ADD_SUBDIRECTORY(main)
 ADD_SUBDIRECTORY(man)
