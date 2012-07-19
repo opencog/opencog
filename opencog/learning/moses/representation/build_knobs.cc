@@ -553,25 +553,25 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
 }
 
 // ***********************************************************************
-// Contin
-
-// Given a pointer @it into the exemplar, the contin_cannonize()
-// method will insert a "canonical form" above this pointer.
-//
-// The canonical form we want for a contin-valued term is a linear-
-// weighted fraction whose numerator and denominator are either
-// generalized polynomials or other contin-valued terms, i.e.:
-//
-//    c1 + (c2 * p1) / p2
-//
-// The generalized polys (p1 and p2) may contain x, sin, abs_log, exp,
-// x*y, where x and y are any other contin-valued terms.
-//
-// We assume that reduction has already taken place, i.e. that p1, p2
-// are already in reduced form.
-//
-// If there are multiple divisors, they will be transformed into separate terms
-// (???)
+/// contin_cannonize -- add knobs to create canonical contin expr.
+///
+/// Given a pointer @it into the exemplar, the contin_cannonize()
+/// method will insert a "canonical form" above this pointer.
+///
+/// The canonical form we want for a contin-valued term is a linear-
+/// weighted fraction whose numerator and denominator are either
+/// generalized polynomials or other contin-valued terms, i.e.:
+///
+///    c1 + (c2 * p1) / p2
+///
+/// The generalized polys (p1 and p2) may contain x, sin, log, exp,
+/// x*y, where x and y are any other contin-valued terms.
+///
+/// We assume that reduction has already taken place, i.e. that p1, p2
+/// are already in reduced form.
+///
+/// If there are multiple divisors, they will be transformed into separate terms
+/// (???)
 void build_knobs::contin_canonize(pre_it it)
 {
     if (is_contin(*it) && get_contin(*it) == 0) {
@@ -605,6 +605,7 @@ void build_knobs::contin_canonize(pre_it it)
             linear_canonize_times(it);
     }
     else {
+        // else if we are here, then it must be id::times
         _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
         if (permitted_op(id::div)) {
             _exemplar.append_child(_exemplar.insert_above(it, id::div),
@@ -615,7 +616,7 @@ void build_knobs::contin_canonize(pre_it it)
     }
 
 #ifdef DEBUG_INFO
-    cout << "ok " << _exemplar << endl;
+    cout << "after contin_canonize " << _exemplar << endl;
 #endif
 
 }
@@ -659,7 +660,7 @@ void build_knobs::add_constant_child(pre_it it, contin_t v)
         _exemplar.swap(sib, it.last_child());
 }
 
-// Make it binary * with second arg a constant.
+/// caonize_times: turn 'it' into a  binary * with second arg a constant.
 pre_it build_knobs::canonize_times(pre_it it)
 {
     // get contin child of 'it', if 'it' == 'times' and such contin
@@ -695,7 +696,7 @@ void build_knobs::linear_canonize_times(pre_it it)
 /// So, for example, this will insert terms such as *(0 $n) (an arg
 /// multiplied by zero), and the zero will later be made a knob.  The
 /// "pre-knobs" are always inserted linearly (i.e. prepended by a plus,
-/// so that they forma linear combination).
+/// so that they form a linear combination).
 ///
 /// The recursive aspect of this is such that, if it encounters terms
 /// that are functions, it will canonize their arguments as well.  Thus,
@@ -743,8 +744,19 @@ void build_knobs::rec_canonize(pre_it it)
         linear_canonize(it.begin());
     }
     else if ((*it == id::times) || (*it == id::div)) {
-        // @todo: think about that case...
-        logger().warn("TODO: handle case where it = id::times in build_knobs::rec_canonize");
+        // The canonization used here raises the degree of polynomials.
+        // This may not be desirable...!?  XXX some experimental validation
+        // that this speeds convergence is needed.
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
+            if (is_argument(*sib)) {
+                sib = _exemplar.insert_above(sib, id::plus);
+                append_linear_combination(sib);
+                // logger().info()<<"after arg canonization ="<<combo_tree(sib);
+            }
+            else if (!is_contin(*sib)) {
+                rec_canonize(sib);
+            }
+        }
     }
     // functions that take a single boolean arg: canonize the arg.
     else if (*it == id::impulse) {
@@ -761,9 +773,8 @@ void build_knobs::rec_canonize(pre_it it)
 /// the term +( *(0 $1) *(0 $2) *(0 $3) ...)  Later on, the zero
 /// constants will become knobs.
 ///
-/// The appending happens at location 'it' (which happens to always
-/// be in the exampler, in the current usage).  If '*it' isn't plus,
-/// then plus is inserted.
+/// The appending happens at location 'it' in the exemplar.  If '*it'
+/// isn't plus, then plus is inserted.
 ///
 /// If the argument is of type contin, then it is directly inserted,
 /// as shown above.

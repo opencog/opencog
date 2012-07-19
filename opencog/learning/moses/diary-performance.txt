@@ -2826,3 +2826,33 @@ almost 56% accuracy.  Yahoo!  The 5.12M run is hitting 78% accuracy.
 1.28M:                      8831   379    56     7731   604     42
 2.56M:                     23594   345    61    17755   603     42
 5.12M:                     53584   330    63
+
+=======================================================================
+Another dataset: wdbc Wisconsin Diagnostic Breast Cancer
+
+Ignore: column 1
+Predict: column 2
+30 features, 569 records.
+linearly seperable, resulting in 97.5% accuracy (using 10-fold cross-validation)
+This translates to scor 569 x 2.5% = 14 or better
+
+
+wdbc-base:
+    run as moses-perf -Hit -Y1 -u2 -i wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
+
+wdbc-base-j12: as above, but -j12 
+
+wdbc-div-j12: as above, but diversity penalty turned on (by mistake).
+
+
+           wdbc-base          wdbc-div-j12         wdbc-base-j12
+-m      time  score  cpxy   time  score  cpxy    time  score   cpxy
+10K:      44    37    13       3    37    13        3    37     13
+20K:     217    27    19      13    27    19       11    27     19
+40K:     736    27    18      86    25    23       38    27     18
+80K:    1562    24    25     506    21    31       88    24     25
+160K:   3267    23    28    1411    20    32      224    23     28
+320K:                       2732    19    32      667    22     29  
+640K:                       4036    17    38        
+1.28M:                      6734    17    37        
+2.56M:       
