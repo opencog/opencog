@@ -83,8 +83,8 @@ static const builtin_description bd[] =
     { id::car,                  "->(list union)" },
     { id::cdr,                  "->(list list)" },
     { id::cons,                 "->(union list list)" },
-    { id::foldr,                "->(-> union list)" },
-    { id::foldl,                "->(-> union list)" },
+    { id::foldr,                "->(-> union list union)" },
+    { id::foldl,                "->(-> union list union)" },
 
     //{ id::ann,                  "->(arg_list(boolean))" },
     //{ id::ann_node,             "->(arg_list(boolean))" },
