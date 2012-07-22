@@ -624,7 +624,7 @@ struct metapopulation : bscored_combo_tree_set
             // [HIGHLY EXPERIMENTAL]. It allows to select features
             // that provide the most information when combined with
             // the exemplar
-            const bool enable_feature_selection = true;
+            const bool enable_feature_selection = false;
             operator_set ignore_ops = params.ignore_ops;
             if (enable_feature_selection) {
                 OC_ASSERT(params.fstor);
