@@ -46,6 +46,7 @@
 #include "../representation/representation.h"
 #include "scoring.h"
 #include "types.h"
+#include "feature_selector.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -74,7 +75,8 @@ struct metapop_parameters
                        bool _enable_cache = false,
                        unsigned _jobs = 1,
                        const combo_tree_ns_set* _perceptions = NULL,
-                       const combo_tree_ns_set* _actions = NULL) :
+                       const combo_tree_ns_set* _actions = NULL,
+                       const feature_selector* _fstor = NULL) :
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         revisit(_revisit),
@@ -87,7 +89,8 @@ struct metapop_parameters
         perceptions(_perceptions),
         actions(_actions),
         merge_callback(NULL),
-        callback_user_data(NULL)
+        callback_user_data(NULL),
+        fstor(_fstor)
         {}
 
     // The max number of candidates considered to be added to the
@@ -128,6 +131,8 @@ struct metapop_parameters
 
     bool (*merge_callback)(bscored_combo_tree_set&, void*);
     void *callback_user_data;
+
+    const feature_selector* fstor;
 };
 
 /**
@@ -616,12 +621,32 @@ struct metapopulation : bscored_combo_tree_set
                     << "\nScored: " << _cscorer(get_tree(_exemplar));
             }
 
+            // [HIGHLY EXPERIMENTAL]. It allows to select features
+            // that provide the most information when combined with
+            // the exemplar
+            const bool enable_feature_selection = true;
+            operator_set ignore_ops = params.ignore_ops;
+            if (enable_feature_selection) {
+                OC_ASSERT(params.fstor);
+                // return the set of selected features as column index
+                // (left most column corresponds to 0)
+                auto selected_features = (*params.fstor)(_exemplar);
+                // add the complementary of the selected features in ignore_ops
+                unsigned arity = params.fstor->ctable.get_arity();
+                for (unsigned i = 0; i < arity; i++)
+                    if (selected_features.find(i) == selected_features.end())
+                        ignore_ops.insert(argument(i + 1));
+                // std::vector<std::string> ios;
+                // boost::transform(ignore_ops, back_inserter(ios), [](const vertex& v) { std::stringstream ss; ss << v; return ss.str(); });
+                // printlnContainer(ios);
+            }
+            
             // Build a representation by adding knobs to the exemplar,
             // creating a field set, and a mapping from field set to knobs.
             _rep = new representation(*simplify_candidate,
                                       *simplify_knob_building,
                                       get_tree(_exemplar), _type_sig,
-                                      params.ignore_ops,
+                                      ignore_ops,
                                       params.perceptions,
                                       params.actions);
 

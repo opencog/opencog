@@ -22,7 +22,7 @@ ADD_SUBDIRECTORY (example-ant)
 ADD_SUBDIRECTORY (example-progs)
 ADD_SUBDIRECTORY (man)
 
-ADD_LIBRARY (moses SHARED
+ADD_LIBRARY (moses SHARED STATIC
 	eda/initialization
 	eda/local_structure
 	moses/complexity
@@ -45,6 +45,7 @@ ADD_LIBRARY (moses SHARED
 
 TARGET_LINK_LIBRARIES (moses
 	comboreduct
+    feature_selection
 	util 
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )

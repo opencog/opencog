@@ -1,4 +1,4 @@
-ADD_LIBRARY(feature_selection SHARED
+ADD_LIBRARY(feature_selection SHARED STATIC
     moses_based_scorer
 	main/feature-selection
 )

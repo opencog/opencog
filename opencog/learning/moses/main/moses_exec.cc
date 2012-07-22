@@ -1157,6 +1157,27 @@ int moses_exec(int argc, char** argv)
                         exemplars.push_back(tr);
                     }
                 }
+                /// @todo add program option
+                /// Enable feature selection while selecting exemplar
+                static const bool enable_feature_selection = false;
+                if (enable_feature_selection) {
+                    // define the feature selection algorithm
+                    feature_selection_parameters fs_params;
+                    fs_params.algorithm = inc;
+                    fs_params.max_evals = 100000;
+                    fs_params.target_size = 30;
+                    fs_params.inc_red_intensity = 0.1;
+                    fs_params.inc_interaction_terms = 1;
+                    fs_params.hc_confi = 1.0;
+                    fs_params.jobs = jobs[localhost];
+                    fs_params.hc_cache_size = 100000;
+                    
+                    // use the first table, normally it should
+                    // probably use the concatenation of all of them
+                    meta_params.fstor = new feature_selector(ctables.front(),
+                                                             fs_params);
+                }
+
                 multibscore_based_bscore<BScore> bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,
                                       bool_reduct, bool_reduct_rep, bscore,
