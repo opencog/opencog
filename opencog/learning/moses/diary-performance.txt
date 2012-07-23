@@ -253,6 +253,12 @@ Diary contains these major sections, below.
    (event identification/rejection problem, 19K rows, 11 contin-valued 
    features.  When discretized, 150 binary fetures.)
 
+-- Study of Yeast dataset June-July 2012
+   Yeast classification, 1.5K records, 8 features.
+   Other systems get 55% accuracy. (per ascii description)
+   Moses best: 78% accuracy
+
+
 =======================================================================
 Diary started in January 2012
 
@@ -2368,8 +2374,8 @@ nohup time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data -u1
 
 "threading": multi-threading test.  Captions: "time", raw time in secs.
        "slow": slowdown, percent.  For N threads, this is just 
-        100* (N * jN_time - j1_time) / j1_time, i.e. the perceived
-        parallelizable fraction of the algo.  score and cpxy as usual.
+        100* (N * jN_time - j1_time) / j1_time, i.e. the fraction of
+        the runtime spent in a serial bottlneck.  score and cpxy as usual.
         Looks like exactly the same exemplars were found each time, so
         looks like none of the random-number generation stuff sits in
         a thread.
@@ -2419,7 +2425,117 @@ model name      : AMD Athlon(tm) 64 X2 Dual Core Processor 6000+
 cache size      : 1024 KB
 cpu cores       : 2
 
+------
+20 July 2012: Redo moses scaling tests, this time with boolean, not
+contin learning, via PM interfaces.  Dataset: magic-16-sect.data
+19020 rows, 150 boolean input features.
 
+pm moses -d magic-16-sect.data -m m.model -p targ -n2 -e160000 -M"-j12"
+record the elapsed time, all other calcs done by hand.
+
+           time1            time2        avg
+ -j1:  0:58:31.579784   0:58:50.374713  
+ -j2:  0:28:10.411133   0:28:07.570191
+ -j3:  0:18:01.457073   0:17:58.062739
+ -j4:  0:13:11.109083   0:13:16.838854
+ -j5:  0:10:28.439161   0:10:31.166558
+ -j6:  0:08:33.932223   0:08:37.904997
+ -j7:  0:07:19.550359   0:07:18.878978
+ -j8:  0:06:23.496197   0:06:21.677673
+ -j9:  0:05:42.928437   0:05:40.982504
+-j10:  0:05:09.037658   0:05:03.645573
+-j11:  0:04:36.562135   0:04:38.079406
+-j12:  0:04:19.169721   0:04:13.499484  256.33
+-j12:  0:04:16.516100   0:04:16.119379
+-j13:  0:05:25.515190   0:05:16.550722
+-j14:  0:05:22.836662   0:05:25.458669
+-j15:  0:05:15.643609   0:05:09.794156
+-j16:  0:05:06.838044   0:05:06.326885
+
+Same data as above:
+Somewhat insane, as speedup is greater than N, which indicates
+that the j=1 case is broken somehow. However, four measurements
+for -j1 give the same thing, indicating that the current code
+is likely to have some significant cache collision problem with
+the -j1 case.  This makes it impossible to get a measurement of
+the parallelizable fraction, and the true N=infinity speedup.
+
+  N     avg time   speedup
+ -j1:  3520.97  
+ -j2:  1688.99      2.08
+ -j3:  1079.75      3.26
+ -j4:   793.97      4.43
+ -j5:   629.80      5.59
+ -j6:   515.92      6.82
+ -j7:   439.21      8.02
+ -j8:   382.59      9.20
+ -j9:   341.95     10.30
+-j10:   306.34     11.49
+-j11:   277.32     12.70
+-j12:   256.32     13.74
+-j13:   321.03     10.97
+-j14:   324.15     10.86
+-j15:   312.72     11.26
+-j16:   306.58     11.48
+
+script scaling.pl to compute averages above.
+
+#! /usr/bin/perl
+
+$base = 0;
+$j = 1;
+while(<>) {
+   ($a, $b, $c) = split;
+   ($ha, $ma, $sa) = split (/:/, $b);
+   ($hb, $mb, $sb) = split (/:/, $c);
+   # print "duude $b $c  $ha $ma $sa \n";
+
+   $avg = $ha*3600 + $ma*60 + $sa;
+   $avg += $hb*3600 + $mb*60 + $sb;
+   $avg *= 0.5;
+   if (0 == $base) { $base = $avg; }
+
+   # speedup
+   $su = $base / $avg;
+
+   $pf = 0;
+   # paralllizable fraction
+   if ($j != 1) {
+      $pf = (1 - 1/$su) / (1 - 1/$j);
+   }
+
+   # maximum speedup
+   $maxsu = 1 / (1-$pf);
+   # print "$j  avg=$avg speedup = $su maxspeedup = $maxsu\n";
+   print "$j  $avg   $su\n";
+
+   $j++;
+}
+
+Again, this time with -r1 random seed:
+Again, same problem: greater than unity drive.
+
+           time1            time2        avg
+ -j1:  0:55:34.438427   0:57:40.722962
+ -j2:  0:28:09.940727   0:28:08.055481
+ -j3:  0:18:07.668825   0:17:59.532231
+ -j4:  0:13:07.527517   0:13:07.980217
+ -j5:  0:10:34.328574   0:10:19.094884
+ -j6:  0:08:37.897093   0:08:36.165487
+ -j7:  0:07:14.747906   0:07:21.580980
+ -j8:  0:06:22.907118   0:06:19.043655
+ -j9:  0:05:36.325852   0:05:38.498216
+-j10:  0:05:08.184284   0:05:02.946471
+-j11:  0:04:39.090906   0:04:38.483967
+-j12:  0:04:15.044312   0:04:17.156179   
+-j13:  0:05:38.029001   0:05:20.919572
+-j14:  0:05:29.199905   0:05:20.543640
+-j15:  0:05:07.448976   0:05:12.333979
+-j16:  0:05:04.920271   0:05:03.272574
+
+
+------------------------------
+Early June 2012:
 Below is a run with escalating m values, to see how/if score improves
 with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 12 threads.
@@ -2781,6 +2897,9 @@ Accuracy: 0.841114616193 (15998 correct out of 19020 total)
 Very little evidence of overtraining in the above.  Clearly
 much more could be done.
 =======================================================================
+=======================================================================
+=======================================================================
+=======================================================================
 
 Lets give this one a whirl:
  * Yeast  1.5K records, 8 features.
@@ -2828,6 +2947,9 @@ almost 56% accuracy.  Yahoo!  The 5.12M run is hitting 78% accuracy.
 5.12M:                     53584   330    63
 
 =======================================================================
+=======================================================================
+=======================================================================
+=======================================================================
 Another dataset: wdbc Wisconsin Diagnostic Breast Cancer
 
 Ignore: column 1
@@ -2871,7 +2993,7 @@ wdbc-canon: bzr rev 7242, fix of the build_knobs::rec_canonize
 40K:    4002    27    18
 80K:    6884    25    21
 160K:  24303    25    21
-320K:                       
+320K:  56074    25    21                    
 640K:                       
 1.28M:                      
 2.56M:       

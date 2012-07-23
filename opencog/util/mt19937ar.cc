@@ -307,7 +307,7 @@ double MT19937RandGen::genrand_res53(void)
 } 
 #endif
 
-// Create and return the signle instance. The initial seed is zero but
+// Create and return the single instance. The initial seed is zero but
 // can be changed with the public method RandGen::seed(unsigned long)
 RandGen& opencog::randGen()
 {
