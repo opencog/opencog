@@ -457,6 +457,12 @@ int moses_exec(int argc, char** argv)
     // it params
     bool it_abs_err;
 
+    // EXPERIMENTAL
+    // feature selection happens before each representation building
+    /// Enable feature selection while selecting exemplar
+    bool enable_feature_selection;
+    feature_selection_parameters fs_params;
+
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
     options_description desc("Allowed options");
@@ -893,7 +899,92 @@ int moses_exec(int argc, char** argv)
          value<bool>(&gen_best_tree)->default_value(false),
          "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.")
 
-       ;
+        ("enable-fs",
+         value<bool>(&enable_feature_selection)->default_value(false),
+         "Enable feature selection (happen before each representation building)")
+        
+        ("fs-algo",
+         value<string>(&fs_params.algorithm)->default_value(mmi),
+         string("Feature selection algorithm. Supported algorithms are:\n")
+         /*
+          * We're not going to support univariate or sa any time
+          * soon, and maybe never; they're kind-of deprecated in
+          * MOSES, at the moment.
+          .append(un).append(" for univariate,\n")
+          .append(sa).append(" for simulated annealing,\n")
+         */
+         .append(mmi).append(" for maximal mutual information,\n")
+         .append(moses::hc).append(" for hillclimbing,\n")
+         .append(inc).append(" for incremental mutual information.\n").c_str())
+
+        ("fs-target-size",
+         value<unsigned>(&fs_params.target_size)->default_value(0),
+            "Feature count.  This option "
+            "specifies the number of features to be selected out of "
+            "the dataset.  A value of 0 disables this option. \n")
+
+        ("fs-threshold",
+         value<double>(&fs_params.threshold)->default_value(0),
+            "Improvment threshold. Floating point number. "
+            "Specifies the threshold above which the mutual information "
+            "of a feature is considered to be significantly correlated "
+            "to the target.  A value of zero means that all features "
+            "will be selected. \n"
+            "For the -ainc algo only, the -C flag over-rides this setting.\n")
+
+        ("fs-inc-redundant-intensity",
+         value<double>(&fs_params.inc_red_intensity)->default_value(0.1),
+         "Incremental Selection parameter. Floating-point value must "
+         "lie between 0.0 and 1.0.  A value of 0.0 means that no "
+         "redundant features will discarded, while 1.0 will cause a "
+         "maximal number will be discarded.\n")
+
+        ("fs-inc-target-size-epsilon",
+         value<double>(&fs_params.inc_target_size_epsilon)->default_value(0.001),
+         "Incremental Selection parameter. Tolerance applied when "
+         "selecting for a fixed number of features (option -C).\n")
+
+        ("fs-inc-interaction-terms",
+         value<unsigned>(&fs_params.inc_interaction_terms)->default_value(1),
+         "Incremental Selection parameter. Maximum number of "
+         "interaction terms considered during incremental feature "
+         "selection. Higher values make the feature selection more "
+         "accurate but is combinatorially more computationally expensive.\n")
+
+        // ======= Hill-climbing only params =======
+        ("fs-max-score",
+         value<double>(&fs_params.hc_max_score)->default_value(1),
+         "Hillclimbing parameter.  The max score to reach, once "
+         "reached feature selection halts.\n")
+
+        ("fs-confidence-penalty-intensity",
+         value<double>(&fs_params.hc_confi)->default_value(1.0),
+         "Hillclimbing parameter.  Intensity of the confidence "
+         "penalty, in the range [0,+Inf).  Zero means no confidence "
+         "penalty. This parameter influences how much importance is "
+         "attributed to the confidence of the quality measure. The "
+         "fewer samples in the data set, the more features the "
+         "less confidence in the feature set quality measure.\n")
+
+        // no need of that for now
+        // (opt_desc_str(hc_initial_feature_opt).c_str(), 
+        //  value<vector<string> >(&fs_params.hc_initial_features),
+        //  "Hillclimbing parameter.  Initial feature to search from.  "
+        //  "This option can be used as many times as there are features, "
+        //  "to have them included in the initial feature set. If the "
+        //  "initial feature set is close to the one that maximizes the "
+        //  "quality measure, the selection speed can be greatly increased.\n")
+
+        ("fs-max-evals",
+         value<unsigned>(&fs_params.max_evals)->default_value(10000),
+         "Hillclimbing parameter.  Maximum number of fitness function "
+         "evaluations.\n")
+
+        ("fs-hc-fraction-of-remaining",
+         value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.5),
+         "Hillclimbing parameter.  Determine the fraction of the "
+         "remaining number of eval to use for the current iteration.\n")
+        ;
 
     variables_map vm;
     try {
@@ -1159,19 +1250,7 @@ int moses_exec(int argc, char** argv)
                 }
                 /// @todo add program option
                 /// Enable feature selection while selecting exemplar
-                static const bool enable_feature_selection = false;
                 if (enable_feature_selection) {
-                    // define the feature selection algorithm
-                    feature_selection_parameters fs_params;
-                    fs_params.algorithm = inc;
-                    fs_params.max_evals = 100000;
-                    fs_params.target_size = 30;
-                    fs_params.inc_red_intensity = 0.1;
-                    fs_params.inc_interaction_terms = 1;
-                    fs_params.hc_confi = 1.0;
-                    fs_params.jobs = jobs[localhost];
-                    fs_params.hc_cache_size = 100000;
-                    
                     // use the first table, normally it should
                     // probably use the concatenation of all of them
                     meta_params.fstor = new feature_selector(ctables.front(),

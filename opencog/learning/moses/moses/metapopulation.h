@@ -31,6 +31,8 @@
 #include <boost/unordered_set.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/set_algorithm.hpp>
+#include <boost/range/irange.hpp>
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
@@ -624,21 +626,19 @@ struct metapopulation : bscored_combo_tree_set
             // [HIGHLY EXPERIMENTAL]. It allows to select features
             // that provide the most information when combined with
             // the exemplar
-            const bool enable_feature_selection = false;
             operator_set ignore_ops = params.ignore_ops;
-            if (enable_feature_selection) {
-                OC_ASSERT(params.fstor);
+            if (params.fstor) {
                 // return the set of selected features as column index
                 // (left most column corresponds to 0)
                 auto selected_features = (*params.fstor)(_exemplar);
                 // add the complementary of the selected features in ignore_ops
-                unsigned arity = params.fstor->ctable.get_arity();
-                for (unsigned i = 0; i < arity; i++)
-                    if (selected_features.find(i) == selected_features.end())
-                        ignore_ops.insert(argument(i + 1));
+                auto ir = boost::irange(0, params.fstor->ctable.get_arity());
+                boost::set_difference(ir, selected_features, inserter(ignore_ops));
+                // debug print
                 // std::vector<std::string> ios;
                 // boost::transform(ignore_ops, back_inserter(ios), [](const vertex& v) { std::stringstream ss; ss << v; return ss.str(); });
                 // printlnContainer(ios);
+                // ~debug print
             }
             
             // Build a representation by adding knobs to the exemplar,
