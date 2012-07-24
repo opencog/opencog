@@ -632,11 +632,18 @@ struct metapopulation : bscored_combo_tree_set
                 // (left most column corresponds to 0)
                 auto selected_features = (*params.fstor)(_exemplar);
                 // add the complementary of the selected features in ignore_ops
-                auto ir = boost::irange(0, params.fstor->ctable.get_arity());
-                boost::set_difference(ir, selected_features, inserter(ignore_ops));
+                unsigned arity = params.fstor->ctable.get_arity();
+                for (unsigned i = 0; i < arity; i++)
+                    if (selected_features.find(i) == selected_features.end())
+                        ignore_ops.insert(argument(i + 1));
                 // debug print
                 // std::vector<std::string> ios;
-                // boost::transform(ignore_ops, back_inserter(ios), [](const vertex& v) { std::stringstream ss; ss << v; return ss.str(); });
+                // auto vertex_to_str = [](const vertex& v) {
+                //     std::stringstream ss;
+                //     ss << v;
+                //     return ss.str();
+                // };
+                // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
                 // printlnContainer(ios);
                 // ~debug print
             }
