@@ -46,9 +46,10 @@
 
 #include "../representation/instance_set.h"
 #include "../representation/representation.h"
+#include "feature_selector.h"
+// #include "mpi_moses.h"
 #include "scoring.h"
 #include "types.h"
-#include "feature_selector.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -293,19 +294,6 @@ struct metapopulation : bscored_combo_tree_set
     }
 
     /**
-     * List of exemplars that we've already tried to build reps
-     * and demes for.
-     */
-    const combo_tree_hash_set& visited() const
-    {
-        return _visited_exemplars;
-    }
-    combo_tree_hash_set& visited()
-    {
-        return _visited_exemplars;
-    }
-
-    /**
      * Select the exemplar from the population. An exemplar is choosen
      * from the pool of candidates using a Boltzmann distribution
      * exp (-score / temperature).  Thus, they choosen exemplar will
@@ -416,7 +404,12 @@ struct metapopulation : bscored_combo_tree_set
                                                              sum, randGen()));
         // cout << "select_exemplar(): sum=" << sum << " fwd =" << fwd
         // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
-        return std::next(begin(), fwd);
+        const_iterator selex = std::next(begin(), fwd);
+
+        // Mark the exemplar so we won't look at it again.
+        _visited_exemplars.insert(*selex);
+
+        return selex;
     }
 
     /// Given the current complexity temp, return the range of scores that
@@ -584,6 +577,7 @@ struct metapopulation : bscored_combo_tree_set
 
         // Attempt to create a non-empty representation, by looping
         // over exemplars until we find one that expands.
+        // XXX When would one never expand?  Wouldn't that be a bug?
         do {
             const_iterator exemplar = select_exemplar();
 
@@ -662,11 +656,8 @@ struct metapopulation : bscored_combo_tree_set
             if (_rep->fields().empty()) {
                 delete(_rep);
                 _rep = NULL;
-                _visited_exemplars.insert(get_tree(_exemplar));
-                // Logger
-                logger().info("The representation is empty, perhaps the reduct "
-                               "effort for knob building is too high");
-                // ~Logger
+                logger().warn("The representation is empty, perhaps the reduct "
+                              "effort for knob building is too high.");
             }
         } while (!_rep);
 
@@ -715,9 +706,6 @@ struct metapopulation : bscored_combo_tree_set
 
         logger().debug("Close deme; evaluations performed: %d",
                            eval_during_this_deme);
-
-        // Mark the exemplar so we won't expand it again
-        _visited_exemplars.insert(get_tree(_exemplar));
 
         // Add, as potential exemplars for future demes, all unique
         // trees in the final deme.

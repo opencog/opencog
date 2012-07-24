@@ -159,7 +159,6 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             mp_cit exemplar = mp.select_exemplar();
             if (exemplar != mp.end()) {
                 const combo_tree& tr = get_tree(*mp.select_exemplar());
-                mp.visited().insert(tr);
 
                 string cmdline =
                     build_cmdline(vm, tr, hostname, n_jobs,
