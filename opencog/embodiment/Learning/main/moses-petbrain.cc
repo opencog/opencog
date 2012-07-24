@@ -30,7 +30,6 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 

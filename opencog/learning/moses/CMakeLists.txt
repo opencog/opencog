@@ -33,7 +33,6 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/partial
 	moses/pole_balancing
 	moses/scoring
-	moses/scoring_functions
 	moses/types
 	moses/using
 	representation/build_knobs
@@ -45,7 +44,7 @@ ADD_LIBRARY (moses SHARED STATIC
 
 TARGET_LINK_LIBRARIES (moses
 	comboreduct
-    feature_selection
+	feature_selection
 	util 
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
