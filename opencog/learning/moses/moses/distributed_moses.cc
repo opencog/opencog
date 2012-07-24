@@ -165,22 +165,27 @@ proc_map::value_type launch_cmd(string cmd, unsigned n_jobs) {
     return make_pair(pid, boost::make_tuple(cmd, tmp, fp, n_jobs));
 }
 
-bool is_being_written(const string& file_name, int pid) {
+bool is_being_written(const string& file_name, int pid)
+{
+    // Arghhh FIXME. fuser might not be installed, or it may not be in
+    // the default search path.  RedHat/CentOS puts it into /sbin/fuser
+    // which is not in the default searchpath.
     FILE* fp = popen(string("fuser ").append(file_name).append(" 2> /dev/null").c_str(), "r");
-    while(!feof(fp)) {
+    while (!feof(fp)) {
         int p;
         int count_matches = fscanf(fp, "%u", &p);
-        OC_ASSERT(count_matches == 1);
-        if(pid == p)
+        OC_ASSERT(count_matches == 1, "The fuser command failed; is it installed?");
+        if (pid == p)
             return true;
     }
     return false;
 }
 
-bool is_running(const proc_map::value_type& pmv) {
+bool is_running(const proc_map::value_type& pmv)
+{
     // check if the file is still empty
     FILE* fp = get_file(pmv);
-    if(fseek(fp, 0, SEEK_END)) {
+    if (fseek(fp, 0, SEEK_END)) {
         std::cerr << "Error while seeking to end of file" << std::endl;
         exit(1);
     }
@@ -188,7 +193,7 @@ bool is_running(const proc_map::value_type& pmv) {
     if (length < 0) {
         std::cerr << "Error while reading file position" << std::endl;
         exit(1);
-    } else if(length == 0) {
+    } else if (length == 0) {
         return true;
     }
     return is_being_written(get_tmp(pmv), get_pid(pmv));

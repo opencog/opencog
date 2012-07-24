@@ -178,11 +178,11 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                                              // there is no hope that
                                              // one will come
                 // Logger
-                logger().info("There is no more exemplar in the metapopulation"
-                              " that has not been visited and"
+                logger().info("There are no more exemplars in the metapopulation"
+                              " that have not been visited and"
                               " no more results from other process are expected."
-                              " This is a blockage situation, several options"
-                              " can be used to prevent that, see moses -h");
+                              " This is a deadlock; several options"
+                              " can be used to prevent this, see moses -h");
                 // ~Logger
                 break;
             }
