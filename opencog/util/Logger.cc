@@ -30,19 +30,19 @@
 #include "Logger.h"
 #include "Config.h"
 
-#include <pthread.h>
-#define pthread_yield sched_yield
-
 #ifndef WIN32
 #include <cxxabi.h>
 #include <execinfo.h>
 #endif
 
 #include <iostream>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <time.h>
 #include <sstream>
+
+#include <pthread.h>
+#include <sched.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <time.h>
 
 #ifdef WIN32_NOT_UNIX
 #include <winsock2.h>
@@ -167,7 +167,7 @@ void Logger::flush()
 {
     while (!pendingMessagesToWrite.empty())
     {
-        pthread_yield();
+        sched_yield();
         usleep(100);
     }
 }
