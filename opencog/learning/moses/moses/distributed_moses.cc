@@ -109,7 +109,15 @@ string build_cmdline(const variables_map& vm,
     // add exemplar option
     stringstream ss;
     ss << tr;
-    res += string(" -") + exemplars_str_opt.second + " \"" + ss.str() + "\"";
+
+    // When using ssh, must escape the $varname
+    string trs = ss.str();
+    size_t pos = trs.find('$');
+    while (pos != string::npos) {
+        trs.insert(pos, 1, '\\');
+        pos = trs.find('$', pos+2);
+    }
+    res += string(" -") + exemplars_str_opt.second + " \"" + trs + "\"";
     // add output options
     res += string(" -") + output_bscore_opt.second + " 1";
     res += string(" -") + output_complexity_opt.second + " 1";
