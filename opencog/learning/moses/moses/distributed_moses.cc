@@ -215,16 +215,19 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
             // read complexity
             complexity_t complexity;
             in >> complexity;
-            // read penalty
-            score_t penalty;
-            in >> penalty;
+            // read complexity penalty
+            score_t complexity_penalty;
+            in >> complexity_penalty;
+            // read complexity penalty
+            score_t diversity_penalty;
+            in >> diversity_penalty;
             // read candidate
             combo_tree tr;
             in >> tr;
             // read bscore, which is preceeded by the bscore penalty
             score_t bpenalty;
             in >> bpenalty;
-            OC_ASSERT(bpenalty == penalty);
+            OC_ASSERT(bpenalty == complexity_penalty);
 
             penalized_behavioral_score pbs;
             behavioral_score &bscore = pbs.first;
@@ -232,7 +235,7 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
             pbs.second = bpenalty;
             // insert read element in candidates
             bscored_combo_tree candidate =
-                make_pair(tr, make_pair(pbs, composite_score(score, complexity, penalty)));
+                make_pair(tr, make_pair(pbs, composite_score(score, complexity, complexity_penalty)));
             candidates.insert(candidate);
             // Logger
             if (logger().isFineEnabled()) {
