@@ -168,6 +168,7 @@ proc_map::value_type launch_cmd(string cmd, unsigned n_jobs) {
     int pid;
     int count_matches = fscanf(fp_pid, "%u", &pid);
     OC_ASSERT(count_matches == 1);
+    pclose(fp_pid);
 
     // make the proc_map
     return make_pair(pid, boost::make_tuple(cmd, tmp, fp, n_jobs));
@@ -183,9 +184,12 @@ bool is_being_written(const string& file_name, int pid)
         int p;
         int count_matches = fscanf(fp, "%u", &p);
         OC_ASSERT(count_matches == 1, "The fuser command failed; is it installed?");
-        if (pid == p)
+        if (pid == p) {
+            pclose(fp);
             return true;
+        }
     }
+    pclose(fp);
     return false;
 }
 
@@ -267,7 +271,7 @@ void parse_result(const proc_map::value_type& pmv,
     // parse result
     parse_result(sp, candidates, evals);
     // close fp
-    pclose(fp);
+    fclose(fp);
 }
 
 
