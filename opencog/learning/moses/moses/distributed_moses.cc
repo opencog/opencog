@@ -239,24 +239,29 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
             // read bscore, which is preceeded by the bscore penalty
             score_t bpenalty;
             in >> bpenalty;
-            OC_ASSERT(bpenalty == complexity_penalty);
 
             penalized_behavioral_score pbs;
-            behavioral_score &bscore = pbs.first;
-            istreamContainer(in, std::back_inserter(bscore), "[", "]");
-            pbs.second = bpenalty;
+            pbs.second = complexity_penalty;
+            if (0 != bpenalty) {
+                OC_ASSERT(bpenalty == complexity_penalty,
+                          "Behavioural score is mangled!");
+                behavioral_score &bscore = pbs.first;
+                istreamContainer(in, std::back_inserter(bscore), "[", "]");
+            } else {
+                // Discard remaining characters till end-of-line.
+                in.ignore(4123123, '\n');
+            }
             // insert read element in candidates
             bscored_combo_tree candidate =
                 make_pair(tr, make_pair(pbs, composite_score(score, complexity, complexity_penalty)));
             candidates.insert(candidate);
-            // Logger
+
             if (logger().isFineEnabled()) {
                 logger().fine("Parsed candidate:");
                 stringstream ss;
                 logger().fine(ostream_bscored_combo_tree(ss, candidate,
                                                          true, true).str());
             }
-            // ~Logger
         }
     }
 };
