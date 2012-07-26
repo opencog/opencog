@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <unistd.h>
+
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/format.hpp>
@@ -33,7 +35,6 @@
 #include "moses_exec.h"
 #include "moses_exec_def.h"
 #include "../moses/moses_main.h"
-#include "../moses/moses.h"
 #include "../moses/partial.h"
 #include "../optimization/optimization.h"
 #include "../example-progs/scoring_iterators.h"
@@ -384,6 +385,9 @@ int moses_exec(int argc, char** argv)
     //     cout << "arg = " << argv[i] << endl;
 
     // program options, see options_description below for their meaning
+    vector<string> jobs_str;
+    bool enable_mpi;
+
     unsigned long rand_seed;
     vector<string> input_data_files;
     string target_feature;
@@ -415,7 +419,6 @@ int moses_exec(int argc, char** argv)
     vector<string> exemplars_str;
     int reduct_candidate_effort;
     int reduct_knob_building_effort;
-    vector<string> jobs_str;
     bool weighted_accuracy;
 
     // metapop_param
@@ -705,6 +708,10 @@ int moses_exec(int argc, char** argv)
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
 
+        ("mpi",
+         value<bool>(&enable_mpi)->default_value(false),
+         "Enable MPI-based distributed processing. ")
+
         (opt_desc_str(weighted_accuracy_opt).c_str(),
          value<bool>(&weighted_accuracy)->default_value(false),
          "This option is useful in case of unbalanced data as it "
@@ -902,7 +909,7 @@ int moses_exec(int argc, char** argv)
         ("enable-fs",
          value<bool>(&enable_feature_selection)->default_value(false),
          "Enable feature selection (happen before each representation building)")
-        
+
         ("fs-algo",
          value<string>(&fs_params.algorithm)->default_value(mmi),
          string("Feature selection algorithm. Supported algorithms are:\n")
@@ -1043,6 +1050,10 @@ int moses_exec(int argc, char** argv)
     }
     logger().info(cmdline);
 
+    char hname[256];
+    gethostname(hname, 256);
+    logger().info("hostname: %s\n", hname);
+
     // Init random generator.
     randGen().seed(rand_seed);
 
@@ -1078,7 +1089,7 @@ int moses_exec(int argc, char** argv)
     // Fill jobs
     jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
     bool local = true;
-    foreach(const string& js, jobs_str) {
+    foreach (const string& js, jobs_str) {
         size_t pos = js.find(job_seperator);
         if (pos != string::npos) {
             unsigned int nj = boost::lexical_cast<unsigned int>(js.substr(0, pos));
@@ -1091,6 +1102,20 @@ int moses_exec(int argc, char** argv)
     }
 
     setting_omp(jobs[localhost]);
+
+    if (enable_mpi) {
+#ifdef HAVE_MPI
+        if (!local) {
+            logger().error("MPI-bsed distributed processing should not "
+                "be mixed with host-based distributed processing!  "
+                "That is: specify -j:hostname or --mpi but not both.\n");
+            exit(1);
+        }
+        logger().info("Will run MOSES with MPI distributed processing.\n");
+#else
+        logger().warn("WARNING: This version of MOSES does NOT have MPI support!\n");
+#endif
+    }
 
     // Set metapopulation parameters.
     metapop_parameters meta_params(max_candidates, reduce_all,

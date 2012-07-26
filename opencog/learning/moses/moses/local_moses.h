@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/moses.h
+ * opencog/learning/moses/moses/local_moses.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,64 +21,36 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _MOSES_MOSES_H
-#define _MOSES_MOSES_H
+#ifndef _MOSES_LOCAL_MOSES_H
+#define _MOSES_LOCAL_MOSES_H
 
-#include <map>
-#include <boost/program_options/variables_map.hpp>
 #include "metapopulation.h"
+#include "moses_params.h"
 #include "../optimization/optimization.h"
 
 namespace opencog {
- namespace moses {
+namespace moses {
 
 using namespace combo;
 
-/// A map between hostname and number of jobs allocated.
-typedef std::map<string, unsigned> jobs_t;
-
 /**
- * parameters to decide how to run moses
- */
-struct moses_parameters
-{
-    moses_parameters(const boost::program_options::variables_map& _vm =
-                           boost::program_options::variables_map(),
-                     const jobs_t& _jobs = jobs_t(),
-                     bool _local = true,
-                     int _max_evals = 10000,
-                     int _max_gens = -1,
-                     score_t _max_score = 0)
-        : local(_local), jobs(_jobs), vm(_vm),
-          max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score)
-    {}
-
-    // Distributed solver control.
-    bool local;
-    const jobs_t& jobs;
-    const boost::program_options::variables_map& vm;
-
-    // total maximun number of evals
-    int max_evals;
-    // the max number of demes to create and optimize, if negative,
-    // then no limit
-    int max_gens;
-    // the max score
-    score_t max_score;
-};
-
-/**
- * the main function of MOSES
+ * The main function of MOSES, non-distributed version.
+ *
+ * This is termed "local" because it runs only on the local CPU node.
+ * That is, it does not assume nor make use of any distrirubted
+ * processing capabilities.  It does assume that the local environment
+ * might possibly be an SMP system (i.e. generic CPU's with more-or-less
+ * tightly coupled memory).
  *
  * @param mp the metapopulation
  * @param pa the parameters to run moses
  */
 template<typename Scoring, typename BScoring, typename Optimization>
-void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+void local_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            const moses_parameters& pa = moses_parameters())
 {
     // Logger
-    logger().info("MOSES starts, max_evals=%d max_gens=%d", 
+    logger().info("MOSES starts, max_evals=%d max_gens=%d",
                   pa.max_evals, pa.max_gens);
     // ~Logger
     int gen_idx = 0;

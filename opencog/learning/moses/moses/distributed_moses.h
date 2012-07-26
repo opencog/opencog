@@ -42,7 +42,7 @@
 
 #include "../main/moses_exec_def.h"
 #include "metapopulation.h"
-#include "moses.h"
+#include "moses_params.h"
 
 namespace opencog { namespace moses {
 

@@ -27,8 +27,9 @@ ADD_LIBRARY (moses SHARED STATIC
 	eda/local_structure
 	moses/complexity
 	moses/distributed_moses
+	moses/local_moses
 	moses/metapopulation
-	moses/moses
+	moses/mpi_moses
 	moses/neighborhood_sampling
 	moses/partial
 	moses/pole_balancing
@@ -48,6 +49,18 @@ TARGET_LINK_LIBRARIES (moses
 	util 
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
+
+
+# target_link_libraries(hello ${MPI_LIBRARIES}) 
+# if(MPI_COMPILE_FLAGS) 
+#   set_target_properties(hello PROPERTIES 
+#     COMPILE_FLAGS "${MPI_COMPILE_FLAGS}") 
+# endif() 
+# 
+# if(MPI_LINK_FLAGS) 
+#   set_target_properties(hello PROPERTIES 
+#     LINK_FLAGS "${MPI_LINK_FLAGS}") 
+# endif() 
 
 # Install library
 IF (WIN32)

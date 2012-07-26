@@ -37,8 +37,8 @@
 
 #include <opencog/comboreduct/combo/combo.h>
 
-#include "moses.h"
 #include "distributed_moses.h"
+#include "local_moses.h"
 #include "metapopulation.h"
 #include "scoring.h"
 
@@ -48,8 +48,6 @@ using namespace std;
 
 /**
  * Run moses
- * (This could be moved to moses.h, except for a header-include order
- * clash with distributed_moses.)
  */
 template<typename Score, typename BScore, typename Optimization>
 void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
@@ -57,9 +55,9 @@ void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
 {
     // Run moses, either on localhost, or distributed.
     if (moses_params.local)
-        moses::moses(metapop, moses_params);
+        local_moses(metapop, moses_params);
     else
-        moses::distributed_moses(metapop, moses_params);
+        distributed_moses(metapop, moses_params);
 }
 
 /// Print metapopulation results to stdout, logfile, etc.
