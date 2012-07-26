@@ -197,7 +197,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
             const string& hostname = get_hostname(*hpm_it);
             unsigned n_jobs = jobs.find(hostname)->second;
-            const combo_tree& tr = get_tree(*mp.select_exemplar());
+            const combo_tree& tr = get_tree(*exemplar);
 
             string cmdline =
                 build_cmdline(vm, tr, hostname, n_jobs,
