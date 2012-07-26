@@ -180,11 +180,13 @@ void moses_learning::operator()()
         std::cout << "NEPC : " << _nepc << std::endl;
         std::cout << "MFG : " << max_for_generation << std::endl;
 
-        int o = metapop->_dex.optimize_deme(max_for_generation - metapop->n_evals());
-        std::cout << "opt returned : " << o << std::endl;
+        int o = metapop->_dex.optimize_deme(max_for_generation - stats.n_evals);
+        std::cout << "number of evaluations: " << o << std::endl;
 
         if (o < 0)
             _hcState = HC_FINISH_CANDIDATES;
+
+        stats.n_evals += o;
 
         //print the generation number and a best solution
 //          std::cout << "EST sampled " << metapop->n_evals()
@@ -199,14 +201,14 @@ void moses_learning::operator()()
 
         metapop->merge_deme(metapop->_dex._deme,
                             metapop->_dex._rep,
-                            metapop->_dex._deme->size());
+                            stats.n_evals);
 
         //print the generation number and a best solution
-        std::cout << "sampled " << metapop->n_evals()
+        std::cout << "sampled " << stats.n_evals
                   << " best " << metapop->best_score() << " "
                   << metapop->best_tree() << std::endl;
 
-        std::cout << "sampled " << metapop->n_evals() << std::endl;;
+        std::cout << "sampled " << stats.n_evals << std::endl;;
 
         if (metapop->best_score() >= _best_fitness_estimated) {
             _best_fitness_estimated = metapop->best_score();

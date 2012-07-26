@@ -63,6 +63,16 @@ struct moses_parameters
     score_t max_score;
 };
 
+/**
+ * Keep track of miscellaneous solver statistics
+ */
+struct moses_statistics
+{
+    moses_statistics() : n_evals(0), n_expansions(0) {}
+    int n_evals;        // total number of scoring function evaluations
+    int n_expansions;   // total number of deme expansions (generations)
+};
+
 
 } // ~namespace moses
 } // ~namespace opencog

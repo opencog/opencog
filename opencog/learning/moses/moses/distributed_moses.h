@@ -133,7 +133,8 @@ bool all_resources_free(const host_proc_map& hpm);
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
-                       const moses_parameters& pa)
+                       const moses_parameters& pa,
+                       moses_statistics& stats)
 {
     // Logger
     logger().info("Distributed MOSES starts");
@@ -145,11 +146,9 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     typedef typename metapopulation<Scoring, BScoring,
                                     Optimization>::const_iterator mp_cit;
 
-    int gen_idx = 1;
-
     host_proc_map hpm = init(jobs);
 
-    while ((int(mp.n_evals()) < pa.max_evals) && (pa.max_gens != gen_idx) 
+    while ((stats.n_evals < pa.max_evals) && (pa.max_gens != stats.n_expansions) 
            && (mp.best_score() < pa.max_score)) {
         // if there exists free resource, launch a process
         host_proc_map::iterator hpm_it = find_free_resource(hpm, jobs);
@@ -162,17 +161,17 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                 string cmdline =
                     build_cmdline(vm, tr, hostname, n_jobs,
-                                  pa.max_evals - mp.n_evals(), gen_idx);
+                                  pa.max_evals - stats.n_evals, stats.n_expansions);
 
                 proc_map::value_type pmv(launch_cmd(cmdline, n_jobs));
                 hpm_it->second.insert(pmv);
 
                 // Logger
-                logger().info("Generation: %d", gen_idx);
+                logger().info("Generation: %d", stats.n_expansions);
                 logger().info("Launch command: %s", get_cmd(pmv).c_str());
                 logger().info("corresponding to PID = %d", get_pid(pmv));
                 // ~Logger
-                gen_idx++;
+                stats.n_expansions++;
             } else if (all_resources_free(hpm)) { // can't find any
                                              // available exemplar and
                                              // there is no hope that
@@ -202,7 +201,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     // ~Logger
 
                     parse_result(*it, candidates, evals);
-                    mp.n_evals() += evals;
+                    stats.n_evals += evals;
 
                     // update best and merge
                     // Logger
@@ -233,7 +232,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                         logger().fine(mp.ostream(ss, -1, true, true).str());
                     }
                     logger().fine("Number of evaluations so far: %d",
-                                  mp.n_evals());
+                                  stats.n_evals);
                     // ~Logger
 
                     // Logger
@@ -260,9 +259,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     OC_ASSERT(running_proc_count(hpm) == 0);
 
-    // Logger
     logger().info("Distributed MOSES ends");
-    // ~Logger
 }
 
 } // ~namespace moses

@@ -51,13 +51,14 @@ using namespace std;
  */
 template<typename Score, typename BScore, typename Optimization>
 void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
-               const moses_parameters& moses_params = moses_parameters())
+               const moses_parameters& moses_params = moses_parameters(),
+               moses_statistics& stats = moses_statistics())
 {
     // Run moses, either on localhost, or distributed.
     if (moses_params.local)
-        local_moses(metapop, moses_params);
+        local_moses(metapop, moses_params, stats);
     else
-        distributed_moses(metapop, moses_params);
+        distributed_moses(metapop, moses_params, stats);
 }
 
 /// Print metapopulation results to stdout, logfile, etc.
@@ -87,7 +88,8 @@ struct metapop_printer
      * Print metapopulation summary.
      */
     template<typename Score, typename BScore, typename Optimization>
-    void operator()(metapopulation<Score, BScore, Optimization> &metapop) const
+    void operator()(metapopulation<Score, BScore, Optimization> &metapop,
+                   moses_statistics& stats) const
     {
         stringstream ss;
         metapop.ostream(ss,
@@ -99,7 +101,7 @@ struct metapop_printer
                         output_python); 
     
         if (output_eval_number)
-            ss << number_of_evals_str << ": " << metapop.n_evals() << std::endl;;
+            ss << number_of_evals_str << ": " << stats.n_evals << std::endl;;
 
 #if 0
 // XXX TEMPORARY HACK for perf measurements, remove me after June 2012
@@ -151,21 +153,21 @@ struct metapop_printer
             logger().info("Best candidates (preceded by its score):\n %s", res.c_str());
     
     #ifdef GATHER_STATS
-        metapop.optimize.hiscore /= metapop.optimize.hicount;
-        metapop.optimize.num_improved /= metapop.optimize.count_improved;
+        metapop._dex._optimize.hiscore /= metapop._dex._optimize.hicount;
+        metapop._dex._optimize.num_improved /= metapop._dex._optimize.count_improved;
         logger().info() << "Avg number of improved scores = "
-                        << metapop.optimize.num_improved;
+                        << metapop._dex._optimize.num_improved;
         logger().info() << "Avg improved as percentage= "
-                        << 100.0 * metapop.optimize.num_improved /
-                               metapop.optimize.scores.size();
+                        << 100.0 * metapop._dex._optimize.num_improved /
+                               metapop._dex._optimize.scores.size();
 
-        for (unsigned i=0; i< metapop.optimize.scores.size(); i++) {
-            metapop.optimize.scores[i] /= metapop.optimize.counts[i];
+        for (unsigned i=0; i< metapop._dex._optimize.scores.size(); i++) {
+            metapop._dex._optimize.scores[i] /= metapop._dex._optimize.counts[i];
             logger().info() << "Avg Scores: "
                 << i << "\t"
-                << metapop.optimize.hiscore << "\t"
-                << metapop.optimize.counts[i] << "\t"
-                << metapop.optimize.scores[i];
+                << metapop._dex._optimize.hiscore << "\t"
+                << metapop._dex._optimize.counts[i] << "\t"
+                << metapop._dex._optimize.scores[i];
         }
     #endif
     }
@@ -198,14 +200,16 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const moses_parameters& moses_params,
                              Printer& printer)
 {
+    moses_statistics stats;
+
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
 
         metapopulation<Scorer, BScorer, hill_climbing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, climber, meta_params);
 
-        run_moses(metapop, moses_params);
-        printer(metapop);
+        run_moses(metapop, moses_params, stats);
+        printer(metapop, stats);
     }
     else if (opt_params.opt_algo == sa) { // simulated annealing
         simulated_annealing annealer(opt_params);
@@ -213,8 +217,8 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         metapopulation<Scorer, BScorer, simulated_annealing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, annealer, meta_params);
 
-        run_moses(metapop, moses_params);
-        printer(metapop);
+        run_moses(metapop, moses_params, stats);
+        printer(metapop, stats);
     }
     else if (opt_params.opt_algo == un) { // univariate
         univariate_optimization unopt(opt_params);
@@ -222,8 +226,8 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
         metapopulation<Scorer, BScorer, univariate_optimization>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, unopt, meta_params);
 
-        run_moses(metapop, moses_params);
-        printer(metapop);
+        run_moses(metapop, moses_params, stats);
+        printer(metapop, stats);
     }
     else {
         std::cerr << "Unknown optimization algo " << opt_params.opt_algo

@@ -88,6 +88,7 @@ int main(int argc,char** argv)
   jobs_t jobs;
 
   moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
-  run_moses(metapop, moses_param);
+  moses_statistics st;
+  run_moses(metapop, moses_param, st);
 }
 

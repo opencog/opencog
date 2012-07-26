@@ -47,7 +47,9 @@ int main(int argc, char** argv)
         metapop_pole2(tr, tt, clean_reduction(),
                       p2_cscore, p2_bscore, hc);
 
-    run_moses(metapop_pole2);
+    moses_parameters pa;
+    moses_statistics st;
+    run_moses(metapop_pole2, pa, st);
 
     combo_tree best = metapop_pole2.best_tree();
     ann bestnet = trans.decodify_tree(best);

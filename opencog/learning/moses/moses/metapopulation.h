@@ -361,8 +361,7 @@ struct metapopulation : bscored_combo_tree_set
                    const metapop_parameters& pa = metapop_parameters()) :
         _dex(type_signature, si_ca, si_kb, sc, opt, pa),
         _bscorer(bsc), params(pa),
-        _n_evals(0),
-        _n_expansions(0),
+        _merge_count(0),
         _best_cscore(worst_composite_score)
     {
         init(bases, si_ca, sc);
@@ -377,35 +376,11 @@ struct metapopulation : bscored_combo_tree_set
                    const metapop_parameters& pa = metapop_parameters()) :
         _dex(type_signature, si, si, sc, opt, pa),
         _bscorer(bsc), params(pa),
-        _n_evals(0), _n_expansions(0),
+        _merge_count(0),
         _best_cscore(worst_composite_score)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
-    }
-
-    /**
-     * Return reference to the number of evaluations.
-     * Its a non-const reference, because distributed moses increments it directly.
-     */
-    const size_t& n_evals() const
-    {
-        return _n_evals;
-    }
-
-    size_t& n_evals()
-    {
-        return _n_evals;
-    }
-
-    const size_t& n_expansions() const
-    {
-        return _n_expansions;
-    }
-
-    size_t& n_expansions()
-    {
-        return _n_expansions;
     }
 
     /**
@@ -656,9 +631,10 @@ struct metapopulation : bscored_combo_tree_set
         // each exemplar, right!?
         // size_t nbelts = get_bscore(*begin()).size();
         // double cap = 1.0e6 / double(nbelts);
+        _merge_count++;
         double cap = 50.0;
-        cap *= _n_expansions + 250.0;
-        cap *= 1 + 2.0*exp(- double(_n_expansions) / 500.0);
+        cap *= _merge_count + 250.0;
+        cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
         size_t popsz_cap = cap;
         size_t popsz = size();
         while (popsz_cap < popsz)
@@ -1342,8 +1318,7 @@ protected:
     const BScoring& _bscorer; // behavioral score
     metapop_parameters params;
 
-    size_t _n_evals;
-    size_t _n_expansions;
+    size_t _merge_count;
 
     // The best score ever found during search.
     composite_score _best_cscore;

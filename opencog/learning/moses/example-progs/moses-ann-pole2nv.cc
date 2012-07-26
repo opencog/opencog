@@ -64,7 +64,8 @@ int main(int argc, char** argv)
     boost::program_options::variables_map vm;
     jobs_t jobs;
     moses_parameters moses_param(vm, jobs, true, max_evals);
-    run_moses(metapop_pole2, moses_param);
+    moses_statistics st;
+    run_moses(metapop_pole2, moses_param, st);
 
     //change best combo tree back into ANN
     tree_transform trans; 

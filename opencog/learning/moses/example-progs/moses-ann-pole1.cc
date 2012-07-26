@@ -85,7 +85,9 @@ int main(int argc, char** argv)
     metapopulation<ann_pole_cscore, ann_pole_bscore, univariate_optimization>
         metapop_pole(tr, tt, *si, p_cscore, p_bscore, optim_algo);
 
-    run_moses(metapop_pole);
+    moses_parameters pa;
+    moses_statistics st;
+    run_moses(metapop_pole, pa, st);
 
     //change best tree into ANN
     tree_transform trans; 

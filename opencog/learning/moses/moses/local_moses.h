@@ -49,7 +49,7 @@ using namespace combo;
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
-     int max_evals)
+     int max_evals, moses_statistics& stats)
 {
     if (mp.empty())
         return false;
@@ -76,16 +76,15 @@ bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
-    mp.n_expansions() ++;
     size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
-    mp.n_evals() += evals_this_deme;
+    stats.n_evals += evals_this_deme;
 
     bool done = mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
 
     if (logger().isInfoEnabled()) {
         logger().info()
-           << "Expansion " << mp.n_expansions()
-           << " total number of evaluations so far: " << mp.n_evals();
+           << "Expansion " << stats.n_expansions
+           << " total number of evaluations so far: " << stats.n_evals;
         mp.log_best_candidates();
     }
 
@@ -109,13 +108,11 @@ bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 void local_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
-           const moses_parameters& pa = moses_parameters())
+                 const moses_parameters& pa,
+                 moses_statistics& stats)
 {
-    // Logger
     logger().info("MOSES starts, max_evals=%d max_gens=%d",
                   pa.max_evals, pa.max_gens);
-    // ~Logger
-    int gen_idx = 0;
 
     optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
 
@@ -145,19 +142,19 @@ void local_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info(ss.str());
     }
 
-    while ((int(mp.n_evals()) < pa.max_evals) && (pa.max_gens != gen_idx++))
+    while ((stats.n_evals < pa.max_evals) && (pa.max_gens != stats.n_expansions++))
     {
-        logger().info("Deme generation: %i", gen_idx);
+        logger().info("Deme expansion: %i", stats.n_expansions);
 
         // Run a generation
-        bool done = expand_deme(mp, pa.max_evals - mp.n_evals());
+        bool done = expand_deme(mp, pa.max_evals - stats.n_evals, stats);
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
             stringstream ss;
-            ss << "Stats: " << gen_idx;
-            ss << "\t" << mp.n_evals();    // number of evaluations so far
+            ss << "Stats: " << stats.n_expansions;
+            ss << "\t" << stats.n_evals;    // number of evaluations so far
             ss << "\t" << mp.size();       // size of the metapopulation
             ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
             ss << "\t" << get_complexity(mp.best_composite_score()); // as above.

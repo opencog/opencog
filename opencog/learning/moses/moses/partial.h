@@ -56,9 +56,10 @@ class partial_solver
         /// exemplars that moses found, so that we can see if they are
         /// "good enough".
         template<typename Score, typename BScore, typename Optimization>
-        void operator()(metapopulation<Score, BScore, Optimization> &metapop)
+        void operator()(metapopulation<Score, BScore, Optimization> &metapop,
+                        moses_statistics& stats)
         {
-            _num_evals = metapop.n_evals();
+            _num_evals = stats.n_evals;
 
             // If _most_good is zero, then we are here because the
             // metapopulation came to a natural end. We are done, in

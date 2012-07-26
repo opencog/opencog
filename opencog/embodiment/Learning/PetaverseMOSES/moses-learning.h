@@ -27,6 +27,7 @@
 #include <opencog/util/tree.h>
 
 #include <opencog/learning/moses/moses/metapopulation.h>
+#include <opencog/learning/moses/moses/moses_params.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
@@ -113,6 +114,7 @@ private:
 
     typedef metapopulation<petaverse_cscore, petaverse_bscore, hill_climbing> metapop_t;
     metapop_t *metapop;
+    moses_statistics stats;
 };
 
 struct petaverse_cscore : public unary_function<combo_tree, composite_score>
