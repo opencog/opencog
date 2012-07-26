@@ -138,7 +138,7 @@ struct metapop_parameters
     const feature_selector* fstor;
 };
 
-template<typename CScoring, typename BScoring, typename Optimization>
+template<typename CScoring, typename Optimization>
 struct deme_expander
 {
     typedef instance_set<composite_score> deme_t;
@@ -150,7 +150,7 @@ struct deme_expander
                   const reduct::rule& si_kb,
                   const CScoring& sc,
                   Optimization& opt = Optimization(),
-                  const metapop_parameters& pa = metapop_parameters()) 
+                  const metapop_parameters& pa = metapop_parameters())
         : _type_sig(type_signature),
         simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb),
@@ -194,7 +194,7 @@ struct deme_expander
             // (left most column corresponds to 0)
             auto selected_features = (*_params.fstor)(_exemplar);
             // add the complementary of the selected features in ignore_ops
-            unsigned arity = params.fstor->ctable.get_arity();
+            unsigned arity = _params.fstor->ctable.get_arity();
             for (unsigned i = 0; i < arity; i++)
                 if (selected_features.find(i) == selected_features.end())
                     ignore_ops.insert(argument(i + 1));
@@ -209,7 +209,7 @@ struct deme_expander
             // printlnContainer(ios);
             // ~debug print
         }
-            
+
         // Build a representation by adding knobs to the exemplar,
         // creating a field set, and a mapping from field set to knobs.
         _rep = new representation(*simplify_candidate,
@@ -227,7 +227,7 @@ struct deme_expander
             logger().warn("The representation is empty, perhaps the reduct "
                           "effort for knob building is too high.");
         }
-        
+
         if (!_rep) return false;
 
         // Create an empty deme.
@@ -359,8 +359,8 @@ struct metapopulation : bscored_combo_tree_set
                    const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        _bscorer(bsc), params(pa),
         _dex(type_signature, si_ca, si_kb, sc, opt, pa),
+        _bscorer(bsc), params(pa),
         _n_evals(0),
         _n_expansions(0),
         _best_cscore(worst_composite_score)
@@ -375,17 +375,13 @@ struct metapopulation : bscored_combo_tree_set
                    const CScoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        _bscorer(bsc), params(pa),
         _dex(type_signature, si, si, sc, opt, pa),
+        _bscorer(bsc), params(pa),
         _n_evals(0), _n_expansions(0),
         _best_cscore(worst_composite_score)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
-    }
-
-    ~metapopulation()
-    {
     }
 
     /**
@@ -466,7 +462,7 @@ struct metapopulation : bscored_combo_tree_set
         // If the diversity penalty is enabled, then punish the scores
         // of those exemplars that are too similar to the previous one.
         // This typically won't make  any difference for the first dozen
-        // exemplars choosen, but starts getting important once the 
+        // exemplars choosen, but starts getting important once the
         // metapopulation gets large, and the search bogs down.
         //
         // XXX The implementation here results in a lot of copying of
@@ -1402,11 +1398,12 @@ struct metapopulation : bscored_combo_tree_set
                 output_bscore, output_only_bests);
     }
 
-    const BScoring& _bscorer; // behavioral score
-    metapop_parameters params;
-    deme_expander<CScoring, BScoring, Optimization> _dex;
+    deme_expander<CScoring, Optimization> _dex;
 
 protected:
+    const BScoring& _bscorer; // behavioral score
+    metapop_parameters params;
+
     size_t _n_evals;
     size_t _n_expansions;
 
@@ -1418,7 +1415,6 @@ protected:
 
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
-
 };
 
 } // ~namespace moses
