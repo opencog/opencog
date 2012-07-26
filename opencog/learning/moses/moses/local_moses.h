@@ -34,6 +34,68 @@ namespace moses {
 using namespace combo;
 
 /**
+ * expand -- Run one deme-creation and optimization step.
+ *
+ * A single step consists of representation-building, to create
+ * a deme, followed by optimization, (according to the specified
+ * optimizer and scoring function), and finally, a merger of
+ * the unique (and possibly non-dominated) trees back into the
+ * metapopulation, for potential use as exemplars for futre demes.
+ *
+ * @param max_evals    the max evals
+ *
+ * @return return true if expansion has succeeded, false otherwise
+ *
+ */
+template<typename Scoring, typename BScoring, typename Optimization>
+bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
+     int max_evals)
+{
+    if (mp.empty())
+        return false;
+
+    // Attempt to create a non-empty representation, by looping
+    // over exemplars until we find one that expands.
+    // XXX When would one never expand?  Wouldn't that be a bug?
+    while (1) {
+        bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+
+        // Should have found something by now.
+        if (exemplar == mp.end()) {
+            logger().warn(
+                "WARNING: All exemplars in the metapopulation have "
+                "been visited, but it was impossible to build a "
+                "representation for any of them.  Perhaps the reduct "
+                "effort for knob building is too high.");
+            return false;
+        }
+
+        // if create_deme returned true, we are good to go.
+        if (mp._dex.create_deme(exemplar)) break;
+
+        OC_ASSERT(false, "Exemplar failed to expand!\n");
+    }
+
+    mp.n_expansions() ++;
+    size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
+    mp.n_evals() += evals_this_deme;
+
+    bool done = mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
+
+    if (logger().isInfoEnabled()) {
+        logger().info()
+           << "Expansion " << mp.n_expansions()
+           << " total number of evaluations so far: " << mp.n_evals();
+        mp.log_best_candidates();
+    }
+
+    mp._dex.free_deme();
+
+    // Might be empty, if the eval fails and throws an exception
+    return done || mp.empty();
+}
+
+/**
  * The main function of MOSES, non-distributed version.
  *
  * This is termed "local" because it runs only on the local CPU node.
@@ -88,7 +150,7 @@ void local_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info("Deme generation: %i", gen_idx);
 
         // Run a generation
-        bool done = mp.expand(pa.max_evals - mp.n_evals());
+        bool done = expand_deme(mp, pa.max_evals - mp.n_evals());
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)

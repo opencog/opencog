@@ -398,6 +398,16 @@ struct metapopulation : bscored_combo_tree_set
         return _n_evals;
     }
 
+    const size_t& n_expansions() const
+    {
+        return _n_expansions;
+    }
+
+    size_t& n_expansions()
+    {
+        return _n_expansions;
+    }
+
     /**
      * Return the best composite score.
      */
@@ -663,66 +673,6 @@ struct metapopulation : bscored_combo_tree_set
             popsz --;
         }
 #endif
-    }
-
-    /**
-     * expand -- Run one deme-creation and optimization step.
-     *
-     * A single step consists of representation-building, to create
-     * a deme, followed by optimization, (according to the specified
-     * optimizer and scoring function), and finally, a merger of
-     * the unique (and possibly non-dominated) trees back into the
-     * metapopulation, for potential use as exemplars for futre demes.
-     *
-     * @param max_evals    the max evals
-     *
-     * @return return true if expansion has succeeded, false otherwise
-     *
-     */
-    bool expand(int max_evals)
-    {
-        if (empty())
-            return false;
-
-        // Attempt to create a non-empty representation, by looping
-        // over exemplars until we find one that expands.
-        // XXX When would one never expand?  Wouldn't that be a bug?
-        while (1) {
-            const_iterator exemplar = select_exemplar();
-
-            // Should have found something by now.
-            if (exemplar == end()) {
-                logger().warn(
-                    "WARNING: All exemplars in the metapopulation have "
-                    "been visited, but it was impossible to build a "
-                    "representation for any of them.  Perhaps the reduct "
-                    "effort for knob building is too high.");
-                return false;
-            }
-
-            // if create_deme returned true, we are good to go.
-            if (_dex.create_deme(exemplar)) break;
-
-            OC_ASSERT(false, "Exemplar failed to expand!\n");
-        }
-
-        _n_expansions ++;
-        size_t evals_this_deme = _dex.optimize_deme(max_evals);
-        _n_evals += evals_this_deme;
-
-        bool done = merge_deme(_dex._deme, _dex._rep, evals_this_deme);
-
-        if (logger().isInfoEnabled()) {
-            logger().info()
-               << "Expansion " << _n_expansions
-               << " total number of evaluations so far: " << _n_evals;
-            log_best_candidates();
-        }
-
-        _dex.free_deme();
-
-        // Might be empty, if the eval fails and throws an exception
-        return done || empty();
     }
 
     /**
