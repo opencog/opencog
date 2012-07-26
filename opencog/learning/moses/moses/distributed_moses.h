@@ -127,7 +127,34 @@ host_proc_map::iterator find_free_resource(host_proc_map& hpm,
 bool all_resources_free(const host_proc_map& hpm);
 
 /**
- * the main function of Distributed MOSES
+ * Distributed MOSES main entry point. 
+ *
+ * This function implements a simple, network-distributed scatter-gather
+ * algorithm to distribute moses over multiple networked machines.  This
+ * algorithm is simple, and thus somewhat slow, in two different respects:
+ *
+ * 1) It uses only a single thread for both the scatter and gathe steps.
+ *    The gather step involves a rather slow, expensive step, the merge
+ *    of a deme into the metapopulation.  Because of this, some processors
+ *    may starve for input, as they will not be fed until the merge is
+ *    complete.  In particular, this means that this algorithm will not
+ *    scale up to any large number of processors (probably not more than
+ *    a few dozen!?)  A solution to this problem would be to run the scatter
+ *    and gather steps in separate threads.
+ *
+ * 2) It performs network distribution by launching a new instance of moses
+ *    for each deme, using the ssh protocol.  This adds a significant
+ *    overhead: a) ssh negotiation b) ssh encryption c) moses startup
+ *    d) ascii encoding encryption, decryption and finally, decoding of
+ *    the combo_tree and behavioural score results.  The biggest overhead
+ *    is probably due to step c), followed by step d), and then a). These
+ *    overheads might be in the multi-second range.  This can be firghtful,
+ *    especially if the deme evaluation takes only a few seconds.
+ *    The solution to this is to use a tigher communications medium and
+ *    design, such as MPI.
+ *
+ * Note: this algo requires that the commands 'fuser', 'pgrep' and of
+ * course 'moses' be found in the default ssh shell search path.
  *
  * @param mp          the metapopulation 
  */
@@ -136,9 +163,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                        const moses_parameters& pa,
                        moses_statistics& stats)
 {
-    // Logger
     logger().info("Distributed MOSES starts");
-    // ~Logger
 
     const variables_map& vm = pa.vm;
     const jobs_t& jobs = pa.jobs;
@@ -149,62 +174,70 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     host_proc_map hpm = init(jobs);
 
     while ((stats.n_evals < pa.max_evals) && (pa.max_gens != stats.n_expansions) 
-           && (mp.best_score() < pa.max_score)) {
-        // if there exists free resource, launch a process
+           && (mp.best_score() < pa.max_score))
+    {
+        // Launch processes as long as there are free resources.
+        // We'll be greedy here, and launch as many as we can.
         host_proc_map::iterator hpm_it = find_free_resource(hpm, jobs);
-        if (hpm_it != hpm.end()) {
-            const string& hostname = get_hostname(*hpm_it);
-            unsigned n_jobs = jobs.find(hostname)->second;
+        while (hpm_it != hpm.end()) {
             mp_cit exemplar = mp.select_exemplar();
-            if (exemplar != mp.end()) {
-                const combo_tree& tr = get_tree(*mp.select_exemplar());
 
-                string cmdline =
-                    build_cmdline(vm, tr, hostname, n_jobs,
-                                  pa.max_evals - stats.n_evals, stats.n_expansions);
+            if (exemplar == mp.end()) {
+                if (all_resources_free(hpm)) {
+                    logger().warn("There are no more exemplars in the metapopulation "
+                                  "that have not been visited and yet a solution was "
+                                  "not found.  Perhaps reduction is too strict?");
+                    goto theend;
+                }
 
-                proc_map::value_type pmv(launch_cmd(cmdline, n_jobs));
-                hpm_it->second.insert(pmv);
-
-                // Logger
-                logger().info("Generation: %d", stats.n_expansions);
-                logger().info("Launch command: %s", get_cmd(pmv).c_str());
-                logger().info("corresponding to PID = %d", get_pid(pmv));
-                // ~Logger
-                stats.n_expansions++;
-            } else if (all_resources_free(hpm)) { // can't find any
-                                             // available exemplar and
-                                             // there is no hope that
-                                             // one will come
-                // Logger
-                logger().info("There are no more exemplars in the metapopulation"
-                              " that have not been visited and"
-                              " no more results from other process are expected."
-                              " This is a deadlock; several options"
-                              " can be used to prevent this, see moses -h");
-                // ~Logger
+                // If there are no more exemplars in our pool, we will
+                // have to wait for some more to come rolling in.
                 break;
             }
-        }   
 
-        // check for results and merge if necessary
-        foreach(host_proc_map::value_type& hpmv, hpm) {
-            for(proc_map::iterator it = hpmv.second.begin();
+            const string& hostname = get_hostname(*hpm_it);
+            unsigned n_jobs = jobs.find(hostname)->second;
+            const combo_tree& tr = get_tree(*mp.select_exemplar());
+
+            string cmdline =
+                build_cmdline(vm, tr, hostname, n_jobs,
+                              pa.max_evals - stats.n_evals, stats.n_expansions);
+
+            proc_map::value_type pmv(launch_cmd(cmdline, n_jobs));
+            hpm_it->second.insert(pmv);
+
+            stats.n_expansions++;
+            logger().info("Generation: %d", stats.n_expansions);
+            logger().info("Launch command: %s", get_cmd(pmv).c_str());
+            logger().info("corresponding to PID = %d", get_pid(pmv));
+
+            hpm_it = find_free_resource(hpm, jobs);
+        }
+
+        // Wait for a second, so as not to take all resources.
+        // A somewhat more elegant solution would be to have the
+        // sender and receiver run in different threads, with the
+        // sender waiting on a mutex lock for machines to free up.
+        // But this solution more or less works, mostly because
+        // most problems require more than a few seconds to perform
+        // one evaluation.
+        sleep(1);
+
+        // Check for results and merge if necessary
+        foreach (host_proc_map::value_type& hpmv, hpm) {
+            for (proc_map::iterator it = hpmv.second.begin();
                 it != hpmv.second.end();) {
-                if(!is_running(*it)) { // result is ready
+                if (!is_running(*it)) { // result is ready
                     // parse the result
                     metapop_candidates candidates;
                     int evals;
 
-                    // Logger
                     logger().info("Parsing results from PID %d", get_pid(*it));
-                    // ~Logger
 
                     parse_result(*it, candidates, evals);
                     stats.n_evals += evals;
 
                     // update best and merge
-                    // Logger
                     logger().info("Merge %u candidates with the metapopulation",
                                   candidates.size());
                     if (logger().isFineEnabled()) {
@@ -215,7 +248,6 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                                                  candidates.end(),
                                                  -1, true, true).str());
                     }
-                    // ~Logger
 
                     bscored_combo_tree_set mc(candidates.begin(),
                                               candidates.end());
@@ -224,36 +256,32 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                     mp.merge_candidates(mc);
 
-                    // Logger
                     logger().info("Metapopulation size is %u", mp.size());
                     if (logger().isFineEnabled()) {
                         stringstream ss;
                         ss << "Metapopulation after merging: " << std::endl;
                         logger().fine(mp.ostream(ss, -1, true, true).str());
+                        logger().fine("Number of evaluations so far: %d",
+                                      stats.n_evals);
                     }
-                    logger().fine("Number of evaluations so far: %d",
-                                  stats.n_evals);
-                    // ~Logger
 
-                    // Logger
                     mp.log_best_candidates();
-                    // ~Logger
 
-                    // remove proc info from pm
+                    // Remove proc info from pm
                     it = remove_proc(hpmv.second, it);
+
+                    // Break out of loop, feed hungry mouths before
+                    // merging more results.
+                    break;
                 }
                 else it++;
             }
         }
 
-        // Logger
         logger().fine("Number of running processes: %u", running_proc_count(hpm));
-        // ~Logger
-
-        // wait for a second to not take all resources
-        sleep(1);
     }
 
+theend:
     // kill all children processes
     killall(hpm);
 
