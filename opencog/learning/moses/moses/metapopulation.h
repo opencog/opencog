@@ -692,34 +692,18 @@ struct metapopulation : bscored_combo_tree_set
 
             // Should have found something by now.
             if (exemplar == end()) {
-
-                // XXX There is currently no way to set the revisit flag
-                // using the command-line options...
-                if (params.revisit) {
-
-                    _visited_exemplars.clear();
-
-                    logger().info(
-                        "All exemplars in the metapopulation have been "
-                        "visited, but it was impossible to build a "
-                        "representation for any of them.  All exemplars "
-                        "have been untagged and will be visited again.");
-
-                    continue;
-
-                } else {
-
-                    logger().warn(
-                        "WARNING: All exemplars in the metapopulation have "
-                        "been visited, but it was impossible to build a "
-                        "representation for any of them.  Perhaps the reduct "
-                        "effort for knob building is too high.");
-                    return false;
-                }
+                logger().warn(
+                    "WARNING: All exemplars in the metapopulation have "
+                    "been visited, but it was impossible to build a "
+                    "representation for any of them.  Perhaps the reduct "
+                    "effort for knob building is too high.");
+                return false;
             }
 
             // if create_deme returned true, we are good to go.
             if (_dex.create_deme(exemplar)) break;
+
+            OC_ASSERT(false, "Exemplar failed to expand!\n");
         }
 
         _n_expansions ++;
