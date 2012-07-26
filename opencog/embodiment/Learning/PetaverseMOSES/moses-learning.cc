@@ -163,7 +163,8 @@ void moses_learning::operator()()
     case HC_BUILD_CANDIDATES:  {
 
         std::cout << "BUILD" << std::endl;
-        if (metapop->create_deme())
+        bscored_combo_tree_set::const_iterator exemplar = metapop->select_exemplar();
+        if (metapop->_dex.create_deme(exemplar))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
@@ -179,7 +180,7 @@ void moses_learning::operator()()
         std::cout << "NEPC : " << _nepc << std::endl;
         std::cout << "MFG : " << max_for_generation << std::endl;
 
-        int o = metapop->optimize_deme(max_for_generation - metapop->n_evals());
+        int o = metapop->_dex.optimize_deme(max_for_generation - metapop->n_evals());
         std::cout << "opt returned : " << o << std::endl;
 
         if (o < 0)
@@ -196,7 +197,9 @@ void moses_learning::operator()()
 
     case HC_FINISH_CANDIDATES:  {
 
-        metapop->close_deme();
+        metapop->merge_deme(metapop->_dex._deme,
+                            metapop->_dex._rep,
+                            metapop->_dex._deme->size());
 
         //print the generation number and a best solution
         std::cout << "sampled " << metapop->n_evals()
