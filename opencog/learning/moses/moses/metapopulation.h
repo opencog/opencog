@@ -138,6 +138,11 @@ struct metapop_parameters
     const feature_selector* fstor;
 };
 
+template<typename CScoring, typename BScoring, typename Optimization>
+struct expander
+{
+};
+
 /**
  * The metapopulation will store the expressions (as scored trees)
  * that were encountered during the learning process.  Only the
@@ -541,44 +546,13 @@ struct metapopulation : bscored_combo_tree_set
      */
     bool expand(int max_evals)
     {
-        if (!create_deme())
-            return false;
-
-        _n_expansions ++;
-        _n_evals += optimize_deme(max_evals);
-
-        bool done = close_deme();
-
-        if (logger().isInfoEnabled()) {
-            logger().info()
-               << "Expansion " << _n_expansions
-               << " total number of evaluations so far: " << _n_evals;
-            log_best_candidates();
-        }
-
-        // Might be empty, if the eval fails and throws an exception
-        return done || empty();
-    }
-
-    /**
-     * Create the deme
-     *
-     * @return return true if it creates deme successfully,otherwise false.
-     */
-    bool create_deme()
-    {
-        using namespace reduct;
-
-        if (_rep != NULL || _deme != NULL)
-            return false;
-
         if (empty())
             return false;
 
         // Attempt to create a non-empty representation, by looping
         // over exemplars until we find one that expands.
         // XXX When would one never expand?  Wouldn't that be a bug?
-        do {
+        while (1) {
             const_iterator exemplar = select_exemplar();
 
             // Should have found something by now.
@@ -609,57 +583,93 @@ struct metapopulation : bscored_combo_tree_set
                 }
             }
 
-            _exemplar = *exemplar;
+            // if create_deme returned true, we are good to go.
+            if (create_deme(exemplar)) break;
+        }
 
-            if (logger().isDebugEnabled()) {
-                logger().debug()
-                    << "Attempt to build rep from exemplar: " << get_tree(_exemplar)
-                    << "\nScored: " << _cscorer(get_tree(_exemplar));
-            }
+        _n_expansions ++;
+        _n_evals += optimize_deme(max_evals);
 
-            // [HIGHLY EXPERIMENTAL]. It allows to select features
-            // that provide the most information when combined with
-            // the exemplar
-            operator_set ignore_ops = params.ignore_ops;
-            if (params.fstor) {
-                // return the set of selected features as column index
-                // (left most column corresponds to 0)
-                auto selected_features = (*params.fstor)(_exemplar);
-                // add the complementary of the selected features in ignore_ops
-                unsigned arity = params.fstor->ctable.get_arity();
-                for (unsigned i = 0; i < arity; i++)
-                    if (selected_features.find(i) == selected_features.end())
-                        ignore_ops.insert(argument(i + 1));
-                // debug print
-                // std::vector<std::string> ios;
-                // auto vertex_to_str = [](const vertex& v) {
-                //     std::stringstream ss;
-                //     ss << v;
-                //     return ss.str();
-                // };
-                // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
-                // printlnContainer(ios);
-                // ~debug print
-            }
-            
-            // Build a representation by adding knobs to the exemplar,
-            // creating a field set, and a mapping from field set to knobs.
-            _rep = new representation(*simplify_candidate,
-                                      *simplify_knob_building,
-                                      get_tree(_exemplar), _type_sig,
-                                      ignore_ops,
-                                      params.perceptions,
-                                      params.actions);
+        bool done = close_deme();
 
-            // If the representation is empty, try the next
-            // best-scoring exemplar.
-            if (_rep->fields().empty()) {
-                delete(_rep);
-                _rep = NULL;
-                logger().warn("The representation is empty, perhaps the reduct "
-                              "effort for knob building is too high.");
-            }
-        } while (!_rep);
+        if (logger().isInfoEnabled()) {
+            logger().info()
+               << "Expansion " << _n_expansions
+               << " total number of evaluations so far: " << _n_evals;
+            log_best_candidates();
+        }
+
+        // Might be empty, if the eval fails and throws an exception
+        return done || empty();
+    }
+
+    /**
+     * Create the deme
+     *
+     * @return return true if it creates deme successfully,otherwise false.
+     */
+    bool create_deme(const_iterator exemplar)
+    {
+        using namespace reduct;
+
+        OC_ASSERT(_rep == NULL);
+        OC_ASSERT(_deme == NULL);
+        if (_rep != NULL || _deme != NULL)
+            return false;
+
+        _exemplar = *exemplar;
+
+        if (logger().isDebugEnabled()) {
+            logger().debug()
+                << "Attempt to build rep from exemplar: " << get_tree(_exemplar)
+                << "\nScored: " << _cscorer(get_tree(_exemplar));
+        }
+
+        // [HIGHLY EXPERIMENTAL]. It allows to select features
+        // that provide the most information when combined with
+        // the exemplar
+        operator_set ignore_ops = params.ignore_ops;
+        if (params.fstor) {
+            // return the set of selected features as column index
+            // (left most column corresponds to 0)
+            auto selected_features = (*params.fstor)(_exemplar);
+            // add the complementary of the selected features in ignore_ops
+            // add the complementary of the selected features in ignore_ops
+            unsigned arity = params.fstor->ctable.get_arity();
+            for (unsigned i = 0; i < arity; i++)
+                if (selected_features.find(i) == selected_features.end())
+                    ignore_ops.insert(argument(i + 1));
+            // debug print
+            // std::vector<std::string> ios;
+            // auto vertex_to_str = [](const vertex& v) {
+            //     std::stringstream ss;
+            //     ss << v;
+            //     return ss.str();
+            // };
+            // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
+            // printlnContainer(ios);
+            // ~debug print
+        }
+
+        // Build a representation by adding knobs to the exemplar,
+        // creating a field set, and a mapping from field set to knobs.
+        _rep = new representation(*simplify_candidate,
+                                  *simplify_knob_building,
+                                  get_tree(_exemplar), _type_sig,
+                                  ignore_ops,
+                                  params.perceptions,
+                                  params.actions);
+
+        // If the representation is empty, try the next
+        // best-scoring exemplar.
+        if (_rep->fields().empty()) {
+            delete(_rep);
+            _rep = NULL;
+            logger().warn("The representation is empty, perhaps the reduct "
+                          "effort for knob building is too high.");
+        }
+        
+        if (!_rep) return false;
 
         // Create an empty deme.
         _deme = new deme_t(_rep->fields());
@@ -821,7 +831,7 @@ struct metapopulation : bscored_combo_tree_set
 
         // Behavioural scores are needed only if domination-based
         // merging is asked for, or if the diversity penalty is in use.
-        //  Save CPU time by not computing them.
+        // Save CPU time by not computing them.
         if (!params.include_dominated || params.use_diversity_penalty) {
             logger().debug("Compute behavioral score of %d selected candidates",
                            pot_candidates.size());
@@ -1373,6 +1383,7 @@ protected:
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
 
+    // Structures related to the current deme
     representation* _rep; // representation of the current deme
     typedef instance_set<composite_score> deme_t;
     typedef deme_t::iterator deme_it;
@@ -1381,6 +1392,7 @@ protected:
 
     // exemplar of the current deme; a copy, not a reference.
     bscored_combo_tree _exemplar;
+
 };
 
 } // ~namespace moses
