@@ -439,9 +439,13 @@ struct metapopulation : bscored_combo_tree_set
         // Shortcut for special case, as sometimes, the very first time
         // through, the score is invalid.
         if (size() == 1) {
-            const combo_tree& tr = get_tree(*begin());
-            if (_visited_exemplars.find(tr) == _visited_exemplars.end())
-                return begin();
+            const_iterator selex = begin();
+            const combo_tree& tr = get_tree(*selex);
+            if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
+                _visited_exemplars.insert(*selex);
+                return selex;
+            }
+            return end();
         }
 
         // If the diversity penalty is enabled, then punish the scores
