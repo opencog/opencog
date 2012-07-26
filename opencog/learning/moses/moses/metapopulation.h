@@ -163,6 +163,9 @@ struct metapopulation : bscored_combo_tree_set
     typedef metapopulation<CScoring, BScoring, Optimization> self;
     typedef bscored_combo_tree_set super;
     typedef super::value_type value_type;
+    typedef instance_set<composite_score> deme_t;
+    typedef deme_t::iterator deme_it;
+    typedef deme_t::const_iterator deme_cit;
 
     // The goal of using unordered_set here is to have O(1) access time
     // to see if a combo tree is in the set, or not.
@@ -590,7 +593,7 @@ struct metapopulation : bscored_combo_tree_set
         _n_expansions ++;
         _n_evals += optimize_deme(max_evals);
 
-        bool done = close_deme();
+        bool done = close_deme(_deme, _rep);
 
         if (logger().isInfoEnabled()) {
             logger().info()
@@ -598,6 +601,8 @@ struct metapopulation : bscored_combo_tree_set
                << " total number of evaluations so far: " << _n_evals;
             log_best_candidates();
         }
+
+        free_deme();
 
         // Might be empty, if the eval fails and throws an exception
         return done || empty();
@@ -704,13 +709,15 @@ struct metapopulation : bscored_combo_tree_set
      * 3) delete the deme instance from memory.
      * Return true if further deme exploration should be halted.
      */
-    bool close_deme()
+    bool close_deme(deme_t* __deme, representation* __rep)
     {
+        OC_ASSERT(__rep);
+        OC_ASSERT(__deme);
         if (_rep == NULL || _deme == NULL)
             return false;
 
         size_t eval_during_this_deme = std::min(_n_evals_this_deme,
-                                             _deme->size());
+                                             __deme->size());
 
         logger().debug("Close deme; evaluations performed: %d",
                            eval_during_this_deme);
@@ -722,7 +729,7 @@ struct metapopulation : bscored_combo_tree_set
         logger().debug("Sort the deme");
 
         // Sort the deme according to composite_score (descending order)
-        std::sort(_deme->begin(), _deme->end(),
+        std::sort(__deme->begin(), __deme->end(),
                   std::greater<scored_instance<composite_score> >());
 
         // Trim the deme down to size.  The point here is that the next
@@ -736,20 +743,20 @@ struct metapopulation : bscored_combo_tree_set
         // However, trimming too much is bad: it can happen that none
         // of the best-scoring instances lead to a solution. So keep
         // around a reasonable pool. Wild choice ot 250 seems reasonable.
-        if (MIN_POOL_SIZE < _deme->size()) {
-            score_t top_sc = get_weighted_score(_deme->begin()->second);
+        if (MIN_POOL_SIZE < __deme->size()) {
+            score_t top_sc = get_weighted_score(__deme->begin()->second);
             score_t bot_sc = top_sc - useful_score_range();
 
-            for (size_t i = _deme->size()-1; 0 < i; --i) {
-                const composite_score &cscore = (*_deme)[i].second;
+            for (size_t i = __deme->size()-1; 0 < i; --i) {
+                const composite_score &cscore = (*__deme)[i].second;
                 score_t score = get_weighted_score(cscore);
                 if (score < bot_sc) {
-                    _deme->pop_back();
+                    __deme->pop_back();
                 }
             }
 
             eval_during_this_deme =
-                std::min(eval_during_this_deme, _deme->size());
+                std::min(eval_during_this_deme, __deme->size());
         }
 
         ///////////////////////////////////////////////////////////////
@@ -790,7 +797,7 @@ struct metapopulation : bscored_combo_tree_set
                 // @todo: below, the candidate is reduced possibly for the
                 // second time.  This second reduction could probably be
                 // avoided with some clever cache or something. (or a flag?)
-                combo_tree tr = this->_rep->get_candidate(inst, true);
+                combo_tree tr = __rep->get_candidate(inst, true);
 
                 // Look for tr in the list of potential candidates.
                 // Return true if not found.
@@ -823,8 +830,8 @@ struct metapopulation : bscored_combo_tree_set
         // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
         // for me; my (reduced, simplified) instances have complexity
         // of about 100. This seems too long/slow.
-        deme_cit deme_begin = _deme->begin();
-        deme_cit deme_end = _deme->begin() + eval_during_this_deme;
+        deme_cit deme_begin = __deme->begin();
+        deme_cit deme_end = __deme->begin() + eval_during_this_deme;
         OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
         // Behavioural scores are needed only if domination-based
@@ -897,12 +904,15 @@ struct metapopulation : bscored_combo_tree_set
             }
         }
 
+        return done;
+    }
+
+    void free_deme()
+    {
         delete _deme;
         delete _rep;
         _deme = NULL;
         _rep = NULL;
-
-        return done;
     }
 
     // Return the set of candidates not present in the metapopulation.
@@ -1383,9 +1393,6 @@ protected:
     // Structures related to the current deme
     size_t _n_evals_this_deme;
     representation* _rep; // representation of the current deme
-    typedef instance_set<composite_score> deme_t;
-    typedef deme_t::iterator deme_it;
-    typedef deme_t::const_iterator deme_cit;
     deme_t* _deme; // current deme
 
     // exemplar of the current deme; a copy, not a reference.
