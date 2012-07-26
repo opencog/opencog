@@ -83,7 +83,7 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     // ~Logger
     int gen_idx = 0;
 
-    optim_stats *os = dynamic_cast<optim_stats *> (&mp.optimize);
+    optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
 
     // Print legend for the columns of the stats.
     if (logger().isInfoEnabled()) {

@@ -139,8 +139,146 @@ struct metapop_parameters
 };
 
 template<typename CScoring, typename BScoring, typename Optimization>
-struct expander
+struct deme_expander
 {
+    typedef instance_set<composite_score> deme_t;
+    typedef deme_t::iterator deme_it;
+    typedef deme_t::const_iterator deme_cit;
+
+    deme_expander(const type_tree& type_signature,
+                  const reduct::rule& si_ca,
+                  const reduct::rule& si_kb,
+                  const CScoring& sc,
+                  Optimization& opt = Optimization(),
+                  const metapop_parameters& pa = metapop_parameters()) 
+        : _type_sig(type_signature),
+        simplify_candidate(&si_ca),
+        simplify_knob_building(&si_kb),
+        _cscorer(sc), _optimize(opt),
+        _params(pa), _rep(NULL), _deme(NULL)
+    {}
+
+    ~deme_expander()
+    {
+        if (_rep) delete _rep;
+        if (_deme) delete _deme;
+    }
+
+    /**
+     * Create the deme
+     *
+     * @return return true if it creates deme successfully,otherwise false.
+     */
+    bool create_deme(bscored_combo_tree_set::const_iterator exemplar)
+    {
+        using namespace reduct;
+
+        OC_ASSERT(_rep == NULL);
+        OC_ASSERT(_deme == NULL);
+
+        _n_evals_this_deme = 0;
+        _exemplar = *exemplar;
+
+        if (logger().isDebugEnabled()) {
+            logger().debug()
+                << "Attempt to build rep from exemplar: " << get_tree(_exemplar)
+                << "\nScored: " << _cscorer(get_tree(_exemplar));
+        }
+
+        // [HIGHLY EXPERIMENTAL]. It allows to select features
+        // that provide the most information when combined with
+        // the exemplar
+        operator_set ignore_ops = _params.ignore_ops;
+        if (_params.fstor) {
+            // return the set of selected features as column index
+            // (left most column corresponds to 0)
+            auto selected_features = (*_params.fstor)(_exemplar);
+            // add the complementary of the selected features in ignore_ops
+            unsigned arity = params.fstor->ctable.get_arity();
+            for (unsigned i = 0; i < arity; i++)
+                if (selected_features.find(i) == selected_features.end())
+                    ignore_ops.insert(argument(i + 1));
+            // debug print
+            // std::vector<std::string> ios;
+            // auto vertex_to_str = [](const vertex& v) {
+            //     std::stringstream ss;
+            //     ss << v;
+            //     return ss.str();
+            // };
+            // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
+            // printlnContainer(ios);
+            // ~debug print
+        }
+            
+        // Build a representation by adding knobs to the exemplar,
+        // creating a field set, and a mapping from field set to knobs.
+        _rep = new representation(*simplify_candidate,
+                                  *simplify_knob_building,
+                                  get_tree(_exemplar), _type_sig,
+                                  ignore_ops,
+                                  _params.perceptions,
+                                  _params.actions);
+
+        // If the representation is empty, try the next
+        // best-scoring exemplar.
+        if (_rep->fields().empty()) {
+            delete(_rep);
+            _rep = NULL;
+            logger().warn("The representation is empty, perhaps the reduct "
+                          "effort for knob building is too high.");
+        }
+        
+        if (!_rep) return false;
+
+        // Create an empty deme.
+        _deme = new deme_t(_rep->fields());
+
+        return true;
+    }
+
+    /**
+     * Do some optimization according to the scoring function.
+     *
+     * @param max_evals the max evals
+     *
+     * @return return the number of evaluations actually performed,
+     */
+    int optimize_deme(int max_evals)
+    {
+        if (logger().isDebugEnabled()) {
+            logger().debug()
+               << "Optimize deme; max evaluations allowed: "
+               << max_evals;
+        }
+
+        complexity_based_scorer<CScoring> cpx_scorer =
+            complexity_based_scorer<CScoring>(_cscorer, *_rep, _params.reduce_all);
+        _n_evals_this_deme = _optimize(*_deme, cpx_scorer, max_evals);
+        return _n_evals_this_deme;
+    }
+
+    void free_deme()
+    {
+        delete _deme;
+        delete _rep;
+        _deme = NULL;
+        _rep = NULL;
+    }
+
+    const combo::type_tree& _type_sig;    // type signature of the exemplar
+    const reduct::rule* simplify_candidate; // to simplify candidates
+    const reduct::rule* simplify_knob_building; // during knob building
+    const CScoring& _cscorer; // composite score
+    Optimization &_optimize;
+    metapop_parameters _params;
+
+    // Structures related to the current deme
+    size_t _n_evals_this_deme;
+    representation* _rep; // representation of the current deme
+    deme_t* _deme; // current deme
+
+    // exemplar of the current deme; a copy, not a reference.
+    bscored_combo_tree _exemplar;
 };
 
 /**
@@ -173,19 +311,21 @@ struct metapopulation : bscored_combo_tree_set
                                  boost::hash<combo_tree> > combo_tree_hash_set;
 
     // Init the metapopulation with the following set of exemplars.
-    void init(const std::vector<combo_tree>& exemplars)
+    void init(const std::vector<combo_tree>& exemplars,
+              const reduct::rule& simplify_candidate,
+              const CScoring& cscorer)
     {
         metapop_candidates candidates;
         foreach (const combo_tree& base, exemplars) {
             combo_tree si_base(base);
-            (*simplify_candidate)(si_base);
+            simplify_candidate(si_base);
 
             penalized_behavioral_score pbs(_bscorer(si_base));
             // XXX Compute the bscore a second time.   The first time
             // was immediately above.  We do it again, because the
             // caching scorer lacks the correct signature.
             // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
-            composite_score csc(_cscorer(si_base));
+            composite_score csc(cscorer(si_base));
 
             candidates[si_base] = composite_behavioral_score(pbs, csc);
         }
@@ -219,39 +359,33 @@ struct metapopulation : bscored_combo_tree_set
                    const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        _type_sig(type_signature),
-        simplify_candidate(&si_ca),
-        simplify_knob_building(&si_kb),
-        _cscorer(sc),
-        _bscorer(bsc), optimize(opt), params(pa),
+        _bscorer(bsc), params(pa),
+        _dex(type_signature, si_ca, si_kb, sc, opt, pa),
         _n_evals(0),
         _n_expansions(0),
-        _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
+        _best_cscore(worst_composite_score)
     {
-        init(bases);
+        init(bases, si_ca, sc);
     }
 
     // Like above but using a single base, and a single reduction rule.
     metapopulation(const combo_tree& base,
-                   const type_tree& tt,
+                   const type_tree& type_signature,
                    const reduct::rule& si,
                    const CScoring& sc, const BScoring& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
-        _type_sig(tt), simplify_candidate(&si),
-        simplify_knob_building(&si), _cscorer(sc),
-        _bscorer(bsc), optimize(opt), params(pa),
+        _bscorer(bsc), params(pa),
+        _dex(type_signature, si, si, sc, opt, pa),
         _n_evals(0), _n_expansions(0),
-        _best_cscore(worst_composite_score), _rep(NULL), _deme(NULL)
+        _best_cscore(worst_composite_score)
     {
         std::vector<combo_tree> bases(1, base);
-        init(bases);
+        init(bases, si, sc);
     }
 
     ~metapopulation()
     {
-        if (_rep) delete _rep;
-        if (_deme) delete _deme;
     }
 
     /**
@@ -342,6 +476,7 @@ struct metapopulation : bscored_combo_tree_set
         // would be a fairly big task, and it's currently not clear that
         // its worth the effort, as diversity_penalty is not yet showing
         // promising results...
+#if 0
         if (params.use_diversity_penalty) {
             bscored_combo_tree_set pool;
             // Behavioral score of the (previous) exemplar.
@@ -361,6 +496,7 @@ struct metapopulation : bscored_combo_tree_set
             // Replace the existing metapopulation with the new one.
             swap(pool);
         }
+#endif
 
         vector<score_t> probs;
         // Set flag to true, when a suitable exemplar is found.
@@ -587,13 +723,14 @@ struct metapopulation : bscored_combo_tree_set
             }
 
             // if create_deme returned true, we are good to go.
-            if (create_deme(exemplar)) break;
+            if (_dex.create_deme(exemplar)) break;
         }
 
         _n_expansions ++;
-        _n_evals += optimize_deme(max_evals);
+        size_t evals_this_deme = _dex.optimize_deme(max_evals);
+        _n_evals += evals_this_deme;
 
-        bool done = close_deme(_deme, _rep);
+        bool done = merge_deme(_dex._deme, _dex._rep, evals_this_deme);
 
         if (logger().isInfoEnabled()) {
             logger().info()
@@ -602,121 +739,25 @@ struct metapopulation : bscored_combo_tree_set
             log_best_candidates();
         }
 
-        free_deme();
+        _dex.free_deme();
 
         // Might be empty, if the eval fails and throws an exception
         return done || empty();
     }
 
     /**
-     * Create the deme
-     *
-     * @return return true if it creates deme successfully,otherwise false.
-     */
-    bool create_deme(const_iterator exemplar)
-    {
-        using namespace reduct;
-
-        OC_ASSERT(_rep == NULL);
-        OC_ASSERT(_deme == NULL);
-
-        _n_evals_this_deme = 0;
-        _exemplar = *exemplar;
-
-        if (logger().isDebugEnabled()) {
-            logger().debug()
-                << "Attempt to build rep from exemplar: " << get_tree(_exemplar)
-                << "\nScored: " << _cscorer(get_tree(_exemplar));
-        }
-
-        // [HIGHLY EXPERIMENTAL]. It allows to select features
-        // that provide the most information when combined with
-        // the exemplar
-        operator_set ignore_ops = params.ignore_ops;
-        if (params.fstor) {
-            // return the set of selected features as column index
-            // (left most column corresponds to 0)
-            auto selected_features = (*params.fstor)(_exemplar);
-            // add the complementary of the selected features in ignore_ops
-            // add the complementary of the selected features in ignore_ops
-            unsigned arity = params.fstor->ctable.get_arity();
-            for (unsigned i = 0; i < arity; i++)
-                if (selected_features.find(i) == selected_features.end())
-                    ignore_ops.insert(argument(i + 1));
-            // debug print
-            // std::vector<std::string> ios;
-            // auto vertex_to_str = [](const vertex& v) {
-            //     std::stringstream ss;
-            //     ss << v;
-            //     return ss.str();
-            // };
-            // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
-            // printlnContainer(ios);
-            // ~debug print
-        }
-
-        // Build a representation by adding knobs to the exemplar,
-        // creating a field set, and a mapping from field set to knobs.
-        _rep = new representation(*simplify_candidate,
-                                  *simplify_knob_building,
-                                  get_tree(_exemplar), _type_sig,
-                                  ignore_ops,
-                                  params.perceptions,
-                                  params.actions);
-
-        // If the representation is empty, try the next
-        // best-scoring exemplar.
-        if (_rep->fields().empty()) {
-            delete(_rep);
-            _rep = NULL;
-            logger().warn("The representation is empty, perhaps the reduct "
-                          "effort for knob building is too high.");
-        }
-        
-        if (!_rep) return false;
-
-        // Create an empty deme.
-        _deme = new deme_t(_rep->fields());
-
-        return true;
-    }
-
-    /**
-     * Do some optimization according to the scoring function.
-     *
-     * @param max_evals the max evals
-     *
-     * @return return the number of evaluations actually performed,
-     */
-    int optimize_deme(int max_evals)
-    {
-        if (logger().isDebugEnabled()) {
-            logger().debug()
-               << "Optimize deme; max evaluations allowed: "
-               << max_evals;
-        }
-
-        complexity_based_scorer<CScoring> cpx_scorer =
-            complexity_based_scorer<CScoring>(_cscorer, *_rep, params.reduce_all);
-        _n_evals_this_deme = optimize(*_deme, cpx_scorer, max_evals);
-        return _n_evals_this_deme;
-    }
-
-    /**
-     * close deme
+     * merge deme
      * 1) mark the current deme exemplar to not explore it again,
      * 2) merge non-dominated candidates in the metapopulation,
      * 3) delete the deme instance from memory.
      * Return true if further deme exploration should be halted.
      */
-    bool close_deme(deme_t* __deme, representation* __rep)
+    bool merge_deme(deme_t* __deme, representation* __rep, size_t evals)
     {
         OC_ASSERT(__rep);
         OC_ASSERT(__deme);
-        if (_rep == NULL || _deme == NULL)
-            return false;
 
-        size_t eval_during_this_deme = std::min(_n_evals_this_deme,
+        size_t eval_during_this_deme = std::min(evals,
                                              __deme->size());
 
         logger().debug("Close deme; evaluations performed: %d",
@@ -905,14 +946,6 @@ struct metapopulation : bscored_combo_tree_set
         }
 
         return done;
-    }
-
-    void free_deme()
-    {
-        delete _deme;
-        delete _rep;
-        _deme = NULL;
-        _rep = NULL;
     }
 
     // Return the set of candidates not present in the metapopulation.
@@ -1369,13 +1402,9 @@ struct metapopulation : bscored_combo_tree_set
                 output_bscore, output_only_bests);
     }
 
-    const combo::type_tree& _type_sig;    // type signature of the exemplar
-    const reduct::rule* simplify_candidate; // to simplify candidates
-    const reduct::rule* simplify_knob_building; // during knob building
-    const CScoring& _cscorer; // composite score
     const BScoring& _bscorer; // behavioral score
-    Optimization &optimize;
     metapop_parameters params;
+    deme_expander<CScoring, BScoring, Optimization> _dex;
 
 protected:
     size_t _n_evals;
@@ -1389,14 +1418,6 @@ protected:
 
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
-
-    // Structures related to the current deme
-    size_t _n_evals_this_deme;
-    representation* _rep; // representation of the current deme
-    deme_t* _deme; // current deme
-
-    // exemplar of the current deme; a copy, not a reference.
-    bscored_combo_tree _exemplar;
 
 };
 
