@@ -2997,3 +2997,71 @@ wdbc-canon: bzr rev 7242, fix of the build_knobs::rec_canonize
 640K:                       
 1.28M:                      
 2.56M:       
+
+=======================================================================
+=======================================================================
+=======================================================================
+=======================================================================
+Distributed moses:
+
+Initial sniff tests, on the cray.  This version computes behavioural
+scores, fixing this would make it go faster.
+  moses -Hpa -k5 -j12  -m400000 -r1
+
+Just looking at top, its clear that its only 450% of total cpu, and not
+the full 12 threads.  Its blasting along at maybe 1 generation ever few
+seconds.  Best score is -6   Divive (user+sys)/real = 4.41 wayyy below
+12x.
+
+Actual time:
+real	9m59.974s
+user	41m56.854s
+sys	2m14.725s
+
+moses -Hpa -k5   -m400000 -r1 -j12:10.1.1.1 -j12:10.1.1.2 -j12:10.1.1.3
+-j12:10.1.1.4 -j12:10.1.1.5
+
+Applingly slow; there is forward progres, but cpu utilization extremely
+low; like maybe 8%.  Crash with  dup() in/out/err failed
+Repeating with same -j arguments fails to parse command line.
+per cpu utilization, seems like only one remote host is ever
+serviced...!?  and best score was -8 so something went very wrong here..
+write total of 1013 generation files.
+
+real	18m49.263s
+user	1m23.451s
+sys	0m29.472s
+
+Above disaster may be due to parity...
+-------------------------------
+Try again: with WDBC dataset:
+
+moses -Hit -Y1 -u2 -i /home/linas/src/opencog/build/wdbc.data -W1 -x1 -n
+sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12:10.1.1.1
+-j12:10.1.1.2 -j12:10.1.1.3 -j12:10.1.1.4 -j12:10.1.1.5 -m320000
+
+Seems to be averaging: 37% 36% 30% 30% 56% for the five nodes 
+(out of 100% not out of 1200%)
+
+real	4m18.260s
+user	1m29.876s
+sys	0m4.715s
+
+Hmmm best score:  16 complex=26 which is all time best, so far ... and
+elapsed time seems to be less than half of the normal -j12 time.
+
+Below is the 3-node version of above.  Best score is 20 plex=23 so not as
+good, I thik thi is a rand-gen dependence.
+
+real	5m15.666s
+user	1m33.363s
+sys	0m5.017s
+
+
+Below is 1-node -j12:10.1.1.1  best score 23 cplxty=25
+real	13m57.563s
+user	1m28.678s
+sys	0m5.590s
+
+
+
