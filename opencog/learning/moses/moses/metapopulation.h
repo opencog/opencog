@@ -150,12 +150,14 @@ struct deme_expander
                   const reduct::rule& si_kb,
                   const CScoring& sc,
                   Optimization& opt = Optimization(),
-                  const metapop_parameters& pa = metapop_parameters())
-        : _type_sig(type_signature),
+                  const metapop_parameters& pa = metapop_parameters()) :
+        _rep(NULL), _deme(NULL),
+        _optimize(opt),
+        _type_sig(type_signature),
         simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb),
-        _cscorer(sc), _optimize(opt),
-        _params(pa), _rep(NULL), _deme(NULL)
+        _cscorer(sc),
+        _params(pa)
     {}
 
     ~deme_expander()
@@ -176,7 +178,6 @@ struct deme_expander
         OC_ASSERT(_rep == NULL);
         OC_ASSERT(_deme == NULL);
 
-        _n_evals_this_deme = 0;
         _exemplar = *exemplar;
 
         if (logger().isDebugEnabled()) {
@@ -253,8 +254,7 @@ struct deme_expander
 
         complexity_based_scorer<CScoring> cpx_scorer =
             complexity_based_scorer<CScoring>(_cscorer, *_rep, _params.reduce_all);
-        _n_evals_this_deme = _optimize(*_deme, cpx_scorer, max_evals);
-        return _n_evals_this_deme;
+        return _optimize(*_deme, cpx_scorer, max_evals);
     }
 
     void free_deme()
@@ -265,17 +265,17 @@ struct deme_expander
         _rep = NULL;
     }
 
+    // Structures related to the current deme
+    representation* _rep; // representation of the current deme
+    deme_t* _deme; // current deme
+    Optimization &_optimize;
+
+protected:
     const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule* simplify_candidate; // to simplify candidates
     const reduct::rule* simplify_knob_building; // during knob building
     const CScoring& _cscorer; // composite score
-    Optimization &_optimize;
     metapop_parameters _params;
-
-    // Structures related to the current deme
-    size_t _n_evals_this_deme;
-    representation* _rep; // representation of the current deme
-    deme_t* _deme; // current deme
 
     // exemplar of the current deme; a copy, not a reference.
     bscored_combo_tree _exemplar;
@@ -753,6 +753,10 @@ struct metapopulation : bscored_combo_tree_set
         OC_ASSERT(__rep);
         OC_ASSERT(__deme);
 
+        // It seems that, when using univariate multi-threaded opt,
+        // the number of evals is (much) greater than the deme size.
+        // I suspect this is a bug? XXX  This needs investigation and
+        // fixing.  On the other hand, univariate is quasi-obsolete...
         size_t eval_during_this_deme = std::min(evals,
                                              __deme->size());
 
