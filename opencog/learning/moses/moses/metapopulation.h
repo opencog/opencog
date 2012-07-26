@@ -614,9 +614,8 @@ struct metapopulation : bscored_combo_tree_set
 
         OC_ASSERT(_rep == NULL);
         OC_ASSERT(_deme == NULL);
-        if (_rep != NULL || _deme != NULL)
-            return false;
 
+        _n_evals_this_deme = 0;
         _exemplar = *exemplar;
 
         if (logger().isDebugEnabled()) {
@@ -674,8 +673,6 @@ struct metapopulation : bscored_combo_tree_set
         // Create an empty deme.
         _deme = new deme_t(_rep->fields());
 
-        _evals_before_this_deme = n_evals();
-
         return true;
     }
 
@@ -696,7 +693,8 @@ struct metapopulation : bscored_combo_tree_set
 
         complexity_based_scorer<CScoring> cpx_scorer =
             complexity_based_scorer<CScoring>(_cscorer, *_rep, params.reduce_all);
-        return optimize(*_deme, cpx_scorer, max_evals);
+        _n_evals_this_deme = optimize(*_deme, cpx_scorer, max_evals);
+        return _n_evals_this_deme;
     }
 
     /**
@@ -711,7 +709,7 @@ struct metapopulation : bscored_combo_tree_set
         if (_rep == NULL || _deme == NULL)
             return false;
 
-        size_t eval_during_this_deme = std::min(n_evals() - _evals_before_this_deme,
+        size_t eval_during_this_deme = std::min(_n_evals_this_deme,
                                              _deme->size());
 
         logger().debug("Close deme; evaluations performed: %d",
@@ -1372,7 +1370,6 @@ struct metapopulation : bscored_combo_tree_set
 protected:
     size_t _n_evals;
     size_t _n_expansions;
-    size_t _evals_before_this_deme;
 
     // The best score ever found during search.
     composite_score _best_cscore;
@@ -1384,6 +1381,7 @@ protected:
     combo_tree_hash_set _visited_exemplars;
 
     // Structures related to the current deme
+    size_t _n_evals_this_deme;
     representation* _rep; // representation of the current deme
     typedef instance_set<composite_score> deme_t;
     typedef deme_t::iterator deme_it;
