@@ -51,7 +51,7 @@ using namespace std;
  */
 template<typename Score, typename BScore, typename Optimization>
 void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
-                             const moses_parameters& moses_params)
+               const moses_parameters& moses_params = moses_parameters())
 {
     // Run moses, either on localhost, or distributed.
     if (moses_params.local)

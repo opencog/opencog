@@ -29,7 +29,7 @@
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
-#include <opencog/learning/moses/moses/moses.h>
+#include <opencog/learning/moses/moses/moses_main.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
@@ -112,5 +112,5 @@ int main(int argc, char** argv)
     moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
 
     //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
-    moses::moses(metapop, moses_param);
+    run_moses(metapop, moses_param);
 }

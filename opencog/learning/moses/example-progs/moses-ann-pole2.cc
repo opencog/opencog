@@ -28,7 +28,7 @@
 
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
-#include "../moses/moses.h"
+#include "../moses/moses_main.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     metapopulation<ann_pole2_cscore, ann_pole2_bscore, univariate_optimization>
         metapop_pole2(tr, tt, *si, p2_cscore, p2_bscore, univ);
 
-    moses::moses(metapop_pole2);
+    run_moses(metapop_pole2);
 
     //change best combo tree back into ANN
     tree_transform trans; 

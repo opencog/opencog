@@ -5,7 +5,7 @@
 #include <opencog/comboreduct/combo/eval.h>
 
 #include "../representation/representation.h"
-#include "../moses/moses.h"
+#include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     boost::program_options::variables_map vm;
     jobs_t jobs;
     moses_parameters moses_param(vm, jobs, true, max_evals);
-    moses::moses(metapop_pole2, moses_param);
+    run_moses(metapop_pole2, moses_param);
 
     //change best combo tree back into ANN
     tree_transform trans; 

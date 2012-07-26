@@ -34,7 +34,7 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
-#include "../moses/moses.h"
+#include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
 #include "ant_scoring.h"
 
@@ -88,6 +88,6 @@ int main(int argc,char** argv)
   jobs_t jobs;
 
   moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
-  moses::moses(metapop, moses_param);
+  run_moses(metapop, moses_param);
 }
 

@@ -24,7 +24,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/comboreduct/combo/eval.h>
 
-#include "../moses/moses.h"
+#include "../moses/moses_main.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 #include "../representation/representation.h"
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     metapopulation<ann_pole_cscore, ann_pole_bscore, univariate_optimization>
         metapop_pole(tr, tt, *si, p_cscore, p_bscore, optim_algo);
 
-    moses::moses(metapop_pole);
+    run_moses(metapop_pole);
 
     //change best tree into ANN
     tree_transform trans; 

@@ -1,7 +1,7 @@
 #include <opencog/comboreduct/combo/eval.h>
 
 #include <iostream>
-#include "../moses/moses.h"
+#include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
 #include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
         metapop_pole2(tr, tt, clean_reduction(),
                       p2_cscore, p2_bscore, hc);
 
-    moses::moses(metapop_pole2);
+    run_moses(metapop_pole2);
 
     combo_tree best = metapop_pole2.best_tree();
     ann bestnet = trans.decodify_tree(best);
