@@ -154,8 +154,8 @@ struct deme_expander
         _rep(NULL), _deme(NULL),
         _optimize(opt),
         _type_sig(type_signature),
-        simplify_candidate(&si_ca),
-        simplify_knob_building(&si_kb),
+        simplify_candidate(si_ca),
+        simplify_knob_building(si_kb),
         _cscorer(sc),
         _params(pa)
     {}
@@ -213,8 +213,8 @@ struct deme_expander
 
         // Build a representation by adding knobs to the exemplar,
         // creating a field set, and a mapping from field set to knobs.
-        _rep = new representation(*simplify_candidate,
-                                  *simplify_knob_building,
+        _rep = new representation(simplify_candidate,
+                                  simplify_knob_building,
                                   get_tree(_exemplar), _type_sig,
                                   ignore_ops,
                                   _params.perceptions,
@@ -272,8 +272,8 @@ struct deme_expander
 
 protected:
     const combo::type_tree& _type_sig;    // type signature of the exemplar
-    const reduct::rule* simplify_candidate; // to simplify candidates
-    const reduct::rule* simplify_knob_building; // during knob building
+    const reduct::rule& simplify_candidate; // to simplify candidates
+    const reduct::rule& simplify_knob_building; // during knob building
     const CScoring& _cscorer; // composite score
     metapop_parameters _params;
 
