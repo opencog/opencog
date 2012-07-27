@@ -214,20 +214,14 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             hpm_it = find_free_resource(hpm, jobs);
         }
 
-        // Wait for a second, so as not to take all resources.
-        // A somewhat more elegant solution would be to have the
-        // sender and receiver run in different threads, with the
-        // sender waiting on a mutex lock for machines to free up.
-        // But this solution more or less works, mostly because
-        // most problems require more than a few seconds to perform
-        // one evaluation.
-        sleep(1);
-
         // Check for results and merge if necessary
+        bool found_one = false;
         foreach (host_proc_map::value_type& hpmv, hpm) {
             for (proc_map::iterator it = hpmv.second.begin();
                 it != hpmv.second.end();) {
                 if (!is_running(*it)) { // result is ready
+                    found_one = true;
+
                     // parse the result
                     metapop_candidates candidates;
                     int evals;
@@ -279,6 +273,19 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         }
 
         logger().fine("Number of running processes: %u", running_proc_count(hpm));
+
+        if (!found_one) {
+            // If we are here, everyone has been given work to do,
+            // and no one has any results to report.
+            // Wait for a second, so as not to take all resources.
+            // A somewhat more elegant solution would be to have the
+            // sender and receiver run in different threads, with the
+            // sender waiting on a mutex lock for machines to free up.
+            // But this solution more or less works, mostly because
+            // most problems require more than a few seconds to perform
+            // one evaluation.
+            sleep(1);
+        }
     }
 
 theend:
