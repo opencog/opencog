@@ -143,11 +143,12 @@ string build_cmdline(const variables_map& vm,
     return res;
 }
 
-proc_map::value_type launch_cmd(string cmd, unsigned n_jobs) {
+proc_map::value_type launch_cmd(string cmd, unsigned n_jobs)
+{
     // append " > tempfile&" to cmd
     char tempfile[] = "/tmp/mosesXXXXXX";
     int fd = mkstemp(tempfile);
-    if(fd == -1) {
+    if (fd == -1) {
         std::cerr << "could not create temporary file" << std::endl;
         exit(1);
     }
@@ -156,11 +157,11 @@ proc_map::value_type launch_cmd(string cmd, unsigned n_jobs) {
 
     // launch the command
     int res = system(cmd.c_str());
-    if(res != 0) {
+    if (res != 0) {
         std::cerr << "the execution of " << cmd << "has failed" << std::endl;
         exit(1);        
     }
-    FILE* fp = fopen(tempfile, "r");
+    FILE* fp = fdopen(fd, "r");
 
     // get its PID
     string exec_name = cmd.substr(0, cmd.find(" "));
@@ -277,6 +278,9 @@ void parse_result(const proc_map::value_type& pmv,
     parse_result(sp, candidates, evals);
     // close fp
     fclose(fp);
+
+    // Don't clutter the file system with temp files.
+    unlink(get_tmp(pmv).c_str());
 }
 
 
