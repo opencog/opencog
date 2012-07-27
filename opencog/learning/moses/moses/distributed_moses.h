@@ -231,7 +231,8 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 metapop_candidates candidates;
                 int evals;
 
-                logger().info("Parsing results from PID %d", get_pid(*it));
+                logger().info("Parsing results from PID %d file %s",
+                    get_pid(*it), get_tmp(*it).c_str());
 
                 parse_result(*it, candidates, evals);
                 stats.n_evals += evals;
