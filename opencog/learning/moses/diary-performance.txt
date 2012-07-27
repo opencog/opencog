@@ -3032,7 +3032,35 @@ real	18m49.263s
 user	1m23.451s
 sys	0m29.472s
 
-Above disaster may be due to parity...
+Above disaster turns out to be due to poorly structured
+distributed_moses dispatch loop.  Re-worked the loop by bzr rev 7285
+and fixed a few more bugs.  This gives better results (for 5 nodes;
+and the best score is better: its -4) 
+
+real	3m40.990s
+user	0m39.928s
+sys	0m18.466s
+
+So above gives overall speedup of 3x on 5 nodes.  OK, not great.
+CPU usage still never clears 25%... Ahh, algo still has a bug in it.
+Was sleeping inappropriately.
+
+Anyway, above is non-deterministic, too; second run like above, score=-6 and:
+real	6m21.316s
+user	2m21.796s
+sys	0m38.137s
+
+But then I got lucky: perfect score, and
+real	1m18.370s
+user	0m33.583s
+sys	0m6.160s
+
+
+
+After fixing sleep bug (bzr 7287):
+... more crashiness....
+
+
 -------------------------------
 Try again: with WDBC dataset:
 
@@ -3051,7 +3079,7 @@ Hmmm best score:  16 complex=26 which is all time best, so far ... and
 elapsed time seems to be less than half of the normal -j12 time.
 
 Below is the 3-node version of above.  Best score is 20 plex=23 so not as
-good, I thik thi is a rand-gen dependence.
+good, I think this is a rand-gen dependence.
 
 real	5m15.666s
 user	1m33.363s
@@ -3062,6 +3090,35 @@ Below is 1-node -j12:10.1.1.1  best score 23 cplxty=25
 real	13m57.563s
 user	1m28.678s
 sys	0m5.590s
+
+-------------
+Try again, after bugfixes bzr 7287, get much higher cpu usage, got to
+70% for cpu usage: best score 21 complex=20
+
+real	2m1.692s    
+user	0m18.434s
+sys	0m2.378s
+
+Wait ... above are getting 'Killed by signal 15.' messages,
+but seemed to terminate healthy...
+
+Weird: node 'compute-02' (10.1.1.4) crashed immediately after
+completion.
+
+Again with only 4 nodes:   20  cpy=28
+real	2m18.883s    
+user	0m39.331s
+sys	0m2.677s
+
+3 nodes:      22 cpy=26
+real	3m28.292s
+user	0m56.444s
+sys	0m3.252s
+
+2 nodes:       19 cpy=26
+real	6m24.558s
+user	1m30.821s
+sys	0m4.699s
 
 
 
