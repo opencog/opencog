@@ -218,58 +218,64 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         bool found_one = false;
         foreach (host_proc_map::value_type& hpmv, hpm) {
             for (proc_map::iterator it = hpmv.second.begin();
-                it != hpmv.second.end();) {
-                if (!is_running(*it)) { // result is ready
-                    found_one = true;
-
-                    // parse the result
-                    metapop_candidates candidates;
-                    int evals;
-
-                    logger().info("Parsing results from PID %d", get_pid(*it));
-
-                    parse_result(*it, candidates, evals);
-                    stats.n_evals += evals;
-
-                    // update best and merge
-                    logger().info("Merge %u candidates with the metapopulation",
-                                  candidates.size());
-                    if (logger().isFineEnabled()) {
-                        logger().fine("Candidates with their bscores to merge with"
-                                      " the metapopulation:");
-                        stringstream ss;
-                        logger().fine(mp.ostream(ss, candidates.begin(),
-                                                 candidates.end(),
-                                                 -1, true, true).str());
-                    }
-
-                    bscored_combo_tree_set mc(candidates.begin(),
-                                              candidates.end());
-
-                    mp.update_best_candidates(mc);
-
-                    mp.merge_candidates(mc);
-
-                    logger().info("Metapopulation size is %u", mp.size());
-                    if (logger().isFineEnabled()) {
-                        stringstream ss;
-                        ss << "Metapopulation after merging: " << std::endl;
-                        logger().fine(mp.ostream(ss, -1, true, true).str());
-                        logger().fine("Number of evaluations so far: %d",
-                                      stats.n_evals);
-                    }
-
-                    mp.log_best_candidates();
-
-                    // Remove proc info from pm
-                    it = remove_proc(hpmv.second, it);
-
-                    // Break out of loop, feed hungry mouths before
-                    // merging more results.
-                    break;
+                it != hpmv.second.end(); )
+            {
+                if (is_running(*it)) {
+                    it++;
+                    continue;
                 }
-                else it++;
+
+                found_one = true;
+
+                // parse the result
+                metapop_candidates candidates;
+                int evals;
+
+                logger().info("Parsing results from PID %d", get_pid(*it));
+
+                parse_result(*it, candidates, evals);
+                stats.n_evals += evals;
+
+                // update best and merge
+                logger().info("Merge %u candidates with the metapopulation",
+                              candidates.size());
+                if (logger().isFineEnabled()) {
+                    logger().fine("Candidates with their bscores to merge with"
+                                  " the metapopulation:");
+                    stringstream ss;
+                    logger().fine(mp.ostream(ss, candidates.begin(),
+                                             candidates.end(),
+                                             -1, true, true).str());
+                }
+
+                bscored_combo_tree_set mc(candidates.begin(),
+                                          candidates.end());
+
+                mp.update_best_candidates(mc);
+
+                mp.merge_candidates(mc);
+
+                logger().info("Metapopulation size is %u", mp.size());
+                if (logger().isFineEnabled()) {
+                    stringstream ss;
+                    ss << "Metapopulation after merging: " << std::endl;
+                    logger().fine(mp.ostream(ss, -1, true, true).str());
+                    logger().fine("Number of evaluations so far: %d",
+                                  stats.n_evals);
+                }
+
+                mp.log_best_candidates();
+
+                // Remove proc info from pm
+                it = remove_proc(hpmv.second, it);
+
+                // Break out of loop, feed hungry mouths.
+                break;
             }
+
+            // Break out of loop, feed hungry mouths before
+            // merging more results.
+            if (found_one) break;
         }
 
         logger().fine("Number of running processes: %u", running_proc_count(hpm));
