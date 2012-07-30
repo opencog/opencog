@@ -776,7 +776,7 @@ ostream& ostreamTable(ostream& out, const Table& table, int target_pos)
 void saveTable(const string& file_name, const ITable& it, const OTable& ot,
                int target_pos)
 {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    OC_ASSERT(!file_name.empty(), "No filename specified!");
     ofstream out(file_name.c_str());
     OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
     ostreamTable(out, it, ot, target_pos);

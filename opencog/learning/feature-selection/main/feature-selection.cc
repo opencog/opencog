@@ -52,13 +52,25 @@ using namespace combo;
 using namespace std;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
-void err_empty_features() {
+void err_empty_features(const string& outfile)
+{
+    // If the dataset is degenerate, it can happen that feature
+    // selection will fail to find any features.  Rather than just
+    // crashing as a result, write out an empty file, which at least
+    // allows downstream processes to infer what happened (i.e. to tell
+    // apart this case from an outright crash.)
+    logger().warn() << "No features have been selected.";
     std::cerr << "No features have been selected." << std::endl;
-    exit(1);
+    if (!outfile.empty()) {
+        ofstream out(outfile.c_str());
+        out << "# No features have been selected." << std::endl;
+    }
+    exit(0);
 }
 
 // log the set of features and its number
-void log_selected_features(arity_t old_arity, const Table& ftable) {
+void log_selected_features(arity_t old_arity, const Table& ftable)
+{
     // log the number selected features
     logger().info("%d out of %d have been selected",
                   ftable.get_arity(), old_arity);
@@ -145,10 +157,11 @@ int update_target_feature(const Table& table,
 }
 
 void write_results(const Table& table,
-                   const feature_selection_parameters& fs_params) {
+                   const feature_selection_parameters& fs_params)
+{
     Table table_wff = add_force_features(table, fs_params);
     int tfp = update_target_feature(table_wff, fs_params);
-    if(fs_params.output_file.empty())
+    if (fs_params.output_file.empty())
         ostreamTable(std::cout, table_wff, tfp);
     else
         saveTable(fs_params.output_file, table_wff, tfp);
@@ -265,7 +278,7 @@ void feature_selection(const Table& table,
 {
     feature_set selected_features = select_features(table, fs_params);
     if (selected_features.empty())
-        err_empty_features();
+        err_empty_features(fs_params.output_file);
     else {
         Table ftable = table.filtered(selected_features);
         log_selected_features(table.get_arity(), ftable);
