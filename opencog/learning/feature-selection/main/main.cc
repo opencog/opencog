@@ -28,6 +28,7 @@
 #include <boost/range/algorithm/find.hpp>
 
 #include <opencog/util/log_prog_name.h>
+#include <opencog/learning/moses/moses/moses_main.h> // for version string
 
 using namespace std;
 using namespace boost::program_options;
@@ -107,6 +108,7 @@ int main(int argc, char** argv)
 
     desc.add_options()
         ("help,h", "Produce help message.\n")
+        ("version,v", "Display the version number.\n")
 
         (opt_desc_str(algo_opt).c_str(),
          value<string>(&fs_params.algorithm)->default_value(mmi),
@@ -265,6 +267,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    if (vm.count("version")) {
+        cout << "feature-selection "
+             << opencog::moses::version_string
+             << std::endl;
+        return 0;
+    }
+
     // Set log
     if (log_file_dep_opt) {
         std::set<std::string> ignore_opt {
@@ -298,6 +307,8 @@ int main(int argc, char** argv)
     logger().setBackTraceLevel(Logger::ERROR);
 
     // Log command-line args
+    logger().info() << "feature-selction version "
+                    << opencog::moses::version_string;
     string cmdline = "Command line:";
     for (int i = 0; i < argc; ++i) {
          cmdline += " ";

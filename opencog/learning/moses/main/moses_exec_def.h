@@ -33,9 +33,6 @@ namespace opencog { namespace moses {
 
 using namespace std;
 
-// number of evals string
-static const string number_of_evals_str = "n_evals";
-
 // program option names and abbreviations (one letter). If the
 // abbreviation is empty there is none. For their meanings see
 // options_description in moses-exec.cc.

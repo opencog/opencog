@@ -1011,13 +1011,7 @@ int moses_exec(int argc, char** argv)
     }
 
     if (vm.count("version")) {
-        cout << "moses " << MOSES_VERSION_MAJOR
-             << "." << MOSES_VERSION_MINOR
-             << "." << MOSES_VERSION_PATCH
-#ifdef MOSES_BZR_REVNO        
-             << " (revno " << MOSES_BZR_REVNO << ")"
-#endif
-             << std::endl;
+        cout << "moses " << version_string << std::endl;
         return 0;
     }
 
@@ -1043,6 +1037,7 @@ int moses_exec(int argc, char** argv)
     logger().setBackTraceLevel(Logger::ERROR);
 
     // Log command-line args
+    logger().info() << "moses version " << version_string;
     string cmdline = "Command line:";
     for (int i = 0; i < argc; ++i) {
          cmdline += " ";

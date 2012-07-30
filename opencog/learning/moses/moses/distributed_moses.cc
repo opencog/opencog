@@ -21,6 +21,7 @@
  */
 
 #include "distributed_moses.h"
+#include "../main/moses_exec_def.h"
 
 namespace opencog { namespace moses {
 

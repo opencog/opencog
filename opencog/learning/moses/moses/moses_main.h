@@ -46,6 +46,8 @@ namespace opencog { namespace moses {
 
 using namespace std;
 
+extern const char * version_string;
+
 /**
  * Run moses
  */
@@ -62,6 +64,7 @@ void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
 }
 
 /// Print metapopulation results to stdout, logfile, etc.
+static const string number_of_evals_str = "n_evals";
 struct metapop_printer
 {
     metapop_printer(long _result_count,
