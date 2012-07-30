@@ -21,6 +21,8 @@ pln             -- Backward-chainer
 
 embodiment      -- Avatars
 
+learning        -- Supervised program learning.
+
 ubigraph, dotty -- Visualization, graphics.
 
 cycl-import     -- Import OpenCyc datasets
