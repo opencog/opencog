@@ -175,7 +175,8 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     host_proc_map hpm = init(jobs);
 
-    while ((stats.n_evals < pa.max_evals) && (pa.max_gens != stats.n_expansions) 
+    while ((stats.n_evals < pa.max_evals)
+           && (pa.max_gens != stats.n_expansions) 
            && (mp.best_score() < pa.max_score))
     {
         // Launch processes as long as there are free resources.

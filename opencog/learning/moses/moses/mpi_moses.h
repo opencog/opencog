@@ -49,6 +49,12 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     logger().info("MPI MOSES starts");
     moses_mpi mompi;
 
+    while ((stats.n_evals < pa.max_evals) 
+           && (pa.max_gens != stats.n_expansions)
+           && (mp.best_score() < pa.max_score))
+    {
+return;
+    }
 };
 
 #else
@@ -60,6 +66,14 @@ class moses_mpi
         ~moses_mpi() {}
 
         bool is_mpi_master() { return true; }
+};
+
+template<typename Scoring, typename BScoring, typename Optimization>
+void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+               const moses_parameters& pa,
+               moses_statistics& stats)
+{
+    OC_ASSERT(0, "There is no MPI support in this version of moses");
 };
 
 #endif
