@@ -51,6 +51,7 @@ struct moses_parameters
 
     // Distributed solver control.
     bool local;
+    bool mpi;
     const jobs_t& jobs;
     const boost::program_options::variables_map& vm;
 

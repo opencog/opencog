@@ -28,7 +28,7 @@
 
 namespace opencog { namespace moses {
 
-mpi_moses::mpi_moses()
+moses_mpi::moses_mpi()
 {
     // MPI::Init(argc, argv);
     MPI::Init();
@@ -44,12 +44,12 @@ mpi_moses::mpi_moses()
         << "\" rank=" << rank << " out of num_procs=" << num_procs;
 }
 
-mpi_moses::~mpi_moses()
+moses_mpi::~moses_mpi()
 {
     MPI::Finalize();
 }
 
-bool mpi_moses::is_mpi_master()
+bool moses_mpi::is_mpi_master()
 {
     return (0 == MPI::COMM_WORLD.Get_rank());
 }

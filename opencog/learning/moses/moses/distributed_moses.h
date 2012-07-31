@@ -50,6 +50,9 @@ using boost::tuple;
 using boost::make_tuple;
 using boost::lexical_cast;
 
+// both sender and receiver must use exactly this string for n_evals.
+static const string number_of_evals_str = "n_evals";
+
 // get the pid of the main instance of moses (the one launching the
 // others). This is useful to have more uniqueness in the log names of
 // the launched moseses.

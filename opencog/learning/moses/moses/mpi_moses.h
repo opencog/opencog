@@ -25,25 +25,39 @@
 #ifndef _OPENCOG_MPI_MOSES_H
 #define _OPENCOG_MPI_MOSES_H
 
+#include "metapopulation.h"
+#include "moses_params.h"
+
 namespace opencog { namespace moses {
 
 #ifdef HAVE_MPI
-class mpi_moses
+class moses_mpi
 {
     public:
-        mpi_moses();
-        ~mpi_moses();
+        moses_mpi();
+        ~moses_mpi();
 
         bool is_mpi_master();
 };
 
+
+template<typename Scoring, typename BScoring, typename Optimization>
+void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+               const moses_parameters& pa,
+               moses_statistics& stats)
+{
+    logger().info("MPI MOSES starts");
+    moses_mpi mompi;
+
+};
+
 #else
 
-class mpi_moses
+class moses_mpi
 {
     public:
-        mpi_moses() {}
-        ~mpi_moses() {}
+        moses_mpi() {}
+        ~moses_mpi() {}
 
         bool is_mpi_master() { return true; }
 };

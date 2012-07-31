@@ -1106,9 +1106,11 @@ int moses_exec(int argc, char** argv)
                 "That is: specify -j:hostname or --mpi but not both.\n");
             exit(1);
         }
+        local = false;
         logger().info("Will run MOSES with MPI distributed processing.\n");
 #else
         logger().warn("WARNING: This version of MOSES does NOT have MPI support!\n");
+        enable_mpi = false;
 #endif
     }
 
@@ -1131,6 +1133,7 @@ int moses_exec(int argc, char** argv)
     // Set moses_parameters.
     moses_parameters moses_params(
         vm, jobs, local, max_evals, max_gens, max_score);
+    moses_params.mpi = enable_mpi;
 
     // Find the column number of the target feature in the data file,
     // if any.

@@ -39,6 +39,7 @@
 
 #include "distributed_moses.h"
 #include "local_moses.h"
+#include "mpi_moses.h"
 #include "metapopulation.h"
 #include "scoring.h"
 
@@ -59,12 +60,13 @@ void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
     // Run moses, either on localhost, or distributed.
     if (moses_params.local)
         local_moses(metapop, moses_params, stats);
+    else if (moses_params.mpi)
+        mpi_moses(metapop, moses_params, stats);
     else
         distributed_moses(metapop, moses_params, stats);
 }
 
 /// Print metapopulation results to stdout, logfile, etc.
-static const string number_of_evals_str = "n_evals";
 struct metapop_printer
 {
     metapop_printer(long _result_count,
