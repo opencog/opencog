@@ -5,17 +5,17 @@ ELSE (WIN32 AND NOT UNIX)
 ENDIF (WIN32 AND NOT UNIX)
 
 IF (APPLE)
-    SET(APPLE_STRNDUP_FILES strndup strnlen)
+	SET(APPLE_STRNDUP_FILES strndup strnlen)
 ELSE (APPLE)
-    SET(APPLE_STRNDUP_FILES)
+	SET(APPLE_STRNDUP_FILES)
 ENDIF (APPLE)
 
 ADD_LIBRARY(util SHARED
-    ansi
+	ansi
 	algorithm
-    log_prog_name
 	based_variant
 	cluster
+	comprehension
 	Config
 	Cover_Tree
 	digraph
@@ -23,28 +23,28 @@ ADD_LIBRARY(util SHARED
 	exceptions
 	files
 	functional.h
-    iostreamContainer
+	iostreamContainer
+	KLD
 	lazy_normal_selector
 	lazy_random_selector
 	lazy_selector
-	oc_assert
+	log_prog_name
 	Logger
 	lru_cache
+	MannWhitneyU
 	misc
 	mt19937ar
-    random
+	oc_assert
+	oc_omp
+	octime
 	platform
+	random
+	ranking
 	StringManipulator
 	StringTokenizer
-    octime
 	tree
-    oc_omp
-    KLD
-    comprehension
-    ranking
-    MannWhitneyU
 	${WIN32_GETOPT_FILES}
-    ${APPLE_STRNDUP_FILES}
+	${APPLE_STRNDUP_FILES}
 )
 
 TARGET_LINK_LIBRARIES(util
@@ -55,46 +55,47 @@ TARGET_LINK_LIBRARIES(util
 )
 
 INSTALL(FILES
-    ansi.h
+	ansi.h
 	algorithm.h
-    log_prog_name.h
 	based_variant.h
 	cluster.h
+	comprehension.h
 	Config.h
+	Counter.h
 	Cover_Tree.h
-    concurrent_queue.h
+	concurrent_queue.h
 	digraph.h
 	dorepeat.h
 	exceptions.h
 	files.h
-    foreach.h
+	foreach.h
 	functional.h
-	oc_assert.h
 	hashing.h
-    iostreamContainer.h
+	iostreamContainer.h
+	KLD.h
 	lazy_normal_selector.h
 	lazy_random_selector.h
 	lazy_selector.h
+	log_prog_name.h
 	Logger.h
 	lru_cache.h
+	MannWhitneyU.h
 	misc.h
 	mt19937ar.h
-    random.h
 	numeric.h
+	oc_assert.h
+	oc_omp.h
+	octime.h
 	platform.h
+	pool.h
 	RandGen.h
+	random.h
+	ranking.h
 	recent_val.h
 	selection.h
 	StringManipulator.h
 	StringTokenizer.h
 	tree.h
-    octime.h
-    oc_omp.h
-    Counter.h
-    KLD.h
-    comprehension.h
-    ranking.h
-    MannWhitneyU.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
 
