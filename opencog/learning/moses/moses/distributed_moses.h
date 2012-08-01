@@ -170,8 +170,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     const variables_map& vm = pa.vm;
     const jobs_t& jobs = pa.jobs;
 
-    typedef typename metapopulation<Scoring, BScoring,
-                                    Optimization>::const_iterator mp_cit;
+    typedef bscored_combo_tree_set::const_iterator mp_cit;
 
     host_proc_map hpm = init(jobs);
 

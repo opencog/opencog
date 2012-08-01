@@ -28,6 +28,11 @@
 
 namespace opencog { namespace moses {
 
+dispatch_thread::dispatch_thread()
+{
+cout<<"woot!"<<endl;
+}
+
 moses_mpi::moses_mpi()
 {
     // MPI::Init(argc, argv);
@@ -42,6 +47,18 @@ moses_mpi::moses_mpi()
 
     logger().info() << "MPI initialized on host \"" << processor_name
         << "\" rank=" << rank << " out of num_procs=" << num_procs;
+
+    // MPI::COMM_WORLD.Bcast(&answer, 1, MPI::INT, 0);
+
+    // Only the root process maintains a pool.
+    if (0 == rank) {
+        workers.resize(num_procs);
+        for (int i=0; i<num_procs; i++) {
+            dispatch_thread& worker = workers[i];
+            worker.rank = i;
+            worker_pool.give_back(worker);
+        }
+    }
 }
 
 moses_mpi::~moses_mpi()
@@ -54,6 +71,15 @@ bool moses_mpi::is_mpi_master()
     return (0 == MPI::COMM_WORLD.Get_rank());
 }
 
+void moses_mpi::dispatch_deme(const combo_tree &tr)
+{
+    dispatch_thread& worker = worker_pool.borrow();
+cout<<"duude got worker "<<worker.rank<<endl;
+}
+void moses_mpi::do_work()
+{
+cout <<"duude done doing work"<<endl;
+}
 
 } // ~namespace moses
 } // ~namespace opencog
