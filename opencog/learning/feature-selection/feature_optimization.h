@@ -151,12 +151,9 @@ FeatureSet incremental_selection(const FeatureSet& features,
     if (logger().isInfoEnabled()) {
         std::stringstream ss;
         ss << "Exit incremental_selection(), selected: ";
-        typename FeatureSet::const_iterator fi;
-        for (fi = res.begin(); fi != res.end(); fi++) {
-            ss << " " << *fi;
-        }
-        double mi = scorer(res);
-        ss << " MI=" << mi;
+        ostreamContainer(ss, res);
+        // Note: the score isn't necessarily the mutual information
+        ss << " Score = " << scorer(res);
         logger().info() << ss.str();
     }
 

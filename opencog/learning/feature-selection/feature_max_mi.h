@@ -95,8 +95,6 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     // vector, then shuffle the vector.
     std::vector<feature_id> shuffle(features.begin(), features.end());
     auto shr = [&](ptrdiff_t i) { return randGen().randint(i); };
-    /// @todo should pass OpenCog's random generator so that it is
-    /// determined by its seed
     random_shuffle(shuffle.begin(), shuffle.end(), shr);
 
     // Repeat, until we've gotton the highest-ranked FeatueSet
@@ -155,12 +153,9 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     if (logger().isDebugEnabled()) {
         std::stringstream ss;
         ss << "Exit max_mi_selection(), selected: ";
-        typename FeatureSet::const_iterator fi;
-        for (fi = res.begin(); fi != res.end(); fi++) {
-            ss << " " << *fi;
-        }
-        double mi = scorer(res);
-        ss << " MI=" << mi;
+        ostreamContainer(ss, res);
+        // Note: the score isn't necessarily the mutual information
+        ss << " Score = " << scorer(res);
         logger().debug() << ss.str();
     }
     return res;
