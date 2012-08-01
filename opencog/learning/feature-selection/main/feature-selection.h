@@ -52,11 +52,17 @@ static const string inc="inc"; // incremental_selection (see
 static const string mmi="mmi"; // max_mi_selection (see
                                // feature_max_mi.h)
 
+// Feature selection scorers
+static const string mi="mi";    // Mutual Information (see feature_scorer.h)
+static const string pre="pre";  // Precision (see
+                                // opencog/learning/moses/moses/scoring.h)
+    
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
 struct feature_selection_parameters
 {
     std::string algorithm;
+    std::string scorer;
     unsigned int max_evals;
     std::string input_file;
     int target_feature;
@@ -97,11 +103,11 @@ void write_results(const Table& table,
                    const feature_selection_parameters& fs_params);
 
 template<typename Optimize, typename Scorer>
-feature_set moses_select_features(const field_set& fields,
-                                  instance_set<composite_score>& deme,
-                                  instance& init_inst,
-                                  Optimize& optimize, const Scorer& scorer,
-                                  const feature_selection_parameters& fs_params)
+feature_set optimize_deme_select_features(const field_set& fields,
+                                          instance_set<composite_score>& deme,
+                                          instance& init_inst,
+                                          Optimize& optimize, const Scorer& scorer,
+                                          const feature_selection_parameters& fs_params)
 {
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
@@ -139,36 +145,48 @@ feature_set moses_select_features(const field_set& fields,
 instance initial_instance(const feature_selection_parameters& fs_params,
                           const field_set& fields);
 
-// run feature selection given an moses optimizer
-template<typename Optimize>
-feature_set moses_select_features(const CTable& ctable,
-                                  Optimize& optimize,
-                                  const feature_selection_parameters& fs_params) {
+// run feature selection given a moses optimizer and a scorer, create
+// a deme a define the wrap the scorer for that deme. Possibly add
+// cache as well.
+template<typename Optimize, typename Scorer>
+feature_set create_deme_select_features(const CTable& ctable,
+                                        Optimize& optimize,
+                                        const Scorer& scorer,
+                                        const feature_selection_parameters& fs_params) {
     arity_t arity = ctable.get_arity();
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);
     // determine the initial instance given the initial feature set
     instance init_inst = initial_instance(fs_params, fields);
-    // define feature set quality scorer
-    typedef MICScorerCTable<set<arity_t> > FSScorer;
-    FSScorer fs_sc(ctable, fs_params.hc_confi);
-    typedef moses_based_scorer<FSScorer> MBScorer;
-    MBScorer mb_sc(fs_sc, fields);
+    // define moses based scorer
+    typedef moses_based_scorer<Scorer> MBScorer;
+    MBScorer mb_sc(scorer, fields);
     // possibly wrap in a cache
     if(fs_params.hc_cache_size > 0) {
         typedef prr_cache_threaded<MBScorer> ScorerCache;
         ScorerCache sc_cache(fs_params.hc_cache_size, mb_sc);
         feature_set selected_features =
-            moses_select_features(fields, deme, init_inst, optimize,
-                                  sc_cache, fs_params);
+            optimize_deme_select_features(fields, deme, init_inst, optimize,
+                                          sc_cache, fs_params);
         // Logger
         logger().info("Number of cache failures = %u", sc_cache.get_failures());
         // ~Logger
         return selected_features;
     } else {
-        return moses_select_features(fields, deme, init_inst, optimize,
-                                     mb_sc, fs_params);
+        return optimize_deme_select_features(fields, deme, init_inst, optimize,
+                                             mb_sc, fs_params);
     }
+}
+
+// run feature selection given a moses optimizer
+template<typename Optimize>
+feature_set moses_select_features(const CTable& ctable,
+                                  Optimize& optimize,
+                                  const feature_selection_parameters& fs_params) {
+    // define feature set scorer
+    typedef MICScorerCTable<set<arity_t> > FSScorer;
+    FSScorer fs_sc(ctable, fs_params.hc_confi);
+    return create_deme_select_features(ctable, optimize, fs_sc, fs_params);
 }
 
 feature_set incremental_select_features(const CTable& ctable,

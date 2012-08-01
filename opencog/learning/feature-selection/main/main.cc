@@ -26,6 +26,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/range/algorithm/find.hpp>
+#include <boost/format.hpp>
 
 #include <opencog/util/log_prog_name.h>
 #include <opencog/learning/moses/moses/moses_main.h> // for version string
@@ -35,6 +36,7 @@ using namespace boost::program_options;
 using namespace opencog;
 using boost::lexical_cast;
 using boost::trim;
+using boost::str;
 
 // Assorted defaults.
 static const unsigned max_filename_size = 255;
@@ -45,9 +47,10 @@ static const string default_log_file = default_log_file_prefix + "." + default_l
 
 // Program option names and abbreviations.
 // Available abbreviations:
-// b, d (TODO complete)
+// b, d, g, k, n (TODO complete)
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> algo_opt("algo", "a");
+static const pair<string, string> scorer_opt("scorer", "H");
 static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> ignore_feature_opt("ignore-feature", "Y");
@@ -123,6 +126,14 @@ int main(int argc, char** argv)
              .append(mmi).append(" for maximal mutual information,\n")
              .append(moses::hc).append(" for hillclimbing,\n")
              .append(inc).append(" for incremental mutual information.\n").c_str())
+
+        (opt_desc_str(scorer_opt).c_str(),
+         value<string>(&fs_params.algorithm)->default_value(mi),
+         str(boost::format("Feature selection fitness function (scorer).\n"
+                           " Supported scorers are:\n"
+                           "%s, for mutual information\n"
+                           "%s, for precision (see moses -h for more info)\n")
+             % mi % pre).c_str())
 
         // ======= File I/O opts =========
         (opt_desc_str(input_data_file_opt).c_str(),

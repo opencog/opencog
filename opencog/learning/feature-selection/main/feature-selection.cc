@@ -264,7 +264,7 @@ feature_set select_features(const CTable& ctable,
                      "list of algorithms." << std::endl;
         exit(1);
         return feature_set(); // to please Mr compiler
-    }    
+    }
 }
 
 feature_set select_features(const Table& table,
