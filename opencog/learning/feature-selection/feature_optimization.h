@@ -85,15 +85,9 @@ FeatureSet incremental_selection(const FeatureSet& features,
     for (unsigned i = 1; i <= max_interaction_terms; ++i) {
         std::set<FeatureSet> ps = powerset(features, i, true);
         typename std::set<FeatureSet>::const_iterator psit;
-        for (psit = ps.begin(); psit != ps.end(); psit++) {
-            const FeatureSet &fs = *psit;
-            std::cout << "fs";
-            typename FeatureSet::const_iterator fi;
-            for (fi = fs.begin(); fi != fs.end(); fi++) {
-                std::cout << "-" << *fi;
-            }
-            double mi = scorer(fs);
-            std::cout << "\t" << mi << std::endl;
+        foreach (const FeatureSet& fs, ps) {
+            printContainer(fs, ", ", "fs=[", "]");
+            std::cout << "\t" << scorer(fs) << std::endl;
         }
         std::cout << "============================" << std::endl;
     }
