@@ -49,7 +49,8 @@ TARGET_LINK_LIBRARIES (moses
 	feature_selection
 	util 
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
-	${MPI_CXX_LIBRARIES}
+	${MPI_LIBRARY}
+	${MPI_EXTRA_LIBRARY}
 )
 
 

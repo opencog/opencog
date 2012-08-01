@@ -9,7 +9,7 @@ Extraction
 
 To extract MOSES from OpenCog use the script OC2MOSES.sh. The usage is
 
-   ./OC2MOSES.sh MOSES_DIR
+    $ ./OC2MOSES.sh MOSES_DIR
 
 MOSES_DIR is the name of the directory to create and place the MOSES
 project.  Non-standard locations of the OpenCog project can be dealt
@@ -30,7 +30,10 @@ installation and version management.  Be sure to create a ~/.rpmmacros
 file for yourself, and review general RPM build proceedures.  The spec
 file is called moses.spec.
 
-$ rpmbuild -bb moses.spec
+    $ cp moses-x.y.z.tar.bz2 wherever/rpmbuild
+    $ cp moses.spec wherever/rpmbuild/SPECS
+    $ cd wherever/rpmbuild/SPECS
+    $ rpmbuild -bb moses.spec
 
 
 Manual Installation
@@ -38,16 +41,16 @@ Manual Installation
 For a manual compile and install, perform the following from the 
 extracted directory:
 
-$ cd moses-3.0.9
+    $ cd moses-3.0.9
 
 To compile:
 
-$ mkdir bin
-$ cd bin
-$ cmake ..
-$ make
+    $ mkdir bin
+    $ cd bin
+    $ cmake ..
+    $ make
 
 Install (requires root privilege)
 
-# make install
-# ldconfig
+    # make install
+    # ldconfig

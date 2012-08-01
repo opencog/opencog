@@ -1,14 +1,15 @@
 
-               MOSES -- Meta-Optimizing Semantic Evolutionary Search
-               -----------------------------------------------------
-                              December, 2011
+          MOSES -- Meta-Optimizing Semantic Evolutionary Search
+          -----------------------------------------------------
+                         August, 2012
+
 
 INTRODUCTION
 ------------
 MOSES is an evolutionary program learner. It is mostly based on Moshe
 Looks' thesis, "Competent Porgram Evolution", 2006 (Washington 
-University, Missouri) http://metacog.org/main.pdf. Moshe is also the
-primary author of the code.
+University, Missouri) http://metacog.org/main.pdf. Moshe is also one of
+the primary authors of this code.
 
 
 LICENSE
