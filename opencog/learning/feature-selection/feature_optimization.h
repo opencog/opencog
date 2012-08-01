@@ -27,6 +27,8 @@
 
 #include <functional>
 
+#include <boost/range/algorithm/set_algorithm.hpp>
+
 #include <opencog/util/numeric.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/lru_cache.h>
@@ -95,7 +97,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
 
     for (unsigned i = 1; i <= max_interaction_terms; ++i) {
         // Define the set of set of features to test for relevancy
-        FeatureSet tf = set_difference(features, rel);
+        FeatureSet tf = opencog::set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
 
         logger().debug("Iteration %d feature set size=%d powerset size=%d",
@@ -138,8 +140,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
             logger().debug("Iteration %d redundant features=%d",
                 i, red.size());
             // add in res the relevant non-redundant features
-            std::set_difference(rel.begin(), rel.end(), red.begin(), red.end(),
-                                std::inserter(res, res.begin()));
+            boost::set_difference(rel, red, std::inserter(res, res.begin()));
         } else {
             res.insert(rel.begin(), rel.end());
         }
