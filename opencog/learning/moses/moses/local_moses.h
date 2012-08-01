@@ -34,13 +34,13 @@ namespace moses {
 using namespace combo;
 
 /**
- * expand -- Run one deme-creation and optimization step.
+ * expand_deme -- Run one deme-creation and optimization step.
  *
  * A single step consists of representation-building, to create
  * a deme, followed by optimization, (according to the specified
  * optimizer and scoring function), and finally, a merger of
  * the unique (and possibly non-dominated) trees back into the
- * metapopulation, for potential use as exemplars for futre demes.
+ * metapopulation, for potential use as exemplars for future demes.
  *
  * @param max_evals    the max evals
  *
@@ -52,7 +52,7 @@ bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
      int max_evals, moses_statistics& stats)
 {
     if (mp.empty())
-        return false;
+        return true;
 
     // Attempt to create a non-empty representation, by looping
     // over exemplars until we find one that expands.
@@ -67,7 +67,7 @@ bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
                 "been visited, but it was impossible to build a "
                 "representation for any of them.  Perhaps the reduct "
                 "effort for knob building is too high.");
-            return false;
+            return true;
         }
 
         // if create_deme returned true, we are good to go.
