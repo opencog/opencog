@@ -1,3 +1,6 @@
+/// TODO rename that file, mutual information scorer or something
+
+
 /** feature_scorer.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation

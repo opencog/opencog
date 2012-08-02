@@ -246,13 +246,16 @@ feature_set select_features(const CTable& ctable,
         double pop_size_ratio = 20;
         size_t max_dist = 4;
         score_t min_score_improv = 0.0;
-        optim_parameters op_param(moses::hc, pop_size_ratio, fs_params.hc_max_score,
-                                  max_dist, min_score_improv);
-        op_param.hc_params = hc_parameters(true, // widen distance if no improvement
-                                           false, // step (backward compatibility)
-                                           false, // crossover
-                                           fs_params.hc_fraction_of_remaining);
-        hill_climbing hc(op_param);
+        optim_parameters op_params;
+        op_params.opt_algo = moses::hc;
+        op_params.pop_size_ratio = pop_size_ratio;
+        op_params.terminate_if_gte = fs_params.hc_max_score;
+        op_params.max_dist = max_dist;
+        op_params.set_min_score_improv(min_score_improv);
+        op_params.hc_params.widen_search = true;
+        op_params.hc_params.single_step = false;
+        op_params.hc_params.crossover = false;
+        hill_climbing hc(op_params);
         return moses_select_features(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
         return incremental_select_features(ctable, fs_params);
@@ -269,7 +272,7 @@ feature_set select_features(const CTable& ctable,
 
 feature_set select_features(const Table& table,
                             const feature_selection_parameters& fs_params) {
-    CTable ctable = table.compress();
+    CTable ctable = table.compressed();
     return select_features(ctable, fs_params);
 }
 

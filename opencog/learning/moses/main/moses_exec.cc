@@ -1220,7 +1220,7 @@ int moses_exec(int argc, char** argv)
             if (nsamples > 0)
                 subsampleTable(table, nsamples);
             tables.push_back(table);
-            ctables.push_back(table.compress());
+            ctables.push_back(table.compressed());
         }
 
         // 'it' means regression based on input table; we maximimze accuracy.

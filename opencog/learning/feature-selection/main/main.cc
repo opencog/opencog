@@ -128,7 +128,7 @@ int main(int argc, char** argv)
              .append(inc).append(" for incremental mutual information.\n").c_str())
 
         (opt_desc_str(scorer_opt).c_str(),
-         value<string>(&fs_params.algorithm)->default_value(mi),
+         value<string>(&fs_params.scorer)->default_value(mi),
          str(boost::format("Feature selection fitness function (scorer).\n"
                            " Supported scorers are:\n"
                            "%s, for mutual information\n"
@@ -262,6 +262,24 @@ int main(int argc, char** argv)
          value<unsigned long>(&fs_params.hc_cache_size)->default_value(1000000),
          "Hillclimbing parameter.  Cache size, so that identical "
          "candidates are not re-evaluated.   Zero means no cache.\n")
+
+        // options for pre scoring
+        ("pre-penalty",
+         value<float>(&fs_params.pre_penalty)->default_value(1.0f),
+         "Activation penalty (see moses --help or man moses for more info)")
+
+        ("pre-min-activation",
+         value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
+         "Minimum activation (see moses --help or man moses for more info).\n")
+
+        ("pre-max-activation",
+         value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
+         "Maximum activation (see moses --help or man moses for more info).\n")
+
+        ("pre-positive",
+         value<bool>(&fs_params.pre_positive)->default_value(true),
+         "If 1, then precision, otherwise negative predictive value "
+         "(see moses --help or man moses for more info).\n")
 
         ;
 

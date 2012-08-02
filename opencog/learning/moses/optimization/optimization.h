@@ -258,14 +258,14 @@ struct optim_parameters
     // Optimization is terminated if best score is >= terminate_if_gte
     score_t terminate_if_gte;
 
-    // Some hill-climbing-specific parameters.
-    hc_parameters hc_params;
-
-private:
     // Defines the max distance to search during one iteration (used
     // in method max_distance)
     size_t max_dist;
 
+    // Some hill-climbing-specific parameters.
+    hc_parameters hc_params;
+
+private:
     // We accept improvement only if the score improved by that amount
     // or better, to avoid fine-tuning. It may be better to restart
     // the search from a new exemplar rather wasting time climbing a

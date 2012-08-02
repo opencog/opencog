@@ -1,3 +1,7 @@
+/// TODO rename that file whatever we agree with Linas
+
+
+
 /** feature_max_mi.h ---
  *
  * Copyright (C) 2010,2012 OpenCog Foundation

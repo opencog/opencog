@@ -71,7 +71,7 @@ private:
     void test_incremental_selection(unsigned n_jobs) {
         setting_omp(n_jobs);
 
-        CTable ctable = big_table.compress();
+        CTable ctable = big_table.compressed();
         FeatureScorer fs(ctable);
         set<arity_t> features(counting_iterator<arity_t>(0),
                               counting_iterator<arity_t>(big_table.get_arity()));
@@ -87,7 +87,7 @@ private:
     void test_redundant_features(unsigned n_jobs) {
         setting_omp(n_jobs);
 
-        CTable ctable = big_table.compress();
+        CTable ctable = big_table.compressed();
         FeatureScorer fs(ctable);
         set<arity_t> features{3, 4, 10, 17};
         set<arity_t> redundant = redundant_features(features, fs, 0.001);
@@ -102,6 +102,7 @@ private:
         // set feature selection parameters
         feature_selection_parameters fsp;
         fsp.algorithm = moses::hc;
+        fsp.scorer = mi;
         fsp.max_evals = 10000;
         char tempfile[] = "/tmp/feature_selectionUTestXXXXXX";
         int fd = mkstemp(tempfile);

@@ -29,6 +29,7 @@
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/eda/eda.h>
 #include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/combo/common_def.h>
 
 namespace opencog {
@@ -44,13 +45,48 @@ std::set<arity_t> get_feature_set(const field_set& fields,
                                   const instance& inst);
 
 /**
+ * Wrapper to use moses scoring precision (see
+ * opencog/learning/moses/moses/scoring.h).
+ *
+ * That wrapper uses the method best_possible_score() given a certain
+ * feature set. And therefore attempts to maximize the best possible
+ * score one would get (w.r.t. some fitness function) given the
+ * feature set being evaluated.
+ */
+template<typename FeatureSet>
+struct pre_scorer : public unary_function<FeatureSet, double> {
+    pre_scorer(const CTable& ctable,
+               float penalty = 1.0f,
+               float min_activation = 0.5f,
+               float max_activation = 1.0f,
+               bool positive = true)
+        : _ctable(ctable), _penalty(penalty),
+          _min_activation(min_activation), _max_activation(max_activation),
+          _positive(positive) {}
+
+    double operator()(const FeatureSet& fs) const {
+        // filter the ctable
+        CTable filtered_ctable = _ctable.filtered(fs);
+        // create the scorer
+        precision_bscore sc(filtered_ctable, _penalty,
+                            _min_activation, _max_activation, _positive);
+        return boost::accumulate(sc.best_possible_bscore(), 0.0);
+    }
+protected:
+    const CTable& _ctable;
+    float _penalty, _min_activation, _max_activation;
+    bool _positive;
+};
+
+/**
  * Wrapper to use a feature set scorer with MOSES's optimization
- * algorithms.
+ * algorithms operating on a deme. Each deme is a binary string where
+ * each bit represents whether a feature is selected or not.
  */
 template<typename FSScorer>
-struct moses_based_scorer : public unary_function<instance, composite_score> {
+struct deme_based_scorer : public unary_function<instance, composite_score> {
 
-    moses_based_scorer(const FSScorer& fs_scorer, const field_set& fields)
+    deme_based_scorer(const FSScorer& fs_scorer, const field_set& fields)
         : _fs_scorer(fs_scorer), _fields(fields) {}
 
     /**

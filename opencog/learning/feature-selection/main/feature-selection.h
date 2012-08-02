@@ -44,9 +44,6 @@ using namespace moses;
 using namespace combo;
 
 // Feature selection algorithms
-static const string un="un"; // moses based univariate
-static const string sa="sa"; // moses based simulation annealing
-static const string hc="hc"; // moses based hillclimbing
 static const string inc="inc"; // incremental_selection (see
                                // feature_optimization.h)
 static const string mmi="mmi"; // max_mi_selection (see
@@ -80,6 +77,10 @@ struct feature_selection_parameters
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
     std::vector<std::string> hc_initial_features;
+    float pre_penalty;
+    float pre_min_activation;
+    float pre_max_activation;
+    bool pre_positive;
 };
 
 typedef std::set<arity_t> feature_set;
@@ -159,12 +160,12 @@ feature_set create_deme_select_features(const CTable& ctable,
     // determine the initial instance given the initial feature set
     instance init_inst = initial_instance(fs_params, fields);
     // define moses based scorer
-    typedef moses_based_scorer<Scorer> MBScorer;
-    MBScorer mb_sc(scorer, fields);
+    typedef deme_based_scorer<Scorer> DBScorer;
+    DBScorer db_sc(scorer, fields);
     // possibly wrap in a cache
     if(fs_params.hc_cache_size > 0) {
-        typedef prr_cache_threaded<MBScorer> ScorerCache;
-        ScorerCache sc_cache(fs_params.hc_cache_size, mb_sc);
+        typedef prr_cache_threaded<DBScorer> ScorerCache;
+        ScorerCache sc_cache(fs_params.hc_cache_size, db_sc);
         feature_set selected_features =
             optimize_deme_select_features(fields, deme, init_inst, optimize,
                                           sc_cache, fs_params);
@@ -174,7 +175,7 @@ feature_set create_deme_select_features(const CTable& ctable,
         return selected_features;
     } else {
         return optimize_deme_select_features(fields, deme, init_inst, optimize,
-                                             mb_sc, fs_params);
+                                             db_sc, fs_params);
     }
 }
 
@@ -183,10 +184,21 @@ template<typename Optimize>
 feature_set moses_select_features(const CTable& ctable,
                                   Optimize& optimize,
                                   const feature_selection_parameters& fs_params) {
-    // define feature set scorer
-    typedef MICScorerCTable<set<arity_t> > FSScorer;
-    FSScorer fs_sc(ctable, fs_params.hc_confi);
-    return create_deme_select_features(ctable, optimize, fs_sc, fs_params);
+    if (fs_params.scorer == mi) { // mutual information
+        MICScorerCTable<set<arity_t> > fs_sc(ctable, fs_params.hc_confi);
+        return create_deme_select_features(ctable, optimize, fs_sc, fs_params);
+    } else if (fs_params.scorer == pre) { // precision (see
+                                          // opencog/learning/moses/moses/scoring.h)
+        pre_scorer<set<arity_t> > pre_sc(ctable,
+                                         fs_params.pre_penalty,
+                                         fs_params.pre_min_activation,
+                                         fs_params.pre_max_activation,
+                                         fs_params.pre_positive);
+        return create_deme_select_features(ctable, optimize, pre_sc, fs_params);
+    } else {
+        OC_ASSERT(false);
+        return feature_set();
+    }
 }
 
 feature_set incremental_select_features(const CTable& ctable,
