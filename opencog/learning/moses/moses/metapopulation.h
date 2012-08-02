@@ -171,19 +171,20 @@ struct deme_expander
      *
      * @return return true if it creates deme successfully,otherwise false.
      */
-    bool create_deme(bscored_combo_tree_set::const_iterator exemplar)
+    // bool create_deme(bscored_combo_tree_set::const_iterator exemplar)
+    bool create_deme(const combo_tree& exemplar)
     {
         using namespace reduct;
 
         OC_ASSERT(_rep == NULL);
         OC_ASSERT(_deme == NULL);
 
-        _exemplar = *exemplar;
+        _exemplar = exemplar;
 
         if (logger().isDebugEnabled()) {
             logger().debug()
-                << "Attempt to build rep from exemplar: " << get_tree(_exemplar)
-                << "\nScored: " << _cscorer(get_tree(_exemplar));
+                << "Attempt to build rep from exemplar: " << _exemplar
+                << "\nScored: " << _cscorer(_exemplar);
         }
 
         // [HIGHLY EXPERIMENTAL]. It allows to select features
@@ -215,7 +216,7 @@ struct deme_expander
         // creating a field set, and a mapping from field set to knobs.
         _rep = new representation(simplify_candidate,
                                   simplify_knob_building,
-                                  get_tree(_exemplar), _type_sig,
+                                  _exemplar, _type_sig,
                                   ignore_ops,
                                   _params.perceptions,
                                   _params.actions);
@@ -278,7 +279,7 @@ protected:
     metapop_parameters _params;
 
     // exemplar of the current deme; a copy, not a reference.
-    bscored_combo_tree _exemplar;
+    combo_tree _exemplar;
 };
 
 /**
