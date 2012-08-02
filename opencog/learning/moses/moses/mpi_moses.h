@@ -43,15 +43,22 @@ struct dispatch_thread
 class moses_mpi
 {
     public:
+        typedef instance_set<composite_score> deme_t;
+
         moses_mpi();
         ~moses_mpi();
 
         bool is_mpi_master();
-        void dispatch_deme(const combo_tree&);
-        void do_work();
+        void dispatch_deme(const combo_tree&, int max_evals);
+
+        int recv_more_work();
+        combo_tree recv_exemplar();
+        void return_deme(deme_t*, representation*, size_t);
     private:
+        // master state
         std::vector<dispatch_thread> workers;
         pool<dispatch_thread> worker_pool;
+
 };
 
 
@@ -67,8 +74,20 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     // Slave processes loop until done, then return.
     if (!mompi.is_mpi_master()) {
-        mompi.do_work();
-        return;
+        while(1) {
+            int max_evals = mompi.recv_more_work();
+            if (0 >= max_evals)
+                return;
+
+            combo_tree exemplar = mompi.recv_exemplar();
+            if (!mp._dex.create_deme(exemplar)) {
+                // XXX replace this with appropriate message back to root!
+                OC_ASSERT(false, "Exemplar failed to expand!\n");
+            }
+            size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
+            mompi.return_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
+            mp._dex.free_deme();
+        }
     }
 
     while ((stats.n_evals < pa.max_evals) 
@@ -88,9 +107,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             break;
         }
         const combo_tree &extree = get_tree(*exemplar);
-while(1) {
-mompi.dispatch_deme(extree);
-}
+        mompi.dispatch_deme(extree, pa.max_evals - stats.n_evals);
     }
 };
 

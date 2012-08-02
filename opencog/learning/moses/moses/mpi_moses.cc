@@ -36,7 +36,8 @@ cout<<"woot!"<<endl;
 enum msg_types
 {
     MSG_COMBO_TREE = 1,
-    MSG_COMBO_TREE_LEN
+    MSG_COMBO_TREE_LEN,
+    MSG_MAX_EVALS,
 };
 
 moses_mpi::moses_mpi()
@@ -79,37 +80,57 @@ bool moses_mpi::is_mpi_master()
     return (0 == MPI::COMM_WORLD.Get_rank());
 }
 
-void moses_mpi::dispatch_deme(const combo_tree &tr)
+/// Send an exemplar from the root node to a worker node.
+//
+void moses_mpi::dispatch_deme(const combo_tree &tr, int max_evals)
 {
     dispatch_thread& worker = worker_pool.borrow();
 cout<<"duude got worker "<<worker.rank<<endl;
+    MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, worker.rank, MSG_MAX_EVALS);
+
     stringstream ss;
     ss << tr;
     const char * stree = ss.str().c_str();
     int stree_sz = ss.str().size();
-cout<<"duuude stree="<<stree<<"<<<"<<endl;
+cout<<"duuude send stree="<<stree<<"<<<"<<endl;
     MPI::COMM_WORLD.Send(&stree_sz, 1, MPI::INT, worker.rank, MSG_COMBO_TREE_LEN);
 cout<<"duuude sent size="<<stree_sz<<endl;
     MPI::COMM_WORLD.Send(stree, strlen(stree), MPI::CHAR, worker.rank, MSG_COMBO_TREE);
 cout<<"duuude sent tree"<<endl;
 
 }
-void moses_mpi::do_work()
+
+/// Return true if there is more work pending in the recevie buffers.
+/// This method should be called only once per iteration!
+//
+int moses_mpi::recv_more_work()
+{
+    int max_evals = 0;
+    MPI::COMM_WORLD.Recv(&max_evals, 1, MPI::INT, 0, MSG_MAX_EVALS);
+    return max_evals;
+}
+
+combo_tree moses_mpi::recv_exemplar()
 {
     int stree_sz = 0;
 cout<<"duuude before recv i am="<< MPI::COMM_WORLD.Get_rank()<<endl;
     MPI::COMM_WORLD.Recv(&stree_sz, 1, MPI::INT, 0, MSG_COMBO_TREE_LEN);
 cout <<"duude recv size="<<stree_sz<<endl;
+
     char stree[stree_sz+1];
     MPI::COMM_WORLD.Recv(stree, stree_sz, MPI::CHAR, 0, MSG_COMBO_TREE);
     stree[stree_sz] = 0;
-cout <<"duude recv tree="<<stree<<"<<<<<"<<endl;
     stringstream ss;
     ss << stree;
     combo_tree exemplar;
     ss >> exemplar;
-cout <<"duude done doing work tree="<<exemplar<<endl;
-    
+cout <<"duude received tree="<<exemplar<<endl;
+    return exemplar;
+}
+
+void moses_mpi::return_deme(deme_t* deme, representation* rep, size_t n_evals)
+{
+cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << "returnin a deme after evals="<<n_evals<<endl;
 }
 
 } // ~namespace moses
