@@ -657,11 +657,18 @@ struct metapopulation : bscored_combo_tree_set
     }
 
     /**
-     * merge deme
-     * 1) mark the current deme exemplar to not explore it again,
-     * 2) merge non-dominated candidates in the metapopulation,
-     * 3) delete the deme instance from memory.
+     * merge deme -- convert instances to trees, and save them.
+     *
+     * 1) cull the poorest scoring instnaces.
+     * 2) convert set of instances to trees
+     * 3) merge trees into the metapopulation, possibly using domination
+     *    as the merge criterion.
+     *
      * Return true if further deme exploration should be halted.
+     *
+     * This is almost but not quite thread-safe.  The use of
+     * _visited_exemplars is not yet protected. There may be other
+     * things.
      */
     bool merge_deme(deme_t* __deme, representation* __rep, size_t evals)
     {
@@ -744,36 +751,38 @@ struct metapopulation : bscored_combo_tree_set
                 shared_lock lock(pot_cnd_mutex);
                 return pot_candidates.size(); }();
 
-            // only add up to max_candidates
-            if (this->params.max_candidates < 0
-                || pot_candidates_size < this->params.max_candidates) {
+            // Only add up to max_candidates
+            if (this->params.max_candidates >= 0
+                && pot_candidates_size >= this->params.max_candidates)
+                return;
 
-                // Get the combo_tree associated to inst, cleaned and reduced.
-                //
-                // @todo: below, the candidate is reduced possibly for the
-                // second time.  This second reduction could probably be
-                // avoided with some clever cache or something. (or a flag?)
-                combo_tree tr = __rep->get_candidate(inst, true);
+            // Get the combo_tree associated to inst, cleaned and reduced.
+            //
+            // @todo: below, the candidate is reduced possibly for the
+            // second time.  This second reduction could probably be
+            // avoided with some clever cache or something. (or a flag?)
+            combo_tree tr = __rep->get_candidate(inst, true);
 
-                // Look for tr in the list of potential candidates.
-                // Return true if not found.
-                auto thread_safe_tr_not_found = [&]() {
-                    shared_lock lock(pot_cnd_mutex);
-                    return pot_candidates.find(tr) == pot_candidates.end();
-                };
+            // Look for tr in the list of potential candidates.
+            // Return true if not found.
+            auto thread_safe_tr_not_found = [&]() {
+                shared_lock lock(pot_cnd_mutex);
+                return pot_candidates.find(tr) == pot_candidates.end();
+            };
 
-                bool not_already_visited = this->_visited_exemplars.find(tr)
-                    == this->_visited_exemplars.end();
+            // XXX To make merge_deme thread safe, this needs to be
+            // locked too.  (to avoid collision with threads updating
+            // _visited, e.g. the MPI case.
+            bool not_already_visited = this->_visited_exemplars.find(tr)
+                == this->_visited_exemplars.end();
 
-                // update the set of potential exemplars
-                if (not_already_visited && thread_safe_tr_not_found()) {
-                    penalized_behavioral_score pbs; // empty bscore till it gets computed
-                    composite_behavioral_score cbsc(pbs, inst_csc);
-                    {
-                        unique_lock lock(pot_cnd_mutex);
-                        pot_candidates[tr] = cbsc;
-                    }
-                }
+            // update the set of potential exemplars
+            if (not_already_visited && thread_safe_tr_not_found()) {
+                penalized_behavioral_score pbs; // empty bscore till it gets computed
+                composite_behavioral_score cbsc(pbs, inst_csc);
+
+                unique_lock lock(pot_cnd_mutex);
+                pot_candidates[tr] = cbsc;
             }
         };
 
