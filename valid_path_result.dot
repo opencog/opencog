@@ -1,0 +1,20 @@
+strict digraph  {
+	"PDN (InheritanceLink A:ConceptNode C:ConceptNode)" -> "PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode,";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN (InheritanceLink A:ConceptNode B:ConceptNode)";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN (InheritanceLink B:ConceptNode C:ConceptNode)";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN C:ConceptNode";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN B:ConceptNode";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN A:ConceptNode";
+}
