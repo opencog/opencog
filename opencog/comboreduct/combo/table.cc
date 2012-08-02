@@ -157,6 +157,9 @@ const string& OTable::get_label() const
 
 Table::Table() {}
 
+Table::Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_)
+    : tt(tt_), itable(itable_), otable(otable_) {}
+
 Table::Table(const combo_tree& tr, int nsamples,
              contin_t min_contin, contin_t max_contin) :
     tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
@@ -186,7 +189,7 @@ bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
     return true;
 }
 
-CTable Table::compress() const
+CTable Table::compressed() const
 {
     // Logger
     logger().debug("Compress the dataset, current size is %d", itable.size());
@@ -194,7 +197,7 @@ CTable Table::compress() const
 
     CTable res(otable.get_label(), itable.get_labels());
     // assign type_tree
-    res.tt = tt;                
+    res.tt = tt;
 
     ITable::const_iterator in_it = itable.begin();
     OTable::const_iterator out_it = otable.begin();

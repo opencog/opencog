@@ -87,20 +87,23 @@ public:
     typedef Counter<vertex, unsigned> counter_t;
     typedef std::map<key_type, counter_t> super;
     typedef typename super::value_type value_type;
+    typedef std::vector<std::string> string_seq;
 
     std::string olabel;               // output label
-    std::vector<std::string> ilabels; // list of input labels
+    string_seq ilabels; // list of input labels
 
     // definition is delaied after Table as it uses Table
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
     
-    CTable(const std::string& _olabel, const std::vector<std::string>& _ilabels)
+    CTable(const std::string& _olabel, const string_seq& _ilabels)
         : olabel(_olabel), ilabels(_ilabels) {}
 
     arity_t get_arity() const { return ilabels.size(); }
 
-    // TODO remove that junk  !?? Remove what junk ?? Huh ?? XXX
+    // TODO obsolete (or close to), should be removed. We don't need
+    // that anymore because the evaluator is taking a vertex_seq
+    // directly.
     binding_map get_binding_map(const vertex_seq& args) const
     {
         binding_map bmap;
@@ -125,6 +128,38 @@ public:
         foreach(const value_type& v, *this) {
             res += v.second.total_count();
         }
+        return res;
+    }
+
+    /**
+     * Return a sequence retaining only the elements with indexes F
+     * TODO: check whether boost offers already that
+     */
+    template<typename F, typename Seq>
+    Seq filtered(const F& filter, const Seq& seq) const {
+        Seq res;
+        foreach(arity_t a, filter) res.push_back(seq[a]);
+        return res;
+    }
+    
+    template<typename F>
+    CTable filtered(const F& filter) const {
+        typedef type_tree::iterator pre_it;
+        typedef type_tree::sibling_iterator sib_it;
+        
+        // Filter the labels
+        CTable res(olabel, filtered(filter, ilabels));
+        // Filter the rows
+        foreach(const CTable::value_type v, *this)
+            res[filtered(filter, v.first)] += v.second;
+        // Filter the type tree
+        res.tt = tt;
+        pre_it head_it = res.tt.begin();
+        OC_ASSERT(*head_it == id::lambda_type);
+        OC_ASSERT((int)tt.number_of_children(head_it) == get_arity() + 1);
+        sib_it sib = head_it.begin();
+        foreach(arity_t a, filter) res.tt.erase(std::next(sib, a));
+        // return the filtered CTable
         return res;
     }
 
@@ -207,13 +242,13 @@ public:
     /// container of arity_t. Each value of that container corresponds
     /// to the column index of the ITable (starting from 0).
     template<typename F>
-    ITable filtered(const F& f) const
+    ITable filtered(const F& filter) const
     {
         ITable res;
-        res.set_labels(get_filtered_labels(f));
+        res.set_labels(get_filtered_labels(filter));
         foreach(const value_type& row, *this) {
             vertex_seq new_row;
-            foreach(arity_t a, f)
+            foreach(arity_t a, filter)
                 new_row.push_back(row[a]);
             res.push_back(new_row);
         }
@@ -343,6 +378,8 @@ struct Table
 
     Table();
 
+    Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_);
+
     template<typename Func>
     Table(const Func& func, arity_t a, int nsamples = -1) :
         tt(gen_signature(type_node_of<bool>(),
@@ -353,9 +390,11 @@ struct Table
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
+    
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
     // (starting from 0).
+    // TODO take care of tt
     template<typename F> Table filtered(const F& f) const {
         Table res;
         res.itable = itable.filtered(f);
@@ -363,7 +402,7 @@ struct Table
         return res;
     }
     /// return the corresponding compressed table
-    CTable compress() const;
+    CTable compressed() const;
 
     type_tree tt;
     ITable itable;
@@ -373,7 +412,7 @@ struct Table
 template<typename Func>
 CTable::CTable(const Func& func, arity_t arity, int nsamples) {
     Table table(func, arity, nsamples);
-    *this = table.compress();
+    *this = table.compressed();
 }
 
         
@@ -700,9 +739,9 @@ std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
  * istream. If the file name is not correct then an OC_ASSERT is
  * raised.
  */
-void istreamTable(const std::string& file_name,
-                  ITable& it, OTable& ot, const type_tree& tt, int pos = 0,
-                  const std::vector<int>& ignore_col_nums = empty_int_vec);
+void loadTable(const std::string& file_name,
+               ITable& it, OTable& ot, const type_tree& tt, int pos = 0,
+               const std::vector<int>& ignore_col_nums = empty_int_vec);
 /**
  * like above but return an object Table.
  */
