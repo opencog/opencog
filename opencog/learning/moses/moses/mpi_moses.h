@@ -84,7 +84,9 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     logger().info("MPI MOSES starts");
     moses_mpi mompi;
 
-    // Slave processes loop until done, then return.
+    // Worker processes loop until done, then return.
+    // Each worker waits for aan exemplar, expands it, then returns
+    // the results.
     if (!mompi.is_mpi_master()) {
         while(1) {
             int max_evals = mompi.recv_more_work();
@@ -102,6 +104,8 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
             mp._dex.free_deme();
             mompi.send_deme(mp, evals_this_deme);
+
+            // Clear the metapop -- tart with a new slate each time.
             mp.clear();
         }
     }
@@ -129,6 +133,12 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         bscored_combo_tree_set candidates;
         mompi.recv_deme(candidates, n_evals);
 cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
+
+        stats.n_evals += n_evals;
+        mp.update_best_candidates(candidates);
+        mp.merge_candidates(candidates);
+        mp.log_best_candidates();
+cout<<"duuude done merging!"<<endl;
     }
 };
 
