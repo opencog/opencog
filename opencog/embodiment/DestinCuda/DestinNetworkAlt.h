@@ -114,7 +114,10 @@ public:
     }
 
     float * getNodeBeliefs(int layer, int row, int col){
-        return GetNodeFromDestin(destin, layer, row, col)->beliefEuc;
+
+        Node * hostnode = GetNodeFromDestin(destin, layer, row, col);
+        CopyNodeFromDevice(hostnode);
+        return hostnode->beliefEuc;
     }
 };
 
