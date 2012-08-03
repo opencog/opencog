@@ -1,6 +1,8 @@
 
 #include "VideoSource.h"
 #include "DestinNetworkAlt.h"
+#include "Transporter.h"
+#include "stdio.h"
 
 int main(int argc, char ** argv){
     VideoSource vs(true, "");
@@ -12,8 +14,24 @@ int main(int argc, char ** argv){
     destin_network_alt network(siw, 8, centroid_counts);
 
     vs.enableDisplayWindow();
+
+    Transporter t(512 * 512);
+
+
+
+    float * beliefs;
     while(vs.grab()){
-        network.doDestin(vs. getOutput());
+
+        t.setHostSourceImage(vs.getOutput());
+        t.transport(); //move video from host to card
+
+        network.doDestin(t.getDeviceDest());
+
+        beliefs = network.getNodeBeliefs(7,0,0);
+
+        //printf("%c[2A", 27); //earase two lines so window doesn't scroll
+        printf("0: %f\n");
+        printf("1: %f\n");
     }
 
     return 0;
