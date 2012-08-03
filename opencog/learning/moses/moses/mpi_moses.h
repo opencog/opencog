@@ -52,8 +52,16 @@ class moses_mpi
         void dispatch_deme(const combo_tree&, int max_evals);
 
         int recv_more_work();
-        combo_tree recv_exemplar();
-        void return_deme(deme_t*, representation*, size_t);
+        void recv_exemplar(combo_tree&);
+        void send_deme(const bscored_combo_tree_set&, int);
+        void recv_deme(bscored_combo_tree_set&, int&);
+
+        int get_actual_evals();
+
+    protected:
+        void send_tree(const combo_tree&, int target);
+        void recv_tree(combo_tree&, int source);
+
     private:
         // master state
         std::vector<dispatch_thread> workers;
@@ -68,6 +76,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                moses_statistics& stats)
 {
     typedef bscored_combo_tree_set::const_iterator mp_cit;
+    typedef instance_set<composite_score> deme_t;
 
     logger().info("MPI MOSES starts");
     moses_mpi mompi;
@@ -79,14 +88,18 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             if (0 >= max_evals)
                 return;
 
-            combo_tree exemplar = mompi.recv_exemplar();
+            combo_tree exemplar;
+            mompi.recv_exemplar(exemplar);
             if (!mp._dex.create_deme(exemplar)) {
                 // XXX replace this with appropriate message back to root!
                 OC_ASSERT(false, "Exemplar failed to expand!\n");
             }
             size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
-            mompi.return_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
+
+            mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
             mp._dex.free_deme();
+            mompi.send_deme(mp, evals_this_deme);
+            mp.clear();
         }
     }
 
@@ -108,6 +121,11 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         }
         const combo_tree &extree = get_tree(*exemplar);
         mompi.dispatch_deme(extree, pa.max_evals - stats.n_evals);
+
+        int n_evals = 0;
+        bscored_combo_tree_set candidates;
+        mompi.recv_deme(candidates, n_evals);
+cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
     }
 };
 

@@ -33,11 +33,15 @@ dispatch_thread::dispatch_thread()
 cout<<"woot!"<<endl;
 }
 
+#define ROOT_NODE 0
+
 enum msg_types
 {
     MSG_COMBO_TREE = 1,
     MSG_COMBO_TREE_LEN,
     MSG_MAX_EVALS,
+    MSG_NUM_EVALS,
+    MSG_NUM_COMBO_TREES,
 };
 
 moses_mpi::moses_mpi()
@@ -58,7 +62,7 @@ moses_mpi::moses_mpi()
     // MPI::COMM_WORLD.Bcast(&answer, 1, MPI::INT, 0);
 
     // Only the root process maintains a pool.
-    if (0 == rank) {
+    if (ROOT_NODE == rank) {
         workers.resize(num_procs);
         // The root process itself is not in the pool.
         // i.e. pool starts at 1 not at 0.
@@ -77,7 +81,32 @@ moses_mpi::~moses_mpi()
 
 bool moses_mpi::is_mpi_master()
 {
-    return (0 == MPI::COMM_WORLD.Get_rank());
+    return (ROOT_NODE == MPI::COMM_WORLD.Get_rank());
+}
+
+/// Send an exemplar from the root node to a worker node.
+//
+void moses_mpi::send_tree(const combo_tree &tr, int target)
+{
+    stringstream ss;
+    ss << tr;
+    const char * stree = ss.str().c_str();
+    int stree_sz = ss.str().size();
+    MPI::COMM_WORLD.Send(&stree_sz, 1, MPI::INT, target, MSG_COMBO_TREE_LEN);
+    MPI::COMM_WORLD.Send(stree, strlen(stree), MPI::CHAR, target, MSG_COMBO_TREE);
+}
+
+void moses_mpi::recv_tree(combo_tree &tr, int source)
+{
+    int stree_sz = 0;
+    MPI::COMM_WORLD.Recv(&stree_sz, 1, MPI::INT, source, MSG_COMBO_TREE_LEN);
+
+    char stree[stree_sz+1];
+    MPI::COMM_WORLD.Recv(stree, stree_sz, MPI::CHAR, source, MSG_COMBO_TREE);
+    stree[stree_sz] = 0;
+    stringstream ss;
+    ss << stree;
+    ss >> tr;
 }
 
 /// Send an exemplar from the root node to a worker node.
@@ -88,16 +117,7 @@ void moses_mpi::dispatch_deme(const combo_tree &tr, int max_evals)
 cout<<"duude got worker "<<worker.rank<<endl;
     MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, worker.rank, MSG_MAX_EVALS);
 
-    stringstream ss;
-    ss << tr;
-    const char * stree = ss.str().c_str();
-    int stree_sz = ss.str().size();
-cout<<"duuude send stree="<<stree<<"<<<"<<endl;
-    MPI::COMM_WORLD.Send(&stree_sz, 1, MPI::INT, worker.rank, MSG_COMBO_TREE_LEN);
-cout<<"duuude sent size="<<stree_sz<<endl;
-    MPI::COMM_WORLD.Send(stree, strlen(stree), MPI::CHAR, worker.rank, MSG_COMBO_TREE);
-cout<<"duuude sent tree"<<endl;
-
+    send_tree(tr, worker.rank);
 }
 
 /// Return true if there is more work pending in the recevie buffers.
@@ -106,31 +126,53 @@ cout<<"duuude sent tree"<<endl;
 int moses_mpi::recv_more_work()
 {
     int max_evals = 0;
-    MPI::COMM_WORLD.Recv(&max_evals, 1, MPI::INT, 0, MSG_MAX_EVALS);
+    MPI::COMM_WORLD.Recv(&max_evals, 1, MPI::INT, ROOT_NODE, MSG_MAX_EVALS);
     return max_evals;
 }
 
-combo_tree moses_mpi::recv_exemplar()
+void moses_mpi::recv_exemplar(combo_tree& exemplar)
 {
-    int stree_sz = 0;
-cout<<"duuude before recv i am="<< MPI::COMM_WORLD.Get_rank()<<endl;
-    MPI::COMM_WORLD.Recv(&stree_sz, 1, MPI::INT, 0, MSG_COMBO_TREE_LEN);
-cout <<"duude recv size="<<stree_sz<<endl;
-
-    char stree[stree_sz+1];
-    MPI::COMM_WORLD.Recv(stree, stree_sz, MPI::CHAR, 0, MSG_COMBO_TREE);
-    stree[stree_sz] = 0;
-    stringstream ss;
-    ss << stree;
-    combo_tree exemplar;
-    ss >> exemplar;
-cout <<"duude received tree="<<exemplar<<endl;
-    return exemplar;
+    recv_tree(exemplar, ROOT_NODE);
 }
 
-void moses_mpi::return_deme(deme_t* deme, representation* rep, size_t n_evals)
+/// send_deme -- send the completed deme from the worker back to root
+///
+/// This sends a pretty big glob.
+// XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
+void moses_mpi::send_deme(const bscored_combo_tree_set& mp, int n_evals)
 {
 cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << "returnin a deme after evals="<<n_evals<<endl;
+    MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
+
+    int num_trees = mp.size();
+    MPI::COMM_WORLD.Send(&num_trees, 1, MPI::INT, ROOT_NODE, MSG_NUM_COMBO_TREES);
+
+    bscored_combo_tree_set::const_iterator it;
+    for (it = mp.begin(); it != mp.end(); it++) {
+        const combo_tree& tr = *it;
+        send_tree(tr, ROOT_NODE);
+    }
+}
+
+/// recv_deme -- receive the deme sent by send_deme()
+///
+/// This will receive a deme from any source.
+void moses_mpi::recv_deme(bscored_combo_tree_set& cands, int& n_evals)
+{
+    MPI::Status status;
+    MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, MPI_ANY_SOURCE, MSG_NUM_EVALS, status);
+
+    int source = status.Get_source();
+
+cout<<"duuude ahh reved evals="<<n_evals<<" drom src="<<source<<endl;
+    int num_trees = 0;
+    MPI::COMM_WORLD.Recv(&num_trees, 1, MPI::INT, source, MSG_NUM_COMBO_TREES);
+    for (int i=0; i<num_trees; i++) {
+        combo_tree tr;
+        recv_tree(tr, source);
+        // cands.insert(tr);
+    }
+cout<<"duuude ahh reved trees="<<num_trees<<endl;
 }
 
 } // ~namespace moses
