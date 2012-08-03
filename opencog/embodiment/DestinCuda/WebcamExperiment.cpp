@@ -30,8 +30,8 @@ int main(int argc, char ** argv){
         beliefs = network.getNodeBeliefs(7,0,0);
 
         //printf("%c[2A", 27); //earase two lines so window doesn't scroll
-        printf("0: %f\n");
-        printf("1: %f\n");
+        printf("0: %f\n", beliefs[0]);
+        printf("1: %f\n", beliefs[1]);
     }
 
     return 0;
