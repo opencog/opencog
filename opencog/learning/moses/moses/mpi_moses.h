@@ -62,6 +62,9 @@ class moses_mpi
         void send_tree(const combo_tree&, int target);
         void recv_tree(combo_tree&, int source);
 
+        void send_cscore(const composite_score&, int target);
+        void recv_cscore(composite_score&, int source);
+
     private:
         // master state
         std::vector<dispatch_thread> workers;

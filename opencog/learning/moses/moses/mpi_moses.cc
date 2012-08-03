@@ -34,14 +34,16 @@ cout<<"woot!"<<endl;
 }
 
 #define ROOT_NODE 0
+#define COMPOSITE_SCORE_SIZE 3
 
 enum msg_types
 {
-    MSG_COMBO_TREE = 1,
-    MSG_COMBO_TREE_LEN,
-    MSG_MAX_EVALS,
-    MSG_NUM_EVALS,
-    MSG_NUM_COMBO_TREES,
+    MSG_COMBO_TREE = 1,  // combo_tree, in ascii string form.
+    MSG_COMBO_TREE_LEN,  // length of ascii string, for above.
+    MSG_MAX_EVALS,       // maximum allowed evaluations
+    MSG_NUM_EVALS,       // number of evaluations actually performed.
+    MSG_NUM_COMBO_TREES, // number of combo trees sent
+    MSG_CSCORE,          // composite score
 };
 
 moses_mpi::moses_mpi()
@@ -84,8 +86,7 @@ bool moses_mpi::is_mpi_master()
     return (ROOT_NODE == MPI::COMM_WORLD.Get_rank());
 }
 
-/// Send an exemplar from the root node to a worker node.
-//
+/// Send a combo tree to the target node 
 void moses_mpi::send_tree(const combo_tree &tr, int target)
 {
     stringstream ss;
@@ -96,6 +97,7 @@ void moses_mpi::send_tree(const combo_tree &tr, int target)
     MPI::COMM_WORLD.Send(stree, strlen(stree), MPI::CHAR, target, MSG_COMBO_TREE);
 }
 
+/// Receive a combo tree from the source node.
 void moses_mpi::recv_tree(combo_tree &tr, int source)
 {
     int stree_sz = 0;
@@ -107,6 +109,27 @@ void moses_mpi::recv_tree(combo_tree &tr, int source)
     stringstream ss;
     ss << stree;
     ss >> tr;
+}
+
+/// Send composite score to target node
+void moses_mpi::send_cscore(const composite_score &cs, int target)
+{
+    double flattened_score[COMPOSITE_SCORE_SIZE];
+    flattened_score[0] = cs.get_score();
+    flattened_score[1] = cs.get_complexity();
+    flattened_score[2] = cs.get_complexity_penalty();
+    MPI::COMM_WORLD.Send(flattened_score, COMPOSITE_SCORE_SIZE,
+         MPI::DOUBLE, target, MSG_CSCORE);
+}
+
+/// Receive composite score from source node
+void moses_mpi::recv_cscore(composite_score &cs, int source)
+{
+    double flattened_score[COMPOSITE_SCORE_SIZE];
+    MPI::COMM_WORLD.Recv(flattened_score, COMPOSITE_SCORE_SIZE,
+         MPI::DOUBLE, source, MSG_CSCORE);
+
+    cs = composite_score(flattened_score[0], flattened_score[1], flattened_score[2]);
 }
 
 /// Send an exemplar from the root node to a worker node.
@@ -149,8 +172,13 @@ cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << "returnin a deme after evals
 
     bscored_combo_tree_set::const_iterator it;
     for (it = mp.begin(); it != mp.end(); it++) {
-        const combo_tree& tr = *it;
-        send_tree(tr, ROOT_NODE);
+        const bscored_combo_tree& btr = *it;
+
+        // We are going to send only the composite score, and not the
+        // full behavioural score.  Basically, the full bscore is just
+        // not needed for the current most popular merge technique.
+        send_cscore(get_composite_score(btr), ROOT_NODE);
+        send_tree(get_tree(btr), ROOT_NODE);
     }
 }
 
@@ -164,15 +192,22 @@ void moses_mpi::recv_deme(bscored_combo_tree_set& cands, int& n_evals)
 
     int source = status.Get_source();
 
-cout<<"duuude ahh reved evals="<<n_evals<<" drom src="<<source<<endl;
     int num_trees = 0;
     MPI::COMM_WORLD.Recv(&num_trees, 1, MPI::INT, source, MSG_NUM_COMBO_TREES);
     for (int i=0; i<num_trees; i++) {
+        composite_score sc;
+        recv_cscore(sc, source);
         combo_tree tr;
         recv_tree(tr, source);
-        // cands.insert(tr);
+
+        // The vectore behavioural score will be empty; only the 
+        // composite score gets a non-trivial value.
+        behavioral_score bs;
+        penalized_behavioral_score pbs(bs, sc.get_complexity_penalty());
+        composite_behavioral_score cbs(pbs, sc);
+        bscored_combo_tree bsc_tr(tr, cbs);
+        cands.insert(bsc_tr);
     }
-cout<<"duuude ahh reved trees="<<num_trees<<endl;
 }
 
 } // ~namespace moses
