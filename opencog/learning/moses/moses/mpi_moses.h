@@ -49,14 +49,15 @@ class moses_mpi
         ~moses_mpi();
 
         bool is_mpi_master();
-        void dispatch_deme(const combo_tree&, int max_evals);
 
+        // root methods, to be used only by root node.
+        void dispatch_deme(const combo_tree&, int max_evals,
+                           bscored_combo_tree_set&, int& n_evals);
+
+        // worker methods, to be used only by workers.
         int recv_more_work();
         void recv_exemplar(combo_tree&);
         void send_deme(const bscored_combo_tree_set&, int);
-        void recv_deme(bscored_combo_tree_set&, int&);
-
-        int get_actual_evals();
 
     protected:
         void send_tree(const combo_tree&, int target);
@@ -65,6 +66,7 @@ class moses_mpi
         void send_cscore(const composite_score&, int target);
         void recv_cscore(composite_score&, int source);
 
+        void recv_deme(bscored_combo_tree_set&, int& n_evals, int source);
     private:
         // master state
         std::vector<dispatch_thread> workers;
@@ -127,11 +129,11 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             break;
         }
         const combo_tree &extree = get_tree(*exemplar);
-        mompi.dispatch_deme(extree, pa.max_evals - stats.n_evals);
-
         int n_evals = 0;
         bscored_combo_tree_set candidates;
-        mompi.recv_deme(candidates, n_evals);
+
+        mompi.dispatch_deme(extree, pa.max_evals - stats.n_evals,
+                            candidates, n_evals);
 cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
 
         stats.n_evals += n_evals;
@@ -140,6 +142,8 @@ cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<en
         mp.log_best_candidates();
 cout<<"duuude done merging!"<<endl;
     }
+
+    // XXX TODO: send all workers the "done" message.
 };
 
 #else

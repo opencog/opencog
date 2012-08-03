@@ -132,18 +132,40 @@ void moses_mpi::recv_cscore(composite_score &cs, int source)
     cs = composite_score(flattened_score[0], flattened_score[1], flattened_score[2]);
 }
 
-/// Send an exemplar from the root node to a worker node.
+/// dispatch_deme -- Send an exemplar to node for deme expansion.
+///
+/// This method will send an exemplar to the first available (free) worker,
+/// and then block, waiting for results from the worker.  Upon receiving
+/// the results, it will unblock and return to the caller.  This blocking
+/// behaviour is intended for use within a thread.
+///
+/// @max_evals is the maximum number of evaluations the worker should perform.
+/// @n_evals is the actual number of evaluations performed.
 //
-void moses_mpi::dispatch_deme(const combo_tree &tr, int max_evals)
+void moses_mpi::dispatch_deme(const combo_tree &tr, int max_evals,
+                              bscored_combo_tree_set& cands, int& n_evals)
 {
     dispatch_thread& worker = worker_pool.borrow();
 cout<<"duude got worker "<<worker.rank<<endl;
     MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, worker.rank, MSG_MAX_EVALS);
 
+    // Note: recv_deme will block, until remote worker has delivered
+    // the results back to us.
     send_tree(tr, worker.rank);
+    recv_deme(cands, n_evals, worker.rank);
+
+    worker_pool.give_back(worker);
+cout<<"duude done with worker "<<worker.rank<<endl;
 }
 
-/// Return true if there is more work pending in the recevie buffers.
+/// recv_more_work -- indicate to worker if there is more work to be done.
+///
+/// This method is intended for use on worker nodes; it will block until
+/// the worker receives more work, or until the worker is told to exit.
+/// If the return value is zero, the worker should exit.  If the return
+/// value is positive, it is the "maximum allowed evaluations" (max_evals)
+/// for the next batch, which follows next.
+///
 /// This method should be called only once per iteration!
 //
 int moses_mpi::recv_more_work()
@@ -153,6 +175,10 @@ int moses_mpi::recv_more_work()
     return max_evals;
 }
 
+/// recv_exemplar -- used by worker to receive an exemplar
+///
+/// This method is intended for use only on worker nodes.
+//
 void moses_mpi::recv_exemplar(combo_tree& exemplar)
 {
     recv_tree(exemplar, ROOT_NODE);
@@ -184,13 +210,18 @@ cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << "returnin a deme after evals
 
 /// recv_deme -- receive the deme sent by send_deme()
 ///
-/// This will receive a deme from any source.
-void moses_mpi::recv_deme(bscored_combo_tree_set& cands, int& n_evals)
+/// This will receive a deme from any source; it is safe to call this
+/// routine with source=MPI_ANY_SOURCE, it will then pick up a deme,
+/// in an atomic, unfragmented way, from the first source that sent
+/// one to us.
+void moses_mpi::recv_deme(bscored_combo_tree_set& cands, int& n_evals, int source)
 {
     MPI::Status status;
-    MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, MPI_ANY_SOURCE, MSG_NUM_EVALS, status);
+    MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, source, MSG_NUM_EVALS, status);
 
-    int source = status.Get_source();
+    // This allows recv to be called with MPI_ANY_SOURCE, yet finish
+    // the reception with the correct materials.
+    source = status.Get_source();
 
     int num_trees = 0;
     MPI::COMM_WORLD.Recv(&num_trees, 1, MPI::INT, source, MSG_NUM_COMBO_TREES);
