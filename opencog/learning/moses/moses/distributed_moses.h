@@ -240,33 +240,11 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 stats.n_evals += evals;
 
                 // update best and merge
-                logger().info("Merge %u candidates with the metapopulation",
-                              candidates.size());
-                if (logger().isFineEnabled()) {
-                    logger().fine("Candidates with their bscores to merge with"
-                                  " the metapopulation:");
-                    stringstream ss;
-                    logger().fine(mp.ostream(ss, candidates.begin(),
-                                             candidates.end(),
-                                             -1, true, true).str());
-                }
-
                 bscored_combo_tree_set mc(candidates.begin(),
                                           candidates.end());
 
                 mp.update_best_candidates(mc);
-
                 mp.merge_candidates(mc);
-
-                logger().info("Metapopulation size is %u", mp.size());
-                if (logger().isFineEnabled()) {
-                    stringstream ss;
-                    ss << "Metapopulation after merging: " << std::endl;
-                    logger().fine(mp.ostream(ss, -1, true, true).str());
-                    logger().fine("Number of evaluations so far: %d",
-                                  stats.n_evals);
-                }
-
                 mp.log_best_candidates();
 
                 // Remove proc info from pm

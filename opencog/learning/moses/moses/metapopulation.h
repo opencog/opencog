@@ -561,6 +561,17 @@ struct metapopulation : bscored_combo_tree_set
     template<typename Candidates>
     void merge_candidates(Candidates& candidates)
     {
+        if (logger().isDebugEnabled()) {
+            logger().debug("Going to merge %u candidates with the metapopulation",
+                           candidates.size());
+            if (logger().isFineEnabled()) {
+                stringstream ss;
+                ss << "Candidates to merge with the metapopulation:" << std::endl;
+                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
+                                      -1, true, true).str());
+            }
+        }
+
         // Note that merge_nondominated() is very cpu-expensive and
         // complex...
         if (params.include_dominated)
@@ -654,6 +665,14 @@ struct metapopulation : bscored_combo_tree_set
             popsz --;
         }
 #endif
+        if (logger().isDebugEnabled()) {
+            logger().debug("Metapopulation size after merging is %u", size());
+            if (logger().isFineEnabled()) {
+                stringstream ss;
+                ss << "Metapopulation after merging:" << std::endl;
+                logger().fine(ostream(ss, -1, true, true).str());
+            }
+        }
     }
 
     /**
@@ -844,31 +863,10 @@ struct metapopulation : bscored_combo_tree_set
         // update the record of the best-seen score & trees
         update_best_candidates(candidates);
 
-        if (logger().isDebugEnabled()) {
-            logger().debug("Merge %u candidates with the metapopulation",
-                           candidates.size());
-            if (logger().isFineEnabled()) {
-                stringstream ss;
-                ss << "Candidates to merge with the metapopulation:" << std::endl;
-                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
-                                      -1, true, true).str());
-            }
-        }
-
         bool done = false;
         if (params.merge_callback)
             done = (*params.merge_callback)(candidates, params.callback_user_data);
         merge_candidates(candidates);
-
-        if (logger().isDebugEnabled()) {
-            logger().debug("Metapopulation size is %u", size());
-            if (logger().isFineEnabled()) {
-                stringstream ss;
-                ss << "Metapopulation after merging:" << std::endl;
-                logger().fine(ostream(ss, -1, true, true).str());
-            }
-        }
-
         return done;
     }
 
