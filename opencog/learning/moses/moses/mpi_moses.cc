@@ -44,8 +44,12 @@ enum msg_types
 
 moses_mpi::moses_mpi()
 {
-    // MPI::Init(argc, argv);
-    MPI::Init();
+    int have_thread_support = MPI::Init_thread(MPI_THREAD_MULTIPLE);
+    if (MPI_THREAD_MULTIPLE != have_thread_support) {
+        MPI::Finalize();
+        logger().error() << "This MPI implementation lacks threading support!";
+        OC_ASSERT(false, "This MPI implementation lacks threading support!");
+    }
     
     int num_procs = MPI::COMM_WORLD.Get_size();
     int rank = MPI::COMM_WORLD.Get_rank();

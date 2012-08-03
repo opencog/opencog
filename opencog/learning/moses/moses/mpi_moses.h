@@ -1,5 +1,5 @@
 /*
- * mpi_moses.h --- 
+ * mpi_moses.h ---
  *
  * Copyright (C) 2012 Poulin Holdings LLC
  *
@@ -9,12 +9,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -74,7 +74,6 @@ class moses_mpi
         std::vector<dispatch_thread> workers;
 };
 
-
 // wrapper class; the only reason this class exists is to make thread
 // creation simpler -- threads require a function as an argument, and
 // this class provides the needed operator() to make this work.
@@ -96,11 +95,11 @@ private:
      int& _thread_count;
 
 public:
-     // Cache of arguments we will need.
-     mpi_expander(moses_mpi& mompi,
-                  metapopulation<Scoring, BScoring, Optimization>& mp,
-                  int max_evals, moses_statistics& stats,
-                  std::mutex& mu, int& tcount) :
+    // Cache of arguments we will need.
+    mpi_expander(moses_mpi& mompi,
+                 metapopulation<Scoring, BScoring, Optimization>& mp,
+                 int max_evals, moses_statistics& stats,
+                 std::mutex& mu, int& tcount) :
         _worker(_w), _extree(_t),
         _mompi(mompi), _mp(mp), _max_evals(max_evals), _stats(stats),
         _merge_mutex(mu), _thread_count(tcount)
@@ -127,6 +126,7 @@ public:
     }
 
     // Function that will run inside a thread
+    // self-deletes upon exit of the thread.
     bool operator()()
     {
         _merge_mutex.lock();
@@ -144,6 +144,7 @@ cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<en
         // We assume that the metapop merge operations are not
         // thread-safe, and so we will lock here, to be prudent.
         std::lock_guard<std::mutex> lock(_merge_mutex);
+        _stats.n_expansions ++;
         _stats.n_evals += n_evals;
         _mp.update_best_candidates(candidates);
         _mp.merge_candidates(candidates);
@@ -151,7 +152,6 @@ cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<en
         _thread_count--;
         return false;
     }
-
 };
 
 
@@ -166,6 +166,11 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                   pa.max_evals, pa.max_gens);
 
     moses_mpi mompi;
+
+    if (0 >= mompi.num_workers()) {
+        logger().error() << "MPI MOSES requires at least two nodes to operate!";
+        return;
+    }
 
     // Worker processes loop until done, then return.
     // Each worker waits for an exemplar, expands it, then returns
@@ -203,7 +208,7 @@ cout<<"duuude wioerkr= exiting"<<endl;
     std::mutex merge_mutex;
     int thread_count = 0;
 
-    while ((stats.n_evals < pa.max_evals) 
+    while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
@@ -216,12 +221,10 @@ cout<<"duuude wioerkr= exiting"<<endl;
 
         // If we are here, we unblocked, and have a woker ready to do
         // the work. Create a thread to handle all communications with
-        // this worker one-on-one.
-        std::future<bool> fudone = std::async(std::launch::async, mex);
-
-// XXX the only reason this isn't crashing is becaus the future is strongly synchronizing.
-// XXX fix me.
-        bool done = fudone.get();
+        // this worker one-on-one.  Note that the async code will make a
+        // copy of mex, put it in a thread private area, and use that,
+        // so it is completely safe for us to have mex on stack here.
+        std::async(std::launch::async, mex);
 
 cout<<"duuude thread count="<<thread_count<<endl;
         // Print stats in a way that makes them easy to graph.
@@ -235,7 +238,6 @@ cout<<"duuude thread count="<<thread_count<<endl;
             ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
             logger().info(ss.str());
         }
-        if (done) break;
     }
 
     logger().info("MPI MOSES ends");
