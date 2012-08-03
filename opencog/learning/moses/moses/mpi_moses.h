@@ -157,13 +157,15 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     moses_mpi mompi;
 
     // Worker processes loop until done, then return.
-    // Each worker waits for aan exemplar, expands it, then returns
+    // Each worker waits for an exemplar, expands it, then returns
     // the results.
     if (!mompi.is_mpi_root()) {
         while(1) {
             int max_evals = mompi.recv_more_work();
-            if (0 >= max_evals)
+            if (0 >= max_evals) {
+cout<<"duuude wioerkr= exiting"<<endl;
                 return;
+            }
 
             combo_tree exemplar;
             mompi.recv_exemplar(exemplar);
@@ -177,11 +179,15 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             mp._dex.free_deme();
             mompi.send_deme(mp, evals_this_deme);
 
-            // Clear the metapop -- tart with a new slate each time.
+            // Clear the metapop -- start with a new slate each time.
             mp.clear();
         }
     }
 
+    // If we are here, then we are the root node.  The root will act
+    // as a dispatcher to all of the worker nodes.
+// XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
+// come around ...
     while ((stats.n_evals < pa.max_evals) 
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
@@ -189,6 +195,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         mpi_expander<Scoring, BScoring, Optimization>
             mex(mompi, mp, pa.max_evals - stats.n_evals, stats);
 
+        // This method blocks until there is a free worker...
         mex.pick_exemplar();
 
         // If we are here, we unblocked, and have a woker ready to do
@@ -211,8 +218,8 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         if (done) break;
     }
 
+    logger().info("MPI MOSES ends");
 cout<<"duude are we done yet!?"<<endl;
-    // XXX TODO: send all workers the "done" message.
 };
 
 #else

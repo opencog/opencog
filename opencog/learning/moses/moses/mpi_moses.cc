@@ -78,6 +78,18 @@ moses_mpi::moses_mpi()
 
 moses_mpi::~moses_mpi()
 {
+    // Send each of te workers a shutdown message.
+    int rank = MPI::COMM_WORLD.Get_rank();
+    if (ROOT_NODE == rank) {
+        int num_procs = MPI::COMM_WORLD.Get_size();
+        for (int i=1; i<num_procs; i++) {
+            dispatch_thread& worker = worker_pool.borrow();
+            int max_evals = 0;
+            MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT,
+                                 worker.rank, MSG_MAX_EVALS);
+        }
+    }
+cout<<"duude node="<<rank<<" finalizing..."<<endl;
     MPI::Finalize();
 }
 
