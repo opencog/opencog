@@ -26,6 +26,7 @@
 #define _OPENCOG_MPI_MOSES_H
 
 #include <future>
+#include <mutex>
 #include <opencog/util/pool.h>
 
 #include "metapopulation.h"
@@ -37,7 +38,7 @@ namespace opencog { namespace moses {
 
 struct dispatch_thread
 {
-   dispatch_thread();
+   dispatch_thread() : rank(-1) {}
    int rank;
 };
 
@@ -91,14 +92,18 @@ private:
      metapopulation<Scoring, BScoring, Optimization>& _mp;
      int _max_evals;
      moses_statistics& _stats;
+     std::mutex& _merge_mutex;
+     int& _thread_count;
 
 public:
      // Cache of arguments we will need.
      mpi_expander(moses_mpi& mompi,
-         metapopulation<Scoring, BScoring, Optimization>& mp,
-         int max_evals, moses_statistics& stats) :
+                  metapopulation<Scoring, BScoring, Optimization>& mp,
+                  int max_evals, moses_statistics& stats,
+                  std::mutex& mu, int& tcount) :
         _worker(_w), _extree(_t),
-        _mompi(mompi), _mp(mp), _max_evals(max_evals), _stats(stats)
+        _mompi(mompi), _mp(mp), _max_evals(max_evals), _stats(stats),
+        _merge_mutex(mu), _thread_count(tcount)
     {}
 
     /// Select an exemplar out of the metapopulation. Cache it.
@@ -124,6 +129,10 @@ public:
     // Function that will run inside a thread
     bool operator()()
     {
+        _merge_mutex.lock();
+        _thread_count++;
+        _merge_mutex.unlock();
+
         _mompi.dispatch_deme(_worker, _extree, _max_evals);
 
         int n_evals = 0;
@@ -132,12 +141,14 @@ public:
 cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
         _mompi.worker_pool.give_back(_worker);
 
-// XXX lock here...
+        // We assume that the metapop merge operations are not
+        // thread-safe, and so we will lock here, to be prudent.
+        std::lock_guard<std::mutex> lock(_merge_mutex);
         _stats.n_evals += n_evals;
         _mp.update_best_candidates(candidates);
         _mp.merge_candidates(candidates);
         _mp.log_best_candidates();
-cout<<"duuude done merging!"<<endl;
+        _thread_count--;
         return false;
     }
 
@@ -188,12 +199,17 @@ cout<<"duuude wioerkr= exiting"<<endl;
     // as a dispatcher to all of the worker nodes.
 // XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
 // come around ...
+
+    std::mutex merge_mutex;
+    int thread_count = 0;
+
     while ((stats.n_evals < pa.max_evals) 
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
         mpi_expander<Scoring, BScoring, Optimization>
-            mex(mompi, mp, pa.max_evals - stats.n_evals, stats);
+            mex(mompi, mp, pa.max_evals - stats.n_evals, stats,
+                merge_mutex, thread_count);
 
         // This method blocks until there is a free worker...
         mex.pick_exemplar();
@@ -202,8 +218,12 @@ cout<<"duuude wioerkr= exiting"<<endl;
         // the work. Create a thread to handle all communications with
         // this worker one-on-one.
         std::future<bool> fudone = std::async(std::launch::async, mex);
+
+// XXX the only reason this isn't crashing is becaus the future is strongly synchronizing.
+// XXX fix me.
         bool done = fudone.get();
 
+cout<<"duuude thread count="<<thread_count<<endl;
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {

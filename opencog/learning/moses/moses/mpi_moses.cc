@@ -28,10 +28,6 @@
 
 namespace opencog { namespace moses {
 
-dispatch_thread::dispatch_thread()
-{
-cout<<"woot!"<<endl;
-}
 
 #define ROOT_NODE 0
 #define COMPOSITE_SCORE_SIZE 3
@@ -201,7 +197,7 @@ void moses_mpi::recv_exemplar(combo_tree& exemplar)
 // XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
 void moses_mpi::send_deme(const bscored_combo_tree_set& mp, int n_evals)
 {
-cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << "returnin a deme after evals="<<n_evals<<endl;
+cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << " returnin a deme after evals="<<n_evals<<endl;
     MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
 
     int num_trees = mp.size();
