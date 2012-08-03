@@ -78,6 +78,7 @@ bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
     stats.n_evals += evals_this_deme;
+    stats.n_expansions++;
 
     bool done = mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
 
@@ -142,10 +143,10 @@ void local_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         logger().info(ss.str());
     }
 
-    while ((stats.n_evals < pa.max_evals) && (pa.max_gens != stats.n_expansions++))
+    while ((stats.n_evals < pa.max_evals)
+           && (pa.max_gens != stats.n_expansions)
+           && (mp.best_score() < pa.max_score))
     {
-        logger().info("Deme expansion: %i", stats.n_expansions);
-
         // Run a generation
         bool done = expand_deme(mp, pa.max_evals - stats.n_evals, stats);
 
@@ -171,9 +172,6 @@ void local_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         // Alternately, the candidate callback may urge a premature
         // termination.
         if (done) break;
-
-        if (mp.best_score() >= pa.max_score || mp.empty())
-            break;
     }
 
     logger().info("MOSES ends");

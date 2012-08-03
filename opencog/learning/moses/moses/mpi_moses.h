@@ -74,6 +74,36 @@ class moses_mpi
 
 };
 
+template<typename Scoring, typename BScoring, typename Optimization>
+bool mpi_expand_deme(moses_mpi& mompi,
+     metapopulation<Scoring, BScoring, Optimization>& mp,
+     int max_evals, moses_statistics& stats)
+{
+    bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+    if (exemplar == mp.end()) {
+        logger().warn("There are no more exemplars in the metapopulation "
+                      "that have not been visited and yet a solution was "
+                      "not found.  Perhaps reduction is too strict?");
+        // goto theend;
+
+        // If there are no more exemplars in our pool, we will
+        // have to wait for some more to come rolling in.
+    }
+    const combo_tree &extree = get_tree(*exemplar);
+    int n_evals = 0;
+    bscored_combo_tree_set candidates;
+
+    mompi.dispatch_deme(extree, max_evals, candidates, n_evals);
+cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
+
+    stats.n_evals += n_evals;
+    mp.update_best_candidates(candidates);
+    mp.merge_candidates(candidates);
+    mp.log_best_candidates();
+cout<<"duuude done merging!"<<endl;
+    return false;
+}
+
 
 template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
@@ -83,7 +113,9 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     typedef bscored_combo_tree_set::const_iterator mp_cit;
     typedef instance_set<composite_score> deme_t;
 
-    logger().info("MPI MOSES starts");
+    logger().info("MPI MOSES starts, max_evals=%d max_gens=%d",
+                  pa.max_evals, pa.max_gens);
+
     moses_mpi mompi;
 
     // Worker processes loop until done, then return.
@@ -116,31 +148,20 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
+        bool done = mpi_expand_deme(mompi, mp, pa.max_evals - stats.n_evals, stats);
 
-        mp_cit exemplar = mp.select_exemplar();
-        if (exemplar == mp.end()) {
-            logger().warn("There are no more exemplars in the metapopulation "
-                          "that have not been visited and yet a solution was "
-                          "not found.  Perhaps reduction is too strict?");
-            // goto theend;
-
-            // If there are no more exemplars in our pool, we will
-            // have to wait for some more to come rolling in.
-            break;
+        // Print stats in a way that makes them easy to graph.
+        // (columns of tab-seprated numbers)
+        if (logger().isInfoEnabled()) {
+            stringstream ss;
+            ss << "Stats: " << stats.n_expansions;
+            ss << "\t" << stats.n_evals;    // number of evaluations so far
+            ss << "\t" << mp.size();       // size of the metapopulation
+            ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
+            ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+            logger().info(ss.str());
         }
-        const combo_tree &extree = get_tree(*exemplar);
-        int n_evals = 0;
-        bscored_combo_tree_set candidates;
-
-        mompi.dispatch_deme(extree, pa.max_evals - stats.n_evals,
-                            candidates, n_evals);
-cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
-
-        stats.n_evals += n_evals;
-        mp.update_best_candidates(candidates);
-        mp.merge_candidates(candidates);
-        mp.log_best_candidates();
-cout<<"duuude done merging!"<<endl;
+        if (done) break;
     }
 
     // XXX TODO: send all workers the "done" message.
