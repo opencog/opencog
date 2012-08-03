@@ -81,9 +81,15 @@ moses_mpi::~moses_mpi()
     MPI::Finalize();
 }
 
-bool moses_mpi::is_mpi_master()
+bool moses_mpi::is_mpi_root()
 {
     return (ROOT_NODE == MPI::COMM_WORLD.Get_rank());
+}
+
+int moses_mpi::num_workers()
+{
+    // Not counting the root...
+    return MPI::COMM_WORLD.Get_size() - 1;
 }
 
 /// Send a combo tree to the target node 
@@ -134,28 +140,21 @@ void moses_mpi::recv_cscore(composite_score &cs, int source)
 
 /// dispatch_deme -- Send an exemplar to node for deme expansion.
 ///
-/// This method will send an exemplar to the first available (free) worker,
-/// and then block, waiting for results from the worker.  Upon receiving
-/// the results, it will unblock and return to the caller.  This blocking
-/// behaviour is intended for use within a thread.
-///
 /// @max_evals is the maximum number of evaluations the worker should perform.
-/// @n_evals is the actual number of evaluations performed.
 //
-void moses_mpi::dispatch_deme(const combo_tree &tr, int max_evals,
+void moses_mpi::dispatch_deme(dispatch_thread& worker, 
+                              const combo_tree &tr, int max_evals)
+{
+    MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, worker.rank, MSG_MAX_EVALS);
+    send_tree(tr, worker.rank);
+}
+
+/// Receive results from an expanded deme.
+/// @n_evals is the actual number of evaluations performed.
+void moses_mpi::recv_deme(dispatch_thread& worker,
                               bscored_combo_tree_set& cands, int& n_evals)
 {
-    dispatch_thread& worker = worker_pool.borrow();
-cout<<"duude got worker "<<worker.rank<<endl;
-    MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, worker.rank, MSG_MAX_EVALS);
-
-    // Note: recv_deme will block, until remote worker has delivered
-    // the results back to us.
-    send_tree(tr, worker.rank);
     recv_deme(cands, n_evals, worker.rank);
-
-    worker_pool.give_back(worker);
-cout<<"duude done with worker "<<worker.rank<<endl;
 }
 
 /// recv_more_work -- indicate to worker if there is more work to be done.

@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_MPI_MOSES_H
 #define _OPENCOG_MPI_MOSES_H
 
+#include <future>
 #include <opencog/util/pool.h>
 
 #include "metapopulation.h"
@@ -43,22 +44,22 @@ struct dispatch_thread
 class moses_mpi
 {
     public:
-        typedef instance_set<composite_score> deme_t;
-
         moses_mpi();
         ~moses_mpi();
 
-        bool is_mpi_master();
+        bool is_mpi_root();
+        int num_workers();
 
         // root methods, to be used only by root node.
-        void dispatch_deme(const combo_tree&, int max_evals,
-                           bscored_combo_tree_set&, int& n_evals);
+        void dispatch_deme(dispatch_thread&, const combo_tree&, int max_evals);
+        void recv_deme(dispatch_thread&, bscored_combo_tree_set&, int& n_evals);
 
         // worker methods, to be used only by workers.
         int recv_more_work();
         void recv_exemplar(combo_tree&);
         void send_deme(const bscored_combo_tree_set&, int);
 
+        pool<dispatch_thread> worker_pool;
     protected:
         void send_tree(const combo_tree&, int target);
         void recv_tree(combo_tree&, int source);
@@ -70,39 +71,77 @@ class moses_mpi
     private:
         // master state
         std::vector<dispatch_thread> workers;
-        pool<dispatch_thread> worker_pool;
-
 };
 
+
+// wrapper class; the only reason this class exists is to make thread
+// creation simpler -- threads require a function as an argument, and
+// this class provides the needed operator() to make this work.
 template<typename Scoring, typename BScoring, typename Optimization>
-bool mpi_expand_deme(moses_mpi& mompi,
-     metapopulation<Scoring, BScoring, Optimization>& mp,
-     int max_evals, moses_statistics& stats)
+struct mpi_expander
 {
-    bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
-    if (exemplar == mp.end()) {
-        logger().warn("There are no more exemplars in the metapopulation "
-                      "that have not been visited and yet a solution was "
-                      "not found.  Perhaps reduction is too strict?");
-        // goto theend;
+private:
+     dispatch_thread _w;
+     combo_tree _t;
 
-        // If there are no more exemplars in our pool, we will
-        // have to wait for some more to come rolling in.
+     dispatch_thread& _worker;
+     combo_tree& _extree;
+
+     moses_mpi& _mompi;
+     metapopulation<Scoring, BScoring, Optimization>& _mp;
+     int _max_evals;
+     moses_statistics& _stats;
+
+public:
+     // Cache of arguments we will need.
+     mpi_expander(moses_mpi& mompi,
+         metapopulation<Scoring, BScoring, Optimization>& mp,
+         int max_evals, moses_statistics& stats) :
+        _worker(_w), _extree(_t),
+        _mompi(mompi), _mp(mp), _max_evals(max_evals), _stats(stats)
+    {}
+
+    /// Select an exemplar out of the metapopulation. Cache it.
+    /// Try to get an unoccupied node.  This method will block if all
+    /// the nodes are busy.  When if finally unblocks, caller can
+    /// start sending stuff to the worker.
+    void pick_exemplar()
+    {
+        bscored_combo_tree_set::const_iterator exemplar = _mp.select_exemplar();
+        if (exemplar == _mp.end()) {
+            // XXX fixme we should block and wait, ...!  But how ..!?
+            logger().warn("There are no more exemplars in the metapopulation "
+                          "that have not been visited and yet a solution was "
+                          "not found.  Perhaps reduction is too strict?");
+            // If there are no more exemplars in our pool, we will
+            // have to wait for some more to come rolling in.
+            return;
+        }
+        _extree = get_tree(*exemplar);
+        _worker = _mompi.worker_pool.borrow();
     }
-    const combo_tree &extree = get_tree(*exemplar);
-    int n_evals = 0;
-    bscored_combo_tree_set candidates;
 
-    mompi.dispatch_deme(extree, max_evals, candidates, n_evals);
+    // Function that will run inside a thread
+    bool operator()()
+    {
+        _mompi.dispatch_deme(_worker, _extree, _max_evals);
+
+        int n_evals = 0;
+        bscored_combo_tree_set candidates;
+        _mompi.recv_deme(_worker, candidates, n_evals);
 cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
+        _mompi.worker_pool.give_back(_worker);
 
-    stats.n_evals += n_evals;
-    mp.update_best_candidates(candidates);
-    mp.merge_candidates(candidates);
-    mp.log_best_candidates();
+// XXX lock here...
+        _stats.n_evals += n_evals;
+        _mp.update_best_candidates(candidates);
+        _mp.merge_candidates(candidates);
+        _mp.log_best_candidates();
 cout<<"duuude done merging!"<<endl;
-    return false;
-}
+        return false;
+    }
+
+};
 
 
 template<typename Scoring, typename BScoring, typename Optimization>
@@ -111,7 +150,6 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                moses_statistics& stats)
 {
     typedef bscored_combo_tree_set::const_iterator mp_cit;
-    typedef instance_set<composite_score> deme_t;
 
     logger().info("MPI MOSES starts, max_evals=%d max_gens=%d",
                   pa.max_evals, pa.max_gens);
@@ -121,7 +159,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     // Worker processes loop until done, then return.
     // Each worker waits for aan exemplar, expands it, then returns
     // the results.
-    if (!mompi.is_mpi_master()) {
+    if (!mompi.is_mpi_root()) {
         while(1) {
             int max_evals = mompi.recv_more_work();
             if (0 >= max_evals)
@@ -148,7 +186,16 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-        bool done = mpi_expand_deme(mompi, mp, pa.max_evals - stats.n_evals, stats);
+        mpi_expander<Scoring, BScoring, Optimization>
+            mex(mompi, mp, pa.max_evals - stats.n_evals, stats);
+
+        mex.pick_exemplar();
+
+        // If we are here, we unblocked, and have a woker ready to do
+        // the work. Create a thread to handle all communications with
+        // this worker one-on-one.
+        std::future<bool> fudone = std::async(std::launch::async, mex);
+        bool done = fudone.get();
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
@@ -164,6 +211,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         if (done) break;
     }
 
+cout<<"duude are we done yet!?"<<endl;
     // XXX TODO: send all workers the "done" message.
 };
 
@@ -175,7 +223,7 @@ class moses_mpi
         moses_mpi() {}
         ~moses_mpi() {}
 
-        bool is_mpi_master() { return true; }
+        bool is_mpi_root() { return true; }
 };
 
 template<typename Scoring, typename BScoring, typename Optimization>
