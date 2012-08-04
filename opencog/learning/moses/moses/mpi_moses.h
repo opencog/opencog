@@ -179,6 +179,8 @@ public:
             return;
         }
         _extree = get_tree(*exemplar);
+
+        // borrow will block, if there are no workers free.
         _worker = _pool.borrow();
     }
 
@@ -195,7 +197,7 @@ public:
         int n_evals = 0;
         bscored_combo_tree_set candidates;
         _mompi.recv_deme(_worker.rank, candidates, n_evals);
-cout<<"duuude master "<<getpid() << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
+cout<<"duuude master "<<getpid() <<" from="<<_worker.rank << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
         _pool.give_back(_worker);
 
         // We assume that the metapop merge operations are not
@@ -255,7 +257,6 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         // so it is completely safe for us to have mex on stack here.
         std::async(std::launch::async, mex);
 
-cout<<"duuude thread count="<<thread_count<<endl;
 // XXX should print stats less often...
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
@@ -272,7 +273,7 @@ cout<<"duuude thread count="<<thread_count<<endl;
 
     // Shut down each of the workers.
     int np = mompi.num_workers();
-    for (int i=1; i<np; i++) {
+    for (int i=0; i<np; i++) {
         worker_node& worker = wrkpool.borrow();
         mompi.send_finished(worker.rank);
     }

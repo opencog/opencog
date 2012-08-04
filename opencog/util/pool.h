@@ -69,6 +69,11 @@ class pool
             cond.notify_one();
         }
 
+        size_t available()
+        {
+            return objs.size();
+        }
+
     private:
         std::mutex mu;
         std::condition_variable cond;

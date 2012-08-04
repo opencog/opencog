@@ -250,9 +250,9 @@ worker_pool::worker_pool(int num_workers)
     workers.resize(num_workers);
     // The root process itself is not in the pool.
     // i.e. pool starts at 1 not at 0.
-    for (int i=1; i<num_workers; i++) {
+    for (int i=0; i<num_workers; i++) {
         worker_node& worker = workers[i];
-        worker.rank = i;
+        worker.rank = i+1;  // rank 0 is root, and not a worker.
         give_back(worker);
     }
 }
