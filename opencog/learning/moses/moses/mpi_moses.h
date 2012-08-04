@@ -36,12 +36,6 @@ namespace opencog { namespace moses {
 
 #ifdef HAVE_MPI
 
-struct worker_node
-{
-   worker_node() : rank(-1) {}
-   int rank;
-};
-
 class moses_mpi_comm
 {
     public:
@@ -52,26 +46,21 @@ class moses_mpi_comm
         int num_workers();
 
         // root methods, to be used only by root node.
-        void dispatch_deme(worker_node&, const combo_tree&, int max_evals);
-        void recv_deme(worker_node&, bscored_combo_tree_set&, int& n_evals);
+        void dispatch_deme(int target, const combo_tree&, int max_evals);
+        void recv_deme(int source, bscored_combo_tree_set&, int& n_evals);
+        void send_finished(int target);
 
         // worker methods, to be used only by workers.
         int recv_more_work();
         void recv_exemplar(combo_tree&);
         void send_deme(const bscored_combo_tree_set&, int);
 
-        pool<worker_node> worker_pool;
     protected:
         void send_tree(const combo_tree&, int target);
         void recv_tree(combo_tree&, int source);
 
         void send_cscore(const composite_score&, int target);
         void recv_cscore(composite_score&, int source);
-
-        void recv_deme(bscored_combo_tree_set&, int& n_evals, int source);
-    private:
-        // master state
-        std::vector<worker_node> workers;
 };
 
 /// mpi_moses_worker -- main loop for the worker node.
@@ -111,6 +100,21 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
 
 #define HAVE_MULTI_THREAD_MPI 1
 #ifdef HAVE_MULTI_THREAD_MPI
+
+struct worker_node
+{
+   worker_node() : rank(-1) {}
+   int rank;
+};
+
+struct worker_pool :
+    public pool<worker_node>
+{
+    worker_pool(int num);
+private:
+    std::vector<worker_node> workers;
+};
+
 /// mpi_expander_threaded -- multi-threaded variant of a deme expander.
 ///
 /// Expands one exemplar into a deme.  Exemplar is dispatched to an
@@ -122,6 +126,10 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
 /// class exists is to make thread creation simpler -- threads require
 /// a function as an argument, and this class provides the needed
 /// operator() to make this work.
+///
+/// This class has been lightly tested, and seems to work. It has not
+/// been heavily teted, because I don't have a multi-node machine with
+/// an MPI implementation that supports threads.
 //
 template<typename Scoring, typename BScoring, typename Optimization>
 struct mpi_expander_threaded
@@ -134,6 +142,7 @@ private:
      combo_tree& _extree;
 
      moses_mpi_comm& _mompi;
+     worker_pool& _pool;
      metapopulation<Scoring, BScoring, Optimization>& _mp;
      int _max_evals;
      moses_statistics& _stats;
@@ -143,11 +152,13 @@ private:
 public:
     // Cache of arguments we will need.
     mpi_expander_threaded(moses_mpi_comm& mompi,
+                 worker_pool& wpool,
                  metapopulation<Scoring, BScoring, Optimization>& mp,
                  int max_evals, moses_statistics& stats,
                  std::mutex& mu, int& tcount) :
         _worker(_w), _extree(_t),
-        _mompi(mompi), _mp(mp), _max_evals(max_evals), _stats(stats),
+        _mompi(mompi), _pool(wpool),
+        _mp(mp), _max_evals(max_evals), _stats(stats),
         _merge_mutex(mu), _thread_count(tcount)
     {}
 
@@ -168,7 +179,7 @@ public:
             return;
         }
         _extree = get_tree(*exemplar);
-        _worker = _mompi.worker_pool.borrow();
+        _worker = _pool.borrow();
     }
 
     // Function that will run inside a thread
@@ -179,13 +190,13 @@ public:
         _thread_count++;
         _merge_mutex.unlock();
 
-        _mompi.dispatch_deme(_worker, _extree, _max_evals);
+        _mompi.dispatch_deme(_worker.rank, _extree, _max_evals);
 
         int n_evals = 0;
         bscored_combo_tree_set candidates;
-        _mompi.recv_deme(_worker, candidates, n_evals);
+        _mompi.recv_deme(_worker.rank, candidates, n_evals);
 cout<<"duuude master "<<getpid() << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
-        _mompi.worker_pool.give_back(_worker);
+        _pool.give_back(_worker);
 
         // We assume that the metapop merge operations are not
         // thread-safe, and so we will lock here, to be prudent.
@@ -221,6 +232,8 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 // XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
 // come around ...
 
+    worker_pool wrkpool(mompi.num_workers());
+
     std::mutex merge_mutex;
     int thread_count = 0;
 
@@ -229,7 +242,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            && (mp.best_score() < pa.max_score))
     {
         mpi_expander_threaded<Scoring, BScoring, Optimization>
-            mex(mompi, mp, pa.max_evals - stats.n_evals, stats,
+            mex(mompi, wrkpool, mp, pa.max_evals - stats.n_evals, stats,
                 merge_mutex, thread_count);
 
         // This method blocks until there is a free worker...
@@ -257,15 +270,56 @@ cout<<"duuude thread count="<<thread_count<<endl;
         }
     }
 
+    // Shut down each of the workers.
+    int np = mompi.num_workers();
+    for (int i=1; i<np; i++) {
+        worker_node& worker = wrkpool.borrow();
+        mompi.send_finished(worker.rank);
+    }
+
     logger().info("MPI MOSES ends");
-cout<<"duude are we done yet!?"<<endl;
 };
 
 #else // HAVE_MULTI_THREAD_MPI
 
+template<typename Scoring, typename BScoring, typename Optimization>
+struct mpi_deme_merge_thread
+{
+private:
+     metapopulation<Scoring, BScoring, Optimization>& _mp;
+     bscored_combo_tree_set& _candidates;
+     std::mutex& _merge_mutex;
+     int& _thread_count;
+
+public:
+    // Cache of arguments we will need.
+    mpi_deme_merge_thread(metapopulation<Scoring, BScoring, Optimization>& mp,
+                      bscored_combo_tree_set& cands,
+                      std::mutex& mu, int& tcount)
+        : _mp(mp), _candidates(cands),
+        _merge_mutex(mu), _thread_count(tcount)
+    {}
+
+    // Function that will run inside a thread
+    // Self-deletes upon exit of the thread.
+    bool operator()()
+    {
+        // We assume that the metapop merge operations are not
+        // thread-safe, and so we will lock here, to be prudent.
+        std::lock_guard<std::mutex> lock(_merge_mutex);
+        _thread_count++;
+        _mp.update_best_candidates(_candidates);
+        _mp.merge_candidates(_candidates);
+        _mp.log_best_candidates();
+        _thread_count--;
+        return false;
+    }
+};
+
 /// mpi_moses main -- non-theaded version
 ///
-/// 
+/// Main entry point for MPI moses, for the cases where the MPI
+/// implementation does not support threading.
 template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                const moses_parameters& pa,
@@ -295,13 +349,14 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-        mpi_expander_threaded<Scoring, BScoring, Optimization>
-            mex(mompi, mp, pa.max_evals - stats.n_evals, stats,
-                merge_mutex, thread_count);
+#if 0
+        while
 
-        // This method blocks until there is a free worker...
-        mex.pick_exemplar();
-
+        // Perform  deme merge in a distinct thread.
+        mpi_deme_merge_thread<Scoring, BScoring, Optimization>
+            mex(mp, candidates, merge_mutex, thread_count);
+        std::async(std::launch::async, mex);
+#endif
     }
 }
 

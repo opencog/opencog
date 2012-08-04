@@ -74,33 +74,10 @@ moses_mpi_comm::moses_mpi_comm()
         << "\" rank=" << rank << " out of num_procs=" << num_procs;
 
     // MPI::COMM_WORLD.Bcast(&answer, 1, MPI::INT, 0);
-
-    // Only the root process maintains a pool.
-    if (ROOT_NODE == rank) {
-        workers.resize(num_procs);
-        // The root process itself is not in the pool.
-        // i.e. pool starts at 1 not at 0.
-        for (int i=1; i<num_procs; i++) {
-            worker_node& worker = workers[i];
-            worker.rank = i;
-            worker_pool.give_back(worker);
-        }
-    }
 }
 
 moses_mpi_comm::~moses_mpi_comm()
 {
-    // Send each of te workers a shutdown message.
-    int rank = MPI::COMM_WORLD.Get_rank();
-    if (ROOT_NODE == rank) {
-        int num_procs = MPI::COMM_WORLD.Get_size();
-        for (int i=1; i<num_procs; i++) {
-            worker_node& worker = worker_pool.borrow();
-            int max_evals = 0;
-            MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT,
-                                 worker.rank, MSG_MAX_EVALS);
-        }
-    }
     MPI::Finalize();
 }
 
@@ -113,6 +90,14 @@ int moses_mpi_comm::num_workers()
 {
     // Not counting the root...
     return MPI::COMM_WORLD.Get_size() - 1;
+}
+
+
+void moses_mpi_comm::send_finished(int target)
+{
+    int max_evals = 0;
+    MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT,
+                         target, MSG_MAX_EVALS);
 }
 
 /// Send a combo tree to the target node 
@@ -166,19 +151,11 @@ void moses_mpi_comm::recv_cscore(composite_score &cs, int source)
 ///
 /// @max_evals is the maximum number of evaluations the worker should perform.
 //
-void moses_mpi_comm::dispatch_deme(worker_node& worker, 
+void moses_mpi_comm::dispatch_deme(int target, 
                               const combo_tree &tr, int max_evals)
 {
-    MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, worker.rank, MSG_MAX_EVALS);
-    send_tree(tr, worker.rank);
-}
-
-/// Receive results from an expanded deme.
-/// @n_evals is the actual number of evaluations performed.
-void moses_mpi_comm::recv_deme(worker_node& worker,
-                          bscored_combo_tree_set& cands, int& n_evals)
-{
-    recv_deme(cands, n_evals, worker.rank);
+    MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, target, MSG_MAX_EVALS);
+    send_tree(tr, target);
 }
 
 /// recv_more_work -- indicate to worker if there is more work to be done.
@@ -232,12 +209,15 @@ cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << " returnin a deme after eval
 }
 
 /// recv_deme -- receive the deme sent by send_deme()
+/// @n_evals is the actual number of evaluations performed.
 ///
 /// This will receive a deme from any source; it is safe to call this
 /// routine with source=MPI_ANY_SOURCE, it will then pick up a deme,
 /// in an atomic, unfragmented way, from the first source that sent
 /// one to us.
-void moses_mpi_comm::recv_deme(bscored_combo_tree_set& cands, int& n_evals, int source)
+void moses_mpi_comm::recv_deme(int source,
+                               bscored_combo_tree_set& cands,
+                               int& n_evals)
 {
     MPI::Status status;
     MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, source, MSG_NUM_EVALS, status);
@@ -263,6 +243,20 @@ void moses_mpi_comm::recv_deme(bscored_combo_tree_set& cands, int& n_evals, int 
         cands.insert(bsc_tr);
     }
 }
+
+#ifdef HAVE_MULTI_THREAD_MPI
+worker_pool::worker_pool(int num_workers)
+{
+    workers.resize(num_workers);
+    // The root process itself is not in the pool.
+    // i.e. pool starts at 1 not at 0.
+    for (int i=1; i<num_workers; i++) {
+        worker_node& worker = workers[i];
+        worker.rank = i;
+        give_back(worker);
+    }
+}
+#endif // HAVE_MULTI_THREAD_MPI
 
 } // ~namespace moses
 } // ~namespace opencog
