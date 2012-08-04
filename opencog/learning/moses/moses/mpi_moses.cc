@@ -89,7 +89,6 @@ moses_mpi::~moses_mpi()
                                  worker.rank, MSG_MAX_EVALS);
         }
     }
-cout<<"duude node="<<rank<<" finalizing..."<<endl;
     MPI::Finalize();
 }
 
@@ -109,10 +108,11 @@ void moses_mpi::send_tree(const combo_tree &tr, int target)
 {
     stringstream ss;
     ss << tr;
-    const char * stree = ss.str().c_str();
-    int stree_sz = ss.str().size();
+    const string& xtree = ss.str();
+    const char * stree = xtree.c_str();
+    int stree_sz = xtree.size();
     MPI::COMM_WORLD.Send(&stree_sz, 1, MPI::INT, target, MSG_COMBO_TREE_LEN);
-    MPI::COMM_WORLD.Send(stree, strlen(stree), MPI::CHAR, target, MSG_COMBO_TREE);
+    MPI::COMM_WORLD.Send(stree, stree_sz, MPI::CHAR, target, MSG_COMBO_TREE);
 }
 
 /// Receive a combo tree from the source node.

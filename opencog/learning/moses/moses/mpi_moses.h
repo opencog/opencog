@@ -138,7 +138,7 @@ public:
         int n_evals = 0;
         bscored_combo_tree_set candidates;
         _mompi.recv_deme(_worker, candidates, n_evals);
-cout<<"duuude master got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
+cout<<"duuude master "<<getpid() << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
         _mompi.worker_pool.give_back(_worker);
 
         // We assume that the metapop merge operations are not
@@ -227,6 +227,7 @@ cout<<"duuude wioerkr= exiting"<<endl;
         std::async(std::launch::async, mex);
 
 cout<<"duuude thread count="<<thread_count<<endl;
+// XXX should print stats less often...
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
