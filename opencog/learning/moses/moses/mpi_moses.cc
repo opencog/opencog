@@ -42,14 +42,26 @@ enum msg_types
     MSG_CSCORE,          // composite score
 };
 
-moses_mpi::moses_mpi()
+moses_mpi_comm::moses_mpi_comm()
 {
     int have_thread_support = MPI::Init_thread(MPI_THREAD_MULTIPLE);
+
+    const char * sup;
+    switch(have_thread_support) {
+        case MPI_THREAD_SINGLE:     sup = "MPI_THREAD_SINGLE";     break; 
+        case MPI_THREAD_FUNNELED:   sup = "MPI_THREAD_FUNNELED";   break; 
+        case MPI_THREAD_SERIALIZED: sup = "MPI_THREAD_SERIALIZED"; break; 
+        case MPI_THREAD_MULTIPLE:   sup = "MPI_THREAD_MULTIPLE";   break; 
+    }
+    logger().info() << "MPI support level: " << sup;
+
+#ifdef HAVE_MULTI_THREAD_MPI
     if (MPI_THREAD_MULTIPLE != have_thread_support) {
         MPI::Finalize();
         logger().error() << "This MPI implementation lacks threading support!";
         OC_ASSERT(false, "This MPI implementation lacks threading support!");
     }
+#endif
     
     int num_procs = MPI::COMM_WORLD.Get_size();
     int rank = MPI::COMM_WORLD.Get_rank();
@@ -69,21 +81,21 @@ moses_mpi::moses_mpi()
         // The root process itself is not in the pool.
         // i.e. pool starts at 1 not at 0.
         for (int i=1; i<num_procs; i++) {
-            dispatch_thread& worker = workers[i];
+            worker_node& worker = workers[i];
             worker.rank = i;
             worker_pool.give_back(worker);
         }
     }
 }
 
-moses_mpi::~moses_mpi()
+moses_mpi_comm::~moses_mpi_comm()
 {
     // Send each of te workers a shutdown message.
     int rank = MPI::COMM_WORLD.Get_rank();
     if (ROOT_NODE == rank) {
         int num_procs = MPI::COMM_WORLD.Get_size();
         for (int i=1; i<num_procs; i++) {
-            dispatch_thread& worker = worker_pool.borrow();
+            worker_node& worker = worker_pool.borrow();
             int max_evals = 0;
             MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT,
                                  worker.rank, MSG_MAX_EVALS);
@@ -92,19 +104,19 @@ moses_mpi::~moses_mpi()
     MPI::Finalize();
 }
 
-bool moses_mpi::is_mpi_root()
+bool moses_mpi_comm::is_mpi_root()
 {
     return (ROOT_NODE == MPI::COMM_WORLD.Get_rank());
 }
 
-int moses_mpi::num_workers()
+int moses_mpi_comm::num_workers()
 {
     // Not counting the root...
     return MPI::COMM_WORLD.Get_size() - 1;
 }
 
 /// Send a combo tree to the target node 
-void moses_mpi::send_tree(const combo_tree &tr, int target)
+void moses_mpi_comm::send_tree(const combo_tree &tr, int target)
 {
     stringstream ss;
     ss << tr;
@@ -116,7 +128,7 @@ void moses_mpi::send_tree(const combo_tree &tr, int target)
 }
 
 /// Receive a combo tree from the source node.
-void moses_mpi::recv_tree(combo_tree &tr, int source)
+void moses_mpi_comm::recv_tree(combo_tree &tr, int source)
 {
     int stree_sz = 0;
     MPI::COMM_WORLD.Recv(&stree_sz, 1, MPI::INT, source, MSG_COMBO_TREE_LEN);
@@ -130,7 +142,7 @@ void moses_mpi::recv_tree(combo_tree &tr, int source)
 }
 
 /// Send composite score to target node
-void moses_mpi::send_cscore(const composite_score &cs, int target)
+void moses_mpi_comm::send_cscore(const composite_score &cs, int target)
 {
     double flattened_score[COMPOSITE_SCORE_SIZE];
     flattened_score[0] = cs.get_score();
@@ -141,7 +153,7 @@ void moses_mpi::send_cscore(const composite_score &cs, int target)
 }
 
 /// Receive composite score from source node
-void moses_mpi::recv_cscore(composite_score &cs, int source)
+void moses_mpi_comm::recv_cscore(composite_score &cs, int source)
 {
     double flattened_score[COMPOSITE_SCORE_SIZE];
     MPI::COMM_WORLD.Recv(flattened_score, COMPOSITE_SCORE_SIZE,
@@ -154,7 +166,7 @@ void moses_mpi::recv_cscore(composite_score &cs, int source)
 ///
 /// @max_evals is the maximum number of evaluations the worker should perform.
 //
-void moses_mpi::dispatch_deme(dispatch_thread& worker, 
+void moses_mpi_comm::dispatch_deme(worker_node& worker, 
                               const combo_tree &tr, int max_evals)
 {
     MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, worker.rank, MSG_MAX_EVALS);
@@ -163,8 +175,8 @@ void moses_mpi::dispatch_deme(dispatch_thread& worker,
 
 /// Receive results from an expanded deme.
 /// @n_evals is the actual number of evaluations performed.
-void moses_mpi::recv_deme(dispatch_thread& worker,
-                              bscored_combo_tree_set& cands, int& n_evals)
+void moses_mpi_comm::recv_deme(worker_node& worker,
+                          bscored_combo_tree_set& cands, int& n_evals)
 {
     recv_deme(cands, n_evals, worker.rank);
 }
@@ -179,7 +191,7 @@ void moses_mpi::recv_deme(dispatch_thread& worker,
 ///
 /// This method should be called only once per iteration!
 //
-int moses_mpi::recv_more_work()
+int moses_mpi_comm::recv_more_work()
 {
     int max_evals = 0;
     MPI::COMM_WORLD.Recv(&max_evals, 1, MPI::INT, ROOT_NODE, MSG_MAX_EVALS);
@@ -190,7 +202,7 @@ int moses_mpi::recv_more_work()
 ///
 /// This method is intended for use only on worker nodes.
 //
-void moses_mpi::recv_exemplar(combo_tree& exemplar)
+void moses_mpi_comm::recv_exemplar(combo_tree& exemplar)
 {
     recv_tree(exemplar, ROOT_NODE);
 }
@@ -199,7 +211,7 @@ void moses_mpi::recv_exemplar(combo_tree& exemplar)
 ///
 /// This sends a pretty big glob.
 // XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
-void moses_mpi::send_deme(const bscored_combo_tree_set& mp, int n_evals)
+void moses_mpi_comm::send_deme(const bscored_combo_tree_set& mp, int n_evals)
 {
 cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << " returnin a deme after evals="<<n_evals<<endl;
     MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
@@ -225,7 +237,7 @@ cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << " returnin a deme after eval
 /// routine with source=MPI_ANY_SOURCE, it will then pick up a deme,
 /// in an atomic, unfragmented way, from the first source that sent
 /// one to us.
-void moses_mpi::recv_deme(bscored_combo_tree_set& cands, int& n_evals, int source)
+void moses_mpi_comm::recv_deme(bscored_combo_tree_set& cands, int& n_evals, int source)
 {
     MPI::Status status;
     MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, source, MSG_NUM_EVALS, status);

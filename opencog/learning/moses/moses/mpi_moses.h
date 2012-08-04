@@ -36,31 +36,31 @@ namespace opencog { namespace moses {
 
 #ifdef HAVE_MPI
 
-struct dispatch_thread
+struct worker_node
 {
-   dispatch_thread() : rank(-1) {}
+   worker_node() : rank(-1) {}
    int rank;
 };
 
-class moses_mpi
+class moses_mpi_comm
 {
     public:
-        moses_mpi();
-        ~moses_mpi();
+        moses_mpi_comm();
+        ~moses_mpi_comm();
 
         bool is_mpi_root();
         int num_workers();
 
         // root methods, to be used only by root node.
-        void dispatch_deme(dispatch_thread&, const combo_tree&, int max_evals);
-        void recv_deme(dispatch_thread&, bscored_combo_tree_set&, int& n_evals);
+        void dispatch_deme(worker_node&, const combo_tree&, int max_evals);
+        void recv_deme(worker_node&, bscored_combo_tree_set&, int& n_evals);
 
         // worker methods, to be used only by workers.
         int recv_more_work();
         void recv_exemplar(combo_tree&);
         void send_deme(const bscored_combo_tree_set&, int);
 
-        pool<dispatch_thread> worker_pool;
+        pool<worker_node> worker_pool;
     protected:
         void send_tree(const combo_tree&, int target);
         void recv_tree(combo_tree&, int source);
@@ -71,23 +71,69 @@ class moses_mpi
         void recv_deme(bscored_combo_tree_set&, int& n_evals, int source);
     private:
         // master state
-        std::vector<dispatch_thread> workers;
+        std::vector<worker_node> workers;
 };
 
-// wrapper class; the only reason this class exists is to make thread
-// creation simpler -- threads require a function as an argument, and
-// this class provides the needed operator() to make this work.
+/// mpi_moses_worker -- main loop for the worker node.
+///
+/// Listens for exemplars, expands them, sends back the results.
+/// This is mono-threaded: i.e. both the send and receive happen
+/// within the main thread.
+//
 template<typename Scoring, typename BScoring, typename Optimization>
-struct mpi_expander
+void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
+                      moses_mpi_comm& mompi)
+{
+    // Worker processes loop until done, then return.
+    // Each worker waits for an exemplar, expands it, then returns
+    // the results.
+    while(1) {
+        int max_evals = mompi.recv_more_work();
+        if (0 >= max_evals)
+            return;
+
+        combo_tree exemplar;
+        mompi.recv_exemplar(exemplar);
+        if (!mp._dex.create_deme(exemplar)) {
+            // XXX replace this with appropriate message back to root!
+            OC_ASSERT(false, "Exemplar failed to expand!\n");
+        }
+        size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
+
+        mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
+        mp._dex.free_deme();
+        mompi.send_deme(mp, evals_this_deme);
+
+        // Clear the metapop -- start with a new slate each time.
+        mp.clear();
+    }
+}
+
+#define HAVE_MULTI_THREAD_MPI 1
+#ifdef HAVE_MULTI_THREAD_MPI
+/// mpi_expander_threaded -- multi-threaded variant of a deme expander.
+///
+/// Expands one exemplar into a deme.  Exemplar is dispatched to an
+/// available MPI node.  Dispatch and collection of results is done
+/// in a distinct thread; thus, this class won't work/is unusable if
+/// the MPI implementation doesn't support MPI_THREAD_MULTIPLE mode.
+///
+/// This is a "wrapper class"; it doesn't do much; the only reason this
+/// class exists is to make thread creation simpler -- threads require
+/// a function as an argument, and this class provides the needed
+/// operator() to make this work.
+//
+template<typename Scoring, typename BScoring, typename Optimization>
+struct mpi_expander_threaded
 {
 private:
-     dispatch_thread _w;
+     worker_node _w;
      combo_tree _t;
 
-     dispatch_thread& _worker;
+     worker_node& _worker;
      combo_tree& _extree;
 
-     moses_mpi& _mompi;
+     moses_mpi_comm& _mompi;
      metapopulation<Scoring, BScoring, Optimization>& _mp;
      int _max_evals;
      moses_statistics& _stats;
@@ -96,7 +142,7 @@ private:
 
 public:
     // Cache of arguments we will need.
-    mpi_expander(moses_mpi& mompi,
+    mpi_expander_threaded(moses_mpi_comm& mompi,
                  metapopulation<Scoring, BScoring, Optimization>& mp,
                  int max_evals, moses_statistics& stats,
                  std::mutex& mu, int& tcount) :
@@ -154,50 +200,20 @@ cout<<"duuude master "<<getpid() << " got evals="<<n_evals <<" got cands="<<cand
     }
 };
 
-
 template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                const moses_parameters& pa,
                moses_statistics& stats)
 {
-    typedef bscored_combo_tree_set::const_iterator mp_cit;
-
-    logger().info("MPI MOSES starts, max_evals=%d max_gens=%d",
+    logger().info("MPI Threaded MOSES starts, max_evals=%d max_gens=%d",
                   pa.max_evals, pa.max_gens);
 
-    moses_mpi mompi;
+    moses_mpi_comm mompi;
 
-    if (0 >= mompi.num_workers()) {
-        logger().error() << "MPI MOSES requires at least two nodes to operate!";
-        return;
-    }
-
-    // Worker processes loop until done, then return.
-    // Each worker waits for an exemplar, expands it, then returns
-    // the results.
+    // main worker dispatch loop
     if (!mompi.is_mpi_root()) {
-        while(1) {
-            int max_evals = mompi.recv_more_work();
-            if (0 >= max_evals) {
-cout<<"duuude wioerkr= exiting"<<endl;
-                return;
-            }
-
-            combo_tree exemplar;
-            mompi.recv_exemplar(exemplar);
-            if (!mp._dex.create_deme(exemplar)) {
-                // XXX replace this with appropriate message back to root!
-                OC_ASSERT(false, "Exemplar failed to expand!\n");
-            }
-            size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
-
-            mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
-            mp._dex.free_deme();
-            mompi.send_deme(mp, evals_this_deme);
-
-            // Clear the metapop -- start with a new slate each time.
-            mp.clear();
-        }
+        mpi_moses_worker(mp, mompi);
+        return;
     }
 
     // If we are here, then we are the root node.  The root will act
@@ -212,7 +228,7 @@ cout<<"duuude wioerkr= exiting"<<endl;
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-        mpi_expander<Scoring, BScoring, Optimization>
+        mpi_expander_threaded<Scoring, BScoring, Optimization>
             mex(mompi, mp, pa.max_evals - stats.n_evals, stats,
                 merge_mutex, thread_count);
 
@@ -245,16 +261,53 @@ cout<<"duuude thread count="<<thread_count<<endl;
 cout<<"duude are we done yet!?"<<endl;
 };
 
-#else
+#else // HAVE_MULTI_THREAD_MPI
 
-class moses_mpi
+/// mpi_moses main -- non-theaded version
+///
+/// 
+template<typename Scoring, typename BScoring, typename Optimization>
+void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+               const moses_parameters& pa,
+               moses_statistics& stats)
+
 {
-    public:
-        moses_mpi() {}
-        ~moses_mpi() {}
+    logger().info("MPI Uni MOSES starts, max_evals=%d max_gens=%d",
+                  pa.max_evals, pa.max_gens);
 
-        bool is_mpi_root() { return true; }
-};
+    moses_mpi_comm mompi;
+
+    // main worker dispatch loop
+    if (!mompi.is_mpi_root()) {
+        mpi_moses_worker(mp, mompi);
+        return;
+    }
+
+    // If we are here, then we are the root node.  The root will act
+    // as a dispatcher to all of the worker nodes.
+// XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
+// come around ...
+
+    std::mutex merge_mutex;
+    int thread_count = 0;
+
+    while ((stats.n_evals < pa.max_evals)
+           && (pa.max_gens != stats.n_expansions)
+           && (mp.best_score() < pa.max_score))
+    {
+        mpi_expander_threaded<Scoring, BScoring, Optimization>
+            mex(mompi, mp, pa.max_evals - stats.n_evals, stats,
+                merge_mutex, thread_count);
+
+        // This method blocks until there is a free worker...
+        mex.pick_exemplar();
+
+    }
+}
+
+#endif // HAVE_MULTI_THREAD_MPI
+
+#else // HAVE_MPI
 
 template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
@@ -264,7 +317,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     OC_ASSERT(0, "There is no MPI support in this version of moses");
 };
 
-#endif
+#endif  // HAVE_MPI
 
 } // ~namespace moses
 } // ~namespace opencog
