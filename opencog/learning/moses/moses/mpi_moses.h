@@ -308,7 +308,20 @@ public:
 /// mpi_moses main -- non-theaded version
 ///
 /// Main entry point for MPI moses, for the cases where the MPI
-/// implementation does not support threading.
+/// implementation does not support threading.  The algorithm is
+/// structured into a single send-recv loop: work is sent out, so
+/// as to give each worker something to do.  The a check for completed
+/// work is made.  Any demes that are received are merged in a
+/// separate thread; meanwhile, this loops back and sens out more
+/// work.
+///
+/// The implementation of this loop is very similar to that of 
+/// distributed moses.  With appropriate wrappers for the
+/// communications API, it might be possible to consolidate both.
+/// Not clear if such a consolidation is worth-while...
+///
+/// XXX TODO: this could be made pushier, by first sending out more
+/// work, and only then doing the receive.
 template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                const moses_parameters& pa,
@@ -368,12 +381,10 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         // Note that probe_for_deme() is blocking; it returns only if
         // there is work that we can receive.
         int source = mompi.probe_for_deme();
-cout<<"duuude gonna recev from src="<<source<<endl;
         int n_evals = 0;
         bscored_combo_tree_set candidates;
         mompi.recv_deme(source, candidates, n_evals);
         wrkpool.push(source);
-cout<<"duuude done with recev from src="<<source<<endl;
 
         stats.n_expansions ++;
         stats.n_evals += n_evals;
@@ -385,7 +396,11 @@ cout<<"duuude done with recev from src="<<source<<endl;
     }
 
 theend:
-cout<<"duuude byyyyyyyy"<<endl;
+
+    // Shut down each of the workers.
+    for (size_t i=0; i<tot_workers; i++) {
+        mompi.send_finished(i+1);
+    }
 
     logger().info("MPI mono-threaded MOSES ends");
 }
