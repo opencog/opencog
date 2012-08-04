@@ -208,6 +208,20 @@ cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << " returnin a deme after eval
     }
 }
 
+/// probe_for_deme -- return value >0 if there is a deme ready to recv.
+///
+/// This method blocks if there is no work to receive.
+int moses_mpi_comm::probe_for_deme()
+{
+    MPI::Status status;
+    MPI::COMM_WORLD.Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, status);
+    int tag = status.Get_tag();
+    OC_ASSERT(tag == MSG_NUM_EVALS);
+    int source = status.Get_source();
+    OC_ASSERT(source != 0);
+    return source;
+}
+
 /// recv_deme -- receive the deme sent by send_deme()
 /// @n_evals is the actual number of evaluations performed.
 ///

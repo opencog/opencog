@@ -216,7 +216,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             hpm_it = find_free_resource(hpm, jobs);
         }
 
-        // Check for results and merge if necessary
+        // Check for results and merge any that are found
         bool found_one = false;
         foreach (host_proc_map::value_type& hpmv, hpm) {
             for (proc_map::iterator it = hpmv.second.begin();

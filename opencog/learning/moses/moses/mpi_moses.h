@@ -47,6 +47,7 @@ class moses_mpi_comm
 
         // root methods, to be used only by root node.
         void dispatch_deme(int target, const combo_tree&, int max_evals);
+        int probe_for_deme();
         void recv_deme(int source, bscored_combo_tree_set&, int& n_evals);
         void send_finished(int target);
 
@@ -98,7 +99,7 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
     }
 }
 
-#define HAVE_MULTI_THREAD_MPI 1
+// #define HAVE_MULTI_THREAD_MPI 1
 #ifdef HAVE_MULTI_THREAD_MPI
 
 struct worker_node
@@ -283,12 +284,12 @@ struct merge_deme_threaded
 private:
      metapopulation<Scoring, BScoring, Optimization>& _mp;
      bscored_combo_tree_set& _candidates;
-     int& _thread_count;
+     std::atomic<int>& _thread_count;
 
 public:
     // Cache of arguments we will need.
     merge_deme_threaded(metapopulation<Scoring, BScoring, Optimization>& mp,
-                      bscored_combo_tree_set& cands, int& tcount)
+                      bscored_combo_tree_set& cands, std::atomic<int>& tcount)
         : _mp(mp), _candidates(cands), _thread_count(tcount)
     {}
 
@@ -314,7 +315,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                moses_statistics& stats)
 
 {
-    logger().info("MPI Uni MOSES starts, max_evals=%d max_gens=%d",
+    logger().info("MPI mon-threaded MOSES starts, max_evals=%d max_gens=%d",
                   pa.max_evals, pa.max_gens);
 
     moses_mpi_comm mompi;
@@ -327,24 +328,66 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     // If we are here, then we are the root node.  The root will act
     // as a dispatcher to all of the worker nodes.
-// XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
-// come around ...
 
-    // std::atomic<int> thread_count = 0;
+    // Pool of free workers maintained in a circular queue.
+    std::queue<int> wrkpool;
+    size_t tot_workers = mompi.num_workers();
+    for (size_t i=0; i<tot_workers; i++)
+        wrkpool.push(i+1);
+
+    std::atomic<int> thread_count(0);
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-#if 0
-        while
+        // Feeder: push work out to each worker.
+        while (0 < wrkpool.size()) {
+            bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+            if (exemplar == mp.end()) {
+                if (tot_workers == wrkpool.size()) {
+                    logger().warn("There are no more exemplars in the metapopulation "
+                                  "that have not been visited and yet a solution was "
+                                  "not found.  Perhaps reduction is too strict?");
+                    goto theend;
+                }
+
+                // If there are no more exemplars in our pool, we will
+                // have to wait for some more to come rolling in.
+                break;
+            }
+
+            const combo_tree& extree = get_tree(*exemplar); 
+            int worker = wrkpool.front();
+            wrkpool.pop();
+            int max_evals = pa.max_evals - stats.n_evals;
+            mompi.dispatch_deme(worker, extree, max_evals);
+        }
+
+        // Check for results and merge any that are found
+        // Note that probe_for_deme() is blocking; it returns only if
+        // there is work that we can receive.
+        int source = mompi.probe_for_deme();
+cout<<"duuude gonna recev from src="<<source<<endl;
+        int n_evals = 0;
+        bscored_combo_tree_set candidates;
+        mompi.recv_deme(source, candidates, n_evals);
+        wrkpool.push(source);
+cout<<"duuude done with recev from src="<<source<<endl;
+
+        stats.n_expansions ++;
+        stats.n_evals += n_evals;
 
         // Perform  deme merge in a distinct thread.
         merge_deme_threaded<Scoring, BScoring, Optimization>
             mex(mp, candidates, thread_count);
         std::async(std::launch::async, mex);
-#endif
     }
+
+theend:
+cout<<"duuude byyyyyyyy"<<endl;
+
+    logger().info("MPI mono-threaded MOSES ends");
 }
 
 #endif // HAVE_MULTI_THREAD_MPI
