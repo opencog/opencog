@@ -25,8 +25,8 @@
 #ifndef _OPENCOG_MPI_MOSES_H
 #define _OPENCOG_MPI_MOSES_H
 
+#include <atomic>
 #include <future>
-#include <mutex>
 #include <opencog/util/pool.h>
 
 #include "metapopulation.h"
@@ -146,8 +146,7 @@ private:
      metapopulation<Scoring, BScoring, Optimization>& _mp;
      int _max_evals;
      moses_statistics& _stats;
-     std::mutex& _merge_mutex;
-     int& _thread_count;
+     std::atomic<int>& _thread_count;
 
 public:
     // Cache of arguments we will need.
@@ -155,11 +154,11 @@ public:
                  worker_pool& wpool,
                  metapopulation<Scoring, BScoring, Optimization>& mp,
                  int max_evals, moses_statistics& stats,
-                 std::mutex& mu, int& tcount) :
+                 std::atomic<int>& tcount) :
         _worker(_w), _extree(_t),
         _mompi(mompi), _pool(wpool),
         _mp(mp), _max_evals(max_evals), _stats(stats),
-        _merge_mutex(mu), _thread_count(tcount)
+        _thread_count(tcount)
     {}
 
     /// Select an exemplar out of the metapopulation. Cache it.
@@ -188,9 +187,7 @@ public:
     // self-deletes upon exit of the thread.
     bool operator()()
     {
-        _merge_mutex.lock();
         _thread_count++;
-        _merge_mutex.unlock();
 
         _mompi.dispatch_deme(_worker.rank, _extree, _max_evals);
 
@@ -200,14 +197,12 @@ public:
 cout<<"duuude master "<<getpid() <<" from="<<_worker.rank << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
         _pool.give_back(_worker);
 
-        // We assume that the metapop merge operations are not
-        // thread-safe, and so we will lock here, to be prudent.
-        std::lock_guard<std::mutex> lock(_merge_mutex);
         _stats.n_expansions ++;
         _stats.n_evals += n_evals;
+
         _mp.update_best_candidates(candidates);
         _mp.merge_candidates(candidates);
-        _mp.log_best_candidates();
+
         _thread_count--;
         return false;
     }
@@ -236,8 +231,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     worker_pool wrkpool(mompi.num_workers());
 
-    std::mutex merge_mutex;
-    int thread_count = 0;
+    std::atomic<int> thread_count(0);
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
@@ -245,7 +239,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     {
         mpi_expander_threaded<Scoring, BScoring, Optimization>
             mex(mompi, wrkpool, mp, pa.max_evals - stats.n_evals, stats,
-                merge_mutex, thread_count);
+                thread_count);
 
         // This method blocks until there is a free worker...
         mex.pick_exemplar();
@@ -284,34 +278,27 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 #else // HAVE_MULTI_THREAD_MPI
 
 template<typename Scoring, typename BScoring, typename Optimization>
-struct mpi_deme_merge_thread
+struct merge_deme_threaded
 {
 private:
      metapopulation<Scoring, BScoring, Optimization>& _mp;
      bscored_combo_tree_set& _candidates;
-     std::mutex& _merge_mutex;
      int& _thread_count;
 
 public:
     // Cache of arguments we will need.
-    mpi_deme_merge_thread(metapopulation<Scoring, BScoring, Optimization>& mp,
-                      bscored_combo_tree_set& cands,
-                      std::mutex& mu, int& tcount)
-        : _mp(mp), _candidates(cands),
-        _merge_mutex(mu), _thread_count(tcount)
+    merge_deme_threaded(metapopulation<Scoring, BScoring, Optimization>& mp,
+                      bscored_combo_tree_set& cands, int& tcount)
+        : _mp(mp), _candidates(cands), _thread_count(tcount)
     {}
 
     // Function that will run inside a thread
     // Self-deletes upon exit of the thread.
     bool operator()()
     {
-        // We assume that the metapop merge operations are not
-        // thread-safe, and so we will lock here, to be prudent.
-        std::lock_guard<std::mutex> lock(_merge_mutex);
         _thread_count++;
         _mp.update_best_candidates(_candidates);
         _mp.merge_candidates(_candidates);
-        _mp.log_best_candidates();
         _thread_count--;
         return false;
     }
@@ -343,8 +330,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 // XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
 // come around ...
 
-    std::mutex merge_mutex;
-    int thread_count = 0;
+    // std::atomic<int> thread_count = 0;
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
@@ -354,8 +340,8 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         while
 
         // Perform  deme merge in a distinct thread.
-        mpi_deme_merge_thread<Scoring, BScoring, Optimization>
-            mex(mp, candidates, merge_mutex, thread_count);
+        merge_deme_threaded<Scoring, BScoring, Optimization>
+            mex(mp, candidates, thread_count);
         std::async(std::launch::async, mex);
 #endif
     }

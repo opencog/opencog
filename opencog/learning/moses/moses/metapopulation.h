@@ -26,6 +26,7 @@
 #define _OPENCOG_METAPOPULATION_H
 
 #include <future>
+#include <mutex>
 #include <math.h>
 
 #include <boost/unordered_set.hpp>
@@ -554,10 +555,13 @@ struct metapopulation : bscored_combo_tree_set
     }
 
     /// Merge candidates in to the metapopulation.
+    ///
     /// If the include-dominated flag is not set, the set of candidates
     /// might be changed during merge, with the dominated candidates
     /// removed during the merge. XXX Really?  It looks like the code
     /// does this culling *before* this method is called ...
+    ///
+    /// Safe to call in a multi-threaded context.
     template<typename Candidates>
     void merge_candidates(Candidates& candidates)
     {
@@ -571,6 +575,9 @@ struct metapopulation : bscored_combo_tree_set
                                       -1, true, true).str());
             }
         }
+
+        // Serialize access
+        std::lock_guard<std::mutex> lock(_merge_mutex);
 
         // Note that merge_nondominated() is very cpu-expensive and
         // complex...
@@ -1184,37 +1191,43 @@ struct metapopulation : bscored_combo_tree_set
         return res;
     }
 
-    // Update the record of the best score seen, and the associated tree.
+    /// Update the record of the best score seen, and the associated tree.
+    /// Safe to call in a multi-threaded context.
     void update_best_candidates(const bscored_combo_tree_set& candidates)
     {
-        if (!candidates.empty()) {
+        if (candidates.empty())
+            return;
 
-            // Candidates are kept in weighted score order, not in
-            // absolute score order.  Thus, we need to search through
-            // the first few to find the true best score.  Also, there
-            // may be several candidates with the best score.
-            score_t best_score = get_score(_best_cscore);
-            complexity_t best_cpx = get_complexity(_best_cscore);
+        // Make this routine thread-safe.
+        // XXX this lock probably doesn't have to be the same one
+        // that merge uses.  I think. 
+        std::lock_guard<std::mutex> lock(_merge_mutex);
 
-            foreach(const bscored_combo_tree& it, candidates)
+        // Candidates are kept in weighted score order, not in
+        // absolute score order.  Thus, we need to search through
+        // the first few to find the true best score.  Also, there
+        // may be several candidates with the best score.
+        score_t best_score = get_score(_best_cscore);
+        complexity_t best_cpx = get_complexity(_best_cscore);
+
+        foreach(const bscored_combo_tree& it, candidates)
+        {
+            const composite_score& cit = get_composite_score(it);
+            score_t sc = get_score(cit);
+            complexity_t cpx = get_complexity(cit);
+            if ((sc > best_score) ||
+                ((sc == best_score) && (cpx <= best_cpx)))
             {
-                const composite_score& cit = get_composite_score(it);
-                score_t sc = get_score(cit);
-                complexity_t cpx = get_complexity(cit);
-                if ((sc > best_score) ||
-                    ((sc == best_score) && (cpx <= best_cpx)))
-                {
                     if ((sc > best_score) ||
-                        ((sc == best_score) && (cpx < best_cpx)))
-                    {
-                        _best_cscore = cit;
-                        best_score = get_score(_best_cscore);
-                        best_cpx = get_complexity(_best_cscore);
-                        _best_candidates.clear();
-                        logger().debug() << "New best score: " << _best_cscore;
-                    }
-                    _best_candidates.insert(it);
+                    ((sc == best_score) && (cpx < best_cpx)))
+                {
+                    _best_cscore = cit;
+                    best_score = get_score(_best_cscore);
+                    best_cpx = get_complexity(_best_cscore);
+                    _best_candidates.clear();
+                    logger().debug() << "New best score: " << _best_cscore;
                 }
+                _best_candidates.insert(it);
             }
         }
     }
@@ -1340,6 +1353,9 @@ protected:
 
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
+
+    // lock to enable thread-safe deme merging.
+    std::mutex _merge_mutex;
 };
 
 } // ~namespace moses

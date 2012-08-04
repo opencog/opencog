@@ -24,6 +24,7 @@
 #ifndef _MOSES_MOSES_PARAMS_H
 #define _MOSES_MOSES_PARAMS_H
 
+#include <atomic>
 #include <map>
 #include <boost/program_options/variables_map.hpp>
 
@@ -70,8 +71,12 @@ struct moses_parameters
 struct moses_statistics
 {
     moses_statistics() : n_evals(0), n_expansions(0) {}
-    int n_evals;        // total number of scoring function evaluations
-    int n_expansions;   // total number of deme expansions (generations)
+
+    // total number of scoring function evaluations
+    std::atomic<int> n_evals;
+
+    // total number of deme expansions (generations)
+    std::atomic<int> n_expansions;
 };
 
 
