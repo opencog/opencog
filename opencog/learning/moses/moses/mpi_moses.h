@@ -319,9 +319,7 @@ public:
 /// distributed moses.  With appropriate wrappers for the
 /// communications API, it might be possible to consolidate both.
 /// Not clear if such a consolidation is worth-while...
-///
-/// XXX TODO: this could be made pushier, by first sending out more
-/// work, and only then doing the receive.
+//
 template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                const moses_parameters& pa,
@@ -350,6 +348,8 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     std::atomic<int> thread_count(0);
 
+    int source = 0;
+
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
@@ -358,10 +358,11 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         while (0 < wrkpool.size()) {
             bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
-                if (tot_workers == wrkpool.size()) {
-                    logger().warn("There are no more exemplars in the metapopulation "
-                                  "that have not been visited and yet a solution was "
-                                  "not found.  Perhaps reduction is too strict?");
+                if ((tot_workers == wrkpool.size()) && (0 == source)) {
+                    logger().warn(
+                        "There are no more exemplars in the metapopulation "
+                        "that have not been visited and yet a solution was "
+                        "not found.  Perhaps reduction is too strict?");
                     goto theend;
                 }
 
@@ -377,14 +378,19 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             mompi.dispatch_deme(worker, extree, max_evals);
         }
 
-        // Check for results and merge any that are found
-        // Note that probe_for_deme() is blocking; it returns only if
-        // there is work that we can receive.
-        int source = mompi.probe_for_deme();
+        if (0 == source) {
+            // Check for results and merge any that are found
+            // Note that probe_for_deme() is blocking; it returns only if
+            // there is work that we can receive.
+            source = mompi.probe_for_deme();
+            wrkpool.push(source);
+            continue;
+        }
+
         int n_evals = 0;
         bscored_combo_tree_set candidates;
         mompi.recv_deme(source, candidates, n_evals);
-        wrkpool.push(source);
+        source = 0;
 
         stats.n_expansions ++;
         stats.n_evals += n_evals;
