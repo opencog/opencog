@@ -36,6 +36,19 @@ namespace opencog { namespace moses {
 
 #ifdef HAVE_MPI
 
+// MPI wrapper class.  The goal of this class is to hide all of the 
+// MPI communications details into a distinct .cc file, so that none
+// of the rest of the moses code is polluted with MPI header files.
+// This class is effectively stateless: viz, there is no real reason
+// for having a class here, other than to put all the routines in 
+// a common place.
+//
+// It might be agood idea to turn this into a virtual base class, and
+// have the distributed_moses code use the same API.  That way, we'd
+// have less dispatcher code to maintain.  But this will require some
+// fair amount of work and testing, and there's no pressing need to do
+// this just right now. XXX TODO: do this, someday.
+//
 class moses_mpi_comm
 {
     public:
@@ -55,6 +68,9 @@ class moses_mpi_comm
         int recv_more_work();
         void recv_exemplar(combo_tree&);
         void send_deme(const bscored_combo_tree_set&, int);
+
+        std::atomic<size_t> sent_bytes;
+        std::atomic<size_t> recv_bytes;
 
     protected:
         void send_tree(const combo_tree&, int target);
@@ -346,6 +362,8 @@ theend:
         mompi.send_finished(i+1);
     }
 
+    logger().info() << "MPI: bytes sent=" << mompi.sent_bytes
+                    << " bytes received=" << mompi.recv_bytes;
     logger().info("MPI mono-threaded MOSES ends");
 }
 

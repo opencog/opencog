@@ -42,7 +42,8 @@ enum msg_types
     MSG_CSCORE,          // composite score
 };
 
-moses_mpi_comm::moses_mpi_comm()
+moses_mpi_comm::moses_mpi_comm() :
+    sent_bytes(0), recv_bytes(0)
 {
     int have_thread_support = MPI::Init_thread(MPI_THREAD_MULTIPLE);
 
@@ -98,6 +99,7 @@ void moses_mpi_comm::send_finished(int target)
     int max_evals = 0;
     MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT,
                          target, MSG_MAX_EVALS);
+    sent_bytes += sizeof(int);
 }
 
 /// Send a combo tree to the target node 
@@ -110,6 +112,8 @@ void moses_mpi_comm::send_tree(const combo_tree &tr, int target)
     int stree_sz = xtree.size();
     MPI::COMM_WORLD.Send(&stree_sz, 1, MPI::INT, target, MSG_COMBO_TREE_LEN);
     MPI::COMM_WORLD.Send(stree, stree_sz, MPI::CHAR, target, MSG_COMBO_TREE);
+
+    sent_bytes += sizeof(int) + stree_sz;
 }
 
 /// Receive a combo tree from the source node.
@@ -124,6 +128,8 @@ void moses_mpi_comm::recv_tree(combo_tree &tr, int source)
     stringstream ss;
     ss << stree;
     ss >> tr;
+
+    recv_bytes += sizeof(int) + stree_sz;
 }
 
 /// Send composite score to target node
@@ -135,6 +141,8 @@ void moses_mpi_comm::send_cscore(const composite_score &cs, int target)
     flattened_score[2] = cs.get_complexity_penalty();
     MPI::COMM_WORLD.Send(flattened_score, COMPOSITE_SCORE_SIZE,
          MPI::DOUBLE, target, MSG_CSCORE);
+
+    sent_bytes += 3*sizeof(double);
 }
 
 /// Receive composite score from source node
@@ -145,6 +153,7 @@ void moses_mpi_comm::recv_cscore(composite_score &cs, int source)
          MPI::DOUBLE, source, MSG_CSCORE);
 
     cs = composite_score(flattened_score[0], flattened_score[1], flattened_score[2]);
+    recv_bytes += 3*sizeof(double);
 }
 
 /// dispatch_deme -- Send an exemplar to node for deme expansion.
@@ -156,6 +165,7 @@ void moses_mpi_comm::dispatch_deme(int target,
 {
     MPI::COMM_WORLD.Send(&max_evals, 1, MPI::INT, target, MSG_MAX_EVALS);
     send_tree(tr, target);
+    sent_bytes += sizeof(int);
 }
 
 /// recv_more_work -- indicate to worker if there is more work to be done.
@@ -172,6 +182,7 @@ int moses_mpi_comm::recv_more_work()
 {
     int max_evals = 0;
     MPI::COMM_WORLD.Recv(&max_evals, 1, MPI::INT, ROOT_NODE, MSG_MAX_EVALS);
+    recv_bytes += sizeof(int);
     return max_evals;
 }
 
@@ -190,11 +201,11 @@ void moses_mpi_comm::recv_exemplar(combo_tree& exemplar)
 // XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
 void moses_mpi_comm::send_deme(const bscored_combo_tree_set& mp, int n_evals)
 {
-cout << "duude id="<< MPI::COMM_WORLD.Get_rank() << " returnin a deme after evals="<<n_evals<<endl;
     MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
 
     int num_trees = mp.size();
     MPI::COMM_WORLD.Send(&num_trees, 1, MPI::INT, ROOT_NODE, MSG_NUM_COMBO_TREES);
+    sent_bytes += 2*sizeof(int);
 
     bscored_combo_tree_set::const_iterator it;
     for (it = mp.begin(); it != mp.end(); it++) {
@@ -242,6 +253,7 @@ void moses_mpi_comm::recv_deme(int source,
 
     int num_trees = 0;
     MPI::COMM_WORLD.Recv(&num_trees, 1, MPI::INT, source, MSG_NUM_COMBO_TREES);
+    recv_bytes += sizeof(int);
     for (int i=0; i<num_trees; i++) {
         composite_score sc;
         recv_cscore(sc, source);
