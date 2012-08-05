@@ -116,99 +116,25 @@ private:
     std::vector<worker_node> workers;
 };
 
-/// mpi_expander_threaded -- multi-threaded variant of a deme expander.
+/// mpi_moses main -- threaded version
 ///
-/// Expands one exemplar into a deme.  Exemplar is dispatched to an
-/// available MPI node.  Dispatch and collection of results is done
-/// in a distinct thread; thus, this class won't work/is unusable if
-/// the MPI implementation doesn't support MPI_THREAD_MULTIPLE mode.
+/// Main entry point for threaded MPI moses.  Exemplars from the
+/// metapopulation are dispatched to different nodes for expansion; the 
+/// results are returned here, for merging back into the metapopulation.
 ///
-/// This is a "wrapper class"; it doesn't do much; the only reason this
-/// class exists is to make thread creation simpler -- threads require
-/// a function as an argument, and this class provides the needed
-/// operator() to make this work.
+/// This variant assumes that MPI is thread-safe, and so handles
+/// communication to each distinct node in a distinct thread.  Thus, it
+/// will not work if the MPI implementation doesn't support
+/// MPI_THREAD_MULTIPLE mode.
 ///
-/// This class has been lightly tested, and seems to work. It has not
+/// This routine has been lightly tested, and seems to work. It has not
 /// been heavily teted, because I don't have a multi-node machine with
-/// an MPI implementation that supports threads.
-//
-template<typename Scoring, typename BScoring, typename Optimization>
-struct mpi_expander_threaded
-{
-private:
-     worker_node _w;
-     combo_tree _t;
-
-     worker_node& _worker;
-     combo_tree& _extree;
-
-     moses_mpi_comm& _mompi;
-     worker_pool& _pool;
-     metapopulation<Scoring, BScoring, Optimization>& _mp;
-     int _max_evals;
-     moses_statistics& _stats;
-     std::atomic<int>& _thread_count;
-
-public:
-    // Cache of arguments we will need.
-    mpi_expander_threaded(moses_mpi_comm& mompi,
-                 worker_pool& wpool,
-                 metapopulation<Scoring, BScoring, Optimization>& mp,
-                 int max_evals, moses_statistics& stats,
-                 std::atomic<int>& tcount) :
-        _worker(_w), _extree(_t),
-        _mompi(mompi), _pool(wpool),
-        _mp(mp), _max_evals(max_evals), _stats(stats),
-        _thread_count(tcount)
-    {}
-
-    /// Select an exemplar out of the metapopulation. Cache it.
-    /// Try to get an unoccupied node.  This method will block if all
-    /// the nodes are busy.  When if finally unblocks, caller can
-    /// start sending stuff to the worker.
-    void pick_exemplar()
-    {
-        bscored_combo_tree_set::const_iterator exemplar = _mp.select_exemplar();
-        if (exemplar == _mp.end()) {
-            // XXX fixme we should block and wait, ...!  But how ..!?
-            logger().warn("There are no more exemplars in the metapopulation "
-                          "that have not been visited and yet a solution was "
-                          "not found.  Perhaps reduction is too strict?");
-            // If there are no more exemplars in our pool, we will
-            // have to wait for some more to come rolling in.
-            return;
-        }
-        _extree = get_tree(*exemplar);
-
-        // borrow will block, if there are no workers free.
-        _worker = _pool.borrow();
-    }
-
-    // Function that will run inside a thread
-    // self-deletes upon exit of the thread.
-    bool operator()()
-    {
-        _thread_count++;
-
-        _mompi.dispatch_deme(_worker.rank, _extree, _max_evals);
-
-        int n_evals = 0;
-        bscored_combo_tree_set candidates;
-        _mompi.recv_deme(_worker.rank, candidates, n_evals);
-cout<<"duuude master "<<getpid() <<" from="<<_worker.rank << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
-        _pool.give_back(_worker);
-
-        _stats.n_expansions ++;
-        _stats.n_evals += n_evals;
-
-        _mp.update_best_candidates(candidates);
-        _mp.merge_candidates(candidates);
-
-        _thread_count--;
-        return false;
-    }
-};
-
+/// an MPI implementation that supports threads.  There's no particular
+/// advantage of this class over the mono-threaded class; its just that
+/// the design of this class seemed to be intuitively simpler and easier
+/// than writing a home-grown dispatcher loop that the mono-threaed
+/// version (below) needs.
+///
 template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                const moses_parameters& pa,
@@ -230,7 +156,8 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 // XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
 // come around ...
 
-    worker_pool wrkpool(mompi.num_workers());
+    size_t tot_workers = mompi.num_workers();
+    worker_pool wrkpool(tot_workers);
 
     std::atomic<int> thread_count(0);
 
@@ -238,19 +165,52 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-        mpi_expander_threaded<Scoring, BScoring, Optimization>
-            mex(mompi, wrkpool, mp, pa.max_evals - stats.n_evals, stats,
-                thread_count);
+        bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+        if (exemplar == mp.end()) {
+            if (wrkpool.available() == tot_workers) {
+                logger().warn(
+                    "There are no more exemplars in the metapopulation "
+                    "that have not been visited and yet a solution was "
+                    "not found.  Perhaps reduction is too strict?");
+                    goto theend;
+                }
 
-        // This method blocks until there is a free worker...
-        mex.pick_exemplar();
+            // If there are no more exemplars in our pool, we will
+            // have to wait for some more to come rolling in.
+            sleep(1);
+            continue;
+        }
 
-        // If we are here, we unblocked, and have a woker ready to do
+        const combo_tree& extree = get_tree(*exemplar);
+
+        // borrow will block, if there are no workers free.
+        worker_node& worker = wrkpool.borrow();
+
+        // If we are here, pool unblocked, and have a woker ready to do
         // the work. Create a thread to handle all communications with
-        // this worker one-on-one.  Note that the async code will make a
-        // copy of mex, put it in a thread private area, and use that,
-        // so it is completely safe for us to have mex on stack here.
-        std::async(std::launch::async, mex);
+        // this worker one-on-one. Note that the async code will make a
+        // copy of of all references, put them in a thread private area,
+        // and use those ...
+        std::async(std::launch::async, 
+            [&]() {
+                thread_count++;
+                int max_evals = pa.max_evals - stats.n_evals;
+                mompi.dispatch_deme(worker.rank, extree, max_evals);
+
+                int n_evals = 0;
+                bscored_combo_tree_set candidates;
+                mompi.recv_deme(worker.rank, candidates, n_evals);
+cout<<"duuude master "<<getpid() <<" from="<<worker.rank << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
+                wrkpool.give_back(worker);
+
+                stats.n_expansions ++;
+                stats.n_evals += n_evals;
+
+                mp.update_best_candidates(candidates);
+                mp.merge_candidates(candidates);
+
+                thread_count--;
+                });
 
 // XXX should print stats less often...
         // Print stats in a way that makes them easy to graph.
@@ -266,44 +226,17 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         }
     }
 
+theend:
     // Shut down each of the workers.
-    int np = mompi.num_workers();
-    for (int i=0; i<np; i++) {
+    for (size_t i=0; i<tot_workers; i++) {
         worker_node& worker = wrkpool.borrow();
         mompi.send_finished(worker.rank);
     }
 
-    logger().info("MPI MOSES ends");
+    logger().info("MPI Threaded MOSES ends");
 };
 
 #else // HAVE_MULTI_THREAD_MPI
-
-template<typename Scoring, typename BScoring, typename Optimization>
-struct merge_deme_threaded
-{
-private:
-     metapopulation<Scoring, BScoring, Optimization>& _mp;
-     bscored_combo_tree_set& _candidates;
-     std::atomic<int>& _thread_count;
-
-public:
-    // Cache of arguments we will need.
-    merge_deme_threaded(metapopulation<Scoring, BScoring, Optimization>& mp,
-                      bscored_combo_tree_set& cands, std::atomic<int>& tcount)
-        : _mp(mp), _candidates(cands), _thread_count(tcount)
-    {}
-
-    // Function that will run inside a thread
-    // Self-deletes upon exit of the thread.
-    bool operator()()
-    {
-        _thread_count++;
-        _mp.update_best_candidates(_candidates);
-        _mp.merge_candidates(_candidates);
-        _thread_count--;
-        return false;
-    }
-};
 
 /// mpi_moses main -- non-theaded version
 ///
@@ -395,10 +328,15 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         stats.n_expansions ++;
         stats.n_evals += n_evals;
 
-        // Perform  deme merge in a distinct thread.
-        merge_deme_threaded<Scoring, BScoring, Optimization>
-            mex(mp, candidates, thread_count);
-        std::async(std::launch::async, mex);
+        // Perform deme merge in a distinct thread.
+        // We want to keep this thread available for i/o
+        std::async(std::launch::async,
+            [&]() { 
+                thread_count++;
+                mp.update_best_candidates(candidates);
+                mp.merge_candidates(candidates);
+                thread_count--;
+            });
     }
 
 theend:
