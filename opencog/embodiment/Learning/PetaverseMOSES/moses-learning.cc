@@ -164,7 +164,7 @@ void moses_learning::operator()()
 
         std::cout << "BUILD" << std::endl;
         bscored_combo_tree_set::const_iterator exemplar = metapop->select_exemplar();
-        if (metapop->_dex.create_deme(exemplar))
+        if (metapop->_dex.create_deme(*exemplar))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
