@@ -1015,6 +1015,15 @@ int moses_exec(int argc, char** argv)
         return 0;
     }
 
+    // Avoid MPI log file clobber mania
+    if (enable_mpi) {
+        stringstream ss;
+        ss << getpid();
+        size_t pos = log_file.find_last_of('.');
+        log_file.insert(pos, ss.str());
+        log_file.insert(pos, "-pid-");
+    }
+
     // Set log file.
     if (log_file_dep_opt) {
         set<string> ignore_opt{log_file_dep_opt_opt.first};

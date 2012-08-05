@@ -275,7 +275,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                moses_statistics& stats)
 
 {
-    logger().info("MPI mon-threaded MOSES starts, max_evals=%d max_gens=%d",
+    logger().info("MPI mono-threaded MOSES starts, max_evals=%d max_gens=%d",
                   pa.max_evals, pa.max_gens);
 
     moses_mpi_comm mompi;
@@ -353,6 +353,21 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 mp.merge_candidates(candidates);
                 thread_count--;
             });
+
+        // Print stats in a way that makes them easy to graph.
+        // (columns of tab-seprated numbers)
+        // XXX this is kind-of buggy, since the following data is not
+        // updated and collected atomically... other threads may be
+        // merging and updating as this print happens. Yuck. Oh well.
+        if (logger().isInfoEnabled()) {
+            stringstream ss;
+            ss << "Stats: " << stats.n_expansions;
+            ss << "\t" << stats.n_evals;    // number of evaluations so far
+            ss << "\t" << mp.size();       // size of the metapopulation
+            ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
+            ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+            logger().info(ss.str());
+        }
     }
 
 theend:
