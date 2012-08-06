@@ -6,7 +6,7 @@ from types_inheritance import types_graph, name_to_type, is_a
 from collections import defaultdict
 from m_util import log
 from m_adaptors import FakeAtom
-log.setLevel(log.DEBUG)
+log.add_level(log.DEBUG)
 log.use_stdout(True)
 
     

@@ -25,42 +25,60 @@ def format_log(offset, dsp_caller = True, *args):
     return out
 
 class Logger(object):
+    DEBUG = 0
+    INFO = 1
+    WARNING = 2
+    ERROR = 3
     def __init__(self, f = 'opencog-python.log'):
-        self._file = open(f,'w')
+        try:
+            self._file = open(f,'w')
+        except IOError:
+            print " error: can't open logging file %s " % f
+            #raise IOError
+        self._filename = f
         self.to_stdout = True
-        self._leves = []
-        self.DEBUG = 0
-        self.INFO = 1
-        self.WARNING = 2
-        self.ERROR = 3
+        self._leves = set()
         #
-        self.trace = True
+        self.to_file = True
         self.ident = 0
     
     def debug(self,msg):
-        if self.trace and self.DEBUG in self._leves:
-            print >>self._file, "[DEBUG]:"  + str(msg)
-        if self.to_stdout:
-            print "[DEBUG]:" +  str(msg)
-            #pprint("[DEBUG]:"  + str(msg))
+
+        try:
+            if self.to_file and Logger.DEBUG in self._leves:
+                print >>self._file, "[DEBUG]:"  + str(msg)
+            if self.to_stdout:
+                print "[DEBUG]:" +  str(msg)
+                #pprint("[DEBUG]:"  + str(msg))
+        except IOError:
+            print " error: can't write logging file %s " % self._filename
 
     def info(self, msg):
-        if self.trace and self.INFO in self._leves:
-            print >>self._file, "[INFO]:"  + str(msg)
-        if self.to_stdout:
-            print "[INFO]:" +  str(msg)
+        try:
+            if self.to_file and Logger.INFO in self._leves:
+                print >>self._file, "[INFO]:"  + str(msg)
+            if self.to_stdout:
+                print "[INFO]:" +  str(msg)
+        except IOError:
+            print " error: can't write logging file %s " % self._filename
 
     def warning(self,msg):
-        if self.trace and self.WARNING in self._leves:
-            print >>self._file, "[WARNING]:"  + str(msg)
-        if self.to_stdout:
-            print "[WARNING]:" +  str(msg)
+        try:
+            if self.to_file and Logger.WARNING in self._leves:
+                print >>self._file, "[WARNING]:"  + str(msg)
+            if self.to_stdout:
+                print "[WARNING]:" +  str(msg)
+        except IOError:
+            print " error: can't write logging file %s " % self._filename
 
     def error(self, msg):
-        if self.trace and self.ERROR in self._leves:
-            print >>self._file, "[ERROR]:"  + str(msg)
-        if self.to_stdout:
-            print "[ERROR]:" +  str(msg)
+        try:
+            if self.to_file and Logger.ERROR in self._leves:
+                print >>self._file, "[ERROR]:"  + str(msg)
+            if self.to_stdout:
+                print "[ERROR]:" +  str(msg)
+        except IOError:
+            print " error: can't write logging file %s " % self._filename
 
     def flush(self):
         self._file.flush()
@@ -68,7 +86,11 @@ class Logger(object):
     def use_stdout(self, use):
         self.to_stdout = use
 
-    def setLevel(self, level):
-        self._leves.append(level)
+    #def setLevel(self, level):
+        #self._leves.append(level)
+    def add_level(self, level):
+        self._leves.add(level)
+        '''docstring for add_level''' 
+        pass
 log = Logger()
-log.setLevel(log.ERROR)
+log.add_level(Logger.ERROR)
