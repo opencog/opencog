@@ -51,7 +51,7 @@ void measure(vector<string> arguments)
         stringstream ss;
 #if DO_THREADING
         ss << "-j" << i;
-#elif 0
+#elif DO_SEEDS
         ss << "-r" << i;
 #else
         int nrep = 10000*(1<<i);

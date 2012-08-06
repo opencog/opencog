@@ -298,13 +298,12 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     std::atomic<int> thread_count(0);
 
     int source = 0;
+    bool done = false;
 
-    while ((stats.n_evals < pa.max_evals)
-           && (pa.max_gens != stats.n_expansions)
-           && (mp.best_score() < pa.max_score))
+    while (true)
     {
         // Feeder: push work out to each worker.
-        while (0 < wrkpool.size()) {
+        while ((0 < wrkpool.size()) && !done) {
             bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
                 if ((tot_workers == wrkpool.size()) && (0 == source)) {
@@ -312,7 +311,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                         "There are no more exemplars in the metapopulation "
                         "that have not been visited and yet a solution was "
                         "not found.  Perhaps reduction is too strict?");
-                    goto theend;
+                    done = true;
                 }
 
                 // If there are no more exemplars in our pool, we will
@@ -368,9 +367,16 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
             logger().info(ss.str());
         }
-    }
 
-theend:
+        done = done || (stats.n_evals >= pa.max_evals)
+                    || (pa.max_gens == stats.n_expansions)
+                    || (mp.best_score() >= pa.max_score);
+
+        // Keep looping around till all pending messages have been
+        // received.  Failure to do so will prevent MPI from finalizing.
+        if (done && (0 == source) && (wrkpool.size() == tot_workers))
+            break;
+    }
 
     // Shut down each of the workers.
     for (size_t i=0; i<tot_workers; i++) {

@@ -3127,3 +3127,31 @@ sys	0m2.614s
 
 
 
+=======================================================================
+=======================================================================
+=======================================================================
+=======================================================================
+MPI moses.
+OpenMPI
+mpirun -n 6 --hostfile ~/mpd.hosts moses ...
+
+Try parity:
+moses -Hpa -k5 -x1 --mpi=1 -m4000000 -j12
+Parity is very un-even in how long it takes to find a solution, so not
+a good benchmark; but it does give hint of traffic:
+
+procs   time  score  plex  bytes      bytes/sec
+-----   ----  -----  ----  --------   ---------
+   6    5m15    0     30   28625555   28.6MB/315 = 91KB/sec = 1Mbit/sec
+   6   48m24   -4     24  214074796   214MB/2904 = 74KB/sec
+
+
+Try again:
+mpirun -n 6 --hostfile ~/mpd.hosts ./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12 -m320000 --mpi=1
+
+
+Above seem to run with 60-85% cpu utilization across all five nodes.  So
+why did it take sooo much longer than the ssl version? !? I'm confused.
+Yuck. Two effects: firt, it really did seem to run longer; second,
+master proces knew it was done, then waited a *long* time for other 
+workers to wrap it up.
