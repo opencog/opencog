@@ -6,7 +6,7 @@
 # @date 2012-08-04
 from opencog.atomspace import types, TruthValue, AtomSpace
 from viz_graph import Viz_Graph
-from types_inheritance import name_to_type, is_a
+from types_inheritance import name_type_dict, is_a
 from m_util import log, replace_with_dict
 from m_adaptors import FakeAtom
 
@@ -52,9 +52,9 @@ def load_scm_file(a, filename):
     define_dict = { }
     try:
         f = open(filename, "r")
-    except Exception, e:
-        log.debug(str(e))
-        raise e
+    except IOError:
+        log.error("can't not open file %s "%filename )
+        raise IOError
     #for line in f.readlines():
     for line_no, line in enumerate(f.readlines()):
         # code...
@@ -143,11 +143,10 @@ def load_scm_file(a, filename):
             if name != "" :
                 # node
                 try:
-                    node = FakeAtom(name_to_type[t], name, stv, av)
-                except Exception, e:
+                    node = FakeAtom(name_type_dict[t], name, stv, av)
+                except KeyError:
                     log.error("Unknown Atom type '%s' in line %s, pls add related type infomation to file 'types_inheritance.py' "% (t,line_no))
-                    log.error("*********************************************" )
-                    raise e
+                    raise KeyError
                 tree.add_node(name, atom = node)
                 atom_stack.append(node)
                 if l.startswith('('):
@@ -158,10 +157,10 @@ def load_scm_file(a, filename):
                 no_link[t] += 1
                 link_name = t + str(no)
                 try:
-                    link = FakeAtom(name_to_type[t], link_name, stv, av)
-                except Exception, e:
-                    log.debug("Unknown Atom type '%s' in line %s"% (t,line_no))
-                    raise e
+                    link = FakeAtom(name_type_dict[t], link_name, stv, av)
+                except KeyError:
+                    log.error("Unknown Atom type '%s' in line %s"% (t,line_no))
+                    raise KeyError
                 atom_stack.append(link)
                 tree.add_node(link_name, atom = link)
                 if l.startswith('('):
@@ -195,10 +194,11 @@ if __name__ == '__main__':
     import atomspace_abserver
     a = AtomSpace()
     load_scm_file(a, "test_load_scm_file_and_abserver.scm")
+    #load_scm_file(a, "da.scm")
     links = a.get_atoms_by_type(types.Link)
     abserver = atomspace_abserver.Atomspace_Abserver(a)
     abserver.graph_info()
     abserver.filter_graph()
-    abserver.graph.write("test_load_scm_file.dot")
+    abserver.write("test_load_scm_file.dot")
 
     

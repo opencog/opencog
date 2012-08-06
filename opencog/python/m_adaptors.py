@@ -6,9 +6,8 @@
 # @date 2012-07-31
 from opencog.atomspace import Atom
 from types_inheritance import type_to_name
-
 class Viz_OpenCog_Tree_Adaptor(object):
-    """ adaptor to tree type used in pln"""
+    """docstring for tree"""
     def __init__(self, tree_opencog):
         self._op = tree_opencog.op.name if isinstance(tree_opencog.op, Atom) else str(tree_opencog.op)
         self._children = []
@@ -30,14 +29,13 @@ class Viz_OpenCog_Tree_Adaptor(object):
 
 class FakeAtom(object):
     """docstring for FakeAtom"""
-    def __init__(self, type, name, tv = None, av = None):
-        self.type = type
+    def __init__(self, t, name, tv = None, av = None):
+        self.type = t
         self.name = name
         self.tv = tv
         self.av = av
         # @@ could just use attribute method
-        try:
-            self.type_name = type_to_name[type]         # a string
-        except Exception, e:
-            print "Unknown Atom type '%s' in line %s"%str(type)
-            raise e
+        self.type_name = type_to_name(t)
+
+__all__ = ["Viz_OpenCog_Tree_Adaptor", "FakeAtom" ]
+

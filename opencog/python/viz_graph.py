@@ -7,6 +7,7 @@
 
 import networkx as nx
 from collections import defaultdict
+from m_util import log
 
 
 class Tree(object):
@@ -47,7 +48,7 @@ class Tree(object):
     #assert type(trees) == list
     #return Tree("forest", trees)
 
-def tree_to_graphic(tree, graph):
+def tree_to_viz_graphic(tree, graph):
     ''' transfer a simpler and more efficient tree StructureNode
         to Viz_Graph for visualisation purpose
     ''' 
@@ -58,7 +59,7 @@ def tree_to_graphic(tree, graph):
             # make name of tree node unique
             child_name = graph.unique_id(child.op)
             child.op = child_name
-            child_name = tree_to_graphic(child, graph)
+            child_name = tree_to_viz_graphic(child, graph)
             graph.add_edge(tree.op, child_name, order = i)
         return tree.op
     else:
@@ -159,14 +160,13 @@ class Dotty_Output(object):
             ''' 
             content = content % self.body
             f.write(content)
-        except Exception, e:
-            print e
-            raise e
+        except IOError:
+            log.error("can't write dot file: %s" % filename)
         finally:
             f.close()
 
 class Viz_Graph(object):
-    """ draw the graph """
+    """ a wrapper to networkx, which work as a graph drawer"""
     def __init__(self, viz = Dotty_Output()):
         self._nx_graph = nx.DiGraph()
         self.viz = viz
@@ -183,7 +183,8 @@ class Viz_Graph(object):
         target = self.unique_id(target)
         self.add_edge(source, target, **attr)
 
-    # should use carefully
+    # should use carefully, help to get a unique node id
+    # when display link.type_name, it will make add an number behind to make it unique
     def unique_id(self, node):
         ''' supposed to added this node later''' 
         node = str(node)
@@ -232,7 +233,7 @@ class Viz_Graph(object):
         return self._nx_graph.number_of_nodes()
     
     def write(self, filename):
-        """docstring for write_dot"""
+        """ draw the graph"""
         assert self.viz 
         # output nodes
         for node in self._nx_graph.nodes():
@@ -361,4 +362,4 @@ class Graph_Abserver(object):
                 # invalid node
                 return False
         return True
-
+__all__ = ["Dotty_Output","Gephi_Output", "Tree", "tree_to_viz_graphic", "Graph_Abserver" ]

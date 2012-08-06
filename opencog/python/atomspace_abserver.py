@@ -4,9 +4,9 @@ import networkx as ax
 from types_inheritance import types_graph, name_to_type, is_a
 #from pprint import pprint
 from collections import defaultdict
-from m_util import log
+from m_util import log, Logger
 from m_adaptors import FakeAtom
-log.add_level(log.DEBUG)
+log.add_level(Logger.DEBUG)
 log.use_stdout(True)
 
     
@@ -47,7 +47,7 @@ class Atomspace_Abserver(Graph_Abserver):
     
     def _get_edges(self,type):
         """docstring for __getEdges"""
-        return  self.source.get_atoms_by_type(name_to_type[type])
+        return  self.source.get_atoms_by_type(name_to_type(type))
 
     def _nodes_from_edge(self,edge):
         return edge.out
@@ -79,11 +79,10 @@ class Atomspace_Abserver(Graph_Abserver):
                 if len(nodes) > 0:
                     if self.valid_edge(link,nodes):
                         # make the linkname uniqueness
-                        link_name = link.type_name + "[%s]"% str(link.h.value())
+                        link_name = link.type_name + str(link.h.value())
                         for i, node in enumerate(nodes):
                             if is_a(node.type_name, "Link"):
-                                # make the link name uniqueness
-                               node_name = node.type_name + "[%s]"% str(node.h.value())
+                               node_name = node.type_name + str(node.h.value())
                             else:
                                 node_name = node.name
                             #print "%s -> %s" %(link_name,node_name)
@@ -108,6 +107,6 @@ if __name__ == '__main__':
     abserver = Atomspace_Abserver(a)
     abserver.graph_info()
     abserver.filter_graph()
-    abserver.graph.write("test_load_scm_file.dot")
+    abserver.write("test_load_scm_file.dot")
 
     

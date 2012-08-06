@@ -94,3 +94,4 @@ class Logger(object):
         pass
 log = Logger()
 log.add_level(Logger.ERROR)
+__all__ = ["log", "Logger", "replace_with_dict"]
