@@ -110,7 +110,7 @@ int main(int argc, char** argv)
     boost::program_options::variables_map vm;
     jobs_t jobs;
     moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
+    moses_statistics stats;
 
-    //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
-    run_moses(metapop, moses_param);
+    run_moses(metapop, moses_param, stats);
 }
