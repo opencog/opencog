@@ -80,11 +80,14 @@ class Atomspace_Abserver(Graph_Abserver):
                     if self.valid_edge(link,nodes):
                         # make the linkname uniqueness
                         link_name = link.type_name + str(link.h.value())
+                        #print link_name
                         for i, node in enumerate(nodes):
                             if is_a(node.type_name, "Link"):
                                node_name = node.type_name + str(node.h.value())
+                               #print "***%s" % node_name
                             else:
                                 node_name = node.name
+                                #print "^^%s" % node_name
                             #print "%s -> %s" %(link_name,node_name)
                             self.graph.add_edge(link_name,node_name)
                             # maintain order in the list
@@ -101,12 +104,14 @@ class Atomspace_Abserver(Graph_Abserver):
 
 if __name__ == '__main__':
     from load_scm_file import load_scm_file
+    from pre_fishgram import output_atomspace
     a = AtomSpace()
     load_scm_file(a, "test_load_scm_file_and_abserver.scm")
     links = a.get_atoms_by_type(types.Link)
+    output_atomspace(a,"space.log",True)
     abserver = Atomspace_Abserver(a)
-    abserver.graph_info()
+    #abserver.graph_info()
     abserver.filter_graph()
-    abserver.write("test_load_scm_file.dot")
+    abserver.write("test_atomspace_abserver.dot")
 
     

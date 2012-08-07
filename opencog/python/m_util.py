@@ -11,8 +11,11 @@ import inspect
 
 def replace_with_dict(s, d):
     '''replace key words in a string with dictionary '''
-    pattern = re.compile(r'\b(' + '|'.join(d.keys()) + r')\b')
-    return pattern.sub(lambda x: d[x.group()], s)
+    try:
+        pattern = re.compile(r'\b(' + '|'.join(d.keys()) + r')\b')
+        return pattern.sub(lambda x: d[x.group()], s)
+    except Exception:
+        return s
 
 def format_log(offset, dsp_caller = True, *args):
     '''  '''
@@ -37,17 +40,18 @@ class Logger(object):
             #raise IOError
         self._filename = f
         self.to_stdout = True
-        self._leves = set()
+        self._levels = set()
         #
         self.to_file = True
         self.ident = 0
+        self.add_level(Logger.ERROR)
     
     def debug(self,msg):
 
         try:
-            if self.to_file and Logger.DEBUG in self._leves:
+            if self.to_file and Logger.DEBUG in self._levels:
                 print >>self._file, "[DEBUG]:"  + str(msg)
-            if self.to_stdout:
+            if self.to_stdout and Logger.DEBUG in self._levels:
                 print "[DEBUG]:" +  str(msg)
                 #pprint("[DEBUG]:"  + str(msg))
         except IOError:
@@ -55,27 +59,28 @@ class Logger(object):
 
     def info(self, msg):
         try:
-            if self.to_file and Logger.INFO in self._leves:
+            if self.to_file and Logger.INFO in self._levels:
                 print >>self._file, "[INFO]:"  + str(msg)
-            if self.to_stdout:
+            if self.to_stdout and Logger.INFO in self._levels:
                 print "[INFO]:" +  str(msg)
         except IOError:
             print " error: can't write logging file %s " % self._filename
+            
 
     def warning(self,msg):
         try:
-            if self.to_file and Logger.WARNING in self._leves:
+            if self.to_file and Logger.WARNING in self._levels:
                 print >>self._file, "[WARNING]:"  + str(msg)
-            if self.to_stdout:
+            if self.to_stdout and Logger.WARNING in self._levels:
                 print "[WARNING]:" +  str(msg)
         except IOError:
             print " error: can't write logging file %s " % self._filename
 
     def error(self, msg):
         try:
-            if self.to_file and Logger.ERROR in self._leves:
+            if self.to_file and Logger.ERROR in self._levels:
                 print >>self._file, "[ERROR]:"  + str(msg)
-            if self.to_stdout:
+            if self.to_stdout and Logger.ERROR in self._levels:
                 print "[ERROR]:" +  str(msg)
         except IOError:
             print " error: can't write logging file %s " % self._filename
@@ -87,11 +92,10 @@ class Logger(object):
         self.to_stdout = use
 
     #def setLevel(self, level):
-        #self._leves.append(level)
+        #self._levels.append(level)
     def add_level(self, level):
-        self._leves.add(level)
+        self._levels.add(level)
         '''docstring for add_level''' 
-        pass
 log = Logger()
-log.add_level(Logger.ERROR)
+#log.add_level(Logger.ERROR)
 __all__ = ["log", "Logger", "replace_with_dict"]
