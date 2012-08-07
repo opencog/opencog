@@ -7,7 +7,7 @@
 from opencog.atomspace import types, TruthValue, AtomSpace
 from viz_graph import Viz_Graph
 from types_inheritance import name_type_dict, is_a
-from m_util import Logger, replace_with_dict
+from m_util import Logger, dict_sub
 from m_adaptors import FakeAtom
 log = Logger()
 log.to_file = False
@@ -95,7 +95,7 @@ def load_scm_file(a, filename):
                 try:
                     second = elms[2]
                     second = second.split(')')[0]
-                    second = replace_with_dict(second, define_dict)
+                    second = dict_sub(define_dict, second)
                 except Exception:
                     second = None
 
@@ -103,7 +103,7 @@ def load_scm_file(a, filename):
                 try:
                     third = elms[3]
                     third = third.split(')')[0]
-                    third = replace_with_dict(third, define_dict)
+                    third = dict_sub(define_dict, third)
                 except Exception:
                     third = None
                 #log.debug("********************" )
@@ -122,9 +122,9 @@ def load_scm_file(a, filename):
                         temp = second.split(" ")
                         mean = float(temp[1])
                         count = float(temp[2])
+                        # atcually, temp[2] is confidence of atom, but no way to assign 
+                        # the value to stv!
                         stv = TruthValue(mean,count)
-                        #print strenth
-                        #print count
 
                 if third:
                     third = third.strip()
@@ -137,6 +137,8 @@ def load_scm_file(a, filename):
                         temp = third.split(" ")
                         mean = float(temp[1])
                         count = float(temp[2])
+                        # atcually, temp[2] is confidence of atom, but no way to assign 
+                        # the value to stv!
                         stv = TruthValue(mean,count)
                 try:
                     t = first[0:first.index(' ')]
@@ -207,37 +209,36 @@ def load_scm_file(a, filename):
         f.close()
 
 def test_load_scm_file():
-    '''docstring for tes''' 
+    '''it always failed! because there is no way to assign "confidence" attr of TruthValue,
+        which make the stv value of loaded atom is always wrong, but any thing else is ok!
+    ''' 
     def output_atomspace(a):
         '''docstring for output_atomspace''' 
         f = open('diff_log', 'w')
         atoms = a.get_atoms_by_type(types.Atom)
         for atom in atoms:
             print >> f, atom
-            print >> f, a.get_tv(atom.h).mean, a.get_tv(atom.h).count, a.get_tv(atom.h).confidence
+            #print >> f, a.get_tv(atom.h).mean, a.get_tv(atom.h).count, a.get_tv(atom.h).confidence
         f.close()
 
     # load a scm file 
     a = AtomSpace()
-    load_scm_file(a, "test.scm")
+    load_scm_file(a, "air.scm")
     # output atomspace  to file "diff_log" 
     output_atomspace(a)
     # compare "diff_log" with output of atomspace loaded with cogserver
     try:
         f_l = open('diff_log', 'r')
-        f_server = open('server.log', 'r')
+        f_server = open('diff_log_server', 'r')
         # 
         from_scm = { }
         for line in f_l.readlines():
             from_scm[line]=1
         # compare it with output of atomspace load with cogserver
-        print "******" 
         for i,line in enumerate(f_server.readlines()):
             try:
                 from_scm[line]
-                #print "ok%s"%i
             except KeyError:
-                # lines should appeard in diff_log
                 log.error("test failed:**%s**!"%line)
     except IOError,e:
         log.error(str(e))
