@@ -75,22 +75,30 @@ int main(int argc,char** argv) {
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
+
         (opt_desc_str(input_data_file_opt).c_str(),
          value<string>(&pa.input_table_file),
          "Input table file.\n")
+        
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string> >(&pa.combo_programs),
          "Combo program to replace the output (last column) of the data set. It can be used several time so that several programs are evaluated at once.\n")
+        
         (opt_desc_str(combo_prog_file_opt).c_str(),
          value<string>(&pa.combo_programs_file),
          "File containing combo programs to replace the output (last column) of the data set. Each combo program in the file is seperated by a new line. For each program, all features sets are evaluated and their results displayed.\n")
+        
         (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program \"and($large $tall)\" instead of \"and($24 $124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
+        
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
+        
         (opt_desc_str(feature_opt).c_str(), value<vector<string> >(&pa.features),
          "Feature to consider. Can be used several time for several features.\n")
+        
         (opt_desc_str(features_file_opt).c_str(), value<string>(&pa.features_file),
          "File containing feature sets to consider. Each feature set per line, with features seperated by comma. The results of each feature set is displayed in a row seperated by a whitespace. So if there several combo programs (if any at all), each row corresponds to a program and each column corresponds to a feature set.\n")
+        
         (opt_desc_str(confidence_penalty_intensity_opt).c_str(),
          value<double>(&pa.confidence_penalty_intensity)->default_value(0),
          "Confidence penalty of the feature set (the larger the more penalized). Value between 0 to inf. This penalty is different than the complexity penalty as it takes into account the sample number size. The larger the sample size the more confident.\n")
