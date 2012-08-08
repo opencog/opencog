@@ -49,11 +49,12 @@ void measure(vector<string> arguments)
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
         stringstream ss;
+#define DO_REPS 1
 #if DO_THREADING
         ss << "-j" << i;
 #elif DO_SEEDS
         ss << "-r" << i;
-#else
+#elif DO_REPS
         int nrep = 10000*(1<<i);
         ss << "-m" << nrep;
 #endif

@@ -3149,9 +3149,122 @@ procs   time  score  plex  bytes      bytes/sec
 Try again:
 mpirun -n 6 --hostfile ~/mpd.hosts ./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12 -m320000 --mpi=1
 
+real	7m31.761s      score: -17 cpxy=23
+user	60m41.797s
+sys	10m35.159s
+
+[2012-08-06 03:11:03:131] [INFO] Stats: 97      333813  31980   -17 23
+[2012-08-06 03:11:03:134] [INFO] MPI: bytes sent=13637 bytes received=15533506
+
+Do it again:
+real	7m40.788s
+user	62m36.163s
+sys	10m21.553s
+
+[2012-08-06 03:20:32:821] [INFO] Stats: 94	333137	45704	-20	23
+[2012-08-06 03:20:32:824] [INFO] MPI: bytes sent=13338 bytes
+received=15352014
+
 
 Above seem to run with 60-85% cpu utilization across all five nodes.  So
 why did it take sooo much longer than the ssl version? !? I'm confused.
 Yuck. Two effects: firt, it really did seem to run longer; second,
 master proces knew it was done, then waited a *long* time for other 
 workers to wrap it up.
+
+time ./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i
+/home/linas/src/opencog/build/wdbc.data -W1 -x1 -n sin -n log -n exp -Z1
+-v12 --hc-max-nn-evals=5000 -r1  -m320000  -j12:10.1.1.1 -j12:10.1.1.2
+-j12:10.1.1.3 -j12:10.1.1.4 -j12:10.1.1.5
+Segmentation fault
+
+real	5m15.839s
+user	0m12.409s
+sys	0m1.749s
+
+WTF.... processor utilization seems similar ... run tims should be
+similar, scores should be similar.  But the earlier runs were much
+shorter, and had worse scores.  I think the earlier runs weren't
+actually for -m320000 but for something else ... 
+
+non-crash run:
+real	8m44.040s       score 19 cpxy=25
+user	0m41.264s
+sys	0m2.925s
+
+-----------------------------
+Table below is for clusters WDBC dataset.  Measured with bzr rev 7332.
+
+"mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts
+./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1
+-n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -m320000
+--mpi=1 -fmspeed.log"
+
+speedup, "parallelizable fraction" and "max speedup" just as defined
+before, but this time for nodes, not cpus.
+
+"gens" is number of generations (aka number of demes expanded)
+
+Wow. Greater than unity on n=3... this is presumably due to the 
+poorer score and lower complexity: each instance can be evaluated
+more quickly, on average.  So, ideally, we should take averages...
+Note that for procs=6..10, there are two processes running on each
+node, so they are sucking up any and all spare cycles that a single
+process couldn't quite muster.
+
+Anyway, its clear that whatever limit there is to scaling for this
+case, its well beyond what is easily measured on this cluster. 
+Why? Because this is essentially an "emarassingly parallel" problem:
+once we have some reasonable initial metapopulation, the deme expansion
+can be run in parallel more or less arbitrarily.
+
+Data rates: typicaly, 18MB to 25MBytes received per run, so max
+data rate is 25MB/300 sec < 1MBit/sec 
+
+procs   time  score  plex   gens  speedup   parfrac  maxspeed
+-----   ----  -----  ----   ----  -------   -------  --------
+  1     3155   19     27      98     -         -        -
+  2     1582   20     25     126    1.994     0.9972    357
+  3      865   23     23     101    3.647     1.0887      -
+  4      817   21     25      96    3.863     0.9882     84
+  5      463   20     23      93    6.816     1.0666      -
+  6      437   20     23      97    7.213     1.0336      -
+  7      415   17     23      92    7.595     1.0130      -
+  8      335   17     23      88    9.429     1.0216      -
+  9      292   17     23      83   10.793     1.0208      -
+ 10      452   21     20      85    6.982     0.9520     21
+
+Never-the-less, lets redo the abve results, averaging over 6 runs each.
+Each run is with random seeds -r1 through -r6
+
+The baseline, below.  Note the dramatic variation depending on the
+random seed.  Hmm, I thought this dataset was more stable than that.
+
+seed    hh:mm:ss         score   cpxy     again ...
+----  --------------     -----   ----     --------------
+-r1   0:55:06.980233      19       28     0:52:27.173870
+-r2   0:39:14.148769      30       13     0:40:19.101815
+-r3   0:28:05.324377      23       13     0:27:45.767175
+-r4   1:36:40.991209      31       39     1:36:12.468238
+-r5   0:42:33.128429      20       18     0:42:21.632165
+-r6                       27       17     0:38:32.139468       
+
+
+Still greater-than-unity speedup. I think this is because the algo
+is distributing simpler, smaller work units when there are lots of
+nodes, causing the jobs to run faster.  Its picking simpler, smaller
+units because, at the time of work-unit distribution, the metapopulation
+is smaller.
+
+procs   time  speedup   parfrac  maxspeed
+-----   ----  -------   -------  --------
+  1     2976     -         -        -
+  2     1383   2.152     1.0706     -
+  3      776   3.837     1.1090     -
+  4      529   5.723     1.1004     -
+  5      455   6.545     1.0590     -
+  6      416   7.159     1.0324     -
+  7      354   8.417     1.0281     -
+  8      378   7.883     0.9979    471
+  9      332   8.953     0.9993   1512
+ 10      299   9.943     0.9994   1559
