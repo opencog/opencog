@@ -41,8 +41,6 @@
 
 namespace opencog { namespace moses {
 
-using namespace std;
-
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
 
@@ -215,7 +213,7 @@ build_knobs::logical_probe_rec(pre_it subtree,
         pre_it subtree_cp = next(exemplr_cp.begin(), distance(exemplr.begin(), subtree));
 
         // asynchronous recursive call for [from, mid)
-        future<ptr_vector<logical_subtree_knob>> f_async =
+        std::future<ptr_vector<logical_subtree_knob>> f_async =
             async(launch::async,
                   [&]() {return this->logical_probe_rec(subtree, exemplr, it,
                                                         from, mid,
