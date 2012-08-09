@@ -22,6 +22,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/mt19937ar.h>
@@ -34,62 +35,48 @@ using boost::lexical_cast;
 
 /**
  * Program to output the feature quality of a feature set given a data
- * set. Optionally the variable correpsonding to the output of the
- * data set (the last column) can be substituted by a combo program
- * (or several combo programs, one for each results). Likewise one can
- * provide a list of feature sets instead of one feature set and
- * output the results for each data set.
+ * set. One can provide a list of feature sets instead of one feature
+ * set and output the results for each data set.
  */
-
-/**
- * Convert a string representing a combo program in a combo_tree.
- *
- * @param combo_prog_str   the string containing the combo program
- * @param has_labels       true if the combo program has labels instead of
- * place holders (like and($start $up) instead of and($23 $134)
- * @param labels           a vector of labels
- * @return                 the combo_tree
- */
-combo_tree str2combo_tree_label(const std::string& combo_prog_str,
-                                bool has_labels,
-                                const std::vector<std::string>& labels) {
-    // combo pogram with place holders
-    std::string combo_prog_ph_str = 
-        has_labels? l2ph(combo_prog_str, labels) : combo_prog_str;
-    std::stringstream ss(combo_prog_ph_str);
-    combo_tree tr;
-    ss >> tr;
-    return tr;
-}
 
 int main(int argc,char** argv) { 
 
     // program options, see options_description below for their meaning
     eval_features_parameters pa;
     unsigned long rand_seed;
+    string target_feature_str;
+    vector<string> ignore_features_str;
 
     // Declare the supported options.
     options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "Produce help message.\n")
+
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
-
-        (opt_desc_str(input_data_file_opt).c_str(),
-         value<string>(&pa.input_table_file),
+        
+        (opt_desc_str(scorer_opt).c_str(),
+         value<string>(&pa.scorer)->default_value(mi),
+         str(boost::format("Feature set scorer.\n"
+                           " Supported scorers are:\n"
+                           "%s, for mutual information\n"
+                           "%s, for precision (see moses -h for more info)\n")
+             % mi % pre).c_str())
+        
+        (opt_desc_str(input_file_opt).c_str(),
+         value<string>(&pa.input_file),
          "Input table file.\n")
-        
-        (opt_desc_str(combo_str_opt).c_str(),
-         value<vector<string> >(&pa.combo_programs),
-         "Combo program to replace the output (last column) of the data set. It can be used several time so that several programs are evaluated at once.\n")
-        
-        (opt_desc_str(combo_prog_file_opt).c_str(),
-         value<string>(&pa.combo_programs_file),
-         "File containing combo programs to replace the output (last column) of the data set. Each combo program in the file is seperated by a new line. For each program, all features sets are evaluated and their results displayed.\n")
-        
-        (opt_desc_str(labels_opt).c_str(), "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program \"and($large $tall)\" instead of \"and($24 $124)\". In such a case it is expected that the input data file contains the labels as first row.\n")
-        
+                
+        (opt_desc_str(target_feature_opt).c_str(),
+         value<string>(&target_feature_str),
+         "Label of the target feature to fit. If none is given the first one is used.\n")
+
+        (opt_desc_str(ignore_feature_opt).c_str(),
+         value<vector<string>>(&ignore_features_str),
+         "Ignore feature from the datasets. Can be used several times "
+         "to ignore several features.\n")
+
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
          "File where to save the results. If empty then it outputs on the stdout.\n")
         
@@ -113,14 +100,24 @@ int main(int argc,char** argv) {
         return 1;
     }
 
-    // set variables
-    pa.has_labels = vm.count("labels");
-
     // init random generator
     randGen().seed(rand_seed);
 
-    // read input_table_file file
-    type_tree data_tt = infer_data_type_tree(pa.input_table_file);
+    // Find the position of the target feature (the first one by default)
+    pa.target_feature = target_feature_str.empty()? 0
+        : find_feature_position(pa.input_file, target_feature_str);
+
+    // Get the list of indexes of features to ignore
+    pa.ignore_features = find_features_positions(pa.input_file,
+                                                 ignore_features_str);
+    OC_ASSERT(boost::find(pa.ignore_features, pa.target_feature)
+              == pa.ignore_features.end(),
+              "You cannot ignore the target feature (column %d)",
+              pa.target_feature);    
+
+    // Infer type tree
+    type_tree data_tt = infer_data_type_tree(pa.input_file,
+                                             pa.target_feature);
     type_tree output_tt = get_signature_output(data_tt);
     type_node data_type = get_type_node(output_tt);
 

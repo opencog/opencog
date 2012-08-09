@@ -40,30 +40,32 @@ using namespace ant_combo;
 using namespace opencog;
 
 static const pair<string, string> rand_seed_opt("random-seed", "r");
-static const pair<string, string> input_data_file_opt("input-file", "i");
+static const pair<string, string> scorer_opt("scorer", "H");
+static const pair<string, string> input_file_opt("input-file", "i");
+static const pair<string, string> target_feature_opt("target-feature", "u");
+static const pair<string, string> ignore_feature_opt("ignore-feature", "Y");
 static const pair<string, string> output_file_opt("output-file", "o");
-static const pair<string, string> labels_opt("labels", "l");
 static const pair<string, string> feature_opt("feature", "f");
 static const pair<string, string> features_file_opt("features-file", "F");
-static const pair<string, string> combo_str_opt("combo-program", "c");
-static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> confidence_penalty_intensity_opt("confidence-penalty-intensity", "d");
+
+/// @todo this could be in some common file
+// Feature selection scorers
+static const string mi="mi";    // Mutual Information (see feature_scorer.h)
+static const string pre="pre";  // Precision (see
+                                // opencog/learning/moses/moses/scoring.h)
 
 string opt_desc_str(const pair<string, string>& opt) {
     return string(opt.first).append(",").append(opt.second);
 }
 
-combo_tree str2combo_tree_label(const std::string& combo_prog_str,
-                                bool has_labels,
-                                const std::vector<std::string>& labels);
-
 // structure containing the options for the eval-table program
 struct eval_features_parameters {
-    string input_table_file;
-    vector<string> combo_programs;
-    string combo_programs_file;
-    bool has_labels;
+    string input_file;
+    string scorer;
     vector<string> features;
+    int target_feature;
+    vector<int> ignore_features;
     string features_file;
     string output_file;
     double confidence_penalty_intensity;
@@ -76,7 +78,6 @@ void output_results(const eval_features_parameters& pa,
     else {
         ofstream of(pa.output_file.c_str(), ios_base::app);
         ostreamContainer(of, qs, " ", "", "\n");
-        of.close();        
     }
 }
 
@@ -88,7 +89,7 @@ set<arity_t> get_features_idx(const vector<string>& features,
         arity_t idx = distance(labels.begin(), boost::find(labels, f));
         OC_ASSERT((size_t)idx != labels.size(),
                   "No such a feature %s in file %s",
-                  f.c_str(), pa.input_table_file.c_str());
+                  f.c_str(), pa.input_file.c_str());
         res.insert(idx);
     }
     return res;
@@ -125,60 +126,29 @@ void eval_output_results(const eval_features_parameters& pa,
 }
 
 void eval_output_results(const eval_features_parameters& pa,
-                         const vector<string>& labels,
                          const vector<set<arity_t> > fss,
-                         const vector<combo_tree>& trs,
                          const ITable& it,
                          const OTable& ot) {
-
+    
     typedef MICScorer<set<arity_t> > FSScorer;
 
-    if(trs.empty()) { // there is no combo programs so we use the data output
-        FSScorer fs_sc(it, ot, pa.confidence_penalty_intensity);
-        // compute and output the results
-        eval_output_results(pa, fs_sc, fss);
-    } else {
-        foreach(const combo_tree& tr, trs) {
-            // evaluated tr over input table
-            OTable ot_tr(tr, it);
-            ot_tr.set_label(ot.get_label());
-
-            FSScorer fs_sc(it, ot_tr, pa.confidence_penalty_intensity);
-            
-            // compute and output the results
-            eval_output_results(pa, fs_sc, fss);
-        }
-    }
+    FSScorer fs_sc(it, ot, pa.confidence_penalty_intensity);
+    // compute and output the results
+    eval_output_results(pa, fs_sc, fss);
 }
 
 void read_eval_output_results(const eval_features_parameters& pa) {
-    Table table = loadTable(pa.input_table_file);
+    Table table = loadTable(pa.input_file);
 
     // determine labels
-    vector<string> labels = readInputLabels(pa.input_table_file);
+    vector<string> labels = readInputLabels(pa.input_file,
+                                            pa.target_feature);
 
     // read feature sets
     vector<set<arity_t> > fss = feature_sets(pa, labels);
 
-    // read combo programs
-    vector<combo_tree> trs;
-    foreach(const string& tr_str, pa.combo_programs)
-        trs += str2combo_tree_label(tr_str, pa.has_labels,
-                                    table.itable.get_labels());
-    if(!pa.combo_programs_file.empty()) {
-        ifstream in(pa.combo_programs_file.c_str());
-        while(in.good()) {
-            string line;
-            getline(in, line);
-            if(line.empty())
-                continue;
-            trs += str2combo_tree_label(line, pa.has_labels,
-                                        table.itable.get_labels());
-        }
-    }
-
     // eval and output the results
-    eval_output_results(pa, labels, fss, trs, table.itable, table.otable);
+    eval_output_results(pa, fss, table.itable, table.otable);
 }
 
 #endif // _OPENCOG_EVAL_FEATURES_H
