@@ -44,10 +44,10 @@ namespace opencog {
  * Returns a set S of features following the algo:
  * 0) set<FeatureSet> tops = empty set
  * 1) For each FeatureSet fs in tops:
- * 2)     Add one feature, compute new MI. Repeat 1)
+ * 2)     Add one feature, compute new score. Repeat 1)
  * 3) Discard all but top_size of highest scorers
  * 4) tops = the highest scorers.
- * 5) If mutual information hasn't improved by threshold,
+ * 5) If score hasn't improved by threshold,
  *    then skip next step.
  * 6) Repeat, until tops holds FeatureSets of at most 
  *    'num_features' features.
@@ -119,11 +119,11 @@ FeatureSet max_mi_selection(const FeatureSet& features,
                 FeatureSet prod = fs;
                 prod.insert(fid);
 
-                double mi = scorer(prod);
+                double sc = scorer(prod);
 
                 unique_lock lock(mutex);
                 /// @todo this lock can be more granular
-                ranks.insert(std::pair<double, FeatureSet>(mi, prod));
+                ranks.insert(std::pair<double, FeatureSet>(sc, prod));
             }
         };
         // OMP_ALGO only works on random access iterators, which is
@@ -142,7 +142,7 @@ FeatureSet max_mi_selection(const FeatureSet& features,
         // Get the highest MI found.  If these are not getting better,
         // then stop looking for new features.
         double high_score = ranks.rbegin()->first;
-        logger().debug("max_mi: featureset size %d MI=%f", i, high_score);
+        logger().debug("highest score: featureset size %d MI=%f", i, high_score);
         if (high_score - previous_high_score < threshold) break;
 
         // Record the highest score found.
@@ -158,7 +158,6 @@ FeatureSet max_mi_selection(const FeatureSet& features,
         std::stringstream ss;
         ss << "Exit max_mi_selection(), selected: ";
         ostreamContainer(ss, res);
-        // Note: the score isn't necessarily the mutual information
         ss << " Score = " << scorer(res);
         logger().debug() << ss.str();
     }
