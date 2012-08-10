@@ -12,7 +12,6 @@ using namespace std;
 
 
 bool VideoSource::grab() {
-
 	if (cap->grab()) {
 		cap->retrieve(original_frame); //retrieve the captured frame
 
@@ -40,9 +39,24 @@ bool VideoSource::grab() {
 		if(cv::waitKey(5)>=0){ //stop the video when a key is pressed
 			return false;
 		}
-
 		return true;
 	} else {
+	    if(cap->get(CV_CAP_PROP_FRAME_COUNT) > 0){
+	        if(cap->get(CV_CAP_PROP_POS_AVI_RATIO) > 0.9){   // if reached near end of video
+	            cap->set(CV_CAP_PROP_POS_FRAMES,0);         // move to begining
+	            if(cap->grab()){                            // if can get a frame
+	                cout << "video rewind " << endl;
+	                return this->grab();                    // get the next frame
+	            }else{
+	                cout << "couldn't rewind and grab first frame." << endl;
+	            }
+	        }else{
+	            cout << "couldn't get video and not end of video. was: " <<  cap->get(CV_CAP_PROP_POS_AVI_RATIO) << endl;
+	        }
+	    }else{
+	        cout << "frame count not larger than 0\n";
+	    }
+
 		cout << "Reached end of video stream." << endl;
 		return false;
 	}
