@@ -5,6 +5,7 @@
 package javadestin;
 
 import callbacks.BeliefGraphCallback;
+import callbacks.FPSCallback;
 
 /**
  *
@@ -27,7 +28,9 @@ public class NetworkFactory implements INetworkFactory {
             n.setIterationFinishedCallback(new BeliefGraphCallback());
             return n;
         } else {
-            return new NetworkAlt(SupportedImageWidths.W512, 8, new long[]{20, 16, 14, 12, 10, 8, 6, 2});
+            INetwork n = new NetworkAlt(SupportedImageWidths.W512, 8, new long[]{20, 16, 14, 12, 10, 8, 6, 2});
+            n.setIterationFinishedCallback(new BeliefGraphCallback());
+            return n;
         }
     }
 }

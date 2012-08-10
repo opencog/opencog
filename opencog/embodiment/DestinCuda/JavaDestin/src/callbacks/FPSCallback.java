@@ -4,19 +4,22 @@ import javadestin.DestinIterationFinishedCallback;
 import javadestin.INetwork;
 
 public class FPSCallback extends DestinIterationFinishedCallback{
-	long lastTime =  System.currentTimeMillis();
-	long lastReportTime = lastTime;
-	
+	long lastReportTime = System.currentTimeMillis();
+        long frameCount = 0;
+	long delay = 0;
+        
+        public FPSCallback(long delay){
+            this.delay = delay;
+        }
+        
 	@Override
 	public void callback(INetwork network) {
-		
 		long time = System.currentTimeMillis();
-		long diff = time - lastReportTime; 
-		//if(diff > 1000){
-			System.out.println("FPS: "+ 1000.0 / (time - lastTime));
-		//	lastReportTime = time;
-		//}
-		lastTime = time;
-		  
+		if(time - lastReportTime > delay){
+                    System.out.println("FPS: "+ 1000*(float)frameCount / (float) (time - lastReportTime));
+                    lastReportTime = time;
+                    frameCount = 0;
+		}
+                frameCount++;
 	}
 }
