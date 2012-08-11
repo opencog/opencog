@@ -179,26 +179,50 @@ feature_set create_deme_select_features(const CTable& ctable,
     }
 }
 
+template<typename FeatureSet>
+struct fs_scorer : public unary_function<FeatureSet, double> {
+    fs_scorer(const CTable& ctable,
+              const feature_selection_parameters& fs_params)
+        : _ptr_mi_scorer(nullptr), _ptr_pre_scorer(nullptr) {
+        if (fs_params.scorer == mi) { // mutual information
+            _ptr_mi_scorer =
+                new MICScorerCTable<FeatureSet>(ctable, fs_params.hc_confi);
+        } else if (fs_params.scorer == pre) { // precision (see
+            // opencog/learning/moses/moses/scoring.h)
+            _ptr_pre_scorer =
+                new pre_scorer<FeatureSet>(ctable,
+                                           fs_params.pre_penalty,
+                                           fs_params.pre_min_activation,
+                                           fs_params.pre_max_activation,
+                                           fs_params.pre_positive);
+        }
+    }
+    ~fs_scorer() {
+        delete _ptr_mi_scorer;
+        delete _ptr_pre_scorer;
+    }
+    double operator()(const FeatureSet& fs) const {
+        if (_ptr_mi_scorer)
+            return _ptr_mi_scorer->operator()(fs);
+        else if (_ptr_pre_scorer)
+            return _ptr_pre_scorer->operator()(fs);
+        else {
+            OC_ASSERT(false);
+            return 0.0;
+        }
+    }
+protected:
+    MICScorerCTable<FeatureSet>* _ptr_mi_scorer;
+    pre_scorer<FeatureSet>* _ptr_pre_scorer;
+};
+    
 // run feature selection given a moses optimizer
 template<typename Optimize>
 feature_set moses_select_features(const CTable& ctable,
                                   Optimize& optimize,
                                   const feature_selection_parameters& fs_params) {
-    if (fs_params.scorer == mi) { // mutual information
-        MICScorerCTable<set<arity_t> > fs_sc(ctable, fs_params.hc_confi);
-        return create_deme_select_features(ctable, optimize, fs_sc, fs_params);
-    } else if (fs_params.scorer == pre) { // precision (see
-                                          // opencog/learning/moses/moses/scoring.h)
-        pre_scorer<set<arity_t> > pre_sc(ctable,
-                                         fs_params.pre_penalty,
-                                         fs_params.pre_min_activation,
-                                         fs_params.pre_max_activation,
-                                         fs_params.pre_positive);
-        return create_deme_select_features(ctable, optimize, pre_sc, fs_params);
-    } else {
-        OC_ASSERT(false);
-        return feature_set();
-    }
+    fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
+    return create_deme_select_features(ctable, optimize, fs_sc, fs_params);
 }
 
 feature_set incremental_select_features(const CTable& ctable,

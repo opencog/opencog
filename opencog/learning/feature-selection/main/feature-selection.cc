@@ -68,17 +68,40 @@ void err_empty_features(const string& outfile)
     exit(0);
 }
 
+// Score all individual features of Table
+vector<double> score_individual_features(const Table& table,
+                                         const feature_selection_parameters& fs_params)
+{
+    typedef set<arity_t> FS;
+    CTable ctable = table.compressed();
+    fs_scorer<FS> fs_sc(ctable, fs_params);
+    vector<double> res;
+    boost::transform(boost::irange(0, table.get_arity()), back_inserter(res),
+                     [&](arity_t idx) { FS fs = {idx}; return fs_sc(fs); });
+    return res;
+}
+
 // log the set of features and its number
-void log_selected_features(arity_t old_arity, const Table& ftable)
+void log_selected_features(arity_t old_arity, const Table& ftable,
+                           const feature_selection_parameters& fs_params)
 {
     // log the number selected features
     logger().info("%d out of %d have been selected",
                   ftable.get_arity(), old_arity);
     // log set of selected feature set
-    stringstream ss;
-    ss << "The following features have been selected: ";
-    ostreamContainer(ss, ftable.itable.get_labels(), ",");
-    logger().info(ss.str());
+    {
+        stringstream ss;
+        ss << "The following features have been selected: ";
+        ostreamContainer(ss, ftable.itable.get_labels(), ",");
+        logger().info(ss.str());
+    }
+    // log the score of each feature individually
+    {
+        stringstream ss;
+        ss << "With the following scores (individually): ";
+        ostreamContainer(ss, score_individual_features(ftable, fs_params), ",");
+        logger().info(ss.str());            
+    }
 }
 
 Table add_force_features(const Table& table,
@@ -284,7 +307,7 @@ void feature_selection(const Table& table,
         err_empty_features(fs_params.output_file);
     else {
         Table ftable = table.filtered(selected_features);
-        log_selected_features(table.get_arity(), ftable);
+        log_selected_features(table.get_arity(), ftable, fs_params);
         write_results(ftable, fs_params);
     }
 }
