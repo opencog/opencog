@@ -296,6 +296,8 @@ Destin * InitDestin( uint ni, uint nl, uint *nb, uint nMovements )
 
     free(inputOffsets);
 
+    ClearBeliefs(d); //give it a clean slate
+
     return d;
 }
 
