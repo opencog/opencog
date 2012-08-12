@@ -32,6 +32,7 @@
 #include "../reduct/logical_rules.h"
 #include "../reduct/contin_rules.h"
 #include "../reduct/general_rules.h"
+#include "../reduct/fold_rules.h"
 #include "../combo/eval.h"
 #include "../combo/table.h"
 #include "../combo/type_tree.h"
@@ -119,7 +120,10 @@ const rule* select_rule(string rule_ref_str)
         ("LEV", make_pair(new downwards(level()),
                           "level"))
         ("EC", make_pair(new upwards(eval_constants()),
-                         "eval_constants"));
+                         "eval_constants"))
+        //fold rules
+        ("FUR", make_pair(new downwards(fold_unrolling()),
+                         "fold_unrolling"));
     if ((rule_ref_str == "h") || (rule_ref_str == "?")) {
         for (ref_rule_map_const_it cit = ref_rules.begin();
             cit != ref_rules.end(); ++cit) {
