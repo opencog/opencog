@@ -19,13 +19,15 @@ class IndividualBase(object):
     _out_of_date_fitness_value = True
     population = None
 
-    def __init__(self):
+    def __init__(self, **common_attributes):
         """
-        __init__ should not take any parameters
-        use individual.generation for storing common data
-        by overriding Population class.
+        Do not override init, every key in **common_attributes
+        will be an attribute of the individual object automatically.
+        You can override __randomly_initialise__ which is called
+        after __init__
         """
-        pass
+        self.__dict__.update(common_attributes)
+        self.__randomly_initialise__()
 
     def __fitness__(self):
         pass
@@ -41,6 +43,14 @@ class IndividualBase(object):
 
     def __setitem__(self, key, value):
         pass
+
+    def __randomly_initialise__(self):
+        """
+        Override this method if you want to randomly initialise
+        the individual before it's added to the population
+        """
+        pass
+
     #############################################################
 
     @property
@@ -133,16 +143,11 @@ class Population(object):
         return offspring
 
     def select_for_crossover(self):
-        offspring = self.__crossover_selection__()
-        self._assign_common_attributes(offspring)
-        return offspring
+        return self.__crossover_selection__()
 
     def add_many(self, quantity):
         for _ in range(quantity):
-            if self.type_of_individuals.__dict__.has_key('randomly_initialised'):
-                individual = type.randomly_initialised()
-            else:
-                individual = self.type_of_individuals() # new instance
+            individual = self.type_of_individuals() # new instance
             self.add_to_current_generation(individual)
 
     def add_to_current_generation(self, individual):
@@ -257,7 +262,7 @@ class NoneEpistaticGeneticAlgorithm(GeneticAlgorithm):
                 return NoneEpistaticGeneticAlgorithm.fitness_unit
             return dict.__getitem__(self, item)
 
-    fitness_contribution_by_locus = _none_epistatic_population._contribution_dict()
+    fitness_contribution_by_locus = _contribution_dict()
 
     def __init__(self, type_of_individuals, number_of_individuals):
         self.population = _none_epistatic_population(type_of_individuals, number_of_individuals)

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from math import log
 from random import random as rand
 from learning.bayesian_learning.network import Row
 
@@ -16,7 +17,6 @@ def _givens_and_negations_from(kwargs):
         negations=set()
     return givens, negations
 
-
 class DataObserver(list):
     """
     Container with the ability of calculating probabilities
@@ -24,6 +24,9 @@ class DataObserver(list):
     that had value of True in that time-step (all the other variables
     are considered false for this step, open-world assumption)
     """
+
+    epsilon = 0.00001
+
     def probability_of(self, variable, value=True, **kwargs):
         """
         Calculates probability for value of True or False by
@@ -44,6 +47,36 @@ class DataObserver(list):
         return matched / total
 
 
+
+    def mutual_information(self, first_variable, second_variable):
+        M = float(len(self))
+
+        n_first, n_second = {True:0, False:0}, {True:0, False:0}
+
+        n_first_and_second = {(True,True):0, (True,False):0,
+                              (False,True):0, (False,False):0}
+        for record in self:
+            value_of_first, value_of_second = first_variable in record,\
+                                              second_variable in record
+            n_first[value_of_first] += 1
+            n_second[value_of_second] += 1
+            n_first_and_second[(value_of_first, value_of_second)] += 1
+
+        for dict in n_first, n_second, n_first_and_second:
+            for key in dict:
+                if dict[key] is 0:
+                    dict[key] = self.epsilon
+
+
+        result = 0
+        for key in n_first_and_second:
+            value_of_first, value_of_second = key
+            result += n_first_and_second[key] / M * log(n_first_and_second[key] *\
+                        M / n_first[value_of_first] / n_second[value_of_second])
+        return result
+
+
+
 TEST_VARIABLES = ['A','B','C','D','E']
 A,B,C,D,E = TEST_VARIABLES
 
@@ -60,7 +93,7 @@ def generate_test_record():
     if rand() < 0.6: # P(B) = 0.6
         record.add(B)
 
-    if record == set((A,B)):
+    if record == set([A,B]):
         if rand() < 0.9: # P(C|A,B) = 0.9
             record.add(C)
     elif record == set(A):
@@ -82,9 +115,10 @@ def generate_test_record():
 
     return record
 
-#data = DataObserver()
-#for i in range(10000):
-#    data.append(generate_test_record())
-#
-#print data.probability_of('C', givens=['A','B'])
+data = DataObserver()
+for i in range(10):
+    data.append(generate_test_record())
+
+print data.mutual_information(D, B)
+#print data.probability_of('C', givens=[A], negations=[B])
 #    print data.probability_of('D', givens=['A','B'])

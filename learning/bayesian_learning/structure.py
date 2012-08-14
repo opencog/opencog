@@ -8,10 +8,13 @@ __author__ = 'keyvan'
 
 class BayesNetPopulation(Population):
 
-    def __init__(self, variable_names, data, number_of_individuals=0):
-        self.data = data
+    def __init__(self, variable_names, number_of_individuals=0):
+        self.scoring_function = K2(variable_names)
         Population.__init__(self, NetworkChromosomeRepresentation, number_of_individuals,
-            variable_names=variable_names, scoring_function=K1(variable_names, data))
+            variable_names=variable_names, scoring_function=self.scoring_function)
+
+    def process_new_data(self, data):
+        self.scoring_function.process_new_data(data)
 
 class ScoringFunction(object):
     def __init__(self, variable_names, data):
@@ -21,8 +24,12 @@ class ScoringFunction(object):
     def probability_of(self, network):
         return 1
 
-    def __call__(self, network, data):
+    def process_new_data(self, network, data):
         pass
+
+#    def __call__(self, individual):
+#        if individual.last
+
 
 class BinaryVariableScoringFunction(ScoringFunction):
     pass
@@ -33,21 +40,14 @@ def matches(row, config):
         return False
     return config.issubset(row)
 
-class K1(BinaryVariableScoringFunction):
-    default_epsilon = 0.2
-    epsilon_by_node = {}
-
-
-    def __call__(self, network):
-
-
 
 class K2(BinaryVariableScoringFunction):
 
-    def __call__(self, B):
+    def process_new_data(self, network, data):
         P = self.probability_of
         X = self.variable_names
-        T = self.data
+        B = network
+        T = data
         x_i = [True, False]
         r_i = 2
         N = {}
@@ -93,12 +93,10 @@ class NetworkChromosomeRepresentation(IndividualSetBase):
 
     scoring_function = None
 
-    @staticmethod
-    def randomly_initialised():
-        individual = NetworkChromosomeRepresentation()
-        for i in range(len(NetworkChromosomeRepresentation.population.variable_names) / 2):
-            individual.add_random_link()
-        return individual
+
+    def __randomly_initialise__(self):
+        for i in range(len(self.variable_names) / 2):
+            self.add_random_link()
 
     def get_node_by_name(self, name):
         if not self.nodes.has_key(name):
