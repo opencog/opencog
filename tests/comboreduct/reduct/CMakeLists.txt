@@ -45,3 +45,9 @@ TARGET_LINK_LIBRARIES(ANNReductUTest
 	comboreduct
 	util
 )
+
+ADD_CXXTEST(FoldReductUTest)
+TARGET_LINK_LIBRARIES(FoldReductUTest
+	comboreduct
+	util
+)

@@ -44,7 +44,8 @@ ADD_LIBRARY(comboreduct SHARED
 	reduct/logical_reduction
 	reduct/ann_reduction
 	reduct/logical_rules
-        reduct/fold_rules
+	reduct/fold_reduction
+	reduct/fold_rules
 	reduct/meta_rules
 	reduct/mixed_reduction
 	reduct/mixed_rules
