@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "June 22, 2012" "3.2.1" "OpenCog Learning"
+.TH MOSES 1 "August 15, 2012" "3.2.5" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -70,10 +70,11 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR loglevel ]
 .RB [ \-m
 .IR max_evals ]
+.RB [ \-\-mpi=1 ]
 .RB [ \-N
-.IR oper ]
+.IR operator ]
 .RB [ \-n
-.IR oper ]
+.IR operator ]
 .RB [ \-o
 .IR output_file ]
 .RB [ \-P
@@ -260,21 +261,8 @@ Print command options, and exit.
 .BI \-j\  num \fR,\ \fB\-\-jobs= num
 Allocate \fInum\fR threads for deme optimization.  Using multiple
 threads will speed the search on a multi-core machine.
-Jobs can be executed on a remote machine as well,
-in such case the notation \fB\-j\fR \fIN:REMOTE_HOST\fR is used,
-where \fIN\fR is the number of jobs on the machine \fIREMOTE_HOST\fR.
-For instance, one can enter the options
-\fB\-j\fR4 \fB\-j\fR16:my_server.org
-(or \fB\-j\fR16:user@my_server.org if one wishes to
-run the remote jobs under a different user name),
-meaning that 4 jobs are allocated on the local machine
-and 16 jobs are allocated on my_server.org.
-Communications is done via \fBssh\fR, so passwd prompts will appear
-unless \fBssh\-agent\fR is being used.  The \fBmoses\fR executable must
-be on the remote machine(s), and located in a directory included in the
-\fBPATH\fR environment variable. Beware that a lot of log
-files are going to be generated when using this option on
-the remote machines.
+This flag may also be used to specify remote execution; see the section
+\fBDistributed processing\fR below.
 .TP
 .B -\-version
 Print program version, and exit.
@@ -708,7 +696,8 @@ Specify the level of detail for debug loging. Possible
 values for \fIloglevel\fR are \fBNONE\fR, \fBERROR\fR, \fBWARN\fR,
 \fBINFO\fR, \fBDEBUG\fR, and \fBFINE\fR. Case does not matter.
 Caution: excessive logging detail can lead to significant
-program slowdown.
+program slowdown.  The \fBNONE\fR option disables log file creation.
+This may make error debugging difficult.
 .TP
 .BI \-o\  filename \fR,\ \fB\-\-output\-file= filename
 Write results to \fIfilename\fR. If not specified, results are written to
@@ -1033,6 +1022,90 @@ Alternately, one may interpret each row x as a feature; then the
 penatly term |M|*log(|A|)*2*V can be interpreted as an additional
 feature that must be fit.
 
+.\" ============================================================
+.SH Distributed processing
+.PP
+MOSES provides two different styles of distributed processing for
+cluster computing systems.  One style is to use MPI (as implemented in
+the OpenMPI/MPICH2 systems), the second is to use SSH. The first style
+is best suited for local area networks (LANs) and compute clusters. The
+second style allows operation over the open internet, but is more
+problematic, as it may require manual cleanup of log files and failed
+jobs.  Because MPI is easy to install and manage, it is the recommended
+method for distributing moses operation across many machines.
+.PP
+When \fBmoses\fP is run in distributed fashion, one single node, the
+root node, maintains control over a pool of workers that execute on
+remote nodes.  The root node maintains the set of candidate solutions,
+and assigns these to the workers for additional exploration, as the
+workers become free.  The results are automatically collected by the
+root, and are automatically merged into the candidate population.  When
+termination criteria are met, processing will terminate on all nodes,
+and the root node will report the merged, best results.
+.PP
+.SS "MPI"
+Using MPI requires a \fBmoses\fR binary with MPI support compiled in, with
+either the OpenMPI or the MPICH2 implementations.  MPI support in MOSES
+is enabled with the \fB\-\-mpi=1\fR command-line flag.  When this flag
+is specified, \fBmoses\fR may be run as usual in an MPI environemnt.
+Details will vary from one system configuration to another, but a
+typical usage might resemble the following:
+
+.\" .TP
+.BI mpirun\ \-n \ 15 \ \-\-hostfile \ mpd.hosts \ moses\ \-\-mpi=1\ \-j \ 12\ <other\ moses\ params>
+
+.PP
+The above specifies that the run should be distrbuted over fifteen nodes,
+with the node names specified in the \fImpd.hosts\fP file.  The
+\fB\-\-mpi=1\fR flag indicates to \fBmoses\fP that it is being run in an
+MPI environment.  The \fB\-j12\fP flag tells \fBmoses\fP to use up to
+twelve threads on each node, whenever possible; this example assumes
+each node has 12 cores per CPU.
+.PP
+To maximize CPU utilization, it seems best to specify two MPI instances per
+node.  This is because not all parts of moses are parallelized, and some
+parts are subject to lock contention.  Thus, running multiple instances
+per node seems to be an effective way to utilize all available compute
+power on that node.  It is almost always the case that moses RAM usage
+is relatively small, and so RAM availability is rarely a problem.  The
+network utilization by moses is also very modest: the only network
+traffic is the reporting of candidate solutions, and so the network
+demands are typically in the range of 1 Megabit per second, and are thus
+easily supported on an ethernet connection.  The moses workload
+distributes in an 'embarassingly parallel' fashion, and so there is no
+practical limit to scaling on small and medium compute clusters.
+.PP
+When performing input data regression, be sure that the input data file
+is available on all nodes.   This is most easily acheived by placing the
+input data file on a shared filesystem.  Each instance of moses will
+write a log file.  In order to avoid name collision on the log files,
+the proccess id (PID) will automatically be incorporated into the
+log-file name when the \fB\-\-mpi=1\fR option is specified.  Log file
+creation can be disabled with the \fB\-lNONE\fR option; however, this is
+not recommended, as it makes debugging and progress monitoring
+difficult.
+
+.SS "SSH"
+The SSH style of distributed processing uses the \fBssh\fP command to
+establish communications and to control the pool of workers.  Although
+\fBmoses\fP provides job control when the system is running normally, it
+does not provide any mechanism for cleaning up after hung or failed
+jobs;  this is outside the scope of the ssh implementation.  The use of
+a job manager, such as LSF, is recommended.
+
+.PP
+Remote machines are specified using the \fB\-j\fP option, using the
+notation \fB\-j\fR \fIN:REMOTE_HOST\fR.  Here, \fIN\fR is the number
+of threads to use on the machine \fIREMOTE_HOST\fR.  For instance,
+one can enter the options \fB\-j\fR4 \fB\-j\fI16:my_server.org\fR
+(or \fB\-j\fI16:user@my_server.org\fR if one wishes to run the remote
+job under a different user name), meaning that 4 threads are allocated
+on the local machine and 16 threads are allocated on \fImy_server.org\fP.
+Passwd prompts will appear unless \fBssh\-agent\fR is being used.
+The \fBmoses\fR executable must be on the remote machine(s), and
+located in a directory included in the \fBPATH\fR environment variable.
+Beware that a lot of log files are going to be generated on the
+remote machines.
 
 .\" ============================================================
 .SH TODO

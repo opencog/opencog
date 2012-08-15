@@ -1015,6 +1015,7 @@ int moses_exec(int argc, char** argv)
         return 0;
     }
 
+#ifdef HAVE_MPI
     // Avoid MPI log file clobber mania
     if (enable_mpi) {
         stringstream ss;
@@ -1023,6 +1024,7 @@ int moses_exec(int argc, char** argv)
         log_file.insert(pos, ss.str());
         log_file.insert(pos, "-pid-");
     }
+#endif
 
     // Set log file.
     if (log_file_dep_opt) {
