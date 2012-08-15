@@ -292,17 +292,20 @@ outputs, the scoring function simply counts the number of incorrect
 answers, and tries to minimize this score.  For contin-valued outputs,
 the mean-square variation is minimized.
 T}
+
 \fBpre\fR@T{
 Regression on an input table, maximizing precision, instead of accuracy
 (that is, minimizing the number of false positives, at the risk of
 sometimes failing to identify true positives).  Maximization is done
 while holding activation (the hit rate) constant.
 T}
+
 \fBprerec\fR@T{
 Regression on an input table, maximizing precision, while holding the
 recall (sensitivity) at a given level.  Recall, also known as senstivity,
 is the ratio of true positives to the sum of true positives and false negatives.
 T}
+
 \fBrecall\fR@T{
 Regression on an input table, maximizing recall while holding
 precision constant.  This scorer is most commonly used when it is
@@ -311,16 +314,19 @@ means rejecting most events. In medicine and physics/radio applications,
 recall is exactly the same thing as sensitivity: this option searches
 for the most sensitive test while holding to a minimum level of precision.
 T}
+
 \fBip\fR@T{
 Clustering ("interesting patterns") on an input table. XXX more detail,
 please.
 T}
+
 \fBkl\fR@T{
 Regression on an input table, by maximizing the Kullback-Leibler
 divergence between the distribution of the outputs.  That is, the
 output must still be well-scored, but it is assumed that there are
 many possible maxima.  (XXX???) Huh?
 T}
+
 \fBann-it\fR@T{
 Regression on an input table, using a neural network.  (kind-of-like
 a hidden markov model-sih, kind of. XXX Huh???)
