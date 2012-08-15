@@ -78,6 +78,30 @@ namespace opencog
                                   (z - other.z )*(z - other.z ));
             }
 
+            // It doesn't make sense for the operator < in BlockVectors,
+            // - we implement operator < for BlockVector just in case it would be used as key of map
+            inline bool operator < (const BlockVector& other) const
+            {
+                if((x < other.x) )
+                    return true;
+                else if (x > other.x)
+                    return false;
+                else
+                {
+                    if (y < other.y)
+                        return true;
+                    else if (y > other.y)
+                        return false;
+                    else
+                    {
+                        if (z < other.z)
+                            return true;
+                        else
+                            return false;
+                    }
+                }
+            }
+
             inline std::string toString( ) const
             {
                 std::stringstream response;
@@ -182,8 +206,9 @@ namespace opencog
 
             // is this UnitBlock inside this AxisAlignedBox
             // @ point is the nearleftbottom point of the block
-            inline bool isUnitBlockInsideMe(BlockVector& point)
+            inline bool isUnitBlockInsideMe(BlockVector& point) const
             {
+
                 if ((point.x >= nearLeftBottomConer.x) &&
                     (point.y >= nearLeftBottomConer.y) &&
                     (point.z >= nearLeftBottomConer.z) &&
@@ -195,6 +220,7 @@ namespace opencog
                 }
                 else
                     return false;
+
             }
 
             // is other AxisAlignedBox insidAxisAlignedBoxAxisAlignedBox

@@ -30,6 +30,9 @@ ADD_LIBRARY(SpaceMap SHARED
     3DSpaceMap/Octree3DMapManager.cc
     3DSpaceMap/Entity3D.cc
     3DSpaceMap/BlockEntity.cc
+    3DSpaceMap/StructGraph.cc
+    3DSpaceMap/Pathfinder3D.cc
+    
 
     MapExplorerServer.cc
 )
@@ -38,8 +41,17 @@ ADD_LIBRARY(SpaceMap SHARED
     opencog_atom_types
  )
 
-TARGET_LINK_LIBRARIES(SpaceMap
+SET(SPACEMPA_LINK_LIBS
     ${Boost_THREAD_LIBRARY}
+    statistics
+)
+
+IF (HAVE_ZMQ)
+  SET(SPACEMPA_LINK_LIBS ${SPACEMPA_LINK_LIBS} zmq)
+ENDIF (HAVE_ZMQ)
+
+TARGET_LINK_LIBRARIES(SpaceMap
+  ${SPACEMPA_LINK_LIBS} 
 )
 
 ADD_LIBRARY(HPASearch
@@ -159,6 +171,7 @@ INSTALL (FILES
     3DSpaceMap/Octree3DMapManager.h
     3DSpaceMap/Entity3D.h
     3DSpaceMap/BlockEntity.h
+    3DSpaceMap/Pathfinder3D.h
     DESTINATION "include/${PROJECT_NAME}/spatial/3DSpaceMap"
 )
 

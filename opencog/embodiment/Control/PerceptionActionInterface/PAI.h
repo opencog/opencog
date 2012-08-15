@@ -912,6 +912,8 @@ private:
     bool isObjectAnObstacle(Handle objectNode, const std::string& entityClass, const MapInfo& mapinfo) const;
     #endif
 
+
+
 }; // class
 
 

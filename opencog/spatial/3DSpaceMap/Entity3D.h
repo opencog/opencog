@@ -41,14 +41,19 @@ namespace opencog
         {
 
         public:
-            Entity3D(BlockVector _centerPosition, int _width, int _lenght, int _height,double yaw, std::string _entityName, bool _is_obstacle);
+            Entity3D(BlockVector _centerPosition, int _width, int _lenght, int _height,double yaw, std::string _entityName, std::string _entityClass, bool _is_obstacle);
             ~Entity3D();
 
             inline int getEntityID() const {return mID;}
             inline std::string getEntityName() const { return mName;}
+            inline std::string getEntityClass() const { return mEntityClass;}
             inline bool getIsObstacle() const { return is_obstacle;}
             inline BlockVector& getLeftBottomPosition() {return mBoundingBox.nearLeftBottomConer;}
-            inline const BlockVector& getPosition() const {return mCenterPosition;}
+
+            // the standing location
+            BlockVector getPosition() const {return BlockVector(mCenterPosition.x, mCenterPosition.y, mBoundingBox.nearLeftBottomConer.z);}
+
+            inline const BlockVector& getCenterPosition() const {return mCenterPosition;}
 
             inline int getWidth() const {return mBoundingBox.size_x;}
             inline int getLength() const {return mBoundingBox.size_y;}
@@ -75,10 +80,15 @@ namespace opencog
             // (x = 1, y = -1): -pai*5/8 <= a < -pai/8
             BlockVector getDirection() const;
 
+            // when a nonblock entity change its position or direction or other space attributes, call this function
+            // Note: only apply to non-block entities - pls do not apply in a blockEntity
+            void updateNonBlockEntitySpaceInfo(BlockVector _centerPosition, int _width, int _lenght, int _height,double yaw, bool _is_obstacle);
+
         protected:
             Entity3D(){};
             int mID;
             std::string mName;
+            std::string mEntityClass;
             bool is_obstacle;
             AxisAlignedBox mBoundingBox;
             BlockVector mCenterPosition;

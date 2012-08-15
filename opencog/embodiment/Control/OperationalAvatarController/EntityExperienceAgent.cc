@@ -38,6 +38,9 @@ EntityExperienceAgent::EntityExperienceAgent()
 
 void EntityExperienceAgent::run(opencog::CogServer *server)
 {
+    // Disable this agent
+    return;
+
     logger().debug("EntityExperienceAgent::%s - Experiencing entities at moment '%d'", 
                    __FUNCTION__, this->elapsedMoments );
 

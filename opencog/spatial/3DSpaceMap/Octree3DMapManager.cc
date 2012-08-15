@@ -23,9 +23,11 @@
 
 #include "Octree3DMapManager.h"
 #include <iterator>
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include "BlockEntity.h"
 #include "Entity3D.h"
+#include <opencog/learning/statistics/LearningMessage.info.pb.h>
 
 using namespace opencog;
 using namespace opencog::spatial;
@@ -33,6 +35,7 @@ using namespace opencog::spatial;
 vector<Handle> Octree3DMapManager::newDisappearBlockEntityList;
 vector<BlockEntity*> Octree3DMapManager::newAppearBlockEntityList;
 vector<BlockEntity*> Octree3DMapManager::updateBlockEntityList;
+vector<BlockEntity*> Octree3DMapManager::updateSuperBlockEntityList;
 
 Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight):
     mMapName(_mapName), mFloorHeight(_floorHeight)
@@ -45,6 +48,9 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 
     mTotalDepthOfOctree = 0;
     int size = 1;
+
+    //default agent height is 1
+    mAgentHeight = 1;
 
     // get the biggest edge among x, y ,z
     int offSet = _xDim;
@@ -73,17 +79,38 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
     mAllUnitBlockAtoms.clear();
     mBlockEntityList.clear();
     mAllNoneBlockEntities.clear();
+    mPosToNoneBlockEntityMap.clear();
 
     hasPerceptedMoreThanOneTimes = false;
+
+    // set up the zmq socket to communicate with the learning server
+    this->zmqLSContext = new zmq::context_t(1);
+
+    this->socketLSFromLS = new zmq::socket_t(*zmqLSContext, ZMQ_PULL);
+    this->socketSendToLS = new zmq::socket_t(*zmqLSContext, ZMQ_PUSH);
+
+    this->toLSIP = config().get("LEARNING_SERVER_PULL_IP");
+    this->toLSPort = config().get("LEARNING_SERVER_PULL_PORT");
+
+    this->fromLSIP = config().get("LEARNING_SERVER_PUSH_IP");
+    this->fromLSPort = config().get("LEARNING_SERVER_PUSH_PORT");
+
+    string toLSAddress = "tcp://" + this->toLSIP + ":" + this->toLSPort;
+    string fromLSAddress = "tcp://" + this->fromLSIP + ":" + this->fromLSPort;
+
+    this->socketSendToLS->connect(toLSAddress.c_str());
+    this->socketLSFromLS->connect(fromLSAddress.c_str());
+
+    this->enableStaticsMapLearning = config().get_bool("ENABLE_STATICS_MAP_LEARNING");
 
 }
 
 void Octree3DMapManager::removeAnEntityFromList(BlockEntity* entityToRemove)
 {
-    vector<BlockEntity*>::iterator iter2;
+    map<int,BlockEntity*>::iterator iter2;
     for (iter2 = mBlockEntityList.begin(); iter2 != mBlockEntityList.end(); ++iter2)
     {
-        if ((*iter2) == entityToRemove)
+        if ((BlockEntity*)(iter2->second) == entityToRemove)
         {
             mBlockEntityList.erase(iter2);
             break;
@@ -93,12 +120,12 @@ void Octree3DMapManager::removeAnEntityFromList(BlockEntity* entityToRemove)
 
 BlockEntity* Octree3DMapManager::findBlockEntityByHandle(const Handle entityNode) const
 {
-    vector<BlockEntity*>::const_iterator iter2;
+    map<int,BlockEntity*>::const_iterator iter2;
     for (iter2 = mBlockEntityList.begin(); iter2 != mBlockEntityList.end(); ++iter2)
     {
-        if (((BlockEntity*)(*iter2))->mEntityNode == entityNode)
+        if (((BlockEntity*)(iter2->second))->mEntityNode == entityNode)
         {
-            return (BlockEntity*)(*iter2);
+            return (BlockEntity*)(iter2->second);
         }
     }
 
@@ -107,15 +134,35 @@ BlockEntity* Octree3DMapManager::findBlockEntityByHandle(const Handle entityNode
 
 // currently we consider all the none block entities has no collision, agents can get through them
 void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
-                                            int _width, int _lenght, int _height, double yaw, std::string _entityName, bool is_obstacle)
+                                            int _width, int _lenght, int _height, double yaw, std::string _entityName, std::string _entityClass,bool is_obstacle)
 {
     map<Handle, Entity3D*>::iterator it;
+    multimap<BlockVector, Entity3D*>::iterator biter;
+    multimap<BlockVector, Entity3D*>::iterator eiter;
     it = mAllNoneBlockEntities.find(entityNode);
     if (it == mAllNoneBlockEntities.end())
     {
-        Entity3D* newEntity = new Entity3D(_centerPosition,_width,_lenght,_height,yaw,_entityName,is_obstacle);
+        Entity3D* newEntity = new Entity3D(_centerPosition,_width,_lenght,_height,yaw,_entityName,_entityClass, is_obstacle);
         newEntity->mEntityNode = entityNode;
         mAllNoneBlockEntities.insert(map<Handle, Entity3D*>::value_type(entityNode, newEntity));
+        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,newEntity));
+    }
+    else
+    {
+        ((Entity3D*)(it->second))->updateNonBlockEntitySpaceInfo(_centerPosition,_width,_lenght,_height,yaw,is_obstacle);
+        biter = mPosToNoneBlockEntityMap.lower_bound(_centerPosition);
+        eiter = mPosToNoneBlockEntityMap.upper_bound(_centerPosition);
+        while(biter != eiter)
+        {
+            if (biter->second == it->second)
+            {
+                mPosToNoneBlockEntityMap.erase(biter);
+                break;
+            }
+            ++ biter;
+        }
+
+        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,(Entity3D*)(it->second)));
     }
 }
 
@@ -127,6 +174,23 @@ void Octree3DMapManager::removeNoneBlockEntity(const Handle &entityNode)
     if (it != mAllNoneBlockEntities.end())
     {
         Entity3D* entity = mAllNoneBlockEntities[entityNode];
+
+        // delete from mPosToNoneBlockEntityMap first
+        BlockVector pos = entity->getPosition();
+        multimap<BlockVector, Entity3D*>::iterator biter;
+        multimap<BlockVector, Entity3D*>::iterator eiter;
+        biter = mPosToNoneBlockEntityMap.lower_bound(pos);
+        eiter = mPosToNoneBlockEntityMap.upper_bound(pos);
+        while(biter != eiter)
+        {
+            if (biter->second == entity)
+            {
+                mPosToNoneBlockEntityMap.erase(biter);
+                break;
+            }
+            ++ biter;
+        }
+
         mAllNoneBlockEntities.erase(it);
         delete entity;
     }
@@ -158,7 +222,7 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
         //there is not any entity will combine with this block
         // so make this block as a new entity which only contains one block
         BlockEntity* entity = new BlockEntity(*block);
-        Octree3DMapManager::mBlockEntityList.push_back(entity);
+        Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
         return;
     }
     else if (entities.size() == 1)
@@ -189,7 +253,7 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
             removeAnEntityFromList(oldEntity);
             delete oldEntity;
         }
-        mBlockEntityList.push_back(entity);
+        mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
         return;
     }
 }
@@ -222,7 +286,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
     // if this block is the only block in its entity, just remove this entity
     if (blockList.size() == 0)
     {
-        newDisappearBlockEntityList.push_back(myEntity->mEntityNode);
+        delete myEntity;
         return;
     }
 
@@ -257,7 +321,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
 
         // create the first entity we just found
         BlockEntity* entity = new BlockEntity(neighbourblockList);
-        Octree3DMapManager::mBlockEntityList.push_back(entity);
+        Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
 
         // get all the neighbour solid positions of this removed unit block
         vector<BlockVector> allNeighbours = mRootOctree->getAllNeighbourSolidBlockVectors(_pos);
@@ -280,7 +344,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
             BlockEntity* newEntity = new BlockEntity(newBlockList);
             newEntity->addBlocks(newBlockList);
 
-            mBlockEntityList.push_back(newEntity);
+            mBlockEntityList.insert(map<int,BlockEntity*>::value_type(newEntity->getEntityID(), newEntity));
         }
 
         // remove the original entity
@@ -324,7 +388,7 @@ BlockEntity* Octree3DMapManager::findAllBlocksInBlockEntity(BlockVector& _pos)
          entity->addBlocks(blockList);
         // entity->SortBlockOrder();
 
-        Octree3DMapManager::mBlockEntityList.push_back(entity);
+        Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
         return entity;
     }
 }
@@ -358,7 +422,7 @@ void Octree3DMapManager::findAllBlockEntitiesOnTheMap()
             //  entity->SortBlockOrder();
              entity->addBlocks(blockList);
 
-            Octree3DMapManager::mBlockEntityList.push_back(entity);
+            Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
             newEntitiesNum ++;
         }
 
@@ -435,11 +499,11 @@ const Entity3D* Octree3DMapManager::getEntity( std::string entityName) const
             return (it->second);
     } // for
 
-    vector<BlockEntity*>::const_iterator it2;
+    map<int,BlockEntity*>::const_iterator it2;
     for (it2 = mBlockEntityList.begin( ); it2 != mBlockEntityList.end( ); ++it2 )
     {
-        if (((BlockEntity*)(*it2))->getEntityName() == entityName)
-            return (*it2);
+        if (((BlockEntity*)(it2->second))->getEntityName() == entityName)
+            return (it2->second);
     }
 
     return 0;
@@ -484,12 +548,35 @@ BlockVector Octree3DMapManager::getObjectDirection(Handle objNode) const
 
 bool Octree3DMapManager::checkStandable(BlockVector& pos) const
 {
-    // todo: should as well consider the size of the the agent
 
     Block3D* block;
+    if (! mMapBoundingBox.isUnitBlockInsideMe(pos))
+        return false;
+
+    // check if there is any non-block obstacle in this pos
+    if (mPosToNoneBlockEntityMap.count(pos) != 0 )
+    return false;
+
     if (mRootOctree->checkIsSolid(pos,block))
         return false;
 
+    if (pos.z <= mFloorHeight)
+        return false;
+
+    // because the agent has a height,
+    // we should check if there are enough room above this pos for this agent to stand on
+    if (mAgentHeight > 1)
+    {
+        for (int height = 1; height < mAgentHeight; height ++)
+        {
+            BlockVector blockAbove(pos.x,pos.y,pos.z + height);
+            if (mRootOctree->checkIsSolid(blockAbove,block))
+                return false;
+        }
+    }
+
+    // because there are too many blocks for the whole floor, we don't send these floor blocks to opencog
+    // so we just check if the pos height is just on the floor.
     if ( (pos.z - mFloorHeight) == 1)
         return true;
 
@@ -499,6 +586,12 @@ bool Octree3DMapManager::checkStandable(BlockVector& pos) const
 
     return false;
 
+}
+
+bool Octree3DMapManager::checkIsSolid(BlockVector& pos)
+{
+    Block3D* block;
+    return (mRootOctree->checkIsSolid(pos, block));
 }
 
 bool Octree3DMapManager::checkStandable(int x, int y, int z) const
@@ -525,6 +618,8 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
             z = -1;
         else
             z = 1;
+
+        ztimes++;
 
         // we first search at the startdirection, if cannot find a proper position then go on with the complete search
         BlockVector curpos(position.x + startD.x, position.y + startD.y, position.z + z);
@@ -988,3 +1083,62 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
          return " invalid relation ";
      }
  }
+
+ void Octree3DMapManager::computeAllAdjacentBlockClusters()
+ {
+     map<int,BlockEntity*>::iterator iter2;
+     vector<Block3D*>::const_iterator iter;
+     vector<Handle>::const_iterator iter1;
+     vector<BlockEntity*>::const_iterator iter3;
+     map<BlockEntity*,AdjacentInfo>::const_iterator iter4;
+
+     // TODO: Send raw block clusters data to learning server
+     // construct these adjacent blocks messages to send to the learning server
+     learning::message::BlockClusterDataInput dataInput;
+     learning::message::BlockClusterStream blockClusters;
+     learning::message::BlockClusterLinkStream blockClusterLinks;
+
+     for (iter2 = mBlockEntityList.begin(); iter2 != mBlockEntityList.end(); ++iter2)
+     {
+         int unitBlockNum = 0;
+         BlockEntity* entity = (BlockEntity*)(iter2->second);
+         entity->NeighbourBlockEntities.clear();
+
+         vector<Block3D*> blocks = entity->getBlockList();
+         for (iter = blocks.begin(); iter != blocks.end(); ++ iter)
+         {
+            HandleSeq unitBlockHandles = ((Block3D*)(*iter))->getAllMyUnitBlockHandles();
+            unitBlockNum +=  unitBlockHandles.size();
+            for (iter1 = unitBlockHandles.begin(); iter1 != unitBlockHandles.end(); ++ iter1)
+            {
+                vector<BlockEntity*>  neighbourEntities = mRootOctree->getNeighbourEntities(mAllUnitBlockAtoms[(Handle)(*iter1)]);
+                for (iter3 = neighbourEntities.begin(); iter3 != neighbourEntities.end(); ++ iter3)
+                {
+                    iter4 = entity->NeighbourBlockEntities.find((BlockEntity*)(*iter3));
+                    if (iter4 == entity->NeighbourBlockEntities.end())
+                    {
+                        AdjacentInfo adjacentInfo;
+                        adjacentInfo.adjacentUnitNum = 1;
+                        entity->NeighbourBlockEntities.insert(map<BlockEntity*,AdjacentInfo>::value_type((BlockEntity*)(*iter3),adjacentInfo));
+                    }
+                    else
+                    {
+                        ((AdjacentInfo)(iter4->second)).adjacentUnitNum ++;
+                    }
+
+                }
+            }
+         }
+
+         if (this->enableStaticsMapLearning)
+         {
+             learning::message::BlockCluster* blockCluster = blockClusters.add_blockclusters();
+             blockCluster->set_entityid(entity->getEntityID());
+             blockCluster->set_blocknumber(unitBlockNum);
+             blockCluster->set_blocktype(((BlockMaterial)(((Block3D*)(blocks.front()))->getBlockMaterial())).materialType);
+         }
+
+     }
+
+ }
+

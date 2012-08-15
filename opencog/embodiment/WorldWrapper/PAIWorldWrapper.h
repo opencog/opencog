@@ -116,7 +116,8 @@ private:
      * @param endPoint End point
      * @param actions Return the vector of 3d points.
      */
-    void get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint, const SpaceServer::SpaceMapPoint& endPoint, std::vector<SpaceServer::SpaceMapPoint>& actions);
+    void get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint, const SpaceServer::SpaceMapPoint& endPoint,
+                        std::vector<SpaceServer::SpaceMapPoint>& actions,SpaceServer::SpaceMap& sm);
 
 
     /**

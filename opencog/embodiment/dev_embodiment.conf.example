@@ -259,12 +259,11 @@ SIZE_PENALTY_COEF_B             = 0.34
 ######################
 
 # SpaceMap grid X dimensions.
-#MAP_XDIM                        = 256
+MAP_XDIM                        = 256
 #MAP_XDIM 1024
 
 # SpaceMap grid Y dimensions.
-
-#MAP_YDIM                        = 256
+MAP_YDIM                        = 256
 #MAP_YDIM 1024
 
 # Parameters used to enable/disable the tasks to be executed during OAC idle
@@ -428,7 +427,4 @@ RAMONA_SERVER_PORT	= 7003
 
 # Whether to collect action corpus for event detection
 ENABLE_ACTION_COLLECT   = false
-
-# Whether to use 3D map, currently the 3D map is used by the Unity3D embodiment
-USE_3D_MAP = false
 

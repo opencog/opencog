@@ -230,6 +230,7 @@
         <xsd:attribute name="global-floor-height" type="xsd:int" use="optional"/>
         <xsd:attribute name="gridParcel" type="xsd:string" use="optional"/>
 	<xsd:attribute name="is-first-time-percept-world" type="xsd:boolean" use="required"/>
+	<xsd:attribute name="timestamp" type="xsd:string" use="required"/>
     </xsd:complexType>
 
     <xsd:complexType name="MapDataType">

@@ -78,7 +78,6 @@ namespace opencog
 
         protected:
 
-
             // It indicates how big this block is.
             // Level for a unit block is 1, level for a block composed by 8 units is 2...
             int mLevel;

@@ -630,60 +630,64 @@ vector<Block3D*> Octree::findAllBlocksCombinedWith(BlockVector* _pos, bool useBl
     BlockMaterial curMaterial;
 
     while(searchList.size() != 0)
+
     {
         curPos = searchList.front();
-        checkIsSolid(curPos, curblock);
-        curMaterial = curblock->getBlockMaterial();
+        if (checkIsSolid(curPos, curblock))
+        {
 
-        for (int i = -1; i < 2; i ++)
-            for (int j = -1; j < 2; j ++)
-                for (int k = -1; k < 2; k ++)
-                {
-                    if (i == 0 && j == 0 && k == 0)
-                        continue;
-                    BlockVector nextPos(curPos.x + i, curPos.y + j, curPos.z + k);
+            curMaterial = curblock->getBlockMaterial();
 
-                    if (! rootBox.isUnitBlockInsideMe(nextPos))
+            for (int i = -1; i < 2; i ++)
+                for (int j = -1; j < 2; j ++)
+                    for (int k = -1; k < 2; k ++)
                     {
-                        searchedList.push_back(nextPos);
-                        continue;
-                    }
+                        if (i == 0 && j == 0 && k == 0)
+                            continue;
+                        BlockVector nextPos(curPos.x + i, curPos.y + j, curPos.z + k);
 
-                    // if this nextPos already searched, don't push in searchList
-                    for(it = searchedList.begin(); it != searchedList.end(); it ++)
-                    {
-                        if (nextPos == (BlockVector)(*it))
-                            break;
-                    }
-                    if (it != searchedList.end())
-                        continue;
-
-                    if (checkIsSolid(nextPos, nextBlock) && (nextBlock->getBlockMaterial() == curMaterial))
-                    {
-                        for(it2 = searchList.begin(); it2 != searchList.end(); it2 ++)
+                        if (! rootBox.isUnitBlockInsideMe(nextPos))
                         {
-                            if (nextPos == (BlockVector)(*it2))
+                            searchedList.push_back(nextPos);
+                            continue;
+                        }
+
+                        // if this nextPos already searched, don't push in searchList
+                        for(it = searchedList.begin(); it != searchedList.end(); it ++)
+                        {
+                            if (nextPos == (BlockVector)(*it))
                                 break;
                         }
-                        if (it2 == searchList.end())
-                            searchList.push_back(nextPos);
+                        if (it != searchedList.end())
+                            continue;
 
-                        if (nextBlock->mBlockEntity == 0)
+                        if (checkIsSolid(nextPos, nextBlock) && ( (!useBlockMaterial) || (nextBlock->getBlockMaterial() == curMaterial)))
                         {
-                            for(iter = blockList.begin(); iter != blockList.end(); iter ++)
+                            for(it2 = searchList.begin(); it2 != searchList.end(); it2 ++)
                             {
-                                if (nextBlock == (Block3D*)(*iter))
+                                if (nextPos == (BlockVector)(*it2))
                                     break;
                             }
-                            if (iter == blockList.end())
-                                blockList.push_back(nextBlock);
+                            if (it2 == searchList.end())
+                                searchList.push_back(nextPos);
+
+                            if (nextBlock->mBlockEntity == 0)
+                            {
+                                for(iter = blockList.begin(); iter != blockList.end(); iter ++)
+                                {
+                                    if (nextBlock == (Block3D*)(*iter))
+                                        break;
+                                }
+                                if (iter == blockList.end())
+                                    blockList.push_back(nextBlock);
+                            }
+                        }
+                        else
+                        {
+                            searchedList.push_back(nextPos);
                         }
                     }
-                    else
-                    {
-                        searchedList.push_back(nextPos);
-                    }
-                }
+        }
         searchedList.push_back(curPos);
         searchList.erase(searchList.begin());
 

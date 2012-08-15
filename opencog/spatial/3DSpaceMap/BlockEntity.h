@@ -21,13 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _SPATIAL_BLOCKENTITY_H
-#define _SPATIAL_BLOCKENTITY_H
+#ifndef _SPATIAL_BlockEntity_H
+#define _SPATIAL_BlockEntity_H
 
 #include "Block3DMapUtil.h"
 #include "Block3D.h"
 #include "Entity3D.h"
 #include <vector>
+#include <map>
 
 namespace opencog
 {
@@ -36,18 +37,28 @@ namespace opencog
         class Block3D;
         class Entity3D;
 
-        // A blockEntity is made of blocks
+        // the info to describe the adjacent situation with an neighbour blockEntity
+        struct AdjacentInfo
+        {
+            int adjacentUnitNum; // the number of unit blocks in me which adjacent to this neighbour blockEntity
+        };
+
+        // A BlockEntity is made of blocks
         class BlockEntity : public Entity3D
         {
         protected:
             static int BlockEntityIDCount;
         public:
-            // this will also add a node to the atom space representing this blockEntity
+            // this will also add a node to the atom space representing this BlockEntity
             BlockEntity(Block3D& firstBlock, std::string entityName = "");
             BlockEntity(vector<Block3D*>& blockList, std::string entityName = "");
+            BlockEntity(vector<BlockEntity*> subEntities, std::string entityName = ""); // for super BlockEntity only
             ~BlockEntity();
 
             inline const vector<Block3D*>& getBlockList(){return mMyBlocks;}
+            inline const vector<BlockEntity*>& getSubEntities() {return mMySubEntities;}
+            inline const BlockEntity* getFartherEntity() {return mFartherEntity;}
+            inline bool isSuperBlockEntity(){return is_superBlockEntity;}
 
             void addBlock(Block3D* _block);
             void addBlocks(vector<Block3D*>& _blockList);
@@ -59,9 +70,24 @@ namespace opencog
 
             bool isBlockEntity(){return true;}
 
-        protected:
+            void setFartherEntity(BlockEntity* father){mFartherEntity = father;}
 
+            void addSubEntity(BlockEntity* subEntity);
+            void addSubEntities(vector<BlockEntity*> subEntityList);
+
+            void removeSubEntity(BlockEntity* subEntityToRemove);
+            void removeSubEntities(vector<BlockEntity*> subEntityListToRemove);
+
+            // only for non-super blockEntities
+            map<BlockEntity*,AdjacentInfo> NeighbourBlockEntities;
+
+        protected:
+            bool is_superBlockEntity; // superBlockEntity is a BlockEntity composed of sub blockEntities
+            BlockEntity* mFartherEntity; // the farther BlockEntity of this entity
             vector<Block3D*> mMyBlocks; // all the blocks in this entity
+            vector<BlockEntity*> mMySubEntities; // all the subBlockEntities in this entity
+
+            void _init(std::string entityName, bool _is_superBlockEntity);
             void _reCalculateBoundingBox();
             void _ReCalculatCenterPosition();
 
@@ -70,4 +96,4 @@ namespace opencog
 }
 
 
-#endif // _SPATIAL_BLOCKENTITY_H
+#endif // _SPATIAL_BlockEntity_H

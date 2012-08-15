@@ -51,6 +51,7 @@ SpaceServer::SpaceServer(AtomSpaceAsync &_atomspace): atomspace(&_atomspace)
 {
     // Default values (should only be used for test purposes)
     agentRadius = 0.25;
+    agentHeight = 0;
     xMin = 0;
     xMax = 256;
     yMin = 0;
@@ -61,6 +62,8 @@ SpaceServer::SpaceServer(AtomSpaceAsync &_atomspace): atomspace(&_atomspace)
     timeServer = NULL;
     curSpaceMapHandle = Handle::UNDEFINED;
     curMap = NULL;
+
+
 }
 
 SpaceServer::~SpaceServer()
@@ -85,8 +88,11 @@ void SpaceServer::setAgentHeight(unsigned int _height)
 {
     if (agentHeight != _height) {
         agentHeight = _height;
+        curMap->setAgentHeight(_height);
         logger().info("SpaceServer - AgentRadius: %d", agentHeight);
     }
+
+
 }
 /*
 // this function does not be used in 3d map
@@ -490,7 +496,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, unsigned long timestamp,
     }
     else
     {
-        curMap->addNoneBlockEntity(objectNode,pos,objWidth,objLength,objHeight,objYaw,objectName);
+        curMap->addNoneBlockEntity(objectNode,pos,objWidth,objLength,objHeight,objYaw,objectName, entityClass, true);
     }
 }
 
@@ -698,7 +704,6 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
 
 }
 
-
 void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _entity, unsigned long timestamp)
 {
     addBlocksLisitPredicateToEntity(_entity, timestamp);
@@ -769,4 +774,5 @@ Handle SpaceServer::addPropertyPredicate(
     //atomspace->setLTI(result, 1);
     return result;
 }
+
 

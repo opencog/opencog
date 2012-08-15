@@ -27,18 +27,19 @@ using namespace opencog;
 using namespace opencog::spatial;
 
 
-Entity3D::Entity3D(BlockVector _centerPosition, int _width, int _lenght, int _height, double yaw, std::string _entityName, bool _is_obstacle)
+Entity3D::Entity3D(BlockVector _centerPosition, int _width, int _lenght, int _height, double yaw, std::string _entityName, std::string _entityClass, bool _is_obstacle)
 {
     mCenterPosition = _centerPosition;
     mName = _entityName;
+    mEntityClass = _entityClass;
     mYaw = yaw;
     mOrientation = math::Quaternion( math::Vector3::Z_UNIT, yaw);
     mBoundingBox.size_x = _width;
     mBoundingBox.size_y = _lenght;
     mBoundingBox.size_z = _height;
-    mBoundingBox.nearLeftBottomConer.x = _centerPosition.x + _width / 2;
-    mBoundingBox.nearLeftBottomConer.y = _centerPosition.y + _lenght / 2;
-    mBoundingBox.nearLeftBottomConer.z = _centerPosition.z + _height / 2;
+    mBoundingBox.nearLeftBottomConer.x = _centerPosition.x - _width / 2;
+    mBoundingBox.nearLeftBottomConer.y = _centerPosition.y - _lenght / 2;
+    mBoundingBox.nearLeftBottomConer.z = _centerPosition.z - _height / 2;
     is_obstacle =  _is_obstacle;
 }
 
@@ -82,4 +83,18 @@ BlockVector Entity3D::getDirection() const
 
     return BlockVector(x,y,0);
 
+}
+
+void Entity3D::updateNonBlockEntitySpaceInfo(BlockVector _centerPosition, int _width, int _lenght, int _height,double yaw, bool _is_obstacle)
+{
+    mCenterPosition = _centerPosition;
+    mYaw = yaw;
+    mOrientation = math::Quaternion( math::Vector3::Z_UNIT, yaw);
+    mBoundingBox.size_x = _width;
+    mBoundingBox.size_y = _lenght;
+    mBoundingBox.size_z = _height;
+    mBoundingBox.nearLeftBottomConer.x = _centerPosition.x - _width / 2;
+    mBoundingBox.nearLeftBottomConer.y = _centerPosition.y - _lenght / 2;
+    mBoundingBox.nearLeftBottomConer.z = _centerPosition.z - _height / 2;
+    is_obstacle =  _is_obstacle;
 }

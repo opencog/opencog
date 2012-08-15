@@ -1,15 +1,28 @@
 
-ADD_LIBRARY(lslib
+SET(LSLIB_SOURCE_FILES
+        LearningServer
 	LS
 	LSMocky
 	SleepAgent
 	ImitationLearningAgent
 )
 
-TARGET_LINK_LIBRARIES (lslib
+ADD_LIBRARY(lslib
+${LSLIB_SOURCE_FILES} 
+)
+
+SET(lslib_LINK_LIBS
     PetaverseMOSES
     comboreduct
     server
+)
+
+IF (HAVE_ZMQ)
+  SET(lslib_LINK_LIBS ${lslib_LINK_LIBS} zmq)
+ENDIF (HAVE_ZMQ)
+
+TARGET_LINK_LIBRARIES (lslib
+    ${lslib_LINK_LIBS}
 )
 
 SET(SERVER_LINK_LIBS

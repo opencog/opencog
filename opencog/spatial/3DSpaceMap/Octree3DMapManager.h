@@ -1,3 +1,26 @@
+/*
+ * opencog/spatial/3DSpaceMap/Octree3DMapManager.h
+ *
+ * Copyright (C) 2002-2011 OpenCog Foundation
+ * All Rights Reserved
+ * Author(s): Shujing Ke
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #ifndef _SPATIAL_OCTREE3DMAPMANAGER_H
 #define _SPATIAL_OCTREE3DMAPMANAGER_H
 
@@ -7,6 +30,7 @@
 #include "Block3D.h"
 #include "Octree.h"
 #include <opencog/atomspace/Handle.h>
+#include <zmq.hpp>
 
 using namespace std;
 
@@ -54,7 +78,10 @@ namespace opencog
             // to store the blockentities need to be updated the predicates
             static vector<BlockEntity*> updateBlockEntityList;
 
-            static const int AccessDistance = 2;
+            // to store the super blockEntities need to be updated the predicates
+            static vector<BlockEntity*> updateSuperBlockEntityList;
+
+            static const int AccessDistance = 1;
 
             /**
              * @ min_x and min_y is the start position of this octree space
@@ -68,7 +95,9 @@ namespace opencog
 
             const map<Handle, BlockVector>& getAllUnitBlockatoms(){return mAllUnitBlockAtoms;}
 
-            const vector<BlockEntity*>& getBlockEntityList(){return mBlockEntityList;}
+            const map<int,BlockEntity*>& getBlockEntityList(){return mBlockEntityList;}
+
+            const map<int,BlockEntity*>& getSuperBlockEntityList(){return mSuperBlockEntityList;}
 
             const map<Handle, Entity3D*>& getAllNoneBlockEntities(){return mAllNoneBlockEntities;}
 
@@ -93,7 +122,7 @@ namespace opencog
 
             // currently we consider all the none block entities has no collision, agents can get through them
             void addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
-                                    int _width, int _lenght, int _height, double yaw, std::string _entityName, bool is_obstacle = false);
+                                    int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool is_obstacle = false);
 
             void removeNoneBlockEntity(const Handle &entityNode);
 
@@ -242,11 +271,23 @@ namespace opencog
              */
             static std::string spatialRelationToString( SPATIAL_RELATION relation );
 
+            // Note: for non-super blockEntities only
+            // Find all the neighbour BlockEntities for every blockEntity and describe their adjacent situation
+            void computeAllAdjacentBlockClusters();
+
+            int getAgentHeight(){return mAgentHeight;}
+            void setAgentHeight(int _height){mAgentHeight = _height;}
+
+            bool checkIsSolid(BlockVector& pos);
+
         protected:
 
             map<Handle, BlockVector> mAllUnitBlockAtoms;
-            vector<BlockEntity*> mBlockEntityList;
+            map<int,BlockEntity*> mBlockEntityList;
+            map<int,BlockEntity*> mSuperBlockEntityList;
             map<Handle, Entity3D*> mAllNoneBlockEntities;
+            multimap<BlockVector, Entity3D*> mPosToNoneBlockEntityMap;
+
             int mTotalDepthOfOctree;
 
             std::string     mMapName;
@@ -257,11 +298,26 @@ namespace opencog
             // So till the deepest octree every block in it is a unit block
 
             int             mFloorHeight; // the z of the floor
+            int             mAgentHeight;
             int             mTotalUnitBlockNum;
 
             // it's not the boundingbox for the map, not for the octree,
             // an octree boundingbox is usually a cube, but the map is not necessary to be a cube
             AxisAlignedBox mMapBoundingBox;
+
+            // using zmq to communicate with the learning server
+            string fromLSIP;
+            string fromLSPort;
+
+            string toLSIP;
+            string toLSPort;
+
+            zmq::context_t * zmqLSContext;
+            zmq::socket_t * socketSendToLS;
+            zmq::socket_t * socketLSFromLS;
+
+            bool enableStaticsMapLearning;
+
         };
 
     }
