@@ -1,11 +1,14 @@
 * MOSES
 ** Code Improvements
+- [ ] Finish documenting varous moses flags in man page; see bottom
+  of man page for the list.
 - [ ] Move as many thing as possible in body files to decrease
   recompiling time
-- [ ] refactore AntFitnessFunction moses/ant_scoring.h so that it uses
+- [ ] refactor AntFitnessFunction moses/ant_scoring.h so that it uses
   eval in combo/eval.h
 - [ ] replace instance_t by vector<bool> (which should automatically
-  pack everything)
+  pack everything) Huh?? but instances aren't just vectrs of bool!?
+  So I don't get this work item.
 - [ ] make a Python binding for MOSES
 - [ ] fixed moses_exec so that it returns the right exit code
 - [ ] test option -E2 vs E3 for 11-multiplexer
@@ -13,32 +16,29 @@
   why it has poor performance
 - [ ] comments in build_knobs::sample_logical_perms about n(n-1) and
   check that it's really correct
-- [ ] support contin reduct effort
+- [ ] support contin reduct effort. That is, split up contin reductions
+  into "easy" and "hard/time-consuming" reductions.
 - [ ] _perm_ratio is set to 0, experiment and add it to the program option
-  if that is worth
-- [ ] in Distributed MOSES add log to tell that there is no more
-  candidate to try but we're waiting for more threads to complete to
-  see if can get more
-- [ ] add remaining evals in distributed moses in the log
-- [ ] added log for start "init metapop" and correct "start moses"
-  (inside moses-exec I guess)
-- [ ] Distributed MOSES, should run an instance everytime a resource is
-  free, and not wait for more merges
+  if that is worthwhile.
+- [ ] add number of evals remaining in distributed moses in the log
 - [ ] neighborhood_sampling method and other methods filling the deme
   should not assume the size is right and instead should use
   back_inserter(ret)
 - [ ] try adaptive reduct effort in moses-exec
 - [ ] in moses-exec replace boolean program options by flags (like
   with-blah or without-blah)
-- [ ] refactore test_sample_from_neighborhood in NeighborSamplingUTest
+- [ ] refactor test_sample_from_neighborhood in NeighborSamplingUTest
 - [ ] there are possibly confusions between eda::field_set::width_t,
   multiplicity_t and combo::arity_t
 - [ ] there is a big mess between score_t and contin_t, fix
   that mess
-- [ ] refactore Pedrag slice moses code, optimization API should be
+- [ ] refactor Pedrag slice moses code, optimization API should be
   simple and sliced for everyone
+- [ ] example-ant/moses-ant-hillclimbing crashes.
+   Open bug 911364 to report this.
 
 ** Ideas (things that should require thought before deciding whether to implement or not)
+- [ ] See also TODO-Ideas.txt in this directory.
 - [ ] use a normalized variable instead of the variable itself in
       continuous MOSES. For instance $1 becomes ($1 - mean)/std where mean
   and std are the mean and the standard deviation of $1 respectively
@@ -52,3 +52,12 @@
 - [ ] use famous continuous regression when the knobs are continuous
 - [ ] implement HC EDA
 - [ ] add the prob of being wrong in the computation of the conditional entropy (if that makes sense)
+
+** Done (things that have been done, more or less)
+- [ ] Distributed MOSES, should run an instance everytime a resource is
+  free, and not wait for more merges.  This was done in bzr rev 7280, July 26, 2012
+- [ ] in Distributed MOSES add log to tell that there is no more
+  candidate to try but we're waiting for more threads to complete to
+  see if can get more.  This message already seems to be there, as of July 2012
+- [ ] added log for start "init metapop" and correct "start moses"
+  (inside moses-exec I guess) Rejected. If you need this, then add it.

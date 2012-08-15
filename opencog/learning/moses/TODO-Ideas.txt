@@ -1,0 +1,170 @@
+
+              MOSES Enhancement Ideas
+              -----------------------
+
+A collection of half-finished thoughts for MAJOR enhancements to MOSES.
+Most of the ideas listed below would take weeks or months or more to
+implement, and all require additional theoretical thought and research.
+Perhaps some are easy to implement, but its not exactly clear quite how...
+All requrie measurements and vetting to make sure they work.
+
+
+ToDo List
+---------
+-- Add ability to add new, de-novo logic pattterns: e.g. build in an xor gate,
+   or more complex electronic circuits (aka patterns/paradigms). i.e.
+   combo would have a library of these to draw on, and moses would use
+   them.
+
+-- Moses would choose such patterns based on the frequency of being used
+   in previous demes...  That is, when going through the metapop, notice
+   commonly used and stable subtrees.
+
+-- Keep track of which subtrees are stable against mutation, and which
+   change easily. In genetic terms, which are strongly conserved, and which
+   are not.
+
+-- add mechanism to discern repeated patterns in the combo tree i.e. notice
+   that this branch is same as that branch, and then label these. i.e. the
+   automatic discovery of subroutines...  This is the pleasure algo!?
+   This is kind-of-like transfer learning.  
+
+-- Understand branch heat structure. That is, for some rows of input
+   table regression, some parts of a tree don't matter (because they
+   are multiplied by zero, or anded with false, etc.) and some parts
+   of the tree (some features) determine the entire outcome.  These
+   parts of the tree can be assigned an activation probability: the
+   probability is low, if they play a role in only a few input rows,
+   the probability is high if they are active in most input rows.
+   Understanding these, and understanding how they might lead to a
+   factoring of a tree, seems important.  It might also be a way of
+   discerning "repeated patterns", as noted above.
+
+-- Transfer learning for moses: By factorizing the branch structure
+   of a program, as described aove, some of the individual trees may
+   be useful.  But perhaps this is 'pleasure' etc. described
+   above/below...
+
+-- Transfer learning for moses. This can be done in several ways:
+   When one has a complex exemplar which will be the model exemplar,
+   but the domain is all new, then try to permute the input features.
+   That is, the initial knob decoration will insert knobs between
+   the new features and the old features (insert a layer) and try to
+   learn if certain remappings of old-to-new features allow for fast
+   learning.
+
+-- Integrated feature selection: simply track how often a feature 
+   was used in previous generations, and select it with this weighting
+   in future gens!?
+
+-- Integrated feature selection and learning, per Ben.  Basically,
+   explore only a limited set of features when building exemplars.
+   Priority: medium.
+
+-- As above, but for contin patterns as well ... e.g. linear regression?
+
+-- In table regression, contin variables should perhaps be normalized
+   to mean and stddev ?  perhaps this would be an example of an 
+   extension of the contin library? i.e. in addtition to just sin, log,
+   exp, we could also have 'normalized var' as a possible input..?
+
+-- The information_theoretic_bits() function computes sum_i log p_i
+   as the complexity. What if we replace this by the entropy, so that
+   instead, we use sum_i p_i log p_i ?? 
+
+-- There is a single-threaded bottleneck in the deme generation code,
+   e.g. between generation 3 and 4 in the magic-16-sect code.
+   Its a very very long bottleneck... what is this bottleneck???
+
+-- hill-climbing: for large feature-sets, large complexity, try to
+   understand how random sub-sampling affects things !?
+
+-- Use ideas from precision maximization discussion, to find
+   high-scoring, precise exemplars, and then use intersections 
+   & unions between these to improve accuracy.  (precision-scoring
+   aka radio operating characteristics ROC) Priority: High.
+
+-- Add equ support (i.e. enumerated input support).  Priority: high.
+
+-- Add a diversity Penalty: High priority.
+
+-- There is a hint that, when decorating large trees, two slightly
+   different trees end up being more or less exactly the same after
+   decoration.  That is, both start with nearly the same initial
+   score, and after much cpu time, finish with nearly the same score,
+   making no advance.  This suggests that both exemplars are very similar
+   to one-another, and fail to differ by much, and, after decoration, fail
+   to differ at all.  This should be fixed.  Priority: High.
+
+   Current plan is to use diversity penalty to suppress this.
+
+-- The build_knobs::disc_probe does some rather expensive masuring
+   but its not clear if it is really needed.  Should try some perf 
+   measurements.  This affects performance of logical knobs only,
+   not contin knobs. Priority: Medium? or high? what's the impact??
+
+-- merge of candidates is slow, and sometimes un-needed.
+   moses/metapopulation.h:
+   OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
+   In particular, this is not needed when at the very last step, since
+   almost all the metapop will be discarded, leaving only the best ...
+   This is curently taking 25-500 millisecs(!!) per instance.
+   This is mostly all due to the reduct step of hairy exemplars.
+   Priority: Medium ??
+
+-- auto-increment the contin step size ...
+   Hard: the "obvious" first experiment failed.
+   More generally, how contin values are managed impedes learning
+   performance.  Doing something here could be important. Priority:
+   Medium.
+
+-- should info-theortic bits for contin be less agressive?
+   ... or some stunt to encourage more exploration of different contin
+   values?  See above.
+
+-- contin seems to be under-sampled, algo seems to have trouble finding 
+   precise values.  There is no way to dial in for additional precision
+   while the algo is running.  See above.
+
+-- fix combo reduct: it failed to simplify this expression:
+    and(0<(+(-1.25 #x)) 0<(#x) 0<(#y) #g)
+   Priority: Medium/Low
+
+-- Ineffective conditions: the cond primitive can evolve trees
+   which have ineffective conditions in them: i.e. conditions which
+   are false for all input values, and thus serve no prupose. These
+   should be removed before final reporting of results to user.
+   Priority: Medium/Low.
+
+-- add flag/option to search for combo trees that are only 
+   linear combinations (right now, poly's are easily discovered)
+   i.e. to do linear-programming solutions only ...
+   is. this worth doing .. !?
+   Priority Medium/Low.
+
+-- Provide better slicing of avail cycles for hill-climbing.
+   This is the -m flag ... !?
+   priority: medium/low.
+
+-- man page: explain that -m counts are split up between optimization 
+   runs, and deme runs, so even small changes in m value can lead to 
+   different results.  Explain the splitting algo.
+
+-- The -Hcp (combo program problem) The sampling of linear combo 
+   programs is bad; since quadratic solutions seem to be accepted
+   quite often.  Need a longer arm to blow these away.   Not urgent.
+   Priority: Low
+
+-- Is the merge dominated code buggy? Are we getting duplicate
+   exemplars? See metapopulation.h  However, dominated merge is
+   very slow, and is currently not used.  And using it seems to
+   degrade ability to find solutions.  I think its based on 
+   a faulty understanding of evolution.  Priority: Very Low
+
+-- simulated annealing code should not be jumping huge distances 
+   at high temps.  Maybe .. -D2 seems to work best ???
+   Review the cooling sched...  The simluated annealing algo, 
+   as currently implemented, doesn't work very wwell, at all, 
+   and is deprecated.  Fixing it or improving it seems not
+   important. Priority Low/Very Low.
+
