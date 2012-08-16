@@ -57,6 +57,7 @@ static const unsigned int default_nsamples = 20;
 
 // problems
 static const string it="it"; // regression based on input table
+                             // maximize accuracy.
 
 static const string recall="recall"; // regression based on input table,
                                   // maximize recall, while holding
@@ -65,6 +66,12 @@ static const string recall="recall"; // regression based on input table,
 static const string prerec="prerec"; // regression based on input table,
                                   // maximize precision, while holding
                                   // recall const.
+
+static const string bep="bep";    // regression based on input table,
+                                  // maximize break-even point
+
+static const string f_one="f_one"; // regression based on input table,
+                                  // maximize f_1 score
 
 static const string pre="pre";    // regression based on input table by
                                   // maximizing precision (or negative
@@ -456,7 +463,7 @@ int moses_exec(int argc, char** argv)
     // pre params
     bool pre_worst_norm;
     bool gen_best_tree;
-    
+
     // it params
     bool it_abs_err;
 
@@ -552,11 +559,13 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(problem_opt).c_str(),
          value<string>(&problem)->default_value(it),
-         str(format("Problem to solve, supported problems are:\n"
-                    "%s, regression based on input table\n"
-                    "%s, regression based on input table, maximizing precision, while holding activation fixed\n"
-                    "%s, regression based on input table, maximizing precision, while holding recall fixed\n"
-                    "%s, regression based on input table, maximizing recall while holding precision fixed\n"
+         str(format("Problem to solve, supported problems are:\n\n"
+                    "%s, regression based on input table\n\n"
+                    "%s, regression based on input table, maximizing precision, while holding activation fixed\n\n"
+                    "%s, regression based on input table, maximizing precision, while holding recall fixed\n\n"
+                    "%s, regression based on input table, maximizing recall while holding precision fixed\n\n"
+                    "%s, regression based on input table, maximizing break-even point (BEP) between precision and recall\n\n"
+                    "%s, regression based on input table, maximizing the F_1 score (harmonic mean of precision and recall)\n\n"
                     "%s, search interesting patterns, where interestingness"
                     " is defined in terms of several features such as maximizing"
                     " the Kullback-Leibler"
@@ -564,14 +573,14 @@ int moses_exec(int argc, char** argv)
                     " that same distribution in the context of the pattern"
                     " being true."
                     " Or the difference of skewnesses between the 2 distributions"
-                    " and other things being experimented.\n"
-                    "%s, regression based on input table using ann\n"
-                    "%s, regression based on combo program\n"
-                    "%s, even parity\n"
-                    "%s, disjunction\n"
-                    "%s, multiplex\n"
+                    " and other things being experimented.\n\n"
+                    "%s, regression based on input table using ann\n\n"
+                    "%s, regression based on combo program\n\n"
+                    "%s, even parity\n\n"
+                    "%s, disjunction\n\n"
+                    "%s, multiplex\n\n"
                     "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
-             % it % pre % prerec % recall % ip % ann_it % cp % pa % dj % mux % sr).c_str())
+             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % sr).c_str())
 
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
@@ -598,8 +607,9 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0.0),
-         "Minimum value of a sampled coninuous input.  The cp, ip, recall, pre "
-         "and prerec problems all require a range of values to be sampled in "
+         "Minimum value of a sampled coninuous input.  The cp, ip, pre, "
+         "recall, prerec, bep and f_one "
+         "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low end of the sampled range. In the case of "
          "fitness function pre, the range corresponds to the activation "
@@ -607,8 +617,9 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1.0),
-         "Maximum value of a sampled coninuous input.  The cp, ip, recall, pre "
-         "and prerec problems all require a range of values to be sampled in "
+         "Maximum value of a sampled coninuous input.  The cp, ip, pre, "
+         "recall, prerec, bep and f_one "
+         "problems all require a range of values to be sampled in "
          "order to measure the fitness of a proposed solution. This "
          "option sets the low high of the sampled range. In the case of "
          "fitness function pre, the range corresponds to the activation "
@@ -710,7 +721,7 @@ int moses_exec(int argc, char** argv)
 
         ("mpi",
          value<bool>(&enable_mpi)->default_value(false),
-         "Enable MPI-based distributed processing. ")
+         "Enable MPI-based distributed processing.\n")
 
         (opt_desc_str(weighted_accuracy_opt).c_str(),
          value<bool>(&weighted_accuracy)->default_value(false),
@@ -885,8 +896,8 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&hardness)->default_value(0.0),
-         "If problems pre, prerec or recall are specified, this "
-         "option is used to set the 'hardness' of the constraint, "
+         "If problems pre, prerec, recall, f_one or bep are specified, "
+         "this option is used to set the 'hardness' of the constraint, "
          "with larger values corresponding to a harder constraint "
          "(i.e. punishing the score more strongly if the contraint "
          "is not met.)  For the 'pre' problem, if alpha is negative, "
@@ -974,7 +985,7 @@ int moses_exec(int argc, char** argv)
          "less confidence in the feature set quality measure.\n")
 
         // no need of that for now
-        // (opt_desc_str(hc_initial_feature_opt).c_str(), 
+        // (opt_desc_str(hc_initial_feature_opt).c_str(),
         //  value<vector<string> >(&fs_params.hc_initial_features),
         //  "Hillclimbing parameter.  Initial feature to search from.  "
         //  "This option can be used as many times as there are features, "
@@ -1231,8 +1242,11 @@ int moses_exec(int argc, char** argv)
         // 'prerec' means we must maximize precision (i.e minimize the number of
         // false positives) while holding recall fixed.
         // 'recall' means we must maximize recall while holding precision fixed.
-        if (problem == it || problem == pre || 
-            problem == prerec || problem == recall)
+        // 'f_one' means we must maximize the f_one score while holding ratio const
+        // 'bep' means we must maximize the break-even point while holding difference const
+        if (problem == it || problem == pre ||
+            problem == prerec || problem == recall ||
+            problem == f_one || problem == bep)
         {
             // Infer the type of the input table
             type_tree table_output_tt = get_signature_output(table_type_signature);
@@ -1255,8 +1269,38 @@ int moses_exec(int argc, char** argv)
 
             logger().info() << "Inferred output type: " << output_type;
 
+// Generic table regression code.  Could be a template, I suppose, but
+// the args are variable length, tables is a variable, and scorer is a type,
+// and I don't feel like fighting templates to make all three happen just
+// exactly right.
+#define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
+{                                                                \
+    /* Keep the table input signature, just make sure */         \
+    /* the output is the desired type. */                        \
+    type_tree cand_sig = gen_signature(                          \
+        get_signature_inputs(table_type_signature),              \
+        type_tree(OUT_TYPE));                                    \
+    int as = alphabet_size(cand_sig, ignore_ops);                \
+    typedef SCORER BScore;                                       \
+    boost::ptr_vector<BScore> bscores;                           \
+    foreach(const auto& table, TABLES) {                         \
+        BScore* r = new BScore ARGS ;                            \
+        set_noise_or_ratio(*r, as, noise, complexity_ratio);     \
+        bscores.push_back(r);                                    \
+    }                                                            \
+    multibscore_based_bscore<BScore> bscore(bscores);            \
+    metapop_moses_results(exemplars, cand_sig,                   \
+                          REDUCT, REDUCT_REP, bscore,            \
+                          opt_params, meta_params, moses_params, \
+                          mmr_pa);                               \
+}
+
             // problem == pre  precision-based scoring
             if (problem == pre) {
+
+                // Very nearly identical to the REGRESSION acro above,
+                // except that some new experimental features are being tried.
+
                 // Keep the table input signature, just make sure the
                 // output is a boolean.
                 type_tree cand_sig = gen_signature(
@@ -1299,77 +1343,48 @@ int moses_exec(int argc, char** argv)
             }
 
             // problem == prerec  maximize precision, holding recall const.
-            // Very nearly identical to above, just uses a different
-            // scorer.
+            // Identical to above, just uses a different scorer.
             else if (problem == prerec) {
-                // Keep the table input signature, just make sure the
-                // output is a boolean.
-                type_tree cand_sig = gen_signature(
-                    get_signature_inputs(table_type_signature),
-                    type_tree(id::boolean_type));
-                int as = alphabet_size(cand_sig, ignore_ops);
-                typedef prerec_bscore BScore;
-                boost::ptr_vector<BScore> bscores;
-                foreach(const CTable& ctable, ctables) {
-                    BScore* r = new BScore(ctable,
-                                           min_rand_input,
-                                           max_rand_input,
-                                           abs(hardness));
-                    set_noise_or_ratio(*r, as, noise, complexity_ratio);
-                    bscores.push_back(r);
-                }
-                multibscore_based_bscore<BScore> bscore(bscores);
-                metapop_moses_results(exemplars, cand_sig,
-                                      bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
-                                      mmr_pa);
+                REGRESSION(id::boolean_type,
+                           bool_reduct, bool_reduct_rep,
+                           ctables, prerec_bscore,
+                           (table, min_rand_input, max_rand_input, abs(hardness)));
             }
 
             // problem == recall  maximize recall, holding precision const.
-            // Identical to above, just uses a different scorer.
             else if (problem == recall) {
-                // Keep the table input signature, just make sure the
-                // output is a boolean.
-                type_tree cand_sig = gen_signature(
-                    get_signature_inputs(table_type_signature),
-                    type_tree(id::boolean_type));
-                int as = alphabet_size(cand_sig, ignore_ops);
-                typedef recall_bscore BScore;
-                boost::ptr_vector<BScore> bscores;
-                foreach(const CTable& ctable, ctables) {
-                    BScore* r = new BScore(ctable,
-                                           min_rand_input,
-                                           max_rand_input,
-                                           abs(hardness));
-                    set_noise_or_ratio(*r, as, noise, complexity_ratio);
-                    bscores.push_back(r);
-                }
-                multibscore_based_bscore<BScore> bscore(bscores);
-                metapop_moses_results(exemplars, cand_sig,
-                                      bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
-                                      mmr_pa);
+                REGRESSION(id::boolean_type,
+                           bool_reduct, bool_reduct_rep,
+                           ctables, recall_bscore,
+                           (table, min_rand_input, max_rand_input, abs(hardness)));
+            }
+
+            // bep == beak-even point between recall and precision.
+            else if (problem == bep) {
+                REGRESSION(id::boolean_type,
+                           bool_reduct, bool_reduct_rep,
+                           ctables, bep_bscore,
+                           (table, min_rand_input, max_rand_input, abs(hardness)));
+            }
+
+            // f_one = F_1 harmonic ratio of recall and precision
+            else if (problem == f_one) {
+                REGRESSION(id::boolean_type,
+                           bool_reduct, bool_reduct_rep,
+                           ctables, f_one_bscore,
+                           (table, min_rand_input, max_rand_input, abs(hardness)));
             }
 
             // problem == it  i.e. input-table based scoring.
             else {
                 OC_ASSERT(output_type == table_output_tn);
-                int as = alphabet_size(table_type_signature, ignore_ops);
 
                 // --------- Boolean output type
                 if (output_type == id::boolean_type) {
-                    typedef ctruth_table_bscore BScore;
-                    boost::ptr_vector<BScore> bscores;
-                    foreach(const CTable& ctable, ctables) {
-                        BScore *r = new BScore(ctable);
-                        set_noise_or_ratio(*r, as, noise, complexity_ratio);
-                        bscores.push_back(r);
-                    }
-                    multibscore_based_bscore<BScore> bscore(bscores);
-                    metapop_moses_results(exemplars, table_type_signature,
-                                          bool_reduct, bool_reduct_rep, bscore,
-                                          opt_params, meta_params, moses_params,
-                                          mmr_pa);
+                    REGRESSION(output_type,
+                               bool_reduct, bool_reduct_rep,
+                               ctables, ctruth_table_bscore,
+                               (table));
                 }
 
                 // --------- Enumerated output type
@@ -1387,54 +1402,32 @@ int moses_exec(int argc, char** argv)
                     } else {
                         // Much like the boolean-output-type above,
                         // just uses a slightly different scorer.
-                        typedef enum_effective_bscore BScore;
-                        boost::ptr_vector<BScore> bscores;
-                        foreach(const CTable& ctable, ctables) {
-                            BScore *r = new BScore(ctable);
-                            set_noise_or_ratio(*r, as, noise, complexity_ratio);
-                            bscores.push_back(r);
-                        }
-                        multibscore_based_bscore<BScore> bscore(bscores);
-                        metapop_moses_results(exemplars, table_type_signature,
-                                   contin_reduct, contin_reduct, bscore,
-                                   opt_params, meta_params, moses_params,
-                                   mmr_pa);
+                        REGRESSION(output_type,
+                                   contin_reduct, contin_reduct,
+                                   ctables, enum_effective_bscore,
+                                   (table));
                     }
                 }
 
                 // --------- Contin output type
                 else if (output_type == id::contin_type) {
                     if (discretize_thresholds.empty()) {
-                        typedef contin_bscore BScore;
-                        boost::ptr_vector<BScore> bscores;
+
                         contin_bscore::err_function_type eft =
                             it_abs_err ? contin_bscore::abs_error :
                             contin_bscore::squared_error;
-                        foreach(const Table& table, tables) {
-                            BScore *r = new BScore(table, eft);
-                            set_noise_or_ratio(*r, as, noise, complexity_ratio);
-                            bscores.push_back(r);
-                        }
-                        multibscore_based_bscore<BScore> bscore(bscores);
-                        metapop_moses_results(exemplars, table_type_signature,
-                                              contin_reduct, contin_reduct, bscore,
-                                              opt_params, meta_params, moses_params,
-                                              mmr_pa);
+
+                        REGRESSION(output_type,
+                                   contin_reduct, contin_reduct,
+                                   tables, contin_bscore,
+                                   (table, eft));
+
                     } else {
-                        typedef discretize_contin_bscore BScore;
-                        boost::ptr_vector<BScore> bscores;
-                        foreach(const Table& table, tables) {
-                            BScore *r = new BScore(table.otable, table.itable,
-                                                   discretize_thresholds,
-                                                   weighted_accuracy);
-                            set_noise_or_ratio(*r, as, noise, complexity_ratio);
-                            bscores.push_back(r);
-                        }
-                        multibscore_based_bscore<BScore> bscore(bscores);
-                        metapop_moses_results(exemplars, table_type_signature,
-                                              contin_reduct, contin_reduct, bscore,
-                                              opt_params, meta_params, moses_params,
-                                              mmr_pa);
+                        REGRESSION(output_type,
+                                   contin_reduct, contin_reduct,
+                                   tables, discretize_contin_bscore,
+                                   (table.otable, table.itable,
+                                        discretize_thresholds, weighted_accuracy));
                     }
                 }
 
