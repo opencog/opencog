@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "August 15, 2012" "3.2.5" "OpenCog Learning"
+.TH MOSES 1 "August 16, 2012" "3.2.5" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -301,18 +301,30 @@ while holding activation (the hit rate) constant.
 T}
 
 \fBprerec\fR@T{
-Regression on an input table, maximizing precision, while holding the
-recall (sensitivity) at a given level.  Recall, also known as senstivity,
-is the ratio of true positives to the sum of true positives and false negatives.
+Regression on an input table, maximizing precision, while attempting
+to maintain the recall (sensitivity) at or above a given level.  Recall,
+also known as senstivity, is the ratio of true positives to the sum of
+true positives and false negatives.
 T}
 
 \fBrecall\fR@T{
-Regression on an input table, maximizing recall while holding
-precision constant.  This scorer is most commonly used when it is
+Regression on an input table, maximizing recall (sensitivity) while
+attempting to maintain the precision at or above a given level.
+This scorer is most commonly used when it is
 important to gaurantee a certain level of precision, even if it
 means rejecting most events. In medicine and physics/radio applications,
 recall is exactly the same thing as sensitivity: this option searches
 for the most sensitive test while holding to a minimum level of precision.
+T}
+
+\fBbep\fR@T{
+Regression on an input table, maximizing the arithmetic mean of the
+precision and recall, also known as the "break-even point" or BEP.
+T}
+
+\fBf_one\fR@T{
+Regression on an input table, maximizing the harmonic mean of the
+precision and recall, that is, the F_1 score.
 T}
 
 \fBip\fR@T{
@@ -731,13 +743,14 @@ contains labels in its header.
 Print the complexity measure of the model, and the scoring penalty.
 
 .\" ============================================================
-.SS "Precision, recall and prerec problem types"
-The precision, recall and prerec types are used to solve binary
-classification problems:  problems where the goal is to sort inputs
-into one of two sets, while maximizing either the precision or the 
-sensitivity of the test.
+.SS "Precision, recall, BEP, F_1 and prerec problem types"
+The prerec, recall, bep, f_one and precision problem types are used
+to solve binary classification problems:  problems where the goal
+is to sort inputs into one of two sets, while maximizing either
+the precision, the sensitivity, or some other figure of merit
+of the test.
 .PP
-In \fBmoses\fR, precision and recall (senstivity) are defined as usual.
+In \fBmoses\fR, precision and recall (senstivity) are defined as standard.
 Precision is defined as the number of true positives, divded by the number
 of true positives plus the number of false positives.  Classifiers 
 with a high precision make very few mistakes identifiying postives:
@@ -762,6 +775,13 @@ less common: to find the most precise test that gaurantees a certain
 minimum sensitivity; this may be accomplished with the \fB\-Hprerec\fR
 option.
 .PP
+A common alternative to maximizing one or the other is to maximize
+wither the arithmetic or the harmonic mean of the two.  The arithmetic
+mean is sometimes called the "break-even point" or BEP; it is maximized
+when the \fB\-Hbep\fR option is specified.  The harmonic mean is known
+as the F_1 score, it is maximized when the \fB\-Hf_one\fR option is
+specified.
+.PP
 \fBmoses\fR also provides a second way of maximizing precision, using
 the \fB\-Hpre\fR option.  This option searches for the test with the
 highest precision, while holding the 'activation' in a bounded range.
@@ -775,14 +795,31 @@ exactly the fraction of positives in the training set.
 .PP
 The minimum level to which a fixed component should be held may be
 specified with the \fB\-q\fR or \fB\-\-min\-rand\-input\fR option.
+Thus, for the \fB\-Hrecall\fR problem, the \fB\-q\fR flag is used
+to specify the minimum desired precision.  Similarly, for the 
+\fB\-Hprerec\fR problem, the \fB\-q\fR flag is used to specify the
+minimum desired recall.
 For the \fB\-Hpre\fR problem, the  \fB\-w\fR or 
 \fB\-\-max\-rand\-input\fR option should be used to make sure the
 activation does not get too high.
 .PP
-Adherence to the minumum or bounds is done by means of a scoring
-penalty;  combo programs that fail to lie within bounds are penalized.
+The \fB\-q\fR  and \fB\-w\fR options also set lower and upper
+bounds for the BEP and F_1 problems as well.   When maximizing
+BEP, the system attempts to keep the absolute value of the 
+difference between precision and recall less than 0.5.  This
+maximum difference can be over-ridden with the \fB\-w\fR option.
+For the F_1 problem, the system attempts to keep the ratio of 
+precision to recall between 0.5 and 2.0.  These lower and upper
+bounds can be over-ridden with these two options.
+.PP
+Adherence to the bounds is done by means of a scoring penalty;
+combo programs that fail to lie within bounds are penalized.
 The harshness or hardness of the penalty may be specified by means
-of the \fB\-Q\fR or \fB\-\-alpha\fR option. 
+of the \fB\-Q\fR or \fB\-\-alpha\fR option.  Values much greater
+than one enforce a hard boundary; values much less than one make
+for a very soft boundary.  Negative values are invalid.
+.PP
+
 
 
 .\" ============================================================

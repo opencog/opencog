@@ -576,10 +576,10 @@ int moses_exec(int argc, char** argv)
                     " and other things being experimented.\n\n"
                     "%s, regression based on input table using ann\n\n"
                     "%s, regression based on combo program\n\n"
-                    "%s, even parity\n\n"
-                    "%s, disjunction\n\n"
-                    "%s, multiplex\n\n"
-                    "%s, regression of f(x)_o = sum_{i={1,o}} x^i\n")
+                    "%s, even parity demo problem\n\n"
+                    "%s, disjunction demo problem\n\n"
+                    "%s, multiplex demo problem\n\n"
+                    "%s, regression of f(x)_o = sum_{i={1,o}} x^i demo problem\n")
              % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % sr).c_str())
 
         (opt_desc_str(combo_str_opt).c_str(),
