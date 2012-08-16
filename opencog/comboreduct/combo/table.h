@@ -78,7 +78,7 @@ static const std::string default_input_label("i");
 ///   {0:1},1,1
 ///
 /// Most scoring functions work on CTable, as it avoids re-evaluating a
-/// combo program on the same inputs.
+/// combo program on duplicated inputs.
 //
 class CTable : public std::map<vertex_seq, Counter<vertex, unsigned>>
 {
@@ -92,7 +92,7 @@ public:
     std::string olabel;               // output label
     string_seq ilabels; // list of input labels
 
-    // definition is delaied after Table as it uses Table
+    // Definition is delayed until after Table, as it uses Table.
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
     

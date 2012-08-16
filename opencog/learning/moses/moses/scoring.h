@@ -441,6 +441,49 @@ protected:
 };
 
 /**
+ * bep_bscore -- scorer that attempts to maximize "BEP", the 
+ * "precision-recall break-even point"; i.e. the arithmetic average
+ * of the precision and recall.  To avoid solutions that optimize
+ * for very high precision or very high recall, but not both, the
+ * scorer attempts to keep the absolute value between precision and
+ * recall less than the given bound.
+ */
+struct bep_bscore : public discriminating_bscore
+{
+    bep_bscore(const CTable& _ctable,
+               float min_diff = 0.0f,
+               float max_diff = 0.5f,
+               float hardness = 1.0f);
+
+    penalized_behavioral_score operator()(const combo_tree& tr) const;
+
+protected:
+    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
+    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) const;
+};
+
+/**
+ * f_one_bscore -- scorer that attempts to maximize the F_1 score,
+ * harmonic mean of the precision and recall scores. To avoid
+ * solutions that optimize excessively for one or the other,  the
+ * scorer attempts to keep the ratio of precision to recall within
+ * the given bounds.
+ */
+struct f_one_bscore : public discriminating_bscore
+{
+    f_one_bscore(const CTable& _ctable,
+                 float min_ratio = 0.5f,
+                 float max_ratio = 2.0f,
+                 float hardness = 1.0f);
+
+    penalized_behavioral_score operator()(const combo_tree& tr) const;
+
+protected:
+    virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
+    virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) const;
+};
+
+/**
  * Fitness function for maximizing binary precision, that is, for
  * minimizing false positives.   This scorer works for both boolean
  * regression and contin regression.  For contin regression, the
