@@ -324,6 +324,13 @@ class BayesianNetwork(Network):
             parents |= node.parents
         return True
 
+    def __dim__(self):
+        dim = 0
+        for node in self:
+            if len(node.parents) is 0:
+                dim += 1
+        return dim
+
     def copy(self):
         """
         Deep copy

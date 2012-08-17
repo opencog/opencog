@@ -1,6 +1,8 @@
 from learning.bayesian_learning.network import *
 from random import randrange, random as rand
 from util.evolutionary import *
+from dynamics import *
+from util.generic import dim
 from math import log, factorial
 
 __author__ = 'keyvan'
@@ -9,7 +11,8 @@ __author__ = 'keyvan'
 class BayesNetPopulation(Population):
 
     def __init__(self, variable_names, number_of_individuals=0):
-        self.scoring_function = K2(variable_names)
+        data = generate_test_dataset(100)
+        self.scoring_function = BayesianInformationCriterionScore(variable_names, data)
         Population.__init__(self, NetworkChromosomeRepresentation, number_of_individuals,
             variable_names=variable_names, scoring_function=self.scoring_function)
 
@@ -21,61 +24,18 @@ class ScoringFunction(object):
         self.variable_names = variable_names
         self.data =  data
 
-    def probability_of(self, network):
+    def __call__(self, network):
         return 1
 
-    def process_new_data(self, network, data):
-        pass
-
-#    def __call__(self, individual):
-#        if individual.last
-
-
-class BinaryVariableScoringFunction(ScoringFunction):
-    pass
-
-
-def matches(row, config):
-    if len(config) is 0 and len(row) is not 0:
-        return False
-    return config.issubset(row)
-
-
-class K2(BinaryVariableScoringFunction):
-
-    def process_new_data(self, network, data):
-        P = self.probability_of
-        X = self.variable_names
-        B = network
-        T = data
-        x_i = [True, False]
-        r_i = 2
-        N = {}
-
-        for data_row in T:
-            for X_i in X:
-                N[X_i] = {}
-                if X_i in B.CPTs:
-                    for w_ij, theta_ij in B.CPTs[X_i]:
-                        N[X_i][w_ij] = {}
-                        for x_ik in x_i:
-                            N[X_i][w_ij][x_ik] = 0
-                        if matches(data_row, w_ij):
-                            for x_ik in x_i:
-                                if data_row[X_i] is x_ik:
-                                    N[X_i][w_ij][x_ik] += 1
-
-
-        r_i_minus_one_fact = float(factorial(r_i-1))
-        score = log(P(B))
-        for X_i in X:
-            if X_i in B.CPTs:
-                for w_ij, theta_ij in B.CPTs[X_i]:
-                    N_ij = 0
-                    for x_ik in x_i:
-                        N_ij += N[X_i][w_ij][x_ik]
-                        score += log(factorial(N[X_i][w_ij][x_ik]))
-                    score += log(r_i_minus_one_fact/factorial(N_ij + r_i - 1))
+class BayesianInformationCriterionScore(ScoringFunction):
+    def __call__(self, network):
+        score = 0
+        M = float(len(self.data))
+        for node in network:
+            for parent in node.parents:
+                score += self.data.mutual_information(node.name, parent.name)
+        score *= M
+        score -= log(M)/2 * dim(network) # penalise complexity
         return score
 
 
@@ -92,7 +52,6 @@ class NetworkChromosomeRepresentation(IndividualSetBase):
             self |= self.network.edges
 
     scoring_function = None
-
 
     def __randomly_initialise__(self):
         for i in range(len(self.variable_names) / 2):
@@ -158,13 +117,9 @@ class NetworkChromosomeRepresentation(IndividualSetBase):
 
 if __name__ == '__main__':
     from util.evolutionary import GeneticAlgorithm
-    from learning.bayesian_learning.dynamics import *
 
-    data = DataObserver()
-    for i in range(10):
-        data.append(generate_test_record())
 
-    population = BayesNetPopulation(TEST_VARIABLES, data, 10)
+    population = BayesNetPopulation(TEST_VARIABLES, 10)
 
 
     ga = GeneticAlgorithm(population=population)

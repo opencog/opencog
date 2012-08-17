@@ -115,10 +115,10 @@ def generate_test_record():
 
     return record
 
-data = DataObserver()
-for i in range(10):
-    data.append(generate_test_record())
-
-print data.mutual_information(D, B)
-#print data.probability_of('C', givens=[A], negations=[B])
-#    print data.probability_of('D', givens=['A','B'])
+def generate_test_dataset(dataset_size):
+    data = DataObserver()
+    for i in range(dataset_size):
+        data.append(generate_test_record())
+    return data
+    #print data.probability_of('C', givens=[A], negations=[B])
+    #    print data.probability_of('D', givens=['A','B'])
