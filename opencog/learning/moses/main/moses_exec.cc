@@ -1376,12 +1376,10 @@ int moses_exec(int argc, char** argv)
 
             // f_one = F_1 harmonic ratio of recall and precision
             else if (problem == f_one) {
-                if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.5;
-                    max_rand_input = 2.0; }
                 REGRESSION(id::boolean_type,
                            bool_reduct, bool_reduct_rep,
                            ctables, f_one_bscore,
-                           (table, min_rand_input, max_rand_input, fabs(hardness)));
+                           (table));
             }
 
             // problem == it  i.e. input-table based scoring.

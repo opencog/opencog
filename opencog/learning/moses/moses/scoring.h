@@ -386,7 +386,9 @@ protected:
      *    hardness * log(1 - dst(value, [min_threshold, max_threshold])) 
      *
      * where dst(x, I) is defined as being zero on the interval I and ramping
-     * up to one if x lies outside the interval I.
+     * up to one if x lies outside the interval I.  The penalty
+     * approaches -infty as the value approaches 0.0 or 1.0. Values less
+     * than zero or greater than one are invalid.
      *
      *                            {  1 - x/x_min         if x < x_min 
      *    dst(x, [x_min,x_max]) = {    0                 if x_min < x < x_max
@@ -464,18 +466,11 @@ protected:
 
 /**
  * f_one_bscore -- scorer that attempts to maximize the F_1 score,
- * harmonic mean of the precision and recall scores. To avoid
- * solutions that optimize excessively for one or the other,  the
- * scorer attempts to keep the ratio of precision to recall within
- * the given bounds.
+ * harmonic mean of the precision and recall scores.
  */
 struct f_one_bscore : public discriminating_bscore
 {
-    f_one_bscore(const CTable& _ctable,
-                 float min_ratio = 0.5f,
-                 float max_ratio = 2.0f,
-                 float hardness = 1.0f);
-
+    f_one_bscore(const CTable& _ctable);
     penalized_behavioral_score operator()(const combo_tree& tr) const;
 
 protected:

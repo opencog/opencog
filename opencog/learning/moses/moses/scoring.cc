@@ -401,6 +401,8 @@ score_t discriminating_bscore::get_threshold_penalty(score_t value) const
     if (_max_threshold < value)
         dst = (value - _max_threshold) / (1.0 - _max_threshold);
 
+    // Attempt to avoid insane values.
+    if (0.99999999 < dst) return -_hardness * 18;
     return _hardness * log(1.0 - dst);
 }
 
@@ -620,15 +622,14 @@ score_t bep_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 // f_one_bscore //
 //////////////////
 
-/// The F_1 bscore attempts to maximize the F_1 score, while holding
-/// the ratio of precision to recall within the given thresholds.
+/// The F_1 bscore attempts to maximize the F_1 score.
 /// The F_1 score is the harmonic mean of the precision and recall
 /// (exactly as defined in standard textbooks, etc.)
-f_one_bscore::f_one_bscore(const CTable& ct,
-                  float min_ratio,
-                  float max_ratio,
-                  float hardness) 
-    : discriminating_bscore(ct, min_ratio, max_ratio, hardness)
+/// While it might be nice to hold the ratio of precision to recall
+/// within some given thresholds, this turns out to be complicated,
+/// so we are not going to bother.
+f_one_bscore::f_one_bscore(const CTable& ct)
+    : discriminating_bscore(ct, 0.0, 1.0, 1.0e-20)
 {
 }
 
@@ -645,12 +646,9 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
     penalized_behavioral_score pbs;
     pbs.first.push_back(f_one);
     
-    score_t ratio = precision / recall;
-    score_t ratio_penalty = get_threshold_penalty(ratio);
-    pbs.first.push_back(ratio_penalty);
     if (logger().isFineEnabled()) 
-        logger().fine("ratio = %f  f_one=%f  ratio penalty=%e",
-                     ratio, f_one, ratio_penalty);
+        logger().fine("precision = %f recall = %f f_one=%f",
+                     precision, recall, f_one);
  
     // Add the Complexity penalty
     if (occam)
@@ -661,14 +659,11 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
     return pbs;
 }
 
-/// Return the ratio for this ctable row.
+/// Quasi-meaningless for f_one, but needed for automatic
+// generation of best-possible score.
 score_t f_one_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_precision = pos / cnt;
-    contin_t best_possible_recall = 1.0;
-    contin_t ratio = best_possible_precision / best_possible_recall;
-    ratio /= _positive_total; // since we add these together.
-    return ratio;
+    return 0.999999 / _ctable_usize; // since we add these together.
 }
 
 /// Return the f_one for this ctable row.

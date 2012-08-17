@@ -804,13 +804,10 @@ For the \fB\-Hpre\fR problem, the  \fB\-w\fR or
 activation does not get too high.
 .PP
 The \fB\-q\fR  and \fB\-w\fR options also set lower and upper
-bounds for the BEP and F_1 problems as well.   When maximizing
+bounds for the BEP problem as well.   When maximizing
 BEP, the system attempts to keep the absolute value of the 
 difference between precision and recall less than 0.5.  This
 maximum difference can be over-ridden with the \fB\-w\fR option.
-For the F_1 problem, the system attempts to keep the ratio of 
-precision to recall between 0.5 and 2.0.  These lower and upper
-bounds can be over-ridden with these two options.
 .PP
 Adherence to the bounds is done by means of a scoring penalty;
 combo programs that fail to lie within bounds are penalized.
