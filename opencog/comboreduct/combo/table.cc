@@ -140,7 +140,7 @@ OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
     arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
             this->push_back(eval_throws_binding(vs, tr));
-    });
+        });
 }
 
 void OTable::set_label(const string& ol)
