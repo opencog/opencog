@@ -268,8 +268,12 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     moses_params.max_score = target_score;
     logger().info("Target score = %f", target_score);
 
-    if (meta_params.enable_cache) {
-        static const unsigned initial_cache_size = 1000000;
+    if (meta_params.cache_size > 0) {
+        // WARNING: adaptive_cache is not thread safe (and therefore
+        // deactivated for now)
+        
+        // static const unsigned initial_cache_size = 1000000;
+        unsigned initial_cache_size = meta_params.cache_size;
         
         if (meta_params.include_dominated) {
             // When the include_dominated flag is set, then trees are merged
@@ -277,12 +281,12 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             // not on the behavioral score. So we can throw away the 
             // behavioral score after computng it (we don't need to cche it).
             typedef bscore_based_cscore<BScorer> CScorer;
-            typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
+            // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
             CScorer cscorer(bscorer);
             prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer);
-            ScoreACache score_acache(score_cache, "composite scores");
+            // ScoreACache score_acache(score_cache, "composite scores");
             metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
-                                    score_acache, bscorer,
+                                    score_cache /*score_acache*/, bscorer,
                                     opt_params, meta_params, moses_params,
                                     printer);
         }
@@ -290,16 +294,17 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             // We put the cache on the bscore as well because then it
             // is reused later (for metapopulation merging)
             typedef prr_cache_threaded<BScorer> BScoreCache;
-            typedef adaptive_cache<BScoreCache> BScoreACache;
-            typedef bscore_based_cscore<BScoreACache> CScorer;
+            // typedef adaptive_cache<BScoreCache> BScoreACache;
+            typedef bscore_based_cscore<BScoreCache /*BScoreACache*/> CScorer;
             BScoreCache bscore_cache(initial_cache_size, bscorer);
-            BScoreACache bscore_acache(bscore_cache, "behavioural scores");
-            typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
-            CScorer cscorer(bscore_acache);
+            // BScoreACache bscore_acache(bscore_cache, "behavioural scores");
+            // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
+            CScorer cscorer(bscore_cache /*bscore_acache*/);
             prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer);
-            ScoreACache score_acache(score_cache, "composite scores");
+            // ScoreACache score_acache(score_cache, "composite scores");
             metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
-                                    score_acache, bscore_acache,
+                                    score_cache /*score_acache*/,
+                                    bscore_cache /*bscore_acache*/,
                                     opt_params, meta_params, moses_params,
                                     printer);
         }
@@ -307,7 +312,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     }
 
     metapop_moses_results_b(bases, type_sig, si_ca, si_kb, c_scorer, bscorer,
-                         opt_params, meta_params, moses_params, printer);
+                            opt_params, meta_params, moses_params, printer);
 }
 
 } // ~namespace moses

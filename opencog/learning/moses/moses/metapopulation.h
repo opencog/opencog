@@ -76,7 +76,8 @@ struct metapop_parameters
                        bool _include_dominated = true,
                        score_t _complexity_temperature = 3.0f,
                        const operator_set& _ignore_ops = empty_ignore_ops,
-                       bool _enable_cache = false,
+                       // bool _enable_cache = false,    // adaptive_cache
+                       unsigned _cache_size = 100000,     // is disabled
                        unsigned _jobs = 1,
                        const combo_tree_ns_set* _perceptions = NULL,
                        const combo_tree_ns_set* _actions = NULL,
@@ -88,7 +89,8 @@ struct metapop_parameters
         use_diversity_penalty(false), // XXX should pass as arg ...
         complexity_temperature(_complexity_temperature),
         ignore_ops(_ignore_ops),
-        enable_cache(_enable_cache),
+        // enable_cache(_enable_cache),   // adaptive_cache
+        cache_size(_cache_size),          // is disabled
         jobs(_jobs),
         perceptions(_perceptions),
         actions(_actions),
@@ -122,7 +124,8 @@ struct metapop_parameters
     operator_set ignore_ops;
 
     // Enable caching of scores.
-    bool enable_cache;
+    // bool enable_cache;   // adaptive_cache
+    unsigned cache_size;    // is disabled
 
     // Number of jobs for metapopulation maintenance such as merging
     // candidates to the metapopulation.

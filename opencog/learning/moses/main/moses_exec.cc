@@ -436,7 +436,7 @@ int moses_exec(int argc, char** argv)
     bool include_dominated;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
-    bool enable_cache;
+    unsigned cache_size;
 
     // optim_param
     double pop_size_ratio;
@@ -696,10 +696,13 @@ int moses_exec(int argc, char** argv)
          "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
 
         (opt_desc_str(enable_cache_opt).c_str(),
-         value<bool>(&enable_cache)->default_value(false),
-         "Memoize, that is, cache evaluation results, so that identical "
-         "candidates are not re-evaluated. The cache size is dynamically "
-         "adjusted to fit in the RAM.\n")
+         value<unsigned>(&cache_size)->default_value(100000),
+         "Cache size. Memoize, that is, cache evaluation results, "
+         "so that identical candidates are not re-evaluated.\n")
+         // adaptive_cache has been temporarly disabled because it is
+         // not thread safe, so the following comment doesn't apply
+         // " The cache size is determined by this option "
+         // "adjusted to fit in the RAM.\n")
 
         (opt_desc_str(jobs_opt).c_str(),
          value<vector<string>>(&jobs_str),
@@ -1142,7 +1145,8 @@ int moses_exec(int argc, char** argv)
                                    revisit, include_dominated,
                                    complexity_temperature,
                                    ignore_ops,
-                                   enable_cache,
+                                   // enable_cache,   // adaptive_cache
+                                   cache_size,        // is disabled
                                    jobs[localhost]);
 
     // Set optim_parameters.
