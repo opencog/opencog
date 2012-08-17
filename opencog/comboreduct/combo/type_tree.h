@@ -246,6 +246,8 @@ type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
 
 // return the set of absolute idx corresponding to the arguments of tr
 arity_set get_argument_abs_idx_set(const combo_tree& tr);
+// like above but idx start from 0
+arity_set get_argument_abs_idx_from_zero_set(const combo_tree& tr);
 
 // infer the type_tree of each argument of a given combo_tree
 void infer_arg_type_tree(const combo_tree& tr, type_tree_seq& arg_types);

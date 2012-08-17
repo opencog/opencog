@@ -1110,6 +1110,15 @@ arity_set get_argument_abs_idx_set(const combo_tree& tr)
     return res;
 }
 
+arity_set get_argument_abs_idx_from_zero_set(const combo_tree& tr)
+{
+    arity_set res;
+    foreach(const vertex& v, make_pair(tr.begin_leaf(), tr.end_leaf()))
+        if (const argument* ap = boost::get<argument>(&v))
+            res.insert(ap->abs_idx_from_zero());
+    return res;
+}
+
 //that function uses a trace of procedure_calls already in progress
 //in order to avoid infinite loop due to circularity references
 void infer_arg_type_tree(const combo_tree& tr, type_tree_seq& arg_types)
