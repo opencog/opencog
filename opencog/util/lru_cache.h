@@ -55,7 +55,7 @@ namespace opencog {
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct lru_cache {
+struct lru_cache : public F {
     typedef typename F::argument_type argument_type;
     typedef typename F::result_type result_type;
     typedef typename std::list<argument_type> list;
@@ -67,7 +67,7 @@ struct lru_cache {
     typedef typename map::size_type size_type;
 
     lru_cache(size_type n, const F& f=F())
-        : _n(n), _map(n+1), _f(f), _failures(0), _hits(0) {}
+        : F(f), _n(n), _map(n+1), _failures(0), _hits(0) {}
 
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
@@ -150,13 +150,16 @@ struct lru_cache {
 protected:
     size_type _n;
     mutable map _map;
-    const F& _f;
     mutable list _lru; // this list is only here so that we know what
                        // is the last used element to remove it from
                        // the cache when it gets full
     
     mutable unsigned _failures; // number of cache failures
     mutable unsigned _hits; // number of cache hits
+    
+    inline result_type _f(const argument_type& x) const {
+        return F::operator()(x);
+    }
 
     // increment failure and call
     inline result_type if_f(const argument_type& x) const {
@@ -330,7 +333,7 @@ protected:
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct prr_cache {
+struct prr_cache : public F {
     typedef typename F::argument_type argument_type;
     typedef typename F::result_type result_type;
     typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
@@ -338,7 +341,7 @@ struct prr_cache {
     typedef typename map::size_type size_type;
   
     prr_cache(size_type n, const F& f=F()) 
-        : _n(n), _map(n+1), _f(f), _failures(0), _hits(0) {}
+        : F(f), _n(n), _map(n+1), _failures(0), _hits(0) {}
 
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
@@ -380,10 +383,13 @@ struct prr_cache {
 protected:
     size_type _n;
     mutable map _map;
-    const F &_f;
     mutable unsigned _failures;
     mutable unsigned _hits; // number of cache hits
 
+    inline result_type _f(const argument_type& x) const {
+        return F::operator()(x);
+    }
+    
     // increment failures and call
     inline result_type if_f(const argument_type& x) const {
         _failures++;
