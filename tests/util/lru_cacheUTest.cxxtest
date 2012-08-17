@@ -47,6 +47,11 @@ class lru_cacheUTest : public CxxTest::TestSuite
                 throw std::exception();
             return x + rnd->randfloat();
         }
+
+        bool my_method() const {
+            std::cout << "my_method" << std::endl;
+            return true;
+        }
     };
 
 
@@ -102,6 +107,16 @@ public:
         // Ensure that after throwing the exception the cache doesn't
         // get inconsistent (which would throw an exception)
         TS_ASSERT_THROWS_NOTHING(cache(500));        
+    }
+
+    /**
+     * Test to check if we can access a method of a function being
+     * cached.
+     */
+    void test_lru_cache_inherit() {
+        _function f;
+        lru_cache<lru_cacheUTest::_function> cache(1000, f);
+        TS_ASSERT(cache.my_method());
     }
 
 };
