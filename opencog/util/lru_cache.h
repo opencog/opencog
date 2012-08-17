@@ -69,6 +69,11 @@ struct lru_cache : public F {
     lru_cache(size_type n, const F& f=F())
         : F(f), _n(n), _map(n+1), _failures(0), _hits(0) {}
 
+    ~lru_cache()
+    {
+        logger().info("LRU Cache hits=%u misses=%u", get_hits(), get_failures());
+    }
+    
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
     inline unsigned max_size() const { return _n; }
@@ -343,6 +348,11 @@ struct prr_cache : public F {
     prr_cache(size_type n, const F& f=F()) 
         : F(f), _n(n), _map(n+1), _failures(0), _hits(0) {}
 
+    ~prr_cache()
+    {
+        logger().info("PRR Cache hits=%u misses=%u", get_hits(), get_failures());
+    }
+
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
 
@@ -496,6 +506,12 @@ protected:
 /// Cache adjusting automatically its size to avoid running out of RAM
 /// or not using enough of the available RAM. The adjustment is done
 /// every n calls (as provided in the constructor).
+///
+/// WARNING!!!! This code is NOT thread safe!!!!!!
+///
+/// Besides it also should be implemented so that it inherits the
+/// cache given in the constructor (that way attributes of the cache
+/// are accessible.
 template<typename Cache>
 struct adaptive_cache {
     typedef typename Cache::result_type result_type;
