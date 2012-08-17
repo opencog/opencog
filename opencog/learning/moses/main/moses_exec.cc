@@ -126,8 +126,8 @@ void illformed_exit(const combo_tree& tr) {
  * Display error message about unsupported problem and exit
  */
 void unsupported_problem_exit(const string& problem) {
-    cerr << "Error: problem " << problem
-         << " unsupported for the moment." << endl;
+    cerr << "Error: problem type \"" << problem
+         << "\" unsupported for the moment." << endl;
     exit(1);
 }
 
@@ -316,7 +316,8 @@ contin_t largest_const_in_tree(const combo_tree &tr)
 bool datafile_based_problem(const string& problem)
 {
     return problem == it || problem == pre || problem == recall ||
-        problem == prerec || problem == ann_it || problem == ip;
+        problem == prerec || problem == bep || problem == f_one ||
+        problem == ann_it || problem == ip;
 }
 
 //* return true iff the problem is based on a combo tree
@@ -1311,7 +1312,7 @@ int moses_exec(int argc, char** argv)
                 boost::ptr_vector<BScore> bscores;
                 foreach(const CTable& ctable, ctables) {
                     BScore* r = new BScore(ctable,
-                                           abs(hardness),
+                                           fabs(hardness),
                                            min_rand_input,
                                            max_rand_input,
                                            hardness >= 0,
@@ -1345,34 +1346,42 @@ int moses_exec(int argc, char** argv)
             // problem == prerec  maximize precision, holding recall const.
             // Identical to above, just uses a different scorer.
             else if (problem == prerec) {
+                if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.5;
+                    max_rand_input = 1.0; }
                 REGRESSION(id::boolean_type,
                            bool_reduct, bool_reduct_rep,
                            ctables, prerec_bscore,
-                           (table, min_rand_input, max_rand_input, abs(hardness)));
+                           (table, min_rand_input, max_rand_input, fabs(hardness)));
             }
 
             // problem == recall  maximize recall, holding precision const.
             else if (problem == recall) {
+                if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.8;
+                    max_rand_input = 1.0; }
                 REGRESSION(id::boolean_type,
                            bool_reduct, bool_reduct_rep,
                            ctables, recall_bscore,
-                           (table, min_rand_input, max_rand_input, abs(hardness)));
+                           (table, min_rand_input, max_rand_input, fabs(hardness)));
             }
 
             // bep == beak-even point between recall and precision.
             else if (problem == bep) {
+                if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.0;
+                    max_rand_input = 0.5; }
                 REGRESSION(id::boolean_type,
                            bool_reduct, bool_reduct_rep,
                            ctables, bep_bscore,
-                           (table, min_rand_input, max_rand_input, abs(hardness)));
+                           (table, min_rand_input, max_rand_input, fabs(hardness)));
             }
 
             // f_one = F_1 harmonic ratio of recall and precision
             else if (problem == f_one) {
+                if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.5;
+                    max_rand_input = 2.0; }
                 REGRESSION(id::boolean_type,
                            bool_reduct, bool_reduct_rep,
                            ctables, f_one_bscore,
-                           (table, min_rand_input, max_rand_input, abs(hardness)));
+                           (table, min_rand_input, max_rand_input, fabs(hardness)));
             }
 
             // problem == it  i.e. input-table based scoring.

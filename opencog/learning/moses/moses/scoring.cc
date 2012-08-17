@@ -298,10 +298,10 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
                   _hardness, _min_threshold, _max_threshold);
 
     // Verify that the thresholds are sane
-    OC_ASSERT((0.0 < hardness) && (0.0 < min_threshold) && (min_threshold <= max_threshold),
+    OC_ASSERT((0.0 < hardness) && (0.0 <= min_threshold) && (min_threshold <= max_threshold),
         "Discriminating scorer, invalid thresholds.  "
         "The hardness must be positive, the minimum threshold must be "
-        "greater than zero, and the maximum threshold must be greater "
+        "non-negative, and the maximum threshold must be greater "
         "than or equal to the minimum threshold.\n");
 
     // For boolean tables, the highest possible output is 1.0 (of course)
@@ -664,18 +664,21 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
 /// Return the ratio for this ctable row.
 score_t f_one_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_precision = pos / (cnt * _positive_total);
-    contin_t best_possible_recall = 1.0 / _positive_total;
-    return best_possible_precision / best_possible_recall;
+    contin_t best_possible_precision = pos / cnt;
+    contin_t best_possible_recall = 1.0;
+    contin_t ratio = best_possible_precision / best_possible_recall;
+    ratio /= _positive_total; // since we add these together.
+    return ratio;
 }
 
 /// Return the f_one for this ctable row.
 score_t f_one_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_precision = pos / (cnt * _positive_total);
-    contin_t best_possible_recall = 1.0 / _positive_total;
+    contin_t best_possible_precision = pos / cnt;
+    contin_t best_possible_recall = 1.0;
     contin_t f_one = 2 * best_possible_precision * best_possible_recall 
               / (best_possible_recall + best_possible_precision);
+    f_one /= _positive_total; // since we add these together.
     return f_one;
 }
 
