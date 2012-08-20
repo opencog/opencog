@@ -170,7 +170,7 @@ feature_set create_deme_select_features(const CTable& ctable,
             optimize_deme_select_features(fields, deme, init_inst, optimize,
                                           sc_cache, fs_params);
         // Logger
-        logger().info("Number of cache failures = %u", sc_cache.get_failures());
+        logger().info("Number of cache misses = %u", sc_cache.get_misses());
         // ~Logger
         return selected_features;
     } else {

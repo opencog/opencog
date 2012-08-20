@@ -38,11 +38,6 @@
 
 namespace opencog {
 
-/// @todo we want to have the caches inherit the functor F being
-/// cached because them one can put members in F and have the cached
-/// version of it where the code using F can still access all its
-/// members. Specifically this would be useful w.r.t. the fitness
-/// functions used by MOSES
 
 /**
  * A set of generic caches. Please be careful if you add more caches
@@ -50,12 +45,39 @@ namespace opencog {
  * exception.
  */
 
+// base class for all caches
+struct cache_base {
+    typedef size_t size_type;
+
+    cache_base(size_type n, const std::string& name) :
+        _n(n), _misses(0), _hits(0), _cache_name(name)
+    {
+        logger().info("Cache %s size=%u", _cache_name.c_str(), n);
+    }
+
+    ~cache_base()
+    {
+        logger().info("Cache %s hits=%u misses=%u",
+                      _cache_name.c_str(), get_hits(), get_misses());
+    }
+
+    size_type get_misses() const { return _misses; }
+    size_type get_hits() const { return _hits; }
+    size_type max_size() const { return _n; }
+
+protected:
+    size_type _n;               // cache size
+    mutable unsigned _misses;   // number of cache misses
+    mutable unsigned _hits;     // number of cache hits
+    std::string _cache_name;    // name of the cache (useful for logging)
+};
+    
 // Least Recently Used Cache. Non thread safe, use
 // lru_cache_threaded for that.
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct lru_cache : public F {
+struct lru_cache : public F, public cache_base {
     typedef typename F::argument_type argument_type;
     typedef typename F::result_type result_type;
     typedef typename std::list<argument_type> list;
@@ -64,19 +86,12 @@ struct lru_cache : public F {
                                  deref_hash<list_iter,Hash>,
                                  deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;
-    typedef typename map::size_type size_type;
 
-    lru_cache(size_type n, const F& f=F())
-        : F(f), _n(n), _map(n+1), _failures(0), _hits(0) {}
-
-    ~lru_cache()
-    {
-        logger().info("LRU Cache hits=%u misses=%u", get_hits(), get_failures());
-    }
+    lru_cache(size_type n, const F& f=F(), const std::string name = "")
+        : F(f), cache_base(n, name), _map(n+1) {}
     
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
-    inline unsigned max_size() const { return _n; }
 
     //! Remove (aka make dirty) x from cache because entry invalid
     void remove(const argument_type& x) {
@@ -135,9 +150,6 @@ struct lru_cache : public F {
         _lru.clear();
     }
 
-    unsigned get_failures() const { return _failures; }
-    unsigned get_hits() const { return _hits; }
-
     void resize(unsigned n) {
         _n = n;
         while(_map.size() > _n) {
@@ -153,14 +165,10 @@ struct lru_cache : public F {
     }
     
 protected:
-    size_type _n;
     mutable map _map;
     mutable list _lru; // this list is only here so that we know what
                        // is the last used element to remove it from
                        // the cache when it gets full
-    
-    mutable unsigned _failures; // number of cache failures
-    mutable unsigned _hits; // number of cache hits
     
     inline result_type _f(const argument_type& x) const {
         return F::operator()(x);
@@ -168,13 +176,13 @@ protected:
 
     // increment failure and call
     inline result_type if_f(const argument_type& x) const {
-        ++_failures;
+        ++_misses;
         return _f(x);
     }
 
     // increment failure and exception safe call
     inline result_type ifx_f(const argument_type& x) const {
-        ++_failures;
+        ++_misses;
         return x_f(x);
     }
 
@@ -209,7 +217,8 @@ public:
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    lru_cache_threaded(size_type n, const F& f=F()) : super(n, f) {}
+    lru_cache_threaded(size_type n, const F& f=F(), const std::string name = "")
+        : super(n, f, name) {}
 
     inline bool full() const {
         shared_lock lock(mutex);
@@ -338,25 +347,17 @@ protected:
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct prr_cache : public F {
+struct prr_cache : public F, public cache_base {
     typedef typename F::argument_type argument_type;
     typedef typename F::result_type result_type;
     typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
     typedef typename map::iterator map_iter;
-    typedef typename map::size_type size_type;
   
-    prr_cache(size_type n, const F& f=F()) 
-        : F(f), _n(n), _map(n+1), _failures(0), _hits(0) {}
+    prr_cache(size_type n, const F& f=F(), const std::string name = "") 
+        : F(f), cache_base(n, name), _map(n+1) {}
 
-    ~prr_cache()
-    {
-        logger().info("PRR Cache hits=%u misses=%u", get_hits(), get_failures());
-    }
-
-    bool full() const { return _map.size()==_n; }
+    bool full() const { return _map.size() == _n; }
     bool empty() const { return _map.empty(); }
-
-    unsigned max_size() const { return _n; }
 
     result_type operator()(const argument_type& x) const
     {        
@@ -386,23 +387,17 @@ struct prr_cache : public F {
     void clear() {
         _map.clear();
     }
-    
-    unsigned get_failures() const { return _failures; }
-    unsigned get_hits() const { return _hits; }
 
 protected:
-    size_type _n;
     mutable map _map;
-    mutable unsigned _failures;
-    mutable unsigned _hits; // number of cache hits
 
     inline result_type _f(const argument_type& x) const {
         return F::operator()(x);
     }
     
-    // increment failures and call
+    // increment misses and call
     inline result_type if_f(const argument_type& x) const {
-        _failures++;
+        _misses++;
         return _f(x);
     }
 
@@ -426,7 +421,8 @@ public:
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    prr_cache_threaded(size_type n, const F& f=F()) : super(n, f) {}
+    prr_cache_threaded(size_type n, const F& f=F(), const std::string name = "")
+        : super(n, f, name) {}
 
     bool full() const {
         shared_lock lock(mutex);
@@ -477,9 +473,9 @@ public:
         super::clear();
     }
     
-    unsigned get_failures() const {
+    unsigned get_misses() const {
         shared_lock lock(mutex);
-        return super::get_failures();
+        return super::get_misses();
     }
 
     unsigned get_hits() const {
@@ -490,14 +486,14 @@ public:
 protected:
     mutable cache_mutex mutex;
 
-    inline void inc_failures() const {
+    inline void inc_misses() const {
         unique_lock lock(mutex);
-        ++super::_failures;
+        ++super::_misses;
     }
 
-    // increment failures and call
+    // increment misses and call
     inline result_type incfail_f(const argument_type& x) const {
-        inc_failures();
+        inc_misses();
         return super::_f(x);
     }
 
@@ -524,20 +520,12 @@ struct adaptive_cache {
     /// obligingly tries to swap everything out to disk (see vm.swappiness
     /// setting & LKML discussions w/ AKPM)
     adaptive_cache(Cache& cache, 
-                   const std::string name = "",
                    unsigned ncycles = 1000,
                    float llimit = 0.75, float lfact = 2,
                    float ulimit = 0.90, float ufrac = 2)
         : _cache(cache), _counter(0), _ncycles(ncycles),
           _llimit(llimit), _lfact(lfact),
-          _ulimit(ulimit), _ufrac(ufrac),
-          _cache_name(name) {}
-
-    ~adaptive_cache()
-    {
-        logger().info("Cache %s hits=%u misses=%u", _cache_name.c_str(),
-                      get_hits(), get_failures());
-    }
+          _ulimit(ulimit), _ufrac(ufrac) {}
 
     result_type operator()(const argument_type& x) const {
         using boost::numeric_cast;
@@ -562,7 +550,7 @@ struct adaptive_cache {
         return _cache(x);
     }
 
-    unsigned get_failures() const { return _cache.get_failures(); }
+    unsigned get_misses() const { return _cache.get_misses(); }
     unsigned get_hits() const { return _cache.get_hits(); }
 
 private:
@@ -576,8 +564,6 @@ private:
     float _lfact;
     float _ulimit;
     float _ufrac;
-
-    std::string _cache_name;
 };
 
 

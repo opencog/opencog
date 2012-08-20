@@ -66,14 +66,14 @@ public:
             TS_ASSERT(answer >= i);
             TS_ASSERT(answer <= i+1);
         }
-        TS_ASSERT_EQUALS(cache.get_failures(), 1000);
+        TS_ASSERT_EQUALS(cache.get_misses(), 1000);
         TS_ASSERT_EQUALS(cache.get_hits(), 0);
         for (unsigned int i=0; i < 1000; i++) {
             answer = cache(i);
             TS_ASSERT(answer >= i);
             TS_ASSERT(answer <= i+1);
         }
-        TS_ASSERT_EQUALS(cache.get_failures(), 1000);
+        TS_ASSERT_EQUALS(cache.get_misses(), 1000);
         TS_ASSERT_EQUALS(cache.get_hits(), 1000);
 
         for (unsigned int i=500; i < 1500; i++) {
@@ -81,27 +81,27 @@ public:
             TS_ASSERT(answer >= i);
             TS_ASSERT(answer <= i+1);
         }
-        TS_ASSERT_EQUALS(cache.get_failures(), 1500);
+        TS_ASSERT_EQUALS(cache.get_misses(), 1500);
         TS_ASSERT_EQUALS(cache.get_hits(), 1500);
 
         answer = cache(500);
-        TS_ASSERT_EQUALS(cache.get_failures(), 1500);
+        TS_ASSERT_EQUALS(cache.get_misses(), 1500);
         TS_ASSERT_EQUALS(cache.get_hits(), 1501);
 
         answer = cache(1500);
-        TS_ASSERT_EQUALS(cache.get_failures(), 1501);
+        TS_ASSERT_EQUALS(cache.get_misses(), 1501);
         TS_ASSERT_EQUALS(cache.get_hits(), 1501);
 
         // Ensure that entry for 500 wasn't removed as the earlier access should
         // move it up the lru list
         answer = cache(500);
-        TS_ASSERT_EQUALS(cache.get_failures(), 1501);
+        TS_ASSERT_EQUALS(cache.get_misses(), 1501);
         TS_ASSERT_EQUALS(cache.get_hits(), 1502);
 
         // Ensure that if the function throws an exception the cache
         // transmit it
         TS_ASSERT_THROWS(cache(2000), std::exception);
-        TS_ASSERT_EQUALS(cache.get_failures(), 1502);
+        TS_ASSERT_EQUALS(cache.get_misses(), 1502);
         TS_ASSERT_EQUALS(cache.get_hits(), 1502);
         
         // Ensure that after throwing the exception the cache doesn't
