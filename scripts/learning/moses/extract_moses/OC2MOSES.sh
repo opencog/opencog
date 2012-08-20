@@ -107,7 +107,7 @@ echo "SET(CMAKE_BUILD_TYPE Release)" >> "$ABS_MOSES_DIR/CMakeLists.txt"
 echo "SET(CMAKE_FIND_LIBRARY_SUFFIXES .a \${CMAKE_FIND_LIBRARY_SUFFIXES})" >> $ABS_MOSES_DIR/CMakeLists.txt
 
 # keep what's necessary and set options to be as standalone as possible
-grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproject_source_dir|dproject_binary_dir|man_install|boost|have_util|have_comboreduct|have_moses|have_feature_selection|summary_show|summary\.cmake' "$ABS_MOSES_DIR/CMakeLists.txt.orig" | sed s/opencog/$PROJECT/g | sed s/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")'/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector -static-libstdc++ -static-libgcc")'/ >> "$ABS_MOSES_DIR/CMakeLists.txt"
+grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproject_source_dir|dproject_binary_dir|man_install|boost|_mpi|mpi_|mpi\)|\(mpi|mpi |have_util|have_comboreduct|have_moses|have_feature_selection|summary_show|summary\.cmake' "$ABS_MOSES_DIR/CMakeLists.txt.orig" | sed s/opencog/$PROJECT/g | sed s/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")'/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector -static-libstdc++ -static-libgcc")'/ >> "$ABS_MOSES_DIR/CMakeLists.txt"
 
 echo "ADD_SUBDIRECTORY($PROJECT)" >> "$ABS_MOSES_DIR/CMakeLists.txt"
 rm "$ABS_MOSES_DIR/CMakeLists.txt.orig"
