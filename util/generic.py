@@ -21,3 +21,6 @@ def subsets_of(collection, subsets_type=set):
                          for i in range(2**len(set(x)))]
     for subset in subsets(collection):
         yield subset
+
+def dim(structure):
+    return structure.__dim__()

@@ -41,21 +41,21 @@ class BayesianInformationCriterionScore(ScoringFunction):
 
 class NetworkChromosomeRepresentation(IndividualSetBase):
 
-    def __init__(self, chromosome_to_copy_from=None):
+    def __init_normal__(self):
         self.nodes = {}
-        if chromosome_to_copy_from is None:
-            self.network = BayesianNetwork()
-        else:
-            self.network = chromosome_to_copy_from.network.copy()
-            for node in self.network:
-                self.nodes[node.name] = node
-            self |= self.network.edges
-
-    scoring_function = None
-
-    def __randomly_initialise__(self):
+        self.network = BayesianNetwork()
+        #randomly initialise
         for i in range(len(self.variable_names) / 2):
             self.add_random_link()
+
+    def __init_by_parent__(self, parent):
+        self.nodes = {}
+        self.network = parent.network.copy()
+        for node in self.network:
+            self.nodes[node.name] = node
+        self |= self.network.edges
+
+    scoring_function = None
 
     def get_node_by_name(self, name):
         if not self.nodes.has_key(name):
@@ -105,7 +105,7 @@ class NetworkChromosomeRepresentation(IndividualSetBase):
         return self.scoring_function(self.network)
 
     def __mutate__(self):
-        offspring = NetworkChromosomeRepresentation(self)
+        offspring = new_offspring(self)
         num = rand()
         if num < float(1) / 3:
             offspring.add_random_link()

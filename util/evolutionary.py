@@ -1,7 +1,12 @@
 __author__ = 'keyvan'
 
 from random import randrange, random as rand
-from util.generic import new_instance_of_same_type as new_offspring
+
+def new_offspring(parent):
+    return type(parent)(parent=parent)
+
+def new_individual(population):
+    return population.type_of_individuals(population=population)
 
 class IndividualBase(object):
     """
@@ -17,38 +22,52 @@ class IndividualBase(object):
 
     loci = None
     _out_of_date_fitness_value = True
-    population = None
 
-    def __init__(self, **common_attributes):
+    def __init__(self, **kwargs):
         """
-        Do not override init, every key in **common_attributes
-        will be an attribute of the individual object automatically.
-        You can override __randomly_initialise__ which is called
-        after __init__
+        Do not override __init___
+        instead, override __init_normal___ and/or __init_by_parent__
         """
-        self.__dict__.update(common_attributes)
-        self.__randomly_initialise__()
+        if 'parent' in kwargs:
+            parent = kwargs['parent']
+            self.__dict__.update(parent.population.common_attributes)
+            self.population = parent.population
+            self.__init_by_parent__(parent)
+        elif 'population' in kwargs:
+            self.population = kwargs['population']
+            self.__dict__.update(self.population.common_attributes)
+            self.__init_normal__()
 
     def __fitness__(self):
         pass
 
     def __mutate__(self):
+        """
+        return an offspring with a mutated gene
+        """
         pass
 
     def __crossover__(self, other):
+        """
+        return an offspring
+        """
         return self.fitness_proportionate_crossover(other)
 
-    def __getitem__(self, key):
+
+    # implement getitem and setitem if you're not using an
+    # standard structure. If list, set or dict satisfy you're
+    # needs, you can subclass from IndividualListBase,
+    # IndividualSetBase or IndividualDictBase, respectively.
+#    def __getitem__(self, key):
+#        pass
+#
+#    def __setitem__(self, key, value):
+#        pass
+
+    def __init_by_parent__(self, parent):
         pass
 
-    def __setitem__(self, key, value):
-        pass
-
-    def __randomly_initialise__(self):
-        """
-        Override this method if you want to randomly initialise
-        the individual before it's added to the population
-        """
+    def __init_normal__(self):
         pass
 
     #############################################################
@@ -116,10 +135,6 @@ class Population(object):
         self.generation_count = 0
         self.add_many(number_of_individuals)
 
-    def _assign_common_attributes(self, individual):
-        individual.population = self
-        individual.__dict__.update(self.common_attributes)
-
     def __selection__(self):
         """
         Override this method to control selection behaviour.
@@ -138,16 +153,14 @@ class Population(object):
         return self.__selection__(), self.__selection__()
 
     def select_for_mutation(self):
-        offspring =  self.__selection__()
-        self._assign_common_attributes(offspring)
-        return offspring
+        return self.__selection__()
 
     def select_for_crossover(self):
         return self.__crossover_selection__()
 
     def add_many(self, quantity):
         for _ in range(quantity):
-            individual = self.type_of_individuals() # new instance
+            individual = new_individual(self)
             self.add_to_current_generation(individual)
 
     def add_to_current_generation(self, individual):
@@ -228,17 +241,20 @@ class GeneticAlgorithm(object):
                     print individual
             print 'Fittest:', str(self.step())
 
-class IndividualListBase(list, IndividualBase):
+
+class IndividualListBase(IndividualBase, list):
+
     @property
     def loci(self):
         return range(len(self))
 
-class IndividualDictBase(dict, IndividualBase):
+class IndividualDictBase(IndividualBase, dict):
+
     @property
     def loci(self):
         return self
 
-class IndividualSetBase(set, IndividualBase):
+class IndividualSetBase(IndividualBase, set):
 
     @property
     def loci(self):
@@ -252,22 +268,22 @@ class IndividualSetBase(set, IndividualBase):
         self.add(value)
 
 
-class NoneEpistaticGeneticAlgorithm(GeneticAlgorithm):
-
-    fitness_unit = 1
-
-    class _contribution_dict(dict):
-        def __getitem__(self, item):
-            if item not in self:
-                return NoneEpistaticGeneticAlgorithm.fitness_unit
-            return dict.__getitem__(self, item)
-
-    fitness_contribution_by_locus = _contribution_dict()
-
-    def __init__(self, type_of_individuals, number_of_individuals):
-        self.population = _none_epistatic_population(type_of_individuals, number_of_individuals)
-        self.population.a
-
-    def step(self, mutation_rate=1, crossover_rate = 1,
-             number_of_individuals=0):
-        pass
+#class NoneEpistaticGeneticAlgorithm(GeneticAlgorithm):
+#
+#    fitness_unit = 1
+#
+#    class _contribution_dict(dict):
+#        def __getitem__(self, item):
+#            if item not in self:
+#                return NoneEpistaticGeneticAlgorithm.fitness_unit
+#            return dict.__getitem__(self, item)
+#
+#    fitness_contribution_by_locus = _contribution_dict()
+#
+#    def __init__(self, type_of_individuals, number_of_individuals):
+#        self.population = _none_epistatic_population(type_of_individuals, number_of_individuals)
+#        self.population.a
+#
+#    def step(self, mutation_rate=1, crossover_rate = 1,
+#             number_of_individuals=0):
+#        pass
