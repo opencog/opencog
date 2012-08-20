@@ -54,10 +54,7 @@
 
 namespace opencog { namespace moses {
 
-#if 0
 // Abstract scoring function class to implement
-// XXX currently, we don't use this, because it causes headaches with the
-// templated score cache functions.
 struct cscore_base : public unary_function<combo_tree, composite_score>
 {
     // Evaluate the candidate tr
@@ -71,7 +68,6 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
     // Return the minimum value considered for improvement
     virtual score_t min_improv() const = 0;
 };
-#endif
 
 // Abstract bscoring function class to implement
 struct bscore_base : public unary_function<combo_tree, penalized_behavioral_score>
@@ -108,9 +104,9 @@ protected:
  * 1)  avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
  */
-
 template<typename PBScorer>
-struct bscore_based_cscore : public unary_function<combo_tree, composite_score>
+// struct bscore_based_cscore : public unary_function<combo_tree, composite_score>
+struct bscore_based_cscore : public cscore_base
 {
     bscore_based_cscore(const PBScorer& sr) : _pbscorer(sr) {}
 
