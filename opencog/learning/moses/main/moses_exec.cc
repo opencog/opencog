@@ -695,7 +695,7 @@ int moses_exec(int argc, char** argv)
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
 
-        (opt_desc_str(enable_cache_opt).c_str(),
+        (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned>(&cache_size)->default_value(100000),
          "Cache size. Memoize, that is, cache evaluation results, "
          "so that identical candidates are not re-evaluated.\n")
