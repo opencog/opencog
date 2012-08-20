@@ -97,6 +97,10 @@ ostream& ostream_builtin(ostream& out, const builtin& h, format f)
             return out << "foldr";
         case id::foldl:
             return out << "foldl";
+        case id::lambda:
+            return out << "->";
+        case id::apply:
+            return out << "apply";
         case id::contin_if:
             return out << "contin_if";
         case id::cond:

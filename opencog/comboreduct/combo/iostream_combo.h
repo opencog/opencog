@@ -120,6 +120,10 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
         v = id::foldr;
     else if (str == "foldl")
         v = id::foldl;
+    else if (str == "->" || str == "lambda")
+        v = id::lambda;
+    else if (str == "apply")
+        v = id::apply;
     else if (str == "null_vertex")
         v = id::null_vertex;
     //wild_card

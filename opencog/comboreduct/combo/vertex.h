@@ -99,7 +99,9 @@ enum builtin
     // Maybe action_boolean_if too, I guess?
     contin_if,
 
-    builtin_count // to get the number of builtin
+    builtin_count, // to get the number of builtin
+    lambda,
+    apply
 };
 
 }

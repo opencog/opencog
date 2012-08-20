@@ -85,6 +85,8 @@ static const builtin_description bd[] =
     { id::cons,                 "->(unknown list list)" },
     { id::foldr,                "->(unknown unknown list unknown)" },
     { id::foldl,                "->(unknown unknown list unknown)" },
+    { id::lambda,               "->(arg_list(unknown) ->)" },
+    { id::apply,                "->(-> unknown unknown)" },
 
     //{ id::ann,                  "->(arg_list(boolean))" },
     //{ id::ann_node,             "->(arg_list(boolean))" },

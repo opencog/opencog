@@ -204,7 +204,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         arity_t idx = a->idx;
         // Assumption : when idx is negative, the argument is
         // necessarily boolean, and must be negated.
-        return idx > 0? bmap[idx - 1] : negate_vertex(bmap[-idx - 1]);
+        return idx > 0? v : negate_vertex(v);
     }
     // builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
@@ -644,6 +644,28 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             tr.append_child(tr_it, cdr_lst_it);
 
             return eval_throws_tree(bmap, tr_it , pe); 
+        }
+
+        // lambda constructor
+        case id::lambda : {
+            combo_tree tr(it);
+            return tr;
+        }
+
+        case id::apply : {
+            combo_tree tr(it);
+            sib_it tr_it = tr.begin().begin();
+            sib_it lambda_it = tr_it.end();
+            lambda_it --;
+            combo_tree exp_tr(lambda_it);
+
+            vector<vertex> al; // list of arguments
+            tr_it++;
+            for(; tr_it!=tr.begin().end(); tr_it++){
+                al.push_back(*tr_it);
+            }
+            set_bindings(exp_tr, exp_tr.begin(), al, explicit_arity(exp_tr));
+            return eval_throws_tree(bmap, exp_tr);
         }
 
         default:
