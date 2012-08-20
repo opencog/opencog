@@ -86,8 +86,8 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
     // Return the minimum value considered for improvement
     virtual score_t min_improv() const = 0;
 
-    virtual void set_complexity_coef(score_t complexity_ratio);
-    virtual void set_complexity_coef(unsigned alphabet_size, float p);
+    void set_complexity_coef(score_t complexity_ratio);
+    void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:
     bool occam; // If true, then Occam's razor is taken into account.
@@ -136,7 +136,8 @@ struct bscore_based_cscore : public cscore_base
     }
 
     // Hmmm, this could be static, actually ... 
-    composite_score operator()(const penalized_behavioral_score& pbs, complexity_t cpxy) const
+    composite_score operator()(const penalized_behavioral_score& pbs,
+                               complexity_t cpxy) const
     {
         const behavioral_score &bs = pbs.first;
         score_t res = boost::accumulate(bs, 0.0);
@@ -360,8 +361,8 @@ struct discriminating_bscore : public bscore_base, discriminator
 
     /// Over-ride the default complexity setters, since our scoring is
     /// normalized to 1.0, unlike other scorers.
-    virtual void set_complexity_coef(score_t complexity_ratio);
-    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+    void set_complexity_coef(score_t complexity_ratio);
+    void set_complexity_coef(unsigned alphabet_size, float stddev);
 
 protected:
     //* The two functions below are used to implement a generic
@@ -542,8 +543,8 @@ struct precision_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    virtual void set_complexity_coef(score_t complexity_ratio);
-    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+    void set_complexity_coef(score_t complexity_ratio);
+    void set_complexity_coef(unsigned alphabet_size, float stddev);
 
     /**
      * This is a experimental feature, we generate a massive combo
@@ -736,11 +737,13 @@ struct contin_bscore : public bscore_base
     OTable target;
     ITable cti;
 
-    // Hmmm, not picked up from base class, for some reason...
-    virtual void set_complexity_coef(score_t complexity_ratio) {
+    // Hmmm, not picked up from base class, for some reason... Perhaps
+    // this is because another set_complexity_coef method is being
+    // overloaded and gcc relies solely on the name of the method.
+    void set_complexity_coef(score_t complexity_ratio) {
         bscore_base::set_complexity_coef(complexity_ratio);
     }
-    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+    void set_complexity_coef(unsigned alphabet_size, float stddev);
 
 private:
     // for a given data point calculate the error of the target
@@ -1068,11 +1071,13 @@ struct interesting_predicate_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    // Hmmm, not picked up from base class, for some reason...
-    virtual void set_complexity_coef(score_t complexity_ratio) {
+    // Hmmm, not picked up from base class, for some reason... Perhaps
+    // this is because another set_complexity_coef method is being
+    // overloaded and gcc relies solely on the name of the method.
+    void set_complexity_coef(score_t complexity_ratio) {
         bscore_base::set_complexity_coef(complexity_ratio);
     }
-    virtual void set_complexity_coef(unsigned alphabet_size, float p);
+    void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:
 
