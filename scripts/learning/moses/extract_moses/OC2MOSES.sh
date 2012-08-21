@@ -7,6 +7,10 @@
 
 PROJECT=moses3
 
+# Building the MPI-enabled moses requires dynamic-linked libs, since
+# the MPI implementation itself requires this.  Sooo...
+STATIC_LINK=0
+
 if [ $# -ne 1 ]; then
     echo "Wrong number of arguments"
     echo "Usage: $0 MOSES_DIR"
@@ -72,8 +76,12 @@ for dir in comboreduct learning/moses learning/feature-selection; do
     find $dir -path "*/diary" -prune , -path "*/sample" -prune , -not -name "*~" -and -not -name "*.bak.?" -and -type f > find.txt
     while read -r; do
         if [ $(basename $REPLY) == "CMakeLists.txt" ]; then
-            # sed -e s/opencog/"$PROJECT"/g -e s/SHARED/STATIC/ "$REPLY" | grep -v "(WIN32)" | grep -v "TARGETS" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
-            sed -e s/opencog/"$PROJECT"/g  -e s/SHARED/STATIC/ "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
+            if [ $STATIC_LINK -eq 1 ]; then
+                # sed -e s/opencog/"$PROJECT"/g -e s/SHARED/STATIC/ "$REPLY" | grep -v "(WIN32)" | grep -v "TARGETS" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
+                sed -e s/opencog/"$PROJECT"/g  -e s/SHARED/STATIC/ "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
+            else
+                sed -e s/opencog/"$PROJECT"/g  "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
+            fi
         else
             sed s/opencog/"$PROJECT"/g "$REPLY" > "$ABS_MOSES_DIR/$PROJECT/$REPLY"
         fi
@@ -104,10 +112,16 @@ echo "PROJECT($PROJECT)" > "$ABS_MOSES_DIR/CMakeLists.txt"
 echo "SET(CMAKE_BUILD_TYPE Release)" >> "$ABS_MOSES_DIR/CMakeLists.txt"
 
 # set the libraries to be static
-echo "SET(CMAKE_FIND_LIBRARY_SUFFIXES .a \${CMAKE_FIND_LIBRARY_SUFFIXES})" >> $ABS_MOSES_DIR/CMakeLists.txt
+if [ $STATIC_LINK -eq 1 ]; then
+    echo "SET(CMAKE_FIND_LIBRARY_SUFFIXES .a \${CMAKE_FIND_LIBRARY_SUFFIXES})" >> $ABS_MOSES_DIR/CMakeLists.txt
+fi
 
 # keep what's necessary and set options to be as standalone as possible
-grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproject_source_dir|dproject_binary_dir|man_install|boost|_mpi|mpi_|mpi\)|\(mpi|mpi |have_util|have_comboreduct|have_moses|have_feature_selection|summary_show|summary\.cmake' "$ABS_MOSES_DIR/CMakeLists.txt.orig" | sed s/opencog/$PROJECT/g | sed s/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")'/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector -static-libstdc++ -static-libgcc")'/ >> "$ABS_MOSES_DIR/CMakeLists.txt"
+if [ $STATIC_LINK -eq 1 ]; then
+    grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproject_source_dir|dproject_binary_dir|man_install|boost|_mpi|mpi_|mpi\)|\(mpi|mpi |have_util|have_comboreduct|have_moses|have_feature_selection|summary_show|summary\.cmake' "$ABS_MOSES_DIR/CMakeLists.txt.orig" | sed s/opencog/$PROJECT/g | sed s/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")'/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector -static-libstdc++ -static-libgcc")'/ >> "$ABS_MOSES_DIR/CMakeLists.txt"
+else
+    grep -Ei 'cmake_minimum_required|cmake_c_flags|rpath|confdir|cmake_policy|dproject_source_dir|dproject_binary_dir|man_install|boost|_mpi|mpi_|mpi\)|\(mpi|mpi |have_util|have_comboreduct|have_moses|have_feature_selection|summary_show|summary\.cmake' "$ABS_MOSES_DIR/CMakeLists.txt.orig" | sed s/opencog/$PROJECT/g | sed s/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")'/'SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector -fPIC")'/ >> "$ABS_MOSES_DIR/CMakeLists.txt"
+fi
 
 echo "ADD_SUBDIRECTORY($PROJECT)" >> "$ABS_MOSES_DIR/CMakeLists.txt"
 rm "$ABS_MOSES_DIR/CMakeLists.txt.orig"

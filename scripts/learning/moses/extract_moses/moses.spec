@@ -66,6 +66,7 @@ if [ -d $RPM_BUILD_ROOT ]; then rm -rf $RPM_BUILD_ROOT; fi
 %defattr(644,root,root,755)
 %doc LICENSE README
 %attr(755,root,root)%{_bindir}/*
+%{_libdir}/lib*.so
 %{_mandir}/man1/*
 
 
@@ -88,4 +89,6 @@ if [ -d $RPM_BUILD_ROOT ]; then rm -rf $RPM_BUILD_ROOT; fi
 %changelog
 * Fri Jun 15 2012 Linas Vepstas <linavepstas@gmail.com>
 - Initial version
+* Tue Aug 201 2012 Linas Vepstas <linavepstas@gmail.com>
+- Package lib*so, needed for MPI
 
