@@ -83,7 +83,7 @@ public:
     bool operator<(const enum_t& m) const {
         return _content < m.getContent();
     }
-    
+
     /// This is used by enum_str_to_vertex() to identify enums.
     static std::string prefix() {
         return "enum:";
@@ -91,9 +91,7 @@ public:
 
     /// Return some random enum out of the pool of all of them.
     static enum_t get_random_enum();
-    static size_t size() {
-        return enum_map.size();
-    }
+    static size_t size();
 
     /// Return an enum that is gaurenteed to be not equal to any other.
     static const enum_t& invalid_enum() {

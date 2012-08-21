@@ -59,9 +59,14 @@ unsigned enum_t::get_id(const string& token)
     return (unsigned) entry->second;
 }
 
+size_t enum_t::size()
+{
+    return enum_map.size();
+}
+
 ostream& operator<<(ostream& out, const combo::enum_t& m)
 {
-    return out << combo::enum_t::prefix() 
+    return out << combo::enum_t::prefix()
                << "(" << m.getId() << "):"
                << '\"' << m.getContent() << '\"';
 }
