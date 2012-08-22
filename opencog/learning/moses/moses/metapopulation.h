@@ -142,6 +142,8 @@ struct metapop_parameters
     const feature_selector* fstor;
 };
 
+void print_stats_header (optim_stats *os);
+
 template<typename CScoring, typename Optimization>
 struct deme_expander
 {

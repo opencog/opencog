@@ -171,6 +171,9 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         return;
     }
 
+    // Print legend for the columns of the stats.
+    print_stats_header(NULL);
+
     // If we are here, then we are the root node.  The root will act
     // as a dispatcher to all of the worker nodes.
 // XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
@@ -304,6 +307,9 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     int source = 0;
     bool done = false;
 
+    // Print legend for the columns of the stats.
+    print_stats_header(NULL);
+
     while (true)
     {
         // Feeder: push work out to each worker.
@@ -386,6 +392,20 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     for (size_t i=0; i<tot_workers; i++) {
         mompi.send_finished(i+1);
     }
+
+    // Wait until all merge threads have finished.
+    while (thread_count != 0) {
+        sleep(1);
+    }
+
+    stringstream ss;
+    ss << "Final stats:\n";
+    ss << "Stats: " << stats.n_expansions;
+    ss << "\t" << stats.n_evals;    // number of evaluations so far
+    ss << "\t" << mp.size();       // size of the metapopulation
+    ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
+    ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+    logger().info(ss.str());
 
     logger().info() << "MPI: bytes sent=" << mompi.sent_bytes
                     << " bytes received=" << mompi.recv_bytes;

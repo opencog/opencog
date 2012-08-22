@@ -118,30 +118,7 @@ void local_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
 
     // Print legend for the columns of the stats.
-    if (logger().isInfoEnabled()) {
-        stringstream ss;
-        ss << "Stats:# \n"
-           << "Stats:# Stats are tab-separated, ready for graphing.  Column explanation:\n"
-           << "Stats:# \n"
-           << "Stats:# gen is the generation number.\n"
-           << "Stats:# num_evals is the number of scoring function evaluations so far.\n"
-           << "Stats:# metapop_size is the size of the metapopulation.\n"
-           << "Stats:# best_score is the highest raw score seen, of all exemplars.\n"
-           << "Stats:# complexity is in bits, of the highest-composite score exemplar.\n";
-        if (os) {
-           ss << "Stats:# field_set_size is the ESTIMATED number of bits in all the knobs.\n"
-              << "Stats:# optim_steps is the number of steps the optimizer took.\n"
-              << "Stats:# over_budget is bool, T if search exceeded scoring func eval budget.\n";
-        }
-        ss << "Stats:# \n"
-           << "Stats:# gen\tnum_evals\tmetapop_size\tbest_score\tcomplexity";
-        if (os) {
-            ss << "\tfield_set_size\toptim_steps\tover_budget";
-        }
-        ss << "Stats:# \n";
-        ss << endl;
-        logger().info(ss.str());
-    }
+    print_stats_header(os);
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
