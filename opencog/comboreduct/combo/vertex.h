@@ -95,13 +95,14 @@ enum builtin
     cond,
     equ,
 
+    lambda,
+    apply,
+
     // XXX This should be obsoleted by cond, at some point. 
     // Maybe action_boolean_if too, I guess?
     contin_if,
 
-    builtin_count, // to get the number of builtin
-    lambda,
-    apply
+    builtin_count // to get the number of builtin
 };
 
 }
