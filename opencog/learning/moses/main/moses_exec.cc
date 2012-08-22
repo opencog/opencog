@@ -723,9 +723,11 @@ int moses_exec(int argc, char** argv)
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
 
+#ifdef HAVE_MPI
         ("mpi",
          value<bool>(&enable_mpi)->default_value(false),
          "Enable MPI-based distributed processing.\n")
+#endif
 
         (opt_desc_str(weighted_accuracy_opt).c_str(),
          value<bool>(&weighted_accuracy)->default_value(false),
@@ -1027,6 +1029,11 @@ int moses_exec(int argc, char** argv)
 
     if (vm.count("version")) {
         cout << "moses " << version_string << std::endl;
+#ifdef HAVE_MPI
+        cout << "\tMPI support enabled." << std::endl;
+#else
+        cout << "\tNo MPI support." << std::endl;
+#endif
         return 0;
     }
 
