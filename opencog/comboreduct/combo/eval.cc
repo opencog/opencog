@@ -204,7 +204,8 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         arity_t idx = a->idx;
         // Assumption : when idx is negative, the argument is
         // necessarily boolean, and must be negated.
-        return idx > 0? v : negate_vertex(v);
+        // return idx > 0? v : negate_vertex(v);
+        return idx > 0? bmap[idx - 1] : negate_vertex(bmap[-idx - 1]);
     }
     // builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
