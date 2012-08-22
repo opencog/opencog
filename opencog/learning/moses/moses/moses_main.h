@@ -78,7 +78,8 @@ struct metapop_printer
                     bool _output_with_labels,
                     const vector<string>& _labels,
                     const string& _output_file,
-                    bool _output_python) :
+                    bool _output_python,
+                    bool _is_mpi) :
         result_count(_result_count), output_score(_output_score),
         output_complexity(_output_complexity),
         output_bscore(_output_bscore),
@@ -87,7 +88,8 @@ struct metapop_printer
         output_with_labels(_output_with_labels),
         labels(_labels),
         output_file(_output_file),
-        output_python(_output_python) {}
+        output_python(_output_python),
+        is_mpi(_is_mpi) {}
 
     /**
      * Print metapopulation summary.
@@ -96,6 +98,15 @@ struct metapop_printer
     void operator()(metapopulation<Score, BScore, Optimization> &metapop,
                    moses_statistics& stats) const
     {
+        // We expect the mpi worker processes to have an empty
+        // metapop at this point.  So don't print alarming output
+        // messages.  In fact, the mpi workers should not even have
+        // a printer at all, or use a null_printer.  Unfortunately,
+        // the current code structure makes this hard to implement.
+        // XXX TODO this should be fixed, someday...
+        if (is_mpi && metapop.size() == 0)
+            return;
+
         stringstream ss;
         metapop.ostream(ss,
                         result_count,
@@ -153,7 +164,7 @@ struct metapop_printer
         string resb = (output_with_labels && !labels.empty()?
                       ph2l(ssb.str(), labels) : ssb.str());
         if (resb.empty())
-            logger().info("No candidate is good enough to be returned. Yeah that's bad!");
+            logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
         else
             logger().info("Best candidates (preceded by its score):\n %s", res.c_str());
     
@@ -187,6 +198,7 @@ private:
     const vector<string>& labels;
     string output_file;
     bool output_python;
+    bool is_mpi;
 };
 
 

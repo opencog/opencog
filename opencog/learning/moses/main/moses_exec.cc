@@ -1205,7 +1205,8 @@ int moses_exec(int argc, char** argv)
                            output_with_labels,
                            labels,
                            output_file,
-                           output_python);
+                           output_python,
+                           enable_mpi);
 
     // Continuous reduction rules used during search and representation
     // building.

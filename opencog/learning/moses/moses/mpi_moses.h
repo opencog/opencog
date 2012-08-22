@@ -100,6 +100,8 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
 
         combo_tree exemplar;
         mompi.recv_exemplar(exemplar);
+        logger().info() << "Allowed " << max_evals 
+                        << " evals for recvd exemplar " << exemplar;
         if (!mp._dex.create_deme(exemplar)) {
             // XXX replace this with appropriate message back to root!
             OC_ASSERT(false, "Exemplar failed to expand!\n");
@@ -108,6 +110,8 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
 
         mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
         mp._dex.free_deme();
+
+        logger().info() << "Sending " << mp.size() << " results";
         mompi.send_deme(mp, evals_this_deme);
 
         // Clear the metapop -- start with a new slate each time.
