@@ -579,6 +579,48 @@ private:
 };
 
 /**
+ * A bit like precision but tries to maximize the number conjunctions
+ * after precision. It blatantly assumes that the domain is boolean.
+ */
+struct precision_conj_bscore : public bscore_base
+{
+    precision_conj_bscore(const CTable& _ctable, bool positive = true);
+
+    penalized_behavioral_score operator()(const combo_tree& tr) const;
+
+    // Return the best possible bscore. Used as one of the
+    // termination conditions (when the best bscore is reached).
+    behavioral_score best_possible_bscore() const;
+
+    score_t min_improv() const;
+
+    /**
+     * Filter the table with all permitted idxs (the complementary
+     * with [0..arity).
+     */
+    void ignore_idxs(std::set<arity_t>& idxs) const;
+
+    void set_complexity_coef(score_t complexity_ratio);
+    void set_complexity_coef(unsigned alphabet_size, float stddev);
+    
+protected:
+    const CTable& orig_ctable;  // ref to the original table
+
+    // table actually used for the evaluation. It is mutable because
+    // we want to be able to change it to ignore some features (it
+    // speeds-up evaluation)
+    mutable CTable wrk_ctable;
+    
+    size_t ctable_usize;   // uncompressed size of ctable
+    bool positive;
+
+private:
+    // function to calculate the total weight of the observations
+    // associated to an input vector
+    std::function<score_t(const CTable::counter_t&)> sum_outputs;
+};
+        
+/**
  * Fitness function based on discretization of the output. If the
  * classes match the bscore element is 0, or -1 otherwise. If
  * @weighted_average is true then each element of the bscore is

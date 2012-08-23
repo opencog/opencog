@@ -29,9 +29,9 @@
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/for_each.hpp>
-#include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/max_element.hpp>
+#include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/range/adaptor/transformed.hpp>
@@ -1008,6 +1008,123 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
     }
     return tr;
 }
+
+///////////////////////////
+// precision_conj_bscore //
+///////////////////////////
+
+precision_conj_bscore::precision_conj_bscore(const CTable& _ctable,
+                                             bool positive_)
+    : orig_ctable(_ctable), wrk_ctable(orig_ctable),
+      ctable_usize(orig_ctable.uncompressed_size()), positive(positive_)
+{
+    vertex target = bool_to_vertex(positive);
+    sum_outputs = [target](const CTable::counter_t& c)->score_t {
+        return c.get(target); };
+}
+
+void precision_conj_bscore::set_complexity_coef(unsigned alphabet_size, float p)
+{
+    complexity_coef = 0.0;
+    // Both p==0.0 and p==0.5 are singularity points in the Occam's
+    // razor formula for discrete outputs (see the explanation in the
+    // comment above ctruth_table_bscore)
+    occam = p > 0.0f && p < 0.5f;
+    if (occam)
+        complexity_coef = discrete_complexity_coef(alphabet_size, p)
+            / ctable_usize;     // normalized by the size of the table
+                                // because the precision is normalized
+                                // as well
+
+    logger().info() << "Precision scorer, noise = " << p
+                    << " alphabest size = " << alphabet_size
+                    << " complexity ratio = " << 1.0/complexity_coef;
+}
+
+void precision_conj_bscore::set_complexity_coef(score_t ratio)
+{
+    complexity_coef = 0.0;
+    occam = (ratio > 0);
+
+    // The complexity coeff is normalized by the size of the table,
+    // because the precision is normalized as well.  So e.g.
+    // max precision for boolean problems is 1.0.  However...
+    // umm XXX I think the normalization here should be the
+    // best-possible activation, not the usize, right?
+    if (occam)
+        complexity_coef = 1.0 / (ctable_usize * ratio);
+
+    logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
+}
+
+penalized_behavioral_score precision_conj_bscore::operator()(const combo_tree& tr) const
+{
+    penalized_behavioral_score pbs;
+
+    // compute active and sum of all active outputs
+    unsigned active = 0;   // total number of active outputs by tr
+    score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
+    foreach(const CTable::value_type& vct, wrk_ctable) {
+        // vct.first = input vector
+        // vct.second = counter of outputs
+        if (eval_binding(vct.first, tr) == id::logical_true) {
+            contin_t sumo = sum_outputs(vct.second);
+            unsigned totalc = vct.second.total_count();
+            // For boolean tables, sao == sum of all true positives,
+            // and active == sum of true+false positives.
+            sao += sumo;
+            active += totalc;
+        }
+    }
+
+    // Compute normalized precision.  No hits means perfect precision :)
+    // Yes, zero hits is common, early on.
+    score_t precision = 1.0;
+    if (0 < active)
+        precision = sao / active;
+    pbs.first.push_back(precision);
+
+    // Count the number of conjunctions
+    unsigned conj_n = 0;
+    for (combo_tree::iterator it = tr.begin(); it != tr.end(); ++it)
+        if (*it == id::logical_and)
+            ++conj_n;
+    score_t conj_n_penalty = -1.0 / (1.0 + conj_n);
+    pbs.first.push_back(conj_n_penalty);
+
+    if (logger().isFineEnabled())
+        logger().fine("precision = %f  conj_n=%u  conj_n penalty=%e",
+                     precision, conj_n, conj_n_penalty);
+
+    // Add the Complexity penalty
+    if (occam)
+        pbs.second = tree_complexity(tr) * complexity_coef;
+
+    log_candidate_pbscore(tr, pbs);
+
+    return pbs;
+}
+
+behavioral_score precision_conj_bscore::best_possible_bscore() const
+{
+    return {1.0, 0.0};
+}
+
+score_t precision_conj_bscore::min_improv() const
+{
+    return 1.0 / ctable_usize;
+}
+
+void precision_conj_bscore::ignore_idxs(std::set<arity_t>& idxs) const {
+    // get permitted idxs
+    auto irng = boost::irange(0, orig_ctable.get_arity());
+    std::set<arity_t> all_idxs(irng.begin(), irng.end());
+    std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
+
+    // filter orig_table with permitted idxs
+    wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
+}
+
 
 //////////////////////////////
 // discretize_contin_bscore //
