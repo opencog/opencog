@@ -172,7 +172,7 @@ public:
         Seq res;
         auto it = filter.cbegin();
         for (unsigned i = 0; i < seq.size(); ++i) {
-            if (it != filter.cend() && i == *it) {
+            if (it != filter.cend() && (typename F::value_type)i == *it) {
                 res.push_back(seq[i]);
                 ++it;
             } else
