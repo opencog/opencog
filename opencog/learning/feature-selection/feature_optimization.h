@@ -117,18 +117,23 @@ FeatureSet incremental_selection(const FeatureSet& features,
             }};
         OMP_ALGO::for_each(fss_view.begin(), fss_view.end(), filter_relevant);
         logger().debug("Iteration %d relevant features=%d",
-            i, rel.size());
+                       i, rel.size());
 
         if (red_threshold > 0) {
             // Define the set of set of features to test for redundancy
             std::set<FeatureSet> nrfss = powerset(rel, i+1, true);
-            // determine the set of redundant features
+            // determine the set of redundant features and add then in red
             FeatureSet red;
             auto filter_redundant = [&](const FeatureSet* fs) {
-                bool fs_red_disjoint = [&]() {
-                    shared_lock lock(mutex);
-                    return has_empty_intersection(*fs, red); }();
-                if (fs_red_disjoint) {
+                // Test whether the feature set tested is disjoint
+                // from red. WARNING: this is too speed up the
+                // computation but it introduces some undeterminism
+                // when run in multi-thread.
+                // bool fs_red_disjoint = [&]() {
+                //     shared_lock lock(mutex);
+                //     return has_empty_intersection(*fs, red); }();
+                // if (fs_red_disjoint)
+                {
                     FeatureSet rfs = redundant_features(*fs, scorer,
                                                         threshold
                                                         * red_threshold);
