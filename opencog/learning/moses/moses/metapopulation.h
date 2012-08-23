@@ -33,7 +33,6 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
-#include <boost/range/irange.hpp>
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
@@ -221,6 +220,17 @@ struct deme_expander
             // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
             // printlnContainer(ios);
             // ~debug print
+
+            // Reformat the data so that dedundant inputs are grouped
+            // (the number of redundant can possibly change from a
+            // deme to another given that ignored input features can
+            // change as well) as to possibly speed-up evaluation (if
+            // the scorer implement ignore_idxs).
+            std::set<arity_t> idxs;
+            foreach(const vertex& v, ignore_ops)
+                if (is_argument(v))
+                    idxs.insert(get_argument(v).abs_idx_from_zero());
+            _cscorer.ignore_idxs(idxs);
         }
 
         // Build a representation by adding knobs to the exemplar,
@@ -695,7 +705,7 @@ struct metapopulation : bscored_combo_tree_set
     /**
      * merge deme -- convert instances to trees, and save them.
      *
-     * 1) cull the poorest scoring instnaces.
+     * 1) cull the poorest scoring instances.
      * 2) convert set of instances to trees
      * 3) merge trees into the metapopulation, possibly using domination
      *    as the merge criterion.
@@ -713,13 +723,15 @@ struct metapopulation : bscored_combo_tree_set
 
         // It seems that, when using univariate multi-threaded opt,
         // the number of evals is (much) greater than the deme size.
-        // I suspect this is a bug? XXX  This needs investigation and
+        // I suspect this is a bug? XXX This needs investigation and
         // fixing.  On the other hand, univariate is quasi-obsolete...
-        size_t eval_during_this_deme = std::min(evals,
-                                             __deme->size());
-
+        // (Note from Nil : Univariate overwrites candidates of the
+        // deme during optimization so that is why the number of evals
+        // is greater than the deme size).
+        size_t eval_during_this_deme = std::min(evals, __deme->size());
+        
         logger().debug("Close deme; evaluations performed: %d",
-                           eval_during_this_deme);
+                       eval_during_this_deme);
 
         // Add, as potential exemplars for future demes, all unique
         // trees in the final deme.
@@ -761,8 +773,13 @@ struct metapopulation : bscored_combo_tree_set
         ///////////////////////////////////////////////////////////////
         // select the set of candidates to add in the metapopulation //
         ///////////////////////////////////////////////////////////////
-        logger().debug("Select candidates to merge");
-
+        {
+            stringstream ss;
+            ss << "Select candidates to merge";
+            if (params.max_candidates >= 0)
+                ss << " (" << params.max_candidates << " max)";
+            logger().debug(ss.str());
+        }
         typedef boost::shared_mutex mutex;
         typedef boost::shared_lock<mutex> shared_lock;
         typedef boost::unique_lock<mutex> unique_lock;
@@ -781,15 +798,6 @@ struct metapopulation : bscored_combo_tree_set
 
             // if it's really bad stops
             if (inst_sc <= worst_score || !isfinite(inst_sc))
-                return;
-
-            int pot_candidates_size = [&]() {
-                shared_lock lock(pot_cnd_mutex);
-                return pot_candidates.size(); }();
-
-            // Only add up to max_candidates
-            if (this->params.max_candidates >= 0
-                && pot_candidates_size >= this->params.max_candidates)
                 return;
 
             // Get the combo_tree associated to inst, cleaned and reduced.
@@ -814,7 +822,8 @@ struct metapopulation : bscored_combo_tree_set
 
             // update the set of potential exemplars
             if (not_already_visited && thread_safe_tr_not_found()) {
-                penalized_behavioral_score pbs; // empty bscore till it gets computed
+                penalized_behavioral_score pbs; // empty bscore till
+                                                // it gets computed
                 composite_behavioral_score cbsc(pbs, inst_csc);
 
                 unique_lock lock(pot_cnd_mutex);
@@ -822,19 +831,40 @@ struct metapopulation : bscored_combo_tree_set
             }
         };
 
-        // We use deme->begin() + eval_during_this_deme instead of
-        // deme->end(), because we might have resized the deme to
-        // something larger than the actual number of instances we
-        // placed into it (XXX really? Does this ever happen?)
+        // We use
+        //
+        // deme->begin() + min(eval_during_this_deme, params.max_candidates)
+        //
+        // instead of
+        //
+        // deme->begin() + params.max_candidates,
+        //
+        // because we might have resized the deme to something larger
+        // than the actual number of instances we placed into it (XXX
+        // really?  Does this ever happen? Yes it did in very special
+        // situation when MOSES was used in a sliced manner).
+        //
+        // Also, before we used params.max_candidates during
+        // select_candidates, this was nice because it would discount
+        // redundant candidates, but it turns out this introduces some
+        // non-determinism when run with multiple threads. However
+        // using params.max_candidates to determine the end iterator
+        // doesn't introduce any indeterminism.
         //
         // Note: this step can be very time consuming; it currently
         // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
         // for me; my (reduced, simplified) instances have complexity
         // of about 100. This seems too long/slow.
         deme_cit deme_begin = __deme->begin();
-        deme_cit deme_end = __deme->begin() + eval_during_this_deme;
+        unsigned max_pot_cnd = eval_during_this_deme;
+        if (params.max_candidates >= 0)
+            max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
+        deme_cit deme_end = __deme->begin() + max_pot_cnd;
         OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
+        logger().debug("Number of potential candidates to be merged %u",
+                       pot_candidates.size());
+            
         // Behavioural scores are needed only if domination-based
         // merging is asked for, or if the diversity penalty is in use.
         // Save CPU time by not computing them.
