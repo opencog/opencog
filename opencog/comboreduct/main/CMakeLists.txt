@@ -65,6 +65,13 @@ TARGET_LINK_LIBRARIES(gen-table
     ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
+ADD_EXECUTABLE (gen-disj-conj gen-disj-conj.cc)
+TARGET_LINK_LIBRARIES(gen-disj-conj
+    comboreduct
+    util
+    ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+)
+
 # install eval-table
 INSTALL(TARGETS eval-table gen-table RUNTIME DESTINATION bin)
 
