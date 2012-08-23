@@ -27,6 +27,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 
 #include "RandGen.h"
+#include "mt19937ar.h"
 #include "numeric.h"
 
 /**
@@ -38,7 +39,7 @@ namespace opencog {
 // choose uniformly randomly an element of the set s
 // WARNING : it is assumed that s is non-empty
 template<typename T>
-T randset(const std::set<T>& s, RandGen& rng)
+T randset(const std::set<T>& s, RandGen& rng = randGen())
 {
     OC_ASSERT(!s.empty());
     return *std::next(s.begin(), rng.randint(s.size()));
@@ -48,7 +49,7 @@ T randset(const std::set<T>& s, RandGen& rng)
 // distribution. If the number falls out of the range of T then it is
 // automatically truncated.
 template<typename T>
-T gaussian_rand(T mean, T std_dev, RandGen& rng)
+T gaussian_rand(T mean, T std_dev, RandGen& rng = randGen())
 {
     double val = mean + std_dev *
         std::sqrt(-2 * std::log(rng.randDoubleOneExcluded())) * 
@@ -66,7 +67,7 @@ T gaussian_rand(T mean, T std_dev, RandGen& rng)
 
 // linear biased random bool, b in [0,1] when b tends to 1 the result
 // tends to be true
-bool biased_randbool(float b, RandGen& rng) {
+bool biased_randbool(float b, RandGen& rng = randGen()) {
     return b > rng.randfloat();
 }
 
