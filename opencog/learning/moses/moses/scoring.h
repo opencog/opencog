@@ -62,11 +62,21 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
 
     // Return the best possible score achievable with that fitness
     // function. This is useful in order to stop running MOSES when
-    // the best possible score is reached.
-    virtual score_t best_possible_score() const = 0;
+    // the best possible score is reached. If not overloaded it will
+    // return best_score (constant defined under
+    // opencog/learning/moses/moses/types.h)
+    score_t best_possible_score() { return best_score; }
 
-    // Return the minimum value considered for improvement
-    virtual score_t min_improv() const = 0;
+    // Return the minimum value considered for improvement (by
+    // default return 0)
+    score_t min_improv() { return 0.0; }
+
+    // In case the fitness function can be sped-up when certain
+    // arguments are ignored. The arguments are indicated as set of
+    // values of the idx-1 when idx is the argument idx. So {1, 3}
+    // corresponds to the arguments {$2, $4}. The method provided by
+    // default does nothing (no speed-up).
+    void ignore_idxs(set<arity_t>&) const {}
 };
 
 // Abstract bscoring function class to implement
@@ -83,8 +93,16 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
     // the best possible score is reached
     virtual behavioral_score best_possible_bscore() const = 0;
 
-    // Return the minimum value considered for improvement
-    virtual score_t min_improv() const = 0;
+    // Return the minimum value considered for improvement (by defaut
+    // return 0)
+    score_t min_improv() const { return 0.0; }
+
+    // In case the fitness function can be sped-up when certain
+    // arguments are ignored. The arguments are indicated as set of
+    // values of the idx-1 when idx is the argument idx. So {1, 3}
+    // corresponds to the arguments {$2, $4}. The method provided by
+    // default does nothing (no speed-up).
+    void ignore_idxs(set<arity_t>&) const {}
 
     void set_complexity_coef(score_t complexity_ratio);
     void set_complexity_coef(unsigned alphabet_size, float p);
@@ -105,7 +123,6 @@ protected:
  * 2) Helps with keeping the score-caching code cleaner.
  */
 template<typename PBScorer>
-// struct bscore_based_cscore : public unary_function<combo_tree, composite_score>
 struct bscore_based_cscore : public cscore_base
 {
     bscore_based_cscore(const PBScorer& sr) : _pbscorer(sr) {}
@@ -165,58 +182,12 @@ struct bscore_based_cscore : public cscore_base
         return _pbscorer.min_improv();
     }
 
+    void ignore_idxs(std::set<arity_t>& idxs) const {
+        _pbscorer.ignore_idxs(idxs);
+    }
+
     const PBScorer& _pbscorer;
 };
-
-#ifdef THIS_IS_DEAD_CODE
-This is currently not used anywehere... 
-/**
- * Bscore defined by multiple scoring functions. This is done when the
- * problem to solve is defined in terms of multiple problems. For now
- * the multiple scores have the same type as defined by the template
- * argument Score.
- */
-template<typename Scorer>
-struct multiscore_based_bscore : public bscore_base
-{
-    typedef boost::ptr_vector<Scorer> ScoreSeq;
-
-    // ctors
-    multiscore_based_bscore(const ScoreSeq& scores_) : scores(scores_) {}
-
-    // main operator
-    penalized_behavioral_score operator()(const combo_tree& tr) const
-    {
-        penalized_behavioral_score pbs(
-            make_pair<behavioral_score, score_t>(behavioral_score(scores.size()), 0));
-
-        behavioral_score &bs = pbs.first;
-        boost::transform(scores, bs.begin(), [&](const Scorer& sc){return sc(tr);});
-// XXX what about the penalty ??  we need to handle that too...
-        return pbs;
-    }
-
-    behavioral_score best_possible_bscore() const
-    {
-        behavioral_score bs;
-        foreach(const Scorer& sc, scores) {
-            bs.push_back(sc.best_possible_score());
-        }
-        return bs;
-    }
-
-    // return the min of all min_improv
-    score_t min_improv() const
-    {
-        score_t res = best_score;
-        foreach(const Scorer& s, scores)
-            res = min(res, s.min_improv());
-        return res;
-    }
-
-    ScoreSeq scores;
-};
-#endif
 
 /**
  * Behavioral scorer defined by multiple behavioral scoring functions.
@@ -256,10 +227,17 @@ struct multibscore_based_bscore : public bscore_base
     // return the min of all min_improv
     score_t min_improv() const
     {
+        /// @todo can be turned in to 1-line with boost::min_element
+        // boost::min_element(bscorers | boost::transformed(/*)
         score_t res = best_score;
         foreach(const BScorer& bs, bscorers)
             res = min(res, bs.min_improv());
         return res;
+    }
+
+    void ignore_idxs(std::set<arity_t>& idxs) const {
+        foreach(const BScorer& bs, bscorers)
+            bs.ignore_idxs(idxs);
     }
 
     BScorerSeq bscorers;
@@ -543,9 +521,15 @@ struct precision_bscore : public bscore_base
 
     score_t min_improv() const;
 
+    /**
+     * Filter the table with all permitted idxs (the complementary
+     * with [0..arity).
+     */
+    void ignore_idxs(std::set<arity_t>& idxs) const;
+
     void set_complexity_coef(score_t complexity_ratio);
     void set_complexity_coef(unsigned alphabet_size, float stddev);
-
+    
     /**
      * This is a experimental feature, we generate a massive combo
      * tree that is supposed to maximize the precision (keeping
@@ -570,7 +554,13 @@ struct precision_bscore : public bscore_base
     combo_tree gen_canonical_best_candidate() const;
 
 protected:
-    CTable ctable;
+    const CTable& orig_ctable;  // ref to the original table
+
+    // table actually used for the evaluation. It is mutable because
+    // we want to be able to change it to ignore some features (it
+    // speeds-up evaluation)
+    mutable CTable wrk_ctable;
+    
     size_t ctable_usize;   // uncompressed size of ctable
     score_t min_activation, max_activation;
     score_t max_output; // max output one gets (1 in case it is

@@ -26,6 +26,7 @@
 
 #include <cmath>
 
+#include <boost/range/irange.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm_ext/for_each.hpp>
@@ -695,11 +696,12 @@ precision_bscore::precision_bscore(const CTable& _ctable,
                                    float max_activation_,
                                    bool positive_,
                                    bool worst_norm_)
-    : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
+    : orig_ctable(_ctable), wrk_ctable(orig_ctable),
+      ctable_usize(orig_ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_)
 {
-    output_type = get_type_node(get_signature_output(ctable.tt));
+    output_type = get_type_node(get_signature_output(wrk_ctable.tt));
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score
@@ -744,7 +746,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         // For contin tables, we search for the largest value in the table.
         // (or smallest, if positive == false)
         max_output = worst_score;
-        foreach(const auto& cr, ctable) {
+        foreach(const auto& cr, wrk_ctable) {
             const CTable::counter_t& c = cr.second;
             foreach(const auto& cv, c) {
                 score_t val = get_contin(cv.first);
@@ -802,7 +804,7 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     // compute active and sum of all active outputs
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
-    foreach(const CTable::value_type& vct, ctable) {
+    foreach(const CTable::value_type& vct, wrk_ctable) {
         // vct.first = input vector
         // vct.second = counter of outputs
         if (eval_binding(vct.first, tr) == id::logical_true) {
@@ -885,7 +887,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
                                               unsigned> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
-    for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
+    for (CTable::const_iterator it = wrk_ctable.begin();
+         it != wrk_ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         contin_t sumo = sum_outputs(c);
         unsigned total = c.total_count();
@@ -943,6 +946,16 @@ score_t precision_bscore::min_improv() const
     return 1.0 / ctable_usize;
 }
 
+void precision_bscore::ignore_idxs(std::set<arity_t>& idxs) const {
+    // get permitted idxs
+    auto irng = boost::irange(0, orig_ctable.get_arity());
+    std::set<arity_t> all_idxs(irng.begin(), irng.end());
+    std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
+
+    // filter orig_table with permitted idxs
+    wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
+}
+
 combo_tree precision_bscore::gen_canonical_best_candidate() const
 {
     // @todo doesn't treat the case with worst_norm
@@ -958,7 +971,8 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
                                     unsigned> // total count
                           > precision_to_count_t;
     precision_to_count_t ptc;
-    for (CTable::const_iterator it = ctable.begin(); it != ctable.end(); ++it) {
+    for (CTable::const_iterator it = wrk_ctable.begin();
+         it != wrk_ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         unsigned total = c.total_count();
         contin_t precision = sum_outputs(c) / total;
