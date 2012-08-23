@@ -30,6 +30,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/moses/moses_main.h>
+#include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
@@ -40,8 +41,7 @@ using namespace reduct;
 using namespace boost;
 using namespace std;
 
-struct interactive_cscore : public unary_function<combo_tree,
-composite_score>
+struct interactive_cscore : public cscore_base
 {
     interactive_cscore() {  }
 

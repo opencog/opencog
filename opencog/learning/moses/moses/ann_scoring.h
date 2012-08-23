@@ -249,7 +249,7 @@ namespace opencog { namespace moses {
 // obviously correct, to me.
 #define CPXY_RATIO 1.0
 
-struct ann_pole2nv_cscore : public unary_function<combo_tree, composite_score>
+struct ann_pole2nv_cscore : public cscore_base
 {
     ann_pole2nv_cscore() { }
     composite_score operator()(const combo_tree& tr) const
@@ -275,15 +275,15 @@ struct ann_pole2nv_bscore : public unary_function<combo_tree, penalized_behavior
     }
 };
 
-struct ann_pole2_cscore : public unary_function<combo_tree, composite_score>
+struct ann_pole2_cscore : public cscore_base
 {
-   ann_pole2_cscore() { }
-   result_type operator()(const combo_tree& tr) const
-   {
-      complexity_t sz = tr.size();
-      return composite_score(p2ff(tr), sz, sz/CPXY_RATIO);
-   }
-   AnnPole2FitnessFunction p2ff;
+    ann_pole2_cscore() { }
+    result_type operator()(const combo_tree& tr) const
+    {
+        complexity_t sz = tr.size();
+        return composite_score(p2ff(tr), sz, sz/CPXY_RATIO);
+    }
+    AnnPole2FitnessFunction p2ff;
 };
 
 struct ann_pole2_bscore : public unary_function<combo_tree, penalized_behavioral_score>
@@ -301,7 +301,7 @@ struct ann_pole2_bscore : public unary_function<combo_tree, penalized_behavioral
     }
 };
 
-struct ann_pole_cscore  : public unary_function<combo_tree, composite_score>
+struct ann_pole_cscore  : public cscore_base
 {
     ann_pole_cscore() { }
     composite_score operator()(const combo_tree& tr) const
@@ -327,7 +327,7 @@ struct ann_pole_bscore : public unary_function<combo_tree, penalized_behavioral_
     }
 };
 
-struct ann_cscore  : public unary_function<combo_tree, composite_score>
+struct ann_cscore  : public cscore_base
 {
     ann_cscore() { }
     composite_score operator()(const combo_tree& tr) const

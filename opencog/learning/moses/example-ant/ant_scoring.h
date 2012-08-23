@@ -31,6 +31,7 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 #include "../moses/types.h"
+#include "../moses/scoring.h"
 
 using namespace ant_combo;
 using namespace opencog::moses;
@@ -221,13 +222,12 @@ private:
 };
 
 
-struct ant_score : public unary_function<combo_tree, composite_score> {
+struct ant_score : public cscore_base
+{
     ant_score() {}
-
     composite_score operator()(const combo_tree& tr) const {
         return composite_score (-1000 + aff(tr), 0, 0);
     }
-
     AntFitnessFunction aff;
 };
 

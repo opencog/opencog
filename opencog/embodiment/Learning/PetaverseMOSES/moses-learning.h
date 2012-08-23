@@ -28,6 +28,7 @@
 
 #include <opencog/learning/moses/moses/metapopulation.h>
 #include <opencog/learning/moses/moses/moses_params.h>
+#include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
@@ -117,7 +118,7 @@ private:
     moses_statistics stats;
 };
 
-struct petaverse_cscore : public unary_function<combo_tree, composite_score>
+struct petaverse_cscore : public cscore_base
 {
     petaverse_cscore(const FE& fitnessEstimator)
             : _fitnessEstimator(fitnessEstimator) {}
