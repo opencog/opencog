@@ -132,8 +132,9 @@ public:
     }
 
     /**
-     * Return a sequence retaining only the elements with indexes F
-     * TODO: check whether boost offers already that
+     * Return a sequence retaining only the elements with indexes F.
+     * filter is a container containing all (ordered) idxs to filter
+     * in.  TODO: check whether boost offers already that
      */
     template<typename F, typename Seq>
     Seq filtered(const F& filter, const Seq& seq) const {
@@ -149,9 +150,11 @@ public:
         
         // Filter the labels
         CTable res(olabel, filtered(filter, ilabels));
+        
         // Filter the rows
         foreach(const CTable::value_type v, *this)
             res[filtered(filter, v.first)] += v.second;
+        
         // Filter the type tree
         res.tt = tt;
         pre_it head_it = res.tt.begin();
@@ -159,12 +162,50 @@ public:
         OC_ASSERT((int)tt.number_of_children(head_it) == get_arity() + 1);
         sib_it sib = head_it.begin();
         foreach(arity_t a, filter) res.tt.erase(std::next(sib, a));
+        
+        // return the filtered CTable
+        return res;
+    }
+
+    template<typename F, typename Seq>
+    Seq filtered_preverse_idxs(const F& filter, const Seq& seq) const {
+        Seq res;
+        auto it = filter.cbegin();
+        for (unsigned i = 0; i < seq.size(); ++i) {
+            if (it != filter.cend() && i == *it) {
+                res.push_back(seq[i]);
+                ++it;
+            } else
+                res.push_back(id::null_vertex);
+        }
+        return seq;
+    }
+    
+    /**
+     * Like filtered but preserve the indices on the columns,
+     * techincally it replaces all input values filtered out by
+     * id::null_vertex.
+     */
+    template<typename F>
+    CTable filtered_preverse_idxs(const F& filter) const {
+        typedef type_tree::iterator pre_it;
+        typedef type_tree::sibling_iterator sib_it;
+        
+        // Set new CTable
+        CTable res(olabel, ilabels);
+        
+        // Filter the rows (replace filtered out values by id::null_vertex)
+        foreach(const CTable::value_type v, *this)
+            res[filtered_preverse_idxs(filter, v.first)] += v.second;
+        
         // return the filtered CTable
         return res;
     }
 
     type_tree tt;
 };
+
+        
 
 /**
  * Input table of vertexes.
