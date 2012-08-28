@@ -945,23 +945,6 @@ protected:
     mutable vertex_seq bmap;
 };
 
-//////////////////
-// contin table //
-//////////////////
-
-//////////////////////////////
-// probably soon deprecated //
-//////////////////////////////
-
-//shorthands used by class contin_input_table and contin_output_table
-typedef std::vector<contin_t> contin_vector;
-typedef contin_vector::iterator cv_it;
-typedef contin_vector::const_iterator const_cv_it;
-typedef std::vector<contin_vector> contin_matrix;
-typedef contin_matrix::iterator cm_it;
-typedef contin_matrix::const_iterator const_cm_it;
-
-
 /**
  * if the DSV data file has a header with labels
  */
