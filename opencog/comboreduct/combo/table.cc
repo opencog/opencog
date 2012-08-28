@@ -23,16 +23,7 @@
 
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/for_each.hpp>
-#include <boost/range/algorithm/transform.hpp>
-#include <boost/range/adaptor/map.hpp>
-#include <boost/range/irange.hpp>
-
-#include <opencog/util/numeric.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/oc_omp.h>
 
 #include "ann.h"
 #include "simple_nn.h"
