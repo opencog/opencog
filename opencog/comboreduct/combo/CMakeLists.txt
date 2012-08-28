@@ -23,6 +23,7 @@ INSTALL(FILES
 	procedure_repository.h
 	simple_nn.h
 	table.h
+	table_io.h
 	tree_generation.h
 	type_tree.h
 	type_tree_def.h

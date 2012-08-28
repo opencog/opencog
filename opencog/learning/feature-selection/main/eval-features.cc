@@ -28,6 +28,8 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
 
+#include <opencog/comboreduct/combo/table_io.h>
+
 #include "eval-features.h"
 
 using namespace boost::program_options;

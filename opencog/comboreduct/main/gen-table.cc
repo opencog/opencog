@@ -28,6 +28,7 @@
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/combo/table_io.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 
 using namespace boost::program_options;

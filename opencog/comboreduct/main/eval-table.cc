@@ -28,6 +28,7 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
 
+#include "../combo/table_io.h"
 #include "eval-table.h"
 
 using namespace boost::program_options;

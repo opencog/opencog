@@ -31,6 +31,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
 #include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/combo/table_io.h>
 
 #include "moses_exec.h"
 #include "moses_exec_def.h"

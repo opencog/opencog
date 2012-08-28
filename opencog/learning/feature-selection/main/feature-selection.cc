@@ -39,6 +39,7 @@
 #include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/combo/table_io.h>
 
 #include <opencog/learning/moses/optimization/optimization.h>
 

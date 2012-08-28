@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/combo/table_io.h>
 
 using namespace opencog;
 using namespace combo;

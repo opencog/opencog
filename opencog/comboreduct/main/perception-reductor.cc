@@ -29,6 +29,7 @@
 #include "../reduct/reduct.h"
 #include "../combo/eval.h"
 #include "../combo/table.h"
+#include "../combo/table_io.h"
 #include "../combo/type_tree.h"
 
 using namespace std;
