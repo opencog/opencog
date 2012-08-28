@@ -25,6 +25,7 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/procedure_repository
 	combo/simple_nn
 	combo/table
+	combo/table_io
 	combo/tree_generation
 	combo/type_tree_def
 	combo/type_tree
