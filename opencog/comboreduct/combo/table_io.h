@@ -29,6 +29,9 @@
 #include <string>
 #include <vector>
 
+#include <boost/range/algorithm/find.hpp>
+#include <boost/tokenizer.hpp>
+
 #include "table.h"
 #include "type_tree.h"
 

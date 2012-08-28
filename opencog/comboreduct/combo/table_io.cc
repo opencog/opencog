@@ -19,12 +19,17 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <iomanip>
+#include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/transform.hpp>
+#include <boost/range/irange.hpp>
+#include <boost/tokenizer.hpp>
+
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/oc_omp.h>
+
 #include "table.h"
 #include "table_io.h"
-
-#include <iomanip>
-#include <boost/range/irange.hpp>
-#include <opencog/util/oc_omp.h>
 
 namespace opencog { namespace combo {
 

@@ -24,6 +24,10 @@
 #include <iomanip>
 
 #include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/algorithm/transform.hpp>
+
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/Logger.h>
 
 #include "ann.h"
 #include "simple_nn.h"

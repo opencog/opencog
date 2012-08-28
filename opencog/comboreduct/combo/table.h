@@ -26,19 +26,12 @@
 
 #include <fstream>
 
-#include <boost/iterator/counting_iterator.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm/transform.hpp>
-#include <boost/range/algorithm/find.hpp>
-#include <boost/range/adaptor/map.hpp>
-#include <boost/tokenizer.hpp>
 
-#include <opencog/util/RandGen.h>
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/dorepeat.h>
 #include <opencog/util/Counter.h>
-#include <opencog/util/Logger.h>
 
-#include "eval.h"
+#include "eval.h"   /* Needed for binding map, and then obsolete */
 #include "vertex.h"
 #include "common_def.h"
 
@@ -47,9 +40,6 @@
                                // a formula
 
 namespace opencog { namespace combo {
-
-using boost::variant;
-using boost::adaptors::map_values;
 
 ///////////////////
 // Generic table //
