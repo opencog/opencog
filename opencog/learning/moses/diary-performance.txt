@@ -3193,7 +3193,7 @@ user	0m41.264s
 sys	0m2.925s
 
 -----------------------------
-Table below is for clusters WDBC dataset.  Measured with bzr rev 7332.
+Tables below are for cluster WDBC dataset.  Measured with bzr rev 7332.
 
 "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts
 ./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1
@@ -3268,3 +3268,45 @@ procs   time  speedup   parfrac  maxspeed
   8      378   7.883     0.9979    471
   9      332   8.953     0.9993   1512
  10      299   9.943     0.9994   1559
+
+OK. These results are due to what I am measuring: "How long does it
+take to perform a fixed number of evaluations of the scoring function?"
+If instead, I measured "How long does it take to reach a given score?"
+the results would be quite different. So lets try that ...
+
+---------
+Tables below are for clusters WDBC dataset.  Measured with bzr rev 7377.
+From perf standpoint, results should be identical to the above.  Goal
+is to fix score. the -A"-19" does this, and the -m flag uncaps the num evals.
+
+"mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts
+./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1
+-n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -A"-19" -m555320000
+--mpi=1 -fmscore.log"
+
+Use the "scaling.py" script.
+
+
+procs   time  speedup   parfrac  maxspeed    gens   evals    popsz
+-----   ----  -------   -------  --------    ----   ------   -----
+  1     2262     -         -        -         75    255295   44223
+  2     2694   0.8395    -0.3823   0.7234    206    508788   53001
+  3      777   2.9086     0.9843  63.6195    100    339266    7654
+  4   >22200                               >1276  >4660566  >88191
+  5      285   8.006      1.0939    -         64    244985   36028
+  6      289   7.889      1.0479    -         59    235106   34927
+  7      282   8.106      1.0227    -         60    237651   27709
+  8      546   4.188      0.8700   7.69      125    467584   47955
+  9      176  12.961      1.0382    -         52    261719    2774
+ 10      535   4.270      0.8509   6.71      149    549796   49567
+ 11      267   8.554      0.9714  34.97       97    386558   24651
+
+Ugh, what a mess. Had to restart after #4, so the numbes skew slightly.
+
+The 4-procs case stalled; it got to a best score of 21 and then never
+got any farther (in over 6 hours, and then the gateway reset).
+
+Note: for the six-random-seed test up above, one run took hour-n-half
+to reach score of -31 By comparison, most of the other random seeds can
+reach that score in a few minutes!  So re-running the above and averaging
+with  different random seeds will deliver mostly garbage.
