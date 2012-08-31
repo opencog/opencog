@@ -91,7 +91,7 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
                       moses_mpi_comm& mompi)
 {
     // Print header for the loop stats.
-    logger().info() << "Unit: # cnt\trun_secs\twait_secs\tevals\tmax_evals\tmetapop_size";
+    logger().info() << "Unit: # cnt\trun_secs\twait_secs\tevals\tmax_evals\tmetapop_size\tbest_score\tcomplexity";
 
     // Worker processes loop until done, then return.
     // Each worker waits for an exemplar, expands it, then returns
@@ -138,7 +138,9 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
                         << wait_time << "\t"
                         << evals_this_deme << "\t"
                         << max_evals << "\t"
-                        << mp.size() << "\n";
+                        << mp.size() << "\t"
+                        << mp.best_score() <<"\t"
+                        << get_complexity(mp.best_composite_score()) <<"\n";
 
         // Clear the metapop -- start with a new slate each time.
         mp.clear();
