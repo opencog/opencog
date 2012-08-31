@@ -90,13 +90,29 @@ template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
                       moses_mpi_comm& mompi)
 {
+    // Print header for the loop stats.
+    logger().info() << "Unit: # cnt\trun_secs\twait_secs\tevals\tmax_evals\tmetapop_size";
+
     // Worker processes loop until done, then return.
     // Each worker waits for an exemplar, expands it, then returns
     // the results.
+    int cnt = 0;
     while(1) {
+        struct timeval start;
+        gettimeofday(&start, NULL);
+
+        // Blocking wait for work unit.
         int max_evals = mompi.recv_more_work();
         if (0 >= max_evals)
             return;
+        cnt ++;
+
+        // Measure how long we blocked waiting for work.
+        struct timeval stop, elapsed;
+        gettimeofday(&stop, NULL);
+        timersub(&stop, &start, &elapsed);
+        unsigned wait_time = elapsed.tv_sec;
+        start = stop;
 
         combo_tree exemplar;
         mompi.recv_exemplar(exemplar);
@@ -111,8 +127,18 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
         mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
         mp._dex.free_deme();
 
-        logger().info() << "Sending " << mp.size() << " results";
+        // logger().info() << "Sending " << mp.size() << " results";
         mompi.send_deme(mp, evals_this_deme);
+
+        // Print timing stats and counts for this work unit.
+        gettimeofday(&stop, NULL);
+        timersub(&stop, &start, &elapsed);
+        logger().info() << "Unit: " << cnt <<"\t" 
+                        << elapsed.tv_sec << "\t"
+                        << wait_time << "\t"
+                        << evals_this_deme << "\t"
+                        << max_evals << "\t"
+                        << mp.size() << "\n";
 
         // Clear the metapop -- start with a new slate each time.
         mp.clear();
