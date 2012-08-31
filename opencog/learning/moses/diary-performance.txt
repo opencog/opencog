@@ -2588,7 +2588,7 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 2.56M:                                             63340  0.8900  146
 
 
-"v12-accu": traidional -Hit accuracy maximization.  On Cray, using:
+"v12-accu": traditional -Hit accuracy maximization.  On Cray, using:
         moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hit -r1 -j12 -v12 
 
 "bisect": using the bisected data. On localhost.
@@ -2708,7 +2708,7 @@ the heck is -U2 faster!?
         why does full search take 71698 evals? Ohhh because its an
         estimate!   Fourth Field set contains 141546 bits
 
-"16-sect-C48-j12: One the cray, pick out 48 features out of the 150
+"16-sect-C48-j12: On the cray, pick out 48 features out of the 150
         (the hexsect raw had 47 features).  Do this with
           feature-selection -imagic-16-sect.data 
             -omagic-16-sect-mmi-C48.data -utarg -ammi -C48 -j12
@@ -3182,7 +3182,7 @@ real	5m15.839s
 user	0m12.409s
 sys	0m1.749s
 
-WTF.... processor utilization seems similar ... run tims should be
+WTF.... processor utilization seems similar ... run times should be
 similar, scores should be similar.  But the earlier runs were much
 shorter, and had worse scores.  I think the earlier runs weren't
 actually for -m320000 but for something else ... 
@@ -3310,3 +3310,40 @@ Note: for the six-random-seed test up above, one run took hour-n-half
 to reach score of -31 By comparison, most of the other random seeds can
 reach that score in a few minutes!  So re-running the above and averaging
 with  different random seeds will deliver mostly garbage.
+
+Note: The WDBC dataset uses contin learning.  Thus, the highly-variable
+runtime behaviour previously seen for boolean problems is also occuring
+for contin problems (even though previously, it seemed like contin didn't
+suffer from this??? Somewhere before, I'd seen this, but where ??).
+
+=======================================================================
+MPI moses.
+OpenMPI - magic gamma ray dataset.
+
+Redo above, but with magic gamma 16-sectored dataset.
+magic-16-sect.data  19020 data rows,  150 bloolean input features
+
+cmd = "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts 
+/usr/local/bin/moses -Hit -utarg -i ./magic-16-sect.data -W1 -x1
+-n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r" +
+str(rseed) + " -j12 -m360000 --mpi=1 -fhexadeca.log"
+
+Each work unit is about 1/2 hour long, so, on average, each proc
+does about 2 work units, and aftr that, we are waiting for the
+shutdown to complete.  So the measurements below are never actually
+free-running, but rate-limited by the shutdown sequence.  Each work
+unit also takes about 1/2 of the total alloted eval cycles...
+
+
+procs   time  speedup   parfrac  maxspeed    score  cpxy 
+-----   ----  -------   -------  --------    -----  ----
+  1     6669    -          -        -         2489   273
+  2     4970   1.342      0.509    2.04       2440   292
+  3     5213   1.279      0.327    1.49       2375   353
+  4     3721   1.792      0.589    2.44       2448   309
+  5     3883   1.717      0.522    2.10       2416   339
+  6     4103   1.626      0.462    1.86       2437   294
+  7     4979   1.339      0.296    1.42       2422   333
+  8     4233   1.575      0.417    1.72       2418   298
+  9     4127   1.616      0.429    1.75       2418   298
+ 10
