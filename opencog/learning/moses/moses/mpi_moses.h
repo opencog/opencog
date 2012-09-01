@@ -90,8 +90,10 @@ template<typename Scoring, typename BScoring, typename Optimization>
 void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
                       moses_mpi_comm& mompi)
 {
+    optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
+
     // Print header for the loop stats.
-    logger().info() << "Unit: # cnt\trun_secs\twait_secs\tevals\tmax_evals\tmetapop_size\tbest_score\tcomplexity";
+    logger().info() << "Unit: # cnt\trun_secs\twait_secs\tevals\tmax_evals\tmetapop_size\tbest_score\tcomplexity\tfield_set_sz";
 
     // Worker processes loop until done, then return.
     // Each worker waits for an exemplar, expands it, then returns
@@ -131,16 +133,24 @@ void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
         mompi.send_deme(mp, evals_this_deme);
 
         // Print timing stats and counts for this work unit.
-        gettimeofday(&stop, NULL);
-        timersub(&stop, &start, &elapsed);
-        logger().info() << "Unit: " << cnt <<"\t" 
-                        << elapsed.tv_sec << "\t"
-                        << wait_time << "\t"
-                        << evals_this_deme << "\t"
-                        << max_evals << "\t"
-                        << mp.size() << "\t"
-                        << mp.best_score() <<"\t"
-                        << get_complexity(mp.best_composite_score()) <<"\n";
+        if (logger().isInfoEnabled()) {
+            gettimeofday(&stop, NULL);
+            timersub(&stop, &start, &elapsed);
+
+            stringstream ss;
+            ss << "Unit: " << cnt <<"\t" 
+               << elapsed.tv_sec << "\t"
+               << wait_time << "\t"
+               << evals_this_deme << "\t"
+               << max_evals << "\t"
+               << mp.size() << "\t"  // size of the metapopulation
+               << mp.best_score() <<"\t"
+               << get_complexity(mp.best_composite_score());
+            if (os) {
+                ss << "\t" << os->field_set_size;  // number of bits in the knobs
+            }
+            logger().info(ss.str());
+        }
 
         // Clear the metapop -- start with a new slate each time.
         mp.clear();
