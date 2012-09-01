@@ -3322,6 +3322,9 @@ OpenMPI - magic gamma ray dataset.
 
 Redo above, but with magic gamma 16-sectored dataset.
 magic-16-sect.data  19020 data rows,  150 bloolean input features
+measured with bzr rev 7398, which uses an older "greedy feeder"
+algorithm that pushes stale exemplars to workers... So this data
+is not ideal, but still should be representatitive...
 
 cmd = "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts 
 /usr/local/bin/moses -Hit -utarg -i ./magic-16-sect.data -W1 -x1
@@ -3334,16 +3337,75 @@ shutdown to complete.  So the measurements below are never actually
 free-running, but rate-limited by the shutdown sequence.  Each work
 unit also takes about 1/2 of the total alloted eval cycles...
 
+The 1-hour runs 4,5 had each worker do 2 work units.  The others,
+e.g. 3, 7, 10 had some workers do 3 work units.
 
-procs   time  speedup   parfrac  maxspeed    score  cpxy 
------   ----  -------   -------  --------    -----  ----
-  1     6669    -          -        -         2489   273
-  2     4970   1.342      0.509    2.04       2440   292
-  3     5213   1.279      0.327    1.49       2375   353
-  4     3721   1.792      0.589    2.44       2448   309
-  5     3883   1.717      0.522    2.10       2416   339
-  6     4103   1.626      0.462    1.86       2437   294
-  7     4979   1.339      0.296    1.42       2422   333
-  8     4233   1.575      0.417    1.72       2418   298
-  9     4127   1.616      0.429    1.75       2418   298
- 10
+"gens" is the total number of work units processed.  So avg work
+units per run would be gens/procs which is under 2.5 always.
+
+
+procs   time  speedup   parfrac  maxspeed    score  cpxy   gens
+-----   ----  -------   -------  --------    -----  ----   ----
+  1     6669    -          -        -         2489   273     5
+  2     4970   1.342      0.509    2.04       2440   292     5
+  3     5213   1.279      0.327    1.49       2375   353     7
+  4     3721   1.792      0.589    2.44       2446   316     9
+  5     3883   1.717      0.522    2.10       2416   339    10
+  6     4103   1.626      0.462    1.86       2437   294    11
+  7     4979   1.339      0.296    1.42       2422   333    12
+  8     4233   1.575      0.417    1.72       2418   298    13
+  9     4127   1.616      0.429    1.75       2418   298    12
+ 10     6236   1.070      0.072    1.08       2441   318    15
+
+So, try again:
+magic-16-sect-mmi-C48.data selects 48 features out of 150, those with
+the highest mmi.  Hopefully, the length of each work unit will be 
+considerably smaller. Lets see... OK, typical n_evals per unit is 50K
+to 90K for the later units.   (again -m360K for stop condition.)
+
+"tunit" column below is time, in seconds, for the last unit to run.
+
+
+procs   time  speedup   parfrac  maxspeed    score  cpxy  gens   tunit 
+-----   ----  -------   -------  --------    -----  ----  ----   -----
+  1     2569    -          -        -         2652   215    9     929
+  2     1896    1.355    0.524     1.35       2588   204   11     953
+  3     1276    2.104    0.755     4.09       2664   158   15     708
+  4     1026    2.502    0.801     5.01       2710   162   16     733
+  5      866    2.966    0.829     5.83       2712   158   18
+  6     1056    2.431    0.706     3.41       2673   155   19
+  7     1267    2.028    0.591     2.45       2664   168   21
+  8     1317    1.950    0.557     2.26       2676   158   23
+  9      749    3.426    0.797     4.92       2752   152   24
+ 10      838    3.062    0.748     3.97       2727   150   27
+
+
+OK, the size of the work-units are sharply increasing in size; evaluation
+times are exploding: (now measured with rdone w/ bzr rev 7404):
+
+Legend:
+run_secs -- time to run one workload, received from MPI master.
+evals -- number of scoring function evaluations
+score -- best score obtained on this run.
+cpxy -- information-theoretic complexity of highest-scoring tree.
+fssz -- field-set size (information-theoretic bits in field set)
+
+cnt   run_secs	 evals    score    cpxy    fssz
+---   --------  -----    -----    ----    ----
+ 1         1     3793    -4305      7      608
+ 2         8     7756    -3414      11    1016
+ 3       169    65686    -3028      54    3256
+ 4       417    75641    -2755     125    9369
+ 5       944    80281    -2634     213   20767
+ 6      1899    80161    -2539     282   37757
+ 7      2116    52881    -2500     317
+ 8      3498    79801    -2432     379
+ 9      4985    89201    -2385     420
+ 10     4282    15841    -2378     426
+ 11     4072     5121    -2378     425
+ 12     4339    15481    -2373     429
+ 13     4416    15601    -2367     435
+ 14     4479    10241    -2366     435
+ 15     4622    15601    -2358     446
+ 16     5040    20601    -2351     455
+
