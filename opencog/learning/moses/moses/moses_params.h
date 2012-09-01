@@ -46,13 +46,14 @@ struct moses_parameters
                      int _max_evals = 10000,
                      int _max_gens = -1,
                      score_t _max_score = 0)
-        : local(_local), jobs(_jobs), vm(_vm),
+        : local(_local), mpi(false), force_feed(false), jobs(_jobs), vm(_vm),
           max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score)
     {}
 
     // Distributed solver control.
     bool local;
     bool mpi;
+    bool force_feed;
     const jobs_t& jobs;
     const boost::program_options::variables_map& vm;
 

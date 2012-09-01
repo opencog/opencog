@@ -370,7 +370,10 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
             // there is work that we can receive.
             source = mompi.probe_for_deme();
             wrkpool.push(source);
-            continue;
+
+            // If we are in force-feed mode, don't look at results yet,
+            // and instead, give worker more work (even if it's stale).
+            if (pa.force_feed) continue;
         }
 
         int n_evals = 0;
@@ -381,15 +384,24 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         stats.n_expansions ++;
         stats.n_evals += n_evals;
 
-        // Perform deme merge in a distinct thread.
-        // We want to keep this thread available for i/o
-        std::async(std::launch::async,
-            [&]() { 
-                thread_count++;
-                mp.update_best_candidates(candidates);
-                mp.merge_candidates(candidates);
-                thread_count--;
-            });
+        // Merge results back into population.
+        if (!pa.force_feed) {
+            mp.update_best_candidates(candidates);
+            mp.merge_candidates(candidates);
+        } else {
+            // Perform deme merge in a distinct thread.
+            // We want to keep this thread available for i/o.
+            // However, this has the side-effect of giving the worker
+            // an exemplar issued from an older, more stale metapop.
+            //
+            std::async(std::launch::async,
+                [&]() { 
+                    thread_count++;
+                    mp.update_best_candidates(candidates);
+                    mp.merge_candidates(candidates);
+                    thread_count--;
+                });
+        }
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
