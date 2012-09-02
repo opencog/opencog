@@ -4,15 +4,26 @@
 # @author Dingjie.Wang
 # @version 1.0
 # @date 2012-08-04
-from opencog.atomspace import types, TruthValue, AtomSpace
+from opencog.atomspace import types, TruthValue, AtomSpace, confidence_to_count
 from viz_graph import Viz_Graph
 from types_inheritance import name_type_dict, is_a
 from m_util import Logger, dict_sub
-from m_adaptors import FakeAtom
-log = Logger()
-log.to_file = False
+from m_adaptors import FakeAtom, output_atomspace
+#import atomspace_abserver
+from m_util import rough_compare_files
+log = Logger("diff")
+log.to_file = True
 #log.add_level(Logger.DEBUG)
 log.add_level(Logger.INFO)
+
+##
+# @brief :load every segment( the previous line begin with '('  to previous line) to atomspace
+#
+# @param a: atomspace
+# @param tree : an instance of Viz_Graph
+# @param root : root of subtree
+#
+# @return 
 def add_tree_to_atomspace(a, tree, root):
      ''' add nodes of a tree to atomspace in postorder ''' 
      out = []
@@ -55,7 +66,6 @@ def load_scm_file(a, filename):
     define_dict = { }
     try:
         f = open(filename, "r")
-        #for line in f.readlines():
         for line_no, line in enumerate(f.readlines()):
             # code...
             ## parase scheme file line by line
@@ -71,7 +81,6 @@ def load_scm_file(a, filename):
                 # deal with previous segment
                     add_tree_to_atomspace(a, tree, root)
                     tree.clear()
-                    no_link.clear()
                 # 
                 ident_stack[:] = []
                 atom_stack[:] = []
@@ -95,7 +104,7 @@ def load_scm_file(a, filename):
                 try:
                     second = elms[2]
                     second = second.split(')')[0]
-                    second = dict_sub(define_dict, second)
+                    second = dict_sub(second, define_dict)
                 except Exception:
                     second = None
 
@@ -103,7 +112,7 @@ def load_scm_file(a, filename):
                 try:
                     third = elms[3]
                     third = third.split(')')[0]
-                    third = dict_sub(define_dict, third)
+                    third = dict_sub(third, define_dict)
                 except Exception:
                     third = None
                 #log.debug("********************" )
@@ -121,10 +130,9 @@ def load_scm_file(a, filename):
                     elif second.find("stv") != -1:
                         temp = second.split(" ")
                         mean = float(temp[1])
-                        count = float(temp[2])
-                        # atcually, temp[2] is confidence of atom, but no way to assign 
+                        confidence = float(temp[2])
                         # the value to stv!
-                        stv = TruthValue(mean,count)
+                        stv = TruthValue(mean,confidence_to_count(confidence))
 
                 if third:
                     third = third.strip()
@@ -136,71 +144,73 @@ def load_scm_file(a, filename):
                     elif third.find("stv") != -1:
                         temp = third.split(" ")
                         mean = float(temp[1])
-                        count = float(temp[2])
-                        # atcually, temp[2] is confidence of atom, but no way to assign 
+                        confidence = float(temp[2])
                         # the value to stv!
-                        stv = TruthValue(mean,count)
+                        stv = TruthValue(mean,confidence_to_count(confidence))
                 try:
                     t = first[0:first.index(' ')]
                     name = first[first.index(' ') + 1: -1].strip('"')
-                    log.debug("**********atom**************" )
-                    log.debug("type: %s"%t+"*" )
-                    log.debug("name: %s"%name+"*")
-                    log.debug("stv: %s"%stv)
-                    log.debug("av: %s"%av)
-                    log.debug("*****************************" )
+                    #log.debug("**********atom**************" )
+                    #log.debug("type: %s"%t+"*" )
+                    #log.debug("name: %s"%name+"*")
+                    #log.debug("stv: %s"%stv)
+                    #log.debug("av: %s"%av)
+                    #log.debug("*****************************" )
                 except Exception:
                     t = first.strip(' ')
                 ## add nodes to segment tree
-                if name != "" :
-                    #print "node:%s**"%name
+                is_node = True if name else False
+                if is_node:
                     # node
                     try:
                         node = FakeAtom(name_type_dict[t], name, stv, av)
                     except KeyError:
                         log.error("Unknown Atom type '%s' in line %s, pls add related type infomation to file 'types_inheritance.py' "% (t,line_no))
                         raise KeyError
-                    tree.add_node(name, atom = node)
+                    uni_node_id = tree.unique_id(name)
+                    tree.add_node(uni_node_id, atom = node)
                     atom_stack.append(node)
                     if l.startswith('('):
-                        root = name
+                        root = uni_node_id
                 else:
                     # link
-                    no = no_link.setdefault(t,1)
-                    no_link[t] += 1
-                    link_name = t + str(no)
+                    uni_link_id = tree.unique_id(t)
                     #print "link:%s**"%t
                     try:
-                        link = FakeAtom(name_type_dict[t], link_name, stv, av)
+                        link = FakeAtom(name_type_dict[t], uni_link_id, stv, av)
                     except KeyError:
                         log.error("Unknown Atom type '%s' in line %s"% (t,line_no))
                         raise KeyError
                     atom_stack.append(link)
-                    tree.add_node(link_name, atom = link)
+                    tree.add_node( uni_link_id, atom = link)
                     if l.startswith('('):
-                        root = link_name
+                        root = uni_link_id
 
-                ## add an edge to the segment tree
+                ## add an edge(between link and node, or link to sub_link) to the segment tree
                 now = ident_stack[-1]
                 for i, prev_ident in reversed(list(enumerate(ident_stack))):
                     if now > prev_ident:
-                        ## the ith is parent
-                        #print atom_stack[i].name + "->" + atom_stack[-1].name
-                        tree.add_edge(atom_stack[i].name, atom_stack[-1].name)
+                        ## the ith is parent, the link
+                        if is_node:
+                            log.debug("%s -> %s"%(atom_stack[i].name, uni_node_id))
+                            tree.add_edge(atom_stack[i].name, uni_node_id)
+                        else:
+                            log.debug("%s -> %s"%(atom_stack[i].name, uni_link_id))
+                            tree.add_edge(atom_stack[i].name, uni_link_id)
                         ## set the 'order' attribute
-                        try:
-                            tree.get_node_attr(atom_stack[i].name)['order'] += 1
-                        except Exception:
-                            tree.get_node_attr(atom_stack[i].name)['order'] = 0
+                        tree.get_node_attr(atom_stack[i].name).setdefault('order',-1)
+                        tree.get_node_attr(atom_stack[i].name)['order'] += 1
                         order = tree.get_node_attr(atom_stack[i].name)['order']
-                        tree.set_edge_attr(atom_stack[i].name, atom_stack[-1].name, order = order)
+                        if is_node:
+                            tree.set_edge_attr(atom_stack[i].name, uni_node_id, order = order)
+                        else:
+                            tree.set_edge_attr(atom_stack[i].name, uni_link_id, order = order)
                         break
 
         ## deal with the last segment
         if tree.number_of_nodes() > 0:
             add_tree_to_atomspace(a, tree, root)
             tree.clear()
-            no_link.clear()
         log.info("loaded scm file sucessfully!" )
     except IOError:
         log.error("failed to read file %s "%filename )
@@ -209,48 +219,28 @@ def load_scm_file(a, filename):
         f.close()
 
 def test_load_scm_file():
-    '''it always failed! because there is no way to assign "confidence" attr of TruthValue,
-        which make the stv value of loaded atom is always wrong, but any thing else is ok!
-    ''' 
-    def output_atomspace(a):
-        '''docstring for output_atomspace''' 
-        f = open('diff_log', 'w')
-        atoms = a.get_atoms_by_type(types.Atom)
-        for atom in atoms:
-            print >> f, atom
-            #print >> f, a.get_tv(atom.h).mean, a.get_tv(atom.h).count, a.get_tv(atom.h).confidence
-        f.close()
 
     # load a scm file 
     a = AtomSpace()
-    load_scm_file(a, "air.scm")
+    load_scm_file(a, "./test/scm/test_load_scm_file.scm")
+    #load_scm_file(a, "./air.scm")
     # output atomspace  to file "diff_log" 
-    output_atomspace(a)
-    # compare "diff_log" with output of atomspace loaded with cogserver
-    try:
-        f_l = open('diff_log', 'r')
-        f_server = open('diff_log_server', 'r')
-        # 
-        from_scm = { }
-        for line in f_l.readlines():
-            from_scm[line]=1
-        # compare it with output of atomspace load with cogserver
-        for i,line in enumerate(f_server.readlines()):
-            try:
-                from_scm[line]
-            except KeyError:
-                log.error("test failed:**%s**!"%line)
-    except IOError,e:
-        log.error(str(e))
-        raise e
+    output_atomspace(a, "py_atomspace.log" )
+    # compare output with output of atomspace loaded with cogserver
+    if rough_compare_files("py_atomspace.log", "./test/log/server_atomspace.log") and rough_compare_files("./test/log/server_atomspace.log", "py_atomspace.log"):
+        log.info("test passed!")
+    else:
+        log.info("test failed!")
+        
+
+    #abserver = atomspace_abserver.Atomspace_Abserver(a)
+    #abserver.graph_info()
+    #abserver.filter_graph()
+    #abserver.write("test_load_scm_file.dot")
 if __name__ == '__main__':test_load_scm_file()
     #import atomspace_abserver
     #a = AtomSpace()
     #load_scm_file(a, "test_load_scm_file_and_abserver.scm")
     ##load_scm_file(a, "da.scm")
     #links = a.get_atoms_by_type(types.Link)
-    #abserver = atomspace_abserver.Atomspace_Abserver(a)
-    #abserver.graph_info()
-    #abserver.filter_graph()
-    #abserver.write("test_load_scm_file.dot")
 

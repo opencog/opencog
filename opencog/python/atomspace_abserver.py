@@ -6,12 +6,15 @@ from types_inheritance import types_graph, name_to_type, is_a
 from collections import defaultdict
 from m_util import log, Logger
 from m_adaptors import FakeAtom
-log.add_level(Logger.DEBUG)
+log.add_level(Logger.INFO)
 log.use_stdout(True)
 
     
 #from opencog.atomspace import Atom, types
 class Atomspace_Abserver(Graph_Abserver):
+    ''' @bug: when link B have two same children ---- link A, then only one link A is given in the picture
+              It happened rarely and  you could discover it when look the edge order(in the picture) carefully.
+    '''
     """ attention: not including isolate concpet node and empty link"""
     def __init__(self, a, e_types = ["Link"], n_types = ["Node", "Link"], inheritance = True):
         super(Atomspace_Abserver, self).__init__(a, e_types, n_types, inheritance)
@@ -36,13 +39,13 @@ class Atomspace_Abserver(Graph_Abserver):
                         for i, node in enumerate(nodes):
                             if is_a(node.type_name, "Node"):
                                 nodes_info[node.type_name].add(node.name)
-        log.debug("*******************************edges:" )
+        log.info("*******************************edges:" )
         for type_name, num in edges_info.iteritems():
-            log.debug( type_name + ":  " + str(num))
+            log.info( type_name + ":  " + str(num))
             #pprint(edges)
-        log.debug("*******************************nodes:" )
+        log.info("*******************************nodes:" )
         for type_name, nodes in nodes_info.iteritems():
-            log.debug(type_name + ": " + str(len(nodes)))
+            log.info(str(len(nodes)),type_name)
             #pprint(nodes)
     
     def _get_edges(self,type):
@@ -79,14 +82,14 @@ class Atomspace_Abserver(Graph_Abserver):
                 if len(nodes) > 0:
                     if self.valid_edge(link,nodes):
                         # make the linkname uniqueness
-                        link_name = link.type_name + str(link.h.value())
+                        link_name = link.type_name + "[%s]"% str(link.h.value())
                         #print link_name
                         for i, node in enumerate(nodes):
                             if is_a(node.type_name, "Link"):
-                               node_name = node.type_name + str(node.h.value())
+                               node_name = node.type_name + "[%s]"% str(node.h.value())
                                #print "***%s" % node_name
                             else:
-                                node_name = node.name
+                                node_name = self.graph.unique_id(node.name)
                                 #print "^^%s" % node_name
                             #print "%s -> %s" %(link_name,node_name)
                             self.graph.add_edge(link_name,node_name)
@@ -104,13 +107,10 @@ class Atomspace_Abserver(Graph_Abserver):
 
 if __name__ == '__main__':
     from load_scm_file import load_scm_file
-    from pre_fishgram import output_atomspace
     a = AtomSpace()
-    load_scm_file(a, "test_load_scm_file_and_abserver.scm")
-    links = a.get_atoms_by_type(types.Link)
-    output_atomspace(a,"space.log",True)
+    load_scm_file(a, "./test/scm/test_atomspace_abserver.scm")
     abserver = Atomspace_Abserver(a)
-    #abserver.graph_info()
+    abserver.graph_info()
     abserver.filter_graph()
     abserver.write("test_atomspace_abserver.dot")
 

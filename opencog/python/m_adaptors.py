@@ -4,7 +4,7 @@
 # @author Dingjie.Wang
 # @version 1.0
 # @date 2012-07-31
-from opencog.atomspace import Atom
+from opencog.atomspace import Atom, types
 from types_inheritance import type_to_name
 class Viz_OpenCog_Tree_Adaptor(object):
     """docstring for tree"""
@@ -37,5 +37,22 @@ class FakeAtom(object):
         # @@ could just use attribute method
         self.type_name = type_to_name(t)
 
-__all__ = ["Viz_OpenCog_Tree_Adaptor", "FakeAtom" ]
 
+# --------------------------------------------------------------------------------------------------------------
+def output_atomspace(a, filename):
+    '''docstring for output_atomspace''' 
+    try:
+        f = open(filename, 'w')
+        atoms = a.get_atoms_by_type(types.Atom)
+        for atom in atoms:
+            print atom
+            print >> f, atom
+            #print >> f, a.get_tv(atom.h).mean, a.get_tv(atom.h).count, a.get_tv(atom.h).confidence
+        f.close()
+    except IOError, e:
+        print e
+        raise e
+    finally:
+        f.close()
+
+__all__ = ["Viz_OpenCog_Tree_Adaptor", "FakeAtom" ,"output_atomspace" ]
