@@ -85,7 +85,7 @@ struct metapop_parameters
         reduce_all(_reduce_all),
         revisit(_revisit),
         include_dominated(_include_dominated),
-        use_diversity_penalty(false), // XXX should pass as arg ...
+        diversity_pressure(0.0), // XXX should pass as arg ...
         complexity_temperature(_complexity_temperature),
         ignore_ops(_ignore_ops),
         // enable_cache(_enable_cache),   // adaptive_cache
@@ -114,7 +114,7 @@ struct metapop_parameters
     bool include_dominated;
 
     // Enable forced diversification of the metapop.
-    bool use_diversity_penalty;
+    score_t diversity_pressure;
 
     // Boltzmann temperature ...
     score_t complexity_temperature;
@@ -439,6 +439,103 @@ struct metapopulation : bscored_combo_tree_set
     }
 
     /**
+     * Turn a bscore distance into a diversity penalty.
+     */
+    score_t dst2dp(score_t dst) const {
+        return params.diversity_pressure / (1.0 + dst);
+    }
+
+    /**
+     * Take a sequence of diversity penalties and aggregate them into one.
+     */
+    score_t aggregated_dps(std::vector<score_t>& dps) {
+        // compute the aggregated penalty of dps (here the average)
+        const double pap = 1.0;   /// here regular mean
+                                  /// @todo should be a parameter
+        return generalized_mean(dps.begin(), dps.end(), pap);
+    }
+    
+    /**
+     * Compute the diversity penalty for all models of the metapopulation.
+     *
+     * If the diversity penalty is enabled, then punish the scores of
+     * those exemplars that are too similar to the previous ones.
+     * This may not make any difference for the first dozen exemplars
+     * choosen, but starts getting important once the metapopulation
+     * gets large, and the search bogs down.
+     * 
+     * XXX The implementation here results in a lot of copying of
+     * behavioral scores and combo trees, and thus could hurt
+     * performance by quite a bit.  To avoid this, we'd need to change
+     * the use of bscored_combo_tree_set in this class. This would be
+     * a fairly big task, and it's currently not clear that its worth
+     * the effort, as diversity_penalty is not yet showing promising
+     * results...
+     */
+    void set_diversity()
+    {        
+        bscored_combo_tree_set pool; // new metapopulation
+        
+        // temporary copy the metapop in a vector to update the
+        // diversity penalty (HIGHLY PESSIMIZED) + a vector of already
+        // computed penalties (to avoid recomputing them)
+        typedef std::pair<bscored_combo_tree, std::vector<score_t> > 
+            bscored_combo_tree_penalties_pair;
+        typedef std::vector<bscored_combo_tree_penalties_pair>
+            bscored_combo_tree_penalties_pair_seq;
+        bscored_combo_tree_penalties_pair_seq tmp;
+        foreach(const value_type& v, *this)
+            tmp.push_back({v, std::vector<score_t>()});
+
+        auto update_diversity_penalty = [&](bscored_combo_tree_penalties_pair& v) {
+            if (!pool.empty()) { // only do something if the pool is
+                                 // not empty (WARNING: this assumes
+                                 // that all diversity penalties are
+                                 // initially zero
+                
+                const behavioral_score& bs = get_bscore(v.first);
+                OC_ASSERT(bs.size(), "Behavioral score is needed for diversity!");
+
+                // compute diversity penalty between bs abd the last
+                // element of the pool
+                const bscored_combo_tree& last = *pool.crbegin();
+                const behavioral_score last_bs = get_bscore(last);
+                const double p = 2.0;   /// here Euclidean distance.
+                                        /// @todo should be a parameter
+                score_t last_dp = this->dst2dp(lp_distance(bs, last_bs, p));
+
+                // add it to v.second
+                v.second.push_back(last_dp);
+                
+                // aggregate the penalties, update v.first
+                score_t dp = this->aggregated_dps(v.second);
+                get_composite_score(v.first).set_diversity_penalty(dp);
+            }
+        };
+
+        while (tmp.size()) {
+            // update all diversity penalties of tmp
+            OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
+
+            // take the max score, insert in the pool and remove from tmp
+            bscored_combo_tree_greater bsct_gt;
+            auto gt = [&](const bscored_combo_tree_penalties_pair& l,
+                          const bscored_combo_tree_penalties_pair& r) {
+                return bsct_gt(l.first, r.first);
+            };
+            // note although we do use min_element it returns the
+            // candidate with the best penalized score because we use
+            // a greater_than function instead of a less_than function
+            auto mit = OMP_ALGO::min_element(tmp.begin(), tmp.end(), gt);
+            pool.insert(mit->first);
+            tmp.erase(mit);
+        }
+
+        // Replace the existing metapopulation with the new one.
+        swap(pool);
+    }
+    
+    /**
      * Select the exemplar from the population. An exemplar is choosen
      * from the pool of candidates using a Boltzmann distribution
      * exp (-score / temperature).  Thus, they choosen exemplar will
@@ -449,7 +546,7 @@ struct metapopulation : bscored_combo_tree_set
      *
      * Current experimental evidence shows that temperatures in the
      * range of 6-12 work best for most problems, both discrete
-     * (e.g. 4-parity) and conintuous.
+     * (e.g. 4-parity) and continuous.
      *
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
@@ -470,41 +567,6 @@ struct metapopulation : bscored_combo_tree_set
             return end();
         }
 
-        // If the diversity penalty is enabled, then punish the scores
-        // of those exemplars that are too similar to the previous one.
-        // This typically won't make  any difference for the first dozen
-        // exemplars choosen, but starts getting important once the
-        // metapopulation gets large, and the search bogs down.
-        //
-        // XXX The implementation here results in a lot of copying of
-        // behavioral scores and combo trees, and thus could hurt
-        // performance by quite a bit.  To avoid this, we'd need to
-        // change the use of bscored_combo_tree_set in this class. This
-        // would be a fairly big task, and it's currently not clear that
-        // its worth the effort, as diversity_penalty is not yet showing
-        // promising results...
-#if 0
-        if (params.use_diversity_penalty) {
-            bscored_combo_tree_set pool;
-            // Behavioral score of the (previous) exemplar.
-            const behavioral_score& exbs = get_bscore(_exemplar);
-            for (const_iterator it = begin(); it != end(); ++it) {
-                const behavioral_score &bs = get_bscore(*it);
-                OC_ASSERT(bs.size(), "Behavioral score is needed for diversity!");
-
-                score_t penalty = 1.0 / (1.0 + lp_distance(exbs, bs, 1.0));
-
-                composite_score cs = get_composite_score(*it);
-                cs.set_diversity_penalty(penalty);
-                pool.insert(bscored_combo_tree(get_tree(*it),
-                     composite_behavioral_score(get_pbscore(*it), cs)));
-            }
-
-            // Replace the existing metapopulation with the new one.
-            swap(pool);
-        }
-#endif
-
         vector<score_t> probs;
         // Set flag to true, when a suitable exemplar is found.
         bool found_exemplar = false;
@@ -515,7 +577,7 @@ struct metapopulation : bscored_combo_tree_set
         // the iterator follows this order.
         for (const_iterator it = begin(); it != end(); ++it) {
 
-            score_t sc = get_weighted_score(*it);
+            score_t sc = get_penalized_score(*it);
 
             // Skip any exemplars we've already used in the past.
             const combo_tree& tr = get_tree(*it);
@@ -628,70 +690,72 @@ struct metapopulation : bscored_combo_tree_set
         // quite OK to cut back on this value.
 
 #define MIN_POOL_SIZE 250
-        if (size() < MIN_POOL_SIZE) return;
+        if (size() > MIN_POOL_SIZE) {
 
-        score_t top_score = get_weighted_score(*begin());
-        score_t range = useful_score_range();
-        score_t worst_score = top_score - range;
+            score_t top_score = get_penalized_score(*begin());
+            score_t range = useful_score_range();
+            score_t worst_score = top_score - range;
 
 #if 0
-        // Erase all the lowest scores.  The metapop is not kept in
-        // weighted-score order, so we have to remove one at a time.
-        iterator it = begin();
-        while (it != end()) {
-            score_t sc = get_weighted_score(*it);
-            if (sc < worst_score)
-                it = erase (it);
-            else
-                it++;
-        }
+            // Erase all the lowest scores.  The metapop is not kept in
+            // penalized-score order, so we have to remove one at a time.
+            iterator it = begin();
+            while (it != end()) {
+                score_t sc = get_penalized_score(*it);
+                if (sc < worst_score)
+                    it = erase (it);
+                else
+                    it++;
+            }
 #else
-        // Erase all the lowest scores.  The metapop is in quasi-sorted
-        // order (since the deme was sorted before being appended), so
-        // this bulk remove mostly works "correctly". It is also 25%
-        // faster than above. I think this is because the erase() above
-        // causes the std::set to try to sort the contents, and this
-        // ends up costing a lot.  I think... not sure.
-        iterator it = begin();
-        for (int i=0; i<MIN_POOL_SIZE; i++) it++;
-        while (it != end()) {
-            score_t sc = get_weighted_score(*it);
-            if (sc < worst_score) break;
-            it++;
-        }
+            // Erase all the lowest scores.  The metapop is in quasi-sorted
+            // order (since the deme was sorted before being appended), so
+            // this bulk remove mostly works "correctly". It is also 25%
+            // faster than above. I think this is because the erase() above
+            // causes the std::set to try to sort the contents, and this
+            // ends up costing a lot.  I think... not sure.
+            iterator it = begin();
+            for (int i=0; i<MIN_POOL_SIZE; i++) it++;
+            while (it != end()) {
+                score_t sc = get_penalized_score(*it);
+                if (sc < worst_score) break;
+                it++;
+            }
 
-        erase(it, end());
+            erase(it, end());
 
-        // Is the population still too large?  Yes, it is, if it is more
-        // than 50 times the size of the current number of generations.
-        // Realisitically, we could never explore more than 2% of a pool
-        // that size.  For 10Bytes per table row, 20K rows, generation=500
-        // this will still eat up tens of GBytes of RAM, and so is a
-        // relatively lenient cap.
-        // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
-        //
-        // XXX TODO fix the cap so its more sensitive to the size of
-        // each exemplar, right!?
-        // size_t nbelts = get_bscore(*begin()).size();
-        // double cap = 1.0e6 / double(nbelts);
-        _merge_count++;
-        double cap = 50.0;
-        cap *= _merge_count + 250.0;
-        cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
-        size_t popsz_cap = cap;
-        size_t popsz = size();
-        while (popsz_cap < popsz)
-        {
-            // Leave the first 50 alone.
+            // Is the population still too large?  Yes, it is, if it is more
+            // than 50 times the size of the current number of generations.
+            // Realisitically, we could never explore more than 2% of a pool
+            // that size.  For 10Bytes per table row, 20K rows, generation=500
+            // this will still eat up tens of GBytes of RAM, and so is a
+            // relatively lenient cap.
+            // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
+            //
+            // XXX TODO fix the cap so its more sensitive to the size of
+            // each exemplar, right!?
+            // size_t nbelts = get_bscore(*begin()).size();
+            // double cap = 1.0e6 / double(nbelts);
+            _merge_count++;
+            double cap = 50.0;
+            cap *= _merge_count + 250.0;
+            cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
+            size_t popsz_cap = cap;
+            size_t popsz = size();
+            while (popsz_cap < popsz)
+            {
+                // Leave the first 50 alone.
 #define OFFSET 50
-            int which = OFFSET + randGen().randint(popsz-OFFSET);
-            // using std is necessary to break the ambiguity between
-            // boost::next and std::next. Weirdly enough this appears
-            // only 32bit arch
-            erase(std::next(begin(), which));
-            popsz --;
-        }
+                int which = OFFSET + randGen().randint(popsz-OFFSET);
+                // using std is necessary to break the ambiguity between
+                // boost::next and std::next. Weirdly enough this appears
+                // only 32bit arch
+                erase(std::next(begin(), which));
+                popsz --;
+            }
 #endif
+        } // end of if (size() > MIN_POOL_SIZE)
+        
         if (logger().isDebugEnabled()) {
             logger().debug("Metapopulation size after merging is %u", size());
             if (logger().isFineEnabled()) {
@@ -755,12 +819,12 @@ struct metapopulation : bscored_combo_tree_set
         // of the best-scoring instances lead to a solution. So keep
         // around a reasonable pool. Wild choice ot 250 seems reasonable.
         if (MIN_POOL_SIZE < __deme->size()) {
-            score_t top_sc = get_weighted_score(__deme->begin()->second);
+            score_t top_sc = get_penalized_score(__deme->begin()->second);
             score_t bot_sc = top_sc - useful_score_range();
 
             for (size_t i = __deme->size()-1; 0 < i; --i) {
                 const composite_score &cscore = (*__deme)[i].second;
-                score_t score = get_weighted_score(cscore);
+                score_t score = get_penalized_score(cscore);
                 if (score < bot_sc) {
                     __deme->pop_back();
                 }
@@ -868,7 +932,7 @@ struct metapopulation : bscored_combo_tree_set
         // Behavioural scores are needed only if domination-based
         // merging is asked for, or if the diversity penalty is in use.
         // Save CPU time by not computing them.
-        if (!params.include_dominated || params.use_diversity_penalty) {
+        if (!params.include_dominated || params.diversity_pressure > 0.0) {
             logger().debug("Compute behavioral score of %d selected candidates",
                            pot_candidates.size());
 
@@ -914,6 +978,17 @@ struct metapopulation : bscored_combo_tree_set
         if (params.merge_callback)
             done = (*params.merge_callback)(candidates, params.callback_user_data);
         merge_candidates(candidates);
+
+        // update diversity penalties
+        if (params.diversity_pressure > 0.0) {
+            set_diversity();
+            if (logger().isFineEnabled()) {
+                stringstream ss;
+                ss << "Metapopulation after setting diversity:" << std::endl;
+                logger().fine(ostream(ss, -1, true, true).str());
+            }
+        }
+
         return done;
     }
 
@@ -1243,7 +1318,7 @@ struct metapopulation : bscored_combo_tree_set
         // that merge uses.  I think. 
         std::lock_guard<std::mutex> lock(_merge_mutex);
 
-        // Candidates are kept in weighted score order, not in
+        // Candidates are kept in penalized score order, not in
         // absolute score order.  Thus, we need to search through
         // the first few to find the true best score.  Also, there
         // may be several candidates with the best score.
@@ -1294,15 +1369,14 @@ struct metapopulation : bscored_combo_tree_set
      * stream out the metapopulation in decreasing order of their
      * score along with their scores (optionally complexity and
      * bscore).  If n is negative, then stream them all out.  Note
-     * that the default sort order for the metapop is a weighted
-     * linear combo of the best scores and the smallest complexities,
-     * so that the best-ranked candidates are not necessarily those
-     * with the best raw score.
+     * that the default sort order for the metapop is a penalized
+     * scores and the smallest complexities, so that the best-ranked
+     * candidates are not necessarily those with the best raw score.
      */
     template<typename Out, typename In>
     Out& ostream(Out& out, In from, In to, long n = -1,
                  bool output_score = true,
-                 bool output_complexity = false,
+                 bool output_penalty = false,
                  bool output_bscore = false,
                  bool output_only_bests = false,
                  bool output_python = false)
@@ -1310,7 +1384,8 @@ struct metapopulation : bscored_combo_tree_set
         if (!output_only_bests) {
             for (; from != to && n != 0; ++from, n--) {
                 ostream_bscored_combo_tree(out, *from, output_score,
-                                           output_complexity, output_bscore, output_python);
+                                           output_penalty, output_bscore,
+                                           output_python);
             }
             return out;
         }
@@ -1332,7 +1407,8 @@ struct metapopulation : bscored_combo_tree_set
             const bscored_combo_tree& bt = *f;
             if (best_score <= get_score(bt)) {
                 ostream_bscored_combo_tree(out, *f, output_score,
-                                           output_complexity, output_bscore, output_python);
+                                           output_penalty, output_bscore,
+                                           output_python);
             }
         }
         return out;
@@ -1342,13 +1418,13 @@ struct metapopulation : bscored_combo_tree_set
     template<typename Out>
     Out& ostream(Out& out, long n = -1,
                  bool output_score = true,
-                 bool output_complexity = false,
+                 bool output_penalty = false,
                  bool output_bscore = false,
                  bool output_only_bests = false,
                  bool output_python = false)
     {
         return ostream(out, begin(), end(),
-                       n, output_score, output_complexity,
+                       n, output_score, output_penalty,
                        output_bscore, output_only_bests, output_python);
     }
 
@@ -1369,11 +1445,11 @@ struct metapopulation : bscored_combo_tree_set
     // Like above, but using std::cout.
     void print(long n = -1,
                bool output_score = true,
-               bool output_complexity = false,
+               bool output_penalty = false,
                bool output_bscore = false,
                bool output_only_bests = false)
     {
-        ostream(std::cout, n, output_score, output_complexity,
+        ostream(std::cout, n, output_score, output_penalty,
                 output_bscore, output_only_bests);
     }
 
