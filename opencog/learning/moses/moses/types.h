@@ -108,13 +108,13 @@ struct composite_score:
     void set_complexity_penalty(score_t penalty)
     {
         complexity_penalty = penalty;
-        penalized_score = score - complexity_penalty - diversity_penalty;
+        update_penalized_score();
     }
     score_t get_diversity_penalty() const { return diversity_penalty; }
     void set_diversity_penalty(score_t penalty)
     {
         diversity_penalty = penalty;
-        penalized_score = score - complexity_penalty - diversity_penalty;
+        update_penalized_score();
     }
     score_t get_penalty() const { return complexity_penalty + diversity_penalty; }
 
@@ -134,6 +134,12 @@ protected:
     score_t complexity_penalty;
     score_t diversity_penalty;
     score_t penalized_score;
+
+    /// Update penalized_score, i.e. substract the complexity and
+    /// diversity penalty from the raw score.
+    void update_penalized_score() {
+        penalized_score = score - complexity_penalty - diversity_penalty;
+    }
 };
 
 extern const composite_score worst_composite_score;
@@ -143,6 +149,8 @@ typedef tagged_item<combo::combo_tree,
 
 typedef std::vector<score_t> behavioral_score;
 
+// bscore tagged by complexity penalty (why is it tagged? could it be
+// std::pair instead?)
 typedef tagged_item<behavioral_score,
                     score_t> penalized_behavioral_score;
 
@@ -151,8 +159,11 @@ typedef tagged_item<penalized_behavioral_score,
 typedef tagged_item<combo::combo_tree,
                     composite_behavioral_score> bscored_combo_tree;
 
-// convenience accessors
-inline score_t get_weighted_score(const composite_score &sc)
+///////////////////////////
+// convenience accessors //
+///////////////////////////
+
+static inline score_t get_penalized_score(const composite_score& sc)
 {
    return sc.get_penalized_score();
 }
@@ -177,9 +188,19 @@ inline const composite_score& get_composite_score(const bscored_combo_tree& bsct
     return get_composite_score(bsct.second);
 }
 
-inline score_t get_weighted_score(const bscored_combo_tree& bsct)
+static inline score_t get_penalized_score(const bscored_combo_tree& st)
 {
-    return get_weighted_score(get_composite_score(bsct));
+    return get_penalized_score(get_composite_score(st));
+}
+
+inline composite_score& get_composite_score(composite_behavioral_score& ctbs)
+{
+    return ctbs.second;
+}
+
+inline composite_score& get_composite_score(bscored_combo_tree& bsct)
+{
+    return get_composite_score(bsct.second);
 }
 
 inline score_t get_score(const composite_score& ts)
@@ -329,6 +350,10 @@ typedef std::set<bscored_combo_tree,
 typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
 typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 
+typedef std::vector<bscored_combo_tree> bscored_combo_tree_seq;
+typedef bscored_combo_tree_seq::iterator bscored_combo_tree_seq_it;
+typedef bscored_combo_tree_seq::const_iterator bscored_combo_tree_seq_cit;
+        
 /// Compute the distance between two vectors, using the lp norm.
 /// For p=2, this is the usual Eucliden distance, and for p=1, this
 /// is the Manhattan distance, and for p=0, this is the maximum
@@ -355,7 +380,7 @@ score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double
     if (2.0 == p) {
         for (; ia != a.end(); ia++, ib++) {
             score_t diff = *ia - *ib;
-            sum += diff*diff;
+            sum += sq(diff);
         }
         return sqrt(sum);
     }
@@ -426,29 +451,30 @@ Out& ostream_penalized_behavioral_score(Out& out, const penalized_behavioral_sco
 template<typename Out>
 Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
                                 bool output_score = true,
-                                bool output_complexity = false,
+                                bool output_penalty = false,
                                 bool output_bscore = false,
                                 bool output_python = false)
 {
     if (output_python)
         return ostream_bscored_combo_tree_python(out, candidate, output_score,
-                                                 output_complexity, output_bscore);
+                                                 output_penalty, output_bscore);
 
     if (output_score)
         out << std::setprecision(io_score_precision)
             << get_score(candidate) << " ";
-
-    if (output_complexity)
-        out << get_complexity(candidate) << " "
-            << get_complexity_penalty(candidate) << " "
-            << get_diversity_penalty(candidate) << " ";
-
+    
     out << get_tree(candidate) << std::endl;
 
-    if (output_bscore) {
-        ostream_penalized_behavioral_score(out, get_pbscore(candidate));
-        out << std::endl;
-    }
+    if (output_penalty)
+        out << "complexity: " << get_complexity(candidate) << std::endl
+            << "complexity penalty: " << get_complexity_penalty(candidate) << std::endl
+            << "diversity penalty: " << get_diversity_penalty(candidate) << std::endl
+            << "penalized score: " << get_penalized_score(candidate) << std::endl;
+
+    if (output_bscore)
+        ostream_behavioral_score(out << "behavioral score: ",
+                                 get_pbscore(candidate)) << std::endl;
+
     return out;
 }
 
@@ -459,7 +485,7 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
 template<typename Out>
 Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candidate,
                                 bool output_score = true,
-                                bool output_complexity = false,
+                                bool output_penalty = false,
                                 bool output_bscore = false)
 {
     out << std::endl
@@ -477,7 +503,7 @@ Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candi
     if (output_score) {
         out << "#score: " << std::setprecision(io_score_precision) << get_score(candidate) << std::endl;
     }
-    if (output_complexity) {
+    if (output_penalty) {
         out << " #complexity: " << get_complexity(candidate) << std::endl;
         out << " #complexity_penalty: " << get_complexity_penalty(candidate) << std::endl;
         out << " #diversity_penalty: " << get_diversity_penalty(candidate) << std::endl;
