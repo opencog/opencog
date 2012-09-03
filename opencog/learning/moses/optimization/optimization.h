@@ -833,7 +833,7 @@ struct hill_climbing : optim_stats
             for (unsigned i = current_number_of_instances;
                  deme.begin() + i != deme.end(); ++i) {
                 composite_score inst_cscore = deme[i].second;
-                score_t iscore = get_weighted_score(inst_cscore);
+                score_t iscore = get_penalized_score(inst_cscore);
                 if (iscore >  best_score) {
                     best_cscore = inst_cscore;
                     best_score = iscore;
@@ -878,7 +878,7 @@ struct hill_climbing : optim_stats
                      next(deme.begin(), i) != deme.end(); ++i)
                 {
                     composite_score inst_cscore = deme[i].second;
-                    score_t iscore = get_weighted_score(inst_cscore);
+                    score_t iscore = get_penalized_score(inst_cscore);
                     unsigned j = i - current_number_of_instances;
                     scores[j] += iscore;
                     counts[j] += 1.0;
