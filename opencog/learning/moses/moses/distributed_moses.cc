@@ -91,7 +91,7 @@ string build_cmdline(const variables_map& vm,
            && it->first != exemplars_str_opt.first
            && it->first != output_score_opt.first
            && it->first != output_bscore_opt.first
-           && it->first != output_complexity_opt.first
+           && it->first != output_penalty_opt.first
            && it->first != output_eval_number_opt.first
            && it->first != output_with_labels_opt.first
            && it->first != output_file_opt.first
@@ -121,7 +121,7 @@ string build_cmdline(const variables_map& vm,
     res += string(" -") + exemplars_str_opt.second + " \"" + trs + "\"";
     // add output options
     res += string(" -") + output_bscore_opt.second + " 1";
-    res += string(" -") + output_complexity_opt.second + " 1";
+    res += string(" -") + output_penalty_opt.second + " 1";
     res += string(" -") + output_eval_number_opt.second + " 1";
     // add number of jobs option
     res += string(" -") + jobs_opt.second + lexical_cast<string>(n_jobs);
