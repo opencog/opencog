@@ -71,7 +71,7 @@ struct metapop_printer
 {
     metapop_printer(long _result_count,
                     bool _output_score,
-                    bool _output_complexity,
+                    bool _output_penalty,
                     bool _output_bscore,
                     bool _output_dominated,
                     bool _output_eval_number,
@@ -81,7 +81,7 @@ struct metapop_printer
                     bool _output_python,
                     bool _is_mpi) :
         result_count(_result_count), output_score(_output_score),
-        output_complexity(_output_complexity),
+        output_penalty(_output_penalty),
         output_bscore(_output_bscore),
         output_dominated(_output_dominated),
         output_eval_number(_output_eval_number),
@@ -111,7 +111,7 @@ struct metapop_printer
         metapop.ostream(ss,
                         result_count,
                         output_score,
-                        output_complexity,
+                        output_penalty,
                         output_bscore,
                         output_dominated,
                         output_python); 
@@ -166,7 +166,7 @@ struct metapop_printer
         if (resb.empty())
             logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
         else
-            logger().info("Best candidates (preceded by its score):\n %s", res.c_str());
+            logger().info("Best candidates (preceded by its score):\n%s", res.c_str());
     
     #ifdef GATHER_STATS
         metapop._dex._optimize.hiscore /= metapop._dex._optimize.hicount;
@@ -190,7 +190,7 @@ struct metapop_printer
 private:
     long result_count;
     bool output_score;
-    bool output_complexity;
+    bool output_penalty;
     bool output_bscore;
     bool output_dominated;
     bool output_eval_number;
@@ -286,8 +286,15 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         
         // static const unsigned initial_cache_size = 1000000;
         unsigned initial_cache_size = meta_params.cache_size;
+
+        // Strangely enough it seems enabling bscore cache slows down
+        // the computation so we temporarly disable it.
+        //
+        // bool need_bscore = !meta_params.include_dominated
+        //     || meta_params.use_diversity_penalty;
+        bool need_bscore = false;
         
-        if (meta_params.include_dominated) {
+        if (!need_bscore) {
             // When the include_dominated flag is set, then trees are merged
             // into the metapop based only on the score (and complexity),
             // not on the behavioral score. So we can throw away the 

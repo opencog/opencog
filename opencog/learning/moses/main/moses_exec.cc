@@ -409,7 +409,7 @@ int moses_exec(int argc, char** argv)
     unsigned long max_evals;
     long result_count;
     bool output_score;
-    bool output_complexity;
+    bool output_penalty;
     bool output_bscore;
     bool output_dominated = false;
     bool output_eval_number;
@@ -435,6 +435,7 @@ int moses_exec(int argc, char** argv)
     bool reduce_all;
     bool revisit = false;
     bool include_dominated;
+    score_t diversity_pressure;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     unsigned cache_size;
@@ -501,13 +502,13 @@ int moses_exec(int argc, char** argv)
          value<bool>(&output_score)->default_value(true),
          "If 1, output the score before each candidate (at the left of the complexity).\n")
 
-        (opt_desc_str(output_complexity_opt).c_str(),
-         value<bool>(&output_complexity)->default_value(false),
-         "If 1, output the complexity and the scoring penalty before each candidate (after the score).\n")
+        (opt_desc_str(output_penalty_opt).c_str(),
+         value<bool>(&output_penalty)->default_value(false),
+         "If 1, output the penalized score and it's compenents (below each candidate).\n")
 
         (opt_desc_str(output_bscore_opt).c_str(),
          value<bool>(&output_bscore)->default_value(false),
-         "If 1, output the bscore below each candidate.\n")
+         "If 1, output the bscore (below each candidate).\n")
 
         (opt_desc_str(output_dominated_opt).c_str(),
          value<bool>(&output_dominated)->default_value(false),
@@ -758,6 +759,12 @@ int moses_exec(int argc, char** argv)
          "Include dominated candidates (according behavioral score) "
          "when merging candidates in the metapopulation. Disabling "
          "this may lead to poorer performance.\n")
+
+        ("diversity-pressure",
+         value<score_t>(&diversity_pressure)->default_value(0.0),
+         "[EXPERIMENTAL] Set a diversity pressure on the metapopulation. "
+         "Programs behaving similarily to others are more penalized. "
+         "That value sets the importance of that penalty (from 0 to +inf). \n")
 
         (opt_desc_str(complexity_temperature_opt).c_str(),
          value<score_t>(&complexity_temperature)->default_value(6.0),
@@ -1148,14 +1155,23 @@ int moses_exec(int argc, char** argv)
 #endif
     }
 
-    // Set metapopulation parameters.
-    metapop_parameters meta_params(max_candidates, reduce_all,
-                                   revisit, include_dominated,
-                                   complexity_temperature,
-                                   ignore_ops,
-                                   // enable_cache,   // adaptive_cache
-                                   cache_size,        // is disabled
-                                   jobs[localhost]);
+    // Set parameter structures. Please don't systematically use their
+    // constructors (if you can avoid it), as it is prone to error,
+    // whenever the constructor changes it may silently set the wrong
+    // things (as long as they have the same types).
+    
+    // Set metapopulation parameters
+    metapop_parameters meta_params;
+    meta_params.max_candidates = max_candidates;
+    meta_params.reduce_all = reduce_all;
+    meta_params.revisit = revisit;
+    meta_params.include_dominated = include_dominated;
+    meta_params.diversity_pressure = diversity_pressure;
+    meta_params.complexity_temperature = complexity_temperature;
+    meta_params.ignore_ops = ignore_ops;
+    // meta_params.enable_cache = enable_cache;   // adaptive_cache
+    meta_params.cache_size = cache_size;          // is disabled
+    meta_params.jobs = jobs[localhost];
 
     // Set optim_parameters.
     optim_parameters opt_params(opt_algo, pop_size_ratio, max_score, max_dist);
@@ -1206,7 +1222,7 @@ int moses_exec(int argc, char** argv)
     // Set metapop printer parameters.
     metapop_printer mmr_pa(result_count,
                            output_score,
-                           output_complexity,
+                           output_penalty,
                            output_bscore,
                            output_dominated,
                            output_eval_number,
