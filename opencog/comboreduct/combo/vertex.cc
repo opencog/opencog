@@ -57,7 +57,6 @@ vertex negate_vertex(const vertex& v)
     else {
         std::stringstream ss;
         ss << v;
-        // ostream_combo(ss, v, combo);
         OC_ASSERT(false,
                   "vertex %s should be id::logical_true or id::logical_false",
                   ss.str().c_str());
@@ -65,6 +64,12 @@ vertex negate_vertex(const vertex& v)
     }
 }
 
+vertex swap_and_or(const vertex& v)
+{
+    OC_ASSERT(v == id::logical_or || v == id::logical_and);
+    return v == id::logical_and ? id::logical_or : id::logical_and;
+}
+        
 void copy_without_null_vertices(combo_tree::iterator src,
                                 combo_tree& dst_tr, combo_tree::iterator dst)
 {

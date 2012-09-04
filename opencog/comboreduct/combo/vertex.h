@@ -786,6 +786,12 @@ inline bool is_logical_operator(const T& v)
     return (v == id::logical_and || v == id::logical_or || v == id::logical_not);
 }
 
+/**
+ * If v == id::logical_or returns id::logical_and and vice
+ * versa. Raise an OC_ASSERT in other cases.
+ */
+vertex swap_and_or(const vertex& v);
+
 template<typename T>
 inline bool is_constant(const T& v)
 {
