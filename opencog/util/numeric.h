@@ -332,7 +332,7 @@ template<typename OutInt> OutInt pow2(unsigned int x) {
 inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
 
 // Generalized mean http://en.wikipedia.org/wiki/Generalized_mean
-template<typename Float, typename It>
+template<typename It, typename Float>
 Float generalized_mean(It from, It to, Float p = 1.0)
 {
     Float pow_sum =
@@ -340,7 +340,12 @@ Float generalized_mean(It from, It to, Float p = 1.0)
                         [&](Float l, Float r) { return l + pow(r, p); });
     return pow(pow_sum / std::distance(from, to), 1.0 / p);
 }
-    
+template<typename C, typename Float>
+Float generalized_mean(const C& c, Float p = 1.0)
+{
+    return generalized_mean(c.begin(), c.end(), p);
+}
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_NUMERIC_H
