@@ -79,6 +79,11 @@ static const string pre="pre";    // regression based on input table by
                                   // predictive value), holding activation
                                   // const.
 
+static const string pre_conj="pre_conj";    // simplified version of
+                                            // pre, but tries to
+                                            // maximize number of
+                                            // conjunctions
+
 static const string ip="ip"; // find interesting patterns
 static const string cp="cp"; // regression based on combo program to fit
 static const string pa="pa"; // even parity
@@ -316,9 +321,9 @@ contin_t largest_const_in_tree(const combo_tree &tr)
 //* return true iff the problem is based on data file
 bool datafile_based_problem(const string& problem)
 {
-    return problem == it || problem == pre || problem == recall ||
-        problem == prerec || problem == bep || problem == f_one ||
-        problem == ann_it || problem == ip;
+    static set<string> dbp
+        = {it, pre, pre_conj, recall, prerec, bep, f_one, ann_it, ip};
+    return dbp.find(problem) != dbp.end();
 }
 
 //* return true iff the problem is based on a combo tree
@@ -768,7 +773,8 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(complexity_temperature_opt).c_str(),
          value<score_t>(&complexity_temperature)->default_value(6.0),
-         "Set the \"temperature\" of the Boltzmann-like distribution "
+         "Set the \"temperature\" (scritly positive floating number) "
+         "of the Boltzmann-like distribution "
          "used to select the next exemplar out of the metapopulaton. "
          "A temperature that is too high or too low will make it likely "
          "that poor exemplars will be chosen for exploration, thus "
@@ -1274,7 +1280,7 @@ int moses_exec(int argc, char** argv)
         // 'recall' means we must maximize recall while holding precision fixed.
         // 'f_one' means we must maximize the f_one score while holding ratio const
         // 'bep' means we must maximize the break-even point while holding difference const
-        if (problem == it || problem == pre ||
+        if (problem == it || problem == pre || problem == pre_conj ||
             problem == prerec || problem == recall ||
             problem == f_one || problem == bep)
         {
@@ -1328,7 +1334,7 @@ int moses_exec(int argc, char** argv)
             // problem == pre  precision-based scoring
             if (problem == pre) {
 
-                // Very nearly identical to the REGRESSION acro above,
+                // Very nearly identical to the REGRESSION macro above,
                 // except that some new experimental features are being tried.
 
                 // Keep the table input signature, just make sure the
@@ -1356,7 +1362,42 @@ int moses_exec(int argc, char** argv)
                         exemplars.push_back(tr);
                     }
                 }
-                /// @todo add program option
+                /// Enable feature selection while selecting exemplar
+                if (enable_feature_selection) {
+                    // use the first table, normally it should
+                    // probably use the concatenation of all of them
+                    meta_params.fstor = new feature_selector(ctables.front(),
+                                                             fs_params);
+                }
+
+                multibscore_based_bscore<BScore> bscore(bscores);
+                metapop_moses_results(exemplars, cand_sig,
+                                      bool_reduct, bool_reduct_rep, bscore,
+                                      opt_params, meta_params, moses_params,
+                                      mmr_pa);
+            }
+
+            // problem == pre_conj  precision-based scoring (maximizing # conj)
+            else if (problem == pre_conj) {
+
+                // Very nearly identical to the REGRESSION macro above,
+                // except that some new experimental features are being tried.
+
+                // Keep the table input signature, just make sure the
+                // output is a boolean.
+                type_tree cand_sig = gen_signature(
+                    get_signature_inputs(table_type_signature),
+                    type_tree(id::boolean_type));
+                int as = alphabet_size(cand_sig, ignore_ops);
+                typedef precision_conj_bscore BScore;
+                boost::ptr_vector<BScore> bscores;
+                foreach(const CTable& ctable, ctables) {
+                    BScore* r = new BScore(ctable,
+                                           fabs(hardness),
+                                           hardness >= 0);
+                    set_noise_or_ratio(*r, as, noise, complexity_ratio);
+                    bscores.push_back(r);
+                }
                 /// Enable feature selection while selecting exemplar
                 if (enable_feature_selection) {
                     // use the first table, normally it should
