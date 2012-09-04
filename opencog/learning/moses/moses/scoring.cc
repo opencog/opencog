@@ -882,7 +882,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // Also store the sumo and total, so that they don't need to be
     // recomputed later.  Note that this routine could be performance
     // critical if used as a fitness function for feature selection
-    // (which is planned).
+    // (which is actually being done).
     typedef std::multimap<contin_t, std::pair<contin_t, // sum_outputs
                                               unsigned> // total count
                           > max_precisions_t;
@@ -897,33 +897,44 @@ behavioral_score precision_bscore::best_possible_bscore() const
         max_precisions.insert(lmnt);
     }
 
-    // Compute best precision till minimum activation is reached. Note
-    // that the best precision (sao / active) can never increase for each
-    // new mpv.  Despite this, we keep going until at least min_activation
-    // is reached. It's not clear this actually gives the best score one
-    // can get if min_activation isn't reached, but we don't want to go
-    // below min activation anyway, so it's an acceptable inacurracy.
-    // (It would be a problem only if activation constraint is very loose.)
-    //
+    // Compute best precision till minimum activation is reached.
+    // Note that the best precision (sao / active) can never increase
+    // for each new mpv. However the activation penalty can, for that
+    // reason we keep going until min_activation is reached. At the
+    // end we keep the best score (considering both precision and
+    // activation penalty at each step).
     unsigned active = 0;
-    score_t sao = 0.0;
+    score_t sao = 0.0,
+        best_sc = 0.0,
+        best_precision = 0.0,
+        best_activation = 0.0,
+        best_activation_penalty = 0.0;
+    
     reverse_foreach (const auto& mpv, max_precisions) {
         sao += mpv.second.first;
         active += mpv.second.second;
+        score_t precision = (sao / active) / max_output,
+            activation = active / (score_t)ctable_usize,
+            activation_penalty = get_activation_penalty(activation),
+            sc = precision + activation_penalty;
+        // update best score
+        if (sc > best_sc) {
+            best_sc = sc;
+            best_precision = precision;
+            best_activation = activation;
+            best_activation_penalty = activation_penalty;
+        }
+        // halt if min_activation is reached
         if (ctable_usize * min_activation <= active)
             break;
     }
 
-    score_t precision = (sao / active) / max_output;
+    logger().info("Precision scorer, best score = %f", best_sc);
+    logger().info("precision at best score = %f", best_precision);
+    logger().info("activation at best score = %f", best_activation);
+    logger().info("activation penalty at best score = %f", best_activation_penalty);
 
-    score_t activation = active / (score_t)ctable_usize;
-    score_t activation_penalty = get_activation_penalty(activation);
-
-    logger().info("Precision scorer, precision at min activation = %f", precision);
-    logger().info("Precision scorer, activation at above precision = %f", activation);
-    logger().info("Precision scorer, activation penalty at above precision = %f", activation_penalty);
-
-    return {precision, activation_penalty};
+    return {best_precision, best_activation_penalty};
 }
 
 // Note that the logarithm is always negative, so this method always
@@ -1014,9 +1025,11 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
 ///////////////////////////
 
 precision_conj_bscore::precision_conj_bscore(const CTable& _ctable,
+                                             float hardness_,
                                              bool positive_)
     : orig_ctable(_ctable), wrk_ctable(orig_ctable),
-      ctable_usize(orig_ctable.uncompressed_size()), positive(positive_)
+      ctable_usize(orig_ctable.uncompressed_size()),
+      hardness(hardness_), positive(positive_)
 {
     vertex target = bool_to_vertex(positive);
     sum_outputs = [target](const CTable::counter_t& c)->score_t {
@@ -1084,12 +1097,17 @@ penalized_behavioral_score precision_conj_bscore::operator()(const combo_tree& t
         precision = sao / active;
     pbs.first.push_back(precision);
 
-    // Count the number of conjunctions
+    // Count the number of conjunctions (up to depth 2)
     unsigned conj_n = 0;
-    for (combo_tree::iterator it = tr.begin(); it != tr.end(); ++it)
-        if (*it == id::logical_and)
+    typedef combo_tree::iterator pre_it;
+    typedef combo_tree::sibling_iterator sib_it;
+    pre_it head = tr.begin();
+    if (*head == id::logical_and)
+        ++conj_n;
+    for (sib_it sib = head.begin(); sib != head.end(); ++sib)
+        if (*sib == id::logical_and)
             ++conj_n;
-    score_t conj_n_penalty = -1.0 / (1.0 + conj_n);
+    score_t conj_n_penalty = hardness * (-1.0 / (1.0 + conj_n));
     pbs.first.push_back(conj_n_penalty);
 
     if (logger().isFineEnabled())
@@ -1112,7 +1130,8 @@ behavioral_score precision_conj_bscore::best_possible_bscore() const
 
 score_t precision_conj_bscore::min_improv() const
 {
-    return 1.0 / ctable_usize;
+    return 0.0;
+    // return 1.0 / ctable_usize;
 }
 
 void precision_conj_bscore::ignore_idxs(std::set<arity_t>& idxs) const {

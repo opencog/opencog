@@ -584,7 +584,8 @@ private:
  */
 struct precision_conj_bscore : public bscore_base
 {
-    precision_conj_bscore(const CTable& _ctable, bool positive = true);
+    precision_conj_bscore(const CTable& _ctable, float hardness,
+                          bool positive = true);
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
 
@@ -612,6 +613,7 @@ protected:
     mutable CTable wrk_ctable;
     
     size_t ctable_usize;   // uncompressed size of ctable
+    float hardness;
     bool positive;
 
 private:
