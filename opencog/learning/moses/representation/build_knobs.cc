@@ -392,7 +392,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
             _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
         dorepeat (n_pairs) {
             //while (!select.empty()) {
-            combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
+            combo_tree v(swap_and_or(*it));
             int x = select();
             int a = x / (_arity - 1);
             int b = x - a * (_arity - 1);
