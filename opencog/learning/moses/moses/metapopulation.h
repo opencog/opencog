@@ -837,13 +837,6 @@ struct metapopulation : bscored_combo_tree_set
         ///////////////////////////////////////////////////////////////
         // select the set of candidates to add in the metapopulation //
         ///////////////////////////////////////////////////////////////
-        {
-            stringstream ss;
-            ss << "Select candidates to merge";
-            if (params.max_candidates >= 0)
-                ss << " (" << params.max_candidates << " max)";
-            logger().debug(ss.str());
-        }
         typedef boost::shared_mutex mutex;
         typedef boost::shared_lock<mutex> shared_lock;
         typedef boost::unique_lock<mutex> unique_lock;
@@ -923,10 +916,13 @@ struct metapopulation : bscored_combo_tree_set
         unsigned max_pot_cnd = eval_during_this_deme;
         if (params.max_candidates >= 0)
             max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
+
+        logger().debug("Select candidates to merge (amongst %u)", max_pot_cnd);
+
         deme_cit deme_end = __deme->begin() + max_pot_cnd;
         OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
-        logger().debug("Number of potential candidates to be merged %u",
+        logger().debug("Selected %u candidates to be merged",
                        pot_candidates.size());
             
         // Behavioural scores are needed only if domination-based
@@ -1322,7 +1318,7 @@ struct metapopulation : bscored_combo_tree_set
         // absolute score order.  Thus, we need to search through
         // the first few to find the true best score.  Also, there
         // may be several candidates with the best score.
-        score_t best_score = get_score(_best_cscore);
+        score_t best_sc = get_score(_best_cscore);
         complexity_t best_cpx = get_complexity(_best_cscore);
 
         foreach(const bscored_combo_tree& it, candidates)
@@ -1330,14 +1326,12 @@ struct metapopulation : bscored_combo_tree_set
             const composite_score& cit = get_composite_score(it);
             score_t sc = get_score(cit);
             complexity_t cpx = get_complexity(cit);
-            if ((sc > best_score) ||
-                ((sc == best_score) && (cpx <= best_cpx)))
+            if ((sc > best_sc) || ((sc == best_sc) && (cpx <= best_cpx)))
             {
-                    if ((sc > best_score) ||
-                    ((sc == best_score) && (cpx < best_cpx)))
+                if ((sc > best_sc) || ((sc == best_sc) && (cpx < best_cpx)))
                 {
                     _best_cscore = cit;
-                    best_score = get_score(_best_cscore);
+                    best_sc = get_score(_best_cscore);
                     best_cpx = get_complexity(_best_cscore);
                     _best_candidates.clear();
                     logger().debug() << "New best score: " << _best_cscore;
