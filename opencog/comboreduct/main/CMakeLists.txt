@@ -73,5 +73,5 @@ TARGET_LINK_LIBRARIES(gen-disj-conj
 )
 
 # install eval-table
-INSTALL(TARGETS eval-table gen-table RUNTIME DESTINATION bin)
+INSTALL(TARGETS eval-table gen-table gen-disj-conj RUNTIME DESTINATION bin)
 
