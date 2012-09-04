@@ -51,6 +51,7 @@ int main(int argc, char** argv)
     unsigned disj_children, conj_children, conj_children_std;
     float repl_prob;
     string output_file;
+    bool swap;
     
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -78,6 +79,10 @@ int main(int argc, char** argv)
          "to control the degree of intersection of variables between "
          "conjunctions.\n")
 
+        ("swap,w",
+         "Swap conjunctions and disjunctions (that is generate a "
+         "conjunction of disjunctions instead).\n")
+
         ("output-file,o", value<string>(&output_file),
          "File where to save the results. "
          "If none is provided it outputs on the stdout.\n")
@@ -92,6 +97,9 @@ int main(int argc, char** argv)
         cout << desc << "\n";
         return 1;
     }
+
+    // set flags
+    swap = vm.count("swap");
     
     // init random generator
     randGen().seed(rand_seed);
@@ -121,20 +129,23 @@ int main(int argc, char** argv)
     // sampling with replacement
     auto smp_wr = [&]() -> unsigned { return randGen().randint(max_var); };
 
+    auto pos_swap = [&swap](const vertex v) { return swap ? swap_and_or(v) : v; };
+    
     // generate tree
     typedef combo_tree::iterator pre_it;
-    // create disjunction
-    combo_tree tr(id::logical_or);
-    pre_it disj = tr.begin();
+    // create disjunction (or conjunction if swapped)
+    combo_tree tr(pos_swap(id::logical_or));
+    pre_it head = tr.begin();
     foreach(unsigned cc, actual_conj_children) {
-        // create conjunctions
-        pre_it conj = cc ? tr.append_child(disj, id::logical_and) : pre_it();
+        // create conjunctions (or disjunctions if swapped)
+        pre_it child = cc ?
+            tr.append_child(head, pos_swap(id::logical_and)) : pre_it();
         // add litterals
         dorepeat(cc) {
             arity_t idx = (biased_randbool(repl_prob) ? smp_wr() : smp_wor()) + 1;
             if (biased_randbool(0.5)) // whether the litteral is negative
                 idx *= -1;
-            tr.append_child(conj, argument(idx));
+            tr.append_child(child, argument(idx));
         }
     }
 
