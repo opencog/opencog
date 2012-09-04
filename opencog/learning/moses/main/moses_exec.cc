@@ -441,6 +441,7 @@ int moses_exec(int argc, char** argv)
     bool revisit = false;
     bool include_dominated;
     score_t diversity_pressure;
+    score_t diversity_exponent;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     unsigned cache_size;
@@ -769,7 +770,15 @@ int moses_exec(int argc, char** argv)
          value<score_t>(&diversity_pressure)->default_value(0.0),
          "[EXPERIMENTAL] Set a diversity pressure on the metapopulation. "
          "Programs behaving similarily to others are more penalized. "
-         "That value sets the importance of that penalty (from 0 to +inf). \n")
+         "That value sets the importance of that penalty (from 0 to +inf).\n")
+
+        ("diversity-exponent",
+         value<score_t>(&diversity_exponent)->default_value(2.0),
+         "[EXPERIMENTAL] Set the exponent of the generalized mean aggregating "
+         "the penalties between a candidate and the set of all candidates better "
+         "than itself (taking into account diversity). The value"
+         "goes from 0 excluded to +inf. Towards 0 it is the geometric mean, "
+         "towards +inf it tends to the max function.\n")
 
         (opt_desc_str(complexity_temperature_opt).c_str(),
          value<score_t>(&complexity_temperature)->default_value(6.0),
@@ -1173,6 +1182,8 @@ int moses_exec(int argc, char** argv)
     meta_params.revisit = revisit;
     meta_params.include_dominated = include_dominated;
     meta_params.diversity_pressure = diversity_pressure;
+    meta_params.diversity_exponent = diversity_exponent;
+    meta_params.keep_bscore = output_bscore;
     meta_params.complexity_temperature = complexity_temperature;
     meta_params.ignore_ops = ignore_ops;
     // meta_params.enable_cache = enable_cache;   // adaptive_cache

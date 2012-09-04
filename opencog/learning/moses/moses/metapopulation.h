@@ -85,7 +85,9 @@ struct metapop_parameters
         reduce_all(_reduce_all),
         revisit(_revisit),
         include_dominated(_include_dominated),
-        diversity_pressure(0.0), // XXX should pass as arg ...
+        diversity_pressure(0.0),
+        diversity_exponent(2.0),
+        keep_bscore(false),
         complexity_temperature(_complexity_temperature),
         ignore_ops(_ignore_ops),
         // enable_cache(_enable_cache),   // adaptive_cache
@@ -113,9 +115,19 @@ struct metapop_parameters
     // performance by avoiding local maxima.
     bool include_dominated;
 
-    // Enable forced diversification of the metapop.
+    // Diversity pressure of to enforce diversification of the
+    // metapop. 0 means no diversity pressure, the higher the value
+    // the strong the pressure.
     score_t diversity_pressure;
 
+    // exponent of the generalized mean used to aggregate the
+    // diversity penalties of a candidate between a set of candidates
+    score_t diversity_exponent;
+
+    // keep track of the bscores even if not needed (in case the user
+    // wants to keep them around)
+    bool keep_bscore;
+    
     // Boltzmann temperature ...
     score_t complexity_temperature;
 
@@ -449,10 +461,7 @@ struct metapopulation : bscored_combo_tree_set
      * Take a sequence of diversity penalties and aggregate them into one.
      */
     score_t aggregated_dps(std::vector<score_t>& dps) {
-        // compute the aggregated penalty of dps (here the average)
-        const double pap = 1.0;   /// here regular mean
-                                  /// @todo should be a parameter
-        return generalized_mean(dps.begin(), dps.end(), pap);
+        return generalized_mean(dps, params.diversity_exponent);
     }
     
     /**
@@ -928,7 +937,8 @@ struct metapopulation : bscored_combo_tree_set
         // Behavioural scores are needed only if domination-based
         // merging is asked for, or if the diversity penalty is in use.
         // Save CPU time by not computing them.
-        if (!params.include_dominated || params.diversity_pressure > 0.0) {
+        if (params.keep_bscore
+            || !params.include_dominated || params.diversity_pressure > 0.0) {
             logger().debug("Compute behavioral score of %d selected candidates",
                            pot_candidates.size());
 
