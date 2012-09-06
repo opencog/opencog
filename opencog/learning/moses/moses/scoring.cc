@@ -699,7 +699,8 @@ precision_bscore::precision_bscore(const CTable& _ctable,
     : orig_ctable(_ctable), wrk_ctable(orig_ctable),
       ctable_usize(orig_ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
-      penalty(penalty_), positive(positive_), worst_norm(worst_norm_)
+      penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
+      precision_full_bscore(true)
 {
     output_type = get_type_node(get_signature_output(wrk_ctable.tt));
     if (output_type == id::boolean_type) {
@@ -801,58 +802,82 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     // that sum
     multimap<contin_t, unsigned> worst_deciles;
 
-    // compute active and sum of all active outputs
-    unsigned active = 0;   // total number of active outputs by tr
-    score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
-    foreach(const CTable::value_type& vct, wrk_ctable) {
-        // vct.first = input vector
-        // vct.second = counter of outputs
-        if (eval_binding(vct.first, tr) == id::logical_true) {
-            contin_t sumo = sum_outputs(vct.second);
-            unsigned totalc = vct.second.total_count();
-            // For boolean tables, sao == sum of all true positives,
-            // and active == sum of true+false positives.
-            // For contin tables, sao = sum of contin values, and
-            // active == count of rows.
-            sao += sumo;
-            active += totalc;
-            if (worst_norm && sumo < 0)
-                worst_deciles.insert({sumo, totalc});
-        }
-    }
-
-    // remove all observations from worst_norm so that only the worst
-    // n_deciles or less remains and compute its average
-    contin_t avg_worst_deciles = 0.0;
-    if (worst_norm and sao > 0) {
-        unsigned worst_count = 0,
-            n_deciles = active / 10;
-        foreach (const auto& pr, worst_deciles) {
-            worst_count += pr.second;
-            avg_worst_deciles += pr.first;
-            if (worst_count > n_deciles)
-                break;
-        }
-        avg_worst_deciles /= worst_count;
-    }
-
-    // Compute normalized precision.  No hits means perfect precision :)
+    // Initial precision. No hits means perfect precision :)
     // Yes, zero hits is common, early on.
     score_t precision = 1.0;
-    if (0 < active)
-        precision = (sao / active) / max_output;
+    unsigned active = 0;   // total number of active outputs by tr
+    score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
+    
+    if (precision_full_bscore) {
+        // compute active and sum of all active outputs
+        foreach(const CTable::value_type& vct, wrk_ctable) {
+            const vertex_seq& iv = vct.first;
+            const auto& ct = vct.second;
+            contin_t sumo = 0.0;
+            if (eval_binding(iv, tr) == id::logical_true) {
+                sumo = sum_outputs(ct);
+                sao += sumo;
+                active += ct.total_count();
+            }
+            pbs.first.push_back(sumo);
+        }
 
-    // normalize precision w.r.t. worst deciles
-    if (avg_worst_deciles < 0) {
-        logger().fine("precision before worst_norm = %f", precision);
-        logger().fine("abs(avg_worst_deciles) = %f", -avg_worst_deciles);
-        precision /= -avg_worst_deciles;
-        if (avg_worst_deciles >= 0)
-            logger().fine("Weird: worst_norm (%f) is positive, maybe the activation is really low", avg_worst_deciles);
+        if (active > 0) {
+            // normalize all components by active
+            score_t iac = 1.0/active; // inverse of activity to be faster
+            boost::transform(pbs.first, pbs.first.begin(),
+                             [&](score_t e) { return e*iac; });
+        }
+
+    } else {
+    
+        // compute active and sum of all active outputs
+        foreach(const CTable::value_type& vct, wrk_ctable) {
+            // vct.first = input vector
+            // vct.second = counter of outputs
+            if (eval_binding(vct.first, tr) == id::logical_true) {
+                contin_t sumo = sum_outputs(vct.second);
+                unsigned totalc = vct.second.total_count();
+                // For boolean tables, sao == sum of all true positives,
+                // and active == sum of true+false positives.
+                // For contin tables, sao = sum of contin values, and
+                // active == count of rows.
+                sao += sumo;
+                active += totalc;
+                if (worst_norm && sumo < 0)
+                    worst_deciles.insert({sumo, totalc});
+            }
+        }
+
+        // remove all observations from worst_norm so that only the worst
+        // n_deciles or less remains and compute its average
+        contin_t avg_worst_deciles = 0.0;
+        if (worst_norm and sao > 0) {
+            unsigned worst_count = 0,
+                n_deciles = active / 10;
+            foreach (const auto& pr, worst_deciles) {
+                worst_count += pr.second;
+                avg_worst_deciles += pr.first;
+                if (worst_count > n_deciles)
+                    break;
+            }
+            avg_worst_deciles /= worst_count;
+        }
+        // normalize precision w.r.t. worst deciles
+        if (avg_worst_deciles < 0) {
+            logger().fine("precision before worst_norm = %f", precision);
+            logger().fine("abs(avg_worst_deciles) = %f", -avg_worst_deciles);
+            precision /= -avg_worst_deciles;
+            if (avg_worst_deciles >= 0)
+                logger().fine("Weird: worst_norm (%f) is positive, maybe the activation is really low", avg_worst_deciles);
+        }
+
+        pbs.first.push_back(precision);
     }
 
-    pbs.first.push_back(precision);
-
+    if (0 < active)
+        precision = (sao / active) / max_output;
+    
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
     // is likewise: the number of rows for which the combo tree returned
@@ -862,7 +887,7 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     pbs.first.push_back(activation_penalty);
     if (logger().isFineEnabled())
         logger().fine("precision = %f  activation=%f  activation penalty=%e",
-                     precision, activation, activation_penalty);
+                      precision, activation, activation_penalty);
 
     // Add the Complexity penalty
     if (occam)

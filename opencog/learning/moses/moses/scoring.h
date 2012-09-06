@@ -569,6 +569,12 @@ protected:
     score_t penalty;
     bool positive, worst_norm;
 
+    // if enabled then each datapoint is an entry in the bscore (its
+    // part contributing to the precision, and the activation penalty
+    // is the last one).
+    // WARNING: worst_score isn't supported then
+    bool precision_full_bscore;
+
     type_node output_type;
 
 private:
