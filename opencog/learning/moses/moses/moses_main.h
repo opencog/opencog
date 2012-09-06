@@ -291,7 +291,8 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         // the computation so we temporarly disable it.
         //
         // bool need_bscore = !meta_params.include_dominated
-        //     || meta_params.use_diversity_penalty;
+        //     || (meta_params.diversity_pressure > 0.0)
+        //     || meta_params.output_bscore;
         bool need_bscore = false;
         
         if (!need_bscore) {
@@ -302,8 +303,9 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             typedef bscore_based_cscore<BScorer> CScorer;
             // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
             CScorer cscorer(bscorer);
-            prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer);
-            // ScoreACache score_acache(score_cache, "composite scores");
+            prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer,
+                                                    "composite scores");
+            // ScoreACache score_acache(score_cache);
             metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                     score_cache /*score_acache*/, bscorer,
                                     opt_params, meta_params, moses_params,
@@ -315,12 +317,14 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             typedef prr_cache_threaded<BScorer> BScoreCache;
             // typedef adaptive_cache<BScoreCache> BScoreACache;
             typedef bscore_based_cscore<BScoreCache /*BScoreACache*/> CScorer;
-            BScoreCache bscore_cache(initial_cache_size, bscorer);
-            // BScoreACache bscore_acache(bscore_cache, "behavioural scores");
+            BScoreCache bscore_cache(initial_cache_size, bscorer,
+                                     "behavioral scores");
+            // BScoreACache bscore_acache(bscore_cache);
             // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
             CScorer cscorer(bscore_cache /*bscore_acache*/);
-            prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer);
-            // ScoreACache score_acache(score_cache, "composite scores");
+            prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer,
+                                                    "composite scores");
+            // ScoreACache score_acache(score_cache);
             metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                     score_cache /*score_acache*/,
                                     bscore_cache /*bscore_acache*/,
