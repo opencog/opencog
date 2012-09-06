@@ -87,7 +87,7 @@ struct lru_cache : public F, public cache_base {
                                  deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;
 
-    lru_cache(size_type n, const F& f=F(), const std::string name = "")
+    lru_cache(size_type n, const F& f=F(), const std::string name = "lru_cache")
         : F(f), cache_base(n, name), _map(n+1) {}
     
     inline bool full() const { return _map.size()==_n; }
@@ -217,7 +217,8 @@ public:
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    lru_cache_threaded(size_type n, const F& f=F(), const std::string name = "")
+    lru_cache_threaded(size_type n, const F& f=F(),
+                       const std::string name = "lru_cache_threaded")
         : super(n, f, name) {}
 
     inline bool full() const {
@@ -353,7 +354,7 @@ struct prr_cache : public F, public cache_base {
     typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
     typedef typename map::iterator map_iter;
   
-    prr_cache(size_type n, const F& f=F(), const std::string name = "") 
+    prr_cache(size_type n, const F& f=F(), const std::string name = "prr_cache")
         : F(f), cache_base(n, name), _map(n+1) {}
 
     bool full() const { return _map.size() == _n; }
@@ -421,7 +422,8 @@ public:
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
-    prr_cache_threaded(size_type n, const F& f=F(), const std::string name = "")
+    prr_cache_threaded(size_type n, const F& f=F(),
+                       const std::string name = "prr_cache_threaded")
         : super(n, f, name) {}
 
     bool full() const {
