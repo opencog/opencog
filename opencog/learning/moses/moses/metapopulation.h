@@ -987,6 +987,7 @@ struct metapopulation : bscored_combo_tree_set
 
         // update diversity penalties
         if (params.diversity_pressure > 0.0) {
+            logger().debug("Compute diversity penalties of the metapopulation");
             set_diversity();
             if (logger().isFineEnabled()) {
                 stringstream ss;
