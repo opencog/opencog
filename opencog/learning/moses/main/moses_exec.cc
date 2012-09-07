@@ -828,11 +828,11 @@ int moses_exec(int argc, char** argv)
          "to produce n classes and the thresholds are automatically sorted.\n")
 
         (opt_desc_str(hc_crossover_opt).c_str(),
-         value<bool>(&hc_crossover)->default_value(false),
-         str(format("Hillclimbing parameter (%s). If false, then the entire "
-                    "local neighborhood of the current center "
-                    "instance is explored. The highest-scoring "
-                    "instance is then chosen as the new center "
+         value<bool>(&hc_crossover)->default_value(true),
+         str(format("Hillclimbing parameter (%s). If false, then only "
+                    "the local neighborhood of the current center "
+                    "instance is explored. That is, the highest-scoring "
+                    "instance is chosen as the new center "
                     "instance, and the process is repeated.  For "
                     "many datasets, however, the highest-scoring "
                     "instances tend to cluster together, and so an "
