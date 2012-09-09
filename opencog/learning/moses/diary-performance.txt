@@ -3381,7 +3381,7 @@ procs   time  speedup   parfrac  maxspeed    score  cpxy  gens   tunit
 
 
 OK, the size of the work-units are sharply increasing in size; evaluation
-times are exploding: (now measured with rdone w/ bzr rev 7404):
+times are exploding: (now measured with bzr rev 7404):
 
 Legend:
 run_secs -- time to run one workload, received from MPI master.
@@ -3429,3 +3429,23 @@ procs   time    speedup   parfrac  maxspeed    score  cpxy  gens
   8       979    36.35       -        -         2706   150   24
   9      1352    26.33       -        -         2650   181   27
  10      1232    28.90       -        -         2653   176   29
+
+
+OK, here is another, this time, to reach the target score of 2500:
+cmd = "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts /usr/local/bin/moses
+-Hit -utarg -i ./magic-16-sect-mmi-C48.data -W1 -x1 -n sin -n log -n exp
+-Z1 -v12 --hc-max-nn-evals=5000 -r" + str(rseed) + " -j12
+-A\"-2500\" -m1590000 --mpi=1 -fhexfixC48.log"
+
+procs   time    speedup   parfrac  maxspeed    score  cpxy  gens 
+-----   ----    -------   -------  --------    -----  ----  ----
+  1     5553       -         -        -         2500   318
+  2     7548     0.736       -        -         2500   312
+  3     4227     1.314      0.36     1.56       2500   295
+  4     4349     1.28       0.28     1.41       2498   299
+  5     3592     1.55       0.44     1.79       2500   268
+  6     5029     1.10       0.11     1.13       2499   285
+  7     5006     1.11       0.11     1.13       2499   302
+  8     4872     1.14       0.14     1.16       2500   310
+  9     3566     1.56       0.49     1.67       2500   246
+ 10     3847     1.44       0.34     1.51       2499   278

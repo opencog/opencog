@@ -1,0 +1,18 @@
+set term png size 1024,768
+set term png size 640,480
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key right
+
+# =======================================================
+set out 'work-unit.png'
+set xlabel "iteration"
+set ylabel " xxxp"
+set title "xxxx"
+set xrange [0:14]
+
+set key left
+
+plot "work-unit.data" using 1:2 title "oblaa"

@@ -20,5 +20,10 @@ to assist future verification or regression testing, etc.
    or thereabouts. Circa Feb/March 2012.  Research results documented in 
    ../documentation/Genetic Crossover.html
 
+-- directory diversity:
+   Experiments with guarenteeing diversity of exploration.
 
+-- directory scaling-mpi:
+   Exploring scaling of the MOSES algorithm as a function of the number
+   of MPI nodes in a compute cluster. 
 

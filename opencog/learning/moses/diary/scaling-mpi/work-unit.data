@@ -1,0 +1,35 @@
+#
+# work-unit.data
+# 
+# Copied straight from the diary:
+# OK, the size of the work-units are sharply increasing in size; evaluation
+# times are exploding: (now measured with bzr rev 7404):
+# 
+# Legend:
+# run_secs -- time to run one workload, received from MPI master.
+# evals -- number of scoring function evaluations
+# score -- best score obtained on this run.
+# cpxy -- information-theoretic complexity of highest-scoring tree.
+# fssz -- field-set size (information-theoretic bits in field set)
+# 
+# cnt   run_secs  evals    score    cpxy    fssz
+# ---   --------  -----    -----    ----    ----
+ 1         1     3793    -4305      7      608
+ 2         8     7756    -3414      11    1016
+ 3       169    65686    -3028      54    3256
+ 4       417    75641    -2755     125    9369
+ 5       944    80281    -2634     213   20767
+ 6      1899    80161    -2539     282   37757
+ 7      2116    52881    -2500     317   21087
+ 8      3498    79801    -2432     379   60220
+ 9      4985    89201    -2385     420   74484
+ 10     4282    15841    -2378     426   84479
+ 11     4072     5121    -2378     425   85170
+ 12     4339    15481    -2373     429   85005
+ 13     4416    15601    -2367     435   85835
+ 14     4479    10241    -2366     435   87638
+ 15     4622    15601    -2358     446
+ 16     5040    20601    -2351     455
+ 17     5097    10361    -2346     462
+
+
