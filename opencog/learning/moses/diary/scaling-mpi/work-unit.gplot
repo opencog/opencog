@@ -1,5 +1,9 @@
 set term png size 1024,768
 set term png size 640,480
+set out 'work-unit.png'
+
+set term postscript eps color
+set out 'work-unit.eps'
 
 # set style data points
 # set style data lines
@@ -7,12 +11,14 @@ set style data linespoints
 set key right
 
 # =======================================================
-set out 'work-unit.png'
 set xlabel "iteration"
-set ylabel " xxxp"
-set title "xxxx"
-set xrange [0:14]
+set ylabel "size"
+set title "Workunit size"
+set xrange [1:14]
+set logscale y
 
-set key left
+set key right bottom
 
-plot "work-unit.data" using 1:2 title "oblaa"
+plot "work-unit.data" using 1:2 title "runtime (seconds)", \
+    "work-unit.data" using 1:($5*10) title "complexity * 10", \
+    "work-unit.data" using 1:($6/10) title "field set size / 10"

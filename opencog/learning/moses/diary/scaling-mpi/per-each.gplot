@@ -1,0 +1,36 @@
+set term png size 1024,768
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key right
+
+# =======================================================
+set term png size 640,480
+set out 'per-each.png'
+set xlabel "iteration"
+set ylabel "microseconds"
+set title "Runtime per eval per field-bit"
+set xrange [1:14]
+set logscale y
+
+set key right bottom
+
+plot "work-unit.data" using 1:(1000000*$2/($3*$6)) title "runtime per eval per field-bit"
+
+# =======================================================
+set term png size 640,480
+set out 'per-eval.png'
+
+set term postscript eps color
+set out 'per-eval.eps'
+
+set xlabel "iteration"
+set ylabel "milliseconds"
+set title "Runtime per evaluation"
+set xrange [1:14]
+set logscale y
+
+set key right bottom
+
+plot "work-unit.data" using 1:(1000*$2/$3) title ""

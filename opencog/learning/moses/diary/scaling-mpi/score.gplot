@@ -1,0 +1,21 @@
+set term png size 1024,768
+set term png size 640,480
+set out 'score.png'
+
+set term postscript eps color
+set out 'score.eps'
+
+# set style data points
+# set style data lines
+set style data linespoints
+set key right
+
+# =======================================================
+set xlabel "iteration"
+set ylabel "score"
+set title "Score"
+set xrange [1:14]
+
+set key right bottom
+
+plot "work-unit.data" using 1:4 title ""
