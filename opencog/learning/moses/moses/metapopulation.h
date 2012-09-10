@@ -962,7 +962,11 @@ struct metapopulation : bscored_combo_tree_set
                                compute_bscore);
         }
 
+        logger().debug("Select only candidates not already in the metapopulation");
         bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
+        logger().debug("Selected %u candidates (%u were in the metapopulation)",
+                       candidates.size(), pot_candidates.size()-candidates.size());
+
         if (!params.include_dominated) {
 
             logger().debug("Remove dominated candidates");
@@ -1016,9 +1020,14 @@ struct metapopulation : bscored_combo_tree_set
     bscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs)
     {
         bscored_combo_tree_set res;
-        foreach (bscored_combo_tree cnd, mcs)
-            if (find(cnd) == end())
+        foreach (const bscored_combo_tree& cnd, mcs) {
+            const combo_tree& tr = get_tree(cnd);
+            const_iterator fcnd =
+                OMP_ALGO::find_if(begin(), end(), [&](const bscored_combo_tree& v) {
+                        return tr == get_tree(v); });
+            if (fcnd == end())
                 res.insert(cnd);
+        }
         return res;
     }
 
