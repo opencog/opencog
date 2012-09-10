@@ -37,13 +37,6 @@
 
 namespace opencog { namespace combo {
 
-// using boost::variant;
-// using boost::adaptors::map_values;
-
-//////////////////
-// istreamTable //
-//////////////////
-
 /**
  * remove the carriage return (for DOS format)
  */
@@ -195,6 +188,10 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
 
     return {inputs, output};
 }
+
+//////////////////
+// istreamTable //
+//////////////////
 
 /**
  * Fill an input table give an istream of DSV file format, where

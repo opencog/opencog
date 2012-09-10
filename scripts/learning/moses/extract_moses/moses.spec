@@ -1,5 +1,5 @@
 %define name moses
-%define version 3.2.6
+%define version 3.2.7
 %define release 1
 
 Summary: MOSES automated program learning system
@@ -89,6 +89,6 @@ if [ -d $RPM_BUILD_ROOT ]; then rm -rf $RPM_BUILD_ROOT; fi
 %changelog
 * Fri Jun 15 2012 Linas Vepstas <linavepstas@gmail.com>
 - Initial version
-* Tue Aug 201 2012 Linas Vepstas <linavepstas@gmail.com>
+* Tue Aug 21 2012 Linas Vepstas <linavepstas@gmail.com>
 - Package lib*so, needed for MPI
 

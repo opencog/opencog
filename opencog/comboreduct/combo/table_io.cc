@@ -79,8 +79,8 @@ bool is_comment(const char c)
 //* Get one line of actual data.
 // This ignores lines that start with a 'standard comment char'
 //
-// TODO: This routine should be extended so that comments elsewhere in
-// the file are also ignored...
+// TODO: This routine should be extended so that comments that start
+// somewhere other than column 0 are also ignored.
 //
 // The signature of this routine is the same as std:getline()
 //

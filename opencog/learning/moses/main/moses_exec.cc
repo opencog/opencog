@@ -335,28 +335,10 @@ bool combo_based_problem(const string& problem)
 // Infer the arity of the problem
 combo::arity_t infer_arity(const string& problem,
                            unsigned int problem_size,
-                           const vector<string>& input_table_files,
-                           const vector<int>& ignore_features,
                            const string& combo_str)
 {
     if (datafile_based_problem(problem)) {
-        if (input_table_files.empty())
-            no_input_datafile_exit();
-
-        combo::arity_t arity = dataFileArity(input_table_files.front());
-        if (input_table_files.size() > 1) {
-            // check that all input data files have the same arity
-            combo::arity_t test_arity;
-            for (size_t i = 1; i < input_table_files.size(); ++i) {
-                test_arity = dataFileArity(input_table_files[i]);
-                if (test_arity != arity) {
-                    not_all_same_arity_exit(input_table_files[0], arity,
-                                            input_table_files[i], test_arity);
-                    return -1;
-                }
-            }
-        }
-        return arity - ignore_features.size();
+        return -1;
     }
     else if (combo_based_problem(problem))
     {
@@ -1225,9 +1207,45 @@ int moses_exec(int argc, char** argv)
     }
 
     // Infer arity
-    combo::arity_t arity = infer_arity(problem, problem_size,
-                                       input_data_files, ignore_features,
-                                       combo_str);
+    combo::arity_t arity = infer_arity(problem, problem_size, combo_str);
+
+    // Input data for table-based problems.
+    vector<Table> tables;
+    vector<CTable> ctables;
+
+    // Problem based on input table.
+    if (datafile_based_problem(problem))
+    {
+        if (input_data_files.empty())
+            no_input_datafile_exit();
+
+        // Read input data files
+        foreach (const string& idf, input_data_files) {
+            logger().info("Read data file %s", idf.c_str());
+            Table table = loadTable(idf, target_column, ignore_features);
+            // possible subsample the table
+            if (nsamples > 0)
+                subsampleTable(table, nsamples);
+            tables.push_back(table);
+            ctables.push_back(table.compressed());
+        }
+
+        arity = tables.front().get_arity();
+
+        // Check that all input data files have the same arity
+        if (tables.size() > 1) {
+            combo::arity_t test_arity;
+            for (size_t i = 1; i < tables.size(); ++i) {
+                test_arity = tables[i].get_arity();
+                if (test_arity != arity) {
+                    not_all_same_arity_exit(input_data_files[0], arity,
+                                            input_data_files[i], test_arity);
+                }
+            }
+        }
+        arity -= ignore_features.size();
+    }
+
     logger().info("Inferred arity = %d", arity);
 
     // Read labels contained in the data file.
@@ -1265,23 +1283,8 @@ int moses_exec(int argc, char** argv)
     if (datafile_based_problem(problem))
     {
         // Infer the signature based on the input table.
-        type_tree table_type_signature =
-            infer_data_type_tree(input_data_files.front(), target_column,
-                                 ignore_features);
+        const type_tree& table_type_signature = tables.front().get_signature();
         logger().info() << "Inferred data signature " << table_type_signature;
-
-        // Read input data files
-        vector<Table> tables;
-        vector<CTable> ctables;
-        foreach (const string& idf, input_data_files) {
-            logger().info("Read data file %s", idf.c_str());
-            Table table = loadTable(idf, target_column, ignore_features);
-            // possible subsample the table
-            if (nsamples > 0)
-                subsampleTable(table, nsamples);
-            tables.push_back(table);
-            ctables.push_back(table.compressed());
-        }
 
         // 'it' means regression based on input table; we maximimze accuracy.
         // 'pre' means we must maximize precision (i.e minimize the number of

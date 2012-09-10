@@ -421,6 +421,7 @@ struct Table
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
+    const type_tree& get_signature() const { return tt; }
     
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
