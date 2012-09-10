@@ -198,11 +198,8 @@ struct deme_expander
 
         _exemplar = exemplar;
 
-        if (logger().isDebugEnabled()) {
-            logger().debug()
-                << "Attempt to build rep from exemplar: " << _exemplar
-                << "\nScored: " << _cscorer(_exemplar);
-        }
+        if (logger().isDebugEnabled())
+            logger().debug() << "Attempt to build rep from exemplar: " << _exemplar;
 
         // [HIGHLY EXPERIMENTAL]. It allows to select features
         // that provide the most information when combined with
@@ -543,7 +540,19 @@ struct metapopulation : bscored_combo_tree_set
         // Replace the existing metapopulation with the new one.
         swap(pool);
     }
-    
+
+    void log_selected_exemplar(const_iterator exemplar_it) {
+        if (exemplar_it == cend()) {
+            logger().debug() << "No exemplar found";
+        } else {
+            unsigned pos = std::distance(cbegin(), exemplar_it) + 1;
+            logger().debug() << "Selected the " << pos << "th exemplar: "
+                             << get_tree(*exemplar_it);
+            logger().debug() << "With composite score :"
+                             << get_composite_score(*exemplar_it);
+        }
+    }
+
     /**
      * Select the exemplar from the population. An exemplar is choosen
      * from the pool of candidates using a Boltzmann distribution
@@ -567,13 +576,13 @@ struct metapopulation : bscored_combo_tree_set
         // Shortcut for special case, as sometimes, the very first time
         // through, the score is invalid.
         if (size() == 1) {
-            const_iterator selex = begin();
+            const_iterator selex = cbegin();
             const combo_tree& tr = get_tree(*selex);
-            if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
-                _visited_exemplars.insert(*selex);
-                return selex;
-            }
-            return end();
+            if (_visited_exemplars.find(tr) == _visited_exemplars.end())
+                _visited_exemplars.insert(tr);
+            else selex = cend();
+            log_selected_exemplar(selex);
+            return selex;
         }
 
         vector<score_t> probs;
@@ -602,7 +611,8 @@ struct metapopulation : bscored_combo_tree_set
 
         // Nothing found, we've already tried them all.
         if (!found_exemplar) {
-            return end();
+            log_selected_exemplar(cend());
+            return cend();
         }
 
         // Compute the probability normalization, needed for the
@@ -629,8 +639,9 @@ struct metapopulation : bscored_combo_tree_set
         const_iterator selex = std::next(begin(), fwd);
 
         // Mark the exemplar so we won't look at it again.
-        _visited_exemplars.insert(*selex);
+        _visited_exemplars.insert(get_tree(*selex));
 
+        log_selected_exemplar(selex);
         return selex;
     }
 
