@@ -25,6 +25,7 @@
 
 #include <list>
 #include <limits>
+#include <atomic>
 
 #include <boost/unordered_map.hpp>
 #include <boost/thread.hpp>
@@ -61,15 +62,15 @@ struct cache_base {
                       _cache_name.c_str(), get_hits(), get_misses());
     }
 
-    size_type get_misses() const { return _misses; }
-    size_type get_hits() const { return _hits; }
+    size_type get_misses() const { return _misses.load(); }
+    size_type get_hits() const { return _hits.load(); }
     size_type max_size() const { return _n; }
 
 protected:
-    size_type _n;               // cache size
-    mutable unsigned _misses;   // number of cache misses
-    mutable unsigned _hits;     // number of cache hits
-    std::string _cache_name;    // name of the cache (useful for logging)
+    size_type _n;                            // cache size
+    mutable std::atomic<unsigned> _misses;   // number of cache misses
+    mutable std::atomic<unsigned> _hits;     // number of cache hits
+    std::string _cache_name;            // name of the cache (useful for logging)
 };
     
 // Least Recently Used Cache. Non thread safe, use
@@ -123,7 +124,7 @@ struct lru_cache : public F, public cache_base {
         if (it!=_map.end()) {
             _lru.pop_front();
             _lru.splice(_lru.begin(), _lru,it->first);
-            _hits++;
+            ++_hits;
             return it->second;
         }
       
@@ -311,21 +312,15 @@ protected:
         super::_lru.push_front(x);
     }
 
-    // thread safe increment failure
-    inline void inc_failure() const {
-        unique_lock lock(mutex);
-        super::_failure++;
-    }
-
     // increment failure and call
     inline result_type if_f(const argument_type& x) const {
-        inc_failure();
+        ++super::misses;
         return super::_f(x);
     }
 
     // increment failure and exception safe call
     inline result_type ifx_f(const argument_type& x) const {
-        inc_failure();
+        ++super::misses;
         return xs_f(x);
     }
 
@@ -366,7 +361,7 @@ struct prr_cache : public F, public cache_base {
         map_iter it = _map.find(x);
 
         if(it != _map.end()) { // if we've found return 
-            _hits++;
+            ++_hits;
             return it->second;
         }
         else { // otherwise evaluate, insert in _map then return
@@ -398,7 +393,7 @@ protected:
     
     // increment misses and call
     inline result_type if_f(const argument_type& x) const {
-        _misses++;
+        ++_misses;
         return _f(x);
     }
 
@@ -443,20 +438,17 @@ public:
     result_type operator()(const argument_type& x) const
     {
         {
-            // for some unknown reason using shared_lock produces
-            // occasional run-time error
-            // shared_lock lock(mutex);
-            unique_lock lock(mutex);
+            shared_lock lock(mutex);
             // search for x
             map_iter it = super::_map.find(x);
             if(it != super::_map.end()) { // if we've found return 
-                super::_hits++;
+                ++super::_hits;
                 return it->second;
             }
         }
         // otherwise evaluate, insert in _map then return
-        result_type res = incfail_f(x);
-        if(full()) { // if the cache is full randomly remove an element
+        result_type res = incmis_f(x);
+        if(full()) { // if the cache is full remove an element
             unique_lock lock(mutex);
             super::_map.erase(super::_map.begin());
         }
@@ -475,27 +467,12 @@ public:
         super::clear();
     }
     
-    unsigned get_misses() const {
-        shared_lock lock(mutex);
-        return super::get_misses();
-    }
-
-    unsigned get_hits() const {
-        shared_lock lock(mutex);
-        return super::get_hits();
-    }
-
 protected:
     mutable cache_mutex mutex;
 
-    inline void inc_misses() const {
-        unique_lock lock(mutex);
-        ++super::_misses;
-    }
-
     // increment misses and call
-    inline result_type incfail_f(const argument_type& x) const {
-        inc_misses();
+    inline result_type incmis_f(const argument_type& x) const {
+        ++super::_misses;
         return super::_f(x);
     }
 
