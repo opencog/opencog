@@ -209,7 +209,7 @@ Table::Table(const combo_tree& tr, int nsamples,
 vector<string> Table::get_labels() const
 {
     vector<string> labels = itable.get_labels();
-    labels.push_back(otable.get_label());
+    labels.insert(labels.begin(), otable.get_label());
     return labels;
 }
 
@@ -240,7 +240,7 @@ CTable Table::compressed() const
 vector<string> CTable::get_labels() const
 {
     vector<string> labels = ilabels;
-    labels.push_back(olabel);
+    labels.insert(labels.begin(), olabel);
     return labels;
 }
 

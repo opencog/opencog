@@ -100,8 +100,6 @@ static const std::vector<int> empty_int_vec;
  */
 std::vector<int> find_features_positions(const std::string& fileName,
                                          const std::vector<std::string>& features);
-int find_feature_position(const std::string& fileName,
-                          const std::string& feature);
 
 /**
  * Take a row, strip away any nnon-ASCII chars and trailing carriage
@@ -250,20 +248,22 @@ std::ostream& ostreamTableHeader(std::ostream& out,
 // output a data table in CSV format. Boolean values are output in
 // binary form (0 for false, 1 for true). target_pos is the column
 // index of the target. If -1 then it is the last one.
+// XXX deprecated
 std::ostream& ostreamTable(std::ostream& out,
                            const ITable& it, const OTable& ot,
                            int target_pos = 0);
 // like above but take a table instead of an input and output table
-std::ostream& ostreamTable(std::ostream& out, const Table& table,
-                           int target_pos = 0);
+std::ostream& ostreamTable(std::ostream& out, const Table& table);
+std::ostream& ostreamTable(std::ostream& out, const Table& table, int target_column);
 
 // like above but takes the file name where to write the table
+// XXX deprecated
 void saveTable(const std::string& file_name,
                const ITable& it, const OTable& ot,
                int target_pos = 0);
 // like above but take a table instead of a input and output table
-void saveTable(const std::string& file_name, const Table& table,
-               int target_pos = 0);
+void saveTable(const std::string& file_name, const Table& table);
+void saveTable(const std::string& file_name, const Table& table, int target_column);
 
 // like ostreamTableHeader but on a compressed table
 std::ostream& ostreamCTableHeader(std::ostream& out, const CTable& ct);

@@ -60,12 +60,13 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
                                 const std::vector<std::string>& labels);
 
 // structure containing the options for the eval-table program
-struct evalTableParameters {
+struct evalTableParameters
+{
     string input_table_file;
     vector<string> combo_programs;
     string combo_programs_file;
     string target_feature_str;
-    int target_feature;
+    int target_column;
     vector<string> ignore_features_str;
     vector<int> ignore_features;
     bool has_labels;
@@ -79,16 +80,18 @@ struct evalTableParameters {
 
 template<typename Out>
 Out& output_results(Out& out, const evalTableParameters& pa, const ITable& it,
-                    const OTable& ot_tr) {
+                    const OTable& ot_tr)
+{
     if (pa.display_inputs)
-        ostreamTable(out, it, ot_tr, pa.target_feature); // print io table
+        ostreamTable(out, it, ot_tr, pa.target_column); // print io table
     else
         out << ot_tr; // print output table
     return out;
 }
 
 void output_results(const evalTableParameters& pa, const ITable& it,
-                    const OTable& ot_tr) {
+                    const OTable& ot_tr)
+{
     if(pa.output_file.empty())
         output_results(cout, pa, it, ot_tr);
     else {
@@ -134,10 +137,9 @@ void read_eval_output_results(evalTableParameters& pa)
         if (boost::find(header, pa.target_feature_str) == header.end())
             table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
         else {
-            pa.target_feature = find_feature_position(pa.input_table_file,
-                                                      pa.target_feature_str);
             table = loadTable(pa.input_table_file, pa.target_feature_str,
                               pa.ignore_features_str);
+            pa.target_column = table.target_column;
         }
     }
 
@@ -149,7 +151,7 @@ void read_eval_output_results(evalTableParameters& pa)
     foreach(const string& tr_str, pa.combo_programs)
         trs += str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
     // from a file
-    if(!pa.combo_programs_file.empty()) {
+    if (!pa.combo_programs_file.empty()) {
         ifstream in(pa.combo_programs_file.c_str());
         while(in.good()) {
             string line;

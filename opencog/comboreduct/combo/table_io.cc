@@ -578,9 +578,15 @@ ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
     return out;
 }
 
-ostream& ostreamTable(ostream& out, const Table& table, int target_pos)
+ostream& ostreamTable(ostream& out, const Table& table)
 {
-    return ostreamTable(out, table.itable, table.otable, target_pos);
+    return ostreamTable(out, table.itable, table.otable, table.target_column);
+}
+
+// XXX deprecated
+ostream& ostreamTable(ostream& out, const Table& table, int target_column)
+{
+    return ostreamTable(out, table.itable, table.otable, target_column);
 }
 
 void saveTable(const string& file_name, const ITable& it, const OTable& ot,
@@ -592,9 +598,15 @@ void saveTable(const string& file_name, const ITable& it, const OTable& ot,
     ostreamTable(out, it, ot, target_pos);
 }
 
-void saveTable(const string& file_name, const Table& table, int target_pos)
+void saveTable(const string& file_name, const Table& table)
 {
-    saveTable(file_name, table.itable, table.otable, target_pos);
+    saveTable(file_name, table.itable, table.otable, table.target_column);
+}
+
+// XXX deprecated
+void saveTable(const string& file_name, const Table& table, int target_column)
+{
+    saveTable(file_name, table.itable, table.otable, target_column);
 }
 
 ostream& ostreamCTableHeader(ostream& out, const CTable& ct)
