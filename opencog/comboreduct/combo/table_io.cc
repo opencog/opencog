@@ -495,21 +495,49 @@ istream& istreamITable(istream& in, ITable& it,
 }
 
 void loadITable(const string& file_name, ITable& it, const type_tree& tt,
+                const vector<string>& ignore_features)
+{
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_col_nums =
+        find_features_positions(file_name, ignore_features);
+
+    ostreamContainer(logger().info() << "Ignore the following columns: ",
+                     ignore_col_nums);
+
+    istreamITable(in, it, hasHeader(file_name), tt, ignore_col_nums);
+}
+ 
+// XXX the below is deprecated, remove it asap.
+void loadITable(const string& file_name, ITable& it, const type_tree& tt,
                 const vector<int>& ignore_col_nums)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+
     istreamITable(in, it, hasHeader(file_name), tt, ignore_col_nums);
 }
-    
-ITable loadITable(const string& file_name, const vector<int>& ignore_col_nums)
+ 
+ITable loadITable(const string& file_name, const vector<string>& ignore_features)
 {
-    ITable res;
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_col_nums =
+        find_features_positions(file_name, ignore_features);
+
+    ostreamContainer(logger().info() << "Ignore the following columns: ",
+                     ignore_col_nums);
+
     type_tree tt = infer_data_type_tree(file_name, -1, ignore_col_nums);
     // append an unknown type child at the end for the output
     tt.append_child(tt.begin(), id::unknown_type);
-    loadITable(file_name, res, tt, ignore_col_nums);
+
+    ITable res;
+    loadITable(file_name, res, tt, ignore_features);
     return res;
 }
         

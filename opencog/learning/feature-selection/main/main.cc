@@ -241,7 +241,7 @@ int main(int argc, char** argv)
          "fewer samples in the data set, the more features the "
          "less confidence in the feature set quality measure.\n")
 
-        (opt_desc_str(hc_initial_feature_opt).c_str(), 
+        (opt_desc_str(hc_initial_feature_opt).c_str(),
          value<vector<string> >(&fs_params.hc_initial_features),
          "Hillclimbing parameter.  Initial feature to search from.  "
          "This option can be used as many times as there are features, "
@@ -345,7 +345,7 @@ int main(int argc, char** argv)
          cmdline += argv[i];
     }
     logger().info(cmdline);
-    
+
     // init random generator
     randGen().seed(rand_seed);
 
@@ -360,17 +360,8 @@ int main(int argc, char** argv)
     fs_params.target_feature = target_feature_str.empty()? 0
         : find_feature_position(fs_params.input_file, target_feature_str);
 
-    // Get the list of indexes of features to ignore
-    fs_params.ignore_features = find_features_positions(fs_params.input_file,
-                                                        ignore_features_str);
-    ostreamContainer(logger().info() << "Ignore the following columns: ",
-                     fs_params.ignore_features);
+    // fs_params.ignore_features_str = ignore_features_str;
 
-    OC_ASSERT(boost::find(fs_params.ignore_features, fs_params.target_feature)
-              == fs_params.ignore_features.end(),
-              "You cannot ignore the target feature (column %d)",
-              fs_params.target_feature);    
-    
     // Read input_data_file file
     Table table = loadTable(fs_params.input_file,
                             target_feature_str,

@@ -41,8 +41,8 @@ using boost::lexical_cast;
  * set and output the results for each data set.
  */
 
-int main(int argc,char** argv) { 
-
+int main(int argc, char** argv)
+{
     // program options, see options_description below for their meaning
     eval_features_parameters pa;
     unsigned long rand_seed;
@@ -108,14 +108,6 @@ int main(int argc,char** argv) {
     // Find the position of the target feature (the first one by default)
     pa.target_feature = target_feature_str.empty()? 0
         : find_feature_position(pa.input_file, target_feature_str);
-
-    // Get the list of indexes of features to ignore
-    pa.ignore_features = find_features_positions(pa.input_file,
-                                                 ignore_features_str);
-    OC_ASSERT(boost::find(pa.ignore_features, pa.target_feature)
-              == pa.ignore_features.end(),
-              "You cannot ignore the target feature (column %d)",
-              pa.target_feature);    
 
     read_eval_output_results(pa);
 }

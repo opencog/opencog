@@ -106,7 +106,8 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
 }
 
 Table add_force_features(const Table& table,
-                         const feature_selection_parameters& fs_params) {
+                         const feature_selection_parameters& fs_params)
+{
     const ITable& itable = table.itable;
     // get forced features that have not been selected
     std::vector<std::string> fnsel;
@@ -192,12 +193,12 @@ void write_results(const Table& table,
 }
 
 instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields) {
-    instance res(fields.packed_width());
-    vector<std::string> labels = readInputLabels(fs_params.input_file,
-                                                 fs_params.target_feature,
-                                                 fs_params.ignore_features);
+                          const field_set& fields,
+                          const vector<string>& labels)
+{
     vector<std::string> vif; // valid initial features, used for logging
+    instance res(fields.packed_width());
+
     foreach(const std::string& f, fs_params.hc_initial_features) {
         size_t idx = std::distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found

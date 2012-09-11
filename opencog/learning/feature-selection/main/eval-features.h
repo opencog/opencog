@@ -55,17 +55,18 @@ static const string mi="mi";    // Mutual Information (see feature_scorer.h)
 static const string pre="pre";  // Precision (see
                                 // opencog/learning/moses/moses/scoring.h)
 
-string opt_desc_str(const pair<string, string>& opt) {
+string opt_desc_str(const pair<string, string>& opt)
+{
     return string(opt.first).append(",").append(opt.second);
 }
 
 // structure containing the options for the eval-table program
-struct eval_features_parameters {
+struct eval_features_parameters
+{
     string input_file;
     string scorer;
     vector<string> features;
     int target_feature;
-    vector<int> ignore_features;
     string features_file;
     string output_file;
     double confidence_penalty_intensity;
@@ -148,8 +149,7 @@ void read_eval_output_results(const eval_features_parameters& pa)
     Table table = loadTable(pa.input_file, target_feature, ignore_features);
 
     // determine labels
-    vector<string> labels = readInputLabels(pa.input_file,
-                                            pa.target_feature);
+    vector<string> labels = table.get_labels();
 
     // read feature sets
     vector<set<arity_t> > fss = feature_sets(pa, labels);

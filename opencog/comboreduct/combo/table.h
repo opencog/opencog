@@ -79,9 +79,6 @@ public:
     typedef typename super::value_type value_type;
     typedef std::vector<std::string> string_seq;
 
-    std::string olabel;               // output label
-    string_seq ilabels; // list of input labels
-
     // Definition is delayed until after Table, as it uses Table.
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
@@ -192,7 +189,13 @@ public:
         return res;
     }
 
+    string_seq get_labels() const;
+
+// protected:
     type_tree tt;
+    std::string olabel;               // output label
+    string_seq ilabels; // list of input labels
+
 };
 
         

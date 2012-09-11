@@ -63,7 +63,7 @@ struct feature_selection_parameters
     unsigned int max_evals;
     std::string input_file;
     int target_feature;
-    std::vector<int> ignore_features;
+    // std::vector<std::string> ignore_features_str;
     std::vector<std::string> force_features_str;
     std::string output_file;
     unsigned target_size;
@@ -144,7 +144,8 @@ feature_set optimize_deme_select_features(const field_set& fields,
 
 /** For the MOSES algo, generate the intial instance */
 instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields);
+                          const field_set& fields,
+                          const std::vector<std::string>& labels);
 
 // run feature selection given a moses optimizer and a scorer, create
 // a deme a define the wrap the scorer for that deme. Possibly add
@@ -153,12 +154,13 @@ template<typename Optimize, typename Scorer>
 feature_set create_deme_select_features(const CTable& ctable,
                                         Optimize& optimize,
                                         const Scorer& scorer,
-                                        const feature_selection_parameters& fs_params) {
+                                        const feature_selection_parameters& fs_params)
+{
     arity_t arity = ctable.get_arity();
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);
     // determine the initial instance given the initial feature set
-    instance init_inst = initial_instance(fs_params, fields);
+    instance init_inst = initial_instance(fs_params, fields, ctable.get_labels());
     // define moses based scorer
     typedef deme_based_scorer<Scorer> DBScorer;
     DBScorer db_sc(scorer, fields);

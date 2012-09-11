@@ -1,4 +1,4 @@
-/** eval-table.h --- 
+/** eval-table.h ---
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -99,7 +99,8 @@ void output_results(const evalTableParameters& pa, const ITable& it,
 }
 
 void eval_output_results(const evalTableParameters& pa, ITable& it,
-                         const vector<combo_tree>& trs) {
+                         const vector<combo_tree>& trs)
+{
     foreach(const combo_tree& tr, trs) {
         // evaluated tr over input table
         OTable ot_tr(tr, it);
@@ -124,14 +125,14 @@ void read_eval_output_results(evalTableParameters& pa)
 
     // read data ITable
     Table table;
-    if(pa.target_feature_str.empty())
-        table.itable = loadITable(pa.input_table_file, pa.ignore_features);
+    if (pa.target_feature_str.empty())
+        table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
     else {
         // check that the target feature is in the data file, and load
         // the whole table if it is, instead of the itable
         auto header = loadHeader(pa.input_table_file);
-        if(boost::find(header, pa.target_feature_str) == header.end())
-            table.itable = loadITable(pa.input_table_file, pa.ignore_features);
+        if (boost::find(header, pa.target_feature_str) == header.end())
+            table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
         else {
             pa.target_feature = find_feature_position(pa.input_table_file,
                                                       pa.target_feature_str);
@@ -141,7 +142,7 @@ void read_eval_output_results(evalTableParameters& pa)
     }
 
     ITable& it = table.itable;
-    
+
     // read combo programs
     vector<combo_tree> trs;
     // from command line
@@ -158,7 +159,7 @@ void read_eval_output_results(evalTableParameters& pa)
             trs += str2combo_tree_label(line, pa.has_labels, it.get_labels());
         }
     }
-    
+
     // eval and output the results
     eval_output_results(pa, it, trs);
 }

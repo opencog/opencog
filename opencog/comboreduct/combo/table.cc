@@ -150,72 +150,6 @@ const string& OTable::get_label() const
 
 // -------------------------------------------------------
 
-Table::Table() {}
-
-Table::Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_)
-    : tt(tt_), itable(itable_), otable(otable_) {}
-
-Table::Table(const combo_tree& tr, int nsamples,
-             contin_t min_contin, contin_t max_contin) :
-    tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
-    otable(tr, itable) {}
-
-vector<string> Table::get_labels() const
-{
-    vector<string> labels = itable.get_labels();
-    labels.push_back(otable.get_label());
-    return labels;
-}
-
-// -------------------------------------------------------
-complete_truth_table::size_type
-complete_truth_table::hamming_distance(const complete_truth_table& other) const
-{
-    OC_ASSERT(other.size() == size(),
-              "complete_truth_tables size should be the same.");
-
-    size_type res = 0;
-    for (const_iterator x = begin(), y = other.begin();x != end();)
-        res += (*x++ != *y++);
-    return res;
-}
-
-bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
-{
-    const_iterator cit = begin();
-    for (int i = 0; cit != end(); ++i, ++cit) {
-        for (int j = 0; j < _arity; ++j)
-            bmap[j] = bool_to_vertex((i >> j) % 2);
-        if (*cit != vertex_to_bool(eval_binding(bmap, tr)))
-            return false;
-    }
-    return true;
-}
-
-CTable Table::compressed() const
-{
-    // Logger
-    logger().debug("Compress the dataset, current size is %d", itable.size());
-    // ~Logger
-
-    CTable res(otable.get_label(), itable.get_labels());
-    // assign type_tree
-    res.tt = tt;
-
-    ITable::const_iterator in_it = itable.begin();
-    OTable::const_iterator out_it = otable.begin();
-    for(; in_it != itable.end(); ++in_it, ++out_it)
-        ++res[*in_it][*out_it];
-
-    // Logger
-    logger().debug("Size of the compressed dataset is %d", res.size());
-    // ~Logger
-
-    return res;
-}
-
-// -------------------------------------------------------
-
 bool OTable::operator==(const OTable& rhs) const
 {
     const static contin_t epsilon = 1e-12;
@@ -260,6 +194,81 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
     return sqrt(mean_squared_error(ot));
 }
 
+// -------------------------------------------------------
+
+Table::Table() {}
+
+Table::Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_)
+    : tt(tt_), itable(itable_), otable(otable_) {}
+
+Table::Table(const combo_tree& tr, int nsamples,
+             contin_t min_contin, contin_t max_contin) :
+    tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
+    otable(tr, itable) {}
+
+vector<string> Table::get_labels() const
+{
+    vector<string> labels = itable.get_labels();
+    labels.push_back(otable.get_label());
+    return labels;
+}
+
+CTable Table::compressed() const
+{
+    // Logger
+    logger().debug("Compress the dataset, current size is %d", itable.size());
+    // ~Logger
+
+    CTable res(otable.get_label(), itable.get_labels());
+    // assign type_tree
+    res.tt = tt;
+
+    ITable::const_iterator in_it = itable.begin();
+    OTable::const_iterator out_it = otable.begin();
+    for(; in_it != itable.end(); ++in_it, ++out_it)
+        ++res[*in_it][*out_it];
+
+    // Logger
+    logger().debug("Size of the compressed dataset is %d", res.size());
+    // ~Logger
+
+    return res;
+}
+
+// -------------------------------------------------------
+
+vector<string> CTable::get_labels() const
+{
+    vector<string> labels = ilabels;
+    labels.push_back(olabel);
+    return labels;
+}
+
+// -------------------------------------------------------
+
+complete_truth_table::size_type
+complete_truth_table::hamming_distance(const complete_truth_table& other) const
+{
+    OC_ASSERT(other.size() == size(),
+              "complete_truth_tables size should be the same.");
+
+    size_type res = 0;
+    for (const_iterator x = begin(), y = other.begin();x != end();)
+        res += (*x++ != *y++);
+    return res;
+}
+
+bool complete_truth_table::same_complete_truth_table(const combo_tree& tr) const
+{
+    const_iterator cit = begin();
+    for (int i = 0; cit != end(); ++i, ++cit) {
+        for (int j = 0; j < _arity; ++j)
+            bmap[j] = bool_to_vertex((i >> j) % 2);
+        if (*cit != vertex_to_bool(eval_binding(bmap, tr)))
+            return false;
+    }
+    return true;
+}
 // -------------------------------------------------------
 
 double OTEntropy(const OTable& ot)
