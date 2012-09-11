@@ -53,16 +53,6 @@ void removeNonASCII(std::string& str);
  */
 bool checkCarriageReturn(std::istream& in);
 
-/**
- * Return the arity of the table provided in istream (by counting the
- * number of elements of the first line).
- */
-arity_t istreamArity(std::istream& in);
-/**
- * Helper, like above but given the file name instead of istream
- */
-arity_t dataFileArity(const std::string& dataFileName);
-
 std::vector<std::string> loadHeader(const std::string& file_name);
 
 /**

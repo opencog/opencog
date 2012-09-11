@@ -95,13 +95,6 @@ istream &get_data_line(istream& is, string& line)
     }
 }
 
-arity_t istreamArity(istream& in)
-{
-    string line;
-    get_data_line(in, line);
-    return tokenizeRowIO<string>(line).first.size();
-}
-
 ifstream* open_data_file(const string& fileName)
 {
     ifstream* in = new ifstream(fileName.c_str());
@@ -111,12 +104,6 @@ ifstream* open_data_file(const string& fileName)
         OC_ASSERT(false, ss.str());
     }
     return in;
-}
-
-arity_t dataFileArity(const string& fileName)
-{
-    unique_ptr<ifstream> in(open_data_file(fileName));
-    return istreamArity(*in);
 }
 
 vector<string> loadHeader(const string& file_name)

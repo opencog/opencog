@@ -131,7 +131,7 @@ Table add_force_features(const Table& selected_table,
 
     // get the complementary of their positions
     std::vector<int> fnsel_pos_comp;
-    auto ir = boost::irange(0, dataFileArity(fs_params.input_file) + 1);
+    auto ir = boost::irange(0, full_table.get_arity() + 1);
     boost::set_difference(ir, fnsel_pos, back_inserter(fnsel_pos_comp));
 
     // get header of the input table
