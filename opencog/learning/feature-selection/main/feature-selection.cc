@@ -105,10 +105,18 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
     }
 }
 
-Table add_force_features(const Table& table,
+/// Add back in any required features that were not selected.
+///
+/// 'selected_table' is the table of features that were selected.
+///     (it is a filtered version of the full table, holding only the
+///     selected features.)
+/// 'full_table' is the original input table (with all features in it)
+//
+Table add_force_features(const Table& selected_table,
+                         const Table& full_table,
                          const feature_selection_parameters& fs_params)
 {
-    const ITable& itable = table.itable;
+    const ITable& itable = selected_table.itable;
     // get forced features that have not been selected
     std::vector<std::string> fnsel;
     const auto& ilabels = itable.get_labels();
@@ -143,7 +151,7 @@ Table add_force_features(const Table& table,
 
     // insert the forced features in the right order
     Table new_table;
-    new_table.otable = table.otable;
+    new_table.otable = selected_table.otable;
     new_table.itable = itable;
     // insert missing columns from fns_itable to new_table.itable
     for (auto lit = fnsel_pos.cbegin(), rit = fsel_pos.cbegin();
@@ -182,10 +190,11 @@ int update_target_feature(const Table& table,
     }
 }
 
-void write_results(const Table& table,
+void write_results(const Table& selected_table,
+                   const Table& full_table,
                    const feature_selection_parameters& fs_params)
 {
-    Table table_wff = add_force_features(table, fs_params);
+    Table table_wff = add_force_features(selected_table, full_table, fs_params);
     int tfp = update_target_feature(table_wff, fs_params);
     if (fs_params.output_file.empty())
         ostreamTable(std::cout, table_wff, tfp);
@@ -309,9 +318,9 @@ void feature_selection(const Table& table,
     if (selected_features.empty())
         err_empty_features(fs_params.output_file);
     else {
-        Table ftable = table.filtered(selected_features);
-        log_selected_features(table.get_arity(), ftable, fs_params);
-        write_results(ftable, fs_params);
+        Table filt_table = table.filtered(selected_features);
+        log_selected_features(table.get_arity(), filt_table, fs_params);
+        write_results(filt_table, table, fs_params);
     }
 }
 
