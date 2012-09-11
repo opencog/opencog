@@ -200,6 +200,13 @@ vector<int> find_features_positions(istream& in,
     return positions;
 }
 
+// Like above but takes only a single feature
+int find_feature_position(istream& in, const string& feature)
+{
+    vector<string> features{feature};
+    return find_features_positions(in, features).back();
+}
+
 vector<int> find_features_positions(const string& fileName,
                                     const vector<string>& features)
 {
@@ -210,9 +217,8 @@ vector<int> find_features_positions(const string& fileName,
 // Like above but takes only a single feature
 int find_feature_position(const string& fileName, const string& feature)
 {
-    vector<string> features{feature};
     unique_ptr<ifstream> in(open_data_file(fileName));
-    return find_features_positions(*in, features).back();
+    return find_feature_position(*in, feature);
 }
 
 /**
@@ -252,7 +258,7 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 ///
 /// @return type_tree infered
 type_tree infer_data_type_tree(const string& fileName,
-                               int output_col_num,
+                               const string& target_feature,
                                const vector<int>& ignore_col_nums)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
@@ -265,8 +271,15 @@ type_tree infer_data_type_tree(const string& fileName,
         "Error: the data file %s appears to be empty!?\n",
         fileName.c_str());
 
+    int target_column = 0;
+
+    // Find the column number of the target feature in the data file,
+    // if any.
+    if (!target_feature.empty())
+        target_column = find_feature_position(*in, target_feature);
+
     type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line,
-                                                              output_col_num,
+                                                              target_column,
                                                               ignore_col_nums));
 
     if (!is_well_formed(res)) {
@@ -351,15 +364,22 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
  * position. The default position is 0, the first column.
  */
 istream& istreamTable(istream& in, ITable& it, OTable& ot,
-                      bool has_header, const type_tree& tt, int pos,
+                      bool has_header, const type_tree& tt, const string& target_feature,
                       const vector<int>& ignore_col_nums)
 {
     string line;
     arity_t arity = type_tree_arity(tt);
 
+    int target_column = 0;
+
+    // Find the column number of the target feature in the data file,
+    // if any.
+    if (!target_feature.empty())
+        target_column = find_feature_position(in, target_feature);
+
     if (has_header) {
         get_data_line(in, line);
-        pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, pos,
+        pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, target_column,
                                                                  ignore_col_nums);
         it.set_labels(ioh.first);
         ot.set_label(ioh.second);
@@ -392,7 +412,7 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
 
     auto parse_line = [&](int i) {
         // tokenize the line and fill the input vector and output
-        pair<vector<string>, string> io = tokenizeRowIO<string>(lines[i], pos,
+        pair<vector<string>, string> io = tokenizeRowIO<string>(lines[i], target_column,
                                                                 ignore_col_nums);
 
         // check arity
@@ -418,13 +438,6 @@ Table loadTable(const string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features)
 {
-    int target_column = 0;
-
-    // Find the column number of the target feature in the data file,
-    // if any.
-    if (!target_feature.empty())
-        target_column = find_feature_position(file_name, target_feature);
-
     // Get the list of indexes of features to ignore
     vector<int> ignore_col_nums =
         find_features_positions(file_name, ignore_features);
@@ -432,19 +445,21 @@ Table loadTable(const string& file_name,
     ostreamContainer(logger().info() << "Ignore the following columns: ",
                      ignore_col_nums);
 
+/*
     OC_ASSERT(boost::find(ignore_col_nums, target_column)
                   == ignore_col_nums.end(),
                   "You cannot ignore the target feature %s",
                   target_feature.c_str());
 
+*/
     Table res;
-    res.tt = infer_data_type_tree(file_name, target_column, ignore_col_nums);
+    res.tt = infer_data_type_tree(file_name, target_feature, ignore_col_nums);
 
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
 
-    istreamTable(in, res.itable, res.otable, hasHeader(file_name), res.tt, target_column, ignore_col_nums);
+    istreamTable(in, res.itable, res.otable, hasHeader(file_name), res.tt, target_feature, ignore_col_nums);
 
     return res;
 }
@@ -533,7 +548,7 @@ ITable loadITable(const string& file_name, const vector<string>& ignore_features
     ostreamContainer(logger().info() << "Ignore the following columns: ",
                      ignore_col_nums);
 
-    type_tree tt = infer_data_type_tree(file_name, -1, ignore_col_nums);
+    type_tree tt = infer_data_type_tree(file_name, "", ignore_col_nums);
     // append an unknown type child at the end for the output
     tt.append_child(tt.begin(), id::unknown_type);
 

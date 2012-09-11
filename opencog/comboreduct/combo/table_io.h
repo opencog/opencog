@@ -163,8 +163,8 @@ Table loadTable(const std::string& file_name,
 
 /// XXX deprecated, remove at first opporunity.
 std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
-                           bool has_header, const type_tree& tt, int
-                           pos = 0,
+                           bool has_header, const type_tree& tt, 
+                           const std::string& target_feature,
                            const std::vector<int>& ignore_col_nums
                            = empty_int_vec);
 

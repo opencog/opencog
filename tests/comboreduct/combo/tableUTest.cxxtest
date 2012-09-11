@@ -31,18 +31,20 @@ const string label1 = "price";
 const string label2 = "temperature";
 const string tableUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/comboreduct/combo/";
 
-class tableUTest : public CxxTest::TestSuite {
+class tableUTest : public CxxTest::TestSuite
+{
 private:
     template<typename IT, typename OT>
     void testIStreamTable(const string& ts, const IT& it, const OT& ot,
                           bool has_header, const type_tree& tt,
-                          int target_col = 0,
-                          std::vector<int> ignore_cols= std::vector<int>()) {
+                          const std::string& target_feature = std::string(),
+                          std::vector<int> ignore_cols = std::vector<int>())
+    {
         stringstream ss(ts);
         IT it_test;
         OT ot_test;
         istreamTable(ss, it_test, ot_test, has_header, tt,
-                     target_col, ignore_cols);
+                     target_feature, ignore_cols);
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;
@@ -160,7 +162,7 @@ public:
                          "10.1,0.4,244.2\n"
                          "6.5,9.5,4.2\n", it, ot, true,
                          gen_signature(id::contin_type, 1),
-                         1, {2});
+                         "price", {2});
     }
 
     void test_mutualInformation()
