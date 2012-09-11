@@ -37,14 +37,14 @@ private:
     template<typename IT, typename OT>
     void testIStreamTable(const string& ts, const IT& it, const OT& ot,
                           bool has_header, const type_tree& tt,
-                          const std::string& target_feature = std::string(),
-                          std::vector<int> ignore_cols = std::vector<int>())
+                          const string& target_feature = string(),
+                          const vector<string>& ignore_features = vector<string>())
     {
         stringstream ss(ts);
         IT it_test;
         OT ot_test;
         istreamTable(ss, it_test, ot_test, has_header, tt,
-                     target_feature, ignore_cols);
+                     target_feature, ignore_features);
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;
@@ -158,11 +158,12 @@ public:
         it.push_back({6.5});
         vector<string> il{olabel};
         it.set_labels(il);
+
         testIStreamTable("happiness,price,temperature\n"
                          "10.1,0.4,244.2\n"
                          "6.5,9.5,4.2\n", it, ot, true,
                          gen_signature(id::contin_type, 1),
-                         "price", {2});
+                         "price", {"temperature"});
     }
 
     void test_mutualInformation()

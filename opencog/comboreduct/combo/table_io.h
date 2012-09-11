@@ -165,8 +165,7 @@ Table loadTable(const std::string& file_name,
 std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
                            bool has_header, const type_tree& tt, 
                            const std::string& target_feature,
-                           const std::vector<int>& ignore_col_nums
-                           = empty_int_vec);
+                           const std::vector<std::string>& ignore_features);
 
 
 

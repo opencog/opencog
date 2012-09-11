@@ -207,20 +207,6 @@ int find_feature_position(istream& in, const string& feature)
     return find_features_positions(in, features).back();
 }
 
-vector<int> find_features_positions(const string& fileName,
-                                    const vector<string>& features)
-{
-    unique_ptr<ifstream> in(open_data_file(fileName));
-    return find_features_positions(*in, features);
-}
-
-// Like above but takes only a single feature
-int find_feature_position(const string& fileName, const string& feature)
-{
-    unique_ptr<ifstream> in(open_data_file(fileName));
-    return find_feature_position(*in, feature);
-}
-
 /**
  * take a row in input as a pair {inputs, output} and return the type
  * tree corresponding to the function mapping inputs to output. If the
@@ -251,7 +237,7 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 /// Create a type tree describing the types of the input columns
 /// and the output column.
 ///
-/// @param output_col_num is the column we expect to use as the output
+/// @param target_feature is the feature we expect to use as the output
 /// (the dependent variable)
 ///
 /// @param ignore_col_nums are a list of column to ignore
@@ -259,7 +245,7 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 /// @return type_tree infered
 type_tree infer_data_type_tree(const string& fileName,
                                const string& target_feature,
-                               const vector<int>& ignore_col_nums)
+                               const vector<string>& ignore_features)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
@@ -277,6 +263,10 @@ type_tree infer_data_type_tree(const string& fileName,
     // if any.
     if (!target_feature.empty())
         target_column = find_feature_position(*in, target_feature);
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_col_nums =
+        find_features_positions(*in, ignore_features);
 
     type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line,
                                                               target_column,
@@ -365,7 +355,7 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
  */
 istream& istreamTable(istream& in, ITable& it, OTable& ot,
                       bool has_header, const type_tree& tt, const string& target_feature,
-                      const vector<int>& ignore_col_nums)
+                      const std::vector<std::string>& ignore_features)
 {
     string line;
     arity_t arity = type_tree_arity(tt);
@@ -376,6 +366,18 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     // if any.
     if (!target_feature.empty())
         target_column = find_feature_position(in, target_feature);
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_col_nums =
+        find_features_positions(in, ignore_features);
+
+    ostreamContainer(logger().info() << "Ignore the following columns: ",
+                     ignore_col_nums);
+
+    OC_ASSERT(boost::find(ignore_col_nums, target_column)
+                  == ignore_col_nums.end(),
+                  "You cannot ignore the target feature %s",
+                  target_feature.c_str());
 
     if (has_header) {
         get_data_line(in, line);
@@ -438,28 +440,15 @@ Table loadTable(const string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features)
 {
-    // Get the list of indexes of features to ignore
-    vector<int> ignore_col_nums =
-        find_features_positions(file_name, ignore_features);
-
-    ostreamContainer(logger().info() << "Ignore the following columns: ",
-                     ignore_col_nums);
-
-/*
-    OC_ASSERT(boost::find(ignore_col_nums, target_column)
-                  == ignore_col_nums.end(),
-                  "You cannot ignore the target feature %s",
-                  target_feature.c_str());
-
-*/
-    Table res;
-    res.tt = infer_data_type_tree(file_name, target_feature, ignore_col_nums);
-
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
 
-    istreamTable(in, res.itable, res.otable, hasHeader(file_name), res.tt, target_feature, ignore_col_nums);
+    Table res;
+    res.tt = infer_data_type_tree(file_name, target_feature, ignore_features);
+
+    istreamTable(in, res.itable, res.otable, hasHeader(file_name),
+                 res.tt, target_feature, ignore_features);
 
     return res;
 }
@@ -471,10 +460,17 @@ Table loadTable(const string& file_name,
  */
 istream& istreamITable(istream& in, ITable& it,
                        bool has_header, const type_tree& tt,
-                       const vector<int>& ignore_col_nums)
+                       const vector<string>& ignore_features)
 {
     string line;
     arity_t arity = type_tree_arity(tt);
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_col_nums =
+        find_features_positions(in, ignore_features);
+
+    ostreamContainer(logger().info() << "Ignore the following columns: ",
+                     ignore_col_nums);
 
     if (has_header) {
         get_data_line(in, line);
@@ -528,27 +524,12 @@ void loadITable(const string& file_name, ITable& it, const type_tree& tt,
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
 
-    // Get the list of indexes of features to ignore
-    vector<int> ignore_col_nums =
-        find_features_positions(file_name, ignore_features);
-
-    ostreamContainer(logger().info() << "Ignore the following columns: ",
-                     ignore_col_nums);
-
-    istreamITable(in, it, hasHeader(file_name), tt, ignore_col_nums);
+    istreamITable(in, it, hasHeader(file_name), tt, ignore_features);
 }
 
 ITable loadITable(const string& file_name, const vector<string>& ignore_features)
 {
-
-    // Get the list of indexes of features to ignore
-    vector<int> ignore_col_nums =
-        find_features_positions(file_name, ignore_features);
-
-    ostreamContainer(logger().info() << "Ignore the following columns: ",
-                     ignore_col_nums);
-
-    type_tree tt = infer_data_type_tree(file_name, "", ignore_col_nums);
+    type_tree tt = infer_data_type_tree(file_name, "", ignore_features);
     // append an unknown type child at the end for the output
     tt.append_child(tt.begin(), id::unknown_type);
 
