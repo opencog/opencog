@@ -110,7 +110,8 @@ void eval_output_results(const evalTableParameters& pa, ITable& it,
     }
 }
 
-void read_eval_output_results(evalTableParameters& pa) {
+void read_eval_output_results(evalTableParameters& pa)
+{
     // Get the list of indexes of features to ignore
     pa.ignore_features = find_features_positions(pa.input_table_file,
                                                  pa.ignore_features_str);
@@ -134,8 +135,8 @@ void read_eval_output_results(evalTableParameters& pa) {
         else {
             pa.target_feature = find_feature_position(pa.input_table_file,
                                                       pa.target_feature_str);
-            table = loadTable(pa.input_table_file, pa.target_feature,
-                              pa.ignore_features);
+            table = loadTable(pa.input_table_file, pa.target_feature_str,
+                              pa.ignore_features_str);
         }
     }
 

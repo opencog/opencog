@@ -94,7 +94,9 @@ public:
                          "6.5,9.5,4.2\n", it, ot, true,
                          gen_signature(id::contin_type, 2));
     }
-    void test_filterITable() {
+
+    void test_filterITable()
+    {
         ITable it;
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
@@ -118,7 +120,9 @@ public:
                          "1,1\n"
                          "0,0\n");
     }
-    void test_filterCTable() {
+
+    void test_filterCTable()
+    {
         ITable it;
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
@@ -141,8 +145,10 @@ public:
                          "{true:1},true\n"
                          "{false:1},false\n");
     }
+
     // Set target Price, and ignore column Temperature
-    void test_target_col_ignore_col() {
+    void test_target_col_ignore_col()
+    {
         vertex_seq o{0.4, 9.5}; // price column
         OTable ot(o, label1);
         ITable it;
@@ -156,15 +162,21 @@ public:
                          gen_signature(id::contin_type, 1),
                          1, {2});
     }
-    void test_mutualInformation() {
-        Table tt = loadTable(tableUTest_dir + "dataset.csv");
+
+    void test_mutualInformation()
+    {
+        string target_feature;
+        vector<string> ignore_features;
+        Table tt = loadTable(tableUTest_dir + "dataset.csv", target_feature, ignore_features);
         set<arity_t> fs{0, 1};
         CTable ctt = tt.compressed();
         double mi = mutualInformation(ctt, fs);
         cout << "mi = " << mi << endl;
         TS_ASSERT_DELTA(0.419973, mi, 0.0001);
     }
-    void test_insert_get_pos() {
+
+    void test_insert_get_pos()
+    {
         ITable it;
         vertex_seq col1 = {id::logical_true, id::logical_false};
         it.insert_col("label1", col1);

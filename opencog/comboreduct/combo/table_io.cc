@@ -413,12 +413,32 @@ void loadTable(const string& file_name, ITable& it, OTable& ot,
     istreamTable(in, it, ot, hasHeader(file_name), tt, pos, ignore_col_nums);
 }
 
-Table loadTable(const string& file_name, int pos,
-                const vector<int>& ignore_col_nums)
+Table loadTable(const string& file_name, 
+                const std::string& target_feature,
+                const std::vector<std::string>& ignore_features)
 {
     Table res;
-    res.tt = infer_data_type_tree(file_name, pos, ignore_col_nums);
-    loadTable(file_name, res.itable, res.otable, res.tt, pos, ignore_col_nums);
+    int target_column = 0;
+
+    // Find the column number of the target feature in the data file,
+    // if any.
+    if (!target_feature.empty())
+        target_column = find_feature_position(file_name, target_feature);
+
+    // Get the list of indexes of features to ignore
+    vector<int> ignore_col_nums =
+        find_features_positions(file_name, ignore_features);
+
+    ostreamContainer(logger().info() << "Ignore the following columns: ",
+                     ignore_col_nums);
+
+    OC_ASSERT(boost::find(ignore_col_nums, target_column)
+                  == ignore_col_nums.end(),
+                  "You cannot ignore the target feature %s",
+                  target_feature.c_str());
+
+    res.tt = infer_data_type_tree(file_name, target_column, ignore_col_nums);
+    loadTable(file_name, res.itable, res.otable, res.tt, target_column, ignore_col_nums);
     return res;
 }
 

@@ -1199,29 +1199,10 @@ int moses_exec(int argc, char** argv)
         if (input_data_files.empty())
             no_input_datafile_exit();
 
-        // Find the column number of the target feature in the
-        // data file, if any.
-        int target_column = 0;
-        if (!target_feature.empty())
-            target_column = find_feature_position(input_data_files.front(),
-                                                  target_feature);
-        logger().info("Target column is %u", target_column);
-
-        // Get the list of indexes of features to ignore
-        vector<int> ignore_features =
-                       find_features_positions(input_data_files.front(),
-                                                  ignore_features_str);
-        ostreamContainer(logger().info() << "Ignore the following columns: ",
-                         ignore_features);
-        OC_ASSERT(boost::find(ignore_features, target_column)
-                  == ignore_features.end(),
-                  "You cannot ignore the target feature (column %d)",
-                  target_column);
-
         // Read input data files
         foreach (const string& idf, input_data_files) {
             logger().info("Read data file %s", idf.c_str());
-            Table table = loadTable(idf, target_column, ignore_features);
+            Table table = loadTable(idf, target_feature, ignore_features_str);
             // possible subsample the table
             if (nsamples > 0)
                 subsampleTable(table, nsamples);
@@ -1246,7 +1227,7 @@ int moses_exec(int argc, char** argv)
                 }
             }
         }
-        arity -= ignore_features.size();
+        arity -= ignore_features_str.size();
     }
 
     logger().info("Inferred arity = %d", arity);

@@ -96,7 +96,8 @@ set<arity_t> get_features_idx(const vector<string>& features,
 }
 
 vector<set<arity_t> > feature_sets(const eval_features_parameters& pa,
-                                   const vector<string>& labels) {
+                                   const vector<string>& labels)
+{
     vector<set<arity_t> > res;
     if(!pa.features.empty())
         res += get_features_idx(pa.features, labels, pa);
@@ -116,7 +117,8 @@ vector<set<arity_t> > feature_sets(const eval_features_parameters& pa,
 template<typename Scorer>
 void eval_output_results(const eval_features_parameters& pa,
                          const Scorer& sc,
-                         const vector<set<arity_t> >& feature_sets) {
+                         const vector<set<arity_t> >& feature_sets)
+{
     // compute feature quality for each feature set
     vector<double> qs;
     foreach(const set<arity_t>& fs, feature_sets)
@@ -128,7 +130,8 @@ void eval_output_results(const eval_features_parameters& pa,
 void eval_output_results(const eval_features_parameters& pa,
                          const vector<set<arity_t> > fss,
                          const ITable& it,
-                         const OTable& ot) {
+                         const OTable& ot)
+{
     
     typedef MICScorer<set<arity_t> > FSScorer;
 
@@ -137,8 +140,12 @@ void eval_output_results(const eval_features_parameters& pa,
     eval_output_results(pa, fs_sc, fss);
 }
 
-void read_eval_output_results(const eval_features_parameters& pa) {
-    Table table = loadTable(pa.input_file);
+void read_eval_output_results(const eval_features_parameters& pa)
+{
+    string target_feature;
+    vector<string> ignore_features;
+
+    Table table = loadTable(pa.input_file, target_feature, ignore_features);
 
     // determine labels
     vector<string> labels = readInputLabels(pa.input_file,

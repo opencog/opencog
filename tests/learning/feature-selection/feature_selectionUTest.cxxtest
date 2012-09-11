@@ -1,4 +1,4 @@
-/** feature_selectionUTest.cxxtest --- 
+/** feature_selectionUTest.cxxtest ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -42,12 +42,18 @@ class feature_selectionUTest : public CxxTest::TestSuite {
 public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
 
-    feature_selectionUTest() {        
+    feature_selectionUTest()
+    {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);
 
-        big_table = loadTable(FEATURE_SELECTION_TEST_DIR"big-dataset.csv");
-        small_table = loadTable(FEATURE_SELECTION_TEST_DIR"small-dataset.csv");
+        string target_feature;
+        vector<string> ignore_features;
+
+        big_table = loadTable(FEATURE_SELECTION_TEST_DIR"big-dataset.csv", 
+                    target_feature, ignore_features);
+        small_table = loadTable(FEATURE_SELECTION_TEST_DIR"small-dataset.csv",
+                    target_feature, ignore_features);
     }
 
     void test_incremental_selection_j1() {
@@ -62,13 +68,13 @@ public:
     void test_redundant_features_j4() {
         test_redundant_features(4);
     }
-    
+
     void test_moses_based_feature_selection_j1() {
         test_moses_based_feature_selection(1);
     }
 
 private:
-    
+
     void test_incremental_selection(unsigned n_jobs) {
         setting_omp(n_jobs);
 
@@ -76,12 +82,12 @@ private:
         FeatureScorer fs(ctable);
         set<arity_t> features(counting_iterator<arity_t>(0),
                               counting_iterator<arity_t>(big_table.get_arity()));
-        set<arity_t> selected_features = 
+        set<arity_t> selected_features =
             incremental_selection(features, fs, 0.1, 1, false);
 
         ostreamContainer(cout, selected_features);
         cout << endl;
-        
+
         TS_ASSERT_EQUALS(selected_features.size(), 6);
     }
 
@@ -96,7 +102,7 @@ private:
         ostreamContainer(cout, redundant);
         cout << endl;
 
-        TS_ASSERT_EQUALS(redundant.size(), 2);        
+        TS_ASSERT_EQUALS(redundant.size(), 2);
     }
 
     void test_moses_based_feature_selection(unsigned n_jobs) {
@@ -119,7 +125,7 @@ private:
         fsp.hc_fraction_of_remaining = 1;
 
         ostreamTable(std::cout << "small_table = ", small_table);
-        
+
         // run feature selection (put the result into fsp.output_file)
         feature_selection(small_table, fsp);
 

@@ -243,8 +243,9 @@ void loadTable(const std::string& file_name,
 /**
  * like above but return an object Table.
  */
-Table loadTable(const std::string& file_name, int pos = 0,
-                const std::vector<int>& ignore_col_nums = empty_int_vec);
+Table loadTable(const std::string& file_name, 
+                const std::string& target_feature,
+                const std::vector<std::string>& ignore_features);
 
 //////////////////
 // ostreamTable //
