@@ -87,22 +87,8 @@ type_node infer_type_from_token(const std::string& token);
 type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
                                         std::string>& row);
 
-// used as default of infer_data_type_tree and other IO function
+// used as default of various calls
 static const std::vector<int> empty_int_vec;
-
-/// Create a type tree describing the types of the input columns
-/// and the output column.
-///        
-/// @param output_col_num is the column we expect to use as the output
-/// (the dependent variable)
-///
-/// @param ignore_col_nums are a list of column to ignore
-///
-/// @return type_tree infered
-type_tree infer_data_type_tree(const std::string& fileName,
-                               int output_col_num = 0,
-                               const std::vector<int>& ignore_col_nums
-                               = empty_int_vec);
 
 /**
  * Find the column numbers associated with the names features

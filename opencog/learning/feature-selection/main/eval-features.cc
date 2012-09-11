@@ -117,16 +117,5 @@ int main(int argc,char** argv) {
               "You cannot ignore the target feature (column %d)",
               pa.target_feature);    
 
-    // Infer type tree
-    type_tree data_tt = infer_data_type_tree(pa.input_file,
-                                             pa.target_feature);
-    type_tree output_tt = get_signature_output(data_tt);
-    type_node data_type = get_type_node(output_tt);
-
-    if(data_type == id::boolean_type) {
-        read_eval_output_results(pa);
-    } else if(data_type == id::contin_type) {
-        read_eval_output_results(pa);
-    }
-
+    read_eval_output_results(pa);
 }
