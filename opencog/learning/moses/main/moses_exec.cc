@@ -1085,7 +1085,7 @@ int moses_exec(int argc, char** argv)
 
     char hname[256];
     gethostname(hname, 256);
-    logger().info("hostname: %s\n", hname);
+    logger().info("hostname: %s", hname);
 
     // Init random generator.
     randGen().seed(rand_seed);
