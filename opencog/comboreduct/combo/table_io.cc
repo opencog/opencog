@@ -490,17 +490,6 @@ void loadITable(const string& file_name, ITable& it, const type_tree& tt,
     istreamITable(in, it, hasHeader(file_name), tt, ignore_col_nums);
 }
  
-// XXX the below is deprecated, remove it asap.
-void loadITable(const string& file_name, ITable& it, const type_tree& tt,
-                const vector<int>& ignore_col_nums)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-
-    istreamITable(in, it, hasHeader(file_name), tt, ignore_col_nums);
-}
- 
 ITable loadITable(const string& file_name, const vector<string>& ignore_features)
 {
 

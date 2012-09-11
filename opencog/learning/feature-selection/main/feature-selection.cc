@@ -116,52 +116,47 @@ Table add_force_features(const Table& selected_table,
                          const Table& full_table,
                          const feature_selection_parameters& fs_params)
 {
-    const ITable& itable = selected_table.itable;
     // get forced features that have not been selected
+    const std::vector<std::string>& fsel = selected_table.itable.get_labels();
     std::vector<std::string> fnsel;
-    const auto& ilabels = itable.get_labels();
-    foreach(const std::string& fn, fs_params.force_features_str)
-        if (boost::find(ilabels, fn) == ilabels.cend())
+    foreach (const std::string& fn, fs_params.force_features_str)
+        if (boost::find(fsel, fn) == fsel.cend())
             fnsel.push_back(fn);
 
-    // get their positions
-    std::vector<int> fnsel_pos =
-        find_features_positions(fs_params.input_file, fnsel);
-    boost::sort(fnsel_pos);
+    // get the complement: all features except the above.
+    std::vector<std::string> all_feats = full_table.get_labels();
+    std::vector<std::string> fnot_sel_comp;
+    boost::set_difference(all_feats, fnsel, back_inserter(fnot_sel_comp));
 
-    // get the complementary of their positions
-    std::vector<int> fnsel_pos_comp;
-    auto ir = boost::irange(0, full_table.get_arity() + 1);
-    boost::set_difference(ir, fnsel_pos, back_inserter(fnsel_pos_comp));
-
-    // get header of the input table
-    auto header = loadHeader(fs_params.input_file);
-    
     // load the table with force_non_selected features with all
     // selected features with types definite_object (i.e. string) that
     // way the content is unchanged (convenient when the data contains
     // stuff that loadITable does not know how to interpret)
     ITable fns_itable;          // ITable from fnsel (+ output)
     type_tree tt = gen_signature(id::definite_object_type, fnsel.size());
-    loadITable(fs_params.input_file, fns_itable, tt, fnsel_pos_comp);
-
-    // Find the positions of the selected features
-    std::vector<int> fsel_pos =
-        find_features_positions(fs_params.input_file, ilabels);
+    loadITable(fs_params.input_file, fns_itable, tt, fnot_sel_comp);
 
     // insert the forced features in the right order
-    Table new_table;
-    new_table.otable = selected_table.otable;
-    new_table.itable = itable;
+    // TODO why do they need to be in order?? Can't we just append?
+    type_tree bogus;
+    Table new_table(selected_table.otable, selected_table.itable, bogus);
     // insert missing columns from fns_itable to new_table.itable
-    for (auto lit = fnsel_pos.cbegin(), rit = fsel_pos.cbegin();
-         lit != fnsel_pos.cend(); ++lit) {
-        int lpos = distance(fnsel_pos.cbegin(), lit);
-        auto lc = fns_itable.get_col(lpos);
-        while(rit != fsel_pos.cend() && *lit > *rit) ++rit;
-        int rpos = rit != fsel_pos.cend() ?
-            distance(fsel_pos.cbegin(), rit) + lpos : -1;
-        new_table.itable.insert_col(lc.first, lc.second, rpos);
+    int pos = 0;
+    int npos = 0;
+    for (auto f = all_feats.cbegin(); f != all_feats.cend(); ++f)
+    {
+        vector<string> labs = new_table.itable.get_labels();
+        if (*f == labs[pos]) {
+            pos ++;
+            continue;
+        }
+        if (*f == fnsel[npos]) {
+            auto data = fns_itable.get_column_data(*f);
+            new_table.itable.insert_col(*f, data, pos);
+            npos ++;
+            pos ++;
+            continue;
+        }
     }
 
     return new_table;

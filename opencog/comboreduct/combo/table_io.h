@@ -183,10 +183,6 @@ std::istream& istreamITable(std::istream& in, ITable& it,
 void loadITable(const std::string& file_name, ITable& it, const type_tree& tt,
                 const std::vector<std::string>& ignore_features);
 
-/// XXX deprecated, remove ASAP....
-void loadITable(const std::string& file_name, ITable& it, const type_tree& tt,
-                const std::vector<int>& ignore_col_nums);
-
 /**
  * Like above but return an ITable and automatically infer the tree
  * tree.

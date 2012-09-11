@@ -244,7 +244,9 @@ public:
         return res;
     }
 
-    // get binding map prior calling the combo evaluation
+    /// get binding map prior calling the combo evaluation
+    /// XXX Deprecated, to be removed when embodiment gets rid of
+    /// binding maps!
     binding_map get_binding_map(const vertex_seq& args) const
     {
         binding_map bmap;
@@ -252,7 +254,9 @@ public:
             bmap[i+1] = args[i];
         return bmap;
     }
-    // like above but only consider the arguments in as
+    /// like above but only consider the arguments in as
+    /// XXX Deprecated, to be removed when embodiment gets rid of
+    /// binding maps!
     binding_map get_binding_map(const vertex_seq& args, const arity_set& as) const
     {
         binding_map bmap;
@@ -290,34 +294,41 @@ public:
     }
 
     /**
-     * Insert a column col in the itable at position pos with label
-     * l. If pos is negative then it inserts after the last column.
+     * Insert a column 'col', named 'clab', after position 'off'
+     * If off is negative, then the insert is after the last column.
+     * TODO: we really should use iterators here, not column numbers.
      */
-    void insert_col(const std::string& l, const vertex_seq& col, int pos = -1) {
+    void insert_col(const std::string& clab, const vertex_seq& col, int off = -1)
+    {
         // insert label
-        labels.insert(pos >= 0 ? labels.begin() + pos : labels.end(), l);
+        labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
 
         // insert values
         if (empty()) {
-            OC_ASSERT(pos < 0);
+            OC_ASSERT(off < 0);
             foreach (const auto& v, col)
                 push_back({v});
         } else {
             for (unsigned i = 0; i < col.size(); i++) {
                 auto& row = (*this)[i];
-                row.insert(pos >= 0 ? row.begin() + pos : row.end(), col[i]);
+                row.insert(off >= 0 ? row.begin() + off : row.end(), col[i]);
             }
         }
     }
 
     /**
-     * Get the (pos+1)th column and its label
+     * Get the column, given its label
      */
-    std::pair<std::string, vertex_seq> get_col(int pos) const {
+    vertex_seq get_column_data(const std::string& name) const
+    {
         vertex_seq col;
+        auto pos = std::find(labels.begin(), labels.end(), name);
+        if (pos == labels.end())
+            return col;
+        int off = distance(labels.begin(), pos); 
         foreach (const auto& row, *this)
-            col.push_back(row[pos]);
-        return {labels[pos], col};
+            col.push_back(row[off]);
+        return col;
     }
 
 protected:
