@@ -287,13 +287,6 @@ void subsampleTable(Table& table, unsigned nsamples);
  */
 void subsampleTable(ITable& it, unsigned nsamples);
 
-/**
- * if the DSV data file has a header with labels
- */
-std::vector<std::string> readInputLabels(const std::string& file, int pos = 0,
-                                         const std::vector<int>& ignore_features
-                                         = empty_int_vec);
-
 std::ifstream* open_data_file(const std::string& fileName);
 
 std::ostream& operator<<(std::ostream& out, const ITable& it);

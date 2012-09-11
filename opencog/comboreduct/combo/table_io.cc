@@ -113,15 +113,6 @@ ifstream* open_data_file(const string& fileName)
     return in;
 }
 
-vector<string> readInputLabels(const string& file, int pos,
-                               const vector<int>& ignore_features)
-{
-    auto_ptr<ifstream> in(open_data_file(file));
-    string line;
-    get_data_line(*in, line);
-    return tokenizeRowIO<string>(line, pos, ignore_features).first;
-}
-
 arity_t dataFileArity(const string& fileName)
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
