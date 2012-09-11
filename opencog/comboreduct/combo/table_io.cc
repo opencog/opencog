@@ -402,20 +402,9 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
 }
 
 /**
- * like istreamTable above but take an string (file name) instead of
  * istream. If the file name is not correct then an OC_ASSERT is
  * raised.
  */
-void loadTable(const string& file_name, ITable& it, OTable& ot,
-               const type_tree& tt, int pos,
-               const vector<int>& ignore_col_nums)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable(in, it, ot, hasHeader(file_name), tt, pos, ignore_col_nums);
-}
-
 Table loadTable(const string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features)
@@ -441,7 +430,13 @@ Table loadTable(const string& file_name,
 
     Table res;
     res.tt = infer_data_type_tree(file_name, target_column, ignore_col_nums);
-    loadTable(file_name, res.itable, res.otable, res.tt, target_column, ignore_col_nums);
+
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+
+    istreamTable(in, res.itable, res.otable, hasHeader(file_name), res.tt, target_column, ignore_col_nums);
+
     return res;
 }
 
