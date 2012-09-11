@@ -342,6 +342,9 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
     return id::null_vertex;
 }
 
+// ===========================================================
+// istream regular tables.
+
 /**
  * Fill an input table and output table given a DSV
  * (delimiter-seperated values) file format, where delimiters are ',',
@@ -437,6 +440,24 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
  * raised.
  */
 Table loadTable(const string& file_name,
+                const type_tree& signature,
+                const std::string& target_feature,
+                const std::vector<std::string>& ignore_features)
+{
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+
+    Table res;
+    res.tt = signature;
+
+    istreamTable(in, res.itable, res.otable, hasHeader(file_name),
+                 res.tt, target_feature, ignore_features);
+
+    return res;
+}
+
+Table loadTable(const string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features)
 {
@@ -453,90 +474,8 @@ Table loadTable(const string& file_name,
     return res;
 }
 
-/**
- * Fill an input table give an istream of DSV file format, where
- * delimiters are ',',' ' or '\t'. All columns, except the
- * ignore_col_nums ones are considered for the ITable.
- */
-istream& istreamITable(istream& in, ITable& it,
-                       bool has_header, const type_tree& tt,
-                       const vector<string>& ignore_features)
-{
-    string line;
-    arity_t arity = type_tree_arity(tt);
-
-    // Get the list of indexes of features to ignore
-    vector<int> ignore_col_nums =
-        find_features_positions(in, ignore_features);
-
-    ostreamContainer(logger().info() << "Ignore the following columns: ",
-                     ignore_col_nums);
-
-    if (has_header) {
-        get_data_line(in, line);
-        vector<string> h = tokenizeRow<string>(line, ignore_col_nums);
-        it.set_labels(h);
-        OC_ASSERT(arity == (arity_t)h.size(),
-                  "Error: there must be a bug somewhere because the inferred "
-                  " arity (%d) doesn't match the number of columns (%u)",
-                  arity, h.size());
-    }
-
-    // Copy the input types to a vector; we need this to pass as an
-    // argument to boost::transform, below.
-    vector<type_node> vin_types;   // vector of input types
-    transform(get_signature_inputs(tt),
-              back_inserter(vin_types), get_type_node);
-
-    // Read all lines at once as it appears to be faster
-    std::vector<string> lines;
-    while (get_data_line(in, line))
-        lines.push_back(line);
-    int ls = lines.size();
-    it.resize(ls);
-
-    // vector of indices [0, ls)
-    auto ir = boost::irange(0, ls);
-    vector<size_t> indices(ir.begin(), ir.end());
-
-    auto parse_line = [&](int i) {
-        // tokenize the line and fill the input vector and output
-        vector<string> vs = tokenizeRow<string>(lines[i], ignore_col_nums);
-
-        // check arity
-        OC_ASSERT(arity == (arity_t)vs.size(),
-                  "ERROR: Input file inconsistent: the %uth row has %u "
-                  "columns while the first row has %d columns.  All "
-                  "rows should have the same number of columns.\n",
-                  i + 1, vs.size(), arity);
-
-        // fill table, based on the types passed in the type-tree
-        transform(vin_types, vs, back_inserter(it[i]), token_to_vertex);
-    };
-    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
-    return in;
-}
-
-void loadITable(const string& file_name, ITable& it, const type_tree& tt,
-                const vector<string>& ignore_features)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-
-    istreamITable(in, it, hasHeader(file_name), tt, ignore_features);
-}
-
-ITable loadITable(const string& file_name, const vector<string>& ignore_features)
-{
-    type_tree tt = infer_data_type_tree(file_name, "", ignore_features);
-    // append an unknown type child at the end for the output
-    tt.append_child(tt.begin(), id::unknown_type);
-
-    ITable res;
-    loadITable(file_name, res, tt, ignore_features);
-    return res;
-}
+// ===========================================================
+// ostream regular tables
 
 /// output the header of a data table in CSV format.
 ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot)
@@ -586,6 +525,9 @@ void saveTable(const string& file_name, const Table& table)
     ostreamTable(out, table.itable, table.otable);
 }
 
+// ===========================================================
+// ostream CTables
+
 ostream& ostreamCTableHeader(ostream& out, const CTable& ct)
 {
     out << ct.olabel << ",";
@@ -611,6 +553,9 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
     }
     return out;
 }
+
+// ===========================================================
+// subsample stuff
 
 void subsampleTable(ITable& it, OTable& ot, unsigned nsamples)
 {
@@ -639,6 +584,9 @@ void subsampleTable(ITable& it, unsigned nsamples) {
         }
     }
 }
+
+// ===========================================================
+// operator<< for the various tables and stuff.
 
 ostream& operator<<(ostream& out, const ITable& it)
 {

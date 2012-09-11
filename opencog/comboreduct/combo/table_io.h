@@ -139,21 +139,6 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
 // istreamTable //
 //////////////////
 
-
-/**
- * Like above but takes a file_name instead of a istream and
- * automatically infer whether it has header.
- */
-void loadITable(const std::string& file_name, ITable& it, const type_tree& tt,
-                const std::vector<std::string>& ignore_features);
-
-/**
- * Like above but return an ITable and automatically infer the tree
- * tree.
- */
-ITable loadITable(const std::string& file_name,
-                  const std::vector<std::string>& ignore_features);
-
 /**
  * like above but return an object Table.
  */
@@ -161,9 +146,15 @@ Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features);
 
+Table loadTable(const std::string& file_name,
+                const type_tree& signature,
+                const std::string& target_feature,
+                const std::vector<std::string>& ignore_features);
+
 /// XXX deprecated, remove at first opporunity.
 std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
-                           bool has_header, const type_tree& tt, 
+                           bool has_header,
+                           const type_tree& signature, 
                            const std::string& target_feature,
                            const std::vector<std::string>& ignore_features);
 
