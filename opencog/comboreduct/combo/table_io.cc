@@ -114,7 +114,10 @@ vector<string> loadHeader(const string& file_name)
     return tokenizeRow<string>(line);
 }
 
-//* Return true if the table seems to have a header line in it.
+/**
+ * check if the data file has a header. That is whether the first row
+ * starts with a sequence of output and input labels
+ */
 bool hasHeader(const string& dataFileName)
 {
     type_node n = infer_type_from_token(loadHeader(dataFileName).front());

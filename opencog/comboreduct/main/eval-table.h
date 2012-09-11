@@ -130,15 +130,8 @@ void read_eval_output_results(evalTableParameters& pa)
     if (pa.target_feature_str.empty())
         table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
     else {
-        // check that the target feature is in the data file, and load
-        // the whole table if it is, instead of the itable
-        auto header = loadHeader(pa.input_table_file);
-        if (boost::find(header, pa.target_feature_str) == header.end())
-            table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
-        else {
-            table = loadTable(pa.input_table_file, pa.target_feature_str,
+        table = loadTable(pa.input_table_file, pa.target_feature_str,
                               pa.ignore_features_str);
-        }
     }
 
     ITable& it = table.itable;
