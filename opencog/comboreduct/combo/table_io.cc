@@ -168,12 +168,12 @@ type_node infer_type_from_token(const string& token)
  *
  * If the target is numeric, just assume that it is a column number.
  */
-vector<int> find_features_positions(const string& fileName,
+vector<int> find_features_positions(istream& in,
                                     const vector<string>& features)
 {
-    unique_ptr<ifstream> in(open_data_file(fileName));
+    auto curpos = in.tellg();
     string line;
-    get_data_line(*in, line);
+    get_data_line(in, line);
     vector<string> labels = tokenizeRow<string>(line);
     vector<int> positions;
 
@@ -184,26 +184,35 @@ vector<int> find_features_positions(const string& fileName,
             pos = atoi(f.c_str());
             pos --;  // let users number columns starting at 1.
             OC_ASSERT((pos < (int)labels.size()) || (0 <= pos),
-                      "ERROR: The column number \"%s\" doesn't exist in data file %s",
-                      f.c_str(), fileName.c_str());
+                      "ERROR: The column number \"%s\" doesn't exist",
+                      f.c_str());
         }
         else {
             // Not numeric; search for the column name
             pos = distance(labels.begin(), find(labels, f));
             OC_ASSERT((pos < (int)labels.size()) || (0 <= pos),
-                      "ERROR: There is no column labelled \"%s\" in data file %s",
-                      f.c_str(), fileName.c_str());
+                      "ERROR: There is no column labelled \"%s\"",
+                      f.c_str());
         }
         positions.push_back(pos);
     }
+    in.seekg(curpos);
     return positions;
+}
+
+vector<int> find_features_positions(const string& fileName,
+                                    const vector<string>& features)
+{
+    unique_ptr<ifstream> in(open_data_file(fileName));
+    return find_features_positions(*in, features);
 }
 
 // Like above but takes only a single feature
 int find_feature_position(const string& fileName, const string& feature)
 {
     vector<string> features{feature};
-    return find_features_positions(fileName, features).back();
+    unique_ptr<ifstream> in(open_data_file(fileName));
+    return find_features_positions(*in, features).back();
 }
 
 /**
