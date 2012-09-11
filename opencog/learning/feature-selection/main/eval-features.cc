@@ -104,10 +104,5 @@ int main(int argc, char** argv)
 
     // init random generator
     randGen().seed(rand_seed);
-
-    // Find the position of the target feature (the first one by default)
-    pa.target_feature = target_feature_str.empty()? 0
-        : find_feature_position(pa.input_file, target_feature_str);
-
     read_eval_output_results(pa);
 }

@@ -66,7 +66,6 @@ struct eval_features_parameters
     string input_file;
     string scorer;
     vector<string> features;
-    int target_feature;
     string features_file;
     string output_file;
     double confidence_penalty_intensity;
