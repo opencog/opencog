@@ -117,8 +117,8 @@ Table add_force_features(const Table& selected_table,
                          const feature_selection_parameters& fs_params)
 {
     // get forced features that have not been selected
-    const std::vector<std::string>& fsel = selected_table.itable.get_labels();
-    std::vector<std::string> fnsel;
+    const vector<string>& fsel = selected_table.itable.get_labels();
+    vector<string> fnsel;
     foreach (const std::string& fn, fs_params.force_features_str)
         if (boost::find(fsel, fn) == fsel.cend())
             fnsel.push_back(fn);
@@ -127,6 +127,10 @@ Table add_force_features(const Table& selected_table,
     std::vector<std::string> all_feats = full_table.get_labels();
     std::vector<std::string> fnot_sel_comp;
     boost::set_difference(all_feats, fnsel, back_inserter(fnot_sel_comp));
+
+    // If nothing to do, we are done.
+    if (0 == fnsel.size())
+        return selected_table;
 
     // load the table with force_non_selected features with all
     // selected features with types definite_object (i.e. string) that
@@ -138,16 +142,20 @@ Table add_force_features(const Table& selected_table,
 
     // insert the forced features in the right order
     // TODO why do they need to be in order?? Can't we just append?
+    // If we really do need to keep things in order, then should
+    // probably redo insert_col() to use iterators...
     type_tree bogus;
     Table new_table(selected_table.otable, selected_table.itable, bogus);
+
     // insert missing columns from fns_itable to new_table.itable
-    int pos = 0;
-    int npos = 0;
+    size_t pos = 0;
+    size_t npos = 0;
     for (auto f = all_feats.cbegin(); f != all_feats.cend(); ++f)
     {
         vector<string> labs = new_table.itable.get_labels();
         if (*f == labs[pos]) {
             pos ++;
+            if (pos == labs.size()) break;
             continue;
         }
         if (*f == fnsel[npos]) {
@@ -155,6 +163,8 @@ Table add_force_features(const Table& selected_table,
             new_table.itable.insert_col(*f, data, pos);
             npos ++;
             pos ++;
+            if (pos == labs.size()) break;
+            if (npos == fnsel.size()) break;
             continue;
         }
     }
