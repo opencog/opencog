@@ -160,6 +160,14 @@ Table::Table(const combo_tree& tr, int nsamples,
     tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
     otable(tr, itable) {}
 
+vector<string> Table::get_labels() const
+{
+    vector<string> labels = itable.get_labels();
+    labels.push_back(otable.get_label());
+    return labels;
+}
+
+// -------------------------------------------------------
 complete_truth_table::size_type
 complete_truth_table::hamming_distance(const complete_truth_table& other) const
 {

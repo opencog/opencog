@@ -1212,6 +1212,7 @@ int moses_exec(int argc, char** argv)
     // Input data for table-based problems.
     vector<Table> tables;
     vector<CTable> ctables;
+    vector<string> labels;
 
     // Problem based on input table.
     if (datafile_based_problem(problem))
@@ -1230,6 +1231,10 @@ int moses_exec(int argc, char** argv)
             ctables.push_back(table.compressed());
         }
 
+        // Get the labels contained in the data file.
+        if (output_with_labels)
+            labels = tables.front().get_labels();
+
         arity = tables.front().get_arity();
 
         // Check that all input data files have the same arity
@@ -1247,12 +1252,6 @@ int moses_exec(int argc, char** argv)
     }
 
     logger().info("Inferred arity = %d", arity);
-
-    // Read labels contained in the data file.
-    vector<string> labels;
-    if (output_with_labels && !input_data_files.empty())
-        labels = readInputLabels(input_data_files.front(), target_column,
-                                 ignore_features);
 
     // Set metapop printer parameters.
     metapop_printer mmr_pa(result_count,

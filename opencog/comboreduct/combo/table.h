@@ -405,6 +405,7 @@ private:
  */
 struct Table
 {
+    typedef std::vector<std::string> string_seq;
     typedef vertex value_type;
 
     Table();
@@ -422,6 +423,7 @@ struct Table
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
     const type_tree& get_signature() const { return tt; }
+    string_seq get_labels() const;
     
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
