@@ -82,7 +82,7 @@ static const std::vector<int> empty_int_vec;
 
 /**
  * Find the column numbers associated with the names features
- * 
+ *
  * If the target begins with an alpha character, it is assumed to be a
  * column label. We return the column number; 0 is the left-most column.
  *
@@ -143,7 +143,7 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
     int i = 0;
     foreach (const std::string& t, tok) {
         // Some input files contain multiple delimiters between columns
-        // (e.g. two or three spaces between numeric columns).  This 
+        // (e.g. two or three spaces between numeric columns).  This
         // results in empty columns.  Ignore these, and don't i++ either.
         if (0 == t.size()) continue;
 
@@ -217,7 +217,7 @@ void loadTable(const std::string& file_name,
 /**
  * like above but return an object Table.
  */
-Table loadTable(const std::string& file_name, 
+Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features);
 
@@ -225,36 +225,18 @@ Table loadTable(const std::string& file_name,
 // ostreamTable //
 //////////////////
 
-// output the header of a data table in CSV format. target_pos is the
-// column index of the target. If -1 then it is the last one.
-std::ostream& ostreamTableHeader(std::ostream& out,
-                                 const ITable& it, const OTable& ot,
-                                 int target_pos = 0);
-
-// output a data table in CSV format. Boolean values are output in
-// binary form (0 for false, 1 for true). target_pos is the column
-// index of the target. If -1 then it is the last one.
-// XXX deprecated
+/// output a data table in CSV format. Boolean values are output in
+/// binary form (0 for false, 1 for true).
 std::ostream& ostreamTable(std::ostream& out,
-                           const ITable& it, const OTable& ot,
-                           int target_pos = 0);
-// like above but take a table instead of an input and output table
+                           const ITable& it, const OTable& ot);
+
+/// like above but take a table instead of an input and output table
 std::ostream& ostreamTable(std::ostream& out, const Table& table);
-std::ostream& ostreamTable(std::ostream& out, const Table& table, int target_column);
 
-// like above but takes the file name where to write the table
-// XXX deprecated
-void saveTable(const std::string& file_name,
-               const ITable& it, const OTable& ot,
-               int target_pos = 0);
-// like above but take a table instead of a input and output table
+/// like above but take a table instead of a input and output table
 void saveTable(const std::string& file_name, const Table& table);
-void saveTable(const std::string& file_name, const Table& table, int target_column);
 
-// like ostreamTableHeader but on a compressed table
-std::ostream& ostreamCTableHeader(std::ostream& out, const CTable& ct);
-
-// output a compress table in pseudo CSV format
+/// output a compressed table in pseudo CSV format
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
 
 /**
@@ -279,9 +261,9 @@ std::ostream& operator<<(std::ostream& out, const ITable& it);
 
 std::ostream& operator<<(std::ostream& out, const OTable& ot);
 
-std::ostream& operator<<(std::ostream& out, const complete_truth_table& tt);
-
 std::ostream& operator<<(std::ostream& out, const CTable& ct);
+
+std::ostream& operator<<(std::ostream& out, const complete_truth_table& tt);
 
 }} // ~namespaces combo opencog
 

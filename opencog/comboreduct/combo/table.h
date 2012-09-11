@@ -82,7 +82,7 @@ public:
     // Definition is delayed until after Table, as it uses Table.
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
-    
+
     CTable(const std::string& _olabel, const string_seq& _ilabels)
         : olabel(_olabel), ilabels(_ilabels) {}
 
@@ -129,19 +129,19 @@ public:
         foreach(arity_t a, filter) res.push_back(seq[a]);
         return res;
     }
-    
+
     template<typename F>
     CTable filtered(const F& filter) const {
         typedef type_tree::iterator pre_it;
         typedef type_tree::sibling_iterator sib_it;
-        
+
         // Filter the labels
         CTable res(olabel, filtered(filter, ilabels));
-        
+
         // Filter the rows
         foreach(const CTable::value_type v, *this)
             res[filtered(filter, v.first)] += v.second;
-        
+
         // Filter the type tree
         res.tt = tt;
         pre_it head_it = res.tt.begin();
@@ -149,7 +149,7 @@ public:
         OC_ASSERT((int)tt.number_of_children(head_it) == get_arity() + 1);
         sib_it sib = head_it.begin();
         foreach(arity_t a, filter) res.tt.erase(std::next(sib, a));
-        
+
         // return the filtered CTable
         return res;
     }
@@ -167,7 +167,7 @@ public:
         }
         return seq;
     }
-    
+
     /**
      * Like filtered but preserve the indices on the columns,
      * techincally it replaces all input values filtered out by
@@ -177,14 +177,14 @@ public:
     CTable filtered_preverse_idxs(const F& filter) const {
         typedef type_tree::iterator pre_it;
         typedef type_tree::sibling_iterator sib_it;
-        
+
         // Set new CTable
         CTable res(olabel, ilabels);
-        
+
         // Filter the rows (replace filtered out values by id::null_vertex)
         foreach(const CTable::value_type v, *this)
             res[filtered_preverse_idxs(filter, v.first)] += v.second;
-        
+
         // return the filtered CTable
         return res;
     }
@@ -198,7 +198,7 @@ public:
 
 };
 
-        
+
 
 /**
  * Input table of vertexes.
@@ -325,7 +325,7 @@ public:
         auto pos = std::find(labels.begin(), labels.end(), name);
         if (pos == labels.end())
             return col;
-        int off = distance(labels.begin(), pos); 
+        int off = distance(labels.begin(), pos);
         foreach (const auto& row, *this)
             col.push_back(row[off]);
         return col;
@@ -431,15 +431,15 @@ struct Table
         tt(gen_signature(type_node_of<bool>(),
                          type_node_of<bool>(), a)),
         itable(tt), otable(func, itable) {}
-    
+
     Table(const combo_tree& tr, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
     const type_tree& get_signature() const { return tt; }
     string_seq get_labels() const;
-    int get_target_column() const { return target_column; }
-    
+    const std::string& get_target() const { return otable.get_label(); }
+
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
     // (starting from 0).
@@ -456,9 +456,6 @@ struct Table
     type_tree tt;
     ITable itable;
     OTable otable;
-
-    // TODO: Maybe taget_column should be deprecated !?
-    int target_column;
 };
 
 template<typename Func>
@@ -467,7 +464,7 @@ CTable::CTable(const Func& func, arity_t arity, int nsamples) {
     *this = table.compressed();
 }
 
-        
+
 ////////////////////////
 // Mutual Information //
 ////////////////////////
@@ -486,7 +483,7 @@ double OTEntropy(const OTable& ot);
  * whereas the input features are specified as a set of indexes giving
  * columns in the input table ITable.
  *
- * The mutual information 
+ * The mutual information
  *
  *   MI(Y; X1, ..., Xn)
  *
@@ -532,7 +529,7 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
     return entropy(ip) + OTEntropy(ot) - entropy(iop);
 }
 
-// Like the above, but taking a table in argument instead of 
+// Like the above, but taking a table in argument instead of
 // input and output tables
 template<typename FeatureSet>
 double mutualInformation(const Table& table, const FeatureSet& fs)

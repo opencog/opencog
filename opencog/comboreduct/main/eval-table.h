@@ -66,7 +66,6 @@ struct evalTableParameters
     vector<string> combo_programs;
     string combo_programs_file;
     string target_feature_str;
-    int target_column;
     vector<string> ignore_features_str;
     vector<int> ignore_features;
     bool has_labels;
@@ -83,7 +82,7 @@ Out& output_results(Out& out, const evalTableParameters& pa, const ITable& it,
                     const OTable& ot_tr)
 {
     if (pa.display_inputs)
-        ostreamTable(out, it, ot_tr, pa.target_column); // print io table
+        ostreamTable(out, it, ot_tr); // print io table
     else
         out << ot_tr; // print output table
     return out;
@@ -139,7 +138,6 @@ void read_eval_output_results(evalTableParameters& pa)
         else {
             table = loadTable(pa.input_table_file, pa.target_feature_str,
                               pa.ignore_features_str);
-            pa.target_column = table.target_column;
         }
     }
 

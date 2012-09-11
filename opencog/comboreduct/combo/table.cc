@@ -75,7 +75,7 @@ ITable::ITable(const type_tree& tt, int nsamples,
             else if (n == id::unknown_type)
                 vs.push_back(vertex()); // push default vertex
             else
-                OC_ASSERT(false, "Not implemented yet");                    
+                OC_ASSERT(false, "Not implemented yet");
 
         // input vector
         push_back(vs);

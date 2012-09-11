@@ -132,8 +132,8 @@ type_node infer_type_from_token(const string& token)
     /* Prefered representation is T's and 0's, to maximize clarity,
      * readability.  Numeric values are easily confused with contin
      * type.
-     */ 
-    if (token == "0" || 
+     */
+    if (token == "0" ||
         token == "1" ||
         token == "T" ||
         token == "F" ||
@@ -159,7 +159,7 @@ type_node infer_type_from_token(const string& token)
 
 /**
  * Find the column numbers associated with the names features
- * 
+ *
  * If the target begins with an alpha character, it is assumed to be a
  * column label. We return the column number; 0 is the left-most column.
  *
@@ -173,7 +173,7 @@ vector<int> find_features_positions(const string& fileName,
     get_data_line(*in, line);
     vector<string> labels = tokenizeRow<string>(line);
     vector<int> positions;
-    
+
     foreach (const string& f, features) {
         // If its just numeric, go with it; double-check the value.
         int pos;
@@ -202,7 +202,7 @@ int find_feature_position(const string& fileName, const string& feature)
     vector<string> features{feature};
     return find_features_positions(fileName, features).back();
 }
-        
+
 type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 {
     type_tree tt(id::lambda_type);
@@ -226,7 +226,7 @@ type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 
 /// Create a type tree describing the types of the input columns
 /// and the output column.
-///        
+///
 /// @param output_col_num is the column we expect to use as the output
 /// (the dependent variable)
 ///
@@ -310,7 +310,7 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
     case id::definite_object_type:
         return token;
         break;
- 
+
     default:
         stringstream ss;
         ss << "Unable to handle input type=" << tipe << endl;
@@ -350,7 +350,7 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     // Dependent column type.
     type_node out_type = get_type_node(get_signature_output(tt));
 
-    std::vector<string> lines; 
+    std::vector<string> lines;
     while (get_data_line(in, line))
         lines.push_back(line);
     int ls = lines.size();
@@ -360,7 +360,7 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     // vector of indices [0, lines.size())
     auto ir = boost::irange(0, ls);
     vector<size_t> indices(ir.begin(), ir.end());
-    
+
     auto parse_line = [&](int i) {
         // tokenize the line and fill the input vector and output
         pair<vector<string>, string> io = tokenizeRowIO<string>(lines[i], pos,
@@ -380,7 +380,7 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
     return in;
 }
-        
+
 void loadTable(const string& file_name, ITable& it, OTable& ot,
                const type_tree& tt, int pos,
                const vector<int>& ignore_col_nums)
@@ -391,7 +391,7 @@ void loadTable(const string& file_name, ITable& it, OTable& ot,
     istreamTable(in, it, ot, hasHeader(file_name), tt, pos, ignore_col_nums);
 }
 
-Table loadTable(const string& file_name, 
+Table loadTable(const string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features)
 {
@@ -415,7 +415,6 @@ Table loadTable(const string& file_name,
                   target_feature.c_str());
 
     Table res;
-    res.target_column = target_column;
     res.tt = infer_data_type_tree(file_name, target_column, ignore_col_nums);
     loadTable(file_name, res.itable, res.otable, res.tt, target_column, ignore_col_nums);
     return res;
@@ -445,7 +444,7 @@ istream& istreamITable(istream& in, ITable& it,
               back_inserter(vin_types), get_type_node);
 
     // Read all lines at once as it appears to be faster
-    std::vector<string> lines; 
+    std::vector<string> lines;
     while (get_data_line(in, line))
         lines.push_back(line);
     int ls = lines.size();
@@ -454,7 +453,7 @@ istream& istreamITable(istream& in, ITable& it,
     // vector of indices [0, ls)
     auto ir = boost::irange(0, ls);
     vector<size_t> indices(ir.begin(), ir.end());
-    
+
     auto parse_line = [&](int i) {
         // tokenize the line and fill the input vector and output
         vector<string> vs = tokenizeRow<string>(lines[i], ignore_col_nums);
@@ -489,7 +488,7 @@ void loadITable(const string& file_name, ITable& it, const type_tree& tt,
 
     istreamITable(in, it, hasHeader(file_name), tt, ignore_col_nums);
 }
- 
+
 ITable loadITable(const string& file_name, const vector<string>& ignore_features)
 {
 
@@ -508,47 +507,37 @@ ITable loadITable(const string& file_name, const vector<string>& ignore_features
     loadITable(file_name, res, tt, ignore_features);
     return res;
 }
-        
-ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot,
-                            int target_pos)
+
+/// output the header of a data table in CSV format.
+ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot)
 {
-    const auto& ils = it.get_labels();
-    const string& ol = ot.get_label();
-    int is = ils.size();
-    vector<string> header = ils;
-    OC_ASSERT(target_pos <= is);
-    if (target_pos < 0)
-        header.push_back(ol);
-    else
-        header.insert(header.begin() + target_pos, ol);
+    vector<string> header = it.get_labels();
+    header.insert(header.begin(), ot.get_label());
     return ostreamContainer(out, header, ",") << endl;
 }
 
 string vertex_to_str(const vertex& v)
 {
     stringstream ss;
-    if(is_boolean(v))
+    if (is_boolean(v))
         ss << vertex_to_bool(v);
     else
         ss << v;
     return ss.str();
 }
 
-ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
-                      int target_pos)
+ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot)
 {
     // print header
-    ostreamTableHeader(out, it, ot, target_pos);
+    ostreamTableHeader(out, it, ot);
     // print data
     OC_ASSERT(it.size() == ot.size());
-    for(size_t row = 0; row < it.size(); ++row) {
+    for (size_t row = 0; row < it.size(); ++row) {
         vector<string> content;
         boost::transform(it[row], back_inserter(content), vertex_to_str);
         string oc = vertex_to_str(ot[row]);
-        if (target_pos < 0)
-            content.push_back(oc);
-        else
-            content.insert(content.begin() + target_pos, oc);
+        // output column is always first.
+        content.insert(content.begin(), oc);
         ostreamContainer(out, content, ",") << endl;
     }
     return out;
@@ -556,33 +545,15 @@ ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
 
 ostream& ostreamTable(ostream& out, const Table& table)
 {
-    return ostreamTable(out, table.itable, table.otable, table.target_column);
-}
-
-// XXX deprecated
-ostream& ostreamTable(ostream& out, const Table& table, int target_column)
-{
-    return ostreamTable(out, table.itable, table.otable, target_column);
-}
-
-void saveTable(const string& file_name, const ITable& it, const OTable& ot,
-               int target_pos)
-{
-    OC_ASSERT(!file_name.empty(), "No filename specified!");
-    ofstream out(file_name.c_str());
-    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, it, ot, target_pos);
+    return ostreamTable(out, table.itable, table.otable);
 }
 
 void saveTable(const string& file_name, const Table& table)
 {
-    saveTable(file_name, table.itable, table.otable, table.target_column);
-}
-
-// XXX deprecated
-void saveTable(const string& file_name, const Table& table, int target_column)
-{
-    saveTable(file_name, table.itable, table.otable, target_column);
+    OC_ASSERT(!file_name.empty(), "No filename specified!");
+    ofstream out(file_name.c_str());
+    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
+    ostreamTable(out, table.itable, table.otable);
 }
 
 ostream& ostreamCTableHeader(ostream& out, const CTable& ct)

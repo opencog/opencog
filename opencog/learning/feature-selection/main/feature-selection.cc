@@ -162,39 +162,15 @@ Table add_force_features(const Table& selected_table,
     return new_table;
 }
 
-int update_target_feature(const Table& table,
-                          const feature_selection_parameters& fs_params)
-{
-    int tfp = table.get_target_column();
-    if (tfp <= 0)               // it is either first or last
-        return tfp;
-    else {
-        // Find the positions of the selected features
-        std::vector<int> fsel_pos =
-            find_features_positions(fs_params.input_file,
-                                    table.itable.get_labels());
-        if (tfp < fsel_pos.front()) // it is first
-            return 0;
-        else if (tfp > fsel_pos.back()) // it is last
-            return -1;
-        else {                  // it is somewhere in between
-            auto it = boost::adjacent_find(fsel_pos, [tfp](int l, int r) {
-                    return l < tfp && tfp < r; });
-            return distance(fsel_pos.begin(), ++it);
-        }
-    }
-}
-
 void write_results(const Table& selected_table,
                    const Table& full_table,
                    const feature_selection_parameters& fs_params)
 {
     Table table_wff = add_force_features(selected_table, full_table, fs_params);
-    int tfp = update_target_feature(table_wff, fs_params);
     if (fs_params.output_file.empty())
-        ostreamTable(std::cout, table_wff, tfp);
+        ostreamTable(std::cout, table_wff);
     else
-        saveTable(fs_params.output_file, table_wff, tfp);
+        saveTable(fs_params.output_file, table_wff);
 }
 
 instance initial_instance(const feature_selection_parameters& fs_params,
