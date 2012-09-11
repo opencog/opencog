@@ -427,6 +427,7 @@ struct Table
     arity_t get_arity() const { return itable.get_arity(); }
     const type_tree& get_signature() const { return tt; }
     string_seq get_labels() const;
+    int get_target_column() const { return target_column; }
     
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
@@ -444,6 +445,9 @@ struct Table
     type_tree tt;
     ITable itable;
     OTable otable;
+
+    // TODO: Maybe taget_column should be deprecated !?
+    int target_column;
 };
 
 template<typename Func>

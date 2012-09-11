@@ -356,10 +356,6 @@ int main(int argc, char** argv)
     logger().info("Read input file %s", fs_params.input_file.c_str());
     // ~Logger
 
-    // Find the position of the target feature (the first one by default)
-    fs_params.target_feature = target_feature_str.empty()? 0
-        : find_feature_position(fs_params.input_file, target_feature_str);
-
     // fs_params.ignore_features_str = ignore_features_str;
 
     // Read input_data_file file

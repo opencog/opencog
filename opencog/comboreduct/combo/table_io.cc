@@ -408,7 +408,6 @@ Table loadTable(const string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features)
 {
-    Table res;
     int target_column = 0;
 
     // Find the column number of the target feature in the data file,
@@ -428,6 +427,8 @@ Table loadTable(const string& file_name,
                   "You cannot ignore the target feature %s",
                   target_feature.c_str());
 
+    Table res;
+    res.target_column = target_column;
     res.tt = infer_data_type_tree(file_name, target_column, ignore_col_nums);
     loadTable(file_name, res.itable, res.otable, res.tt, target_column, ignore_col_nums);
     return res;

@@ -160,8 +160,9 @@ Table add_force_features(const Table& table,
 }
 
 int update_target_feature(const Table& table,
-                          const feature_selection_parameters& fs_params) {
-    int tfp = fs_params.target_feature;
+                          const feature_selection_parameters& fs_params)
+{
+    int tfp = table.get_target_column();
     if (tfp <= 0)               // it is either first or last
         return tfp;
     else {
