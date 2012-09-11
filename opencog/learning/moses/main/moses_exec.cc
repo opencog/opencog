@@ -1185,27 +1185,6 @@ int moses_exec(int argc, char** argv)
         vm, jobs, local, max_evals, max_gens, max_score);
     moses_params.mpi = enable_mpi;
 
-    // Find the column number of the target feature in the data file,
-    // if any.
-    int target_column = 0;
-    if (!target_feature.empty() && !input_data_files.empty())
-        target_column = find_feature_position(input_data_files.front(),
-                                              target_feature);
-    logger().info("Target column is %u", target_column);
-
-    // Get the list of indexes of features to ignore
-    vector<int> ignore_features;
-    if (!input_data_files.empty()) {
-        ignore_features = find_features_positions(input_data_files.front(),
-                                                  ignore_features_str);
-        ostreamContainer(logger().info() << "Ignore the following columns: ",
-                         ignore_features);
-        OC_ASSERT(boost::find(ignore_features, target_column)
-                  == ignore_features.end(),
-                  "You cannot ignore the target feature (column %d)",
-                  target_column);
-    }
-
     // Infer arity
     combo::arity_t arity = infer_arity(problem, problem_size, combo_str);
 
@@ -1219,6 +1198,25 @@ int moses_exec(int argc, char** argv)
     {
         if (input_data_files.empty())
             no_input_datafile_exit();
+
+        // Find the column number of the target feature in the
+        // data file, if any.
+        int target_column = 0;
+        if (!target_feature.empty())
+            target_column = find_feature_position(input_data_files.front(),
+                                                  target_feature);
+        logger().info("Target column is %u", target_column);
+
+        // Get the list of indexes of features to ignore
+        vector<int> ignore_features =
+                       find_features_positions(input_data_files.front(),
+                                                  ignore_features_str);
+        ostreamContainer(logger().info() << "Ignore the following columns: ",
+                         ignore_features);
+        OC_ASSERT(boost::find(ignore_features, target_column)
+                  == ignore_features.end(),
+                  "You cannot ignore the target feature (column %d)",
+                  target_column);
 
         // Read input data files
         foreach (const string& idf, input_data_files) {
