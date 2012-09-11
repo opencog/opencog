@@ -87,6 +87,18 @@ void ITable::set_labels(const vector<string>& il)
     labels = il;
 }
 
+static const std::string default_input_label("i");
+
+vector<string> ITable::get_default_labels() const
+{
+    string_seq res;
+    for (arity_t i = 1; i <= get_arity(); ++i)
+        res.push_back(default_input_label
+                      + boost::lexical_cast<std::string>(i));
+    return res;
+}
+
+
 const vector<string>& ITable::get_labels() const
 {
     if (labels.empty() and !super::empty()) // return default labels

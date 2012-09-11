@@ -45,8 +45,6 @@ namespace opencog { namespace combo {
 // Generic table //
 ///////////////////
 
-static const std::string default_input_label("i");
-
 /// CTable is a "compressed" table.  Compression is done by removing
 /// duplicated inputs, and the output column is replaced by a counter
 /// of the duplicated outputs.  That is, the output column is of the
@@ -335,14 +333,7 @@ protected:
     mutable string_seq labels; // list of input labels
 
 private:
-    string_seq get_default_labels() const
-    {
-        string_seq res;
-        for(arity_t i = 1; i <= get_arity(); ++i)
-            res.push_back(default_input_label
-                          + boost::lexical_cast<std::string>(i));
-        return res;
-    }
+    string_seq get_default_labels() const;
 
     /**
      * this function take an arity in input and returns in output the
