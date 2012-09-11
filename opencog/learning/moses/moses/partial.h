@@ -96,9 +96,9 @@ class partial_solver
                         const combo_tree::iterator,
                         unsigned& deleted,   // return value
                         unsigned& total);    // return value
-        void refresh(const bscored_combo_tree_set&);
+        void refresh(const bscored_combo_tree_ptr_set&);
 
-        void final_cleanup(const bscored_combo_tree_set&);
+        void final_cleanup(const bscored_combo_tree_ptr_set&);
     private:
 
         // Copy, more or less, or arguments, so that moses

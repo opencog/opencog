@@ -58,7 +58,7 @@ bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
     // over exemplars until we find one that expands.
     // XXX When would one never expand?  Wouldn't that be a bug?
     while (1) {
-        bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+        bscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
 
         // Should have found something by now.
         if (exemplar == mp.end()) {
@@ -71,7 +71,7 @@ bool expand_deme(metapopulation<Scoring, BScoring, Optimization>& mp,
         }
 
         // if create_deme returned true, we are good to go.
-        if (mp._dex.create_deme(*exemplar)) break;
+        if (mp._dex.create_deme(**exemplar)) break;
 
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }

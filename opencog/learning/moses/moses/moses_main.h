@@ -162,7 +162,7 @@ struct metapop_printer
         stringstream ssb;
         metapop.ostream(ssb, 1, true, true);
         string resb = (output_with_labels && !labels.empty()?
-                      ph2l(ssb.str(), labels) : ssb.str());
+                       ph2l(ssb.str(), labels) : ssb.str());
         if (resb.empty())
             logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
         else

@@ -26,13 +26,16 @@
 #define _OPENCOG_METAPOPULATION_H
 
 #include <future>
+#include <atomic>
 #include <mutex>
+#include <memory>
 #include <math.h>
 
 #include <boost/unordered_set.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
+#include <boost/range/algorithm/find_if.hpp>
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
@@ -327,7 +330,7 @@ protected:
  *   BScoring = behavioral scoring function (output behaviors)
  */
 template<typename CScoring, typename BScoring, typename Optimization>
-struct metapopulation : bscored_combo_tree_set
+struct metapopulation : bscored_combo_tree_ptr_set
 {
     typedef metapopulation<CScoring, BScoring, Optimization> self;
     typedef bscored_combo_tree_set super;
@@ -393,7 +396,8 @@ struct metapopulation : bscored_combo_tree_set
         _dex(type_signature, si_ca, si_kb, sc, opt, pa),
         _bscorer(bsc), params(pa),
         _merge_count(0),
-        _best_cscore(worst_composite_score)
+        _best_cscore(worst_composite_score),
+        _bscore_dst(2.0)        // Euclidean distance
     {
         init(bases, si_ca, sc);
     }
@@ -408,12 +412,28 @@ struct metapopulation : bscored_combo_tree_set
         _dex(type_signature, si, si, sc, opt, pa),
         _bscorer(bsc), params(pa),
         _merge_count(0),
-        _best_cscore(worst_composite_score)
+        _best_cscore(worst_composite_score),
+        _bscore_dst(2.0)        // Euclidean distance
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
     }
 
+    ~metapopulation()
+    {
+        // deallocate all bscored_combo_tree
+        for_each(begin(), end(), std::default_delete<bscored_combo_tree>());
+    }
+
+    /**
+     * Delete bscored_combo_tree and possibly remove any trace of it
+     * from _bscore_dst.
+     */
+    void delete_cnd(bscored_combo_tree* ptr) {
+        _bscore_dst.erase_ptr(ptr);
+        delete ptr;
+    }
+    
     /**
      * Return the best composite score.
      */
@@ -480,42 +500,44 @@ struct metapopulation : bscored_combo_tree_set
      */
     void set_diversity()
     {        
-        bscored_combo_tree_set pool; // new metapopulation
+        bscored_combo_tree_ptr_set pool; // new metapopulation
         
         // temporary copy the metapop in a vector to update the
-        // diversity penalty (HIGHLY PESSIMIZED) + a vector of already
-        // computed penalties (to avoid recomputing them)
-        typedef std::pair<bscored_combo_tree, std::vector<score_t> > 
-            bscored_combo_tree_penalties_pair;
-        typedef std::vector<bscored_combo_tree_penalties_pair>
-            bscored_combo_tree_penalties_pair_seq;
-        bscored_combo_tree_penalties_pair_seq tmp;
-        foreach(const value_type& v, *this)
-            tmp.push_back({v, std::vector<score_t>()});
+        // diversity penalty + a vector of already computed penalties
+        // (to avoid recomputing them)
+        typedef std::pair<bscored_combo_tree*, std::vector<score_t> > bsct_dp_pair;
+        std::vector<bsct_dp_pair> tmp;
+        foreach(bscored_combo_tree* bsct_ptr, *this)
+            tmp.push_back(bsct_dp_pair(bsct_ptr, std::vector<score_t>()));
 
-        auto update_diversity_penalty = [&](bscored_combo_tree_penalties_pair& v) {
+        // debug
+        std::atomic<unsigned> dst_count(0); // count the number of
+                                            // calls of lp_distance
+        // ~debug
+
+        auto update_diversity_penalty = [&](bsct_dp_pair& v) {
             if (!pool.empty()) { // only do something if the pool is
                                  // not empty (WARNING: this assumes
                                  // that all diversity penalties are
                                  // initially zero
                 
-                const behavioral_score& bs = get_bscore(v.first);
-                OC_ASSERT(bs.size(), "Behavioral score is needed for diversity!");
+                bscored_combo_tree* bsct_ptr = v.first;
+                OC_ASSERT(get_bscore(*bsct_ptr).size(),
+                          "Behavioral score is needed for diversity!");
 
                 // compute diversity penalty between bs abd the last
                 // element of the pool
-                const bscored_combo_tree& last = *pool.crbegin();
-                const behavioral_score last_bs = get_bscore(last);
-                const double p = 2.0;   /// here Euclidean distance.
-                                        /// @todo should be a parameter
-                score_t last_dp = this->dst2dp(lp_distance(bs, last_bs, p));
+                const bscored_combo_tree* last = *pool.crbegin();
+                score_t last_dp = this->dst2dp(this->_bscore_dst(bsct_ptr, last));
 
+                ++dst_count;
+                
                 // add it to v.second
                 v.second.push_back(last_dp);
                 
                 // aggregate the penalties, update v.first
                 score_t dp = this->aggregated_dps(v.second);
-                get_composite_score(v.first).set_diversity_penalty(dp);
+                get_composite_score(*bsct_ptr).set_diversity_penalty(dp);
             }
         };
 
@@ -524,10 +546,10 @@ struct metapopulation : bscored_combo_tree_set
             OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
 
             // take the max score, insert in the pool and remove from tmp
-            bscored_combo_tree_greater bsct_gt;
-            auto gt = [&](const bscored_combo_tree_penalties_pair& l,
-                          const bscored_combo_tree_penalties_pair& r) {
-                return bsct_gt(l.first, r.first);
+            bscored_combo_tree_ptr_greater bsct_ptr_gt;
+            auto gt = [&](const bsct_dp_pair& l,
+                          const bsct_dp_pair& r) {
+                return bsct_ptr_gt(l.first, r.first);
             };
             // note although we do use min_element it returns the
             // candidate with the best penalized score because we use
@@ -536,6 +558,13 @@ struct metapopulation : bscored_combo_tree_set
             pool.insert(mit->first);
             tmp.erase(mit);
         }
+
+        // debug
+        logger().debug() << "Number of dst evals = " << dst_count;
+        logger().debug() << "Is lock free? " << dst_count.is_lock_free();
+        logger().debug() << "Number of hits = " << _bscore_dst.hits;
+        logger().debug() << "Number of misses = " << _bscore_dst.misses;
+        // ~debug
 
         // Replace the existing metapopulation with the new one.
         swap(pool);
@@ -547,9 +576,9 @@ struct metapopulation : bscored_combo_tree_set
         } else {
             unsigned pos = std::distance(cbegin(), exemplar_it) + 1;
             logger().debug() << "Selected the " << pos << "th exemplar: "
-                             << get_tree(*exemplar_it);
+                             << get_tree(**exemplar_it);
             logger().debug() << "With composite score :"
-                             << get_composite_score(*exemplar_it);
+                             << get_composite_score(**exemplar_it);
         }
     }
 
@@ -573,11 +602,13 @@ struct metapopulation : bscored_combo_tree_set
     {
         OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
 
+        logger().debug("Select exemplar");
+
         // Shortcut for special case, as sometimes, the very first time
         // through, the score is invalid.
         if (size() == 1) {
             const_iterator selex = cbegin();
-            const combo_tree& tr = get_tree(*selex);
+            const combo_tree& tr = get_tree(**selex);
             if (_visited_exemplars.find(tr) == _visited_exemplars.end())
                 _visited_exemplars.insert(tr);
             else selex = cend();
@@ -595,10 +626,10 @@ struct metapopulation : bscored_combo_tree_set
         // the iterator follows this order.
         for (const_iterator it = begin(); it != end(); ++it) {
 
-            score_t sc = get_penalized_score(*it);
+            score_t sc = get_penalized_score(**it);
 
             // Skip any exemplars we've already used in the past.
-            const combo_tree& tr = get_tree(*it);
+            const combo_tree& tr = get_tree(**it);
             if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
                 probs.push_back(sc);
                 found_exemplar = true;
@@ -639,7 +670,7 @@ struct metapopulation : bscored_combo_tree_set
         const_iterator selex = std::next(begin(), fwd);
 
         // Mark the exemplar so we won't look at it again.
-        _visited_exemplars.insert(get_tree(*selex));
+        _visited_exemplars.insert(get_tree(**selex));
 
         log_selected_exemplar(selex);
         return selex;
@@ -673,8 +704,9 @@ struct metapopulation : bscored_combo_tree_set
             if (logger().isFineEnabled()) {
                 stringstream ss;
                 ss << "Candidates to merge with the metapopulation:" << std::endl;
-                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
-                                      -1, true, true).str());
+                foreach(const auto& cnd, candidates)
+                    ostream_bscored_combo_tree(ss, cnd, true, true);
+                logger().fine(ss.str());
             }
         }
 
@@ -683,11 +715,16 @@ struct metapopulation : bscored_combo_tree_set
 
         // Note that merge_nondominated() is very cpu-expensive and
         // complex...
-        if (params.include_dominated)
-            insert(candidates.begin(), candidates.end());
-        else
-            // merge_nondominated_any(candidates);
-            merge_nondominated(candidates, params.jobs);
+        if (params.include_dominated) {
+            foreach(const auto& cnd, candidates) {
+                bscored_combo_tree* bsct_ptr = new bscored_combo_tree(cnd);
+                insert(bsct_ptr);
+            }
+        } else {
+            OC_ASSERT(false, "NOT IMPLEMENTED!!!!");
+            // TODO let that aside for now!
+            // merge_nondominated(candidates, params.jobs);
+        }
 
         // Weed out excessively bad scores. The select_exemplar()
         // routine picks an exemplar out of the metapopulation, using
@@ -712,7 +749,7 @@ struct metapopulation : bscored_combo_tree_set
 #define MIN_POOL_SIZE 250
         if (size() > MIN_POOL_SIZE) {
 
-            score_t top_score = get_penalized_score(*begin());
+            score_t top_score = get_penalized_score(**begin());
             score_t range = useful_score_range();
             score_t worst_score = top_score - range;
 
@@ -721,10 +758,11 @@ struct metapopulation : bscored_combo_tree_set
             // penalized-score order, so we have to remove one at a time.
             iterator it = begin();
             while (it != end()) {
-                score_t sc = get_penalized_score(*it);
-                if (sc < worst_score)
+                score_t sc = get_penalized_score(**it);
+                if (sc < worst_score) {
+                    delete_cnd(*it);
                     it = erase (it);
-                else
+                } else
                     it++;
             }
 #else
@@ -737,12 +775,15 @@ struct metapopulation : bscored_combo_tree_set
             iterator it = begin();
             for (int i=0; i<MIN_POOL_SIZE; i++) it++;
             while (it != end()) {
-                score_t sc = get_penalized_score(*it);
+                score_t sc = get_penalized_score(**it);
                 if (sc < worst_score) break;
                 it++;
             }
 
-            erase(it, end());
+            while (it != end()) {
+                delete_cnd(*it);
+                it = erase(it);
+            }
 
             // Is the population still too large?  Yes, it is, if it is more
             // than 50 times the size of the current number of generations.
@@ -971,11 +1012,12 @@ struct metapopulation : bscored_combo_tree_set
 
             logger().debug("Remove dominated candidates");
             if (logger().isFineEnabled()) {
-                logger().fine("Candidates with their bscores before"
-                              " removing the dominated candidates");
                 stringstream ss;
-                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
-                                      -1, true, true, true).str());
+                ss << "Candidates with their bscores before"
+                    " removing the dominated candidates" << std::endl;
+                foreach(const auto& cnd, candidates)
+                    ostream_bscored_combo_tree(ss, cnd, true, true, true);
+                logger().fine(ss.str());
             }
 
             size_t old_size = candidates.size();
@@ -984,11 +1026,12 @@ struct metapopulation : bscored_combo_tree_set
             logger().debug("Removed %u dominated candidates out of %u",
                            old_size - candidates.size(), old_size);
             if (logger().isFineEnabled()) {
-                logger().fine("Candidates with their bscores after"
-                              " removing the dominated candidates");
                 stringstream ss;
-                logger().fine(ostream(ss, candidates.begin(), candidates.end(),
-                                      -1, true, true, true).str());
+                ss << "Candidates with their bscores after"
+                    " removing the dominated candidates" << std::endl;
+                foreach(const auto& cnd, candidates)
+                    ostream_bscored_combo_tree(ss, cnd, true, true, true);
+                logger().fine(ss.str());
             }
         }
 
@@ -1023,8 +1066,8 @@ struct metapopulation : bscored_combo_tree_set
         foreach (const bscored_combo_tree& cnd, mcs) {
             const combo_tree& tr = get_tree(cnd);
             const_iterator fcnd =
-                OMP_ALGO::find_if(begin(), end(), [&](const bscored_combo_tree& v) {
-                        return tr == get_tree(v); });
+                OMP_ALGO::find_if(begin(), end(), [&](const bscored_combo_tree* v) {
+                        return tr == get_tree(*v); });
             if (fcnd == end())
                 res.insert(cnd);
         }
@@ -1039,7 +1082,6 @@ struct metapopulation : bscored_combo_tree_set
     typedef bscored_combo_tree_ptr_vec::const_iterator bscored_combo_tree_ptr_vec_cit;
     typedef pair<bscored_combo_tree_ptr_vec,
                  bscored_combo_tree_ptr_vec> bscored_combo_tree_ptr_vec_pair;
-    typedef std::set<const bscored_combo_tree*> bscored_combo_tree_ptr_set;
 
     // reciprocal of random_access_view
     static bscored_combo_tree_set
@@ -1274,29 +1316,6 @@ struct metapopulation : bscored_combo_tree_set
         insert (bcs.begin(), bcs.end());
     }
 
-    // like merge_nondominated_iter but doesn't make any assumption on
-    // bcs
-    void merge_nondominated_any(const bscored_combo_tree_set& bcs)
-    {
-        bscored_combo_tree_set_cit from = bcs.begin(), to = bcs.end();
-        for (;from != to;++from) {
-            bool nondominated = true;
-            for (iterator it = begin(); it != end();) {
-                tribool dom = dominates(from->second, it->second);
-                if (dom) {
-                    erase(it++);
-                } else if (!dom) {
-                    nondominated = false;
-                    break;
-                } else {
-                    ++it;
-                }
-            }
-            if (nondominated)
-                insert(*from);
-        }
-    }
-
     /**
      * return true if x dominates y
      *        false if y dominates x
@@ -1408,7 +1427,7 @@ struct metapopulation : bscored_combo_tree_set
     {
         if (!output_only_bests) {
             for (; from != to && n != 0; ++from, n--) {
-                ostream_bscored_combo_tree(out, *from, output_score,
+                ostream_bscored_combo_tree(out, **from, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
             }
@@ -1419,7 +1438,7 @@ struct metapopulation : bscored_combo_tree_set
         score_t best_score = worst_score;
 
         for (In f = from; f != to; ++f) {
-            const bscored_combo_tree& bt = *f;
+            const bscored_combo_tree& bt = **f;
             score_t sc = get_score(bt);
             if (best_score < sc) best_score = sc;
         }
@@ -1429,9 +1448,9 @@ struct metapopulation : bscored_combo_tree_set
         // necessarily ranked highest, as the ranking is a linear combo
         // of both score and complexity.
         for (In f = from; f != to && n != 0; ++f, n--) {
-            const bscored_combo_tree& bt = *f;
+            const bscored_combo_tree& bt = **f;
             if (best_score <= get_score(bt)) {
-                ostream_bscored_combo_tree(out, *f, output_score,
+                ostream_bscored_combo_tree(out, bt, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
             }
@@ -1497,6 +1516,66 @@ protected:
 
     // lock to enable thread-safe deme merging.
     std::mutex _merge_mutex;
+
+    // Functor for bscore distance. Contains a cache. I don't use
+    // {lru,prr}_cache because I want to avoid storing
+    // bscored_combo_tree pairs (which takes too much memory), instead
+    // it uses pairs of pointers of bscored_combo_tree.
+    struct cached_bscore_dst {
+        // ctor
+        cached_bscore_dst(double lp_norm = 1.0) : p(lp_norm), misses(0), hits(0) {}
+
+        // operator
+        typedef score_t dst_t;  // distance type
+        // little optimization to deal with the symmetry of the
+        // distance
+        typedef std::set<const bscored_combo_tree*> ptr_pair; 
+        dst_t operator()(const bscored_combo_tree* cl,
+                         const bscored_combo_tree* cr) {
+            ptr_pair cts = {cl, cr};
+            // hit
+            {
+                shared_lock lock(mutex);
+                auto it = cache.find(cts);
+                if (it != cache.end()) {
+                    ++hits;
+                    return it->second;
+                }
+            }
+            // miss
+            score_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p);
+            ++misses;
+            {
+                unique_lock lock(mutex);
+                return cache[cts] = dst;
+            }
+        }
+
+        /**
+         * Remove any key containing ptr
+         */
+        void erase_ptr(bscored_combo_tree* ptr) {
+            for (Cache::iterator it = cache.begin(); it != cache.end();) {
+                if (it->first.find(ptr) != it->first.end())
+                    it = cache.erase(it);
+                else
+                    ++it;
+            }
+        }
+
+        // cache
+        typedef boost::shared_mutex cache_mutex;
+        typedef boost::shared_lock<cache_mutex> shared_lock;
+        typedef boost::unique_lock<cache_mutex> unique_lock;
+        typedef boost::unordered_map<ptr_pair, dst_t, boost::hash<ptr_pair>> Cache;
+        cache_mutex mutex;
+
+        double p;
+        std::atomic<unsigned> misses, hits;
+        Cache cache;
+    };
+
+    cached_bscore_dst _bscore_dst;
 };
 
 } // ~namespace moses

@@ -67,7 +67,7 @@ class moses_mpi_comm
         // worker methods, to be used only by workers.
         int recv_more_work();
         void recv_exemplar(combo_tree&);
-        void send_deme(const bscored_combo_tree_set&, int);
+        void send_deme(const bscored_combo_tree_ptr_set&, int);
 
         std::atomic<size_t> sent_bytes;
         std::atomic<size_t> recv_bytes;
@@ -352,7 +352,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     {
         // Feeder: push work out to each worker.
         while ((0 < wrkpool.size()) && !done) {
-            bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+            bscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
                 if ((tot_workers == wrkpool.size()) && (0 == source)) {
                     logger().warn(
@@ -367,7 +367,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 break;
             }
 
-            const combo_tree& extree = get_tree(*exemplar); 
+            const combo_tree& extree = get_tree(**exemplar); 
             int worker = wrkpool.front();
             wrkpool.pop();
             int max_evals = pa.max_evals - stats.n_evals;

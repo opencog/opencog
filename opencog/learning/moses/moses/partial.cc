@@ -154,7 +154,7 @@ bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
 /// of the pieces we've accumulated, and feed those back into the main
 /// algo as exemplars.  The main algo will realize that it's out of time,
 /// it will just score these, print them, and then all is done.
-void partial_solver::final_cleanup(const bscored_combo_tree_set& cands)
+void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
 {
     logger().info() << "well-enough ending with " << cands.size()
                     << " exemplars. Prefix count= " << _prefix_count
@@ -164,7 +164,7 @@ void partial_solver::final_cleanup(const bscored_combo_tree_set& cands)
     // and feed them back in as exemplars, for scoring.
     _exemplars.clear();
     foreach(auto &item, cands) {
-        combo_tree cand = item.first;
+        combo_tree cand = item->first;
         sib_it ldr = _leader.begin();
         sib_it cit = cand.begin();
         cit = cit.begin();
@@ -251,10 +251,10 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 
 /// Refresh the exemplars list.  Basically, just copy the entire
 /// metapopulation from the previous run.
-void partial_solver::refresh(const bscored_combo_tree_set& cands)
+void partial_solver::refresh(const bscored_combo_tree_ptr_set& cands)
 {
     foreach(auto &item, cands) {
-        const combo_tree& cand = item.first;
+        const combo_tree& cand = item->first;
         _exemplars.push_back(cand);
     }
 }

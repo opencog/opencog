@@ -199,7 +199,7 @@ void moses_mpi_comm::recv_exemplar(combo_tree& exemplar)
 ///
 /// This sends a pretty big glob.
 // XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
-void moses_mpi_comm::send_deme(const bscored_combo_tree_set& mp, int n_evals)
+void moses_mpi_comm::send_deme(const bscored_combo_tree_ptr_set& mp, int n_evals)
 {
     MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
 
@@ -207,9 +207,9 @@ void moses_mpi_comm::send_deme(const bscored_combo_tree_set& mp, int n_evals)
     MPI::COMM_WORLD.Send(&num_trees, 1, MPI::INT, ROOT_NODE, MSG_NUM_COMBO_TREES);
     sent_bytes += 2*sizeof(int);
 
-    bscored_combo_tree_set::const_iterator it;
+    bscored_combo_tree_ptr_set_cit it;
     for (it = mp.begin(); it != mp.end(); it++) {
-        const bscored_combo_tree& btr = *it;
+        const bscored_combo_tree& btr = **it;
 
         // We are going to send only the composite score, and not the
         // full behavioural score.  Basically, the full bscore is just
