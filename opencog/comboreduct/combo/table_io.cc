@@ -206,6 +206,12 @@ int find_feature_position(const string& fileName, const string& feature)
     return find_features_positions(fileName, features).back();
 }
 
+/**
+ * take a row in input as a pair {inputs, output} and return the type
+ * tree corresponding to the function mapping inputs to output. If the
+ * inference fails then it returns a type_tree with
+ * id::ill_formed_type as root.
+ */
 type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
 {
     type_tree tt(id::lambda_type);
@@ -324,6 +330,17 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
     return id::null_vertex;
 }
 
+/**
+ * Fill an input table and output table given a DSV
+ * (delimiter-seperated values) file format, where delimiters are ',',
+ * ' ' or '\t'.
+ *
+ * It is assumed that each row have the same number of columns, if not
+ * an assert is raised.
+ *
+ * pos specifies the position of the output, if -1 it is the last
+ * position. The default position is 0, the first column.
+ */
 istream& istreamTable(istream& in, ITable& it, OTable& ot,
                       bool has_header, const type_tree& tt, int pos,
                       const vector<int>& ignore_col_nums)
@@ -384,6 +401,11 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     return in;
 }
 
+/**
+ * like istreamTable above but take an string (file name) instead of
+ * istream. If the file name is not correct then an OC_ASSERT is
+ * raised.
+ */
 void loadTable(const string& file_name, ITable& it, OTable& ot,
                const type_tree& tt, int pos,
                const vector<int>& ignore_col_nums)
@@ -423,6 +445,11 @@ Table loadTable(const string& file_name,
     return res;
 }
 
+/**
+ * Fill an input table give an istream of DSV file format, where
+ * delimiters are ',',' ' or '\t'. All columns, except the
+ * ignore_col_nums ones are considered for the ITable.
+ */
 istream& istreamITable(istream& in, ITable& it,
                        bool has_header, const type_tree& tt,
                        const vector<int>& ignore_col_nums)

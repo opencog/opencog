@@ -60,16 +60,7 @@ bool checkCarriageReturn(std::istream& in);
  */
 type_node infer_type_from_token(const std::string& token);
 
-/**
- * take a row in input as a pair {inputs, output} and return the type
- * tree corresponding to the function mapping inputs to output. If the
- * inference fails then it returns a type_tree with
- * id::ill_formed_type as root.
- */
-type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
-                                        std::string>& row);
-
-// used as default of various calls
+// used as default for TokenizeRow
 static const std::vector<int> empty_int_vec;
 
 /**
@@ -148,14 +139,6 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
 // istreamTable //
 //////////////////
 
-/**
- * Fill an input table give an istream of DSV file format, where
- * delimiters are ',',' ' or '\t'. All columns, except the
- * ignore_col_nums ones are considered for the ITable.
- */
-std::istream& istreamITable(std::istream& in, ITable& it,
-                            bool has_header, const type_tree& tt,
-                            const std::vector<int>& ignore_col_nums = empty_int_vec);
 
 /**
  * Like above but takes a file_name instead of a istream and
@@ -172,35 +155,20 @@ ITable loadITable(const std::string& file_name,
                   const std::vector<std::string>& ignore_features);
 
 /**
- * Fill an input table and output table given a DSV
- * (delimiter-seperated values) file format, where delimiters are ',',
- * ' ' or '\t'.
- *
- * It is assumed that each row have the same number of columns, if not
- * an assert is raised.
- *
- * pos specifies the position of the output, if -1 it is the last
- * position. The default position is 0, the first column.
- */
-std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
-                           bool has_header, const type_tree& tt, int pos = 0,
-                           const std::vector<int>& ignore_col_nums
-                           = empty_int_vec);
-
-/**
- * like istreamTable above but take an string (file name) instead of
- * istream. If the file name is not correct then an OC_ASSERT is
- * raised.
- */
-void loadTable(const std::string& file_name,
-               ITable& it, OTable& ot, const type_tree& tt, int pos = 0,
-               const std::vector<int>& ignore_col_nums = empty_int_vec);
-/**
  * like above but return an object Table.
  */
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features);
+
+/// XXX deprecated, remove at first opporunity.
+std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
+                           bool has_header, const type_tree& tt, int
+                           pos = 0,
+                           const std::vector<int>& ignore_col_nums
+                           = empty_int_vec);
+
+
 
 //////////////////
 // ostreamTable //
