@@ -106,21 +106,20 @@ ifstream* open_data_file(const string& fileName)
     return in;
 }
 
-vector<string> loadHeader(const string& file_name)
-{
-    unique_ptr<ifstream> in(open_data_file(file_name));
-    string line;
-    get_data_line(*in, line);
-    return tokenizeRow<string>(line);
-}
-
 /**
  * check if the data file has a header. That is whether the first row
  * starts with a sequence of output and input labels
  */
-bool hasHeader(const string& dataFileName)
+bool hasHeader(istream& in)
 {
-    type_node n = infer_type_from_token(loadHeader(dataFileName).front());
+    auto curpos = in.tellg();
+
+    string line;
+    get_data_line(in, line);
+    vector<string> cols = tokenizeRow<string>(line);
+    type_node n = infer_type_from_token(cols[0]);
+
+    in.seekg(curpos);
 
     // Well, first row might be enums, or headers...
     return (n == id::ill_formed_type) || (n == id::enum_type);
@@ -249,9 +248,10 @@ type_tree infer_data_type_tree(const string& fileName,
 {
     unique_ptr<ifstream> in(open_data_file(fileName));
     string line;
-    get_data_line(*in, line);
-    if (hasHeader(fileName))
+    if (hasHeader(*in))
         get_data_line(*in, line);
+
+    get_data_line(*in, line);
 
     OC_ASSERT(1 < line.size(),
         "Error: the data file %s appears to be empty!?\n",
@@ -356,19 +356,23 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
  * pos specifies the position of the output, if -1 it is the last
  * position. The default position is 0, the first column.
  */
-istream& istreamTable(istream& in, ITable& it, OTable& ot,
-                      bool has_header, const type_tree& tt, const string& target_feature,
+istream& istreamTable(istream& in, Table& tab,
+                      const string& target_feature,
                       const std::vector<std::string>& ignore_features)
 {
     string line;
-    arity_t arity = type_tree_arity(tt);
+    arity_t arity = type_tree_arity(tab.tt);
+
+    bool has_header = hasHeader(in);
 
     int target_column = 0;
 
     // Find the column number of the target feature in the data file,
     // if any.
-    if (!target_feature.empty())
+    if (!target_feature.empty()) {
+        tab.otable.set_label(target_feature);
         target_column = find_feature_position(in, target_feature);
+    }
 
     // Get the list of indexes of features to ignore
     vector<int> ignore_col_nums =
@@ -386,8 +390,8 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
         get_data_line(in, line);
         pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, target_column,
                                                                  ignore_col_nums);
-        it.set_labels(ioh.first);
-        ot.set_label(ioh.second);
+        tab.itable.set_labels(ioh.first);
+        tab.otable.set_label(ioh.second);
         OC_ASSERT(arity == (arity_t)ioh.first.size(),
                   "ERROR: Input file header/data declaration mismatch: "
                   "The header has %u columns while the first row has "
@@ -398,18 +402,18 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
     // Copy the input types to a vector; we need this to pass as an
     // argument to boost::transform, below.
     vector<type_node> vin_types;   // vector of input types
-    transform(get_signature_inputs(tt),
+    transform(get_signature_inputs(tab.tt),
               back_inserter(vin_types), get_type_node);
 
     // Dependent column type.
-    type_node out_type = get_type_node(get_signature_output(tt));
+    type_node out_type = get_type_node(get_signature_output(tab.tt));
 
     std::vector<string> lines;
     while (get_data_line(in, line))
         lines.push_back(line);
     int ls = lines.size();
-    it.resize(ls);
-    ot.resize(ls);
+    tab.itable.resize(ls);
+    tab.otable.resize(ls);
 
     // vector of indices [0, lines.size())
     auto ir = boost::irange(0, ls);
@@ -428,8 +432,8 @@ istream& istreamTable(istream& in, ITable& it, OTable& ot,
                   i + 1, io.first.size(), arity);
 
         // fill table, based on the types passed in the type-tree
-        transform(vin_types, io.first, back_inserter(it[i]), token_to_vertex);
-        ot[i] = token_to_vertex(out_type, io.second);
+        transform(vin_types, io.first, back_inserter(tab.itable[i]), token_to_vertex);
+        tab.otable[i] = token_to_vertex(out_type, io.second);
     };
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
     return in;
@@ -451,8 +455,7 @@ Table loadTable(const string& file_name,
     Table res;
     res.tt = signature;
 
-    istreamTable(in, res.itable, res.otable, hasHeader(file_name),
-                 res.tt, target_feature, ignore_features);
+    istreamTable(in, res, target_feature, ignore_features);
 
     return res;
 }
@@ -468,8 +471,7 @@ Table loadTable(const string& file_name,
     Table res;
     res.tt = infer_data_type_tree(file_name, target_feature, ignore_features);
 
-    istreamTable(in, res.itable, res.otable, hasHeader(file_name),
-                 res.tt, target_feature, ignore_features);
+    istreamTable(in, res, target_feature, ignore_features);
 
     return res;
 }

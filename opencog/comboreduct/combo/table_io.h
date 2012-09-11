@@ -139,8 +139,13 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
 // istreamTable //
 //////////////////
 
+/// Read a table from an input stream.
+std::istream& istreamTable(std::istream& in, Table& tab,
+                           const std::string& target_feature,
+                           const std::vector<std::string>& ignore_features);
+
 /**
- * like above but return an object Table.
+ * like above but read from file, and return an object Table.
  */
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
@@ -150,14 +155,6 @@ Table loadTable(const std::string& file_name,
                 const type_tree& signature,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features);
-
-/// XXX deprecated, remove at first opporunity.
-std::istream& istreamTable(std::istream& in, ITable& it, OTable& ot,
-                           bool has_header,
-                           const type_tree& signature, 
-                           const std::string& target_feature,
-                           const std::vector<std::string>& ignore_features);
-
 
 
 //////////////////

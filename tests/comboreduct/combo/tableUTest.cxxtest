@@ -34,17 +34,16 @@ const string tableUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/comboreduct/c
 class tableUTest : public CxxTest::TestSuite
 {
 private:
-    template<typename IT, typename OT>
-    void testIStreamTable(const string& ts, const IT& it, const OT& ot,
+    void testIStreamTable(const string& ts, const ITable& it, const OTable& ot,
                           bool has_header, const type_tree& tt,
                           const string& target_feature = string(),
                           const vector<string>& ignore_features = vector<string>())
     {
         stringstream ss(ts);
-        IT it_test;
-        OT ot_test;
-        istreamTable(ss, it_test, ot_test, has_header, tt,
-                     target_feature, ignore_features);
+        ITable it_test;
+        OTable ot_test;
+        Table tab(ot_test, it_test, tt);
+        istreamTable(ss, tab, target_feature, ignore_features);
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;
@@ -58,12 +57,14 @@ private:
     }
 public:
     
-    tableUTest() {
+    tableUTest()
+    {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::DEBUG);
     }
 
-    void test_TruthTable() {
+    void test_TruthTable()
+    {
         vertex_seq o{id::logical_true, id::logical_false};
         OTable ot(o);
         ITable it;
@@ -73,7 +74,9 @@ public:
                          "0,0,1\n", it, ot, false,
                          gen_signature(id::boolean_type, 2));
     }
-    void test_ContinTable() {
+
+    void test_ContinTable()
+    {
         vertex_seq o{10.1, 6.5};
         OTable ot(o);
         ITable it;
@@ -83,7 +86,9 @@ public:
                          "6.5,9.5,4.2\n", it, ot, false,
                          gen_signature(id::contin_type, 2));
     }
-    void test_ContinTableLabels() {
+
+    void test_ContinTableLabels()
+    {
         vertex_seq o{10.1, 6.5};
         OTable ot(o, olabel);
         ITable it;
