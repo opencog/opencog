@@ -73,17 +73,6 @@ type_tree infer_row_type_tree(std::pair<std::vector<std::string>,
 static const std::vector<int> empty_int_vec;
 
 /**
- * Find the column numbers associated with the names features
- *
- * If the target begins with an alpha character, it is assumed to be a
- * column label. We return the column number; 0 is the left-most column.
- *
- * If the target is numeric, just assum that it is a column number.
- */
-std::vector<int> find_features_positions(const std::string& fileName,
-                                         const std::vector<std::string>& features);
-
-/**
  * Take a row, strip away any nnon-ASCII chars and trailing carriage
  * returns, and then return a tokenizer.  Tokenization uses the
  * seperator characters comma, blank, tab (',', ' ' or '\t').

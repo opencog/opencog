@@ -67,7 +67,6 @@ struct evalTableParameters
     string combo_programs_file;
     string target_feature_str;
     vector<string> ignore_features_str;
-    vector<int> ignore_features;
     bool has_labels;
     vector<string> features;
     string features_file;
@@ -115,11 +114,8 @@ void eval_output_results(const evalTableParameters& pa, ITable& it,
 
 void read_eval_output_results(evalTableParameters& pa)
 {
-    // Get the list of indexes of features to ignore
-    pa.ignore_features = find_features_positions(pa.input_table_file,
-                                                 pa.ignore_features_str);
-    ostreamContainer(logger().info() << "Ignore the following columns: ",
-                     pa.ignore_features);
+    ostreamContainer(logger().info() << "Ignore the following features: ",
+                     pa.ignore_features_str);
     OC_ASSERT(boost::find(pa.ignore_features_str, pa.target_feature_str)
               == pa.ignore_features_str.end(),
               "You cannot ignore the target feature %s",
