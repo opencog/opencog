@@ -397,7 +397,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cache_dp(2.0 /* Euclidean distance */, pa.diversity_pressure)
+        _cached_ddp(2.0 /* Euclidean distance */,
+                    pa.diversity_pressure, pa.diversity_exponent)
     {
         init(bases, si_ca, sc);
     }
@@ -413,7 +414,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cache_dp(2.0 /* Euclidean distance */, pa.diversity_pressure)
+        _cached_ddp(2.0 /* Euclidean distance */,
+                    pa.diversity_pressure, pa.diversity_exponent)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
@@ -430,7 +432,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * from _bscore_dst.
      */
     void delete_cnd(bscored_combo_tree* ptr) {
-        _cache_dp.erase_ptr(ptr);
+        _cached_ddp.erase_ptr(ptr);
         delete ptr;
     }
     
@@ -470,7 +472,9 @@ struct metapopulation : bscored_combo_tree_ptr_set
     typedef score_t dp_t;  // diversity_penalty type
     
     /**
-     * Distort a diversity penalty component between 2 candidates.
+     * Distort a diversity penalty component between 2
+     * candidates. (actually not used apart from a comment of
+     * aggregated_dps)
      */
     dp_t distort_dp(dp_t dp) const {
         return pow(dp, params.diversity_exponent);
@@ -516,13 +520,27 @@ struct metapopulation : bscored_combo_tree_ptr_set
 
         // debug
         std::atomic<unsigned> dp_count(0); // count the number of
-                                           // calls of _cache_dp
+                                           // calls of _cached_ddp
         // ~debug
 
-        unsigned lhits = _cache_dp.hits.load(),
-            lmisses = _cache_dp.misses.load();
+        unsigned lhits = _cached_ddp.hits.load(),
+            lmisses = _cached_ddp.misses.load();
         
         auto update_diversity_penalty = [&](bsct_dp_pair& v) {
+            // // debug
+            // logger().fine("update_diversity_penalty");
+            // {
+            //     stringstream ss;
+            //     ostream_bscored_combo_tree(ss, *v.first, true, true, true);
+            //     logger().fine("v.first = %s", ss.str().c_str());
+            // }
+            // {
+            //     stringstream ss;
+            //     ss << v.second;
+            //     logger().fine("v.second = %s", ss.str().c_str());
+            // }
+            // // ~debug
+            
             if (!pool.empty()) { // only do something if the pool is
                                  // not empty (WARNING: this assumes
                                  // that all diversity penalties are
@@ -531,11 +549,11 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 bscored_combo_tree* bsct_ptr = v.first;
                 OC_ASSERT(get_bscore(*bsct_ptr).size(),
                           "Behavioral score is needed for diversity!");
-
+                
                 // compute diversity penalty between bs and the last
                 // element of the pool
                 const bscored_combo_tree* last = *pool.crbegin();
-                dp_t last_dp = this->_cache_dp(bsct_ptr, last);
+                dp_t last_dp = this->_cached_ddp(bsct_ptr, last);
 
                 ++dp_count;
                 
@@ -543,12 +561,24 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 v.second += last_dp;
                 
                 // aggregate the penalties, update v.first
+                logger().fine("v.second (after) = %f", v.second);
                 dp_t dp = this->aggregated_dps(v.second, pool.size());
+                logger().fine("dp = %f", dp);
                 get_composite_score(*bsct_ptr).set_diversity_penalty(dp);
             }
         };
 
         while (tmp.size()) {
+
+            // // debug
+            // logger().fine("Pool =");
+            // foreach (bscored_combo_tree* ptr, pool) {
+            //     stringstream ss;
+            //     ostream_bscored_combo_tree(ss, *ptr, true, true, true);
+            //     logger().fine(ss.str());
+            // }
+            // // ~debug
+            
             // update all diversity penalties of tmp
             OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
 
@@ -570,11 +600,11 @@ struct metapopulation : bscored_combo_tree_ptr_set
         logger().debug() << "Number of dst evals = " << dp_count;
         logger().debug() << "Is lock free? " << dp_count.is_lock_free();
         logger().debug() << "Number of hits = "
-                         << _cache_dp.hits.load() - lhits;
+                         << _cached_ddp.hits.load() - lhits;
         logger().debug() << "Number of misses = "
-                         << _cache_dp.misses.load() - lmisses;
-        logger().debug() << "Total number of hits = " << _cache_dp.hits;
-        logger().debug() << "Total number of misses = " << _cache_dp.misses;
+                         << _cached_ddp.misses.load() - lmisses;
+        logger().debug() << "Total number of hits = " << _cached_ddp.hits;
+        logger().debug() << "Total number of misses = " << _cached_ddp.misses;
         // ~debug
 
         // Replace the existing metapopulation with the new one.
@@ -1528,15 +1558,21 @@ protected:
     // lock to enable thread-safe deme merging.
     std::mutex _merge_mutex;
 
-    // Functor for diversity penalty. Contains a cache. It doesn't use
-    // {lru,prr}_cache because we want to avoid storing
-    // bscored_combo_tree pairs (which takes too much memory) and we
-    // don't need a limit on the cache. To avoid taking too much
-    // memory it uses pairs of pointers of bscored_combo_tree.
-    struct cached_dp {
+    /**
+     * Cache for distorted diversity penalty. Maps a
+     * std::set<bscored_combo_tree*> (only 2 elements to represent an
+     * unordered pair) to an distorted diversity penalty. We don't use
+     * {lru,prr}_cache because
+     *
+     * 1) we don't need a limit on the cache.
+     *
+     * 2) however we need a to remove the pairs containing deleted pointers
+     */
+    struct cached_ddp {
         // ctor
-        cached_dp(dp_t lp_norm, dp_t diversity_pressure)
-            : p(lp_norm), d(diversity_pressure), misses(0), hits(0) {}
+        cached_ddp(dp_t lp_norm, dp_t diversity_pressure, dp_t diversity_exponent)
+            : p(lp_norm), dpre(diversity_pressure), dexp(diversity_exponent),
+              misses(0), hits(0) {}
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
@@ -1555,11 +1591,17 @@ protected:
             }
             // miss
             dp_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p),
-                dp = d / (1.0 + dst);
+                dp = dpre / (1.0 + dst),
+                ddp = pow(dp, dexp);
+
+            // // debug
+            // logger().fine("dst = %f, dp = %f, ddp = %f", dst, dp, ddp);
+            // // ~debug
+            
             ++misses;
             {
                 unique_lock lock(mutex);
-                return cache[cts] = dp;
+                return cache[cts] = ddp;
             }
         }
 
@@ -1582,12 +1624,12 @@ protected:
         typedef boost::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> Cache;
         cache_mutex mutex;
 
-        dp_t p, d;
+        dp_t p, dpre, dexp;
         std::atomic<unsigned> misses, hits;
         Cache cache;
     };
 
-    cached_dp _cache_dp;
+    cached_ddp _cached_ddp;
 };
 
 } // ~namespace moses
