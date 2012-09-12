@@ -346,6 +346,53 @@ Float generalized_mean(const C& c, Float p = 1.0)
     return generalized_mean(c.begin(), c.end(), p);
 }
 
+/// Compute the distance between two vectors, using the p-norm.  For
+/// p=2, this is the usual Eucliden distance, and for p=1, this is the
+/// Manhattan distance, and for p=0, this is the maximum difference
+/// for one element.
+template<typename Vec, typename Float>
+Float p_norm(const Vec& a, const Vec& b, Float p=1.0)
+{
+    OC_ASSERT (a.size() == b.size(),
+               "Cannot compare unequal-sized vectors!  %d %d\n",
+               a.size(), b.size());
+
+    typename Vec::const_iterator ia = a.begin(), ib = b.begin();
+
+    Float sum = 0.0;
+    // Special case Manhattan distance.
+    if (1.0 == p) {
+        for (; ia != a.end(); ia++, ib++) {
+            sum += fabs (*ia - *ib);
+        }
+        return sum;
+    }
+    // Special case Euclidean distance.
+    if (2.0 == p) {
+        for (; ia != a.end(); ia++, ib++) {
+            Float diff = *ia - *ib;
+            sum += sq(diff);
+        }
+        return sqrt(sum);
+    }
+    // Special case max difference
+    if (0.0 == p) {
+        for (; ia != a.end(); ia++, ib++) {
+            Float diff = fabs (*ia - *ib);
+            if (sum < diff) sum = diff;
+        }
+        return sum;
+    }
+
+    // General case.
+    for (; ia != a.end(); ia++, ib++) {
+        Float diff = fabs (*ia - *ib);
+        if (0.0 < diff)
+            sum += pow(log(diff), p);
+    }
+    return pow(sum, 1.0/p);
+}
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_NUMERIC_H
