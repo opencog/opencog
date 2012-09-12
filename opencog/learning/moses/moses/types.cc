@@ -24,8 +24,12 @@
 #include "types.h"
 #include "complexity.h"
 
+#include <sstream>
+
 namespace opencog { namespace moses {
 
+using namespace std;
+        
 bool bscored_combo_tree_greater::operator()(const bscored_combo_tree& bs_tr1,
                                             const bscored_combo_tree& bs_tr2) const
 {
@@ -96,5 +100,41 @@ bool composite_score::operator<(const composite_score &r) const
                 or (lef == rig and complexity > r.complexity);
 }
 
+/// Compute the distance between two vectors, using the p-norm.
+score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double p)
+{
+    // // debug
+    // {
+    //     stringstream ss;
+    //     ostream_behavioral_score(ss, a);
+    //     logger().fine("a = %s", ss.str().c_str());
+    // }
+    // {
+    //     stringstream ss;
+    //     ostream_behavioral_score(ss, b);
+    //     logger().fine("b = %s", ss.str().c_str());
+    // }
+    // score_t res = p_norm(a, b, p);
+    // logger().fine("res = %f", res);
+    // return res;
+    // // ~debug
+    return p_norm(a, b, p);
+}
+
+score_t lp_distance(const penalized_behavioral_score& a, const penalized_behavioral_score& b, double p)
+{
+    return lp_distance(a.first, b.first, p);
+}
+
+score_t lp_distance(const composite_behavioral_score& a, const composite_behavioral_score& b, double p)
+{
+    return lp_distance(a.first, b.first, p);
+}
+
+score_t lp_distance(const bscored_combo_tree& a, const bscored_combo_tree& b, double p)
+{
+    return lp_distance(a.second, b.second, p);
+}
+        
 } // ~namespace moses
 } // ~namespace opencog

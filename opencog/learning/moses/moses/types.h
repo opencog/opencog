@@ -366,71 +366,15 @@ typedef std::vector<bscored_combo_tree> bscored_combo_tree_seq;
 typedef bscored_combo_tree_seq::iterator bscored_combo_tree_seq_it;
 typedef bscored_combo_tree_seq::const_iterator bscored_combo_tree_seq_cit;
         
-/// Compute the distance between two vectors, using the lp norm.
-/// For p=2, this is the usual Eucliden distance, and for p=1, this
-/// is the Manhattan distance, and for p=0, this is the maximum
-/// difference for one element.
-static inline
-score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double p=1.0)
-{
-    OC_ASSERT (a.size() == b.size(),
-        "Cannot compare unequal-sized vectors!  %d %d\n",
-         a.size(), b.size());
-
-    behavioral_score::const_iterator ia = a.begin();
-    behavioral_score::const_iterator ib = b.begin();
-
-    score_t sum = 0.0;
-    // Special case Manhattan distance.
-    if (1.0 == p) {
-        for (; ia != a.end(); ia++, ib++) {
-            sum += fabs (*ia - *ib);
-        }
-        return sum;
-    }
-    // Special case Euclidean distance.
-    if (2.0 == p) {
-        for (; ia != a.end(); ia++, ib++) {
-            score_t diff = *ia - *ib;
-            sum += sq(diff);
-        }
-        return sqrt(sum);
-    }
-    // Special case max difference
-    if (0.0 == p) {
-        for (; ia != a.end(); ia++, ib++) {
-            score_t diff = fabs (*ia - *ib);
-            if (sum < diff) sum = diff;
-        }
-        return sum;
-    }
-
-    // General case.
-    for (; ia != a.end(); ia++, ib++) {
-        score_t diff = fabs (*ia - *ib);
-        if (0.0 < diff)
-            sum += pow(log(diff), p);
-    }
-    return pow(sum, 1.0/p);
-}
-
-static inline
-score_t lp_distance(const penalized_behavioral_score& a, const penalized_behavioral_score& b, double p=1.0)
-{
-    return lp_distance(a.first, b.first, p);
-}
-
-static inline
-score_t lp_distance(const composite_behavioral_score& a, const composite_behavioral_score& b, double p=1.0)
-{
-    return lp_distance(a.first, b.first, p);
-}
-
-static inline
-score_t lp_distance(const bscored_combo_tree& a, const bscored_combo_tree& b, double p=1.0)
-{
-    return lp_distance(a.second, b.second, p);
-}
+/// Compute the distance between two vectors, using the p-norm.
+score_t lp_distance(const behavioral_score& a,
+                    const behavioral_score& b, double p=1.0);
+score_t lp_distance(const penalized_behavioral_score& a,
+                    const penalized_behavioral_score& b, double p=1.0);
+score_t lp_distance(const composite_behavioral_score& a,
+                    const composite_behavioral_score& b, double p=1.0);
+score_t lp_distance(const bscored_combo_tree& a,
+                    const bscored_combo_tree& b, double p=1.0);
 
 /// metapop_candidates provides an O(1) way of determining if a combo
 /// tree is in the map, or not (and getting its score, if it is).
