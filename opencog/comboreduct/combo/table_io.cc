@@ -381,11 +381,11 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
  * Fill the input table only, given a DSV (delimiter-seperated values)
  * file format, where delimiters are ',', ' ' or '\t'.
  *
- * This algorithm makes several passes over the data.  First, it reads
- * the entire table, as a collection of strings.  Next, it tries to 
- * infer the column types, and the presence of a header.
+ * It stuffs all data into the table as strings; type conversion to
+ * the appropriate type, and thunking for the header, and ignoring
+ * certain features, must alll be done as a separate step.
  */
-istream& istreamTable(istream& in, Table& tab)
+istream& istreamRawTable(istream& in, Table& tab)
     throw(AssertionException)
 {
     string line;
@@ -466,14 +466,27 @@ bool has_header(Table& tab, vector<type_node> col_types)
     arity_t arity = (*rowit).size();
 
     for (arity_t i=0; i<arity; i++) {
-         const vertex &v = (*rowit)[i];
-         const string& tok = boost::get<string>(v);
-         type_node flt = infer_type_from_token(col_types[i], tok);
-         if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
-             return true;
+        const vertex &v = (*rowit)[i];
+        const string& tok = boost::get<string>(v);
+        type_node flt = infer_type_from_token(col_types[i], tok);
+        if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
+            return true;
     }
     return false;
 }
+
+/**
+ * Rturn column number of the indicated column name
+ */
+size_t find_column(const Table& tab, const string& col)
+{
+    vector<string> labels = tab.itable.get_labels();
+    size_t pos = distance(labels.begin(), find(labels, col));
+    OC_ASSERT((pos < labels.size()) && (0 <= pos),
+              "ERROR: There is no column labelled \"%s\"", col.c_str());
+    return pos;
+}
+
 
 /**
  * Delete the named feature from the input table.
@@ -481,10 +494,7 @@ bool has_header(Table& tab, vector<type_node> col_types)
 void delete_column(Table& tab, const string& col)
 {
     // First, get the column number
-    vector<string> labels = tab.itable.get_labels();
-    size_t pos = distance(labels.begin(), find(labels, col));
-    OC_ASSERT((pos < labels.size()) && (0 <= pos),
-              "ERROR: There is no column labelled \"%s\"", col.c_str());
+    size_t pos = find_column(tab, col);
 
     // Next, delete the column itself.
     foreach (vertex_seq& row, tab.itable)
@@ -493,6 +503,7 @@ void delete_column(Table& tab, const string& col)
     }
 
     // Delete the label as well.
+    vector<string> labels = tab.itable.get_labels();
     labels.erase(labels.begin() + pos);
     tab.itable.set_labels(labels);
 }
@@ -502,6 +513,57 @@ void delete_columns(Table& tab,
 {
     foreach(const string& feat, ignore_features)
         delete_column(tab, feat);
+}
+
+/**
+ * Fill the input table only, given a DSV (delimiter-seperated values)
+ * file format, where delimiters are ',', ' ' or '\t'.
+ *
+ * This algorithm makes several passes over the data.  First, it reads
+ * the entire table, as a collection of strings.  Next, it tries to 
+ * infer the column types, and the presence of a header.
+ */
+istream& istreamTable(istream& in, Table& tab,
+                      const vector<string>& ignore_features)
+{
+    istream& stm = istreamRawTable(in, tab);
+
+    vector<type_node> col_types = infer_column_types(tab);
+
+    // If there is a header row, then it must be the column labels.
+    bool hdr = has_header(tab, col_types);
+    if (hdr) {
+        vector<vertex> hdr = *(tab.itable.begin());
+        vector<string> labels;
+        foreach (const vertex& v, hdr) {
+            const string& tok = boost::get<string>(v);
+            labels.push_back(tok);
+        }
+        tab.itable.set_labels(labels);
+        tab.itable.erase(tab.itable.begin());
+    }
+
+    // Now that we have some column labels to work off of,
+    // clean out
+    // xxxxxx asize_t pos = find_column(tab, col);
+
+    // Now that we have some column labels to work off of,
+    // Get rid of the unwanted columns.
+    delete_columns(tab, ignore_features);
+
+    // Finally, perform a column type conversion
+    arity_t arity = tab.itable.get_arity();
+    foreach (vertex_seq& row, tab.itable)
+    {
+        for (arity_t i=0; i<arity; i++) {
+             vertex v = row[i];
+             const string& tok = boost::get<string>(v);
+             // row[i] = token_to_vertex(xx, tok);
+// xxxxxxxxxxxxxxxxxx
+        }
+    }
+
+    return stm;
 }
 
 /**
