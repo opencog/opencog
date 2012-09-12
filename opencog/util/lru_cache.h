@@ -41,22 +41,22 @@ namespace opencog {
 
 
 /**
- * A set of generic caches. Please be careful if you add more caches
- * that they do not break when the function to cache raises an
+ * A colection of generic caches. Please be careful if you add more
+ * caches that they do not break when the function to cache raises an
  * exception.
  */
 
-// base class for all caches
-struct cache_base {
+// base class for all unlimited caches
+struct inf_cache_base {
     typedef size_t size_type;
 
-    cache_base(size_type n, const std::string& name) :
-        _n(n), _misses(0), _hits(0), _cache_name(name)
+    inf_cache_base(const std::string& name) :
+        _misses(0), _hits(0), _cache_name(name)
     {
-        logger().info("Cache %s size=%u", _cache_name.c_str(), n);
+        logger().info("Cache %s", _cache_name.c_str());
     }
 
-    ~cache_base()
+    ~inf_cache_base()
     {
         logger().info("Cache %s hits=%u misses=%u",
                       _cache_name.c_str(), get_hits(), get_misses());
@@ -64,13 +64,24 @@ struct cache_base {
 
     size_type get_misses() const { return _misses.load(); }
     size_type get_hits() const { return _hits.load(); }
+
+protected:
+    mutable std::atomic<size_type> _misses;   // number of cache misses
+    mutable std::atomic<size_type> _hits;     // number of cache hits
+    std::string _cache_name;          // name of the cache (useful for logging)
+};
+
+// base class for all caches limited in size
+struct cache_base : public inf_cache_base {
+    cache_base(size_type n, const std::string& name)
+        : inf_cache_base(name), _n(n) {}
+
+    ~cache_base() {}
+
     size_type max_size() const { return _n; }
 
 protected:
     size_type _n;                            // cache size
-    mutable std::atomic<unsigned> _misses;   // number of cache misses
-    mutable std::atomic<unsigned> _hits;     // number of cache hits
-    std::string _cache_name;            // name of the cache (useful for logging)
 };
     
 // Least Recently Used Cache. Non thread safe, use
@@ -476,6 +487,47 @@ protected:
         return super::_f(x);
     }
 
+};
+
+/**
+ * Unlimited cache, will grow as much as necessary. Thread safe!!!
+ */
+template<typename F,
+         typename Hash=boost::hash<typename F::argument_type>,
+         typename Equals=std::equal_to<typename F::argument_type> >
+struct inf_cache : public F, public inf_cache_base {
+    typedef typename F::argument_type argument_type;
+    typedef typename F::result_type result_type;
+    typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
+    typedef typename map::iterator map_iter;
+    typedef boost::shared_mutex cache_mutex;
+    typedef boost::shared_lock<cache_mutex> shared_lock;
+    typedef boost::unique_lock<cache_mutex> unique_lock;
+
+    inf_cache(const F& f=F(), const std::string name = "inf_cache")
+        : F(f), inf_cache_base(name) {}
+
+    result_type operator()(const argument_type& x) const {
+        // hit?
+        {
+            shared_lock lock(_mutex);
+            auto it = _map.find(x);
+            if (it != _map.end()) {
+                ++_hits;
+                return it->second;
+            }
+        }
+        // then miss
+        ++_misses;
+        result_type y = F::operator()(x);
+        {
+            unique_lock lock(_mutex);
+            return _map[x] = y;
+        }
+    }
+protected:
+    mutable cache_mutex _mutex;
+    mutable map _map;
 };
 
 /// Cache adjusting automatically its size to avoid running out of RAM
