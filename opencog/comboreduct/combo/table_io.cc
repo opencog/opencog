@@ -109,6 +109,8 @@ ifstream* open_data_file(const string& fileName)
 /**
  * check if the data file has a header. That is whether the first row
  * starts with a sequence of output and input labels
+ *
+ * FiXME: this is pretty hacky...
  */
 bool hasHeader(istream& in)
 {
@@ -344,6 +346,61 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 
 // ===========================================================
 // istream regular tables.
+
+/**
+ * Fill the input table only, given a DSV (delimiter-seperated values)
+ * file format, where delimiters are ',', ' ' or '\t'.
+ *
+ * This algorithm makes several passes over the data.  First, it reads
+ * the entire table, as a collection of strings.  Next, it tries to 
+ * infer the column types, and the presence of a header.
+ */
+istream& istreamTable(istream& in, Table& tab)
+    throw(AssertionException)
+{
+    string line;
+    std::vector<string> lines;
+    while (get_data_line(in, line))
+        lines.push_back(line);
+    int ls = lines.size();
+    tab.itable.resize(ls);
+
+    // Determine the arity from the first line.
+    vector<string> fl = tokenizeRow<string>(lines[0]);
+    arity_t arity = fl.size();
+
+    auto parse_line = [&](int i) {
+        // tokenize the line
+        vector<string> io = tokenizeRow<string>(lines[i]);
+
+        // check arity
+        if (arity != (arity_t)io.size())
+            throw AssertionException(TRACE_INFO,
+                  "ERROR: Input file inconsistent: the %uth row has %u "
+                  "columns while the first row has %d columns.  All "
+                  "rows should have the same number of columns.\n",
+                  i + 1, io.size(), arity);
+
+        // fill table with string-valued vertexes.
+        foreach (const string& tok, io) {
+            vertex v = (vertex) tok;
+            tab.itable[i].push_back(v);
+        }
+    };
+
+    // vector of indices [0, lines.size())
+    auto ir = boost::irange(0, ls);
+    vector<size_t> indices(ir.begin(), ir.end());
+    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
+    return in;
+}
+
+/**
+ * Infer the column types of the input table
+ */
+void infer_column_types(Table& tab)
+{
+}
 
 /**
  * Fill an input table and output table given a DSV
