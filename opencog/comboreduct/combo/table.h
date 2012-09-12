@@ -209,6 +209,7 @@ class ITable : public std::vector<vertex_seq>
 public:
     typedef std::vector<vertex_seq > super;
     typedef std::vector<std::string> string_seq;
+    typedef std::vector<type_node> type_seq;
     ITable();
     ITable(const super& mat, string_seq il = string_seq());
     /**
@@ -227,8 +228,11 @@ public:
            contin_t min_contin = -1.0, contin_t max_contin = 1.0);
 
     // set input labels
-    void set_labels(const string_seq& il);
+    void set_labels(const string_seq&);
     const string_seq& get_labels() const;
+
+    void set_types(const type_seq&);
+    const type_seq& get_types() const;
 
     // like get_labels but filtered accordingly to a container of
     // arity_t. Each value of that container corresponds to the column
@@ -296,41 +300,22 @@ public:
      * If off is negative, then the insert is after the last column.
      * TODO: we really should use iterators here, not column numbers.
      */
-    void insert_col(const std::string& clab, const vertex_seq& col, int off = -1)
-    {
-        // insert label
-        labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
+    void insert_col(const std::string& clab, const vertex_seq& col, int off = -1);
 
-        // insert values
-        if (empty()) {
-            OC_ASSERT(off < 0);
-            foreach (const auto& v, col)
-                push_back({v});
-        } else {
-            for (unsigned i = 0; i < col.size(); i++) {
-                auto& row = (*this)[i];
-                row.insert(off >= 0 ? row.begin() + off : row.end(), col[i]);
-            }
-        }
-    }
+    /**
+     * Delete the named feature from the input table.
+     */
+    void delete_column(const std::string& feature);
+    void delete_columns(const string_seq& ignore_features);
 
     /**
      * Get the column, given its label
      */
-    vertex_seq get_column_data(const std::string& name) const
-    {
-        vertex_seq col;
-        auto pos = std::find(labels.begin(), labels.end(), name);
-        if (pos == labels.end())
-            return col;
-        int off = distance(labels.begin(), pos);
-        foreach (const auto& row, *this)
-            col.push_back(row[off]);
-        return col;
-    }
+    vertex_seq get_column_data(const std::string& name) const;
 
 protected:
     mutable string_seq labels; // list of input labels
+    mutable type_seq types;    // list of types of the columns
 
 private:
     string_seq get_default_labels() const;

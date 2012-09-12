@@ -39,6 +39,8 @@ using namespace std;
 using namespace boost;
 using namespace boost::adaptors;
 
+// -------------------------------------------------------
+
 ITable::ITable() {}
 
 ITable::ITable(const ITable::super& mat, vector<string> il)
@@ -82,6 +84,8 @@ ITable::ITable(const type_tree& tt, int nsamples,
     }
 }
 
+// -------------------------------------------------------
+
 void ITable::set_labels(const vector<string>& il)
 {
     labels = il;
@@ -104,6 +108,83 @@ const vector<string>& ITable::get_labels() const
     if (labels.empty() and !super::empty()) // return default labels
         labels = get_default_labels();
     return labels;
+}
+
+void ITable::set_types(const vector<type_node>& il)
+{
+    types = il;
+}
+
+const vector<type_node>& ITable::get_types() const
+{
+    if (labels.empty() and !super::empty()) {
+        arity_t arity = get_arity();
+        types.resize(arity);
+        for (arity_t i=0; i<arity; i++) {
+            types[i] = id::unknown_type;
+        }
+    }
+    return types;
+}
+
+// -------------------------------------------------------
+
+void ITable::insert_col(const std::string& clab, const vertex_seq& col, int off)
+{
+    // insert label
+    labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
+
+    // insert values
+    if (empty()) {
+        OC_ASSERT(off < 0);
+        foreach (const auto& v, col)
+            push_back({v});
+        return;
+    }
+
+    OC_ASSERT (col.size() == size(), "Incorrect column length!");
+    for (unsigned i = 0; i < col.size(); i++) {
+        auto& row = (*this)[i];
+        row.insert(off >= 0 ? row.begin() + off : row.end(), col[i]);
+    }
+}
+
+vector<vertex> ITable::get_column_data(const std::string& name) const
+{
+    vector<vertex> col;
+    auto pos = std::find(labels.begin(), labels.end(), name);
+    if (pos == labels.end())
+        return col;
+    size_t off = distance(labels.begin(), pos);
+    foreach (const auto& row, *this)
+        col.push_back(row[off]);
+    return col;
+}
+
+void ITable::delete_column(const string& name)
+{
+    auto pos = std::find(labels.begin(), labels.end(), name);
+    if (pos == labels.end())
+        return;
+    size_t off = distance(labels.begin(), pos);
+
+    // Delete the column
+    foreach (vertex_seq& row, *this) 
+        row.erase(row.begin() + off);
+
+    // Delete the label as well.
+    if (!labels.empty())
+        labels.erase(labels.begin() + off);
+
+    if (!types.empty())
+        types.erase(types.begin() + off);
+}
+
+
+void ITable::delete_columns(const vector<string>& ignore_features)
+{
+    foreach(const string& feat, ignore_features)
+        delete_column(feat);
 }
 
 // -------------------------------------------------------

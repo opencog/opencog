@@ -487,34 +487,6 @@ size_t find_column(const Table& tab, const string& col)
     return pos;
 }
 
-
-/**
- * Delete the named feature from the input table.
- */
-void delete_column(Table& tab, const string& col)
-{
-    // First, get the column number
-    size_t pos = find_column(tab, col);
-
-    // Next, delete the column itself.
-    foreach (vertex_seq& row, tab.itable)
-    {
-        row.erase(row.begin() + pos);
-    }
-
-    // Delete the label as well.
-    vector<string> labels = tab.itable.get_labels();
-    labels.erase(labels.begin() + pos);
-    tab.itable.set_labels(labels);
-}
-
-void delete_columns(Table& tab,
-                   const vector<string>& ignore_features)
-{
-    foreach(const string& feat, ignore_features)
-        delete_column(tab, feat);
-}
-
 /**
  * Fill the input table only, given a DSV (delimiter-seperated values)
  * file format, where delimiters are ',', ' ' or '\t'.
@@ -544,12 +516,8 @@ istream& istreamTable(istream& in, Table& tab,
     }
 
     // Now that we have some column labels to work off of,
-    // clean out
-    // xxxxxx asize_t pos = find_column(tab, col);
-
-    // Now that we have some column labels to work off of,
     // Get rid of the unwanted columns.
-    delete_columns(tab, ignore_features);
+    tab.itable.delete_columns(ignore_features);
 
     // Finally, perform a column type conversion
     arity_t arity = tab.itable.get_arity();
