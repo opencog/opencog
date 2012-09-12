@@ -758,9 +758,9 @@ int moses_exec(int argc, char** argv)
          value<score_t>(&diversity_exponent)->default_value(2.0),
          "[EXPERIMENTAL] Set the exponent of the generalized mean aggregating "
          "the penalties between a candidate and the set of all candidates better "
-         "than itself (taking into account diversity). The value"
-         "goes from 0 excluded to +inf. Towards 0 it is the geometric mean, "
-         "towards +inf it tends to the max function.\n")
+         "than itself (taking into account diversity). If the value tends "
+         "towards 0 it tends to the geometric mean, towards +inf it tends "
+         "to the max function. If negative or null is it the max function. \n")
 
         (opt_desc_str(complexity_temperature_opt).c_str(),
          value<score_t>(&complexity_temperature)->default_value(6.0),

@@ -89,7 +89,7 @@ struct metapop_parameters
         revisit(_revisit),
         include_dominated(_include_dominated),
         diversity_pressure(0.0),
-        diversity_exponent(2.0),
+        diversity_exponent(-1.0),
         keep_bscore(false),
         complexity_temperature(_complexity_temperature),
         ignore_ops(_ignore_ops),
@@ -124,7 +124,9 @@ struct metapop_parameters
     score_t diversity_pressure;
 
     // exponent of the generalized mean used to aggregate the
-    // diversity penalties of a candidate between a set of candidates
+    // diversity penalties of a candidate between a set of
+    // candidates. If the exponent is negative (default) then the max
+    // is used instead (generalized mean with infinite exponent).
     score_t diversity_exponent;
 
     // keep track of the bscores even if not needed (in case the user
@@ -510,8 +512,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
         bscored_combo_tree_ptr_set pool; // new metapopulation
         
         // temporary copy the metapop in a vector to update the
-        // diversity penalty + a sum of the distorted diversity
-        // penalties between the candidates and the existing ones in
+        // diversity penalty + a partially aggredated distorted
+        // diversity penalties between the candidates and the ones in
         // the pool (to avoid recomputing them)
         typedef std::pair<bscored_combo_tree*, dp_t> bsct_dp_pair;
         std::vector<bsct_dp_pair> tmp;
@@ -557,14 +559,19 @@ struct metapopulation : bscored_combo_tree_ptr_set
 
                 ++dp_count;
                 
-                // add it to v.second
-                v.second += last_dp;
+                // add it to v.second and compute the aggregated
+                // diversity penalty
+                dp_t adp;
+                if (params.diversity_exponent > 0.0) {
+                    v.second += last_dp;
+                    adp = this->aggregated_dps(v.second, pool.size());
+                } else {
+                    v.second = std::max(v.second, last_dp);
+                    adp = v.second;
+                }
                 
-                // aggregate the penalties, update v.first
-                logger().fine("v.second (after) = %f", v.second);
-                dp_t dp = this->aggregated_dps(v.second, pool.size());
-                logger().fine("dp = %f", dp);
-                get_composite_score(*bsct_ptr).set_diversity_penalty(dp);
+                // update v.first                
+                get_composite_score(*bsct_ptr).set_diversity_penalty(adp);
             }
         };
 
@@ -1592,7 +1599,7 @@ protected:
             // miss
             dp_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p),
                 dp = dpre / (1.0 + dst),
-                ddp = pow(dp, dexp);
+                ddp = dexp > 0.0 ? pow(dp, dexp) : dp /* no distortion */;
 
             // // debug
             // logger().fine("dst = %f, dp = %f, ddp = %f", dst, dp, ddp);
