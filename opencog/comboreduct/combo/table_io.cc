@@ -214,14 +214,14 @@ vector<int> find_features_positions(istream& in,
         if (isdigit(f[0])) {
             pos = atoi(f.c_str());
             pos --;  // let users number columns starting at 1.
-            OC_ASSERT((pos < (int)labels.size()) || (0 <= pos),
+            OC_ASSERT((pos < (int)labels.size()) && (0 <= pos),
                       "ERROR: The column number \"%s\" doesn't exist",
                       f.c_str());
         }
         else {
             // Not numeric; search for the column name
             pos = distance(labels.begin(), find(labels, f));
-            OC_ASSERT((pos < (int)labels.size()) || (0 <= pos),
+            OC_ASSERT((pos < (int)labels.size()) && (0 <= pos),
                       "ERROR: There is no column labelled \"%s\"",
                       f.c_str());
         }
@@ -456,7 +456,8 @@ vector<type_node> infer_column_types(const Table& tab)
 /**
  * Infer the column types of the first line of the input table and
  * compare it to the given column types.  If there is a mis-match,
- * then the first row must be a header.
+ * then the first row must be a header, i.e. a set of ascii column
+ * labels.
  */
 bool has_header(Table& tab, vector<type_node> col_types)
 {
@@ -475,6 +476,35 @@ bool has_header(Table& tab, vector<type_node> col_types)
 }
 
 /**
+ * Delete the named feature from the input table.
+ */
+void delete_column(Table& tab, const string& col)
+{
+    // First, get the column number
+    vector<string> labels = tab.itable.get_labels();
+    size_t pos = distance(labels.begin(), find(labels, col));
+    OC_ASSERT((pos < labels.size()) && (0 <= pos),
+              "ERROR: There is no column labelled \"%s\"", col.c_str());
+
+    // Next, delete the column itself.
+    foreach (vertex_seq& row, tab.itable)
+    {
+        row.erase(row.begin() + pos);
+    }
+
+    // Delete the label as well.
+    labels.erase(labels.begin() + pos);
+    tab.itable.set_labels(labels);
+}
+
+void delete_columns(Table& tab,
+                   const vector<string>& ignore_features)
+{
+    foreach(const string& feat, ignore_features)
+        delete_column(tab, feat);
+}
+
+/**
  * Fill an input table and output table given a DSV
  * (delimiter-seperated values) file format, where delimiters are ',',
  * ' ' or '\t'.
@@ -487,7 +517,7 @@ bool has_header(Table& tab, vector<type_node> col_types)
  */
 istream& istreamTable(istream& in, Table& tab,
                       const string& target_feature,
-                      const std::vector<std::string>& ignore_features)
+                      const vector<string>& ignore_features)
 {
     string line;
     arity_t arity = type_tree_arity(tab.tt);
