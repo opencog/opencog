@@ -1,8 +1,10 @@
 /** table_io.cc ---
  *
  * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2012 Poulin Holdings
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
+ *         Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -159,6 +161,34 @@ type_node infer_type_from_token(const string& token)
             return id::ill_formed_type;
         }
     }
+}
+
+/**
+ * Given an input string, guess the type of the string.
+ * Inferable types are: boolean, contin and enum.
+ * Compare this to 'curr_guess', and upgrade the type inference
+ * if it can be done consistently.
+ */
+type_node infer_type_from_token(type_node curr_guess, const string& token)
+{
+    type_node tokt = infer_type_from_token(token);
+
+    // First time, just go with the flow.
+    if (id::unknown_type == curr_guess)
+        return tokt;
+
+    // Yayy! its consistent!
+    if (tokt == curr_guess)
+        return tokt;
+
+    // If we thought its a boolean 0,1 it might be a contin.
+    if ((id::boolean_type == curr_guess) && (id::contin_type == tokt))
+        return tokt;
+
+    // If we got to here, then there's some sort of unexpected 
+    // inconsistency in the column types; we've got to presume that 
+    // its just some crazy ascii string, i.e. enum_type.
+    return id::enum_type;
 }
 
 /**
@@ -398,8 +428,50 @@ istream& istreamTable(istream& in, Table& tab)
 /**
  * Infer the column types of the input table
  */
-void infer_column_types(Table& tab)
+vector<type_node> infer_column_types(const Table& tab)
 {
+    vector<vertex_seq>::const_iterator rowit = tab.itable.begin();
+
+    vector<type_node> types;
+    arity_t arity = (*rowit).size();
+    types.resize(arity);
+    for (arity_t i=0; i<arity; i++) {
+        types[i] = id::unknown_type;
+    }
+
+    // Skip the first line, it might be a header...
+    // and that would confuse type inference.
+    rowit++;
+    for (; rowit != tab.itable.end(); rowit++)
+    {
+        for (arity_t i=0; i<arity; i++) {
+             const vertex &v = (*rowit)[i];
+             const string& tok = boost::get<string>(v);
+             types[i] = infer_type_from_token(types[i], tok);
+        }
+    }
+    return types;
+}
+
+/**
+ * Infer the column types of the first line of the input table and
+ * compare it to the given column types.  If there is a mis-match,
+ * then the first row must be a header.
+ */
+bool has_header(Table& tab, vector<type_node> col_types)
+{
+    vector<vertex_seq>::const_iterator rowit = tab.itable.begin();
+
+    arity_t arity = (*rowit).size();
+
+    for (arity_t i=0; i<arity; i++) {
+         const vertex &v = (*rowit)[i];
+         const string& tok = boost::get<string>(v);
+         type_node flt = infer_type_from_token(col_types[i], tok);
+         if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
+             return true;
+    }
+    return false;
 }
 
 /**
