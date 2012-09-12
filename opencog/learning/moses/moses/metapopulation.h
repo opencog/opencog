@@ -397,7 +397,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _bscore_dst(2.0)        // Euclidean distance
+        _cache_dp(2.0 /* Euclidean distance */, pa.diversity_pressure)
     {
         init(bases, si_ca, sc);
     }
@@ -413,7 +413,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _bscore_dst(2.0)        // Euclidean distance
+        _cache_dp(2.0 /* Euclidean distance */, pa.diversity_pressure)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
@@ -430,7 +430,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * from _bscore_dst.
      */
     void delete_cnd(bscored_combo_tree* ptr) {
-        _bscore_dst.erase_ptr(ptr);
+        _cache_dp.erase_ptr(ptr);
         delete ptr;
     }
     
@@ -467,20 +467,23 @@ struct metapopulation : bscored_combo_tree_ptr_set
         return _best_candidates.begin()->first;
     }
 
-    /**
-     * Turn a bscore distance into a diversity penalty.
-     */
-    score_t dst2dp(score_t dst) const {
-        return params.diversity_pressure / (1.0 + dst);
-    }
-
-    /**
-     * Take a sequence of diversity penalties and aggregate them into one.
-     */
-    score_t aggregated_dps(std::vector<score_t>& dps) {
-        return generalized_mean(dps, params.diversity_exponent);
-    }
+    typedef score_t dp_t;  // diversity_penalty type
     
+    /**
+     * Distort a diversity penalty component between 2 candidates.
+     */
+    dp_t distort_dp(dp_t dp) const {
+        return pow(dp, params.diversity_exponent);
+    }
+    /**
+     * The inverse function of distort_dp normalized by the vector
+     * size. Basically aggregated_dps(1/N * sum_i distort_dp(x_i)) ==
+     * generalized_mean(x) where N is the size of x.
+     */
+    dp_t aggregated_dps(dp_t ddp_sum, unsigned N) const {
+        return pow(ddp_sum / N, 1.0 / params.diversity_exponent);
+    }
+        
     /**
      * Compute the diversity penalty for all models of the metapopulation.
      *
@@ -503,18 +506,22 @@ struct metapopulation : bscored_combo_tree_ptr_set
         bscored_combo_tree_ptr_set pool; // new metapopulation
         
         // temporary copy the metapop in a vector to update the
-        // diversity penalty + a vector of already computed penalties
-        // (to avoid recomputing them)
-        typedef std::pair<bscored_combo_tree*, std::vector<score_t> > bsct_dp_pair;
+        // diversity penalty + a sum of the distorted diversity
+        // penalties between the candidates and the existing ones in
+        // the pool (to avoid recomputing them)
+        typedef std::pair<bscored_combo_tree*, dp_t> bsct_dp_pair;
         std::vector<bsct_dp_pair> tmp;
         foreach(bscored_combo_tree* bsct_ptr, *this)
-            tmp.push_back(bsct_dp_pair(bsct_ptr, std::vector<score_t>()));
+            tmp.push_back(bsct_dp_pair(bsct_ptr, 0.0));
 
         // debug
-        std::atomic<unsigned> dst_count(0); // count the number of
-                                            // calls of lp_distance
+        std::atomic<unsigned> dp_count(0); // count the number of
+                                           // calls of _cache_dp
         // ~debug
 
+        unsigned lhits = _cache_dp.hits.load(),
+            lmisses = _cache_dp.misses.load();
+        
         auto update_diversity_penalty = [&](bsct_dp_pair& v) {
             if (!pool.empty()) { // only do something if the pool is
                                  // not empty (WARNING: this assumes
@@ -525,18 +532,18 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 OC_ASSERT(get_bscore(*bsct_ptr).size(),
                           "Behavioral score is needed for diversity!");
 
-                // compute diversity penalty between bs abd the last
+                // compute diversity penalty between bs and the last
                 // element of the pool
                 const bscored_combo_tree* last = *pool.crbegin();
-                score_t last_dp = this->dst2dp(this->_bscore_dst(bsct_ptr, last));
+                dp_t last_dp = this->_cache_dp(bsct_ptr, last);
 
-                ++dst_count;
+                ++dp_count;
                 
                 // add it to v.second
-                v.second.push_back(last_dp);
+                v.second += last_dp;
                 
                 // aggregate the penalties, update v.first
-                score_t dp = this->aggregated_dps(v.second);
+                dp_t dp = this->aggregated_dps(v.second, pool.size());
                 get_composite_score(*bsct_ptr).set_diversity_penalty(dp);
             }
         };
@@ -560,10 +567,14 @@ struct metapopulation : bscored_combo_tree_ptr_set
         }
 
         // debug
-        logger().debug() << "Number of dst evals = " << dst_count;
-        logger().debug() << "Is lock free? " << dst_count.is_lock_free();
-        logger().debug() << "Number of hits = " << _bscore_dst.hits;
-        logger().debug() << "Number of misses = " << _bscore_dst.misses;
+        logger().debug() << "Number of dst evals = " << dp_count;
+        logger().debug() << "Is lock free? " << dp_count.is_lock_free();
+        logger().debug() << "Number of hits = "
+                         << _cache_dp.hits.load() - lhits;
+        logger().debug() << "Number of misses = "
+                         << _cache_dp.misses.load() - lmisses;
+        logger().debug() << "Total number of hits = " << _cache_dp.hits;
+        logger().debug() << "Total number of misses = " << _cache_dp.misses;
         // ~debug
 
         // Replace the existing metapopulation with the new one.
@@ -1517,21 +1528,21 @@ protected:
     // lock to enable thread-safe deme merging.
     std::mutex _merge_mutex;
 
-    // Functor for bscore distance. Contains a cache. I don't use
-    // {lru,prr}_cache because I want to avoid storing
-    // bscored_combo_tree pairs (which takes too much memory), instead
-    // it uses pairs of pointers of bscored_combo_tree.
-    struct cached_bscore_dst {
+    // Functor for diversity penalty. Contains a cache. It doesn't use
+    // {lru,prr}_cache because we want to avoid storing
+    // bscored_combo_tree pairs (which takes too much memory) and we
+    // don't need a limit on the cache. To avoid taking too much
+    // memory it uses pairs of pointers of bscored_combo_tree.
+    struct cached_dp {
         // ctor
-        cached_bscore_dst(double lp_norm = 1.0) : p(lp_norm), misses(0), hits(0) {}
+        cached_dp(dp_t lp_norm, dp_t diversity_pressure)
+            : p(lp_norm), d(diversity_pressure), misses(0), hits(0) {}
 
-        // operator
-        typedef score_t dst_t;  // distance type
-        // little optimization to deal with the symmetry of the
-        // distance
+        // We use a std::set instead of a std::pair, little
+        // optimization to deal with the symmetry of the distance
         typedef std::set<const bscored_combo_tree*> ptr_pair; 
-        dst_t operator()(const bscored_combo_tree* cl,
-                         const bscored_combo_tree* cr) {
+        dp_t operator()(const bscored_combo_tree* cl, const bscored_combo_tree* cr)
+        {
             ptr_pair cts = {cl, cr};
             // hit
             {
@@ -1543,11 +1554,12 @@ protected:
                 }
             }
             // miss
-            score_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p);
+            dp_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p),
+                dp = d / (1.0 + dst);
             ++misses;
             {
                 unique_lock lock(mutex);
-                return cache[cts] = dst;
+                return cache[cts] = dp;
             }
         }
 
@@ -1567,15 +1579,15 @@ protected:
         typedef boost::shared_mutex cache_mutex;
         typedef boost::shared_lock<cache_mutex> shared_lock;
         typedef boost::unique_lock<cache_mutex> unique_lock;
-        typedef boost::unordered_map<ptr_pair, dst_t, boost::hash<ptr_pair>> Cache;
+        typedef boost::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> Cache;
         cache_mutex mutex;
 
-        double p;
+        dp_t p, d;
         std::atomic<unsigned> misses, hits;
         Cache cache;
     };
 
-    cached_bscore_dst _bscore_dst;
+    cached_dp _cache_dp;
 };
 
 } // ~namespace moses
