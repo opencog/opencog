@@ -444,6 +444,7 @@ vector<type_node> infer_column_types(const ITable& tab)
     rowit++;
     for (; rowit != tab.end(); rowit++)
     {
+// XXX use transform or map or something, instead of this loop
         for (arity_t i=0; i<arity; i++) {
              const vertex &v = (*rowit)[i];
              const string& tok = boost::get<string>(v);
@@ -486,7 +487,7 @@ bool has_header(ITable& tab, vector<type_node> col_types)
 istream& istreamITable(istream& in, ITable& tab,
                       const vector<string>& ignore_features)
 {
-    istream& stm = istreamRawITable(in, tab);
+    istreamRawITable(in, tab);
 
     // Determine the column types.
     vector<type_node> col_types = infer_column_types(tab);
@@ -514,6 +515,11 @@ istream& istreamITable(istream& in, ITable& tab,
     const vector<type_node>& ig_types = tab.get_types();
     foreach (vertex_seq& row, tab)
     {
+
+// XXX TODO use transform instead of the loop below.... something like this:
+        // fill table, based on the types passed in the type-tree
+        // transform(vin_types, io.first, back_inserter(tab.itable[i]), token_to_vertex);
+
         for (arity_t i=0; i<arity; i++) {
              vertex v = row[i];
              const string& tok = boost::get<string>(v);
@@ -521,7 +527,7 @@ istream& istreamITable(istream& in, ITable& tab,
         }
     }
 
-    return stm;
+    return in;
 }
 
 ITable loadITable(const string& file_name,
@@ -551,45 +557,15 @@ istream& istreamTable(istream& in, Table& tab,
                       const string& target_feature,
                       const vector<string>& ignore_features)
 {
-    string line;
-    arity_t arity = type_tree_arity(tab.tt);
+    istreamITable(in, tab.itable, ignore_features);
 
-    bool has_header = hasHeader(in);
+    tab.otable = tab.itable.get_column_data(target_feature);
+    tab.otable.set_label(target_feature);
 
-    int target_column = 0;
+    // XXX get a copy of the type!!  Set it in the OTable!!
+    tab.itable.delete_column(target_feature);
 
-    // Find the column number of the target feature in the data file,
-    // if any.
-    if (!target_feature.empty()) {
-        tab.otable.set_label(target_feature);
-        target_column = find_feature_position(in, target_feature);
-    }
-
-    // Get the list of indexes of features to ignore
-    vector<int> ignore_col_nums =
-        find_features_positions(in, ignore_features);
-
-    ostreamContainer(logger().info() << "Ignore the following columns: ",
-                     ignore_col_nums);
-
-    OC_ASSERT(boost::find(ignore_col_nums, target_column)
-                  == ignore_col_nums.end(),
-                  "You cannot ignore the target feature %s",
-                  target_feature.c_str());
-
-    if (has_header) {
-        get_data_line(in, line);
-        pair<vector<string>, string> ioh = tokenizeRowIO<string>(line, target_column,
-                                                                 ignore_col_nums);
-        tab.itable.set_labels(ioh.first);
-        tab.otable.set_label(ioh.second);
-        OC_ASSERT(arity == (arity_t)ioh.first.size(),
-                  "ERROR: Input file header/data declaration mismatch: "
-                  "The header has %u columns while the first row has "
-                  "%d columns.\n",
-                  ioh.first.size(), arity);
-    }
-
+#if 0
     // Copy the input types to a vector; we need this to pass as an
     // argument to boost::transform, below.
     vector<type_node> vin_types;   // vector of input types
@@ -598,35 +574,8 @@ istream& istreamTable(istream& in, Table& tab,
 
     // Dependent column type.
     type_node out_type = get_type_node(get_signature_output(tab.tt));
+#endif
 
-    std::vector<string> lines;
-    while (get_data_line(in, line))
-        lines.push_back(line);
-    int ls = lines.size();
-    tab.itable.resize(ls);
-    tab.otable.resize(ls);
-
-    // vector of indices [0, lines.size())
-    auto ir = boost::irange(0, ls);
-    vector<size_t> indices(ir.begin(), ir.end());
-
-    auto parse_line = [&](int i) {
-        // tokenize the line and fill the input vector and output
-        pair<vector<string>, string> io = tokenizeRowIO<string>(lines[i], target_column,
-                                                                ignore_col_nums);
-
-        // check arity
-        OC_ASSERT(arity == (arity_t)io.first.size(),
-                  "ERROR: Input file inconsistent: the %uth row has %u "
-                  "columns while the first row has %d columns.  All "
-                  "rows should have the same number of columns.\n",
-                  i + 1, io.first.size(), arity);
-
-        // fill table, based on the types passed in the type-tree
-        transform(vin_types, io.first, back_inserter(tab.itable[i]), token_to_vertex);
-        tab.otable[i] = token_to_vertex(out_type, io.second);
-    };
-    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
     return in;
 }
 
