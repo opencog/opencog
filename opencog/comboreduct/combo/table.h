@@ -232,8 +232,9 @@ public:
      * If off is negative, then the insert is after the last column.
      * TODO: we really should use iterators here, not column numbers.
      */
-    void insert_col(const std::string& clab, const vertex_seq& col, int off = -1);
-
+    void insert_col(const std::string& clab,
+                    const vertex_seq& col,
+                    int off = -1);
     /**
      * Delete the named feature from the input table.
      * If the feature is the empty string, then column zero is deleted.

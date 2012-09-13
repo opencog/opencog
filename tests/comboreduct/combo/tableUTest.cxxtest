@@ -200,21 +200,21 @@ public:
         {
             stringstream ss_res;
             ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("label1\nboolean1\n0\n"));
+            TS_ASSERT_EQUALS(ss_res.str(), string("label1\nboolean\n1\n0\n"));
         }
         vertex_seq col2 = {id::logical_false, id::logical_true};
         it.insert_col("label2", col2);
         {
             stringstream ss_res;
             ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("label1,label2\n1,0\n0,1\n"));
+            TS_ASSERT_EQUALS(ss_res.str(), string("label1,label2\nboolean,boolean\n1,0\n0,1\n"));
         }
         auto lc = it.get_column_data("label2");
         it.insert_col("label3", lc, 0);
         {
             stringstream ss_res;
             ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("label3,label1,label2\n0,1,0\n1,0,1\n"));
+            TS_ASSERT_EQUALS(ss_res.str(), string("label3,label1,label2\nboolean,boolean,boolean\n0,1,0\n1,0,1\n"));
         }
     }
 };

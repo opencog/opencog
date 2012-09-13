@@ -146,12 +146,19 @@ type_node ITable::get_type(const std::string& name) const
 
 // -------------------------------------------------------
 
-void ITable::insert_col(const std::string& clab, const vertex_seq& col, int off)
+void ITable::insert_col(const std::string& clab,
+                        const vertex_seq& col,
+                        int off)
 {
-    // insert label
+    // Infer the column type
+    // Use the second row, just in case the first holds labels...
+    type_node col_type = get_type_node(get_output_type_tree(col[1]));
+    types.insert(off >= 0 ? types.begin() + off : types.end(), col_type);
+
+    // Insert label
     labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
 
-    // insert values
+    // Insert values
     if (empty()) {
         OC_ASSERT(off < 0);
         foreach (const auto& v, col)
@@ -224,10 +231,14 @@ OTable::OTable(const string& ol)
     : label(ol), type(id::unknown_type) {}
 
 OTable::OTable(const super& ot, const string& ol)
-    : super(ot), label(ol), type(id::unknown_type) {}
+    : super(ot), label(ol)
+{
+    // Be sure to set the column type as well ... 
+    type = get_type_node(get_output_type_tree((*this)[0]));
+}
 
 OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
-    : label(ol), type(id::unknown_type)
+    : label(ol)
 {
     OC_ASSERT(!tr.empty());
     if (is_ann_type(*tr.begin())) {
@@ -248,19 +259,24 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
             push_back(net.outputs[0]->activation);
         }
     } else {
-        // XXX todo: should set the output type here...
         foreach(const vertex_seq& vs, itable)
             push_back(eval_throws_binding(vs, tr));
     }
+
+    // Be sure to set the column type as well ... 
+    type = get_type_node(get_output_type_tree((*this)[0]));
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
-    : label(ol), type(id::unknown_type)
+    : label(ol)
 {
     arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {
             this->push_back(eval_throws_binding(vs, tr));
         });
+
+    // Be sure to set the column type as well ... 
+    type = get_type_node(get_output_type_tree((*this)[0]));
 }
 
 void OTable::set_label(const string& ol)
