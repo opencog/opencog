@@ -88,6 +88,14 @@ ITable::ITable(const type_tree& tt, int nsamples,
     }
 }
 
+bool ITable::operator==(const ITable& rhs) const
+{
+    return
+        static_cast<const super&>(*this) == static_cast<const super&>(rhs)
+        && get_labels() == rhs.get_labels()
+        && get_types() == rhs.get_types();
+}
+
 // -------------------------------------------------------
 
 void ITable::set_labels(const vector<string>& il)
@@ -151,7 +159,7 @@ void ITable::insert_col(const std::string& clab,
 {
     // Infer the column type
     // Use the second row, just in case the first holds labels...
-    type_node col_type = get_type_node(get_output_type_tree(col[1]));
+    type_node col_type = get_type_node(get_type_tree(col[1]));
     types.insert(off >= 0 ? types.begin() + off : types.end(), col_type);
 
     // Insert label
@@ -315,12 +323,12 @@ type_node OTable::get_type() const
 bool OTable::operator==(const OTable& rhs) const
 {
     const static contin_t epsilon = 1e-12;
-    for(auto lit = begin(), rit = rhs.begin(); lit != end(); ++lit, ++rit) {
-        if(is_contin(*lit) && is_contin(*rit)) {
-            if(!isApproxEq(get_contin(*lit), get_contin(*rit), epsilon))
+    for (auto lit = begin(), rit = rhs.begin(); lit != end(); ++lit, ++rit) {
+        if (is_contin(*lit) && is_contin(*rit)) {
+            if (!isApproxEq(get_contin(*lit), get_contin(*rit), epsilon))
                 return false;
         }
-        else if(*lit != *rit)
+        else if (*lit != *rit)
             return false;
     }
     return rhs.get_label() == label;

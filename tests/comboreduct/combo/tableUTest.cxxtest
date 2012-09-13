@@ -96,23 +96,61 @@ public:
                          gen_signature(id::contin_type, 2));
     }
 
+    void test_ContinTable_type_inference()
+    {
+        vertex_seq o{0, 1, 10.1, 6.5};
+        OTable ot(o);
+        ITable it;
+        // first row looks boolean, do not be fooled!
+        it.push_back({1, 1});
+        it.push_back({0, 1});
+        it.push_back({0.4, 244.2});
+        it.push_back({9.5, 4.2});
+        testIStreamTable("0,1,1\n"
+                         "1,0,1\n"
+                         "10.1,0.4,244.2\n"
+                         "6.5,9.5,4.2\n", it, ot, false,
+                         gen_signature(id::contin_type, 2));
+    }
+
     void test_ContinTableLabels()
     {
-        vertex_seq o{10.1, 6.5};
+        vertex_seq o{0, 10.1, 6.5};
         OTable ot(o, olabel);
         ITable it;
+        it.push_back({1, 1});
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         vector<string> il{label1, label2};
         it.set_labels(il);
         testIStreamTable("happiness,price,temperature\n"
+                         "0,1,1\n"
                          "10.1,0.4,244.2\n"
                          "6.5,9.5,4.2\n", it, ot, true,
                          gen_signature(id::contin_type, 2));
     }
 
+    void test_EnumTableLabels()
+    {
+        vertex_seq o{enum_t("sad"), enum_t("bored"), enum_t("super-happy")};
+        OTable ot(o, olabel);
+        ITable it;
+        it.push_back({1, 1, id::logical_false});
+        it.push_back({0.44, 244.2, id::logical_true});
+        it.push_back({9.5, 4.2, id::logical_false});
+        vector<string> il{label1, label2, "truth"};
+        it.set_labels(il);
+        vector<type_node> itypes({id::contin_type, id::contin_type, id::boolean_type});
+        testIStreamTable("happiness,price,temperature,truth\n"
+                         "sad,1,1,0\n"
+                         "bored,0.44,244.2,T\n"
+                         "super-happy,9.5,4.2,F\n", it, ot, true,
+                         gen_signature(itypes, id::enum_type));
+    }
+
     void test_filterITable()
     {
+        std::cout << "\n----------------------------" << std::endl;
         ITable it;
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
@@ -139,6 +177,7 @@ public:
 
     void test_filterCTable()
     {
+        std::cout << "\n----------------------------" << std::endl;
         ITable it;
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
@@ -182,6 +221,7 @@ public:
 
     void test_mutualInformation()
     {
+        std::cout << "\n----------------------------" << std::endl;
         string target_feature;
         vector<string> ignore_features;
         Table tt = loadTable(tableUTest_dir + "dataset.csv", target_feature, ignore_features);
@@ -194,6 +234,7 @@ public:
 
     void test_insert_get_pos()
     {
+        std::cout << "\n----------------------------" << std::endl;
         ITable it;
         vertex_seq col1 = {id::logical_true, id::logical_false};
         it.insert_col("label1", col1);

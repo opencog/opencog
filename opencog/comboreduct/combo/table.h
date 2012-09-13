@@ -187,7 +187,7 @@ public:
 class ITable : public std::vector<vertex_seq>
 {
 public:
-    typedef std::vector<vertex_seq > super;
+    typedef std::vector<vertex_seq> super;
     typedef std::vector<std::string> string_seq;
     typedef std::vector<type_node> type_seq;
     ITable();
@@ -211,13 +211,7 @@ public:
         return super::front().size();
     }
 
-    bool operator==(const ITable& rhs) const
-    {
-        return
-            static_cast<const super&>(*this) == static_cast<const super&>(rhs)
-            && get_labels() == rhs.get_labels()
-            && get_types() == rhs.get_types();
-    }
+    bool operator==(const ITable& rhs) const;
 
     // set input labels
     void set_labels(const string_seq&);
