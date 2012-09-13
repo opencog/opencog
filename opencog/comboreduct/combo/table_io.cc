@@ -551,7 +551,8 @@ void subsampleTable(ITable& it, unsigned nsamples) {
 ostream& operator<<(ostream& out, const ITable& it)
 {
     ostreamlnContainer(out, it.get_labels(), ",");
-    foreach(const vertex_seq& row, it) {
+    ostreamlnContainer(out, it.get_types(), ",");
+    foreach (const vertex_seq& row, it) {
         vector<string> row_str;
         boost::transform(row, back_inserter(row_str), vertex_to_str);
         ostreamlnContainer(out, row_str, ",");
@@ -561,9 +562,10 @@ ostream& operator<<(ostream& out, const ITable& it)
 
 ostream& operator<<(ostream& out, const OTable& ot)
 {
-    if(!ot.get_label().empty())
+    if (!ot.get_label().empty())
         out << ot.get_label() << endl;
-    foreach(const vertex& v, ot)
+    out << ot.get_type() << endl;
+    foreach (const vertex& v, ot)
         out << vertex_to_str(v) << endl;
     return out;
 }
