@@ -403,9 +403,9 @@ istream& istreamTable(istream& in, Table& tab,
     istreamITable(in, tab.itable, ignore_features);
 
     tab.otable = tab.itable.get_column_data(target_feature);
+    type_node targ_type = tab.itable.get_type(target_feature);
 
     string targ_feat = tab.itable.delete_column(target_feature);
-    type_node targ_type = tab.itable.get_type(target_feature);
 
     // If the target feature was emtpy string, then its column zero we are after.
     tab.otable.set_label(targ_feat);
