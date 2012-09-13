@@ -385,7 +385,7 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
  * the appropriate type, and thunking for the header, and ignoring
  * certain features, must alll be done as a separate step.
  */
-istream& istreamRawTable(istream& in, Table& tab)
+istream& istreamRawITable(istream& in, ITable& tab)
     throw(AssertionException)
 {
     string line;
@@ -393,7 +393,7 @@ istream& istreamRawTable(istream& in, Table& tab)
     while (get_data_line(in, line))
         lines.push_back(line);
     int ls = lines.size();
-    tab.itable.resize(ls);
+    tab.resize(ls);
 
     // Determine the arity from the first line.
     vector<string> fl = tokenizeRow<string>(lines[0]);
@@ -414,7 +414,7 @@ istream& istreamRawTable(istream& in, Table& tab)
         // fill table with string-valued vertexes.
         foreach (const string& tok, io) {
             vertex v = (vertex) tok;
-            tab.itable[i].push_back(v);
+            tab[i].push_back(v);
         }
     };
 
@@ -428,9 +428,9 @@ istream& istreamRawTable(istream& in, Table& tab)
 /**
  * Infer the column types of the input table
  */
-vector<type_node> infer_column_types(const Table& tab)
+vector<type_node> infer_column_types(const ITable& tab)
 {
-    vector<vertex_seq>::const_iterator rowit = tab.itable.begin();
+    vector<vertex_seq>::const_iterator rowit = tab.begin();
 
     vector<type_node> types;
     arity_t arity = (*rowit).size();
@@ -442,7 +442,7 @@ vector<type_node> infer_column_types(const Table& tab)
     // Skip the first line, it might be a header...
     // and that would confuse type inference.
     rowit++;
-    for (; rowit != tab.itable.end(); rowit++)
+    for (; rowit != tab.end(); rowit++)
     {
         for (arity_t i=0; i<arity; i++) {
              const vertex &v = (*rowit)[i];
@@ -459,9 +459,9 @@ vector<type_node> infer_column_types(const Table& tab)
  * then the first row must be a header, i.e. a set of ascii column
  * labels.
  */
-bool has_header(Table& tab, vector<type_node> col_types)
+bool has_header(ITable& tab, vector<type_node> col_types)
 {
-    vector<vertex_seq>::const_iterator rowit = tab.itable.begin();
+    vector<vertex_seq>::const_iterator rowit = tab.begin();
 
     arity_t arity = (*rowit).size();
 
@@ -476,18 +476,6 @@ bool has_header(Table& tab, vector<type_node> col_types)
 }
 
 /**
- * Rturn column number of the indicated column name
- */
-size_t find_column(const Table& tab, const string& col)
-{
-    vector<string> labels = tab.itable.get_labels();
-    size_t pos = distance(labels.begin(), find(labels, col));
-    OC_ASSERT((pos < labels.size()) && (0 <= pos),
-              "ERROR: There is no column labelled \"%s\"", col.c_str());
-    return pos;
-}
-
-/**
  * Fill the input table only, given a DSV (delimiter-seperated values)
  * file format, where delimiters are ',', ' ' or '\t'.
  *
@@ -495,39 +483,41 @@ size_t find_column(const Table& tab, const string& col)
  * the entire table, as a collection of strings.  Next, it tries to 
  * infer the column types, and the presence of a header.
  */
-istream& istreamTable(istream& in, Table& tab,
+istream& istreamITable(istream& in, ITable& tab,
                       const vector<string>& ignore_features)
 {
-    istream& stm = istreamRawTable(in, tab);
+    istream& stm = istreamRawITable(in, tab);
 
+    // Determine the column types.
     vector<type_node> col_types = infer_column_types(tab);
+    tab.set_types(col_types);
 
     // If there is a header row, then it must be the column labels.
     bool hdr = has_header(tab, col_types);
     if (hdr) {
-        vector<vertex> hdr = *(tab.itable.begin());
+        vector<vertex> hdr = *(tab.begin());
         vector<string> labels;
         foreach (const vertex& v, hdr) {
             const string& tok = boost::get<string>(v);
             labels.push_back(tok);
         }
-        tab.itable.set_labels(labels);
-        tab.itable.erase(tab.itable.begin());
+        tab.set_labels(labels);
+        tab.erase(tab.begin());
     }
 
     // Now that we have some column labels to work off of,
     // Get rid of the unwanted columns.
-    tab.itable.delete_columns(ignore_features);
+    tab.delete_columns(ignore_features);
 
     // Finally, perform a column type conversion
-    arity_t arity = tab.itable.get_arity();
-    foreach (vertex_seq& row, tab.itable)
+    arity_t arity = tab.get_arity();
+    const vector<type_node>& ig_types = tab.get_types();
+    foreach (vertex_seq& row, tab)
     {
         for (arity_t i=0; i<arity; i++) {
              vertex v = row[i];
              const string& tok = boost::get<string>(v);
-             // row[i] = token_to_vertex(xx, tok);
-// xxxxxxxxxxxxxxxxxx
+             row[i] = token_to_vertex(ig_types[i], tok);
         }
     }
 

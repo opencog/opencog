@@ -140,6 +140,9 @@ std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
 //////////////////
 
 /// Read a table from an input stream.
+std::istream& istreamITable(std::istream& in, ITable& tab,
+                           const std::vector<std::string>& ignore_features);
+
 std::istream& istreamTable(std::istream& in, Table& tab,
                            const std::string& target_feature,
                            const std::vector<std::string>& ignore_features);
