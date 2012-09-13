@@ -236,7 +236,7 @@ OTable::OTable(const super& ot, const string& ol)
     : super(ot), label(ol)
 {
     // Be sure to set the column type as well ... 
-    type = get_type_node(get_output_type_tree((*this)[0]));
+    type = get_type_node(get_type_tree((*this)[0]));
 }
 
 OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
@@ -266,7 +266,7 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
     }
 
     // Be sure to set the column type as well ... 
-    type = get_type_node(get_output_type_tree((*this)[0]));
+    type = get_type_node(get_type_tree((*this)[0]));
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
@@ -278,7 +278,7 @@ OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
         });
 
     // Be sure to set the column type as well ... 
-    type = get_type_node(get_output_type_tree((*this)[0]));
+    type = get_type_node(get_type_tree((*this)[0]));
 }
 
 void OTable::set_label(const string& ol)

@@ -231,8 +231,8 @@ type_tree get_type_tree(const vertex& v)
         return get_type_tree(get_wild_card(v));
     //other non handled cases
     else {
-        OC_ASSERT(false, "this case isn't handled yet");
-        type_tree tmp;
+        // OC_ASSERT(false, "this case isn't handled yet");
+        type_tree tmp(id::unknown_type);
         return tmp;
     }
 }
