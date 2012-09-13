@@ -152,10 +152,15 @@ void ITable::insert_col(const std::string& clab, const vertex_seq& col, int off)
 vector<vertex> ITable::get_column_data(const std::string& name) const
 {
     vector<vertex> col;
-    auto pos = std::find(labels.begin(), labels.end(), name);
-    if (pos == labels.end())
-        return col;
-    size_t off = distance(labels.begin(), pos);
+
+    // If the name is empty, get column zero.
+    size_t off = 0;
+    if (!name.empty()) {
+        auto pos = std::find(labels.begin(), labels.end(), name);
+        if (pos == labels.end())
+            return col;
+        off = distance(labels.begin(), pos);
+    }
     foreach (const auto& row, *this)
         col.push_back(row[off]);
     return col;
@@ -163,10 +168,14 @@ vector<vertex> ITable::get_column_data(const std::string& name) const
 
 void ITable::delete_column(const string& name)
 {
-    auto pos = std::find(labels.begin(), labels.end(), name);
-    if (pos == labels.end())
-        return;
-    size_t off = distance(labels.begin(), pos);
+    // If the name is empty, get column zero.
+    size_t off = 0;
+    if (!name.empty()) {
+        auto pos = std::find(labels.begin(), labels.end(), name);
+        if (pos == labels.end())
+            return;
+        off = distance(labels.begin(), pos);
+    }
 
     // Delete the column
     foreach (vertex_seq& row, *this) 
@@ -233,7 +242,10 @@ OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
 
 void OTable::set_label(const string& ol)
 {
-    label = ol;
+    if (ol.empty())
+        label = default_output_label;
+    else
+        label = ol;
 }
 
 const string& OTable::get_label() const
