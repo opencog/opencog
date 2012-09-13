@@ -167,6 +167,10 @@ type_node infer_type_from_token(type_node curr_guess, const string& token)
     if (tokt == curr_guess)
         return tokt;
 
+    // If we saw 0,1 when expecting a contin, its a contin.
+    if ((id::contin_type == curr_guess) && (id::boolean_type == tokt))
+        return curr_guess;
+
     // If we thought its a boolean 0,1 it might be a contin.
     if ((id::boolean_type == curr_guess) && (id::contin_type == tokt))
         return tokt;
@@ -224,16 +228,17 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 // istream regular tables.
 
 /**
- * Fill the input table only, given a DSV (delimiter-seperated values)
- * file format, where delimiters are ',', ' ' or '\t'.
+ * Fill the input table, given a file in DSV (delimiter-seperated values)
+ * format.  The delimiters are ',', ' ' or '\t'.
  *
  * It stuffs all data into the table as strings; type conversion to
  * the appropriate type, and thunking for the header, and ignoring
- * certain features, must alll be done as a separate step.
+ * certain features, must all be done as a separate step.
  */
 istream& istreamRawITable(istream& in, ITable& tab)
     throw(AssertionException)
 {
+    // Get the entire dataset into memory
     string line;
     std::vector<string> lines;
     while (get_data_line(in, line))
