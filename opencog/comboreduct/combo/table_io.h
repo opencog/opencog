@@ -54,16 +54,6 @@ void removeNonASCII(std::string& str);
 bool checkCarriageReturn(std::istream& in);
 
 /**
- * Check the token, if it is "0" or "1" then it is boolean, otherwise
- * it is contin. It is not 100% reliable of course and should be
- * improved.
- */
-type_node infer_type_from_token(const std::string& token);
-
-// used as default for TokenizeRow
-static const std::vector<int> empty_int_vec;
-
-/**
  * Take a row, strip away any nnon-ASCII chars and trailing carriage
  * returns, and then return a tokenizer.  Tokenization uses the
  * seperator characters comma, blank, tab (',', ' ' or '\t').
@@ -77,63 +67,15 @@ table_tokenizer get_row_tokenizer(std::string& line);
  * non-ASCII characters, as well as stripping of any carriage-returns.
  */
 template<typename T>
-std::vector<T> tokenizeRow(std::string& line,
-                           const std::vector<int>& ignore_col_nums = empty_int_vec)
+std::vector<T> tokenizeRow(std::string& line)
 {
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
-    int i = 0;
-    foreach (const std::string& t, tok) {
-        // Record a column, only if it's not to be ignored.
-        if (boost::find(ignore_col_nums, i) == ignore_col_nums.end())
-            res.push_back(boost::lexical_cast<T>(t));
-        i++;
-    }
+    foreach (const std::string& t, tok)
+        res.push_back(boost::lexical_cast<T>(t));
     return res;
 }
 
-/**
- * Take a line and return an output and a vector of inputs.
- *
- * The pos variable indicates which token is taken as the output.
- * If pos < 0 then the last token is assumed to be the output.
- * If pos >=0 then that token is used (0 is the first, 1 is the
- * second, etc.)  If pos is out of range, an assert is raised.
- *
- * This will modify the line to remove leading non-ASCII characters,
- * as well as stripping of any carriage-returns.
- */
-template<typename T>
-std::pair<std::vector<T>, T> tokenizeRowIO(std::string& line,
-                                           int pos = 0,
-                                           const std::vector<int>& ignore_col_nums
-                                           = empty_int_vec)
-{
-    table_tokenizer tok = get_row_tokenizer(line);
-    std::vector<T> inputs;
-    T output;
-    int i = 0;
-    foreach (const std::string& t, tok) {
-        // Some input files contain multiple delimiters between columns
-        // (e.g. two or three spaces between numeric columns).  This
-        // results in empty columns.  Ignore these, and don't i++ either.
-        if (0 == t.size()) continue;
-
-        // Record a column, only if it's not to be ignored.
-        if (boost::find(ignore_col_nums, i) == ignore_col_nums.end()) {
-            if (i != pos)
-                inputs.push_back(boost::lexical_cast<T>(t));
-            else output = boost::lexical_cast<T>(t);
-        }
-        i++;
-    }
-    if (pos < 0) {
-        output = inputs.back();
-        inputs.pop_back();
-    }
-
-    return {inputs, output};
-}
 
 //////////////////
 // istreamTable //
@@ -154,11 +96,6 @@ ITable loadITable(const std::string& file_name,
                 const std::vector<std::string>& ignore_features);
 
 Table loadTable(const std::string& file_name,
-                const std::string& target_feature,
-                const std::vector<std::string>& ignore_features);
-
-Table loadTable(const std::string& file_name,
-                const type_tree& signature,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features);
 
@@ -196,8 +133,6 @@ void subsampleTable(Table& table, unsigned nsamples);
  * like above but subsample only the input table
  */
 void subsampleTable(ITable& it, unsigned nsamples);
-
-std::ifstream* open_data_file(const std::string& fileName);
 
 std::ostream& operator<<(std::ostream& out, const ITable& it);
 

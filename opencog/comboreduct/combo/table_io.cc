@@ -64,6 +64,23 @@ void removeNonASCII(string& str)
         str = str.substr(1);
 }
 
+table_tokenizer get_row_tokenizer(string& line)
+{
+    typedef boost::escaped_list_separator<char> separator;
+    typedef boost::tokenizer<separator> tokenizer;
+    typedef tokenizer::const_iterator tokenizer_cit;
+
+    // Remove weird symbols at the start of the line (only).
+    removeNonASCII(line);
+    // Remove carriage return at end of line (for DOS files).
+    removeCarriageReturn(line);
+
+    // Tokenize line; current allow tabs, commas, blanks.
+    static const separator sep("\\", ",\t ", "\"");
+    return tokenizer(line, sep);
+}
+
+// -------------------------------------------------------
 // Return true if the character is one of the standard comment
 // delimiters.  Here, we define a 'standard delimiter' as one
 // of hash, bang or semicolon.
@@ -97,38 +114,7 @@ istream &get_data_line(istream& is, string& line)
     }
 }
 
-ifstream* open_data_file(const string& fileName)
-{
-    ifstream* in = new ifstream(fileName.c_str());
-    if(!in->is_open()) {
-        stringstream ss;
-        ss << "ERROR: Could not open " << fileName << endl;
-        OC_ASSERT(false, ss.str());
-    }
-    return in;
-}
-
-/**
- * check if the data file has a header. That is whether the first row
- * starts with a sequence of output and input labels
- *
- * FiXME: this is pretty hacky...
- */
-bool hasHeader(istream& in)
-{
-    auto curpos = in.tellg();
-
-    string line;
-    get_data_line(in, line);
-    vector<string> cols = tokenizeRow<string>(line);
-    type_node n = infer_type_from_token(cols[0]);
-
-    in.seekg(curpos);
-
-    // Well, first row might be enums, or headers...
-    return (n == id::ill_formed_type) || (n == id::enum_type);
-}
-
+// -------------------------------------------------------
 /**
  * Given an input string, guess the type of the string.
  * Inferable types are: boolean, contin and enum.
@@ -189,146 +175,6 @@ type_node infer_type_from_token(type_node curr_guess, const string& token)
     // inconsistency in the column types; we've got to presume that 
     // its just some crazy ascii string, i.e. enum_type.
     return id::enum_type;
-}
-
-/**
- * Find the column numbers associated with the names features
- *
- * If the target begins with an alpha character, it is assumed to be a
- * column label. We return the column number; 0 is the left-most column.
- *
- * If the target is numeric, just assume that it is a column number.
- */
-vector<int> find_features_positions(istream& in,
-                                    const vector<string>& features)
-{
-    auto curpos = in.tellg();
-    string line;
-    get_data_line(in, line);
-    vector<string> labels = tokenizeRow<string>(line);
-    vector<int> positions;
-
-    foreach (const string& f, features) {
-        // If its just numeric, go with it; double-check the value.
-        int pos;
-        if (isdigit(f[0])) {
-            pos = atoi(f.c_str());
-            pos --;  // let users number columns starting at 1.
-            OC_ASSERT((pos < (int)labels.size()) && (0 <= pos),
-                      "ERROR: The column number \"%s\" doesn't exist",
-                      f.c_str());
-        }
-        else {
-            // Not numeric; search for the column name
-            pos = distance(labels.begin(), find(labels, f));
-            OC_ASSERT((pos < (int)labels.size()) && (0 <= pos),
-                      "ERROR: There is no column labelled \"%s\"",
-                      f.c_str());
-        }
-        positions.push_back(pos);
-    }
-    in.seekg(curpos);
-    return positions;
-}
-
-// Like above but takes only a single feature
-int find_feature_position(istream& in, const string& feature)
-{
-    vector<string> features{feature};
-    return find_features_positions(in, features).back();
-}
-
-/**
- * take a row in input as a pair {inputs, output} and return the type
- * tree corresponding to the function mapping inputs to output. If the
- * inference fails then it returns a type_tree with
- * id::ill_formed_type as root.
- */
-type_tree infer_row_type_tree(const pair<vector<string>, string>& row)
-{
-    type_tree tt(id::lambda_type);
-    auto root = tt.begin();
-
-    foreach (const string& s, row.first) {
-        type_node n = infer_type_from_token(s);
-        if (n == id::ill_formed_type)
-            return type_tree(id::ill_formed_type);
-        else
-            tt.append_child(root, n);
-    }
-    type_node n = infer_type_from_token(row.second);
-    if (n == id::ill_formed_type)
-        return type_tree(id::ill_formed_type);
-    else
-        tt.append_child(root, n);
-
-    return tt;
-}
-
-/// Create a type tree describing the types of the input columns
-/// and the output column.
-///
-/// @param target_feature is the feature we expect to use as the output
-/// (the dependent variable)
-///
-/// @param ignore_col_nums are a list of column to ignore
-///
-/// @return type_tree infered
-type_tree infer_data_type_tree(const string& fileName,
-                               const string& target_feature,
-                               const vector<string>& ignore_features)
-{
-    unique_ptr<ifstream> in(open_data_file(fileName));
-    string line;
-    if (hasHeader(*in))
-        get_data_line(*in, line);
-
-    get_data_line(*in, line);
-
-    OC_ASSERT(1 < line.size(),
-        "Error: the data file %s appears to be empty!?\n",
-        fileName.c_str());
-
-    int target_column = 0;
-
-    // Find the column number of the target feature in the data file,
-    // if any.
-    if (!target_feature.empty())
-        target_column = find_feature_position(*in, target_feature);
-
-    // Get the list of indexes of features to ignore
-    vector<int> ignore_col_nums =
-        find_features_positions(*in, ignore_features);
-
-    type_tree res = infer_row_type_tree(tokenizeRowIO<string>(line,
-                                                              target_column,
-                                                              ignore_col_nums));
-
-    if (!is_well_formed(res)) {
-        logger().error() << "Error: Cannot infer type tree for this line: "
-            << line << "\nType tree is " <<  res;
-    }
-    OC_ASSERT(is_well_formed(res),
-        "Error: In file %s, cannot deduce data types of some of the "
-        "columns in this line=%s\nSee log file for  more info.",
-        fileName.c_str(), line.c_str());
-    return res;
-}
-
-table_tokenizer get_row_tokenizer(string& line)
-{
-    typedef boost::escaped_list_separator<char> separator;
-    typedef boost::tokenizer<separator> tokenizer;
-    typedef tokenizer::const_iterator tokenizer_cit;
-
-    // Remove weird symbols at the start of the line (only).
-    removeNonASCII(line);
-    // Remove carriage return at end of line (for DOS files).
-    removeCarriageReturn(line);
-
-    // Tokenize line; current allow tabs, commas, blanks.
-    static const separator sep("\\", ",\t ", "\"");
-    return tokenizer(line, sep);
 }
 
 /// cast string "token" to a vertex of type "tipe"
@@ -586,7 +432,6 @@ istream& istreamTable(istream& in, Table& tab,
  * raised.
  */
 Table loadTable(const string& file_name,
-                const type_tree& signature,
                 const string& target_feature,
                 const vector<string>& ignore_features)
 {
@@ -595,26 +440,7 @@ Table loadTable(const string& file_name,
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
 
     Table res;
-    res.tt = signature;
-
     istreamTable(in, res, target_feature, ignore_features);
-
-    return res;
-}
-
-Table loadTable(const string& file_name,
-                const string& target_feature,
-                const vector<string>& ignore_features)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-
-    Table res;
-    res.tt = infer_data_type_tree(file_name, target_feature, ignore_features);
-
-    istreamTable(in, res, target_feature, ignore_features);
-
     return res;
 }
 
