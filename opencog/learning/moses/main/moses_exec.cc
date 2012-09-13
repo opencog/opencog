@@ -755,7 +755,7 @@ int moses_exec(int argc, char** argv)
          "That value sets the importance of that penalty (from 0 to +inf).\n")
 
         ("diversity-exponent",
-         value<score_t>(&diversity_exponent)->default_value(2.0),
+         value<score_t>(&diversity_exponent)->default_value(-1.0),
          "[EXPERIMENTAL] Set the exponent of the generalized mean aggregating "
          "the penalties between a candidate and the set of all candidates better "
          "than itself (taking into account diversity). If the value tends "
