@@ -1,10 +1,10 @@
 /** table_io.cc ---
  *
  * Copyright (C) 2010 OpenCog Foundation
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012 Poulin Holdings LLC
  *
- * Author: Nil Geisweiller <ngeiswei@gmail.com>
- *         Linas Vepstas <linasvepstas@gmail.com>
+ * Authors: Nil Geisweiller <ngeiswei@gmail.com>
+ *          Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
