@@ -373,9 +373,20 @@ type_tree     get_signature_output(const type_tree& ty);
 type_tree_seq get_signature_inputs(const type_tree& ty);
 
 
-/// Given the arity, the types of the inputs and the output, create
+/// Given the types of the inputs and the output, create
 /// a corresponding function signature, that is, a lambda type tree 
 /// with that signature.  So, for example:
+///      gen_signature({id::contin_type,  id::contin_type}, id::boolean_type)
+/// returns
+///     ->(contin contin boolean)
+type_tree gen_signature(const std::vector<type_node>& itypes, type_node otype);
+
+/// As above, except using a vector of input types.
+type_tree gen_signature(const type_tree_seq& inputs, const type_tree& output);
+
+/// For uniform input types, given the input arity, and the input type,
+/// together with the output, create a corresponding function signature,
+/// that is, a lambda type tree with that signature.  So, for example:
 ///      gen_signature(id::contin_type, id::boolean_type, 3)
 /// returns
 ///     ->(contin contin contin boolean)
@@ -389,8 +400,6 @@ type_tree gen_signature(const type_tree& itype, const type_tree& otype,
 type_tree gen_signature(type_node iotype, arity_t arity);
 type_tree gen_signature(const type_tree& iotype, arity_t arity);
 
-/// As above, except using a vector of input types.
-type_tree gen_signature(const type_tree_seq& inputs, const type_tree& output);
 
 } // ~namespace combo
 } // ~namespace opencog
