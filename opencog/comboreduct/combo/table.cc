@@ -221,13 +221,13 @@ void ITable::delete_columns(const vector<string>& ignore_features)
 // -------------------------------------------------------
 
 OTable::OTable(const string& ol)
-    : label(ol) {}
+    : label(ol), type(id::unknown_type) {}
 
 OTable::OTable(const super& ot, const string& ol)
-    : super(ot), label(ol) {}
+    : super(ot), label(ol), type(id::unknown_type) {}
 
 OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
-    : label(ol)
+    : label(ol), type(id::unknown_type)
 {
     OC_ASSERT(!tr.empty());
     if (is_ann_type(*tr.begin())) {
@@ -248,13 +248,14 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
             push_back(net.outputs[0]->activation);
         }
     } else {
+        // XXX todo: should set the output type here...
         foreach(const vertex_seq& vs, itable)
             push_back(eval_throws_binding(vs, tr));
     }
 }
 
 OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
-    : label(ol)
+    : label(ol), type(id::unknown_type)
 {
     arity_set as = get_argument_abs_idx_set(tr);
     for_each(ctable | map_keys, [&](const vertex_seq& vs) {

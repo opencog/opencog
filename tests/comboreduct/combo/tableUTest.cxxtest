@@ -34,17 +34,25 @@ const string tableUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/comboreduct/c
 class tableUTest : public CxxTest::TestSuite
 {
 private:
-    void testIStreamTable(const string& ts, const ITable& it, const OTable& ot,
+    void testIStreamTable(const string& ts, ITable& it, OTable& ot,
                           bool has_header, const type_tree& tt,
                           const string& target_feature = string(),
                           const vector<string>& ignore_features = vector<string>())
     {
-        std::cout << "----------------------------" << std::endl;
+        std::cout << "\n----------------------------" << std::endl;
+
+        // table compare will fail if the types don't match up.
+        ot.set_type(get_type_node(get_signature_output(tt)));
+        vector<type_node> isig;
+        boost::transform(get_signature_inputs(tt), back_inserter(isig), get_type_node);
+        it.set_types(isig);
+
         stringstream ss(ts);
         Table tab;
         istreamTable(ss, tab, target_feature, ignore_features);
         ITable& it_test = tab.itable;
         OTable& ot_test = tab.otable;
+
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;
@@ -192,7 +200,7 @@ public:
         {
             stringstream ss_res;
             ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("label1\n1\n0\n"));
+            TS_ASSERT_EQUALS(ss_res.str(), string("label1\nboolean1\n0\n"));
         }
         vertex_seq col2 = {id::logical_false, id::logical_true};
         it.insert_col("label2", col2);
