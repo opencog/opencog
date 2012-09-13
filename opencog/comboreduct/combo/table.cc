@@ -24,6 +24,8 @@
 #include "table.h"
 
 #include <iomanip>
+#include <ctype.h>
+#include <stdlib.h>
 
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
@@ -129,19 +131,14 @@ const vector<type_node>& ITable::get_types() const
     return types;
 }
 
-type_node ITable::get_type(const std::string& name) const
+type_node ITable::get_type(const string& name) const
 {
     if (types.empty())
         return id::unknown_type;
 
-    // If the name is empty, get column zero.
-    size_t off = 0;
-    if (!name.empty()) {
-        auto pos = std::find(labels.begin(), labels.end(), name);
-        if (pos == labels.end())
-            return id::unknown_type;
-        off = distance(labels.begin(), pos);
-    }
+    int off = get_column_offset(name);
+    if (-1 == off)
+        return id::unknown_type;
 
     return types[off];
 }
@@ -175,18 +172,32 @@ void ITable::insert_col(const std::string& clab,
     }
 }
 
+int ITable::get_column_offset(const std::string& name) const
+{
+    // If the name is empty, get column zero.
+    if (name.empty())
+        return 0;
+
+    // If the name is numeric, then assume its a column number
+    // starting at column 1 for the leftmost column.
+    // i.e. subtract one to get number.
+    if (isdigit(name.c_str()[0]))
+        return atoi(name.c_str()) - 1;
+
+    auto pos = std::find(labels.begin(), labels.end(), name);
+    if (pos == labels.end())
+        return -1;
+    return distance(labels.begin(), pos);
+}
+
 vector<vertex> ITable::get_column_data(const std::string& name) const
 {
     vector<vertex> col;
 
-    // If the name is empty, get column zero.
-    size_t off = 0;
-    if (!name.empty()) {
-        auto pos = std::find(labels.begin(), labels.end(), name);
-        if (pos == labels.end())
-            return col;
-        off = distance(labels.begin(), pos);
-    }
+    int off = get_column_offset(name);
+    if (-1 == off)
+        return col;
+
     foreach (const auto& row, *this)
         col.push_back(row[off]);
     return col;
@@ -194,14 +205,9 @@ vector<vertex> ITable::get_column_data(const std::string& name) const
 
 string ITable::delete_column(const string& name)
 {
-    // If the name is empty, get column zero.
-    size_t off = 0;
-    if (!name.empty()) {
-        auto pos = std::find(labels.begin(), labels.end(), name);
-        if (pos == labels.end())
-            return string();
-        off = distance(labels.begin(), pos);
-    }
+    int off = get_column_offset(name);
+    if (-1 == off)
+        return string();
 
     // Delete the column
     foreach (vertex_seq& row, *this)
@@ -320,6 +326,7 @@ bool OTable::operator==(const OTable& rhs) const
     return rhs.get_label() == label;
 }
 
+// XXX TODO replace this by the util p_norm function.
 contin_t OTable::abs_distance(const OTable& ot) const
 {
     OC_ASSERT(ot.size() == size());
@@ -329,6 +336,7 @@ contin_t OTable::abs_distance(const OTable& ot) const
     return res;
 }
 
+// XXX TODO replace this by the util p_norm function.
 contin_t OTable::sum_squared_error(const OTable& ot) const
 {
     OC_ASSERT(ot.size() == size());
@@ -402,6 +410,7 @@ vector<string> CTable::get_labels() const
 
 // -------------------------------------------------------
 
+// XXX TODO replace this by the util p_norm function.
 complete_truth_table::size_type
 complete_truth_table::hamming_distance(const complete_truth_table& other) const
 {

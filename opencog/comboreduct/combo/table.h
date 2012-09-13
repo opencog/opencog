@@ -283,6 +283,7 @@ protected:
 
 private:
     string_seq get_default_labels() const;
+    int get_column_offset(const std::string& col_name) const;
 
     /**
      * this function take an arity in input and returns in output the
