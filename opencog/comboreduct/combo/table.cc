@@ -127,6 +127,23 @@ const vector<type_node>& ITable::get_types() const
     return types;
 }
 
+type_node ITable::get_type(const std::string& name) const
+{
+    if (types.empty())
+        return id::unknown_type;
+
+    // If the name is empty, get column zero.
+    size_t off = 0;
+    if (!name.empty()) {
+        auto pos = std::find(labels.begin(), labels.end(), name);
+        if (pos == labels.end())
+            return id::unknown_type;
+        off = distance(labels.begin(), pos);
+    }
+
+    return types[off];
+}
+
 // -------------------------------------------------------
 
 void ITable::insert_col(const std::string& clab, const vertex_seq& col, int off)
@@ -178,7 +195,7 @@ string ITable::delete_column(const string& name)
     }
 
     // Delete the column
-    foreach (vertex_seq& row, *this) 
+    foreach (vertex_seq& row, *this)
         row.erase(row.begin() + off);
 
     // Delete the label as well.
@@ -256,6 +273,16 @@ void OTable::set_label(const string& ol)
 const string& OTable::get_label() const
 {
     return label;
+}
+
+void OTable::set_type(type_node t)
+{
+    type = t;
+}
+
+type_node OTable::get_type() const
+{
+    return type;
 }
 
 // -------------------------------------------------------

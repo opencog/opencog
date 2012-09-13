@@ -86,26 +86,6 @@ public:
 
     arity_t get_arity() const { return ilabels.size(); }
 
-    // TODO obsolete (or close to), should be removed. We don't need
-    // that anymore because the evaluator is taking a vertex_seq
-    // directly.
-    binding_map get_binding_map(const vertex_seq& args) const
-    {
-        binding_map bmap;
-        for (size_t i = 0; i < args.size(); ++i)
-            bmap[i+1] = args[i];
-        return bmap;
-    }
-
-    // like above but only consider the arguments in as
-    binding_map get_binding_map(const vertex_seq& args, const arity_set& as) const
-    {
-        binding_map bmap;
-        foreach (arity_t a, as)
-            bmap[a] = args[a-1];
-        return bmap;
-    }
-
     // Return the total number of observations (should be equal to the
     // size of the corresponding uncompressed table)
     unsigned uncompressed_size() const {
@@ -227,46 +207,6 @@ public:
     ITable(const type_tree& tt, int nsamples = -1,
            contin_t min_contin = -1.0, contin_t max_contin = 1.0);
 
-    // set input labels
-    void set_labels(const string_seq&);
-    const string_seq& get_labels() const;
-
-    void set_types(const type_seq&);
-    const type_seq& get_types() const;
-
-    // like get_labels but filtered accordingly to a container of
-    // arity_t. Each value of that container corresponds to the column
-    // index of the ITable (starting from 0).
-    template<typename F>
-    string_seq get_filtered_labels(const F& filter) const
-    {
-        string_seq res;
-        foreach(arity_t a, filter)
-            res.push_back(get_labels()[a]);
-        return res;
-    }
-
-    /// get binding map prior calling the combo evaluation
-    /// XXX Deprecated, to be removed when embodiment gets rid of
-    /// binding maps!
-    binding_map get_binding_map(const vertex_seq& args) const
-    {
-        binding_map bmap;
-        for(size_t i = 0; i < args.size(); ++i)
-            bmap[i+1] = args[i];
-        return bmap;
-    }
-    /// like above but only consider the arguments in as
-    /// XXX Deprecated, to be removed when embodiment gets rid of
-    /// binding maps!
-    binding_map get_binding_map(const vertex_seq& args, const arity_set& as) const
-    {
-        binding_map bmap;
-        foreach (arity_t a, as)
-            bmap[a] = args[a-1];
-        return bmap;
-    }
-
     arity_t get_arity() const {
         return super::front().size();
     }
@@ -275,25 +215,17 @@ public:
     {
         return
             static_cast<const super&>(*this) == static_cast<const super&>(rhs)
-            && get_labels() == rhs.get_labels();
+            && get_labels() == rhs.get_labels()
+            && get_types() == rhs.get_types();
     }
 
-    /// return a copy of the input table filtered according to a given
-    /// container of arity_t. Each value of that container corresponds
-    /// to the column index of the ITable (starting from 0).
-    template<typename F>
-    ITable filtered(const F& filter) const
-    {
-        ITable res;
-        res.set_labels(get_filtered_labels(filter));
-        foreach(const value_type& row, *this) {
-            vertex_seq new_row;
-            foreach(arity_t a, filter)
-                new_row.push_back(row[a]);
-            res.push_back(new_row);
-        }
-        return res;
-    }
+    // set input labels
+    void set_labels(const string_seq&);
+    const string_seq& get_labels() const;
+
+    void set_types(const type_seq&);
+    const type_seq& get_types() const;
+    type_node get_type(const std::string&) const;
 
     /**
      * Insert a column 'col', named 'clab', after position 'off'
@@ -314,6 +246,35 @@ public:
      * Get the column, given its label
      */
     vertex_seq get_column_data(const std::string& name) const;
+
+    // like get_labels but filtered accordingly to a container of
+    // arity_t. Each value of that container corresponds to the column
+    // index of the ITable (starting from 0).
+    template<typename F>
+    string_seq get_filtered_labels(const F& filter) const
+    {
+        string_seq res;
+        foreach(arity_t a, filter)
+            res.push_back(get_labels()[a]);
+        return res;
+    }
+
+    /// return a copy of the input table filtered according to a given
+    /// container of arity_t. Each value of that container corresponds
+    /// to the column index of the ITable (starting from 0).
+    template<typename F>
+    ITable filtered(const F& filter) const
+    {
+        ITable res;
+        res.set_labels(get_filtered_labels(filter));
+        foreach(const value_type& row, *this) {
+            vertex_seq new_row;
+            foreach(arity_t a, filter)
+                new_row.push_back(row[a]);
+            res.push_back(new_row);
+        }
+        return res;
+    }
 
 protected:
     mutable string_seq labels; // list of input labels
@@ -375,18 +336,21 @@ public:
             push_back(f(vs.begin(), vs.end()));
     }
 
-    void set_label(const std::string& ol);
+    void set_label(const std::string&);
     const std::string& get_label() const;
+    void set_type(type_node);
+    type_node get_type() const;
     bool operator==(const OTable& rhs) const;
-    contin_t abs_distance(const OTable& ot) const;
-    contin_t sum_squared_error(const OTable& ot) const;
-    contin_t mean_squared_error(const OTable& ot) const;
-    contin_t root_mean_square_error(const OTable& ot) const;
+    contin_t abs_distance(const OTable&) const;
+    contin_t sum_squared_error(const OTable&) const;
+    contin_t mean_squared_error(const OTable&) const;
+    contin_t root_mean_square_error(const OTable&) const;
 
     vertex get_enum_vertex(const std::string& token);
 
-private:
+protected:
     std::string label; // output label
+    type_node type;
 };
 
 /**
@@ -428,6 +392,7 @@ struct Table
         res.otable = otable;
         return res;
     }
+
     /// return the corresponding compressed table
     CTable compressed() const;
 

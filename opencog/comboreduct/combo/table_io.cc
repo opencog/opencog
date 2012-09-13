@@ -171,8 +171,8 @@ type_node infer_type_from_token(type_node curr_guess, const string& token)
     if ((id::boolean_type == curr_guess) && (id::contin_type == tokt))
         return tokt;
 
-    // If we got to here, then there's some sort of unexpected 
-    // inconsistency in the column types; we've got to presume that 
+    // If we got to here, then there's some sort of unexpected
+    // inconsistency in the column types; we've got to presume that
     // its just some crazy ascii string, i.e. enum_type.
     return id::enum_type;
 }
@@ -290,7 +290,7 @@ vector<type_node> infer_column_types(const ITable& tab)
     rowit++;
     for (; rowit != tab.end(); rowit++)
     {
-// XXX use transform or map or something, instead of this loop
+        // TODO: could use a two-arg transform, here, but its tricky ...
         for (arity_t i=0; i<arity; i++) {
              const vertex &v = (*rowit)[i];
              const string& tok = boost::get<string>(v);
@@ -327,7 +327,7 @@ bool has_header(ITable& tab, vector<type_node> col_types)
  * file format, where delimiters are ',', ' ' or '\t'.
  *
  * This algorithm makes several passes over the data.  First, it reads
- * the entire table, as a collection of strings.  Next, it tries to 
+ * the entire table, as a collection of strings.  Next, it tries to
  * infer the column types, and the presence of a header.
  */
 istream& istreamITable(istream& in, ITable& tab,
@@ -362,11 +362,7 @@ istream& istreamITable(istream& in, ITable& tab,
 
     foreach (vertex_seq& row, tab)
     {
-
-// XXX TODO use transform instead of the loop below.... something like this:
-        // fill table, based on the types passed in the type-tree
-        // transform(vin_types, io.first, back_inserter(tab.itable[i]), token_to_vertex);
-
+        // TODO use transform instead of the loop below...
         for (arity_t i=0; i<arity; i++) {
              vertex v = row[i];
              const string& tok = boost::get<string>(v);
@@ -408,21 +404,15 @@ istream& istreamTable(istream& in, Table& tab,
 
     tab.otable = tab.itable.get_column_data(target_feature);
 
-    // XXX get a copy of the type!!  Set it in the OTable!!
     string targ_feat = tab.itable.delete_column(target_feature);
+    type_node targ_type = tab.itable.get_type(target_feature);
 
     // If the target feature was emtpy string, then its column zero we are after.
     tab.otable.set_label(targ_feat);
-#if 0
-    // Copy the input types to a vector; we need this to pass as an
-    // argument to boost::transform, below.
-    vector<type_node> vin_types;   // vector of input types
-    transform(get_signature_inputs(tab.tt),
-              back_inserter(vin_types), get_type_node);
+    tab.otable.set_type(targ_type);
 
-    // Dependent column type.
-    type_node out_type = get_type_node(get_signature_output(tab.tt));
-#endif
+    // Record the table signature.
+    tab.tt = gen_signature(tab.itable.get_types(), targ_type);
 
     return in;
 }
