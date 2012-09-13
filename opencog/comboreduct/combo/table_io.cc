@@ -513,6 +513,7 @@ istream& istreamITable(istream& in, ITable& tab,
     // Finally, perform a column type conversion
     arity_t arity = tab.get_arity();
     const vector<type_node>& ig_types = tab.get_types();
+
     foreach (vertex_seq& row, tab)
     {
 
@@ -560,11 +561,12 @@ istream& istreamTable(istream& in, Table& tab,
     istreamITable(in, tab.itable, ignore_features);
 
     tab.otable = tab.itable.get_column_data(target_feature);
-    tab.otable.set_label(target_feature);
 
     // XXX get a copy of the type!!  Set it in the OTable!!
-    tab.itable.delete_column(target_feature);
+    string targ_feat = tab.itable.delete_column(target_feature);
 
+    // If the target feature was emtpy string, then its column zero we are after.
+    tab.otable.set_label(targ_feat);
 #if 0
     // Copy the input types to a vector; we need this to pass as an
     // argument to boost::transform, below.

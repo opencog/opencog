@@ -39,11 +39,12 @@ private:
                           const string& target_feature = string(),
                           const vector<string>& ignore_features = vector<string>())
     {
+        std::cout << "----------------------------" << std::endl;
         stringstream ss(ts);
-        ITable it_test;
-        OTable ot_test;
-        Table tab(ot_test, it_test, tt);
+        Table tab;
         istreamTable(ss, tab, target_feature, ignore_features);
+        ITable& it_test = tab.itable;
+        OTable& ot_test = tab.otable;
         std::cout << "it =" << std::endl;
         std::cout << it << std::endl;
         std::cout << "it_test =" << std::endl;

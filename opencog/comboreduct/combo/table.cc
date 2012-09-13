@@ -166,14 +166,14 @@ vector<vertex> ITable::get_column_data(const std::string& name) const
     return col;
 }
 
-void ITable::delete_column(const string& name)
+string ITable::delete_column(const string& name)
 {
     // If the name is empty, get column zero.
     size_t off = 0;
     if (!name.empty()) {
         auto pos = std::find(labels.begin(), labels.end(), name);
         if (pos == labels.end())
-            return;
+            return string();
         off = distance(labels.begin(), pos);
     }
 
@@ -182,11 +182,16 @@ void ITable::delete_column(const string& name)
         row.erase(row.begin() + off);
 
     // Delete the label as well.
-    if (!labels.empty())
+    string rv;
+    if (!labels.empty()) {
+        rv = *(labels.begin() + off);
         labels.erase(labels.begin() + off);
+    }
 
     if (!types.empty())
         types.erase(types.begin() + off);
+
+    return rv;
 }
 
 

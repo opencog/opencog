@@ -304,8 +304,10 @@ public:
 
     /**
      * Delete the named feature from the input table.
+     * If the feature is the empty string, then column zero is deleted.
+     * The returned value is the name of the column.
      */
-    void delete_column(const std::string& feature);
+    std::string delete_column(const std::string& feature);
     void delete_columns(const string_seq& ignore_features);
 
     /**
