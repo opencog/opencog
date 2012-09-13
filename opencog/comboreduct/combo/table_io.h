@@ -150,6 +150,9 @@ std::istream& istreamTable(std::istream& in, Table& tab,
 /**
  * like above but read from file, and return an object Table.
  */
+ITable loadITable(const std::string& file_name,
+                const std::vector<std::string>& ignore_features);
+
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features);

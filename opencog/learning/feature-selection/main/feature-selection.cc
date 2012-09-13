@@ -136,8 +136,7 @@ Table add_force_features(const Table& selected_table,
     // selected features with types definite_object (i.e. string) that
     // way the content is unchanged (convenient when the data contains
     // stuff that loadITable does not know how to interpret)
-    type_tree tt = gen_signature(id::definite_object_type, fnsel.size());
-    Table fns_table = loadTable(fs_params.input_file, tt, "", fnot_sel_comp);
+    ITable fns_table = loadITable(fs_params.input_file, fnot_sel_comp);
 
     // insert the forced features in the right order
     // TODO why do they need to be in order?? Can't we just append?
@@ -158,7 +157,7 @@ Table add_force_features(const Table& selected_table,
             continue;
         }
         if (*f == fnsel[npos]) {
-            auto data = fns_table.itable.get_column_data(*f);
+            auto data = fns_table.get_column_data(*f);
             new_table.itable.insert_col(*f, data, pos);
             npos ++;
             pos ++;

@@ -524,6 +524,18 @@ istream& istreamITable(istream& in, ITable& tab,
     return stm;
 }
 
+ITable loadITable(const string& file_name,
+                  const vector<string>& ignore_features)
+{
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+
+    ITable res;
+    istreamITable(in, res, ignore_features);
+    return res;
+}
+
 /**
  * Fill an input table and output table given a DSV
  * (delimiter-seperated values) file format, where delimiters are ',',
@@ -624,8 +636,8 @@ istream& istreamTable(istream& in, Table& tab,
  */
 Table loadTable(const string& file_name,
                 const type_tree& signature,
-                const std::string& target_feature,
-                const std::vector<std::string>& ignore_features)
+                const string& target_feature,
+                const vector<string>& ignore_features)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
@@ -640,8 +652,8 @@ Table loadTable(const string& file_name,
 }
 
 Table loadTable(const string& file_name,
-                const std::string& target_feature,
-                const std::vector<std::string>& ignore_features)
+                const string& target_feature,
+                const vector<string>& ignore_features)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
