@@ -117,7 +117,7 @@ void ITable::set_types(const vector<type_node>& il)
 
 const vector<type_node>& ITable::get_types() const
 {
-    if (labels.empty() and !super::empty()) {
+    if (types.empty() and !super::empty()) {
         arity_t arity = get_arity();
         types.resize(arity);
         for (arity_t i=0; i<arity; i++) {
