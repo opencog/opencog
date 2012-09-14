@@ -162,6 +162,38 @@ bool has_empty_intersection(const Set& ls, const Set& rs) {
 }
 
 /**
+ * Like has_empty_intersection but more efficient. Code by Graphics
+ * Noob, taken from stackoverflow. WARNING: it doesn't check whether
+ * the 2 containers are sorted.
+ */
+template<class Set1, class Set2> 
+bool is_disjoint(const Set1 &set1, const Set2 &set2)
+{
+    if (set1.empty() || set2.empty()) return true;
+
+    typename Set1::const_iterator 
+        from1 = set1.begin(), 
+        to1 = set1.end();
+    typename Set2::const_iterator 
+        from2 = set2.begin(), 
+        to2 = set2.end();
+
+    if (*from1 > *set2.rbegin() || *from2 > *set1.rbegin()) return true;
+
+    while (from1 != to1 && from2 != to2)
+    {
+        if (*from1 == *from2)
+            return false;
+        if (*from1 < *from2)
+            ++from1;
+        else
+            ++from2;
+    }
+    
+    return true;
+}
+
+/**
  * return a singleton set with the input given in it
  */
 template<typename Set>
