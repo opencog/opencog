@@ -727,7 +727,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         return;
     }
 
-    logger().info("Precision scorer, penalty = %f, "
+    logger().fine("Precision scorer, penalty = %f, "
                   "min_activation = %f, "
                   "max_activation = %f",
                   penalty, min_activation, max_activation);
@@ -757,7 +757,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         }
     }
 
-    logger().info("Precision scorer, max_output = %f", max_output);
+    logger().fine("Precision scorer, max_output = %f", max_output);
 }
 
 void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
@@ -954,10 +954,10 @@ behavioral_score precision_bscore::best_possible_bscore() const
             break;
     }
 
-    logger().info("Precision scorer, best score = %f", best_sc);
-    logger().info("precision at best score = %f", best_precision);
-    logger().info("activation at best score = %f", best_activation);
-    logger().info("activation penalty at best score = %f", best_activation_penalty);
+    logger().fine("Precision scorer, best score = %f", best_sc);
+    logger().fine("precision at best score = %f", best_precision);
+    logger().fine("activation at best score = %f", best_activation);
+    logger().fine("activation penalty at best score = %f", best_activation_penalty);
 
     return {best_precision, best_activation_penalty};
 }
