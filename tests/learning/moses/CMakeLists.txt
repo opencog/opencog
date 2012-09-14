@@ -59,3 +59,10 @@ TARGET_LINK_LIBRARIES(metapopulationUTest
   comboreduct
   util
 )
+
+ADD_CXXTEST(iostream_bscored_combo_treeUTest)
+TARGET_LINK_LIBRARIES(iostream_bscored_combo_treeUTest
+  moses
+  comboreduct
+  util
+)
