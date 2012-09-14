@@ -36,7 +36,7 @@ Headers and libraries needed to develop for MOSES
 
 %prep
 
-%setup
+%setup -q
 
 %build
 CFLAGS="$RPM_OPT_FLAGS" 

@@ -75,10 +75,43 @@ table_tokenizer get_row_tokenizer(string& line)
     // Remove carriage return at end of line (for DOS files).
     removeCarriageReturn(line);
 
-    // Tokenize line; current allow tabs, commas, blanks.
+    // Tokenize line; currently, we allow tabs, commas, blanks.
     static const separator sep("\\", ",\t ", "\"");
     return tokenizer(line, sep);
 }
+
+// Same as above, but only allow commas as a column separator.
+table_tokenizer get_sparse_row_tokenizer(string& line)
+{
+    typedef boost::escaped_list_separator<char> separator;
+    typedef boost::tokenizer<separator> tokenizer;
+    typedef tokenizer::const_iterator tokenizer_cit;
+
+    // Remove weird symbols at the start of the line (only).
+    removeNonASCII(line);
+    // Remove carriage return at end of line (for DOS files).
+    removeCarriageReturn(line);
+
+    // Tokenize line; currently, we allow tabs, commas, blanks.
+    static const separator sep("\\", ",", "\"");
+    return tokenizer(line, sep);
+}
+
+/**
+ * Take a line and return a vector containing the elements parsed.
+ * Used by istreamTable. This will modify the line to remove leading
+ * non-ASCII characters, as well as stripping of any carriage-returns.
+ */
+template<typename T>
+std::vector<T> tokenizeSparseRow(std::string& line)
+{
+    table_tokenizer tok = get_sparse_row_tokenizer(line);
+    std::vector<T> res;
+    foreach (const std::string& t, tok)
+        res.push_back(boost::lexical_cast<T>(t));
+    return res;
+}
+
 
 // -------------------------------------------------------
 // Return true if the character is one of the standard comment
@@ -240,6 +273,8 @@ const char *sparse_delim = " : ";
 istream& istreamRawITable(istream& in, ITable& tab)
     throw(AssertionException)
 {
+    streampos beg = in.tellg();
+
     // Get the entire dataset into memory
     string line;
     std::vector<string> lines;
@@ -251,9 +286,11 @@ istream& istreamRawITable(istream& in, ITable& tab)
     lines.push_back(line);
 
     // If it is a sparse file, we are outta here.
-    if (line.find (sparse_delim))
+    if (line.find (sparse_delim)) {
+        in.seekg(beg);
         throw AssertionException(TRACE_INFO,
               "ERROR: Sparse input cannot be read by regular reader");
+    }
 
     // Grab the rest of the file.
     while (get_data_line(in, line))
@@ -285,7 +322,7 @@ istream& istreamRawITable(istream& in, ITable& tab)
                   "columns while the first row has %d columns.  All "
                   "rows should have the same number of columns.\n",
                   i + 1, io.size(), arity);
-#endif GCC_OMP_GLIBC_EXCEPTION_BUG
+#endif // GCC_OMP_GLIBC_EXCEPTION_BUG
 
         // Fill table with string-valued vertexes.
         foreach (const string& tok, io) {
@@ -299,12 +336,14 @@ istream& istreamRawITable(istream& in, ITable& tab)
     vector<size_t> indices(ir.begin(), ir.end());
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
 
-    if (-1 != arity_fail_row)
+    if (-1 != arity_fail_row) {
+        in.seekg(beg);
         throw AssertionException(TRACE_INFO,
               "ERROR: Input file inconsistent: the %uth row has "
               "a different number of columns than the rest of the file.  "
               "All rows should have the same number of columns.\n",
                arity_fail_row);
+    }
     return in;
 }
 
@@ -334,21 +373,36 @@ istream& istreamRawITable(istream& in, ITable& tab)
  */
 istream& istreamRawSparseITable(istream& in, ITable& tab)
 {
+    // The raw dataset
+    std::vector<string> lines;
+
     // The first non-comment line is assumed to be the header.
+    // ... unless it isn't. (The header must not contain a colon).
     string header;
     get_data_line(in, header);
+    if (string::npos != header.find(sparse_delim)) {
+        lines.push_back(header);
+        header = "";
+    }
 
     // Get the entire dataset into memory
     string line;
-    std::vector<string> lines;
     while (get_data_line(in, line))
         lines.push_back(line);
     int ls = lines.size();
     tab.resize(ls);
 
     // Determine the arity of the fixed columns
-    vector<string> hdr = tokenizeRow<string>(header);
-    arity_t hdr_arity = hdr.size();
+    vector<string> hdr = tokenizeSparseRow<string>(header);
+    arity_t fixed_arity = hdr.size();
+
+    if (0 == fixed_arity) {
+        vector<string> fixy = tokenizeSparseRow<string>(lines[0]);
+        // count commas, until a semi-colon is found.
+        while (string::npos == fixy[fixed_arity].find(sparse_delim))
+            fixed_arity++;
+    }
+cout<<"header arity:"<<fixed_arity<<endl;
 
 // XXX under construction....
 cout<<"bye"<<endl;
