@@ -192,6 +192,7 @@ string ph2l(const string& ce, const vector<string>& labels)
     /// boost.regex with boost version 1.42 or above because then we
     /// can use Formatter as callback, but we're stuck with boost 1.38
     /// :-(
+    /// @todo we're not stuck any more with boost 1.38!!!
     string res;
     string match;
     bool matching = false;
