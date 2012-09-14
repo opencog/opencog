@@ -12,7 +12,7 @@ Group: System Environment/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 URL: http://www.boost.org/
 Prereq: /sbin/ldconfig
-BuildRequires: libstdc++-devel python
+BuildRequires: libstdc++-devel python python-devel bzip2-devel 
 Obsoletes: boost < 1.49
 Obsoletes: boost-devel < 1.49
 Obsoletes: boost-doc < 1.49
@@ -49,12 +49,9 @@ Headers for the Boost C++ libraries
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install
 mkdir -p $RPM_BUILD_ROOT/usr
-mv $RPM_BUILD_ROOT/lib $RPM_BUILD_ROOT/usr
-mv $RPM_BUILD_ROOT/include/boost-1_49/boost $RPM_BUILD_ROOT/include/
-rmdir $RPM_BUILD_ROOT/include/boost-1_49
-mv $RPM_BUILD_ROOT/include $RPM_BUILD_ROOT/usr
+./b2 --prefix=$RPM_BUILD_ROOT/usr install
+mv $RPM_BUILD_ROOT/usr/lib $RPM_BUILD_ROOT/usr/lib64
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -62,12 +59,12 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %{_libdir}/*.so.%{version}
+%{_libdir}/*.so
 
 %files devel
 %defattr(-, root, root)
 %{_includedir}/boost
 %{_libdir}/*.a
-%{_libdir}/*.so
 
 %changelog
 * Fri Sep 14 2012 Linas Vepstas <linavepstas@gmail.com>
