@@ -41,11 +41,11 @@ Headers for the Boost C++ libraries
 
 %prep
 
-%setup -q -n ${name}_${underb}
+%setup -q -n %{name}_%{underb}
 
 %build
-./configure --prefix=$RPM_BUILD_ROOT
-make
+./bootstrap.sh
+./b2 --prefix=$RPM_BUILD_ROOT
 
 %install
 rm -rf $RPM_BUILD_ROOT
