@@ -424,6 +424,7 @@ int moses_exec(int argc, char** argv)
     bool include_dominated;
     score_t diversity_pressure;
     score_t diversity_exponent;
+    score_t diversity_p_norm;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     unsigned cache_size;
@@ -750,17 +751,25 @@ int moses_exec(int argc, char** argv)
 
         ("diversity-pressure",
          value<score_t>(&diversity_pressure)->default_value(0.0),
-         "[EXPERIMENTAL] Set a diversity pressure on the metapopulation. "
+         "Set a diversity pressure on the metapopulation. "
          "Programs behaving similarily to others are more penalized. "
          "That value sets the importance of that penalty (from 0 to +inf).\n")
 
         ("diversity-exponent",
          value<score_t>(&diversity_exponent)->default_value(-1.0),
-         "[EXPERIMENTAL] Set the exponent of the generalized mean aggregating "
+         "Set the exponent of the generalized mean aggregating "
          "the penalties between a candidate and the set of all candidates better "
          "than itself (taking into account diversity). If the value tends "
          "towards 0 it tends to the geometric mean, towards +inf it tends "
-         "to the max function. If negative or null is it the max function. \n")
+         "to the max function. If negative or null is it the max function.\n")
+
+        ("diversity-p-norm",
+         value<score_t>(&diversity_p_norm)->default_value(2.0),
+         "Set the parameter of the p-norm used to compute the distance between "
+         "behavioral scores used for the diversity penalty. A value of 1.0 "
+         "correspond to the Manhatan distance. A value of 2.0 corresponds to "
+         "the Euclidean distance. A value of 0.0 or less correspond to the "
+         "max component-wise. Any other value corresponds to the general case.\n")
 
         (opt_desc_str(complexity_temperature_opt).c_str(),
          value<score_t>(&complexity_temperature)->default_value(6.0),

@@ -90,7 +90,8 @@ struct metapop_parameters
         revisit(_revisit),
         include_dominated(_include_dominated),
         diversity_pressure(0.0),
-        diversity_exponent(-1.0),
+        diversity_exponent(-1.0), // max
+        diversity_p_norm(2.0),    // Euclidean
         keep_bscore(false),
         complexity_temperature(_complexity_temperature),
         ignore_ops(_ignore_ops),
@@ -129,6 +130,10 @@ struct metapop_parameters
     // candidates. If the exponent is negative (default) then the max
     // is used instead (generalized mean with infinite exponent).
     score_t diversity_exponent;
+
+    // Parameter value of the p-norm used to compute the distance
+    // between 2 bscores
+    score_t diversity_p_norm;
 
     // keep track of the bscores even if not needed (in case the user
     // wants to keep them around)
@@ -400,13 +405,15 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_ddp(2.0 /* Euclidean distance */,
-                    pa.diversity_pressure, pa.diversity_exponent)
+        _cached_ddp(pa.diversity_p_norm,
+                    pa.diversity_pressure,
+                    pa.diversity_exponent)
     {
         init(bases, si_ca, sc);
     }
 
     // Like above but using a single base, and a single reduction rule.
+    /// @todo use C++11 redirection
     metapopulation(const combo_tree& base,
                    const type_tree& type_signature,
                    const reduct::rule& si,
@@ -417,8 +424,9 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_ddp(2.0 /* Euclidean distance */,
-                    pa.diversity_pressure, pa.diversity_exponent)
+        _cached_ddp(pa.diversity_p_norm,
+                    pa.diversity_pressure,
+                    pa.diversity_exponent)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
