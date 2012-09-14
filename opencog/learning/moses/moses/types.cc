@@ -100,6 +100,16 @@ bool composite_score::operator<(const composite_score &r) const
                 or (lef == rig and complexity > r.complexity);
 }
 
+bool composite_score::operator==(const composite_score &r) const
+{
+    return score == r.get_score()
+        && complexity == r.get_complexity()
+        && complexity_penalty == r.get_complexity_penalty()
+        && diversity_penalty == r.get_diversity_penalty()
+        && penalized_score == r.get_penalized_score()
+        ;
+}
+
 /// Compute the distance between two vectors, using the p-norm.
 score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double p)
 {

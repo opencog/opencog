@@ -31,6 +31,8 @@
 #include <boost/unordered_map.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/operators.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <opencog/util/functional.h>
 #include <opencog/util/foreach.h>
@@ -77,7 +79,8 @@ static const score_t worst_score = score_t(1) - best_score;
 
 // But modify the default sort ordering for these objects.
 struct composite_score:
-     public boost::less_than_comparable<composite_score>
+        public boost::less_than_comparable<composite_score>,
+        public boost::equality_comparable<composite_score>
 {
     /// By convention, we expect score to be negative (so that
     /// higher scores==better scores) while cpxy and penalty are both
@@ -127,6 +130,9 @@ struct composite_score:
     /// Additionally we assume that nan is always smaller than
     /// anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
+
+    /// useful for testing (probably not in practice)
+    bool operator==(const composite_score& r) const;
 
 protected:
     score_t score;
@@ -404,6 +410,11 @@ Out& ostream_penalized_behavioral_score(Out& out, const penalized_behavioral_sco
  *
  * @param bool output_python if true, output is a python module instead of a combo program
  */
+static const std::string complexity_prefix_str = "complexity:";
+static const std::string complexity_penalty_prefix_str = "complexity penalty:";
+static const std::string diversity_penalty_prefix_str = "diversity penalty:";
+static const std::string penalized_score_prefix_str = "penalized score:";
+static const std::string behavioral_score_prefix_str = "behavioral score:";
 template<typename Out>
 Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
                                 bool output_score = true,
@@ -422,17 +433,85 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
     out << get_tree(candidate) << std::endl;
 
     if (output_penalty)
-        out << "complexity: " << get_complexity(candidate) << std::endl
-            << "complexity penalty: " << get_complexity_penalty(candidate) << std::endl
-            << "diversity penalty: " << get_diversity_penalty(candidate) << std::endl
-            << "penalized score: " << get_penalized_score(candidate) << std::endl;
+        out << complexity_prefix_str << " "
+            << get_complexity(candidate) << std::endl
+            << complexity_penalty_prefix_str << " "
+            << get_complexity_penalty(candidate) << std::endl
+            << diversity_penalty_prefix_str << " "
+            << get_diversity_penalty(candidate) << std::endl
+            << penalized_score_prefix_str << " "
+            << get_penalized_score(candidate) << std::endl;
 
     if (output_bscore)
-        ostream_behavioral_score(out << "behavioral score: ",
+        ostream_behavioral_score(out << behavioral_score_prefix_str << " ",
                                  get_pbscore(candidate)) << std::endl;
 
     return out;
 }
+
+// Stream in bscored_combo_tree, use the same format as
+// ostream_bscored_combo_tree. Note that for now we assume that combo
+// tree is always preceeded by the score, it's easier that way.
+template<typename In>
+In& istream_bscored_combo_tree(In& in, bscored_combo_tree& candidate) {
+    // parse score
+    score_t sc;
+    in >> sc;
+    
+    // parse combo tree
+    combo::combo_tree tr;
+    in >> tr;
+    
+    // parse the rest
+    complexity_t cpx = 0;
+    score_t cpx_penalty = 0, diversity_penalty = 0, penalized_score = 0;
+    behavioral_score bs;
+    // whitespace, function split
+    auto ssplit = [](const std::string& s) {
+        std::vector<std::string> res;
+        boost::split(res, s, boost::algorithm::is_space());
+        return res;
+    };
+    std::vector<std::string> complexity_penalty_prefix_str_split =
+        ssplit(complexity_penalty_prefix_str);
+    std::vector<std::string> diversity_penalty_prefix_str_split =
+        ssplit(diversity_penalty_prefix_str);
+    std::vector<std::string> penalized_score_prefix_str_split =
+        ssplit(penalized_score_prefix_str);
+    std::vector<std::string> behavioral_score_prefix_str_split =
+        ssplit(behavioral_score_prefix_str);
+    while (in.good()) {
+        std::string token;
+        in >> token;
+        if (token == complexity_prefix_str)
+            in >> cpx;
+        else if (token == complexity_penalty_prefix_str_split[0]) {
+            in >> token;        // complexity_penalty_prefix_str_split[1]
+            in >> cpx_penalty;
+        }
+        else if (token == diversity_penalty_prefix_str_split[0]) {
+            in >> token;        // diversity_penalty_prefix_str_split[1]
+            in >> cpx_penalty;
+        }
+        else if (token == penalized_score_prefix_str_split[0]) {
+            in >> token;        // penalized_score_prefix_str_split[1]
+            in >> penalized_score;
+        }
+        else if (token == behavioral_score_prefix_str_split[0]) {
+            in >> token;        // behavioral_score_prefix_str_split[1]
+            istreamContainer(in, back_inserter(bs), "[", "]");
+        }
+    }
+    // assign to candidate
+    penalized_behavioral_score pbs(bs, cpx_penalty);
+    composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
+    composite_behavioral_score cbs(pbs, cs);
+    bscored_combo_tree bct(tr, cbs);
+    candidate = bct;
+
+    // return istream
+    return in;
+}                                      
 
 /**
  * stream out a candidate along with their scores (optionally
@@ -440,9 +519,9 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
  */
 template<typename Out>
 Out& ostream_bscored_combo_tree_python(Out& out, const bscored_combo_tree& candidate,
-                                bool output_score = true,
-                                bool output_penalty = false,
-                                bool output_bscore = false)
+                                       bool output_score = true,
+                                       bool output_penalty = false,
+                                       bool output_bscore = false)
 {
     out << std::endl
         << "#!/usr/bin/python" << std::endl
