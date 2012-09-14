@@ -227,6 +227,8 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 // ===========================================================
 // istream regular tables.
 
+const char *sparse_delim = " : ";
+
 /**
  * Fill the input table, given a file in DSV (delimiter-seperated values)
  * format.  The delimiters are ',', ' ' or '\t'.
@@ -241,6 +243,19 @@ istream& istreamRawITable(istream& in, ITable& tab)
     // Get the entire dataset into memory
     string line;
     std::vector<string> lines;
+
+    // Read first few by hand.
+    get_data_line(in, line);
+    lines.push_back(line);
+    get_data_line(in, line);
+    lines.push_back(line);
+
+    // If it is a sparse file, we are outta here.
+    if (line.find (sparse_delim))
+        throw AssertionException(TRACE_INFO,
+              "ERROR: Sparse input cannot be read by regular reader");
+
+    // Grab the rest of the file.
     while (get_data_line(in, line))
         lines.push_back(line);
     int ls = lines.size();
@@ -250,30 +265,94 @@ istream& istreamRawITable(istream& in, ITable& tab)
     vector<string> fl = tokenizeRow<string>(lines[0]);
     arity_t arity = fl.size();
 
+    int arity_fail_row = -1;
     auto parse_line = [&](int i) {
         // tokenize the line
         vector<string> io = tokenizeRow<string>(lines[i]);
 
-        // check arity
+        // Check arity
         if (arity != (arity_t)io.size())
+            arity_fail_row = i + 1;
+#ifdef GCC_OMP_GLIBC_EXCEPTION_BUG
+            // XXX This exception cannot be caught, because its inside a
+            // multi-threaded OMP algo, and so each thread throws, but
+            // there's only one thread that is trying to catch, and so
+            // the catcher perceives this as a recursive exception. This
+            // is a gcc+omp+glibc bug, and may take many years to get fixed.
+            // Oh well...
             throw AssertionException(TRACE_INFO,
                   "ERROR: Input file inconsistent: the %uth row has %u "
                   "columns while the first row has %d columns.  All "
                   "rows should have the same number of columns.\n",
                   i + 1, io.size(), arity);
+#endif GCC_OMP_GLIBC_EXCEPTION_BUG
 
-        // fill table with string-valued vertexes.
+        // Fill table with string-valued vertexes.
         foreach (const string& tok, io) {
             vertex v = (vertex) tok;
             tab[i].push_back(v);
         }
     };
 
-    // vector of indices [0, lines.size())
+    // Vector of indices [0, lines.size())
     auto ir = boost::irange(0, ls);
     vector<size_t> indices(ir.begin(), ir.end());
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
+
+    if (-1 != arity_fail_row)
+        throw AssertionException(TRACE_INFO,
+              "ERROR: Input file inconsistent: the %uth row has "
+              "a different number of columns than the rest of the file.  "
+              "All rows should have the same number of columns.\n",
+               arity_fail_row);
     return in;
+}
+
+/**
+ * Fill the input table, given a file in 'sparse' format.
+ *
+ * The sparse table format consists of some fixed number of columns,
+ * in comma-separated format, followed by key-value pairs, also
+ * tab-separated. viz:
+ * 
+ *     val, val, val, name:val, name:val, name:val
+ * 
+ * Thus, for example, a row such as 
+ * 
+ *    earn, issued : 1, results : 2, ending : 1, including : 1
+ * 
+ * indicates that there one fixed column, of enum type, (the enum value
+ * being "earn"), and that features called "issued", "ending" and 
+ * "including" have a contin value of 1.0  and "results" has a contin
+ * value of 2.
+ * 
+ * The routine does NOT store teh table in sparse format: it stores the
+ * full, exploded table. This could be bad ....
+ *
+ * The "Raw" format has all data as strings; type conversion to the
+ * appropriate type, must all be done as a separate step.
+ */
+istream& istreamRawSparseITable(istream& in, ITable& tab)
+{
+    // The first non-comment line is assumed to be the header.
+    string header;
+    get_data_line(in, header);
+
+    // Get the entire dataset into memory
+    string line;
+    std::vector<string> lines;
+    while (get_data_line(in, line))
+        lines.push_back(line);
+    int ls = lines.size();
+    tab.resize(ls);
+
+    // Determine the arity of the fixed columns
+    vector<string> hdr = tokenizeRow<string>(header);
+    arity_t hdr_arity = hdr.size();
+
+// XXX under construction....
+cout<<"bye"<<endl;
+exit(1);
 }
 
 /**
@@ -338,7 +417,13 @@ bool has_header(ITable& tab, vector<type_node> col_types)
 istream& istreamITable(istream& in, ITable& tab,
                       const vector<string>& ignore_features)
 {
-    istreamRawITable(in, tab);
+    try {
+        istreamRawITable(in, tab);
+    }
+    catch (AssertionException e) {
+cout<<"duuuude try again"<<endl;
+        istreamRawSparseITable(in, tab);
+    }
 
     // Determine the column types.
     vector<type_node> col_types = infer_column_types(tab);
