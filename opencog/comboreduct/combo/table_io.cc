@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <iomanip>
+#include <boost/algorithm/string.hpp>
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/irange.hpp>
@@ -133,13 +134,14 @@ table_tokenizer get_sparse_row_tokenizer(const string& line)
  * Used by istreamTable. This will modify the line to remove leading
  * non-ASCII characters, as well as stripping of any carriage-returns.
  */
-template<typename T>
-std::vector<T> tokenizeSparseRow(const string& line)
+vector<string> tokenizeSparseRow(const string& line)
 {
     table_tokenizer tok = get_sparse_row_tokenizer(line);
-    std::vector<T> res;
-    foreach (const std::string& t, tok)
-        res.push_back(boost::lexical_cast<T>(t));
+    vector<string> res;
+    foreach (string t, tok) {
+        boost::trim(t);
+        res.push_back(t);
+    }
     return res;
 }
 
@@ -291,15 +293,14 @@ istream& istreamRawITable(istream& in, ITable& tab)
     // Grab the rest of the file.
     while (get_data_line(in, line))
         lines.push_back(line);
-    int ls = lines.size();
-    tab.resize(ls);
 
     // Determine the arity from the first line.
     vector<string> fl = tokenizeRow<string>(lines[0]);
     arity_t arity = fl.size();
 
     int arity_fail_row = -1;
-    auto parse_line = [&](int i) {
+    auto parse_line = [&](int i)
+    {
         // tokenize the line
         vector<string> io = tokenizeRow<string>(lines[i]);
 
@@ -328,7 +329,9 @@ istream& istreamRawITable(istream& in, ITable& tab)
     };
 
     // Vector of indices [0, lines.size())
-    auto ir = boost::irange(0, ls);
+    size_t ls = lines.size();
+    tab.resize(ls);
+    auto ir = boost::irange((size_t)0, ls);
     vector<size_t> indices(ir.begin(), ir.end());
     OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
 
@@ -375,12 +378,12 @@ istream& istreamRawSparseITable(istream& in, ITable& tab)
     // The first non-comment line is assumed to be the header.
     // ... unless it isn't. (The header must not contain a colon).
     vector<string> labs;
-    arity_t fixed_arity = 0;
+    size_t fixed_arity = 0;
     string header;
     get_data_line(in, header);
     if (string::npos == header.find(sparse_delim)) {
         // Determine the arity of the fixed columns
-        vector<string> hdr = tokenizeSparseRow<string>(header);
+        vector<string> hdr = tokenizeSparseRow(header);
         fixed_arity = hdr.size();
         labs = hdr;
     }
@@ -392,37 +395,90 @@ istream& istreamRawSparseITable(istream& in, ITable& tab)
     string iline;
     while (get_data_line(in, iline))
         lines.push_back(iline);
-    int ls = lines.size();
-    tab.resize(ls);
 
     if (0 == fixed_arity) {
-        vector<string> fixy = tokenizeSparseRow<string>(lines[0]);
+        vector<string> fixy = tokenizeSparseRow(lines[0]);
         // count commas, until a semi-colon is found.
         while (string::npos == fixy[fixed_arity].find(sparse_delim)) 
             fixed_arity++;
     }
     logger().info() << "Sparse file fixed column count="<<fixed_arity;
-cout<<"duuude fixed arity:"<<fixed_arity<<endl;
 
     // Get a list of all of the features.
     set<string> feats;
+    size_t d_len = strlen(sparse_delim);
     foreach (const string& line, lines) {
-        vector<string> chunks = tokenizeSparseRow<string>(line);
+        vector<string> chunks = tokenizeSparseRow(line);
         vector<string>::const_iterator pit = chunks.begin() + fixed_arity;
         for (; pit != chunks.end(); pit++) {
+            // rip out the key-value pairs
             size_t pos = pit->find(sparse_delim);
             string key = pit->substr(0, pos);
+            boost::trim(key);
+            string val = pit->substr(pos + d_len);
+            boost::trim(val);
+
+            // store the key, uniquely.
             feats.insert(key);
         }
     }
     logger().info() << "Sparse file unique features count="<<feats.size();
-cout<<"feats="<<feats.size()<<endl;
 
     // Convert the feature set into a list of labels.
-    // foreach()
+    // 'index' is a map from feature name to column number.
+    size_t cnt = fixed_arity;
+    map<const string, size_t> index;
+    foreach (const string& key, feats) {
+        labs.push_back(key);
+        index.insert(pair<const string, size_t> (key, cnt));
+        cnt++;
+    }
+cout<<"labs="<<labs.size()<<endl;
+    tab.set_labels(labs);
+
+    // And finally, stuff up the table.
+    // The function below tokenizes one row, and jams it into the table
+    size_t row_len = labs.size();
+    auto fill_line = [&](int i)
+    {
+        const string& line = lines[i];
+        vector<vertex> row;
+        row.resize(row_len);
+
+        // Tokenize the line
+        vector<string> chunks = tokenizeSparseRow(line);
+        vector<string>::const_iterator pit = chunks.begin();
+
+        // First, handle the fixed columns
+        size_t off = 0;
+        for (; off < fixed_arity; off++, pit++) {
+            row[off] = (vertex) *pit;
+        }
+
+        // Next, handle the key-value pairs.
+        for (; pit != chunks.end(); pit++) {
+            size_t pos = pit->find(sparse_delim);
+            if (string::npos == pos)
+                break;
+            string key = pit->substr(0, pos);
+            boost::trim(key);
+            string val = pit->substr(pos + d_len);
+            boost::trim(val);
+            off = index[key];
+            row[off] = val;
+        }
+        tab[i] = row;
+    };
+
+    // Vector of indices [0, lines.size())
+    size_t ls = lines.size();
+    tab.resize(ls);
+    auto ir = boost::irange((size_t)0, ls);
+    vector<size_t> indices(ir.begin(), ir.end());
+    OMP_ALGO::for_each(indices.begin(), indices.end(), fill_line);
 
 // XXX under construction....
-cout<<"duuude bye"<<endl;
+cout<<"duuude bye "<<ls<<endl;
 exit(1);
 }
 
