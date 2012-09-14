@@ -34,6 +34,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 
@@ -430,6 +431,26 @@ struct metapopulation : bscored_combo_tree_ptr_set
     }
 
     /**
+     * Remove candidates from the metapopulation as well as from
+     * _cached_cnd, given a sequence of metapopulation iterators.
+     */
+    void delete_cnds(vector<bscored_combo_tree*>& ptr_seq) {
+        // deallocate them from the memory
+        boost::for_each(ptr_seq, std::default_delete<bscored_combo_tree>());
+        // remove them for _cached_cnd
+        boost::sort(ptr_seq);
+        // // debug
+        // logger().debug("dp cache size before removing = %u",
+        //                _cached_ddp.cache.size());
+        // // ~debug
+        _cached_ddp.erase_ptr_seq(ptr_seq);
+        // // debug
+        // logger().debug("dp cache size after removing = %u",
+        //                _cached_ddp.cache.size());
+        // // ~debug
+    }
+    
+    /**
      * Delete bscored_combo_tree and possibly remove any trace of it
      * from _bscore_dst.
      */
@@ -520,13 +541,13 @@ struct metapopulation : bscored_combo_tree_ptr_set
         foreach(bscored_combo_tree* bsct_ptr, *this)
             tmp.push_back(bsct_dp_pair(bsct_ptr, 0.0));
 
-        // debug
-        std::atomic<unsigned> dp_count(0); // count the number of
-                                           // calls of _cached_ddp
-        // ~debug
+        // // debug
+        // std::atomic<unsigned> dp_count(0); // count the number of
+        //                                    // calls of _cached_ddp
+        // unsigned lhits = _cached_ddp.hits.load(),
+        //     lmisses = _cached_ddp.misses.load();
+        // // ~debug
 
-        unsigned lhits = _cached_ddp.hits.load(),
-            lmisses = _cached_ddp.misses.load();
         
         auto update_diversity_penalty = [&](bsct_dp_pair& v) {
             // // debug
@@ -557,7 +578,9 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 const bscored_combo_tree* last = *pool.crbegin();
                 dp_t last_dp = this->_cached_ddp(bsct_ptr, last);
 
-                ++dp_count;
+                // // debug
+                // ++dp_count;
+                // // ~debug
                 
                 // add it to v.second and compute the aggregated
                 // diversity penalty
@@ -603,16 +626,16 @@ struct metapopulation : bscored_combo_tree_ptr_set
             tmp.erase(mit);
         }
 
-        // debug
-        logger().debug() << "Number of dst evals = " << dp_count;
-        logger().debug() << "Is lock free? " << dp_count.is_lock_free();
-        logger().debug() << "Number of hits = "
-                         << _cached_ddp.hits.load() - lhits;
-        logger().debug() << "Number of misses = "
-                         << _cached_ddp.misses.load() - lmisses;
-        logger().debug() << "Total number of hits = " << _cached_ddp.hits;
-        logger().debug() << "Total number of misses = " << _cached_ddp.misses;
-        // ~debug
+        // // debug
+        // logger().debug() << "Number of dst evals = " << dp_count;
+        // logger().debug() << "Is lock free? " << dp_count.is_lock_free();
+        // logger().debug() << "Number of hits = "
+        //                  << _cached_ddp.hits.load() - lhits;
+        // logger().debug() << "Number of misses = "
+        //                  << _cached_ddp.misses.load() - lmisses;
+        // logger().debug() << "Total number of hits = " << _cached_ddp.hits;
+        // logger().debug() << "Total number of misses = " << _cached_ddp.misses;
+        // // ~debug
 
         // Replace the existing metapopulation with the new one.
         swap(pool);
@@ -764,112 +787,31 @@ struct metapopulation : bscored_combo_tree_ptr_set
         // Note that merge_nondominated() is very cpu-expensive and
         // complex...
         if (params.include_dominated) {
-            foreach(const auto& cnd, candidates) {
-                bscored_combo_tree* bsct_ptr = new bscored_combo_tree(cnd);
-                insert(bsct_ptr);
-            }
+            logger().debug("Insert all candidates in the metapopulation");
+            foreach(const auto& cnd, candidates)
+                insert(new bscored_combo_tree(cnd));
         } else {
             OC_ASSERT(false, "NOT IMPLEMENTED!!!!");
             // TODO let that aside for now!
+            logger().debug("Insert non-dominated candidates in the metapopulation");
+            unsigned old_size = size();
             // merge_nondominated(candidates, params.jobs);
+            logger().debug("Inserted %u non-dominated candidates in the metapopulation",
+                           size() - old_size);
         }
 
-        // Weed out excessively bad scores. The select_exemplar()
-        // routine picks an exemplar out of the metapopulation, using
-        // an exponential distribution of the score. Scores that
-        // are much worse than the best scores are extremely unlikely
-        // to be choosen, so discard these from the metapopulation.
-        // Keeping the metapop small brings huge benefits to the
-        // mem usage and runtime performance.
+        unsigned old_size = size();
+        logger().debug("Resize the metapopulation (%u), removing worst candidates",
+                       old_size);
+        resize_metapop();
+        logger().debug("Removed %u candidates from the metapopulation",
+                       old_size - size());
 
-        // However, lets not get over-zelous; if the metapop is too small,
-        // then we have the nasty situation where none of the best-scoring
-        // individuals lead to a solution.  Fix the minimum metapop size
-        // to, oh, say, 250.
-        //
-        // But if the population starts exploding, this is also bad, as
-        // it chews up RAM with unlikely exemplars. Keep it in check by
-        // applying more and more stringent bounds on the allowable scores.
-        // The current implementation of useful_score_range() returns a
-        // value a bit on the large size, by a factor of 2 or so, so its
-        // quite OK to cut back on this value.
-
-#define MIN_POOL_SIZE 250
-        if (size() > MIN_POOL_SIZE) {
-
-            score_t top_score = get_penalized_score(**begin());
-            score_t range = useful_score_range();
-            score_t worst_score = top_score - range;
-
-#if 0
-            // Erase all the lowest scores.  The metapop is not kept in
-            // penalized-score order, so we have to remove one at a time.
-            iterator it = begin();
-            while (it != end()) {
-                score_t sc = get_penalized_score(**it);
-                if (sc < worst_score) {
-                    delete_cnd(*it);
-                    it = erase (it);
-                } else
-                    it++;
-            }
-#else
-            // Erase all the lowest scores.  The metapop is in quasi-sorted
-            // order (since the deme was sorted before being appended), so
-            // this bulk remove mostly works "correctly". It is also 25%
-            // faster than above. I think this is because the erase() above
-            // causes the std::set to try to sort the contents, and this
-            // ends up costing a lot.  I think... not sure.
-            iterator it = begin();
-            for (int i=0; i<MIN_POOL_SIZE; i++) it++;
-            while (it != end()) {
-                score_t sc = get_penalized_score(**it);
-                if (sc < worst_score) break;
-                it++;
-            }
-
-            while (it != end()) {
-                delete_cnd(*it);
-                it = erase(it);
-            }
-
-            // Is the population still too large?  Yes, it is, if it is more
-            // than 50 times the size of the current number of generations.
-            // Realisitically, we could never explore more than 2% of a pool
-            // that size.  For 10Bytes per table row, 20K rows, generation=500
-            // this will still eat up tens of GBytes of RAM, and so is a
-            // relatively lenient cap.
-            // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
-            //
-            // XXX TODO fix the cap so its more sensitive to the size of
-            // each exemplar, right!?
-            // size_t nbelts = get_bscore(*begin()).size();
-            // double cap = 1.0e6 / double(nbelts);
-            _merge_count++;
-            double cap = 50.0;
-            cap *= _merge_count + 250.0;
-            cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
-            size_t popsz_cap = cap;
-            size_t popsz = size();
-            while (popsz_cap < popsz)
-            {
-                // Leave the first 50 alone.
-#define OFFSET 50
-                int which = OFFSET + randGen().randint(popsz-OFFSET);
-                // using std is necessary to break the ambiguity between
-                // boost::next and std::next. Weirdly enough this appears
-                // only 32bit arch
-                erase(std::next(begin(), which));
-                popsz --;
-            }
-#endif
-        } // end of if (size() > MIN_POOL_SIZE)
-        
         if (logger().isDebugEnabled()) {
-            logger().debug("Metapopulation size after merging is %u", size());
+            logger().debug("Metapopulation size is %u", size());
             if (logger().isFineEnabled()) {
                 stringstream ss;
-                ss << "Metapopulation after merging:" << std::endl;
+                ss << "Metapopulation:" << std::endl;
                 logger().fine(ostream(ss, -1, true, true).str());
             }
         }
@@ -927,7 +869,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         // However, trimming too much is bad: it can happen that none
         // of the best-scoring instances lead to a solution. So keep
         // around a reasonable pool. Wild choice ot 250 seems reasonable.
-        if (MIN_POOL_SIZE < __deme->size()) {
+        if (min_pool_size < __deme->size()) {
             score_t top_sc = get_penalized_score(__deme->begin()->second);
             score_t bot_sc = top_sc - useful_score_range();
 
@@ -1105,6 +1047,92 @@ struct metapopulation : bscored_combo_tree_ptr_set
         return done;
     }
 
+    /**
+     * Weed out excessively bad scores. The select_exemplar() routine
+     * picks an exemplar out of the metapopulation, using an
+     * exponential distribution of the score. Scores that are much
+     * worse than the best scores are extremely unlikely to be
+     * choosen, so discard these from the metapopulation.  Keeping the
+     * metapop small brings huge benefits to the mem usage and runtime
+     * performance.
+     *
+     * However, lets not get over-zelous; if the metapop is too small,
+     * then we have the nasty situation where none of the best-scoring
+     * individuals lead to a solution.  Fix the minimum metapop size
+     * to, oh, say, 250.
+     *
+     * But if the population starts exploding, this is also bad, as it
+     * chews up RAM with unlikely exemplars. Keep it in check by
+     * applying more and more stringent bounds on the allowable
+     * scores.  The current implementation of useful_score_range()
+     * returns a value a bit on the large size, by a factor of 2 or
+     * so, so its quite OK to cut back on this value.
+     */
+    void resize_metapop() {
+        if (size() > min_pool_size) {
+
+            // pointers to deallocate
+            std::vector<bscored_combo_tree*> ptr_seq;
+            
+            score_t top_score = get_penalized_score(**begin()),
+                range = useful_score_range(),
+                worst_score = top_score - range;
+            
+            // Erase all the lowest scores.  The metapop is in quasi-sorted
+            // order (since the deme was sorted before being appended), so
+            // this bulk remove mostly works "correctly". It is also 25%
+            // faster than above. I think this is because the erase() above
+            // causes the std::set to try to sort the contents, and this
+            // ends up costing a lot.  I think... not sure.
+            iterator it = std::next(begin(), min_pool_size);
+            while (it != end()) {
+                score_t sc = get_penalized_score(**it);
+                if (sc < worst_score) break;
+                it++;
+            }
+
+            while (it != end()) {
+                ptr_seq.push_back(*it);
+                it = erase(it);
+            }
+
+            // Is the population still too large?  Yes, it is, if it is more
+            // than 50 times the size of the current number of generations.
+            // Realisitically, we could never explore more than 2% of a pool
+            // that size.  For 10Bytes per table row, 20K rows, generation=500
+            // this will still eat up tens of GBytes of RAM, and so is a
+            // relatively lenient cap.
+            // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
+            //
+            // XXX TODO fix the cap so its more sensitive to the size of
+            // each exemplar, right!?
+            // size_t nbelts = get_bscore(*begin()).size();
+            // double cap = 1.0e6 / double(nbelts);
+            _merge_count++;
+            double cap = 50.0;
+            cap *= _merge_count + 250.0;
+            cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
+            size_t popsz_cap = cap;
+            size_t popsz = size();
+            while (popsz_cap < popsz)
+            {
+                // Leave the first 50 alone.
+                static const int offset = 50;
+                int which = offset + randGen().randint(popsz-offset);
+                // using std is necessary to break the ambiguity between
+                // boost::next and std::next. Weirdly enough this appears
+                // only 32bit arch
+                iterator it = std::next(begin(), which);
+                ptr_seq.push_back(*it);
+                erase(it);
+                popsz --;
+            }
+
+            // deallocate the pointers and remove them from _cached_cnd
+            delete_cnds(ptr_seq);
+        } // end of if (size() > min_pool_size)
+    }
+    
     // Return the set of candidates not present in the metapopulation.
     // This makes merging faster because it decreases the number of
     // calls of dominates.
@@ -1548,6 +1576,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
     deme_expander<CScoring, Optimization> _dex;
 
 protected:
+    static const unsigned min_pool_size = 250;
+    
     const BScoring& _bscorer; // behavioral score
     metapop_parameters params;
 
@@ -1618,6 +1648,15 @@ protected:
         void erase_ptr(bscored_combo_tree* ptr) {
             for (Cache::iterator it = cache.begin(); it != cache.end();) {
                 if (it->first.find(ptr) != it->first.end())
+                    it = cache.erase(it);
+                else
+                    ++it;
+            }
+        }
+
+        void erase_ptr_seq(std::vector<bscored_combo_tree*> ptr_seq) {
+            for (Cache::iterator it = cache.begin(); it != cache.end();) {
+                if (!is_disjoint(ptr_seq, it->first))
                     it = cache.erase(it);
                 else
                     ++it;
