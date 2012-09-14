@@ -348,8 +348,8 @@ Float generalized_mean(const C& c, Float p = 1.0)
 
 /// Compute the distance between two vectors, using the p-norm.  For
 /// p=2, this is the usual Eucliden distance, and for p=1, this is the
-/// Manhattan distance, and for p=0, this is the maximum difference
-/// for one element.
+/// Manhattan distance, and for p=0 or negative, this is the maximum
+/// difference for one element.
 template<typename Vec, typename Float>
 Float p_norm(const Vec& a, const Vec& b, Float p=1.0)
 {
@@ -362,21 +362,18 @@ Float p_norm(const Vec& a, const Vec& b, Float p=1.0)
     Float sum = 0.0;
     // Special case Manhattan distance.
     if (1.0 == p) {
-        for (; ia != a.end(); ia++, ib++) {
+        for (; ia != a.end(); ia++, ib++)
             sum += fabs (*ia - *ib);
-        }
         return sum;
     }
     // Special case Euclidean distance.
     if (2.0 == p) {
-        for (; ia != a.end(); ia++, ib++) {
-            Float diff = *ia - *ib;
-            sum += sq(diff);
-        }
+        for (; ia != a.end(); ia++, ib++)
+            sum += sq (*ia - *ib);
         return sqrt(sum);
     }
     // Special case max difference
-    if (0.0 == p) {
+    if (0.0 >= p) {
         for (; ia != a.end(); ia++, ib++) {
             Float diff = fabs (*ia - *ib);
             if (sum < diff) sum = diff;
