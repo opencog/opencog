@@ -1,8 +1,8 @@
 
 # We need to put this in a library, so that MOSESUTest can link to it.
 ADD_LIBRARY (moses_exec
-   moses_exec
-	moses_exec_def
+    moses_exec
+    moses_exec_def
 )
 
 ADD_EXECUTABLE (moses-exec moses-exec)
@@ -12,8 +12,15 @@ TARGET_LINK_LIBRARIES (moses-exec
 )
 SET_TARGET_PROPERTIES(moses-exec PROPERTIES OUTPUT_NAME "moses")
 
+ADD_EXECUTABLE (eval-diversity eval-diversity)
+TARGET_LINK_LIBRARIES (eval-diversity
+    util
+    ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+)
+SET_TARGET_PROPERTIES(moses-exec PROPERTIES OUTPUT_NAME "moses")
+
 # install moses-exec
-INSTALL(TARGETS moses-exec RUNTIME DESTINATION bin)
+INSTALL(TARGETS moses-exec eval-diversity RUNTIME DESTINATION bin)
 
 #install header files
 INSTALL(FILES
