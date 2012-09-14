@@ -64,55 +64,6 @@ void removeNonASCII(string& str)
         str = str.substr(1);
 }
 
-table_tokenizer get_row_tokenizer(string& line)
-{
-    typedef boost::escaped_list_separator<char> separator;
-    typedef boost::tokenizer<separator> tokenizer;
-    typedef tokenizer::const_iterator tokenizer_cit;
-
-    // Remove weird symbols at the start of the line (only).
-    removeNonASCII(line);
-    // Remove carriage return at end of line (for DOS files).
-    removeCarriageReturn(line);
-
-    // Tokenize line; currently, we allow tabs, commas, blanks.
-    static const separator sep("\\", ",\t ", "\"");
-    return tokenizer(line, sep);
-}
-
-// Same as above, but only allow commas as a column separator.
-table_tokenizer get_sparse_row_tokenizer(string& line)
-{
-    typedef boost::escaped_list_separator<char> separator;
-    typedef boost::tokenizer<separator> tokenizer;
-    typedef tokenizer::const_iterator tokenizer_cit;
-
-    // Remove weird symbols at the start of the line (only).
-    removeNonASCII(line);
-    // Remove carriage return at end of line (for DOS files).
-    removeCarriageReturn(line);
-
-    // Tokenize line; currently, we allow tabs, commas, blanks.
-    static const separator sep("\\", ",", "\"");
-    return tokenizer(line, sep);
-}
-
-/**
- * Take a line and return a vector containing the elements parsed.
- * Used by istreamTable. This will modify the line to remove leading
- * non-ASCII characters, as well as stripping of any carriage-returns.
- */
-template<typename T>
-std::vector<T> tokenizeSparseRow(std::string& line)
-{
-    table_tokenizer tok = get_sparse_row_tokenizer(line);
-    std::vector<T> res;
-    foreach (const std::string& t, tok)
-        res.push_back(boost::lexical_cast<T>(t));
-    return res;
-}
-
-
 // -------------------------------------------------------
 // Return true if the character is one of the standard comment
 // delimiters.  Here, we define a 'standard delimiter' as one
@@ -128,8 +79,9 @@ bool is_comment(const char c)
     return false;
 }
 
-//* Get one line of actual data.
-// This ignores lines that start with a 'standard comment char'
+/// Get one line of actual data.
+/// This ignores lines that start with a 'standard comment char'
+///
 //
 // TODO: This routine should be extended so that comments that start
 // somewhere other than column 0 are also ignored.
@@ -143,8 +95,52 @@ istream &get_data_line(istream& is, string& line)
         getline(is, line);
         if (!is) return is;
         if (is_comment(line[0])) continue;
+
+        // Remove weird symbols at the start of the line (only).
+        removeNonASCII(line);
+        // Remove carriage return at end of line (for DOS files).
+        removeCarriageReturn(line);
+
         return is;
     }
+}
+
+// -------------------------------------------------------
+
+table_tokenizer get_row_tokenizer(const string& line)
+{
+    typedef boost::escaped_list_separator<char> separator;
+    typedef boost::tokenizer<separator> tokenizer;
+
+    // Tokenize line; currently, we allow tabs, commas, blanks.
+    static const separator sep("\\", ",\t ", "\"");
+    return tokenizer(line, sep);
+}
+
+// Same as above, but only allow commas as a column separator.
+table_tokenizer get_sparse_row_tokenizer(const string& line)
+{
+    typedef boost::escaped_list_separator<char> separator;
+    typedef boost::tokenizer<separator> tokenizer;
+
+    // Tokenize line; currently, we allow tabs, commas, blanks.
+    static const separator sep("\\", ",", "\"");
+    return tokenizer(line, sep);
+}
+
+/**
+ * Take a line and return a vector containing the elements parsed.
+ * Used by istreamTable. This will modify the line to remove leading
+ * non-ASCII characters, as well as stripping of any carriage-returns.
+ */
+template<typename T>
+std::vector<T> tokenizeSparseRow(const string& line)
+{
+    table_tokenizer tok = get_sparse_row_tokenizer(line);
+    std::vector<T> res;
+    foreach (const std::string& t, tok)
+        res.push_back(boost::lexical_cast<T>(t));
+    return res;
 }
 
 // -------------------------------------------------------
@@ -378,34 +374,55 @@ istream& istreamRawSparseITable(istream& in, ITable& tab)
 
     // The first non-comment line is assumed to be the header.
     // ... unless it isn't. (The header must not contain a colon).
+    vector<string> labs;
+    arity_t fixed_arity = 0;
     string header;
     get_data_line(in, header);
-    if (string::npos != header.find(sparse_delim)) {
+    if (string::npos == header.find(sparse_delim)) {
+        // Determine the arity of the fixed columns
+        vector<string> hdr = tokenizeSparseRow<string>(header);
+        fixed_arity = hdr.size();
+        labs = hdr;
+    }
+    else {
         lines.push_back(header);
-        header = "";
     }
 
     // Get the entire dataset into memory
-    string line;
-    while (get_data_line(in, line))
-        lines.push_back(line);
+    string iline;
+    while (get_data_line(in, iline))
+        lines.push_back(iline);
     int ls = lines.size();
     tab.resize(ls);
-
-    // Determine the arity of the fixed columns
-    vector<string> hdr = tokenizeSparseRow<string>(header);
-    arity_t fixed_arity = hdr.size();
 
     if (0 == fixed_arity) {
         vector<string> fixy = tokenizeSparseRow<string>(lines[0]);
         // count commas, until a semi-colon is found.
-        while (string::npos == fixy[fixed_arity].find(sparse_delim))
+        while (string::npos == fixy[fixed_arity].find(sparse_delim)) 
             fixed_arity++;
     }
-cout<<"header arity:"<<fixed_arity<<endl;
+    logger().info() << "Sparse file fixed column count="<<fixed_arity;
+cout<<"duuude fixed arity:"<<fixed_arity<<endl;
+
+    // Get a list of all of the features.
+    set<string> feats;
+    foreach (const string& line, lines) {
+        vector<string> chunks = tokenizeSparseRow<string>(line);
+        vector<string>::const_iterator pit = chunks.begin() + fixed_arity;
+        for (; pit != chunks.end(); pit++) {
+            size_t pos = pit->find(sparse_delim);
+            string key = pit->substr(0, pos);
+            feats.insert(key);
+        }
+    }
+    logger().info() << "Sparse file unique features count="<<feats.size();
+cout<<"feats="<<feats.size()<<endl;
+
+    // Convert the feature set into a list of labels.
+    // foreach()
 
 // XXX under construction....
-cout<<"bye"<<endl;
+cout<<"duuude bye"<<endl;
 exit(1);
 }
 
@@ -475,7 +492,6 @@ istream& istreamITable(istream& in, ITable& tab,
         istreamRawITable(in, tab);
     }
     catch (AssertionException e) {
-cout<<"duuuude try again"<<endl;
         istreamRawSparseITable(in, tab);
     }
 

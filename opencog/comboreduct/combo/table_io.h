@@ -56,12 +56,11 @@ void removeNonASCII(std::string& str);
 bool checkCarriageReturn(std::istream& in);
 
 /**
- * Take a row, strip away any nnon-ASCII chars and trailing carriage
- * returns, and then return a tokenizer.  Tokenization uses the
+ * Take a row, return a tokenizer.  Tokenization uses the
  * seperator characters comma, blank, tab (',', ' ' or '\t').
  */
 typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
-table_tokenizer get_row_tokenizer(std::string& line);
+table_tokenizer get_row_tokenizer(const std::string& line);
 
 /**
  * Take a line and return a vector containing the elements parsed.
@@ -69,7 +68,7 @@ table_tokenizer get_row_tokenizer(std::string& line);
  * non-ASCII characters, as well as stripping of any carriage-returns.
  */
 template<typename T>
-std::vector<T> tokenizeRow(std::string& line)
+std::vector<T> tokenizeRow(const std::string& line)
 {
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
