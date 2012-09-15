@@ -269,7 +269,7 @@ const char *sparse_delim = " : ";
  * certain features, must all be done as a separate step.
  */
 istream& istreamRawITable(istream& in, ITable& tab)
-    throw(AssertionException)
+    throw(std::exception, AssertionException)
 {
     streampos beg = in.tellg();
 
@@ -284,10 +284,11 @@ istream& istreamRawITable(istream& in, ITable& tab)
     lines.push_back(line);
 
     // If it is a sparse file, we are outta here.
+    // throw an std::exception, since we don't to log this as an error
+    // (all the other exception types log to the log file).
     if (line.find (sparse_delim)) {
         in.seekg(beg);
-        throw AssertionException(TRACE_INFO,
-              "ERROR: Sparse input cannot be read by regular reader");
+        throw std::exception();
     }
 
     // Grab the rest of the file.
@@ -568,7 +569,7 @@ istream& istreamITable(istream& in, ITable& tab,
     try {
         istreamRawITable(in, tab);
     }
-    catch (AssertionException e) {
+    catch (std::exception e) {
         istreamSparseITable(in, tab);
         return in;
     }
