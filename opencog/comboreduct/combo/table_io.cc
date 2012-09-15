@@ -286,7 +286,7 @@ istream& istreamRawITable(istream& in, ITable& tab)
     // If it is a sparse file, we are outta here.
     // throw an std::exception, since we don't to log this as an error
     // (all the other exception types log to the log file).
-    if (line.find (sparse_delim)) {
+    if (string::npos != line.find (sparse_delim)) {
         in.seekg(beg);
         throw std::exception();
     }
