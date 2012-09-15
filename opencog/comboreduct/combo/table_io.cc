@@ -414,6 +414,8 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     // Fixed features may have different types, by column.
     vector<type_node> types;
     types.resize(fixed_arity);
+    for (size_t off = 0; off < fixed_arity; off++) 
+        types[off] = id::unknown_type;
 
     size_t d_len = strlen(sparse_delim);
 
@@ -571,6 +573,8 @@ istream& istreamITable(istream& in, ITable& tab,
     }
     catch (std::exception e) {
         istreamSparseITable(in, tab);
+        // Get rid of the unwanted columns.
+        tab.delete_columns(ignore_features);
         return in;
     }
 
