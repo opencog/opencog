@@ -260,6 +260,21 @@ public:
                          "2", {"3"});
     }
 
+    void test_sparseFile()
+    {
+        std::cout << "\n----------------------------" << std::endl;
+        string target_feature = "target2";
+        vector<string> ignore_features = {"a", "b", "c", "target1"};
+        Table tt = loadTable(tableUTest_dir + "sparse.data", target_feature, ignore_features);
+
+        testIStreamTable("target2,d,e,f,g,x,y,z\n"
+                         "3.0,0,0,0,0,0,0,0\n"
+                         "4.4,4,0,6,0,0,0,0\n"
+                         "5.5,0,5,0,7,0,0,0\n"
+                         "6.6,4,5,0,0,24,25,26\n",
+                         tt.itable, tt.otable, true, tt.tt);
+    }
+
     void test_mutualInformation()
     {
         std::cout << "\n----------------------------" << std::endl;
