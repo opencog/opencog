@@ -364,13 +364,14 @@ istream& istreamRawITable(istream& in, ITable& tab)
  * "including" have a contin value of 1.0  and "results" has a contin
  * value of 2.
  * 
- * The routine does NOT store teh table in sparse format: it stores the
- * full, exploded table. This could be bad ....
+ * The routine does NOT store the table in sparse format: it stores the
+ * full, exploded table. This could be bad ...
+ * TODO: we really need a sparse table format, as well.  
  *
  * The "Raw" format has all data as strings; type conversion to the
  * appropriate type, must all be done as a separate step.
  */
-istream& istreamRawSparseITable(istream& in, ITable& tab)
+istream& istreamSparseITable(istream& in, ITable& tab)
 {
     // The raw dataset
     std::vector<string> lines;
@@ -406,35 +407,55 @@ istream& istreamRawSparseITable(istream& in, ITable& tab)
 
     // Get a list of all of the features.
     set<string> feats;
+    // All sparse features have the same type.
+    type_node feat_type = id::unknown_type;
+
+    // Fixed features may have different types, by column.
+    vector<type_node> types;
+    types.resize(fixed_arity);
+
     size_t d_len = strlen(sparse_delim);
+
     foreach (const string& line, lines) {
         vector<string> chunks = tokenizeSparseRow(line);
-        vector<string>::const_iterator pit = chunks.begin() + fixed_arity;
+        vector<string>::const_iterator pit = chunks.begin();
+
+        // Infer the types of the fixed features.
+        size_t off = 0;
+        for (; off < fixed_arity; off++, pit++) 
+            types[off] = infer_type_from_token(types[off], *pit);
+
         for (; pit != chunks.end(); pit++) {
-            // rip out the key-value pairs
+
+            // Rip out the key-value pairs
             size_t pos = pit->find(sparse_delim);
+            if (string::npos == pos)
+                break;
             string key = pit->substr(0, pos);
             boost::trim(key);
             string val = pit->substr(pos + d_len);
             boost::trim(val);
 
-            // store the key, uniquely.
+            // Store the key, uniquely.  Store best guess as the type.
             feats.insert(key);
+            feat_type = infer_type_from_token(feat_type, val);
         }
     }
-    logger().info() << "Sparse file unique features count="<<feats.size();
+    logger().info() << "Sparse file unique features count=" << feats.size();
+    logger().info() << "Sparse file feature type=" << feat_type;
 
     // Convert the feature set into a list of labels.
     // 'index' is a map from feature name to column number.
     size_t cnt = fixed_arity;
     map<const string, size_t> index;
     foreach (const string& key, feats) {
+        types.push_back(feat_type);
         labs.push_back(key);
-        index.insert(pair<const string, size_t> (key, cnt));
+        index[key] = cnt;
         cnt++;
     }
-cout<<"labs="<<labs.size()<<endl;
     tab.set_labels(labs);
+    tab.set_types(types);
 
     // And finally, stuff up the table.
     // The function below tokenizes one row, and jams it into the table
@@ -450,12 +471,14 @@ cout<<"labs="<<labs.size()<<endl;
         vector<string>::const_iterator pit = chunks.begin();
 
         // First, handle the fixed columns
+        // Cast them to the appropriate types
         size_t off = 0;
         for (; off < fixed_arity; off++, pit++) {
-            row[off] = (vertex) *pit;
+            row[off] = token_to_vertex(types[off], *pit);
         }
 
-        // Next, handle the key-value pairs.
+        // Next, handle the key-value pairs, again, casting
+        // them to the appropriate types.
         for (; pit != chunks.end(); pit++) {
             size_t pos = pit->find(sparse_delim);
             if (string::npos == pos)
@@ -465,7 +488,7 @@ cout<<"labs="<<labs.size()<<endl;
             string val = pit->substr(pos + d_len);
             boost::trim(val);
             off = index[key];
-            row[off] = val;
+            row[off] = token_to_vertex(feat_type, val);
         }
         tab[i] = row;
     };
@@ -477,9 +500,7 @@ cout<<"labs="<<labs.size()<<endl;
     vector<size_t> indices(ir.begin(), ir.end());
     OMP_ALGO::for_each(indices.begin(), indices.end(), fill_line);
 
-// XXX under construction....
-cout<<"duuude bye "<<ls<<endl;
-exit(1);
+    return in;
 }
 
 /**
@@ -503,9 +524,9 @@ vector<type_node> infer_column_types(const ITable& tab)
     {
         // TODO: could use a two-arg transform, here, but its tricky ...
         for (arity_t i=0; i<arity; i++) {
-             const vertex &v = (*rowit)[i];
-             const string& tok = boost::get<string>(v);
-             types[i] = infer_type_from_token(types[i], tok);
+            const vertex &v = (*rowit)[i];
+            const string& tok = boost::get<string>(v);
+            types[i] = infer_type_from_token(types[i], tok);
         }
     }
     return types;
@@ -548,7 +569,8 @@ istream& istreamITable(istream& in, ITable& tab,
         istreamRawITable(in, tab);
     }
     catch (AssertionException e) {
-        istreamRawSparseITable(in, tab);
+        istreamSparseITable(in, tab);
+        return in;
     }
 
     // Determine the column types.
