@@ -446,6 +446,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     }
     logger().info() << "Sparse file unique features count=" << feats.size();
     logger().info() << "Sparse file feature type=" << feat_type;
+    logger().info() << "Sparse file row count=" << lines.size();
 
     // Convert the feature set into a list of labels.
     // 'index' is a map from feature name to column number.
@@ -646,6 +647,10 @@ istream& istreamTable(istream& in, Table& tab,
     istreamITable(in, tab.itable, ignore_features);
 
     tab.otable = tab.itable.get_column_data(target_feature);
+    OC_ASSERT(0 != tab.otable.size(), 
+              "Fatal Error: target feature \"%s\" not found",
+              target_feature.c_str());
+
     type_node targ_type = tab.itable.get_type(target_feature);
 
     string targ_feat = tab.itable.delete_column(target_feature);
