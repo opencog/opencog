@@ -181,6 +181,24 @@ void build_knobs::logical_canonize(pre_it it)
 
 
 /**
+ * Probe the exemplar for useless knobs/knob settings. Recursive variant.
+ *
+ * The general idea here is that, when decorating an exemplar with 
+ * knobs, we want to avoid inserting useless/pointless knobs, as doing
+ * so will only enlarge the search space of possible knob settings. 
+ * This routine "probes" the various knobs to see if they are "useful"
+ * (as determined by the disc_probe() method). If some klnob settings
+ * are "useless", they are excluded from the field set. If all knob
+ * settings are useless, then the knob itself is never created.
+ *
+ * This method is implemented in a recusrive fashion, so that it can
+ * be parallelized on SMP processors. The recursion is divide-n-conquor;
+ * the exemplar is split into two at each recursion.
+ *
+ * XXX TODO: see comments on disc_probe() below.  This method is a real
+ * CPU time-waster; it is not clear that the computational cost is ever
+ * repaid as a performance advantage later on, during the instance search.
+ *
  * @param subtree  subtree of exemplar to be probed
  * @param exemplr  reference to the exemplar to apply probe
  * @param it       where in the exemplar
@@ -263,10 +281,35 @@ void build_knobs::logical_cleanup()
         _exemplar.set_head(id::logical_and);
 }
 
-// XXX This probing and complexity measuring can be rather costly.
-// Is it really, really needed?  Can we punt and cross our fingers,
-// and live with the few over-expensive cases?  XXX TODO -- measure
-// the resulting performance ...
+/// disc_probe: determine if a discrete knob is worth creating.
+///
+/// The general idea is to minimize the number of 'pointless' knobs
+/// in an exemplar: having too many of these makes the field set too
+/// large, and, as a result, searching for fit instances can take too
+/// long.  Thus, we can do a kind of dimensional reduction if we can 
+/// determine, a-priori, if a knob will be useless, or if some of the
+/// settings of a knob are useless. 
+///
+/// This routine tries to discover useless discrete knob settings, by
+/// trying each knob setting in turn, and then reducing the resulting
+/// tree. If the reduced tree is of low complexity, the knob setting is
+/// considered useless. If all knob settings are useless, then the whole
+/// knob will be discarded.
+///
+/// XXX There's a deep problem here: this probing and complexity measuring
+/// can be rather incredibly costly, especially when the exemplars start
+/// getting large.  So the real question is: is the performance cost of
+/// this routine worth the eventual savings when scoring instances?
+/// TODO: measure and compare the resulting performance.
+//
+// Notes to self: hmm. in 5-parity problem, about 2/3 of knobs are
+// disallowed! viz of 6738 probes, 4007 knobs are completely disallowed.
+// Wow. This is a huge fraction.
+//
+// By contrast, in a large bag-of-words contin problem, there was NOT
+// a SINGLE knob disallowed, out of 27K probes! Which means this whole
+// thing is a huge waste of time for contin problems ... 
+//
 bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
 {
     using namespace reduct;
@@ -296,19 +339,27 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
         // Note that complexity is positive, with 0 being the simplest
         // possible tree (the empty tree).   We disallow settings that
         // reduce the complexity of the tree.
-        if (initial_c > tree_complexity(tmp, is_predicate)) {
+        complexity_t tmp_cmp = tree_complexity(tmp, is_predicate);
+        if (initial_c > tmp_cmp) {
             to_disallow.push_back(idx);
         }
     }
     kb.turn(0);
 
+    // logger().fine("Disc probe mpy=%d disallow=%d tree=",
+    //      kb.multiplicity(), to_disallow.size()); // << combo_tree(subtree);
+
     // If any settings aren't disallowed, make a knob.
     // If all settings are disallowed, there will be no knob.
     if (int(to_disallow.size()) < kb.multiplicity() - 1) {
+
+        // if (to_disallow.size() != 0)
+        //    logger().fine("Disallowing %d knob settings", to_disallow.size());
         foreach (int idx, to_disallow)
             kb.disallow(idx);
         return true;
     } else {
+        // logger().fine() << "No knob will be built for " << combo_tree(subtree);
         kb.clear_exemplar();
         return false;
     }
@@ -438,6 +489,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
             }
         }
     }
+    logger().debug("Created %d logical knob subtrees", perms.size());
 
 #ifdef DEBUG_INFO
     cerr << "---------------------------------" << endl;
@@ -470,6 +522,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, num_threads());
 
+    logger().debug("Adding %d logical knobs", kb_v.size());
     foreach (const logical_subtree_knob& kb, kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }

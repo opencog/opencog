@@ -3469,6 +3469,6 @@ The reuters-test-10.data dataset is the smallest of the reuters
 datasets, its the top-10 topic test (not training) dataset. 
 It has 16935 contin-valued features (and one enum for the target)
 and 4853 rows.   The file format itself is sparse, the table is not:
-the resulting run takes 5.7GB to run.
+the resulting run takes 5.8GB to run.
 
 moses -Hit -i ./reuters-test-10.data -u1 -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -m3200 
