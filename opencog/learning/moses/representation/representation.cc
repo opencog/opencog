@@ -203,6 +203,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         }
     };
 
+    logger().debug("Number of disc knobs=%d", disc.size());
     typedef std::map<pre_it, disc_map_cit, pre_it_comp> disc_map_t;
     disc_map_t disc_lookup;
     for (disc_map_cit dit = disc.begin(); dit != disc.end(); dit++) {
@@ -211,6 +212,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         disc_lookup[pit] = dit;
     }
 
+    logger().debug("Number of contin knobs=%d", contin.size());
     typedef std::map<pre_it, contin_map_cit, pre_it_comp> contin_map_t;
     contin_map_t contin_lookup;
     for (contin_map_cit cit = contin.begin(); cit != contin.end(); cit++) {
@@ -219,6 +221,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         contin_lookup[pit] = cit;
     }
 
+    logger().debug("Going to cross-reference the knobs");
     for (pre_it it = _exemplar.begin(); it != _exemplar.end(); ++it) {
         disc_map_t::iterator dit = disc_lookup.find(it);
         if (dit != disc_lookup.end()) {

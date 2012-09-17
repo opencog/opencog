@@ -321,7 +321,7 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
     using namespace reduct;
 
     // Probing is expensive, see comments above. Skip if at all possible.
-    if (_skip_disc_probe) return true;
+//    if (_skip_disc_probe) return true;
 
     vector<int> to_disallow;
 
@@ -498,7 +498,6 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
             }
         }
     }
-    logger().debug("Created %d logical knob subtrees", perms.size());
 
 #ifdef DEBUG_INFO
     cerr << "---------------------------------" << endl;
@@ -524,9 +523,15 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     if (!is_logical_operator(*it))
        return;
 
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "Adding logical knobs to subtree of size="
+                         << combo_tree(subtree).size()
+                         << "\nat location of size=" << combo_tree(it).size();
+    }
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
 
+    logger().debug("Created %d logical knob subtrees", perms.size());
     ptr_vector<logical_subtree_knob> kb_v =
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, num_threads());
@@ -575,14 +580,17 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
     if (flip == id::null_vertex)
         return;
 
+    logger().debug("First call to add_logical_knobs");
     add_logical_knobs(subtree, it);
     for (sib_it sib = it.begin(); sib != it.end(); ++sib)
     {
         // Insert logical and/or knobs above arguments and predicates.
         if (is_argument(*sib)) {
+            logger().debug("Call add_logical_knobs for argument");
             add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
         }
         else if (is_predicate(sib)) {
+            logger().debug("Call add_logical_knobs for predictate");
             add_logical_knobs(subtree, _exemplar.insert_above(sib, flip), false);
 
             // At this time, we assume that the only predicate is
@@ -606,9 +614,13 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
         }
         else if (*sib == id::null_vertex)
             break;
-        else
+        else {
+            logger().debug("Recursive call to build_logical");
             build_logical(subtree, sib);
+            logger().debug("Return from recursive call to build_logical");
+        }
     }
+    logger().debug("Call add_logical_knobs for flipped subtree");
     add_logical_knobs(subtree, _exemplar.append_child(it, flip));
 }
 
