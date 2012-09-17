@@ -3472,3 +3472,9 @@ and 4853 rows.   The file format itself is sparse, the table is not:
 the resulting run takes 5.8GB to run.
 
 moses -Hit -i ./reuters-test-10.data -u1 -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -m3200 
+
+Fix required to build_knobs, disc_probe()
+-m32   with probe:  12m6.669s  12m12.922s
+-m32   without probe: 5m15.060s
+-m3200 without probe: 6m27.400s
+-m32K  without probe:

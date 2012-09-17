@@ -53,7 +53,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
                          contin_t step_size,
                          contin_t expansion,
                          field_set::width_t depth)
-    : _exemplar(exemplar), _rep(rep),
+    : _exemplar(exemplar), _rep(rep), _skip_disc_probe(true),
       _arity(tt.begin().number_of_children() - 1), types(tt),
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _perm_ratio(0),
@@ -83,6 +83,10 @@ build_knobs::build_knobs(combo_tree& exemplar,
         // tree of logic ops, with anything else contin-valued wrapped
         // up in a predicate (i.e. wrapped by greter_than_zero).
         //
+        // Hmm. Probe, although this is expensive, it seems to be a net
+        // performance benefit for pure boolean problems, I think. Maybe.
+        _skip_disc_probe = false;
+
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
         build_logical(_exemplar.begin(), _exemplar.begin());
@@ -183,9 +187,9 @@ void build_knobs::logical_canonize(pre_it it)
 /**
  * Probe the exemplar for useless knobs/knob settings. Recursive variant.
  *
- * The general idea here is that, when decorating an exemplar with 
+ * The general idea here is that, when decorating an exemplar with
  * knobs, we want to avoid inserting useless/pointless knobs, as doing
- * so will only enlarge the search space of possible knob settings. 
+ * so will only enlarge the search space of possible knob settings.
  * This routine "probes" the various knobs to see if they are "useful"
  * (as determined by the disc_probe() method). If some klnob settings
  * are "useless", they are excluded from the field set. If all knob
@@ -286,9 +290,9 @@ void build_knobs::logical_cleanup()
 /// The general idea is to minimize the number of 'pointless' knobs
 /// in an exemplar: having too many of these makes the field set too
 /// large, and, as a result, searching for fit instances can take too
-/// long.  Thus, we can do a kind of dimensional reduction if we can 
+/// long.  Thus, we can do a kind of dimensional reduction if we can
 /// determine, a-priori, if a knob will be useless, or if some of the
-/// settings of a knob are useless. 
+/// settings of a knob are useless.
 ///
 /// This routine tries to discover useless discrete knob settings, by
 /// trying each knob setting in turn, and then reducing the resulting
@@ -308,11 +312,16 @@ void build_knobs::logical_cleanup()
 //
 // By contrast, in a large bag-of-words contin problem, there was NOT
 // a SINGLE knob disallowed, out of 27K probes! Which means this whole
-// thing is a huge waste of time for contin problems ... 
+// thing is a huge waste of time for contin problems ...
+// Ineed: setting _skip_disc_probe to true reduces runtime by more than
+// half (12 minutes to 5 minutes) for one problem (but maybe not realistic...)
 //
 bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
 {
     using namespace reduct;
+
+    // Probing is expensive, see comments above. Skip if at all possible.
+    if (_skip_disc_probe) return true;
 
     vector<int> to_disallow;
 
@@ -533,7 +542,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
  * and logic terms, and predicates.  If a predicate is found, it is
  * cannonized, and knobs are added to that.
  *
- * @subtree -- pointer to a subtree of the exemplar that consists of 
+ * @subtree -- pointer to a subtree of the exemplar that consists of
  *             logical elements.
  * @it -- an iterator pointing into the the subtree
  */
@@ -921,7 +930,7 @@ void build_knobs::enum_canonize(pre_it it)
         _exemplar.insert(last, enum_t::get_random_enum());
     }
 
-    // Cannonize every predicate. 
+    // Cannonize every predicate.
     // This loop is strangely structured because the logical_canonize()
     // does an insert_above, and thus wrecks the iterator.
     sib_it sib = it.begin();

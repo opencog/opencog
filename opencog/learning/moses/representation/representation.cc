@@ -135,6 +135,8 @@ representation::representation(const reduct::rule& simplify_candidate,
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
+    logger().debug() << "Total number of field specs: " << tmp.size();
+
     std::mutex disc_mutex;
     std::mutex contin_mutex;
 

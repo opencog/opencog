@@ -65,6 +65,9 @@ protected:
     combo_tree& _exemplar;
     representation& _rep;
 
+    // knob probing is expensive, skip if possible.
+    bool _skip_disc_probe;
+
     // Number of arguments of the combo program.
     const combo::arity_t _arity;
 
