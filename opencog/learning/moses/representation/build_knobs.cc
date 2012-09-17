@@ -321,7 +321,7 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
     using namespace reduct;
 
     // Probing is expensive, see comments above. Skip if at all possible.
-//    if (_skip_disc_probe) return true;
+    if (_skip_disc_probe) return true;
 
     vector<int> to_disallow;
 

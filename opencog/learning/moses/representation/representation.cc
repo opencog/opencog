@@ -92,14 +92,19 @@ representation::representation(const reduct::rule& simplify_candidate,
       _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
 {
-    logger().debug() << "Building representation from exemplar: " << _exemplar;
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "Building representation from exemplar: " << _exemplar;
+    }
 
     // Build the knobs.
     build_knobs(_exemplar, tt, *this, ignore_ops,
                 perceptions, actions,
                 stepsize, expansion, depth);
 
-    logger().debug() << "After knob building: " << _exemplar;
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "Representation size after knob building: " << _exemplar.size();
+        logger().fine() << "Rep, after knob building: " << _exemplar;
+    }
 #if 0
     // Attempt to adjust the contin spec step size to a value that is
     // "most likely to be useful" for exploring the neighborhood of an
@@ -140,6 +145,8 @@ representation::representation(const reduct::rule& simplify_candidate,
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
+    logger().debug() << "Number of disc knobs: " << disc.size();
+    logger().debug() << "Number of contin knobs: " << contin.size();
     logger().debug() << "Total number of field specs: " << tmp.size();
 
 #ifdef USE_SLOW_O_N_SEARCH
@@ -203,6 +210,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         it_disc_idx[pit] = _fields.begin_disc_raw_idx() + offset;
     }
 
+    logger().debug() << "Done with disc knobs";
     for (contin_map_cit cit = contin.cbegin(); cit != contin.cend(); cit++) {
         const contin_v& v = *cit;
         pre_it pit = v.second.get_loc();
@@ -210,10 +218,11 @@ representation::representation(const reduct::rule& simplify_candidate,
         size_t offset = distance(contin.cbegin(), cit);
         it_contin_idx[pit] = _fields.begin_contin_raw_idx() + offset;
     }
+    logger().debug() << "Done with contin knobs";
 
 #endif // USE_SLOW_O_N_SEARCH
 
-    if (logger().isDebugEnabled()) {
+    if (logger().isFineEnabled()) {
         std::stringstream ss;
         ostream_prototype(ss << "Created prototype: ");
         logger().debug(ss.str());
