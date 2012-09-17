@@ -106,8 +106,7 @@ bool composite_score::operator==(const composite_score &r) const
         && complexity == r.get_complexity()
         && complexity_penalty == r.get_complexity_penalty()
         && diversity_penalty == r.get_diversity_penalty()
-        && penalized_score == r.get_penalized_score()
-        ;
+        && penalized_score == r.get_penalized_score();
 }
 
 /// Compute the distance between two vectors, using the p-norm.

@@ -452,8 +452,20 @@ Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
 // Stream in bscored_combo_tree, use the same format as
 // ostream_bscored_combo_tree. Note that for now we assume that combo
 // tree is always preceeded by the score, it's easier that way.
+//
+// You may want to set 'in' to send exceptions if something goes wrong
+// such as
+//
+// in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
+//
+// so a bad parse is detected (maybe istream_bscored_combo_tree should
+// set it automatically).
+//
+// TODO: if the istream doesn't end by a bscore then it will
+// completely exhaust it.
 template<typename In>
-In& istream_bscored_combo_tree(In& in, bscored_combo_tree& candidate) {
+bscored_combo_tree istream_bscored_combo_tree(In& in) {
+
     // parse score
     score_t sc;
     in >> sc;
@@ -491,7 +503,7 @@ In& istream_bscored_combo_tree(In& in, bscored_combo_tree& candidate) {
         }
         else if (token == diversity_penalty_prefix_str_split[0]) {
             in >> token;        // diversity_penalty_prefix_str_split[1]
-            in >> cpx_penalty;
+            in >> diversity_penalty;
         }
         else if (token == penalized_score_prefix_str_split[0]) {
             in >> token;        // penalized_score_prefix_str_split[1]
@@ -500,17 +512,16 @@ In& istream_bscored_combo_tree(In& in, bscored_combo_tree& candidate) {
         else if (token == behavioral_score_prefix_str_split[0]) {
             in >> token;        // behavioral_score_prefix_str_split[1]
             istreamContainer(in, back_inserter(bs), "[", "]");
+            break;              // that way we don't consume 'in' further
         }
     }
     // assign to candidate
+    combo::combo_tree tr_test = tr;
+    
     penalized_behavioral_score pbs(bs, cpx_penalty);
     composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
     composite_behavioral_score cbs(pbs, cs);
-    bscored_combo_tree bct(tr, cbs);
-    candidate = bct;
-
-    // return istream
-    return in;
+    return bscored_combo_tree(tr, cbs);
 }                                      
 
 /**

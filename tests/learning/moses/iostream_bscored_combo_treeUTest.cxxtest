@@ -57,8 +57,7 @@ public:
         // check that it is the same object parse by istream_bscored_combo_tree
         std::stringstream iss;
         iss << oss.str();
-        bscored_combo_tree parsed_bct;
-        istream_bscored_combo_tree(iss, parsed_bct);
+        bscored_combo_tree parsed_bct = istream_bscored_combo_tree(iss);
         // check the combo trees
         TS_ASSERT_EQUALS(get_tree(bct), get_tree(parsed_bct));
         // check the composite scores
