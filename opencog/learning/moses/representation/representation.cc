@@ -2,10 +2,12 @@
  * opencog/learning/moses/representation/representation.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Moshe Looks
  *            Predrag Janicic
+ *            Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,9 +25,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <mutex>
+#include <map>
 #include <boost/thread.hpp>
+#ifdef USE_SLOW_O_N_SEARCH
+#include <mutex>
 #include <boost/range/algorithm/find_if.hpp>
+#endif
 
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/oc_omp.h>
@@ -137,6 +142,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 
     logger().debug() << "Total number of field specs: " << tmp.size();
 
+#ifdef USE_SLOW_O_N_SEARCH
     std::mutex disc_mutex;
     std::mutex contin_mutex;
 
@@ -145,7 +151,7 @@ representation::representation(const reduct::rule& simplify_candidate,
     // small fields sets (less than a few thousand knobs) this is
     // not important; however, for combo trees with > 100K nodes in
     // them, this can take huge amounts of time.  This is because the
-    // find_if is essentially a linear search.
+    // find_if is essentially a linear search with runtime O(N).
     // XXX TODO: Can we improve on this, e.g. by recording it during
     // knob creation?
     auto make_it_map = [&](const pre_it &it)
@@ -180,6 +186,57 @@ representation::representation(const reduct::rule& simplify_candidate,
     vector<pre_it>::const_iterator exbeg = itv.begin();
     vector<pre_it>::const_iterator exend = itv.end();
     OMP_ALGO::for_each(exbeg, exend, make_it_map);
+
+#else // USE_SLOW_O_N_SEARCH
+
+    // Build a reversed-lookup table for disc and contin knobs.
+    // That is, given an iterator pointing into the exemplar, fetch the
+    // correspinding knob (if any). To use std::map, we need to have
+    // some kind of compare function, to compare iterators. Yes, this 
+    // seems cheesey, but just use the physical address. Its good enough
+    // for this vey short code block; this reversed map will be discarded
+    // by the end of this function block.
+    // 
+    struct pre_it_comp {
+        bool operator()(const pre_it& l, const pre_it& r) {
+            return ((void *) l.node) < ((void *) r.node);
+        }
+    };
+
+    typedef std::map<pre_it, disc_map_cit, pre_it_comp> disc_map_t;
+    disc_map_t disc_lookup;
+    for (disc_map_cit dit = disc.begin(); dit != disc.end(); dit++) {
+        const disc_v& v = *dit;
+        pre_it pit = v.second->get_loc();
+        disc_lookup[pit] = dit;
+    }
+
+    typedef std::map<pre_it, contin_map_cit, pre_it_comp> contin_map_t;
+    contin_map_t contin_lookup;
+    for (contin_map_cit cit = contin.begin(); cit != contin.end(); cit++) {
+        const contin_v& v = *cit;
+        pre_it pit = v.second.get_loc();
+        contin_lookup[pit] = cit;
+    }
+
+    for (pre_it it = _exemplar.begin(); it != _exemplar.end(); ++it) {
+        disc_map_t::iterator dit = disc_lookup.find(it);
+        if (dit != disc_lookup.end()) {
+            disc_map_cit d_cit = dit->second;
+            size_t offset = distance(disc.cbegin(), d_cit);
+            it_disc_knob[it] = d_cit;
+            it_disc_idx[it] = _fields.begin_disc_raw_idx() + offset;
+        } else {
+            contin_map_t::iterator cit = contin_lookup.find(it);
+            if (cit != contin_lookup.end()) {
+                contin_map_cit c_cit = cit->second;
+                size_t offset = distance(contin.cbegin(), c_cit);
+                it_contin_knob[it] = c_cit;
+                it_contin_idx[it] = offset;
+            }
+        }
+    }
+#endif // USE_SLOW_O_N_SEARCH
 
     if (logger().isDebugEnabled()) {
         std::stringstream ss;

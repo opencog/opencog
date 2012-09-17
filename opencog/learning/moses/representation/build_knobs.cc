@@ -531,7 +531,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, num_threads());
 
-    logger().debug("Adding %d logical knobs", kb_v.size());
+    logger().debug("Adding  %d logical knobs", kb_v.size());
     foreach (const logical_subtree_knob& kb, kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
