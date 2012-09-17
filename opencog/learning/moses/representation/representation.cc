@@ -189,6 +189,7 @@ representation::representation(const reduct::rule& simplify_candidate,
 
 #else // USE_SLOW_O_N_SEARCH
 
+#ifdef CRAZY_TOWN
     // Build a reversed-lookup table for disc and contin knobs.
     // That is, given an iterator pointing into the exemplar, fetch the
     // correspinding knob (if any). To use std::map, we need to have
@@ -239,6 +240,25 @@ representation::representation(const reduct::rule& simplify_candidate,
             }
         }
     }
+#else // CRAZY_TOWN
+    for (disc_map_cit dit = disc.cbegin(); dit != disc.cend(); dit++) {
+        const disc_v& v = *dit;
+        pre_it pit = v.second->get_loc();
+        it_disc_knob[pit] = dit;
+        size_t offset = distance(disc.cbegin(), dit);
+        it_disc_idx[pit] = _fields.begin_disc_raw_idx() + offset;
+    }
+
+    for (contin_map_cit cit = contin.cbegin(); cit != contin.cend(); cit++) {
+        const contin_v& v = *cit;
+        pre_it pit = v.second.get_loc();
+        it_contin_knob[pit] = cit;
+        size_t offset = distance(contin.cbegin(), cit);
+        it_contin_idx[pit] = _fields.begin_contin_raw_idx() + offset;
+    }
+
+#endif // CRAZY_TOWN
+
 #endif // USE_SLOW_O_N_SEARCH
 
     if (logger().isDebugEnabled()) {
