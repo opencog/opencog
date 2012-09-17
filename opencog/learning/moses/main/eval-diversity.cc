@@ -26,19 +26,28 @@
  */
 
 #include <boost/program_options.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
 
 #include <opencog/util/oc_assert.h>
+#include <opencog/learning/moses/moses/types.h>
 
-using namespace boost::program_options;
 using namespace std;
-// using namespace opencog;
+using namespace boost::program_options;
+using namespace boost::accumulators;
+using namespace opencog;
+using namespace moses;
 
 struct eval_diversity_params {
     vector<string> moses_files;
     float diversity_p_norm;
 };
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {    
     eval_diversity_params edp;
     
     // Declare the supported options.
@@ -59,6 +68,9 @@ int main(int argc, char** argv) {
          "the Euclidean distance. A value of 0.0 or less correspond to the "
          "max component-wise. Any other value corresponds to the general case.\n")
 
+        // ("output_file,o",
+        //  value<string>)
+
         ;
 
         variables_map vm;
@@ -77,9 +89,29 @@ int main(int argc, char** argv) {
     }
 
     // load the bscores
-    // TODO
-    // vector<behavioral_score> bscores;
-    // foreach(string file, edp.moses_files) {
-        
-    // }
+    vector<behavioral_score> bscores;
+    vector<bscored_combo_tree> bcts;
+    foreach(string file, edp.moses_files) {
+        ifstream in(file);
+        while (in.good()) {
+            in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
+            try {
+                bcts.push_back(istream_bscored_combo_tree(in));
+            } catch(...) {}
+        }
+    }
+
+    
+    // // compute the distances
+    accumulator_set<float, stats<tag::mean, tag::variance, tag::min, tag::max>> acc;
+    for (unsigned i = 0; i < bcts.size(); ++i)
+        for (unsigned j = 0; j < i; ++j)
+            acc(lp_distance(get_bscore(bcts[i]), get_bscore(bcts[j]),
+                            edp.diversity_p_norm));
+    
+    // write the results
+    std::cout << "mean: " << mean(acc) << std::endl;
+    std::cout << "std dev: " << sqrt(variance(acc)) << std::endl;
+    std::cout << "min: " << boost::accumulators::min(acc) << std::endl;
+    std::cout << "max: " << boost::accumulators::max(acc) << std::endl;
 }
