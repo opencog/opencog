@@ -143,6 +143,9 @@ representation::representation(const reduct::rule& simplify_candidate,
     logger().debug() << "Total number of field specs: " << tmp.size();
 
 #ifdef USE_SLOW_O_N_SEARCH
+    // XXX Remove this code after December 2012 ... its just crazy.
+    // I don't get it .. this was some really complicated code to do
+    // something simple.  I assume this is a weird historical accident ...
     std::mutex disc_mutex;
     std::mutex contin_mutex;
 
@@ -189,58 +192,9 @@ representation::representation(const reduct::rule& simplify_candidate,
 
 #else // USE_SLOW_O_N_SEARCH
 
-#ifdef CRAZY_TOWN
     // Build a reversed-lookup table for disc and contin knobs.
     // That is, given an iterator pointing into the exemplar, fetch the
-    // correspinding knob (if any). To use std::map, we need to have
-    // some kind of compare function, to compare iterators. Yes, this 
-    // seems cheesey, but just use the physical address. Its good enough
-    // for this vey short code block; this reversed map will be discarded
-    // by the end of this function block.
-    // 
-    struct pre_it_comp {
-        bool operator()(const pre_it& l, const pre_it& r) {
-            return ((void *) l.node) < ((void *) r.node);
-        }
-    };
-
-    logger().debug("Number of disc knobs=%d", disc.size());
-    typedef std::map<pre_it, disc_map_cit, pre_it_comp> disc_map_t;
-    disc_map_t disc_lookup;
-    for (disc_map_cit dit = disc.begin(); dit != disc.end(); dit++) {
-        const disc_v& v = *dit;
-        pre_it pit = v.second->get_loc();
-        disc_lookup[pit] = dit;
-    }
-
-    logger().debug("Number of contin knobs=%d", contin.size());
-    typedef std::map<pre_it, contin_map_cit, pre_it_comp> contin_map_t;
-    contin_map_t contin_lookup;
-    for (contin_map_cit cit = contin.begin(); cit != contin.end(); cit++) {
-        const contin_v& v = *cit;
-        pre_it pit = v.second.get_loc();
-        contin_lookup[pit] = cit;
-    }
-
-    logger().debug("Going to cross-reference the knobs");
-    for (pre_it it = _exemplar.begin(); it != _exemplar.end(); ++it) {
-        disc_map_t::iterator dit = disc_lookup.find(it);
-        if (dit != disc_lookup.end()) {
-            disc_map_cit d_cit = dit->second;
-            size_t offset = distance(disc.cbegin(), d_cit);
-            it_disc_knob[it] = d_cit;
-            it_disc_idx[it] = _fields.begin_disc_raw_idx() + offset;
-        } else {
-            contin_map_t::iterator cit = contin_lookup.find(it);
-            if (cit != contin_lookup.end()) {
-                contin_map_cit c_cit = cit->second;
-                size_t offset = distance(contin.cbegin(), c_cit);
-                it_contin_knob[it] = c_cit;
-                it_contin_idx[it] = offset;
-            }
-        }
-    }
-#else // CRAZY_TOWN
+    // correspinding knob (if any).
     for (disc_map_cit dit = disc.cbegin(); dit != disc.cend(); dit++) {
         const disc_v& v = *dit;
         pre_it pit = v.second->get_loc();
@@ -256,8 +210,6 @@ representation::representation(const reduct::rule& simplify_candidate,
         size_t offset = distance(contin.cbegin(), cit);
         it_contin_idx[pit] = _fields.begin_contin_raw_idx() + offset;
     }
-
-#endif // CRAZY_TOWN
 
 #endif // USE_SLOW_O_N_SEARCH
 
