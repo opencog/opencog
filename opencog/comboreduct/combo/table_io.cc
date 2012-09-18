@@ -654,7 +654,6 @@ istream& istreamTable(istream& in, Table& tab,
 
     string targ_feat = tab.itable.delete_column(target_feature);
 
-    // If the target feature was emtpy string, then its column zero we are after.
     tab.otable.set_label(targ_feat);
     tab.otable.set_type(targ_type);
 

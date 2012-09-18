@@ -2950,7 +2950,7 @@ almost 56% accuracy.  Yahoo!  The 5.12M run is hitting 78% accuracy.
 =======================================================================
 =======================================================================
 =======================================================================
-Another dataset: wdbc Wisconsin Diagnostic Breast Cancer
+Another dataset: WDBC Wisconsin Diagnostic Breast Cancer
 
 Ignore: column 1
 Predict: column 2
@@ -2960,7 +2960,7 @@ This translates to scor 569 x 2.5% = 14 or better
 
 
 wdbc-base:
-    run as moses-perf -Hit -Y1 -u2 -i wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
+    run as moses-perf -Hit -Y"id" -u"diag" -i wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
 
 wdbc-base-j12: as above, but -j12  Clearly, this stalls out above
     160K evals.  I think work on contin and linearization is needed.
@@ -3064,7 +3064,7 @@ After fixing sleep bug (bzr 7287):
 -------------------------------
 Try again: with WDBC dataset:
 
-moses -Hit -Y1 -u2 -i /home/linas/src/opencog/build/wdbc.data -W1 -x1 -n
+moses -Hit -Yid -udiag -i /home/linas/src/opencog/build/wdbc.data -W1 -x1 -n
 sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12:10.1.1.1
 -j12:10.1.1.2 -j12:10.1.1.3 -j12:10.1.1.4 -j12:10.1.1.5 -m320000
 
@@ -3150,7 +3150,7 @@ procs   time  score  plex  bytes      bytes/sec
 
 
 Try again:
-mpirun -n 6 --hostfile ~/mpd.hosts ./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12 -m320000 --mpi=1
+mpirun -n 6 --hostfile ~/mpd.hosts ./opencog/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12 -m320000 --mpi=1
 
 real	7m31.761s      score: -17 cpxy=23
 user	60m41.797s
@@ -3175,7 +3175,7 @@ Yuck. Two effects: firt, it really did seem to run longer; second,
 master proces knew it was done, then waited a *long* time for other 
 workers to wrap it up.
 
-time ./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i
+time ./opencog/learning/moses/main/moses -Hit -Yid -udiag -i
 /home/linas/src/opencog/build/wdbc.data -W1 -x1 -n sin -n log -n exp -Z1
 -v12 --hc-max-nn-evals=5000 -r1  -m320000  -j12:10.1.1.1 -j12:10.1.1.2
 -j12:10.1.1.3 -j12:10.1.1.4 -j12:10.1.1.5
@@ -3199,7 +3199,7 @@ sys	0m2.925s
 Tables below are for cluster WDBC dataset.  Measured with bzr rev 7332.
 
 "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts
-./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1
+./opencog/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1
 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -m320000
 --mpi=1 -fmspeed.log"
 
@@ -3283,7 +3283,7 @@ From perf standpoint, results should be identical to the above.  Goal
 is to fix score. the -A"-19" does this, and the -m flag uncaps the num evals.
 
 "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts
-./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1
+./opencog/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1
 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -A"-19" -m555320000
 --mpi=1 -fmscore.log"
 

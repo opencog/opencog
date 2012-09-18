@@ -101,6 +101,7 @@ static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
  */
 void unspecified_combo_exit()
 {
+    logger().error() << "Error: you must specify which combo tree to learn (option -y).";
     cerr << "Error: you must specify which combo tree to learn (option -y)."
          << endl;
     exit(1);
@@ -111,6 +112,7 @@ void unspecified_combo_exit()
  */
 void unsupported_type_exit(const type_tree& tt)
 {
+    logger().error() << "Error: type " << tt << " currently not supported.";
     cerr << "Error: type " << tt << " currently not supported." << endl;
     exit(1);
 }
@@ -122,25 +124,32 @@ void unsupported_type_exit(type_node type)
 /**
  * Display error message about ill formed combo tree and exit
  */
-void illformed_exit(const combo_tree& tr) {
-    cerr << "Error: apparently the combo tree "
-         << tr << "is not well formed." << endl;
+void illformed_exit(const combo_tree& tr)
+{
+    logger().error() << "Error: the combo tree " << tr << " is not well formed.";
+    cerr << "Error: the combo tree " << tr << " is not well formed." << endl;
     exit(1);
 }
 
 /**
  * Display error message about unsupported problem and exit
  */
-void unsupported_problem_exit(const string& problem) {
+void unsupported_problem_exit(const string& problem)
+{
+    logger().error() << "Problem type \"" << problem
+         << "\" is currently unsupported.";
     cerr << "Error: problem type \"" << problem
-         << "\" unsupported for the moment." << endl;
+         << "\" is currently unsupported." << endl;
     exit(1);
 }
 
 /**
  * Display error message about missing input data file and exit
  */
-void no_input_datafile_exit() {
+void no_input_datafile_exit()
+{
+    logger().error() << "No input data file has been specified (option -"
+         << input_data_file_opt.second << ")";
     cerr << "No input data file has been specified (option -"
          << input_data_file_opt.second << ")" << endl;
     exit(1);
@@ -152,6 +161,8 @@ void no_input_datafile_exit() {
 void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
                              const string& input_data_file2, arity_t arity2)
 {
+    logger().error() << "File " << input_data_file1 << " has arity " << arity1
+         << " while file " << input_data_file2 << "has_arity " << arity2;
     cerr << "Error: File " << input_data_file1 << " has arity " << arity1
          << " while file " << input_data_file2 << "has_arity "
          << arity2 << endl;
@@ -161,7 +172,10 @@ void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
 /**
  * Display error message about not recognized combo operator and exist
  */
-void not_recognized_combo_operator(const string& ops_str) {
+void not_recognized_combo_operator(const string& ops_str)
+{
+    logger().error() << "Error: " << ops_str
+         << " is not recognized as combo operator.";
     cerr << "Error: " << ops_str
          << " is not recognized as combo operator." << endl;
     exit(1);
@@ -1236,7 +1250,6 @@ int moses_exec(int argc, char** argv)
                 }
             }
         }
-        arity -= ignore_features_str.size();
     }
 
     logger().info("Inferred arity = %d", arity);
