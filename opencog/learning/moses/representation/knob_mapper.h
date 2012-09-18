@@ -27,7 +27,6 @@
 #define _MOSES_KNOB_MAPPER_H
 
 #include <map>
-#include <unordered_map>
 
 #include <opencog/util/hashing.h>
 
@@ -67,14 +66,12 @@ struct knob_mapper
     // map the address of the combo_tree node to its corresponding
     // knob. This can only work if the combo tree is immutable. Which
     // we assume in the new design (as we need that for thread safety)
-    typedef std::unordered_map<pre_it, disc_map_cit,
-                               obj_ptr_hash<pre_it>> it_disc_knob_map;
-    typedef std::unordered_map<pre_it, contin_map_cit,
-                               obj_ptr_hash<pre_it>> it_contin_knob_map;
-    typedef std::unordered_map<pre_it, int,
-                               obj_ptr_hash<pre_it>> it_disc_idx_map;
-    typedef std::unordered_map<pre_it, int,
-                               obj_ptr_hash<pre_it>> it_contin_idx_map;
+    typedef std::map<pre_it, disc_map_cit, obj_ptr_cmp<pre_it>> 
+        it_disc_knob_map;
+    typedef std::map<pre_it, contin_map_cit, obj_ptr_cmp<pre_it>>
+        it_contin_knob_map;
+    typedef std::map<pre_it, int, obj_ptr_cmp<pre_it>> it_disc_idx_map;
+    typedef std::map<pre_it, int, obj_ptr_cmp<pre_it>> it_contin_idx_map;
 
     it_disc_knob_map it_disc_knob;
     it_contin_knob_map it_contin_knob;
