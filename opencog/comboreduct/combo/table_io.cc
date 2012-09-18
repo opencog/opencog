@@ -604,15 +604,14 @@ istream& istreamITable(istream& in, ITable& tab,
     arity_t arity = tab.get_arity();
     const vector<type_node>& ig_types = tab.get_types();
 
-    foreach (vertex_seq& row, tab)
-    {
-        // TODO use transform instead of the loop below...
-        for (arity_t i=0; i<arity; i++) {
-             vertex v = row[i];
-             const string& tok = boost::get<string>(v);
-             row[i] = token_to_vertex(ig_types[i], tok);
-        }
-    }
+    OMP_ALGO::for_each (tab.begin(), tab.end(),
+        [&](vertex_seq& row) {
+            for (arity_t i=0; i<arity; i++) {
+                 vertex v = row[i];
+                 const string& tok = boost::get<string>(v);
+                 row[i] = token_to_vertex(ig_types[i], tok);
+            }
+        });
 
     return in;
 }
