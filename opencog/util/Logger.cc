@@ -330,9 +330,6 @@ void Logger::log(Logger::Level level, const std::string &txt)
 #ifdef ASYNC_LOGGING
     static const unsigned int max_queue_size_allowed = 1024;
 #endif
-    static char timestamp[64];
-    static char timestampStr[256];
-
     // Don't log if not enabled, or level is too low.
     if (!logEnabled) return;
     if (level > currentLevel) return;
@@ -342,6 +339,9 @@ void Logger::log(Logger::Level level, const std::string &txt)
     {
         struct timeval stv;
         struct tm stm;
+        char timestamp[64];
+        char timestampStr[256];
+
 
         ::gettimeofday(&stv, NULL);
         time_t t = stv.tv_sec;
