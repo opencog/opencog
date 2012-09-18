@@ -27,10 +27,6 @@
 
 #include <map>
 #include <boost/thread.hpp>
-#ifdef USE_SLOW_O_N_SEARCH
-#include <mutex>
-#include <boost/range/algorithm/find_if.hpp>
-#endif
 
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/oc_omp.h>
@@ -145,59 +141,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
-    logger().debug() << "Number of disc knobs: " << disc.size();
-    logger().debug() << "Number of contin knobs: " << contin.size();
     logger().debug() << "Total number of field specs: " << tmp.size();
-
-#ifdef USE_SLOW_O_N_SEARCH
-    // XXX Remove this code after December 2012 ... its just crazy.
-    // I don't get it .. this was some really complicated code to do
-    // something simple.  I assume this is a weird historical accident ...
-    std::mutex disc_mutex;
-    std::mutex contin_mutex;
-
-    // Build mapping from combo tree iterator to knobs and idx
-    // Do this using a lambda, so as to allow parallelization.  For
-    // small fields sets (less than a few thousand knobs) this is
-    // not important; however, for combo trees with > 100K nodes in
-    // them, this can take huge amounts of time.  This is because the
-    // find_if is essentially a linear search with runtime O(N).
-    // XXX TODO: Can we improve on this, e.g. by recording it during
-    // knob creation?
-    auto make_it_map = [&](const pre_it &it)
-    {
-        // Find disc knobs
-        disc_map_cit d_cit = boost::find_if(disc, [&it](const disc_v& v) {
-                return v.second->get_loc() == it; });
-        if (d_cit != disc.end()) {
-            size_t offset = distance(disc.cbegin(), d_cit);
-            std::lock_guard<std::mutex> lock(disc_mutex);
-            it_disc_knob[it] = d_cit;
-            it_disc_idx[it] = _fields.begin_disc_raw_idx() + offset;
-        } else {
-            // Find contin knobs
-            contin_map_cit c_cit =
-                boost::find_if(contin, [&it](const contin_v& v) {
-                        return v.second.get_loc() == it; });
-            if (c_cit != contin.end()) {
-                size_t offset = distance(contin.cbegin(), c_cit);
-                std::lock_guard<std::mutex> lock(contin_mutex);
-                it_contin_knob[it] = c_cit;
-                it_contin_idx[it] = offset;
-            }
-        }
-    };
-
-    // Make a copy, argh, because of the stupid for_each semantics.
-    vector<pre_it> itv;
-    for (pre_it it = _exemplar.begin(); it != _exemplar.end(); ++it)
-        itv.push_back(it);
-
-    vector<pre_it>::const_iterator exbeg = itv.begin();
-    vector<pre_it>::const_iterator exend = itv.end();
-    OMP_ALGO::for_each(exbeg, exend, make_it_map);
-
-#else // USE_SLOW_O_N_SEARCH
 
     // Build a reversed-lookup table for disc and contin knobs.
     // That is, given an iterator pointing into the exemplar, fetch the
@@ -214,7 +158,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         it_disc_idx[pit] = _fields.begin_disc_raw_idx() + offset;
         offset ++;
     }
-    logger().debug() << "Done with disc knobs";
+    logger().debug() << "Number of disc knobs mapped: " << disc.size();
 
     offset = 0;
     for (contin_map_cit cit = contin.cbegin(); cit != contin.cend(); cit++) {
@@ -225,9 +169,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         it_contin_idx[pit] = _fields.begin_contin_raw_idx() + offset;
         offset++;
     }
-    logger().debug() << "Done with contin knobs";
-
-#endif // USE_SLOW_O_N_SEARCH
+    logger().debug() << "Number of contin knobs mapped: " << contin.size();
 
     if (logger().isFineEnabled()) {
         std::stringstream ss;
