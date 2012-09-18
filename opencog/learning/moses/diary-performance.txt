@@ -3478,3 +3478,6 @@ Fix required to build_knobs, disc_probe()
 -m32   without probe: 5m15.060s
 -m3200 without probe: 6m27.400s
 -m32K  without probe:
+
+hashing:  207032 disc knobs in 25:36min = 134 knobs/sec ouch!
+New code: as above but 0.50 seconds.  3000x faster. Woot!

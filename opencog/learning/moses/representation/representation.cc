@@ -202,21 +202,28 @@ representation::representation(const reduct::rule& simplify_candidate,
     // Build a reversed-lookup table for disc and contin knobs.
     // That is, given an iterator pointing into the exemplar, fetch the
     // correspinding knob (if any).
+    size_t offset = 0;
     for (disc_map_cit dit = disc.cbegin(); dit != disc.cend(); dit++) {
         const disc_v& v = *dit;
         pre_it pit = v.second->get_loc();
         it_disc_knob[pit] = dit;
-        size_t offset = distance(disc.cbegin(), dit);
+        // offset used to be calculated like this:
+        // size_t offset = distance(disc.cbegin(), dit);
+        // but distance() is 3000x slower!! The trick here is that the
+        // knobs and fields are in exactly the same order, so this works.
         it_disc_idx[pit] = _fields.begin_disc_raw_idx() + offset;
+        offset ++;
     }
-
     logger().debug() << "Done with disc knobs";
+
+    offset = 0;
     for (contin_map_cit cit = contin.cbegin(); cit != contin.cend(); cit++) {
         const contin_v& v = *cit;
         pre_it pit = v.second.get_loc();
         it_contin_knob[pit] = cit;
-        size_t offset = distance(contin.cbegin(), cit);
+        // size_t offset = distance(contin.cbegin(), cit); per comments above.
         it_contin_idx[pit] = _fields.begin_contin_raw_idx() + offset;
+        offset++;
     }
     logger().debug() << "Done with contin knobs";
 
