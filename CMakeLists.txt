@@ -130,7 +130,7 @@ SET(Boost_USE_MULTITHREADED ON)
 
 # Required boost packages
 # hypertable requires boost iostreams
-# boost-1.49 no longer has a libboost_iostreams  
+# boost-1.49 no longer has a libboost_iostreams
 FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
 
 # Optional boost packages; can build without these.
@@ -348,18 +348,34 @@ ELSE (UnixODBC_FOUND)
 ENDIF (UnixODBC_FOUND)
 MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
+# Optional, currently needed only to hush up DRD in util/Logger.cc
+FIND_PACKAGE(VALGRIND)
+IF (VALGRIND_FOUND)
+	MESSAGE(STATUS "VALGRIND was found.")
+	IF (VALGRIND_INCLUDE_DIR)
+		MESSAGE(STATUS "VALGRIND devel headers found.")
+		SET(HAVE_VALGRIND 1)
+	ELSE (VALGRIND_INCLUDE_DIR)
+		MESSAGE(STATUS "VALGRIND devel headers NOT FOUND: needed for thread debugging.")
+	ENDIF (VALGRIND_INCLUDE_DIR)
+ELSE (VALGRIND_FOUND)
+	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
+ENDIF (VALGRIND_FOUND)
+
 # These are required for building the embodiment code
 FIND_PACKAGE(XercesC)
 IF (XERCESC_FOUND)
- # using COMPARE_VERSION_STRINGS instead of COMPARE_VERSION for staying compatible with cmake 2.4
- IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-   MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARIES}")
-   INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
-   SET(XERCESC_VERSION_OK TRUE)
- ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-   MESSAGE(WARNING "Xerces ${XERCESC_VERSION} not supported. Only versions 2.* are supported. Embodiment won't be built.")
-   SET(XERCESC_VERSION_OK FALSE)
- ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+	# using COMPARE_VERSION_STRINGS instead of COMPARE_VERSION for staying compatible with cmake 2.4
+	IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+		MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARIES}")
+		INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
+		SET(XERCESC_VERSION_OK TRUE)
+	ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+		MESSAGE(WARNING "Xerces ${XERCESC_VERSION} not supported. Only versions 2.* are supported. Embodiment won't be built.")
+		SET(XERCESC_VERSION_OK FALSE)
+	ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+ELSE (XERCESC_FOUND)
+	MESSAGE(STATUS "Xerces-C missing: needed for embodiment")
 ENDIF (XERCESC_FOUND)
 
 # XML-RPC, used by the ubigraph module
@@ -372,7 +388,7 @@ ENDIF (NOT XMLRPC_FOUND)
 FIND_PACKAGE(ZMQ)
 IF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_ZMQ)
-    SET(HAVE_ZMQ 1)
+	SET(HAVE_ZMQ 1)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
 ELSE (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure ZMQ_LIBRARIES and ZMQ_INCLUDE_DIRS are set.")
