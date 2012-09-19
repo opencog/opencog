@@ -268,9 +268,14 @@ ENDIF (PROTOBUF_FOUND
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
-# Python needed for embodiment
+# Python needed for embodiment (!?) and for PLN
 FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs)
+IF(PYTHONLIBS_FOUND)
+	MESSAGE(STATUS "Python libs found.")
+ELSE(PYTHONLIBS_FOUND)
+	MESSAGE(STATUS "Python libs NOT found.")
+ENDIF(PYTHONLIBS_FOUND)
 
 # Python bindings using Cython
 # Cython is used to generate bindings
@@ -293,7 +298,9 @@ IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 	   MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
    ENDIF ("${PYTHON_DEST}" STREQUAL "")
 ELSE (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
-	MESSAGE(STATUS "Neither Cython or Python libraries not found.")
+	IF(NOT CYTHON_EXECUTABLE)
+		MESSAGE(STATUS "Cython executable not found.")
+	ENDIF(NOT CYTHON_EXECUTABLE)
 ENDIF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 
 # SDL needed for the spatial tools
