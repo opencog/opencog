@@ -52,6 +52,9 @@
 #include <sys/time.h>
 #endif
 
+#ifdef HAVE_VALGRIND
+#include <valgrind/drd.h>
+#endif
 #include <boost/algorithm/string.hpp>
 
 #include <opencog/util/platform.h>
@@ -84,7 +87,7 @@ static void prt_backtrace(std::ostringstream& oss)
 		if (!(begin && end) || end <= begin)
 		{
 			// Failed to pull apart the symbol names
-            oss << "\t" << i << ": " << syms[i] << "\n";
+			oss << "\t" << i << ": " << syms[i] << "\n";
 		}
 		else
 		{
@@ -216,10 +219,16 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
     this->printToStdout = false;
 
     this->logEnabled = true;
+#ifdef HAVE_VALGRIND
+    DRD_IGNORE_VAR(this->logEnabled);
+#endif
     this->f = NULL;
 
     pthread_mutex_init(&lock, NULL);
 #ifdef ASYNC_LOGGING
+#ifdef HAVE_VALGRIND
+    DRD_IGNORE_VAR(this->pendingMessagesToWrite);
+#endif
     this->writingLoopActive = false;
     startWriteLoop();
 #endif // ASYNC_LOGGING
