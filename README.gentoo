@@ -4,19 +4,20 @@ Instalation and dependency resolution for Gentoo (circa Sep. 2008)
 
 Opencog depends on the following packages:
 
-  dev-util/cmake dev-libs/openssl dev-libs/boost sci-libs/gsl
+  dev-util/cmake dev-libs/boost sci-libs/gsl
+
+You might need to eselect the right boost version as well.
 
 ----------------------------------------------------------
 
 Additionally, it depends on the following non-official packages:
 
-  cxxtest csockets
+  cxxtest
 
 which are available in the 'vendor' directory. To install them, issue
 the following commands:
 
   prompt# cd <opencog-base-dir>
-  prompt# ebuild vendor/csockets/gentoo/dev-cpp/csockets/csockets*.ebuild install qmerge
   prompt# ebuild vendor/cxxtest/gentoo/dev-cpp/cxxtest/cxxtest*.ebuild install qmerge
 
 ----------------------------------------------------------
@@ -29,28 +30,3 @@ Opencog also _optionally_ depends on the following packages:
 
   dev-libs/expat   -- needed for embodiment
 
-----------------------------------------------------------
-
-Note that if you have boost libraries newer than 1.39 installed as
-well as the 1.39 versions, cmake will find and use the newer versions,
-even if you eselect the 1.39 version.  To force cmake to use 1.39,
-apply the following patch to CMakeLists.txt: 
-
----- begin patch ----
-
-=== modified file 'CMakeLists.txt'
---- CMakeLists.txt	2010-08-25 02:46:22 +0000
-+++ CMakeLists.txt	2010-08-29 08:31:09 +0000
-@@ -79,7 +79,7 @@
- 
- # Required boost packages
- # hypertable requires boost iostreams
--FIND_PACKAGE(Boost 1.37 COMPONENTS date_time filesystem iostreams regex serialization signals system thread REQUIRED)
-+FIND_PACKAGE(Boost 1.39 COMPONENTS date_time filesystem iostreams regex serialization signals system thread REQUIRED EXACT)
- 
- # Optional boost packages; can build without these.
- # Arghhh. Except cmake is treating these as required, not optional. #$%**&
-
----- end patch ----
-
-You might need to eselect the right boost version as well.

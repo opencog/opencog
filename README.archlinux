@@ -18,9 +18,11 @@ if so just compile it manually and it should work.
 
 ----------------------------------------------------------
 
-Opencog depends on the following packages:
+Opencog depends on the many packages. Some of the more important ones are:
 
-   g++ cmake openssl boost expat guile xerces-c-2 cxxtest
+   g++ cmake boost expat guile xerces-c-2 cxxtest unixodbc
+
+xerces, expat, unixodbc are optional.  See the main README for details.
 
 ----------------------------------------------------------
 

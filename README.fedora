@@ -4,24 +4,15 @@ Instalation and dependency resolution for Fedora 9 users
 
 Opencog depends on the following packages:
 
-   gcc-c++ cmake openssl openssl-devel boost boost-devel gsl-devel
+   gcc-c++ cmake boost boost-devel gsl-devel
 
 ----------------------------------------------------------
-
-Additionally, it depends on the following non-official packages:
-
-   cxxtest csockets csockets-devel
 
 They may be downloaded and installed using the following commands:
 
    wget http://downloads.sourceforge.net/cxxtest/cxxtest-3.10.1-1.noarch.rpm
 
-   wget http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/fc8/i386/RPMS.dries/csockets-devel-2.2.5-1.fc8.rf.i386.rpm
-
-   wget http://ftp.belnet.be/packages/dries.ulyssis.org/fedora/fc8/i386/RPMS.dries/csockets-2.2.9-1.fc8.rf.i386.rpm
-
-   sudo yum --nogpgcheck localinstall cxxtest-3.10.1-1.noarch.rpm \
-   csockets-devel-2.2.5-1.fc8.rf.i386.rpm csockets-2.2.9-1.fc8.rf.i386.rpm
+   sudo yum --nogpgcheck localinstall cxxtest-3.10.1-1.noarch.rpm 
 
 ----------------------------------------------------------
 

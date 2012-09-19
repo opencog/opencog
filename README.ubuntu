@@ -98,9 +98,9 @@ sudo aptitude install bzr cmake
 note: the command above will also install necessary dependencies, such as a C compiler and other libraries and tools. If your system hasn't been used before to build software, it may take many minutes to download and install all dependencies.
 Install the core libraries
 
-OpenCog uses the Boost C++ Libraries, the GNU Scientific Library and the Expat XML parsing library.
+OpenCog uses the Boost C++ Libraries and  the GNU Scientific Library.
 
-sudo aptitude install libboost1.38-dev libgsl0-dev libexpat1-dev
+sudo aptitude install libboost-dev libgsl0-dev
 
 note: the command above will also install necessary dependencies, such as a C++ compiler and other libraries and tools. If your system hasn't been used before to build software, it may take many minutes to download and install all dependencies.
 Get the source code

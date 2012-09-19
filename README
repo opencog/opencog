@@ -53,8 +53,7 @@ curl        -- cURL groks URLs
                Debian/Ubuntu package libcurl4-gnutls-dev
 
 expat       -- an XML parsing library - 
-               Optional package
-               Required for saving data to file.
+               Optional package, needed for embodiment support.
                http://www.jclark.com/xml/expat.html (version 1.2)
                Debian/Ubuntu package libexpat1-dev
                Alternatively Debian/Ubuntu package libxmltok1-dev 
