@@ -32,8 +32,14 @@
 
 #include <errno.h>
 
-// for backward compatibility as from boost 1.46 filesystem 3 is the default
+// For backward compatibility as from boost 1.46 filesystem 3 is the default
+// as of boost 1.50 there is no version 2, and compiles will fail ;-(
+#include <boost/version.hpp>
+#if BOOST_VERSION > 104900
+#define BOOST_FILESYSTEM_VERSION 3
+#else
 #define BOOST_FILESYSTEM_VERSION 2
+#endif
 #include <boost/filesystem/operations.hpp>
 
 #include <boost/lexical_cast.hpp>
