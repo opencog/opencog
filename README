@@ -19,6 +19,10 @@ some needed CMake scripts are included in lib, but others in lib/compat are
 provided if you are trying to build with an old version of CMake (although the
 best option is to get the latest CMake if possible).
 
+boost       -- a C++ utilities package -
+               http://www.boost.org/
+               Debian/Ubuntu package libboost-dev
+
 cmake       -- a build management tool
                http://www.cmake.org/
                Debian/Ubuntu package cmake
@@ -28,20 +32,6 @@ cxxtest     -- a test framework
                (Not originally available in Debian/Ubuntu; get cxxtest 
                from https://launchpad.net/~dhart/+archive/ppa)
 
-boost       -- a C++ utilities package -
-               http://www.boost.org/
-               Debian/Ubuntu package libboost-dev
-
-expat       -- an XML parsing library - 
-               http://www.jclark.com/xml/expat.html (version 1.2)
-               Debian/Ubuntu package libexpat1-dev
-               Alternatively Debian/Ubuntu package libxmltok1-dev 
-               (supplies expat v1.2) Version 2 seems to work as well.  
-               http://expat.sourceforge.net/
-
-xercesc     -- Apache Xerces-C++ XML Parser
-               Debian/Ubuntu packages libxerces-c28 and libxerces-c2-dev
- 
 guile       -- Embedded scheme interperter
                http://www.gnu.org/software/guile/guile.html
                Version 1.8.6 or newer is required.
@@ -50,26 +40,36 @@ guile       -- Embedded scheme interperter
 libgsl      -- The GNU Scientific Library
                Debian/Ubuntu package libgsl0-dev
 
-unixODBC    -- Generic SQL Database client access libraries
+Optional prereqs
+----------------
+The following packages are optional. If they are not installed, some
+optional parts of OpenCog will not be built.  The CMake command, during
+the build, will be more precise as to which parts will not be built.
+
+curl        -- cURL groks URLs
                Optional package
-               Required for the distributed-processing atomspace.
-               http://www.unixodbc.org/
-               Debian/Ubuntu packages unixodbc-dev
+               Required by opencog/ubigraph
+               http://curl.haxx.se/
+               Debian/Ubuntu package libcurl4-gnutls-dev
 
-Lua         -- Lua programming language
-               http://www.lua.org/ (version 5.1)
-               Debian/Ubuntu package liblua5.1-dev
-
-Luabind     -- Binding between C++ and Lua
-               http://www.rasterbar.com/products/luabind.html (version 
-               0.8.1 or later) (Not originally available in Debian/Ubuntu;
-               get libluabind-dev from 
-               https://launchpad.net/~arthur.loiret/+archive/ppa)
+expat       -- an XML parsing library - 
+               Optional package
+               Required for saving data to file.
+               http://www.jclark.com/xml/expat.html (version 1.2)
+               Debian/Ubuntu package libexpat1-dev
+               Alternatively Debian/Ubuntu package libxmltok1-dev 
+               (supplies expat v1.2) Version 2 seems to work as well.  
+               http://expat.sourceforge.net/
 
 HyperTable  -- Distributed storage.
                Optional package, needed only for experimental support.
                http://hypertable.org.
                This requires SIGAR as well. 
+
+MPI         -- Message Passing Interface
+               Optional package
+               Required for compute-cluster version of MOSES.
+               Use either MPICHV2 or OpenMPI
 
 OpenGL      -- Open Graphics Library
                Optional package
@@ -89,22 +89,22 @@ SDL_gfx     -- Simple DirectMedia Layer extension
                http://www.ferzkopp.net/joomla/content/view/19/14/
                Debian/Ubuntu package libsdl-gfx1.2-dev
 
+unixODBC    -- Generic SQL Database client access libraries
+               Optional package
+               Required for the distributed-processing atomspace.
+               http://www.unixodbc.org/
+               Debian/Ubuntu packages unixodbc-dev
+
+xercesc     -- Apache Xerces-C++ XML Parser
+               Optional package
+               Requied for embodiment
+               Debian/Ubuntu packages libxerces-c28 and libxerces-c2-dev
+ 
 xmlrpc      -- XML-RPC support
                Optional package
                Required by opencog/ubigraph
                http://www.xmlrpc.com
                Debian/Ubuntu package libxmlrpc-c-dev
-
-curl        -- cURL groks URLs
-               Optional package
-               Required by opencog/ubigraph
-               http://curl.haxx.se/
-               Debian/Ubuntu package libcurl4-gnutls-dev
-
-MPI         -- Message Passing Interface
-               Optional package
-               Required for compute-cluster version of MOSES.
-               Use either MPICHV2 or OpenMPI
 
 
 To build opencog:

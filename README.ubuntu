@@ -157,6 +157,21 @@ Make & run OpenCog tests
 make test 
 
 note: tests can be run after building each following section.
+
+Build the Scheme interpreter
+
+Install the development packages for Guile (the GNU scheme interpreter).
+
+sudo aptitude install guile-1.8-dev 
+
+Re-configure the build
+
+cmake ..
+
+Build OpenCog with Scheme interpreter
+
+make
+
 Build the documentation
 
 Also available online at http://buildbot.opencog.org/doxygen/
@@ -173,20 +188,6 @@ Build OpenCog documentation
 
 make doxygen
 
-Build the Scheme interpreter
-
-Install the development packages for Guile (the GNU scheme interpreter).
-
-sudo aptitude install guile-1.8-dev 
-
-Re-configure the build
-
-cmake ..
-
-Build OpenCog with Scheme interpreter
-
-make
-
 Build the Embodiment base system
 
 Enable the universe repository by editing /etc/apt/sources.list or ticking the list at System > Administration > Software Sources.
@@ -197,7 +198,7 @@ sudo aptitude update
 
 Install dependencies
 
-sudo aptitude install libxerces-c2-dev liblua5.1-0-dev libluabind-dev
+sudo aptitude install libxerces-c2-dev 
 
 Configure the build
 
