@@ -62,14 +62,9 @@ ADD_LIBRARY (pln SHARED
 )
 
 INCLUDE_DIRECTORIES (
-	${PROJECT_SOURCE_DIR}/src/util
-	${PROJECT_SOURCE_DIR}/src/atomspace
-	${PROJECT_SOURCE_DIR}/src/xml
-	${PROJECT_SOURCE_DIR}/src/server
-
-    # For the Python PLN binding
-    ${PYTHON_INCLUDE_PATH}
-    ${CMAKE_BINARY_DIR}
+	# For the Python PLN binding
+	${PYTHON_INCLUDE_PATH}
+	${CMAKE_BINARY_DIR}
 )
 
 SET(PLN_LINK_LIBS

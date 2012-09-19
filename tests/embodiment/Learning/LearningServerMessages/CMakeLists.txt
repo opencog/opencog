@@ -1,4 +1,3 @@
-CMAKE_POLICY(SET CMP0005 OLD)
 
 ADD_DEFINITIONS(-DATOM_SPACE_DUMP_FILE=\\"${CMAKE_CURRENT_SOURCE_DIR}/atomSpace.xml\\")
 
@@ -33,8 +32,6 @@ TARGET_LINK_LIBRARIES(SchemaMessageUTest
     LearningServerMessages
     SpaceMap
     AvatarComboVocabulary
-    #util
-    #comboreduct
 )
 
 IF(WIN32)

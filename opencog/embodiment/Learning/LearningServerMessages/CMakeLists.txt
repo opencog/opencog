@@ -12,7 +12,6 @@ TARGET_LINK_LIBRARIES (LearningServerMessages
     AvatarComboVocabulary
     comboreduct
     util
-    xml
     AtomSpaceExtensions
     atomspace
     ${PROJECT_LIBRARIES}

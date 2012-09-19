@@ -448,6 +448,9 @@ IF(ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
 ENDIF(ODBC_FOUND)
 
+# Here's the catch: much of embodiment relies on the MessagingSystem,
+# which uses NMXML as the message format.  And NMXML needs expat,
+# so embodiment can't build without expat.
 IF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)
    SET(HAVE_EMBODIMENT 1)
 ENDIF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)

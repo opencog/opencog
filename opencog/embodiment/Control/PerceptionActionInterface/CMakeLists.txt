@@ -1,9 +1,8 @@
-CMAKE_POLICY(SET CMP0005 OLD)
 
 ADD_DEFINITIONS(-DPVP_XSD_FILE_PATH=\\"${CMAKE_CURRENT_SOURCE_DIR}/BrainProxyAxon.xsd\\")
 
 SET(PAI_SOURCE_FILES
-    PAIUtils
+	PAIUtils
 	ActionParamType
 	ActionParameter
 	ActionType
@@ -11,10 +10,10 @@ SET(PAI_SOURCE_FILES
 	ActionPlan
 	PAI
 	ActionPlanDispatcher
-    EmbodimentDOMParser
-    EmbodimentErrorHandler
-    EventResponder
-    EventDetector
+	EmbodimentDOMParser
+	EmbodimentErrorHandler
+	EventResponder
+	EventDetector
 )
 
 IF (PROTOBUF_FOUND)
@@ -33,8 +32,8 @@ ADD_LIBRARY (PAI
 
 SET(PAI_LINK_LIBS
 	AtomSpaceExtensions
+	oac
 	util 
-    oac
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 
 	${Boost_REGEX_LIBRARY}

@@ -20,10 +20,6 @@ TARGET_LINK_LIBRARIES (Procedure
 ADD_DEPENDENCIES(Procedure
     PAI.MapInfo.pb.h)
 
-IF(COMMAND cmake_policy)
-    CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF(COMMAND cmake_policy)
-
 ADD_EXECUTABLE (combo_shell_stdio ComboSTDIOExecutable)
 TARGET_LINK_LIBRARIES (combo_shell_stdio
     oac
