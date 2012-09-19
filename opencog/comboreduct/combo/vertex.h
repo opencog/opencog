@@ -774,11 +774,13 @@ inline bool is_complement(const vertex& x, const vertex& y)
     return false;
 }
 
-template<typename T>
-inline bool is_boolean(const T& v)
+inline bool is_boolean(const vertex& v)
 {
     return (v == id::logical_true || v == id::logical_false);
 }
+
+// like get_contin but cast the vertex to contin no matter what
+contin_t cast_contin(const vertex& v);
 
 template<typename T>
 inline bool is_logical_operator(const T& v)

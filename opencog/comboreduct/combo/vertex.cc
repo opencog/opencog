@@ -29,6 +29,18 @@
 
 namespace opencog { namespace combo {
 
+contin_t cast_contin(const vertex& v)
+{
+    if (is_boolean(v))
+        return (contin_t)vertex_to_bool(v);
+    else if (is_contin(v))
+        return get_contin(v);
+    else {
+        OC_ASSERT(false, "can't do much more");
+        return 0;
+    }
+}
+        
 bool operator==(const vertex& v, procedure_call h)
 {
     if (const procedure_call* vh = boost::get<procedure_call>(&v))
