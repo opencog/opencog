@@ -158,10 +158,11 @@ ENDIF (NOT CURL_FOUND)
 # XML parsing library
 FIND_PACKAGE(EXPAT)
 IF (EXPAT_FOUND)
+	MESSAGE(STATUS "Expat XML parser found.")
 	ADD_DEFINITIONS(-DHAVE_EXPAT)
 	SET(HAVE_EXPAT 1)
 ELSE (EXPAT_FOUND)
-	MESSAGE(STATUS "Expat XML parser missing: needed for hypertable support.")
+	MESSAGE(STATUS "Expat XML parser missing: needed for embodiment.")
 ENDIF (EXPAT_FOUND)
 
 # Gnu Scientific Library
@@ -267,10 +268,11 @@ ENDIF (PROTOBUF_FOUND
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
-# Python bindings using Cython
-# Needed for testing
+# Python needed for embodiment
 FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs)
+
+# Python bindings using Cython
 # Cython is used to generate bindings
 FIND_PROGRAM(CYTHON_EXECUTABLE cython)
 FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
@@ -337,7 +339,7 @@ ENDIF (TCL_TCLSH)
 FIND_PACKAGE(UnixODBC QUIET)
 IF (UnixODBC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-    SET(HAVE_SQL_STORAGE 1)
+	SET(HAVE_SQL_STORAGE 1)
 	SET(ODBC_FOUND 1)
 	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
 	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
@@ -405,12 +407,12 @@ IF(Boost_FOUND)
     SET(HAVE_FEATURE_SELECTION 1)
 ENDIF(Boost_FOUND)
 
-IF(GSL_FOUND)
+IF(GSL_FOUND AND HAVE_UTIL)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
 #    SET(HAVE_PLN 1)
     SET(HAVE_DIMEMBED 1)
-ENDIF(GSL_FOUND)
+ENDIF(GSL_FOUND AND HAVE_UTIL)
 
 # Always want to build spatial dir for the AtomSpace
 # as it depends on libSpaceMap and guards against compiling
@@ -424,21 +426,24 @@ ELSE(HAVE_ATOMSPACE)
 ENDIF(HAVE_ATOMSPACE)
 
 IF(EXPAT_FOUND AND HAVE_ATOMSPACE)
-    SET(HAVE_PERSIST 1)
+	SET(HAVE_XML 1)
 ENDIF(EXPAT_FOUND AND HAVE_ATOMSPACE)
 
-IF(HAVE_PERSIST AND HAVE_ATOMSPACE)
-    SET(HAVE_SERVER 1)
-ENDIF(HAVE_PERSIST AND HAVE_ATOMSPACE)
+IF(HAVE_ATOMSPACE)
+	SET(HAVE_SERVER 1)
+ENDIF(HAVE_ATOMSPACE)
 
 IF(HAVE_SERVER) # because web depends on server
-    SET(HAVE_WEB 1)
+	SET(HAVE_WEB 1)
 ENDIF(HAVE_SERVER)
 
+IF(ODBC_FOUND) # SQL persistance
+	SET(HAVE_PERSIST 1)
+ENDIF(ODBC_FOUND)
 
-IF(XERCESC_VERSION_OK AND EXPAT_FOUND AND HAVE_PROTOBUF)
+IF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)
    SET(HAVE_EMBODIMENT 1)
-ENDIF(XERCESC_VERSION_OK AND EXPAT_FOUND AND HAVE_PROTOBUF)
+ENDIF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)
 
 IF (CURL_FOUND AND XMLRPC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
@@ -641,8 +646,8 @@ ENDIF (DOXYGEN_FOUND)
 # Show a summary of what we got
 
 
-SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
+SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("ComboReduct" "Library for reduction of combo program trees" HAVE_COMBOREDUCT)
 SUMMARY_ADD("CythonBinding" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
@@ -651,11 +656,11 @@ SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
 SUMMARY_ADD("FeatureSelection" "MOSES based feature selection tool" HAVE_FEATURE_SELECTION)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
-SUMMARY_ADD("Persist" "Interfaces for persistance of the AtomSpace" HAVE_PERSIST)
 #SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
 SUMMARY_ADD("SchemeBinding" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Spatial tools" HAVE_SPATIAL)
+SUMMARY_ADD("SQL Persist" "Interfaces for SQL persistance of the AtomSpace" HAVE_PERSIST)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)

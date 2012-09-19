@@ -1,5 +1,5 @@
 #
-# spec file for package opencog
+# spec file for RPM package opencog
 #
 # Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
 # All Rights Reserved
@@ -22,7 +22,7 @@ Source0:        file:///home/gama/rpmbuild/SOURCES/opencog-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
-BuildRequires:  cmake >= 2.4.6, make >= 3, gcc-c++ >= 4.1, csockets-devel >= 2.2.9, openssl-devel >= 0.9.8, boost-devel >= 1.34, unixODBC-devel >= 2.2, guile-devel >= 1.8.5, gsl-devel >= 1.9, glibc-devel >= 2.3
+BuildRequires:  cmake >= 2.6, make >= 3, gcc-c++ >= 4.4, boost-devel >= 1.44, unixODBC-devel >= 2.2, guile-devel >= 1.8.6, gsl-devel >= 1.9, glibc-devel >= 2.3
 %if 0%{?suse_version} > 1020
 BuildRequires:  libexpat-devel >= 2
 %else
@@ -63,7 +63,7 @@ make install DESTDIR=%buildroot
 Summary: The underlying hyper-graph infrastructure of the Open Cognition Framework
 Group: Development/Libraries
 AutoReqProv: 0
-Requires: libstdc++ >= 4.1, glibc >= 2.3
+Requires: libstdc++ >= 4.4, glibc >= 2.3
 %description -n libatomspace
 The libatomspace library provides the underlying hyper-graph (Nodes, Links,
 TruthValues, AttentionValues, AtomTable, etc.) infrastructure of the Open
@@ -78,7 +78,7 @@ Cognition Framework.
 Summary: Header files for the libatomspace library
 Group: Development/Libraries
 AutoReqProv: 0
-Requires: libatomspace >= %{version}, gcc-c++ >= 4.1, boost-devel >= 1.34, glibc-devel >= 2.3
+Requires: libatomspace >= %{version}, gcc-c++ >= 4.4, boost-devel >= 1.44, glibc-devel >= 2.3
 %description -n libatomspace-devel
 The libatomspace-devel package contains the header files needed to develop
 programs that use the libatomspace library (which is part of the Open Cognition
@@ -94,7 +94,7 @@ Framework).
 Summary: The base server of the Open Cognition Framework
 Group: Development/Libraries
 AutoReqProv: 0
-Requires: libatomspace >= %{version}, openssl >= 0.9.8, boost >= 1.34
+Requires: libatomspace >= %{version}, boost >= 1.44
 %if 0%{?suse_version} > 1020
 Requires: libexpat1 >= 2
 %else
@@ -117,7 +117,7 @@ by the Open Cognition Framework.
 Summary: Header files and development files for the opencog-server
 Group:   Development/Libraries
 AutoReqProv: 0
-Requires: opencog-server >= %{version}, libatomspace-devel >= %{version}, csockets-devel >= 2.2.9, openssl-devel >= 0.9.8
+Requires: opencog-server >= %{version}, libatomspace-devel >= %{version}
 %if 0%{?suse_version} > 1020
 Requires: libexpat-devel >= 2
 %else
@@ -130,7 +130,7 @@ needed to develop programs that use the Open Cognition Framework.
 %defattr(-,root,root,-)
 %doc LICENSE README
 /%{_includedir}/opencog/server/*
-/%{_includedir}/opencog/xml/*
+/%{_includedir}/opencog/persist/*
 /%{_datadir}/opencog/cmake
 
 
@@ -138,7 +138,7 @@ needed to develop programs that use the Open Cognition Framework.
 Summary: The main modules used by the opencog server
 Group:   Development/Libraries
 AutoReqProv: 0
-Requires: opencog-server >= %{version}, guile >= 1.8.5, unixODBC >= 2.2, gsl >= 1.9
+Requires: opencog-server >= %{version}, guile >= 1.8.6, unixODBC >= 2.2, gsl >= 1.9
 %description core
 The opencog-core package contains the modules shipped by default by the Open
 Cognition Framework. They provide a variety of enhancements and additional
@@ -160,7 +160,7 @@ allocation.
 Summary: Header files for the the opencog-core package
 Group:   Development/Libraries
 AutoReqProv: 0
-Requires: opencog-core >= %{version}, opencog-server-devel >= %{version}, guile-devel >= 1.8.5, unixODBC-devel >= 2.2, gsl-devel >= 1.9
+Requires: opencog-core >= %{version}, opencog-server-devel >= %{version}, guile-devel >= 1.8.6, unixODBC-devel >= 2.2, gsl-devel >= 1.9
 %description core-devel
 The opencog-core-devel package contains the header files associated with the
 modules that are part of the opencog-core package.
@@ -212,3 +212,5 @@ rm -rf %buildroot
 %changelog
 * Wed Oct 01 2008 Gustavo Machado Campagnani Gama <gama@vettalabs.com> 0.1.4-0
 - Initial RPM release
+* Wed Sep 10 2012 Linas Vepstas <linasvepstas@gmail.com>
+- Remove obviously obsolete packages, dependencies.

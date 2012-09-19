@@ -72,6 +72,9 @@ TARGET_LINK_LIBRARIES(cogserver
 
 # to ease testing/debugging modules on the source tree
 # IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+# XXX what is this shit?  The below is one wild and insane violation of everything that
+# cmake stands for ... why bother using cmake, if we are going to crap on every principle
+# of intelligent makefile design.  WTF. 
 IF (APPLE)
     # We should eventually do Apple builds with "packages"
     # Apple's linker seems not to understand a colon-separated list of
@@ -121,7 +124,7 @@ INSTALL (FILES
 	SystemActivityTable.h
 	Registry.h
 	Request.h
-    RequestResult.h
+	RequestResult.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h
 	DESTINATION "include/${PROJECT_NAME}/server"
