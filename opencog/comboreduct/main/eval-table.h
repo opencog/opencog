@@ -127,7 +127,7 @@ void read_eval_output_results(evalTableParameters& pa)
         table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
     else {
         table = loadTable(pa.input_table_file, pa.target_feature_str,
-                              pa.ignore_features_str);
+                          pa.ignore_features_str);
     }
 
     ITable& it = table.itable;
