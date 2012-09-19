@@ -83,6 +83,9 @@ std::vector<T> tokenizeRow(const std::string& line)
 //////////////////
 
 /// Read a table from an input stream.
+std::istream& istreamOTable(std::istream& in, OTable& tab,
+                            const std::string& target_feature);
+        
 std::istream& istreamITable(std::istream& in, ITable& tab,
                            const std::vector<std::string>& ignore_features);
 
@@ -93,8 +96,11 @@ std::istream& istreamTable(std::istream& in, Table& tab,
 /**
  * like above but read from file, and return an object Table.
  */
+OTable loadOTable(const std::string& file_name,
+                  const std::string& target_feature);
+        
 ITable loadITable(const std::string& file_name,
-                const std::vector<std::string>& ignore_features);
+                  const std::vector<std::string>& ignore_features);
 
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,

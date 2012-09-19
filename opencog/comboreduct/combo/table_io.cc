@@ -567,7 +567,7 @@ bool has_header(ITable& tab, vector<type_node> col_types)
  * infer the column types, and the presence of a header.
  */
 istream& istreamITable(istream& in, ITable& tab,
-                      const vector<string>& ignore_features)
+                       const vector<string>& ignore_features)
 {
     try {
         istreamRawITable(in, tab);
@@ -614,6 +614,29 @@ istream& istreamITable(istream& in, ITable& tab,
         });
 
     return in;
+}
+
+std::istream& istreamOTable(std::istream& in, OTable& tab,
+                            const std::string& target_feature)
+{
+    ITable itab;
+    const vector<string> empty_string_seq;
+    istreamITable(in, itab,    /// @todo it's expensive, could be optimized
+                  empty_string_seq);
+    OTable res(itab.get_column_data(target_feature), target_feature);
+    tab = res;
+    return in;
+}
+
+OTable loadOTable(const string& file_name, const string& target_feature)
+{
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+    
+    OTable res;
+    istreamOTable(in, res, target_feature);
+    return res;
 }
 
 ITable loadITable(const string& file_name,
