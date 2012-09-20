@@ -1,6 +1,6 @@
 #install header files
 INSTALL(FILES
-    optimization.h
+	optimization.h
 
 	DESTINATION
 

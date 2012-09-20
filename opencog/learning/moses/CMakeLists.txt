@@ -37,6 +37,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/scoring
 	moses/types
 	moses/using
+	optimization/optimization
 	representation/build_knobs
 	representation/field_set
 	representation/knob_mapper
