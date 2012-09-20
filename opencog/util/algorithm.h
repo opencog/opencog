@@ -288,6 +288,22 @@ template<typename Set> std::set<Set> powerset(const Set& s)
     return powerset(s, s.size());
 }
 
+/**
+ * Given a sequence of indexes, and a sequence of elements, return a
+ * sequence of all elements corresponding to the indexes (in the order
+ * of the indexes).
+ *
+ * Maybe boost offers something like that already but I can't find it.
+ */
+template<typename Indices, typename Seq>
+Seq seq_filtered(const Seq& seq, const Indices& indices) {
+    Seq res;
+    foreach(const auto& idx, indices)
+        res.push_back(seq[idx]);
+    return res;
+}
+ 
+    
 } //~namespace opencog
 
 #endif
