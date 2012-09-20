@@ -410,34 +410,7 @@ struct hill_climbing : optim_stats
                               deme_size_t num_to_make,
                               deme_size_t sample_start,
                               deme_size_t sample_size,
-                              const instance& base)
-    {
-        if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
-
-        // We need to access the high-scorers.
-        // We don't actually need them all sorted; we only need
-        // the highest-scoring num_to_make+1 to appear first, and
-        // after that, we don't care about the ordering.
-        // std::sort(next(deme.begin(), sample_start),
-        //          next(deme.begin(), sample_start + sample_size),
-        //          std::greater<scored_instance<composite_score> >());
-        std::partial_sort(next(deme.begin(), sample_start),
-                          next(deme.begin(), sample_start + num_to_make+1),
-                          next(deme.begin(), sample_start + sample_size),
-                          std::greater<scored_instance<composite_score> >());
-
-        deme.resize(deme_size + num_to_make);
-
-        const instance &reference = deme[sample_start].first;
-
-        // Skip the first entry; its the top scorer.
-        for (unsigned i = 0; i< num_to_make; i++) {
-            unsigned j = deme_size + i;
-            deme[j] = deme[sample_start + i + 1]; // +1 to skip the first one
-            deme.fields().merge_instance(deme[j], base, reference);
-        }
-        return num_to_make;
-    }
+                              const instance& base);
 
     /** two-dimensional simplex version of above. */
     deme_size_t cross_top_two(instance_set<composite_score>& deme,
@@ -445,38 +418,7 @@ struct hill_climbing : optim_stats
                               deme_size_t num_to_make,
                               deme_size_t sample_start,
                               deme_size_t sample_size,
-                              const instance& base)
-    {
-        // sample_size choose two.
-        unsigned max = sample_size * (sample_size-1) / 2;
-        if (max < num_to_make) num_to_make = max;
-
-        // std::sort(next(deme.begin(), sample_start),
-        //          next(deme.begin(), sample_start + sample_size),
-        //          std::greater<scored_instance<composite_score> >());
-        //
-        unsigned num_to_sort = sqrtf(2*num_to_make) + 3;
-        if (sample_size < num_to_sort) num_to_sort = sample_size;
-        std::partial_sort(next(deme.begin(), sample_start),
-                          next(deme.begin(), sample_start + num_to_sort),
-                          next(deme.begin(), sample_start + sample_size),
-                          std::greater<scored_instance<composite_score> >());
-
-        deme.resize(deme_size + num_to_make);
-
-        // Summation is over a 2-simplex
-        for (unsigned i = 1; i < sample_size; i++) {
-            const instance& reference = deme[sample_start+i].first;
-            for (unsigned j = 0; j < i; j++) {
-                unsigned n = i*(i-1)/2 + j;
-                if (num_to_make <= n) return num_to_make;
-                unsigned ntgt = deme_size + n;
-                deme[ntgt] = deme[sample_start + j];
-                deme.fields().merge_instance(deme[ntgt], base, reference);
-            }
-        }
-        return num_to_make;
-    }
+                              const instance& base);
 
     /** three-dimensional simplex version of above. */
     deme_size_t cross_top_three(instance_set<composite_score>& deme,
@@ -484,41 +426,7 @@ struct hill_climbing : optim_stats
                               deme_size_t num_to_make,
                               deme_size_t sample_start,
                               deme_size_t sample_size,
-                              const instance& base)
-    {
-        // sample_size choose three.
-        unsigned max = sample_size * (sample_size-1) * (sample_size-2) / 6;
-        if (max < num_to_make) num_to_make = max;
-
-        // std::sort(next(deme.begin(), sample_start),
-        //           next(deme.begin(), sample_start + sample_size),
-        //           std::greater<scored_instance<composite_score> >());
-
-        unsigned num_to_sort = cbrtf(6*num_to_make) + 3;
-        if (sample_size < num_to_sort) num_to_sort = sample_size;
-        std::partial_sort(next(deme.begin(), sample_start),
-                          next(deme.begin(), sample_start + num_to_make),
-                          next(deme.begin(), sample_start + sample_size),
-                          std::greater<scored_instance<composite_score> >());
-        deme.resize(deme_size + num_to_make);
-
-        // Summation is over a 3-simplex
-        for (unsigned i = 2; i < sample_size; i++) {
-            const instance& iref = deme[sample_start+i].first;
-            for (unsigned j = 1; j < i; j++) {
-                const instance& jref = deme[sample_start+j].first;
-                for (unsigned k = 0; k < i; k++) {
-                    unsigned n = i*(i-1)*(i-2)/6 + j*(j-1)/2 + k;
-                    if (num_to_make <= n) return num_to_make;
-                    unsigned ntgt = deme_size + n;
-                    deme[ntgt] = deme[sample_start + k];
-                    deme.fields().merge_instance(deme[ntgt], base, iref);
-                    deme.fields().merge_instance(deme[ntgt], base, jref);
-                }
-            }
-        }
-        return num_to_make;
-    }
+                              const instance& base);
 
     /**
      * Perform search of the local neighborhood of an instance.  The
