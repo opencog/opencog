@@ -14,6 +14,7 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/builtin_action
 	combo/convert_ann_combo
 	combo/definite_object
+	combo/descriptions
 	combo/enum_type
 	combo/eval
 	combo/indefinite_object
