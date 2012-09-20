@@ -109,13 +109,21 @@ public:
             res[seq_filtered(v.first, filter)] += v.second;
 
         // Filter the type tree
-        res.tt = tt;
-
-        pre_it head_it = res.tt.begin();
-        OC_ASSERT(*head_it == id::lambda_type);
-        OC_ASSERT((int)tt.number_of_children(head_it) == get_arity() + 1);
-        sib_it sib = head_it.begin();
-        foreach(arity_t a, filter) res.tt.erase(std::next(sib, a));
+        // copy head
+        pre_it head_src = tt.begin();
+        OC_ASSERT(*head_src == id::lambda_type);
+        OC_ASSERT((int)tt.number_of_children(head_src) == get_arity() + 1);
+        pre_it head_dst = res.tt.set_head(*head_src);
+        // copy filtered input types
+        sib_it sib_src = head_src.begin();
+        arity_t a_pre = 0;
+        foreach(arity_t a, filter) {
+            std::advance(sib_src, a - a_pre);
+            a_pre = a;
+            res.tt.replace(res.tt.append_child(head_dst), sib_src);
+        }
+        // copy output type
+        res.tt.replace(res.tt.append_child(head_dst), head_src.last_child());
 
         // return the filtered CTable
         return res;
