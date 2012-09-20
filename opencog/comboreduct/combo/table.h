@@ -30,6 +30,7 @@
 #include <boost/range/algorithm/transform.hpp>
 
 #include <opencog/util/Counter.h>
+#include <opencog/util/algorithm.h>
 
 #include "eval.h"   /* Needed for binding map, and then obsolete */
 #include "vertex.h"
