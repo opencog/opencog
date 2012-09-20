@@ -96,32 +96,21 @@ public:
         return res;
     }
 
-    /**
-     * Return a sequence retaining only the elements with indexes F.
-     * filter is a container containing all (ordered) idxs to filter
-     * in.  TODO: check whether boost offers already that
-     */
-    template<typename F, typename Seq>
-    Seq filtered(const F& filter, const Seq& seq) const {
-        Seq res;
-        foreach(arity_t a, filter) res.push_back(seq[a]);
-        return res;
-    }
-
     template<typename F>
     CTable filtered(const F& filter) const {
         typedef type_tree::iterator pre_it;
         typedef type_tree::sibling_iterator sib_it;
 
         // Filter the labels
-        CTable res(olabel, filtered(filter, ilabels));
+        CTable res(olabel, seq_filtered(ilabels, filter));
 
         // Filter the rows
         foreach(const CTable::value_type v, *this)
-            res[filtered(filter, v.first)] += v.second;
+            res[seq_filtered(v.first, filter)] += v.second;
 
         // Filter the type tree
         res.tt = tt;
+
         pre_it head_it = res.tt.begin();
         OC_ASSERT(*head_it == id::lambda_type);
         OC_ASSERT((int)tt.number_of_children(head_it) == get_arity() + 1);
@@ -242,18 +231,6 @@ public:
      */
     vertex_seq get_column_data(const std::string& name) const;
 
-    // like get_labels but filtered accordingly to a container of
-    // arity_t. Each value of that container corresponds to the column
-    // index of the ITable (starting from 0).
-    template<typename F>
-    string_seq get_filtered_labels(const F& filter) const
-    {
-        string_seq res;
-        foreach(arity_t a, filter)
-            res.push_back(get_labels()[a]);
-        return res;
-    }
-
     /// return a copy of the input table filtered according to a given
     /// container of arity_t. Each value of that container corresponds
     /// to the column index of the ITable (starting from 0).
@@ -261,7 +238,14 @@ public:
     ITable filtered(const F& filter) const
     {
         ITable res;
-        res.set_labels(get_filtered_labels(filter));
+
+        // filter labels
+        res.set_labels(seq_filtered(get_labels(), filter));
+
+        // filter types
+        res.set_types(seq_filtered(get_types(), filter));
+
+        // filter content
         foreach(const value_type& row, *this) {
             vertex_seq new_row;
             foreach(arity_t a, filter)
@@ -381,11 +365,21 @@ struct Table
     // Filter according to a container of arity_t. Each value of that
     // container corresponds to the column index of the ITable
     // (starting from 0).
-    // TODO take care of tt
     template<typename F> Table filtered(const F& f) const {
         Table res;
+
+        // filter input table
         res.itable = itable.filtered(f);
+
+        // set output table
         res.otable = otable;
+
+        // set type tree
+        type_tree::iterator head = res.tt.set_head(id::lambda_type);
+        foreach(type_node tn, res.itable.get_types())
+            res.tt.append_child(head, tn);
+        res.tt.append_child(head, otable.get_type());
+            
         return res;
     }
 
