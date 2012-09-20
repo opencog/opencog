@@ -385,60 +385,16 @@ struct logical_subtree_knob : public discrete_knob<3>
         return field_set::disc_spec(multiplicity());
     }
 
-    std::string toStr() const
-    {
-        std::stringstream ss;
-        ss << "[";
-        for(int i = 0; i < multiplicity(); ++i)
-            ss << posStr(map_idx(i)) << (i < multiplicity()-1? " " : "");
-        ss << "]";
-        return ss.str();
-    }
-
+    std::string toStr() const;
 private:
     // return << *_loc or << *_loc.begin() if it is null_vertex
     // if *_loc is a negative literal returns !$n
     // if negated is true a copy of the literal is negated before being printed
-    std::string locStr(bool negated = false) const
-    {
-        OC_ASSERT(*_loc != id::null_vertex || _loc.has_one_child(),
-                  "if _loc is null_vertex then it must have only one child");
-        std::stringstream ss;
-        combo_tree::iterator it;
-        if (*_loc == id::null_vertex)
-            it = _loc.begin();
-        else it = _loc;
-        if (is_argument(*it)) {
-            argument arg = get_argument(*it);
-            if (negated) arg.negate();
-            ostream_abbreviate_literal(ss, arg);
-        } else {
-            ss << (negated? "!" : "") << *it;
-        }
-        return ss.str();
-    }
+    std::string locStr(bool negated = false) const;
 
     // Return the name of the position, if it is the current one and
     // tag_current is true then the name is put in parenthesis.
-    std::string posStr(int pos, bool tag_current = false) const
-    {
-        std::stringstream ss;
-        switch (pos) {
-        case absent:
-            ss << "nil";
-            break;
-        case present:
-            ss << locStr();
-            break;
-        case negated:
-            ss << locStr(true);
-            break;
-        default:
-            ss << "INVALID SETTING";
-        }
-        return pos == _current && tag_current?
-            std::string("(") + ss.str() + ")" : ss.str();
-    }
+    std::string posStr(int pos, bool tag_current = false) const;
 };
 
 #define MAX_PERM_ACTIONS 128
