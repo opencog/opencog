@@ -254,13 +254,22 @@ struct eda_parameters
     double model_complexity;
 };
 
-struct univariate_optimization : optim_stats
+// Base class for all optimizers
+struct optimizer_base : optim_stats
+{
+    // Return # of evaluations actually performed
+    virtual unsigned operator()(instance_set<composite_score>& deme,
+                        const iscorer_base& iscorer, unsigned max_evals) = 0;
+
+};
+
+struct univariate_optimization : optimizer_base
 {
     univariate_optimization(const optim_parameters& op = optim_parameters(),
                             const eda_parameters& ep = eda_parameters())
         : opt_params(op), eda_params(ep) {}
 
-    //return # of evaluations actually performed
+    // Return # of evaluations actually performed
     unsigned operator()(instance_set<composite_score>& deme,
                         const iscorer_base& iscorer, unsigned max_evals);
 
@@ -312,7 +321,7 @@ struct univariate_optimization : optim_stats
  * with a deceptive scoring function (e.g. polynomial factoring, -Hsr)
  * seem to work better with -L1 -T1 -I0.
  */
-struct hill_climbing : optim_stats
+struct hill_climbing : optimizer_base
 {
     hill_climbing(const optim_parameters& op = optim_parameters())
         : opt_params(op)
@@ -450,7 +459,7 @@ struct sa_parameters
  * c) Goto step a).
  * but that's NOT AT ALL what this algo does.
  */
-struct simulated_annealing : optim_stats
+struct simulated_annealing : optimizer_base
 {
     typedef score_t energy_t;
 
