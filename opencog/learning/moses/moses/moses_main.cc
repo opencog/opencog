@@ -74,6 +74,20 @@ void print_stats_header (optim_stats *os)
     }
 }
 
+void run_moses(metapopulation& metapop,
+               const moses_parameters& moses_params,
+               moses_statistics& stats)
+{
+    // Run moses, either on localhost, or distributed.
+    if (moses_params.local)
+        local_moses(metapop, moses_params, stats);
+    else if (moses_params.mpi)
+        mpi_moses(metapop, moses_params, stats);
+    else
+        distributed_moses(metapop, moses_params, stats);
+}
+
+
 } // ~namespace moses
 } // ~namespace opencog
 

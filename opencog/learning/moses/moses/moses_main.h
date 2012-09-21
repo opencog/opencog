@@ -53,18 +53,9 @@ typedef bscore_based_cscore<bscore_base> cscorer_t;
 /**
  * Run moses
  */
-static inline void run_moses(metapopulation& metapop,
+void run_moses(metapopulation& metapop,
                const moses_parameters& moses_params,
-               moses_statistics& stats)
-{
-    // Run moses, either on localhost, or distributed.
-    if (moses_params.local)
-        local_moses(metapop, moses_params, stats);
-    else if (moses_params.mpi)
-        mpi_moses(metapop, moses_params, stats);
-    else
-        distributed_moses(metapop, moses_params, stats);
-}
+               moses_statistics& stats);
 
 /// Print metapopulation results to stdout, logfile, etc.
 struct metapop_printer
@@ -217,33 +208,16 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              Printer& printer)
 {
     moses_statistics stats;
+    optimizer_base *optimizer = NULL;
 
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
-        hill_climbing climber(opt_params);
-
-        metapopulation
-            metapop(bases, tt, si_ca, si_kb, sc, bsc, climber, meta_params);
-
-        run_moses(metapop, moses_params, stats);
-        printer(metapop, stats);
+        optimizer = new hill_climbing(opt_params);
     }
     else if (opt_params.opt_algo == sa) { // simulated annealing
-        simulated_annealing annealer(opt_params);
-
-        metapopulation
-            metapop(bases, tt, si_ca, si_kb, sc, bsc, annealer, meta_params);
-
-        run_moses(metapop, moses_params, stats);
-        printer(metapop, stats);
+        optimizer = new simulated_annealing(opt_params);
     }
     else if (opt_params.opt_algo == un) { // univariate
-        univariate_optimization unopt(opt_params);
-
-        metapopulation
-            metapop(bases, tt, si_ca, si_kb, sc, bsc, unopt, meta_params);
-
-        run_moses(metapop, moses_params, stats);
-        printer(metapop, stats);
+        optimizer = new univariate_optimization(opt_params);
     }
     else {
         std::cerr << "Unknown optimization algo " << opt_params.opt_algo
@@ -252,6 +226,13 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                   << std::endl;
         exit(1);
     }
+
+    metapopulation metapop(bases, tt, si_ca, si_kb, sc, bsc,
+                           *optimizer, meta_params);
+
+    run_moses(metapop, moses_params, stats);
+    printer(metapop, stats);
+    delete optimizer;
 }
 
 /**
