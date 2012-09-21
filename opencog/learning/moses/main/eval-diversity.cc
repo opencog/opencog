@@ -28,7 +28,6 @@
 #include <boost/program_options.hpp>
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/util/iostreamContainer.h>
 #include <opencog/comboreduct/combo/table_io.h>
 #include <opencog/learning/moses/moses/types.h>
 

@@ -32,6 +32,8 @@
 
 #include <opencog/util/iostreamContainer.h>
 
+namespace opencog { namespace moses {
+
 using namespace boost::accumulators;
 
 // structure holding the options
@@ -72,3 +74,7 @@ Out& ostream_results(Out& out, const eval_diversity_params& edp,
     }
     return out;
 }
+
+} // ~namespace moses
+} // ~namespace opencog
+
