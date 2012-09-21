@@ -25,25 +25,11 @@
 #ifndef _OPENCOG_METAPOPULATION_H
 #define _OPENCOG_METAPOPULATION_H
 
-#include <future>
 #include <atomic>
 #include <mutex>
-#include <memory>
-#include <math.h>
 
 #include <boost/unordered_set.hpp>
 #include <boost/logic/tribool.hpp>
-#include <boost/range/algorithm/sort.hpp>
-#include <boost/range/algorithm/for_each.hpp>
-#include <boost/range/algorithm/set_algorithm.hpp>
-#include <boost/range/algorithm/find_if.hpp>
-
-#include <opencog/util/selection.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/functional.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/combo/combo.h>
 #include <opencog/comboreduct/reduct/reduct.h>
@@ -51,7 +37,6 @@
 #include "../representation/instance_set.h"
 #include "../representation/representation.h"
 #include "feature_selector.h"
-// #include "mpi_moses.h"
 #include "scoring.h"
 #include "types.h"
 

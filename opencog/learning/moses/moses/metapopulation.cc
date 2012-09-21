@@ -21,6 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
+#include <future>
+
+#include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/find_if.hpp>
+
+#include <opencog/util/oc_omp.h>
+
 #include "metapopulation.h"
 
 namespace opencog {
