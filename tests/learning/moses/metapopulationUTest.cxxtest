@@ -36,7 +36,7 @@ using namespace reduct;
 using namespace moses;
 
 // For testing only
-struct dummy_cscore : public unary_function<combo_tree, composite_score>
+struct dummy_cscore : public cscore_base
 {
     composite_score operator()(const combo_tree& tr) const {
         return composite_score(0,0,0);
@@ -44,9 +44,15 @@ struct dummy_cscore : public unary_function<combo_tree, composite_score>
 };
 
 // For testing only
-struct dummy_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+struct dummy_bscore : public bscore_base
 {
     penalized_behavioral_score operator()(const combo_tree& tr) const
+    {
+        penalized_behavioral_score pbs;
+        pbs.second = 0;
+        return pbs;
+    }
+    behavioral_score best_possible_bscore() const
     {
         penalized_behavioral_score pbs;
         pbs.second = 0;
@@ -59,9 +65,7 @@ struct dummy_optimization {
 
 
 class metapopulationUTest : public CxxTest::TestSuite {
-    typedef metapopulation<dummy_cscore,
-                           dummy_bscore,
-                           dummy_optimization> metapopulation_t;
+    typedef metapopulation<dummy_optimization> metapopulation_t;
     dummy_cscore _dcsc;
     dummy_bscore _dbsc;
     vertex_set ignore_ops;
@@ -176,7 +180,7 @@ public:
         combo_tree tr2(2.0);
         bscored_combo_tree bct2(tr2, cbs2);
         bcs2.insert(bct2);
-        typedef metapopulation<dummy_cscore, dummy_bscore, dummy_optimization>
+        typedef metapopulation<dummy_optimization>
             metapopulation_t;
 
         metapopulation_t::bscored_combo_tree_set_pair res_p =

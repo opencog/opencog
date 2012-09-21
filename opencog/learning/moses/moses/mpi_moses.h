@@ -86,8 +86,8 @@ class moses_mpi_comm
 /// This is mono-threaded: i.e. both the send and receive happen
 /// within the main thread.
 //
-template<typename Scoring, typename BScoring, typename Optimization>
-void mpi_moses_worker(metapopulation<Scoring, BScoring, Optimization>& mp,
+template<typename Optimization>
+void mpi_moses_worker(metapopulation<Optimization>& mp,
                       moses_mpi_comm& mompi)
 {
     optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
@@ -193,8 +193,8 @@ private:
 /// than writing a home-grown dispatcher loop that the mono-threaed
 /// version (below) needs.
 ///
-template<typename Scoring, typename BScoring, typename Optimization>
-void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+template<typename Optimization>
+void mpi_moses(metapopulation<Optimization>& mp,
                const moses_parameters& pa,
                moses_statistics& stats)
 {
@@ -314,8 +314,8 @@ theend:
 /// communications API, it might be possible to consolidate both.
 /// Not clear if such a consolidation is worth-while...
 //
-template<typename Scoring, typename BScoring, typename Optimization>
-void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+template<typename Optimization>
+void mpi_moses(metapopulation<Optimization>& mp,
                const moses_parameters& pa,
                moses_statistics& stats)
 
@@ -466,8 +466,8 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
 #else // HAVE_MPI
 
-template<typename Scoring, typename BScoring, typename Optimization>
-void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+template<typename Optimization>
+void mpi_moses(metapopulation<Optimization>& mp,
                const moses_parameters& pa,
                moses_statistics& stats)
 {

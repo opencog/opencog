@@ -55,8 +55,8 @@ class partial_solver
         /// This gives us an opportunity to get our hands on the best
         /// exemplars that moses found, so that we can see if they are
         /// "good enough".
-        template<typename Score, typename BScore, typename Optimization>
-        void operator()(metapopulation<Score, BScore, Optimization> &metapop,
+        template<typename Optimization>
+        void operator()(metapopulation<Optimization> &metapop,
                         moses_statistics& stats)
         {
             _num_evals = stats.n_evals;

@@ -150,8 +150,7 @@ void moses_learning::operator()()
         if (metapop)
             delete metapop;
 
-        metapop = new metapopulation<petaverse_cscore, petaverse_bscore,
-                                     hill_climbing>
+        metapop = new metapopulation<hill_climbing>
             (_center, tt, action_reduction(),
              *cscore, *bscore, *climber, *_metaparms);
 

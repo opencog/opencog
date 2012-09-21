@@ -43,8 +43,6 @@ using namespace std;
 
 struct interactive_cscore : public cscore_base
 {
-    interactive_cscore() {  }
-
     composite_score operator()(const combo_tree& tr) const
     {
         cout << "Fitness Function of : " << tr << " enter the score :" << endl;
@@ -54,13 +52,16 @@ struct interactive_cscore : public cscore_base
     }
 };
 
-struct interactive_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+struct interactive_bscore : public bscore_base
 {
-    interactive_bscore() {  }
-
     result_type  operator()(const combo_tree& tr) const
     {
         result_type pbs;
+        return pbs;
+    }
+    behavioral_score best_possible_bscore() const
+    {
+        penalized_behavioral_score pbs;
         return pbs;
     }
 };
@@ -100,7 +101,7 @@ int main(int argc, char** argv)
     metaparms.perceptions = &perceptions;
     metaparms.actions = &actions;
 
-    metapopulation<interactive_cscore, interactive_bscore, hill_climbing>
+    metapopulation<hill_climbing>
         metapop(combo_tree(id::sequential_and), tt, action_reduction(),
                 cscorer, bscorer, climber, metaparms);
 

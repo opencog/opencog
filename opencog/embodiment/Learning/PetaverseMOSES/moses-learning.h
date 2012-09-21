@@ -113,7 +113,7 @@ private:
 
     const score_t max_score;
 
-    typedef metapopulation<petaverse_cscore, petaverse_bscore, hill_climbing> metapop_t;
+    typedef metapopulation<hill_climbing> metapop_t;
     metapop_t *metapop;
     moses_statistics stats;
 };
@@ -148,7 +148,7 @@ private:
 // @todo: this is not a good behavioral score, it should rather be
 // such that each feature correspond to the dissimilarity of an action
 // in the action sequence to imitate
-struct petaverse_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+struct petaverse_bscore : public bscore_base
 {
     petaverse_bscore(const FE& fitnessEstimator)
             : _fitnessEstimator(fitnessEstimator) {}
@@ -161,6 +161,14 @@ struct petaverse_bscore : public unary_function<combo_tree, penalized_behavioral
         penalized_behavioral_score pbs;
         pbs.first[0] = _fitnessEstimator(tr);
         pbs.second = tr.size();
+        return pbs;
+    }
+
+    behavioral_score best_possible_bscore() const
+    {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = 0;
+        pbs.second = 0;
         return pbs;
     }
 

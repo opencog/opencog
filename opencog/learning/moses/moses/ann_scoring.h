@@ -251,7 +251,6 @@ namespace opencog { namespace moses {
 
 struct ann_pole2nv_cscore : public cscore_base
 {
-    ann_pole2nv_cscore() { }
     composite_score operator()(const combo_tree& tr) const
     {
         complexity_t cpxy = tr.size();
@@ -260,10 +259,8 @@ struct ann_pole2nv_cscore : public cscore_base
     AnnPole2NVFitnessFunction p2ff;
 };
 
-struct ann_pole2nv_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+struct ann_pole2nv_bscore : public bscore_base
 {
-    ann_pole2nv_bscore( ) { }
-    
     result_type operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_pole2nv_cscore()(tr));
@@ -273,11 +270,17 @@ struct ann_pole2nv_bscore : public unary_function<combo_tree, penalized_behavior
         pbs.second = get_penalty(cs);
         return pbs;
     }
+    behavioral_score best_possible_bscore() const
+    {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = 0;
+        pbs.second = 0;
+        return pbs;
+    }
 };
 
 struct ann_pole2_cscore : public cscore_base
 {
-    ann_pole2_cscore() { }
     result_type operator()(const combo_tree& tr) const
     {
         complexity_t sz = tr.size();
@@ -286,10 +289,8 @@ struct ann_pole2_cscore : public cscore_base
     AnnPole2FitnessFunction p2ff;
 };
 
-struct ann_pole2_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+struct ann_pole2_bscore : public bscore_base
 {
-    ann_pole2_bscore( ) { }
-
     result_type operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_pole2_cscore()(tr));
@@ -299,11 +300,17 @@ struct ann_pole2_bscore : public unary_function<combo_tree, penalized_behavioral
         pbs.second = get_penalty(cs);
         return pbs;
     }
+    behavioral_score best_possible_bscore() const
+    {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = 0;
+        pbs.second = 0;
+        return pbs;
+    }
 };
 
 struct ann_pole_cscore  : public cscore_base
 {
-    ann_pole_cscore() { }
     composite_score operator()(const combo_tree& tr) const
     {
         complexity_t cpxy = tr.size();
@@ -312,10 +319,8 @@ struct ann_pole_cscore  : public cscore_base
     AnnPoleFitnessFunction pff;
 };
 
-struct ann_pole_bscore : public unary_function<combo_tree, penalized_behavioral_score>
+struct ann_pole_bscore : public bscore_base
 {
-    ann_pole_bscore( ) { }
-
     penalized_behavioral_score operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_pole_cscore()(tr));
@@ -323,6 +328,13 @@ struct ann_pole_bscore : public unary_function<combo_tree, penalized_behavioral_
         penalized_behavioral_score pbs;
         pbs.first[0] = get_score(cs);
         pbs.second = get_penalty(cs);
+        return pbs;
+    }
+    behavioral_score best_possible_bscore() const
+    {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = 0;
+        pbs.second = 0;
         return pbs;
     }
 };
@@ -340,9 +352,8 @@ struct ann_cscore  : public cscore_base
     AnnFitnessFunction aff;
 };
 
-struct ann_bscore : public unary_function<combo_tree, penalized_behavioral_score> {
-    ann_bscore( ) { }
-
+struct ann_bscore : public bscore_base
+{
     penalized_behavioral_score operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_cscore()(tr));
@@ -350,6 +361,13 @@ struct ann_bscore : public unary_function<combo_tree, penalized_behavioral_score
         penalized_behavioral_score pbs;
         pbs.first[0] = get_score(cs);
         pbs.second = get_penalty(cs);
+        return pbs;
+    }
+    behavioral_score best_possible_bscore() const
+    {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = 0;
+        pbs.second = 0;
         return pbs;
     }
 };

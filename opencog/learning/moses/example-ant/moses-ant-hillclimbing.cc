@@ -80,7 +80,7 @@ int main(int argc,char** argv)
   metaparms.actions = &actions;
 
   hill_climbing hc;
-  metapopulation<ant_score, ant_bscore, hill_climbing> 
+  metapopulation<hill_climbing> 
       metapop(combo_tree(id::sequential_and), tt, action_reduction(),
               scorer, bscorer, hc, metaparms);
   

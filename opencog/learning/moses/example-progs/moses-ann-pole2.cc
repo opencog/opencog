@@ -81,7 +81,7 @@ int main(int argc, char** argv)
     ann_pole2_bscore p2_bscore; 
 
     univariate_optimization univ;
-    metapopulation<ann_pole2_cscore, ann_pole2_bscore, univariate_optimization>
+    metapopulation<univariate_optimization>
         metapop_pole2(tr, tt, *si, p2_cscore, p2_bscore, univ);
 
     moses_parameters pa;

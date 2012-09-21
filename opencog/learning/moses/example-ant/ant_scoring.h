@@ -228,18 +228,27 @@ struct ant_score : public cscore_base
     composite_score operator()(const combo_tree& tr) const {
         return composite_score (-1000 + aff(tr), 0, 0);
     }
+private:
     AntFitnessFunction aff;
 };
 
 // @todo: it is probability not a good behavioral_score
-struct ant_bscore : public unary_function<combo_tree, penalized_behavioral_score> {
-    ant_bscore( ) { }
-
-    penalized_behavioral_score operator()(const combo_tree& tr) const {
+struct ant_bscore : public bscore_base
+{
+    penalized_behavioral_score operator()(const combo_tree& tr) const
+    {
         penalized_behavioral_score pbs;
         pbs.first[0] = get_score(ant_score()(tr));
         pbs.second = tr.size();
 
+        return pbs;
+    }
+
+    behavioral_score best_possible_bscore() const
+    {
+        penalized_behavioral_score pbs;
+        pbs.first[0] = 0;
+        pbs.second = 0;
         return pbs;
     }
 };

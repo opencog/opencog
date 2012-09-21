@@ -53,8 +53,8 @@ typedef bscore_based_cscore<bscore_base> cscorer_t;
 /**
  * Run moses
  */
-template<typename Score, typename BScore, typename Optimization>
-void run_moses(metapopulation<Score, BScore, Optimization> &metapop,
+template<typename Optimization>
+void run_moses(metapopulation<Optimization> &metapop,
                const moses_parameters& moses_params = moses_parameters(),
                moses_statistics& stats = moses_statistics())
 {
@@ -95,8 +95,8 @@ struct metapop_printer
     /**
      * Print metapopulation summary.
      */
-    template<typename Score, typename BScore, typename Optimization>
-    void operator()(metapopulation<Score, BScore, Optimization> &metapop,
+    template<typename Optimization>
+    void operator()(metapopulation<Optimization> &metapop,
                    moses_statistics& stats) const
     {
         // We expect the mpi worker processes to have an empty
@@ -223,7 +223,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
 
-        metapopulation<cscore_base, bscore_base, hill_climbing>
+        metapopulation<hill_climbing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, climber, meta_params);
 
         run_moses(metapop, moses_params, stats);
@@ -232,7 +232,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     else if (opt_params.opt_algo == sa) { // simulated annealing
         simulated_annealing annealer(opt_params);
 
-        metapopulation<cscore_base, bscore_base, simulated_annealing>
+        metapopulation<simulated_annealing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, annealer, meta_params);
 
         run_moses(metapop, moses_params, stats);
@@ -241,7 +241,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     else if (opt_params.opt_algo == un) { // univariate
         univariate_optimization unopt(opt_params);
 
-        metapopulation<cscore_base, bscore_base, univariate_optimization>
+        metapopulation<univariate_optimization>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, unopt, meta_params);
 
         run_moses(metapop, moses_params, stats);

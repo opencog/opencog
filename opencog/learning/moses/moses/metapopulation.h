@@ -166,7 +166,7 @@ struct metapop_parameters
 
 void print_stats_header (optim_stats *os);
 
-template<typename CScoring, typename Optimization>
+template<typename Optimization>
 struct deme_expander
 {
     typedef instance_set<composite_score> deme_t;
@@ -176,7 +176,7 @@ struct deme_expander
     deme_expander(const type_tree& type_signature,
                   const reduct::rule& si_ca,
                   const reduct::rule& si_kb,
-                  const CScoring& sc,
+                  const cscore_base& sc,
                   Optimization& opt = Optimization(),
                   const metapop_parameters& pa = metapop_parameters()) :
         _rep(NULL), _deme(NULL),
@@ -294,8 +294,8 @@ struct deme_expander
                << max_evals;
         }
 
-        complexity_based_scorer<CScoring> cpx_scorer =
-            complexity_based_scorer<CScoring>(_cscorer, *_rep, _params.reduce_all);
+        complexity_based_scorer<cscore_base> cpx_scorer =
+            complexity_based_scorer<cscore_base>(_cscorer, *_rep, _params.reduce_all);
         return _optimize(*_deme, cpx_scorer, max_evals);
     }
 
@@ -316,7 +316,7 @@ protected:
     const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule& simplify_candidate; // to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
-    const CScoring& _cscorer; // composite score
+    const cscore_base& _cscorer; // composite score
     metapop_parameters _params;
 
     // exemplar of the current deme; a copy, not a reference.
@@ -334,13 +334,13 @@ protected:
  * of the deme are then folded back into the metapopulation.
  *
  * NOTE:
- *   CScoring = scoring function (output composite scores)
- *   BScoring = behavioral scoring function (output behaviors)
+ *   cscore_base = scoring function (output composite scores)
+ *   bscore_base = behavioral scoring function (output behaviors)
  */
-template<typename CScoring, typename BScoring, typename Optimization>
+template<typename Optimization>
 struct metapopulation : bscored_combo_tree_ptr_set
 {
-    typedef metapopulation<CScoring, BScoring, Optimization> self;
+    typedef metapopulation<Optimization> self;
     typedef bscored_combo_tree_set super;
     typedef super::value_type value_type;
     typedef instance_set<composite_score> deme_t;
@@ -355,7 +355,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars,
               const reduct::rule& simplify_candidate,
-              const CScoring& cscorer)
+              const cscore_base& cscorer)
     {
         metapop_candidates candidates;
         foreach (const combo_tree& base, exemplars) {
@@ -397,8 +397,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
                    const type_tree& type_signature,
                    const reduct::rule& si_ca,
                    const reduct::rule& si_kb,
-                   const CScoring& sc,
-                   const BScoring& bsc,
+                   const cscore_base& sc,
+                   const bscore_base& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         _dex(type_signature, si_ca, si_kb, sc, opt, pa),
@@ -417,7 +417,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
     metapopulation(const combo_tree& base,
                    const type_tree& type_signature,
                    const reduct::rule& si,
-                   const CScoring& sc, const BScoring& bsc,
+                   const cscore_base& sc, const bscore_base& bsc,
                    Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         _dex(type_signature, si, si, sc, opt, pa),
@@ -1535,12 +1535,12 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 output_bscore, output_only_bests);
     }
 
-    deme_expander<CScoring, Optimization> _dex;
+    deme_expander<Optimization> _dex;
 
 protected:
     static const unsigned min_pool_size = 250;
     
-    const BScoring& _bscorer; // behavioral score
+    const bscore_base& _bscorer; // behavioral score
     metapop_parameters params;
 
     size_t _merge_count;

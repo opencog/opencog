@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     ann_pole2_bscore p2_bscore;
 
     hill_climbing hc;
-    metapopulation<ann_pole2_cscore, ann_pole2_bscore, hill_climbing>
+    metapopulation<hill_climbing>
         metapop_pole2(tr, tt, clean_reduction(),
                       p2_cscore, p2_bscore, hc);
 

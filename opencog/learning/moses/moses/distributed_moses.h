@@ -160,8 +160,8 @@ bool all_resources_free(const host_proc_map& hpm);
  *
  * @param mp          the metapopulation 
  */
-template<typename Scoring, typename BScoring, typename Optimization>
-void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
+template<typename Optimization>
+void distributed_moses(metapopulation<Optimization>& mp,
                        const moses_parameters& pa,
                        moses_statistics& stats)
 {
