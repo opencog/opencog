@@ -193,7 +193,7 @@ struct bscore_based_cscore : public cscore_base
 template<typename BScorer>
 struct multibscore_based_bscore : public bscore_base
 {
-    typedef boost::ptr_vector<BScorer> BScorerSeq;
+    typedef std::vector<bscore_base*> BScorerSeq;
 
     // ctors
     multibscore_based_bscore(const BScorerSeq& bscorers_) : bscorers(bscorers_) {}
@@ -202,8 +202,8 @@ struct multibscore_based_bscore : public bscore_base
     penalized_behavioral_score operator()(const combo_tree& tr) const
     {
         penalized_behavioral_score pbs;
-        foreach(const BScorer& bsc, bscorers) {
-            penalized_behavioral_score apbs = bsc(tr);
+        foreach(const bscore_base* bsc, bscorers) {
+            penalized_behavioral_score apbs = bsc->operator()(tr);
             boost::push_back(pbs.first, apbs.first);
             pbs.second += apbs.second;
         }
@@ -213,8 +213,8 @@ struct multibscore_based_bscore : public bscore_base
     behavioral_score best_possible_bscore() const
     {
         penalized_behavioral_score pbs;
-        foreach(const BScorer& bsc, bscorers) {
-            boost::push_back(pbs.first, bsc.best_possible_bscore());
+        foreach(const bscore_base* bsc, bscorers) {
+            boost::push_back(pbs.first, bsc->best_possible_bscore());
         }
         return pbs;
     }
@@ -225,16 +225,17 @@ struct multibscore_based_bscore : public bscore_base
         /// @todo can be turned in to 1-line with boost::min_element
         // boost::min_element(bscorers | boost::transformed(/*)
         score_t res = best_score;
-        foreach(const BScorer& bs, bscorers)
-            res = min(res, bs.min_improv());
+        foreach(const bscore_base* bs, bscorers)
+            res = min(res, bs->min_improv());
         return res;
     }
 
     void ignore_idxs(std::set<arity_t>& idxs) const {
-        foreach(const BScorer& bs, bscorers)
-            bs.ignore_idxs(idxs);
+        foreach(const bscore_base* bs, bscorers)
+            bs->ignore_idxs(idxs);
     }
 
+private:
     BScorerSeq bscorers;
 };
 

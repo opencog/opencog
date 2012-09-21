@@ -1338,7 +1338,7 @@ int moses_exec(int argc, char** argv)
         type_tree(OUT_TYPE));                                    \
     int as = alphabet_size(cand_sig, ignore_ops);                \
     typedef SCORER BScore;                                       \
-    boost::ptr_vector<BScore> bscores;                           \
+    vector<bscore_base*> bscores;                                \
     foreach(const auto& table, TABLES) {                         \
         BScore* r = new BScore ARGS ;                            \
         set_noise_or_ratio(*r, as, noise, complexity_ratio);     \
@@ -1364,7 +1364,7 @@ int moses_exec(int argc, char** argv)
                     type_tree(id::boolean_type));
                 int as = alphabet_size(cand_sig, ignore_ops);
                 typedef precision_bscore BScore;
-                boost::ptr_vector<BScore> bscores;
+                vector<bscore_base *> bscores;
                 foreach(const CTable& ctable, ctables) {
                     BScore* r = new BScore(ctable,
                                            fabs(hardness),
@@ -1410,7 +1410,7 @@ int moses_exec(int argc, char** argv)
                     type_tree(id::boolean_type));
                 int as = alphabet_size(cand_sig, ignore_ops);
                 typedef precision_conj_bscore BScore;
-                boost::ptr_vector<BScore> bscores;
+                vector<bscore_base*> bscores;
                 foreach(const CTable& ctable, ctables) {
                     BScore* r = new BScore(ctable,
                                            fabs(hardness),
@@ -1554,7 +1554,7 @@ int moses_exec(int argc, char** argv)
             int as = alphabet_size(tt, ignore_ops);
 
             typedef interesting_predicate_bscore BScore;
-            boost::ptr_vector<BScore> bscores;
+            vector<bscore_base*> bscores;
             foreach(const CTable& ctable, ctables) {
                 BScore *r = new BScore(ctable,
                                        ip_kld_weight,

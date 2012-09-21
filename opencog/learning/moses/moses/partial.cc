@@ -58,6 +58,10 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
 
 partial_solver::~partial_solver()
 {
+    foreach (bscore_base* sc, score_seq)
+        delete sc;
+    foreach (bscore_base* sc, straight_score_seq)
+        delete sc;
     delete _bscore;
     delete _straight_bscore;
 }
@@ -71,8 +75,6 @@ void partial_solver::solve()
     unsigned tab_sz = 0;
     score_seq.clear();
     foreach(const CTable& ctable, _ctables) {
-        // FYI, no mem-leak, as ptr_vector seems to call delete.
-        // XXX??? That's just weird/wrong -- double check this.
         score_seq.push_back(new BScore(ctable));
 
         tab_sz += ctable.uncompressed_size();
@@ -180,11 +182,9 @@ void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
     // This time, use the non-graded (flat) scorer, that simply counts
     // the number of right & wrong, without weighting.
     straight_score_seq.clear();
-    foreach(const CTable& ctable, _orig_ctables) {
-        // FYI, no mem-leak, as ptr_vector seems to call delete.
-        // XXX !?!?! relly?  as we've got a lifetime problem here.
+    foreach(const CTable& ctable, _orig_ctables)
         straight_score_seq.push_back(new StraightBScore(ctable));
-    }
+
     _straight_bscore = new multibscore_based_bscore<StraightBScore>(straight_score_seq);
 }
 
@@ -345,11 +345,9 @@ void partial_solver::record_prefix()
 
     // Redo the scoring tables, as they cache the score tables (why?)
     score_seq.clear();
-    foreach(const CTable& ctable, _ctables) {
-        // FYI, no mem-leak, as ptr_vector seems to call delete.
-        // XXX !?!?! relly?  as we've got a lifetime problem here.
+    foreach(const CTable& ctable, _ctables)
         score_seq.push_back(new BScore(ctable));
-    }
+
     delete _bscore;
     _bscore = new multibscore_based_bscore<BScore>(score_seq);
 }
