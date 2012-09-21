@@ -58,8 +58,7 @@ int main(int argc, char** argv)
     ann_pole2nv_cscore p2_cscore;
     ann_pole2nv_bscore p2_bscore; 
     univariate_optimization univ;
-    metapopulation<univariate_optimization>
-        metapop_pole2(tr, tt, *si, p2_cscore, p2_bscore, univ);
+    metapopulation metapop_pole2(tr, tt, *si, p2_cscore, p2_bscore, univ);
 
     boost::program_options::variables_map vm;
     jobs_t jobs;

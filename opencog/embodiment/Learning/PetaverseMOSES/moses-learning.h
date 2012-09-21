@@ -113,8 +113,7 @@ private:
 
     const score_t max_score;
 
-    typedef metapopulation<hill_climbing> metapop_t;
-    metapop_t *metapop;
+    metapopulation *metapop;
     moses_statistics stats;
 };
 

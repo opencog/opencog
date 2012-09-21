@@ -166,7 +166,6 @@ struct metapop_parameters
 
 void print_stats_header (optim_stats *os);
 
-template<typename Optimization>
 struct deme_expander
 {
     typedef instance_set<composite_score> deme_t;
@@ -177,7 +176,7 @@ struct deme_expander
                   const reduct::rule& si_ca,
                   const reduct::rule& si_kb,
                   const cscore_base& sc,
-                  Optimization& opt = Optimization(),
+                  optimizer_base& opt,
                   const metapop_parameters& pa = metapop_parameters()) :
         _rep(NULL), _deme(NULL),
         _optimize(opt),
@@ -310,7 +309,7 @@ struct deme_expander
     // Structures related to the current deme
     representation* _rep; // representation of the current deme
     deme_t* _deme; // current deme
-    Optimization &_optimize;
+    optimizer_base &_optimize;
 
 protected:
     const combo::type_tree& _type_sig;    // type signature of the exemplar
@@ -337,10 +336,9 @@ protected:
  *   cscore_base = scoring function (output composite scores)
  *   bscore_base = behavioral scoring function (output behaviors)
  */
-template<typename Optimization>
 struct metapopulation : bscored_combo_tree_ptr_set
 {
-    typedef metapopulation<Optimization> self;
+    typedef metapopulation self;
     typedef bscored_combo_tree_set super;
     typedef super::value_type value_type;
     typedef instance_set<composite_score> deme_t;
@@ -399,7 +397,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
                    const reduct::rule& si_kb,
                    const cscore_base& sc,
                    const bscore_base& bsc,
-                   Optimization& opt = Optimization(),
+                   optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
         _dex(type_signature, si_ca, si_kb, sc, opt, pa),
         _bscorer(bsc), params(pa),
@@ -418,7 +416,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
                    const type_tree& type_signature,
                    const reduct::rule& si,
                    const cscore_base& sc, const bscore_base& bsc,
-                   Optimization& opt = Optimization(),
+                   optimizer_base& opt,
                    const metapop_parameters& pa = metapop_parameters()) :
         _dex(type_signature, si, si, sc, opt, pa),
         _bscorer(bsc), params(pa),
@@ -1155,7 +1153,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
             ++it2;
             if(it2 != mcl.end())
                 for(; it2 != mcl.end();) {
-                    tribool dom = dominates(it1->second, it2->second);
+                    tribool dom = dominates(get_bscore(*it1), get_bscore(*it2));
                     if(dom)
                         it2 = mcl.erase(it2);
                     else if(!dom) {
@@ -1325,20 +1323,22 @@ struct metapopulation : bscored_combo_tree_ptr_set
         foreach (const bscored_combo_tree* cnd, diff_bcv_mp)
             erase(*cnd);
 
+#if XXX_THIS_WONT_COMPILE_CANT_FIGURE_OUT_WHY
         // add the non dominates ones from bsc
         foreach (const bscored_combo_tree* cnd, bcv_p.first)
             insert(*cnd);
+#endif // XXX_THIS_WONT_COMPILE_CANT_FIGURE_OUT_WHY
     }
 
     // Iterative version of merge_nondominated
     void merge_nondominated_iter(bscored_combo_tree_set& bcs)
     {
         for (bscored_combo_tree_set_it it1 = bcs.begin(); it1 != bcs.end();) {
-            bscored_combo_tree_set_it it2 = begin();
+            bscored_combo_tree_ptr_set_it it2 = begin();
             if (it2 == end())
                 break;
             for (; it2 != end();) {
-                tribool dom = dominates(it1->second, it2->second);
+                tribool dom = dominates(get_bscore(*it1), get_bscore(*it2));
                 if (dom)
                     erase(it2++);
                 else if (!dom) {
@@ -1535,7 +1535,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 output_bscore, output_only_bests);
     }
 
-    deme_expander<Optimization> _dex;
+    deme_expander _dex;
 
 protected:
     static const unsigned min_pool_size = 250;

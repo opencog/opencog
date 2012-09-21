@@ -66,8 +66,7 @@ int main(int argc, char** argv)
         si = &(clean_reduction());
 
     univariate_optimization univ;
-    metapopulation<univariate_optimization>
-        metapop(tr, tt, *si, cscore, bscore, univ);
+    metapopulation metapop(tr, tt, *si, cscore, bscore, univ);
 
     boost::program_options::variables_map vm;
     jobs_t jobs;

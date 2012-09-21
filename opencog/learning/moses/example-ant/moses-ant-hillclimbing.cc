@@ -80,8 +80,7 @@ int main(int argc,char** argv)
   metaparms.actions = &actions;
 
   hill_climbing hc;
-  metapopulation<hill_climbing> 
-      metapop(combo_tree(id::sequential_and), tt, action_reduction(),
+  metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
               scorer, bscorer, hc, metaparms);
   
   boost::program_options::variables_map vm;

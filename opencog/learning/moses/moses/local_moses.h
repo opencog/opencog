@@ -47,8 +47,7 @@ using namespace combo;
  * @return return true if expansion has succeeded, false otherwise
  *
  */
-template<typename Optimization>
-bool expand_deme(metapopulation<Optimization>& mp,
+static inline bool expand_deme(metapopulation& mp,
      int max_evals, moses_statistics& stats)
 {
     if (mp.empty())
@@ -107,8 +106,7 @@ bool expand_deme(metapopulation<Optimization>& mp,
  * @param mp the metapopulation
  * @param pa the parameters to run moses
  */
-template<typename Optimization>
-void local_moses(metapopulation<Optimization>& mp,
+static inline void local_moses(metapopulation& mp,
                  const moses_parameters& pa,
                  moses_statistics& stats)
 {

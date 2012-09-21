@@ -47,7 +47,7 @@ moses_mpi_comm::moses_mpi_comm() :
 {
     int have_thread_support = MPI::Init_thread(MPI_THREAD_MULTIPLE);
 
-    const char * sup;
+    const char * sup = "";
     switch(have_thread_support) {
         case MPI_THREAD_SINGLE:     sup = "MPI_THREAD_SINGLE";     break; 
         case MPI_THREAD_FUNNELED:   sup = "MPI_THREAD_FUNNELED";   break; 

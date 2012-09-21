@@ -60,18 +60,21 @@ struct dummy_bscore : public bscore_base
     }
 };
 
-struct dummy_optimization {
+struct dummy_optimization : public optimizer_base
+{
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const iscorer_base& iscorer, unsigned max_evals)
+    { return 0; }
 };
 
 
 class metapopulationUTest : public CxxTest::TestSuite {
-    typedef metapopulation<dummy_optimization> metapopulation_t;
     dummy_cscore _dcsc;
     dummy_bscore _dbsc;
     vertex_set ignore_ops;
     logical_reduction lred;
     dummy_optimization _do;
-    metapopulation_t _metapopulation;
+    metapopulation _metapopulation;
 
 public:
     metapopulationUTest()
@@ -180,10 +183,8 @@ public:
         combo_tree tr2(2.0);
         bscored_combo_tree bct2(tr2, cbs2);
         bcs2.insert(bct2);
-        typedef metapopulation<dummy_optimization>
-            metapopulation_t;
 
-        metapopulation_t::bscored_combo_tree_set_pair res_p =
+        metapopulation::bscored_combo_tree_set_pair res_p =
             _metapopulation.get_nondominated_disjoint(bcs1, bcs2);
         bscored_combo_tree_set res = set_union(res_p.first, res_p.second);
         // 2 is dominated

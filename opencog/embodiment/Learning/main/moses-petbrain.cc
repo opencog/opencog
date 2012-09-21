@@ -101,8 +101,8 @@ int main(int argc, char** argv)
     metaparms.perceptions = &perceptions;
     metaparms.actions = &actions;
 
-    metapopulation<hill_climbing>
-        metapop(combo_tree(id::sequential_and), tt, action_reduction(),
+    metapopulation metapop(combo_tree(id::sequential_and),
+                tt, action_reduction(),
                 cscorer, bscorer, climber, metaparms);
 
     cout << "build metapop" << endl;

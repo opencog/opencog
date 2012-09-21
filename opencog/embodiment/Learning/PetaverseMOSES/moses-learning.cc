@@ -150,8 +150,7 @@ void moses_learning::operator()()
         if (metapop)
             delete metapop;
 
-        metapop = new metapopulation<hill_climbing>
-            (_center, tt, action_reduction(),
+        metapop = new metapopulation (_center, tt, action_reduction(),
              *cscore, *bscore, *climber, *_metaparms);
 
         _hcState = HC_BUILD_CANDIDATES;
