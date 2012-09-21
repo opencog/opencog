@@ -48,6 +48,7 @@ namespace opencog { namespace moses {
 using namespace std;
 
 extern const char * version_string;
+typedef bscore_based_cscore<bscore_base> cscore_t;
 
 /**
  * Run moses
@@ -205,13 +206,13 @@ private:
 /**
  * Create metapopulation, run moses, print results.
  */
-template<typename Scorer, typename BScorer, typename Printer>
+template<typename Printer>
 void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const opencog::combo::type_tree& tt,
                              const reduct::rule& si_ca,
                              const reduct::rule& si_kb,
-                             const Scorer& sc,
-                             const BScorer& bsc,
+                             const cscore_t& sc,
+                             const bscore_base& bsc,
                              const optim_parameters& opt_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
@@ -222,7 +223,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         hill_climbing climber(opt_params);
 
-        metapopulation<Scorer, BScorer, hill_climbing>
+        metapopulation<cscore_t, bscore_base, hill_climbing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, climber, meta_params);
 
         run_moses(metapop, moses_params, stats);
@@ -231,7 +232,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     else if (opt_params.opt_algo == sa) { // simulated annealing
         simulated_annealing annealer(opt_params);
 
-        metapopulation<Scorer, BScorer, simulated_annealing>
+        metapopulation<cscore_t, bscore_base, simulated_annealing>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, annealer, meta_params);
 
         run_moses(metapop, moses_params, stats);
@@ -240,7 +241,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     else if (opt_params.opt_algo == un) { // univariate
         univariate_optimization unopt(opt_params);
 
-        metapopulation<Scorer, BScorer, univariate_optimization>
+        metapopulation<cscore_t, bscore_base, univariate_optimization>
             metapop(bases, tt, si_ca, si_kb, sc, bsc, unopt, meta_params);
 
         run_moses(metapop, moses_params, stats);
@@ -258,18 +259,18 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
 /**
  * like above, but assumes that the score is bscore based
  */
-template<typename BScorer, typename Printer>
+template<typename Printer>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const opencog::combo::type_tree& type_sig,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
-                           BScorer& bscorer,
+                           bscore_base& bscorer,
                            optim_parameters opt_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
                            Printer& printer)
 {
-    bscore_based_cscore<BScorer> c_scorer(bscorer);
+    cscore_t c_scorer(bscorer);
 
     // update terminate_if_gte and max_score criteria
     score_t bps = c_scorer.best_possible_score();
@@ -300,10 +301,9 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
             // into the metapop based only on the score (and complexity),
             // not on the behavioral score. So we can throw away the 
             // behavioral score after computng it (we don't need to cche it).
-            typedef bscore_based_cscore<BScorer> CScorer;
             // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
-            CScorer cscorer(bscorer);
-            prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer,
+            cscore_t cscorer(bscorer);
+            prr_cache_threaded<cscore_t> score_cache(initial_cache_size, cscorer,
                                                     "composite scores");
             // ScoreACache score_acache(score_cache);
             metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
@@ -311,10 +311,11 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                                     opt_params, meta_params, moses_params,
                                     printer);
         }
+#if 0
         else {
             // We put the cache on the bscore as well because then it
             // is reused later (for metapopulation merging)
-            typedef prr_cache_threaded<BScorer> BScoreCache;
+            typedef prr_cache_threaded<bscore_base> BScoreCache;
             // typedef adaptive_cache<BScoreCache> BScoreACache;
             typedef bscore_based_cscore<BScoreCache /*BScoreACache*/> CScorer;
             BScoreCache bscore_cache(initial_cache_size, bscorer,
@@ -331,6 +332,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                                     opt_params, meta_params, moses_params,
                                     printer);
         }
+#endif
         return;
     }
 
