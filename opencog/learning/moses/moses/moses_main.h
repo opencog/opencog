@@ -287,57 +287,23 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         
         // static const unsigned initial_cache_size = 1000000;
         unsigned initial_cache_size = meta_params.cache_size;
-
-        // Strangely enough it seems enabling bscore cache slows down
-        // the computation so we temporarly disable it.
-        //
-        // bool need_bscore = !meta_params.include_dominated
-        //     || (meta_params.diversity_pressure > 0.0)
-        //     || meta_params.output_bscore;
-        bool need_bscore = false;
         
-        if (!need_bscore) {
-            // When the include_dominated flag is set, then trees are merged
-            // into the metapop based only on the score (and complexity),
-            // not on the behavioral score. So we can throw away the 
-            // behavioral score after computng it (we don't need to cche it).
-            // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
-            cscore_t cscorer(bscorer);
-            prr_cache_threaded<cscore_t> score_cache(initial_cache_size, cscorer,
-                                                    "composite scores");
-            // ScoreACache score_acache(score_cache);
-            metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
-                                    score_cache /*score_acache*/, bscorer,
-                                    opt_params, meta_params, moses_params,
-                                    printer);
-        }
-#if 0
-        else {
-            // We put the cache on the bscore as well because then it
-            // is reused later (for metapopulation merging)
-            typedef prr_cache_threaded<bscore_base> BScoreCache;
-            // typedef adaptive_cache<BScoreCache> BScoreACache;
-            typedef bscore_based_cscore<BScoreCache /*BScoreACache*/> CScorer;
-            BScoreCache bscore_cache(initial_cache_size, bscorer,
-                                     "behavioral scores");
-            // BScoreACache bscore_acache(bscore_cache);
-            // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
-            CScorer cscorer(bscore_cache /*bscore_acache*/);
-            prr_cache_threaded<CScorer> score_cache(initial_cache_size, cscorer,
-                                                    "composite scores");
-            // ScoreACache score_acache(score_cache);
-            metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
-                                    score_cache /*score_acache*/,
-                                    bscore_cache /*bscore_acache*/,
-                                    opt_params, meta_params, moses_params,
-                                    printer);
-        }
-#endif
-        return;
-    }
-
-    metapop_moses_results_b(bases, type_sig, si_ca, si_kb, c_scorer, bscorer,
-                            opt_params, meta_params, moses_params, printer);
+        // When the include_dominated flag is set, then trees are merged
+        // into the metapop based only on the score (and complexity),
+        // not on the behavioral score. So we can throw away the 
+        // behavioral score after computng it (we don't need to cche it).
+        // typedef adaptive_cache<prr_cache_threaded<CScorer> > ScoreACache;
+        cscore_t cscorer(bscorer);
+        prr_cache_threaded<cscore_t> score_cache(initial_cache_size, cscorer,
+                                                 "composite scores");
+        // ScoreACache score_acache(score_cache);
+        metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
+                                score_cache /*score_acache*/, bscorer,
+                                opt_params, meta_params, moses_params,
+                                printer);
+    } else
+        metapop_moses_results_b(bases, type_sig, si_ca, si_kb, c_scorer, bscorer,
+                                opt_params, meta_params, moses_params, printer);
 }
 
 } // ~namespace moses
