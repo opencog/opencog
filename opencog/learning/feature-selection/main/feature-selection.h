@@ -146,6 +146,26 @@ instance initial_instance(const feature_selection_parameters& fs_params,
                           const field_set& fields,
                           const std::vector<std::string>& labels);
 
+// A wrapper, simply so that optimizer gets the iscorer_base base class.
+// The only reason for this wrapper is that both iscorer_base, and
+// prr_cache_threaded both define operator(), and I need it to be clear
+// which operator() needs to be called. Otherwise, I guess multiple
+// inheritance would have worked!?
+template<typename DBScorer>
+struct iscorer_cache : public iscorer_base
+{
+    iscorer_cache(size_t n, const DBScorer& sc) :
+        _cache(n, sc) {}
+
+    result_type operator()(const argument_type& x) const
+    {
+        return _cache.operator()(x);
+    }
+    unsigned get_misses() const { return _cache.get_misses(); }
+    unsigned get_hits() const { return _cache.get_hits(); }
+    prr_cache_threaded<DBScorer> _cache;
+};
+
 // run feature selection given a moses optimizer and a scorer, create
 // a deme a define the wrap the scorer for that deme. Possibly add
 // cache as well.
@@ -165,7 +185,8 @@ feature_set create_deme_select_features(const CTable& ctable,
     DBScorer db_sc(scorer, fields);
     // possibly wrap in a cache
     if(fs_params.hc_cache_size > 0) {
-        typedef prr_cache_threaded<DBScorer> ScorerCache;
+        // typedef prr_cache_threaded<DBScorer> ScorerCache;
+        typedef iscorer_cache<DBScorer> ScorerCache;
         ScorerCache sc_cache(fs_params.hc_cache_size, db_sc);
         feature_set selected_features =
             optimize_deme_select_features(fields, deme, init_inst, optimize,
@@ -181,10 +202,12 @@ feature_set create_deme_select_features(const CTable& ctable,
 }
 
 template<typename FeatureSet>
-struct fs_scorer : public unary_function<FeatureSet, double> {
+struct fs_scorer : public unary_function<FeatureSet, double>
+{
     fs_scorer(const CTable& ctable,
               const feature_selection_parameters& fs_params)
-        : _ptr_mi_scorer(nullptr), _ptr_pre_scorer(nullptr) {
+        : _ptr_mi_scorer(nullptr), _ptr_pre_scorer(nullptr)
+    {
         if (fs_params.scorer == mi) { // mutual information
             _ptr_mi_scorer =
                 new MICScorerCTable<FeatureSet>(ctable, fs_params.hc_confi);
@@ -202,7 +225,8 @@ struct fs_scorer : public unary_function<FeatureSet, double> {
         delete _ptr_mi_scorer;
         delete _ptr_pre_scorer;
     }
-    double operator()(const FeatureSet& fs) const {
+    double operator()(const FeatureSet& fs) const
+    {
         if (_ptr_mi_scorer)
             return _ptr_mi_scorer->operator()(fs);
         else if (_ptr_pre_scorer)

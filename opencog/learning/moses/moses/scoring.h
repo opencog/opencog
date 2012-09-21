@@ -1114,13 +1114,17 @@ private:
     score_t get_activation_penalty(score_t activation) const;
 };
 
+struct iscorer_base : public unary_function<instance, composite_score>
+{
+    virtual composite_score operator()(const instance&) const = 0;
+};
+
 /**
  * Mostly for testing the optimization algos.  Returns minus the
  * hamming distance of the candidate to a given target instance and
  * constant null complexity.
  */
-struct distance_based_scorer : public unary_function<instance,
-                                                     composite_score>
+struct distance_based_scorer : public iscorer_base
 {
     distance_based_scorer(const field_set& _fs,
                           const instance& _target_inst)
@@ -1144,8 +1148,7 @@ protected:
     const instance& target_inst;
 };
 
-struct complexity_based_scorer : public unary_function<instance,
-                                                       composite_score>
+struct complexity_based_scorer : public iscorer_base
 {
     complexity_based_scorer(const cscore_base& s, representation& rep, bool reduce)
         : _cscorer(s), _rep(rep), _reduce(reduce) {}

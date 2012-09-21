@@ -84,8 +84,8 @@ protected:
  * each bit represents whether a feature is selected or not.
  */
 template<typename FSScorer>
-struct deme_based_scorer : public unary_function<instance, composite_score> {
-
+struct deme_based_scorer : public iscorer_base
+{
     deme_based_scorer(const FSScorer& fs_scorer, const field_set& fields)
         : _fs_scorer(fs_scorer), _fields(fields) {}
 
@@ -94,7 +94,8 @@ struct deme_based_scorer : public unary_function<instance, composite_score> {
      * field of booleans. Each boolean represents whether its
      * corresponding feature is in the feature set of not.
      */
-    composite_score operator()(const instance& inst) const {
+    composite_score operator()(const instance& inst) const
+    {
         std::set<arity_t> fs = get_feature_set(_fields, inst);
         composite_score csc(_fs_scorer(fs), fs.size(), 0);
         // Logger
