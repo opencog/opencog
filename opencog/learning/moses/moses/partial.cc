@@ -58,10 +58,6 @@ partial_solver::partial_solver(const vector<CTable> &ctables,
 
 partial_solver::~partial_solver()
 {
-    foreach (bscore_base* sc, score_seq)
-        delete sc;
-    foreach (bscore_base* sc, straight_score_seq)
-        delete sc;
     delete _bscore;
     delete _straight_bscore;
 }

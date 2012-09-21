@@ -132,8 +132,9 @@ class partial_solver
 
         // XXX keep these here due object lifetime weirdness ... 
         // There is something bizarre/wrong with how ptr_vector works!?!?
-        std::vector<bscore_base*> score_seq;
-        std::vector<bscore_base*> straight_score_seq;
+        typedef boost::ptr_vector<bscore_base> BScorerSeq;
+        BScorerSeq score_seq;
+        BScorerSeq straight_score_seq;
 };
 
 };};

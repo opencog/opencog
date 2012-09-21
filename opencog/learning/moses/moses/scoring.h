@@ -192,10 +192,10 @@ struct bscore_based_cscore : public cscore_base
  */
 struct multibscore_based_bscore : public bscore_base
 {
-    typedef std::vector<bscore_base*> BScorerSeq;
-
+    typedef boost::ptr_vector<bscore_base> BScorerSeq;
+    
     // ctors
-    multibscore_based_bscore(const BScorerSeq& bscorers_) : bscorers(bscorers_) {}
+    multibscore_based_bscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
 
     // main operator
     penalized_behavioral_score operator()(const combo_tree& tr) const;
@@ -208,7 +208,7 @@ struct multibscore_based_bscore : public bscore_base
     void ignore_idxs(std::set<arity_t>& idxs) const;
 
 protected:
-    BScorerSeq bscorers;
+    const BScorerSeq& _bscorers;
 };
 
 /**
