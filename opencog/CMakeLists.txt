@@ -5,15 +5,15 @@
 #
 ADD_SUBDIRECTORY (util)
 ADD_SUBDIRECTORY (comboreduct)
-ADD_SUBDIRECTORY (learning)
-ADD_SUBDIRECTORY (persist)
 ADD_SUBDIRECTORY (reasoning)
 
 IF (HAVE_ATOMSPACE)
     ADD_SUBDIRECTORY (atomspace)
     ADD_SUBDIRECTORY (benchmark)
     ADD_SUBDIRECTORY (query)
+    ADD_SUBDIRECTORY (learning)  # Dimensional reduction needs atomspace
     ADD_SUBDIRECTORY (nlp)
+    ADD_SUBDIRECTORY (persist)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_ATTENTION)
