@@ -1344,7 +1344,7 @@ int moses_exec(int argc, char** argv)
         set_noise_or_ratio(*r, as, noise, complexity_ratio);     \
         bscores.push_back(r);                                    \
     }                                                            \
-    multibscore_based_bscore<BScore> bscore(bscores);            \
+    multibscore_based_bscore bscore(bscores);                    \
     metapop_moses_results(exemplars, cand_sig,                   \
                           REDUCT, REDUCT_REP, bscore,            \
                           opt_params, meta_params, moses_params, \
@@ -1390,7 +1390,7 @@ int moses_exec(int argc, char** argv)
                                                              fs_params);
                 }
 
-                multibscore_based_bscore<BScore> bscore(bscores);
+                multibscore_based_bscore bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
@@ -1426,7 +1426,7 @@ int moses_exec(int argc, char** argv)
                                                              fs_params);
                 }
 
-                multibscore_based_bscore<BScore> bscore(bscores);
+                multibscore_based_bscore bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,
                                       bool_reduct, bool_reduct_rep, bscore,
                                       opt_params, meta_params, moses_params,
@@ -1567,7 +1567,7 @@ int moses_exec(int argc, char** argv)
                 set_noise_or_ratio(*r, as, noise, complexity_ratio);
                 bscores.push_back(r);
             }
-            multibscore_based_bscore<BScore> bscore(bscores);
+            multibscore_based_bscore bscore(bscores);
             metapop_moses_results(exemplars, tt,
                                   bool_reduct, bool_reduct_rep, bscore,
                                   opt_params, meta_params, moses_params,

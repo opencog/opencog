@@ -1804,5 +1804,48 @@ score_t interesting_predicate_bscore::min_improv() const
                                 // backward behavior
 }
 
+//////////////////////////////
+// multibscore_based_bscore //
+//////////////////////////////
+
+// main operator
+penalized_behavioral_score multibscore_based_bscore::operator()(const combo_tree& tr) const
+{
+    penalized_behavioral_score pbs;
+    foreach(const bscore_base* bsc, bscorers) {
+        penalized_behavioral_score apbs = bsc->operator()(tr);
+        boost::push_back(pbs.first, apbs.first);
+        pbs.second += apbs.second;
+    }
+    return pbs;
+}
+
+behavioral_score multibscore_based_bscore::best_possible_bscore() const
+{
+    penalized_behavioral_score pbs;
+    foreach(const bscore_base* bsc, bscorers) {
+        boost::push_back(pbs.first, bsc->best_possible_bscore());
+    }
+    return pbs;
+}
+
+// return the min of all min_improv
+score_t multibscore_based_bscore::min_improv() const
+{
+    /// @todo can be turned in to 1-line with boost::min_element
+    // boost::min_element(bscorers | boost::transformed(/*)
+    score_t res = best_score;
+    foreach(const bscore_base* bs, bscorers)
+        res = min(res, bs->min_improv());
+    return res;
+}
+
+void multibscore_based_bscore::ignore_idxs(std::set<arity_t>& idxs) const
+{
+    foreach(const bscore_base* bs, bscorers)
+        bs->ignore_idxs(idxs);
+}
+
+
 } // ~namespace moses
 } // ~namespace opencog

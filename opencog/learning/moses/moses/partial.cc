@@ -79,7 +79,7 @@ void partial_solver::solve()
 
         tab_sz += ctable.uncompressed_size();
     }
-    _bscore = new multibscore_based_bscore<BScore>(score_seq);
+    _bscore = new multibscore_based_bscore(score_seq);
 
     _meta_params.merge_callback = check_candidates;
     _meta_params.callback_user_data = (void *) this;
@@ -185,7 +185,7 @@ void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
     foreach(const CTable& ctable, _orig_ctables)
         straight_score_seq.push_back(new StraightBScore(ctable));
 
-    _straight_bscore = new multibscore_based_bscore<StraightBScore>(straight_score_seq);
+    _straight_bscore = new multibscore_based_bscore(straight_score_seq);
 }
 
 /// Compute the effectiveness of the predicate.
@@ -349,7 +349,7 @@ void partial_solver::record_prefix()
         score_seq.push_back(new BScore(ctable));
 
     delete _bscore;
-    _bscore = new multibscore_based_bscore<BScore>(score_seq);
+    _bscore = new multibscore_based_bscore(score_seq);
 }
 
 

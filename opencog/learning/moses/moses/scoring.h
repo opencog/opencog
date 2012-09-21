@@ -190,7 +190,6 @@ struct bscore_based_cscore : public cscore_base
  * problems. For now the multiple scores have the same type as defined
  * by the template argument BScorer.
  */
-template<typename BScorer>
 struct multibscore_based_bscore : public bscore_base
 {
     typedef std::vector<bscore_base*> BScorerSeq;
@@ -199,43 +198,16 @@ struct multibscore_based_bscore : public bscore_base
     multibscore_based_bscore(const BScorerSeq& bscorers_) : bscorers(bscorers_) {}
 
     // main operator
-    penalized_behavioral_score operator()(const combo_tree& tr) const
-    {
-        penalized_behavioral_score pbs;
-        foreach(const bscore_base* bsc, bscorers) {
-            penalized_behavioral_score apbs = bsc->operator()(tr);
-            boost::push_back(pbs.first, apbs.first);
-            pbs.second += apbs.second;
-        }
-        return pbs;
-    }
+    penalized_behavioral_score operator()(const combo_tree& tr) const;
 
-    behavioral_score best_possible_bscore() const
-    {
-        penalized_behavioral_score pbs;
-        foreach(const bscore_base* bsc, bscorers) {
-            boost::push_back(pbs.first, bsc->best_possible_bscore());
-        }
-        return pbs;
-    }
+    behavioral_score best_possible_bscore() const;
 
     // return the min of all min_improv
-    score_t min_improv() const
-    {
-        /// @todo can be turned in to 1-line with boost::min_element
-        // boost::min_element(bscorers | boost::transformed(/*)
-        score_t res = best_score;
-        foreach(const bscore_base* bs, bscorers)
-            res = min(res, bs->min_improv());
-        return res;
-    }
+    score_t min_improv() const;
 
-    void ignore_idxs(std::set<arity_t>& idxs) const {
-        foreach(const bscore_base* bs, bscorers)
-            bs->ignore_idxs(idxs);
-    }
+    void ignore_idxs(std::set<arity_t>& idxs) const;
 
-private:
+protected:
     BScorerSeq bscorers;
 };
 
