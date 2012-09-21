@@ -29,20 +29,11 @@
 #ifndef _MOSES_OPTIMIZATION_H
 #define _MOSES_OPTIMIZATION_H
 
-#include <math.h>   // for sqrtf, cbrtf
 #include <opencog/util/selection.h>
-#include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
-#include <opencog/util/oc_omp.h>
 
-#include "../eda/termination.h"
-#include "../eda/replacement.h"
-#include "../eda/logging.h"
-#include "../eda/local_structure.h"
-#include "../eda/optimize.h"
 #include "../representation/instance_set.h"
-#include "../moses/neighborhood_sampling.h"
 #include "../moses/scoring.h"
 
 // we choose the number 100 because below that multithreading is

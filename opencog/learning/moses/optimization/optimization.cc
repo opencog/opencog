@@ -26,6 +26,18 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <math.h>   // for sqrtf, cbrtf
+
+#include <opencog/util/oc_omp.h>
+
+#include "../eda/termination.h"
+#include "../eda/replacement.h"
+#include "../eda/logging.h"
+#include "../eda/local_structure.h"
+#include "../eda/optimize.h"
+#include "../moses/neighborhood_sampling.h"
+
 #include "optimization.h"
 
 namespace opencog { namespace moses {
