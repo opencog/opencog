@@ -1,4 +1,4 @@
-/** metapopulation.h ---
+/** metapopulation.cc ---
  *
  * Copyright (C) 2010 Novemente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -21,41 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
-#ifndef _OPENCOG_METAPOPULATION_H
-#define _OPENCOG_METAPOPULATION_H
-
-#include <future>
-#include <atomic>
-#include <mutex>
-#include <memory>
-#include <math.h>
-
-#include <boost/unordered_set.hpp>
-#include <boost/logic/tribool.hpp>
-#include <boost/range/algorithm/sort.hpp>
-#include <boost/range/algorithm/for_each.hpp>
-#include <boost/range/algorithm/set_algorithm.hpp>
-#include <boost/range/algorithm/find_if.hpp>
-
-#include <opencog/util/selection.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/functional.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/oc_omp.h>
-
-#include <opencog/comboreduct/combo/combo.h>
-#include <opencog/comboreduct/reduct/reduct.h>
-
-#include "../representation/instance_set.h"
-#include "../representation/representation.h"
-#include "feature_selector.h"
-// #include "mpi_moses.h"
-#include "scoring.h"
-#include "types.h"
-
-#define EVALUATED_ALL_AVAILABLE 1234567
+#include "metapopulation.h"
 
 namespace opencog {
 namespace moses {
@@ -66,168 +32,108 @@ using boost::logic::tribool;
 using boost::logic::indeterminate;
 using namespace combo;
 
-static const operator_set empty_ignore_ops = operator_set();
-
-/**
- * parameters about deme management
- */
-struct metapop_parameters
+// bool deme_expander::create_deme(bscored_combo_tree_set::const_iterator exemplar)
+bool deme_expander::create_deme(const combo_tree& exemplar)
 {
-    metapop_parameters(int _max_candidates = -1,
-                       bool _reduce_all = true,
-                       bool _revisit = false,
-                       bool _include_dominated = true,
-                       score_t _complexity_temperature = 3.0f,
-                       const operator_set& _ignore_ops = empty_ignore_ops,
-                       // bool _enable_cache = false,    // adaptive_cache
-                       unsigned _cache_size = 100000,     // is disabled
-                       unsigned _jobs = 1,
-                       const combo_tree_ns_set* _perceptions = NULL,
-                       const combo_tree_ns_set* _actions = NULL,
-                       const feature_selector* _fstor = NULL) :
-        max_candidates(_max_candidates),
-        reduce_all(_reduce_all),
-        revisit(_revisit),
-        include_dominated(_include_dominated),
-        diversity_pressure(0.0),
-        diversity_exponent(-1.0), // max
-        diversity_p_norm(2.0),    // Euclidean
-        keep_bscore(false),
-        complexity_temperature(_complexity_temperature),
-        ignore_ops(_ignore_ops),
-        // enable_cache(_enable_cache),   // adaptive_cache
-        cache_size(_cache_size),          // is disabled
-        jobs(_jobs),
-        perceptions(_perceptions),
-        actions(_actions),
-        merge_callback(NULL),
-        callback_user_data(NULL),
-        fstor(_fstor)
-        {}
+    using namespace reduct;
 
-    // The max number of candidates considered to be added to the
-    // metapopulation, if negative then all candidates are considered.
-    int max_candidates;
+    OC_ASSERT(_rep == NULL);
+    OC_ASSERT(_deme == NULL);
 
-    // If true then all candidates are reduced before evaluation.
-    bool reduce_all;
+    _exemplar = exemplar;
 
-    // When true then visited exemplars can be revisited.
-    bool revisit;
+    if (logger().isDebugEnabled())
+        logger().debug() << "Attempt to build rep from exemplar: " << _exemplar;
 
-    // Ignore behavioral score domination when merging candidates in
-    // the metapopulation.  Keeping dominated candidates improves
-    // performance by avoiding local maxima.
-    bool include_dominated;
+    // [HIGHLY EXPERIMENTAL]. It allows to select features
+    // that provide the most information when combined with
+    // the exemplar
+    operator_set ignore_ops = _params.ignore_ops;
+    if (_params.fstor) {
+        // return the set of selected features as column index
+        // (left most column corresponds to 0)
+        auto selected_features = (*_params.fstor)(_exemplar);
+        // add the complementary of the selected features (not
+        // present in the exemplar) in ignore_ops
+        auto exemplar_features = get_argument_abs_idx_from_zero_set(_exemplar);
+        // arity_set exemplar_features = arity_set();
+        unsigned arity = _params.fstor->ctable.get_arity();
+        for (unsigned i = 0; i < arity; i++)
+            if (selected_features.find(i) == selected_features.end()
+                && exemplar_features.find(i) == exemplar_features.end())
+                ignore_ops.insert(argument(i + 1));
+        
+        // debug print
+        // std::vector<std::string> ios;
+        // auto vertex_to_str = [](const vertex& v) {
+        //     std::stringstream ss;
+        //     ss << v;
+        //     return ss.str();
+        // };
+        // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
+        // printlnContainer(ios);
+        // ~debug print
 
-    // Diversity pressure of to enforce diversification of the
-    // metapop. 0 means no diversity pressure, the higher the value
-    // the strong the pressure.
-    score_t diversity_pressure;
-
-    // exponent of the generalized mean used to aggregate the
-    // diversity penalties of a candidate between a set of
-    // candidates. If the exponent is negative (default) then the max
-    // is used instead (generalized mean with infinite exponent).
-    score_t diversity_exponent;
-
-    // Parameter value of the p-norm used to compute the distance
-    // between 2 bscores
-    score_t diversity_p_norm;
-
-    // keep track of the bscores even if not needed (in case the user
-    // wants to keep them around)
-    bool keep_bscore;
-    
-    // Boltzmann temperature ...
-    score_t complexity_temperature;
-
-    // the set of operators to ignore
-    operator_set ignore_ops;
-
-    // Enable caching of scores.
-    // bool enable_cache;   // adaptive_cache
-    unsigned cache_size;    // is disabled
-
-    // Number of jobs for metapopulation maintenance such as merging
-    // candidates to the metapopulation.
-    unsigned jobs;
-
-    // the set of perceptions of an optional interactive agent
-    const combo_tree_ns_set* perceptions;
-    // the set of actions of an optional interactive agent
-    const combo_tree_ns_set* actions;
-
-    bool (*merge_callback)(bscored_combo_tree_set&, void*);
-    void *callback_user_data;
-
-    const feature_selector* fstor;
-};
-
-void print_stats_header (optim_stats *os);
-
-struct deme_expander
-{
-    typedef instance_set<composite_score> deme_t;
-    typedef deme_t::iterator deme_it;
-    typedef deme_t::const_iterator deme_cit;
-
-    deme_expander(const type_tree& type_signature,
-                  const reduct::rule& si_ca,
-                  const reduct::rule& si_kb,
-                  const cscore_base& sc,
-                  optimizer_base& opt,
-                  const metapop_parameters& pa = metapop_parameters()) :
-        _rep(NULL), _deme(NULL),
-        _optimize(opt),
-        _type_sig(type_signature),
-        simplify_candidate(si_ca),
-        simplify_knob_building(si_kb),
-        _cscorer(sc),
-        _params(pa)
-    {}
-
-    ~deme_expander()
-    {
-        if (_rep) delete _rep;
-        if (_deme) delete _deme;
+        // Reformat the data so that dedundant inputs are grouped
+        // (the number of redundant can possibly change from a
+        // deme to another given that ignored input features can
+        // change as well) as to possibly speed-up evaluation (if
+        // the scorer implement ignore_idxs).
+        std::set<arity_t> idxs;
+        foreach(const vertex& v, ignore_ops)
+            if (is_argument(v))
+                idxs.insert(get_argument(v).abs_idx_from_zero());
+        _cscorer.ignore_idxs(idxs);
     }
 
-    /**
-     * Create the deme
-     *
-     * @return return true if it creates deme successfully,otherwise false.
-     */
-    // bool create_deme(bscored_combo_tree_set::const_iterator exemplar)
-    bool create_deme(const combo_tree& exemplar);
+    // Build a representation by adding knobs to the exemplar,
+    // creating a field set, and a mapping from field set to knobs.
+    _rep = new representation(simplify_candidate,
+                              simplify_knob_building,
+                              _exemplar, _type_sig,
+                              ignore_ops,
+                              _params.perceptions,
+                              _params.actions);
 
-    /**
-     * Do some optimization according to the scoring function.
-     *
-     * @param max_evals the max evals
-     *
-     * @return return the number of evaluations actually performed,
-     */
-    int optimize_deme(int max_evals);
+    // If the representation is empty, try the next
+    // best-scoring exemplar.
+    if (_rep->fields().empty()) {
+        delete(_rep);
+        _rep = NULL;
+        logger().warn("The representation is empty, perhaps the reduct "
+                      "effort for knob building is too high.");
+    }
 
-    void free_deme();
+    if (!_rep) return false;
 
-    // Structures related to the current deme
-    representation* _rep; // representation of the current deme
-    deme_t* _deme; // current deme
-    optimizer_base &_optimize;
+    // Create an empty deme.
+    _deme = new deme_t(_rep->fields());
 
-protected:
-    const combo::type_tree& _type_sig;    // type signature of the exemplar
-    const reduct::rule& simplify_candidate; // to simplify candidates
-    const reduct::rule& simplify_knob_building; // during knob building
-    const cscore_base& _cscorer; // composite score
-    metapop_parameters _params;
+    return true;
+}
 
-    // exemplar of the current deme; a copy, not a reference.
-    combo_tree _exemplar;
-};
+int deme_expander::optimize_deme(int max_evals)
+{
+    if (logger().isDebugEnabled()) {
+        logger().debug()
+           << "Optimize deme; max evaluations allowed: "
+           << max_evals;
+    }
 
+    complexity_based_scorer cpx_scorer =
+        complexity_based_scorer(_cscorer, *_rep, _params.reduce_all);
+    return _optimize(*_deme, cpx_scorer, max_evals);
+}
+
+void deme_expander::free_deme()
+{
+    delete _deme;
+    delete _rep;
+    _deme = NULL;
+    _rep = NULL;
+}
+
+#if 0
 /**
  * The metapopulation will store the expressions (as scored trees)
  * that were encountered during the learning process.  Only the
@@ -1536,8 +1442,8 @@ protected:
 
     cached_ddp _cached_ddp;
 };
+#endif // _OPENCOG_METAPOPULATION_H
 
 } // ~namespace moses
 } // ~namespace opencog
 
-#endif // _OPENCOG_METAPOPULATION_H
