@@ -164,7 +164,7 @@ void moses_learning::operator()()
 
         std::cout << "BUILD" << std::endl;
         bscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
-        if (metapop->_dex.create_deme(**exemplar))
+        if (metapop->_dex.create_deme(*exemplar))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
@@ -225,7 +225,7 @@ void moses_learning::operator()()
         if(exemplar == metapop->end())
             _hcState = HC_IDLE;
         else {
-            _center = (*exemplar)->first;
+            _center = get_tree(*exemplar);
             _hcState = HC_INIT;
         }
 
@@ -264,7 +264,7 @@ const combo_tree& moses_learning::current_program()
     //returns the best program which has never been sent to the owner
     for(bscored_combo_tree_ptr_set_cit mci = metapop->begin();
         mci != metapop->end(); ++mci)  {
-        _current_program = get_tree(**mci);
+        _current_program = get_tree(*mci);
 
         // if this one has already been sent, check the next one
         if(_used_for_owner.find(_current_program) != _used_for_owner.end())
@@ -272,7 +272,7 @@ const combo_tree& moses_learning::current_program()
 
         _used_for_owner.insert(_current_program);
 
-        fitness_t cur_est_fit = get_score(**mci);
+        fitness_t cur_est_fit = get_score(*mci);
 
         //DEBUG INFO
         std::cout << "CURRENT FITNESS : " << cur_est_fit << std::endl;

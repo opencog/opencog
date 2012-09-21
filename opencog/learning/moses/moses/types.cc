@@ -54,12 +54,6 @@ bool bscored_combo_tree_greater::operator()(const bscored_combo_tree& bs_tr1,
     // the tie.  We're grasping at straws, here.
     return size_tree_order<vertex>()(get_tree(bs_tr1), get_tree(bs_tr2));
 }
-bool bscored_combo_tree_ptr_greater::operator()(const bscored_combo_tree* l,
-                                                const bscored_combo_tree* r) const
-{
-    bscored_combo_tree_greater gt;
-    return gt(*l, *r);
-}
 
 // the empty composite_score ctor returns the worst composite score
 const composite_score worst_composite_score = composite_score();

@@ -209,7 +209,7 @@ void moses_mpi_comm::send_deme(const bscored_combo_tree_ptr_set& mp, int n_evals
 
     bscored_combo_tree_ptr_set_cit it;
     for (it = mp.begin(); it != mp.end(); it++) {
-        const bscored_combo_tree& btr = **it;
+        const bscored_combo_tree& btr = *it;
 
         // We are going to send only the composite score, and not the
         // full behavioural score.  Basically, the full bscore is just

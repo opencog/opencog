@@ -162,7 +162,7 @@ void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
     // and feed them back in as exemplars, for scoring.
     _exemplars.clear();
     foreach(auto &item, cands) {
-        combo_tree cand = item->first;
+        combo_tree cand = get_tree(item);
         sib_it ldr = _leader.begin();
         sib_it cit = cand.begin();
         cit = cit.begin();
@@ -249,10 +249,8 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 /// metapopulation from the previous run.
 void partial_solver::refresh(const bscored_combo_tree_ptr_set& cands)
 {
-    foreach(auto &item, cands) {
-        const combo_tree& cand = item->first;
-        _exemplars.push_back(cand);
-    }
+    foreach(const auto &item, cands)
+        _exemplars.push_back(get_tree(item));
 }
 
 /// Evaluate a single candidate

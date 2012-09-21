@@ -367,7 +367,7 @@ void mpi_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 break;
             }
 
-            const combo_tree& extree = get_tree(**exemplar); 
+            const combo_tree& extree = get_tree(*exemplar); 
             int worker = wrkpool.front();
             wrkpool.pop();
             int max_evals = pa.max_evals - stats.n_evals;

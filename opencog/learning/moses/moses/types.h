@@ -33,6 +33,7 @@
 #include <boost/operators.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/ptr_container/ptr_set.hpp>
 
 #include <opencog/util/functional.h>
 #include <opencog/util/foreach.h>
@@ -351,20 +352,13 @@ struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
     bool operator()(const bscored_combo_tree& bs_tr1,
                     const bscored_combo_tree& bs_tr2) const;
 };
-struct bscored_combo_tree_ptr_greater : public binary_function<bscored_combo_tree*,
-                                                               bscored_combo_tree*,
-                                                               bool>
-{
-    bool operator()(const bscored_combo_tree* bs_tr1,
-                    const bscored_combo_tree* bs_tr2) const;
-};
 typedef std::set<bscored_combo_tree,
                  bscored_combo_tree_greater> bscored_combo_tree_set;
 typedef bscored_combo_tree_set::iterator bscored_combo_tree_set_it;
 typedef bscored_combo_tree_set::const_iterator bscored_combo_tree_set_cit;
 
-typedef std::set<bscored_combo_tree*,
-                 bscored_combo_tree_ptr_greater> bscored_combo_tree_ptr_set;
+typedef boost::ptr_set<bscored_combo_tree,
+                       bscored_combo_tree_greater> bscored_combo_tree_ptr_set;
 typedef bscored_combo_tree_ptr_set::iterator bscored_combo_tree_ptr_set_it;
 typedef bscored_combo_tree_ptr_set::const_iterator bscored_combo_tree_ptr_set_cit;
 

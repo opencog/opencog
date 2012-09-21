@@ -432,41 +432,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
         init(bases, si, sc);
     }
 
-    ~metapopulation()
-    {
-        // deallocate all bscored_combo_tree
-        for_each(begin(), end(), std::default_delete<bscored_combo_tree>());
-    }
-
-    /**
-     * Remove candidates from the metapopulation as well as from
-     * _cached_cnd, given a sequence of metapopulation iterators.
-     */
-    void delete_cnds(vector<bscored_combo_tree*>& ptr_seq) {
-        // deallocate them from the memory
-        boost::for_each(ptr_seq, std::default_delete<bscored_combo_tree>());
-        // remove them for _cached_cnd
-        boost::sort(ptr_seq);
-        // // debug
-        // logger().debug("dp cache size before removing = %u",
-        //                _cached_ddp.cache.size());
-        // // ~debug
-        _cached_ddp.erase_ptr_seq(ptr_seq);
-        // // debug
-        // logger().debug("dp cache size after removing = %u",
-        //                _cached_ddp.cache.size());
-        // // ~debug
-    }
-    
-    /**
-     * Delete bscored_combo_tree and possibly remove any trace of it
-     * from _bscore_dst.
-     */
-    void delete_cnd(bscored_combo_tree* ptr) {
-        _cached_ddp.erase_ptr(ptr);
-        delete ptr;
-    }
-    
+    ~metapopulation() {}
+        
     /**
      * Return the best composite score.
      */
@@ -540,14 +507,14 @@ struct metapopulation : bscored_combo_tree_ptr_set
     {        
         bscored_combo_tree_ptr_set pool; // new metapopulation
         
-        // temporary copy the metapop in a vector to update the
-        // diversity penalty + a partially aggredated distorted
+        // structure to remember a partially aggredated distorted
         // diversity penalties between the candidates and the ones in
         // the pool (to avoid recomputing them)
-        typedef std::pair<bscored_combo_tree*, dp_t> bsct_dp_pair;
+        typedef bscored_combo_tree_ptr_set_it psi;
+        typedef std::pair<psi, dp_t> bsct_dp_pair;
         std::vector<bsct_dp_pair> tmp;
-        foreach(bscored_combo_tree* bsct_ptr, *this)
-            tmp.push_back(bsct_dp_pair(bsct_ptr, 0.0));
+        for (psi bsct_it = begin(); bsct_it != end(); ++bsct_it)
+            tmp.push_back(bsct_dp_pair(bsct_it, 0.0));
 
         // // debug
         // std::atomic<unsigned> dp_count(0); // count the number of
@@ -555,36 +522,22 @@ struct metapopulation : bscored_combo_tree_ptr_set
         // unsigned lhits = _cached_ddp.hits.load(),
         //     lmisses = _cached_ddp.misses.load();
         // // ~debug
-
         
         auto update_diversity_penalty = [&](bsct_dp_pair& v) {
-            // // debug
-            // logger().fine("update_diversity_penalty");
-            // {
-            //     stringstream ss;
-            //     ostream_bscored_combo_tree(ss, *v.first, true, true, true);
-            //     logger().fine("v.first = %s", ss.str().c_str());
-            // }
-            // {
-            //     stringstream ss;
-            //     ss << v.second;
-            //     logger().fine("v.second = %s", ss.str().c_str());
-            // }
-            // // ~debug
             
             if (!pool.empty()) { // only do something if the pool is
                                  // not empty (WARNING: this assumes
                                  // that all diversity penalties are
                                  // initially zero
                 
-                bscored_combo_tree* bsct_ptr = v.first;
-                OC_ASSERT(get_bscore(*bsct_ptr).size(),
+                bscored_combo_tree& bsct = *v.first;
+                OC_ASSERT(get_bscore(bsct).size(),
                           "Behavioral score is needed for diversity!");
                 
                 // compute diversity penalty between bs and the last
                 // element of the pool
-                const bscored_combo_tree* last = *pool.crbegin();
-                dp_t last_dp = this->_cached_ddp(bsct_ptr, last);
+                const bscored_combo_tree& last = *pool.crbegin();
+                dp_t last_dp = this->_cached_ddp(&bsct, &last);
 
                 // // debug
                 // ++dp_count;
@@ -602,7 +555,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 }
                 
                 // update v.first                
-                get_composite_score(*bsct_ptr).set_diversity_penalty(adp);
+                get_composite_score(bsct).set_diversity_penalty(adp);
             }
         };
 
@@ -621,16 +574,16 @@ struct metapopulation : bscored_combo_tree_ptr_set
             OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
 
             // take the max score, insert in the pool and remove from tmp
-            bscored_combo_tree_ptr_greater bsct_ptr_gt;
+            bscored_combo_tree_greater bsct_gt;
             auto gt = [&](const bsct_dp_pair& l,
                           const bsct_dp_pair& r) {
-                return bsct_ptr_gt(l.first, r.first);
+                return bsct_gt(*l.first, *r.first);
             };
             // note although we do use min_element it returns the
             // candidate with the best penalized score because we use
             // a greater_than function instead of a less_than function
             auto mit = OMP_ALGO::min_element(tmp.begin(), tmp.end(), gt);
-            pool.insert(mit->first);
+            pool.transfer(mit->first, *this);
             tmp.erase(mit);
         }
 
@@ -655,9 +608,9 @@ struct metapopulation : bscored_combo_tree_ptr_set
         } else {
             unsigned pos = std::distance(cbegin(), exemplar_it) + 1;
             logger().debug() << "Selected the " << pos << "th exemplar: "
-                             << get_tree(**exemplar_it);
+                             << get_tree(*exemplar_it);
             logger().debug() << "With composite score :"
-                             << get_composite_score(**exemplar_it);
+                             << get_composite_score(*exemplar_it);
         }
     }
 
@@ -687,7 +640,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         // through, the score is invalid.
         if (size() == 1) {
             const_iterator selex = cbegin();
-            const combo_tree& tr = get_tree(**selex);
+            const combo_tree& tr = get_tree(*selex);
             if (_visited_exemplars.find(tr) == _visited_exemplars.end())
                 _visited_exemplars.insert(tr);
             else selex = cend();
@@ -705,10 +658,10 @@ struct metapopulation : bscored_combo_tree_ptr_set
         // the iterator follows this order.
         for (const_iterator it = begin(); it != end(); ++it) {
 
-            score_t sc = get_penalized_score(**it);
+            score_t sc = get_penalized_score(*it);
 
             // Skip any exemplars we've already used in the past.
-            const combo_tree& tr = get_tree(**it);
+            const combo_tree& tr = get_tree(*it);
             if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
                 probs.push_back(sc);
                 found_exemplar = true;
@@ -749,7 +702,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         const_iterator selex = std::next(begin(), fwd);
 
         // Mark the exemplar so we won't look at it again.
-        _visited_exemplars.insert(get_tree(**selex));
+        _visited_exemplars.insert(get_tree(*selex));
 
         log_selected_exemplar(selex);
         return selex;
@@ -1082,7 +1035,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
             // pointers to deallocate
             std::vector<bscored_combo_tree*> ptr_seq;
             
-            score_t top_score = get_penalized_score(**begin()),
+            score_t top_score = get_penalized_score(*begin()),
                 range = useful_score_range(),
                 worst_score = top_score - range;
             
@@ -1094,13 +1047,13 @@ struct metapopulation : bscored_combo_tree_ptr_set
             // ends up costing a lot.  I think... not sure.
             iterator it = std::next(begin(), min_pool_size);
             while (it != end()) {
-                score_t sc = get_penalized_score(**it);
+                score_t sc = get_penalized_score(*it);
                 if (sc < worst_score) break;
                 it++;
             }
 
             while (it != end()) {
-                ptr_seq.push_back(*it);
+                ptr_seq.push_back(&*it);
                 it = erase(it);
             }
 
@@ -1131,13 +1084,14 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 // boost::next and std::next. Weirdly enough this appears
                 // only 32bit arch
                 iterator it = std::next(begin(), which);
-                ptr_seq.push_back(*it);
+                ptr_seq.push_back(&*it);
                 erase(it);
                 popsz --;
             }
 
-            // deallocate the pointers and remove them from _cached_cnd
-            delete_cnds(ptr_seq);
+            // remove them from _cached_cnd
+            boost::sort(ptr_seq);
+            _cached_ddp.erase_ptr_seq(ptr_seq);
         } // end of if (size() > min_pool_size)
     }
     
@@ -1150,8 +1104,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
         foreach (const bscored_combo_tree& cnd, mcs) {
             const combo_tree& tr = get_tree(cnd);
             const_iterator fcnd =
-                OMP_ALGO::find_if(begin(), end(), [&](const bscored_combo_tree* v) {
-                        return tr == get_tree(*v); });
+                OMP_ALGO::find_if(begin(), end(), [&](const bscored_combo_tree& v) {
+                        return tr == get_tree(v); });
             if (fcnd == end())
                 res.insert(cnd);
         }
@@ -1511,7 +1465,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
     {
         if (!output_only_bests) {
             for (; from != to && n != 0; ++from, n--) {
-                ostream_bscored_combo_tree(out, **from, output_score,
+                ostream_bscored_combo_tree(out, *from, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
             }
@@ -1522,7 +1476,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         score_t best_score = worst_score;
 
         for (In f = from; f != to; ++f) {
-            const bscored_combo_tree& bt = **f;
+            const bscored_combo_tree& bt = *f;
             score_t sc = get_score(bt);
             if (best_score < sc) best_score = sc;
         }
@@ -1532,7 +1486,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         // necessarily ranked highest, as the ranking is a linear combo
         // of both score and complexity.
         for (In f = from; f != to && n != 0; ++f, n--) {
-            const bscored_combo_tree& bt = **f;
+            const bscored_combo_tree& bt = *f;
             if (best_score <= get_score(bt)) {
                 ostream_bscored_combo_tree(out, bt, output_score,
                                            output_penalty, output_bscore,
@@ -1651,17 +1605,8 @@ protected:
         }
 
         /**
-         * Remove any key containing ptr
+         * Remove all keys containing any element of ptr_seq
          */
-        void erase_ptr(bscored_combo_tree* ptr) {
-            for (Cache::iterator it = cache.begin(); it != cache.end();) {
-                if (it->first.find(ptr) != it->first.end())
-                    it = cache.erase(it);
-                else
-                    ++it;
-            }
-        }
-
         void erase_ptr_seq(std::vector<bscored_combo_tree*> ptr_seq) {
             for (Cache::iterator it = cache.begin(); it != cache.end();) {
                 if (!is_disjoint(ptr_seq, it->first))
