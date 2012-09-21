@@ -31,9 +31,7 @@
 
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/min_element.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/weighted_skewness.hpp>
@@ -43,10 +41,7 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/KLD.h>
 
-#include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
-#include <opencog/comboreduct/reduct/meta_rules.h>
 
 #include "using.h"
 #include "../representation/representation.h"
@@ -774,9 +769,6 @@ struct contin_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    OTable target;
-    ITable cti;
-
     // Hmmm, not picked up from base class, for some reason... Perhaps
     // this is because another set_complexity_coef method is being
     // overloaded and gcc relies solely on the name of the method.
@@ -784,6 +776,10 @@ struct contin_bscore : public bscore_base
         bscore_base::set_complexity_coef(complexity_ratio);
     }
     void set_complexity_coef(unsigned alphabet_size, float stddev);
+
+protected:
+    OTable target;
+    ITable cti;
 
 private:
     // for a given data point calculate the error of the target
@@ -1184,8 +1180,6 @@ struct complexity_based_scorer : public unary_function<instance,
 
     composite_score operator()(const instance& inst) const
     {
-        using namespace reduct;
-
         if (logger().isFineEnabled()) {
             logger().fine() << "complexity_based_scorer - Evaluate instance: "
                             << _rep.fields().stream(inst);
