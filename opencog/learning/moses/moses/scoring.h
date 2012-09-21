@@ -72,6 +72,8 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
     // corresponds to the arguments {$2, $4}. The method provided by
     // default does nothing (no speed-up).
     void ignore_idxs(set<arity_t>&) const {}
+
+    virtual ~cscore_base(){}
 };
 
 // Abstract bscoring function class to implement
@@ -1117,6 +1119,7 @@ private:
 struct iscorer_base : public unary_function<instance, composite_score>
 {
     virtual composite_score operator()(const instance&) const = 0;
+    virtual ~iscorer_base() {}
 };
 
 /**

@@ -261,6 +261,7 @@ struct optimizer_base : optim_stats
     virtual unsigned operator()(instance_set<composite_score>& deme,
                         const iscorer_base& iscorer, unsigned max_evals) = 0;
 
+    virtual ~optimizer_base() {}
 };
 
 struct univariate_optimization : optimizer_base
