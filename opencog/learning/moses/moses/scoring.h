@@ -1144,11 +1144,10 @@ protected:
     const instance& target_inst;
 };
 
-template<typename CScoring>
 struct complexity_based_scorer : public unary_function<instance,
                                                        composite_score>
 {
-    complexity_based_scorer(const CScoring& s, representation& rep, bool reduce)
+    complexity_based_scorer(const cscore_base& s, representation& rep, bool reduce)
         : _cscorer(s), _rep(rep), _reduce(reduce) {}
 
     composite_score operator()(const instance& inst) const
@@ -1173,7 +1172,7 @@ struct complexity_based_scorer : public unary_function<instance,
     }
 
 protected:
-    const CScoring& _cscorer;
+    const cscore_base& _cscorer;
     representation& _rep;
     bool _reduce; // whether the exemplar is reduced before being
                   // evaluated, this may be advantagous if Scoring is

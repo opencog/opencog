@@ -294,8 +294,8 @@ struct deme_expander
                << max_evals;
         }
 
-        complexity_based_scorer<cscore_base> cpx_scorer =
-            complexity_based_scorer<cscore_base>(_cscorer, *_rep, _params.reduce_all);
+        complexity_based_scorer cpx_scorer =
+            complexity_based_scorer(_cscorer, *_rep, _params.reduce_all);
         return _optimize(*_deme, cpx_scorer, max_evals);
     }
 
