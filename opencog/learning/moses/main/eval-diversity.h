@@ -30,6 +30,8 @@
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 
+#include <opencog/util/iostreamContainer.h>
+
 using namespace boost::accumulators;
 
 // structure holding the options
