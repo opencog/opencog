@@ -25,22 +25,14 @@
 
 #include <iostream>
 #include <fstream>
-#include <memory>
-#include <stdio.h>
 
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/lru_cache.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/combo/combo.h>
 
 #include "distributed_moses.h"
-#include "local_moses.h"
-#include "mpi_moses.h"
-#include "metapopulation.h"
+#include "moses_params.h"
 #include "scoring.h"
 
 namespace opencog { namespace moses {
