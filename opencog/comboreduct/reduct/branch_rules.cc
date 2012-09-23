@@ -51,7 +51,7 @@ static inline void zap_one(combo_tree& tr, combo_tree::iterator it)
 {
     pre_it top = it;
     *it = *it.begin();  // it may be head of the tree...
-    tr.erase(tr.flatten(top));
+    tr.erase(++top);
 }
 
 // cond(v) -> v
