@@ -531,10 +531,24 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
 
-    logger().debug("Created %d logical knob subtrees", perms.size());
+    size_t np = perms.size();
+    logger().debug("Created %d logical knob subtrees", np);
+
+    // recursive knob probing can be a significant performance
+    // de-accelerator if the number of knobs is small, since the
+    // cost of copying the knobs, and then copying the results, 
+    // as well as async thread setup, can be huge.  So don't do it
+    // until a minumum number of break-even knobs need examination.
+    // The number of 60K is a wild guesstimate, based on recent
+    // measurements of relatively simple exemplars; its maybe even
+    // too low.  For large exemplars, it might be too big !?
+    // XXX TODO clarify actual breakeven on range of problems...
+#define BREAKEVEN 60000
+    int nthr = (BREAKEVEN < np) ?  num_threads() : 1;
+
     ptr_vector<logical_subtree_knob> kb_v =
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
-                          add_if_in_exemplar, num_threads());
+                          add_if_in_exemplar, nthr);
 
     logger().debug("Adding  %d logical knobs", kb_v.size());
     foreach (const logical_subtree_knob& kb, kb_v) {

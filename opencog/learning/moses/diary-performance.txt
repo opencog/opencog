@@ -281,7 +281,7 @@ Opencog revision 6386:
 
 -Hpa -k4 -m50000
 (no r flag):  0m52.547s (best is -1)
--r1: 0m51.907s  (also -1, as are result unless otherwise indicated)
+-r1: 0m51.907s  (also -1, as are other results unless otherwise indicated)
 -r2: 1m26.161s
 -r3: 1m1.008s  (best is -2)
 -r4: 1m26.425s
@@ -3481,3 +3481,32 @@ Fix required to build_knobs, disc_probe()
 
 hashing:  207032 disc knobs in 25:36min = 134 knobs/sec ouch!
 New code: as above but 0.50 seconds.  3000x faster. Woot!
+
+==============================================================
+
+logical_probe_rec(): the overhead of creating threads can vastly
+overwhelm the number of logical knobs to probe... so: discrete knobs:
+
+baseline:
+single-threaded: moses -Hpa -k4 -m64000 -r7
+real	0m30.856s
+user	0m30.831s
+sys	0m0.033s
+
+logical_probe_rec(), disable the recursion by setting n_jobs to 1:
+
+twelve-threaded:  moses -Hpa -k4 -m64000 -r7 -j12
+real	0m33.739s
+user	3m49.950s
+sys	0m25.207s
+
+logical_probe_rec(), recurse by setting n_jobs to 12:
+
+twelve-threaded:  moses -Hpa -k4 -m64000 -r7 -j12
+real	0m41.545s
+user	4m53.910s
+sys	0m29.970s
+
+Yikes. Another case, with 3326 knobs is a clear looser, not even
+close to the breakpoint...
+
