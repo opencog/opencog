@@ -338,51 +338,12 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // Keep the size of the deme at a managable level.
         // Large populations can easily blow out the RAM on a machine,
         // so we want to keep it at some reasonably trim level.
-        // XXX TODO: we should also account for the actual size of
-        // an instance (say, in bytes), because pop management is a
-        // cpu-timewaster if the instances are small.
         //
         // To avoid wasting cpu time pointlessly, don't bother with
         // population size management if its already small.
 #define ACCEPTABLE_SIZE 2000
-        if (ACCEPTABLE_SIZE < current_number_of_instances) {
-
-            // Lets see how many we might be able to trounce.
-            score_t cutoff = best_score - hc_params.score_range;
-            size_t bad_score_cnt = 0;
-
-            // To find the number of bad scores, we have to look
-            // at the *whole* deme.
-            foreach (const deme_inst_t& si, deme) {
-                score_t iscore = get_penalized_score(si.second);
-                if (iscore <  cutoff)
-                    bad_score_cnt++;
-            }
-
-            // To avoid wasting cpu time pointlessly, don't bother with
-            // population size management if we don't get any bang  out
-            // of it.
-#define DONT_BOTHER_SIZE 500
-            if (DONT_BOTHER_SIZE < bad_score_cnt) {
-
-cout <<"duuude we are bad! "<<bad_score_cnt<<endl;
-                logger().debug() << "Will trim "
-                    << bad_score_cnt << "low scoreing instances.";
-                current_number_of_instances = resize_deme(deme, best_score);
-            }
-        }
-/*
-int i=0;
-        if (hc_params.max_allowed_instances  < current_number_of_instances) {
-foreach(const deme_inst_t& si, deme) {
-  const composite_score &inst_cscore = si.second;
-  score_t iscore = get_penalized_score(inst_cscore);
-// cout<<i<<" score="<< iscore<<endl;
-i++;
-}
-        }
-*/
-
+        if (ACCEPTABLE_SIZE < current_number_of_instances)
+            current_number_of_instances = resize_deme(deme, best_score);
 
         if (has_improved) {
             distance = 1;
@@ -632,7 +593,7 @@ size_t hill_climbing::cross_top_three(deme_t& deme,
     return num_to_make;
 }
 
-size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
+size_t hill_climbing::resize_by_score(deme_t& deme, score_t best_score)
 {
     score_t cutoff = best_score - hc_params.score_range;
     size_t ndeleted = 0;
@@ -661,6 +622,53 @@ cout<<"duuude contig="<<contig<<endl;
     }
 cout<<"duuude ndeleted = "<<ndeleted<<endl;
 cout<<"duuude demsiz="<<deme.size()<<endl;
+    return deme.size();
+}
+
+/// Keep the size of the deme at a managable level.
+/// Large populations can easily blow out the RAM on a machine,
+/// so we want to keep it at some reasonably trim level.
+/// XXX TODO: we should also account for the actual size of
+/// an instance (say, in bytes), because pop management is a
+/// cpu-timewaster if the instances are small.
+//
+size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
+{
+    // Lets see how many we might be able to trounce.
+    score_t cutoff = best_score - hc_params.score_range;
+    size_t bad_score_cnt = 0;
+
+    // To find the number of bad scores, we have to look
+    // at the *whole* deme.
+    foreach (const deme_inst_t& si, deme) {
+        score_t iscore = get_penalized_score(si.second);
+        if (iscore <  cutoff)
+            bad_score_cnt++;
+    }
+
+    // To avoid wasting cpu time pointlessly, don't bother with
+    // population size management if we don't get any bang  out
+    // of it.
+#define DONT_BOTHER_SIZE 500
+    if (DONT_BOTHER_SIZE < bad_score_cnt) {
+
+        logger().debug() << "Will trim "
+            << bad_score_cnt << "low scoring instances.";
+        resize_by_score(deme, best_score);
+    }
+
+    // Are we still too large? Whack more, if needed.
+    // We want to whack only the worst scorerers, and thus
+    // a partial sort up front.
+    if (hc_params.max_allowed_instances < deme.size()) {
+        std::partial_sort(deme.begin(),
+                          next(deme.begin(), hc_params.max_allowed_instances),
+                          deme.end(),
+                          std::greater<deme_inst_t>());
+
+        deme.erase(next(deme.begin(), hc_params.max_allowed_instances),
+                   deme.end());
+    }
     return deme.size();
 }
 

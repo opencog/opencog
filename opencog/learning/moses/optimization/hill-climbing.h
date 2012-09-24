@@ -210,6 +210,7 @@ struct hill_climbing : optimizer_base
                            const instance& base);
 
     size_t resize_deme(deme_t& deme, score_t best_score);
+    size_t resize_by_score(deme_t& deme, score_t best_score);
 
     /**
      * Perform search of the local neighborhood of an instance.  The

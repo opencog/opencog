@@ -747,7 +747,7 @@ int moses_exec(int argc, char** argv)
          "The higher the more effort is spent on a deme.\n")
 
         (opt_desc_str(max_score_opt).c_str(),
-         value<score_t>(&max_score)->default_value(best_score),
+         value<score_t>(&max_score)->default_value(very_best_score),
          "The max score to reach, once reached MOSES halts. MOSES is"
          " sometimes able to calculate the max score that can be reached"
          " for a particular problem, in such case the max_score is"
