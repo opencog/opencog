@@ -34,12 +34,6 @@
 #include "../representation/instance_set.h"
 #include "../moses/scoring.h"
 
-// we choose the number 100 because below that multithreading is
-// disabled and it leads to some massive slow down because then most
-// of the computational power is spent on successive representation
-// building
-#define MINIMUM_DEME_SIZE         100
-
 namespace opencog { namespace moses {
 
 /**
@@ -170,11 +164,13 @@ struct optim_stats
 #endif
 };
 
+typedef instance_set<composite_score> deme_t;
+
 // Base class for all optimizers
 struct optimizer_base : optim_stats
 {
     // Return # of evaluations actually performed
-    virtual unsigned operator()(instance_set<composite_score>& deme,
+    virtual unsigned operator()(deme_t& deme,
                         const iscorer_base& iscorer, unsigned max_evals) = 0;
 
     virtual ~optimizer_base() {}

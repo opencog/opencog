@@ -67,7 +67,7 @@ struct univariate_optimization : optimizer_base
         : opt_params(op), eda_params(ep) {}
 
     // Return # of evaluations actually performed
-    unsigned operator()(instance_set<composite_score>& deme,
+    unsigned operator()(deme_t& deme,
                         const iscorer_base& iscorer, unsigned max_evals);
 
     optim_parameters opt_params;

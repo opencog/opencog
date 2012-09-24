@@ -1729,7 +1729,6 @@ int moses_exec(int argc, char** argv)
 
         logical_bscore bscore(func, arity);
         set_noise_or_ratio(bscore, as, noise, complexity_ratio);
-
         metapop_moses_results(exemplars, sig,
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, hc_params, meta_params, moses_params, mmr_pa);

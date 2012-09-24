@@ -153,7 +153,6 @@ void print_stats_header (optim_stats *os);
 
 struct deme_expander
 {
-    typedef instance_set<composite_score> deme_t;
     typedef deme_t::iterator deme_it;
     typedef deme_t::const_iterator deme_cit;
 
@@ -229,7 +228,6 @@ protected:
  */
 struct metapopulation : bscored_combo_tree_ptr_set
 {
-    typedef instance_set<composite_score> deme_t;
     typedef deme_t::iterator deme_it;
     typedef deme_t::const_iterator deme_cit;
 

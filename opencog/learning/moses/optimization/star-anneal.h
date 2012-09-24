@@ -134,12 +134,12 @@ struct simulated_annealing : optimizer_base
                            (max_distance - 1) + 1 );
     }
 
-    unsigned operator()(instance_set<composite_score>& deme,
+    unsigned operator()(deme_t& deme,
                         const instance& init_inst,
                         const iscorer_base& iscorer, unsigned max_evals);
 
     // like above but assumes that the initial instance is null
-    unsigned operator()(instance_set<composite_score>& deme,
+    unsigned operator()(deme_t& deme,
                         const iscorer_base& iscorer, unsigned max_evals)
     {
         const instance init_inst(deme.fields().packed_width());

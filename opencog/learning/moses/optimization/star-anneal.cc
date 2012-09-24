@@ -39,7 +39,7 @@ namespace opencog { namespace moses {
 // Star-shaped search  //
 /////////////////////////
 
-unsigned simulated_annealing::operator()(instance_set<composite_score>& deme,
+unsigned simulated_annealing::operator()(deme_t& deme,
                     const instance& init_inst,
                     const iscorer_base& iscorer, unsigned max_evals)
 {

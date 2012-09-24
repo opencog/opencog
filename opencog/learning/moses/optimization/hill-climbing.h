@@ -35,12 +35,6 @@
 #include "../moses/scoring.h"
 #include "optimization.h"
 
-// we choose the number 100 because below that multithreading is
-// disabled and it leads to some massive slow down because then most
-// of the computational power is spent on successive representation
-// building
-#define MINIMUM_DEME_SIZE         100
-
 namespace opencog { namespace moses {
 
 /// Hill-climbing paramters
@@ -57,7 +51,7 @@ struct hc_parameters
           max_nn_evals (max_evals),
           fraction_of_nn(_fraction_of_nn),
           score_range(5.0),
-          max_allowed_instances(2000)
+          max_allowed_instances(10000)
     {
         OC_ASSERT(0.0 < fraction_of_nn);
     }
@@ -162,7 +156,7 @@ struct hc_parameters
  */
 struct hill_climbing : optimizer_base
 {
-    hill_climbing(const optim_parameters& op = optim_parameters(),
+    hill_climbing(const optim_parameters& op,
                   const hc_parameters& hc = hc_parameters())
         : opt_params(op), hc_params(hc)
     {}
@@ -192,7 +186,7 @@ struct hill_climbing : optimizer_base
      *                number created will be the lesser of this and
      *                sample_size-1.
      */
-    deme_size_t cross_top_one(instance_set<composite_score>& deme,
+    deme_size_t cross_top_one(deme_t& deme,
                               deme_size_t deme_size,
                               deme_size_t num_to_make,
                               deme_size_t sample_start,
@@ -200,7 +194,7 @@ struct hill_climbing : optimizer_base
                               const instance& base);
 
     /** two-dimensional simplex version of above. */
-    deme_size_t cross_top_two(instance_set<composite_score>& deme,
+    deme_size_t cross_top_two(deme_t& deme,
                               deme_size_t deme_size,
                               deme_size_t num_to_make,
                               deme_size_t sample_start,
@@ -208,14 +202,14 @@ struct hill_climbing : optimizer_base
                               const instance& base);
 
     /** three-dimensional simplex version of above. */
-    deme_size_t cross_top_three(instance_set<composite_score>& deme,
+    deme_size_t cross_top_three(deme_t& deme,
                               deme_size_t deme_size,
                               deme_size_t num_to_make,
                               deme_size_t sample_start,
                               deme_size_t sample_size,
                               const instance& base);
 
-    deme_size_t resize_deme(instance_set<composite_score>& deme,
+    deme_size_t resize_deme(deme_t& deme,
                               deme_size_t deme_size);
     /**
      * Perform search of the local neighborhood of an instance.  The
@@ -234,7 +228,7 @@ struct hill_climbing : optimizer_base
      *         be equal or larger than the eval_best return, as not all
      *         evaluations lead to the best solution.
      */
-    unsigned operator()(instance_set<composite_score>& deme,
+    unsigned operator()(deme_t& deme,
                         const instance& init_inst,
                         const iscorer_base& iscorer, unsigned max_evals,
                         unsigned* eval_best = NULL);
@@ -242,7 +236,7 @@ struct hill_climbing : optimizer_base
     // Like above but assumes that init_inst is null (backward compatibility)
     // XXX In fact, all of the current code uses this entry point, no one
     // bothers to supply an initial instance.
-    unsigned operator()(instance_set<composite_score>& deme,
+    unsigned operator()(deme_t& deme,
                         const iscorer_base& iscorer, unsigned max_evals)
     {
         instance init_inst(deme.fields().packed_width());
