@@ -56,6 +56,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
             "microseconds\t"
             "new_instances\t"
             "num_instances\t"
+            "num_evals\t"
             "has_improved\t"
             "best_weighted_score\t"
             "delta_weighted\t"
@@ -81,6 +82,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
     deme_size_t nn_estimate = information_theoretic_bits(fields);
     field_set_size = nn_estimate;  // optim stats, printed by moses.
 
+    deme_size_t current_number_of_evals = 0;
     deme_size_t current_number_of_instances = 0;
 
     unsigned max_distance = opt_params.max_distance(fields);
@@ -140,7 +142,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
 
             // avoid overflow.
             deme_size_t nleft =
-                max_evals - current_number_of_instances;
+                max_evals - current_number_of_evals;
             if (nleft < number_of_new_instances)
                 number_of_new_instances = nleft;
 
@@ -179,7 +181,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
                 number_of_new_instances = hc_params.max_nn_evals;
 
             deme_size_t nleft =
-                max_evals - current_number_of_instances;
+                max_evals - current_number_of_evals;
 
             // If fraction is small, just use up the rest of the cycles.
             if (number_of_new_instances < MINIMUM_DEME_SIZE)
@@ -324,6 +326,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
         }
 #endif
         current_number_of_instances += number_of_new_instances;
+        current_number_of_evals += number_of_new_instances;
 
         if (has_improved) {
             distance = 1;
@@ -361,6 +364,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
                 << usec << "\t"
                 << number_of_new_instances << "\t"
                 << current_number_of_instances << "\t"
+                << current_number_of_evals << "\t"
                 << has_improved << "\t"
                 << best_score << "\t"   /* weighted score */
                 << best_score - prev_hi << "\t"  /* previous weighted */
@@ -382,7 +386,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
 
         /* If we've blown our budget for evaluating the scorer,
          * then we are done. */
-        if (max_evals <= current_number_of_instances) {
+        if (max_evals <= current_number_of_evals) {
             over_budget = true;
             logger().debug("Terminate Local Search: Over budget");
             break;
@@ -454,7 +458,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
         }
     }
 
-    return current_number_of_instances;
+    return current_number_of_evals;
 }
 
 deme_size_t hill_climbing::cross_top_one(instance_set<composite_score>& deme,
