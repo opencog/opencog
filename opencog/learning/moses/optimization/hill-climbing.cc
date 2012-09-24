@@ -111,7 +111,8 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
     // Whether the score has improved during an iteration
     while (true)
     {
-        logger().debug("Iteration: %u", ++iteration);
+        ++iteration;
+        logger().debug("Iteration: %u", iteration);
 
         // Estimate the number of neighbours at the distance d.
         // This is faster than actually counting.
@@ -267,7 +268,7 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
         unsigned ibest = current_number_of_instances;
         for (unsigned i = current_number_of_instances;
              deme.begin() + i != deme.end(); ++i) {
-            composite_score inst_cscore = deme[i].second;
+            const composite_score &inst_cscore = deme[i].second;
             score_t iscore = get_penalized_score(inst_cscore);
             if (iscore >  best_score) {
                 best_cscore = inst_cscore;
@@ -284,6 +285,18 @@ unsigned hill_climbing::operator()(instance_set<composite_score>& deme,
             if (rscore >  best_raw_score) {
                 best_raw_score = rscore;
             }
+        }
+
+        // Keep the size of the deme at a managable level.
+        // resize_deme();
+int i=0;
+        if (hc_params.max_allowed_instances < current_number_of_instances) {
+foreach(const scored_instance<composite_score>& si, deme) {
+  const composite_score &inst_cscore = si.second;
+  score_t iscore = get_penalized_score(inst_cscore);
+cout<<i<<" score="<< iscore<<endl;
+i++;
+}
         }
 
         bool has_improved = opt_params.score_improved(best_score, prev_hi);
@@ -574,6 +587,13 @@ deme_size_t hill_climbing::cross_top_three(instance_set<composite_score>& deme,
         }
     }
     return num_to_make;
+}
+
+deme_size_t hill_climbing::resize_deme(instance_set<composite_score>& deme,
+                          deme_size_t deme_size)
+{
+    // Under construction ... 
+    return 0;
 }
 
 } // ~namespace moses

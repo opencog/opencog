@@ -55,7 +55,9 @@ struct hc_parameters
           single_step(step),
           crossover(cross),
           max_nn_evals (max_evals),
-          fraction_of_nn(_fraction_of_nn)
+          fraction_of_nn(_fraction_of_nn),
+          score_range(5.0),
+          max_allowed_instances(2000)
     {
         OC_ASSERT(0.0 < fraction_of_nn);
     }
@@ -94,6 +96,24 @@ struct hc_parameters
     // was insane/non-sensical.  I can't figure out how it was supposed
     // to work.
     double fraction_of_nn;
+
+    // Range of scores for which to keep instances.  This *should* be
+    // set to the value given by metapopulation::useful_score_range().
+    // XXX TODO make sure this value is appropriately updated.
+    //
+    // The range of scores is used to keep the size of the deme in check.
+    // The issue is that, for large feature sets, a large number of knobs
+    // get created, which means that instances are huge.  It is easy to
+    // end up with demes in the tens-of-gigabytes in size, and that's bad,
+    // especially when most of the instances have terrible scores.
+    score_t score_range;
+
+    // Maximum alllowed size of the deme. 
+    // Thisis used to keep the size of the deme in check.
+    // The issue is that, for large feature sets, a large number of knobs
+    // get created, which means that instances are huge.  It is easy to
+    // end up with demes in the tens-of-gigabytes in size, and that's bad.
+    deme_size_t max_allowed_instances;
 };
 
 ///////////////////
@@ -195,6 +215,8 @@ struct hill_climbing : optimizer_base
                               deme_size_t sample_size,
                               const instance& base);
 
+    deme_size_t resize_deme(instance_set<composite_score>& deme,
+                              deme_size_t deme_size);
     /**
      * Perform search of the local neighborhood of an instance.  The
      * search is exhaustive if the local neighborhood is small; else
