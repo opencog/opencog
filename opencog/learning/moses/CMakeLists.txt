@@ -39,6 +39,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/using
 	optimization/hill-climbing
 	optimization/optimization
+	optimization/star-anneal
 	optimization/univariate
 	representation/build_knobs
 	representation/field_set
