@@ -31,6 +31,7 @@
 
 #include <opencog/comboreduct/combo/combo.h>
 
+#include "../optimization/univariate.h"
 #include "distributed_moses.h"
 #include "moses_params.h"
 #include "scoring.h"

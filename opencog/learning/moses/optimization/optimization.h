@@ -228,32 +228,6 @@ struct optim_stats
 #endif
 };
 
-// Parameters specific to EDA optimization
-struct eda_parameters
-{
-    eda_parameters() :
-        selection(2),          //if <=1, truncation selection ratio,
-                               //if >1, tournament selection size (should be int)
-        selection_ratio(1),    //ratio of population size selected for modeling
-
-        replacement_ratio(0.5),//ratio of population size sampled and integrated
-
-        model_complexity(1)    //model parsimony term log(N)*model_complexity
-    {}
-
-    bool is_tournament_selection() {
-        return selection > 1;
-    }
-    bool is_truncation_selection() {
-        return selection <= 1;
-    }
-
-    double selection;
-    double selection_ratio;
-    double replacement_ratio;
-    double model_complexity;
-};
-
 // Base class for all optimizers
 struct optimizer_base : optim_stats
 {
@@ -264,19 +238,6 @@ struct optimizer_base : optim_stats
     virtual ~optimizer_base() {}
 };
 
-struct univariate_optimization : optimizer_base
-{
-    univariate_optimization(const optim_parameters& op = optim_parameters(),
-                            const eda_parameters& ep = eda_parameters())
-        : opt_params(op), eda_params(ep) {}
-
-    // Return # of evaluations actually performed
-    unsigned operator()(instance_set<composite_score>& deme,
-                        const iscorer_base& iscorer, unsigned max_evals);
-
-    optim_parameters opt_params;
-    eda_parameters eda_params;
-};
 
 ///////////////////
 // Hill Climbing //

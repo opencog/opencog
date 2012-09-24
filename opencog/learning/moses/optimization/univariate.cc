@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/optimization/Univariate.cc
+ * opencog/learning/moses/optimization/univariate.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -34,7 +34,7 @@
 #include "../eda/optimize.h"
 #include "../moses/neighborhood_sampling.h"
 
-#include "optimization.h"
+#include "univariate.h"
 
 namespace opencog { namespace moses {
 

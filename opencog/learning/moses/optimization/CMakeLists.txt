@@ -1,6 +1,7 @@
 #install header files
 INSTALL(FILES
 	optimization.h
+	univariate.h
 
 	DESTINATION
 
