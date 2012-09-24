@@ -593,13 +593,18 @@ size_t hill_climbing::cross_top_three(deme_t& deme,
     return num_to_make;
 }
 
-size_t hill_climbing::resize_by_score(deme_t& deme, score_t best_score)
+/// Shrink the deme, by removing all instances with score less than
+/// 'cutoff'.  This is implemented with in-place deletion of elements
+/// from a vector, with at least a token attempt to delete contigous
+/// regions of low scores, in one go.  It is possible that a faster
+/// algorithm would be to sort first, and then delete the tail-end of
+/// the vector.  But this ixsn't know ... XXX experiment with this!?
+/// ... err, but right now, trimming takes a small fraction of a second,
+/// so there is no rush to fis this.
+size_t hill_climbing::resize_by_score(deme_t& deme, score_t cutoff)
 {
-    score_t cutoff = best_score - hc_params.score_range;
     size_t ndeleted = 0;
-    bool not_done = true;
-    while (not_done) {
-         not_done = false;
+    while (true) {
          auto first = deme.end();
          auto last = deme.end();
          size_t contig = 0;
@@ -610,18 +615,20 @@ size_t hill_climbing::resize_by_score(deme_t& deme, score_t best_score)
                  last = it;
                  contig ++;
              } else {
-                 if (0 < contig) {
-                     deme.erase(first, ++last);
-                     ndeleted += contig;
-                     not_done = true;
-cout<<"duuude contig="<<contig<<endl;
+                 if (0 < contig)
                      break;
-                 }
              }
          }
+
+         if (0 == contig) 
+             break;
+
+         if (last != deme.end()) last++;
+         deme.erase(first, last);
+         ndeleted += contig;
     }
-cout<<"duuude ndeleted = "<<ndeleted<<endl;
-cout<<"duuude demsiz="<<deme.size()<<endl;
+    logger().debug() << "Trimmed "
+            << ndeleted << " low scoring instances.";
     return deme.size();
 }
 
@@ -642,19 +649,19 @@ size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
     // at the *whole* deme.
     foreach (const deme_inst_t& si, deme) {
         score_t iscore = get_penalized_score(si.second);
-        if (iscore <  cutoff)
+        if (iscore <=  cutoff)
             bad_score_cnt++;
     }
 
     // To avoid wasting cpu time pointlessly, don't bother with
-    // population size management if we don't get any bang  out
+    // population size management if we don't get any bang out
     // of it.
 #define DONT_BOTHER_SIZE 500
     if (DONT_BOTHER_SIZE < bad_score_cnt) {
 
-        logger().debug() << "Will trim "
-            << bad_score_cnt << "low scoring instances.";
-        resize_by_score(deme, best_score);
+        logger().debug() << "Will trim " << bad_score_cnt
+            << " low scoring instances out of " << deme.size();
+        resize_by_score(deme, cutoff);
     }
 
     // Are we still too large? Whack more, if needed.
