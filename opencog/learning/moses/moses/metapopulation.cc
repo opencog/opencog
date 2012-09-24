@@ -393,10 +393,11 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
     logger().debug("Resize the metapopulation (%u), removing worst candidates",
                    old_size);
     resize_metapop();
-    logger().debug("Removed %u candidates from the metapopulation",
-                   old_size - size());
-    
+
     if (logger().isDebugEnabled()) {
+        logger().debug("Removed %u candidates from the metapopulation",
+                       old_size - size());
+    
         logger().debug("Metapopulation size is %u", size());
         if (logger().isFineEnabled()) {
             stringstream ss;
@@ -624,69 +625,69 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
 
 void metapopulation::resize_metapop()
 {
-    if (size() > min_pool_size) {
+    if (size() <= min_pool_size)
+        return;
 
-        // pointers to deallocate
-        std::vector<bscored_combo_tree*> ptr_seq;
+    // pointers to deallocate
+    std::vector<bscored_combo_tree*> ptr_seq;
 
-        score_t top_score = get_penalized_score(*begin()),
-            range = useful_score_range(),
-            worst_score = top_score - range;
+    score_t top_score = get_penalized_score(*begin());
+    score_t range = useful_score_range();
+    score_t worst_score = top_score - range;
 
-        // Erase all the lowest scores.  The metapop is in quasi-sorted
-        // order (since the deme was sorted before being appended), so
-        // this bulk remove mostly works "correctly". It is also 25%
-        // faster than above. I think this is because the erase() above
-        // causes the std::set to try to sort the contents, and this
-        // ends up costing a lot.  I think... not sure.
-        iterator it = std::next(begin(), min_pool_size);
-        while (it != end()) {
-            score_t sc = get_penalized_score(*it);
-            if (sc < worst_score) break;
-            it++;
-        }
+    // Erase all the lowest scores.  The metapop is in quasi-sorted
+    // order (since the deme was sorted before being appended), so
+    // this bulk remove mostly works "correctly". It is also 25%
+    // faster than above. I think this is because the erase() above
+    // causes the std::set to try to sort the contents, and this
+    // ends up costing a lot.  I think... not sure.
+    iterator it = std::next(begin(), min_pool_size);
+    while (it != end()) {
+        score_t sc = get_penalized_score(*it);
+        if (sc < worst_score) break;
+        it++;
+    }
 
-        while (it != end()) {
-            ptr_seq.push_back(&*it);
-            it = erase(it);
-        }
+    while (it != end()) {
+        ptr_seq.push_back(&*it);
+        it = erase(it);
+    }
 
-        // Is the population still too large?  Yes, it is, if it is more
-        // than 50 times the size of the current number of generations.
-        // Realisitically, we could never explore more than 2% of a pool
-        // that size.  For 10Bytes per table row, 20K rows, generation=500
-        // this will still eat up tens of GBytes of RAM, and so is a
-        // relatively lenient cap.
-        // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
-        //
-        // XXX TODO fix the cap so its more sensitive to the size of
-        // each exemplar, right!?
-        // size_t nbelts = get_bscore(*begin()).size();
-        // double cap = 1.0e6 / double(nbelts);
-        _merge_count++;
-        double cap = 50.0;
-        cap *= _merge_count + 250.0;
-        cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
-        size_t popsz_cap = cap;
-        size_t popsz = size();
-        while (popsz_cap < popsz)
-        {
-            // Leave the first 50 alone.
-            static const int offset = 50;
-            int which = offset + randGen().randint(popsz-offset);
-            // using std is necessary to break the ambiguity between
-            // boost::next and std::next. Weirdly enough this appears
-            // only 32bit arch
-            iterator it = std::next(begin(), which);
-            ptr_seq.push_back(&*it);
-            erase(it);
-            popsz --;
-        }
+    // Is the population still too large?  Yes, it is, if it is more
+    // than 50 times the size of the current number of generations.
+    // Realisitically, we could never explore more than 2% of a pool
+    // that size.  For 10Bytes per table row, 20K rows, generation=500
+    // this will still eat up tens of GBytes of RAM, and so is a
+    // relatively lenient cap.
+    // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
+    //
+    // XXX TODO fix the cap so its more sensitive to the size of
+    // each exemplar, right!?
+    // size_t nbelts = get_bscore(*begin()).size();
+    // double cap = 1.0e6 / double(nbelts);
+    _merge_count++;
+    double cap = 50.0;
+    cap *= _merge_count + 250.0;
+    cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
+    size_t popsz_cap = cap;
+    size_t popsz = size();
+    while (popsz_cap < popsz)
+    {
+        // Leave the first 50 alone.
+        static const int offset = 50;
+        int which = offset + randGen().randint(popsz-offset);
+        // using std is necessary to break the ambiguity between
+        // boost::next and std::next. Weirdly enough this appears
+        // only 32bit arch
+        iterator it = std::next(begin(), which);
+        ptr_seq.push_back(&*it);
+        erase(it);
+        popsz --;
+    }
 
-        // remove them from _cached_cnd
-        boost::sort(ptr_seq);
-        _cached_ddp.erase_ptr_seq(ptr_seq);
-    } // end of if (size() > min_pool_size)
+    // remove them from _cached_cnd
+    boost::sort(ptr_seq);
+    _cached_ddp.erase_ptr_seq(ptr_seq);
 }
 
 // Return the set of candidates not present in the metapopulation.
