@@ -24,8 +24,6 @@
 #ifndef _EDA_INITIALIZATION_H
 #define _EDA_INITIALIZATION_H
 
-#include <opencog/util/RandGen.h>
-
 #include "../representation/field_set.h"
 
 //various routines for initializing instances

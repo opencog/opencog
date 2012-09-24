@@ -37,6 +37,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/scoring
 	moses/types
 	moses/using
+	optimization/hill-climbing
 	optimization/optimization
 	optimization/univariate
 	representation/build_knobs
