@@ -539,13 +539,15 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     // cost of copying the knobs, and then copying the results, 
     // as well as async thread setup, can be huge.  So don't do it
     // until a minumum number of break-even knobs need examination.
-    // The number of 60K is a wild guesstimate, based on recent
+    // The number of 30K is a wild guesstimate, based on recent
     // measurements of relatively simple exemplars; its maybe even
     // too low.  For large exemplars, it might be too big !?
     // XXX TODO clarify actual breakeven on range of problems...
-#define BREAKEVEN 60000
-    int nthr = (BREAKEVEN < np) ?  num_threads() : 1;
-
+#define BREAKEVEN 30000
+    int nthr = 1 + np / BREAKEVEN;
+    int maxth = num_threads();
+    if (nthr > maxth) nthr = maxth;
+     
     ptr_vector<logical_subtree_knob> kb_v =
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, nthr);
