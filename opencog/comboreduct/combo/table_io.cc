@@ -21,7 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <atomic>
 #include <iomanip>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/transform.hpp>
@@ -278,10 +280,10 @@ istream& istreamRawITable(istream& in, ITable& tab)
     std::vector<string> lines;
 
     // Read first few by hand.
-    get_data_line(in, line);
-    lines.push_back(line);
-    get_data_line(in, line);
-    lines.push_back(line);
+    dorepeat(2) {
+        get_data_line(in, line);
+        lines.push_back(line);
+    }
 
     // If it is a sparse file, we are outta here.
     // throw an std::exception, since we don't to log this as an error
@@ -299,7 +301,7 @@ istream& istreamRawITable(istream& in, ITable& tab)
     vector<string> fl = tokenizeRow<string>(lines[0]);
     arity_t arity = fl.size();
 
-    int arity_fail_row = -1;
+    atomic<int> arity_fail_row(-1);
     auto parse_line = [&](int i)
     {
         // tokenize the line
@@ -308,23 +310,10 @@ istream& istreamRawITable(istream& in, ITable& tab)
         // Check arity
         if (arity != (arity_t)io.size())
             arity_fail_row = i + 1;
-#ifdef GCC_OMP_GLIBC_EXCEPTION_BUG
-            // XXX This exception cannot be caught, because its inside a
-            // multi-threaded OMP algo, and so each thread throws, but
-            // there's only one thread that is trying to catch, and so
-            // the catcher perceives this as a recursive exception. This
-            // is a gcc+omp+glibc bug, and may take many years to get fixed.
-            // Oh well...
-            throw AssertionException(TRACE_INFO,
-                  "ERROR: Input file inconsistent: the %uth row has %u "
-                  "columns while the first row has %d columns.  All "
-                  "rows should have the same number of columns.\n",
-                  i + 1, io.size(), arity);
-#endif // GCC_OMP_GLIBC_EXCEPTION_BUG
-
+        
         // Fill table with string-valued vertexes.
         foreach (const string& tok, io) {
-            vertex v = (vertex) tok;
+            vertex v(tok);
             tab[i].push_back(v);
         }
     };
@@ -338,11 +327,12 @@ istream& istreamRawITable(istream& in, ITable& tab)
 
     if (-1 != arity_fail_row) {
         in.seekg(beg);
-        throw AssertionException(TRACE_INFO,
-              "ERROR: Input file inconsistent: the %uth row has "
-              "a different number of columns than the rest of the file.  "
-              "All rows should have the same number of columns.\n",
-               arity_fail_row);
+        throw AssertionException
+            (TRACE_INFO,
+             "ERROR: Input file inconsistent: the %uth row has "
+             "a different number of columns than the rest of the file.  "
+             "All rows should have the same number of columns.\n",
+             arity_fail_row.load());
     }
     return in;
 }
@@ -523,7 +513,8 @@ vector<type_node> infer_column_types(const ITable& tab)
 
     // Skip the first line, it might be a header...
     // and that would confuse type inference.
-    rowit++;
+    if (tab.size() > 1)
+        rowit++;
     for (; rowit != tab.end(); rowit++)
     {
         // TODO: could use a two-arg transform, here, but its tricky ...
@@ -544,12 +535,12 @@ vector<type_node> infer_column_types(const ITable& tab)
  */
 bool has_header(ITable& tab, vector<type_node> col_types)
 {
-    vector<vertex_seq>::const_iterator rowit = tab.begin();
+    const vertex_seq& row = *tab.begin();
 
-    arity_t arity = (*rowit).size();
+    arity_t arity = row.size();
 
     for (arity_t i=0; i<arity; i++) {
-        const vertex &v = (*rowit)[i];
+        const vertex& v = row[i];
         const string& tok = boost::get<string>(v);
         type_node flt = infer_type_from_token(col_types[i], tok);
         if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
@@ -607,12 +598,11 @@ istream& istreamITable(istream& in, ITable& tab,
     OMP_ALGO::for_each (tab.begin(), tab.end(),
         [&](vertex_seq& row) {
             for (arity_t i=0; i<arity; i++) {
-                 vertex v = row[i];
-                 const string& tok = boost::get<string>(v);
+                 const string& tok = boost::get<string>(row[i]);
                  row[i] = token_to_vertex(ig_types[i], tok);
             }
         });
-
+    
     return in;
 }
 
