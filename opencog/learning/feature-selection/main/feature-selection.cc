@@ -61,10 +61,10 @@ void err_empty_features(const string& outfile)
     // allows downstream processes to infer what happened (i.e. to tell
     // apart this case from an outright crash.)
     logger().warn() << "No features have been selected.";
-    std::cerr << "No features have been selected." << std::endl;
+    cerr << "No features have been selected." << endl;
     if (!outfile.empty()) {
         ofstream out(outfile.c_str());
-        out << "# No features have been selected." << std::endl;
+        out << "# No features have been selected." << endl;
     }
     exit(0);
 }
@@ -119,17 +119,17 @@ Table add_force_features(const Table& selected_table,
     // get forced features that have not been selected
     const vector<string>& fsel = selected_table.itable.get_labels();
     vector<string> fnsel;
-    foreach (const std::string& fn, fs_params.force_features_str)
+    foreach (const string& fn, fs_params.force_features_str)
         if (boost::find(fsel, fn) == fsel.cend())
             fnsel.push_back(fn);
-
+    
     // get the complement: all features except the above.
-    std::vector<std::string> all_feats = full_table.get_labels();
-    std::vector<std::string> fnot_sel_comp;
+    vector<string> all_feats = full_table.get_labels();
+    vector<string> fnot_sel_comp;
     boost::set_difference(all_feats, fnsel, back_inserter(fnot_sel_comp));
-
+    
     // If nothing to do, we are done.
-    if (0 == fnsel.size())
+    if (fnsel.empty())
         return selected_table;
 
     // load the table with force_non_selected features with all
@@ -176,7 +176,7 @@ void write_results(const Table& selected_table,
 {
     Table table_wff = add_force_features(selected_table, full_table, fs_params);
     if (fs_params.output_file.empty())
-        ostreamTable(std::cout, table_wff);
+        ostreamTable(cout, table_wff);
     else
         saveTable(fs_params.output_file, table_wff);
 }
@@ -185,11 +185,11 @@ instance initial_instance(const feature_selection_parameters& fs_params,
                           const field_set& fields,
                           const vector<string>& labels)
 {
-    vector<std::string> vif; // valid initial features, used for logging
+    vector<string> vif; // valid initial features, used for logging
     instance res(fields.packed_width());
 
-    foreach(const std::string& f, fs_params.hc_initial_features) {
-        size_t idx = std::distance(labels.begin(), boost::find(labels, f));
+    foreach(const string& f, fs_params.hc_initial_features) {
+        size_t idx = distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found
             *(fields.begin_bit(res) + idx) = true;
             // for logging
@@ -276,9 +276,9 @@ feature_set select_features(const CTable& ctable,
     } else if (fs_params.algorithm == mmi) {
         return max_mi_select_features(ctable, fs_params);
     } else {
-        std::cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
-                  << "' is unknown, please consult the help for the "
-                     "list of algorithms." << std::endl;
+        cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
+             << "' is unknown, please consult the help for the "
+             << "list of algorithms." << endl;
         exit(1);
         return feature_set(); // to please Mr compiler
     }
