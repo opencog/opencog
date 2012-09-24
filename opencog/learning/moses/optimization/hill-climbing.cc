@@ -33,7 +33,7 @@
 
 #include "../moses/neighborhood_sampling.h"
 
-#include "optimization.h"
+#include "hill-climbing.h"
 
 namespace opencog { namespace moses {
 

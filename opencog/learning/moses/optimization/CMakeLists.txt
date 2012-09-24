@@ -1,5 +1,6 @@
 #install header files
 INSTALL(FILES
+	hill-climbing.h
 	optimization.h
 	univariate.h
 

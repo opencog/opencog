@@ -30,6 +30,7 @@
 #include <opencog/learning/moses/eda/initialization.h>
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/optimization/hill-climbing.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/representation/field_set.h>
 
@@ -66,8 +67,8 @@ public:
         distance_based_scorer scorer(fs, target_inst);
         // Local search optimization
         optim_parameters op_param(hc, 20, 1);
-        op_param.hc_params = hc_parameters(false); // do not terminate if improvement
-        hill_climbing hc(op_param);
+        hc_parameters hc_params = hc_parameters(false); // do not terminate if improvement
+        hill_climbing hc(op_param, hc_params);
         // empty deme
         instance_set<composite_score> deme(fs);
         // perform the search

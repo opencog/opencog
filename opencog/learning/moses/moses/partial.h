@@ -26,6 +26,7 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
+#include "../optimization/hill-climbing.h"
 #include "metapopulation.h"
 #include "moses_main.h"
 
@@ -43,6 +44,7 @@ class partial_solver
                        const vector<combo_tree>& exemplars,
                        const rule& reduct,
                        const optim_parameters& opt_params,
+                       const hc_parameters& hc_params,
                        const metapop_parameters& meta_params,
                        const moses_parameters& moses_params,
                        const metapop_printer& mmr_pa);
@@ -110,6 +112,7 @@ class partial_solver
         unsigned _prefix_count;
         const rule& _reduct;
         optim_parameters _opt_params;
+        hc_parameters _hc_params;
         metapop_parameters _meta_params;
         moses_parameters _moses_params;
         const metapop_printer& _printer;

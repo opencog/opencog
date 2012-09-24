@@ -42,6 +42,7 @@
 #include <opencog/comboreduct/combo/table_io.h>
 
 #include <opencog/learning/moses/optimization/optimization.h>
+#include <opencog/learning/moses/optimization/hill-climbing.h>
 
 #include "feature-selection.h"
 #include "../feature_optimization.h"
@@ -266,10 +267,11 @@ feature_set select_features(const CTable& ctable,
         op_params.terminate_if_gte = fs_params.hc_max_score;
         op_params.max_dist = max_dist;
         op_params.set_min_score_improv(min_score_improv);
-        op_params.hc_params.widen_search = true;
-        op_params.hc_params.single_step = false;
-        op_params.hc_params.crossover = false;
-        hill_climbing hc(op_params);
+        hc_parameters hc_params;
+        hc_params.widen_search = true;
+        hc_params.single_step = false;
+        hc_params.crossover = false;
+        hill_climbing hc(op_params, hc_params);
         return moses_select_features(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
         return incremental_select_features(ctable, fs_params);

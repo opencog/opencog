@@ -25,6 +25,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/optimization/optimization.h>
+#include <opencog/learning/moses/optimization/hill-climbing.h>
 #include <opencog/learning/moses/moses/scoring.h>
 
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>

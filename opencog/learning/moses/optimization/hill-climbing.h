@@ -1,0 +1,240 @@
+/*
+ * opencog/learning/moses/optimization/hill-climbing.h
+ *
+ * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings
+ * All Rights Reserved
+ *
+ * Written by Moshe Looks
+ *            Predrag Janicic
+ *            Nil Geisweiller
+ *            Xiaohui Liu
+ *            Linas Vepstas
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#ifndef _MOSES_HILL_CLIMBING_H
+#define _MOSES_HILL_CLIMBING_H
+
+// #include <opencog/util/selection.h>
+// #include <opencog/util/exceptions.h>
+// #include <opencog/util/oc_assert.h>
+
+#include "../representation/instance_set.h"
+#include "../moses/scoring.h"
+#include "optimization.h"
+
+// we choose the number 100 because below that multithreading is
+// disabled and it leads to some massive slow down because then most
+// of the computational power is spent on successive representation
+// building
+#define MINIMUM_DEME_SIZE         100
+
+namespace opencog { namespace moses {
+
+/// Hill-climbing paramters
+struct hc_parameters
+{
+    hc_parameters(bool widen = false,
+                  bool step = false,
+                  bool cross = false,
+                  unsigned max_evals = 20000,
+                  double _fraction_of_nn = 2.0) // > 1.0 since works on estimate only.
+        : widen_search(widen),
+          single_step(step),
+          crossover(cross),
+          max_nn_evals (max_evals),
+          fraction_of_nn(_fraction_of_nn)
+    {
+        OC_ASSERT(0.0 < fraction_of_nn);
+    }
+    
+    bool widen_search;
+    bool single_step;
+    bool crossover;
+
+    // Evaluate no more than this number of instances per iteration.
+    // Problems with 100 or more features easily lead to exemplars with
+    // complexity in excess of 100; these in turn, after decorating with
+    // knobs, can have 20K or more nearest neighbors.  Doing a full
+    // nearest neighbor scan for such cases will eat up a huge amount of
+    // RAM in the instance_set, and its not currently obvious that a full
+    // scan is that much better than a random sampling.  XXX Or is it?
+    //
+    // XXX This parameter should probably be automatically adjusted with
+    // free RAM availability!?  Or something like that !?
+    unsigned max_nn_evals;
+
+    // fraction_of_nn is the fraction of the nearest-neighbrohood (NN)
+    // that should be searched.  For exhaustive NN search, this fraction
+    // should be 1.0.  However, setting this lower seems to be OK,
+    // especially when used with cross-over, since a fraction seems enough
+    // to discover some decent instances that can be crossed-over.  And,
+    // by not doing an exhaustive search, the run-time can be significantly
+    // improved.
+    //
+    // XXX I don't understand what the below is saying.
+    // One should probably try first to tweak pop_size_ratio to
+    // control the allocation of resources. However in some cases (for
+    // instance when hill_climbing is used for feature-selection),
+    // there is only one deme to explore and tweaking that parameter
+    // can make a difference (breadth vs depth)
+    // XXX pop_size_ratio disabled in hill-climbing, since its definition
+    // was insane/non-sensical.  I can't figure out how it was supposed
+    // to work.
+    double fraction_of_nn;
+};
+
+///////////////////
+// Hill Climbing //
+///////////////////
+
+/**
+ * Hill Climbing: search the local neighborhood of an instance for the
+ * highest score, move to that spot, and repeat until no further
+ * improvment is possible.
+ *
+ * This optimizatin algo performs an exhaustive search of the local
+ * neighborhood centered upon a specific instance. The search is
+ * normally limited to the neighborhood at Hamming distance=1 from the
+ * central instance. The point with the best score (the "highest point")
+ * is declared the new center, and the exhaustive search of the nearest
+ * neighbors is repeated.  This loop is repeated until no further
+ * improvement is possible.
+ *
+ * The number of nearest neighbors is roughly equal to the number of
+ * knobs in the exemplar, and, more precisely, to the information-
+ * theoretic bit length of the field set.
+ *
+ * The operation of this algorithm is modified in several important
+ * ways. If the number of nearest neighbors exceeeds a significant
+ * fraction of the max-allowed scoring function evaluations, then the
+ * nearest neighborhood is sub-sampled, instead of being exhaustively
+ * searched.
+ *
+ * If the single_step flag is set, then the search will terminate if
+ * a higher-scoring instance is found.  Since the search is made only
+ * to distance=1, using this flag is silly, unless the widen_search
+ * flag is also used, which will cause the algo to search increasingly
+ * larger neighborhoods.  In this case, the algo stops when improvement
+ * is seen, or all neighborhoods up to the maximum distance have been
+ * explored.
+ *
+ * In call cases, the neighborhood searched is 'spherical'; that is,
+ * only the instances that are equi-distant from the exemplar are
+ * explored (i.e. at the same Hamming distance).
+ *
+ * NB: most problems seem to do just fine without the single-step,
+ * broaden-search flag combination.  However, some problems, esp. those
+ * with a deceptive scoring function (e.g. polynomial factoring, -Hsr)
+ * seem to work better with -L1 -T1 -I0.
+ */
+struct hill_climbing : optimizer_base
+{
+    hill_climbing(const optim_parameters& op = optim_parameters(),
+                  const hc_parameters& hc = hc_parameters())
+        : opt_params(op), hc_params(hc)
+    {}
+
+    /**
+     * Cross the single top-scoring instance against the next-highest scorers.
+     *
+     * As arguments, accepts a range of scored instances ("the sample"),
+     * and a singlee instance from which these were all derived ("the base"
+     * or center instance).  This will create a number of new instances,
+     * which will be a cross of the highest-scoring instance with the
+     * next-highest scoring instances.
+     *
+     * @deme:         the deme holding current instances, and where
+     *                new instances will be placed.
+     * @deme_size:    the current size of the deme. New instances
+     *                will be appended at the end.
+     * @base:         the base instance from which the sample was
+     *                was derived.
+     * @sample_start: the count, within the deme, at which the
+     *                scored instances start. These are assumed to
+     *                have been derived from the base instance.
+     * @sample_size:  the number of instances in the sample. These
+     *                are assumed to be in sequential order, starting
+     *                at sample_start.
+     * @num_to_make:  Number of new instances to create.  The actual
+     *                number created will be the lesser of this and
+     *                sample_size-1.
+     */
+    deme_size_t cross_top_one(instance_set<composite_score>& deme,
+                              deme_size_t deme_size,
+                              deme_size_t num_to_make,
+                              deme_size_t sample_start,
+                              deme_size_t sample_size,
+                              const instance& base);
+
+    /** two-dimensional simplex version of above. */
+    deme_size_t cross_top_two(instance_set<composite_score>& deme,
+                              deme_size_t deme_size,
+                              deme_size_t num_to_make,
+                              deme_size_t sample_start,
+                              deme_size_t sample_size,
+                              const instance& base);
+
+    /** three-dimensional simplex version of above. */
+    deme_size_t cross_top_three(instance_set<composite_score>& deme,
+                              deme_size_t deme_size,
+                              deme_size_t num_to_make,
+                              deme_size_t sample_start,
+                              deme_size_t sample_size,
+                              const instance& base);
+
+    /**
+     * Perform search of the local neighborhood of an instance.  The
+     * search is exhaustive if the local neighborhood is small; else
+     * the local neighborhood is randomly sampled.
+     *
+     * @param deme      Where to store the candidates searched. The deme
+     *                  is assumed to be empty.  If it is not empty, it
+     *                  will be overwritten.
+     * @prama init_inst Start the seach from this instance.
+     * @param iscorer   the Scoring function.
+     * @param max_evals The maximum number of evaluations to eperform.
+     * @param eval_best returned: The number of evaluations performed
+     *                  to reach the best solution.
+     * @return number of evaluations actually performed. This will always
+     *         be equal or larger than the eval_best return, as not all
+     *         evaluations lead to the best solution.
+     */
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const instance& init_inst,
+                        const iscorer_base& iscorer, unsigned max_evals,
+                        unsigned* eval_best = NULL);
+
+    // Like above but assumes that init_inst is null (backward compatibility)
+    // XXX In fact, all of the current code uses this entry point, no one
+    // bothers to supply an initial instance.
+    unsigned operator()(instance_set<composite_score>& deme,
+                        const iscorer_base& iscorer, unsigned max_evals)
+    {
+        instance init_inst(deme.fields().packed_width());
+        return operator()(deme, init_inst, iscorer, max_evals);
+    }
+
+    optim_parameters opt_params;
+    hc_parameters hc_params;
+};
+
+
+} // ~namespace moses
+} // ~namespace opencog
+
+#endif

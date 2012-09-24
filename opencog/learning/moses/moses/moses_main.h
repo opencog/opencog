@@ -31,6 +31,7 @@
 
 #include <opencog/comboreduct/combo/combo.h>
 
+#include "../optimization/hill-climbing.h"
 #include "../optimization/univariate.h"
 #include "distributed_moses.h"
 #include "moses_params.h"
@@ -196,6 +197,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              const cscore_base& sc,
                              const bscore_base& bsc,
                              const optim_parameters& opt_params,
+                             const hc_parameters& hc_params,
                              const metapop_parameters& meta_params,
                              const moses_parameters& moses_params,
                              Printer& printer)
@@ -204,7 +206,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
     optimizer_base *optimizer = NULL;
 
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
-        optimizer = new hill_climbing(opt_params);
+        optimizer = new hill_climbing(opt_params, hc_params);
     }
     else if (opt_params.opt_algo == sa) { // simulated annealing
         optimizer = new simulated_annealing(opt_params);
@@ -238,6 +240,7 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
                            const reduct::rule& si_kb,
                            bscore_base& bscorer,
                            optim_parameters opt_params,
+                           hc_parameters hc_params,
                            const metapop_parameters& meta_params,
                            moses_parameters moses_params,
                            Printer& printer)
@@ -271,11 +274,11 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
         // ScoreACache score_acache(score_cache);
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb,
                                 score_cache /*score_acache*/, bscorer,
-                                opt_params, meta_params, moses_params,
+                                opt_params, hc_params, meta_params, moses_params,
                                 printer);
     } else
         metapop_moses_results_b(bases, type_sig, si_ca, si_kb, c_scorer, bscorer,
-                                opt_params, meta_params, moses_params, printer);
+                                opt_params, hc_params, meta_params, moses_params, printer);
 }
 
 } // ~namespace moses

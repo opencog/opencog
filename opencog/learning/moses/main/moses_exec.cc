@@ -38,6 +38,7 @@
 #include "moses_exec_def.h"
 #include "../moses/moses_main.h"
 #include "../moses/partial.h"
+#include "../optimization/hill-climbing.h"
 #include "../optimization/optimization.h"
 #include "../example-progs/scoring_iterators.h"
 
@@ -1203,11 +1204,12 @@ int moses_exec(int argc, char** argv)
 
     // Set optim_parameters.
     optim_parameters opt_params(opt_algo, pop_size_ratio, max_score, max_dist);
-    opt_params.hc_params.widen_search = hc_widen_search;
-    opt_params.hc_params.single_step = hc_single_step;
-    opt_params.hc_params.crossover = hc_crossover;
-    opt_params.hc_params.max_nn_evals = hc_max_nn;
-    opt_params.hc_params.fraction_of_nn = hc_frac_of_nn;
+    hc_parameters hc_params;
+    hc_params.widen_search = hc_widen_search;
+    hc_params.single_step = hc_single_step;
+    hc_params.crossover = hc_crossover;
+    hc_params.max_nn_evals = hc_max_nn;
+    hc_params.fraction_of_nn = hc_frac_of_nn;
 
     // Set moses_parameters.
     moses_parameters moses_params(
@@ -1349,7 +1351,7 @@ int moses_exec(int argc, char** argv)
     multibscore_based_bscore bscore(bscores);                    \
     metapop_moses_results(exemplars, cand_sig,                   \
                           REDUCT, REDUCT_REP, bscore,            \
-                          opt_params, meta_params, moses_params, \
+                          opt_params, hc_params, meta_params, moses_params, \
                           mmr_pa);                               \
 }
 
@@ -1395,7 +1397,7 @@ int moses_exec(int argc, char** argv)
                 multibscore_based_bscore bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,
                                       bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
+                                      opt_params, hc_params, meta_params, moses_params,
                                       mmr_pa);
             }
 
@@ -1431,7 +1433,7 @@ int moses_exec(int argc, char** argv)
                 multibscore_based_bscore bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,
                                       bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
+                                      opt_params, hc_params, meta_params, moses_params,
                                       mmr_pa);
             }
 
@@ -1495,7 +1497,7 @@ int moses_exec(int argc, char** argv)
                         partial_solver well(ctables,
                                         table_type_signature,
                                         exemplars, contin_reduct,
-                                        opt_params, meta_params,
+                                        opt_params, hc_params, meta_params,
                                         moses_params, mmr_pa);
                         well.solve();
                     } else {
@@ -1572,7 +1574,7 @@ int moses_exec(int argc, char** argv)
             multibscore_based_bscore bscore(bscores);
             metapop_moses_results(exemplars, tt,
                                   bool_reduct, bool_reduct_rep, bscore,
-                                  opt_params, meta_params, moses_params,
+                                  opt_params, hc_params, meta_params, moses_params,
                                   mmr_pa);
         }
 
@@ -1594,7 +1596,7 @@ int moses_exec(int argc, char** argv)
             set_noise_or_ratio(bscore, as, noise, complexity_ratio);
             metapop_moses_results(exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
-                                  opt_params, meta_params, moses_params, mmr_pa);
+                                  opt_params, hc_params, meta_params, moses_params, mmr_pa);
         }
     }
 
@@ -1635,7 +1637,7 @@ int moses_exec(int argc, char** argv)
                 logical_bscore bscore(tr, arity);
                 metapop_moses_results(exemplars, tt,
                                       bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, meta_params, moses_params,
+                                      opt_params, hc_params, meta_params, moses_params,
                                       mmr_pa);
             }
             else if (output_type == id::contin_type) {
@@ -1675,7 +1677,7 @@ int moses_exec(int argc, char** argv)
                 set_noise_or_ratio(bscore, as, noise, complexity_ratio);
                 metapop_moses_results(exemplars, tt,
                                       contin_reduct, contin_reduct, bscore,
-                                      opt_params, meta_params, moses_params,
+                                      opt_params, hc_params, meta_params, moses_params,
                                       mmr_pa);
             } else {
                 unsupported_type_exit(tt);
@@ -1705,7 +1707,7 @@ int moses_exec(int argc, char** argv)
             set_noise_or_ratio(bscore, as, noise, complexity_ratio);
             metapop_moses_results(exemplars, tt,
                                   contin_reduct, contin_reduct, bscore,
-                                  opt_params, meta_params, moses_params, mmr_pa);
+                                  opt_params, hc_params, meta_params, moses_params, mmr_pa);
         }
     }
 
@@ -1730,7 +1732,7 @@ int moses_exec(int argc, char** argv)
 
         metapop_moses_results(exemplars, sig,
                               bool_reduct, bool_reduct_rep, bscore,
-                              opt_params, meta_params, moses_params, mmr_pa);
+                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
 
     // Demo/example problem: learn the logical disjunction. That is,
@@ -1751,7 +1753,7 @@ int moses_exec(int argc, char** argv)
         logical_bscore bscore(func, arity);
         metapop_moses_results(exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
-                              opt_params, meta_params, moses_params, mmr_pa);
+                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
 
     // Demo/example problem: multiplex. Learn the combo program that
@@ -1774,7 +1776,7 @@ int moses_exec(int argc, char** argv)
         logical_bscore bscore(func, arity);
         metapop_moses_results(exemplars, tt,
                               bool_reduct, bool_reduct_rep, bscore,
-                              opt_params, meta_params, moses_params, mmr_pa);
+                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
 
     // Demo/Example problem: polynomial regression.  Given the polynomial
@@ -1807,7 +1809,7 @@ int moses_exec(int argc, char** argv)
         set_noise_or_ratio(bscore, as, noise, complexity_ratio);
         metapop_moses_results(exemplars, tt,
                               contin_reduct, contin_reduct, bscore,
-                              opt_params, meta_params, moses_params, mmr_pa);
+                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
     else
        unsupported_problem_exit(problem);
