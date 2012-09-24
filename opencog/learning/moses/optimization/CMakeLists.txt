@@ -2,6 +2,7 @@
 INSTALL(FILES
 	hill-climbing.h
 	optimization.h
+	star-anneal.h
 	univariate.h
 
 	DESTINATION

@@ -31,7 +31,7 @@
 
 #include "../moses/neighborhood_sampling.h"
 
-#include "optimization.h"
+#include "star-anneal.h"
 
 namespace opencog { namespace moses {
 

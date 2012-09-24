@@ -29,6 +29,7 @@
 #include <boost/range/algorithm/find_if.hpp>
 
 #include <opencog/util/oc_omp.h>
+#include <opencog/util/selection.h>
 
 #include "metapopulation.h"
 
