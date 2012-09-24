@@ -583,7 +583,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         }
 
         // Else, search for the top score...
-        score_t best_score = worst_score;
+        score_t best_score = very_worst_score;
 
         for (In f = from; f != to; ++f) {
             const bscored_combo_tree& bt = *f;

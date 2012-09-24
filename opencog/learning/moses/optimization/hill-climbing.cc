@@ -79,11 +79,11 @@ unsigned hill_climbing::operator()(deme_t& deme,
     const field_set& fields = deme.fields();
 
     // Estimate the number of nearest neighbors.
-    deme_size_t nn_estimate = information_theoretic_bits(fields);
+    size_t nn_estimate = information_theoretic_bits(fields);
     field_set_size = nn_estimate;  // optim stats, printed by moses.
 
-    deme_size_t current_number_of_evals = 0;
-    deme_size_t current_number_of_instances = 0;
+    size_t current_number_of_evals = 0;
+    size_t current_number_of_instances = 0;
 
     unsigned max_distance = opt_params.max_distance(fields);
 
@@ -91,8 +91,8 @@ unsigned hill_climbing::operator()(deme_t& deme,
     // Copy it, don't reference it, since sorting will mess up a ref.
     instance center_inst(init_inst);
     composite_score best_cscore = worst_composite_score;
-    score_t best_score = worst_score;
-    score_t best_raw_score = worst_score;
+    score_t best_score = very_worst_score;
+    score_t best_raw_score = very_worst_score;
 
     // Initial distance is zero, so that the first time through
     // the loop, we handle just one instance, the initial instance.
@@ -102,8 +102,8 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
     // Needed for correlated neighborhood exploration.
     instance prev_center = center_inst;
-    deme_size_t prev_start = 0;
-    deme_size_t prev_size = 0;
+    size_t prev_start = 0;
+    size_t prev_size = 0;
 
     bool rescan = false;
     bool last_chance = false;
@@ -116,10 +116,10 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
         // Estimate the number of neighbours at the distance d.
         // This is faster than actually counting.
-        deme_size_t total_number_of_neighbours;
+        size_t total_number_of_neighbours;
 
         // Number of instances to try, this go-around.
-        deme_size_t number_of_new_instances;
+        size_t number_of_new_instances;
 
         // For a distance of one, we use
         // information_theoretic_bits as an approximation of the
@@ -142,7 +142,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 number_of_new_instances = hc_params.max_nn_evals;
 
             // avoid overflow.
-            deme_size_t nleft =
+            size_t nleft =
                 max_evals - current_number_of_evals;
             if (nleft < number_of_new_instances)
                 number_of_new_instances = nleft;
@@ -181,7 +181,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             if (number_of_new_instances > hc_params.max_nn_evals)
                 number_of_new_instances = hc_params.max_nn_evals;
 
-            deme_size_t nleft =
+            size_t nleft =
                 max_evals - current_number_of_evals;
 
 // we choose the number 100 because below that multithreading is
@@ -270,7 +270,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // the best candidate
         score_t prev_hi = best_score;
         score_t prev_best_raw = best_raw_score;
-        score_t baddest_score = 1.0e35;
+        score_t worst_score = 1.0e35;
 
         unsigned ibest = current_number_of_instances;
         for (unsigned i = current_number_of_instances;
@@ -282,8 +282,8 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 best_score = iscore;
                 ibest = i;
             }
-            if (iscore <  baddest_score) {
-                baddest_score = iscore;
+            if (iscore <  worst_score) {
+                worst_score = iscore;
             }
 
             // The instance with the best raw score will typically
@@ -296,40 +296,6 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 best_raw_score = rscore;
             }
         }
-
-        // Keep the size of the deme at a managable level.
-        // resize_deme();
-        if (baddest_score + hc_params.score_range < best_score) {
-cout <<"duuude we are bad! "<< baddest_score << " vs " << best_score<<endl;
-            score_t cutoff = best_score - hc_params.score_range;
-            deme_size_t ndeleted = 0;
-            bool not_done = true;
-            while (not_done) {
-                 not_done = false;
-                 for (auto it = deme.begin(); it != deme.end(); it++) {
-                     const composite_score &inst_cscore = it->second;
-                     score_t iscore = get_penalized_score(inst_cscore);
-                     if (iscore <= cutoff) {
-                         deme.erase(it);
-                         not_done = true;
-                         ndeleted ++;
-                         break;
-                     }
-                 }
-            }
-cout<<"duuude ndeleted = "<<ndeleted<<endl;
-        }
-/*
-int i=0;
-        if (hc_params.max_allowed_instances  < current_number_of_instances) {
-foreach(const scored_instance<composite_score>& si, deme) {
-  const composite_score &inst_cscore = si.second;
-  score_t iscore = get_penalized_score(inst_cscore);
-// cout<<i<<" score="<< iscore<<endl;
-i++;
-}
-        }
-*/
 
         bool has_improved = opt_params.score_improved(best_score, prev_hi);
 
@@ -370,8 +336,25 @@ i++;
             count_improved += 1.0;
         }
 #endif
-        current_number_of_instances += number_of_new_instances;
         current_number_of_evals += number_of_new_instances;
+
+        // Keep the size of the deme at a managable level.
+        if (worst_score + hc_params.score_range < best_score) {
+cout <<"duuude we are bad! "<< worst_score << " vs " << best_score<<endl;
+            current_number_of_instances = resize_deme(deme, best_score);
+        }
+/*
+int i=0;
+        if (hc_params.max_allowed_instances  < current_number_of_instances) {
+foreach(const scored_instance<composite_score>& si, deme) {
+  const composite_score &inst_cscore = si.second;
+  score_t iscore = get_penalized_score(inst_cscore);
+// cout<<i<<" score="<< iscore<<endl;
+i++;
+}
+        }
+*/
+
 
         if (has_improved) {
             distance = 1;
@@ -506,11 +489,11 @@ i++;
     return current_number_of_evals;
 }
 
-deme_size_t hill_climbing::cross_top_one(deme_t& deme,
-                          deme_size_t deme_size,
-                          deme_size_t num_to_make,
-                          deme_size_t sample_start,
-                          deme_size_t sample_size,
+size_t hill_climbing::cross_top_one(deme_t& deme,
+                          size_t deme_size,
+                          size_t num_to_make,
+                          size_t sample_start,
+                          size_t sample_size,
                           const instance& base)
 {
     if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
@@ -541,11 +524,11 @@ deme_size_t hill_climbing::cross_top_one(deme_t& deme,
 }
 
 /** two-dimensional simplex version of above. */
-deme_size_t hill_climbing::cross_top_two(deme_t& deme,
-                          deme_size_t deme_size,
-                          deme_size_t num_to_make,
-                          deme_size_t sample_start,
-                          deme_size_t sample_size,
+size_t hill_climbing::cross_top_two(deme_t& deme,
+                          size_t deme_size,
+                          size_t num_to_make,
+                          size_t sample_start,
+                          size_t sample_size,
                           const instance& base)
 {
     // sample_size choose two.
@@ -580,11 +563,11 @@ deme_size_t hill_climbing::cross_top_two(deme_t& deme,
 }
 
 /** three-dimensional simplex version of above. */
-deme_size_t hill_climbing::cross_top_three(deme_t& deme,
-                          deme_size_t deme_size,
-                          deme_size_t num_to_make,
-                          deme_size_t sample_start,
-                          deme_size_t sample_size,
+size_t hill_climbing::cross_top_three(deme_t& deme,
+                          size_t deme_size,
+                          size_t num_to_make,
+                          size_t sample_start,
+                          size_t sample_size,
                           const instance& base)
 {
     // sample_size choose three.
@@ -621,11 +604,36 @@ deme_size_t hill_climbing::cross_top_three(deme_t& deme,
     return num_to_make;
 }
 
-deme_size_t hill_climbing::resize_deme(deme_t& deme,
-                          deme_size_t deme_size)
+size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
 {
-    // Under construction ... 
-    return 0;
+    score_t cutoff = best_score - hc_params.score_range;
+    size_t ndeleted = 0;
+    bool not_done = true;
+    while (not_done) {
+         not_done = false;
+         auto first = deme.end();
+         auto last = deme.end();
+         size_t contig = 0;
+         for (auto it = deme.begin(); it != deme.end(); it++) {
+             const composite_score &inst_cscore = it->second;
+             score_t iscore = get_penalized_score(inst_cscore);
+             if (iscore <= cutoff) {
+                 if (0 == contig) first = it;
+                 last = it;
+                 contig ++;
+             } else {
+                 if (0 < contig) {
+                     deme.erase(first, ++last);
+                     ndeleted += contig;
+                     not_done = true;
+cout<<"duuude contig="<<contig<<endl;
+                     break;
+                 }
+             }
+         }
+    }
+cout<<"duuude ndeleted = "<<ndeleted<<endl;
+    return deme.size();
 }
 
 } // ~namespace moses

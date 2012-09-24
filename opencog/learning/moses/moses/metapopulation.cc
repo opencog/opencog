@@ -479,9 +479,8 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     {
         const composite_score& inst_csc = inst.second;
         score_t inst_sc = get_score(inst_csc);
-
         // if it's really bad stops
-        if (inst_sc <= worst_score || !isfinite(inst_sc))
+        if (inst_sc <= very_worst_score || !isfinite(inst_sc))
             return;
 
         // Get the combo_tree associated to inst, cleaned and reduced.

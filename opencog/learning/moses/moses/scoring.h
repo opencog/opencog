@@ -60,7 +60,7 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
     // the best possible score is reached. If not overloaded it will
     // return best_score (constant defined under
     // opencog/learning/moses/moses/types.h)
-    score_t best_possible_score() { return best_score; }
+    score_t best_possible_score() { return very_best_score; }
 
     // Return the minimum value considered for improvement (by
     // default return 0)

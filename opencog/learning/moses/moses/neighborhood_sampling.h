@@ -582,15 +582,15 @@ Out vary_n_knobs(const field_set& fs,
  * overflow in computing the binomial coefficient, so that overflows
  * are clamped to max, instead of wrapping over, or throwing.
  */
-inline deme_size_t
+inline size_t
 safe_binomial_coefficient(unsigned k, unsigned n)
 {
-    deme_size_t res;
+    size_t res;
     double noi_db = binomial_coefficient<double>(k, n);
     try {
-        res = numeric_cast<deme_size_t>(noi_db);
+        res = numeric_cast<size_t>(noi_db);
     } catch (positive_overflow&) {
-        res = numeric_limits<deme_size_t>::max();
+        res = numeric_limits<size_t>::max();
     }
     return res;
 }
@@ -617,18 +617,18 @@ safe_binomial_coefficient(unsigned k, unsigned n)
  * @param starting_index  position of a field to be varied
  * @param max_count       stop counting once this value is reached.
  */
-inline deme_size_t
+inline size_t
 count_neighborhood_size_from_index(const field_set& fs,
                                  const instance& inst,
                                  unsigned dist,
                                  unsigned starting_index,
-                                 deme_size_t max_count
-                                 = numeric_limits<deme_size_t>::max())
+                                 size_t max_count
+                                 = numeric_limits<size_t>::max())
 {
     if (dist == 0)
         return 1;
 
-    deme_size_t number_of_instances = 0;
+    size_t number_of_instances = 0;
 
     // terms
     if ((fs.begin_term_raw_idx() <= starting_index) &&
@@ -749,20 +749,20 @@ count_neighborhood_size_from_index(const field_set& fs,
  * @param max_count       stop counting when the count exceeds this value.
  * @return                the size of the nieghborhood.
  */
-inline deme_size_t count_neighborhood_size(const field_set& fs,
+inline size_t count_neighborhood_size(const field_set& fs,
                                          const instance& inst,
                                          unsigned dist,
-                                         deme_size_t max_count
-                                         = numeric_limits<deme_size_t>::max())
+                                         size_t max_count
+                                         = numeric_limits<size_t>::max())
 {
     return count_neighborhood_size_from_index(fs, inst, dist, 0, max_count);
 }
 
 // For backward compatibility, like above but with null instance
-inline deme_size_t count_neighborhood_size(const field_set& fs,
+inline size_t count_neighborhood_size(const field_set& fs,
                                          unsigned dist,
-                                         deme_size_t max_count
-                                         = numeric_limits<deme_size_t>::max())
+                                         size_t max_count
+                                         = numeric_limits<size_t>::max())
 {
     instance inst(fs.packed_width());
     return count_neighborhood_size_from_index(fs, inst, dist, 0, max_count);
@@ -771,10 +771,10 @@ inline deme_size_t count_neighborhood_size(const field_set& fs,
 /// Fill the deme with at most number_of_new_instances, at distance
 /// dist.  Return the actual number of new instances created (this
 /// number is bounded by the possible neighbors at distance dist).
-inline deme_size_t
-sample_new_instances(deme_size_t total_number_of_neighbours,
-                     deme_size_t number_of_new_instances,
-                     deme_size_t current_number_of_instances,
+inline size_t
+sample_new_instances(size_t total_number_of_neighbours,
+                     size_t number_of_new_instances,
+                     size_t current_number_of_instances,
                      const instance& center_inst,
                      instance_set<composite_score>& deme,
                      unsigned dist)
@@ -817,16 +817,16 @@ sample_new_instances(deme_size_t total_number_of_neighbours,
 /// Just like the above, but computes total_number_of_neighbours
 /// instead of taking it argument.
 //
-inline deme_size_t
-sample_new_instances(deme_size_t number_of_new_instances,
-                     deme_size_t current_number_of_instances,
+inline size_t
+sample_new_instances(size_t number_of_new_instances,
+                     size_t current_number_of_instances,
                      const instance& center_inst,
                      instance_set<composite_score>& deme,
                      unsigned dist)
 {
     // The number of all neighbours at the distance d (stops
     // counting when above number_of_new_instances).
-    deme_size_t total_number_of_neighbours =
+    size_t total_number_of_neighbours =
         count_neighborhood_size(deme.fields(), center_inst, dist,
                                 number_of_new_instances);
     return sample_new_instances(total_number_of_neighbours,

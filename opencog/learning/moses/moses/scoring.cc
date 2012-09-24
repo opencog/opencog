@@ -313,8 +313,8 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
     else // if (_output_type == id::contin_type)
     {
         // For contin tables, we search for the largest value in the table.
-        _max_output = worst_score;
-        _min_output = -worst_score;
+        _max_output = very_worst_score;
+        _min_output = very_best_score;
         foreach(const auto& cr, _ctable) {
             const CTable::counter_t& c = cr.second;
             foreach(const auto& cv, c) {
@@ -746,7 +746,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
 
         // For contin tables, we search for the largest value in the table.
         // (or smallest, if positive == false)
-        max_output = worst_score;
+        max_output = very_worst_score;
         foreach(const auto& cr, wrk_ctable) {
             const CTable::counter_t& c = cr.second;
             foreach(const auto& cv, c) {
@@ -1760,7 +1760,7 @@ penalized_behavioral_score interesting_predicate_bscore::operator()(const combo_
         if (occam)
             pbs.second = tree_complexity(tr) * complexity_coef;
     } else {
-        pbs.first.push_back(worst_score);
+        pbs.first.push_back(very_worst_score);
     }
 
     // Logger
@@ -1772,7 +1772,7 @@ penalized_behavioral_score interesting_predicate_bscore::operator()(const combo_
 
 behavioral_score interesting_predicate_bscore::best_possible_bscore() const
 {
-    return behavioral_score(1, best_score);
+    return behavioral_score(1, very_best_score);
 }
 
 void interesting_predicate_bscore::set_complexity_coef(unsigned alphabet_size,
@@ -1834,7 +1834,7 @@ score_t multibscore_based_bscore::min_improv() const
 {
     /// @todo can be turned in to 1-line with boost::min_element
     // boost::min_element(_bscorers | boost::transformed(/*)
-    score_t res = best_score;
+    score_t res = very_best_score;
     foreach(const bscore_base& bs, _bscorers)
         res = min(res, bs.min_improv());
     return res;

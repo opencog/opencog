@@ -107,7 +107,7 @@ struct hc_parameters
     // The issue is that, for large feature sets, a large number of knobs
     // get created, which means that instances are huge.  It is easy to
     // end up with demes in the tens-of-gigabytes in size, and that's bad.
-    deme_size_t max_allowed_instances;
+    size_t max_allowed_instances;
 };
 
 ///////////////////
@@ -186,31 +186,31 @@ struct hill_climbing : optimizer_base
      *                number created will be the lesser of this and
      *                sample_size-1.
      */
-    deme_size_t cross_top_one(deme_t& deme,
-                              deme_size_t deme_size,
-                              deme_size_t num_to_make,
-                              deme_size_t sample_start,
-                              deme_size_t sample_size,
-                              const instance& base);
+    size_t cross_top_one(deme_t& deme,
+                         size_t deme_size,
+                         size_t num_to_make,
+                         size_t sample_start,
+                         size_t sample_size,
+                         const instance& base);
 
     /** two-dimensional simplex version of above. */
-    deme_size_t cross_top_two(deme_t& deme,
-                              deme_size_t deme_size,
-                              deme_size_t num_to_make,
-                              deme_size_t sample_start,
-                              deme_size_t sample_size,
-                              const instance& base);
+    size_t cross_top_two(deme_t& deme,
+                         size_t deme_size,
+                         size_t num_to_make,
+                         size_t sample_start,
+                         size_t sample_size,
+                         const instance& base);
 
     /** three-dimensional simplex version of above. */
-    deme_size_t cross_top_three(deme_t& deme,
-                              deme_size_t deme_size,
-                              deme_size_t num_to_make,
-                              deme_size_t sample_start,
-                              deme_size_t sample_size,
-                              const instance& base);
+    size_t cross_top_three(deme_t& deme,
+                           size_t deme_size,
+                           size_t num_to_make,
+                           size_t sample_start,
+                           size_t sample_size,
+                           const instance& base);
 
-    deme_size_t resize_deme(deme_t& deme,
-                              deme_size_t deme_size);
+    size_t resize_deme(deme_t& deme, score_t best_score);
+
     /**
      * Perform search of the local neighborhood of an instance.  The
      * search is exhaustive if the local neighborhood is small; else

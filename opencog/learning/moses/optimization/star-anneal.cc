@@ -49,13 +49,13 @@ unsigned simulated_annealing::operator()(deme_t& deme,
     // @todo this should be adapted for SA
     unsigned pop_size = opt_params.pop_size(fields);
     // unsigned max_gens_total = information_theoretic_bits(deme.fields());
-    deme_size_t max_number_of_instances =
-        /*(deme_size_t)max_gens_total * */
-        (deme_size_t)pop_size;
+    size_t max_number_of_instances =
+        /*(size_t)max_gens_total * */
+        (size_t)pop_size;
     if (max_number_of_instances > max_evals)
         max_number_of_instances = max_evals;
 
-    deme_size_t current_number_of_instances = 0;
+    size_t current_number_of_instances = 0;
 
     unsigned step = 1;
 
@@ -81,7 +81,7 @@ unsigned simulated_annealing::operator()(deme_t& deme,
         logger().debug("Step: %u  Distance = %u, Temperature = %f",
                        step, current_distance, current_temp);
 
-        deme_size_t number_of_new_instances =
+        size_t number_of_new_instances =
             sample_new_instances(sa_params.max_new_instances,
                                  current_number_of_instances,
                                  center_instance, deme,

@@ -62,21 +62,17 @@ using boost::transform_iterator;
 // double, float as final score type is likely enough
 typedef float score_t;
 
-// the type used to hold the number of individuals in a deme can have
-// in principle
-typedef unsigned long long deme_size_t;
-
 // score precision used for logging and outputting results, it is set
 // very high because that information may be used by other tools
 static const int io_score_precision = 32;
 
-static const score_t best_score = std::numeric_limits<score_t>::max();
+static const score_t very_best_score = std::numeric_limits<score_t>::max();
 
 // below we use 1 - best score and not
 // std::numeric_limits<score_t>::min, please recall that in the STL
 // standard min when applied to a floating type returns the smallest
 // possible representable value
-static const score_t worst_score = score_t(1) - best_score;
+static const score_t very_worst_score = score_t(1) - very_best_score;
 
 // But modify the default sort ordering for these objects.
 struct composite_score:

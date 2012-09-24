@@ -55,7 +55,7 @@ struct sa_parameters
     double min_temp;
     double temp_step_size;
     double accept_prob_temp_intensity;
-    deme_size_t max_new_instances;
+    size_t max_new_instances;
 };
 
 /**
