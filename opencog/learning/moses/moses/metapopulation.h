@@ -410,54 +410,12 @@ struct metapopulation : bscored_combo_tree_ptr_set
     /// does this culling *before* this method is called ...
     ///
     /// Safe to call in a multi-threaded context.
-    template<typename Candidates>
-    void merge_candidates(Candidates& candidates)
-    {
-        if (logger().isDebugEnabled()) {
-            logger().debug("Going to merge %u candidates with the metapopulation",
-                           candidates.size());
-            if (logger().isFineEnabled()) {
-                stringstream ss;
-                ss << "Candidates to merge with the metapopulation:" << std::endl;
-                foreach(const auto& cnd, candidates)
-                    ostream_bscored_combo_tree(ss, cnd, true, true);
-                logger().fine(ss.str());
-            }
-        }
-
-        // Serialize access
-        std::lock_guard<std::mutex> lock(_merge_mutex);
-
-        // Note that merge_nondominated() is very cpu-expensive and
-        // complex...
-        if (params.include_dominated) {
-            logger().debug("Insert all candidates in the metapopulation");
-            foreach(const auto& cnd, candidates)
-                insert(new bscored_combo_tree(cnd));
-        } else {
-            logger().debug("Insert non-dominated candidates in the metapopulation");
-            unsigned old_size = size();
-            merge_nondominated(candidates, params.jobs);
-            logger().debug("Inserted %u non-dominated candidates in the metapopulation",
-                           size() - old_size);
-        }
-
-        unsigned old_size = size();
-        logger().debug("Resize the metapopulation (%u), removing worst candidates",
-                       old_size);
-        resize_metapop();
-        logger().debug("Removed %u candidates from the metapopulation",
-                       old_size - size());
-
-        if (logger().isDebugEnabled()) {
-            logger().debug("Metapopulation size is %u", size());
-            if (logger().isFineEnabled()) {
-                stringstream ss;
-                ss << "Metapopulation:" << std::endl;
-                logger().fine(ostream(ss, -1, true, true).str());
-            }
-        }
-    }
+    ///
+    /// @todo it would probably be more efficient to use
+    /// bscored_combo_tree_ptr_set and not having to copy and
+    /// reallocate candidates onces they are selected. It might be
+    /// minor though in terms of performance gain.
+    void merge_candidates(bscored_combo_tree_set& candidates);
 
     /**
      * merge deme -- convert instances to trees, and save them.

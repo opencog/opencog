@@ -357,6 +357,54 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     return selex;
 }
 
+void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
+{
+    if (logger().isDebugEnabled()) {
+        logger().debug("Going to merge %u candidates with the metapopulation",
+                       candidates.size());
+        if (logger().isFineEnabled()) {
+            stringstream ss;
+            ss << "Candidates to merge with the metapopulation:" << std::endl;
+            foreach(const auto& cnd, candidates)
+                ostream_bscored_combo_tree(ss, cnd, true, true);
+            logger().fine(ss.str());
+        }
+    }
+    
+    // Serialize access
+    std::lock_guard<std::mutex> lock(_merge_mutex);
+    
+    // Note that merge_nondominated() is very cpu-expensive and
+    // complex...
+    if (params.include_dominated) {
+        logger().debug("Insert all candidates in the metapopulation");
+        foreach(const auto& cnd, candidates)
+            insert(new bscored_combo_tree(cnd));
+    } else {
+        logger().debug("Insert non-dominated candidates in the metapopulation");
+        unsigned old_size = size();
+        merge_nondominated(candidates, params.jobs);
+        logger().debug("Inserted %u non-dominated candidates in the metapopulation",
+                       size() - old_size);
+    }
+    
+    unsigned old_size = size();
+    logger().debug("Resize the metapopulation (%u), removing worst candidates",
+                   old_size);
+    resize_metapop();
+    logger().debug("Removed %u candidates from the metapopulation",
+                   old_size - size());
+    
+    if (logger().isDebugEnabled()) {
+        logger().debug("Metapopulation size is %u", size());
+        if (logger().isFineEnabled()) {
+            stringstream ss;
+            ss << "Metapopulation:" << std::endl;
+            logger().fine(ostream(ss, -1, true, true).str());
+        }
+    }
+}
+
 bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t evals)
 {
     OC_ASSERT(__rep);
