@@ -115,7 +115,7 @@ struct simulated_annealing : optimizer_base
         return -sc;
     }
 
-    energy_t energy(const scored_instance<composite_score>& inst)
+    energy_t energy(const deme_inst_t& inst)
     {
         return energy(get_score(inst.second));
     }

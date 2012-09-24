@@ -61,7 +61,7 @@ unsigned simulated_annealing::operator()(deme_t& deme,
 
     // Score the initial instance
     instance center_instance(init_inst);
-    scored_instance<composite_score> scored_center_inst =
+    deme_inst_t scored_center_inst =
         score_instance(center_instance, iscorer);
     energy_t center_instance_energy = energy(scored_center_inst);
     double current_temp = sa_params.init_temp;
@@ -104,7 +104,7 @@ unsigned simulated_annealing::operator()(deme_t& deme,
                             boost::bind(boost::cref(iscorer), _1));
 
         // get the best instance
-        scored_instance<composite_score>& best_scored_instance =
+        deme_inst_t& best_scored_instance =
             *OMP_ALGO::max_element(next(deme.begin(), current_number_of_instances),
                                    deme.end());
 

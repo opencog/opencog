@@ -165,6 +165,7 @@ struct optim_stats
 };
 
 typedef instance_set<composite_score> deme_t;
+typedef scored_instance<composite_score> deme_inst_t;
 
 // Base class for all optimizers
 struct optimizer_base : optim_stats

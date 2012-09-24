@@ -270,7 +270,6 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // the best candidate
         score_t prev_hi = best_score;
         score_t prev_best_raw = best_raw_score;
-        score_t worst_score = 1.0e35;
 
         unsigned ibest = current_number_of_instances;
         for (unsigned i = current_number_of_instances;
@@ -281,9 +280,6 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 best_cscore = inst_cscore;
                 best_score = iscore;
                 ibest = i;
-            }
-            if (iscore <  worst_score) {
-                worst_score = iscore;
             }
 
             // The instance with the best raw score will typically
@@ -319,7 +315,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             // of scores, as compared to the previous high score.
             std::sort(next(deme.begin(), current_number_of_instances),
                       deme.end(),
-                      std::greater<scored_instance<composite_score> >());
+                      std::greater<deme_inst_t>());
             for (unsigned i = current_number_of_instances;
                  next(deme.begin(), i) != deme.end(); ++i)
             {
@@ -337,16 +333,48 @@ unsigned hill_climbing::operator()(deme_t& deme,
         }
 #endif
         current_number_of_evals += number_of_new_instances;
+        current_number_of_instances += number_of_new_instances;
 
         // Keep the size of the deme at a managable level.
-        if (worst_score + hc_params.score_range < best_score) {
-cout <<"duuude we are bad! "<< worst_score << " vs " << best_score<<endl;
-            current_number_of_instances = resize_deme(deme, best_score);
+        // Large populations can easily blow out the RAM on a machine,
+        // so we want to keep it at some reasonably trim level.
+        // XXX TODO: we should also account for the actual size of
+        // an instance (say, in bytes), because pop management is a
+        // cpu-timewaster if the instances are small.
+        //
+        // To avoid wasting cpu time pointlessly, don't bother with
+        // population size management if its already small.
+#define ACCEPTABLE_SIZE 2000
+        if (ACCEPTABLE_SIZE < current_number_of_instances) {
+
+            // Lets see how many we might be able to trounce.
+            score_t cutoff = best_score - hc_params.score_range;
+            size_t bad_score_cnt = 0;
+
+            // To find the number of bad scores, we have to look
+            // at the *whole* deme.
+            foreach (const deme_inst_t& si, deme) {
+                score_t iscore = get_penalized_score(si.second);
+                if (iscore <  cutoff)
+                    bad_score_cnt++;
+            }
+
+            // To avoid wasting cpu time pointlessly, don't bother with
+            // population size management if we don't get any bang  out
+            // of it.
+#define DONT_BOTHER_SIZE 500
+            if (DONT_BOTHER_SIZE < bad_score_cnt) {
+
+cout <<"duuude we are bad! "<<bad_score_cnt<<endl;
+                logger().debug() << "Will trim "
+                    << bad_score_cnt << "low scoreing instances.";
+                current_number_of_instances = resize_deme(deme, best_score);
+            }
         }
 /*
 int i=0;
         if (hc_params.max_allowed_instances  < current_number_of_instances) {
-foreach(const scored_instance<composite_score>& si, deme) {
+foreach(const deme_inst_t& si, deme) {
   const composite_score &inst_cscore = si.second;
   score_t iscore = get_penalized_score(inst_cscore);
 // cout<<i<<" score="<< iscore<<endl;
@@ -504,11 +532,11 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
     // after that, we don't care about the ordering.
     // std::sort(next(deme.begin(), sample_start),
     //          next(deme.begin(), sample_start + sample_size),
-    //          std::greater<scored_instance<composite_score> >());
+    //          std::greater<deme_inst_t>());
     std::partial_sort(next(deme.begin(), sample_start),
                       next(deme.begin(), sample_start + num_to_make+1),
                       next(deme.begin(), sample_start + sample_size),
-                      std::greater<scored_instance<composite_score> >());
+                      std::greater<deme_inst_t>());
 
     deme.resize(deme_size + num_to_make);
 
@@ -537,14 +565,14 @@ size_t hill_climbing::cross_top_two(deme_t& deme,
 
     // std::sort(next(deme.begin(), sample_start),
     //          next(deme.begin(), sample_start + sample_size),
-    //          std::greater<scored_instance<composite_score> >());
+    //          std::greater<deme_inst_t >());
     //
     unsigned num_to_sort = sqrtf(2*num_to_make) + 3;
     if (sample_size < num_to_sort) num_to_sort = sample_size;
     std::partial_sort(next(deme.begin(), sample_start),
                       next(deme.begin(), sample_start + num_to_sort),
                       next(deme.begin(), sample_start + sample_size),
-                      std::greater<scored_instance<composite_score> >());
+                      std::greater<deme_inst_t >());
 
     deme.resize(deme_size + num_to_make);
 
@@ -576,14 +604,14 @@ size_t hill_climbing::cross_top_three(deme_t& deme,
 
     // std::sort(next(deme.begin(), sample_start),
     //           next(deme.begin(), sample_start + sample_size),
-    //           std::greater<scored_instance<composite_score> >());
+    //           std::greater<deme_inst_t>());
 
     unsigned num_to_sort = cbrtf(6*num_to_make) + 3;
     if (sample_size < num_to_sort) num_to_sort = sample_size;
     std::partial_sort(next(deme.begin(), sample_start),
                       next(deme.begin(), sample_start + num_to_make),
                       next(deme.begin(), sample_start + sample_size),
-                      std::greater<scored_instance<composite_score> >());
+                      std::greater<deme_inst_t>());
     deme.resize(deme_size + num_to_make);
 
     // Summation is over a 3-simplex
@@ -615,8 +643,7 @@ size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
          auto last = deme.end();
          size_t contig = 0;
          for (auto it = deme.begin(); it != deme.end(); it++) {
-             const composite_score &inst_cscore = it->second;
-             score_t iscore = get_penalized_score(inst_cscore);
+             score_t iscore = get_penalized_score(it->second);
              if (iscore <= cutoff) {
                  if (0 == contig) first = it;
                  last = it;
@@ -633,6 +660,7 @@ cout<<"duuude contig="<<contig<<endl;
          }
     }
 cout<<"duuude ndeleted = "<<ndeleted<<endl;
+cout<<"duuude demsiz="<<deme.size()<<endl;
     return deme.size();
 }
 
