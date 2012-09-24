@@ -435,11 +435,9 @@ struct metapopulation : bscored_combo_tree_ptr_set
             foreach(const auto& cnd, candidates)
                 insert(new bscored_combo_tree(cnd));
         } else {
-            OC_ASSERT(false, "NOT IMPLEMENTED!!!!");
-            // TODO let that aside for now!
             logger().debug("Insert non-dominated candidates in the metapopulation");
             unsigned old_size = size();
-            // merge_nondominated(candidates, params.jobs);
+            merge_nondominated(candidates, params.jobs);
             logger().debug("Inserted %u non-dominated candidates in the metapopulation",
                            size() - old_size);
         }
@@ -539,7 +537,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
     // return a pair of sets of nondominated candidates between bcs1
     // and bcs2, assuming none contain dominated candidates. Contrary
     // to what the name of function says, the 2 sets do not need be
-    // disjoint, however there are inded disjoint according to the way
+    // disjoint, however there are indeed disjoint according to the way
     // they are used in the code. The first (resp. second) element of
     // the pair corresponds to the nondominated candidates of bcs1
     // (resp. bcs2)

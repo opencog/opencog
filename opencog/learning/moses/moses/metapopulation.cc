@@ -843,24 +843,24 @@ metapopulation::get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& 
 // that bcs contains no dominated candidates within itself
 void metapopulation::merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs)
 {
-#if XXX_THIS_WONT_COMPILE_CANT_FIGURE_OUT_WHY
-    bscored_combo_tree_ptr_vec bcv_mp = random_access_view(*this),
-        bcv = random_access_view(bcs);
+    bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
+    bscored_combo_tree_ptr_vec bcv_mp;
+    foreach(const bscored_combo_tree& cnd, *this)
+        bcv_mp.push_back(&cnd);
     bscored_combo_tree_ptr_vec_pair bcv_p =
         get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
-    // remove the nondominates ones from the metapopulation
+    
+    // remove the dominated ones from the metapopulation
     boost::sort(bcv_mp);
     boost::sort(bcv_p.second);
     bscored_combo_tree_ptr_vec diff_bcv_mp =
         set_difference(bcv_mp, bcv_p.second);
-
     foreach (const bscored_combo_tree* cnd, diff_bcv_mp)
         erase(*cnd);
 
-    // add the non dominates ones from bsc
+    // add the nondominated ones from bsc
     foreach (const bscored_combo_tree* cnd, bcv_p.first)
-        insert(*cnd);
-#endif // XXX_THIS_WONT_COMPILE_CANT_FIGURE_OUT_WHY
+        insert(new bscored_combo_tree(*cnd));
 }
 
 // Iterative version of merge_nondominated
