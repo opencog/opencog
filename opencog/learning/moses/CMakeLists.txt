@@ -38,6 +38,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/types
 	moses/using
 	optimization/optimization
+	optimization/univariate
 	representation/build_knobs
 	representation/field_set
 	representation/knob_mapper

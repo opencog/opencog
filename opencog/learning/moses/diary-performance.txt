@@ -3510,3 +3510,33 @@ sys	0m29.970s
 Yikes. Another case, with 3326 knobs is a clear looser, not even
 close to the breakpoint...
 
+moses -Hit -i ./reuters-test-10.data -u1 -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -m3200 
+[DEBUG] Representation size after knob building: 4512329
+[DEBUG] Total number of field specs: 948360
+[DEBUG] Number of disc knobs mapped: 948360
+
+30K:
+-2771.60009765625 cond(not(0<($billoin)) usa interest) 
+real	6m28.830s
+user	22m37.554s
+sys	0m35.673s
+last add: 6.5 secs
+
+3K:
+-2771.60009765625 cond(not(0<($billoin)) usa interest) 
+real	10m0.951s
+user	59m40.538s
+sys	1m3.728s
+last add: 13 secs
+
+300K:
+real	14m2.479s
+user	28m13.708s
+sys	0m26.570s
+last add: 22 secs
+
+15K:
+real	7m11.449s
+user	28m34.771s
+sys	0m31.451s
+
