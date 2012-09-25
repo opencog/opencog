@@ -19,8 +19,8 @@
 /* Find the length of STRING, but scan at most MAXLEN characters.
    If no '\0' terminator is found in that many characters, return MAXLEN.  */
 
-#include <cstdlib>
-#include <string>
+#include <stdlib.h>
+#include <string.h>
 
 size_t
 strnlen (const char *string, size_t maxlen)
