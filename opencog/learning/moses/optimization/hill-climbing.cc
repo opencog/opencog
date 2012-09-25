@@ -352,7 +352,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             if (did_resize) {
                 current_number_of_instances = deme.size();
                 prev_start = 0;
-                prev_size = 0;
+                prev_size = current_number_of_instances;
             }
         }
 
@@ -496,6 +496,7 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
                           size_t sample_size,
                           const instance& base)
 {
+    OC_ASSERT (sample_size > 0, "Cross-over sample size must be positive");
     if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
 
     // We need to access the high-scorers.
