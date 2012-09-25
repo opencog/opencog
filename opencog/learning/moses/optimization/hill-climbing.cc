@@ -342,8 +342,19 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // To avoid wasting cpu time pointlessly, don't bother with
         // population size management if its already small.
 #define ACCEPTABLE_SIZE 2000
-        if (ACCEPTABLE_SIZE < current_number_of_instances)
-            current_number_of_instances = resize_deme(deme, best_score);
+        if (ACCEPTABLE_SIZE < current_number_of_instances) {
+            bool did_resize = resize_deme(deme, best_score);
+
+            // After resizing, some of the variables set above become
+            // invalid.  Some are not needed any more: e.g. ibest.
+            // Others, we need, esp prev_start and prev_size for the
+            // cross-over to work.
+            if (did_resize) {
+                current_number_of_instances = deme.size();
+                prev_start = 0;
+                prev_size = 0;
+            }
+        }
 
         if (has_improved) {
             distance = 1;
@@ -639,8 +650,9 @@ size_t hill_climbing::resize_by_score(deme_t& deme, score_t cutoff)
 /// an instance (say, in bytes), because pop management is a
 /// cpu-timewaster if the instances are small.
 //
-size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
+bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
 {
+    bool did_resize =  false;
     // Lets see how many we might be able to trounce.
     score_t cutoff = best_score - hc_params.score_range;
     size_t bad_score_cnt = 0;
@@ -662,6 +674,7 @@ size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
         logger().debug() << "Will trim " << bad_score_cnt
             << " low scoring instances out of " << deme.size();
         resize_by_score(deme, cutoff);
+        did_resize = true;
     }
 
     // Are we still too large? Whack more, if needed.
@@ -675,8 +688,9 @@ size_t hill_climbing::resize_deme(deme_t& deme, score_t best_score)
 
         deme.erase(next(deme.begin(), hc_params.max_allowed_instances),
                    deme.end());
+        did_resize = true;
     }
-    return deme.size();
+    return did_resize;
 }
 
 } // ~namespace moses
