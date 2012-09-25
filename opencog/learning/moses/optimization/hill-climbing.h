@@ -156,7 +156,7 @@ struct hc_parameters
  */
 struct hill_climbing : optimizer_base
 {
-    hill_climbing(const optim_parameters& op,
+    hill_climbing(const optim_parameters& op = optim_parameters(),
                   const hc_parameters& hc = hc_parameters())
         : opt_params(op), hc_params(hc)
     {}
