@@ -1,0 +1,7 @@
+# Small dataset for testing the ignore/enforce functions in feature
+# selection. We want to ignore the feature timestamp (because feature
+# selection isn't able to interpret it), but at the end we want it
+# back in the output dataset because it's useful to keep around.
+timestamp,f1,f2,target
+2002-02-28,0,0,1
+2002-03-01,0,1,0
