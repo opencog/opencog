@@ -337,6 +337,84 @@ istream& istreamRawITable(istream& in, ITable& tab)
     return in;
 }
 
+// like above but ignore indices
+istream& istreamRawITable_ingore_indices(istream& in, ITable& tab,
+                                         const vector<unsigned>& ignored_indices)
+    throw(std::exception, AssertionException)
+{
+    streampos beg = in.tellg();
+
+    // Get the entire dataset into memory
+    string line;
+    std::vector<string> lines;
+
+    // Read first few by hand.
+    dorepeat(2) {
+        get_data_line(in, line);
+        lines.push_back(line);
+    }
+
+    // If it is a sparse file, we are outta here.
+    // throw an std::exception, since we don't to log this as an error
+    // (all the other exception types log to the log file).
+    if (string::npos != line.find (sparse_delim)) {
+        in.seekg(beg);
+        throw std::exception();
+    }
+
+    // Grab the rest of the file.
+    while (get_data_line(in, line))
+        lines.push_back(line);
+
+    // Determine the arity from the first line.
+    vector<string> fl = tokenizeRow_ignore_indices<string>(lines[0],
+                                                           ignored_indices);
+    arity_t arity = fl.size();
+
+    atomic<int> arity_fail_row(-1);
+    auto parse_line = [&](int i)
+    {
+        // tokenize the line
+        vector<string> io = tokenizeRow_ignore_indices<string>(lines[i],
+                                                               ignored_indices);
+
+        // Check arity
+        if (arity != (arity_t)io.size())
+            arity_fail_row = i + 1;
+        
+        // Fill table with string-valued vertexes.
+        foreach (const string& tok, io) {
+            vertex v(tok);
+            tab[i].push_back(v);
+        }
+    };
+
+    // Vector of indices [0, lines.size())
+    size_t ls = lines.size();
+    tab.resize(ls);
+    auto ir = boost::irange((size_t)0, ls);
+    vector<size_t> indices(ir.begin(), ir.end());
+    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
+
+    if (-1 != arity_fail_row) {
+        in.seekg(beg);
+        throw AssertionException
+            (TRACE_INFO,
+             "ERROR: Input file inconsistent: the %uth row has "
+             "a different number of columns than the rest of the file.  "
+             "All rows should have the same number of columns.\n",
+             arity_fail_row.load());
+    }
+    return in;
+}
+
+vector<string> get_header(const string& file_name) {
+    ifstream in(file_name.c_str());
+    string line;
+    get_data_line(in, line);
+    return tokenizeRow<string>(line);
+}
+
 /**
  * Fill the input table, given a file in 'sparse' format.
  *
@@ -528,7 +606,7 @@ vector<type_node> infer_column_types(const ITable& tab)
 }
 
 /**
- * Infer the column types of the first line of the input table and
+ * Infer the column types of the first line of a raw input table and
  * compare it to the given column types.  If there is a mis-match,
  * then the first row must be a header, i.e. a set of ascii column
  * labels.
@@ -697,10 +775,16 @@ Table loadTable(const string& file_name,
 // ostream regular tables
 
 /// output the header of a data table in CSV format.
-ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot)
+ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot,
+                            int target_pos)
 {
     vector<string> header = it.get_labels();
-    header.insert(header.begin(), ot.get_label());
+    const string& ol = ot.get_label();
+    OC_ASSERT(target_pos <= (int)header.size());
+    if (target_pos < 0)
+        header.push_back(ol);
+    else
+        header.insert(header.begin() + target_pos, ol);
     return ostreamContainer(out, header, ",") << endl;
 }
 
@@ -714,34 +798,37 @@ string vertex_to_str(const vertex& v)
     return ss.str();
 }
 
-ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot)
+ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
+                      int target_pos)
 {
     // print header
-    ostreamTableHeader(out, it, ot);
+    ostreamTableHeader(out, it, ot, target_pos);
     // print data
     OC_ASSERT(it.size() == ot.size());
     for (size_t row = 0; row < it.size(); ++row) {
         vector<string> content;
         boost::transform(it[row], back_inserter(content), vertex_to_str);
         string oc = vertex_to_str(ot[row]);
-        // output column is always first.
-        content.insert(content.begin(), oc);
+        if (target_pos < 0)
+            content.push_back(oc);
+        else
+            content.insert(content.begin() + target_pos, oc);
         ostreamContainer(out, content, ",") << endl;
     }
     return out;
 }
 
-ostream& ostreamTable(ostream& out, const Table& table)
+ostream& ostreamTable(ostream& out, const Table& table, int target_pos)
 {
-    return ostreamTable(out, table.itable, table.otable);
+    return ostreamTable(out, table.itable, table.otable, target_pos);
 }
 
-void saveTable(const string& file_name, const Table& table)
+void saveTable(const string& file_name, const Table& table, int target_pos)
 {
     OC_ASSERT(!file_name.empty(), "No filename specified!");
     ofstream out(file_name.c_str());
     OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, table.itable, table.otable);
+    ostreamTable(out, table.itable, table.otable, target_pos);
 }
 
 // ===========================================================

@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/binary_search.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "table.h"
@@ -76,16 +77,50 @@ std::vector<T> tokenizeRow(const std::string& line)
         res.push_back(boost::lexical_cast<T>(t));
     return res;
 }
-
-
+// like tokenizerRow but take a vector of indices to ignore, this
+// duplication is here possible temporary in case that method is
+// substantially slower than tokenizerRow when ignored_indices is
+// empty. As soon as it is measured it is not (which I think is the
+// case because of branch prediction) then it can replace tokenizerRow
+// (and rename to it) with an empty ignore_indices as default.
+template<typename T>
+std::vector<T> tokenizeRow_ignore_indices(const std::string& line,
+                                          const std::vector<unsigned>& ignored_indices)
+{
+    table_tokenizer tok = get_row_tokenizer(line);
+    std::vector<T> res;
+    unsigned i = 0;
+    foreach (const std::string& t, tok)
+        if (!boost::binary_search(ignored_indices, i++))
+            res.push_back(boost::lexical_cast<T>(t));
+    return res;
+}
+        
 //////////////////
 // istreamTable //
 //////////////////
 
+// some hacky function to get the header of a DSV file (assuming there is one)
+std::vector<std::string> get_header(const std::string& input_file);
+        
 /// Read a table from an input stream.
 std::istream& istreamOTable(std::istream& in, OTable& tab,
                             const std::string& target_feature);
         
+std::istream& istreamRawITable(std::istream& in, ITable& tab)
+    throw(std::exception, AssertionException);
+
+// like istreamRawITable but take a vector of indices to ignore, this
+// duplication is here possible temporary in case that method is
+// substantially slower than istreamRawITable when ignored_indices is
+// empty. As soon as it is measured it is not (which I think is the
+// case because of branch prediction) then it can replace
+// istreamRawITable (and rename to it) with an empty ignore_indices as
+// default.
+std::istream& istreamRawITable_ingore_indices(std::istream& in, ITable& tab,
+                                              const std::vector<unsigned>& ignored_indices)
+    throw(std::exception, AssertionException);
+
 std::istream& istreamITable(std::istream& in, ITable& tab,
                            const std::vector<std::string>& ignore_features);
 
@@ -114,13 +149,16 @@ Table loadTable(const std::string& file_name,
 /// output a data table in CSV format. Boolean values are output in
 /// binary form (0 for false, 1 for true).
 std::ostream& ostreamTable(std::ostream& out,
-                           const ITable& it, const OTable& ot);
+                           const ITable& it, const OTable& ot,
+                           int target_pos = 0);
 
 /// like above but take a table instead of an input and output table
-std::ostream& ostreamTable(std::ostream& out, const Table& table);
+std::ostream& ostreamTable(std::ostream& out, const Table& table,
+                           int target_pos = 0);
 
 /// like above but take a table instead of a input and output table
-void saveTable(const std::string& file_name, const Table& table);
+void saveTable(const std::string& file_name, const Table& table,
+               int target_pos = 0);
 
 /// output a compressed table in pseudo CSV format
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
