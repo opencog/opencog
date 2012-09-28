@@ -62,7 +62,8 @@ struct feature_selection_parameters
     std::string scorer;
     unsigned int max_evals;
     std::string input_file;
-    // std::vector<std::string> ignore_features_str;
+    std::string target_feature_str;
+    std::vector<std::string> ignore_features_str;
     std::vector<std::string> force_features_str;
     std::string output_file;
     unsigned target_size;

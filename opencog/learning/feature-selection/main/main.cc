@@ -104,8 +104,6 @@ int main(int argc, char** argv)
     string log_file;
     bool log_file_dep_opt;
     feature_selection_parameters fs_params;
-    string target_feature_str;
-    vector<string> ignore_features_str;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -142,11 +140,11 @@ int main(int argc, char** argv)
          "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
 
         (opt_desc_str(target_feature_opt).c_str(),
-         value<string>(&target_feature_str),
+         value<string>(&fs_params.target_feature_str),
          "Label of the target feature to fit. If none is given the first one is used.\n")
 
         (opt_desc_str(ignore_feature_opt).c_str(),
-         value<vector<string>>(&ignore_features_str),
+         value<vector<string>>(&fs_params.ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
          "to ignore several features.\n")
 
@@ -360,8 +358,8 @@ int main(int argc, char** argv)
 
     // Read input_data_file file
     Table table = loadTable(fs_params.input_file,
-                            target_feature_str,
-                            ignore_features_str);
+                            fs_params.target_feature_str,
+                            fs_params.ignore_features_str);
 
     type_tree inferred_tt = table.get_signature();
     type_tree output_tt = get_signature_output(inferred_tt);

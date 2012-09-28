@@ -106,6 +106,21 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
     }
 }
 
+/**
+ * Get indices (aka positions or offsets) of a list of labels given a header
+ */
+vector<unsigned> get_indices(const vector<string>& labels,
+                             const vector<string>& header) {
+    vector<unsigned> res;
+    for (unsigned i = 0; i < header.size(); ++i)
+        if (boost::find(labels, header[i]) != labels.end())
+            res.push_back(i);
+    return res;
+}
+unsigned get_index(const string& label, const vector<string>& header) {
+    return distance(header.begin(), boost::find(header, label));
+}
+    
 /// Add back in any required features that were not selected.
 ///
 /// 'selected_table' is the table of features that were selected.
@@ -117,58 +132,102 @@ Table add_force_features(const Table& selected_table,
                          const Table& full_table,
                          const feature_selection_parameters& fs_params)
 {
-    // get forced features that have not been selected
+    // get selected features
     const vector<string>& fsel = selected_table.itable.get_labels();
+    
+    // get forced features that have not been selected
     vector<string> fnsel;
     foreach (const string& fn, fs_params.force_features_str)
         if (boost::find(fsel, fn) == fsel.cend())
             fnsel.push_back(fn);
-    
-    // get the complement: all features except the above.
-    vector<string> all_feats = full_table.get_labels();
-    vector<string> fnot_sel_comp;
-    boost::set_difference(all_feats, fnsel, back_inserter(fnot_sel_comp));
-    
-    // If nothing to do, we are done.
+
+    // If no feature to force, we are done.
     if (fnsel.empty())
         return selected_table;
 
-    // load the table with force_non_selected features with all
-    // selected features with types definite_object (i.e. string) that
-    // way the content is unchanged (convenient when the data contains
-    // stuff that loadITable does not know how to interpret)
-    ITable fns_table = loadITable(fs_params.input_file, fnot_sel_comp);
+    // header of the DSV file
+    //
+    // WARNING: by doing that we assume that the datafile is dense and
+    // has a header
+    vector<string> header = get_header(fs_params.input_file);
 
-    // insert the forced features in the right order
-    // TODO why do they need to be in order?? Can't we just append?
-    // If we really do need to keep things in order, then should
-    // probably redo insert_col() to use iterators...
-    type_tree bogus;
+    // [0, header.size())
+    vector<unsigned> header_pos = get_indices(header, header);
+    // indices of selected features
+    vector<unsigned> fsel_pos =  get_indices(fsel, header);
+    // indices of forced non selected features
+    vector<unsigned> fnsel_pos = get_indices(fnsel, header);
+    
+    // Get the complement: all features except the non selected forced
+    // ones. We can't use the strings themselves because they are not
+    // ordered and set_difference assumes they are.
+    vector<unsigned> fnsel_pos_comp;
+    boost::set_difference(header_pos, fnsel_pos, back_inserter(fnsel_pos_comp));
+    
+    // load the table with force_non_selected features with all
+    // selected features with types string that way the content is
+    // unchanged (convenient when the data contains stuff that
+    // loadITable does not know how to interpret)
+    //
+    // I'm using istreamRawITable_ignore_indices because loading via
+    // LoadITable is too slow, usually only a handful of features are
+    // forced, deleting all the others takes time (several seconds in
+    // my test case).
+    ITable fns_table;
+    ifstream in(fs_params.input_file.c_str());
+    istreamRawITable_ingore_indices(in, fns_table, fnsel_pos_comp);
+
+    // set the first row as header
+    auto first_row_it = fns_table.begin();
+    vector<string> fnsel_labels;
+    foreach(const vertex& v, *first_row_it)
+        fnsel_labels.push_back(boost::get<string>(v));
+    fns_table.set_labels(fnsel_labels);
+    fns_table.erase(first_row_it);
+
+    // Insert the forced features in the right order. We want to keep
+    // the features in order because that is likely what the user
+    // expects.
+    type_tree bogus;            // not implemented but maybe it
+                                // doesn't matter
     Table new_table(selected_table.otable, selected_table.itable, bogus);
 
     // insert missing columns from fns_itable to new_table.itable
-    size_t pos = 0;
-    size_t npos = 0;
-    for (auto f = all_feats.cbegin(); f != all_feats.cend(); ++f)
-    {
-        vector<string> labs = new_table.itable.get_labels();
-        if (*f == labs[pos]) {
-            pos ++;
-            if (pos == labs.size()) break;
-            continue;
-        }
-        if (*f == fnsel[npos]) {
-            auto data = fns_table.get_column_data(*f);
-            new_table.itable.insert_col(*f, data, pos);
-            npos ++;
-            pos ++;
-            if (pos == labs.size()) break;
-            if (npos == fnsel.size()) break;
-            continue;
-        }
+    for (auto lit = fnsel_pos.cbegin(), rit = fsel_pos.cbegin();
+         lit != fnsel_pos.cend(); ++lit) {
+        int lpos = distance(fnsel_pos.cbegin(), lit);
+        vertex_seq cd = fns_table.get_column_data(lpos);
+        string cl = fnsel_labels[lpos];
+        while(rit != fsel_pos.cend() && *lit > *rit) ++rit;
+        int rpos = rit != fsel_pos.cend() ?
+            distance(fsel_pos.cbegin(), rit) + lpos : -1;
+        new_table.itable.insert_col(cl, cd, rpos);
     }
-
+    
     return new_table;
+}
+
+/**
+ * After selecting the features the position of the target isn't
+ * necessarily valid anymore so we must find it's correct relative
+ * position.
+ */
+int update_target_feature_pos(const Table& table,
+                              const feature_selection_parameters& fs_params)
+{
+    vector<string> header = get_header(fs_params.input_file);
+    unsigned tfp = get_index(fs_params.target_feature_str, header);
+    // Find the positions of the selected features
+    vector<unsigned> fsel_pos = get_indices(table.itable.get_labels(), header);
+    if (tfp < fsel_pos.front()) // it is first
+        return 0;
+    else if (tfp > fsel_pos.back()) // it is last
+        return -1;
+    else {                  // it is somewhere in between
+        auto it = boost::adjacent_find(fsel_pos, [tfp](int l, int r) {
+                return l < tfp && tfp < r; });
+        return distance(fsel_pos.begin(), ++it);
+    }
 }
 
 void write_results(const Table& selected_table,
@@ -176,10 +235,11 @@ void write_results(const Table& selected_table,
                    const feature_selection_parameters& fs_params)
 {
     Table table_wff = add_force_features(selected_table, full_table, fs_params);
+    int tfp = update_target_feature_pos(table_wff, fs_params);
     if (fs_params.output_file.empty())
-        ostreamTable(cout, table_wff);
+        ostreamTable(cout, table_wff, tfp);
     else
-        saveTable(fs_params.output_file, table_wff);
+        saveTable(fs_params.output_file, table_wff, tfp);
 }
 
 instance initial_instance(const feature_selection_parameters& fs_params,
