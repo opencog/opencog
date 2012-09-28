@@ -198,17 +198,21 @@ int ITable::get_column_offset(const std::string& name) const
     return distance(labels.begin(), pos);
 }
 
-vector<vertex> ITable::get_column_data(const std::string& name) const
+vertex_seq ITable::get_column_data(int offset) const
 {
-    vector<vertex> col;
+    vertex_seq col;
 
-    int off = get_column_offset(name);
-    if (-1 == off)
+    if (-1 == offset)
         return col;
 
     foreach (const auto& row, *this)
-        col.push_back(row[off]);
+        col.push_back(row[offset]);
     return col;
+}
+
+vertex_seq ITable::get_column_data(const std::string& name) const
+{
+    return get_column_data(get_column_offset(name));
 }
 
 string ITable::delete_column(const string& name)

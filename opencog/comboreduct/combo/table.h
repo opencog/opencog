@@ -236,9 +236,10 @@ public:
     void delete_columns(const string_seq& ignore_features);
 
     /**
-     * Get the column, given its label
+     * Get the column, given its offset or label
      */
     vertex_seq get_column_data(const std::string& name) const;
+    vertex_seq get_column_data(int offset) const;
 
     /// return a copy of the input table filtered according to a given
     /// container of arity_t. Each value of that container corresponds
