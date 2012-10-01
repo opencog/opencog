@@ -224,7 +224,7 @@ int update_target_feature_pos(const Table& table,
     else if (tfp > fsel_pos.back()) // it is last
         return -1;
     else {                  // it is somewhere in between
-        auto it = boost::adjacent_find(fsel_pos, [tfp](int l, int r) {
+        auto it = boost::adjacent_find(fsel_pos, [tfp](unsigned l, unsigned r) {
                 return l < tfp && tfp < r; });
         return distance(fsel_pos.begin(), ++it);
     }
@@ -297,17 +297,16 @@ feature_set incremental_select_features(const CTable& ctable,
     }
 }
 
-feature_set max_mi_select_features(const CTable& ctable,
-                                   const feature_selection_parameters& fs_params)
+feature_set smd_select_features(const CTable& ctable,
+                                const feature_selection_parameters& fs_params)
 {
     auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end());
     if (fs_params.target_size > 0) {
-        typedef MutualInformation<feature_set> FeatureScorer;
-        FeatureScorer fsc(ctable);
-        return max_mi_selection(all_features, fsc,
-                                (unsigned) fs_params.target_size,
-                                fs_params.threshold);
+        fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
+        return stochastic_max_dependency_selection(all_features, fs_sc,
+                                                   (unsigned) fs_params.target_size,
+                                                   fs_params.threshold);
     } else {
         // Nothing happened, return the all features by default
         return all_features;
@@ -335,8 +334,8 @@ feature_set select_features(const CTable& ctable,
         return moses_select_features(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
         return incremental_select_features(ctable, fs_params);
-    } else if (fs_params.algorithm == mmi) {
-        return max_mi_select_features(ctable, fs_params);
+    } else if (fs_params.algorithm == smd) {
+        return smd_select_features(ctable, fs_params);
     } else {
         cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
              << "' is unknown, please consult the help for the "

@@ -113,7 +113,7 @@ int main(int argc, char** argv)
         ("version,v", "Display the version number.\n")
 
         (opt_desc_str(algo_opt).c_str(),
-         value<string>(&fs_params.algorithm)->default_value(mmi),
+         value<string>(&fs_params.algorithm)->default_value(smd),
          string("Feature selection algorithm. Supported algorithms are:\n")
              /*
               * We're not going to support univariate or sa any time
@@ -122,9 +122,9 @@ int main(int argc, char** argv)
              .append(un).append(" for univariate,\n")
              .append(sa).append(" for simulated annealing,\n")
              */
-             .append(mmi).append(" for maximal mutual information,\n")
-             .append(moses::hc).append(" for hillclimbing,\n")
-             .append(inc).append(" for incremental mutual information.\n").c_str())
+             .append(smd).append(" for stochastic maximal dependency,\n")
+             .append(moses::hc).append(" for moses-hillclimbing,\n")
+             .append(inc).append(" for incremental max-relevancy, min-redundancy.\n").c_str())
 
         (opt_desc_str(scorer_opt).c_str(),
          value<string>(&fs_params.scorer)->default_value(mi),

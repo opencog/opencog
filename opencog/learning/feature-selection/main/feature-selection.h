@@ -34,7 +34,7 @@
 #include <opencog/comboreduct/combo/table.h>
 
 #include "../feature_scorer.h"
-#include "../feature_max_mi.h"
+#include "../stochastic_max_dependency.h"
 #include "../feature_optimization.h"
 #include "../moses_based_scorer.h"
 
@@ -46,8 +46,8 @@ using namespace combo;
 // Feature selection algorithms
 static const string inc="inc"; // incremental_selection (see
                                // feature_optimization.h)
-static const string mmi="mmi"; // max_mi_selection (see
-                               // feature_max_mi.h)
+static const string smd="smd"; // stochastic_max_dependency (see
+                               // stochastic_max_dependency_mi.h)
 
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)
@@ -254,8 +254,8 @@ feature_set moses_select_features(const CTable& ctable,
 feature_set incremental_select_features(const CTable& ctable,
                                         const feature_selection_parameters& fs_params);
 
-feature_set max_mi_select_features(const CTable& ctable,
-                                   const feature_selection_parameters& fs_params);
+feature_set smd_select_features(const CTable& ctable,
+                                const feature_selection_parameters& fs_params);
 
 /**
  * Select the features according to the method described in fs_params.

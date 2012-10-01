@@ -1,8 +1,4 @@
-/// TODO rename that file whatever we agree with Linas
-
-
-
-/** feature_max_mi.h ---
+/** stochastic_max_dependency.h ---
  *
  * Copyright (C) 2010,2012 OpenCog Foundation
  *
@@ -45,7 +41,7 @@ namespace opencog {
  * algorithm coded in the Section 2.1 of the paper entitled "Feature
  * selection based on mutual information: criteria of max-dependency,
  * max-relevance, and min-redundancy." They call it "max-dependency",
- * so I'm calling this algorithm stochastic max-dependency.
+ * so I'm calling this algorithm stochastic_max_dependency.
  *
  * Returns a set S of features following the algo:
  * 0) set<FeatureSet> tops = empty set
@@ -71,14 +67,14 @@ namespace opencog {
  * @return               The set of selected features
  */
 template<typename Scorer, typename FeatureSet>
-FeatureSet max_mi_selection(const FeatureSet& features,
-                            const Scorer& scorer,
-                            unsigned num_features,
-                            double threshold = 0.0,
-                            unsigned top_size = 100)
+FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
+                                               const Scorer& scorer,
+                                               unsigned num_features,
+                                               double threshold = 0.0,
+                                               unsigned top_size = 100)
 {
     if (logger().isDebugEnabled()) {
-        logger().debug() << "Call max_mi_selection(num_features="
+        logger().debug() << "Call stochastic_max_dependency_selection(num_features="
                          << num_features
                          << ", threshold=" << threshold
                          << ", top_size=" << top_size
@@ -107,7 +103,7 @@ FeatureSet max_mi_selection(const FeatureSet& features,
     auto shr = [&](ptrdiff_t i) { return randGen().randint(i); };
     random_shuffle(shuffle.begin(), shuffle.end(), shr);
 
-    // Repeat, until we've gotton the highest-ranked FeatueSet
+    // Repeat, until we've gotton the highest-ranked FeatureSet
     // that has at most 'num_features' in it.
     for (unsigned i = 1; i <= num_features; ++i) {
 
