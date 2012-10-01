@@ -104,35 +104,6 @@ struct metapop_printer
         if (output_eval_number)
             ss << number_of_evals_str << ": " << stats.n_evals << std::endl;;
 
-#if 0
-// XXX TEMPORARY HACK for perf measurements, remove me after June 2012
-        extern std::vector<CTable> gtables;
-
-        enum_table_bscore etb(gtables[0]);
-        bscore_based_cscore<enum_table_bscore> straight(etb);
-
-        enum_graded_bscore etg(gtables[0]);
-        bscore_based_cscore<enum_graded_bscore> regrade(etg);
-
-        enum_effective_bscore etf(gtables[0]);
-        bscore_based_cscore<enum_effective_bscore> effect(etf);
-
-        // const bscored_combo_tree& candidate = begin();
-        auto cit = metapop.begin();
-    
-        for (int i=0; i<10; i++) {
-            if (cit == metapop.end()) break;
-            composite_score sc = straight(get_tree(*cit));
-            ss << "Sraight: " << sc 
-               << "\n Graded: " << get_composite_score(*cit);
-
-            ss << "\nRegrade: " << regrade(get_tree(*cit));
-            ss << "\nEffecti: " << effect(get_tree(*cit));
-            ss << std::endl;
-            cit++;
-        }
-#endif
-
         string res = (output_with_labels && !labels.empty()?
                       ph2l(ss.str(), labels) : ss.str());
         if (output_file.empty())
