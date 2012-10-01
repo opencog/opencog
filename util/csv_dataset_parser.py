@@ -1,4 +1,3 @@
-from xapian import InvalidArgumentError
 import csv
 import urllib2
 
@@ -60,7 +59,7 @@ class CompositeRecord(object):
                  ignore_if_incomplete):
 
         if string_seq is None:
-            raise InvalidArgumentError()
+            raise IndexError()
         dataset.number_of_records += 1
         self.generate_lambda_dict(converter_by_names_tuples)
         for index, name in enumerate(attribute_names):
