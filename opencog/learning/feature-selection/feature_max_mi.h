@@ -41,6 +41,12 @@
 namespace opencog {
 
 /**
+ * It looks like this algo resemble a stochastic version of the
+ * algorithm coded in the Section 2.1 of the paper entitled "Feature
+ * selection based on mutual information: criteria of max-dependency,
+ * max-relevance, and min-redundancy." They call it "max-dependency",
+ * so I'm calling this algorithm stochastic max-dependency.
+ *
  * Returns a set S of features following the algo:
  * 0) set<FeatureSet> tops = empty set
  * 1) For each FeatureSet fs in tops:

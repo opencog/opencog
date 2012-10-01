@@ -369,7 +369,10 @@ struct Table
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
     const type_tree& get_signature() const { return tt; }
+
+    // return a string with the io labels, the output label comes first
     string_seq get_labels() const;
+    
     const std::string& get_target() const { return otable.get_label(); }
 
     // Filter according to a container of arity_t. Each value of that
