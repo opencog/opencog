@@ -62,7 +62,7 @@ struct metapop_printer
                     bool _output_dominated,
                     bool _output_eval_number,
                     bool _output_with_labels,
-                    const vector<string>& _labels,
+                    const vector<string>& _ilabels,
                     const string& _output_file,
                     bool _output_python,
                     bool _is_mpi) :
@@ -72,7 +72,7 @@ struct metapop_printer
         output_dominated(_output_dominated),
         output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
-        labels(_labels),
+        ilabels(_ilabels),
         output_file(_output_file),
         output_python(_output_python),
         is_mpi(_is_mpi) {}
@@ -104,8 +104,8 @@ struct metapop_printer
         if (output_eval_number)
             ss << number_of_evals_str << ": " << stats.n_evals << std::endl;;
 
-        string res = (output_with_labels && !labels.empty()?
-                      ph2l(ss.str(), labels) : ss.str());
+        string res = (output_with_labels && !ilabels.empty()?
+                      ph2l(ss.str(), ilabels) : ss.str());
         if (output_file.empty())
             std::cout << res;
         else {
@@ -117,8 +117,8 @@ struct metapop_printer
         // Log the best candidate
         stringstream ssb;
         metapop.ostream(ssb, 1, true, true);
-        string resb = (output_with_labels && !labels.empty()?
-                       ph2l(ssb.str(), labels) : ssb.str());
+        string resb = (output_with_labels && !ilabels.empty()?
+                       ph2l(ssb.str(), ilabels) : ssb.str());
         if (resb.empty())
             logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
         else
@@ -151,7 +151,7 @@ private:
     bool output_dominated;
     bool output_eval_number;
     bool output_with_labels;
-    const vector<string>& labels;
+    const vector<string>& ilabels;
     string output_file;
     bool output_python;
     bool is_mpi;

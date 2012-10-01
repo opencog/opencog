@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <opencog/util/oc_assert.h>
@@ -28,9 +29,10 @@
 #include <opencog/learning/moses/moses/types.h>
 #include <opencog/learning/moses/main/moses_exec.h>
 
+using boost::trim_copy;
+using namespace boost::posix_time;
 using namespace opencog::moses;
 using namespace opencog::combo;
-using namespace boost::posix_time;
 
 string build_arguments(vector<string>& arguments)
 {
@@ -67,6 +69,34 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
     return {hiscore, hitr};
 }
 
+// like parse_result but doesn't actually attempt to parse the combo,
+// instead it just fill the string where it is expected to be found.
+pair<score_t, string> cheap_parse_result(const string& tempfile)
+{
+    // open file
+    ifstream in(tempfile);
+
+    score_t hiscore = -1.0e37;
+    string hitr_str;
+
+    // Results are printed in random order these days...
+    while (!in.eof()) {
+       // parse result
+       score_t score;
+       in >> score;
+       char tr_chars[4096];
+       in.getline(tr_chars, 4096);
+       string tr_str(tr_chars);
+       if (hiscore < score) {
+           hiscore = score;
+           hitr_str = tr_str;
+           std::cout << "score = " << score << " tr_str = " << tr_str << std::endl;
+       }
+    }
+
+    return {hiscore, hitr_str};
+}
+
 void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
 {
     auto t1 = microsec_clock::local_time();
@@ -99,6 +129,24 @@ void moses_test_combo(vector<string> arguments,
                                    combo_tree tr;
                                    stringstream(tr_str) >> tr;
                                    return tr == result.second;});
+    TS_ASSERT(f_it != expected_tr_strs.end());
+    auto t2 = microsec_clock::local_time();
+    std::cout << "Real time: " << (t2 - t1) << std::endl;
+}
+// like above but uses cheap_parse_result instead of parse_result
+void cheap_moses_test_combo(vector<string> arguments,
+                            vector<string> expected_tr_strs)
+{
+    auto t1 = microsec_clock::local_time();
+    // build arguments
+    string tempfile = build_arguments(arguments);
+    // run moses
+    moses_exec(arguments);
+    // parse the result
+    auto result = cheap_parse_result(tempfile);
+    // check that the result is one of the expected ones
+    auto f_it = boost::find_if(expected_tr_strs, [&](const string& tr_str) {
+            return trim_copy(result.second) == trim_copy(tr_str); });
     TS_ASSERT(f_it != expected_tr_strs.end());
     auto t2 = microsec_clock::local_time();
     std::cout << "Real time: " << (t2 - t1) << std::endl;

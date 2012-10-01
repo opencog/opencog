@@ -1241,7 +1241,7 @@ int moses_exec(int argc, char** argv)
     // Input data for table-based problems.
     vector<Table> tables;
     vector<CTable> ctables;
-    vector<string> labels;
+    vector<string> ilabels;     // labels of the input table (table.itable)
 
     // Problem based on input table.
     if (datafile_based_problem(problem))
@@ -1262,7 +1262,7 @@ int moses_exec(int argc, char** argv)
 
         // Get the labels contained in the data file.
         if (output_with_labels)
-            labels = tables.front().get_labels();
+            ilabels = tables.front().itable.get_labels();
 
         arity = tables.front().get_arity();
 
@@ -1289,7 +1289,7 @@ int moses_exec(int argc, char** argv)
                            output_dominated,
                            output_eval_number,
                            output_with_labels,
-                           labels,
+                           ilabels,
                            output_file,
                            output_python,
                            enable_mpi);
