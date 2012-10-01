@@ -485,18 +485,306 @@ int moses_exec(int argc, char** argv)
     // XXX TODO: make this print correctly, instead of using brackets.
     options_description desc("Allowed options");
     desc.add_options()
+
+        // General options
+        
         ("help,h", "Produce help message.\n")
 
         ("version", "Display the version of moses.\n")
 
-        (opt_desc_str(rand_seed_opt).c_str(),
-         value<unsigned long>(&rand_seed)->default_value(1),
-         "Random seed.\n")
+        (opt_desc_str(jobs_opt).c_str(),
+         value<vector<string>>(&jobs_str),
+         str(format("Number of jobs allocated for deme optimization."
+                    " Jobs can be executed on a remote machine as well,"
+                    " in such case the notation -%1% N:REMOTE_HOST is used,"
+                    " where N is the number of jobs on the machine REMOTE_HOST."
+                    " For instance one can enter the options"
+                    " -%1%4 -%1%16%2%my_server.org"
+                    " (or -%1%16%2%user@my_server.org if one wishes to"
+                    " run the remote jobs under a different user name),"
+                    " meaning that 4 jobs are allocated on the local machine"
+                    " and 16 jobs are allocated on my_server.org."
+                    " The assumption is that moses must be on the remote"
+                    " machine and is located in a directory included in the"
+                    " PATH environment variable. Beware that a lot of log"
+                    " files are gonna be generated when using this option on"
+                    " the remote machines.\n")
+             % jobs_opt.second % job_seperator).c_str())
+
+        (opt_desc_str(exemplars_str_opt).c_str(),
+         value<vector<string>>(&exemplars_str),
+         "Start the search with a given exemplar, can be used several times.\n")
+
+        // Problem-type options
+        
+        (opt_desc_str(problem_opt).c_str(),
+         value<string>(&problem)->default_value(it),
+         str(format("Problem to solve, supported problems are:\n\n"
+                    "%s, regression based on input table\n\n"
+                    "%s, regression based on input table, maximizing precision, while holding activation fixed\n\n"
+                    "%s, regression based on input table, maximizing precision, while holding recall fixed\n\n"
+                    "%s, regression based on input table, maximizing recall while holding precision fixed\n\n"
+                    "%s, regression based on input table, maximizing break-even point (BEP) between precision and recall\n\n"
+                    "%s, regression based on input table, maximizing the F_1 score (harmonic mean of precision and recall)\n\n"
+                    "%s, search interesting patterns, where interestingness"
+                    " is defined in terms of several features such as maximizing"
+                    " the Kullback-Leibler"
+                    " divergence between the distribution of the outputs and"
+                    " that same distribution in the context of the pattern"
+                    " being true."
+                    " Or the difference of skewnesses between the 2 distributions"
+                    " and other things being experimented.\n\n"
+                    "%s, regression based on input table using ann\n\n"
+                    "%s, regression based on combo program\n\n"
+                    "%s, even parity demo problem\n\n"
+                    "%s, disjunction demo problem\n\n"
+                    "%s, multiplex demo problem\n\n"
+                    "%s, regression of f(x)_o = sum_{i={1,o}} x^i demo problem\n")
+             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % sr).c_str())
+
+        // Input specification options
+        
+        (opt_desc_str(input_data_file_opt).c_str(),
+         value<vector<string>>(&input_data_files),
+         "Input table file in DSV format (with comma, whitespace "
+         "and tabulation as seperator). Colums correspond to features "
+         "and rows to observations. Can be used several times, in such "
+         "a case the behavioral score of the whole problem is the "
+         "concatenation of the behavioral scores of the sub-problems "
+         "associated with the files. Each file must have the same number "
+         "of features in the same order.\n")
+
+        (opt_desc_str(target_feature_opt).c_str(),
+         value<string>(&target_feature),
+         "Label of the target feature to fit. If none is given the first one is used.\n")
+
+        (opt_desc_str(ignore_feature_str_opt).c_str(),
+         value<vector<string>>(&ignore_features_str),
+         "Ignore feature from the datasets. Can be used several times "
+         "to ignore several features.\n")
+
+        (opt_desc_str(nsamples_opt).c_str(),
+         value<int>(&nsamples)->default_value(-1),
+         "Number of samples to describe the problem. "
+         "If nsample is negative, null or larger than the maximum "
+         "number of samples allowed it is ignored. If the default "
+         "problem size is larger than the value provided with that "
+         "option then the dataset is subsampled randomly to reach the "
+         "target size.\n")
+
+        // Algorithm control options
+        
+        (opt_desc_str(hc_crossover_opt).c_str(),
+         value<bool>(&hc_crossover)->default_value(true),
+         str(format("Hillclimbing parameter (%s). If false, then only "
+                    "the local neighborhood of the current center "
+                    "instance is explored. That is, the highest-scoring "
+                    "instance is chosen as the new center "
+                    "instance, and the process is repeated.  For "
+                    "many datasets, however, the highest-scoring "
+                    "instances tend to cluster together, and so an "
+                    "exhaustive search may not be required. When "
+                    "this option is specified, a handful of the "
+                    "highest-scoring instances are crossed-over (in "
+                    "the genetic sense of cross-over) to create new "
+                    "instances.  Only these are evaluated for "
+                    "fitness; the exhaustive search step is skipped. "
+                    "For many problem types, especialy those with "
+                    "large neighborhoods (i.e. those with high "
+                    "prorgram complexity), this can lead to an "
+                    "order-of-magnitude speedup, or more.  For other "
+                    "problem types, especially those with deceptive "
+                    "scoring functions, this can hurt performance.\n"
+                    ) % hc).c_str())
+
+        (opt_desc_str(opt_algo_opt).c_str(),
+         value<string>(&opt_algo)->default_value(hc),
+         str(format("Optimization algorithm, supported algorithms are"
+                    " univariate (%s), simulation annealing (%s),"
+                    " hillclimbing (%s).\n")
+             % un % sa % hc).c_str())
+
+        (opt_desc_str(max_score_opt).c_str(),
+         value<score_t>(&max_score)->default_value(very_best_score),
+         "The max score to reach, once reached MOSES halts. MOSES is"
+         " sometimes able to calculate the max score that can be reached"
+         " for a particular problem, in such case the max_score is"
+         " automatically reset of the minimum between MOSES's calculation"
+         " and the user's option.\n")
 
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
          "Maximum number of fitness function evaluations.\n")
 
+        (opt_desc_str(cache_size_opt).c_str(),
+         value<unsigned>(&cache_size)->default_value(100000),
+         "Cache size. Memoize, that is, cache evaluation results, "
+         "so that identical candidates are not re-evaluated.\n")
+         // adaptive_cache has been temporarly disabled because it is
+         // not thread safe, so the following comment doesn't apply
+         // " The cache size is determined by this option "
+         // "adjusted to fit in the RAM.\n")
+
+        (opt_desc_str(ignore_ops_str_opt).c_str(),
+         value<vector<string>>(&ignore_ops_str),
+         str(format("Ignore the following operator in the program solution.  "
+                    "This option may be used several times.  Currently, only div, "
+                    "sin, exp, log can be ignored. "
+                    "This option has the priority over --%s. "
+                    "That is, if an operator is both be included and ignored, "
+                    "then it is ignored. This option does not work with ANN.\n")
+             % include_only_ops_str_opt.first).c_str())
+
+        (opt_desc_str(rand_seed_opt).c_str(),
+         value<unsigned long>(&rand_seed)->default_value(1),
+         "Random seed.\n")
+
+        (opt_desc_str(complexity_temperature_opt).c_str(),
+         value<score_t>(&complexity_temperature)->default_value(6.0),
+         "Set the \"temperature\" (scritly positive floating number) "
+         "of the Boltzmann-like distribution "
+         "used to select the next exemplar out of the metapopulaton. "
+         "A temperature that is too high or too low will make it likely "
+         "that poor exemplars will be chosen for exploration, thus "
+         "resulting in excessively long search times.\n")
+
+        (opt_desc_str(complexity_ratio_opt).c_str(),
+         value<score_t>(&complexity_ratio)->default_value(3.5),
+         "Fix the ratio of the score to complexity, to be used as a "
+         "penalty, when ranking the metapopulation for fitness.  "
+         "The complexity penalty is "
+         "the inverse of the complexity ratio.  Setting this ratio "
+         "too low (complexity penalty too high) causes the complexity "
+         "to dominate ranking, probably trapping the algorithm in a "
+         "local maximum.  Setting this ratio too high (complexity "
+         "penalty too low) will waste time exploring unproductive "
+         "solutions, adversely lengthening solution times.  "
+         "Suggest setting this to a value that is 1x to 2x larger than "
+         "the ratio of change in complexity to score improvement (as "
+         "determined by earlier runs). \n")
+
+        // Large problem parameters
+
+        ("hc-max-nn-evals",
+         value<unsigned>(&hc_max_nn)->default_value(20000),
+         str(format("Hillclimbing parameter (%s).  When exploring the "
+         "nearest neighborhood of an instance, this number specifies "
+         "the maximum number of nearest neighbors to explore.  An "
+         "exhaustive search of the nearest neighborhood is performed "
+         "when the number of nearest neighbors is less than this value.  "
+         "Problems with a large number of features (100 and above) often "
+         "evolve exemplars with a complexity of 100 or more, which in turn "
+         "may have instances with hundreds of thousands of nearest neighbors.  "
+         "Exploring one nearest neighbor requires one evaluation of the "
+         "scoring function, and so an exhaustive search can be prohibitive.  "
+         "A partial search can often work quite well, especially when "
+         "cross-over is enabled.\n") % hc).c_str())
+
+        ("hc-fraction-of-nn",
+         value<double>(&hc_frac_of_nn)->default_value(2.0),
+         str(format("Hillclimbing parameter (%s).  When exploring the "
+         "nearest neighborhood of an instance, this number specifies "
+         "the fraction of nearest neighborhood to explore.  As currently "
+         "implemented, only an estimate of the nearest-neighborhood size "
+         "is used, not the true size.  However, this estimate is accurate "
+         "to within a factor of 2.  Thus, to obtain an exhaustive search "
+         "of the entire neighborhood, set this to 2.0 or larger.  "
+         "Problems with a large number of features (100 and above) often "
+         "evolve exemplars with a complexity of 100 or more, which in turn "
+         "may have instances with hundreds of thousands of nearest neighbors.  "
+         "Exploring one nearest neighbor requires one evaluation of the "
+         "scoring function, and so an exhaustive search can be prohibitive.  "
+         "A partial search can often work quite well, especially when "
+         "cross-over is enabled.\n") % hc).c_str())
+
+        // Algorithm tuning options
+        
+        (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
+         value<int>(&reduct_knob_building_effort)->default_value(2),
+         "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
+
+        (opt_desc_str(max_dist_opt).c_str(),
+         value<size_t>(&max_dist)->default_value(4),
+         "The maximum radius of the neighborhood around the "
+         "exemplar to explore.\n")
+
+        (opt_desc_str(reduce_all_opt).c_str(),
+         value<bool>(&reduce_all)->default_value(true),
+         "Reduce all candidates before being evaluated.  Otherwise "
+         "they are only reduced before being added to the "
+         "metapopulation. This option can be valuable if memoization "
+         "is enabled to avoid re-evaluate of duplicates.\n")
+
+        (opt_desc_str(reduct_candidate_effort_opt).c_str(),
+         value<int>(&reduct_candidate_effort)->default_value(2),
+         "Effort allocated for reduction of candidates, in the range 0-3. "
+         "0 means minimum effort, 3 means maximum effort.\n")
+
+        (opt_desc_str(max_gens_opt).c_str(),
+         value<int>(&max_gens)->default_value(-1),
+         "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
+
+        (opt_desc_str(include_dominated_opt).c_str(),
+         value<bool>(&include_dominated)->default_value(true),
+         "Include dominated candidates (according behavioral score) "
+         "when merging candidates in the metapopulation. Disabling "
+         "this may lead to poorer performance.\n")
+
+        (opt_desc_str(hc_single_step_opt).c_str(),
+         value<bool>(&hc_single_step)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If false, then the normal "
+                    "hillclimbing algorithm is used.  If true, then only one "
+                    "step is taken towards the hilltop, and the results are "
+                    "promptly folded back into the metapopulation. If this "
+                    "flag is set, then consider using the widen-search flag "
+                    "as well, so as to make forward progress.\n") % hc).c_str())
+
+        (opt_desc_str(include_only_ops_str_opt).c_str(),
+         value<vector<string>>(&include_only_ops_str),
+         "Include this operator, but exclude others, in the solution.  "
+         "This option may be used several times to specify multiple "
+         "operators.  Currently, only these operators are "
+         "supported: plus, times, div, sin, exp, log. "
+         "This option does not work with ANN.\n")
+
+        (opt_desc_str(pop_size_ratio_opt).c_str(),
+         value<double>(&pop_size_ratio)->default_value(20),
+         "The higher the more effort is spent on a deme.\n")
+
+        (opt_desc_str(noise_opt).c_str(),
+         value<float>(&noise)->default_value(-1),
+         "Alternative way to set the ratio of raw score to complexity.  "
+         "Setting this option over-rides the complexity ratio, above.  "
+         "Assumes that the data is noisy.   The noisier the data, the "
+         "stronger the model complexity penalty.  If the target feature "
+         "is discrete, the setting should correspond to the fraction of "
+         "the input data that might be wrong (i.e. the probability p "
+         "that an output datum (row) is wrong).   In this case, only "
+         "values 0 <= p < 0.5 are meaningful (i.e. less than half the "
+         "data can be wrong). Suggested values are in the range 0.01 to "
+         "0.001.  If the target feature is continuous, the value specified "
+         "should correspond to the standard deviation of the (Gaussian) "
+         "noise centered around each candidate's output. A negative "
+         "value cedes this setting to complexity-ratio flag, above.\n")
+
+        (opt_desc_str(hc_widen_search_opt).c_str(),
+         value<bool>(&hc_widen_search)->default_value(false),
+         str(format("Hillclimbing parameter (%s). If false, then deme search "
+                    "terminates when a local hilltop is found. If true, "
+                    "then the search radius is progressively widened, "
+                    "until another termination condition is met.\n") % hc).c_str())
+
+        ("well-enough",
+         value<bool>(&use_well_enough)->default_value(false),
+         "If 1, use the \"leave well-enough alone\" algorithm for "
+         "classification problems. This algorithm, after finding a "
+         "clause that has perfect accuracy, will stop mutating that "
+         "clause any further. In principle, this should speed "
+         "convergence.  In practice, not so much; it can hurt "
+         "performance.\n")
+
+        // Output control options
+        
         (opt_desc_str(result_count_opt).c_str(),
          value<long>(&result_count)->default_value(10),
          "The number of results to return, ordered according to "
@@ -542,54 +830,8 @@ int moses_exec(int argc, char** argv)
          value<string>(&output_file)->default_value(""),
          "File where to place the output. If empty, then output to stdout.\n")
 
-        (opt_desc_str(max_gens_opt).c_str(),
-         value<int>(&max_gens)->default_value(-1),
-         "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
-
-        (opt_desc_str(input_data_file_opt).c_str(),
-         value<vector<string>>(&input_data_files),
-         "Input table file in DSV format (with comma, whitespace "
-         "and tabulation as seperator). Colums correspond to features "
-         "and rows to observations. Can be used several times, in such "
-         "a case the behavioral score of the whole problem is the "
-         "concatenation of the behavioral scores of the sub-problems "
-         "associated with the files. Each file must have the same number "
-         "of features in the same order.\n")
-
-        (opt_desc_str(target_feature_opt).c_str(),
-         value<string>(&target_feature),
-         "Label of the target feature to fit. If none is given the first one is used.\n")
-
-        (opt_desc_str(ignore_feature_str_opt).c_str(),
-         value<vector<string>>(&ignore_features_str),
-         "Ignore feature from the datasets. Can be used several times "
-         "to ignore several features.\n")
-
-        (opt_desc_str(problem_opt).c_str(),
-         value<string>(&problem)->default_value(it),
-         str(format("Problem to solve, supported problems are:\n\n"
-                    "%s, regression based on input table\n\n"
-                    "%s, regression based on input table, maximizing precision, while holding activation fixed\n\n"
-                    "%s, regression based on input table, maximizing precision, while holding recall fixed\n\n"
-                    "%s, regression based on input table, maximizing recall while holding precision fixed\n\n"
-                    "%s, regression based on input table, maximizing break-even point (BEP) between precision and recall\n\n"
-                    "%s, regression based on input table, maximizing the F_1 score (harmonic mean of precision and recall)\n\n"
-                    "%s, search interesting patterns, where interestingness"
-                    " is defined in terms of several features such as maximizing"
-                    " the Kullback-Leibler"
-                    " divergence between the distribution of the outputs and"
-                    " that same distribution in the context of the pattern"
-                    " being true."
-                    " Or the difference of skewnesses between the 2 distributions"
-                    " and other things being experimented.\n\n"
-                    "%s, regression based on input table using ann\n\n"
-                    "%s, regression based on combo program\n\n"
-                    "%s, even parity demo problem\n\n"
-                    "%s, disjunction demo problem\n\n"
-                    "%s, multiplex demo problem\n\n"
-                    "%s, regression of f(x)_o = sum_{i={1,o}} x^i demo problem\n")
-             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % sr).c_str())
-
+        // Demo options
+        
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          str(format("Combo program to learn, used when the problem"
@@ -604,15 +846,8 @@ int moses_exec(int argc, char** argv)
                     " the problem size corresponds to the order o.\n")
              % pa % dj % mux % sr).c_str())
 
-        (opt_desc_str(nsamples_opt).c_str(),
-         value<int>(&nsamples)->default_value(-1),
-         "Number of samples to describe the problem. "
-         "If nsample is negative, null or larger than the maximum "
-         "number of samples allowed it is ignored. If the default "
-         "problem size is larger than the value provided with that "
-         "option then the dataset is subsampled randomly to reach the "
-         "target size.\n")
-
+        // The remaining options (TODO organize that)
+        
         (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0.0),
          "Minimum value of a sampled coninuous input.  The cp, ip, pre, "
@@ -653,82 +888,9 @@ int moses_exec(int argc, char** argv)
                     " This option is overwritten by %s.\n")
              % log_file_dep_opt_opt.first).c_str())
 
-        (opt_desc_str(include_only_ops_str_opt).c_str(),
-         value<vector<string>>(&include_only_ops_str),
-         "Include this operator, but exclude others, in the solution.  "
-         "This option may be used several times to specify multiple "
-         "operators.  Currently, only these operators are "
-         "supported: plus, times, div, sin, exp, log. "
-         "This option does not work with ANN.\n")
-
-        (opt_desc_str(ignore_ops_str_opt).c_str(),
-         value<vector<string>>(&ignore_ops_str),
-         str(format("Ignore the following operator in the program solution.  "
-                    "This option may be used several times.  Currently, only div, "
-                    "sin, exp, log can be ignored. "
-                    "This option has the priority over --%s. "
-                    "That is, if an operator is both be included and ignored, "
-                    "then it is ignored. This option does not work with ANN.\n")
-             % include_only_ops_str_opt.first).c_str())
-
-        (opt_desc_str(opt_algo_opt).c_str(),
-         value<string>(&opt_algo)->default_value(hc),
-         str(format("Optimization algorithm, supported algorithms are"
-                    " univariate (%s), simulation annealing (%s),"
-                    " hillclimbing (%s).\n")
-             % un % sa % hc).c_str())
-
-        (opt_desc_str(exemplars_str_opt).c_str(),
-         value<vector<string>>(&exemplars_str),
-         "Start the search with a given exemplar, can be used several times.\n")
-
         (opt_desc_str(max_candidates_opt).c_str(),
          value<int>(&max_candidates)->default_value(-1),
          "Maximum number of considered candidates to be added to the metapopulation after optimizing deme.\n")
-
-        (opt_desc_str(reduce_all_opt).c_str(),
-         value<bool>(&reduce_all)->default_value(true),
-         "Reduce all candidates before being evaluated.  Otherwise "
-         "they are only reduced before being added to the "
-         "metapopulation. This option can be valuable if memoization "
-         "is enabled to avoid re-evaluate of duplicates.\n")
-
-        (opt_desc_str(reduct_candidate_effort_opt).c_str(),
-         value<int>(&reduct_candidate_effort)->default_value(2),
-         "Effort allocated for reduction of candidates, in the range 0-3. "
-         "0 means minimum effort, 3 means maximum effort.\n")
-
-        (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
-         value<int>(&reduct_knob_building_effort)->default_value(2),
-         "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
-
-        (opt_desc_str(cache_size_opt).c_str(),
-         value<unsigned>(&cache_size)->default_value(100000),
-         "Cache size. Memoize, that is, cache evaluation results, "
-         "so that identical candidates are not re-evaluated.\n")
-         // adaptive_cache has been temporarly disabled because it is
-         // not thread safe, so the following comment doesn't apply
-         // " The cache size is determined by this option "
-         // "adjusted to fit in the RAM.\n")
-
-        (opt_desc_str(jobs_opt).c_str(),
-         value<vector<string>>(&jobs_str),
-         str(format("Number of jobs allocated for deme optimization."
-                    " Jobs can be executed on a remote machine as well,"
-                    " in such case the notation -%1% N:REMOTE_HOST is used,"
-                    " where N is the number of jobs on the machine REMOTE_HOST."
-                    " For instance one can enter the options"
-                    " -%1%4 -%1%16%2%my_server.org"
-                    " (or -%1%16%2%user@my_server.org if one wishes to"
-                    " run the remote jobs under a different user name),"
-                    " meaning that 4 jobs are allocated on the local machine"
-                    " and 16 jobs are allocated on my_server.org."
-                    " The assumption is that moses must be on the remote"
-                    " machine and is located in a directory included in the"
-                    " PATH environment variable. Beware that a lot of log"
-                    " files are gonna be generated when using this option on"
-                    " the remote machines.\n")
-             % jobs_opt.second % job_seperator).c_str())
 
 #ifdef HAVE_MPI
         ("mpi",
@@ -741,29 +903,6 @@ int moses_exec(int argc, char** argv)
          "This option is useful in case of unbalanced data as it "
          "weights the score so that each class weights equally "
          "regardless of their proportion in terms of sample size.\n")
-
-        (opt_desc_str(pop_size_ratio_opt).c_str(),
-         value<double>(&pop_size_ratio)->default_value(20),
-         "The higher the more effort is spent on a deme.\n")
-
-        (opt_desc_str(max_score_opt).c_str(),
-         value<score_t>(&max_score)->default_value(very_best_score),
-         "The max score to reach, once reached MOSES halts. MOSES is"
-         " sometimes able to calculate the max score that can be reached"
-         " for a particular problem, in such case the max_score is"
-         " automatically reset of the minimum between MOSES's calculation"
-         " and the user's option.\n")
-
-        (opt_desc_str(max_dist_opt).c_str(),
-         value<size_t>(&max_dist)->default_value(4),
-         "The maximum radius of the neighborhood around the "
-         "exemplar to explore.\n")
-
-        (opt_desc_str(include_dominated_opt).c_str(),
-         value<bool>(&include_dominated)->default_value(true),
-         "Include dominated candidates (according behavioral score) "
-         "when merging candidates in the metapopulation. Disabling "
-         "this may lead to poorer performance.\n")
 
         ("diversity-pressure",
          value<score_t>(&diversity_pressure)->default_value(0.0),
@@ -787,132 +926,12 @@ int moses_exec(int argc, char** argv)
          "the Euclidean distance. A value of 0.0 or less correspond to the "
          "max component-wise. Any other value corresponds to the general case.\n")
 
-        (opt_desc_str(complexity_temperature_opt).c_str(),
-         value<score_t>(&complexity_temperature)->default_value(6.0),
-         "Set the \"temperature\" (scritly positive floating number) "
-         "of the Boltzmann-like distribution "
-         "used to select the next exemplar out of the metapopulaton. "
-         "A temperature that is too high or too low will make it likely "
-         "that poor exemplars will be chosen for exploration, thus "
-         "resulting in excessively long search times.\n")
-
-        (opt_desc_str(complexity_ratio_opt).c_str(),
-         value<score_t>(&complexity_ratio)->default_value(3.5),
-         "Fix the ratio of the score to complexity, to be used as a "
-         "penalty, when ranking the metapopulation for fitness.  "
-         "The complexity penalty is "
-         "the inverse of the complexity ratio.  Setting this ratio "
-         "too low (complexity penalty too high) causes the complexity "
-         "to dominate ranking, probably trapping the algorithm in a "
-         "local maximum.  Setting this ratio too high (complexity "
-         "penalty too low) will waste time exploring unproductive "
-         "solutions, adversely lengthening solution times.  "
-         "Suggest setting this to a value that is 1x to 2x larger than "
-         "the ratio of change in complexity to score improvement (as "
-         "determined by earlier runs). \n")
-
-        (opt_desc_str(noise_opt).c_str(),
-         value<float>(&noise)->default_value(-1),
-         "Alternative way to set the ratio of raw score to complexity.  "
-         "Setting this option over-rides the complexity ratio, above.  "
-         "Assumes that the data is noisy.   The noisier the data, the "
-         "stronger the model complexity penalty.  If the target feature "
-         "is discrete, the setting should correspond to the fraction of "
-         "the input data that might be wrong (i.e. the probability p "
-         "that an output datum (row) is wrong).   In this case, only "
-         "values 0 <= p < 0.5 are meaningful (i.e. less than half the "
-         "data can be wrong). Suggested values are in the range 0.01 to "
-         "0.001.  If the target feature is continuous, the value specified "
-         "should correspond to the standard deviation of the (Gaussian) "
-         "noise centered around each candidate's output. A negative "
-         "value cedes this setting to complexity-ratio flag, above.\n")
-
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t>>(&discretize_thresholds),
          "If the domain is continuous, discretize the target feature. "
          "A unique used of that option produces 2 classes, x < thresold "
          "and x >= threshold. The option can be used several times (n-1) "
          "to produce n classes and the thresholds are automatically sorted.\n")
-
-        (opt_desc_str(hc_crossover_opt).c_str(),
-         value<bool>(&hc_crossover)->default_value(true),
-         str(format("Hillclimbing parameter (%s). If false, then only "
-                    "the local neighborhood of the current center "
-                    "instance is explored. That is, the highest-scoring "
-                    "instance is chosen as the new center "
-                    "instance, and the process is repeated.  For "
-                    "many datasets, however, the highest-scoring "
-                    "instances tend to cluster together, and so an "
-                    "exhaustive search may not be required. When "
-                    "this option is specified, a handful of the "
-                    "highest-scoring instances are crossed-over (in "
-                    "the genetic sense of cross-over) to create new "
-                    "instances.  Only these are evaluated for "
-                    "fitness; the exhaustive search step is skipped. "
-                    "For many problem types, especialy those with "
-                    "large neighborhoods (i.e. those with high "
-                    "prorgram complexity), this can lead to an "
-                    "order-of-magnitude speedup, or more.  For other "
-                    "problem types, especially those with deceptive "
-                    "scoring functions, this can hurt performance.\n"
-                    ) % hc).c_str())
-
-        ("hc-max-nn-evals",
-         value<unsigned>(&hc_max_nn)->default_value(20000),
-         str(format("Hillclimbing parameter (%s).  When exploring the "
-         "nearest neighborhood of an instance, this number specifies "
-         "the maximum number of nearest neighbors to explore.  An "
-         "exhaustive search of the nearest neighborhood is performed "
-         "when the number of nearest neighbors is less than this value.  "
-         "Problems with a large number of features (100 and above) often "
-         "evolve exemplars with a complexity of 100 or more, which in turn "
-         "may have instances with hundreds of thousands of nearest neighbors.  "
-         "Exploring one nearest neighbor requires one evaluation of the "
-         "scoring function, and so an exhaustive search can be prohibitive.  "
-         "A partial search can often work quite well, especially when "
-         "cross-over is enabled.\n") % hc).c_str())
-
-        ("hc-fraction-of-nn",
-         value<double>(&hc_frac_of_nn)->default_value(2.0),
-         str(format("Hillclimbing parameter (%s).  When exploring the "
-         "nearest neighborhood of an instance, this number specifies "
-         "the fraction of nearest neighborhood to explore.  As currently "
-         "implemented, only an estimate of the nearest-neighborhood size "
-         "is used, not the true size.  However, this estimate is accurate "
-         "to within a factor of 2.  Thus, to obtain an exhaustive search "
-         "of the entire neighborhood, set this to 2.0 or larger.  "
-         "Problems with a large number of features (100 and above) often "
-         "evolve exemplars with a complexity of 100 or more, which in turn "
-         "may have instances with hundreds of thousands of nearest neighbors.  "
-         "Exploring one nearest neighbor requires one evaluation of the "
-         "scoring function, and so an exhaustive search can be prohibitive.  "
-         "A partial search can often work quite well, especially when "
-         "cross-over is enabled.\n") % hc).c_str())
-
-        (opt_desc_str(hc_widen_search_opt).c_str(),
-         value<bool>(&hc_widen_search)->default_value(false),
-         str(format("Hillclimbing parameter (%s). If false, then deme search "
-                    "terminates when a local hilltop is found. If true, "
-                    "then the search radius is progressively widened, "
-                    "until another termination condition is met.\n") % hc).c_str())
-
-        (opt_desc_str(hc_single_step_opt).c_str(),
-         value<bool>(&hc_single_step)->default_value(false),
-         str(format("Hillclimbing parameter (%s). If false, then the normal "
-                    "hillclimbing algorithm is used.  If true, then only one "
-                    "step is taken towards the hilltop, and the results are "
-                    "promptly folded back into the metapopulation. If this "
-                    "flag is set, then consider using the widen-search flag "
-                    "as well, so as to make forward progress.\n") % hc).c_str())
-
-        ("well-enough",
-         value<bool>(&use_well_enough)->default_value(false),
-         "If 1, use the \"leave well-enough alone\" algorithm for "
-         "classification problems. This algorithm, after finding a "
-         "clause that has perfect accuracy, will stop mutating that "
-         "clause any further. In princple, this should speed "
-         "convergence.  In practice, not so much; it can hurt "
-         "performance.\n")
 
         (opt_desc_str(ip_kld_weight_opt).c_str(),
          value<double>(&ip_kld_weight)->default_value(1.0),
