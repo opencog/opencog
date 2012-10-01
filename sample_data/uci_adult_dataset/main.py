@@ -34,7 +34,7 @@ def example4():
         ('a','c','e'))
     print dataset
 
-def example5():
+def uci_adult():
     attribute_names = ('age', 'workclass', 'fnlwgt', 'education',
                        'education_num', 'marital_status', 'occupation',
                        'relationship', 'race', 'sex', 'capital_gain',
@@ -51,22 +51,5 @@ def example5():
     dataset = Dataset('adult.data',
         CONVERT_TO_STRING, attribute_names,
         lambda_by_indexes_tuples,
-        attribute_names[0:3],
+        attribute_names[0:14],
         incomplete_value_evaluation_fn)
-
-    print dataset[7]
-    print 'Makes more than 50K?', dataset[7].greater_than_50k
-    print 'Total records:', dataset.number_of_records
-    print 'Number of records skipped (since contained ? values):',\
-    dataset.number_of_incomplete_records
-
-print 'Example1:'
-example1()
-print '\nExample2:'
-example2()
-print '\nExample3:'
-example3()
-print '\nExample4:'
-example4()
-print '\nExample5:'
-example5()
