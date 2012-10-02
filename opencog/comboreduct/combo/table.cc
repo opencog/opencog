@@ -161,8 +161,9 @@ void ITable::insert_col(const std::string& clab,
                         int off)
 {
     // Infer the column type
-    // Use the second row, just in case the first holds labels...
-    type_node col_type = get_type_node(get_type_tree(col[1]));
+    // If it exists use the second row, just in case the first holds labels...
+    unsigned idx = col.size() > 1 ? 1 : 0;
+    type_node col_type = get_type_node(get_type_tree(col[idx]));
     types.insert(off >= 0 ? types.begin() + off : types.end(), col_type);
 
     // Insert label
