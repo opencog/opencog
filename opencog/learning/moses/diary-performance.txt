@@ -3540,3 +3540,31 @@ real	7m11.449s
 user	28m34.771s
 sys	0m31.451s
 
+==============================================================
+Bag-of-words redux:
+
+bzr rev 7609: this code includes deme size management, as well
+as limited logical_probe funkiness.
+
+Dataset: ./reuters-test-10.data which has 4852 rows, 16935 columns
+Typical run:
+ ./opencog/learning/moses/main/moses -Hit -i ./reuters-test-10.data 
+    -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
+   --hc-max-nn-evals=5000 -j12 -m132000 -freuters-test-10-m132K.log
+
+Note: -s0 to disable caching.
+
+Results: 
+--real-time measures with "time"
+--memusage by monitoring every 60 seconds
+--deme/gen is the deme and generation that it got to.
+
+       real
+-m     time    score   cpxy  memusage   deme/gen
+----  -----    -----  -----  --------   --------
+132K   3917    -1543           ???       1/94   (this one had caching turned on...)
+132K   3992    -1543   111    8.3G       1/94
+264K   8635    -1505   164    8.4G       1/169
+528K   ----    -1497   177    ----       1/190   (started next gen, ran out of memory)
+
+

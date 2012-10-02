@@ -118,7 +118,6 @@ build_knobs::build_knobs(combo_tree& exemplar,
         ss << output_type;
         OC_ASSERT(0, "Unsupported output type, got '%s'",
                   ss.str().c_str());
-
     }
 }
 
@@ -443,59 +442,60 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     // TODO: should bias the selection of these, so that
     // larger subtrees are preferred .. !? why?
     unsigned int max_pairs = _arity * (_arity - 1);
-    if (max_pairs > 0) {
-        type_tree_sib_it arg_types = types.begin(types.begin());  // first child
-        lazy_random_selector select(max_pairs);
+    if (max_pairs <= 0)
+        return;
 
-        // Actual number of pairs to create ...
-        unsigned int n_pairs =
-            _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
-        dorepeat (n_pairs) {
-            //while (!select.empty()) {
-            combo_tree v(swap_and_or(*it));
-            int x = select();
-            int a = x / (_arity - 1);
-            int b = x - a * (_arity - 1);
-            if (b == a)
-                b = _arity - 1;
+    type_tree_sib_it arg_types = types.begin(types.begin());  // first child
+    lazy_random_selector select(max_pairs);
 
-            argument arg_b(1 + b);
-            argument arg_a(1 + a);
+    // Actual number of pairs to create ...
+    unsigned int n_pairs =
+        _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
+    dorepeat (n_pairs) {
+        //while (!select.empty()) 
+        combo_tree v(swap_and_or(*it));
+        int x = select();
+        int a = x / (_arity - 1);
+        int b = x - a * (_arity - 1);
+        if (b == a)
+            b = _arity - 1;
 
-            // Get the types of arguments a and b.
-            // Why doesn't the below just work?
-            // type_tree_sib_it type_a = arg_types + a;
-            // type_tree_sib_it type_b = arg_types + b;
-            type_tree_sib_it type_a = arg_types;
-            type_tree_sib_it type_b = arg_types;
-            type_a += a;
-            type_b += b;
+        argument arg_b(1 + b);
+        argument arg_a(1 + a);
 
-            if (permitted_op(arg_a) && permitted_op(arg_b)) {
-                if (b < a) {
-                    insert_typed_arg(v, type_b, arg_b);
-                    insert_typed_arg(v, type_a, arg_a);
+        // Get the types of arguments a and b.
+        // Why doesn't the below just work?
+        // type_tree_sib_it type_a = arg_types + a;
+        // type_tree_sib_it type_b = arg_types + b;
+        type_tree_sib_it type_a = arg_types;
+        type_tree_sib_it type_b = arg_types;
+        type_a += a;
+        type_b += b;
 
-                } else {
-                    // As above, but negate arg_a first. So we just
-                    // inline-expand insert_typed_arg and put a logical
-                    // not in front of it.
-                    if (*type_a == id::boolean_type)
-                    {
-                        arg_a.negate();
-                        v.append_child(v.begin(), arg_a);
-                    }
-                    else if (permitted_op(id::greater_than_zero) &&
-                         (*type_a == id::contin_type))
-                    {
-                        pre_it nt = v.append_child(v.begin(), id::logical_not);
-                        pre_it gt = v.append_child(nt, id::greater_than_zero);
-                        v.append_child(gt, arg_a);
-                    }
-                    insert_typed_arg(v, type_b, arg_b);
+        if (permitted_op(arg_a) && permitted_op(arg_b)) {
+            if (b < a) {
+                insert_typed_arg(v, type_b, arg_b);
+                insert_typed_arg(v, type_a, arg_a);
+
+            } else {
+                // As above, but negate arg_a first. So we just
+                // inline-expand insert_typed_arg and put a logical
+                // not in front of it.
+                if (*type_a == id::boolean_type)
+                {
+                    arg_a.negate();
+                    v.append_child(v.begin(), arg_a);
                 }
-                perms.push_back(v);
+                else if (permitted_op(id::greater_than_zero) &&
+                     (*type_a == id::contin_type))
+                {
+                    pre_it nt = v.append_child(v.begin(), id::logical_not);
+                    pre_it gt = v.append_child(nt, id::greater_than_zero);
+                    v.append_child(gt, arg_a);
+                }
+                insert_typed_arg(v, type_b, arg_b);
             }
+            perms.push_back(v);
         }
     }
 
@@ -532,11 +532,11 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     sample_logical_perms(it, perms);
 
     size_t np = perms.size();
-    logger().debug("Created %d logical knob subtrees", np);
+    logger().info("Created %d logical knob subtrees", np);
 
     // recursive knob probing can be a significant performance
     // de-accelerator if the number of knobs is small, since the
-    // cost of copying the knobs, and then copying the results, 
+    // cost of copying the knobs, and then copying the results,
     // as well as async thread setup, can be huge.  So don't do it
     // until a minumum number of break-even knobs need examination.
     // The number of 30K is a wild guesstimate, based on recent
@@ -547,12 +547,12 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     int nthr = 1 + np / BREAKEVEN;
     int maxth = num_threads();
     if (nthr > maxth) nthr = maxth;
-     
+
     ptr_vector<logical_subtree_knob> kb_v =
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, nthr);
 
-    logger().debug("Adding  %d logical knobs", kb_v.size());
+    logger().info("Adding  %d logical knobs", kb_v.size());
     foreach (const logical_subtree_knob& kb, kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
@@ -1027,7 +1027,6 @@ void build_knobs::action_canonize(pre_it it)
 }
 
 
-
 void build_knobs::build_action(pre_it it)
 {
 
@@ -1211,7 +1210,8 @@ static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
     }
 }
 
-void build_knobs::ann_canonize(pre_it it) {
+void build_knobs::ann_canonize(pre_it it)
+{
     tree_transform trans;
     cout << _exemplar << endl << endl;
     ann net = trans.decodify_tree(_exemplar);
