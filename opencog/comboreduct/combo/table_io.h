@@ -174,10 +174,11 @@ Out& ostreamTable(Out& out,
     // print header
     ostreamTableHeader(out, it, ot, target_pos);
     // print data
-    OC_ASSERT(it.size() == ot.size());
-    for (size_t row = 0; row < it.size(); ++row) {
+    OC_ASSERT(it.empty() || it.size() == ot.size());
+    for (size_t row = 0; row < ot.size(); ++row) {
         std::vector<std::string> content;
-        boost::transform(it[row], back_inserter(content), vertex_to_str);
+        if (!it.empty())
+            boost::transform(it[row], back_inserter(content), vertex_to_str);
         std::string oc = vertex_to_str(ot[row]);
         if (target_pos < 0)
             content.push_back(oc);
