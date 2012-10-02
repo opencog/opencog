@@ -171,7 +171,7 @@ representation::representation(const reduct::rule& simplify_candidate,
     }
     logger().info() << "Number of contin knobs mapped: " << contin.size();
 
-    if (logger().isFineEnabled()) {
+    if (logger().isDebugEnabled()) {
         std::stringstream ss;
         ostream_prototype(ss << "Created prototype: ");
         logger().debug(ss.str());

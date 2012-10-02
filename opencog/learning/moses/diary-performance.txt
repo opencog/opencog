@@ -3603,5 +3603,8 @@ OK all the extra knobs are from build_knobs::append_linear_combination()
 
 reuters-small: arity of 1617
 1st generation: 90552 = 27 x base
-2nd generation: exactly same as before... wtf?
+2nd generation: exactly same as before... wtf? Ahhh  found it.
+rec_canonize() was building a quadratic with arity-squared knobs.
+Now fixed to kep it linear.
+
 

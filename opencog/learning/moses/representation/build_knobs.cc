@@ -532,7 +532,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     sample_logical_perms(it, perms);
 
     size_t np = perms.size();
-    logger().info("Created %d logical knob subtrees", np);
+    logger().debug("Created %d logical knob subtrees", np);
 
     // recursive knob probing can be a significant performance
     // de-accelerator if the number of knobs is small, since the
@@ -552,7 +552,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, nthr);
 
-    logger().info("Adding  %d logical knobs", kb_v.size());
+    logger().debug("Adding  %d logical knobs", kb_v.size());
     foreach (const logical_subtree_knob& kb, kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
