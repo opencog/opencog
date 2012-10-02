@@ -741,6 +741,10 @@ istream& istreamTable(istream& in, Table& tab,
               "Fatal Error: target feature \"%s\" not found",
               target_feature.c_str());
 
+    tab.target_pos = tab.itable.get_column_offset(target_feature);
+    if (tab.target_pos == (int)tab.itable.get_labels().size() - 1)
+        tab.target_pos = -1;    // the last position is -1
+    
     type_node targ_type = tab.itable.get_type(target_feature);
 
     string targ_feat = tab.itable.delete_column(target_feature);
@@ -828,7 +832,7 @@ void saveTable(const string& file_name, const Table& table)
     OC_ASSERT(!file_name.empty(), "No filename specified!");
     ofstream out(file_name.c_str());
     OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, table.itable, table.otable);
+    ostreamTable(out, table);
 }
 
 // ===========================================================

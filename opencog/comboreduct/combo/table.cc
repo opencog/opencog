@@ -502,7 +502,7 @@ void Table::add_features_from_file(const string& input_file,
 
         // target_pos
         if (target_pos > 0) {
-            auto it = boost::adjacent_find(header_pos, [&](unsigned l, unsigned r) {
+            auto it = boost::adjacent_find(header_pos, [&](int l, int r) {
                     return l < target_pos && target_pos < r; });
             target_pos = distance(header_pos.begin(), ++it);
         }

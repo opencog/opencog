@@ -28,6 +28,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/range/algorithm/adjacent_find.hpp>
 
 #include <opencog/util/Counter.h>
 #include <opencog/util/algorithm.h>
@@ -265,13 +266,14 @@ public:
         return res;
     }
 
+    int get_column_offset(const std::string& col_name) const;
+
 protected:
     mutable string_seq labels; // list of input labels
     mutable type_seq types;    // list of types of the columns
 
 private:
     string_seq get_default_labels() const;
-    int get_column_offset(const std::string& col_name) const;
 
     /**
      * this function take an arity in input and returns in output the
@@ -392,6 +394,14 @@ struct Table
         foreach(type_node tn, res.itable.get_types())
             res.tt.append_child(head, tn);
         res.tt.append_child(head, otable.get_type());
+
+        // update target_pos
+        if (target_pos > 0) {
+            auto it = boost::adjacent_find(f, [&](int l, int r) {
+                    return l < target_pos && target_pos < r; });
+            res.target_pos = distance(f.begin(), ++it);
+        } else
+            res.target_pos = target_pos;
             
         return res;
     }
