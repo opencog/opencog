@@ -81,6 +81,7 @@ struct feature_selection_parameters
     float pre_min_activation;
     float pre_max_activation;
     bool pre_positive;
+    unsigned smd_top_size;
 };
 
 typedef std::set<arity_t> feature_set;

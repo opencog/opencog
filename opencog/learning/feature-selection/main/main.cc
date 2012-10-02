@@ -262,6 +262,12 @@ int main(int argc, char** argv)
          "Hillclimbing parameter.  Cache size, so that identical "
          "candidates are not re-evaluated.   Zero means no cache.\n")
 
+        // ======= Stochastic max dependency params =======
+        ("smd-top-size",
+         value<unsigned>(&fs_params.smd_top_size)->default_value(10),
+         "Stochastic max dependency parameter. Number of feature subset "
+         "candidates to consider building the next superset.\n")
+        
         // options for pre scoring
         ("pre-penalty",
          value<float>(&fs_params.pre_penalty)->default_value(1.0f),

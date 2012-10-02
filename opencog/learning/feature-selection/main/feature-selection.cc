@@ -306,7 +306,8 @@ feature_set smd_select_features(const CTable& ctable,
         fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
         return stochastic_max_dependency_selection(all_features, fs_sc,
                                                    (unsigned) fs_params.target_size,
-                                                   fs_params.threshold);
+                                                   fs_params.threshold,
+                                                   fs_params.smd_top_size);
     } else {
         // Nothing happened, return the all features by default
         return all_features;
