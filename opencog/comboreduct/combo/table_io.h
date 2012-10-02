@@ -146,14 +146,54 @@ Table loadTable(const std::string& file_name,
 // ostreamTable //
 //////////////////
 
+std::string vertex_to_str(const vertex& v);
+
+/// output the header of a data table in CSV format.
+template<typename Out>
+Out& ostreamTableHeader(Out& out, const ITable& it, const OTable& ot,
+                        int target_pos)
+{
+    std::vector<std::string> header = it.get_labels();
+    const std::string& ol = ot.get_label();
+    OC_ASSERT(target_pos <= (int)header.size());
+    if (target_pos < 0)
+        header.push_back(ol);
+    else
+        header.insert(header.begin() + target_pos, ol);
+    ostreamContainer(out, header, ",") << std::endl;
+    return out;
+}
+
 /// output a data table in CSV format. Boolean values are output in
 /// binary form (0 for false, 1 for true).
-std::ostream& ostreamTable(std::ostream& out,
-                           const ITable& it, const OTable& ot,
-                           int target_pos = 0);
+template<typename Out>
+Out& ostreamTable(Out& out,
+                  const ITable& it, const OTable& ot,
+                  int target_pos = 0)
+{
+    // print header
+    ostreamTableHeader(out, it, ot, target_pos);
+    // print data
+    OC_ASSERT(it.size() == ot.size());
+    for (size_t row = 0; row < it.size(); ++row) {
+        std::vector<std::string> content;
+        boost::transform(it[row], back_inserter(content), vertex_to_str);
+        std::string oc = vertex_to_str(ot[row]);
+        if (target_pos < 0)
+            content.push_back(oc);
+        else
+            content.insert(content.begin() + target_pos, oc);
+        ostreamContainer(out, content, ",") << std::endl;
+    }
+    return out;
+}
 
 /// like above but take a table instead of an input and output table
-std::ostream& ostreamTable(std::ostream& out, const Table& table);
+template<typename Out>
+Out& ostreamTable(Out& out, const Table& table)
+{
+    return ostreamTable(out, table.itable, table.otable, table.target_pos);
+}
 
 /// like above but take a table instead of a input and output table
 void saveTable(const std::string& file_name, const Table& table);

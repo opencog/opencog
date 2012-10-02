@@ -779,18 +779,18 @@ Table loadTable(const string& file_name,
 // ostream regular tables
 
 /// output the header of a data table in CSV format.
-ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot,
-                            int target_pos)
-{
-    vector<string> header = it.get_labels();
-    const string& ol = ot.get_label();
-    OC_ASSERT(target_pos <= (int)header.size());
-    if (target_pos < 0)
-        header.push_back(ol);
-    else
-        header.insert(header.begin() + target_pos, ol);
-    return ostreamContainer(out, header, ",") << endl;
-}
+// ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot,
+//                             int target_pos)
+// {
+//     vector<string> header = it.get_labels();
+//     const string& ol = ot.get_label();
+//     OC_ASSERT(target_pos <= (int)header.size());
+//     if (target_pos < 0)
+//         header.push_back(ol);
+//     else
+//         header.insert(header.begin() + target_pos, ol);
+//     return ostreamContainer(out, header, ",") << endl;
+// }
 
 string vertex_to_str(const vertex& v)
 {
@@ -802,30 +802,30 @@ string vertex_to_str(const vertex& v)
     return ss.str();
 }
 
-ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
-                      int target_pos)
-{
-    // print header
-    ostreamTableHeader(out, it, ot, target_pos);
-    // print data
-    OC_ASSERT(it.size() == ot.size());
-    for (size_t row = 0; row < it.size(); ++row) {
-        vector<string> content;
-        boost::transform(it[row], back_inserter(content), vertex_to_str);
-        string oc = vertex_to_str(ot[row]);
-        if (target_pos < 0)
-            content.push_back(oc);
-        else
-            content.insert(content.begin() + target_pos, oc);
-        ostreamContainer(out, content, ",") << endl;
-    }
-    return out;
-}
+// ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
+//                       int target_pos)
+// {
+//     // print header
+//     ostreamTableHeader(out, it, ot, target_pos);
+//     // print data
+//     OC_ASSERT(it.size() == ot.size());
+//     for (size_t row = 0; row < it.size(); ++row) {
+//         vector<string> content;
+//         boost::transform(it[row], back_inserter(content), vertex_to_str);
+//         string oc = vertex_to_str(ot[row]);
+//         if (target_pos < 0)
+//             content.push_back(oc);
+//         else
+//             content.insert(content.begin() + target_pos, oc);
+//         ostreamContainer(out, content, ",") << endl;
+//     }
+//     return out;
+// }
 
-ostream& ostreamTable(ostream& out, const Table& table)
-{
-    return ostreamTable(out, table.itable, table.otable, table.target_pos);
-}
+// ostream& ostreamTable(ostream& out, const Table& table)
+// {
+//     return ostreamTable(out, table.itable, table.otable, table.target_pos);
+// }
 
 void saveTable(const string& file_name, const Table& table)
 {
