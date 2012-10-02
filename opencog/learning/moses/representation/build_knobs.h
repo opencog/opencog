@@ -71,8 +71,8 @@ protected:
     // Number of arguments of the combo program.
     const combo::arity_t _arity;
 
-    // Types of each of the argument literals.
-    const type_tree types;
+    // Type signature of the argument literals.
+    const type_tree _signature;
 
     contin_t _step_size, _expansion;
     field_set::width_t _depth;

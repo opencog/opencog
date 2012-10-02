@@ -54,12 +54,12 @@ build_knobs::build_knobs(combo_tree& exemplar,
                          contin_t expansion,
                          field_set::width_t depth)
     : _exemplar(exemplar), _rep(rep), _skip_disc_probe(true),
-      _arity(tt.begin().number_of_children() - 1), types(tt),
+      _arity(tt.begin().number_of_children() - 1), _signature(tt),
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
-    type_tree ot = get_signature_output(types);
+    type_tree ot = get_signature_output(_signature);
     type_node output_type = get_type_node(ot);
 
     // If there are perceptions/actions, then output had better be
@@ -416,7 +416,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
     // An argument can be a subtree if it's boolean.
     // If its a contin, then wrap it with "greater_than_zero".
-    type_tree_sib_it arg_type = types.begin(types.begin());  // first child
+    type_tree_sib_it arg_type = _signature.begin(_signature.begin());  // first child
     foreach (int i, from_one(_arity))
     {
         vertex arg = argument(i);
@@ -445,7 +445,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     if (max_pairs <= 0)
         return;
 
-    type_tree_sib_it arg_types = types.begin(types.begin());  // first child
+    type_tree_sib_it arg_types = _signature.begin(_signature.begin());  // first child
     lazy_random_selector select(max_pairs);
 
     // Actual number of pairs to create ...
@@ -898,7 +898,7 @@ void build_knobs::append_linear_combination(pre_it it)
     // The type tree holds a lambda which encloses a list of types,
     // i.e. it looks like ->(type type type ... otype)
     // The two begin's skip over the lambda "->"
-    type_tree_sib_it tit = types.begin().begin();
+    type_tree_sib_it tit = _signature.begin().begin();
     foreach (int idx, from_one(_arity))
     {
         vertex arg = argument(idx);

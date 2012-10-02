@@ -3567,4 +3567,16 @@ Results:
 264K   8635    -1505   164    8.4G       1/169
 528K   ----    -1497   177    ----       1/190   (started next gen, ran out of memory)
 
+Its crashing because there are too many knobs that get created (many
+milions, which over-flows RAM).  Need to limit the number of knobs.
 
+=================================================================
+Knob building:
+How many knobs get built?
+Base knob building is 2xarity from sample_logical_perms()
+
+3-parity: approx 5 x 6(base) = 30  
+4-parity: approx 8 x 8(base) = 60
+5-parity: aprox 3 x base early on, then 12 x base
+
+This hints at arity-squared, similar hints from bag-of-words...
