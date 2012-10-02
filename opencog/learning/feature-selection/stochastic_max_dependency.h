@@ -109,28 +109,28 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
 
         ranks_t ranks;
 
-        // Add one feature at a time to fs, and score the
-        // result.  Rank the result.
-        auto rank_em = [&](const std::pair<double, FeatureSet> &pr)
-        {
+        for (const auto& pr : tops) {
             const FeatureSet &fs = pr.second;
-            foreach (feature_id fid, shuffle) {
-
-                if (fs.end() != fs.find(fid)) continue;
-
-                FeatureSet prod = fs;
-                prod.insert(fid);
-
-                double sc = scorer(prod);
-
-                unique_lock lock(mutex);
-                /// @todo this lock can be more granular
-                ranks.insert(std::pair<double, FeatureSet>(sc, prod));
-            }
-        };
-        // OMP_ALGO only works on random access iterators, which is
-        // why tops is a vector
-        OMP_ALGO::for_each(tops.begin(), tops.end(), rank_em);
+            // Add one feature at a time to fs, and score the result.
+            // Rank the result.
+            OMP_ALGO::for_each(shuffle.cbegin(), shuffle.cend(),
+                               [&](feature_id fid) {
+                                   if (fs.end() == fs.find(fid)) {
+                                       
+                                       // define new feature set
+                                       FeatureSet prod = fs;
+                                       prod.insert(fid);
+                                   
+                                       // score it
+                                       double sc = scorer(prod);
+                                   
+                                       // insert it in ranks
+                                       std::pair<double, FeatureSet> pdf(sc, prod);
+                                       unique_lock lock(mutex);
+                                       ranks.insert(pdf);
+                                   }
+                               });
+        }
 
         // Discard all but the highest scorers.  When done, 'tops'
         // will hold FeatureSets with exactly 'i' elts each.
@@ -141,10 +141,10 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
 
         OC_ASSERT (!ranks.empty(), "Fatal Error: no ranked feature sets");
 
-        // Get the highest MI found.  If these are not getting better,
+        // Get the highest score found.  If these are not getting better,
         // then stop looking for new features.
         double high_score = ranks.rbegin()->first;
-        logger().debug("highest score: featureset size %d MI=%f", i, high_score);
+        logger().debug("highest score: featureset size %d score=%f", i, high_score);
         if (high_score - previous_high_score < threshold) break;
 
         // Record the highest score found.
@@ -153,12 +153,12 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
 
     // If we did this correctly, then the highest scorer is at the
     // end of the set.  Return that.
-    FeatureSet res;
-    if (!tops.empty()) res = tops.rbegin()->second;
+    OC_ASSERT(!tops.empty(), "top is empty, there must be a bug");
+    FeatureSet res = tops.front().second;
 
     if (logger().isDebugEnabled()) {
         std::stringstream ss;
-        ss << "Exit max_mi_selection(), selected: ";
+        ss << "Exit stochastic_max_dependency_selection(), selected: ";
         ostreamContainer(ss, res);
         ss << " Score = " << scorer(res);
         logger().debug() << ss.str();
