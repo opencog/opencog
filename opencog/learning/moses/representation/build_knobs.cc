@@ -758,7 +758,7 @@ void build_knobs::add_constant_child(pre_it it, contin_t v)
         _exemplar.swap(sib, it.last_child());
 }
 
-/// caonize_times: turn 'it' into a  binary * with second arg a constant.
+/// canonize_times: turn 'it' into a  binary * with second arg a constant.
 pre_it build_knobs::canonize_times(pre_it it)
 {
     // get contin child of 'it', if 'it' == 'times' and such contin
@@ -821,10 +821,28 @@ void build_knobs::rec_canonize(pre_it it)
         for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
             if (!is_contin(*sib)) {
                 sib = canonize_times(sib);
+
+                // This is ifdef-ed out because it is (perhaps
+                // unintentionally?) raising the power of any polynomial.
+                // Worse, for every quadratic, this means arity-squared
+                // knobs are created; for every cubic, arity-cubed knobs,
+                // and so on.  For arity > 1K, this is a disaster. 
+                // (A million knobs!? Think about it...)  For
+                // arity > 10K, this is an insta-OOM-killer.  This
+                // happens because append_linear_combination, below,
+                // appends not just some, but *all* of the literals,
+                // whence the combinatoric explosion of knobs.
+
+                // So... if you want to create polynomials, then do so
+                // explicitly, instead of the sneaky tricky below. And
+                // when you do, make sure the combinatoric explosion is
+                // under control.
+#ifdef MAKE_A_POLYNOMIAL
                 rec_canonize(sib.begin());
                 OC_ASSERT(is_contin(*sib.last_child()),
                           "Sibling's last child isn't id::contin.");
                 rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
+#endif // MAKE_A_POLYNOMIAL
             }
         }
 
