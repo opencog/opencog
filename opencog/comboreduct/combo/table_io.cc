@@ -742,7 +742,7 @@ istream& istreamTable(istream& in, Table& tab,
               target_feature.c_str());
 
     tab.target_pos = tab.itable.get_column_offset(target_feature);
-    if (tab.target_pos == (int)tab.itable.get_labels().size() - 1)
+    if (tab.target_pos == tab.get_arity() - 1)
         tab.target_pos = -1;    // the last position is -1
     
     type_node targ_type = tab.itable.get_type(target_feature);
@@ -778,20 +778,6 @@ Table loadTable(const string& file_name,
 // ===========================================================
 // ostream regular tables
 
-/// output the header of a data table in CSV format.
-// ostream& ostreamTableHeader(ostream& out, const ITable& it, const OTable& ot,
-//                             int target_pos)
-// {
-//     vector<string> header = it.get_labels();
-//     const string& ol = ot.get_label();
-//     OC_ASSERT(target_pos <= (int)header.size());
-//     if (target_pos < 0)
-//         header.push_back(ol);
-//     else
-//         header.insert(header.begin() + target_pos, ol);
-//     return ostreamContainer(out, header, ",") << endl;
-// }
-
 string vertex_to_str(const vertex& v)
 {
     stringstream ss;
@@ -801,31 +787,6 @@ string vertex_to_str(const vertex& v)
         ss << v;
     return ss.str();
 }
-
-// ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
-//                       int target_pos)
-// {
-//     // print header
-//     ostreamTableHeader(out, it, ot, target_pos);
-//     // print data
-//     OC_ASSERT(it.size() == ot.size());
-//     for (size_t row = 0; row < it.size(); ++row) {
-//         vector<string> content;
-//         boost::transform(it[row], back_inserter(content), vertex_to_str);
-//         string oc = vertex_to_str(ot[row]);
-//         if (target_pos < 0)
-//             content.push_back(oc);
-//         else
-//             content.insert(content.begin() + target_pos, oc);
-//         ostreamContainer(out, content, ",") << endl;
-//     }
-//     return out;
-// }
-
-// ostream& ostreamTable(ostream& out, const Table& table)
-// {
-//     return ostreamTable(out, table.itable, table.otable, table.target_pos);
-// }
 
 void saveTable(const string& file_name, const Table& table)
 {

@@ -508,30 +508,6 @@ void Table::add_features_from_file(const string& input_file,
         }
     }
 }
-
-// /**
-//  * After selecting the features the position of the target isn't
-//  * necessarily valid anymore so we must find it's correct relative
-//  * position.
-//  */
-// int update_target_feature_pos(const Table& table,
-//                               const feature_selection_parameters& fs_params)
-// {
-//     vector<string> header = get_header(fs_params.input_file);
-//     unsigned tfp = get_index(fs_params.target_feature_str, header);
-//     // Find the positions of the selected features
-//     vector<unsigned> fsel_pos = get_indices(table.itable.get_labels(), header);
-//     if (tfp < fsel_pos.front()) // it is first
-//         return 0;
-//     else if (tfp > fsel_pos.back()) // it is last
-//         return -1;
-//     else {                  // it is somewhere in between
-//         auto it = boost::adjacent_find(fsel_pos, [tfp](unsigned l, unsigned r) {
-//                 return l < tfp && tfp < r; });
-//         return distance(fsel_pos.begin(), ++it);
-//     }
-// }
-
         
 // -------------------------------------------------------
 
