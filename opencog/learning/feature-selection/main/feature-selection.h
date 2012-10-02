@@ -86,21 +86,6 @@ struct feature_selection_parameters
 
 typedef std::set<arity_t> feature_set;
 
-/**
- * Add forced features to table.
- *
- * @todo update type_tree (if ever needed)
- */
-Table add_force_features(const Table& table,
-                         const feature_selection_parameters& fs_params);
-
-/**
- * update fs_params.target_feature so that it keeps the same relative
- * position with the selected features.
- */
-int update_target_feature(const Table& table,
-                          const feature_selection_parameters& fs_params);
-
 void write_results(const Table& table,
                    const feature_selection_parameters& fs_params);
 
