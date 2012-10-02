@@ -103,7 +103,6 @@ public:
         // run and test feature selection
         test_feature_selection(ignore_enforce_target_table, fsp,
                                "timestamp,f2,target");
-        // TS_ASSERT(true);
     }
     
 private:
