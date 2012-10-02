@@ -45,16 +45,19 @@ using boost::ptr_vector;
 // build knobs on a reduced combo tree
 struct build_knobs : boost::noncopyable
 {
-    // used to be ss = 1.0, expansion = 2, depth = 4
+    // used to be stepsize = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
     build_knobs(combo_tree& exemplar,
-                const type_tree& tt, representation& rep,
+                const type_tree& tt,
+                representation& rep,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
-                contin_t step_size = 1.0, contin_t expansion = 1.0,
+                contin_t step_size = 1.0,
+                contin_t expansion = 1.0,
                 field_set::width_t depth = 4);
 
+protected:
     void build_logical(combo_tree::iterator sub,
                        combo_tree::iterator it);
     void build_contin(combo_tree::iterator it);
@@ -89,6 +92,8 @@ protected:
     const combo_tree_ns_set* _perceptions;
     const combo_tree_ns_set* _actions;
 
+protected:
+    // Misc protected methods
     // Return true if the operator is allowed for knob building.
     bool permitted_op(const vertex& v);
 

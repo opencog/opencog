@@ -3580,3 +3580,28 @@ Base knob building is 2xarity from sample_logical_perms()
 5-parity: aprox 3 x base early on, then 12 x base
 
 This hints at arity-squared, similar hints from bag-of-words...
+
+reuters-small: arity of 1617
+1st generation: 430149 knobs = 133 x base (none of these are contin knobs)
+                ahh, I think 133 == 4x number of enum targets! see below.
+2nd generation: 8080179 knobs = 2500 x base (but these are almost all contin knobs)
+                Number of disc knobs mapped: 200503 = 61 x base ...
+                Number of contin knobs mapped: 7879676 = 3x arity-squared
+Yeah, its arity squared... 
+
+reuters-tiny: arity of 1219
+1st generation: 19504 knobs = 8 x base  ahhh two enums!
+
+reuters-tiny: 1259  
+1st generation: 30216 knobs = 12x base  ahhh -- three enums!
+2nd generation: 1632928 knobs
+                disc knobs mapped: 42806 = 17x base
+                contin knobs mapped: 1590122 = arity-squared 
+
+OK all the extra knobs are from build_knobs::append_linear_combination()
+... which was making polynomials, by accident... stop doing that, and get:
+
+reuters-small: arity of 1617
+1st generation: 90552 = 27 x base
+2nd generation: exactly same as before... wtf?
+

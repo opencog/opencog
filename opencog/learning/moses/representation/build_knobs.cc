@@ -56,7 +56,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
     : _exemplar(exemplar), _rep(rep), _skip_disc_probe(true),
       _arity(tt.begin().number_of_children() - 1), _signature(tt),
       _step_size(step_size), _expansion(expansion), _depth(depth),
-      _perm_ratio(0),
+      _perm_ratio(0.0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
     type_tree ot = get_signature_output(_signature);
@@ -82,7 +82,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
         // typed boolean.  Thus, any representation will consist of a
         // tree of logic ops, with anything else contin-valued wrapped
         // up in a predicate (i.e. wrapped by greter_than_zero).
-        //
+
         // Hmm. Probe, although this is expensive, it seems to be a net
         // performance benefit for pure boolean problems, I think. Maybe.
         _skip_disc_probe = false;
@@ -452,7 +452,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     unsigned int n_pairs =
         _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
     dorepeat (n_pairs) {
-        //while (!select.empty()) 
+        //while (!select.empty())
         combo_tree v(swap_and_or(*it));
         int x = select();
         int a = x / (_arity - 1);
@@ -734,9 +734,9 @@ void build_knobs::build_contin(pre_it it)
         if (is_contin(*it)) {
             // This creates a knob at a particular location in the
             // exemplar inside the representation, and it creates a
-            // field spec for the knob. This field spec is not yet
-            // yet a part of any field set; this happens later, when
-            // the representation is built.
+            // field spec for the knob. This field spec is not yet a
+            // part of any field set; this happens later, when the
+            // representation is built.
             contin_knob kb(_exemplar, it, _step_size, _expansion, _depth);
             _rep.contin.insert(make_pair(kb.spec(), kb));
         }
@@ -889,9 +889,22 @@ void build_knobs::rec_canonize(pre_it it)
 /// If the argument is a boolean, then its run throught the impulse
 /// function (1.0 if T and 0.0 if F) and appended with multiplier.
 /// That is, its of the form +(... *(0 impulse($n)) ...)
+///
+/// At this time, this routine will NOT append linear combinations
+/// to products. The reason for this is that this often has the effect
+/// of raising the polynomial power of the expression.  So, for example,
+/// if 'i't points at *($3 ...) this would then result in creating
+/// *($3 +( *(0 $1) *(0 $2) *(0 $3) ...)...) which raises the degree.
+/// If you really want to raise the degree, on purpose, do it elsewhere,
+/// and do it explicitly, and not here, by quais-accident.
 //
 void build_knobs::append_linear_combination(pre_it it)
 {
+    // Do NOT append to times! See notes above, explaining why.
+    if (*it == id::times)
+        return;
+
+    // If its not times, and not plus, then its probably sin, exp, log, etc. 
     if (*it != id::plus)
         it = _exemplar.append_child(it, id::plus);
 
