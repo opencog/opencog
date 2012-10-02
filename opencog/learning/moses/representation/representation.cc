@@ -141,7 +141,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
-    logger().debug() << "Total number of field specs: " << tmp.size();
+    logger().info() << "Total number of field specs: " << tmp.size();
 
     // Build a reversed-lookup table for disc and contin knobs.
     // That is, given an iterator pointing into the exemplar, fetch the
@@ -158,7 +158,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         it_disc_idx[pit] = _fields.begin_disc_raw_idx() + offset;
         offset ++;
     }
-    logger().debug() << "Number of disc knobs mapped: " << disc.size();
+    logger().info() << "Number of disc knobs mapped: " << disc.size();
 
     offset = 0;
     for (contin_map_cit cit = contin.cbegin(); cit != contin.cend(); cit++) {
@@ -169,7 +169,7 @@ representation::representation(const reduct::rule& simplify_candidate,
         it_contin_idx[pit] = _fields.begin_contin_raw_idx() + offset;
         offset++;
     }
-    logger().debug() << "Number of contin knobs mapped: " << contin.size();
+    logger().info() << "Number of contin knobs mapped: " << contin.size();
 
     if (logger().isFineEnabled()) {
         std::stringstream ss;

@@ -6,11 +6,32 @@ A collection of half-finished thoughts for MAJOR enhancements to MOSES.
 Most of the ideas listed below would take weeks or months or more to
 implement, and all require additional theoretical thought and research.
 Perhaps some are easy to implement, but its not exactly clear quite how...
-All requrie measurements and vetting to make sure they work.
+All require measurements and vetting to make sure they work.
 
 
 ToDo List
 ---------
+-- Knob decorations: Are these really optimal?  In particular, the
+   flipped-tree knobs add a huge amount of complexity (effectively
+   multiplying it ten-fold or more) without being obviously good.
+   Adding knobs has a large cost come optimization time; so adding
+   junk knobs that will rarely improve things is a bad strategy.
+
+-- Merge demes into a big probabilisitc tree.  i.e. common parts of all
+   demes are "high probability".  That is, if we have two copletely
+   different demes, then we create a probability tree, and each deme
+   has a probability of 1/2.  But if the two trees have common parts,
+   then we merge them so that the common parts have probability 1, and 
+   only the differences have proability 1/2.  Why do this?  Because it
+   gives insight into the highly-conserved regions of the deme.  If all
+   demes have some common portion, then we know that mutating that
+   portion is very likely to cause unacceptable (fatal) damage.
+   What would we do with this knowledge?  Not sure...
+
+-- Review the -D flag in moses, to sometimes make multiple steps when
+   sampling.  i.e. don't make it an "either this or that" method, but
+   more of a blend of both approaches. (with the -T flag)
+
 -- Add ability to add new, de-novo logic pattterns: e.g. build in an xor gate,
    or more complex electronic circuits (aka patterns/paradigms). i.e.
    combo would have a library of these to draw on, and moses would use
@@ -24,7 +45,7 @@ ToDo List
    change easily. In genetic terms, which are strongly conserved, and which
    are not.
 
--- add mechanism to discern repeated patterns in the combo tree i.e. notice
+-- Add mechanism to discern repeated patterns in the combo tree i.e. notice
    that this branch is same as that branch, and then label these. i.e. the
    automatic discovery of subroutines...  This is the pleasure algo!?
    This is kind-of-like transfer learning.  
@@ -136,7 +157,7 @@ ToDo List
    should be removed before final reporting of results to user.
    Priority: Medium/Low.
 
--- add flag/option to search for combo trees that are only 
+-- Add flag/option to search for combo trees that are only 
    linear combinations (right now, poly's are easily discovered)
    i.e. to do linear-programming solutions only ...
    is. this worth doing .. !?
@@ -161,7 +182,7 @@ ToDo List
    degrade ability to find solutions.  I think its based on 
    a faulty understanding of evolution.  Priority: Very Low
 
--- simulated annealing code should not be jumping huge distances 
+-- Simulated annealing code should not be jumping huge distances 
    at high temps.  Maybe .. -D2 seems to work best ???
    Review the cooling sched...  The simluated annealing algo, 
    as currently implemented, doesn't work very wwell, at all, 

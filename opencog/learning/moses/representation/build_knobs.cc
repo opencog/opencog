@@ -636,6 +636,16 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
             logger().debug("Return from recursive call to build_logical");
         }
     }
+
+    // XXX TODO: Is this really optimal?  The below adds an entire copy
+    // of the tree at it, which clearly increases the overall complexity.
+    // But is this really a wise thig to do? It seems gratuitous, and it's
+    // not obvious that knobs from this flipped tree will yeild benefits,
+    // once we start turning knobs.
+    //
+    // I mean, this part increases overall complexity ten-fold or much much
+    // more.   This is a real cost at optimizatino time; was the move really
+    // worth the cost?
     logger().debug("Call add_logical_knobs for flipped subtree");
     add_logical_knobs(subtree, _exemplar.append_child(it, flip));
 }
