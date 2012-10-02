@@ -93,6 +93,11 @@ int main(int argc,char** argv) {
          "Ignore feature from the datasets. Can be used several times "
          "to ignore several features.\n")
 
+        (opt_desc_str(force_feature_opt).c_str(),
+         value<vector<string>>(&pa.force_features_str),
+         "Force feature to be displayed (including ones which have been ignored). "
+         "Can be used several times to force several features.\n")
+
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
          "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
@@ -109,7 +114,8 @@ int main(int argc,char** argv) {
          "File where to save the results. If empty then it outputs on the stdout.\n")
                 
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
-         "Display the inputs as well as the output, the feature order is preserved.\n")
+         "Display all inputs (as well as the output and the forced features), "
+         "the feature order is preserved.\n")
 
         (opt_desc_str(log_level_opt).c_str(),
          value<string>(&pa.log_level)->default_value("INFO"),
@@ -142,9 +148,6 @@ int main(int argc,char** argv) {
         exit(1);
     }
     logger().setBackTraceLevel(Logger::ERROR);
-
-    // set variables
-    pa.has_labels = vm.count("labels");
 
     // init random generator
     randGen().seed(rand_seed);

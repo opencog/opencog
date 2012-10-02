@@ -40,6 +40,7 @@ static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_opt("input-table", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> ignore_feature_str_opt("ignore-feature", "Y");
+static const pair<string, string> force_feature_opt("force-feature", "e");
 static const pair<string, string> combo_str_opt("combo-program", "c");
 static const pair<string, string> combo_prog_file_opt("combo-programs-file", "C");
 static const pair<string, string> labels_opt("labels", "l");
@@ -67,6 +68,7 @@ struct evalTableParameters
     string combo_programs_file;
     string target_feature_str;
     vector<string> ignore_features_str;
+    vector<string> force_features_str;
     bool has_labels;
     vector<string> features;
     string features_file;
@@ -77,38 +79,40 @@ struct evalTableParameters
 };
 
 template<typename Out>
-Out& output_results(Out& out, const evalTableParameters& pa, const ITable& it,
-                    const OTable& ot_tr)
+Out& output_results(Out& out, const evalTableParameters& pa,
+                    const Table& table, const OTable& ot_tr)
 {
-    if (pa.display_inputs)
-        ostreamTable(out, it, ot_tr); // print io table
-    else
-        out << ot_tr; // print output table
-    return out;
+    Table eval_table = table;
+    eval_table.otable = ot_tr;
+    if (!pa.display_inputs)
+        eval_table.itable = ITable();
+    if (!pa.force_features_str.empty())
+        eval_table.add_features_from_file(pa.input_table_file,
+                                          pa.force_features_str);
+    return ostreamTable(out, eval_table);
 }
 
-void output_results(const evalTableParameters& pa, const ITable& it,
-                    const OTable& ot_tr)
+void output_results(const evalTableParameters& pa,
+                    const Table& table, const OTable& ot_tr)
 {
     if(pa.output_file.empty())
-        output_results(cout, pa, it, ot_tr);
+        output_results(cout, pa, table, ot_tr);
     else {
         ofstream of(pa.output_file.c_str(), ios_base::app);
-        output_results(of, pa, it, ot_tr);
-        of.close();
+        output_results(of, pa, table, ot_tr);
     }
 }
 
-void eval_output_results(const evalTableParameters& pa, ITable& it,
-                         const vector<combo_tree>& trs)
+void eval_output_results(const evalTableParameters& pa,
+                         const Table& table, const vector<combo_tree>& trs)
 {
     foreach(const combo_tree& tr, trs) {
         // evaluated tr over input table
-        OTable ot_tr(tr, it);
+        OTable ot_tr(tr, table.itable);
         if (!pa.target_feature_str.empty())
             ot_tr.set_label(pa.target_feature_str);
         // print results
-        output_results(pa, it, ot_tr);
+        output_results(pa, table, ot_tr);
     }
 }
 
@@ -150,7 +154,7 @@ void read_eval_output_results(evalTableParameters& pa)
     }
 
     // eval and output the results
-    eval_output_results(pa, it, trs);
+    eval_output_results(pa, table, trs);
 }
 
 #endif // _OPENCOG_EVAL_TABLE_H
