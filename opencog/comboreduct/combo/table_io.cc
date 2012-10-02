@@ -818,17 +818,17 @@ ostream& ostreamTable(ostream& out, const ITable& it, const OTable& ot,
     return out;
 }
 
-ostream& ostreamTable(ostream& out, const Table& table, int target_pos)
+ostream& ostreamTable(ostream& out, const Table& table)
 {
-    return ostreamTable(out, table.itable, table.otable, target_pos);
+    return ostreamTable(out, table.itable, table.otable, table.target_pos);
 }
 
-void saveTable(const string& file_name, const Table& table, int target_pos)
+void saveTable(const string& file_name, const Table& table)
 {
     OC_ASSERT(!file_name.empty(), "No filename specified!");
     ofstream out(file_name.c_str());
     OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, table.itable, table.otable, target_pos);
+    ostreamTable(out, table.itable, table.otable);
 }
 
 // ===========================================================

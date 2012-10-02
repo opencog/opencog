@@ -27,8 +27,11 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/range/algorithm/adjacent_find.hpp>
+#include <boost/range/algorithm/set_algorithm.hpp>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/Logger.h>
@@ -375,12 +378,12 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
 Table::Table() {}
 
 Table::Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_)
-    : tt(tt_), itable(itable_), otable(otable_) {}
+    : tt(tt_), itable(itable_), otable(otable_), target_pos(0) {}
 
 Table::Table(const combo_tree& tr, int nsamples,
              contin_t min_contin, contin_t max_contin) :
     tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
-    otable(tr, itable) {}
+    otable(tr, itable), target_pos(0) {}
 
 vector<string> Table::get_labels() const
 {
@@ -411,6 +414,125 @@ CTable Table::compressed() const
     return res;
 }
 
+std::istream& istreamRawITable_ingore_indices(std::istream& in, ITable& tab,
+                                              const std::vector<unsigned>& ignored_indices)
+    throw(std::exception, AssertionException);
+std::vector<std::string> get_header(const std::string& input_file);
+
+/**
+ * Get indices (aka positions or offsets) of a list of labels given a header
+ */
+vector<unsigned> get_indices(const vector<string>& labels,
+                             const vector<string>& header) {
+    vector<unsigned> res;
+    for (unsigned i = 0; i < header.size(); ++i)
+        if (boost::find(labels, header[i]) != labels.end())
+            res.push_back(i);
+    return res;
+}
+unsigned get_index(const string& label, const vector<string>& header) {
+    return distance(header.begin(), boost::find(header, label));
+}
+
+void Table::add_features_from_file(const string& input_file,
+                                   vector<string> features)
+{
+    // consider only the features not already present
+    const vector<string>& labels = itable.get_labels();
+    foreach (const string& f, labels) {
+        auto it = boost::find(features, f);
+        if (it != features.end())
+            features.erase(it);
+    }
+
+    // If no feature to force, there is nothing to do
+    if (!features.empty()) {
+        // header of the DSV file
+        vector<string> full_header = get_header(input_file);
+
+        // [0, header.size())
+        vector<unsigned> full_header_pos = get_indices(full_header, full_header);
+        // indices of table's features
+        vector<unsigned> header_pos =  get_indices(labels, full_header);
+        // indices of features to insert
+        vector<unsigned> features_pos = get_indices(features, full_header);
+
+        // Get the complement of features_pos
+        vector<unsigned> features_pos_comp;
+        boost::set_difference(full_header_pos, features_pos,
+                              back_inserter(features_pos_comp));
+
+        // load the table with the features to insert with types
+        // string that way the content is unchanged (convenient when
+        // the data contains stuff that loadITable does not know how
+        // to interpret)/.
+        //
+        // I'm using istreamRawITable_ignore_indices because loading via
+        // LoadITable is too slow, usually only a handful of features are
+        // forced, deleting all the others takes time (several seconds in
+        // my test case).
+        ITable features_table;
+        ifstream in(input_file.c_str());
+        istreamRawITable_ingore_indices(in, features_table, features_pos_comp);
+
+        // set the first row as header
+        auto first_row_it = features_table.begin();
+        vector<string> features_labels;
+        foreach(const vertex& v, *first_row_it)
+            features_labels.push_back(boost::get<string>(v));
+        features_table.set_labels(features_labels);
+        features_table.erase(first_row_it);
+
+        // Insert the forced features in the right order. We want to keep
+        // the features in order because that is likely what the user
+        // expects.
+        // TODO UPDATE THE TYPE TREE
+        
+        // insert missing columns from fns_itable to new_table.itable
+        for (auto lit = features_pos.cbegin(), rit = header_pos.cbegin();
+             lit != features_pos.cend(); ++lit) {
+            int lpos = distance(features_pos.cbegin(), lit);
+            vertex_seq cd = features_table.get_column_data(lpos);
+            string cl = features_labels[lpos];
+            while(rit != header_pos.cend() && *lit > *rit) ++rit;
+            int rpos = rit != header_pos.cend() ?
+                distance(header_pos.cbegin(), rit) + lpos : -1;
+            itable.insert_col(cl, cd, rpos);
+        }
+
+        // target_pos
+        if (target_pos > 0) {
+            auto it = boost::adjacent_find(header_pos, [&](unsigned l, unsigned r) {
+                    return l < target_pos && target_pos < r; });
+            target_pos = distance(header_pos.begin(), ++it);
+        }
+    }
+}
+
+// /**
+//  * After selecting the features the position of the target isn't
+//  * necessarily valid anymore so we must find it's correct relative
+//  * position.
+//  */
+// int update_target_feature_pos(const Table& table,
+//                               const feature_selection_parameters& fs_params)
+// {
+//     vector<string> header = get_header(fs_params.input_file);
+//     unsigned tfp = get_index(fs_params.target_feature_str, header);
+//     // Find the positions of the selected features
+//     vector<unsigned> fsel_pos = get_indices(table.itable.get_labels(), header);
+//     if (tfp < fsel_pos.front()) // it is first
+//         return 0;
+//     else if (tfp > fsel_pos.back()) // it is last
+//         return -1;
+//     else {                  // it is somewhere in between
+//         auto it = boost::adjacent_find(fsel_pos, [tfp](unsigned l, unsigned r) {
+//                 return l < tfp && tfp < r; });
+//         return distance(fsel_pos.begin(), ++it);
+//     }
+// }
+
+        
 // -------------------------------------------------------
 
 vector<string> CTable::get_labels() const

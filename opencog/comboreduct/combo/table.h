@@ -399,9 +399,20 @@ struct Table
     /// return the corresponding compressed table
     CTable compressed() const;
 
+    /// add raw features given an input file and a list of
+    /// features. It is assumed that the table has a subset of
+    /// features as the ones present in the given file, so what that
+    /// function is doing is inserting some missing features in the
+    /// same order.
+    void add_features_from_file(const std::string& input_file,
+                                std::vector<std::string> features);
+
     type_tree tt;
     ITable itable;
     OTable otable;
+    int target_pos;             // position of the target, useful for
+                                // writing the table. If -1 means last
+                                // position
 };
 
 template<typename Func>

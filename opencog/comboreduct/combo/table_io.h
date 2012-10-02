@@ -153,12 +153,10 @@ std::ostream& ostreamTable(std::ostream& out,
                            int target_pos = 0);
 
 /// like above but take a table instead of an input and output table
-std::ostream& ostreamTable(std::ostream& out, const Table& table,
-                           int target_pos = 0);
+std::ostream& ostreamTable(std::ostream& out, const Table& table);
 
 /// like above but take a table instead of a input and output table
-void saveTable(const std::string& file_name, const Table& table,
-               int target_pos = 0);
+void saveTable(const std::string& file_name, const Table& table);
 
 /// output a compressed table in pseudo CSV format
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
