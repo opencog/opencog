@@ -453,10 +453,14 @@ void Table::add_features_from_file(const string& input_file,
 
         // [0, header.size())
         vector<unsigned> full_header_pos = get_indices(full_header, full_header);
-        // indices of table's features
+        // indices of table's features relative to full_header
         vector<unsigned> header_pos =  get_indices(labels, full_header);
-        // indices of features to insert
+        // indices of features to insert relative to full_header
         vector<unsigned> features_pos = get_indices(features, full_header);
+        // target position relative to full_header
+        int full_target_pos = get_index(otable.get_label(), full_header);
+        if (full_target_pos == (int)full_header.size() - 1)
+            full_target_pos = -1; // the last one is denoted -1
 
         // Get the complement of features_pos
         vector<unsigned> features_pos_comp;
@@ -489,7 +493,7 @@ void Table::add_features_from_file(const string& input_file,
         // expects.
         // TODO UPDATE THE TYPE TREE
         
-        // insert missing columns from fns_itable to new_table.itable
+        // insert missing columns from features_itable to itable
         for (auto lit = features_pos.cbegin(), rit = header_pos.cbegin();
              lit != features_pos.cend(); ++lit) {
             int lpos = distance(features_pos.cbegin(), lit);
@@ -501,12 +505,16 @@ void Table::add_features_from_file(const string& input_file,
             itable.insert_col(cl, cd, rpos);
         }
 
-        // target_pos
-        if (target_pos > 0) {
-            auto it = boost::adjacent_find(header_pos, [&](int l, int r) {
-                    return l < target_pos && target_pos < r; });
-            target_pos = distance(header_pos.begin(), ++it);
-        }
+        // update target_pos, does union of features_pos and
+        // header_pos and put the result in new_header_pos
+        vector<unsigned> new_header_pos;
+        boost::set_union(header_pos, features_pos, back_inserter(new_header_pos));
+        if (full_target_pos > 0) {
+            auto it = boost::adjacent_find(new_header_pos, [&](int l, int r) {
+                    return l < full_target_pos && full_target_pos < r; });
+            target_pos = distance(new_header_pos.begin(), ++it);
+        } else
+            OC_ASSERT(full_target_pos == target_pos, "smells a bug");
     }
 }
         
