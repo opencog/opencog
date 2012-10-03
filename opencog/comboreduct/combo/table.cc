@@ -510,9 +510,9 @@ void Table::add_features_from_file(const string& input_file,
         vector<unsigned> new_header_pos;
         boost::set_union(header_pos, features_pos, back_inserter(new_header_pos));
         if (full_target_pos > 0) {
-            if (full_target_pos < new_header_pos.front()) // target is first
+            if (full_target_pos < (int)new_header_pos.front()) // target is first
                 target_pos = 0;
-            else if (full_target_pos > new_header_pos.back()) // target is last
+            else if (full_target_pos > (int)new_header_pos.back()) // target is last
                 target_pos = -1;
             else {              // target is in between
                 auto it = boost::adjacent_find(new_header_pos, [&](int l, int r) {
