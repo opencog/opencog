@@ -84,7 +84,7 @@ contin_t field_set::get_contin(const instance& inst, size_t idx) const
 
         if (direction == contin_spec::Left) {
             stepper.left();
-        } else if (direction==contin_spec::Right) {
+        } else if (direction == contin_spec::Right) {
             stepper.right();
         } else if (direction == contin_spec::Stop) {
             break;

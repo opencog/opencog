@@ -575,12 +575,17 @@ struct field_set
     /// fields (specificaly, to contin_spec->depth fields).
     size_t contin_to_raw_idx(size_t spec_idx) const
     {
-        // @todo: compute at the start in _fields - could be faster..
+        return _contin_raw_offsets[spec_idx];
+
+        // Below is the old code, useful as documentation of what
+        // the cache avoids.
+#ifdef USE_UNCACHED_VERSION
         size_t raw_idx = begin_contin_raw_idx();
         for (vector<contin_spec>::const_iterator it = _contin.begin();
                 it != _contin.begin() + spec_idx; ++it)
             raw_idx += it->depth;
         return raw_idx;
+#endif // USE_UNCACHED_VERSION
     }
 
     /// Given an index into the 'raw' field array, this returns an
@@ -686,6 +691,10 @@ protected:
     vector<disc_spec> _disc; // Includes bits.
     size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
 
+    // Cache of offsets, meant to improve performance of the
+    // contin_to_raw_idx() lookup in get_contin().
+    vector<size_t> _contin_raw_offsets;
+
     // Cached values for start location of the continuous and discrete
     // fields in the _fields array.  We don't need to cache the term
     // start, as that is same as start of _field. Meanwhile, the start
@@ -732,6 +741,14 @@ protected:
         _n_disc_fields   = distance(begin_disc_fields(), end_disc_fields());
         _n_contin_fields = distance(begin_contin_fields(), end_contin_fields());
         _n_term_fields   = distance(begin_term_fields(), end_term_fields());
+
+        // Cache of raw indexes, to speed up get_contin()
+        _contin_raw_offsets.reserve(_contin.size());
+        size_t raw_idx = begin_contin_raw_idx();
+        foreach(const contin_spec& c, _contin) {
+            _contin_raw_offsets.push_back(raw_idx);
+            raw_idx += c.depth;
+        }
     }
 
     size_t back_offset() const
