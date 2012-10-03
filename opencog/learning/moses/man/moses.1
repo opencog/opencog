@@ -481,7 +481,12 @@ then it is ignored.  This option does not work with ANN.
 When attempting to fit continous-valued features, restrict searches
 to linear expressions only; that is, do not use polynomials in the fit.
 Specifying this option also automatically disables the use of div,
-sin, exp and log.
+sin, exp and log.  Note that polynomial regression results in search
+spaces that grow combinatorially large in the number of input features;
+That is, for N features, a quadratic search will entail O(N^2)
+possibilities, a cubic search will explore O(N^3) possibilities, and so
+on.  Thus, for any problem with more than dozens or a hundred features,
+linear regression is recommended.
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
