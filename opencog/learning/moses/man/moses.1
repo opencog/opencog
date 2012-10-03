@@ -114,14 +114,14 @@ moses \- meta-optimizing semantic evolutionary search solver
 .SH DESCRIPTION
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
-.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
+.\" \fI<whatever>\fP escape sequences to invoke bold face and italics,
 .\" respectively.
 \fBmoses\fP is the command-line wrapper to the MOSES program learning
 library. It may be used to solve learning tasks specified with file
 inputs, or to run various demonstration problems.  Given an input table
 of values, it will perform a regression, generating, as output,
 a \fBcombo\fP program that best fits the data. \fBmoses\fP is
-multi-threaded, and can be distrubited across multiple machines to
+multi-threaded, and can be distributed across multiple machines to
 improve run-time performance.
 .PP
 .\" ============================================================
@@ -174,7 +174,7 @@ The inner optimization step can be done using one of several different
 algorithms, including \fIhillclimbing\fP, \fIsimulated annealing\fP,
 or \fIunivariate Bayesian optimization\fP.  The amount of effort
 spent in the inner loop can be limited, as compared to how frequently
-new demes and exemplars are choosen. The total number of demes or
+new demes and exemplars are chosen. The total number of demes or
 exemplars maintained in the population may be controlled.  The effort
 expended on program normalization at each of the two steps can be
 controlled.
@@ -185,17 +185,17 @@ control the printing of the output.
 .PP
 \fBmoses\fP also has a 'demo' mode: it has a number of built-in
 scoring functions for various 'well-known' optimization problems,
-such as parity, disjunction, and multipilex. Each of these typically
+such as parity, disjunction, and multiplex. Each of these typically
 presents a different set of challenges to the optimization algorithm,
 and are used to illustrate 'hard' optimization problems.  These demo
-problems are useful both for learning and undertanding the use of
+problems are useful both for learning and understanding the use of
 \fBmoses\fP, and also for developers and maintainers of \fBmoses\fP
 itself, when testing new features and enhancements.
 
 .PP
 .\" ============================================================
 .SH COMBO PROGRAMS
-This section provides a breif overview of the combo programming
+This section provides a brief overview of the combo programming
 language.  Combo is not meant so much for general use by humans
 for practical programming, as it is to fit the needs of program
 learning.  As such, it is fairly minimal, while still being expressive
@@ -215,7 +215,7 @@ a number, although they may also be named. Variables are not
 explicitly typed; they are only implicitly typed during program
 evaluation. Thus, for example, \fIor ($1 $2)\fP is a combo
 program that represents the boolean-or of two inputs,
-\fI$1\fP and \fI$2\fP.   Built-in constants inlcude \fItrue\fR and 
+\fI$1\fP and \fI$2\fP.   Built-in constants include \fItrue\fR and 
 \fIfalse\fR; numbers may be written with or without a decimal point.
 .PP
 Logical operators include \fIand\fR, \fIor\fR and \fInot\fR.
@@ -231,7 +231,7 @@ the opposite: it takes a single boolean-valued expression, and returns
 .PP
 The \fIcond\fR operator takes an alternating sequence of predicates and
 values, terminated by an 'else' value.  It evaluates as a chain of 
-if-then-else statements, so that it returns teh value following the first
+if-then-else statements, so that it returns the value following the first
 predicate to evaluate to \fItrue\fR.
 .PP
 Thus, as an example, the expression \fIand( 0<( +($x 3))  0<($y))\fR
@@ -285,7 +285,7 @@ tab (@);
 l lx.
 \fBit\fR@T{
 Regression on an input table.  That is, the input table consists of a set
-of columns, all but one consisdered 'inputs', and one is considered an
+of columns, all but one considered 'inputs', and one is considered an
 output.  The goal of regression is to learn a combo program that most
 accurately predicts the output.  For boolean-valued and enumerated
 outputs, the scoring function simply counts the number of incorrect
@@ -303,7 +303,7 @@ T}
 \fBprerec\fR@T{
 Regression on an input table, maximizing precision, while attempting
 to maintain the recall (sensitivity) at or above a given level.  Recall,
-also known as senstivity, is the ratio of true positives to the sum of
+also known as sensitivity, is the ratio of true positives to the sum of
 true positives and false negatives.
 T}
 
@@ -311,7 +311,7 @@ T}
 Regression on an input table, maximizing recall (sensitivity) while
 attempting to maintain the precision at or above a given level.
 This scorer is most commonly used when it is
-important to gaurantee a certain level of precision, even if it
+important to guarantee a certain level of precision, even if it
 means rejecting most events. In medicine and physics/radio applications,
 recall is exactly the same thing as sensitivity: this option searches
 for the most sensitive test while holding to a minimum level of precision.
@@ -341,7 +341,7 @@ T}
 
 \fBann-it\fR@T{
 Regression on an input table, using a neural network.  (kind-of-like
-a hidden markov model-sih, kind of. XXX Huh???)
+a hidden Markov model-sih, kind of. XXX Huh???)
 T}
 .TE
 .PP
@@ -364,7 +364,7 @@ column names on output is controlled with the \fB\-W1\fR flag.
 .TP
 .BI \-i\  filename \fR,\ \fB\-\-input\-file= filename
 The \fIfilename\fR specifies the input data file. The input table must
-be in 'delimiter-separated value' (DSV) format.  Valid seperators 
+be in 'delimiter-separated value' (DSV) format.  Valid separators 
 are comma (CSV, or comma-separated values), blanks and tabs 
 (whitespace). Columns correspond to features; there is one sample per
 (non-blank) row. Comment characters are hash, bang and semicolon (#!;)
@@ -399,21 +399,21 @@ Huh ???
 .\" ============================================================
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
-The most important of these, for controlling behaviour, are the 
+The most important of these, for controlling behavior, are the 
 \fB-A\fR, \fB\-a\fR, \fB\-m\fR, \fB\-r\fR, \fB\-v\fR and \fB\-z\fR flags.
 .TP
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
 Select the algorithm to apply to a single deme.  This is the algorithm
 used in the 'inner loop': given a single exemplar decorated with tunable
 \fIknobs\fR, this algorithm searches for the best possible knob settings.
-Once these are found (or a timeout, or other terminatation condition is
+Once these are found (or a timeout, or other termination condition is
 reached), control is returned to the outer optimization loop.
 Available algorithms include:
 .TS
 tab (@);
 l lx.
 \fBhc\fR@T{
-Hillclimbing. There are two primary modes of operation; each has
+Hill-climbing. There are two primary modes of operation; each has
 strengths and weaknesses for different problem types.
 In the default mode, one begins with an initial collection of 
 knob settings, called an \fIinstance\fR. The settings of each knob is
@@ -424,13 +424,13 @@ resulting instance is a local maximum; it is returned to
 the outer loop.
 
 The alternate mode of operation is triggered by using the
-\fB\-L1\fR flag (usualy with the \fB\-T1\fR flag). In this
+\fB\-L1\fR flag (usually with the \fB\-T1\fR flag). In this
 case, as before, all knob settings are explored, one knob at a time.
 After finding the one knob that most improves the score, the
 algo is done, and the resulting instance is returned to the outer
 loop. If no knob settings improved the score, then all possible
 settings of two knobs are explored, and then three, etc. until
-improvement is found (or the alloted iterations are exceeded).
+improvement is found (or the allotted iterations are exceeded).
 In this alternate mode, the local hill is \fBnot\fR climbed to
 the top; instead, any improvement is immediately handed back to the
 outer loop, for another round of exemplar selection and knob-building.
@@ -458,7 +458,7 @@ T}
 .TP
 .BI \-A\  score \fR,\ \fB\-\-max\-score= score
 Specifies the ideal score for a desired solution; used to terminate
-search.  If the maximum number of evaluations has not yet elasped
+search.  If the maximum number of evaluations has not yet elapsed
 (set with the \fB\-m\fR option), and a candidate solution is found
 that has at least this score, then search is terminated.
 .TP
@@ -478,7 +478,7 @@ That is, if an operator is both be included and ignored,
 then it is ignored.  This option does not work with ANN.
 .TP
 .BI \-\-linear\-regression= 1
-When attempting to fit continous-valued features, restrict searches
+When attempting to fit continuous-valued features, restrict searches
 to linear expressions only; that is, do not use polynomials in the fit.
 Specifying this option also automatically disables the use of div,
 sin, exp and log.  Note that polynomial regression results in search
@@ -500,7 +500,7 @@ memoization is greatly increased by also using the \fB\-d1\fR flag.
 .TP
 .BI \-v\  temperature \fR,\ \fB\-\-complexity\-temperature= temperature
 Set the "temperature" of the Boltzmann-like distribution used to 
-select the next exemplar out of the metapopulaton. A temperature that
+select the next exemplar out of the metapopulation. A temperature that
 is too high or too low will make it likely that poor exemplars will be
 chosen for exploration, thus resulting in excessively long search times.
 Recommended values lie in the range of 2 to 10, with a default of 6.
@@ -539,7 +539,7 @@ with 3.5 as the default.
 
 .TP
 .BI \-Z1\fR,\ \fB\-\-hc\-crossover=1
-Controls hill-climbing algorithm behaviour.  If false (the default),
+Controls hill-climbing algorithm behavior.  If false (the default),
 then the entire local neighborhood of the current center instance is
 explored. The highest-scoring instance is then chosen as the new center
 instance, and the process is repeated.  For many datasets, however, 
@@ -548,8 +548,8 @@ exhaustive search may not be required. When this option is specified,
 a handful of the highest-scoring instances are crossed-over (in the
 genetic sense of cross-over) to create new instances.  Only these are
 evaluated for fitness; the exhaustive search step is skipped.  For many
-problem types, especialy those with large neighborhoods (i.e. those with
-high prorgram complexity), this can lead to an order-of-magnitude
+problem types, especially those with large neighborhoods (i.e. those with
+high program complexity), this can lead to an order-of-magnitude
 speedup, or more.  For other problem types, especially those with 
 deceptive scoring functions, this can hurt performance.
 .PP
@@ -561,18 +561,18 @@ may have instances with hundreds of thousands of nearest neighbors.
 Exploring one nearest neighbor requires one evaluation of the 
 scoring function, and so an exhaustive search can be prohibitive.  
 A partial search can often work quite well, especially when 
-cross-over is enabled.  The following falgs control such partial
-seaches.
+cross-over is enabled.  The following flags control such partial
+searches.
 .TP
 .BI \-\-hc\-max\-nn\-evals= num
-Controls hill-climbing algorithm behaviour.  When exploring the
+Controls hill-climbing algorithm behavior.  When exploring the
 nearest neighborhood of an instance, \fInum\fP specifies 
 the maximum number of nearest neighbors to explore.  An 
 exhaustive search of the nearest neighborhood is performed 
 when the number of nearest neighbors is less than this value.  
 .TP
 .BI \-\-hc\-fraction\-of\-nn= frac
-Controls hill-climbing algorithm behaviour.   When exploring the
+Controls hill-climbing algorithm behavior.   When exploring the
 nearest neighborhood of an instance,  \fIfrac\fP specifies
 the fraction of nearest neighborhood to explore.  As currently
 implemented, only an estimate of the nearest-neighborhood size
@@ -585,7 +585,7 @@ of the entire neighborhood, set this to 2.0 or larger.
 .SS "Algorithm tuning options"
 These options allow the operation of the algorithm to be fine-tuned
 for specific applications.  These are "advanced" options; changing
-these from the default is likely to worsen algorithm behaviour in
+these from the default is likely to worsen algorithm behavior in
 all but certain special cases.
 .TP
 .BI \-B\  effort \fR,\ \fB\-\-reduct\-knob\-building\-effort= effort
@@ -601,11 +601,11 @@ The maximum radius of the neighborhood around the exemplar to explore.
 The default value is 4.
 .TP
 .BI \-d1\fR,\ \fB\-\-reduce\-all=1
-Reduce candidates before scoring evalutation. Otherwise, only dominating
+Reduce candidates before scoring evaluation. Otherwise, only dominating
 candidates are reduced, just before being added to the metapopulation.
 This flag may be useful if scoring function evaluation expense depends
 strongly one the structure of the candidate. It is particularly important
-to specify this flage when memoization is enabled (with \fB-s!\fR).
+to specify this flag when memoization is enabled (with \fB-s!\fR).
 .TP
 .BI \-E\  effort \fR,\ \fB\-\-reduct\-candidate\-effort= effort
 Effort allocated for reduction of candidates. Valid values are
@@ -632,10 +632,10 @@ complexity.
 Single-step, instead of hill-climbing to the top of a hill. That is,
 a single uphill step is taken, and the resulting best demes are folded
 back into the metapopulation.  Solving then continues as usual. By
-default, the hillclimbing algorithm does not single-step; it instead
+default, the hill-climbing algorithm does not single-step; it instead
 continues to the top of the local hill, before folding the resulting
 demes back into the metapopulation.  If using this flag, consider
-usig the \fB\-T1\fR flag to allow the search to be widened, so that
+using the \fB\-T1\fR flag to allow the search to be widened, so that
 if the initial exemplar is already at the top of a local hill, a search
 is made for a different (taller) hill.
 .TP
@@ -677,7 +677,7 @@ detailed explanation.
 
 .TP
 .BI \-T1\fR,\ \fB\-\-hc\-widen\-search=1
-Controls hill-climbing algorithm behaviour.  If false (the default),
+Controls hill-climbing algorithm behavior.  If false (the default),
 then deme search terminates when a local hilltop is found. If true,
 then the search radius is progressively widened, until another
 termination condition is met.  Consider using the \fB\-D\fR flag to
@@ -685,11 +685,11 @@ set the maximum search radius.
 
 .TP
 .BI \-\-well\-enough=1
-For prolems with an enumerated ('nominal') output, the learned combo
+For problems with an enumerated ('nominal') output, the learned combo
 program is always of the form \fBcond\fR\fI(pred_1 value_1 pred_2 value_2 ... 
 pred_n value_n else_val)\fR  where \fIpred_1\fR is a predicate, which,
 if true, causes the output to be \fIvalue_1\fR.  If false, then
-\fIpred_2\fR is tested, and so on.  If none of the predicates evalue to
+\fIpred_2\fR is tested, and so on.  If none of the predicates evaluate to
 true, then the value of the \fBcond\fR expression is the \fIelse_val\fR.
 The well-enough algorithm attempts to find predicates that maximize
 precision, the point being that if a perfectly precise \fIpred_1\fR
@@ -721,7 +721,7 @@ option flags and values. The filename will be truncated to a maximum
 of 255 characters.
 .TP
 .BI \-l\  loglevel \fR,\ \fB\-\-log\-level= loglevel
-Specify the level of detail for debug loging. Possible
+Specify the level of detail for debug logging. Possible
 values for \fIloglevel\fR are \fBNONE\fR, \fBERROR\fR, \fBWARN\fR,
 \fBINFO\fR, \fBDEBUG\fR, and \fBFINE\fR. Case does not matter.
 Caution: excessive logging detail can lead to significant
@@ -739,13 +739,13 @@ Output the highest-scoring programs as python snippets, instead of combo.
 Prevent printing of the score.
 .TP
 .BI \-t1\fR,\ \fB\-\-output\-bscore=1
-Print the behavioural score.
+Print the behavioral score.
 .TP
 .BI \-V1\fR,\ \fB\-\-output\-eval\-number=1
 Print the number of evaluations performed.
 .TP
 .BI \-W1\fR,\ \fB\-\-output\-with\-labels=1
-Use named labels instead of position placeholders when printing
+Use named labels instead of position place-holders when printing
 candidates. For example, *("$temperature" "$entropy") instead
 of *($3 $4). This option is effective only when the data file
 contains labels in its header.
@@ -761,15 +761,15 @@ is to sort inputs into one of two sets, while maximizing either
 the precision, the sensitivity, or some other figure of merit
 of the test.
 .PP
-In \fBmoses\fR, precision and recall (senstivity) are defined as standard.
-Precision is defined as the number of true positives, divded by the number
+In \fBmoses\fR, precision and recall (sensitivity) are defined as standard.
+Precision is defined as the number of true positives, divided by the number
 of true positives plus the number of false positives.  Classifiers 
-with a high precision make very few mistakes identifiying postives:
+with a high precision make very few mistakes identifying positives:
 they have very few or no false positives.  However, precise classifiers
 may completely fail to identify many, if not most positives; they just
 don't make mistakes when they do identify them.
 .PP
-Recall, also known as senstivity, is defined as the number of true
+Recall, also known as sensitivity, is defined as the number of true
 positives divided by the sum of the number of true positives and false
 negatives.  Classifiers with high recall will identify most, or maybe
 even all positives; however, they may also identify many negatives,
@@ -782,7 +782,7 @@ one, while holding the other to a minimum standard.  One of the most
 common problems is find a classifier with the highest possible recall,
 while holding precision to a fixed minimum level; this may be accomplished
 with the \fB\-Hrecall\fR option.  The reversed situation is somewhat
-less common: to find the most precise test that gaurantees a certain
+less common: to find the most precise test that guarantees a certain
 minimum sensitivity; this may be accomplished with the \fB\-Hprerec\fR
 option.
 .PP
@@ -849,7 +849,7 @@ Maximum value for continuous variables.  Default 1.0.
 .TP
 .BI \-R\  num \fR,\ \fB\-\-discretize\-threshold= num
 Split a continuous domain into two pieces. This option maybe be used
-multiple times to split a continuous domain into multiple peices:
+multiple times to split a continuous domain into multiple pieces:
 that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
 
 .\" ============================================================
@@ -927,7 +927,7 @@ Specify the size of the problem.  The interpretation of \fIsize\fR
 depends on the particular problem type.
 .TP
 .BI \-y\  prog \fR,\ \fB\-\-combo\-program= prog
-Specify the combo prorgram to be learned, when used in combination with
+Specify the combo program to be learned, when used in combination with
 the \fB-H cp\fR option.  Thus, for example, \fB-H cp -y "and(\\$1 \\$2)"\fR
 specifies that the two-input conjunction is to be learned.  Keep in mind
 that $ is a reserved character in many shells, and thus must be escaped
@@ -939,9 +939,9 @@ The speed with which the search algorithm can find a reasonable solution
 is significantly affected by the complexity ratio specified with the 
 \fB\-z\fR or \fB\-p\fR options. This section provides the theoretical
 underpinning for the meaning of these flags, and how they affect the
-the algorithm.  The coplexity penalty has two slightly different
+the algorithm.  The complexity penalty has two slightly different
 interpretations, depending on whether one is considering learning
-a discretely-valued problem (i.e. boolean-valued) or a continously-valued
+a discretely-valued problem (i.e. boolean-valued) or a continuously-valued
 problem.  The general structure of the argument is broadly similar
 for both cases; they are presented below.  Similar arguments
 apply for classification problems (learning to classify data into
@@ -1039,7 +1039,7 @@ solution is also computed, using an ad-hoc complexity measure.
 .SS "Continuous case"
 
 A similar argument to the above holds for the case of a 
-continously-valued observable.
+continuously-valued observable.
 
 Let dP(..) be the notation for a probability density (or measure).
 As before, start with Bayes theorem:
@@ -1051,7 +1051,7 @@ log likelihood of M knowing D as:
 
     LL(M) = log(dP(D|M)) + log(P(M))
 
-Assume the output of of the model M on input x has a Guassian 
+Assume the output of of the model M on input x has a Gaussian 
 distributions, of mean M(x) and variance V, so that dP(D|M),
 the probability density of the data D given the modem M is:
 
@@ -1068,9 +1068,9 @@ constant), one then can deduce a scoring function:
 
     score(M) = -|M|*log(|A|)*2*V - Sum_{x\\in D} (M(x)-D(x))^2
 
-As before, |M|*log(|A|)*2*V can be interpeted as a scoring penalty.
+As before, |M|*log(|A|)*2*V can be interpreted as a scoring penalty.
 Alternately, one may interpret each row x as a feature; then the
-penatly term |M|*log(|A|)*2*V can be interpreted as an additional
+penalty term |M|*log(|A|)*2*V can be interpreted as an additional
 feature that must be fit.
 
 .\" ============================================================
@@ -1080,7 +1080,7 @@ MOSES provides two different styles of distributed processing for
 cluster computing systems.  One style is to use MPI (as implemented in
 the OpenMPI/MPICH2 systems), the second is to use SSH. The first style
 is best suited for local area networks (LANs) and compute clusters. The
-second style allows operation over the open internet, but is more
+second style allows operation over the open Internet, but is more
 problematic, as it may require manual cleanup of log files and failed
 jobs.  Because MPI is easy to install and manage, it is the recommended
 method for distributing moses operation across many machines.
@@ -1098,7 +1098,7 @@ and the root node will report the merged, best results.
 Using MPI requires a \fBmoses\fR binary with MPI support compiled in, with
 either the OpenMPI or the MPICH2 implementations.  MPI support in MOSES
 is enabled with the \fB\-\-mpi=1\fR command-line flag.  When this flag
-is specified, \fBmoses\fR may be run as usual in an MPI environemnt.
+is specified, \fBmoses\fR may be run as usual in an MPI environment.
 Details will vary from one system configuration to another, but a
 typical usage might resemble the following:
 
@@ -1106,7 +1106,7 @@ typical usage might resemble the following:
 .BI mpirun\ \-n \ 15 \ \-\-hostfile \ mpd.hosts \ moses\ \-\-mpi=1\ \-j \ 12\ <other\ moses\ params>
 
 .PP
-The above specifies that the run should be distrbuted over fifteen nodes,
+The above specifies that the run should be distributed over fifteen nodes,
 with the node names specified in the \fImpd.hosts\fP file.  The
 \fB\-\-mpi=1\fR flag indicates to \fBmoses\fP that it is being run in an
 MPI environment.  The \fB\-j12\fP flag tells \fBmoses\fP to use up to
@@ -1122,15 +1122,15 @@ is relatively small, and so RAM availability is rarely a problem.  The
 network utilization by moses is also very modest: the only network
 traffic is the reporting of candidate solutions, and so the network
 demands are typically in the range of 1 Megabit per second, and are thus
-easily supported on an ethernet connection.  The moses workload
-distributes in an 'embarassingly parallel' fashion, and so there is no
+easily supported on an Ethernet connection.  The moses workload
+distributes in an 'embarrassingly parallel' fashion, and so there is no
 practical limit to scaling on small and medium compute clusters.
 .PP
 When performing input data regression, be sure that the input data file
-is available on all nodes.   This is most easily acheived by placing the
+is available on all nodes.   This is most easily achieved by placing the
 input data file on a shared filesystem.  Each instance of moses will
 write a log file.  In order to avoid name collision on the log files,
-the proccess id (PID) will automatically be incorporated into the
+the process id (PID) will automatically be incorporated into the
 log-file name when the \fB\-\-mpi=1\fR option is specified.  Log file
 creation can be disabled with the \fB\-lNONE\fR option; however, this is
 not recommended, as it makes debugging and progress monitoring
@@ -1152,7 +1152,7 @@ one can enter the options \fB\-j\fR4 \fB\-j\fI16:my_server.org\fR
 (or \fB\-j\fI16:user@my_server.org\fR if one wishes to run the remote
 job under a different user name), meaning that 4 threads are allocated
 on the local machine and 16 threads are allocated on \fImy_server.org\fP.
-Passwd prompts will appear unless \fBssh\-agent\fR is being used.
+Password prompts will appear unless \fBssh\-agent\fR is being used.
 The \fBmoses\fR executable must be on the remote machine(s), and
 located in a directory included in the \fBPATH\fR environment variable.
 Beware that a lot of log files are going to be generated on the
