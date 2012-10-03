@@ -155,7 +155,9 @@ Out& ostreamTableHeader(Out& out, const ITable& it, const OTable& ot,
 {
     std::vector<std::string> header = it.get_labels();
     const std::string& ol = ot.get_label();
-    OC_ASSERT(target_pos <= (int)header.size());
+    OC_ASSERT(target_pos <= (int)header.size(),
+              "target_pos %d greater than number of inputs %u",
+              target_pos, header.size());
     if (target_pos < 0)
         header.push_back(ol);
     else
