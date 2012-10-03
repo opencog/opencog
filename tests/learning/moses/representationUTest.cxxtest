@@ -65,8 +65,9 @@ public:
         type_tree tt = infer_type_tree(tr);
         vertex_set ignore_ops{id::div, id::exp, id::log, id::sin};
         representation rep(contin_reduction(reduct_effort, ignore_ops),
-                           contin_reduction(reduct_effort, ignore_ops), tr, tt,
-                           ignore_ops);
+                           contin_reduction(reduct_effort, ignore_ops),
+                           tr, tt, ignore_ops,
+                           NULL, NULL, false);
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
 
@@ -74,6 +75,28 @@ public:
 
         std::stringstream ss;
         string expected_str("+(*(+(*(+(*(+(*(+(*($1 +([1.75] *([0] $1))) [1.875] *([0] $1)) $1 +([1] *([0] $1))) [0.75] *([0] $1)) +([0.75] *([0] $1))) [1.375] *([0] $1)) +([0.75] *([0] $1))) [0] *([0] $1)) [1]) [-1.25])");
+        rep.ostream_prototype(ss);
+        TS_ASSERT_EQUALS(ss.str(), expected_str);
+    }
+
+    void test_linear_rep()
+    {
+        int reduct_effort = 2;
+        string tr_str = "+(*(+(*(+(*(+(*($1 1.75) 1.875) $1) 0.75) 0.75) 1.375) 0.75) -1.25)";
+        combo_tree tr = totree(tr_str);
+        type_tree tt = infer_type_tree(tr);
+        vertex_set ignore_ops{id::div, id::exp, id::log, id::sin};
+        representation rep(contin_reduction(reduct_effort, ignore_ops),
+                           contin_reduction(reduct_effort, ignore_ops),
+                           tr, tt, ignore_ops,
+                           NULL, NULL, true);
+
+        TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
+
+        rep.ostream_prototype(std::cout << "Prototype = ") << std::endl;
+
+        std::stringstream ss;
+        string expected_str("+(*(+(*(+(*(+(*(+(*($1 [1.75]) [1.875]) $1) [0.75]) [0.75]) [1.375]) [0.75]) [0] *([0] $1)) [1]) [-1.25])");
         rep.ostream_prototype(ss);
         TS_ASSERT_EQUALS(ss.str(), expected_str);
     }

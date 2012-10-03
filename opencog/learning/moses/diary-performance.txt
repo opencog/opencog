@@ -3605,6 +3605,34 @@ reuters-small: arity of 1617
 1st generation: 90552 = 27 x base
 2nd generation: exactly same as before... wtf? Ahhh  found it.
 rec_canonize() was building a quadratic with arity-squared knobs.
-Now fixed to kep it linear.
+Now fixed to kep it linear. In bzr rev 7633 or 7634 or so.
+
+==============================================================
+Bag-of-words redux: bzr rev 7635
+
+bzr rev 7609: this code includes deme size management, as well
+as limited logical_probe funkiness.
+
+Dataset: ./reuters-test-10.data which has 4852 rows, 16935 columns
+Typical run:
+ ./opencog/learning/moses/main/moses -Hit -i ./reuters-test-10.data 
+    -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
+   --hc-max-nn-evals=5000 -j12 -m2048000 -freuters-test-10-m2048K.log
+
+Note: -s0 to disable caching.
+
+"final gens"      final number of generations explored, for this deme
+"total knobs"     total knobs in the representation
+"disc knobs"      number of disc knobs in the representation
+"contin knobs"    number of contin knobs ...
+"final score"     score at end of this deme run, ditto cpxy
+"approx memusage" initial->final mem usage RSS, per top.
+"deme time":      time to evaluate deme, only  (wall-clock)
+"knob-bld time":  seconds to build knobs, only (wall-clock)
 
 
+      final   tot    disc   contin   final         approx.     deme  knob-bld
+deme  gens   knobs   knobs   knobs   score   cpxy  memusage    time    time
+----  ----   -----   -----   -----   -----   ----  --------    -----   ----
+  1   190   948360  948360     0     -1497   176   6->8->7 GB  9981    320
+  2        3725760 3386980  338780                 14->16             2114

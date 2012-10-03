@@ -444,6 +444,7 @@ int moses_exec(int argc, char** argv)
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     unsigned cache_size;
+    bool linear_regression;
 
     // optim_param
     double pop_size_ratio;
@@ -535,15 +536,15 @@ int moses_exec(int argc, char** argv)
                     " Or the difference of skewnesses between the 2 distributions"
                     " and other things being experimented.\n\n"
                     "%s, regression based on input table using ann\n\n"
-                    "%s, regression based on combo program\n\n"
-                    "%s, even parity demo problem\n\n"
-                    "%s, disjunction demo problem\n\n"
-                    "%s, multiplex demo problem\n\n"
-                    "%s, regression of f(x)_o = sum_{i={1,o}} x^i demo problem\n")
+                    "%s, demo, regression based on combo program\n\n"
+                    "%s, demo, even parity problem\n\n"
+                    "%s, demo, disjunction problem\n\n"
+                    "%s, demo, multiplex problem\n\n"
+                    "%s, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
              % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % sr).c_str())
 
         // Input specification options
-        
+
         (opt_desc_str(input_data_file_opt).c_str(),
          value<vector<string>>(&input_data_files),
          "Input table file in DSV format (with comma, whitespace "
@@ -573,7 +574,7 @@ int moses_exec(int argc, char** argv)
          "target size.\n")
 
         // Algorithm control options
-        
+
         (opt_desc_str(hc_crossover_opt).c_str(),
          value<bool>(&hc_crossover)->default_value(true),
          str(format("Hillclimbing parameter (%s). If false, then only "
@@ -632,8 +633,15 @@ int moses_exec(int argc, char** argv)
                     "sin, exp, log can be ignored. "
                     "This option has the priority over --%s. "
                     "That is, if an operator is both be included and ignored, "
-                    "then it is ignored. This option does not work with ANN.\n")
+                    "then it is ignored.  This option does not work with ANN.\n")
              % include_only_ops_str_opt.first).c_str())
+
+        ("linear-regression",
+         value<bool>(&linear_regression)->default_value(false),
+         "When attempting to fit continous-valued features, restrict "
+         "searches to linear expressions only; that is, do not use "
+         "polynomials in the fit.  Specifying this option also "
+         "automatically disables the use of div, sin, exp and log.\n")
 
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
@@ -1156,12 +1164,21 @@ int moses_exec(int argc, char** argv)
             } else not_recognized_combo_operator(s);
         }
     }
+
     // Convert ignore_ops_str to the set of actual operators to ignore.
     foreach (const string& s, ignore_ops_str) {
         vertex v;
-        if(builtin_str_to_vertex(s, v))
+        if (builtin_str_to_vertex(s, v))
             ignore_ops.insert(v);
         else not_recognized_combo_operator(s);
+    }
+
+    // Specifying linear regression also ignores div exp log sin.
+    if (linear_regression) {
+        ignore_ops.insert(id::div);
+        ignore_ops.insert(id::exp);
+        ignore_ops.insert(id::log);
+        ignore_ops.insert(id::sin);
     }
 
     // Set the initial exemplars.
@@ -1220,6 +1237,7 @@ int moses_exec(int argc, char** argv)
     // meta_params.enable_cache = enable_cache;   // adaptive_cache
     meta_params.cache_size = cache_size;          // is disabled
     meta_params.jobs = jobs[localhost];
+    meta_params.linear_contin = linear_regression;
 
     // Set optim_parameters.
     optim_parameters opt_params(opt_algo, pop_size_ratio, max_score, max_dist);
@@ -1812,6 +1830,10 @@ int moses_exec(int argc, char** argv)
         if (exemplars.empty()) {
             exemplars.push_back(type_to_exemplar(id::contin_type));
         }
+
+        // sr is fundamentally a kind of non-linear regression!
+        // over-ride any flag settings regarding this.
+        meta_params.linear_contin = false;
 
         type_tree tt = gen_signature(id::contin_type, arity);
 

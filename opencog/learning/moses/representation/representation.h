@@ -57,7 +57,8 @@ struct representation : public knob_mapper, boost::noncopyable
                    const combo::type_tree& t,
                    const operator_set& ignore_ops = operator_set(),
                    const combo_tree_ns_set* perceptions = NULL,
-                   const combo_tree_ns_set* actions = NULL);
+                   const combo_tree_ns_set* actions = NULL,
+                   bool linear_contin = true);
 
 
     /**

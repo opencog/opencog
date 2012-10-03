@@ -477,6 +477,12 @@ This option has the priority over the \-N option.
 That is, if an operator is both be included and ignored,
 then it is ignored.  This option does not work with ANN.
 .TP
+.BI \-\-linear\-regression= 1
+When attempting to fit continous-valued features, restrict searches
+to linear expressions only; that is, do not use polynomials in the fit.
+Specifying this option also automatically disables the use of div,
+sin, exp and log.
+.TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 .TP
@@ -550,7 +556,7 @@ may have instances with hundreds of thousands of nearest neighbors.
 Exploring one nearest neighbor requires one evaluation of the 
 scoring function, and so an exhaustive search can be prohibitive.  
 A partial search can often work quite well, especially when 
-cross-over is enabled.  The following falgs cnotrol such partial
+cross-over is enabled.  The following falgs control such partial
 seaches.
 .TP
 .BI \-\-hc\-max\-nn\-evals= num

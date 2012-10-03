@@ -50,11 +50,13 @@ build_knobs::build_knobs(combo_tree& exemplar,
                          const operator_set& ignore_ops,
                          const combo_tree_ns_set* perceptions,
                          const combo_tree_ns_set* actions,
+                         bool linear_regression,
                          contin_t step_size,
                          contin_t expansion,
                          field_set::width_t depth)
     : _exemplar(exemplar), _rep(rep), _skip_disc_probe(true),
       _arity(tt.begin().number_of_children() - 1), _signature(tt),
+      _linear_contin(linear_regression),
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _perm_ratio(0.0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
@@ -822,27 +824,24 @@ void build_knobs::rec_canonize(pre_it it)
             if (!is_contin(*sib)) {
                 sib = canonize_times(sib);
 
-                // This is ifdef-ed out because it is (perhaps
-                // unintentionally?) raising the power of any polynomial.
-                // Worse, for every quadratic, this means arity-squared
-                // knobs are created; for every cubic, arity-cubed knobs,
-                // and so on.  For arity > 1K, this is a disaster. 
-                // (A million knobs!? Think about it...)  For
-                // arity > 10K, this is an insta-OOM-killer.  This
+                // The recursive call below raises the power of any
+                // polynomial.  For every quadratic, this means
+                // arity-squared knobs are created; for every cubic,
+                // arity-cubed knobs, and so on.  For arity > 1K, this
+                // is a disaster; moses struggles with a million knobs.
+                // For arity > 10K, this is an insta-OOM-killer.  This
                 // happens because append_linear_combination, below,
                 // appends not just some, but *all* of the literals,
                 // whence the combinatoric explosion of knobs.
-
-                // So... if you want to create polynomials, then do so
-                // explicitly, instead of the sneaky tricky below. And
-                // when you do, make sure the combinatoric explosion is
-                // under control.
-#ifdef MAKE_A_POLYNOMIAL
-                rec_canonize(sib.begin());
-                OC_ASSERT(is_contin(*sib.last_child()),
-                          "Sibling's last child isn't id::contin.");
-                rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
-#endif // MAKE_A_POLYNOMIAL
+                //
+                // Note also: some learning problems want linear
+                // regression, so this is a natural way to control that.
+                if (!_linear_contin) {
+                    rec_canonize(sib.begin());
+                    OC_ASSERT(is_contin(*sib.last_child()),
+                              "Sibling's last child isn't id::contin.");
+                    rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
+                }
             }
         }
 

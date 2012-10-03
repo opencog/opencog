@@ -53,6 +53,7 @@ struct build_knobs : boost::noncopyable
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
+                bool linear_regression = true,
                 contin_t step_size = 1.0,
                 contin_t expansion = 1.0,
                 field_set::width_t depth = 4);
@@ -76,6 +77,14 @@ protected:
 
     // Type signature of the argument literals.
     const type_tree _signature;
+
+    // If true, then contin knob-building only generates linear
+    // expressions (i.e. so that moses performs only linear
+    // regression).  This greatly reduces the number of contin knobs
+    // that get created (and thus smaller and faster field sets) but
+    // it also makes fitting weaker.  However, some real-life problems
+    // want linear solutions.
+    bool _linear_contin;
 
     contin_t _step_size, _expansion;
     field_set::width_t _depth;

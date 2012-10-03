@@ -87,7 +87,8 @@ struct metapop_parameters
         actions(_actions),
         merge_callback(NULL),
         callback_user_data(NULL),
-        fstor(_fstor)
+        fstor(_fstor),
+        linear_contin(true)
         {}
 
     // The max number of candidates considered to be added to the
@@ -147,6 +148,14 @@ struct metapop_parameters
     void *callback_user_data;
 
     const feature_selector* fstor;
+
+    // Build only linear expressions involving contin features.
+    // This can greatly decrease the number of knobs created during
+    // representation building, resulting in much smaller field sets,
+    // and instances that can be searched more quickly. However, in
+    // order to fit the data, linear expressions may not be as good,
+    // and thus may require more time overall to find...
+    bool linear_contin;
 };
 
 void print_stats_header (optim_stats *os);
