@@ -57,8 +57,8 @@ int main(int argc, char** argv) {
         ("help,h", "Produce help message.\n")
 
         ("input-file,i", value<vector<string>>(&edp.input_files),
-         "DSV file containing a target feature (indicated by option -f)"
-         "used to compute the distance between the other files. Can be used"
+         "DSV file containing a target feature (indicated by option -f) "
+         "used to compute the distance between the other files. Can be used "
          "several times to enter several input files. "
          "The distance will be computed between each target across all files.\n")
 
