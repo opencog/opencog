@@ -103,10 +103,6 @@ std::vector<T> tokenizeRow_ignore_indices(const std::string& line,
 // some hacky function to get the header of a DSV file (assuming there is one)
 std::vector<std::string> get_header(const std::string& input_file);
         
-/// Read a table from an input stream.
-std::istream& istreamOTable(std::istream& in, OTable& tab,
-                            const std::string& target_feature);
-        
 std::istream& istreamRawITable(std::istream& in, ITable& tab)
     throw(std::exception, AssertionException);
 
@@ -129,7 +125,7 @@ std::istream& istreamTable(std::istream& in, Table& tab,
                            const std::vector<std::string>& ignore_features);
 
 /**
- * like above but read from file, and return an object Table.
+ * Load a OTable givent the file name. Only works for dense DSV data.
  */
 OTable loadOTable(const std::string& file_name,
                   const std::string& target_feature);

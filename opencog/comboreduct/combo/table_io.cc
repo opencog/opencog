@@ -684,26 +684,15 @@ istream& istreamITable(istream& in, ITable& tab,
     return in;
 }
 
-std::istream& istreamOTable(std::istream& in, OTable& tab,
-                            const std::string& target_feature)
-{
-    ITable itab;
-    const vector<string> empty_string_seq;
-    istreamITable(in, itab,    /// @todo it's expensive, could be optimized
-                  empty_string_seq);
-    OTable res(itab.get_column_data(target_feature), target_feature);
-    tab = res;
-    return in;
-}
-
 OTable loadOTable(const string& file_name, const string& target_feature)
 {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    
-    OTable res;
-    istreamOTable(in, res, target_feature);
+    vector<string> ignore_features;
+    for (const string& l : get_header(file_name))
+        if (l != target_feature)
+            ignore_features.push_back(l);
+
+    ITable itab = loadITable(file_name, ignore_features);
+    OTable res(itab.get_column_data(target_feature), target_feature);
     return res;
 }
 
