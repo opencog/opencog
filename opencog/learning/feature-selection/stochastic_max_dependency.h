@@ -28,7 +28,6 @@
 #include <functional>
 
 #include <opencog/util/numeric.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/functional.h>

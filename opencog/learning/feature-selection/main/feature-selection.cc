@@ -140,7 +140,7 @@ instance initial_instance(const feature_selection_parameters& fs_params,
     vector<string> vif; // valid initial features, used for logging
     instance res(fields.packed_width());
 
-    foreach(const string& f, fs_params.hc_initial_features) {
+    for (const string& f : fs_params.hc_initial_features) {
         size_t idx = distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found
             *(fields.begin_bit(res) + idx) = true;

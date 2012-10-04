@@ -33,7 +33,6 @@
 #include <boost/range/algorithm/set_algorithm.hpp>
 
 #include <opencog/util/numeric.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/functional.h>
@@ -90,7 +89,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
     for (unsigned i = 1; i <= max_interaction_terms; ++i) {
         std::set<FeatureSet> ps = powerset(features, i, true);
         typename std::set<FeatureSet>::const_iterator psit;
-        foreach (const FeatureSet& fs, ps) {
+        for (const FeatureSet& fs : ps) {
             printContainer(fs, ", ", "fs=[", "]");
             std::cout << "\t" << scorer(fs) << std::endl;
         }
@@ -267,7 +266,7 @@ FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
                               double threshold)
 {
     FeatureSet res;
-    foreach(const typename FeatureSet::value_type& f, features) {
+    for (const typename FeatureSet::value_type& f : features) {
         FeatureSet sf = set_difference(features, res);
         sf.erase(f);
         if(!sf.empty() && (scorer(features) - scorer(sf) < threshold))

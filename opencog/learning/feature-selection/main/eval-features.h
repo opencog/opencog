@@ -85,7 +85,7 @@ set<arity_t> get_features_idx(const vector<string>& features,
                               const vector<string>& labels,
                               const eval_features_parameters& pa) {
     set<arity_t> res;
-    foreach(const string& f, features) {
+    for (const string& f : features) {
         arity_t idx = distance(labels.begin(), boost::find(labels, f));
         OC_ASSERT((size_t)idx != labels.size(),
                   "No such a feature %s in file %s",
@@ -121,7 +121,7 @@ void eval_output_results(const eval_features_parameters& pa,
 {
     // compute feature quality for each feature set
     vector<double> qs;
-    foreach(const set<arity_t>& fs, feature_sets)
+    for (const set<arity_t>& fs : feature_sets)
         qs += sc(fs);
     // print results
     output_results(pa, qs);
