@@ -25,6 +25,7 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/count.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/min.hpp>
@@ -50,7 +51,8 @@ struct eval_diversity_params {
 };
 
 // define accumulator to gather stats
-typedef accumulator_set<float, stats<tag::mean,
+typedef accumulator_set<float, stats<tag::count,
+                                     tag::mean,
                                      tag::variance,
                                      tag::min,
                                      tag::max>> accumulator_t;
@@ -64,9 +66,10 @@ Out& ostream_results(Out& out, const eval_diversity_params& edp,
     if (edp.display_stats) {
         // compute the statistics
         accumulator_t acc;
-        foreach(float f, dsts) acc(f);
+        for (float f : dsts) acc(f);
 
         // display the statistics
+        out << "count: " << count(acc) << std::endl;
         out << "mean: " << mean(acc) << std::endl;
         out << "std dev: " << sqrt(variance(acc)) << std::endl;
         out << "min: " << boost::accumulators::min(acc) << std::endl;

@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
         // load the bscores
         vector<behavioral_score> bscores;
         vector<bscored_combo_tree> bcts;
-        foreach(string file, edp.moses_files) {
+        for (const string& file : edp.moses_files) {
             ifstream in(file);
             in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
             while (in.good()) {
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
         // load the target features (assumed to be of float type) and
         // dump them in vectors of floats
         vector<vector<float>> targets;
-        foreach(string file, edp.input_files) {
+        for (const string& file : edp.input_files) {
             vector<float> target;
             boost::transform(combo::loadOTable(file, edp.target_feature),
                              back_inserter(target), combo::cast_contin);
