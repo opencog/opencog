@@ -344,7 +344,7 @@ struct field_set
         while (from != to)
             ++spec_counts[*from++];
 
-        foreach (const spec_map::value_type& v, spec_counts) //build them
+        for (const spec_map::value_type& v : spec_counts) //build them
             build_spec(v.first, v.second);
 
         compute_starts();                 //compute iterator positions
@@ -720,10 +720,10 @@ protected:
     void compute_starts()
     {
         _contin_start = _fields.begin();
-        foreach(const term_spec& o, _term)
+        for (const term_spec& o : _term)
             _contin_start += o.depth; //# of fields
         _disc_start = _contin_start;
-        foreach(const contin_spec& c, _contin)
+        for (const contin_spec& c : _contin)
             _disc_start += c.depth;
 
         field_iterator term_start = _fields.begin();
@@ -745,7 +745,7 @@ protected:
         // Cache of raw indexes, to speed up get_contin()
         _contin_raw_offsets.reserve(_contin.size());
         size_t raw_idx = begin_contin_raw_idx();
-        foreach(const contin_spec& c, _contin) {
+        for (const contin_spec& c : _contin) {
             _contin_raw_offsets.push_back(raw_idx);
             raw_idx += c.depth;
         }
@@ -1318,7 +1318,7 @@ Out field_set::pack(It from, Out out) const
 {
     unsigned int offset = 0;
 
-    foreach(const term_spec& o, _term) {
+    for (const term_spec& o : _term) {
         size_t width = nbits_to_pack(o.branching);
         size_t total_width = size_t((width * o.depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
@@ -1337,7 +1337,7 @@ Out field_set::pack(It from, Out out) const
         }
     }
 
-    foreach(const contin_spec& c, _contin) {
+    for (const contin_spec& c : _contin) {
         dorepeat (c.depth) {
             *out |= packed_t(*from++) << offset;
             offset += 2;
@@ -1348,7 +1348,7 @@ Out field_set::pack(It from, Out out) const
         }
     }
 
-    foreach(const disc_spec& d, _disc) {
+    for (const disc_spec& d : _disc) {
         *out |= packed_t(*from++) << offset;
         offset += nbits_to_pack(d.multy);
         if (offset == bits_per_packed_t) {

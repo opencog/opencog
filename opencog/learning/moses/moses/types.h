@@ -36,7 +36,6 @@
 #include <boost/ptr_container/ptr_set.hpp>
 
 #include <opencog/util/functional.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/iostreamContainer.h>
 
 #include <opencog/comboreduct/combo/combo.h>

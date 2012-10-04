@@ -115,7 +115,7 @@ representation::representation(const reduct::rule& simplify_candidate,
     // slows down the search, and rarely/never seems to provide better
     // answers.  Leaving this commented out for now.
     contin_map new_cmap;
-    foreach (contin_v& v, contin)
+    for (contin_v& v : contin)
     {
         field_set::contin_spec cspec = v.first;
         contin_t remain = fabs(cspec.mean);
@@ -136,9 +136,9 @@ representation::representation(const reduct::rule& simplify_candidate,
 
     // Convert the knobs into a field set.
     std::multiset<field_set::spec> tmp;
-    foreach (const disc_v& v, disc)
+    for (const disc_v& v : disc)
         tmp.insert(v.first);
-    foreach (const contin_v& v, contin)
+    for (const contin_v& v : contin)
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
 
@@ -359,9 +359,9 @@ void representation::get_candidate_rec(const instance& inst,
 //  not needed either!?
 void representation::clear_exemplar()
 {
-    foreach(disc_v& v, disc)
+    for (disc_v& v : disc)
         v.second->clear_exemplar();
-    foreach(contin_v& v, contin)
+    for (contin_v& v : contin)
         v.second.clear_exemplar();
 }
 

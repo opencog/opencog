@@ -199,7 +199,7 @@ local_structure_model::local_structure_model(const field_set& fs,
                        make_transform_iterator(to, addressof<const instance>));
 
         // Iterate over term-algebgra-valued fields
-        foreach (const field_set::term_spec& o, _fields.term())
+        for (const field_set::term_spec& o : _fields.term())
         {
             int idx_base = distance(begin(), dtr);
 
@@ -224,7 +224,7 @@ local_structure_model::local_structure_model(const field_set& fs,
         }
 
         // Iterate over all contin-valued fields
-        foreach (const field_set::contin_spec& c, _fields.contin())
+        for (const field_set::contin_spec& c : _fields.contin())
         {
             int idx_base = distance(begin(), dtr);
             make_dtree(dtr++, 3); // contin arity is 3=2+1
@@ -248,7 +248,7 @@ local_structure_model::local_structure_model(const field_set& fs,
     // Each discrete variable can take on multiplicity of different
     // values, specifically, one of disc_spec::multy() of them. Thus,
     // each node in the dependency tree will have an arity of multy.
-    foreach (const field_set::disc_spec& d, _fields.disc_and_bit())
+    for (const field_set::disc_spec& d : _fields.disc_and_bit())
         make_dtree(dtr++, d.multy);
 
     // Now that we have created all of the dtrees, construct a

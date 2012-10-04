@@ -50,7 +50,7 @@ information_theoretic_bits(const field_set& fs)
     res += fs.n_bits();  // log_2(2)==1
     res += fs.contin().size() * log_five;
 
-    foreach (const field_set::term_spec& o, fs.term())
+    for (const field_set::term_spec& o : fs.term())
         res += log2<double>(o.branching) * double(o.depth);
 
     return res;

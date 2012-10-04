@@ -76,7 +76,7 @@ int main(int argc,char** argv)
     recbuild(tr, tr.begin(), branching, depth, 0, 0);
     field_set fs(field_set::term_spec(tr), args.length);
     instance_set<contin_t> population(args.popsize,fs);
-    foreach(instance& inst,population) {
+    for (instance& inst : population) {
         occam_randomize_term(fs, inst);
     }
 

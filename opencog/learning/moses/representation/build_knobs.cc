@@ -250,7 +250,7 @@ build_knobs::logical_probe_rec(pre_it subtree,
 
         // append kb_copy_v to kb_v
         auto kb_v = f_async.get();
-        foreach (const logical_subtree_knob& kb_copy, kb_copy_v) {
+        for (const logical_subtree_knob& kb_copy : kb_copy_v) {
             kb_v.push_back(new logical_subtree_knob(exemplr, it, kb_copy));
         }
         return kb_v;
@@ -365,7 +365,7 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
 
         // if (to_disallow.size() != 0)
         //    logger().fine("Disallowing %d knob settings", to_disallow.size());
-        foreach (int idx, to_disallow)
+        for (int idx : to_disallow)
             kb.disallow(idx);
         return true;
     } else {
@@ -504,7 +504,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 #ifdef DEBUG_INFO
     cerr << "---------------------------------" << endl;
     cerr << endl << "Perms: " << endl;
-    foreach (const combo_tree& tr, perms)
+    for (const combo_tree& tr : perms)
         cerr << tr << endl;
     cerr << "---------------------------------" << endl;
 #endif
@@ -555,7 +555,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
                           add_if_in_exemplar, nthr);
 
     logger().debug("Adding  %d logical knobs", kb_v.size());
-    foreach (const logical_subtree_knob& kb, kb_v) {
+    for (const logical_subtree_knob& kb : kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
 }

@@ -40,7 +40,7 @@ struct feature_selector {
     feature_set operator()(const combo::combo_tree& tr) const {
         combo::CTable act_ctable(ctable.olabel, ctable.ilabels);
         // select active rows
-        foreach(const combo::CTable::value_type& vct, ctable)
+        for (const combo::CTable::value_type& vct : ctable)
             if (eval_binding(vct.first, tr) == combo::id::logical_true)
                 act_ctable.insert(vct);
         // Call feature selection

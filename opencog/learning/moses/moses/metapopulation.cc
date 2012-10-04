@@ -90,7 +90,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // change as well) as to possibly speed-up evaluation (if
         // the scorer implement ignore_idxs).
         std::set<arity_t> idxs;
-        foreach(const vertex& v, ignore_ops)
+        for (const vertex& v : ignore_ops)
             if (is_argument(v))
                 idxs.insert(get_argument(v).abs_idx_from_zero());
         _cscorer.ignore_idxs(idxs);
@@ -150,7 +150,7 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
           const cscore_base& cscorer)
 {
     metapop_candidates candidates;
-    foreach (const combo_tree& base, exemplars) {
+    for (const combo_tree& base : exemplars) {
         combo_tree si_base(base);
         simplify_candidate(si_base);
 
@@ -229,7 +229,7 @@ void metapopulation::set_diversity()
 
         // // debug
         // logger().fine("Pool =");
-        // foreach (bscored_combo_tree* ptr, pool) {
+        // for (bscored_combo_tree* ptr : pool) {
         //     stringstream ss;
         //     ostream_bscored_combo_tree(ss, *ptr, true, true, true);
         //     logger().fine(ss.str());
@@ -336,7 +336,7 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     score_t inv_temp = 100.0f / params.complexity_temperature;
     score_t sum = 0.0f;
     // Convert scores into (non-normalized) probabilities
-    foreach (score_t& p, probs) {
+    for (score_t& p : probs) {
         // In case p has the max complexity (already visited) then
         // the probability is set to null
         p = (p > (0.1*SKIP_OVER_ME) ? 0.0f : expf((p - highest_score) * inv_temp));
@@ -367,7 +367,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
         if (logger().isFineEnabled()) {
             stringstream ss;
             ss << "Candidates to merge with the metapopulation:" << std::endl;
-            foreach(const auto& cnd, candidates)
+            for (const auto& cnd : candidates)
                 ostream_bscored_combo_tree(ss, cnd, true, true);
             logger().fine(ss.str());
         }
@@ -380,7 +380,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
     // complex...
     if (params.include_dominated) {
         logger().debug("Insert all candidates in the metapopulation");
-        foreach(const auto& cnd, candidates)
+        for (const auto& cnd : candidates)
             insert(new bscored_combo_tree(cnd));
     } else {
         logger().debug("Insert non-dominated candidates in the metapopulation");
@@ -581,7 +581,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
             stringstream ss;
             ss << "Candidates with their bscores before"
                 " removing the dominated candidates" << std::endl;
-            foreach(const auto& cnd, candidates)
+            for (const auto& cnd : candidates)
                 ostream_bscored_combo_tree(ss, cnd, true, true, true);
             logger().fine(ss.str());
         }
@@ -595,7 +595,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
             stringstream ss;
             ss << "Candidates with their bscores after"
                 " removing the dominated candidates" << std::endl;
-            foreach(const auto& cnd, candidates)
+            for (const auto& cnd : candidates)
                 ostream_bscored_combo_tree(ss, cnd, true, true, true);
             logger().fine(ss.str());
         }
@@ -696,7 +696,7 @@ void metapopulation::resize_metapop()
 bscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs)
 {
     bscored_combo_tree_set res;
-    foreach (const bscored_combo_tree& cnd, mcs) {
+    for (const bscored_combo_tree& cnd : mcs) {
         const combo_tree& tr = get_tree(cnd);
         const_iterator fcnd =
             OMP_ALGO::find_if(begin(), end(), [&](const bscored_combo_tree& v) {
@@ -712,7 +712,7 @@ bscored_combo_tree_set
 metapopulation::to_set(const bscored_combo_tree_ptr_vec& bcv)
 {
     bscored_combo_tree_set res;
-    foreach(const bscored_combo_tree* cnd, bcv)
+    for (const bscored_combo_tree* cnd : bcv)
         res.insert(*cnd);
     return res;
 }
@@ -726,7 +726,7 @@ void metapopulation::remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs
     boost::sort(bcv); boost::sort(res);
     bscored_combo_tree_ptr_vec dif = set_difference(bcv, res);
     // remove the dominated ones
-    foreach(const bscored_combo_tree* cnd_ptr, dif)
+    for (const bscored_combo_tree* cnd_ptr : dif)
         bcs.erase(*cnd_ptr);
 }
 
@@ -895,7 +895,7 @@ void metapopulation::merge_nondominated(bscored_combo_tree_set& bcs, unsigned jo
 {
     bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
     bscored_combo_tree_ptr_vec bcv_mp;
-    foreach(const bscored_combo_tree& cnd, *this)
+    for (const bscored_combo_tree& cnd : *this)
         bcv_mp.push_back(&cnd);
     bscored_combo_tree_ptr_vec_pair bcv_p =
         get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
@@ -905,11 +905,11 @@ void metapopulation::merge_nondominated(bscored_combo_tree_set& bcs, unsigned jo
     boost::sort(bcv_p.second);
     bscored_combo_tree_ptr_vec diff_bcv_mp =
         set_difference(bcv_mp, bcv_p.second);
-    foreach (const bscored_combo_tree* cnd, diff_bcv_mp)
+    for (const bscored_combo_tree* cnd : diff_bcv_mp)
         erase(*cnd);
 
     // add the nondominated ones from bsc
-    foreach (const bscored_combo_tree* cnd, bcv_p.first)
+    for (const bscored_combo_tree* cnd : bcv_p.first)
         insert(new bscored_combo_tree(*cnd));
 }
 
@@ -956,7 +956,7 @@ void metapopulation::update_best_candidates(const bscored_combo_tree_set& candid
     score_t best_sc = get_score(_best_cscore);
     complexity_t best_cpx = get_complexity(_best_cscore);
 
-    foreach(const bscored_combo_tree& it, candidates)
+    for (const bscored_combo_tree& it : candidates)
     {
         const composite_score& cit = get_composite_score(it);
         score_t sc = get_score(cit);
@@ -988,7 +988,7 @@ void metapopulation::log_best_candidates() const
         logger().info()
            << "The following candidate(s) have the best score "
            << best_composite_score();
-        foreach(const bscored_combo_tree& cand, best_candidates()) {
+        for (const bscored_combo_tree& cand : best_candidates()) {
             logger().info() << "" << get_tree(cand);
         }
     }

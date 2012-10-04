@@ -59,14 +59,14 @@ const proc_map& get_proc_map(const host_proc_map::value_type& hp) {
 const unsigned get_total_jobs(const host_proc_map::value_type& hp) {
     // return the number of jobs for all processes of hp's host
     unsigned acc = 0;
-    foreach(const proc_map::value_type& p, get_proc_map(hp))
+    for (const proc_map::value_type& p : get_proc_map(hp))
         acc += get_num_jobs(p);
     return acc;
 }
 
 unsigned running_proc_count(const host_proc_map& hpm) {
     unsigned acc = 0;
-    foreach(const host_proc_map::value_type& hpmv, hpm)
+    for (const host_proc_map::value_type& hpmv : hpm)
         acc += hpmv.second.size();
     return acc;
 }
@@ -288,7 +288,7 @@ void parse_result(const proc_map::value_type& pmv,
 host_proc_map init(const jobs_t& jobs)
 {
     host_proc_map hpm;
-    foreach(const jobs_t::value_type job, jobs) {
+    for (const jobs_t::value_type job : jobs) {
         hpm.insert(make_pair(job.first, proc_map()));
     }
     return hpm;
@@ -313,7 +313,7 @@ void killall(proc_map& pm)
 
 void killall(host_proc_map& hpm)
 {
-    foreach(host_proc_map::value_type& hpmv, hpm)
+    for (host_proc_map::value_type& hpmv : hpm)
         killall(hpmv.second);
 }
 
@@ -333,7 +333,7 @@ host_proc_map::iterator find_free_resource(host_proc_map& hpm,
 
 bool all_resources_free(const host_proc_map& hpm)
 {
-    foreach(const host_proc_map::value_type& hpmv, hpm) {
+    for (const host_proc_map::value_type& hpmv : hpm) {
         if(!hpmv.second.empty())
             return false;
     }
@@ -397,7 +397,7 @@ void distributed_moses(metapopulation& mp,
 
         // Check for results and merge any that are found
         bool found_one = false;
-        foreach (host_proc_map::value_type& hpmv, hpm) {
+        for (host_proc_map::value_type& hpmv : hpm) {
             for (proc_map::iterator it = hpmv.second.begin();
                 it != hpmv.second.end(); )
             {

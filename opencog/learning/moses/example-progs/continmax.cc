@@ -97,7 +97,7 @@ int main(int argc, char** argv)
       args.length));*/
     field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, depth), args.length);
     instance_set<contin_t> population(args.popsize, fs);
-    foreach(instance& inst, population) {
+    for (instance& inst : population) {
         occam_randomize_contin(fs, inst);
         cout << fs.stream(inst) << endl;
         cout << fs.stream_raw(inst) << endl;

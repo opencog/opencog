@@ -72,7 +72,7 @@ void partial_solver::solve()
 
     unsigned tab_sz = 0;
     score_seq.clear();
-    foreach(const CTable& ctable, _ctables) {
+    for (const CTable& ctable : _ctables) {
         score_seq.push_back(new BScore(ctable));
 
         tab_sz += ctable.uncompressed_size();
@@ -123,7 +123,7 @@ void partial_solver::solve()
     }
     logger().info() << "well-enough good-bye!";
 unsigned tcount = 0;
-foreach(CTable& ctable, _ctables) tcount += ctable.uncompressed_size();
+ for (CTable& ctable : _ctables) tcount += ctable.uncompressed_size();
 cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcount << endl;
 }
 
@@ -135,7 +135,7 @@ bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
 {
     logger().info() << "well-enough received " << cands.size() << " candidates";
     _most_good = 0;
-    foreach(auto &item, cands) {
+    for (auto &item : cands) {
         const combo_tree& cand = item.first;
         eval_candidate(cand);
     }
@@ -163,7 +163,7 @@ void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
     // Prefix the leading clauses in front of the best candidates,
     // and feed them back in as exemplars, for scoring.
     _exemplars.clear();
-    foreach(auto &item, cands) {
+    for (auto &item : cands) {
         combo_tree cand = get_tree(item);
         sib_it ldr = _leader.begin();
         sib_it cit = cand.begin();
@@ -180,7 +180,7 @@ void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
     // This time, use the non-graded (flat) scorer, that simply counts
     // the number of right & wrong, without weighting.
     straight_score_seq.clear();
-    foreach(const CTable& ctable, _orig_ctables)
+    for (const CTable& ctable : _orig_ctables)
         straight_score_seq.push_back(new StraightBScore(ctable));
 
     _straight_bscore = new multibscore_based_bscore(straight_score_seq);
@@ -199,7 +199,7 @@ void partial_solver::effective(combo_tree::iterator pred,
 
     unsigned total_count = 0;
     // Count how many items the first predicate mis-identifies.
-    foreach(CTable& ctable, _ctables) {
+    for (CTable& ctable : _ctables) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
             const vertex_seq& vs = cit->first;
             const CTable::counter_t& c = cit->second;
@@ -229,7 +229,7 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
                                 unsigned& total)    // return value
 
 {
-    foreach(CTable& ctable, tabs) {
+    for (CTable& ctable : tabs) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); ) {
             const vertex_seq& vs = cit->first;
             const CTable::counter_t& c = cit->second;
@@ -251,7 +251,7 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 /// metapopulation from the previous run.
 void partial_solver::refresh(const bscored_combo_tree_ptr_set& cands)
 {
-    foreach(const auto &item, cands)
+    for (const auto &item : cands)
         _exemplars.push_back(get_tree(item));
 }
 
@@ -261,7 +261,7 @@ void partial_solver::eval_candidate (const combo_tree& cand)
     // Are we done yet?
     penalized_behavioral_score pbs = _bscore->operator()(cand);
     score_t total_score = 0.0;
-    foreach(const score_t& sc, pbs.first)
+    for (const score_t& sc : pbs.first)
         total_score += sc;
 
     logger().debug() << "well-enough candidate=" << total_score
@@ -341,7 +341,7 @@ void partial_solver::record_prefix()
 
     // Redo the scoring tables, as they cache the score tables (why?)
     score_seq.clear();
-    foreach(const CTable& ctable, _ctables)
+    for (const CTable& ctable : _ctables)
         score_seq.push_back(new BScore(ctable));
 
     delete _bscore;

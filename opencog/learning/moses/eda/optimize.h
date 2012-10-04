@@ -159,7 +159,7 @@ namespace moses {
             logger().debug("Sample and evaluate %d new candidates"
                            " according to the model", n_generate);
             instance_set<ScoreT> new_instances(n_generate, current.fields());
-            foreach(auto& inst, new_instances)
+            for (auto& inst : new_instances)
                 inst = model();
 
             // Compute a fitness score for each instance.

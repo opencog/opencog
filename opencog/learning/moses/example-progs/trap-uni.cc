@@ -147,7 +147,7 @@ int main(int argc, char** argv)
     instance_set<int> population(args.popsize, fs);
 
     // Initialize each member of the population to a random value.
-    foreach(instance& inst, population)
+    for (instance& inst : population)
         generate(fs.begin_disc(inst), fs.end_disc(inst),
                  bind(&RandGen::randint, boost::ref(randGen()), n));
 

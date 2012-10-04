@@ -660,7 +660,7 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
 
     // To find the number of bad scores, we have to look
     // at the *whole* deme.
-    foreach (const deme_inst_t& si, deme) {
+    for (const deme_inst_t& si : deme) {
         score_t iscore = get_penalized_score(si.second);
         if (iscore <=  cutoff)
             bad_score_cnt++;

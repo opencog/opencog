@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "local_structure.h"
-#include <opencog/util/foreach.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/selection.h>
@@ -125,7 +124,7 @@ void local_structure_model::split(int src_idx, int tgt_idx,
 instance local_structure_model::operator()() const
 {
     vector<disc_t> tmp(size());
-    foreach(unsigned int idx, _ordering) {
+    for (unsigned int idx : _ordering) {
         sample((begin() + idx)->begin(), tmp[idx], tmp);
     }
     instance res(_instance_length);

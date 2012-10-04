@@ -1152,7 +1152,7 @@ int moses_exec(int argc, char** argv)
     vertex_set ignore_ops;
     if (vm.count(include_only_ops_str_opt.first.c_str())) {
         bool ignore_operators = false;
-        foreach (const string& s, include_only_ops_str) {
+        for (const string& s : include_only_ops_str) {
             vertex v;
             if (builtin_str_to_vertex(s, v)) {
                 if (!ignore_operators) {
@@ -1166,7 +1166,7 @@ int moses_exec(int argc, char** argv)
     }
 
     // Convert ignore_ops_str to the set of actual operators to ignore.
-    foreach (const string& s, ignore_ops_str) {
+    for (const string& s : ignore_ops_str) {
         vertex v;
         if (builtin_str_to_vertex(s, v))
             ignore_ops.insert(v);
@@ -1188,7 +1188,7 @@ int moses_exec(int argc, char** argv)
     // Fill jobs
     jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
     bool local = true;
-    foreach (const string& js, jobs_str) {
+    for (const string& js : jobs_str) {
         size_t pos = js.find(job_seperator);
         if (pos != string::npos) {
             unsigned int nj = boost::lexical_cast<unsigned int>(js.substr(0, pos));
@@ -1268,7 +1268,7 @@ int moses_exec(int argc, char** argv)
             no_input_datafile_exit();
 
         // Read input data files
-        foreach (const string& idf, input_data_files) {
+        for (const string& idf : input_data_files) {
             logger().info("Read data file %s", idf.c_str());
             Table table = loadTable(idf, target_feature, ignore_features_str);
             // possible subsample the table
@@ -1380,7 +1380,7 @@ int moses_exec(int argc, char** argv)
     int as = alphabet_size(cand_sig, ignore_ops);                \
     typedef SCORER BScore;                                       \
     BScorerSeq bscores;                                          \
-    foreach(const auto& table, TABLES) {                         \
+    for (const auto& table : TABLES) {                           \
         BScore* r = new BScore ARGS ;                            \
         set_noise_or_ratio(*r, as, noise, complexity_ratio);     \
         bscores.push_back(r);                                    \
@@ -1406,7 +1406,7 @@ int moses_exec(int argc, char** argv)
                 int as = alphabet_size(cand_sig, ignore_ops);
                 typedef precision_bscore BScore;
                 BScorerSeq bscores;
-                foreach(const CTable& ctable, ctables) {
+                for (const CTable& ctable : ctables) {
                     BScore* r = new BScore(ctable,
                                            fabs(hardness),
                                            min_rand_input,
@@ -1452,7 +1452,7 @@ int moses_exec(int argc, char** argv)
                 int as = alphabet_size(cand_sig, ignore_ops);
                 typedef precision_conj_bscore BScore;
                 BScorerSeq bscores;
-                foreach(const CTable& ctable, ctables) {
+                for (const CTable& ctable : ctables) {
                     BScore* r = new BScore(ctable,
                                            fabs(hardness),
                                            hardness >= 0);
@@ -1596,7 +1596,7 @@ int moses_exec(int argc, char** argv)
 
             typedef interesting_predicate_bscore BScore;
             BScorerSeq bscores;
-            foreach(const CTable& ctable, ctables) {
+            for (const CTable& ctable : ctables) {
                 BScore *r = new BScore(ctable,
                                        ip_kld_weight,
                                        ip_skewness_weight,
