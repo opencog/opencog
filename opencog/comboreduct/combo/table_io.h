@@ -73,7 +73,7 @@ std::vector<T> tokenizeRow(const std::string& line)
 {
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
-    foreach (const std::string& t, tok)
+    for (const std::string& t : tok)
         res.push_back(boost::lexical_cast<T>(t));
     return res;
 }
@@ -90,7 +90,7 @@ std::vector<T> tokenizeRow_ignore_indices(const std::string& line,
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
     unsigned i = 0;
-    foreach (const std::string& t, tok)
+    for (const std::string& t : tok)
         if (!boost::binary_search(ignored_indices, i++))
             res.push_back(boost::lexical_cast<T>(t));
     return res;

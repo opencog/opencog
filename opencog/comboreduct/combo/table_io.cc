@@ -140,7 +140,7 @@ vector<string> tokenizeSparseRow(const string& line)
 {
     table_tokenizer tok = get_sparse_row_tokenizer(line);
     vector<string> res;
-    foreach (string t, tok) {
+    for (string t : tok) {
         boost::trim(t);
         res.push_back(t);
     }
@@ -312,7 +312,7 @@ istream& istreamRawITable(istream& in, ITable& tab)
             arity_fail_row = i + 1;
         
         // Fill table with string-valued vertexes.
-        foreach (const string& tok, io) {
+        for (const string& tok : io) {
             vertex v(tok);
             tab[i].push_back(v);
         }
@@ -383,7 +383,7 @@ istream& istreamRawITable_ingore_indices(istream& in, ITable& tab,
             arity_fail_row = i + 1;
         
         // Fill table with string-valued vertexes.
-        foreach (const string& tok, io) {
+        for (const string& tok : io) {
             vertex v(tok);
             tab[i].push_back(v);
         }
@@ -487,7 +487,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
 
     size_t d_len = strlen(sparse_delim);
 
-    foreach (const string& line, lines) {
+    for (const string& line : lines) {
         vector<string> chunks = tokenizeSparseRow(line);
         vector<string>::const_iterator pit = chunks.begin();
 
@@ -520,7 +520,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     // 'index' is a map from feature name to column number.
     size_t cnt = fixed_arity;
     map<const string, size_t> index;
-    foreach (const string& key, feats) {
+    for (const string& key : feats) {
         types.push_back(feat_type);
         labs.push_back(key);
         index[key] = cnt;
@@ -657,7 +657,7 @@ istream& istreamITable(istream& in, ITable& tab,
     if (hdr) {
         vector<vertex> hdr = *(tab.begin());
         vector<string> labels;
-        foreach (const vertex& v, hdr) {
+        for (const vertex& v : hdr) {
             const string& tok = boost::get<string>(v);
             labels.push_back(tok);
         }
@@ -799,7 +799,7 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
     // print header
     ostreamCTableHeader(out, ct);
     // print data
-    foreach(const auto& v, ct) {
+    for (const auto& v : ct) {
         // print map of outputs
         out << "{";
         for(auto it = v.second.begin(); it != v.second.end();) {
@@ -852,7 +852,7 @@ ostream& operator<<(ostream& out, const ITable& it)
 {
     ostreamlnContainer(out, it.get_labels(), ",");
     ostreamlnContainer(out, it.get_types(), ",");
-    foreach (const vertex_seq& row, it) {
+    for (const vertex_seq& row : it) {
         vector<string> row_str;
         boost::transform(row, back_inserter(row_str), vertex_to_str);
         ostreamlnContainer(out, row_str, ",");
@@ -865,7 +865,7 @@ ostream& operator<<(ostream& out, const OTable& ot)
     if (!ot.get_label().empty())
         out << ot.get_label() << endl;
     out << ot.get_type() << endl;
-    foreach (const vertex& v, ot)
+    for (const vertex& v : ot)
         out << vertex_to_str(v) << endl;
     return out;
 }

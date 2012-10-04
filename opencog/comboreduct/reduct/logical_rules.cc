@@ -25,7 +25,6 @@
  */
 #include <opencog/util/exceptions.h>
 #include <opencog/util/algorithm.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/comboreduct/combo/assumption.h>
 #include "logical_rules.h"

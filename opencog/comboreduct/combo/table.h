@@ -92,7 +92,7 @@ public:
     // size of the corresponding uncompressed table)
     unsigned uncompressed_size() const {
         unsigned res = 0;
-        foreach(const value_type& v, *this) {
+        for (const value_type& v : *this) {
             res += v.second.total_count();
         }
         return res;
@@ -107,7 +107,7 @@ public:
         CTable res(olabel, seq_filtered(ilabels, filter));
 
         // Filter the rows
-        foreach(const CTable::value_type v, *this)
+        for (const CTable::value_type v : *this)
             res[seq_filtered(v.first, filter)] += v.second;
 
         // Filter the type tree
@@ -119,7 +119,7 @@ public:
         // copy filtered input types
         sib_it sib_src = head_src.begin();
         arity_t a_pre = 0;
-        foreach(arity_t a, filter) {
+        for (arity_t a : filter) {
             std::advance(sib_src, a - a_pre);
             a_pre = a;
             res.tt.replace(res.tt.append_child(head_dst), sib_src);
@@ -159,7 +159,7 @@ public:
         CTable res(olabel, ilabels);
 
         // Filter the rows (replace filtered out values by id::null_vertex)
-        foreach(const CTable::value_type v, *this)
+        for (const CTable::value_type v : *this)
             res[filtered_preverse_idxs(filter, v.first)] += v.second;
 
         // return the filtered CTable
@@ -257,9 +257,9 @@ public:
         res.set_types(seq_filtered(get_types(), filter));
 
         // filter content
-        foreach(const value_type& row, *this) {
+        for (const value_type& row : *this) {
             vertex_seq new_row;
-            foreach(arity_t a, filter)
+            for (arity_t a : filter)
                 new_row.push_back(row[a]);
             res.push_back(new_row);
         }
@@ -324,7 +324,7 @@ public:
            const std::string& ol = default_output_label)
         : label(ol)
     {
-        foreach(const vertex_seq& vs, it)
+        for (const vertex_seq& vs : it)
             push_back(f(vs.begin(), vs.end()));
     }
 
@@ -391,7 +391,7 @@ struct Table
 
         // set type tree
         type_tree::iterator head = res.tt.set_head(id::lambda_type);
-        foreach(type_node tn, res.itable.get_types())
+        for (type_node tn : res.itable.get_types())
             res.tt.append_child(head, tn);
         res.tt.append_child(head, otable.get_type());
 
@@ -477,7 +477,7 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
     OTable::const_iterator o_it = ot.begin();
     for(; i_it != it.end(); ++i_it, ++o_it) {
         vertex_seq ic_vec;
-        foreach(const typename FeatureSet::value_type& idx, fs)
+        for (const typename FeatureSet::value_type& idx : fs)
             ic_vec.push_back((*i_it)[idx]);
         ++ic[ic_vec];
         vertex_seq ioc_vec(ic_vec);
@@ -522,13 +522,13 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         ioc; // for H(Y, X1, ..., Xn)
     unsigned oc = 0; // for H(Y)
     double total = 0;
-    foreach(const auto& row, ctable) {
+    for (const auto& row : ctable) {
         unsigned falses = row.second.get(id::logical_false);
         unsigned trues = row.second.get(id::logical_true);
         unsigned row_total = falses + trues;
         // update ic
         vertex_seq vec;
-        foreach(unsigned idx, fs)
+        for (unsigned idx : fs)
             vec.push_back(row.first[idx]);
         ic[vec] += row_total;
         // update ioc

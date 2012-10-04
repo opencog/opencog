@@ -413,7 +413,7 @@ string ph2l(const string& ce, const vector<string>& labels)
     string res;
     string match;
     bool matching = false;
-    foreach(char c, ce) {
+    for (char c : ce) {
         if(!matching) {
             res += c;
             if(c == '$') // matching starts
@@ -442,7 +442,7 @@ string l2ph(const string& ce, const vector<string>& labels)
     string res;
     string match;
     bool matching = false;
-    foreach(char c, ce) {
+    for (char c : ce) {
         if(!matching) {
             res += c;
             if(c == '$') // matching starts

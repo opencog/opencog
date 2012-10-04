@@ -172,7 +172,7 @@ void ITable::insert_col(const std::string& clab,
     // Insert values
     if (empty()) {
         OC_ASSERT(off < 0);
-        foreach (const auto& v, col)
+        for (const auto& v : col)
             push_back({v});
         return;
     }
@@ -209,7 +209,7 @@ vertex_seq ITable::get_column_data(int offset) const
     if (-1 == offset)
         return col;
 
-    foreach (const auto& row, *this)
+    for (const auto& row : *this)
         col.push_back(row[offset]);
     return col;
 }
@@ -226,7 +226,7 @@ string ITable::delete_column(const string& name)
         return string();
 
     // Delete the column
-    foreach (vertex_seq& row, *this)
+    for (vertex_seq& row : *this)
         row.erase(row.begin() + off);
 
     // Delete the label as well.
@@ -245,7 +245,7 @@ string ITable::delete_column(const string& name)
 
 void ITable::delete_columns(const vector<string>& ignore_features)
 {
-    foreach(const string& feat, ignore_features)
+    for (const string& feat : ignore_features)
         delete_column(feat);
 }
 
@@ -272,7 +272,7 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
         // input, so the order within itable does matter
         ann net = tree_transform().decodify_tree(tr);
         int depth = net.feedforward_depth();
-        foreach(const vertex_seq& vv, itable) {
+        for (const vertex_seq& vv : itable) {
             vector<contin_t> tmp(vv.size());
             transform(vv, tmp.begin(), get_contin);
             tmp.push_back(1.0); // net uses that in case the function
@@ -283,7 +283,7 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
             push_back(net.outputs[0]->activation);
         }
     } else {
-        foreach(const vertex_seq& vs, itable)
+        for (const vertex_seq& vs : itable)
             push_back(eval_throws_binding(vs, tr));
     }
 
@@ -440,7 +440,7 @@ void Table::add_features_from_file(const string& input_file,
 {
     // consider only the features not already present
     const vector<string>& labels = itable.get_labels();
-    foreach (const string& f, labels) {
+    for (const string& f : labels) {
         auto it = boost::find(features, f);
         if (it != features.end())
             features.erase(it);
@@ -483,7 +483,7 @@ void Table::add_features_from_file(const string& input_file,
         // set the first row as header
         auto first_row_it = features_table.begin();
         vector<string> features_labels;
-        foreach(const vertex& v, *first_row_it)
+        for (const vertex& v : *first_row_it)
             features_labels.push_back(boost::get<string>(v));
         features_table.set_labels(features_labels);
         features_table.erase(first_row_it);

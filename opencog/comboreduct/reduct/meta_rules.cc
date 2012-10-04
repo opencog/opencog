@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "meta_rules.h"
-#include <opencog/util/foreach.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/comboreduct/combo/assumption.h>
 
@@ -122,7 +121,7 @@ void upwards::operator()(combo_tree& tr, combo_tree::iterator it) const
     
 void sequential::operator()(combo_tree& tr,combo_tree::iterator it) const {
     INC_TAB
-    foreach (const rule& r,rules) {
+    for (const rule& r : rules) {
         PRINT_DEBUG_STANDARD_REF
         r(tr,it);
     }

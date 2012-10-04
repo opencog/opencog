@@ -161,7 +161,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent)
 // debug printing
 void print_binding_map(const binding_map& bmap) {
     std::cout << "bmap = {";
-    foreach(const binding_map::value_type& vt, bmap) {
+    for (const binding_map::value_type& vt : bmap) {
         std::cout << vt.first << ":";
         if (const vertex* v = boost::get<const vertex>(&vt.second))
             std::cout << *v;

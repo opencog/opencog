@@ -24,8 +24,6 @@
 #ifndef _REDUCT_LOGICAL_RULES_H
 #define _REDUCT_LOGICAL_RULES_H
 
-
-#include <opencog/util/foreach.h>
 #include <opencog/util/exceptions.h>
 
 #include "reduct.h"
@@ -226,7 +224,7 @@ protected:
         template<typename Dst>
         void push_back_negated_arguments(const subtree_set& s,Dst& negated)
         {
-            foreach (sib_it sib, s) {
+            for (sib_it sib : s) {
                 if (is_argument(*sib)) {
                     negated.push_back(combo_tree(sib));
                     get_argument(*negated.back().begin()).negate();
