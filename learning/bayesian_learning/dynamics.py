@@ -2,6 +2,7 @@ from decimal import Decimal
 from math import log
 from random import random as rand
 from learning.bayesian_learning.network import Row
+from sample_data.uci_adult_dataset import main
 
 __author__ = 'keyvan'
 
@@ -118,7 +119,7 @@ def generate_test_record():
 def generate_test_dataset(dataset_size):
     data = DataObserver()
     for i in range(dataset_size):
-        data.append(generate_test_record())
+        data.append(main.uci_adult())
     return data
     #print data.probability_of('C', givens=[A], negations=[B])
     #    print data.probability_of('D', givens=['A','B'])

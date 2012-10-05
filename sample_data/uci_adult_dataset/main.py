@@ -53,3 +53,5 @@ def uci_adult():
         lambda_by_indexes_tuples,
         attribute_names[0:14],
         incomplete_value_evaluation_fn)
+
+    return dataset
