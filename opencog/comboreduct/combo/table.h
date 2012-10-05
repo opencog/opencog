@@ -166,12 +166,13 @@ public:
         return res;
     }
 
+    // return the output label + list of input labels
     string_seq get_labels() const;
 
 // protected:
     type_tree tt;
     std::string olabel;               // output label
-    string_seq ilabels; // list of input labels
+    string_seq ilabels;               // list of input labels
 
 };
 
