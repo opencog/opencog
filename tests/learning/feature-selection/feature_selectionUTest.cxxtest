@@ -84,25 +84,41 @@ public:
     //     test_moses_based_feature_selection(1);
     // }
 
-    void test_ignore_enforce_feature_selection() {
+    // void test_ignore_enforce_feature_selection() {
+    //     // set feature selection parameters
+    //     feature_selection_parameters fsp;
+    //     fsp.algorithm = opencog::inc;
+    //     fsp.scorer = mi;
+    //     fsp.input_file = ignore_enforce_target_table_path;
+    //     fsp.force_features_str = {"timestamp"};
+    //     fsp.target_size = 1;
+    //     fsp.jobs = 1;
+    //     setting_omp(fsp.jobs);
+    //     fsp.inc_target_size_epsilon = 1e-10;
+    //     fsp.inc_interaction_terms = 1;
+
+    //     ostreamTable(std::cout << "ignore/enforce target table = ",
+    //                  ignore_enforce_target_table);
+
+    //     // run and test feature selection
+    //     test_feature_selection(ignore_enforce_target_table, fsp,
+    //                            "timestamp,f2,target");
+    // }
+
+    void test_smd_with_init_feature() {
         // set feature selection parameters
         feature_selection_parameters fsp;
-        fsp.algorithm = opencog::inc;
+        fsp.algorithm = smd;
         fsp.scorer = mi;
-        fsp.input_file = ignore_enforce_target_table_path;
-        fsp.force_features_str = {"timestamp"};
-        fsp.target_size = 1;
+        fsp.input_file = small_table_path;
+        fsp.initial_features = {"f1"};
+        fsp.target_size = 2;
+        fsp.smd_top_size = 1;
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
-        fsp.inc_target_size_epsilon = 1e-10;
-        fsp.inc_interaction_terms = 1;
-
-        ostreamTable(std::cout << "ignore/enforce target table = ",
-                     ignore_enforce_target_table);
 
         // run and test feature selection
-        test_feature_selection(ignore_enforce_target_table, fsp,
-                               "timestamp,f2,target");
+        test_feature_selection(small_table, fsp, "target,f1,f2");
     }
     
 private:

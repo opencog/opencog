@@ -133,17 +133,16 @@ void write_results(const Table& selected_table,
         saveTable(fs_params.output_file, table_wff);
 }
 
-instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields,
-                          const vector<string>& labels)
+feature_set initial_features(const vector<string>& labels,
+                             const feature_selection_parameters& fs_params)
 {
     vector<string> vif; // valid initial features, used for logging
-    instance res(fields.packed_width());
+    feature_set res;
 
-    for (const string& f : fs_params.hc_initial_features) {
+    for (const string& f : fs_params.initial_features) {
         size_t idx = distance(labels.begin(), boost::find(labels, f));
         if(idx < labels.size()) { // feature found
-            *(fields.begin_bit(res) + idx) = true;
+            res.insert(idx);
             // for logging
             vif += f;
         }
@@ -160,6 +159,17 @@ instance initial_instance(const feature_selection_parameters& fs_params,
         logger().info(ss.str());
     }
     // ~Logger
+    return res;
+}
+
+instance initial_instance(const feature_selection_parameters& fs_params,
+                          const field_set& fields,
+                          const vector<string>& labels)
+{
+    feature_set init_features = initial_features(labels, fs_params);
+    instance res(fields.packed_width());
+    for (size_t idx : init_features)
+        *(fields.begin_bit(res) + idx) = true;
     return res;
 }
 
@@ -192,10 +202,12 @@ feature_set smd_select_features(const CTable& ctable,
                                 const feature_selection_parameters& fs_params)
 {
     auto ir = boost::irange(0, ctable.get_arity());
-    feature_set all_features(ir.begin(), ir.end());
+    feature_set all_features(ir.begin(), ir.end()),
+        init_features = initial_features(ctable.get_labels(), fs_params);
     if (fs_params.target_size > 0) {
         fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
-        return stochastic_max_dependency_selection(all_features, fs_sc,
+        return stochastic_max_dependency_selection(all_features, init_features,
+                                                   fs_sc,
                                                    (unsigned) fs_params.target_size,
                                                    fs_params.threshold,
                                                    fs_params.smd_top_size);

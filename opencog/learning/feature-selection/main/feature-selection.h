@@ -65,6 +65,7 @@ struct feature_selection_parameters
     std::string target_feature_str;
     std::vector<std::string> ignore_features_str;
     std::vector<std::string> force_features_str;
+    std::vector<std::string> initial_features;
     std::string output_file;
     unsigned target_size;
     double threshold;
@@ -76,7 +77,6 @@ struct feature_selection_parameters
     double hc_confi; //  confidence intensity
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
-    std::vector<std::string> hc_initial_features;
     float pre_penalty;
     float pre_min_activation;
     float pre_max_activation;
@@ -127,6 +127,12 @@ feature_set optimize_deme_select_features(const field_set& fields,
     // ~Logger
     return selected_features;
 }
+
+/**
+ * Convert the initial features into feature_set (set of indices)
+ */
+feature_set initial_features(const vector<string>& labels,
+                             const feature_selection_parameters& fs_params);
 
 /** For the MOSES algo, generate the intial instance */
 instance initial_instance(const feature_selection_parameters& fs_params,

@@ -67,6 +67,7 @@ namespace opencog {
  */
 template<typename Scorer, typename FeatureSet>
 FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
+                                               const FeatureSet& init_features,
                                                const Scorer& scorer,
                                                unsigned num_features,
                                                double threshold = 0.0,
@@ -87,10 +88,10 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 
-    // Start with the empty set
-    FeatureSet emptySet;
-    std::vector<std::pair<double, FeatureSet>> tops{{scorer(emptySet), emptySet}};
-    double previous_high_score = -1.0;
+    // Start with the initial feature set
+    double init_sc = scorer(init_features);
+    std::vector<std::pair<double, FeatureSet>> tops{{init_sc, init_features}};
+    double previous_high_score = init_sc;
 
     if (features.size() < num_features)
         num_features = features.size();
@@ -104,7 +105,7 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
 
     // Repeat, until we've gotton the highest-ranked FeatureSet
     // that has at most 'num_features' in it.
-    for (unsigned i = 1; i <= num_features; ++i) {
+    for (unsigned i = init_features.size() + 1; i <= num_features; ++i) {
 
         ranks_t ranks;
 

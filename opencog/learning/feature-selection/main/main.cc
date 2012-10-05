@@ -56,6 +56,7 @@ static const pair<string, string> input_data_file_opt("input-file", "i");
 static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> ignore_feature_opt("ignore-feature", "Y");
 static const pair<string, string> force_feature_opt("force-feature", "e");
+static const pair<string, string> initial_feature_opt("initial-feature", "f");
 static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> log_level_opt("log-level", "l");
@@ -67,7 +68,6 @@ static const pair<string, string> jobs_opt("jobs", "j");
 static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");
 static const pair<string, string> inc_redundant_intensity_opt("inc-redundant-intensity", "D");
 static const pair<string, string> inc_interaction_terms_opt("inc-interaction-terms", "U");
-static const pair<string, string> hc_initial_feature_opt("initial-feature", "f");
 static const pair<string, string> hc_max_score_opt("max-score", "A");
 static const pair<string, string> hc_confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
@@ -181,24 +181,32 @@ int main(int argc, char** argv)
           .append(" characters.\n").c_str())
 
         // ======= Generic algo opts =========
+        (opt_desc_str(initial_feature_opt).c_str(),
+         value<vector<string> >(&fs_params.initial_features),
+         "Initial feature to search from (not supported by inc). "
+         "This option can be used as many times as there are features, "
+         "to have them included in the initial feature set. If the "
+         "initial feature set is close to the one that maximizes the "
+         "quality measure, the selection speed can be greatly increased.\n")
+
         (opt_desc_str(jobs_opt).c_str(),
          value<unsigned>(&fs_params.jobs)->default_value(1),
          string("Number of threads to use.\n").c_str())
 
         (opt_desc_str(target_size_opt).c_str(),
          value<unsigned>(&fs_params.target_size)->default_value(0),
-            "Feature count.  This option "
-            "specifies the number of features to be selected out of "
-            "the dataset.  A value of 0 disables this option. \n")
+         "Feature count.  This option "
+         "specifies the number of features to be selected out of "
+         "the dataset.  A value of 0 disables this option. \n")
 
         (opt_desc_str(threshold_opt).c_str(),
          value<double>(&fs_params.threshold)->default_value(0),
-            "Improvment threshold. Floating point number. "
-            "Specifies the threshold above which the mutual information "
-            "of a feature is considered to be significantly correlated "
-            "to the target.  A value of zero means that all features "
-            "will be selected. \n"
-            "For the -ainc algo only, the -C flag over-rides this setting.\n")
+         "Improvment threshold. Floating point number. "
+         "Specifies the threshold above which the mutual information "
+         "of a feature is considered to be significantly correlated "
+         "to the target.  A value of zero means that all features "
+         "will be selected. \n"
+         "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
@@ -238,14 +246,6 @@ int main(int argc, char** argv)
          "attributed to the confidence of the quality measure. The "
          "fewer samples in the data set, the more features the "
          "less confidence in the feature set quality measure.\n")
-
-        (opt_desc_str(hc_initial_feature_opt).c_str(),
-         value<vector<string> >(&fs_params.hc_initial_features),
-         "Hillclimbing parameter.  Initial feature to search from.  "
-         "This option can be used as many times as there are features, "
-         "to have them included in the initial feature set. If the "
-         "initial feature set is close to the one that maximizes the "
-         "quality measure, the selection speed can be greatly increased.\n")
 
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned>(&fs_params.max_evals)->default_value(10000),
