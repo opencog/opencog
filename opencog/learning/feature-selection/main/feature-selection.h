@@ -172,7 +172,7 @@ feature_set create_deme_select_features(const CTable& ctable,
     field_set fields(field_set::disc_spec(2), arity);
     instance_set<composite_score> deme(fields);
     // determine the initial instance given the initial feature set
-    instance init_inst = initial_instance(fs_params, fields, ctable.get_labels());
+    instance init_inst = initial_instance(fs_params, fields, ctable.ilabels);
     // define moses based scorer
     typedef deme_based_scorer<Scorer> DBScorer;
     DBScorer db_sc(scorer, fields);

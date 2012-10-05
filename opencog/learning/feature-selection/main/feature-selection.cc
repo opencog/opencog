@@ -133,15 +133,15 @@ void write_results(const Table& selected_table,
         saveTable(fs_params.output_file, table_wff);
 }
 
-feature_set initial_features(const vector<string>& labels,
+feature_set initial_features(const vector<string>& ilabels,
                              const feature_selection_parameters& fs_params)
 {
     vector<string> vif; // valid initial features, used for logging
     feature_set res;
 
     for (const string& f : fs_params.initial_features) {
-        size_t idx = distance(labels.begin(), boost::find(labels, f));
-        if(idx < labels.size()) { // feature found
+        size_t idx = distance(ilabels.begin(), boost::find(ilabels, f));
+        if(idx < ilabels.size()) { // feature found
             res.insert(idx);
             // for logging
             vif += f;
@@ -164,9 +164,9 @@ feature_set initial_features(const vector<string>& labels,
 
 instance initial_instance(const feature_selection_parameters& fs_params,
                           const field_set& fields,
-                          const vector<string>& labels)
+                          const vector<string>& ilabels)
 {
-    feature_set init_features = initial_features(labels, fs_params);
+    feature_set init_features = initial_features(ilabels, fs_params);
     instance res(fields.packed_width());
     for (size_t idx : init_features)
         *(fields.begin_bit(res) + idx) = true;
@@ -203,7 +203,7 @@ feature_set smd_select_features(const CTable& ctable,
 {
     auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end()),
-        init_features = initial_features(ctable.get_labels(), fs_params);
+        init_features = initial_features(ctable.ilabels, fs_params);
     if (fs_params.target_size > 0) {
         fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
         return stochastic_max_dependency_selection(all_features, init_features,
