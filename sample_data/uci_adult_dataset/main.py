@@ -57,5 +57,3 @@ def uci_adult():
     return dataset
 
 # comment from ramin!
-
-# comment from keyvan!
