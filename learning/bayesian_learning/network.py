@@ -308,6 +308,7 @@ class BayesianNetwork(Network):
                     continue
                 link = neighbour1.add_neighbour(neighbour2)
                 clique = Clique(neighbour1, node, neighbour2, junction_tree)
+#                clique = Clique(neighbour1)
                 clique.connect_link(link)
             eliminated.add(self.pop(node))
         for node in eliminated:
@@ -348,10 +349,10 @@ class BayesianNetwork(Network):
         return clone
 
 
-class Clique(frozenset):
+class Clique(object):
 
     def __init__(self, node1, node2, node3, junction_tree=None):
-        frozenset.__init__(self, (node1, node2, node3))
+        self.frozenSet = frozenset((node1, node2, node3))
         self.edges = set()
         self.network = junction_tree
         if junction_tree is not None:
@@ -364,6 +365,9 @@ class Clique(frozenset):
 
     def __repr__(self):
         return repr(tuple(self))
+
+    def __iter__(self):
+        return self.frozenSet.__iter__()
 
 
 class JunctionTree(Network):
