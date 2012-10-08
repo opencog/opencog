@@ -122,6 +122,12 @@ For a fully functional example, check the ''examples/atomtypes/' directory.
 
                    Foreach Iterators
                    -----------------
+XXX The below is strongly deprecated. There are now adequate foreach
+iterators, as well as anonymous functions, in both C++11 and in Boost.
+The stuff described below should someday be replaced by the std foreach
+constructs.  Below is for historical reference only, to aid in making
+the port. XXX
+
 What follows is a propsoal for a set of "for-each" iterators that call a
 callback for every atom, link, or subhypergraph of some given simple
 form. The callback paradigm provides many powerful benefits, but it also
