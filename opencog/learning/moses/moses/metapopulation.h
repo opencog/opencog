@@ -79,6 +79,7 @@ struct metapop_parameters
         diversity_p_norm(2.0),    // Euclidean
         keep_bscore(false),
         complexity_temperature(_complexity_temperature),
+        cap_coef(50),
         ignore_ops(_ignore_ops),
         // enable_cache(_enable_cache),   // adaptive_cache
         cache_size(_cache_size),          // is disabled
@@ -128,6 +129,14 @@ struct metapop_parameters
     // Boltzmann temperature ...
     score_t complexity_temperature;
 
+    // The metapopulation size is capped according to the following
+    // formula:
+    //
+    // cap = cap_coef*(x+250)*(1+2*exp(-x/500))
+    //
+    // where x is the number of generations so far
+    double cap_coef;
+    
     // the set of operators to ignore
     operator_set ignore_ops;
 

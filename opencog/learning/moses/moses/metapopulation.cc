@@ -391,7 +391,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
     }
     
     unsigned old_size = size();
-    logger().debug("Resize the metapopulation (%u), removing worst candidates",
+    logger().debug("Resize the metapopulation (current size=%u), removing worst candidates",
                    old_size);
     resize_metapop();
 
@@ -654,19 +654,19 @@ void metapopulation::resize_metapop()
     }
 
     // Is the population still too large?  Yes, it is, if it is more
-    // than 50 times the size of the current number of generations.
-    // Realisitically, we could never explore more than 2% of a pool
-    // that size.  For 10Bytes per table row, 20K rows, generation=500
-    // this will still eat up tens of GBytes of RAM, and so is a
-    // relatively lenient cap.
-    // popsize cap =  50*(x+250)*(1+2*exp(-x/500))
+    // than cap as defined by the function of the number of
+    // generations defined below
+    //
+    // popsize cap =  params.cap_coef*(x+250)*(1+2*exp(-x/500))
+    //
+    // when x is the number of generations so far.
     //
     // XXX TODO fix the cap so its more sensitive to the size of
     // each exemplar, right!?
     // size_t nbelts = get_bscore(*begin()).size();
     // double cap = 1.0e6 / double(nbelts);
     _merge_count++;
-    double cap = 50.0;
+    double cap = params.cap_coef;
     cap *= _merge_count + 250.0;
     cap *= 1 + 2.0*exp(- double(_merge_count) / 500.0);
     size_t popsz_cap = cap;

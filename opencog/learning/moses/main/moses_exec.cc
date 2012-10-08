@@ -443,6 +443,7 @@ int moses_exec(int argc, char** argv)
     score_t diversity_p_norm;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
+    double cap_coef;
     unsigned cache_size;
     bool linear_regression;
 
@@ -669,8 +670,14 @@ int moses_exec(int argc, char** argv)
          "solutions, adversely lengthening solution times.  "
          "Suggest setting this to a value that is 1x to 2x larger than "
          "the ratio of change in complexity to score improvement (as "
-         "determined by earlier runs). \n")
+         "determined by earlier runs).\n")
 
+        ("cap-coef", value<double>(&cap_coef)->default_value(50.0),
+         "Set the leading coefficient of the formula defining the "
+         "metapop size cap = cap_coef*(x+250)*(1+2*exp(-x/500)), "
+         "where x is the number of generations so far. The default usually works "
+         "well but if you run out of memory you may decrease that value.\n")
+        
         // Large problem parameters
 
         ("hc-max-nn-evals",
@@ -709,7 +716,9 @@ int moses_exec(int argc, char** argv)
         
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
-         "Effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.\n")
+         "Effort allocated for reduction during knob building, 0-3, "
+         "0 means minimum effort, 3 means maximum effort. The bigger "
+         "the effort the lower the dimension of the deme.\n")
 
         (opt_desc_str(max_dist_opt).c_str(),
          value<size_t>(&max_dist)->default_value(4),
@@ -730,7 +739,8 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_gens_opt).c_str(),
          value<int>(&max_gens)->default_value(-1),
-         "Maximum number of demes to generate and optimize, negative means no generation limit.\n")
+         "Maximum number of demes to generate and optimize, "
+         "negative means no generation limit.\n")
 
         (opt_desc_str(include_dominated_opt).c_str(),
          value<bool>(&include_dominated)->default_value(true),
@@ -898,7 +908,8 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_candidates_opt).c_str(),
          value<int>(&max_candidates)->default_value(-1),
-         "Maximum number of considered candidates to be added to the metapopulation after optimizing deme.\n")
+         "Maximum number of considered candidates to be added to the "
+         "metapopulation after optimizing deme.\n")
 
 #ifdef HAVE_MPI
         ("mpi",
@@ -1233,6 +1244,7 @@ int moses_exec(int argc, char** argv)
     meta_params.diversity_exponent = diversity_exponent;
     meta_params.keep_bscore = output_bscore;
     meta_params.complexity_temperature = complexity_temperature;
+    meta_params.cap_coef = cap_coef;
     meta_params.ignore_ops = ignore_ops;
     // meta_params.enable_cache = enable_cache;   // adaptive_cache
     meta_params.cache_size = cache_size;          // is disabled
