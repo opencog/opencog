@@ -56,6 +56,6 @@ def uci_adult():
 
     return dataset
 
-# comment from ramin!
-
-# comment from K
+if __name__ == '__main__':
+    for var in uci_adult():
+        print var

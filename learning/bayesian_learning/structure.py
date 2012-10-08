@@ -1,5 +1,6 @@
 from learning.bayesian_learning.network import *
 from random import randrange, random as rand
+from sample_data.uci_adult_dataset.main import uci_adult
 from util.evolutionary import *
 from dynamics import *
 from util.generic import dim
@@ -118,8 +119,7 @@ class NetworkChromosomeRepresentation(IndividualSetBase):
 if __name__ == '__main__':
     from util.evolutionary import GeneticAlgorithm
 
-
-    population = BayesNetPopulation(TEST_VARIABLES, 10)
+    population = BayesNetPopulation(uci_adult() , 10)
 
 
     ga = GeneticAlgorithm(population=population)
