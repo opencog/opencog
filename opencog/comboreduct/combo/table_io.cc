@@ -280,14 +280,15 @@ istream& istreamRawITable(istream& in, ITable& tab)
     std::vector<string> lines;
 
     // Read first few by hand.
+    // The first might be labels, so we must get the second line.
     dorepeat(2) {
         get_data_line(in, line);
         lines.push_back(line);
     }
 
     // If it is a sparse file, we are outta here.
-    // throw an std::exception, since we don't to log this as an error
-    // (all the other exception types log to the log file).
+    // Throw an std::exception, since we don't want to log this as an
+    // error (all the other exception types log to the log file).
     if (string::npos != line.find (sparse_delim)) {
         in.seekg(beg);
         throw std::exception();
@@ -338,6 +339,9 @@ istream& istreamRawITable(istream& in, ITable& tab)
 }
 
 // like above but ignore indices
+// XXX The code below is very nearly a cut-n-pste of above; lets not
+// do that, and instead simply provide a default argument for ignored indexes!
+// cut-n-paste == badness
 istream& istreamRawITable_ingore_indices(istream& in, ITable& tab,
                                          const vector<unsigned>& ignored_indices)
     throw(std::exception, AssertionException)
@@ -349,14 +353,15 @@ istream& istreamRawITable_ingore_indices(istream& in, ITable& tab,
     std::vector<string> lines;
 
     // Read first few by hand.
+    // The first might be labels, so we must get the second line.
     dorepeat(2) {
         get_data_line(in, line);
         lines.push_back(line);
     }
 
     // If it is a sparse file, we are outta here.
-    // throw an std::exception, since we don't to log this as an error
-    // (all the other exception types log to the log file).
+    // Throw an std::exception, since we don't want to log this as an
+    // error (all the other exception types log to the log file).
     if (string::npos != line.find (sparse_delim)) {
         in.seekg(beg);
         throw std::exception();
@@ -408,7 +413,8 @@ istream& istreamRawITable_ingore_indices(istream& in, ITable& tab,
     return in;
 }
 
-vector<string> get_header(const string& file_name) {
+vector<string> get_header(const string& file_name)
+{
     ifstream in(file_name.c_str());
     string line;
     get_data_line(in, line);
