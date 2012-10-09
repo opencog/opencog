@@ -3636,3 +3636,15 @@ deme  gens   knobs   knobs   knobs   score   cpxy  memusage    time    time
 ----  ----   -----   -----   -----   -----   ----  --------    -----   ----
   1   190   948360  948360     0     -1497   176   6->8->7 GB  9981    320
   2        3725760 3386980  338780                 14->16             2114
+
+
+Using the old contin_to_raw_idx(), it takes 3.689 seconds per knob,
+(for 186325 contin knobs, and 2167671 disc knobs)
+
+Using the new contin_to_raw_idx() code in bzr rev 7642, it takes... 
+(ran out of memory)
+
+==============================================================
+Bag of words, feature selection
+
+feature-selection -i ./reuters-test-10.data -C1000 -o reduced.csv -u1

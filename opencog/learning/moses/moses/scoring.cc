@@ -192,7 +192,7 @@ void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 discriminator::discriminator(const CTable& ct)
     : _ctable(ct)
 {
-    _output_type = get_type_node(get_signature_output(ct.tt));
+    _output_type = get_type_node(get_signature_output(ct.get_signature()));
     if (_output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output. 
@@ -702,7 +702,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
       precision_full_bscore(true)
 {
-    output_type = get_type_node(get_signature_output(wrk_ctable.tt));
+    output_type = get_type_node(get_signature_output(wrk_ctable.get_signature()));
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score
@@ -982,13 +982,14 @@ score_t precision_bscore::min_improv() const
     return 1.0 / ctable_usize;
 }
 
-void precision_bscore::ignore_idxs(std::set<arity_t>& idxs) const {
-    // get permitted idxs
+void precision_bscore::ignore_idxs(std::set<arity_t>& idxs) const
+{
+    // Get permitted idxs.
     auto irng = boost::irange(0, orig_ctable.get_arity());
     std::set<arity_t> all_idxs(irng.begin(), irng.end());
     std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
 
-    // filter orig_table with permitted idxs
+    // Filter orig_table with permitted idxs.
     wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
 }
 

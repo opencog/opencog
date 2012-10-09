@@ -83,56 +83,62 @@ public:
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
 
-    CTable(const std::string& _olabel, const string_seq& _ilabels)
-        : olabel(_olabel), ilabels(_ilabels) {}
+    CTable(const string_seq& labs, const type_tree& tt)
+        : tsig(tt), olabel(labs[0]), ilabels(labs)
+    {
+        ilabels.erase(ilabels.begin());
+    }
+
+    CTable(const std::string& _olabel, const string_seq& _ilabels,
+           const type_tree& tt)
+        : tsig(tt), olabel(_olabel), ilabels(_ilabels)
+    {}
 
     arity_t get_arity() const { return ilabels.size(); }
 
-    // Return the total number of observations (should be equal to the
-    // size of the corresponding uncompressed table)
-    unsigned uncompressed_size() const {
-        unsigned res = 0;
-        for (const value_type& v : *this) {
-            res += v.second.total_count();
-        }
-        return res;
-    }
+    /// Return the total number of observations (should be equal to the
+    /// size of the corresponding uncompressed table)
+    unsigned uncompressed_size() const;
 
     template<typename F>
-    CTable filtered(const F& filter) const {
+    CTable filtered(const F& filter) const
+    {
         typedef type_tree::iterator pre_it;
         typedef type_tree::sibling_iterator sib_it;
 
-        // Filter the labels
-        CTable res(olabel, seq_filtered(ilabels, filter));
-
-        // Filter the rows
-        for (const CTable::value_type v : *this)
-            res[seq_filtered(v.first, filter)] += v.second;
-
-        // Filter the type tree
+        // Filter the type signature tree
         // copy head
-        pre_it head_src = tt.begin();
+        type_tree fsig;
+        pre_it head_src = tsig.begin();
         OC_ASSERT(*head_src == id::lambda_type);
-        OC_ASSERT((int)tt.number_of_children(head_src) == get_arity() + 1);
-        pre_it head_dst = res.tt.set_head(*head_src);
+        OC_ASSERT((int)tsig.number_of_children(head_src) == get_arity() + 1);
+        pre_it head_dst = fsig.set_head(*head_src);
         // copy filtered input types
         sib_it sib_src = head_src.begin();
         arity_t a_pre = 0;
         for (arity_t a : filter) {
             std::advance(sib_src, a - a_pre);
             a_pre = a;
-            res.tt.replace(res.tt.append_child(head_dst), sib_src);
+            fsig.replace(fsig.append_child(head_dst), sib_src);
         }
+
         // copy output type
-        res.tt.replace(res.tt.append_child(head_dst), head_src.last_child());
+        fsig.replace(fsig.append_child(head_dst), head_src.last_child());
+
+        // Filter the labels
+        CTable res(olabel, seq_filtered(ilabels, filter), fsig);
+
+        // Filter the rows
+        for (const CTable::value_type v : *this)
+            res[seq_filtered(v.first, filter)] += v.second;
 
         // return the filtered CTable
         return res;
     }
 
     template<typename F, typename Seq>
-    Seq filtered_preverse_idxs(const F& filter, const Seq& seq) const {
+    Seq filtered_preverse_idxs(const F& filter, const Seq& seq) const
+    {
         Seq res;
         auto it = filter.cbegin();
         for (unsigned i = 0; i < seq.size(); ++i) {
@@ -151,12 +157,13 @@ public:
      * id::null_vertex.
      */
     template<typename F>
-    CTable filtered_preverse_idxs(const F& filter) const {
+    CTable filtered_preverse_idxs(const F& filter) const
+    {
         typedef type_tree::iterator pre_it;
         typedef type_tree::sibling_iterator sib_it;
 
         // Set new CTable
-        CTable res(olabel, ilabels);
+        CTable res(olabel, ilabels, tsig);
 
         // Filter the rows (replace filtered out values by id::null_vertex)
         for (const CTable::value_type v : *this)
@@ -168,12 +175,13 @@ public:
 
     // return the output label + list of input labels
     string_seq get_labels() const;
+    const string_seq& get_input_labels() const {return ilabels;}
+    const type_tree& get_signature() const {return tsig;}
 
-// protected:
-    type_tree tt;
+protected:
+    type_tree tsig;                   // table signature
     std::string olabel;               // output label
     string_seq ilabels;               // list of input labels
-
 };
 
 

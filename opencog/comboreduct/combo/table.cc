@@ -393,27 +393,36 @@ vector<string> Table::get_labels() const
     return labels;
 }
 
+// -------------------------------------------------------
+
 CTable Table::compressed() const
 {
     // Logger
     logger().debug("Compress the dataset, current size is %d", itable.size());
     // ~Logger
 
-    CTable res(otable.get_label(), itable.get_labels());
-    // assign type_tree
-    res.tt = tt;
+    CTable res(otable.get_label(), itable.get_labels(), tt);
 
     ITable::const_iterator in_it = itable.begin();
     OTable::const_iterator out_it = otable.begin();
     for(; in_it != itable.end(); ++in_it, ++out_it)
         ++res[*in_it][*out_it];
 
-    // Logger
     logger().debug("Size of the compressed dataset is %d", res.size());
-    // ~Logger
 
     return res;
 }
+
+unsigned CTable::uncompressed_size() const
+{
+    unsigned res = 0;
+    for (const value_type& v : *this) {
+        res += v.second.total_count();
+    }
+    return res;
+}
+
+// -------------------------------------------------------
 
 std::istream& istreamRawITable_ingore_indices(std::istream& in, ITable& tab,
                                               const std::vector<unsigned>& ignored_indices)

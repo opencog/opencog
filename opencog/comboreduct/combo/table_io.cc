@@ -790,8 +790,7 @@ void saveTable(const string& file_name, const Table& table)
 
 ostream& ostreamCTableHeader(ostream& out, const CTable& ct)
 {
-    out << ct.olabel << ",";
-    return ostreamlnContainer(out, ct.ilabels, ",");
+    return ostreamlnContainer(out, ct.get_labels(), ",");
 }
 
 ostream& ostreamCTable(ostream& out, const CTable& ct)

@@ -88,7 +88,8 @@ string opt_desc_str(const pair<string, string>& opt) {
  */
 void unsupported_type_exit(const type_tree& tt)
 {
-    std::cerr << "error: type " << tt << "currently not supported" << std::endl;
+    logger().error() << "Type " << tt << "currently not supported.";
+    std::cerr << "Error: type " << tt << "currently not supported." << endl;
     exit(1);
 }
 
@@ -372,7 +373,8 @@ int main(int argc, char** argv)
     type_node inferred_type = get_type_node(output_tt);
 
     // Go and do it.
-    if(inferred_type == id::boolean_type) {
+    if ((inferred_type == id::boolean_type) or
+        (inferred_type == id::enum_type)) {
         feature_selection(table, fs_params);
     } else {
         unsupported_type_exit(inferred_type);

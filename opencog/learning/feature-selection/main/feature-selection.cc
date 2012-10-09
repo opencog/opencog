@@ -203,7 +203,7 @@ feature_set smd_select_features(const CTable& ctable,
 {
     auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end()),
-        init_features = initial_features(ctable.ilabels, fs_params);
+        init_features = initial_features(ctable.get_input_labels(), fs_params);
     if (fs_params.target_size > 0) {
         fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
         return stochastic_max_dependency_selection(all_features, init_features,

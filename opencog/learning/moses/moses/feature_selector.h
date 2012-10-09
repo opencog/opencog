@@ -32,13 +32,18 @@ namespace opencog {
  * Struct in charge of selecting features maximize the amount of
  * information in combination with a candidate.
  */
-struct feature_selector {
+struct feature_selector
+{
     typedef std::set<combo::arity_t> feature_set;
+
     feature_selector(const combo::CTable& _ctable,
                      feature_selection_parameters _fs_params)
-        : ctable(_ctable), fs_params(_fs_params) {}
-    feature_set operator()(const combo::combo_tree& tr) const {
-        combo::CTable act_ctable(ctable.olabel, ctable.ilabels);
+        : ctable(_ctable), fs_params(_fs_params)
+    {}
+
+    feature_set operator()(const combo::combo_tree& tr) const
+    {
+        combo::CTable act_ctable(ctable.get_labels(), ctable.get_signature());
         // select active rows
         for (const combo::CTable::value_type& vct : ctable)
             if (eval_binding(vct.first, tr) == combo::id::logical_true)
@@ -47,6 +52,7 @@ struct feature_selector {
         return select_features(act_ctable, fs_params);
         // return feature_set();
     }
+
     const combo::CTable& ctable;
     feature_selection_parameters fs_params;
 };
