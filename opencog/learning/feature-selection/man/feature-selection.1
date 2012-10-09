@@ -45,6 +45,10 @@ feature-selection \- dimensional reduction of datasets
 .IR random_seed ]
 .RB [ \-u
 .IR target_feature ]
+.RB [ \-Y
+.IR ignore_feature ]
+.RB [ \-e
+.IR force_feature ]
 .RB [ \-j
 .IR jobs ]
 .RB [ \-F
@@ -204,6 +208,15 @@ specified, then the first column is used.  The very first row of the
 input file, if it contains non-numeric, non-boolean values, is
 interpreted as column labels, as is the common practice for
 CSV/DSV file formats.
+.TP
+.BI \-Y\  label \fR,\ \fB\-\-ignore\-feature= label
+Never select the feature \fIlabel\fR.  This feature will be ignored
+during all calculations, and thus is useful if the column contains
+an unsupported data type.  This option may be used multiple times.
+.TP
+.BI \-e\  label \fR,\ \fB\-\-force\-feature= label
+Always select the feature \fIlabel\fR.  This option may be used
+multiple times.
 .PP
 .\" ============================================================
 .SS "Algorithm control options"
@@ -270,15 +283,18 @@ T}
 
 \fBhc\fR@T{
 MOSES Hillclimbing.
+
+Not currently supported.
 T}
 .TE
 .TP
 .BI \-C\  num_features \fR,\ \fB\-\-target\-size= num_features
-Attempt to select at most \fInum_features\fR out of the input set.
+Attempt to select at least \fInum_features\fR out of the input set.
 
 This option is ignored unless the chosen algorithm is \fBsmd\fP or
-\fBinc\fP.  When the selected algorithm is \fBinc\fP, then the 
-\fB\-T\fP option is ignored.
+\fBinc\fP.  When the selected algorithm is \fBinc\fP, then this
+over-rides the \fB\-T\fP option setting (effectively, the 
+\fB\-T\fP option is ignored).
 
 .TP
 .BI \-T\  threshold \fR,\ \fB\-\-threshold= threshold
@@ -302,7 +318,7 @@ chosen randomly.
 These options only apply to the \fB\-ainc\fP algorithm.
 
 .TP
-.BI \-D\  fraction \fR,\ \fB\-\-int\-redundant\-intensity= fraction
+.BI \-D\  fraction \fR,\ \fB\-\-inc\-redundant\-intensity= fraction
 Threshold fraction used to reject redundant features. If a feature
 contributes less than \fIfraction\fP * \fIthreshold\fP to the total
 score, it will be rejected from the final feature set.  That is, if
@@ -335,6 +351,8 @@ features, and k==number of interaction terms.
 Document the MOSES-algorithm and the options that it takes: -A -c -f -m
 -O -s.  These are not documented because the hill-climbing algo is
 currently not supported.
+.PP
+Document -H scorer  -f initial feat 
 
 .SH SEE ALSO
 .br

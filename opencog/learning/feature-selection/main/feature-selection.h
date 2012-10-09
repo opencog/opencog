@@ -60,7 +60,6 @@ struct feature_selection_parameters
 {
     std::string algorithm;
     std::string scorer;
-    unsigned int max_evals;
     std::string input_file;
     std::string target_feature_str;
     std::vector<std::string> ignore_features_str;
@@ -70,17 +69,26 @@ struct feature_selection_parameters
     unsigned target_size;
     double threshold;
     unsigned jobs;
+
+    // incremental selection paramters
     double inc_target_size_epsilon;
     double inc_red_intensity;
     unsigned inc_interaction_terms;
+
+    // hill-climbing parameters
+    unsigned int hc_max_evals;
     double hc_max_score;
     double hc_confi; //  confidence intensity
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
+
+    // precision scorer parameters
     float pre_penalty;
     float pre_min_activation;
     float pre_max_activation;
     bool pre_positive;
+
+    // something mutual dohh parameters
     unsigned smd_top_size;
 };
 
@@ -98,7 +106,7 @@ feature_set optimize_deme_select_features(const field_set& fields,
 {
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
-    unsigned evals = optimize(deme, init_inst, scorer, fs_params.max_evals, &ae);
+    unsigned evals = optimize(deme, init_inst, scorer, fs_params.hc_max_evals, &ae);
 
     // get the best one
     boost::sort(deme, std::greater<scored_instance<composite_score> >());

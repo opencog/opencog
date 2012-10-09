@@ -57,7 +57,6 @@ static const pair<string, string> target_feature_opt("target-feature", "u");
 static const pair<string, string> ignore_feature_opt("ignore-feature", "Y");
 static const pair<string, string> force_feature_opt("force-feature", "e");
 static const pair<string, string> initial_feature_opt("initial-feature", "f");
-static const pair<string, string> max_evals_opt("max-evals", "m");
 static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> log_level_opt("log-level", "l");
 static const pair<string, string> log_file_opt("log-file", "F");
@@ -65,9 +64,14 @@ static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
 static const pair<string, string> target_size_opt("target-size", "C");
 static const pair<string, string> threshold_opt("threshold", "T");
 static const pair<string, string> jobs_opt("jobs", "j");
+
+// incremental selection flags
 static const pair<string, string> inc_target_size_epsilon_opt("inc-target-size-epsilon", "E");
 static const pair<string, string> inc_redundant_intensity_opt("inc-redundant-intensity", "D");
 static const pair<string, string> inc_interaction_terms_opt("inc-interaction-terms", "U");
+
+// hill-climbing flags
+static const pair<string, string> hc_max_evals_opt("max-evals", "m");
 static const pair<string, string> hc_max_score_opt("max-score", "A");
 static const pair<string, string> hc_confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
@@ -207,7 +211,8 @@ int main(int argc, char** argv)
          "of a feature is considered to be significantly correlated "
          "to the target.  A value of zero means that all features "
          "will be selected. \n"
-         "For the -ainc algo only, the -C flag over-rides this setting.\n")
+         "The -C flag over-rides this setting when used with the "
+         "-ainc algorithm.\n")
 
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
@@ -248,8 +253,8 @@ int main(int argc, char** argv)
          "fewer samples in the data set, the more features the "
          "less confidence in the feature set quality measure.\n")
 
-        (opt_desc_str(max_evals_opt).c_str(),
-         value<unsigned>(&fs_params.max_evals)->default_value(10000),
+        (opt_desc_str(hc_max_evals_opt).c_str(),
+         value<unsigned>(&fs_params.hc_max_evals)->default_value(10000),
          "Hillclimbing parameter.  Maximum number of fitness function "
          "evaluations.\n")
 

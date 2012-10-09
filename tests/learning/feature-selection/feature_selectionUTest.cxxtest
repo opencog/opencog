@@ -177,10 +177,10 @@ private:
         feature_selection_parameters fsp;
         fsp.algorithm = moses::hc;
         fsp.scorer = mi;
-        fsp.max_evals = 10000;
         fsp.input_file = FEATURE_SELECTION_TEST_DIR"small-dataset.csv";
         fsp.jobs = n_jobs;
         setting_omp(n_jobs);
+        fsp.hc_max_evals = 10000;
         fsp.hc_confi = 1;
         fsp.hc_cache_size = 100000;
         fsp.hc_max_score = 1;

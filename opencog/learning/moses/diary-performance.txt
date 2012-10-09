@@ -3647,4 +3647,17 @@ Using the new contin_to_raw_idx() code in bzr rev 7642, it takes...
 ==============================================================
 Bag of words, feature selection
 
-feature-selection -i ./reuters-test-10.data -C1000 -o reduced.csv -u1
+feature-selection -i ./reuters-test-10.data -C1000 -o reut-reduced.csv -u1 -j10 -F reut-feat.log
+
+Yow, feature selection took over an hour to run.
+
+ num     elapsed
+feats     time (secs)
+-----    -------
+   3       0.1
+  14       0.2
+  63       3.2
+ 166      18.2
+ 428     128
+ 988     658
+2231    3480
