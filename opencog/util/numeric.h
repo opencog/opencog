@@ -320,7 +320,8 @@ template<typename It> double entropy(It from, It to)
 
 // helper
 template<typename C>
-double entropy(const C& c) {
+double entropy(const C& c)
+{
     return entropy(c.begin(), c.end());
 }
 

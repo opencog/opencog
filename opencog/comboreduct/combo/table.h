@@ -1,8 +1,10 @@
 /** table.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2012 Poulin Holdings LLC
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
+ * Additions and tweaks, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -177,6 +179,7 @@ public:
     string_seq get_labels() const;
     const string_seq& get_input_labels() const {return ilabels;}
     const type_tree& get_signature() const {return tsig;}
+    type_node get_output_type() const;
 
 protected:
     type_tree tsig;                   // table signature
@@ -351,7 +354,7 @@ public:
 
 protected:
     std::string label; // output label
-    type_node type;
+    type_node type;    // the type of the column data.
 };
 
 /**
@@ -383,7 +386,7 @@ struct Table
 
     // return a string with the io labels, the output label comes first
     string_seq get_labels() const;
-    
+
     const std::string& get_target() const { return otable.get_label(); }
 
     // Filter according to a container of arity_t. Each value of that
@@ -411,7 +414,7 @@ struct Table
             res.target_pos = distance(f.begin(), ++it);
         } else
             res.target_pos = target_pos;
-            
+
         return res;
     }
 
@@ -435,7 +438,8 @@ struct Table
 };
 
 template<typename Func>
-CTable::CTable(const Func& func, arity_t arity, int nsamples) {
+CTable::CTable(const Func& func, arity_t arity, int nsamples)
+{
     Table table(func, arity, nsamples);
     *this = table.compressed();
 }
@@ -455,7 +459,7 @@ double OTEntropy(const OTable& ot);
  * Compute the mutual information between a set of independent features
  * X_1, ... X_n and a taget feature Y.
  *
- * The target (output) featuer Y is provided in the output table OTable,
+ * The target (output) feature Y is provided in the output table OTable,
  * whereas the input features are specified as a set of indexes giving
  * columns in the input table ITable.
  *
@@ -470,21 +474,30 @@ double OTEntropy(const OTable& ot);
  * where
  *   H(...) are the joint entropies.
  *
- * @note only works for discrete data set.
+ * @note currently, only works for boolean output columns.
+ * to add enum support, cut-n-paste from CTable code below.
  */
 template<typename FeatureSet>
 double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& fs)
 {
-    // The following mapping is used to keep track of the number
-    // of inputs a given setting. For instance, X1=false, X2=true,
-    // X3=true is one possible setting. It is then used to compute
+    // XXX TODO to implement enum support, cut-n-paste from CTable
+    // mutual info code, below.
+    type_node otype = ot.get_type();
+    OC_ASSERT(id::boolean_type == otype, "Only boolean types supported");
+
+    // Let X1, ..., Xn be the input columns on the table, and
+    // Y be the output column.  We need to compute the joint entropies
     // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
+    // To do this, we need to count how often the vertex sequence
+    // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
+    // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
+    // occurs.
     typedef Counter<vertex_seq, unsigned> VSCounter;
     VSCounter ic, // for H(X1, ..., Xn)
         ioc; // for H(Y, X1, ..., Xn)
     ITable::const_iterator i_it = it.begin();
     OTable::const_iterator o_it = ot.begin();
-    for(; i_it != it.end(); ++i_it, ++o_it) {
+    for (; i_it != it.end(); ++i_it, ++o_it) {
         vertex_seq ic_vec;
         for (const typename FeatureSet::value_type& idx : fs)
             ic_vec.push_back((*i_it)[idx]);
@@ -514,54 +527,125 @@ double mutualInformation(const Table& table, const FeatureSet& fs)
 }
 
 /**
- * Like above but uses a compressed table instead of input and output
- * table. It assumes the output is boolean. The CTable cannot be
- * passed as const because the use of the operator[] may modify it's
- * content (by adding default value on missing keys).
+ * Like above, but uses a compressed table instead of input and output
+ * table.  Currently supports only boolean and enum outputs.  For contin
+ * outputs, consider using KL instead (although, to be technically
+ * correct, we really should use Fisher information. @todo this).
+ *
+ * The CTable cannot be passed as const because the use of the operator[]
+ * may modify it's content (by adding default values for missing keys).
  */
 template<typename FeatureSet>
 double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 {
-    // the following mapping is used to keep track of the number
-    // of inputs a given setting. For instance X1=false, X2=true,
-    // X3=true is one possible setting. It is then used to compute
+    // Let X1, ..., Xn be the input columns on the table, and
+    // Y be the output column.  We need to compute the joint entropies
     // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
+    // To do this, we need to count how often the vertex sequence
+    // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
+    // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
+    // occurs.
     typedef Counter<vertex_seq, unsigned> VSCounter;
-    VSCounter ic, // for H(X1, ..., Xn)
-        ioc; // for H(Y, X1, ..., Xn)
-    unsigned oc = 0; // for H(Y)
-    double total = 0;
-    for (const auto& row : ctable) {
-        unsigned falses = row.second.get(id::logical_false);
-        unsigned trues = row.second.get(id::logical_true);
-        unsigned row_total = falses + trues;
-        // update ic
-        vertex_seq vec;
-        for (unsigned idx : fs)
-            vec.push_back(row.first[idx]);
-        ic[vec] += row_total;
-        // update ioc
-        if (falses > 0) {
-            vec.push_back(id::logical_false);
-            ioc[vec] += falses;
-            vec.pop_back();
+    VSCounter ic;  // for H(X1, ..., Xn)
+    VSCounter ioc; // for H(Y, X1, ..., Xn)
+    double total = 0.0;
+    double yentropy = 0.0;   // for H(Y)
+
+    type_node otype = ctable.get_output_type();
+    if (id::boolean_type == otype)
+    {
+        unsigned oc = 0; // for H(Y)
+
+        for (const auto& row : ctable)
+        {
+            // Create the filtered row.
+            vertex_seq vec;
+            for (unsigned idx : fs)
+                vec.push_back(row.first[idx]);
+
+            unsigned falses = row.second.get(id::logical_false);
+            // update ioc (input-output counter)
+            if (falses > 0) {
+                vec.push_back(id::logical_false);
+                ioc[vec] += falses;
+                vec.pop_back();
+            }
+
+            unsigned trues = row.second.get(id::logical_true);
+            if (trues > 0) {
+                vec.push_back(id::logical_true);
+                ioc[vec] += trues;
+                vec.pop_back();
+            }
+
+            // update oc (output counter)
+            oc += trues;
+
+            // update ic (input counter)
+            unsigned row_total = falses + trues;
+            ic[vec] += row_total;
+
+            // update total
+            total += row_total;
         }
-        if (trues > 0) {
-            vec.push_back(id::logical_true);
-            ioc[vec] += trues;
-        }
-        // update oc
-        oc += trues;
-        // update total
-        total += row_total;
+
+        // Compute H(Y)
+        yentropy =  binaryEntropy(oc/total);
     }
-    // Compute the probability distributions
+    else if (id::enum_type == otype)
+    {
+        // Count the total number of times an enum appears in the table
+        Counter<enum_t, unsigned> ycount;
+
+        // Same as above, but for enums.
+        for (const auto& row : ctable)
+        {
+            // Create the filtered row.
+            vertex_seq vec;
+            for (unsigned idx : fs)
+                vec.push_back(row.first[idx]);
+
+            // update ic (input counter)
+            unsigned row_total = row.second.total_count();
+            ic[vec] += row_total;
+
+            // for each enum type counted in the row,
+            for (const auto& val_pair : row.second) {
+                const vertex& v = val_pair.first; // key of map
+                const enum_t& renum = get_enum_type(v); // typecast
+
+                unsigned enum_count = row.second.get(renum);
+                ycount[renum] += enum_count;
+
+                // update ioc == "input output counter"
+                vec.push_back(renum);
+                ioc[vec] += enum_count;
+                vec.pop_back();
+            }
+
+            // update total numer of data points
+            total += row_total;
+        }
+
+        std::vector<double> yprob(ycount.size());
+        auto div_total = [&](unsigned c) { return c/total; };
+        transform(ycount | map_values, yprob.begin(), div_total);
+        yentropy =  entropy(yprob);
+    }
+    else
+    {
+        OC_ASSERT(0, "Unsupported type for mutual information");
+    }
+
+    // Compute the probability distributions; viz divide count by total.
+    // "c" == count, "p" == probability
     std::vector<double> ip(ic.size()), iop(ioc.size());
     auto div_total = [&](unsigned c) { return c/total; };
     transform(ic | map_values, ip.begin(), div_total);
     transform(ioc | map_values, iop.begin(), div_total);
+
     // Compute the entropies
-    return entropy(ip) + binaryEntropy(oc/total) - entropy(iop);
+    return entropy(ip) + yentropy - entropy(iop);
 }
 
 /**

@@ -2,6 +2,7 @@
  * opencog/comboreduct/combo/enum_type.h
  *
  * Copyright (C) 2002-2008, 2012 Novamente LLC
+ * Copyright (C) 2012 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Nil Geisweiller, Linas Vepstas
@@ -91,6 +92,8 @@ public:
 
     /// Return some random enum out of the pool of all of them.
     static enum_t get_random_enum();
+
+    /// Return the total number of enum types that have been issued.
     static size_t size();
 
     /// Return an enum that is gaurenteed to be not equal to any other.

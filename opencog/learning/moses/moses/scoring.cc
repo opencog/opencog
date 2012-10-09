@@ -192,7 +192,7 @@ void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 discriminator::discriminator(const CTable& ct)
     : _ctable(ct)
 {
-    _output_type = get_type_node(get_signature_output(ct.get_signature()));
+    _output_type = ct.get_output_type();
     if (_output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output. 
@@ -702,7 +702,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
       precision_full_bscore(true)
 {
-    output_type = get_type_node(get_signature_output(wrk_ctable.get_signature()));
+    output_type = wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score

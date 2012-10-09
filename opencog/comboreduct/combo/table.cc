@@ -413,15 +413,6 @@ CTable Table::compressed() const
     return res;
 }
 
-unsigned CTable::uncompressed_size() const
-{
-    unsigned res = 0;
-    for (const value_type& v : *this) {
-        res += v.second.total_count();
-    }
-    return res;
-}
-
 // -------------------------------------------------------
 
 std::istream& istreamRawITable_ingore_indices(std::istream& in, ITable& tab,
@@ -541,6 +532,20 @@ vector<string> CTable::get_labels() const
     vector<string> labels = ilabels;
     labels.insert(labels.begin(), olabel);
     return labels;
+}
+
+unsigned CTable::uncompressed_size() const
+{
+    unsigned res = 0;
+    for (const value_type& v : *this) {
+        res += v.second.total_count();
+    }
+    return res;
+}
+
+type_node CTable::get_output_type() const
+{
+    return get_type_node(get_signature_output(tsig));
 }
 
 // -------------------------------------------------------
