@@ -95,10 +95,14 @@ cp -fr "$OC_PATH/doc/comboreduct" "$ABS_MOSES_DIR/doc"
 # moses doc
 cp -fr "$OC_PATH/doc/moses" "$ABS_MOSES_DIR/doc"
 
-# moses scripts
-cp -fr "$OC_PATH/scripts/learning/moses" "$ABS_MOSES_DIR/scripts"
-# remove extract_moses which wouldn't work anyway
-rm -fr "$ABS_MOSES_DIR/scripts/extract_moses"
+# moses scripts (except extract_moses)
+cd "$OC_PATH/scripts/learning/moses"
+mkdir "$ABS_MOSES_DIR/scripts"
+for f in *; do
+    if [[ "$f" != extract_moses ]]; then
+        cp -fr "$f" "$ABS_MOSES_DIR/scripts"
+    fi
+done
 
 # misc hacks -- remove some large files.
 rm -f "$ABS_MOSES_DIR"/moses3/learning/moses/example-data/wine*
