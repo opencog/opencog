@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH FEATURE-SELECTION 1 "June 11, 2012" "3.1.8" "OpenCog Learning"
+.TH FEATURE-SELECTION 1 "October 9, 2012" "3.2.8" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -75,11 +75,11 @@ but it can be used in more general settings.
 .\" ============================================================
 .SH EXAMPLES
 .TP
-.BI feature-selection\ \-i raw_data.csv \ \-ammi\ \-C 10 \ \-o reduced.csv \ \-F fs.log
+.BI feature-selection\ \-i raw_data.csv \ \-asmd\ \-C 10 \ \-o reduced.csv \ \-F fs.log
 
 Use the input file \fIraw_data.csv\fP as the input dataset.  The input
 file must be a tab-separated or comma-separated table of values.  The 
-dependent feature is assumed to be in the first column.  The \fBmmi\fP
+dependent feature is assumed to be in the first column.  The \fBsmd\fP
 algorithm will be used to select 10 different features that are the most
 strongly correlated with the dependent feature.  The output will be
 written to the file \fIreduced.csv\fP, consisting of the dependent
@@ -88,7 +88,7 @@ columns.  A logfile of algorithm progress will be written to
 \fIfs.log\fP.
 
 .TP
-.BI feature-selection\ \-i raw_data.csv \ \-ammi\ \-C 10 \ \-o reduced.csv \ \-u Q3
+.BI feature-selection\ \-i raw_data.csv \ \-asmd\ \-C 10 \ \-o reduced.csv \ \-u Q3
 
 As above, but use the column labelled \fIQ3\fP as the target feature.
 This assumes that the input dataset contains columns labels as the first
@@ -215,11 +215,14 @@ The most important of these, for controlling behavior, are the
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
 Select the algorithm to use for feature selection.
 Available algorithms include:
+.\" See man gtbl for a description of what can follow a .TS
+.\" The x format is a gnu extension, and needs a modern gtbl 
+.\" in order for it to work. RHEL4 does not have a modern gtbl :-(
 .TS
 tab (@);
 l lx.
-\fBmmi\fR@T{
-Maximal Mutual Information.
+\fBsmd\fR@T{
+Stochastic Maximal Dependency.
 
 This algorithm searches for the featureset with the highest mutual
 information (MI) with regard to the target variable.  It does so by
@@ -273,7 +276,7 @@ T}
 .BI \-C\  num_features \fR,\ \fB\-\-target\-size= num_features
 Attempt to select at most \fInum_features\fR out of the input set.
 
-This option is ignored unless the chosen algorithm is \fBmmi\fP or
+This option is ignored unless the chosen algorithm is \fBsmd\fP or
 \fBinc\fP.  When the selected algorithm is \fBinc\fP, then the 
 \fB\-T\fP option is ignored.
 
@@ -284,13 +287,13 @@ A positive value prevents low-scoring features from being
 selected; a value of zero or less will accept all features.
 
 This option is ignored unless the chosen algorithm is 
-\fBmmi\fP or \fBinc\fP.
+\fBsmd\fP or \fBinc\fP.
 
 .TP
 .BI \-r\  seed \fR,\ \fB\-\-random\-seed= seed
 Use \fIseed\fR as the seed value for the pseudo-random number generator.
 The various algorithms use the random number generator in different
-ways.  The \fPmmi\fP algorithm explicitly shuffles features, so that 
+ways.  The \fPsmd\fP algorithm explicitly shuffles features, so that 
 if the dataset contains multiple redundant features, one will be 
 chosen randomly.
 
