@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_NUMERIC_H
 #define _OPENCOG_NUMERIC_H
 
+#include <math.h>
 #include <stdint.h>
 #include <cmath>
 #include <ctime>
@@ -42,8 +43,9 @@
 
 #include "iostreamContainer.h"
 
-#define PI 3.141592653589793
-#define EXPONENTIAL 2.71828182845905
+// These and many other constants are in <math.h>
+#define PI          M_PI  // 3.1415926535897932384626433832795029L
+#define EXPONENTIAL M_E   // 2.7182818284590452353602874713526625L
 
 #ifdef WIN32
 #include <numeric>
@@ -73,13 +75,16 @@ const double PROB_EPSILON = 1e-127; // error when comparing 2 probabilities
 // absolute_value_order
 //   codes the following order, for T == int, -1,1,-2,2,-3,3,...
 template<typename T>
-struct absolute_value_order {
+struct absolute_value_order
+{
     bool operator()(T a,T b) const {
         return (a == -b) ? a < b : std::abs(a) < std::abs(b);
     }
 };
+
 template<typename T>
-struct absolute_value_equality {
+struct absolute_value_equality
+{
     bool operator()(T a,T b) const {
         return (a == b || a == -b);
     }
@@ -95,11 +100,14 @@ struct absolute_value_equality {
 // __builtin_popcount which is somewhat slower. Using a lookup table might
 // be somwhat faster under some circumstances, but was avoided because it
 // might hog the fast memory ...
-template<int> struct bits {
+template<int> struct bits
+{
     template<typename T>
     static inline unsigned int count(T v);
 };
-template<> struct bits<32> {
+
+template<> struct bits<32>
+{
     template<typename T>
     static inline unsigned int count(T v) {
         v = v - ((v >> 1) & 0x55555555);                       // reuse v as temp
@@ -124,7 +132,9 @@ template<> struct bits<32> {
         v = v | (upperbits << 1);
     }
 };
-template<> struct bits<64> {
+
+template<> struct bits<64>
+{
     template<typename T>
     static inline unsigned int count(T v) {
         v = v - ((v >> 1) & (T)~(T)0 / 3);                         // temp
@@ -143,7 +153,9 @@ template<> struct bits<64> {
         v = (T(tmp1) << 32 | T(tmp2));
     }
 };
-template<> struct bits<128> {
+
+template<> struct bits<128>
+{
     template<typename T>
     static inline unsigned int count(T v) {
         v = v - ((v >> 1) & (T)~(T)0 / 3);                         // temp
@@ -243,18 +255,21 @@ FloatT logsum(size_t n)
 }
 
 // returns true iff x >= min and x <= max
-template<typename FloatT> bool isBetween(FloatT x, FloatT min, FloatT max) {
+template<typename FloatT> bool isBetween(FloatT x, FloatT min, FloatT max)
+{
     return x >= min && x <= max;
 }
 
 // returns true iff abs(x - y) <= epsilon
-template<typename FloatT> bool isWithin(FloatT x, FloatT y, FloatT epsilon) {
+template<typename FloatT> bool isWithin(FloatT x, FloatT y, FloatT epsilon)
+{
     return std::abs(x - y) <= epsilon;
 }
 
 // compare 2 FloatT with precision epsilon,
 // note that, unlike isWithin, the precision adapts with the scale of x and y
-template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon) {
+template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon)
+{
     FloatT diff = std::abs(x - y);
     FloatT amp = std::abs(x + y);
     if (amp*amp > epsilon)
@@ -284,19 +299,25 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
 }
 
 /**
- * Compute entropy of a probability distribution described by (from, to[.
+ * Compute entropy of an n-ary probability distribution, with the
+ * probailities pointed at by iterators (from, to[.
  * Specifically it computes
  *
- * - Sum_i p_i log2(p_i)
+ * - Sum_i p_i log_2(p_i)
  * 
- * where the p_i are values pointed by (from, to[, and Sum_i p_i == 1.0
+ * where the p_i are values pointed by (from, to[, 
+ * It is assumed that Sum_i p_i == 1.0
+ * That is, double tot=0.0; for(; from != to; ++from) tot += *from;
+ * will finish with tot == 1.0;
  */
-template<typename It> double entropy(It from, It to) {
+template<typename It> double entropy(It from, It to)
+{
     double res = 0;
     for(; from != to; ++from)
         res += weightInformation(*from);
     return res;
 }
+
 // helper
 template<typename C>
 double entropy(const C& c) {
@@ -304,7 +325,8 @@ double entropy(const C& c) {
 }
 
 // compute the smallest divisor of n
-template<typename IntT> IntT smallest_divisor(IntT n) {
+template<typename IntT> IntT smallest_divisor(IntT n)
+{
     OC_ASSERT(n > 0, "smallest_divisor: n must be superior than 0");
     if(n<3)
         return n;
@@ -324,7 +346,8 @@ template<typename IntT> IntT smallest_divisor(IntT n) {
 template<typename T> T sq(T x) { return x*x; }
 
 // check if x isn't too high and return 2^x
-template<typename OutInt> OutInt pow2(unsigned int x) {
+template<typename OutInt> OutInt pow2(unsigned int x)
+{
     OC_ASSERT(8*sizeof(OutInt) - (numeric_limits<OutInt>::is_signed?1:0) > x,
               "pow2: Amount to shift is out of range.");
     return static_cast<OutInt>(1) << x;
