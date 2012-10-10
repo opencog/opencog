@@ -30,6 +30,9 @@
 
 #include <opencog/atomspace/TruthValue.h>
 #include <boost/shared_ptr.hpp>
+#ifdef ZMQ_EXPERIMENT
+#include "ProtocolBufferSerializer.h"
+#endif
 
 namespace opencog
 {
@@ -40,6 +43,9 @@ namespace opencog
  */
 class IndefiniteTruthValue : public TruthValue
 {
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+#endif
 
 private:
 
@@ -77,9 +83,6 @@ public:
     IndefiniteTruthValue(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     IndefiniteTruthValue(IndefiniteTruthValue const&);
-#ifdef ZMQ_EXPERIMENT
-    IndefiniteTruthValue(const ZMQSingleTruthValueMessage& singleTruthValue);
-#endif
 
     IndefiniteTruthValue* clone() const;
     IndefiniteTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
@@ -123,9 +126,6 @@ public:
     static void setDefaultK(count_t k) {
         DEFAULT_K = k;
     }
-#ifdef ZMQ_EXPERIMENT
-	void writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage);
-#endif
 };
 
 typedef boost::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;

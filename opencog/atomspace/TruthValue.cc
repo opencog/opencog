@@ -180,33 +180,6 @@ TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (I
     return NULL;
 }
 
-#ifdef ZMQ_EXPERIMENT
-TruthValue* TruthValue::factory(const ZMQTruthValueMessage& truthValueMessage)
-{
-	if(truthValueMessage.singletruthvalue_size()==1)
-		return TruthValue::factory(truthValueMessage.singletruthvalue(0));
-	else
-		return new CompositeTruthValue(truthValueMessage);
-}
-
-TruthValue* TruthValue::factory(const ZMQSingleTruthValueMessage& singleTruthValueMessage)
-{
-	switch(singleTruthValueMessage.truthvaluetype())
-	{
-	case ZMQTruthValueTypeSimple:
-		return new SimpleTruthValue(singleTruthValueMessage);
-	case ZMQTruthValueTypeCount:
-		return new CountTruthValue(singleTruthValueMessage);
-	case ZMQTruthValueTypeNull:
-		return new NullTruthValue();
-	case ZMQTruthValueTypeIndefinite:
-		return new IndefiniteTruthValue(singleTruthValueMessage);
-	default:
-		 throw RuntimeException(TRACE_INFO, "Invalid ZMQ truthvaluetype: '%d'.", singleTruthValueMessage.truthvaluetype());
-	}
-}
-#endif
-
 	void TruthValue::DeleteAndSetDefaultTVIfPertinent(TruthValue** tv)
 {
     if (*tv != &(TruthValue::DEFAULT_TV()) &&

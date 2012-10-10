@@ -26,6 +26,9 @@
 #define _OPENCOG_NULL_TRUTH_VALUE_TV_H
 
 #include <opencog/atomspace/TruthValue.h>
+#ifdef ZMQ_EXPERIMENT
+#include "ProtocolBufferSerializer.h"
+#endif
 
 namespace opencog
 {
@@ -34,6 +37,9 @@ class NullTruthValue : public TruthValue
 {
 
     friend class TruthValue;
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+#endif
 
 public:
     bool isNullTv() const;
@@ -45,9 +51,6 @@ public:
     TruthValueType getType() const throw (RuntimeException);
 
     virtual bool operator==(const TruthValue& rhs) const;
-#ifdef ZMQ_EXPERIMENT
-	void writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage);
-#endif
 
 protected:
     // TODO: Make this constructor protected. For some reason compiler is

@@ -86,19 +86,6 @@ CompositeTruthValue::CompositeTruthValue(CompositeTruthValue const& source)
     copy(source);
 }
 
-#ifdef ZMQ_EXPERIMENT
-CompositeTruthValue::CompositeTruthValue(const ZMQTruthValueMessage& truthValueMessage)
-{
-	primaryTV=TruthValue::factory(truthValueMessage.singletruthvalue(0));
-
-	for (int i=1;i<truthValueMessage.singletruthvalue_size();i++)
-    {
-		const ZMQSingleTruthValueMessage& singleTruthValue = truthValueMessage.singletruthvalue(i);
-		versionedTVs[VersionHandle(singleTruthValue.versionhandle())] = TruthValue::factory(singleTruthValue);
-    }
-}
-#endif
-
 CompositeTruthValue::~CompositeTruthValue()
 {
     clear();
@@ -483,17 +470,3 @@ VersionHandle CompositeTruthValue::getVersionHandle(int i) const {
     return NULL_VERSION_HANDLE;
 }
 
-#ifdef ZMQ_EXPERIMENT
-void CompositeTruthValue::writeToZMQMessage(ZMQTruthValueMessage * truthValueMessage)
-{
-	primaryTV->writeToZMQMessage(truthValueMessage);
-
-    for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();itr != versionedTVs.end(); ++itr)
-    {
-    	itr->second->writeToZMQMessage(truthValueMessage); //creates a new singletruthvaluemessage
-        VersionHandle vh = itr->first;
-        ZMQVersionHandleMessage *versionHandleMessage=truthValueMessage->mutable_singletruthvalue(truthValueMessage->singletruthvalue_size()-1)->mutable_versionhandle();
-        vh.writeToZMQMessage(versionHandleMessage);
-    }
-}
-#endif

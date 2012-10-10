@@ -27,6 +27,9 @@
 #define _OPENCOG_NODE_H
 
 #include <opencog/atomspace/Atom.h>
+#ifdef ZMQ_EXPERIMENT
+#include "ProtocolBufferSerializer.h"
+#endif
 
 namespace opencog
 {
@@ -38,12 +41,18 @@ namespace opencog
 class Node : public Atom
 {
     friend class SavingLoading;
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+#endif
 
 private:
 
     // properties
     std::string name;
 
+#ifdef ZMQ_EXPERIMENT
+    Node() {};
+#endif
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
 public:
@@ -68,10 +77,6 @@ public:
         : Atom(n.getType(),n.getTruthValue(),n.getAttentionValue()) {
         init(n.name);
     }
-
-#ifdef ZMQ_EXPERIMENT
-    Node(const ZMQAtomMessage& atomMessage);
-#endif
 
     /**
      * Destructor for this class.
@@ -124,10 +129,6 @@ public:
     virtual size_t hashCode(void) const;
 
     virtual Atom* clone() const;
-
-#ifdef ZMQ_EXPERIMENT
-    void writeToZMQMessage(ZMQAtomMessage *atomMessage);
-#endif
 
 };
 

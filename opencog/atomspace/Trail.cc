@@ -68,23 +68,6 @@ Trail::Trail(int initialSize, int max) throw (InvalidParamException, std::bad_ex
     init(initialSize, max);
 }
 
-#ifdef ZMQ_EXPERIMENT
-Trail::Trail(const ZMQTrailMessage& trailMessage)
-{
-	maxSize=trailMessage.maxsize();
-	if(trailMessage.trail_size()==0)
-	{
-		trail=NULL;
-	}
-	else
-	{
-		trail = new std::deque<Handle>(trailMessage.trail_size());
-		for(int i=0;i<trailMessage.trail_size();i++)
-			trail->push_back(Handle(trailMessage.trail(i)));
-	}
-}
-#endif
-
 Trail::~Trail()
 {
     if (trail != NULL) delete trail;
@@ -181,11 +164,3 @@ void Trail::print(FILE* fp)
     }
 }
 
-#ifdef ZMQ_EXPERIMENT
-void Trail::writeToZMQMessage(ZMQTrailMessage* trailMessage)
-{
-	trailMessage->set_maxsize(maxSize);
-	BOOST_FOREACH(Handle h, *trail)
-		trailMessage->add_trail(h.value());
-}
-#endif

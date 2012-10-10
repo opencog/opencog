@@ -67,35 +67,6 @@ Atom::Atom(Type type, const TruthValue& tv, const AttentionValue& av)
     init(type, tv, av);
 }
 
-#ifdef ZMQ_EXPERIMENT
-Atom::Atom(const ZMQAtomMessage& atomMessage)
-	:AttentionValueHolder(atomMessage.attentionvalueholder()),
-	 handle(atomMessage.handle())
-{
-	atomTable=NULL;
-	if(atomMessage.incoming_size()==0)
-	{
-		incoming=NULL;
-	}
-	else
-	{
-		incoming=new HandleEntry(Handle(atomMessage.incoming(0)));
-		HandleEntry *previous=incoming;
-		for(int i=1;i<atomMessage.incoming_size();i++)
-		{
-			HandleEntry *current=new HandleEntry(Handle(atomMessage.incoming(i)));
-			previous->next=current;
-			previous=current;
-		}
-	}
-
-	type=atomMessage.type();
-	flags=atomMessage.flags();
-
-	truthValue=TruthValue::factory(atomMessage.truthvalue());
-}
-#endif
-
 Atom::~Atom()
 {
     if (incoming != NULL) delete incoming;
@@ -219,38 +190,4 @@ void Atom::setAtomTable(AtomTable *tb)
 {
     atomTable = tb;
 }
-
-#ifdef ZMQ_EXPERIMENT
-Atom* Atom::factory(const ZMQAtomMessage& atomMessage)
-{
-	switch(atomMessage.atomtype())
-	{
-	case ZMQAtomTypeNode:
-		return new Node(atomMessage);
-	case ZMQAtomTypeLink:
-		return new Link(atomMessage);
-	default:
-		throw RuntimeException(TRACE_INFO, "Invalid ZMQ atomtype");
-	}
-}
-
-void Atom::writeToZMQMessage(ZMQAtomMessage* atomMessage)
-{
-	AttentionValueHolder::writeToZMQMessage(atomMessage->mutable_attentionvalueholder());
-
-	atomMessage->set_handle(handle.value());
-
-	HandleEntry* next=incoming;
-	while(next)
-	{
-		atomMessage->add_incoming(next->handle.value());
-		next = next->next;
-	}
-
-	atomMessage->set_type(type);
-	atomMessage->set_flags(flags);
-
-	truthValue->writeToZMQMessage(atomMessage->mutable_truthvalue());
-}
-#endif
 

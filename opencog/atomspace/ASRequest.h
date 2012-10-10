@@ -51,11 +51,6 @@ public:
         boost::mutex::scoped_lock lock(complete_mutex);
         return completed;
     }
-
-#ifdef ZMQ_EXPERIMENT
-    virtual void copyParametersToZMQRequest(ZMQRequestMessage& req) {}; //TODO make this pure when done
-    virtual void copyResultFromZMQReply(const ZMQReplyMessage& rep) {}; //TODO make this pure when done
-#endif
 };
 
 class AtomSpace;
@@ -70,16 +65,6 @@ class GenericASR: public ASRequest {
 protected:
     T result;
     void set_result(T _result) { result = _result; }
-
-#ifdef ZMQ_EXPERIMENT
-    void set_result_completed(T _result)
-    {
-    	result = _result;
-    	boost::mutex::scoped_lock lock(complete_mutex);
-    	completed = true;
-    	complete_cond.notify_all();
-    }
-#endif
 
 public:
     GenericASR(AtomSpaceImpl* a){ set_atomspace(a); };
@@ -335,20 +320,6 @@ public:
     virtual void do_work() {
         set_result(atomspace->getName(p1));
     };
-
-#ifdef ZMQ_EXPERIMENT
-    void copyParametersToZMQRequest(ZMQRequestMessage& req)
-    {
-    	req.set_function(ZMQgetName);
-    	req.set_handle(p1.value());
-    };
-
-    void copyResultFromZMQReply(const ZMQReplyMessage& rep)
-    {
-    	set_result_completed(rep.str());
-    };
-#endif
-    
 };
 
 class GetAtomASR : public OneParamASR <boost::shared_ptr<Atom>, Handle> {
@@ -359,20 +330,6 @@ public:
     virtual void do_work() {
         set_result(atomspace->cloneAtom(p1));
     };
-    
-#ifdef ZMQ_EXPERIMENT
-    void copyParametersToZMQRequest(ZMQRequestMessage& req)
-    {
-    	req.set_function(ZMQgetAtom);
-    	req.set_handle(p1.value());
-    };
-
-    void copyResultFromZMQReply(const ZMQReplyMessage& rep)
-    {
-    	set_result_completed(boost::shared_ptr<Atom>(Atom::factory(rep.atom())));
-    };
-#endif
-
 };
 
 class CommitAtomASR : public GenericASR <bool> {

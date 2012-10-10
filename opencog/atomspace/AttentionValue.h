@@ -32,7 +32,7 @@
 #include <opencog/atomspace/types.h>
 
 #ifdef ZMQ_EXPERIMENT
-	#include <opencog/atomspace/ZMQMessages.pb.h>
+	#include "ProtocolBufferSerializer.h"
 #endif
 
 namespace opencog
@@ -43,6 +43,9 @@ class AtomSpaceImpl;
 class AttentionBank;
 
 struct AttentionValue {
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+#endif
 
 public:
     typedef short sti_t;   // short-term importance type
@@ -88,10 +91,6 @@ public:
     AttentionValue(sti_t STI = DEFAULTATOMSTI,
                    lti_t LTI = DEFAULTATOMLTI,
                    vlti_t VLTI = DEFAULTATOMVLTI);
-
-#ifdef ZMQ_EXPERIMENT
-    AttentionValue(const ZMQAttentionValueHolderMessage &attentionValueHolderMessage);
-#endif
 
     // PUBLIC GET/SET PROPERTIES
 
@@ -140,9 +139,6 @@ public:
         virtual bool test(const Atom& h1, const Atom& h2);
     };
 
-#ifdef ZMQ_EXPERIMENT
-    void writeToZMQMessage(ZMQAttentionValueHolderMessage* attentionValueHolderMessage);
-#endif
 
     // STATIC METHODS
 
@@ -162,6 +158,9 @@ class AttentionValueHolder
 {
     friend class AtomSpaceImpl;
     friend class AttentionBank;
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+#endif
 
 protected:
     AttentionValue attentionValue;
@@ -173,19 +172,10 @@ protected:
 
 
 public:
-#ifdef ZMQ_EXPERIMENT
-    AttentionValueHolder() {}
-    AttentionValueHolder(const ZMQAttentionValueHolderMessage& attentionValueHolderMessage):attentionValue(attentionValueHolderMessage) {}
-#endif
-
     /** Returns the AttentionValue object */
     virtual const AttentionValue& getAttentionValue() const {
         return attentionValue;
     }
-
-#ifdef ZMQ_EXPERIMENT
-    void writeToZMQMessage(ZMQAttentionValueHolderMessage *attentionValueHolderMessage);
-#endif
 };
 
 } // namespace opencog 

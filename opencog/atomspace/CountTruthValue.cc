@@ -54,15 +54,6 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     count = source.count;
 }
 
-#ifdef ZMQ_EXPERIMENT
-CountTruthValue::CountTruthValue(const ZMQSingleTruthValueMessage& singleTruthValue)
-{
-	mean=singleTruthValue.mean();
-	confidence=singleTruthValue.confidence();
-	count=singleTruthValue.count();
-}
-#endif
-
 void CountTruthValue::setMean(strength_t m)
 {
     mean = m;
@@ -188,13 +179,3 @@ TruthValue* CountTruthValue::merge(const TruthValue& other) const
     return nc;
 }
 
-#ifdef ZMQ_EXPERIMENT
-void CountTruthValue::writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage)
-{
-	ZMQSingleTruthValueMessage *singleTruthValue = truthValueMessage->add_singletruthvalue();
-	singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeCount);
-	singleTruthValue->set_mean(mean);
-	singleTruthValue->set_confidence(confidence);
-	singleTruthValue->set_count(count);
-}
-#endif

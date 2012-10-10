@@ -87,10 +87,3 @@ NullTruthValue& NullTruthValue::operator=(const TruthValue & rhs) throw (Runtime
     throw RuntimeException(TRACE_INFO, "Cannot call operator= of a NullTruthvalue");
 }
 
-#ifdef ZMQ_EXPERIMENT
-void NullTruthValue::writeToZMQMessage(ZMQTruthValueMessage * truthValueMessage)
-{
-	ZMQSingleTruthValueMessage *singleTruthValue = truthValueMessage->add_singletruthvalue();
-	singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeNull);
-}
-#endif

@@ -47,14 +47,6 @@ VersionHandle::VersionHandle( const VersionHandle& other )
     this->substantive = other.substantive;
 }
 
-#ifdef ZMQ_EXPERIMENT
-VersionHandle::VersionHandle(const ZMQVersionHandleMessage& versionHandleMessage)
-{
-	indicator=(IndicatorType)versionHandleMessage.indicator();
-	substantive=Handle(versionHandleMessage.substantive());
-}
-#endif
-
 const char* VersionHandle::indicatorToStr(IndicatorType indicator) throw (InvalidParamException)
 {
     switch (indicator) {
@@ -81,14 +73,6 @@ IndicatorType VersionHandle::strToIndicator(const char* indicatorStr) throw (Inv
     throw InvalidParamException(TRACE_INFO,
                                 "VersionHandle - Invalid IndicatorType name: '%s'.", indicatorStr);
 }
-
-#ifdef ZMQ_EXPERIMENT
-void VersionHandle::writeToZMQMessage(ZMQVersionHandleMessage * versionHandleMessage)
-{
-	versionHandleMessage->set_indicator(indicator);
-	versionHandleMessage->set_substantive(substantive.value());
-}
-#endif
 
 int hashVersionHandle::operator()(VersionHandle const vh) const
 {

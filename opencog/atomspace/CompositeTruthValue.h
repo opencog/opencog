@@ -36,6 +36,9 @@
 #include <opencog/atomspace/VersionHandle.h>
 
 #include <boost/unordered_map.hpp>
+#ifdef ZMQ_EXPERIMENT
+#include "ProtocolBufferSerializer.h"
+#endif
 
 namespace opencog
 {
@@ -51,6 +54,9 @@ class CompositeRenumber;
 class CompositeTruthValue: public TruthValue
 {
     friend class CompositeRenumber; // XXX ugly hack
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+#endif
 
 private:
     TruthValue* primaryTV;
@@ -79,9 +85,7 @@ public:
      */
     CompositeTruthValue(const TruthValue&, VersionHandle);
     CompositeTruthValue(CompositeTruthValue const&);
-#ifdef ZMQ_EXPERIMENT
-    CompositeTruthValue(const ZMQTruthValueMessage& truthValueMessage);
-#endif
+
     ~CompositeTruthValue();
 
     CompositeTruthValue* clone() const;
@@ -174,10 +178,6 @@ public:
      * @param atomspace The AtomSpace to check the handles against
      */
     void removeInvalidTVs(AtomSpace& atomspace);
-
-#ifdef ZMQ_EXPERIMENT
-	void writeToZMQMessage(ZMQTruthValueMessage * truthValueMessage);
-#endif
 
     // iterator over VersionHandles
 private:

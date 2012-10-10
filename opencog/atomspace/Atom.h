@@ -38,7 +38,7 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/exceptions.h>
 #ifdef ZMQ_EXPERIMENT
-	#include <opencog/atomspace/ZMQMessages.pb.h>
+	#include "ProtocolBufferSerializer.h"
 #endif
 
 class AtomUTest;
@@ -65,11 +65,15 @@ class Atom : public AttentionValueHolder
     friend class TLB;
     friend class Node;
     friend class Link;
-
     friend class ::AtomUTest;
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+#endif
 
 private:
-
+#ifdef ZMQ_EXPERIMENT
+    Atom() {};
+#endif
     //! Called by constructors to init this object
     void init(Type, const TruthValue&,
             const AttentionValue& av = AttentionValue::DEFAULT_AV());
@@ -117,10 +121,6 @@ protected:
     void removeIncomingHandle(Handle) throw (RuntimeException);
 
 public:
-
-#ifdef ZMQ_EXPERIMENT
-    Atom(const ZMQAtomMessage& atomMessage);
-#endif
 
     virtual ~Atom();
 
@@ -220,11 +220,7 @@ public:
 
     virtual Atom* clone() const = 0;
 
-#ifdef ZMQ_EXPERIMENT
-    static Atom* factory(const ZMQAtomMessage& atomMessage);
 
-    virtual void writeToZMQMessage(ZMQAtomMessage* atomMessage);
-#endif
 };
 
 } // namespace opencog

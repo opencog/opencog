@@ -28,12 +28,21 @@
 #define _OPENCOG_COUNT_TRUTH_VALUE_H_
 
 #include <opencog/atomspace/TruthValue.h>
+#ifdef ZMQ_EXPERIMENT
+#include "ProtocolBufferSerializer.h"
+#endif
 
 namespace opencog
 {
 
 class CountTruthValue : public TruthValue
 {
+#ifdef ZMQ_EXPERIMENT
+    friend class ProtocolBufferSerializer;
+
+private:
+    CountTruthValue() {};
+#endif
 
 protected:
 
@@ -48,9 +57,6 @@ public:
     CountTruthValue(strength_t, confidence_t, count_t);
     CountTruthValue(const TruthValue&);
     CountTruthValue(CountTruthValue const&);
-#ifdef ZMQ_EXPERIMENT
-    CountTruthValue(const ZMQSingleTruthValueMessage& singleTruthValue);
-#endif
 
     CountTruthValue* clone() const;
     CountTruthValue& operator=(const TruthValue& rhs)
@@ -72,9 +78,7 @@ public:
     void setConfidence(confidence_t);
 
     virtual TruthValue* merge(const TruthValue&) const;
-#ifdef ZMQ_EXPERIMENT
-	void writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage);
-#endif
+
 };
 
 } // namespace opencog

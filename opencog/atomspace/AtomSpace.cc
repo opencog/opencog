@@ -288,6 +288,11 @@ int AtomSpace::Nodes(VersionHandle vh) const
     return atomSpaceAsync->nodeCount(vh)->get_result();
 }
 
+AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
+{
+    return atomSpaceAsync->atomspace.getAttentionBank().getAttentionalFocusBoundary();
+}
+
 int AtomSpace::Links(VersionHandle vh) const
 {
     return atomSpaceAsync->linkCount(vh)->get_result();
@@ -296,11 +301,6 @@ int AtomSpace::Links(VersionHandle vh) const
 void AtomSpace::decayShortTermImportance()
 {
     atomSpaceAsync->decayShortTermImportance()->get_result();
-}
-
-AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
-{
-    return atomSpaceAsync->atomspace.getAttentionBank().getAttentionalFocusBoundary();
 }
 
 AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti_t s)

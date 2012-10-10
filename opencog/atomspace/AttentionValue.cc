@@ -38,15 +38,6 @@ AttentionValue::AttentionValue(sti_t STI, lti_t LTI, vlti_t VLTI)
     m_VLTI = VLTI;
 }
 
-#ifdef ZMQ_EXPERIMENT
-AttentionValue::AttentionValue(const ZMQAttentionValueHolderMessage &attentionValueHolderMessage)
-{
-	m_STI=attentionValueHolderMessage.sti();
-	m_LTI=attentionValueHolderMessage.lti();
-	m_VLTI=attentionValueHolderMessage.vlti();
-}
-#endif
-
 AttentionValue::sti_t AttentionValue::getSTI() const
 {
     return m_STI;
@@ -181,16 +172,3 @@ bool AttentionValue::LTIThenTVAscendingSort::test(const Atom& h1, const Atom& h2
     return tv1 < tv2;
 }
 
-#ifdef ZMQ_EXPERIMENT
-void AttentionValue::writeToZMQMessage(ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
-{
-	attentionValueHolderMessage->set_sti(m_STI);
-	attentionValueHolderMessage->set_lti(m_LTI);
-	attentionValueHolderMessage->set_vlti(m_VLTI);
-}
-
-void AttentionValueHolder::writeToZMQMessage(ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
-{
-	attentionValue.writeToZMQMessage(attentionValueHolderMessage);
-}
-#endif
