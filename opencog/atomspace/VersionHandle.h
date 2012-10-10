@@ -28,6 +28,9 @@
 #include <boost/functional/hash.hpp>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/util/exceptions.h>
+#ifdef ZMQ_EXPERIMENT
+	#include <opencog/atomspace/ZMQMessages.pb.h>
+#endif
 
 namespace opencog
 {
@@ -48,6 +51,9 @@ struct VersionHandle
     // not the atom to make the handle for
     VersionHandle(IndicatorType ind, Handle subs);
     VersionHandle( const VersionHandle& other );
+#ifdef ZMQ_EXPERIMENT
+    VersionHandle(const ZMQVersionHandleMessage& versionHandleMessage);
+#endif
 
     // Needed for comparison within vtree
     bool operator<(const VersionHandle &other) const;
@@ -56,8 +62,13 @@ struct VersionHandle
     bool operator!=(const VersionHandle &other) const;
     VersionHandle& operator=( const VersionHandle& other );
 
+#ifdef ZMQ_EXPERIMENT
+    void writeToZMQMessage(ZMQVersionHandleMessage* versionHandleMessage);
+#endif
+
     static const char* indicatorToStr(IndicatorType) throw (InvalidParamException);
     static IndicatorType strToIndicator(const char*) throw (InvalidParamException);
+
 };
 
 #define NULL_VERSION_HANDLE VersionHandle()

@@ -45,6 +45,9 @@ public:
     TruthValueType getType() const throw (RuntimeException);
 
     virtual bool operator==(const TruthValue& rhs) const;
+#ifdef ZMQ_EXPERIMENT
+	void writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage);
+#endif
 
 protected:
     // TODO: Make this constructor protected. For some reason compiler is

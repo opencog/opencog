@@ -34,6 +34,9 @@
 #include <opencog/atomspace/Trail.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
+#ifdef ZMQ_EXPERIMENT
+#include <boost/foreach.hpp>
+#endif
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -50,6 +53,21 @@ void Link::init(const std::vector<Handle>& outgoingVector)
     trail = new Trail();
     setOutgoingSet(outgoingVector);
 }
+
+#ifdef ZMQ_EXPERIMENT
+Link::Link(const ZMQAtomMessage& atomMessage):Atom(atomMessage)
+{
+	for(int i=0;i<atomMessage.outgoing_size();i++)
+	{
+		outgoing.push_back(Handle(atomMessage.outgoing(i)));
+	}
+
+	if(!atomMessage.has_trail())
+		trail=NULL;
+	else
+		trail=new Trail(atomMessage.trail());
+}
+#endif
 
 Link::~Link()
 {
@@ -322,3 +340,17 @@ Atom* Link::clone() const
     return a;
 }
 
+#ifdef ZMQ_EXPERIMENT
+void Link::writeToZMQMessage(ZMQAtomMessage * atomMessage)
+{
+	Atom::writeToZMQMessage(atomMessage);
+
+	atomMessage->set_atomtype(ZMQAtomTypeLink);
+
+	BOOST_FOREACH(Handle h, outgoing)
+		atomMessage->add_outgoing(h.value());
+
+	if(trail)
+		trail->writeToZMQMessage(atomMessage->mutable_trail());
+}
+#endif

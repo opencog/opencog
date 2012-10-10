@@ -145,14 +145,6 @@ Type AtomSpace::getType(Handle h) const
 #endif
 }
 
-#ifdef ZMQ_EXPERIMENT
-TruthValue* AtomSpace::getTVZmq(Handle h, VersionHandle vh) const
-{
-    TruthValueZmqRequest tvr = atomSpaceAsync->getTVZmq(h, vh);
-    return tvr->get_result();
-}
-#endif
-
 strength_t AtomSpace::getMean(Handle h, VersionHandle vh) const
 {
     FloatRequest tvr = atomSpaceAsync->getMean(h, vh);

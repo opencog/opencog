@@ -1,0 +1,81 @@
+// Definition of the ZMQ message format used by AtomSpaceAsync
+// compile with protoc --cpp_out=. ZMQMessages.proto
+
+option optimize_for = SPEED;
+
+message ZMQAttentionValueHolderMessage {
+    required int32 STI=1;
+    required int32 LTI=2;
+    required int32 VLTI=3; 
+}
+
+enum ZMQTruthValueType {
+    ZMQTruthValueTypeSimple =0;
+    ZMQTruthValueTypeCount=1;	
+    ZMQTruthValueTypeNull=2;	
+    ZMQTruthValueTypeIndefinite=3;
+    ZMQTruthValueTypeComposite=4;
+}
+
+message ZMQVersionHandleMessage {
+	required uint32 indicator=1;
+	required uint64 substantive=2; //handle
+}
+	
+message ZMQSingleTruthValueMessage { 
+    required ZMQTruthValueType truthvaluetype=1;
+    optional float mean=2; //simple, count, composite, indefinite
+    optional float confidence=3; //count, composite, indefinite
+    optional float count=4; //simple, count, composite, indefinite
+    optional ZMQVersionHandleMessage versionHandle=5; //composite (versionedTVs)
+    optional float U=6; //indefinite
+    optional float L=7; //indefinite
+    optional float confidenceLevel=8; //indefinite
+    optional int32 symmetric=9; //indefinite
+    optional float diff=10; //indefinite
+    repeated float firstOrderDistribution=11; //indefinite
+}
+
+message ZMQTruthValueMessage { 
+    repeated ZMQSingleTruthValueMessage singleTruthValue=1;  //if size==1, check truthvalueclass, if size>1, it's a composite truthvalue (first SingleTruthValueMessage is the primaryTV, the others are VersionedTVs)
+}
+
+message ZMQTrailMessage { 
+	required int32 maxSize=1; 
+    repeated uint64 trail=2;
+}
+
+enum ZMQAtomType {
+    ZMQAtomTypeNode=0;
+    ZMQAtomTypeLink=1;	
+}
+
+message ZMQAtomMessage {
+	required ZMQAtomType atomtype=1; 
+    required ZMQAttentionValueHolderMessage attentionvalueholder=2;
+    required uint64 handle=3;
+    repeated uint64 incoming=4;
+    required int32 type=5; 
+    optional int32 flags=6;
+    optional ZMQTruthValueMessage truthValue=7;
+    optional string name=8; //node
+    repeated uint64 outgoing=9; //link
+    optional ZMQTrailMessage trail=10; //link
+}
+
+enum ZMQFunctionType {
+    ZMQgetAtom = 0;
+    ZMQgetName = 1;
+  }
+
+message ZMQRequestMessage {
+  required ZMQFunctionType function = 1;
+  optional uint64 handle = 2;
+  
+}
+
+message ZMQReplyMessage {
+  optional ZMQAtomMessage atom = 1;
+  optional string str = 2;
+}
+

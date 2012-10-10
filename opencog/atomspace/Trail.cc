@@ -32,6 +32,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
+#include <boost/foreach.hpp>
 
 #define DEFAULT_INITIAL_TRAIL_SIZE 0
 #define DEFAULT_MAX_TRAIL_SIZE 1000
@@ -66,6 +67,23 @@ Trail::Trail(int initialSize, int max) throw (InvalidParamException, std::bad_ex
 {
     init(initialSize, max);
 }
+
+#ifdef ZMQ_EXPERIMENT
+Trail::Trail(const ZMQTrailMessage& trailMessage)
+{
+	maxSize=trailMessage.maxsize();
+	if(trailMessage.trail_size()==0)
+	{
+		trail=NULL;
+	}
+	else
+	{
+		trail = new std::deque<Handle>(trailMessage.trail_size());
+		for(int i=0;i<trailMessage.trail_size();i++)
+			trail->push_back(Handle(trailMessage.trail(i)));
+	}
+}
+#endif
 
 Trail::~Trail()
 {
@@ -162,3 +180,12 @@ void Trail::print(FILE* fp)
         fprintf(fp, "\t%d. %s\n", i, ((Link*)(TLB::getAtom((*trail)[i])))->toShortString().c_str());
     }
 }
+
+#ifdef ZMQ_EXPERIMENT
+void Trail::writeToZMQMessage(ZMQTrailMessage* trailMessage)
+{
+	trailMessage->set_maxsize(maxSize);
+	BOOST_FOREACH(Handle h, *trail)
+		trailMessage->add_trail(h.value());
+}
+#endif

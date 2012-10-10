@@ -30,6 +30,9 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
+#ifdef ZMQ_EXPERIMENT
+#include <boost/foreach.hpp>
+#endif
 
 #define W() getU()-getL();
 
@@ -42,6 +45,26 @@ float IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
 float IndefiniteTruthValue::DEFAULT_K = 2.0;
 float IndefiniteTruthValue::diffError = 0.001;
 float IndefiniteTruthValue::s = 0.5;
+
+#ifdef ZMQ_EXPERIMENT
+IndefiniteTruthValue::IndefiniteTruthValue(const ZMQSingleTruthValueMessage& singleTruthValue)
+{
+	L=singleTruthValue.l();
+	U=singleTruthValue.u();
+	confidenceLevel=singleTruthValue.confidencelevel();
+	symmetric=singleTruthValue.symmetric();
+	diff=singleTruthValue.diff();
+	mean=singleTruthValue.mean();
+	confidence=singleTruthValue.confidence();
+	count=singleTruthValue.count();
+
+	for(int i=0;i<singleTruthValue.firstorderdistribution_size();i++)
+	{
+		strength_t* s=new strength_t(singleTruthValue.firstorderdistribution(i));
+		firstOrderDistribution.push_back(s);
+	}
+}
+#endif
 
 // Formula defined in the integral of step one [(x-L1)^ks * (U1-x)^k(1-s)
 static double integralFormula (double x, void * params)
@@ -360,3 +383,23 @@ float IndefiniteTruthValue::toFloat() const
 {
     return static_cast<float>(getMean());
 }
+
+#ifdef ZMQ_EXPERIMENT
+void IndefiniteTruthValue::writeToZMQMessage(ZMQTruthValueMessage* truthValueMessage)
+{
+	ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
+	singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeIndefinite);
+	singleTruthValue->set_l(L);
+	singleTruthValue->set_u(U);
+	singleTruthValue->set_confidencelevel(confidenceLevel);
+	singleTruthValue->set_symmetric(symmetric);
+	singleTruthValue->set_diff(diff);
+	singleTruthValue->set_mean(mean);
+	singleTruthValue->set_count(count);
+	singleTruthValue->set_confidence(confidence);
+	BOOST_FOREACH(float *f,firstOrderDistribution)
+	{
+		singleTruthValue->add_firstorderdistribution(*f);
+	}
+}
+#endif

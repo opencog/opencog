@@ -69,6 +69,10 @@ public:
         init(n.name);
     }
 
+#ifdef ZMQ_EXPERIMENT
+    Node(const ZMQAtomMessage& atomMessage);
+#endif
+
     /**
      * Destructor for this class.
      */
@@ -120,6 +124,11 @@ public:
     virtual size_t hashCode(void) const;
 
     virtual Atom* clone() const;
+
+#ifdef ZMQ_EXPERIMENT
+    void writeToZMQMessage(ZMQAtomMessage *atomMessage);
+#endif
+
 };
 
 } // namespace opencog

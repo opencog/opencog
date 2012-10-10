@@ -14,6 +14,163 @@
 
 #ifdef ZMQ_EXPERIMENT
     #include <zmq.hpp>
+	#include <opencog/atomspace/ZMQMessages.pb.h>
+#endif
+
+#ifdef ZMQ_EXPERIMENT
+/*
+Setup:
+	Install zeroMQ (should already be installed)
+ 		http://www.zeromq.org/intro:get-the-software
+ 		eclipse: add zmq to libraries
+ 	Install protocol buffers (should already be installed)
+ 		http://code.google.com/p/protobuf/downloads/list
+ 		./configure
+ 		make
+ 		sudo make install
+ 		eclipse: add protobuf to libraries
+ 	Compile proto file (if changed)
+		protoc --cpp_out=. AtomSpaceMessages.proto
+	launch cogserver
+		cd ~/ochack; bin/opencog/server/cogserver -c lib/opencog.conf
+	location of scm files
+		/usr/local/share/opencog/scm
+Compiling in Eclipse:
+	Folders
+		~/ochack: my opencog working folder
+		~/ocserver: my eclipse folder
+	Compile opencog
+		cd ~/ochack/bin
+		cmake ..
+		make
+	Create a new Eclipse project in ocserver
+	Copy server and atomspace folders from ochack to ocserver/opencog
+		ocserver
+			opencog
+				server
+				atomspace
+		Note: instead of server you'll probably want to write your own test executable
+	Eclipse settings
+		Note: All of the following settings are done in project properties/C C++ build/Settings/Tool settings
+		Add Include paths (-I) (compile errors: "xxx not found")
+			/home/erwin/ocserver
+			/home/erwin/ochack
+			Note: order is important, add full path not ~/ocserver
+		Add defined symbols
+			 -DCONFDIR=\"/usr/local/etc\" -DDATADIR=\"/usr/local/share/opencog\" -Dserver_EXPORTS -DHAVE_EXPAT -DHAVE_GSL -DHAVE_GUILE -DHAVE_PROTOBUF -DHAVE_CYTHON -DHAVE_SQL_STORAGE -DHAVE_ZMQ -DHAVE_UBIGRAPH
+			 Note: you can add them under Preprocessor but it's easier to just paste them in miscellaneous/other flags
+			 Note: in future also -DZMQ_EXPERIMENT if you want to enable ZMQ
+		Exclude template implementations (compile errors: "xxx already defined")
+			right click on opencog/atomspace/HandleMap.cc and choose properties then check Exclude resource from build
+		Exclude or delete test files that define Main (compile error: "Main() already defined")
+		Add Libraries (-l) (link errors)
+			boost_filesystem
+			persist
+			smob
+			gsl
+			gslcblas
+			boost_signals
+			boost_thread
+			xml
+			util
+			SpaceMap
+			zmq
+			boost_system
+			protobuf
+			Note: gsl has to come before gslcblas (change order if needed)
+		Add Library search path (-L) (link errors)
+			/home/erwin/ochack/bin/opencog/spatial
+			/home/erwin/ochack/bin/opencog/persist/sql
+			/home/erwin/ochack/bin/opencog/guile
+			/home/erwin/ochack/bin/opencog/util
+			/home/erwin/ochack/bin/opencog/persist/xml
+			Note: you have to enter the full paths here not ~/ochack/...
+		Change LD_LIBRARY_PATH (runtime error: "xxx cannot open shared object file"
+			Note: this setting is in Run Debug settings/Environment tab, not environment in Build
+			Append to the existing value :/home/erwin/ochack/bin/opencog/persist/sql:/home/erwin/ochack/bin/opencog/guile:/home/erwin/ochack/bin/opencog/util:/home/erwin/ochack/bin/opencog/spatial:/home/erwin/ochack/bin/opencog/persist/xml
+
+How it works:
+	ZeroMQ allows you to connect a client process to the atomspace managed by the server (normally the
+	cogserver). Use cases include deploying an agent on a separate server, easier debugging of agents,
+	connecting components that are written in different languages (any language that supports protocolbuffers
+	(see http://code.google.com/p/protobuf/wiki/ThirdPartyAddOns) can use a simple message based wrapper to talk
+	to the server. Of course implementing the full atomspace OO interface takes a lot more work. )
+	and connecting tools that need high performance access to the atomspace (e.g. the atomspace visualizer).
+	You can connect multiple clients to one server. The clients can be anywhere in the world as long as
+	the server is reachable via TCP/IP.
+
+	Server:
+		if server is enabled run zmqloop
+		zmqloop
+			check for RequestMessage
+			switch(function)
+				case getAtom:
+					call getAtom with arguments from RequestMessage
+					store return value in ReplyMessage
+				case getName:
+					etc...
+			send ReplyMessage
+	Client:
+		async queue works the same as usual but if client is enabled call server instead of Run
+			copy ASRequest arguments and function number to RequestMessage
+			send RequestMessage to server
+			wait for ReplyMessage
+			copy ReplyMessage to ASRequest
+
+How to compile:
+	 Add new files and libs to opencog/atomspace/CMakeLists.txt
+	 	 add ZMQMessages.pb.cc to ADD_LIBRARY (atomspace SHARED
+	 	 add protobuf to SET(ATOMSPACE_LINK_LIBS
+	 	 add ZMQMessages.pb.h to INSTALL (FILES
+	 	 run cmake .. in bin folder
+	Add  -DZMQ_EXPERIMENT to CXX_DEFINES in the flags.make file in the following folders:
+		/home/erwin/ochack/bin/opencog/atomspace/CMakeFiles/atomspace.dir
+		/home/erwin/ochack/bin/opencog/server/CMakeFiles/cogserver.dir
+		/home/erwin/ochack/bin/opencog/server/CMakeFiles/server.dir
+Problem solving:
+	It doesn't matter if you start the server or client first but if the server crashes or is restarted
+	you have to restart the client(s) as well.
+	If you get error "Address already in use" then another instance of the server is already running
+	also serialize node and link when sending
+	also serialize node and link when receiving
+Performance
+	Both ZMQ and protocolbuffers are very fast. In this test it serializes/deserializes 500 messages per millisecond http://stackoverflow.com/questions/647779/high-performance-serialization-java-vs-google-protocol-buffers-vs
+	If you use the async interface correctly (send commands to fetch all the data you need first then start processing it) the local processing, network communications and database activity all overlap and it may actually be faster than a synchronized local approach. Ideally by the time you call getresult() the data will already be waiting in local memory.
+    e.g. if you have a loop that does some processing on atoms
+		for(i)
+			atom=atomspace.getAtom
+			//non-trivial processing
+     split it into two loops for up to 100% performance improvement:
+		 vector<> future
+		 for(i)
+			future[i]=atomspaceasync.getAtom
+		 for(i)
+			atom=future[i].getResult();
+			//non-trivial processing
+
+TODO:
+    -febcorpus.scm doesn't load
+	-cogserver test: use getAtom (worst case) and getSTI (best case)
+	-the server zmqloop will be a bottleneck unless we can make atomspaceimpl multithreaded and run multiple zmqloops (advanced)
+	-don't use the server eventloop
+	-skip the eventloop for atomspace (only queue atomspaceasync)
+	-don't clone atom in getatom
+	-use protobuf messages in ASRequest?
+	-use zero copy for zmq http://zguide.zeromq.org/page:all#Zero-Copy
+	-clean exit of atomspaceasync without using sleep or a busy loop
+		send ctrl+C signal to the thread and break when NULL message received
+			char *reply = zstr_recv (client);
+			if (!reply)
+				if(exitSeverloop)
+					logger.info "Serverloop exitting"
+					break;
+				else
+					logger.error "Serverloop quit unexpectedly"
+	-what if dowork throws an exception on the server? catch exceptions, put them in reply message and rethrow at client
+		-try to handle communications exceptions locally
+	-allow cogserver to listen to multiple ports e.g. inproc for agents that run in the same process, file
+	based for agents that run in a different process on the same server and TCP/IP for everything else )
+ */
 #endif
 
 class AtomSpaceAsyncUTest;
@@ -34,10 +191,15 @@ class AtomSpaceAsync {
 
     bool processingRequests;
     boost::thread m_Thread;
+
 #ifdef ZMQ_EXPERIMENT
-    boost::thread m_zmq_Thread;
-    zmq::context_t* zmq_context;
+    bool zmqClientEnabled;
+    zmq::socket_t *zmqClientSocket;
+
+    bool zmqServerEnabled;
+    boost::thread zmqServerThread;
 #endif
+
     int counter;
 
     AtomSpaceImpl atomspace;
@@ -53,12 +215,15 @@ class AtomSpaceAsync {
     void eventLoop();
 
 #ifdef ZMQ_EXPERIMENT
-    void zmqLoop();
+    void zmqLoop(string networkAddress);
 #endif
 
     const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 
 public: 
+#ifdef ZMQ_EXPERIMENT
+    static zmq::context_t* zmqContext;
+#endif
 
     AtomSpaceAsync();
     ~AtomSpaceAsync();
@@ -67,6 +232,15 @@ public:
     int get_counter() { return counter; }
 
     bool isQueueEmpty() { return requestQueue.empty(); } ;
+
+#ifdef ZMQ_EXPERIMENT
+    //void enableZMQClient(string networkAddress="inproc:///AtomSpaceZMQ"); //in process communication //TODO also enable this for threads running in the atomspaceserver process (highest performance)?
+    //void enableZMQServer(string networkAddress="inproc:///AtomSpaceZMQ");
+    void enableZMQClient(string networkAddress="ipc:///tmp/AtomSpaceZMQ.ipc"); //named pipe for processes running on the same server
+    void enableZMQServer(string networkAddress="ipc:///tmp/AtomSpaceZMQ.ipc");
+    //void enableZMQClient(string networkAddress="tcp://127.0.0.1:5555"); //TCP/IP //TODO also enable this for processes running on different servers?
+    //void enableZMQServer(string networkAddress="tcp://*:5555");
+#endif
 
     //--------------
     // These functions are not run in the event loop, but may need guards as
@@ -324,14 +498,17 @@ public:
         return r;
     }
 
-#ifdef ZMQ_EXPERIMENT
-    /** Retrieve the TruthValue summary of a given Handle */
+/*
+ //TODO EJ still needed?
+ #ifdef ZMQ_EXPERIMENT
+    //Retrieve the TruthValue summary of a given Handle
     TruthValueRequest getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
         TruthValueRequest r(new GetTruthValueASR(&atomspace,h,vh));
         requestQueue.push(r);
         return r;
     }
 #endif
+*/
 
     /** Retrieve the complete TruthValue of a given Handle */
     TruthValueCompleteRequest getTVComplete(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
@@ -353,15 +530,6 @@ public:
         requestQueue.push(r);
         return r;
     }
-
-#ifdef ZMQ_EXPERIMENT
-    /** Retrieve the TruthValue of a given Handle using ZeroMQ */
-    TruthValueZmqRequest getTVZmq(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
-        TruthValueZmqRequest r(new GetTruthValueZmq(h,vh));
-        //requestQueue.push(r);
-        return r;
-    }
-#endif
 
     /** Change the TruthValue summary of a given Handle */
     VoidRequest setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE) {
