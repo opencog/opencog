@@ -1,6 +1,9 @@
 #include "generation.hpp"
 
 namespace pleasure {
+
+using namespace opencog;
+
     void increase_tree_depth(generation_table& gtable, population& pop, int& from_depth, combo::arity_t& needed_arg_count, int fill_from_arg, const reduct::rule& reduction_rule);
     
     void fill_leaves(population& pop, int& from_arg);

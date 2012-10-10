@@ -6,4 +6,8 @@ IF (HAVE_DIMEMBED)
     ADD_SUBDIRECTORY (dimensionalembedding)
 ENDIF (HAVE_DIMEMBED)
 
-ADD_SUBDIRECTORY (pleasure)
+# Currently, the pleasure code does not build, as it uses various
+# obsolete combo types and routines and etc.  It needs to be ported
+# over to the modern combo interfaces.
+#
+# ADD_SUBDIRECTORY (pleasure)

@@ -2,6 +2,8 @@
 
 namespace pleasure {
 
+using namespace opencog;
+
     bool type_registered(combo::type_tree ttree, generation_table& gtable);
 
     void generate_generation_table(node_list& nlist, combo::type_tree& ttree, generation_table& gtable) {

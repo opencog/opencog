@@ -1,6 +1,7 @@
 #include "population.hpp"
 
 namespace pleasure {
+using namepace opencog;
 
     static int period = 0;
 

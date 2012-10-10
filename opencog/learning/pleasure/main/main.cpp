@@ -8,6 +8,7 @@
 #include <ctime>
 
 using namespace pleasure;
+using namespace opencog;
 
 int main(int argc, char* argv[])
 {

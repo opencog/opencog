@@ -1,6 +1,8 @@
 #include "node_list.hpp"
 
 namespace pleasure {
+using namespace opencog;
+
     //std::istream& stream_to_node_list(std::istream& in, node_list& list) {
     void stream_to_node_list(std::istream& in, node_list& list) {
         std::string str;

@@ -11,19 +11,7 @@ ADD_LIBRARY (pleasure SHARED
 )
 
 TARGET_LINK_LIBRARIES (pleasure
-        comboreduct
-        util 
+	comboreduct
+	util 
 )
 
-
-INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/opencog
-    ${OPENCOG_SOURCE_DIR}/opencog/learning
-    ${OPENCOG_SOURCE_DIR}/opencog/learning/pleasure
-)
-
-LINK_DIRECTORIES (
-    ${OPENCOG_BINARY_DIR}/opencog/learning/pleasure
-    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-    ${OPENCOG_BINARY_DIR}/opencog/util
-)
