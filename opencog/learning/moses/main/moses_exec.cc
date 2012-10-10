@@ -1068,7 +1068,7 @@ int moses_exec(int argc, char** argv)
         //  "quality measure, the selection speed can be greatly increased.\n")
 
         ("fs-max-evals",
-         value<unsigned>(&fs_params.max_evals)->default_value(10000),
+         value<unsigned>(&fs_params.hc_max_evals)->default_value(10000),
          "Hillclimbing parameter.  Maximum number of fitness function "
          "evaluations.\n")
 
