@@ -1,6 +1,7 @@
 __author__ = 'keyvan-m-sadeghi'
 
 from util.csv_dataset_parser import *
+import os
 
 def example1():
     csv_data = ['a,b,c','d,e,f','g,h,i']
@@ -48,7 +49,9 @@ def uci_adult():
 
     incomplete_value_evaluation_fn = lambda v: v == '?' and True or False
 
-    dataset = Dataset('adult.data',
+    address = os.path.join(os.path.dirname(__file__), 'adult.data')
+
+    dataset = Dataset(address,
         CONVERT_TO_STRING, attribute_names,
         lambda_by_indexes_tuples,
         attribute_names[0:14],

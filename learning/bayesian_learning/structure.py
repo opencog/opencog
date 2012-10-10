@@ -119,8 +119,9 @@ class NetworkChromosomeRepresentation(IndividualSetBase):
 if __name__ == '__main__':
     from util.evolutionary import GeneticAlgorithm
 
-    population = BayesNetPopulation(uci_adult() , 10)
+    data = uci_adult()
 
+    population = BayesNetPopulation(data , 10)
 
     ga = GeneticAlgorithm(population=population)
     ga.run()
