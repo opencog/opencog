@@ -6,6 +6,8 @@
 
 namespace boost {
 
+namespace BOOST_FOREACH = foreach;
+
 //namespace foreach {
 // template<>
 //struct is_lightweight_proxy<int> : mpl::true_ { };
