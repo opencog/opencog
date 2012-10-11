@@ -98,6 +98,10 @@ FeatureSet incremental_selection(const FeatureSet& features,
 #endif
 
     for (unsigned i = 1; i <= max_interaction_terms; ++i) {
+
+        struct timeval start;
+        gettimeofday(&start, NULL);
+
         // Define the set of set of features to test for relevancy
         FeatureSet tf = opencog::set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
@@ -153,6 +157,11 @@ FeatureSet incremental_selection(const FeatureSet& features,
         }
         logger().debug("Iteration %d finished with %d features\n",
             i, res.size());
+
+        struct timeval stop, elapsed;
+        gettimeofday(&stop, NULL);
+        timersub(&stop, &start, &elapsed);
+        logger().debug("Elapsed time %d seconds\n", elapsed.tv_sec);
     }
 
     // Log what it is that we actually got.
