@@ -162,6 +162,11 @@ FeatureSet incremental_selection(const FeatureSet& features,
         gettimeofday(&stop, NULL);
         timersub(&stop, &start, &elapsed);
         logger().debug("Elapsed time %d seconds\n", elapsed.tv_sec);
+
+        double rate = 1.0e6 * elapsed.tv_sec + elapsed.tv_usec;
+        rate /= (double) res.size();
+        rate /= (double) res.size();
+        logger().debug("Rate %f microseconds per feature squared\n", rate);
     }
 
     // Log what it is that we actually got.
