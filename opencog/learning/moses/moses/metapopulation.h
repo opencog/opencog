@@ -30,6 +30,13 @@
 
 #include <boost/unordered_set.hpp>
 #include <boost/logic/tribool.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
 
 #include <opencog/comboreduct/combo/combo.h>
 #include <opencog/comboreduct/reduct/reduct.h>
@@ -287,9 +294,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_ddp(pa.diversity_p_norm,
-                    pa.diversity_pressure,
-                    pa.diversity_exponent)
+        _cached_dst(pa.diversity_p_norm)
     {
         init(bases, si_ca, sc);
     }
@@ -306,9 +311,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_ddp(pa.diversity_p_norm,
-                    pa.diversity_pressure,
-                    pa.diversity_exponent)
+        _cached_dst(pa.diversity_p_norm)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
@@ -682,20 +685,18 @@ protected:
     std::mutex _merge_mutex;
 
     /**
-     * Cache for distorted diversity penalty. Maps a
-     * std::set<bscored_combo_tree*> (only 2 elements to represent an
-     * unordered pair) to an distorted diversity penalty. We don't use
+     * Cache for bscore distance between (for diversity penalty). Maps
+     * a std::set<bscored_combo_tree*> (only 2 elements to represent
+     * an unordered pair) to a a bscore distance. We don't use
      * {lru,prr}_cache because
      *
      * 1) we don't need a limit on the cache.
      *
-     * 2) however we need a to remove the pairs containing deleted pointers
+     * 2) we need to remove the pairs containing deleted pointers
      */
-    struct cached_ddp {
+    struct cached_dst {
         // ctor
-        cached_ddp(dp_t lp_norm, dp_t diversity_pressure, dp_t diversity_exponent)
-            : p(lp_norm), dpre(diversity_pressure), dexp(diversity_exponent),
-              misses(0), hits(0) {}
+        cached_dst(dp_t lp_norm) : p(lp_norm), misses(0), hits(0) {}
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
@@ -713,9 +714,7 @@ protected:
                 }
             }
             // miss
-            dp_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p),
-                dp = dpre / (1.0 + dst),
-                ddp = dexp > 0.0 ? pow(dp, dexp) : dp /* no distortion */;
+            dp_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p);
 
             // // debug
             // logger().fine("dst = %f, dp = %f, ddp = %f", dst, dp, ddp);
@@ -724,7 +723,7 @@ protected:
             ++misses;
             {
                 unique_lock lock(mutex);
-                return cache[cts] = ddp;
+                return cache[cts] = dst;
             }
         }
 
@@ -740,6 +739,31 @@ protected:
             }
         }
 
+        /**
+         * Log some statistics about the diversity of the population,
+         * such as mean, std, min, max of the distances.
+         */
+        void log_stats() const {
+            using namespace boost::accumulators;
+            typedef accumulator_set<float, stats<tag::count,
+                                     tag::mean,
+                                     tag::variance,
+                                     tag::min,
+                                     tag::max>> accumulator_t;
+            
+            // compute the statistics
+            accumulator_t acc;
+            for (const auto& v : cache) acc(v.second);
+
+            // log the statistics
+            logger().debug("Diversity of the metapopulation (distances across all pairs of candidates):");
+            logger().debug() << "count=" << boost::accumulators::count(acc)
+                             << ", mean=" << boost::accumulators::mean(acc)
+                             << ", std dev=" << sqrt(boost::accumulators::variance(acc))
+                             << ", min=" << boost::accumulators::min(acc)
+                             << ", max=" << boost::accumulators::max(acc);
+        }
+
         // cache
         typedef boost::shared_mutex cache_mutex;
         typedef boost::shared_lock<cache_mutex> shared_lock;
@@ -747,12 +771,12 @@ protected:
         typedef boost::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> Cache;
         cache_mutex mutex;
 
-        dp_t p, dpre, dexp;
+        dp_t p;
         std::atomic<unsigned> misses, hits;
         Cache cache;
     };
 
-    cached_ddp _cached_ddp;
+    cached_dst _cached_dst;
 };
 
 } // ~namespace moses

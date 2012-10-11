@@ -184,10 +184,14 @@ void metapopulation::set_diversity()
 
     // // debug
     // std::atomic<unsigned> dp_count(0); // count the number of
-    //                                    // calls of _cached_ddp
-    // unsigned lhits = _cached_ddp.hits.load(),
-    //     lmisses = _cached_ddp.misses.load();
+    //                                    // calls of _cached_dst
+    // unsigned lhits = _cached_dst.hits.load(),
+    //     lmisses = _cached_dst.misses.load();
     // // ~debug
+
+    // if diversity_exponent is negative or null then the generalized
+    // mean is replaced by the max
+    bool dp_max = params.diversity_exponent <= 0.0;
 
     auto update_diversity_penalty = [&](bsct_dp_pair& v) {
 
@@ -203,7 +207,9 @@ void metapopulation::set_diversity()
             // compute diversity penalty between bs and the last
             // element of the pool
             const bscored_combo_tree& last = *pool.crbegin();
-            dp_t last_dp = this->_cached_ddp(&bsct, &last);
+            dp_t last_dst = this->_cached_dst(&bsct, &last),
+            last_dp = params.diversity_pressure / (1.0 + last_dst),
+            last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity_exponent);
 
             // // debug
             // ++dp_count;
@@ -212,12 +218,12 @@ void metapopulation::set_diversity()
             // add it to v.second and compute the aggregated
             // diversity penalty
             dp_t adp;
-            if (params.diversity_exponent > 0.0) {
-                v.second += last_dp;
-                adp = this->aggregated_dps(v.second, pool.size());
-            } else {
-                v.second = std::max(v.second, last_dp);
+            if (dp_max) {
+                v.second = std::max(v.second, last_ddp);
                 adp = v.second;
+            } else {
+                v.second += last_ddp;
+                adp = this->aggregated_dps(v.second, pool.size());
             }
 
             // update v.first
@@ -257,15 +263,18 @@ void metapopulation::set_diversity()
     // logger().debug() << "Number of dst evals = " << dp_count;
     // logger().debug() << "Is lock free? " << dp_count.is_lock_free();
     // logger().debug() << "Number of hits = "
-    //                  << _cached_ddp.hits.load() - lhits;
+    //                  << _cached_dst.hits.load() - lhits;
     // logger().debug() << "Number of misses = "
-    //                  << _cached_ddp.misses.load() - lmisses;
-    // logger().debug() << "Total number of hits = " << _cached_ddp.hits;
-    // logger().debug() << "Total number of misses = " << _cached_ddp.misses;
+    //                  << _cached_dst.misses.load() - lmisses;
+    // logger().debug() << "Total number of hits = " << _cached_dst.hits;
+    // logger().debug() << "Total number of misses = " << _cached_dst.misses;
     // // ~debug
 
     // Replace the existing metapopulation with the new one.
     swap(pool);
+
+    // log diversity of the pool
+    _cached_dst.log_stats();
 }
 
 void metapopulation::log_selected_exemplar(const_iterator exemplar_it)
@@ -685,9 +694,9 @@ void metapopulation::resize_metapop()
         popsz --;
     }
 
-    // remove them from _cached_cnd
+    // remove them from _cached_dst
     boost::sort(ptr_seq);
-    _cached_ddp.erase_ptr_seq(ptr_seq);
+    _cached_dst.erase_ptr_seq(ptr_seq);
 }
 
 // Return the set of candidates not present in the metapopulation.
