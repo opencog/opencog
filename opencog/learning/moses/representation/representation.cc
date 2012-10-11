@@ -171,6 +171,9 @@ representation::representation(const reduct::rule& simplify_candidate,
         offset++;
     }
     logger().info() << "Number of contin knobs mapped: " << contin.size();
+    logger().info() << "Field set, in bytes: " << _fields.byte_size();
+    size_t is = sizeof(instance) + sizeof(packed_t) * _fields.packed_width();
+    logger().info() << "One instance, in bytes: " << is;
 
     if (logger().isDebugEnabled()) {
         std::stringstream ss;

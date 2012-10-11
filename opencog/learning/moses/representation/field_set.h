@@ -366,6 +366,18 @@ struct field_set
         return _fields.size();
     }
 
+    // How many bytes are we burning ip?
+    size_t byte_size() const
+    {
+        size_t sz = sizeof(field_set);
+        sz += _fields.size() * sizeof(field);
+        sz += _term.size() * sizeof(term_spec);
+        sz += _contin.size() * sizeof(contin_spec);
+        sz += _disc.size() * sizeof(disc_spec);
+        sz += _contin_raw_offsets.size() * sizeof(size_t);
+        return sz;
+    }
+
     // Dimension size, number of actual knobs to consider, as term and
     // contin may take several raw knobs
     size_t dim_size() const {

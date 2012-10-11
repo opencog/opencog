@@ -2,7 +2,7 @@
  * opencog/learning/moses/representation/build_knobs.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Moshe Looks, Predrag Janicic, Linas Vepstas
