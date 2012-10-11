@@ -81,7 +81,7 @@ struct metapop_printer
      * Print metapopulation summary.
      */
     void operator()(metapopulation &metapop,
-                   moses_statistics& stats) const
+                    moses_statistics& stats) const
     {
         // We expect the mpi worker processes to have an empty
         // metapop at this point.  So don't print alarming output

@@ -541,7 +541,7 @@ void mpi_moses(metapopulation& mp,
     bool done = false;
 
     // Print legend for the columns of the stats.
-    print_stats_header(NULL);
+    print_stats_header(NULL, false /* XXX stats for diversity, should be fixed */);
 
     while (true)
     {

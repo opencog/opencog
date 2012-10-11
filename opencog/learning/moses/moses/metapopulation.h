@@ -174,7 +174,7 @@ struct metapop_parameters
     bool linear_contin;
 };
 
-void print_stats_header (optim_stats *os);
+void print_stats_header (optim_stats *os, bool diversity_enabled);
 
 struct deme_expander
 {
@@ -664,12 +664,71 @@ struct metapopulation : bscored_combo_tree_ptr_set
 
     deme_expander _dex;
 
+    // Structure holding stats about diversity
+    struct diversity_stats {
+        float count,            // number of pairs of candidates considered
+            mean,               // average bscore distance between all candidates
+            std,                // std dev bscore distance between all candidates
+            min,                // min bscore distance between all candidates
+            max;                // max bscore distance between all candidates
+    };
+
+    /**
+     * Gather statistics about the diversity of the n best candidates
+     * (if n is negative then all candidates are included)
+     */
+    diversity_stats gather_diversity_stats(int n) {
+        using namespace boost::accumulators;
+        typedef accumulator_set<float, stats<tag::count,
+                                     tag::mean,
+                                     tag::variance,
+                                     tag::min,
+                                     tag::max>> accumulator_t;
+        if (n < 0)
+            return _cached_dst.gather_stats();
+        else {
+            using namespace boost::accumulators;
+            typedef accumulator_set<float, stats<tag::count,
+                                     tag::mean,
+                                     tag::variance,
+                                     tag::min,
+                                     tag::max>> accumulator_t;
+            
+            // compute the statistics
+            accumulator_t acc;
+            auto from_i = cbegin(),
+                to = std::next(cbegin(), std::min(n, (int)size()));
+            for (; from_i != to; ++from_i) {
+                for (auto from_j = cbegin(); from_j != from_i; ++from_j) {
+                    cached_dst::ptr_pair cts = {&*from_j, &*from_i};
+                    auto it = _cached_dst.cache.find(cts);
+                    OC_ASSERT(it != _cached_dst.cache.cend(),
+                              "Candidate isn't in the cache that must be a bug");
+                    acc(it->second);
+                }
+            }
+            
+            // gather stats
+            diversity_stats ds;
+            ds.count = boost::accumulators::count(acc);
+            ds.mean = boost::accumulators::mean(acc);
+            ds.std = sqrt(boost::accumulators::variance(acc));
+            ds.min = boost::accumulators::min(acc);
+            ds.max = boost::accumulators::max(acc);
+
+            return ds;
+        }
+    }
+    
 protected:
     static const unsigned min_pool_size = 250;
     
     const bscore_base& _bscorer; // behavioral score
-    metapop_parameters params;
 
+public:
+    metapop_parameters params;
+    
+protected:
     size_t _merge_count;
 
     // The best score ever found during search.
@@ -738,12 +797,12 @@ protected:
                     ++it;
             }
         }
-
+        
         /**
-         * Log some statistics about the diversity of the population,
-         * such as mean, std, min, max of the distances.
+         * Gather some statistics about the diversity of the
+         * population, such as mean, std, min, max of the distances.
          */
-        void log_stats() const {
+        diversity_stats gather_stats() const {
             using namespace boost::accumulators;
             typedef accumulator_set<float, stats<tag::count,
                                      tag::mean,
@@ -755,13 +814,15 @@ protected:
             accumulator_t acc;
             for (const auto& v : cache) acc(v.second);
 
-            // log the statistics
-            logger().debug("Diversity of the metapopulation (distances across all pairs of candidates):");
-            logger().debug() << "count=" << boost::accumulators::count(acc)
-                             << ", mean=" << boost::accumulators::mean(acc)
-                             << ", std dev=" << sqrt(boost::accumulators::variance(acc))
-                             << ", min=" << boost::accumulators::min(acc)
-                             << ", max=" << boost::accumulators::max(acc);
+            // gather stats
+            diversity_stats ds;
+            ds.count = boost::accumulators::count(acc);
+            ds.mean = boost::accumulators::mean(acc);
+            ds.std = sqrt(boost::accumulators::variance(acc));
+            ds.min = boost::accumulators::min(acc);
+            ds.max = boost::accumulators::max(acc);
+
+            return ds;
         }
 
         // cache
@@ -777,6 +838,12 @@ protected:
     };
 
     cached_dst _cached_dst;
+
+public:
+    const cached_dst& get_cached_dst() const {
+        return _cached_dst;
+    }
+
 };
 
 } // ~namespace moses

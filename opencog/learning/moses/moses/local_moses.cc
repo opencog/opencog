@@ -112,7 +112,7 @@ void local_moses(metapopulation& mp,
     optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
 
     // Print legend for the columns of the stats.
-    print_stats_header(os);
+    print_stats_header(os, mp.params.diversity_pressure > 0.0);
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
@@ -125,15 +125,33 @@ void local_moses(metapopulation& mp,
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
             stringstream ss;
-            ss << "Stats: " << stats.n_expansions;
-            ss << "\t" << stats.n_evals;    // number of evaluations so far
-            ss << "\t" << mp.size();       // size of the metapopulation
-            ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
-            ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
+            ss << "Stats: " << stats.n_expansions
+               << "\t" << stats.n_evals    // number of evaluations so far
+               << "\t" << mp.size()       // size of the metapopulation
+               << "\t" << mp.best_score() // score of the highest-ranked exemplar.
+               << "\t" << get_complexity(mp.best_composite_score()); // as above.
             if (os) {
-                ss << "\t" << os->field_set_size;  // number of bits in the knobs
-                ss << "\t" << os->nsteps;  // number of iterations of optimizer
-                ss << "\t" << os->over_budget;  // exceeded max_evals
+                ss << "\t" << os->field_set_size  // number of bits in the knobs
+                   << "\t" << os->nsteps  // number of iterations of optimizer
+                   << "\t" << os->over_budget;  // exceeded max_evals
+            }
+            if (mp.params.diversity_pressure > 0.0) {
+                // diversity stats over all metapopulation
+                auto ds = mp.gather_diversity_stats(-1);
+                ss << "\t" << ds.count // number of pairs of candidates
+                   << "\t" << ds.mean  // average distance
+                   << "\t" << ds.std   // average dst dev
+                   << "\t" << ds.min   // min distance
+                   << "\t" << ds.max;  // max distance
+
+                // diversity stats over all best n candidates of the metapopulation
+                // TODO use the option of the output
+                auto best_ds = mp.gather_diversity_stats(pa.max_cnd_output);
+                ss << "\t" << best_ds.count // number of pairs of candidates
+                   << "\t" << best_ds.mean  // average distance
+                   << "\t" << best_ds.std   // average dst dev
+                   << "\t" << best_ds.min   // min distance
+                   << "\t" << best_ds.max;  // max distance                
             }
             logger().info(ss.str());
         }

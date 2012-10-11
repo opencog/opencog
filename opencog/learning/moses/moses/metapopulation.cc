@@ -272,9 +272,6 @@ void metapopulation::set_diversity()
 
     // Replace the existing metapopulation with the new one.
     swap(pool);
-
-    // log diversity of the pool
-    _cached_dst.log_stats();
 }
 
 void metapopulation::log_selected_exemplar(const_iterator exemplar_it)

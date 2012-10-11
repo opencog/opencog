@@ -1261,9 +1261,13 @@ int moses_exec(int argc, char** argv)
     hc_params.fraction_of_nn = hc_frac_of_nn;
 
     // Set moses_parameters.
-    moses_parameters moses_params(
-        vm, jobs, local, max_evals, max_gens, max_score);
+    moses_parameters moses_params(vm, jobs);
+    moses_params.local = local;
     moses_params.mpi = enable_mpi;
+    moses_params.max_evals = max_evals;
+    moses_params.max_gens = max_gens;
+    moses_params.max_score = max_score;
+    moses_params.max_cnd_output = result_count;
 
     // Infer arity
     combo::arity_t arity = infer_arity(problem, problem_size, combo_str);

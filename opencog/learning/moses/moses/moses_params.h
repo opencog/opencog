@@ -45,9 +45,11 @@ struct moses_parameters
                      bool _local = true,
                      int _max_evals = 10000,
                      int _max_gens = -1,
-                     score_t _max_score = 0)
+                     score_t _max_score = 0,
+                     int _max_cnd_output = -1)
         : local(_local), mpi(false), force_feed(false), jobs(_jobs), vm(_vm),
-          max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score)
+          max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score),
+          max_cnd_output(_max_cnd_output)
     {}
 
     // Distributed solver control.
@@ -59,11 +61,17 @@ struct moses_parameters
 
     // total maximun number of evals
     int max_evals;
+    
     // the max number of demes to create and optimize, if negative,
     // then no limit
     int max_gens;
+    
     // the max score
     score_t max_score;
+
+    // the maximum number of candidates to output (if negative then it
+    // output all candidates
+    int max_cnd_output;
 };
 
 /**

@@ -51,13 +51,15 @@ const char * version_string =
 
 #endif
 
-void print_stats_header (optim_stats *os)
+void print_stats_header (optim_stats *os, bool diversity)
 {
     // Print legend for the columns of the stats.
     if (logger().isInfoEnabled()) {
         stringstream ss;
         ss << "Stats: # \n"
-           << "Stats: # Stats are tab-separated, ready for graphing.  Column explanation:\n"
+           << "Stats: # Stats are tab-separated, ready for graphing.\n"
+           << "Stats: # You can also use the script parse_log.py to extract a CSV file given a moses log file.\n"
+           << "Column explanation:\n"
            << "Stats: # \n"
            << "Stats: # gen is the generation number.\n"
            << "Stats: # num_evals is the number of scoring function evaluations so far.\n"
@@ -69,10 +71,26 @@ void print_stats_header (optim_stats *os)
               << "Stats: # optim_steps is the number of steps the optimizer took.\n"
               << "Stats: # over_budget is bool, T if search exceeded scoring func eval budget.\n";
         }
+        if (diversity) {
+            ss << "Stats: # n_pairs is the number of pairs of candidates used to compute the diversity stats.\n"
+               << "Stats: # mean_dst is the average bscore distance between 2 candidates.\n"
+               << "Stats: # std_dst is the standard deviation of the average bscore distance between 2 candidates.\n"
+               << "Stats: # min_dst is the minimum bscore distance between 2 candidates.\n"
+               << "Stats: # max_dst is the maximum bscore distance between 2 candidates.\n";
+            ss << "Stats: # best_n_pairs is the number of pairs of candidates used to compute the diversity stats amongst the best candidates to be output.\n"
+               << "Stats: # best_mean_dst is the average bscore distance between 2 candidates amongst the best candidates to be output.\n"
+               << "Stats: # best_std_dst is the standard deviation of the average bscore distance between 2 candidates amongst the best candidates to be output.\n"
+               << "Stats: # best_min_dst is the minimum bscore distance between 2 candidates amongst the best candidates to be output.\n"
+               << "Stats: # best_max_dst is the maximum bscore distance between 2 candidates amongst the best candidates to be output.\n";
+        }
         ss << "Stats: # \n"
            << "Stats: # gen\tnum_evals\tmetapop_size\tbest_score\tcomplexity";
         if (os) {
             ss << "\tfield_set_size\toptim_steps\tover_budget";
+        }
+        if (diversity) {
+            ss << "\tn_pairs\tmean_dst\tstd_dst\tmin_dst\tmax_dst"
+               << "\tbest_n_pairs\tbest_mean_dst\tbest_std_dst\tbest_min_dst\tbest_max_dst";                
         }
         logger().info(ss.str());
     }
