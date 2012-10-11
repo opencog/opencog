@@ -63,6 +63,7 @@ void print_stats_header (optim_stats *os, bool diversity)
            << "Stats: # \n"
            << "Stats: # gen is the generation number.\n"
            << "Stats: # num_evals is the number of scoring function evaluations so far.\n"
+           << "Stats: # elapsed is the wall-clock time, in seconds, since the last print.\n"
            << "Stats: # metapop_size is the size of the metapopulation.\n"
            << "Stats: # best_score is the highest raw score seen, of all exemplars.\n"
            << "Stats: # complexity is in bits, of the highest-composite score exemplar.\n";
@@ -84,7 +85,7 @@ void print_stats_header (optim_stats *os, bool diversity)
                << "Stats: # best_max_dst is the maximum bscore distance between 2 candidates amongst the best candidates to be output.\n";
         }
         ss << "Stats: # \n"
-           << "Stats: # gen\tnum_evals\tmetapop_size\tbest_score\tcomplexity";
+           << "Stats: # gen\tnum_evals\telapsed\tmetapop_size\tbest_score\tcomplexity";
         if (os) {
             ss << "\tfield_set_size\toptim_steps\tover_budget";
         }

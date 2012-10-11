@@ -3663,3 +3663,25 @@ feats   time (secs)  div by N    N-squared
  428     128          299          0.699 mS
  988     658          666          0.674 mS
 2231    3480         1560          0.699 mS
+
+
+==============================================================
+Again, this time with 
+
+ ./opencog/learning/moses/main/moses -Hit -i ./reut-reduced-1064.csv
+    -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
+   --hc-max-nn-evals=5000 -j12 -m2048000 -freut-red-1064.log
+
+
+[INFO] Inferred arity = 1064
+
+      final   tot    disc   contin   final         approx.     deme  knob-bld
+deme  gens   knobs   knobs   knobs   score   cpxy  memusage    time    time
+----  ----   -----   -----   -----   -----   ----  --------    -----   ----
+  1    76    59584    59584     0    -1504    80     2.2 GB      829      3
+  2    85   285213   240441   44772  -1295   125     2.2GB      9898     12
+  3    50   423545   363849   59696    608    87     2.2GB     10181     20
+  4    25   361815   317043   44772    449    91     2.2GB      4322     17
+  5     -  1517327   334066 1183261     -     -     >24GB  OOM kill      19  
+
+Yikes! clearly the field set size must have exploded for the contin knobs !?

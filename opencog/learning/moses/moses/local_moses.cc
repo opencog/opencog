@@ -114,6 +114,9 @@ void local_moses(metapopulation& mp,
     // Print legend for the columns of the stats.
     print_stats_header(os, mp.params.diversity_pressure > 0.0);
 
+    struct timeval start;
+    gettimeofday(&start, NULL);
+
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
@@ -124,9 +127,16 @@ void local_moses(metapopulation& mp,
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
+
+            struct timeval stop, elapsed;
+            gettimeofday(&stop, NULL);
+            timersub(&stop, &start, &elapsed);
+            start = stop;
+
             stringstream ss;
             ss << "Stats: " << stats.n_expansions
                << "\t" << stats.n_evals    // number of evaluations so far
+               << "\t" << elapsed.tv_sec   // wall-clock time.
                << "\t" << mp.size()       // size of the metapopulation
                << "\t" << mp.best_score() // score of the highest-ranked exemplar.
                << "\t" << get_complexity(mp.best_composite_score()); // as above.

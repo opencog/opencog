@@ -410,13 +410,16 @@ void mpi_moses(metapopulation& mp,
 
     // If we are here, then we are the root node.  The root will act
     // as a dispatcher to all of the worker nodes.
-// XXX is mp.best_score thread safe !???? since aonther thread migh be updating this as we
+// XXX is mp.best_score thread safe !???? since another thread might be updating this as we
 // come around ...
 
     size_t tot_workers = mompi.num_workers();
     worker_pool wrkpool(tot_workers);
 
     std::atomic<int> thread_count(0);
+
+    struct timeval start;
+    gettimeofday(&start, NULL);
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
@@ -473,9 +476,16 @@ cout<<"duuude master "<<getpid() <<" from="<<worker.rank << " got evals="<<n_eva
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
+
+            struct timeval stop, elapsed;
+            gettimeofday(&stop, NULL);
+            timersub(&stop, &start, &elapsed);
+            start = stop;
+
             stringstream ss;
             ss << "Stats: " << stats.n_expansions;
             ss << "\t" << stats.n_evals;    // number of evaluations so far
+            ss << "\t" << elapsed.tv_sec;   // wall-clock time.
             ss << "\t" << mp.size();       // size of the metapopulation
             ss << "\t" << mp.best_score(); // score of the highest-ranked exemplar.
             ss << "\t" << get_complexity(mp.best_composite_score()); // as above.
