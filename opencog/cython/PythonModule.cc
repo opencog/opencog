@@ -2,17 +2,11 @@
 
 #include "agent_finder_api.h"
 
-// for backward compatibility as from boost 1.46 filesystem 3 is the default
-#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
-
-#include <boost/foreach.hpp>
-#ifndef foreach
-#define foreach  BOOST_FOREACH
-#endif
 
 #include <opencog/util/Config.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/foreach.h>
 
 using std::vector;
 using std::string;
