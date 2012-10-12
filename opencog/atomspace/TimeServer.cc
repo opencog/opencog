@@ -234,6 +234,7 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
         OC_ASSERT(a->getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", a->getArity(h));
         Handle timeNode = a->getOutgoing(h, 0);
         
+#if DOES_NOT_COMPILE_RIGHT_NOW
         // If it's not a TimeNode, then it's a VariableNode which can stand in for a TimeNode. So we can ignore it here.
         if (a->getType(timeNode) == TIME_NODE) {
             Handle timedAtom = a->getOutgoing(h, 1);
@@ -253,6 +254,7 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
 
         }
         remove(timedAtom, Temporal::getFromTimeNodeName(a->getName(timeNode).c_str()));
+#endif
     }
 }
 
