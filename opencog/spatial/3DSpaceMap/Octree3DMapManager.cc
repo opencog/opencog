@@ -345,7 +345,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
                 continue;
 
             // calculate from this block to find all the blocks combine with it
-            vector<Block3D*> newBlockList = mRootOctree->findAllBlocksCombinedWith(&((BlockVector)(*it)));
+            vector<Block3D*> newBlockList = mRootOctree->findAllBlocksCombinedWith(&*it);
 
             // create a new entity for this part of original entity
             BlockEntity* newEntity = new BlockEntity(newBlockList);
@@ -973,7 +973,7 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
      vector<Block3D*>::const_iterator iter;
      vector<Handle>::const_iterator iter1;
      vector<BlockEntity*>::const_iterator iter3;
-     map<BlockEntity*,AdjacentInfo>::const_iterator iter4;
+     map<BlockEntity*,AdjacentInfo>::iterator iter4;
 
      // TODO: Send raw block clusters data to learning server
      // construct these adjacent blocks messages to send to the learning server
@@ -1006,7 +1006,7 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
                     }
                     else
                     {
-                        ((AdjacentInfo)(iter4->second)).adjacentUnitNum ++;
+                        iter4->second.adjacentUnitNum ++;
                     }
 
                 }
