@@ -80,6 +80,18 @@ const ActionParamType& ActionParamType::ENTITY()
     return *result;
 }
 
+const ActionParamType& ActionParamType::FUZZY_INTERVAL_INT()
+{
+    static ActionParamType* result = new ActionParamType(FUZZY_INTERVAL_INT_CODE, "fuzzy_interval_int");
+    return *result;
+}
+
+const ActionParamType& ActionParamType::FUZZY_INTERVAL_FLOAT()
+{
+    static ActionParamType* result = new ActionParamType(FUZZY_INTERVAL_FLOAT_CODE, "fuzzy_interval_float");
+    return *result;
+}
+
 // Constructors
 
 ActionParamType::ActionParamType() {};
@@ -133,6 +145,8 @@ void ActionParamType::init()
         VECTOR();
         ROTATION();
         ENTITY();
+        FUZZY_INTERVAL_INT();
+        FUZZY_INTERVAL_FLOAT();
 
         initialized = true;
     }

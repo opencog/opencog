@@ -55,7 +55,7 @@ private:
 
     unsigned long lastTimestamp; 
 
-    typedef std::vector <Entity::SPATIAL_RELATION> SPATIAL_RELATION_VECTOR;
+    typedef std::vector <spatial::SPATIAL_RELATION> SPATIAL_RELATION_VECTOR;
     typedef SPATIAL_RELATION_VECTOR::iterator SPATIAL_RELATION_VECTOR_ITER; 
 
     /**

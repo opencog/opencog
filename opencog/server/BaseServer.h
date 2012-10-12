@@ -58,6 +58,8 @@ public:
     /** Returns the atomspace instance. */
     static AtomSpace* getAtomSpace();
 
+    static AtomSpace& getAtomSpaceReference();
+
     /** Returns a new BaseServer instance. */
     static BaseServer* createInstance(void);
 

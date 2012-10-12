@@ -166,6 +166,7 @@ public:
     /**
      * @return The pet action sequence value in a list of pet actions.
      */
+
     unsigned int getSequence() const;
 
     /**

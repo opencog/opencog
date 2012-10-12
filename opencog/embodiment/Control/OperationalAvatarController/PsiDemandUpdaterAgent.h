@@ -82,27 +82,27 @@ private:
             demandName(demandName), hDemandGoal(hDemandGoal), hFuzzyWithin(hFuzzyWithin)
         {};
 
-        inline const std::string & getDemandName() 
+        inline const std::string & getDemandName() const
         {
             return this->demandName;
         }
 
-        inline double getDemandValue()
+        inline double getDemandValue() const
         {
             return this->currentDemandValue;
         }
 
-        inline double getDemandTruthValue()
+        inline double getDemandTruthValue() const
         {
             return this->currentDemandTruthValue;
         }
 
-        inline Handle getHandleDemandGoal()
+        inline Handle getHandleDemandGoal() const
         {
             return this->hDemandGoal;
         }
    
-        inline Handle getHandleFuzzyWithin()
+        inline Handle getHandleFuzzyWithin() const
         {
             return this->hFuzzyWithin;
         }
@@ -209,6 +209,8 @@ public:
     void forceInitNextCycle() {
         this->bInitialized = false;
     }
+
+    double getDemandValue(string demanName) const;
 
 }; // class
 

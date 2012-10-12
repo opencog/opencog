@@ -54,7 +54,7 @@ namespace opencog
         class Entity
         {
         public:
-
+/*
             enum SPATIAL_RELATION 
             {
                 LEFT_OF = 0,
@@ -75,7 +75,7 @@ namespace opencog
         
                 TOTAL_RELATIONS
             };
-
+*/
             enum AXIS_LIMITS 
             {
                 XMIN = 0, XMAX,
@@ -412,10 +412,10 @@ namespace opencog
              *
              * @note entityA is 'this' entity, that is the entity launches this function. 
              */
-            std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
+            /* std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
                                                                    double besideDistance,
                                                                    const Entity& entityB ) const;
-
+            */
             /**
              * Finds the list of spatial relationships that apply to the three entities.
              * Currently this can only be BETWEEN, which states that A is between B and C
@@ -432,15 +432,15 @@ namespace opencog
              *
              * @note entityA is 'this' entity, that is the entity launches this function. 
              */
-            std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
+            /*std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer,
                                                                    double besideDistance,
                                                                    const Entity& entityB,
                                                                    const Entity& entityC ) const;
-
+*/
             /**
              * Return a string description of the relation
              */
-            static std::string spatialRelationToString( SPATIAL_RELATION relation );
+         //   static std::string spatialRelationToString( SPATIAL_RELATION relation );
 
         protected:
             long id;

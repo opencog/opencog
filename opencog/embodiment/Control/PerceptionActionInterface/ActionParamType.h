@@ -59,6 +59,8 @@ enum ActionParamTypeCode {
     VECTOR_CODE,
     ROTATION_CODE,
     ENTITY_CODE,
+    FUZZY_INTERVAL_INT_CODE,
+    FUZZY_INTERVAL_FLOAT_CODE,
 
     NUMBER_OF_ACTION_PARAM_TYPES // This must be at the end of the enumeration in order to count the number of action types.
 };
@@ -97,6 +99,8 @@ public:
     static const ActionParamType& VECTOR();
     static const ActionParamType& ROTATION();
     static const ActionParamType& ENTITY();
+    static const ActionParamType& FUZZY_INTERVAL_INT();
+    static const ActionParamType& FUZZY_INTERVAL_FLOAT();
 
 private:
     // Attributes

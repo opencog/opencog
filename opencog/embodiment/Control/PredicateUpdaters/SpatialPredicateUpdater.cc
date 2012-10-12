@@ -101,24 +101,24 @@ swapRelations(SPATIAL_RELATION_VECTOR & relations)
 {
     SPATIAL_RELATION_VECTOR newRelations; 
 
-    foreach (Entity::SPATIAL_RELATION rel, relations) {
-        switch (rel) {
-            case Entity::LEFT_OF:     newRelations.push_back(Entity::RIGHT_OF);    break; 
-            case Entity::RIGHT_OF:    newRelations.push_back(Entity::LEFT_OF);     break; 
-            case Entity::ABOVE:       newRelations.push_back(Entity::BELOW);       break; 
-            case Entity::BELOW:       newRelations.push_back(Entity::ABOVE);       break; 
-            case Entity::BEHIND:      newRelations.push_back(Entity::IN_FRONT_OF); break; 
-            case Entity::IN_FRONT_OF: newRelations.push_back(Entity::BEHIND);      break; 
-            case Entity::BESIDE:      newRelations.push_back(Entity::BESIDE);      break; 
-            case Entity::NEAR:        newRelations.push_back(Entity::NEAR);        break; 
-            case Entity::FAR_:        newRelations.push_back(Entity::FAR_);        break;
-            case Entity::TOUCHING:    newRelations.push_back(Entity::TOUCHING);    break; 
-            case Entity::INSIDE:      newRelations.push_back(Entity::OUTSIDE);     break; 
-            case Entity::OUTSIDE:     newRelations.push_back(Entity::INSIDE);      break; 
-            case Entity::ADJACENT:    newRelations.push_back(Entity::ADJACENT);    break; 
-            default: break;                                       
-        } // switch (rel)
-    } // foreach (Entity::SPATIAL_RELATION rel, relations) 
+//    foreach (spatial::SPATIAL_RELATION rel, relations) {
+//        switch (rel) {
+//            case spatial::LEFT_OF:     newRelations.push_back(spatial::RIGHT_OF);    break;
+//            case spatial::RIGHT_OF:    newRelations.push_back(spatial::LEFT_OF);     break;
+//            case spatial::ABOVE:       newRelations.push_back(spatial::BELOW);       break;
+//            case spatial::BELOW:       newRelations.push_back(spatial::ABOVE);       break;
+//            case spatial::BEHIND:      newRelations.push_back(spatial::IN_FRONT_OF); break;
+//            case spatial::IN_FRONT_OF: newRelations.push_back(spatial::BEHIND);      break;
+//            case spatial::BESIDE:      newRelations.push_back(spatial::BESIDE);      break;
+//            case spatial::NEAR:        newRelations.push_back(spatial::NEAR);        break;
+//            case spatial::FAR_:        newRelations.push_back(spatial::FAR_);        break;
+//            case spatial::TOUCHING:    newRelations.push_back(spatial::TOUCHING);    break;
+//            case spatial::INSIDE:      newRelations.push_back(spatial::OUTSIDE);     break;
+//            case spatial::OUTSIDE:     newRelations.push_back(spatial::INSIDE);      break;
+//            case spatial::ADJACENT:    newRelations.push_back(spatial::ADJACENT);    break;
+//            default: break;
+//        } // switch (rel)
+//    } // foreach (spatial::SPATIAL_RELATION rel, relations)
 
     return newRelations; 
 }
@@ -165,16 +165,16 @@ computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 
         // Compute size-2 directional spatial relations (observer is the reference object)
         if (angle >= -45 && angle <= 45) 
-            relationsBO.push_back(Entity::IN_FRONT_OF); 
+            relationsBO.push_back(spatial::IN_FRONT_OF);
         else if (angle >= 45 && angle <= 135)
-            relationsBO.push_back(Entity::LEFT_OF);
+            relationsBO.push_back(spatial::LEFT_OF);
         else if (angle >= -135 && angle <= -45)
-            relationsBO.push_back(Entity::RIGHT_OF);
+            relationsBO.push_back(spatial::RIGHT_OF);
         else
-            relationsBO.push_back(Entity::BEHIND); 
+            relationsBO.push_back(spatial::BEHIND);
 
         if ( objectPosition.z - entityB->getHeight()*0.5 > observerPosition.z + observerEntity->getHeight() ) 
-            relationsBO.push_back(Entity::ABOVE); 
+            relationsBO.push_back(spatial::ABOVE);
 
         relationsOB = this->swapRelations(relationsBO); 
 
@@ -300,7 +300,7 @@ compute3SizeSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
                     SPATIAL_RELATION_VECTOR relationsABC;
 
                     if ( this->isBetween(relationsAB, relationsAC) ) {
-                        relationsABC.push_back(Entity::BETWEEN); 
+                        relationsABC.push_back(spatial::BETWEEN);
                         this->addSpatialRelations(relationsABC, atomSpace, timestamp,
                                                   objectA, objectB, objectC
                                                  ); 
@@ -345,26 +345,26 @@ bool SpatialPredicateUpdater::isBetween(const SPATIAL_RELATION_VECTOR & relation
          bFrontAC  = false, 
          bBehindAC = false; 
 
-    foreach (Entity::SPATIAL_RELATION relAB, relationsAB) {
+    foreach (spatial::SPATIAL_RELATION relAB, relationsAB) {
         switch (relAB) {
-            case Entity::LEFT_OF:     bLeftAB  = true; break; 
-            case Entity::RIGHT_OF:    bRightAB = true; break; 
-            case Entity::ABOVE:       bAboveAB = true; break; 
-            case Entity::BELOW:       bBelowAB = true; break; 
-            case Entity::BEHIND:      bBelowAB = true; break; 
-            case Entity::IN_FRONT_OF: bFrontAB = true; break; 
+            case spatial::LEFT_OF:     bLeftAB  = true; break;
+            case spatial::RIGHT_OF:    bRightAB = true; break;
+            case spatial::ABOVE:       bAboveAB = true; break;
+            case spatial::BELOW:       bBelowAB = true; break;
+            case spatial::BEHIND:      bBelowAB = true; break;
+            case spatial::IN_FRONT_OF: bFrontAB = true; break;
             default: break; 
         } 
     } // foreach
 
-    foreach (Entity::SPATIAL_RELATION relAC, relationsAC) {
+    foreach (spatial::SPATIAL_RELATION relAC, relationsAC) {
         switch (relAC) {
-            case Entity::LEFT_OF:     bLeftAC  = true; break; 
-            case Entity::RIGHT_OF:    bRightAC = true; break; 
-            case Entity::ABOVE:       bAboveAC = true; break; 
-            case Entity::BELOW:       bBelowAC = true; break; 
-            case Entity::BEHIND:      bBelowAC = true; break; 
-            case Entity::IN_FRONT_OF: bFrontAC = true; break; 
+            case spatial::LEFT_OF:     bLeftAC  = true; break;
+            case spatial::RIGHT_OF:    bRightAC = true; break;
+            case spatial::ABOVE:       bAboveAC = true; break;
+            case spatial::BELOW:       bBelowAC = true; break;
+            case spatial::BEHIND:      bBelowAC = true; break;
+            case spatial::IN_FRONT_OF: bFrontAC = true; break;
             default: break; 
         } 
     } // foreach
@@ -385,29 +385,29 @@ addSpatialRelations(const SPATIAL_RELATION_VECTOR & relations,
                    )
 {
 
-    // Clear all the relations firstly
-    if ( objectC == Handle::UNDEFINED ) {
-        for (int rel = 0; rel < (int)Entity::TOTAL_RELATIONS; ++ rel) {
-            string predicateName = Entity::spatialRelationToString( (Entity::SPATIAL_RELATION) rel );
-            Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
-                                                           predicateName, 
-                                                           TruthValue::FALSE_TV(), 
-                                                           objectA, objectB, objectC
-                                                          );
-        }
-    }
+//    // Clear all the relations firstly
+//    if ( objectC == Handle::UNDEFINED ) {
+//        for (int rel = 0; rel < (int)spatial::TOTAL_RELATIONS; ++ rel) {
+//            string predicateName = spatial::spatialRelationToString( (spatial::SPATIAL_RELATION) rel );
+//            Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
+//                                                           predicateName,
+//                                                           TruthValue::FALSE_TV(),
+//                                                           objectA, objectB, objectC
+//                                                          );
+//        }
+//    }
     
-    // Set relations
-    foreach (Entity::SPATIAL_RELATION rel, relations) {
-        string predicateName = Entity::spatialRelationToString(rel);
-        Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
-                                                       predicateName, 
-                                                       TruthValue::TRUE_TV(), 
-                                                       objectA, objectB, objectC
-                                                      );
-        Handle atTime = atomSpace.getTimeServer().addTimeInfo(eval, timestamp);
-        atomSpace.setTV(atTime, TruthValue::TRUE_TV());
-    }
+//    // Set relations
+//    foreach (spatial::SPATIAL_RELATION rel, relations) {
+//        string predicateName = spatial::spatialRelationToString(rel);
+//        Handle eval = AtomSpaceUtil::setPredicateValue(atomSpace,
+//                                                       predicateName,
+//                                                       TruthValue::TRUE_TV(),
+//                                                       objectA, objectB, objectC
+//                                                      );
+//        Handle atTime = atomSpace.getTimeServer().addTimeInfo(eval, timestamp);
+//        atomSpace.setTV(atTime, TruthValue::TRUE_TV());
+//    }
 }
 
 bool SpatialPredicateUpdater::SpatialRelationCache::

@@ -156,7 +156,7 @@ private:
 
     static void createFrameInstancesFromRelations( AtomSpace & atomSpace,
                                                    HandleSeq & resultingFrames,
-                                                   const std::vector<spatial::SPATIAL_RELATION> & relations,
+                                                   const std::set<spatial::SPATIAL_RELATION> & relations,
                                                    const std::string& objectA, 
                                                    const std::string& objectB, 
                                                    const std::string& objectC

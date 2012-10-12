@@ -25,14 +25,18 @@
 #define _SPATIAL_OCTREE3DMAPMANAGER_H
 
 #include <map>
+#include <set>
 #include <vector>
 #include "Block3DMapUtil.h"
 #include "Block3D.h"
 #include "Octree.h"
 #include <opencog/atomspace/Handle.h>
 #include <zmq.hpp>
+#include <limits.h>
 
 using namespace std;
+
+#define DOUBLE_MAX numeric_limits<double>::max()
 
 namespace opencog
 {
@@ -53,12 +57,10 @@ namespace opencog
             BESIDE,
             NEAR,
             FAR_,
-            TOUCHING,
+            TOUCHING, // touching is only face touching
             BETWEEN,
             INSIDE,
             OUTSIDE,
-            ON_TOP_OF,
-            ADJACENT,
 
             TOTAL_RELATIONS
         };
@@ -122,7 +124,7 @@ namespace opencog
 
             // currently we consider all the none block entities has no collision, agents can get through them
             void addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
-                                    int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool is_obstacle = false);
+                                    int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool isSelfObject,bool is_obstacle = false);
 
             void removeNoneBlockEntity(const Handle &entityNode);
 
@@ -160,6 +162,9 @@ namespace opencog
             // return the location of the given object handle. This object can be a block,nonblockentity or blockentity
             BlockVector getObjectLocation(Handle objNode) const;
 
+            // return the location of the given object name. This object can be a block,nonblockentity or blockentity
+            BlockVector getObjectLocation(std::string objName) const;
+
             // return the Direction of the given object face to. This object can be a block,nonblockentity or blockentity
             // Because it make no sense if this object is a block, we just define the directions of all the blocks are all BlockVector::X_UNIT direction (1,0,0)
             // if there is nothting for this handle on this map, return BlockVector::Zero
@@ -183,6 +188,14 @@ namespace opencog
 
             bool containsObject(const Handle objectNode) const;
             bool containsObject(std::string& objectname) const;
+
+            double distanceBetween(const Entity3D* entityA,const Entity3D* entityB) const;
+            double distanceBetween(const BlockVector& posA, const BlockVector& posB) const;
+            double distanceBetween(std::string objectNameA, std::string objectNameB) const;
+            double distanceBetween(std::string objectName, const BlockVector& pos) const;
+
+            static bool isTwoPositionsAdjacent(const BlockVector& pos1, const BlockVector& pos2);
+
 
             /**
              * TODO: Persistence
@@ -230,28 +243,10 @@ namespace opencog
             }
 
             /**
-             * Extract the spatial relations between two objects
-             *
-             * @param observer The observer entity
-             * @param besideDistance A distance used as threshold for considering
-             *                       an object beside or not another
-             * @param entityB The entity used as reference entity
-             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations
-             *         between entityA (this entity) and entityB (reference entity)
-             *
-             */
-            std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity3D* observer,
-                                                                   double besideDistance,
-                                                                   const Entity3D* entityA,
-                                                                   const Entity3D* entityB ) const;
-
-            /**
              * Finds the list of spatial relationships that apply to the three entities.
              * Currently this can only be BETWEEN, which states that A is between B and C
              *
              * @param observer The observer entity
-             * @param besideDistance A distance used as threshold for considering
-             *                       an object beside or not another
              * @param entityB First reference entity
              * @param entityC Second reference entity
              *
@@ -260,11 +255,18 @@ namespace opencog
              *         (second reference)
              *
              */
-            std::vector<SPATIAL_RELATION> computeSpatialRelations( const Entity3D* observer,
-                                                                   double besideDistance,
+            std::set<SPATIAL_RELATION> computeSpatialRelations(
                                                                    const Entity3D* entityA,
                                                                    const Entity3D* entityB,
-                                                                   const Entity3D* entityC ) const;
+                                                                   const Entity3D* entityC = 0,
+                                                                   const Entity3D* observer = 0) const;
+
+            std::set<SPATIAL_RELATION> computeSpatialRelations(
+                                                                   string entityAName,
+                                                                   string entityBName,
+                                                                   string entityCName = "",
+                                                                   string observerName = ""
+                                                                   ) const;
 
             /**
              * Return a string description of the relation
@@ -279,6 +281,8 @@ namespace opencog
             void setAgentHeight(int _height){mAgentHeight = _height;}
 
             bool checkIsSolid(BlockVector& pos);
+            bool checkIsSolid(int x, int y, int z);
+
 
         protected:
 
@@ -304,6 +308,9 @@ namespace opencog
             // it's not the boundingbox for the map, not for the octree,
             // an octree boundingbox is usually a cube, but the map is not necessary to be a cube
             AxisAlignedBox mMapBoundingBox;
+
+            Entity3D* selfAgentEntity;
+
 
             // using zmq to communicate with the learning server
             string fromLSIP;

@@ -51,6 +51,11 @@ AtomSpace *BaseServer::getAtomSpace()
     return atomSpace;
 }
 
+AtomSpace& BaseServer::getAtomSpaceReference()
+{
+    return *atomSpace;
+}
+
 // create and return static singleton instance
 BaseServer& opencog::server(ServerFactory* factoryFunction)
 {

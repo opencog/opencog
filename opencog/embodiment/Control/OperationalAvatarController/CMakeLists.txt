@@ -25,6 +25,10 @@ ADD_LIBRARY (oac
     FramesToRelexRuleEngine
     NLGenClient
     OutputRelex
+    PlanningHeaderFiles.h
+    Strips
+    OCPlanner
+    Inquery
 )
 
 INCLUDE_DIRECTORIES (

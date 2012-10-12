@@ -120,7 +120,7 @@ public:
     // if there is already a spaceMap of this _mapName, just get it and set it to be the current map, not to created a new spaceMap
     Handle addOrGetSpaceMap(unsigned long timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
 
-    bool addSpaceInfo(Handle objectNode, unsigned long timestamp,
+    bool addSpaceInfo(Handle objectNode, bool isSelfObject, unsigned long timestamp,
                       int objX, int objY, int objZ,
                       int objLength, int objWidth, int objHeight,
                       double objYaw, bool isObstacle,  std::string entityClass, std::string objectName, std::string material = "");

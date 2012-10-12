@@ -40,6 +40,7 @@
 #include <iostream>
 
 #include "OAC.h"
+#include "Inquery.h"
 
 /**
  * Uncoment the following define in order to delete atomSpace content inside OAC
@@ -438,6 +439,8 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
             boost::lexical_cast<std::string>( visualDebuggerPort ) );
 
     } // if
+
+    Inquery::init(this);
 
     // Run demand/ feeling updater agents as soon as possible, then virtual
     // world (say unity) will not wait too much time to get the initial values

@@ -54,6 +54,7 @@ static ActionType::ParamTypes ENTITY_and_VECTOR;
 static ActionType::ParamTypes STRING_and_STRING;
 static ActionType::ParamTypes FLOAT_and_FLOAT;
 static ActionType::ParamTypes FLOAT_and_STRING;
+static ActionType::ParamTypes VECTOR_and_STRING;
 
 // Arity 3
 static ActionType::ParamTypes VECTOR_ROTATION_and_FLOAT;
@@ -92,6 +93,8 @@ void ActionType::initParamTypes()
         FLOAT_and_FLOAT.push_back(ActionParamType::FLOAT());
         FLOAT_and_STRING.push_back(ActionParamType::FLOAT());
         FLOAT_and_STRING.push_back(ActionParamType::STRING());
+        VECTOR_and_STRING.push_back(ActionParamType::VECTOR());
+        VECTOR_and_STRING.push_back(ActionParamType::STRING());
 
         // Arity 3
         VECTOR_ROTATION_and_FLOAT.push_back(ActionParamType::VECTOR());
@@ -135,6 +138,15 @@ const ActionType& ActionType::WALK()
     static ActionType* result = new ActionType(WALK_CODE, "walk", VECTOR_and_FLOAT, ROTATION, paramNames, "void walk(Vector target, float speed[, Rotation frameOfReference])");
     return *result;
 }
+
+const ActionType& ActionType::MOVE_TO_OBJ()
+{
+    initParamTypes();
+    static const char* paramNames[] = {"target"};
+    static ActionType* result = new ActionType(MOVE_TO_OBJ_CODE, "move_to_obj", ENTITY, ROTATION, paramNames, "void move_to_obj(EntityID target)");
+    return *result;
+}
+
 const ActionType& ActionType::GRAB()
 {
     initParamTypes();
@@ -728,16 +740,23 @@ const ActionType& ActionType::SAY()
 const ActionType& ActionType::BUILD_BLOCK()
 {
     initParamTypes();
-    static const char* paramNames[] = {"offset", "blockType"};
-    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "build_block", FLOAT_and_STRING, EMPTY, paramNames, "void build_block(float offset[, int direction])");
+    static const char* paramNames[] = {"position", "blockType"};
+    static ActionType* result = new ActionType(BUILD_BLOCK_CODE, "build_block", VECTOR_and_STRING, EMPTY, paramNames, "void build_block(Vector position[, int direction])");
     return *result;
 }
 
 const ActionType& ActionType::DESTROY_BLOCK()
 {
     initParamTypes();
-    static const char* paramNames[] = {"offset"};
-    static ActionType* result = new ActionType(DESTROY_BLOCK_CODE, "destroy_block", FLOAT, EMPTY, paramNames, "void destroy_block(float offset)");
+    static const char* paramNames[] = {"position"};
+    static ActionType* result = new ActionType(DESTROY_BLOCK_CODE, "destroy_block", VECTOR, EMPTY, paramNames, "void destroy_block(Vector position)");
+    return *result;
+}
+const ActionType& ActionType::DO_NOTHING()
+{
+    initParamTypes();
+    static const char* paramNames[] = {};
+    static ActionType* result = new ActionType(DO_NOTHING_CODE, "do_nothing", EMPTY, EMPTY, paramNames, "void do_nothing()");
     return *result;
 }
 
@@ -841,6 +860,7 @@ void ActionType::init()
         TRICK_FOR_FOOD();
         EAT();
         WALK();
+        MOVE_TO_OBJ();
         GRAB();
         DROP();
         SIT();
@@ -927,6 +947,8 @@ void ActionType::init()
 
         BUILD_BLOCK();
         DESTROY_BLOCK();
+
+        DO_NOTHING();
 
         initialized = true;
     }

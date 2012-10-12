@@ -2714,6 +2714,11 @@ Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
                                    STRUCTURE_NODE, objectId);
         }
 
+        if (tmp.empty()) { //it is not an structure, let's try a ordinary object
+            atomSpace.getHandleSet(std::back_inserter(tmp),
+                                   OBJECT_NODE, objectId);
+        }
+
         //assume that structure and accessories have distinct id
         OC_ASSERT(tmp.size() <= 1);
 

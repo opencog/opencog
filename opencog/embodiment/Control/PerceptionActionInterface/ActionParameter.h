@@ -41,6 +41,8 @@ namespace opencog { namespace pai {
 using namespace std;
 using namespace boost;
 
+#define MIN_DOUBLE 0.0001
+
 
 /**
  * XSD vector element struct.
@@ -59,6 +61,17 @@ public:
         y = yy;
         z = zz;
     }
+
+    bool operator==(const Vector& other) const
+    {
+        if ((x - other.x < MIN_DOUBLE) &&
+            (y - other.y < MIN_DOUBLE) &&
+            (z - other.z < MIN_DOUBLE) )
+            return true;
+        else
+            return false;
+
+    }
 };
 
 /**
@@ -76,13 +89,26 @@ public:
         roll = rr;
         yaw = yy;
     }
+
+    bool operator==(const Rotation& other) const
+    {
+        if ((pitch - other.pitch < MIN_DOUBLE) &&
+            (roll - other.roll < MIN_DOUBLE) &&
+            (yaw - other.yaw < MIN_DOUBLE) )
+            return true;
+        else
+            return false;
+
+    }
 };
 
 /**
  * XSD entity element struct.
  */
+
 struct Entity {
 public:
+    static Entity NON_Entity;
     string id;
     string type;
 
@@ -91,10 +117,80 @@ public:
         id = ii;
         type = tt;
     }
+
+    bool operator==(const Entity& other) const
+    {
+       return ((id == other.id) && (type == other.type) );
+
+    }
 };
 
+struct FuzzyIntervalFloat
+{
+public:
+    float bound_low;
+    float bound_high;
 
-typedef variant<string, Rotation, Vector, Entity > ParamValue;
+    FuzzyIntervalFloat(){}
+    FuzzyIntervalFloat(float low, float high)
+    {
+        bound_low = low;
+        bound_high = high;
+    }
+
+    bool operator==(const FuzzyIntervalFloat& other) const
+    {
+        return ((bound_low == other.bound_low)&&(bound_high == other.bound_high));
+    }
+
+    bool isInsideMe(float f)
+    {
+        if ((f <= bound_high) && (f >= bound_low))
+           return true;
+        else
+           return false;
+    }
+
+    bool isInsideMe(FuzzyIntervalFloat& other)
+    {
+        return ((other.bound_high < bound_high) && (other.bound_low > bound_low));
+    }
+};
+
+struct FuzzyIntervalInt
+{
+public:
+    int bound_low;
+    int bound_high;
+
+    FuzzyIntervalInt(){}
+    FuzzyIntervalInt(int low, int high)
+    {
+        bound_low = low;
+        bound_high = high;
+    }
+
+    bool operator==(const FuzzyIntervalInt& other) const
+    {
+        return ((bound_low == other.bound_low)&&(bound_high == other.bound_high));
+    }
+
+    bool isInsideMe(int i)
+    {
+        if ((i <= bound_high) && (i >= bound_low))
+           return true;
+        else
+           return false;
+
+    }
+
+    bool isInsideMe(FuzzyIntervalInt& other)
+    {
+        return ((other.bound_high < bound_high) && (other.bound_low > bound_low));
+    }
+};
+
+typedef variant<string, Rotation, Vector, Entity,FuzzyIntervalInt,FuzzyIntervalFloat > ParamValue;
 
 /**
  * Boost visitor for checking real types inside ParamValue variants.
@@ -134,9 +230,8 @@ private:
      */
     ParamValue value;
 
-    static bool areFromSameType(const ParamValue& v1, const ParamValue& v2);
-
 public:
+    static bool areFromSameType(const ParamValue& v1, const ParamValue& v2);
 
     /**
      * Empty Constructor
@@ -161,6 +256,8 @@ public:
     const ActionParamType& getType() const;
     const ParamValue& getValue() const;
 
+    void assignValue(const ParamValue& newValue);
+
     /**
      * Methods for checking the real type of the value attribute
      */
@@ -168,6 +265,8 @@ public:
     bool isRotationValue() const;
     bool isVectorValue() const;
     bool isEntityValue() const;
+    bool isFuzzyIntervalIntValue() const;
+    bool isFuzzyIntervalFloatValue() const;
 
     /**
      * Methods for getting the real value of the value attribute.
@@ -178,8 +277,24 @@ public:
     const Rotation& getRotationValue() const;
     const Vector& getVectorValue() const;
     const Entity& getEntityValue() const;
+    const FuzzyIntervalInt& getFuzzyIntervalIntValue() const;
+    const FuzzyIntervalFloat& getFuzzyIntervalFloatValue() const;
 
     std::string stringRepresentation() const throw (opencog::RuntimeException, std::bad_exception);
+
+    inline bool operator == (ActionParameter& other) const
+    {
+        if (name != other.getName())
+            return false;
+
+        if (type != other.getType())
+            return false;
+
+        if (!(value == other.getValue()))
+            return false;
+
+        return true;
+    }
 
     /**
      * Create a pvp xml element in the DOMDocument XML document. An action parameter element has the form:
@@ -203,6 +318,7 @@ public:
      */
     XERCES_CPP_NAMESPACE::DOMElement* createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,
             XERCES_CPP_NAMESPACE::DOMElement* parent) const;
+
 
 };
 

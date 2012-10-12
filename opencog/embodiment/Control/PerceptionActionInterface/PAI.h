@@ -814,7 +814,7 @@ private:
      */
     Handle removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long timestamp);
 
-    bool addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp,bool isFirstTimePercept);
+    bool addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool isSelfObject, unsigned long timestamp,bool isFirstTimePercept);
 
     /**
      * Add property predicates of an entity such as edible, drinkable, material 

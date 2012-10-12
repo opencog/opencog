@@ -100,15 +100,15 @@ void MockOpcHCTest::init(const std::string & myId,
                                  boost::lexical_cast<string>(2));
 
 
-    atomSpace->getSpaceServer().addSpaceInfo(pet_h, T1, PET_X, PET_Y, PET_Z,
+    atomSpace->getSpaceServer().addSpaceInfo(pet_h, true,T1, PET_X, PET_Y, PET_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"pet",petId);
-    atomSpace->getSpaceServer().addSpaceInfo(obj_h, T1, OBJ_X, OBJ_Y, OBJ_Z,
+    atomSpace->getSpaceServer().addSpaceInfo(obj_h, false,T1, OBJ_X, OBJ_Y, OBJ_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,false,"object",OBJ_NAME);
-    atomSpace->getSpaceServer().addSpaceInfo(owner_h, T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
+    atomSpace->getSpaceServer().addSpaceInfo(owner_h, false,T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
-    atomSpace->getSpaceServer().addSpaceInfo(owner_h, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
+    atomSpace->getSpaceServer().addSpaceInfo(owner_h, false, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
-    atomSpace->getSpaceServer().addSpaceInfo(owner_h, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
+    atomSpace->getSpaceServer().addSpaceInfo(owner_h,false, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
 
     //add necessary nodes to represent BDs

@@ -470,7 +470,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, unsigned long timestamp,
 }
 */
 
-bool SpaceServer::addSpaceInfo(Handle objectNode, unsigned long timestamp,
+bool SpaceServer::addSpaceInfo(Handle objectNode, bool isSelfObject, unsigned long timestamp,
                               int objX, int objY, int objZ,
                               int objLength, int objWidth, int objHeight,
                               double objYaw, bool isObstacle,  std::string entityClass, std::string objectName, std::string material)
@@ -496,7 +496,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, unsigned long timestamp,
     }
     else
     {
-        curMap->addNoneBlockEntity(objectNode,pos,objWidth,objLength,objHeight,objYaw,objectName, entityClass, true);
+        curMap->addNoneBlockEntity(objectNode,pos,objWidth,objLength,objHeight,objYaw,objectName, entityClass,isSelfObject, true);
     }
 }
 

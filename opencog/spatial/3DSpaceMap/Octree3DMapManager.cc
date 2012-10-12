@@ -83,6 +83,8 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 
     hasPerceptedMoreThanOneTimes = false;
 
+    selfAgentEntity = 0;
+
     // set up the zmq socket to communicate with the learning server
     this->zmqLSContext = new zmq::context_t(1);
 
@@ -134,7 +136,7 @@ BlockEntity* Octree3DMapManager::findBlockEntityByHandle(const Handle entityNode
 
 // currently we consider all the none block entities has no collision, agents can get through them
 void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
-                                            int _width, int _lenght, int _height, double yaw, std::string _entityName, std::string _entityClass,bool is_obstacle)
+                                            int _width, int _lenght, int _height, double yaw, std::string _entityName, std::string _entityClass,bool isSelfObject,bool is_obstacle)
 {
     map<Handle, Entity3D*>::iterator it;
     multimap<BlockVector, Entity3D*>::iterator biter;
@@ -146,6 +148,9 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
         newEntity->mEntityNode = entityNode;
         mAllNoneBlockEntities.insert(map<Handle, Entity3D*>::value_type(entityNode, newEntity));
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,newEntity));
+
+        if (isSelfObject)
+            selfAgentEntity = newEntity;
     }
     else
     {
@@ -164,6 +169,8 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
 
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,(Entity3D*)(it->second)));
     }
+
+
 }
 
 // currently we consider all the none block entities has no collision, agents can get through them
@@ -531,6 +538,15 @@ BlockVector Octree3DMapManager::getObjectLocation(Handle objNode) const
     return BlockVector::ZERO;
 }
 
+BlockVector Octree3DMapManager::getObjectLocation(std::string objName) const
+{
+    const Entity3D* entity = getEntity(objName);
+    if (entity == 0)
+        return BlockVector::ZERO;
+
+    return entity->getPosition();
+}
+
 BlockVector Octree3DMapManager::getObjectDirection(Handle objNode) const
 {
     // if it's a block, the direction make no sense, so we just use the x direction
@@ -544,6 +560,24 @@ BlockVector Octree3DMapManager::getObjectDirection(Handle objNode) const
         return entity->getDirection();
     else
         return BlockVector::ZERO;
+}
+
+bool Octree3DMapManager::isTwoPositionsAdjacent(const BlockVector &pos1, const BlockVector &pos2)
+{
+    int d_x = pos1.x - pos2.x;
+    int d_y = pos1.y - pos2.y;
+    int d_z = pos1.z - pos2.z;
+    if (( d_x >=-1) && (d_x <= 1) &&
+        ( d_y >=-1) && (d_y <= 1) &&
+        ( d_z >=-1) && (d_z <= 1))
+    {
+         if ((d_x == 0) && (d_y == 0))
+             return false; // the position just above or under is considered not accessable
+         else
+             return true;
+    }
+
+    return false;
 }
 
 bool Octree3DMapManager::checkStandable(BlockVector& pos) const
@@ -586,6 +620,12 @@ bool Octree3DMapManager::checkStandable(BlockVector& pos) const
 
     return false;
 
+}
+
+bool Octree3DMapManager::checkIsSolid(int x, int y, int z)
+{
+    BlockVector pos(x,y,z);
+    return checkIsSolid(pos);
 }
 
 bool Octree3DMapManager::checkIsSolid(BlockVector& pos)
@@ -845,223 +885,66 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
 
 
 
-//todo
- std::vector<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations( const Entity3D* observer,
-                                                        double besideDistance,
-                                                        const Entity3D* entityA,
-                                                        const Entity3D* entityB ) const
+// todo: to be completed
+ std::set<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations( const Entity3D* entityA,
+                                                                           const Entity3D* entityB,
+                                                                           const Entity3D* entityC,
+                                                                           const Entity3D* observer ) const
  {
-     std::vector<SPATIAL_RELATION> spatialRelations;
+     std::set<SPATIAL_RELATION> spatialRelations;
 
-//     math::Vector3 pointInA;
-//     math::Vector3 pointInB;
+     if (entityC != 0)
+     {
+         // todo: compute if A is between B and C
 
-//     LimitRelation status;
-//     double distance = entityA.distanceTo( entityB, & pointInA, & pointInB, & status );
+         return spatialRelations;
+     }
 
-//     bool computeAsideRelations = false;
-//     if ( ( status.relations[0] & 64 ) > 0 &&
-//          ( status.relations[1] & 64 ) > 0 &&
-//          ( status.relations[2] & 64 ) > 0 ) {
-//         // A overlaps B and vice-versa
-//         spatialRelations.push_back(INSIDE);
-//         spatialRelations.push_back(TOUCHING);
-//         spatialRelations.push_back(NEAR);
-//         return spatialRelations;
-//     }
-//     else if ( ( status.relations[0] & 128 ) > 0 &&
-//               ( status.relations[1] & 128 ) > 0 &&
-//               ( status.relations[2] & 128 ) > 0 ) {
-//         // A is inside B
-//         spatialRelations.push_back(INSIDE);
-//         spatialRelations.push_back(NEAR);
-//         return spatialRelations;
-//     }
-//     else if ( ( status.relations[0] & 256 ) > 0 &&
-//               ( status.relations[1] & 256 ) > 0 &&
-//               ( status.relations[2] & 256 ) > 0 ) {
-//         // A is outside B
-//         spatialRelations.push_back(OUTSIDE);
-//         spatialRelations.push_back(NEAR);
-//     }
-//     else if ( ( status.relations[0] & (64|128|512) ) > 0 &&
-//               ( status.relations[1] & (64|128|512) ) > 0 &&
-//               ( status.relations[2] & (64|128|512) ) > 0 ) {
-//         // A is inside B and touching it
-//         spatialRelations.push_back(INSIDE);
-//         spatialRelations.push_back(TOUCHING);
-//         spatialRelations.push_back(NEAR);
-//         return spatialRelations;
-//     }
-//     else if ( ( status.relations[0] & (64|256|1024) ) > 0 &&
-//               ( status.relations[1] & (64|256|1024) ) > 0 &&
-//               ( status.relations[2] & (64|256|1024) ) > 0 ) {
-//         // A is outside B but touching it
-//         spatialRelations.push_back(OUTSIDE);
-//         spatialRelations.push_back(TOUCHING);
-//         spatialRelations.push_back(NEAR);
-//     }
-//     else if ( ( status.relations[0] & (1|2) ) == 0 &&
-//               ( status.relations[1] & (1|2) ) == 0 &&
-//               ( status.relations[2] & (1|2) ) == 0 ) {
-//         // A is not completely inside B or vice-versa, but they intersect
-//         spatialRelations.push_back(TOUCHING);
-//         spatialRelations.push_back(NEAR);
-//     }
-//     else if ( ( status.relations[0] & (1|2|16|32) ) == 0 &&
-//               ( status.relations[1] & (1|2|16|32) ) == 0 &&
-//               ( status.relations[2] & 32 ) > 0 ) {
-//         // A is on top of B
-//         spatialRelations.push_back(ON_TOP_OF);
-//         spatialRelations.push_back(TOUCHING);
-//         spatialRelations.push_back(NEAR);
-//     }
-//     else if ( ( ( ( status.relations[0] & (16|32) ) > 0 &&
-//                   ( status.relations[1] & (1|2) ) == 0
-//                 ) ||
-//                 ( ( status.relations[0] & (1|2) ) == 0 &&
-//                   ( status.relations[1] & (16|32) ) > 0
-//                 )
-//               ) &&
-//               ( status.relations[2] & (1|2) ) == 0
-//             ) {
-//         // A is adjacent to B
-//         spatialRelations.push_back(ADJACENT);
-//         spatialRelations.push_back(TOUCHING);
-//         spatialRelations.push_back(NEAR);
-//     }
-//     else {
-//         computeAsideRelations = true;
-//     }// if
+     if (observer == 0 )
+         observer = selfAgentEntity;
 
-//     ///*************************** WARNING *********************************////
-//     // TODO: UP AXIS = Y (TODO: customize it)
-//     //       an intersection must occur at X and Y besides
-//     if ( ( status.relations[0] & (1|2) ) == 0 &&
-//          ( status.relations[1] & (1|2) ) == 0 ) {
-//         if ( ( status.relations[2] & (1|4|16) ) > 0 ) {
-//             spatialRelations.push_back(BELOW);
-//         }
-//         else if ( ( status.relations[2] & (2|8|32) ) > 0 ) {
-//             spatialRelations.push_back(ABOVE);
-//         }
-//     }// if
-//     ///*************************** WARNING *********************************////
+     if (entityA->getBoundingBox().isFaceTouching(entityB->getBoundingBox()))
+     {
+         spatialRelations.insert(TOUCHING);
+     }
 
-//     if ( distance > besideDistance ) {
-//         spatialRelations.push_back(FAR_);
-//         return spatialRelations;
-//     }
-//     else if ( distance < besideDistance * (LocalSpaceMap2D::NEAR_FACTOR/LocalSpaceMap2D::NEXT_FACTOR) ) {
-//         spatialRelations.push_back(NEAR);
-//     }
-//     else {
-//         spatialRelations.push_back(BESIDE);
-//     }// if
+     if (entityA->getBoundingBox().nearLeftBottomConer.z >= entityB->getBoundingBox().nearLeftBottomConer.z + entityB->getBoundingBox().size_z)
+        spatialRelations.insert(ABOVE);
 
-//     if ( !computeAsideRelations ) {
-//         return spatialRelations;
-//     }
+     if (entityB->getBoundingBox().nearLeftBottomConer.z >= entityA->getBoundingBox().nearLeftBottomConer.z + entityA->getBoundingBox().size_z)
+        spatialRelations.insert(BELOW);
 
-//     const math::Vector3& observerPosition = observer.getPosition( );
-
-//     math::Vector3 observerDirection;
-//     math::Vector3 objectDirection( pointInB - pointInA ); // direction vector from A (this) to B
-
-//     bool observerBetweenObjects = false;
-
-//     if ( observer.getName( ) == entityA.getName( ) ||
-//          entityA.getBoundingBox( ).isInside( observerPosition ) ) {
-//         observerDirection = (observer.getDirection( ) * objectDirection.length( )+1.0);
-//     }
-//     else if ( observer.getName( ) == entityB.getName( ) ||
-//               entityB.getBoundingBox( ).isInside( observerPosition ) ) {
-//         observerDirection = -(observer.getDirection( ) * objectDirection.length( )+1.0);
-//     }
-//     else {
-//         math::Vector3 observerToEntityA, observerToEntityB;
-//         {
-//             math::Vector3 observerPoint, entityPoint;
-//             observer.distanceTo( entityA, &observerPoint, &entityPoint );
-//             observerToEntityA = entityPoint - observerPoint; // direction vector from observer to A (this)
-//             observerDirection = observerPoint - entityPoint; // direction vector from A (this) to observer
-//         }
-//         {
-//             math::Vector3 observerPoint, entityPoint;
-//             observer.distanceTo( entityB, &observerPoint, &entityPoint );
-//             observerToEntityB = entityPoint - observerPoint; // direction vector from observer to B (this)
-//         }
-//         observerToEntityA.normalise( );
-//         observerToEntityB.normalise( );
-
-//         double angle = std::acos( observerToEntityA.dotProduct( observerToEntityB ) );
-//         observerBetweenObjects = ( std::abs(angle) > 150.0/180.0*M_PI );
-//     }// if
-
-//     double distanceToA = observerDirection.length( );
-//     double distanceBetweenAandB = objectDirection.length( );
-
-//     observerDirection.normalise(); // direction vector from A (this) to observer
-//     objectDirection.normalise();   // direction vector from A (this) to B
-
-//     double angle;
-//     {
-//         ///*************************** WARNING *********************************////
-//         // TODO: UP AXIS = Z (TODO: customize it)
-
-//         // Angle from observerDirection (A to observer) to objectDirection (A to B)
-//         angle = std::atan2( objectDirection.y, objectDirection.x ) -
-//                 std::atan2( observerDirection.y, observerDirection.x );
-
-//         if ( angle > M_PI ) {
-//             angle -= M_PI*2.0;
-//         } else if ( angle < -M_PI ) {
-//             angle += M_PI*2.0;
-//         }
-//         ///*************************** WARNING *********************************////
-//     }
-//     angle *= 180.0/M_PI;
-
-//     double lowerLimit = 20.0;
-//     double upperLimit = 110.0;
-
-//     if ( angle > lowerLimit && angle <= upperLimit ) {
-//         spatialRelations.push_back( LEFT_OF );
-//     }
-//     else if ( ( angle > upperLimit && angle <= 180.0 ) ||
-//               ( angle >= -180.0 && angle <= -upperLimit ) ) {
-//         spatialRelations.push_back( observerBetweenObjects ? BEHIND : IN_FRONT_OF );
-//     }
-//     else if ( angle > -upperLimit && angle <= -lowerLimit ) {
-//         spatialRelations.push_back( RIGHT_OF );
-//     }
-//     else {
-//         if ( distanceToA > distanceBetweenAandB ) {
-//             spatialRelations.push_back( observerBetweenObjects ? IN_FRONT_OF : BEHIND );
-//         }
-//         else {
-//             spatialRelations.push_back( angle > 0 ? RIGHT_OF : LEFT_OF );
-//         }
-//     }// if
-
-//     // BESIDE = next
-//     // NEAR = near
 
      return spatialRelations;
  }
 
- std::vector<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations( const Entity3D* observer,
-                                                        double besideDistance,
-                                                        const Entity3D* entityA,
-                                                        const Entity3D* entityB,
-                                                        const Entity3D* entityC ) const
+ std::set<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations(
+                                                        string entityAName,
+                                                        string entityBName,
+                                                        string entityCName ,
+                                                        string observerName ) const
  {
-     std::vector<SPATIAL_RELATION> spatialRelations;
-     //todo
+     std::set<SPATIAL_RELATION> empty;
 
-     return spatialRelations;
+     const Entity3D* entityA = getEntity(entityAName);
+     const Entity3D* entityB = getEntity(entityBName);
+     const Entity3D* entityC = 0;
+     const Entity3D* observer;
+
+     if ((entityA == 0) || (entityB == 0))
+         return empty;
+
+     if (entityCName != "")
+        entityC = getEntity(entityCName);
+
+     if (observerName == "")
+         observer = selfAgentEntity;
+     else
+         observer = getEntity(observerName);
+
+     return computeSpatialRelations(entityA,entityB,entityC,observer);
+
  }
-
 
  std::string Octree3DMapManager::spatialRelationToString( SPATIAL_RELATION relation ) {
      switch( relation ) {
@@ -1142,3 +1025,29 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
 
  }
 
+ double Octree3DMapManager::distanceBetween(const Entity3D* entityA,const Entity3D* entityB) const
+ {
+    return (entityA->getPosition() - entityB->getPosition());
+ }
+ double Octree3DMapManager::distanceBetween(const BlockVector& posA, const BlockVector& posB) const
+ {
+    return (posA - posB);
+ }
+ double Octree3DMapManager::distanceBetween(std::string objectNameA, std::string objectNameB) const
+ {
+    const Entity3D* entityA = getEntity(objectNameA);
+    const Entity3D* entityB = getEntity(objectNameB);
+    if (entityA && entityB)
+        return distanceBetween(entityA,entityB);
+    else
+        return DOUBLE_MAX;
+ }
+ double Octree3DMapManager::distanceBetween(std::string objectName, const BlockVector& pos) const
+ {
+    const Entity3D* entity = getEntity(objectName);
+    if (! entity)
+        return DOUBLE_MAX;
+
+    return (entity->getPosition() - pos);
+
+ }

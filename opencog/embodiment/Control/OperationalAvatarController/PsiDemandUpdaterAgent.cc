@@ -427,3 +427,12 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
 
 }
 
+double PsiDemandUpdaterAgent::getDemandValue(string demanName) const
+{
+    foreach (const Demand & demand, this->demandList) {
+        if ( demand.getDemandName() == demanName)
+            return demand.getDemandValue();
+    }
+
+    return 0.0000;
+}

@@ -48,6 +48,7 @@ enum ActionTypeCode {
     TRICK_FOR_FOOD_CODE,
     EAT_CODE,
     WALK_CODE,
+    MOVE_TO_OBJ_CODE,
     GRAB_CODE,
     DROP_CODE,
     SIT_CODE,
@@ -135,6 +136,7 @@ enum ActionTypeCode {
 
     BUILD_BLOCK_CODE,
     DESTROY_BLOCK_CODE,
+    DO_NOTHING_CODE,
 
     // This is not really a type and must be at the end of that enumeration in order to count the number of action types.
     NUMBER_OF_ACTION_TYPES
@@ -189,6 +191,10 @@ public:
      * void walk(Vector target, float speed[, Rotation frameOfReference])
      */
     static const ActionType& WALK();
+    /**
+     * void move_to_obj(EntityID target)
+     */
+    static const ActionType& MOVE_TO_OBJ();
     /**
      * Status grab(EntityID target [, float rangeRadius])
      */
@@ -530,6 +536,12 @@ public:
      * void destroy_block( Vector position )
      */
     static const ActionType& DESTROY_BLOCK();
+
+    /**
+     * void do_nothing( )  // this is using in planning
+     */
+    static const ActionType& DO_NOTHING();
+
 private:
     // Attributes
     ActionTypeCode code;

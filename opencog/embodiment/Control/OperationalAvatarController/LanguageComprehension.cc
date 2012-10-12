@@ -823,12 +823,12 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
                         } // if
                         const spatial::Entity3D* entityC = spaceMap.getEntity( entitiesC[k] );
                         createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                            spaceMap.computeSpatialRelations( observerEntity, besideDistance, entityA, entityB, entityC ),
+                            spaceMap.computeSpatialRelations( entityA, entityB, entityC,observerEntity ),
                                 entitiesA[i], entitiesB[j], entitiesC[k] );
                     } // for
                 } else {
                     createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                        spaceMap.computeSpatialRelations( observerEntity, besideDistance, entityA,entityB ),
+                        spaceMap.computeSpatialRelations(  entityA,entityB,0,observerEntity ),
                             entitiesA[i], entitiesB[j], "" );                        
                 } // else
             } // for
@@ -844,10 +844,10 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
 
 void LanguageComprehension::createFrameInstancesFromRelations( 
     AtomSpace& atomSpace, HandleSeq& resultingFrames,
-        const std::vector<spatial::SPATIAL_RELATION>& relations,
+        const std::set<spatial::SPATIAL_RELATION>& relations,
             const std::string& objectA, const std::string& objectB, const std::string& objectC ) {
 
-    std::vector<spatial::SPATIAL_RELATION>::const_iterator it;
+    std::set<spatial::SPATIAL_RELATION>::const_iterator it;
     for( it = relations.begin( ); it != relations.end( ); ++it ) {
         std::string relationName = SpaceServer::SpaceMap::spatialRelationToString( *it );
 

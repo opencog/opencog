@@ -575,289 +575,289 @@ Entity::LimitRelation Entity::computeObjectsLimits( const Entity& entityB ) cons
     return status;
 }
 
-std::vector<Entity::SPATIAL_RELATION> 
-Entity::computeSpatialRelations( const Entity & observer, 
-                                 double besideDistance, 
-                                 const Entity & entityB,
-                                 const Entity & entityC ) const {
+//std::vector<Entity::SPATIAL_RELATION>
+//Entity::computeSpatialRelations( const Entity & observer,
+//                                 double besideDistance,
+//                                 const Entity & entityB,
+//                                 const Entity & entityC ) const {
 
-    std::vector<SPATIAL_RELATION> spatialRelationsAB = 
-        computeSpatialRelations( observer, besideDistance, entityB );
+//    std::vector<SPATIAL_RELATION> spatialRelationsAB =
+//        computeSpatialRelations( observer, besideDistance, entityB );
 
-    std::vector<SPATIAL_RELATION> spatialRelationsAC = 
-        computeSpatialRelations( observer, besideDistance, entityC );
+//    std::vector<SPATIAL_RELATION> spatialRelationsAC =
+//        computeSpatialRelations( observer, besideDistance, entityC );
     
-    std::vector<SPATIAL_RELATION> relations;
+//    std::vector<SPATIAL_RELATION> relations;
     
-    std::vector<bool> activeRelationsAB(TOTAL_RELATIONS);
-    unsigned int i;
-    for( i = 0; i < activeRelationsAB.size( ); ++i ) {
-        activeRelationsAB[i] = false;
-    } 
+//    std::vector<bool> activeRelationsAB(TOTAL_RELATIONS);
+//    unsigned int i;
+//    for( i = 0; i < activeRelationsAB.size( ); ++i ) {
+//        activeRelationsAB[i] = false;
+//    }
 
-    std::vector<bool> relationsAB(6);
+//    std::vector<bool> relationsAB(6);
 
-    std::vector<SPATIAL_RELATION>::const_iterator it;    
-    for( it = spatialRelationsAB.begin( ); it != spatialRelationsAB.end( ); ++it ) {
-        if ( *it == RIGHT_OF ) {
-            relationsAB[0] = true;
-        }
-        else if ( *it == LEFT_OF ) {
-            relationsAB[1] = true;
-        } 
-        else if ( *it == BEHIND ) {
-            relationsAB[2] = true;
-        }
-        else if ( *it == IN_FRONT_OF ) {
-            relationsAB[3] = true;
-        }
-        else if ( *it == ABOVE ) {
-            relationsAB[4] = true;
-        } 
-        else if ( *it == BELOW ) {
-            relationsAB[5] = true;
-        } 
-        else
-            activeRelationsAB[*it] = true;
-    }// for
+//    std::vector<SPATIAL_RELATION>::const_iterator it;
+//    for( it = spatialRelationsAB.begin( ); it != spatialRelationsAB.end( ); ++it ) {
+//        if ( *it == RIGHT_OF ) {
+//            relationsAB[0] = true;
+//        }
+//        else if ( *it == LEFT_OF ) {
+//            relationsAB[1] = true;
+//        }
+//        else if ( *it == BEHIND ) {
+//            relationsAB[2] = true;
+//        }
+//        else if ( *it == IN_FRONT_OF ) {
+//            relationsAB[3] = true;
+//        }
+//        else if ( *it == ABOVE ) {
+//            relationsAB[4] = true;
+//        }
+//        else if ( *it == BELOW ) {
+//            relationsAB[5] = true;
+//        }
+//        else
+//            activeRelationsAB[*it] = true;
+//    }// for
 
-    for( it = spatialRelationsAC.begin( ); it != spatialRelationsAC.end( ); ++it ) {
-        if ( ( *it == LEFT_OF && relationsAB[0] ) ||
-             ( *it == RIGHT_OF && relationsAB[1] ) ||
-             ( *it == IN_FRONT_OF && relationsAB[2] ) ||
-             ( *it == BEHIND && relationsAB[3] ) ||
-             ( *it == BELOW && relationsAB[4] ) ||
-             ( *it == ABOVE && relationsAB[5] ) ) {
-            relations.push_back( BETWEEN );
-        }// if
-    }// for
+//    for( it = spatialRelationsAC.begin( ); it != spatialRelationsAC.end( ); ++it ) {
+//        if ( ( *it == LEFT_OF && relationsAB[0] ) ||
+//             ( *it == RIGHT_OF && relationsAB[1] ) ||
+//             ( *it == IN_FRONT_OF && relationsAB[2] ) ||
+//             ( *it == BEHIND && relationsAB[3] ) ||
+//             ( *it == BELOW && relationsAB[4] ) ||
+//             ( *it == ABOVE && relationsAB[5] ) ) {
+//            relations.push_back( BETWEEN );
+//        }// if
+//    }// for
 
-    return relations;
-}
+//    return relations;
+//}
 
-std::vector<Entity::SPATIAL_RELATION> 
-Entity::computeSpatialRelations( const Entity & observer, 
-                                 double besideDistance, 
-                                 const Entity & entityB ) const
-{
-    const Entity & entityA = *this;
+//std::vector<Entity::SPATIAL_RELATION>
+//Entity::computeSpatialRelations( const Entity & observer,
+//                                 double besideDistance,
+//                                 const Entity & entityB ) const
+//{
+//    const Entity & entityA = *this;
 
-    std::vector<SPATIAL_RELATION> spatialRelations;
+//    std::vector<SPATIAL_RELATION> spatialRelations;
 
-    math::Vector3 pointInA;
-    math::Vector3 pointInB;
+//    math::Vector3 pointInA;
+//    math::Vector3 pointInB;
 
-    LimitRelation status;
-    double distance = entityA.distanceTo( entityB, & pointInA, & pointInB, & status );
+//    LimitRelation status;
+//    double distance = entityA.distanceTo( entityB, & pointInA, & pointInB, & status );
 
-    bool computeAsideRelations = false;
-    if ( ( status.relations[0] & 64 ) > 0 && 
-         ( status.relations[1] & 64 ) > 0 &&
-         ( status.relations[2] & 64 ) > 0 ) {
-        // A overlaps B and vice-versa
-        spatialRelations.push_back(INSIDE);
-        spatialRelations.push_back(TOUCHING);
-        spatialRelations.push_back(NEAR);
-        return spatialRelations;
-    } 
-    else if ( ( status.relations[0] & 128 ) > 0 && 
-              ( status.relations[1] & 128 ) > 0 && 
-              ( status.relations[2] & 128 ) > 0 ) {
-        // A is inside B
-        spatialRelations.push_back(INSIDE);
-        spatialRelations.push_back(NEAR);
-        return spatialRelations;
-    }
-    else if ( ( status.relations[0] & 256 ) > 0 && 
-              ( status.relations[1] & 256 ) > 0 &&
-              ( status.relations[2] & 256 ) > 0 ) {
-        // A is outside B
-        spatialRelations.push_back(OUTSIDE);
-        spatialRelations.push_back(NEAR);
-    }
-    else if ( ( status.relations[0] & (64|128|512) ) > 0 &&
-              ( status.relations[1] & (64|128|512) ) > 0 &&
-              ( status.relations[2] & (64|128|512) ) > 0 ) {
-        // A is inside B and touching it
-        spatialRelations.push_back(INSIDE);
-        spatialRelations.push_back(TOUCHING);
-        spatialRelations.push_back(NEAR);
-        return spatialRelations;
-    } 
-    else if ( ( status.relations[0] & (64|256|1024) ) > 0 &&
-              ( status.relations[1] & (64|256|1024) ) > 0 &&
-              ( status.relations[2] & (64|256|1024) ) > 0 ) {
-        // A is outside B but touching it
-        spatialRelations.push_back(OUTSIDE);
-        spatialRelations.push_back(TOUCHING);
-        spatialRelations.push_back(NEAR);
-    } 
-    else if ( ( status.relations[0] & (1|2) ) == 0 &&
-              ( status.relations[1] & (1|2) ) == 0 &&
-              ( status.relations[2] & (1|2) ) == 0 ) {
-        // A is not completely inside B or vice-versa, but they intersect
-        spatialRelations.push_back(TOUCHING);
-        spatialRelations.push_back(NEAR);
-    }
-    else if ( ( status.relations[0] & (1|2|16|32) ) == 0 &&
-              ( status.relations[1] & (1|2|16|32) ) == 0 &&
-              ( status.relations[2] & 32 ) > 0 ) {
-        // A is on top of B
-        spatialRelations.push_back(ON_TOP_OF);
-        spatialRelations.push_back(TOUCHING);
-        spatialRelations.push_back(NEAR);
-    } 
-    else if ( ( ( ( status.relations[0] & (16|32) ) > 0 &&
-                  ( status.relations[1] & (1|2) ) == 0
-                ) ||
-                ( ( status.relations[0] & (1|2) ) == 0 &&
-                  ( status.relations[1] & (16|32) ) > 0 
-                )
-              ) &&
-              ( status.relations[2] & (1|2) ) == 0 
-            ) {
-        // A is adjacent to B
-        spatialRelations.push_back(ADJACENT);
-        spatialRelations.push_back(TOUCHING);
-        spatialRelations.push_back(NEAR);
-    } 
-    else { 
-        computeAsideRelations = true;
-    }// if 
+//    bool computeAsideRelations = false;
+//    if ( ( status.relations[0] & 64 ) > 0 &&
+//         ( status.relations[1] & 64 ) > 0 &&
+//         ( status.relations[2] & 64 ) > 0 ) {
+//        // A overlaps B and vice-versa
+//        spatialRelations.push_back(INSIDE);
+//        spatialRelations.push_back(TOUCHING);
+//        spatialRelations.push_back(NEAR);
+//        return spatialRelations;
+//    }
+//    else if ( ( status.relations[0] & 128 ) > 0 &&
+//              ( status.relations[1] & 128 ) > 0 &&
+//              ( status.relations[2] & 128 ) > 0 ) {
+//        // A is inside B
+//        spatialRelations.push_back(INSIDE);
+//        spatialRelations.push_back(NEAR);
+//        return spatialRelations;
+//    }
+//    else if ( ( status.relations[0] & 256 ) > 0 &&
+//              ( status.relations[1] & 256 ) > 0 &&
+//              ( status.relations[2] & 256 ) > 0 ) {
+//        // A is outside B
+//        spatialRelations.push_back(OUTSIDE);
+//        spatialRelations.push_back(NEAR);
+//    }
+//    else if ( ( status.relations[0] & (64|128|512) ) > 0 &&
+//              ( status.relations[1] & (64|128|512) ) > 0 &&
+//              ( status.relations[2] & (64|128|512) ) > 0 ) {
+//        // A is inside B and touching it
+//        spatialRelations.push_back(INSIDE);
+//        spatialRelations.push_back(TOUCHING);
+//        spatialRelations.push_back(NEAR);
+//        return spatialRelations;
+//    }
+//    else if ( ( status.relations[0] & (64|256|1024) ) > 0 &&
+//              ( status.relations[1] & (64|256|1024) ) > 0 &&
+//              ( status.relations[2] & (64|256|1024) ) > 0 ) {
+//        // A is outside B but touching it
+//        spatialRelations.push_back(OUTSIDE);
+//        spatialRelations.push_back(TOUCHING);
+//        spatialRelations.push_back(NEAR);
+//    }
+//    else if ( ( status.relations[0] & (1|2) ) == 0 &&
+//              ( status.relations[1] & (1|2) ) == 0 &&
+//              ( status.relations[2] & (1|2) ) == 0 ) {
+//        // A is not completely inside B or vice-versa, but they intersect
+//        spatialRelations.push_back(TOUCHING);
+//        spatialRelations.push_back(NEAR);
+//    }
+//    else if ( ( status.relations[0] & (1|2|16|32) ) == 0 &&
+//              ( status.relations[1] & (1|2|16|32) ) == 0 &&
+//              ( status.relations[2] & 32 ) > 0 ) {
+//        // A is on top of B
+//        spatialRelations.push_back(ON_TOP_OF);
+//        spatialRelations.push_back(TOUCHING);
+//        spatialRelations.push_back(NEAR);
+//    }
+//    else if ( ( ( ( status.relations[0] & (16|32) ) > 0 &&
+//                  ( status.relations[1] & (1|2) ) == 0
+//                ) ||
+//                ( ( status.relations[0] & (1|2) ) == 0 &&
+//                  ( status.relations[1] & (16|32) ) > 0
+//                )
+//              ) &&
+//              ( status.relations[2] & (1|2) ) == 0
+//            ) {
+//        // A is adjacent to B
+//        spatialRelations.push_back(ADJACENT);
+//        spatialRelations.push_back(TOUCHING);
+//        spatialRelations.push_back(NEAR);
+//    }
+//    else {
+//        computeAsideRelations = true;
+//    }// if
 
-    ///*************************** WARNING *********************************////
-    // TODO: UP AXIS = Y (TODO: customize it)    
-    //       an intersection must occur at X and Y besides
-    if ( ( status.relations[0] & (1|2) ) == 0 &&
-         ( status.relations[1] & (1|2) ) == 0 ) {
-        if ( ( status.relations[2] & (1|4|16) ) > 0 ) {
-            spatialRelations.push_back(BELOW);
-        } 
-        else if ( ( status.relations[2] & (2|8|32) ) > 0 ) {
-            spatialRelations.push_back(ABOVE);
-        }
-    }// if
-    ///*************************** WARNING *********************************////
+//    ///*************************** WARNING *********************************////
+//    // TODO: UP AXIS = Y (TODO: customize it)
+//    //       an intersection must occur at X and Y besides
+//    if ( ( status.relations[0] & (1|2) ) == 0 &&
+//         ( status.relations[1] & (1|2) ) == 0 ) {
+//        if ( ( status.relations[2] & (1|4|16) ) > 0 ) {
+//            spatialRelations.push_back(BELOW);
+//        }
+//        else if ( ( status.relations[2] & (2|8|32) ) > 0 ) {
+//            spatialRelations.push_back(ABOVE);
+//        }
+//    }// if
+//    ///*************************** WARNING *********************************////
 
-    if ( distance > besideDistance ) {
-        spatialRelations.push_back(FAR_);
-        return spatialRelations;
-    } 
-    else if ( distance < besideDistance * (LocalSpaceMap2D::NEAR_FACTOR/LocalSpaceMap2D::NEXT_FACTOR) ) {
-        spatialRelations.push_back(NEAR);
-    } 
-    else {
-        spatialRelations.push_back(BESIDE);
-    }// if
+//    if ( distance > besideDistance ) {
+//        spatialRelations.push_back(FAR_);
+//        return spatialRelations;
+//    }
+//    else if ( distance < besideDistance * (LocalSpaceMap2D::NEAR_FACTOR/LocalSpaceMap2D::NEXT_FACTOR) ) {
+//        spatialRelations.push_back(NEAR);
+//    }
+//    else {
+//        spatialRelations.push_back(BESIDE);
+//    }// if
 
-    if ( !computeAsideRelations ) {
-        return spatialRelations;
-    }
+//    if ( !computeAsideRelations ) {
+//        return spatialRelations;
+//    }
 
-    const math::Vector3& observerPosition = observer.getPosition( );
+//    const math::Vector3& observerPosition = observer.getPosition( );
 
-    math::Vector3 observerDirection;
-    math::Vector3 objectDirection( pointInB - pointInA ); // direction vector from A (this) to B
+//    math::Vector3 observerDirection;
+//    math::Vector3 objectDirection( pointInB - pointInA ); // direction vector from A (this) to B
 
-    bool observerBetweenObjects = false;
+//    bool observerBetweenObjects = false;
 
-    if ( observer.getName( ) == entityA.getName( ) || 
-         entityA.getBoundingBox( ).isInside( observerPosition ) ) {
-        observerDirection = (observer.getDirection( ) * objectDirection.length( )+1.0);
-    } 
-    else if ( observer.getName( ) == entityB.getName( ) || 
-              entityB.getBoundingBox( ).isInside( observerPosition ) ) {
-        observerDirection = -(observer.getDirection( ) * objectDirection.length( )+1.0);
-    }
-    else {
-        math::Vector3 observerToEntityA, observerToEntityB;
-        {
-            math::Vector3 observerPoint, entityPoint;
-            observer.distanceTo( entityA, &observerPoint, &entityPoint );
-            observerToEntityA = entityPoint - observerPoint; // direction vector from observer to A (this)
-            observerDirection = observerPoint - entityPoint; // direction vector from A (this) to observer
-        } 
-        {
-            math::Vector3 observerPoint, entityPoint;
-            observer.distanceTo( entityB, &observerPoint, &entityPoint );
-            observerToEntityB = entityPoint - observerPoint; // direction vector from observer to B (this)
-        }
-        observerToEntityA.normalise( );
-        observerToEntityB.normalise( );
+//    if ( observer.getName( ) == entityA.getName( ) ||
+//         entityA.getBoundingBox( ).isInside( observerPosition ) ) {
+//        observerDirection = (observer.getDirection( ) * objectDirection.length( )+1.0);
+//    }
+//    else if ( observer.getName( ) == entityB.getName( ) ||
+//              entityB.getBoundingBox( ).isInside( observerPosition ) ) {
+//        observerDirection = -(observer.getDirection( ) * objectDirection.length( )+1.0);
+//    }
+//    else {
+//        math::Vector3 observerToEntityA, observerToEntityB;
+//        {
+//            math::Vector3 observerPoint, entityPoint;
+//            observer.distanceTo( entityA, &observerPoint, &entityPoint );
+//            observerToEntityA = entityPoint - observerPoint; // direction vector from observer to A (this)
+//            observerDirection = observerPoint - entityPoint; // direction vector from A (this) to observer
+//        }
+//        {
+//            math::Vector3 observerPoint, entityPoint;
+//            observer.distanceTo( entityB, &observerPoint, &entityPoint );
+//            observerToEntityB = entityPoint - observerPoint; // direction vector from observer to B (this)
+//        }
+//        observerToEntityA.normalise( );
+//        observerToEntityB.normalise( );
 
-        double angle = std::acos( observerToEntityA.dotProduct( observerToEntityB ) );
-        observerBetweenObjects = ( std::abs(angle) > 150.0/180.0*M_PI );
-    }// if
+//        double angle = std::acos( observerToEntityA.dotProduct( observerToEntityB ) );
+//        observerBetweenObjects = ( std::abs(angle) > 150.0/180.0*M_PI );
+//    }// if
 
-    double distanceToA = observerDirection.length( );
-    double distanceBetweenAandB = objectDirection.length( );
+//    double distanceToA = observerDirection.length( );
+//    double distanceBetweenAandB = objectDirection.length( );
 
-    observerDirection.normalise(); // direction vector from A (this) to observer
-    objectDirection.normalise();   // direction vector from A (this) to B
+//    observerDirection.normalise(); // direction vector from A (this) to observer
+//    objectDirection.normalise();   // direction vector from A (this) to B
 
-    double angle;
-    {
-        ///*************************** WARNING *********************************////
-        // TODO: UP AXIS = Z (TODO: customize it)
+//    double angle;
+//    {
+//        ///*************************** WARNING *********************************////
+//        // TODO: UP AXIS = Z (TODO: customize it)
 
-        // Angle from observerDirection (A to observer) to objectDirection (A to B)
-        angle = std::atan2( objectDirection.y, objectDirection.x ) - 
-                std::atan2( observerDirection.y, observerDirection.x );
+//        // Angle from observerDirection (A to observer) to objectDirection (A to B)
+//        angle = std::atan2( objectDirection.y, objectDirection.x ) -
+//                std::atan2( observerDirection.y, observerDirection.x );
 
-        if ( angle > M_PI ) {
-            angle -= M_PI*2.0;
-        } else if ( angle < -M_PI ) {
-            angle += M_PI*2.0;
-        }
-        ///*************************** WARNING *********************************////
-    }
-    angle *= 180.0/M_PI;
+//        if ( angle > M_PI ) {
+//            angle -= M_PI*2.0;
+//        } else if ( angle < -M_PI ) {
+//            angle += M_PI*2.0;
+//        }
+//        ///*************************** WARNING *********************************////
+//    }
+//    angle *= 180.0/M_PI;
     
-    double lowerLimit = 20.0;
-    double upperLimit = 110.0;
+//    double lowerLimit = 20.0;
+//    double upperLimit = 110.0;
 
-    if ( angle > lowerLimit && angle <= upperLimit ) {
-        spatialRelations.push_back( LEFT_OF );
-    } 
-    else if ( ( angle > upperLimit && angle <= 180.0 ) || 
-              ( angle >= -180.0 && angle <= -upperLimit ) ) {
-        spatialRelations.push_back( observerBetweenObjects ? BEHIND : IN_FRONT_OF );           
-    }
-    else if ( angle > -upperLimit && angle <= -lowerLimit ) {
-        spatialRelations.push_back( RIGHT_OF );
-    }
-    else {
-        if ( distanceToA > distanceBetweenAandB ) {
-            spatialRelations.push_back( observerBetweenObjects ? IN_FRONT_OF : BEHIND );
-        } 
-        else {
-            spatialRelations.push_back( angle > 0 ? RIGHT_OF : LEFT_OF );
-        }
-    }// if
+//    if ( angle > lowerLimit && angle <= upperLimit ) {
+//        spatialRelations.push_back( LEFT_OF );
+//    }
+//    else if ( ( angle > upperLimit && angle <= 180.0 ) ||
+//              ( angle >= -180.0 && angle <= -upperLimit ) ) {
+//        spatialRelations.push_back( observerBetweenObjects ? BEHIND : IN_FRONT_OF );
+//    }
+//    else if ( angle > -upperLimit && angle <= -lowerLimit ) {
+//        spatialRelations.push_back( RIGHT_OF );
+//    }
+//    else {
+//        if ( distanceToA > distanceBetweenAandB ) {
+//            spatialRelations.push_back( observerBetweenObjects ? IN_FRONT_OF : BEHIND );
+//        }
+//        else {
+//            spatialRelations.push_back( angle > 0 ? RIGHT_OF : LEFT_OF );
+//        }
+//    }// if
 
-    // BESIDE = next
-    // NEAR = near
+//    // BESIDE = next
+//    // NEAR = near
     
-    return spatialRelations;
-}
+//    return spatialRelations;
+//}
 
-std::string Entity::spatialRelationToString( Entity::SPATIAL_RELATION relation ) {
-    switch( relation ) {
-    case LEFT_OF: return "left_of";
-    case RIGHT_OF: return "right_of";
-    case ABOVE: return "above";
-    case BELOW: return "below";
-    case BEHIND: return "behind";
-    case IN_FRONT_OF: return "in_front_of";
-    case BESIDE: return "beside";
-    case NEAR: return "near";
-    case FAR_: return "far";
-    case TOUCHING: return "touching";
-    case BETWEEN: return "between";
-    case INSIDE: return "inside";
-    case OUTSIDE: return "outside";
-    default:
-    case TOTAL_RELATIONS:
-        return " invalid relation ";
-    }
-}
+//std::string Entity::spatialRelationToString( Entity::SPATIAL_RELATION relation ) {
+//    switch( relation ) {
+//    case LEFT_OF: return "left_of";
+//    case RIGHT_OF: return "right_of";
+//    case ABOVE: return "above";
+//    case BELOW: return "below";
+//    case BEHIND: return "behind";
+//    case IN_FRONT_OF: return "in_front_of";
+//    case BESIDE: return "beside";
+//    case NEAR: return "near";
+//    case FAR_: return "far";
+//    case TOUCHING: return "touching";
+//    case BETWEEN: return "between";
+//    case INSIDE: return "inside";
+//    case OUTSIDE: return "outside";
+//    default:
+//    case TOTAL_RELATIONS:
+//        return " invalid relation ";
+//    }
+//}

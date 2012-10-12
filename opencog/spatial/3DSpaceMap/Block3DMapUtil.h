@@ -14,6 +14,7 @@ namespace opencog
 
     namespace spatial
     {
+
         class BlockVector
         {
         public:
@@ -100,6 +101,36 @@ namespace opencog
                             return false;
                     }
                 }
+            }
+
+            inline bool isFaceTouching(const BlockVector& other) const
+            {
+                if ( ((x == other.x) && (y == other.y) && ((z == other.z - 1) || (z == other.z + 1)))
+                   ||((x == other.x) && (z == other.z) && ((y == other.y - 1) || (y == other.y + 1)))
+                   ||((y == other.y) && (z == other.z) && ((x == other.x - 1) || (x == other.x + 1))) )
+                    return true;
+                else
+                    return false;
+            }
+
+            inline bool isSideTouching(const BlockVector& other) const
+            {
+                if ( ((x == other.x) && ( (y == other.y - 1) || (y == other.y + 1)) && ((z == other.z - 1) || (z == other.z + 1)))
+                   ||((z == other.z) && ( (y == other.y - 1) || (y == other.y + 1)) && ((x == other.x - 1) || (x == other.x + 1)))
+                   ||((y == other.y) && ( (z == other.z - 1) || (z == other.z + 1)) && ((x == other.x - 1) || (x == other.x + 1))))
+                    return true;
+                else
+                    return false;
+            }
+
+            inline bool isCornerTouching(const BlockVector& other) const
+            {
+                if ( ((x == other.x - 1) || (x == other.x + 1)) &&
+                     ((y == other.y - 1) || (y == other.y + 1)) &&
+                     ((z == other.z - 1) || (z == other.z + 1)) )
+                    return true;
+                else
+                    return false;
             }
 
             inline std::string toString( ) const
@@ -239,6 +270,101 @@ namespace opencog
                     return false;
             }
 
+            inline bool isFaceTouching(const AxisAlignedBox& other) const
+            {
+                std::vector<BlockVector> coners1 = getAllCorners();
+                std::vector<BlockVector> coners2 = other.getAllCorners();
+
+                // is my bottom face touching the bottom face of the other
+                if ( ((((BlockVector)coners1[0]).z == ((BlockVector)coners2[0]).z + 1) ||
+                      (((BlockVector)coners1[0]).z == ((BlockVector)coners2[0]).z - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).y, ((BlockVector)coners1[2]).x, ((BlockVector)coners1[2]).y,
+                                           ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).y, ((BlockVector)coners2[2]).x, ((BlockVector)coners2[2]).y ) )
+                    return true;
+
+                // is my bottom face touching the top face of the other
+                if ( ((((BlockVector)coners1[0]).z == ((BlockVector)coners2[4]).z + 1) ||
+                      (((BlockVector)coners1[0]).z == ((BlockVector)coners2[4]).z - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).y, ((BlockVector)coners1[2]).x, ((BlockVector)coners1[2]).y,
+                                           ((BlockVector)coners2[4]).x, ((BlockVector)coners2[4]).y, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).y ) )
+                    return true;
+
+                // is my top face touching the bottom face of the other
+                if ( ((((BlockVector)coners1[4]).z == ((BlockVector)coners2[0]).z + 1) ||
+                      (((BlockVector)coners1[4]).z == ((BlockVector)coners2[0]).z - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[4]).x, ((BlockVector)coners1[4]).y, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).y,
+                                           ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).y, ((BlockVector)coners2[2]).x, ((BlockVector)coners2[2]).y ) )
+                    return true;
+
+                // is my top face touching the top face of the other
+                if ( ((((BlockVector)coners1[4]).z == ((BlockVector)coners2[4]).z + 1) ||
+                      (((BlockVector)coners1[4]).z == ((BlockVector)coners2[4]).z - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[4]).x, ((BlockVector)coners1[4]).y, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).y,
+                                           ((BlockVector)coners2[4]).x, ((BlockVector)coners2[4]).y, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).y ) )
+                    return true;
+
+                // is my left face touching the left face of the other
+                if ( ((((BlockVector)coners1[0]).x == ((BlockVector)coners2[0]).x + 1) ||
+                      (((BlockVector)coners1[0]).x == ((BlockVector)coners2[0]).x - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[0]).y, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[7]).y, ((BlockVector)coners1[7]).z,
+                                           ((BlockVector)coners2[0]).y, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[7]).y, ((BlockVector)coners2[7]).z ) )
+                    return true;
+
+                // is my left face touching the right face of the other
+                if ( ((((BlockVector)coners1[0]).x == ((BlockVector)coners2[1]).x + 1) ||
+                      (((BlockVector)coners1[0]).x == ((BlockVector)coners2[1]).x - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[0]).y, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[7]).y, ((BlockVector)coners1[7]).z,
+                                           ((BlockVector)coners2[1]).y, ((BlockVector)coners2[1]).z, ((BlockVector)coners2[6]).y, ((BlockVector)coners2[6]).z ) )
+                    return true;
+
+                // is my right face touching the left face of the other
+                if ( ((((BlockVector)coners1[1]).x == ((BlockVector)coners2[0]).x + 1) ||
+                      (((BlockVector)coners1[1]).x == ((BlockVector)coners2[0]).x - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[1]).y, ((BlockVector)coners1[1]).z, ((BlockVector)coners1[6]).y, ((BlockVector)coners1[6]).z,
+                                           ((BlockVector)coners2[0]).y, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[7]).y, ((BlockVector)coners2[7]).z ) )
+                    return true;
+
+                // is my right face touching the right face of the other
+                if ( ((((BlockVector)coners1[1]).x == ((BlockVector)coners2[1]).x + 1) ||
+                      (((BlockVector)coners1[1]).x == ((BlockVector)coners2[1]).x - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[1]).y, ((BlockVector)coners1[1]).z, ((BlockVector)coners1[6]).y, ((BlockVector)coners1[6]).z,
+                                           ((BlockVector)coners2[1]).y, ((BlockVector)coners2[1]).z, ((BlockVector)coners2[6]).y, ((BlockVector)coners2[6]).z ) )
+                    return true;
+
+                // is my near face touching the near face of the other
+                if ( ((((BlockVector)coners1[0]).y == ((BlockVector)coners2[0]).y + 1) ||
+                      (((BlockVector)coners1[0]).y == ((BlockVector)coners2[0]).y - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[5]).x, ((BlockVector)coners1[5]).z,
+                                           ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[5]).x, ((BlockVector)coners2[5]).z ) )
+                    return true;
+
+                // is my near face touching the far face of the other
+                if ( ((((BlockVector)coners1[0]).y == ((BlockVector)coners2[3]).y + 1) ||
+                      (((BlockVector)coners1[0]).y == ((BlockVector)coners2[3]).y - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[5]).x, ((BlockVector)coners1[5]).z,
+                                           ((BlockVector)coners2[3]).x, ((BlockVector)coners2[3]).z, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).z ) )
+                    return true;
+
+                // is my far face touching the near face of the other
+                if ( ((((BlockVector)coners1[3]).y == ((BlockVector)coners2[0]).y + 1) ||
+                      (((BlockVector)coners1[3]).y == ((BlockVector)coners2[0]).y - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[3]).x, ((BlockVector)coners1[3]).z, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).z,
+                                           ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[5]).x, ((BlockVector)coners2[5]).z ) )
+                    return true;
+
+                // is my far face touching the far face of the other
+                if ( ((((BlockVector)coners1[3]).y == ((BlockVector)coners2[3]).y + 1) ||
+                      (((BlockVector)coners1[3]).y == ((BlockVector)coners2[3]).y - 1) ) &&
+                        is_2DRectangleOverlap(((BlockVector)coners1[3]).x, ((BlockVector)coners1[3]).z, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).z,
+                                           ((BlockVector)coners2[3]).x, ((BlockVector)coners2[3]).z, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).z ) )
+                    return true;
+
+                return false;
+
+            }
+
+
+
             /**
              * Corners
              *
@@ -265,6 +391,16 @@ namespace opencog
 
                 return coners;
             }
+
+            bool static is_2DRectangleOverlap(int left1, int bottom1, int right1,int top1,
+                                       int left2, int bottom2, int right2,int top2)
+            {
+                if ((right1 > left2)&&(left1 < right2)&&(top1 > bottom2) && (bottom1 < top2))
+                    return true;
+                else
+                    return false;
+            }
+
 
         };
 

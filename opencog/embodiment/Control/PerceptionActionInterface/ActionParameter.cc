@@ -32,6 +32,8 @@
 
 using namespace opencog::pai;
 
+Entity Entity::NON_Entity = Entity("","");
+
 ActionParameter::ActionParameter() : type(ActionParamType::STRING())
 {
     PAIUtils::initializeXMLPlatform();
@@ -58,6 +60,12 @@ ActionParameter::ActionParameter(const string& _name, const ActionParamType& _ty
     case ENTITY_CODE:
         OC_ASSERT(isEntityValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
         break;
+    case FUZZY_INTERVAL_INT_CODE:
+        OC_ASSERT(isFuzzyIntervalIntValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        break;
+    case FUZZY_INTERVAL_FLOAT_CODE:
+        OC_ASSERT(isFuzzyIntervalFloatValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        break;
     default:
         OC_ASSERT(false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
         break;
@@ -68,6 +76,10 @@ ActionParameter::~ActionParameter()
 {
 }
 
+void ActionParameter::assignValue(const ParamValue& newValue)
+{
+    value = newValue;
+}
 
 const string& ActionParameter::getName() const
 {
@@ -191,6 +203,16 @@ bool ActionParameter::isEntityValue() const
     return boost::get<Entity>(&value);
 }
 
+bool ActionParameter::isFuzzyIntervalIntValue() const
+{
+    return boost::get<FuzzyIntervalInt>(&value);
+}
+
+bool ActionParameter::isFuzzyIntervalFloatValue() const
+{
+    return boost::get<FuzzyIntervalFloat>(&value);
+}
+
 const string& ActionParameter::getStringValue() const
 {
     return get<string>(value);
@@ -209,6 +231,16 @@ const Vector& ActionParameter::getVectorValue() const
 const Entity& ActionParameter::getEntityValue() const
 {
     return get<Entity>(value);
+}
+
+const FuzzyIntervalInt& ActionParameter::getFuzzyIntervalIntValue() const
+{
+    return get<FuzzyIntervalInt>(value);
+}
+
+const FuzzyIntervalFloat& ActionParameter::getFuzzyIntervalFloatValue() const
+{
+    return get<FuzzyIntervalFloat>(value);
 }
 
 bool ActionParameter::areFromSameType(const ParamValue& v1, const ParamValue& v2)
@@ -260,6 +292,22 @@ std::string ActionParameter::stringRepresentation() const throw (opencog::Runtim
         answer.append(opencog::toString(boost::get<Entity>(value).id));
         answer.append(",");
         answer.append(opencog::toString(boost::get<Entity>(value).type));
+        answer.append(")");
+        break;
+    }
+    case FUZZY_INTERVAL_INT_CODE: {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<FuzzyIntervalInt>(value).bound_low));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<FuzzyIntervalInt>(value).bound_high));
+        answer.append(")");
+        break;
+    }
+    case FUZZY_INTERVAL_FLOAT_CODE: {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<FuzzyIntervalFloat>(value).bound_low));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<FuzzyIntervalFloat>(value).bound_high));
         answer.append(")");
         break;
     }

@@ -3545,7 +3545,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     addEntityProperties(objectNode, isSelfObject, mapinfo);
 
     // Add space predicate.
-    addSpacePredicates(objectNode, mapinfo, timestamp,isFirstTimePercept);
+    addSpacePredicates(objectNode, mapinfo, isSelfObject, timestamp,isFirstTimePercept);
 
     //addPropertyPredicate(std::string("is_moving"), objectNode, moving);
     
@@ -3599,10 +3599,9 @@ int roundDoubleToInt(double x)
      }
  }
 
-bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, unsigned long timestamp,bool isFirstTimePercept)
+bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool isSelfObject, unsigned long timestamp,bool isFirstTimePercept)
 {
     std::string objectName = atomSpace.getName(objectNode);
-    bool isSelfObject = (avatarInterface.getPetId() == objectName);
 
     // Position predicate
     Vector position(mapinfo.position().x(), mapinfo.position().y(), mapinfo.position().z());
@@ -3698,7 +3697,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, unsigne
 
     // Space server insertion
     // round up these values
-    return atomSpace.getSpaceServer().addSpaceInfo(objectNode, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
+    return atomSpace.getSpaceServer().addSpaceInfo(objectNode,isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
                                     roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
 
 }
