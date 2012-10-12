@@ -498,6 +498,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, bool isSelfObject, unsigned lo
     {
         curMap->addNoneBlockEntity(objectNode,pos,objWidth,objLength,objHeight,objYaw,objectName, entityClass,isSelfObject, true);
     }
+    return true;
 }
 
 Handle SpaceServer::addOrGetSpaceMap(unsigned long timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin,
