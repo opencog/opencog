@@ -51,6 +51,24 @@ LS_ID                           = LS
 LS_IP                           = 127.0.0.1
 LS_PORT                         = 16314
 
+# For the new learningServer for Unity embodiment, not for the old pet Park
+LEARNING_SERVER_PULL_IP         = 127.0.0.1
+LEARNING_SERVER_PULL_PORT       = 16501
+
+LEARNING_SERVER_PUSH_IP         = 127.0.0.1
+LEARNING_SERVER_PUSH_PORT       = 16502
+
+ENABLE_STATICS_MAP_LEARNING     = true
+
+# For zmq based learning server, when the LS is running in the different machine from the OAC, 
+# please asign the LEARNING_SERVER_PULL_IP & LEARNING_SERVER_PUSH_IP as the Ip of the machine on which the LS is running 
+# because the OAC will push message to LEARNING_SERVER_PUSH_IP
+LEARNING_SERVER_PULL_IP         = 127.0.0.1
+LEARNING_SERVER_PULL_PORT       = 16500
+
+LEARNING_SERVER_PUSH_IP         = 127.0.0.1
+LEARNING_SERVER_PUSH_PORT       = 16501
+
 # ServerSocket port range for OACs 
 MIN_OAC_PORT                    = 16326 
 MAX_OAC_PORT                    = 16340 
@@ -114,7 +132,11 @@ ATOM_SPACE_DUMP = atomSpace.dump
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
+
 PSI_DEMANDS = Energy #, Integrity, Certainty, Competence, Affiliation
+
+PSI_DEMANDS = Energy #, Integrity, Certainty , Competence, Affiliation
+
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
@@ -259,11 +281,12 @@ SIZE_PENALTY_COEF_B             = 0.34
 ######################
 
 # SpaceMap grid X dimensions.
-MAP_XDIM                        = 256
+#MAP_XDIM                        = 256
 #MAP_XDIM 1024
 
 # SpaceMap grid Y dimensions.
-MAP_YDIM                        = 256
+
+#MAP_YDIM                        = 256
 #MAP_YDIM 1024
 
 # Parameters used to enable/disable the tasks to be executed during OAC idle
@@ -427,4 +450,7 @@ RAMONA_SERVER_PORT	= 7003
 
 # Whether to collect action corpus for event detection
 ENABLE_ACTION_COLLECT   = false
+
+# Whether to use 3D map, currently the 3D map is used by the Unity3D embodiment
+USE_3D_MAP = false
 

@@ -32,7 +32,7 @@
 
 #include <opencog/atomspace/Node.h>
 
-#include <opencog/spatial/HPASearch.h>
+#include <opencog/spatial/3DSpaceMap/Pathfinder3D.h>
 #include <opencog/spatial/TangentBug.h>
 #include <opencog/spatial/AStarController.h>
 #include <opencog/spatial/AStar3DController.h>
@@ -177,10 +177,14 @@ throw (ComboException, AssertionException, std::bad_exception)
                     target = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
                 Handle targetHandle = toHandle( target );
+<<<<<<< TREE
                 try {
                     sm.getEntity( as.getName( targetHandle ) );
 
                     if (!build_goto_plan(targetHandle, false, Handle::UNDEFINED, Handle::UNDEFINED, walkSpeed )) {
+=======
+                    {
+>>>>>>> MERGE-SOURCE
                         if (_hasPlanFailed) {
                             logger().error("PAIWorldWrapper - Failed to create a goto plan to the goal.");
                             throw ComboException(TRACE_INFO, "PAIWorldWrapper - %s.", "Failed to create a goto plan to the goal");
@@ -192,7 +196,11 @@ throw (ComboException, AssertionException, std::bad_exception)
                         } // else
                         MAIN_LOGGER_ACTION_PLAN_FAILED;
                         return false;
+<<<<<<< TREE
                     } // if
+=======
+                    }
+>>>>>>> MERGE-SOURCE
 
                 } catch ( NotFoundException& ex ) {
                     logger().error("PAIWorldWrapper - Goto: target not found.");
@@ -681,9 +689,14 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
     }
 }
 
+<<<<<<< TREE
 void PAIWorldWrapper::get3DWaypoints( const spatial::Point3D& startPoint,
         const spatial::Point3D& endPoint, std::vector<spatial::Point3D>& actions )
+=======
+        const SpaceServer::SpaceMapPoint& endPoint, std::vector<SpaceServer::SpaceMapPoint>& actions,SpaceServer::SpaceMap& sm )
+>>>>>>> MERGE-SOURCE
 {
+<<<<<<< TREE
     struct timeval timer_start, timer_end;
     time_t elapsed_time = 0;
     const SpaceServer::SpaceMap& sm = pai.getAtomSpace().getSpaceServer().getLatestMap();
@@ -775,6 +788,18 @@ bool PAIWorldWrapper::buildGotoPlan( const spatial::Point3D& position, float cus
     return false;
 }
 
+=======
+    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions))
+    {
+        printf("Pathfinding successfully! From (%d,%d,%d) to (%d, %d, %d)",
+               startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
+    }
+    else
+    {
+        printf("Pathfinding failed! From (%d,%d,%d) to (%d, %d, %d)",
+               startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
+    }
+>>>>>>> MERGE-SOURCE
 bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions, bool useExistingId, Handle toNudge, float customSpeed )
 {
 
@@ -831,6 +856,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
 bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>& actions, bool useExistingId, Handle toNudge, float customSpeed )
 {
 
+<<<<<<< TREE
     if ( actions.empty( ) ) {
         // we're done. No need to create any navigation actions
         logger().debug("PAIWorldWrapper - Zero actions from AStar3D.");
@@ -895,6 +921,58 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<spatial::Point3D>&
         
         it_point++;
     } // while
+=======
+    // the first pos in actions vector is the begin pos, so there should be at least 2 elements in this vector
+    if ( actions.size() < 2 ) {
+        // we're done. No need to create any navigation actions
+        logger().debug("PAIWorldWrapper - Zero actions from AStar3D.");
+        return false;
+    }
+
+    // --------------------------------------------------------------------
+    // transform to a sequence of navigation commands
+    // --------------------------------------------------------------------
+
+    if (!useExistingId ) {
+        planID = pai.createActionPlan( );
+    } // if
+    vector<SpaceServer::SpaceMapPoint>::iterator it_point = actions.begin();
+    it_point ++;
+
+    while (it_point != actions.end()) {
+        PetAction action;
+
+        // The agent need to jump when this pos is higher than last pos
+        if (((SpaceServer::SpaceMapPoint)(*(it_point))).z > ((SpaceServer::SpaceMapPoint)(*(it_point-1))).z )
+        {
+            action = PetAction(ActionType::JUMP_TOWARD());
+            action.addParameter(ActionParameter("direction",
+                                                ActionParamType::VECTOR(),
+                                                Vector(((SpaceServer::SpaceMapPoint)(*it_point)).x,
+                                                       ((SpaceServer::SpaceMapPoint)(*it_point)).y,
+                                                       ((SpaceServer::SpaceMapPoint)(*it_point)).z )));
+        }
+        else
+        {
+            action = PetAction(ActionType::WALK());
+            action.addParameter(ActionParameter("target",
+                                                ActionParamType::VECTOR(),
+                                                Vector(((SpaceServer::SpaceMapPoint)(*it_point)).x,
+                                                       ((SpaceServer::SpaceMapPoint)(*it_point)).y,
+                                                       ((SpaceServer::SpaceMapPoint)(*it_point)).z )));
+
+            float speed = ( customSpeed != 0 ) ?
+                    customSpeed : pai.getAvatarInterface().computeWalkingSpeed();
+            logger().debug("PAIWorldWrapper::createNavigationPlanAction customSpeed[%f] finalSpeed[%f]",
+                    customSpeed, speed );
+            action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(),
+                    lexical_cast<string>( speed) ) );
+
+        }
+        pai.addAction( planID, action );
+        it_point++;
+    } // while
+>>>>>>> MERGE-SOURCE
 
     return true;
 }
@@ -910,6 +988,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
     std::string goalName = atomSpace.getName(goalHandle);
 
     OC_ASSERT(goalHandle != Handle::UNDEFINED);
+<<<<<<< TREE
     OC_ASSERT(spaceMap.containsObject(goalName));
 
     spatial::Point startPoint;
@@ -935,6 +1014,9 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
             }
         } // else
     } catch ( AssertionException& e ) {
+=======
+        endPoint = spaceMap.getNearFreePointAtDistance(targetCenterPosition, SpaceServer::SpaceMap::AccessDistance, direction );
+>>>>>>> MERGE-SOURCE
         logger().error("PAIWorldWrapper - Unable to get pet or goal location.");
         _hasPlanFailed = true;
         return false;
@@ -945,11 +1027,15 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
             startPoint.first, startPoint.second,  endPoint.first,
             endPoint.second, goalName.c_str());
     // register seeking object
+<<<<<<< TREE
     pai.getAvatarInterface( ).setLatestGotoTarget(
         std::pair<std::string, spatial::Point>( goalName, targetCenterPosition ) );
 
     spatial::Point3D goalPoint = spatial::Point3D(endPoint.first, endPoint.second, targetAltitude);
     return buildGotoPlan( goalPoint, walkSpeed );
+=======
+        get3DWaypoints( startPoint, endPoint, actions ,(SpaceServer::SpaceMap&)spaceMap);
+>>>>>>> MERGE-SOURCE
 }
 
 PetAction PAIWorldWrapper::buildPetAction(sib_it from)

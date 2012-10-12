@@ -244,7 +244,15 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
             if( a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom ){
                spaceServer->removeMap(h);
             }
+        OC_ASSERT(a->getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
+        Handle timedAtom = a->getOutgoing(h, 1);
+        // We have to do the check here instead of in the spaceServer
+        // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
+        if( a->getType(timedAtom) == SPACE_MAP_NODE ){
+           spaceServer->removeMap(timedAtom);
+
         }
+        remove(timedAtom, Temporal::getFromTimeNodeName(a->getName(timeNode).c_str()));
     }
 }
 

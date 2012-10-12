@@ -1,6 +1,7 @@
 
 ADD_SUBDIRECTORY (moses)
 ADD_SUBDIRECTORY (feature-selection)
+ADD_SUBDIRECTORY (statistics)
 
 IF (HAVE_DIMEMBED)
     ADD_SUBDIRECTORY (dimensionalembedding)

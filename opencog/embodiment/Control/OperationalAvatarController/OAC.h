@@ -279,6 +279,15 @@ public:
 #endif // HAVE_ZMQ
 
     /**
+<<<<<<< TREE
+=======
+    const PsiModulatorUpdaterAgent * getPsiModulatorUpdaterAgent() {return psiModulatorUpdaterAgent; }
+    const PsiDemandUpdaterAgent * getPsiDemandUpdaterAgent() {return psiDemandUpdaterAgent; }
+    const PsiActionSelectionAgent * getPsiActionSelectionAgent() {return psiActionSelectionAgent ; }
+    const PsiRelationUpdaterAgent * getPsiRelationUpdaterAgent() {return psiRelationUpdaterAgent; }
+    const PsiFeelingUpdaterAgent * getPsiFeelingUpdaterAgent() {return psiFeelingUpdaterAgent; }
+
+>>>>>>> MERGE-SOURCE
      * Get the Procedure Interpreter associated with the OAC.
      *
      * @return The ProcedureInterpreter associated with the OAC.
