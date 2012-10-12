@@ -53,11 +53,15 @@ TARGET_LINK_LIBRARIES (moses
 	feature_selection
 	util 
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
-
-	# These two work for both MPICH2 and OpenMPI, for me.
-	${MPI_LIBRARY}
-	${MPI_EXTRA_LIBRARY}
 )
+
+IF (HAVE_MPI)
+	TARGET_LINK_LIBRARIES (moses
+		# These two work for both MPICH2 and OpenMPI, for me.
+		${MPI_LIBRARY}
+		${MPI_EXTRA_LIBRARY}
+	)
+ENDIF (HAVE_MPI)
 
 
 # target_link_libraries(hello ${MPI_LIBRARIES}) 
