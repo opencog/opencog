@@ -2,7 +2,7 @@
  * opencog/learning/moses/optimization/optimization.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Moshe Looks
@@ -80,15 +80,15 @@ struct optim_parameters
     // N = p.popsize_ratio * n^1.05
     // XXX Why n^1.05 ??? This is going to have a significant effect
     // (as compared to n^1.00) only when n is many thousands or bigger...
-    unsigned pop_size(const field_set& fs);
+    unsigned pop_size(const field_set& fs) const;
 
     // term_improv*sqrt(n/w)  Huh?
-    unsigned max_gens_improv(const field_set& fs);
+    unsigned max_gens_improv(const field_set& fs) const;
 
     // min(windowsize_pop*N,windowsize_len*n)
-    unsigned rtr_window_size(const field_set& fs);
+    unsigned rtr_window_size(const field_set& fs) const;
 
-    unsigned max_distance(const field_set& fs);
+    unsigned max_distance(const field_set& fs) const;
 
     /// The score must improve by at least 's' to be considered; else
     /// the search is terminated.  If 's' is negative, then it is
@@ -96,9 +96,9 @@ struct optim_parameters
     /// improve 5 percent'.  
     void set_min_score_improv(score_t s);
 
-    score_t min_score_improv();
+    score_t min_score_improv() const;
 
-    bool score_improved(score_t best_score, score_t prev_hi);
+    bool score_improved(score_t best_score, score_t prev_hi) const;
 
     // String name of the optimization algo to employ
     string opt_algo;

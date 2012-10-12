@@ -77,14 +77,14 @@ optim_parameters::optim_parameters(const string& _opt_algo,
 // N = p.popsize_ratio * n^1.05
 // XXX Why n^1.05 ??? This is going to have a significant effect
 // (as compared to n^1.00) only when n is many thousands or bigger...
-unsigned optim_parameters::pop_size(const field_set& fs)
+unsigned optim_parameters::pop_size(const field_set& fs) const
 {
     return ceil(pop_size_ratio *
                  pow(information_theoretic_bits(fs), 1.05));
 }
 
 // term_improv*sqrt(n/w)  Huh?
-unsigned optim_parameters::max_gens_improv(const field_set& fs)
+unsigned optim_parameters::max_gens_improv(const field_set& fs) const
 {
     return ceil(term_improv*
                 sqrt(information_theoretic_bits(fs) /
@@ -92,13 +92,13 @@ unsigned optim_parameters::max_gens_improv(const field_set& fs)
 }
 
 // min(windowsize_pop*N,windowsize_len*n)
-unsigned optim_parameters::rtr_window_size(const field_set& fs)
+unsigned optim_parameters::rtr_window_size(const field_set& fs) const
 {
     return ceil(min(window_size_pop*pop_size(fs),
                     window_size_len*information_theoretic_bits(fs)));
 }
 
-unsigned optim_parameters::max_distance(const field_set& fs)
+unsigned optim_parameters::max_distance(const field_set& fs) const
 {
     return std::min(max_dist, fs.dim_size());
 }
@@ -112,12 +112,12 @@ void optim_parameters::set_min_score_improv(score_t s)
     min_score_improvement = s;
 }
 
-score_t optim_parameters::min_score_improv()
+score_t optim_parameters::min_score_improv() const
 {
     return min_score_improvement;
 }
 
-bool optim_parameters::score_improved(score_t best_score, score_t prev_hi)
+bool optim_parameters::score_improved(score_t best_score, score_t prev_hi) const
 {
     bool big_step = false;
     score_t imp = min_score_improv();
