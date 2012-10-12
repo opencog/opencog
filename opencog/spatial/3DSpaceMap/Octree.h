@@ -52,7 +52,7 @@ namespace opencog
 
             //  Remove an unit block at a given position from the octree system.
             //  return the unit block atom handle.
-            Handle& removeAnUnitSolidBlock(BlockVector& _pos);
+            Handle removeAnUnitSolidBlock(BlockVector& _pos);
 
             inline const BlockVector& getNearLeftBottomPoint(){return mNearLeftBottomPoint;}
 

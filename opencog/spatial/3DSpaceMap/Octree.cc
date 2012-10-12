@@ -209,7 +209,7 @@ void Octree::addSolidBlock(Block3D * _block, bool byKnownIndexes, int _x, int _y
 
 }
 
-Handle& Octree::removeAnUnitSolidBlock(BlockVector& _pos)
+Handle Octree::removeAnUnitSolidBlock(BlockVector& _pos)
 {
     // first, check if this _pos is inside this octree
     if (! mBoundingBox.isUnitBlockInsideMe(_pos))
@@ -217,14 +217,14 @@ Handle& Octree::removeAnUnitSolidBlock(BlockVector& _pos)
         // Usually, it should not come here
         logger().error("You want to remove a unit block from otree, but the block in not inside this octree: block is at x = %d, y = %d, z= %d ! /n",
                       _pos.x,_pos.y,_pos.z);
-        return (Handle&)(Handle::UNDEFINED);
+        return Handle::UNDEFINED;
     }
 
     // second, find eigher a bigger block that contains this block,
     // or a sub-octree that contain this block
     int x,y,z;
     bool isInsideABigblock;
-    Block3D* bigBlock;
+    Block3D* bigBlock = NULL;
     Octree* tree = getParentTreeOfUnitBlock(_pos, x,y,z, isInsideABigblock, bigBlock);
 
     if (tree == 0)
@@ -232,7 +232,7 @@ Handle& Octree::removeAnUnitSolidBlock(BlockVector& _pos)
         // Usually, it should not come here
         logger().error("You want to remove a unit block from otree,but cannot find this block x = %d, y = %d, z= %d ! /n",
                       _pos.x,_pos.y,_pos.z);
-        return (Handle&)(Handle::UNDEFINED);
+        return Handle::UNDEFINED;
     }
 
     if (! isInsideABigblock)
@@ -291,6 +291,7 @@ Handle& Octree::removeAnUnitSolidBlock(BlockVector& _pos)
         return unitBlockAtoms.front();
     }
 
+    return Handle::UNDEFINED;
 }
 
 AxisAlignedBox& Octree::getChildBoundingBoxByIndex(int x, int y, int z)
