@@ -1284,15 +1284,18 @@ int moses_exec(int argc, char** argv)
             no_input_datafile_exit();
 
         // Read input data files
+        size_t num_rows = 0;
         for (const string& idf : input_data_files) {
             logger().info("Read data file %s", idf.c_str());
             Table table = loadTable(idf, target_feature, ignore_features_str);
+            num_rows += table.size();
             // possible subsample the table
             if (nsamples > 0)
                 subsampleTable(table, nsamples);
             tables.push_back(table);
             ctables.push_back(table.compressed());
         }
+        logger().info("Number of rows in tables = %d", num_rows);
 
         // Get the labels contained in the data file.
         if (output_with_labels)
