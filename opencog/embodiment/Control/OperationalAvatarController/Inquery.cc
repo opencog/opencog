@@ -68,20 +68,23 @@ StateValue Inquery::inqueryDistance(vector<StateValue>& stateOwnerList)
 
 StateValue Inquery::inqueryExist(vector<StateValue>& stateOwnerList)
 {
-    Entity* entity = boost::get<Entity>(& (StateValue)(stateOwnerList.front()));
-    if (! entity)
-        return "false";
-    bool is_exist = spaceMap->containsObject(entity->id);
+    Entity entity = boost::get<Entity>(stateOwnerList.front());
+    // if (! entity)
+    //    return "false";
+    bool is_exist = spaceMap->containsObject(entity.id);
     return (opencog::toString(is_exist));
 }
 
 StateValue Inquery::inqueryEnergy(vector<StateValue>& stateOwnerList)
 {
-    Entity* entity = boost::get<Entity>( &(StateValue)(stateOwnerList.front()));
+#if 0
+    Entity entity = boost::get<Entity>(stateOwnerList.front());
     if (! entity)
-        return (opencog::toString(0.0));
+       return (opencog::toString(0.0));
     double energyValue = oac->getPsiDemandUpdaterAgent()->getDemandValue("Energy");
     return (opencog::toString(energyValue));
+#endif
+    return (opencog::toString(0.0));
 }
 
 StateValue Inquery::inqueryAtLocation(vector<StateValue>& stateOwnerList)
@@ -301,19 +304,20 @@ StateValue Inquery::inqueryIsInFrontOf(vector<StateValue>& stateOwnerList)
 set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> empty;
-    Entity* entity1 = boost::get<Entity>( &((StateValue)(stateOwnerList.front())));
-    Entity* entity2 = boost::get<Entity>( &((StateValue)(stateOwnerList[1])));
-    Entity* entity3 = boost::get<Entity>( &((StateValue)(stateOwnerList[2])));
+    Entity entity1 = boost::get<Entity>( stateOwnerList.front());
+    Entity entity2 = boost::get<Entity>( stateOwnerList[1]);
+    Entity entity3 = boost::get<Entity>( stateOwnerList[2]);
+#if 0
     if ((entity1 == 0)||(entity2 == 0))
         return empty;
+#endif
 
     string entity3ID = "";
     if (stateOwnerList.size() == 3)
      {
-         Entity* entity3 = boost::get<Entity>( &((StateValue)(stateOwnerList.back())));
-         entity3ID = entity3->id;
-
+         Entity entity3 = boost::get<Entity>( stateOwnerList.back());
+         entity3ID = entity3.id;
      }
 
-    return  spaceMap->computeSpatialRelations(entity1->id,entity2->id,entity3->id);
+    return  spaceMap->computeSpatialRelations(entity1.id, entity2.id, entity3.id);
 }
