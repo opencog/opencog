@@ -165,11 +165,11 @@ namespace opencog
             }
 
             AxisAlignedBox():
-            size_x(0), size_y(0), size_z(0), size(0)
+            size(0), size_x(0), size_y(0), size_z(0)
             {nearLeftBottomConer = BlockVector::ZERO;}
 
             AxisAlignedBox(BlockVector& _neaLeftBottomPos, int _size = 1):
-            size_x(_size), size_y(_size), size_z(_size), size(_size)
+            size(_size), size_x(_size), size_y(_size), size_z(_size)
             {
                 nearLeftBottomConer = BlockVector(_neaLeftBottomPos);
             }
