@@ -85,6 +85,7 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
 {
+#if 0
     vector<State>::const_iterator it = goal.begin();
     for (;it != goal.end(); it ++)
     {
@@ -99,11 +100,13 @@ bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
 
         }
     }
+#endif
+    return false;
 }
 
 bool OCPlanner::doPlanning(vector<State> goal, vector<PetAction> &plan)
 {
-
+    return false;
 }
 
 // a bunch of rules for test, load from c++ codes
