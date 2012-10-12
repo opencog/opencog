@@ -3664,11 +3664,31 @@ feats   time (secs)  div by N    N-squared
  988     658          666          0.674 mS
 2231    3480         1560          0.699 mS
 
+Bug: feature selection is not writing sparse.
+
+./opencog/learning/feature-selection/main/feature-selection -i ./reuters21578-train-10.dat -ainc -C2400 -o reut-reduced.csv -u1 -j12 -F reut-feat-train-10.log
+
+The above requires 13.2GB to run ...
+unique features count=27933
+row count=13116
+
+   num     elapsed       div by      RAM
+  feats   time         N-squared    usage
+           (secs)       (usecs)      
+  -----    -------      ------      ------
+    42         3         2265       13.2 GB
+   127        33         2080       13.2 GB
+   320       183         1795       13.3 GB
+   695       794         1644     
+  1500      3685         1637       13.8 GB
+  3062     15316         1633       14.7 GB
 
 ==============================================================
 Again, this time with 
 
- ./opencog/learning/moses/main/moses -Hit -i ./reut-reduced-1064.csv
+Size: reut-test-10-reduced-1064.csv is 10.3MB
+
+ ./opencog/learning/moses/main/moses -Hit -i ./reut-test-10-reduced-1064.csv
     -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
    --hc-max-nn-evals=5000 -j12 -m2048000 -freut-red-1064.log
 
@@ -3685,3 +3705,21 @@ deme  gens   knobs   knobs   knobs   score   cpxy  memusage    time    time
   5     -  1517327   334066 1183261     -     -     >24GB  OOM kill      19  
 
 Yikes! clearly the field set size must have exploded for the contin knobs !?
+
+reut-train-10-reduced-2443.csv is 64MB
+
+   moses -Hit -i ./reut-train-10-reduced-2443.csv 
+   -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
+   --hc-max-nn-evals=5000 -j12 -m2048000 -freut-red-2443.log
+
+Inferred arity = 2443
+
+"inst size" == size of one instance, in bytes.
+"num inst" == number of instances in the end.
+"prod MBytes" == product of above two.
+
+       tot    disc   contin    inst   num    prod   final  final  deme  
+deme  knobs   knobs   knobs    size   inst  MBytes  score   cpxy  time  
+----  -----   -----   -----    ----   ----   ----   -----   ----  ----- 
+  1   136808  136808     0     34232  6629    216    4748    107  4273
+  2   772049  659579  112470  305512 

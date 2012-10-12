@@ -56,6 +56,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             "microseconds\t"
             "new_instances\t"
             "num_instances\t"
+            "inst_RAM\t"
             "num_evals\t"
             "has_improved\t"
             "best_weighted_score\t"
@@ -77,6 +78,10 @@ unsigned hill_climbing::operator()(deme_t& deme,
         *eval_best = 0;
 
     const field_set& fields = deme.fields();
+
+    // Track RAM usage. Instances can chew up boat-loads of RAM.
+    size_t instance_bytes = sizeof(instance)
+        + sizeof(packed_t) * fields.packed_width();
 
     // Estimate the number of nearest neighbors.
     size_t nn_estimate = information_theoretic_bits(fields);
@@ -384,6 +389,9 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
         // Deme statistics, for performance graphing.
         if (logger().isInfoEnabled()) {
+            double ram_usage = current_number_of_instances;
+            ram_usage *= instance_bytes;
+            ram_usage /= 1024 * 1024;
             logger().info() << "Demes: "
                 << deme_count << "\t"
                 << iteration << "\t"
@@ -392,6 +400,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 << usec << "\t"
                 << number_of_new_instances << "\t"
                 << current_number_of_instances << "\t"
+                << ram_usage << "\t"
                 << current_number_of_evals << "\t"
                 << has_improved << "\t"
                 << best_score << "\t"   /* weighted score */
