@@ -30,6 +30,7 @@
 #define _MOSES_HILL_CLIMBING_H
 
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/platform.h>
 
 #include "../representation/instance_set.h"
 #include "../moses/scoring.h"
@@ -158,9 +159,10 @@ struct hill_climbing : optimizer_base
 {
     hill_climbing(const optim_parameters& op = optim_parameters(),
                   const hc_parameters& hc = hc_parameters())
-        : opt_params(op), hc_params(hc)
+        : opt_params(op), hc_params(hc), _total_RAM_bytes(getTotalRAM())
     {}
 
+protected:
     /**
      * Cross the single top-scoring instance against the next-highest scorers.
      *
@@ -212,6 +214,7 @@ struct hill_climbing : optimizer_base
     bool resize_deme(deme_t& deme, score_t score_cutoff);
     size_t resize_by_score(deme_t& deme, score_t score_cutoff);
 
+public:
     /**
      * Perform search of the local neighborhood of an instance.  The
      * search is exhaustive if the local neighborhood is small; else
@@ -244,8 +247,11 @@ struct hill_climbing : optimizer_base
         return operator()(deme, init_inst, iscorer, max_evals);
     }
 
-    optim_parameters opt_params;
-    hc_parameters hc_params;
+protected:
+    const optim_parameters opt_params;
+    const hc_parameters hc_params;
+    const uint64_t _total_RAM_bytes;
+    size_t _instance_bytes;
 };
 
 

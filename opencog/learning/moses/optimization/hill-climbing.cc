@@ -2,7 +2,7 @@
  * opencog/learning/moses/optimization/hill-climbing.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Moshe Looks
@@ -80,17 +80,17 @@ unsigned hill_climbing::operator()(deme_t& deme,
     const field_set& fields = deme.fields();
 
     // Track RAM usage. Instances can chew up boat-loads of RAM.
-    size_t instance_bytes = sizeof(instance)
+    _instance_bytes = sizeof(instance)
         + sizeof(packed_t) * fields.packed_width();
 
     // Estimate the number of nearest neighbors.
-    size_t nn_estimate = information_theoretic_bits(fields);
+    const size_t nn_estimate = information_theoretic_bits(fields);
     field_set_size = nn_estimate;  // optim stats, printed by moses.
 
     size_t current_number_of_evals = 0;
     size_t current_number_of_instances = 0;
 
-    unsigned max_distance = opt_params.max_distance(fields);
+    const unsigned max_distance = opt_params.max_distance(fields);
 
     // center_inst is the current location on the hill.
     // Copy it, don't reference it, since sorting will mess up a ref.
@@ -345,9 +345,21 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // so we want to keep it at some reasonably trim level.
         //
         // To avoid wasting cpu time pointlessly, don't bother with
-        // population size management if its already small.
-#define ACCEPTABLE_SIZE 2000
-        if (ACCEPTABLE_SIZE < current_number_of_instances) {
+        // population size management if its already small.  Thus, 
+        // ACCEPTABLE_SIZE is fairly "large".
+        //
+        // To avoid being OOM-killed, set ACCEPTABLE_RAM_FRACTION to
+        // half of installed RAM on the machine. This should work in a
+        // more or less scalable fashion on all machines, and still
+        // allow instances that are dozens of megabytes in size.
+        // (This is targeting machines with 4 GB to 100 GB of RAM).
+#define ACCEPTABLE_RAM_FRACTION 0.5
+        uint64_t usage = _instance_bytes * current_number_of_instances;
+
+#define ACCEPTABLE_SIZE 5000
+        if ((ACCEPTABLE_SIZE < current_number_of_instances) or
+            (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < usage))
+        {
             bool did_resize = resize_deme(deme, best_score);
 
             // After resizing, some of the variables set above become
@@ -390,7 +402,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // Deme statistics, for performance graphing.
         if (logger().isInfoEnabled()) {
             double ram_usage = current_number_of_instances;
-            ram_usage *= instance_bytes;
+            ram_usage *= _instance_bytes;
             ram_usage /= 1024 * 1024;
             logger().info() << "Demes: "
                 << deme_count << "\t"
@@ -647,6 +659,11 @@ size_t hill_climbing::resize_by_score(deme_t& deme, score_t cutoff)
          if (last != deme.end()) last++;
          deme.erase(first, last);
          ndeleted += contig;
+
+         // Keep around at least 20 instances; useful for cross-over.
+#define MIN_TO_KEEP 20
+         if (deme.size() < MIN_TO_KEEP)
+             break;
     }
     logger().debug() << "Trimmed "
             << ndeleted << " low scoring instances.";
@@ -656,9 +673,6 @@ size_t hill_climbing::resize_by_score(deme_t& deme, score_t cutoff)
 /// Keep the size of the deme at a managable level.
 /// Large populations can easily blow out the RAM on a machine,
 /// so we want to keep it at some reasonably trim level.
-/// XXX TODO: we should also account for the actual size of
-/// an instance (say, in bytes), because pop management is a
-/// cpu-timewaster if the instances are small.
 //
 bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
 {
@@ -675,11 +689,16 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
             bad_score_cnt++;
     }
 
+
     // To avoid wasting cpu time pointlessly, don't bother with
     // population size management if we don't get any bang out
     // of it.
 #define DONT_BOTHER_SIZE 500
-    if (DONT_BOTHER_SIZE < bad_score_cnt) {
+    uint64_t usage = _instance_bytes * deme.size();
+
+    if ((DONT_BOTHER_SIZE < bad_score_cnt) or
+        (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < usage))
+    {
 
         logger().debug() << "Will trim " << bad_score_cnt
             << " low scoring instances out of " << deme.size();
@@ -690,7 +709,9 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
     // Are we still too large? Whack more, if needed.
     // We want to whack only the worst scorerers, and thus
     // a partial sort up front.
-    if (hc_params.max_allowed_instances < deme.size()) {
+    if ((hc_params.max_allowed_instances < deme.size()) or
+        (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < usage))
+    {
         std::partial_sort(deme.begin(),
                           next(deme.begin(), hc_params.max_allowed_instances),
                           deme.end(),
