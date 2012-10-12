@@ -376,6 +376,7 @@ bool SpatialPredicateUpdater::isBetween(const SPATIAL_RELATION_VECTOR & relation
            (bFrontAB  && bBehindAC) ||
            (bBehindAB && bFrontAC); 
            */
+return false;
 }
 
 void SpatialPredicateUpdater::
