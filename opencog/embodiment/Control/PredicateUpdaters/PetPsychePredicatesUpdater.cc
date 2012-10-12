@@ -48,7 +48,7 @@ PetPsychePredicatesUpdater::PetPsychePredicatesUpdater(AtomSpace &_atomSpace ) :
 PetPsychePredicatesUpdater::~PetPsychePredicatesUpdater()
 {
 }
-/*
+#if 0
 spatial::math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Handle agent)
 {
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap( );
@@ -88,7 +88,7 @@ spatial::math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Ha
     } // if
     rightPoint = intersectionPoint;
 
-    /*
+    
     if ( !spatial::math::lineIntersection( limitLine, spatial::math::LineSegment( spatial::math::Vector3( 0,0 ), leftPoint ), intersectionPoint ) ) {
       logger().error("PetPsychePredicatesUpdater - Line intersection cannot be null lineA(%f,%f - %f, %f) lineB(%f,%f - %f,%f).", limitLine.pointA.x, limitLine.pointA.y, limitLine.pointB.x, limitLine.pointB.y, 0, 0, leftPoint.x, leftPoint.y );
     } // if
@@ -111,7 +111,8 @@ spatial::math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Ha
     return spatial::math::Triangle( agentPosition, 0, 0 );
 
 }
-*/
+#endif
+
 void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long timestamp)
 {
 //    logger().info("PetPsychePredicatesUpdater - updating context predicates..." );
@@ -158,12 +159,12 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 
 //    bool needsArtificialFOV = ( atomSpace.getType(pet) == PET_NODE );
 
-//    /*
+//    
 //    spatial::math::Triangle petFieldOfView;
 //    if ( needsArtificialFOV ) {
 //        petFieldOfView = createFieldOfViewTriangle(pet);
 //    } // if
-//    */
+//    
 //    foreach( std::string entity, entities ) {
 //        logger().debug("PetPsychePredicatesUpdater - inspecting entity %s", entity.c_str( ) );
 //        Handle entityHandle = getHandle(entity);
@@ -211,7 +212,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 //            // TODO: change LocalSpaceMap to support object type on addObject
 //            // and use the Entity FieldOfView function to test the visibility
 //            meanValue = 0.0f;
-//            /*
+//           
 //            unsigned int i;
 //            for ( i = 0; i < bottomSegments.size( ); ++i ) {
 //                // at least on corner inside FOV
@@ -219,7 +220,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 //                    meanValue = 1.0f;
 //                } // if
 //            } // if
-//            */
+//            
             
 //            { // setting Obviousness Frame
 //                std::string level = meanValue > 0.7 ? "High" : meanValue > 0.3 ? "Medium" : "Low";
@@ -282,13 +283,13 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 
 //            //spatial::Vector3 futurePosition targetPath( targetCenter, (velocity * distance * 2 ) + petCenter );
 
-//            /*
+//            
 //            foreach( const spatial::math::LineSegment& segment, petObject.borderSegments ) {
 //            if ( spatial::getDistanceBetweenSegments( segment, targetPath ) < 0.00000001 ) {
 //              isMovingToward = true;
 //             } // if
 //            } // foreach
-//            */
+//           
 //        } // if
 
 //        SimpleTruthValue movingTowardTV( 0.0f, 1.0f );
