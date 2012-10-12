@@ -108,6 +108,7 @@ throw (ComboException, AssertionException, std::bad_exception)
     _hasPlanFailed = false;
     planID = pai.createActionPlan();
 
+#if 0
     const AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     // treat the case when the action is a compound
@@ -503,6 +504,8 @@ throw (ComboException, AssertionException, std::bad_exception)
             return true;
         }
     }
+#endif
+    return false;
 }
 
 combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier& vu)
@@ -557,6 +560,7 @@ combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
 /**
  * private methods
  */
+#if 0
 void PAIWorldWrapper::clearPlan( std::vector<spatial::Point>& actions,
                                  const spatial::Point& startPoint,
                                  const spatial::Point& endPoint )
@@ -1493,6 +1497,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     }
     return action;
 }
+#endif
 
 string PAIWorldWrapper::toCamelCase(const string& str)
 {
@@ -1533,6 +1538,7 @@ string PAIWorldWrapper::ownerName()
     return pai.getAvatarInterface().getOwnerId();
 }
 
+#if 0
 /**
    do a lookup in:
 
@@ -1567,6 +1573,7 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (ComboException, Asse
     throw ComboException(TRACE_INFO, "PAIWorldWrapper - %s.",
                                   stream.str().c_str());
 }
+#endif
 
 Handle PAIWorldWrapper::toHandle(combo::definite_object obj)
 {
