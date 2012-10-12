@@ -736,7 +736,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     const SpaceServer::SpaceMap& spaceMap = 
         atomSpace.getSpaceServer( ).getLatestMap( );
     
-    double besideDistance = spaceMap.getNextDistance( );
+    // double besideDistance = spaceMap.getNextDistance( );
     
     {
         std::stringstream msg;
