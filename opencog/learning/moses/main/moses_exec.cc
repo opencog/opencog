@@ -1546,6 +1546,13 @@ int moses_exec(int argc, char** argv)
 
                 // --------- Enumerated output type
                 else if (output_type == id::enum_type) {
+
+                    // For enum targets, like boolean targets, the score
+                    // can never exceed zero (perfect score).
+                    if (0.0 < moses_params.max_score) {
+                        moses_params.max_score = 0.0;
+                        opt_params.terminate_if_gte = 0.0;
+                    }
                     if (use_well_enough) {
                         // The "leave well-enough alone" algorithm.
                         // Works. Kind of. Not as well as hoped.

@@ -3707,6 +3707,7 @@ deme  gens   knobs   knobs   knobs   score   cpxy  memusage    time    time
 Yikes! clearly the field set size must have exploded for the contin knobs !?
 
 reut-train-10-reduced-2443.csv is 64MB
+It has 13117 rows total.
 
    moses -Hit -i ./reut-train-10-reduced-2443.csv 
    -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
