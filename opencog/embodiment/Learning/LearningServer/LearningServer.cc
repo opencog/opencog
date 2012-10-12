@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//#ifdef HAVE_ZMQ
+#ifdef HAVE_ZMQ
 
-#include "LearningServer.h"
 #include <opencog/util/Config.h>
+#include "LearningServer.h"
 
 
 using namespace opencog::learningserver;
@@ -65,3 +65,4 @@ void LearningServer::createLearningTaskThread()
 
 }
 
+#endif // HAVE_ZMQ

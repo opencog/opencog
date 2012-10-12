@@ -20,15 +20,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-//#ifdef HAVE_ZMQ
 
 #ifndef LEARNING_SERVER_H
 #define LEARNING_SERVER_H
 
+#ifdef HAVE_ZMQ
+
 #include <zmq.hpp>
 #include <string>
-
-using namespace std;
 
 namespace opencog { namespace learningserver {
 
@@ -54,9 +53,8 @@ protected:
     void createLearningTaskThread();
 
 };
-
-
 }} // opencog::learningserver
 
+#endif // HAVE_ZMQ
 
 #endif // LEARNING_SERVER_H
