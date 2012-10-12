@@ -204,9 +204,6 @@ void StimulusUpdaterAgent::init(opencog::CogServer * server)
     // Get AtomSpace
     // const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
-    // Get petId
-    const std::string & petId = oac->getPet().getPetId();
-
     // Clear old stimulus list
     this->stimulusList.clear();
 
@@ -248,6 +245,9 @@ void StimulusUpdaterAgent::init(opencog::CogServer * server)
 
     // Initialize ZeroMQ publisher and add it to the plaza
 #ifdef HAVE_ZMQ
+    // Get petId
+    const std::string & petId = oac->getPet().getPetId();
+
     Plaza & plaza = oac->getPlaza();
     this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
     this->publishEndPoint = "ipc://" + petId + ".StimulusUpdaterAgent.ipc"; 

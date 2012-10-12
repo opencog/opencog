@@ -307,9 +307,6 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
     // Get AtomSpace
     AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
-    // Get petId
-    const std::string & petId = oac->getPet().getPetId();
-
     // Clear old demandList 
     this->demandList.clear();
 
@@ -354,6 +351,9 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
 
     // Initialize ZeroMQ publisher and add it to the plaza
 #ifdef HAVE_ZMQ
+    // Get petId
+    const std::string & petId = oac->getPet().getPetId();
+
     Plaza & plaza = oac->getPlaza();
     this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
     this->publishEndPoint = "ipc://" + petId + ".PsiDemandUpdaterAgent.ipc"; 

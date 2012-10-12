@@ -397,12 +397,6 @@ void PsiFeelingUpdaterAgent::run(opencog::CogServer * server)
                      this->cycleCount
                   );
 
-    // Get OAC
-    OAC * oac = (OAC *) server;
-
-    // Get current time stamp
-    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   
-
     // Initialize the Agent (feelingMetaMap etc)
     if ( !this->bInitialized )
         this->init(server);
@@ -418,6 +412,9 @@ void PsiFeelingUpdaterAgent::run(opencog::CogServer * server)
 
 #ifdef HAVE_ZMQ    
     // Publish updated modulator values via ZeroMQ
+    OAC * oac = (OAC *) server;
+    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   
+
     Plaza & plaza = oac->getPlaza();
     this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
 #endif 

@@ -178,15 +178,8 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
                     __FUNCTION__, 
                     this->cycleCount
                   );
-
-    // Get OAC
-    OAC * oac = (OAC *) server;
-
     // Get AtomSpace
     // const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petId
-    const std::string & petId = oac->getPet().getPetId();
 
     // Clear old modulator list
     this->modulatorList.clear();
@@ -218,6 +211,11 @@ void PsiModulatorUpdaterAgent::init(opencog::CogServer * server)
 
     // Initialize ZeroMQ publisher and add it to the plaza
 #ifdef HAVE_ZMQ
+
+    // Get petId
+    OAC * oac = (OAC *) server;
+    const std::string & petId = oac->getPet().getPetId();
+
     Plaza & plaza = oac->getPlaza();
     this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
     this->publishEndPoint = "ipc://" + petId + ".PsiModulatorUpdaterAgent.ipc"; 
