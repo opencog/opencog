@@ -27,12 +27,16 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <limits.h>
+
+#ifdef HAVE_ZMQ
+#include <zmq.hpp>
+#endif
+
 #include "Block3DMapUtil.h"
 #include "Block3D.h"
 #include "Octree.h"
 #include <opencog/atomspace/Handle.h>
-#include <zmq.hpp>
-#include <limits.h>
 
 using namespace std;
 
@@ -312,6 +316,7 @@ namespace opencog
             Entity3D* selfAgentEntity;
 
 
+#ifdef HAVE_ZMQ
             // using zmq to communicate with the learning server
             string fromLSIP;
             string fromLSPort;
@@ -322,6 +327,7 @@ namespace opencog
             zmq::context_t * zmqLSContext;
             zmq::socket_t * socketSendToLS;
             zmq::socket_t * socketLSFromLS;
+#endif // HAVE_ZMQ
 
             bool enableStaticsMapLearning;
 

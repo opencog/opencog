@@ -85,6 +85,7 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 
     selfAgentEntity = 0;
 
+#ifdef HAVE_ZMQ
     // set up the zmq socket to communicate with the learning server
     this->zmqLSContext = new zmq::context_t(1);
 
@@ -102,6 +103,7 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 
     this->socketSendToLS->connect(toLSAddress.c_str());
     this->socketLSFromLS->connect(fromLSAddress.c_str());
+#endif // HAVE_ZMQ
 
     this->enableStaticsMapLearning = config().get_bool("ENABLE_STATICS_MAP_LEARNING");
 
