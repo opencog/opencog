@@ -21,9 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BDTracker.h"
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+
+#include <opencog/spatial/space_server/HandleTemporalPair.h>
+#include <opencog/spatial/space_server/TemporalTable.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+
+#include "BDTracker.h"
 
 using std::vector;
 using std::map;
@@ -40,7 +45,7 @@ int MIN_TIME_TO_DENOTE_MOVEMENT_STOPPING = 1;
 int getIntervalEnd(AtomSpace* atomspace, Handle h, const Temporal& now)
 {
     vector<HandleTemporalPair> hhh;
-    atomspace->getTimeServer().getTimeInfo(back_inserter(hhh), h, now, TemporalTable::NEXT_AFTER_END_OF);
+    timeServer().getTimeInfo(back_inserter(hhh), h, now, TemporalTable::NEXT_AFTER_END_OF);
 
 
     return (hhh.size() == 1 ? hhh.rbegin()->getTemporal()->getUpperBound()
@@ -55,7 +60,7 @@ int getIntervalEnd(AtomSpace* atomspace, Handle h, const Temporal& now)
 int getIntervalStart(AtomSpace* atomspace, Handle h, const Temporal& now)
 {
     vector<HandleTemporalPair> hhh;
-    atomspace->getTimeServer().getTimeInfo(back_inserter(hhh), h, now, TemporalTable::PREVIOUS_BEFORE_START_OF);
+    timeServer().getTimeInfo(back_inserter(hhh), h, now, TemporalTable::PREVIOUS_BEFORE_START_OF);
 
     return (hhh.size() == 1 ? hhh.rbegin()->getTemporal()->getLowerBound()
             : now.getLowerBound());
@@ -83,10 +88,10 @@ Handle BDTracker::updateEndOfInterval(Handle perception, Handle bd, const Tempor
     OC_ASSERT(new_end >= old_end, "new_end interval should be greater than old_end interval.");
 
     // Remove old interval
-    atomspace->getTimeServer().removeTimeInfo(bd, old_interval);
+    timeServer().removeTimeInfo(bd, old_interval);
 
     // Replace with a new, wider interval
-    Handle atTimeLink = atomspace->getTimeServer().addTimeInfo(bd, new_interval);
+    Handle atTimeLink = timeServer().addTimeInfo(bd, new_interval);
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestBDInterval(atomSpace, atTimeLink, perception);
 
@@ -104,7 +109,7 @@ Handle BDTracker::CreateBD(Handle perception, Handle obj, const Temporal& t_now,
     Temporal t(( old_interval_start ?  old_interval_start : getIntervalStart(atomspace, perception, t_now)),
                t_now.getUpperBound());
 
-    Handle atTimeLink = atomspace->getTimeServer().addTimeInfo(ret, t);
+    Handle atTimeLink = timeServer().addTimeInfo(ret, t);
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestBDInterval(atomSpace, atTimeLink, perception, obj?);
 

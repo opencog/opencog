@@ -25,11 +25,11 @@
 #ifndef ELEMENTARYBEHAVIORDESCRIPTION_H
 #define ELEMENTARYBEHAVIORDESCRIPTION_H
 
-#include <opencog/atomspace/Temporal.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/StringManipulator.h>
+
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spatial/space_server/Temporal.h>
 
 using namespace opencog;
 

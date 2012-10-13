@@ -24,7 +24,6 @@
 #ifndef BDTRACKER_H
 #define BDTRACKER_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <algorithm>
 #include <map>
 
@@ -35,6 +34,9 @@
 #include <sys/time.h>
 #include <opencog/util/foreach.h>
 #endif
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spatial/space_server/Temporal.h>
 
 using namespace opencog;
 

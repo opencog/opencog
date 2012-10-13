@@ -30,18 +30,18 @@ typedef unsigned long ulong;
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 
-#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
-
-#include "BE.h"
-#include "BDTracker.h"
-#include "WorldProvider.h"
+#include <opencog/spatial/space_server/TimeServer.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
+
+#include "BE.h"
+#include "BDTracker.h"
+#include "WorldProvider.h"
 
 #define WALK_PERCEPT_NAME "walk"
 #define MIN_ACTION_DURATION 2
@@ -510,7 +510,7 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
         vector<HandleTemporalPair> new_temps;
         //insert into new_temps all pairs (handle,temporal)
         //that have their starting time within t_grab_range
-        wp->getAtomSpace().getTimeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
+        timeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
                                        Handle::UNDEFINED,
                                        *ti,
                                        TemporalTable::STARTS_WITHIN);
@@ -558,7 +558,7 @@ bool BehaviorEncoder::update(Temporal start_moment)
     vector<HandleTemporalPair> new_temps;
     //insert into new_temps all pairs (handle,temporal)
     //that have their starting time within t_grab_range
-    wp->getAtomSpace().getTimeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
+    timeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
                                    Handle::UNDEFINED,
                                    t_grab_range,
                                    TemporalTable::STARTS_WITHIN);

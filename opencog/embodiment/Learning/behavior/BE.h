@@ -25,11 +25,13 @@
 #define BEHAVIOR_BE_H
 
 #include <algorithm>
-#include <opencog/atomspace/Temporal.h>
+
+#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
+
 #include "BDTracker.h"
 #include "WorldProvider.h"
 #include "CompositeBehaviorDescription.h"
-#include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 
 #define BEHAVED_PREDICATE_NAME "behaved"
 
