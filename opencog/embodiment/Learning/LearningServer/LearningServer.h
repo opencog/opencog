@@ -29,8 +29,6 @@
 #include <zmq.hpp>
 #include <string>
 
-using namespace std;
-
 namespace opencog { namespace learningserver {
 
 class LearningServer
@@ -42,11 +40,11 @@ public:
     void run();
 
 protected:
-    string pullIP;
-    string pullPort;
+    std::string pullIP;
+    std::string pullPort;
 
-    string pushIP;
-    string pushPort;
+    std::string pushIP;
+    std::string pushPort;
 
     zmq::context_t * zmqContext;
     zmq::socket_t * zmqPuller;

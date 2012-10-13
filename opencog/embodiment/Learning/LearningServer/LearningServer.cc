@@ -27,8 +27,9 @@
 #include "LearningServer.h"
 
 
-using namespace opencog::learningserver;
+using namespace std;
 using namespace opencog;
+using namespace opencog::learningserver;
 
 // new learning server for the Unity3D embodiment. not for the pet park.
 LearningServer::LearningServer()
