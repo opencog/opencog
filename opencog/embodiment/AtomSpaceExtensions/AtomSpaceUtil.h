@@ -33,8 +33,13 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+
 #include <opencog/spatial/math/Vector3.h>
+
+#include <opencog/spatial/space_server/HandleTemporalPair.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/spatial/space_server/TemporalTable.h>
 
 #include "atom_types.h"
 

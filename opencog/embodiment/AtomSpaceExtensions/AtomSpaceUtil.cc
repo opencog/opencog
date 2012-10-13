@@ -23,15 +23,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/HandleTemporalPairEntry.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/Temporal.h>
-#include <opencog/atomspace/TemporalTable.h>
 
 #include <opencog/query/PatternMatch.h>
 
+#include <opencog/spatial/space_server/HandleTemporalPairEntry.h>
 #include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/spatial/space_server/TemporalTable.h>
 #include <opencog/spatial/space_server/TimeServer.h>
 
 #include <opencog/util/misc.h>
