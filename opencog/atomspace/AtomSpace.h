@@ -37,8 +37,6 @@
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleSet.h>
-#include <opencog/atomspace/TimeServer.h>
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 
@@ -156,24 +154,6 @@ public:
     inline Handle fetchIncomingSet(Handle h, bool recursive) {
         return atomSpaceAsync->fetchIncomingSet(h,recursive)->get_result();
     };
-
-    /**
-     * Get time server associated with the AtomSpace
-     * @deprecated Use AtomSpaceAsync::getTimeServer in new code.
-     * @return a const reference to the TimeServer object of this AtomSpace
-     */
-    inline TimeServer& getTimeServer() const {
-        return atomSpaceAsync->getTimeServer();
-    }
-
-    /**
-     * Get space server associated with the AtomSpace
-     * @deprecated Use AtomSpaceAsync::getSpaceServer in new code.
-     * @return a reference to the SpaceServer object of this AtomSpace
-     */
-    inline SpaceServer& getSpaceServer() const {
-        return atomSpaceAsync->getSpaceServer();
-    }
 
     inline AttentionBank& getAttentionBank()
     { return atomSpaceAsync->getAttentionBank(); }

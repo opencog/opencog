@@ -63,7 +63,6 @@ AtomSpaceImpl::AtomSpaceImpl(void) :
     _handle_iterator = NULL;
     emptyName = "";
     backing_store = NULL;
-    spaceServer = NULL;
 
     //connect signals
     addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1, _2));
@@ -137,11 +136,6 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
         // no more VersionedTV
         setTV(ca, new_ctv);
     } 
-    else if ( classserver().isA(type, OBJECT_NODE) ) {
-        // TODO remove this and we can remove spaceServer from the
-        // AtomSpaceImpl class
-        spaceServer->removeSpaceInfo(h);
-    } // else if
 }
 
 // ====================================================================

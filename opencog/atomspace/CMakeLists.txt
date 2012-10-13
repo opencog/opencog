@@ -34,7 +34,6 @@ ADD_LIBRARY (atomspace SHARED
     NullTruthValue.cc
     PredicateIndex.cc
     SimpleTruthValue.cc
-    SpaceServer.cc
     StatisticsMonitor.cc
     StringIndex.cc
     TargetTypeIndex.cc
@@ -43,7 +42,6 @@ ADD_LIBRARY (atomspace SHARED
     TemporalMap.cc
     TemporalTable.cc
     TemporalToHandleSetMap.cc
-    TimeServer.cc
     TLB.cc
     Trail.cc
     TruthValue.cc
@@ -54,9 +52,10 @@ ADD_LIBRARY (atomspace SHARED
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 SET(ATOMSPACE_LINK_LIBS
-	util SpaceMap
+	util
 	${GSL_LIBRARIES}
-	${Boost_SIGNALS_LIBRARY} ${Boost_THREAD_LIBRARY}
+	${Boost_SIGNALS_LIBRARY}
+	${Boost_THREAD_LIBRARY}
 )
 
 IF (HAVE_ZMQ)
@@ -118,7 +117,6 @@ INSTALL (FILES
     PredicateEvaluator.h
     PredicateIndex.h
     SimpleTruthValue.h
-    SpaceServer.h
     SpaceServerContainer.h
     StatisticsMonitor.h
     StringIndex.h
@@ -128,7 +126,6 @@ INSTALL (FILES
     TemporalMap.h
     TemporalTable.h
     TemporalToHandleSetMap.h
-    TimeServer.h
     TLB.h
     Trail.h
     TruthValue.h

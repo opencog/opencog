@@ -6,6 +6,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 
+#include <opencog/util/foreach.h>
+
 #include "AtomSpaceImpl.h"
 #include "Handle.h"
 #include "types.h"

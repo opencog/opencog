@@ -30,6 +30,8 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 
+// WTF this is like, total bullshit!  Who did this? 
+// Get rid of these UTest class crap ...
 class TLBUTest;
 class AtomSpaceUTest;
 class AtomTableUTest;
@@ -39,7 +41,6 @@ class CompositeTruthValueUTest;
 class HandleEntryUTest;
 class HandleSetUTest;
 class TemporalTableUTest;
-class TimeServerUTest;
 class BasicSaveUTest;
 class BasicSCMUTest;
 class AtomSpaceBenchmark;
@@ -80,7 +81,6 @@ class TLB
     friend class Trail;
     friend class TypeIndex;
     friend class ::TemporalTableUTest;
-    friend class ::TimeServerUTest;
     friend class ::CompositeTruthValueUTest;
     friend class AtomSpaceBenchmark;
 

@@ -39,7 +39,6 @@
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleSet.h>
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
@@ -61,7 +60,6 @@ class AtomSpaceImpl
     friend class SavingLoading;
     friend class SaveRequest;
 
-    SpaceServer* spaceServer;
     /**
      * Used to fetch atoms from disk.
      */
@@ -78,7 +76,6 @@ public:
     AtomSpaceImpl(void);
     ~AtomSpaceImpl();
 
-    void setSpaceServer(SpaceServer* ss) {spaceServer = ss;};
     AttentionBank& getAttentionBank();
 
     /**

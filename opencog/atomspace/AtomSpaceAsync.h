@@ -35,9 +35,6 @@ class AtomSpaceAsync {
 
     AtomSpaceImpl atomspace;
 
-    TimeServer* timeServer;
-    SpaceServer* spaceServer;
-
     void startEventLoop();
     void stopEventLoop();
 
@@ -722,15 +719,6 @@ public:
     }
 
     //--------------
-    // These functions will eventually be removed. The time and space servers
-    // should run separately and listen to add/remove atom signals. They are
-    // also not thread safe.
-    inline TimeServer& getTimeServer() const
-    { return *timeServer; }
-
-    inline SpaceServer& getSpaceServer() const
-    { return *spaceServer; }
-
     inline AttentionBank& getAttentionBank()
     { return atomspace.getAttentionBank(); }
 

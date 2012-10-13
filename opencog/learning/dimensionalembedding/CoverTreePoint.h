@@ -27,6 +27,8 @@
 
 #include <vector>
 #include <string>
+#include <opencog/util/numeric.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
 
@@ -84,7 +86,7 @@ class CoverTreePoint {
      double distance=0;
      //Calculate euclidean distance between v1 and v2
      for(; it1!=_vector.end(); it1++, it2++) {
-         distance+=sq(*it1 - *it2);
+         distance += sq(*it1 - *it2);
      }
      
      distance=sqrt(distance);
