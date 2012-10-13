@@ -26,7 +26,7 @@
 #ifndef _OPENCOG_TEMPORAL_TABLE_FILE_H
 #define _OPENCOG_TEMPORAL_TABLE_FILE_H
 
-#include <opencog/atomspace/TemporalTable.h>
+#include <opencog/spatial/space_server/TemporalTable.h>
 
 namespace opencog
 {
