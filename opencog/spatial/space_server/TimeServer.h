@@ -30,6 +30,8 @@
 #include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/AtomSpaceAsync.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+
 
 namespace opencog
 {
@@ -354,6 +356,8 @@ private:
     TimeServer(const TimeServer&);
 
 };
+
+TimeServer& timeServer();
 
 } // namespace opencog
 

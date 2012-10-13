@@ -258,3 +258,8 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
     }
 }
 
+TimeServer& timeServer()
+{
+	static TimeServer global_server(&atomSpace, &spaceServer());
+	return global_server;
+}

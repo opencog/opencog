@@ -33,7 +33,7 @@
  */
 #include <map>
 
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 #include <opencog/persist/file/SavableRepository.h>
 #include <opencog/atomspace/types.h>
 

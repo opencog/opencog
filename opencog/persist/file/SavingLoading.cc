@@ -102,11 +102,11 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
     saveLinks(f, atomTable, atomCount);
 
     TimeServerSavable tss;
-    tss.setServer(&atomSpace.atomSpaceAsync->getTimeServer());
+    tss.setServer(&timeServer());
     tss.saveRepository(f);
 
     SpaceServerSavable sss;
-    sss.setServer(&atomSpace.atomSpaceAsync->getSpaceServer());
+    sss.setServer(&spaceServer());
     sss.saveRepository(f);
 
     saveRepositories(f);
@@ -312,11 +312,11 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
 
     TimeServerSavable tss;
-    tss.setServer(&atomSpace.atomSpaceAsync->getTimeServer());
+    tss.setServer(&timeServer());
     tss.loadRepository(f, handles);
 
     SpaceServerSavable sss;
-    sss.setServer(&atomSpace.atomSpaceAsync->getSpaceServer());
+    sss.setServer(&spaceServer());
     sss.loadRepository(f, handles);
 
     loadRepositories(f, handles);

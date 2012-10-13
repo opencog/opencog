@@ -776,4 +776,11 @@ Handle SpaceServer::addPropertyPredicate(
     return result;
 }
 
+// Return a single global instance
+SpaceServer& spaceServer()
+{
+	static SpaceServer global_server(&atomSpace);
+
+	return global_server;
+}
 
