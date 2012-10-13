@@ -1,18 +1,21 @@
 __author__ = 'Keyvan'
 
-marker = object()
+from util.generic import Marker
 
-types = marker
-types.TimeNode = marker
-types.ConceptNode = marker
-types.InheritanceLink = marker
-types.ListLink = marker
-types.AtTimeLink = marker
+types = Marker()
+types.TimeNode = 'TimeNode'
+types.ConceptNode = 'ConceptNode'
+types.InheritanceLink = 'InheritanceLink'
+types.ListLink = 'ListLink'
+types.AtTimeLink = 'AtTimeLink'
 
 class TruthValue(object):
-    def __init__(self, number_of_evidences, confidence):
-        self.number_of_evidences = number_of_evidences
+    def __init__(self,confidence, number_of_evidences):
         self.confidence = confidence
+        self.number_of_evidences = number_of_evidences
+
+    def __repr__(self):
+        return '<' + self.number_of_evidences + ', ' + self.confidence + '>'
 
 DEFAULT_TRUTH_VALUE = TruthValue(1,1)
 
@@ -24,11 +27,17 @@ class Node(object):
     def __eq__(self, other):
         return self.string == other.string
 
-class Link(list):
+    def __repr__(self):
+        return self.string
+
+class Link(object):
     def __init__(self, link_type, list_of_nodes, truth_value=DEFAULT_TRUTH_VALUE):
         self.type = link_type
         self += list_of_nodes
         self.truth_value = truth_value
+
+    def __repr__(self):
+        return self.link_type + repr(self.list_of_nodes)
 
 class AtomSpace(object):
 
@@ -37,10 +46,14 @@ class AtomSpace(object):
         self.links = set()
 
     def add_node(self, type, string):
-        self.nodes.add(Node(type,string))
+        node = Node(type,string)
+        self.nodes.add(node)
+        return node
 
     def add_link(self, link_type, list_of_nodes, truth_value=DEFAULT_TRUTH_VALUE):
-        self.links.add()
+        link = Link(link_type, list_of_nodes, truth_value)
+        self.links.add(link)
+        return link
 
 
 class Atom(object):

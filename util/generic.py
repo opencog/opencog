@@ -1,4 +1,9 @@
-__author__ = 'keyvan'
+__author__ = 'Keyvan'
+
+class Marker(object): # Marker Class, usually used for marking!
+    pass
+
+marker = Marker() # A Marker
 
 def subsets_of_len_two(set):
     indexed_set = list(set)
