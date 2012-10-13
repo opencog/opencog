@@ -21,18 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <xercesc/dom/DOM.hpp>
-#include <xercesc/framework/MemBufInputSource.hpp>
-
-#include <xercesc/framework/Wrapper4InputSource.hpp>
-#include <xercesc/validators/common/Grammar.hpp>
-#include <xercesc/validators/schema/SchemaGrammar.hpp>
-#include <xercesc/util/XMLUni.hpp>
-#include <xercesc/util/Base64.hpp>
-
-#include <xercesc/sax2/SAX2XMLReader.hpp>
-#include <xercesc/sax2/XMLReaderFactory.hpp>
-
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
@@ -45,6 +33,18 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
+#include <xercesc/dom/DOM.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
+
+#include <xercesc/framework/Wrapper4InputSource.hpp>
+#include <xercesc/validators/common/Grammar.hpp>
+#include <xercesc/validators/schema/SchemaGrammar.hpp>
+#include <xercesc/util/XMLUni.hpp>
+#include <xercesc/util/Base64.hpp>
+
+#include <xercesc/sax2/SAX2XMLReader.hpp>
+#include <xercesc/sax2/XMLReaderFactory.hpp>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
@@ -56,6 +56,8 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/query/PatternMatch.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/TimeServer.h>
 
 #include "PAI.h"
 #include "PAIUtils.h"
@@ -1439,7 +1441,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
     // add this action to timelink
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(actionInstanceNode, tsValue);
+    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
 
@@ -1465,7 +1467,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     actionConcernedHandles.push_back(andLink);    
     // Add an AtTimeLink around the AndLink, because Fishgram will ignore the Action ID ConceptNode,
     // and so it won't notice the AtTimeLink created above (which is only connected by having the same ActionID).
-    Handle atTimeLink2 = atomSpace.getTimeServer().addTimeInfo(andLink, tsValue);
+    Handle atTimeLink2 = timeServer().addTimeInfo(andLink, tsValue);
     actionConcernedHandles.push_back(atTimeLink2);
     
     // call the event detector
@@ -1859,7 +1861,7 @@ void PAI::processInstruction(DOMElement * element)
     evalLinkOutgoing.push_back(predicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, tsValue);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, agentNode);
 
     std::vector<std::string> arguments;
@@ -2332,7 +2334,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
         addPropertyPredicate(std::string("exist"), objectNode, !objRemoval, false);
 
         if (objRemoval) {
-            atomSpace.getSpaceServer().removeSpaceInfo(objectNode ,tsValue);
+            spaceServer().removeSpaceInfo(objectNode ,tsValue);
 
             // check if the object to be removed is marked as grabbed in
             // AvatarInterface. If so grabbed status should be unset.
@@ -2481,7 +2483,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
     // will eventually remove the atoms that represents the space maps and, this
     // way, these maps will be removed from spaceServer as well through the
     // AtomSpace::atomRemoved() method connected to removal signal of AtomSpace.
-    if (!keepPreviousMap) atomSpace.getSpaceServer().cleanupSpaceServer();
+    if (!keepPreviousMap) spaceServer().cleanupSpaceServer();
     // --
 
   this->avatarInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
@@ -2528,8 +2530,7 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     int floorHeight = getIntAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
     logger().fine("PAI - addSpaceMap: global floor height = %d", floorHeight);
 
-    SpaceServer& spaceServer = atomSpace.getSpaceServer();
-    spaceServer.addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
+    spaceServer().addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
 }
 
 void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool useProtoBuf)
@@ -2606,7 +2607,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
 /*
     bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    if (!keepPreviousMap) atomSpace.getSpaceServer().cleanupSpaceServer();
+    if (!keepPreviousMap) spaceServer().cleanupSpaceServer();
 
     this->avatarInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
     */
@@ -2726,7 +2727,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
     SimpleTruthValue tv(1,1e35);
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp,tv);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp,tv);
     AtomSpaceUtil::updateLatestPetActionPredicate(atomSpace, atTimeLink, predicateNode);
 
     return atTimeLink;
@@ -2763,7 +2764,7 @@ Vector PAI::addVectorPredicate(Handle objectNode, const std::string& predicateNa
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 
     Vector result(atof(X), atof(Y), atof(Z));
@@ -2805,7 +2806,7 @@ void PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName
     Handle evalLink = addVectorPredicate(objectNode, predicateName, vec);
 
     Handle predNode = atomSpace.getHandle(PREDICATE_NODE, predicateName.c_str());
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 }
 
@@ -2830,7 +2831,7 @@ void PAI::addRotationPredicate(Handle objectNode, const Rotation& rot, unsigned 
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 }
 
@@ -2865,7 +2866,7 @@ Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 
     Rotation result(atof(pitch), atof(roll), atof(yaw));
@@ -2954,7 +2955,7 @@ void PAI::addSpaceMapBoundary(DOMElement * element)
     unsigned int xDim = opencog::config().get_int("MAP_XDIM");
     unsigned int yDim = opencog::config().get_int("MAP_YDIM");
 
-    SpaceServer& spaceServer = atomSpace.getSpaceServer();
+    SpaceServer& spaceServer = spaceServer();
     spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim, floorHeight);
 }
 */
@@ -3004,8 +3005,8 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         if (isSelfObject) {
             agentRadius = sqrt(length * length + width * width) / 2;
             agentHeight = height;
-            atomSpace.getSpaceServer().setAgentRadius(agentRadius);
-            atomSpace.getSpaceServer().setAgentHeight(agentHeight);
+            spaceServer().setAgentRadius(agentRadius);
+            spaceServer().setAgentHeight(agentHeight);
         }
     } else {
         // Get the length, width and height of the object
@@ -3062,7 +3063,7 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         entityClass = "block";
     }
 
-    return atomSpace.getSpaceServer().addSpaceInfo(objectNode, timestamp, (int)position.x, (int)position.y, (int)position.z,
+    return spaceServer().addSpaceInfo(objectNode, timestamp, (int)position.x, (int)position.y, (int)position.z,
                                                    (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept);
 }
 */
@@ -3180,7 +3181,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     //     TimeNode "timestamp"
     //     EvaluationLink
     //
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
 
     // count=1, i.e. one observation of this biological urge
     atomSpace.setTV(atTimeLink,SimpleTruthValue((strength_t)level, 1));
@@ -3455,11 +3456,11 @@ void PAI::processTerrainInfo(DOMElement * element)
             if (!isFirstPerceptTerrian)
             {
                 // maybe it has created new BlockEntities, add them to the atomspace
-                atomSpace.getSpaceServer().addBlockEntityNodes();
+                spaceServer().addBlockEntityNodes();
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-                atomSpace.getSpaceServer().updateBlockEntitiesProperties(timestamp);
+                spaceServer().updateBlockEntitiesProperties(timestamp);
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -3564,7 +3565,7 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    atomSpace.getSpaceServer().removeSpaceInfo(objectNode, timestamp);
+    spaceServer().removeSpaceInfo(objectNode, timestamp);
 
     addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate 
 
@@ -3626,8 +3627,8 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
         // If the object is the Pet, save its radius for new space maps
         if (isSelfObject) {
             unsigned int agentRadius = sqrt(length * length + width * width) / 2;
-            atomSpace.getSpaceServer().setAgentRadius(agentRadius);
-            atomSpace.getSpaceServer().setAgentHeight(roundDoubleToInt(height) );
+            spaceServer().setAgentRadius(agentRadius);
+            spaceServer().setAgentHeight(roundDoubleToInt(height) );
         }
     } else {
         // Get the length, width and height of the object
@@ -3697,7 +3698,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
 
     // Space server insertion
     // round up these values
-    return atomSpace.getSpaceServer().addSpaceInfo(objectNode,isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
+    return spaceServer().addSpaceInfo(objectNode,isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
                                     roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
 
 }
@@ -4187,18 +4188,18 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element)
     {
         printf("Finished the first time percept the terrain - %d blocks in total!\n Now finding all the BlockEntities in the world...! \n", blockNum);
 
-        atomSpace.getSpaceServer().findAllBlockEntitiesOnTheMap();
+        spaceServer().findAllBlockEntitiesOnTheMap();
 
         // maybe it has created new BlockEntities, add them to the atomspace
-        atomSpace.getSpaceServer().addBlockEntityNodes();
+        spaceServer().addBlockEntityNodes();
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        atomSpace.getSpaceServer().updateBlockEntitiesProperties(timestamp);
+        spaceServer().updateBlockEntitiesProperties(timestamp);
 
         int t2 = time(NULL);
 
-        atomSpace.getSpaceServer().markCurMapPerceptedForFirstTime();
+        spaceServer().markCurMapPerceptedForFirstTime();
 
         isFirstPerceptTerrian = false;
         printf("FirstPerceptWorld finished! Finish time: %d. Costed %d seconds. \n", t2, t2 - perceptTerrianBeginTime);
@@ -4231,7 +4232,7 @@ void PAI::processBlockStructureSignal(DOMElement* element)
         int z = atoi(zchar);
 
         opencog::spatial::BlockVector pos(x, y, z);
-        opencog::spatial::BlockEntity* entity = atomSpace.getSpaceServer().getLatestMap().getEntityInPos(pos);
+        opencog::spatial::BlockEntity* entity = spaceServer().getLatestMap().getEntityInPos(pos);
         if (entity == 0)
         {
             return;
@@ -4239,7 +4240,7 @@ void PAI::processBlockStructureSignal(DOMElement* element)
 
         // Currently, for demo, once the oac figure out an blockEnity,
         // It will go to a random near place to build a same blockEnity by blocks.
-        opencog::spatial::BlockVector offsetPos = atomSpace.getSpaceServer().getLatestMap().getBuildEnityOffsetPos(entity);
+        opencog::spatial::BlockVector offsetPos = spaceServer().getLatestMap().getBuildEnityOffsetPos(entity);
         opencog::spatial::BlockVector entityPos = entity->getBoundingBox().nearLeftBottomConer;
 
         // move to a pos near the building pos
