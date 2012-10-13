@@ -25,7 +25,6 @@
 #include <vector>
 #include "StopLearningMessage.h"
 
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/util/StringTokenizer.h>
 
 #include <opencog/persist/xml/NMXmlParser.h>

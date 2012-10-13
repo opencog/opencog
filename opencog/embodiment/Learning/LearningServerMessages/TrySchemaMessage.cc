@@ -25,9 +25,9 @@
 #include <vector>
 #include "TrySchemaMessage.h"
 
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/util/StringTokenizer.h>
 
+// XXX TODO FIXME NMXML is obsolete code, please remove asap.
 #include <opencog/persist/xml/NMXmlParser.h>
 #include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/persist/xml/StringXMLBufferReader.h>

@@ -27,9 +27,14 @@
 #include "LearnMessage.h"
 
 #include <opencog/util/StringTokenizer.h>
+
+// Arghhh! the NMXML stuff is obsolete, please do not use in new code!
 #include <opencog/persist/xml/NMXmlParser.h>
 #include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/persist/xml/StringXMLBufferReader.h>
+
+#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 
 using namespace opencog::learningserver::messages;
 
@@ -81,29 +86,29 @@ throw (opencog::InvalidParamException, std::bad_exception):
     }
 
     std::list<HandleTemporalPair> htp_seq;
-    atomSpace.getTimeServer().getTimeInfo(back_inserter(htp_seq), trick_h);
+    timeServer().getTimeInfo(back_inserter(htp_seq), trick_h);
 
 #ifdef USE_MAP_HANDLE_SET
     // TODO: THIS DOES NOT WORK BECAUSE MAPS GETS WRONG ORDER (Suggestion: to use a set of timestamps instead)
     // So, for now, we may send duplicate maps, which is inneficient but should not cause any error
     std::set<Handle> mapsToSend;
 #endif
-    const SpaceServer& spaceServer = atomSpace.getSpaceServer();
+    const SpaceServer& spacServer = spaceServer();
     foreach(HandleTemporalPair htp, htp_seq) {
         Temporal t = *htp.getTemporal();
         HandleSeq sm_seq;
-        atomSpace.getTimeServer().getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
+        timeServer().getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
 
         foreach(Handle sm_h, sm_seq) {
             try {
-                if (spaceServer.containsMap(sm_h)) {
+                if (spacServer.containsMap(sm_h)) {
 #ifdef USE_MAP_HANDLE_SET
                     mapsToSend.insert(sm_h);
 #else
                     logger().debug(
                                  "LearnMessage - adding space map (%s) to the message.",
                                  atomSpace.atomAsString(sm_h).c_str());
-                    spaceMaps.push_back(spaceServer.mapToString(sm_h));
+                    spaceMaps.push_back(spacServer.mapToString(sm_h));
 #endif
                 } else {
                     logger().error(
@@ -127,7 +132,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
         logger().debug(
                      "LearnMessage - adding space map (%s) to the message.",
                      atomSpace.atomAsString(sm_h).c_str());
-        spaceMaps.push_back(spaceServer.MapToString(sm_h));
+        spaceMaps.push_back(spacServer.MapToString(sm_h));
     }
 #endif
 
