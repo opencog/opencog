@@ -78,7 +78,7 @@ private:
     // sometimes it is possible to know in advance whether the plan has failed
     // without sending it if _planHasFailed is true then we know for sure that
     // the plan has already failed otherwise we don't know
-    bool _hasPlanFailed; 
+    bool _hasPlanFailed;
 
     /**
      * If pet is located at an invalid position, this method will return
@@ -134,7 +134,7 @@ private:
 //                               float customSpeed = 0);
 
     /**
-     * Create a navigation planning action sequence(including walk, jump 
+     * Create a navigation planning action sequence(including walk, jump
      * etc.) that will be sent to OAC.
      * @param actions Calculated path plan
      * @param useExistingID If this method get called two or more times and this

@@ -29,6 +29,8 @@
 #include <zmq.hpp>
 #include <string>
 
+using namespace std;
+
 namespace opencog { namespace learningserver {
 
 class LearningServer
