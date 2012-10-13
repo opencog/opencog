@@ -3716,11 +3716,14 @@ It has 13117 rows total.
 Inferred arity = 2443
 
 "inst size" == size of one instance, in bytes.
-"num inst" == number of instances in the end.
-"prod MBytes" == product of above two.
+"inst MBytes" == above times 10K (since 10K is the max likely number of insts)
 
-       tot    disc   contin    inst   num    prod   final  final  deme  
-deme  knobs   knobs   knobs    size   inst  MBytes  score   cpxy  time  
-----  -----   -----   -----    ----   ----   ----   -----   ----  ----- 
-  1   136808  136808     0     34232  6629    216    4748    107  4273
-  2   772049  659579  112470  305512 
+       tot    disc    contin     inst   prod   final  final  final   deme  
+deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time  
+----  -----   -----    -----     ----   ----    ----  -----   ----   ----- 
+  1   136808  136808      0      34232   342     209   4748    107   4273
+  2   772049  659579   112470   305512  3055     165   3375    187  55021
+  3  1070130  898980   171150   438712  4387      80   1566    186  38662
+  4  7067679  947843  6119836  7886784  78GB  bonk
+
+looks like its about 10 bits per contin knob, 2 bits per disc knob
