@@ -30,12 +30,17 @@
  * This is an abstract class to define the interface that the Pet class must
  * provide for usage by other classes (like PAI, Predavese parser and handlers, etc).
  */
+#include <fstream>
+
+#include <opencog/util/Logger.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/Logger.h>
+
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/Temporal.h>
+
 #include <opencog/embodiment/Control/AgentModeHandler.h>
 
-#include <fstream>
 
 using namespace opencog;
 
@@ -156,11 +161,11 @@ public:
      */
     void saveSpaceMapFile() {
         logger().debug("AvatarInterface - saveSpaceMapFile().");
-        if (!getAtomSpace().getSpaceServer().isLatestMapValid()) {
+        if (!spaceServer().isLatestMapValid()) {
             logger().warn("AvatarInterface - There is no space map yet.");
             return;
         }
-        const SpaceServer::SpaceMap& sm = getAtomSpace().getSpaceServer().getLatestMap();
+        const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
         static unsigned int mapCounter = 0;
         std::stringstream fileName;
         fileName << "ww_mapPersistence_";
