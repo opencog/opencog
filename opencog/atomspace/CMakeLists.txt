@@ -21,9 +21,6 @@ ADD_LIBRARY (atomspace SHARED
     HandleIterator.cc
     HandleSeqIndex.cc
     HandleSet.cc
-    HandleTemporalPair.cc
-    HandleTemporalPairEntry.cc
-    HandleToTemporalEntryMap.cc
     ImportanceIndex.cc
     IndefiniteTruthValue.cc
     Link.cc
@@ -37,11 +34,6 @@ ADD_LIBRARY (atomspace SHARED
     StatisticsMonitor.cc
     StringIndex.cc
     TargetTypeIndex.cc
-    Temporal.cc
-    TemporalEntry.cc
-    TemporalMap.cc
-    TemporalTable.cc
-    TemporalToHandleSetMap.cc
     TLB.cc
     Trail.cc
     TruthValue.cc
@@ -103,9 +95,6 @@ INSTALL (FILES
     HandleMap.h
     HandleSeqIndex.h
     HandleSet.h
-    HandleTemporalPairEntry.h
-    HandleTemporalPair.h
-    HandleToTemporalEntryMap.h
     IndefiniteTruthValue.h
     ImportanceIndex.h
     Link.h
@@ -117,15 +106,9 @@ INSTALL (FILES
     PredicateEvaluator.h
     PredicateIndex.h
     SimpleTruthValue.h
-    SpaceServerContainer.h
     StatisticsMonitor.h
     StringIndex.h
     TargetTypeIndex.h
-    TemporalEntry.h
-    Temporal.h
-    TemporalMap.h
-    TemporalTable.h
-    TemporalToHandleSetMap.h
     TLB.h
     Trail.h
     TruthValue.h

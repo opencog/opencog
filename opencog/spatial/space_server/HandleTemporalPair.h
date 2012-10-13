@@ -25,8 +25,8 @@
 #ifndef _OPENCOG_HANDLE_TEMPORAL_PAIR_H
 #define _OPENCOG_HANDLE_TEMPORAL_PAIR_H
 
-#include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/spatial/space_server/Temporal.h>
 
 namespace opencog
 {

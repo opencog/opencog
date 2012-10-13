@@ -31,8 +31,9 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include <opencog/atomspace/HandleTemporalPair.h>
 #include <opencog/util/exceptions.h>
+
+#include <opencog/spatial/space_server/HandleTemporalPair.h>
 
 namespace opencog
 {

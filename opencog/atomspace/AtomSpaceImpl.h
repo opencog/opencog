@@ -39,7 +39,6 @@
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleSet.h>
-#include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/recent_val.h>

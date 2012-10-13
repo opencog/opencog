@@ -28,7 +28,7 @@
 
 #include <pthread.h>
 
-#include <opencog/atomspace/Temporal.h>
+#include <opencog/spatial/space_server/Temporal.h>
 
 #include <boost/unordered_map.hpp>
 

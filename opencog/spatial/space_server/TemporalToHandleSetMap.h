@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include <opencog/atomspace/TemporalMap.h>
+#include <opencog/spatial/space_server/TemporalMap.h>
 #include <opencog/atomspace/HandleSet.h>
 
 namespace opencog

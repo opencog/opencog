@@ -27,10 +27,10 @@
 
 #include <set>
 
-#include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/AtomSpaceAsync.h>
 #include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/TemporalTable.h>
 
 
 namespace opencog

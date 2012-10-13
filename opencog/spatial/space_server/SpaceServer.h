@@ -40,16 +40,17 @@
 #include <string>
 #include <map>
 
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Config.h>
+
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/SpaceServerContainer.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/spatial/LocalSpaceMap2D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
 #include <opencog/spatial/3DSpaceMap/BlockEntity.h>
-#include <opencog/atomspace/TruthValue.h>
 
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Config.h>
+#include "SpaceServerContainer.h"
 
 namespace opencog
 {
