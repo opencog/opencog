@@ -26,11 +26,13 @@
 #include <opencog/atomspace/HandleTemporalPairEntry.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/TemporalTable.h>
 
 #include <opencog/query/PatternMatch.h>
+
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/TimeServer.h>
 
 #include <opencog/util/misc.h>
 #include <opencog/util/Logger.h>
@@ -129,7 +131,7 @@ Handle AtomSpaceUtil::addRewardPredicate(AtomSpace& atomSpace,
 
     Handle evalLink = addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
+    timeServer().addTimeInfo(evalLink, timestamp);
 
     return evalLink;
 }
@@ -149,7 +151,7 @@ Handle AtomSpaceUtil::addPunishmentPredicate(AtomSpace& atomSpace,
 
     Handle evalLink = addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    atomSpace.getTimeServer().addTimeInfo(evalLink, timestamp);
+    timeServer().addTimeInfo(evalLink, timestamp);
 
     return evalLink;
 }
@@ -180,7 +182,7 @@ bool AtomSpaceUtil::isActionPredicatePresent(const AtomSpace& atomSpace,
             if (evalLink != Handle::UNDEFINED) {
                 //cout << "Found the EvalLink with the PredicateNode and the ListLink in its " << endl;
                 list<HandleTemporalPair> ocurrences;
-                atomSpace.getTimeServer().getTimeInfo(back_inserter(ocurrences),
+                timeServer().getTimeInfo(back_inserter(ocurrences),
                                       evalLink,
                                       Temporal(sinceTimestamp),
                                       TemporalTable::NEXT_AFTER_END_OF);
@@ -230,8 +232,7 @@ bool AtomSpaceUtil::getXYZOFromPositionEvalLink(const AtomSpace& atomspace,
 
 Handle AtomSpaceUtil::getCurrentSpaceMapHandle(const AtomSpace &atomSpace)
 {
-    const SpaceServer& spaceServer = atomSpace.getSpaceServer();
-    return spaceServer.getLatestMapHandle();
+    return spaceServer().getLatestMapHandle();
 }
 
 /*
@@ -250,7 +251,7 @@ Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
     }
 
     const SpaceServer& spaceServer = atomSpace.getSpaceServer();
-    TimeServer& timeserver = atomSpace.getTimeServer();
+    TimeServer& timeserver = timeServer();
 
     // get temporal pair for the EXACT timestamp. Only spaceMapNodes are
     // considered
@@ -381,7 +382,7 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(const AtomSpace &atomSpace,
     unsigned long tu = timestamp;
     Temporal temp(tl, tu);
     std::list<HandleTemporalPair> ret;
-    atomSpace.getTimeServer().getTimeInfo(back_inserter(ret), Handle::UNDEFINED, temp,
+    timeServer().getTimeInfo(back_inserter(ret), Handle::UNDEFINED, temp,
                           TemporalTable::STARTS_WITHIN);
 
     if (ret.empty()) {
@@ -689,7 +690,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     // if not undefined temporal then  a time information should be inserted
     // inserted into AtomSpace.
     if (t != UNDEFINED_TEMPORAL) {
-        result = atomSpace.getTimeServer().addTimeInfo(el, t);
+        result = timeServer().addTimeInfo(el, t);
     } else {
         result = el;
     }
@@ -847,7 +848,7 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
     evalLinkOutgoing.push_back(atomSpace.addLink(LIST_LINK, agentNode));
     Handle evalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoing);
 
-    TimeServer& ts = atomSpace.getTimeServer();
+    TimeServer& ts = timeServer();
     unsigned long latest = ts.getLatestTimestamp();
 
     // An error could occur here, but that should never happen
@@ -948,7 +949,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
     std::vector<HandleTemporalPair> handleTemporalPairs;
 
     foreach(Handle hSimilarityLink, similarityLinkSet) {
-        atomSpace.getTimeServer().getTimeInfo( back_inserter(handleTemporalPairs),
+        timeServer().getTimeInfo( back_inserter(handleTemporalPairs),
                                                hSimilarityLink
                                              );
     }
@@ -1103,7 +1104,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(const AtomSpace & atomSpace,
     std::vector<HandleTemporalPair> handleTemporalPairs;
 
     foreach(Handle hSimilarityLink, similarityLinkSet) {
-        atomSpace.getTimeServer().getTimeInfo( back_inserter(handleTemporalPairs),
+        timeServer().getTimeInfo( back_inserter(handleTemporalPairs),
                                                hSimilarityLink
                                              );
     }
@@ -1254,7 +1255,7 @@ void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
     }
 
     for ( unsigned int i = 0; i < handles.size(); ++i ) {
-        atomSpace.getTimeServer().getTimeInfo(back_inserter(timestamps),
+        timeServer().getTimeInfo(back_inserter(timestamps),
                               handles[i], temporal, criterion);
     }
 
@@ -1387,7 +1388,7 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
                 logger().debug("AtomSpaceUtil - setupHoldingObject: "
                         "new time = '%s'", new_temp.toString().c_str());
                  // Now, it can be forgotten.
-                atomSpace.getTimeServer().addTimeInfo(isHoldingEvalLink, new_temp);
+                timeServer().addTimeInfo(isHoldingEvalLink, new_temp);
             }
         }
         AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -1499,7 +1500,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( const AtomSpace& atomSpace,
                 continue;
             } // if
 
-            atomSpace.getTimeServer().getTimeInfo( back_inserter( timestamps ), handles[i]);
+            timeServer().getTimeInfo( back_inserter( timestamps ), handles[i]);
 
 
         } // if
@@ -1553,7 +1554,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpac
         if ( listLink != Handle::UNDEFINED ) {
             // get only holder's eval-links
             if ( atomSpace.getOutgoing(listLink, 0) == holderHandle ) {
-                atomSpace.getTimeServer().getTimeInfo( back_inserter( timestamps ),
+                timeServer().getTimeInfo( back_inserter( timestamps ),
                                        handles[i]);
             }
         }
@@ -1573,7 +1574,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpac
         logger().debug("AtomSpaceUtil - The most recent holded object %ul",
                       timestamps[mostRecentIndex].getTemporal()->getUpperBound() );
 
-        return atomSpace.getTimeServer().getAtTimeLink(timestamps[mostRecentIndex]);
+        return timeServer().getAtTimeLink(timestamps[mostRecentIndex]);
     }
     return Handle::UNDEFINED;
 }
@@ -1666,7 +1667,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(const AtomSpace& atomSpace,
                          "AtomSpaceUtil - before '%d' timestamps for isHolding pred for '%s'.",
                          timestamps.size(), holderId.c_str());
 
-            atomSpace.getTimeServer().getTimeInfo(back_inserter(timestamps), *h_i,
+            timeServer().getTimeInfo(back_inserter(timestamps), *h_i,
                                   Temporal(time), TemporalTable::INCLUDES);
 
             logger().debug(
@@ -2086,7 +2087,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
                          atomSpace.getOutgoing( incomingLinks[j], 1 ).value() );
             if ( atomSpace.getType( incomingLinks[j] ) == EVALUATION_LINK &&
                     atomSpace.getOutgoing( incomingLinks[j], 0 ) == predicateNodeHandle ) {
-                atomSpace.getTimeServer().getTimeInfo( back_inserter(timestamps),
+                timeServer().getTimeInfo( back_inserter(timestamps),
                                        incomingLinks[j], temporal, criterion );
 
                 //filteredHandles.push_back( incomingLinks[j] );

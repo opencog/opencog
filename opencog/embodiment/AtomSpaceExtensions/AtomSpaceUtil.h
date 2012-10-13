@@ -33,7 +33,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 #include <opencog/spatial/math/Vector3.h>
 
 #include "atom_types.h"
