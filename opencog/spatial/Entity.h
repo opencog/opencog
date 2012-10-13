@@ -24,11 +24,6 @@
 #ifndef _SPATIAL_ENTITY_H_
 #define _SPATIAL_ENTITY_H_
 
-#include <opencog/spatial/math/Dimension3.h>
-#include <opencog/spatial/math/BoundingBox.h>
-#include <opencog/spatial/math/Vector3.h>
-#include <opencog/spatial/math/Quaternion.h>
-
 #include <vector>
 #include <string>
 #include <set>
@@ -38,6 +33,11 @@
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
+
+#include <opencog/spatial/math/Dimension3.h>
+#include <opencog/spatial/math/BoundingBox.h>
+#include <opencog/spatial/math/Vector3.h>
+#include <opencog/spatial/math/Quaternion.h>
 
 namespace opencog
 {
@@ -54,28 +54,6 @@ namespace opencog
         class Entity
         {
         public:
-/*
-            enum SPATIAL_RELATION 
-            {
-                LEFT_OF = 0,
-                RIGHT_OF,
-                ABOVE,
-                BELOW,
-                BEHIND,
-                IN_FRONT_OF,
-                BESIDE,
-                NEAR,
-                FAR_,
-                TOUCHING,
-                BETWEEN,
-                INSIDE,
-                OUTSIDE,
-                ON_TOP_OF, 
-                ADJACENT,
-        
-                TOTAL_RELATIONS
-            };
-*/
             enum AXIS_LIMITS 
             {
                 XMIN = 0, XMAX,

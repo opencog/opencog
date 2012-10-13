@@ -33,10 +33,11 @@
 #include <zmq.hpp>
 #endif
 
+#include <opencog/atomspace/Handle.h>
+
 #include "Block3DMapUtil.h"
 #include "Block3D.h"
 #include "Octree.h"
-#include <opencog/atomspace/Handle.h>
 
 using namespace std;
 
