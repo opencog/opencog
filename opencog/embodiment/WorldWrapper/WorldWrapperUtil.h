@@ -24,6 +24,7 @@
 #ifndef _WORLDWRAPPERUTIL_H
 #define _WORLDWRAPPERUTIL_H
 
+#include <exception>
 #include <opencog/util/exceptions.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
@@ -31,6 +32,7 @@
 #include <opencog/comboreduct/combo/definite_object.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
@@ -38,7 +40,6 @@
 
 #include "WorldWrapperUtilCache.h"
 
-#include <exception>
 
 namespace opencog { namespace world {
 

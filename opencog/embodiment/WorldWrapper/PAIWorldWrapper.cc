@@ -109,7 +109,7 @@ throw (ComboException, AssertionException, std::bad_exception)
     planID = pai.createActionPlan();
 
     const AtomSpace& as = pai.getAtomSpace();
-    const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
     // treat the case when the action is a compound
     if (WorldWrapperUtil::is_builtin_compound_action(*from)) {
         OC_ASSERT(++sib_it(from) == to); // there is only one compound action
@@ -414,7 +414,7 @@ throw (ComboException, AssertionException, std::bad_exception)
 
 combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier& vu)
 {
-    Handle smh = pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
+    Handle smh = spaceServer().getLatestMapHandle();
     unsigned int current_time = pai.getLatestSimWorldTimestamp();
     OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
     combo::vertex v = WorldWrapperUtil::evalPerception(smh, current_time,
@@ -438,7 +438,7 @@ combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier
 combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
         combo::variable_unifier& vu)
 {
-    Handle smh = pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
+    Handle smh = spaceServer().getLatestMapHandle();
     unsigned int current_time = pai.getLatestSimWorldTimestamp();
     OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exists");
 
@@ -730,7 +730,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
                                       Handle goBehind, float walkSpeed )
 {
     const AtomSpace& atomSpace = pai.getAtomSpace();
-    const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap();
     std::string goalName = atomSpace.getName(goalHandle);
 
     OC_ASSERT(goalHandle != Handle::UNDEFINED);
@@ -803,7 +803,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 {
     AtomSpace& as = pai.getAtomSpace();
-    const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
     static const std::map<avatar_builtin_action_enum, ActionType> actions2types =
         { {id::bark, ActionType::BARK()},
           {id::bare_teeth_at, ActionType::BARE_TEETH()},
@@ -1314,11 +1314,10 @@ string PAIWorldWrapper::ownerName()
 double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (ComboException, AssertionException, std::bad_exception)
 {
     const AtomSpace& as = pai.getAtomSpace();
-    const SpaceServer& spaceServer = as.getSpaceServer();
     //get the time node of the latest map, via the link AtTimeLink(TimeNode,SpaceMap)
-    Handle atTimeLink = spaceServer.getLatestMapHandle();
+    Handle atTimeLink = spaceServer().getLatestMapHandle();
     OC_ASSERT(atTimeLink != Handle::UNDEFINED);
-    const SpaceServer::SpaceMap& sm = spaceServer.getLatestMap();
+    const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
 
     if (sm.containsObject(slobj)) {
         //return the yaw

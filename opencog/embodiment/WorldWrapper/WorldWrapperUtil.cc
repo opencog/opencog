@@ -818,7 +818,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         OC_ASSERT(
                          smh != Handle::UNDEFINED,
                          "A SpaceMap must exist");
-        const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
+        const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
         return combo::bool_to_vertex(inSpaceMap(sm, atomSpace, self_id, owner_id,
                                                 *it.begin()));
     }
@@ -928,7 +928,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         } else {
 
                 // if the definite object exists inside the latest map it exists
-                bool isExist = atomSpace.getSpaceServer().getLatestMap( ).containsObject(handle);
+                bool isExist = spaceServer().getLatestMap( ).containsObject(handle);
                 if (isExist)
                 result = true;
                 else
@@ -1310,8 +1310,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         stringstream ss;
                         ss << get_instance(pe);
 
-                        const SpaceServer::SpaceMap& sm =
-                            atomSpace.getSpaceServer().getMap(smh);
+                        const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
 
                         bool result =
                             AtomSpaceUtil::getPredicateValueAtSpaceMap(atomSpace,
