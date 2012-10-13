@@ -1,35 +1,14 @@
-SET(STATISTICS_SOURCE_FILES
-    DataProvider
-    Probability
-    Entropy
-    InteractionInformation
-)
-
-
-IF (PROTOBUF_FOUND)
-    # Compile proto messages.
-    SET(PROTO_ARGS 
-        PROTOFILES LearningMessage.info.proto
-        OUTPATH ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-    PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_ARGS})
-    SET(STATISTICS_SOURCE_FILES ${STATISTICS_SOURCE_FILES} ${PROTO_SRCS}) 
-ENDIF (PROTOBUF_FOUND)
 
 ADD_LIBRARY (statistics SHARED
-    ${STATISTICS_SOURCE_FILES}
+	DataProvider
+	Probability
+	Entropy
+	InteractionInformation
 )
 
-SET(STATISTICS_LINK_LIBS
-    util
-)
-
-IF (PROTOBUF_FOUND)
-    SET(STATISTICS_LINK_LIBS ${STATISTICS_LINK_LIBS} ${PROTOBUF_LIBRARY})
-ENDIF (PROTOBUF_FOUND)
 
 TARGET_LINK_LIBRARIES (statistics
-    ${STATISTICS_LINK_LIBS}
+	util
 )
 
 INSTALL (TARGETS statistics

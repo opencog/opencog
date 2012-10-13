@@ -45,13 +45,14 @@ IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
-IF (HAVE_SPATIAL)
-   ADD_SUBDIRECTORY (spatial)
-ENDIF (HAVE_SPATIAL)
-
 IF (HAVE_EMBODIMENT)
 	ADD_SUBDIRECTORY (embodiment)
 ENDIF (HAVE_EMBODIMENT)
+
+# Cannot build spatial till after embodiment
+IF (HAVE_SPATIAL)
+   ADD_SUBDIRECTORY (spatial)
+ENDIF (HAVE_SPATIAL)
 
 # Graphics and visualization subsystems
 IF (HAVE_SERVER)
