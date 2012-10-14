@@ -103,7 +103,7 @@ public:
 	    //agent->getLogger()->setPrintToStdoutFlag(true);
 	    
 	    cogserver.startAgent(agent);
-	    createSimpleGraph(cogserver.getAtomSpace(), "import-update");
+	    createSimpleGraph(&cogserver.getAtomSpace(), "import-update");
     }
 
 	void tearDown() {
@@ -118,7 +118,7 @@ public:
         logger().debug("Running agent without noise");
 	    for(int i=0; i < 20; i++) cogserver.runLoopStep();
     
-        AtomSpace* as = cogserver.getAtomSpace();
+        AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
 	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
 	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getSTIFunds(), agent->acceptableLobeSTIRange[1]);
@@ -131,7 +131,7 @@ public:
 	    agent->setNoiseFlag(true);
 	    for(int i=0; i < 20; i++) cogserver.runLoopStep();
 
-        AtomSpace* as = cogserver.getAtomSpace();
+       AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
 	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
 	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getSTIFunds(), agent->acceptableLobeSTIRange[1]);
@@ -148,7 +148,7 @@ public:
 	    agent->setNoiseFlag(true);
 	    for(int i=0; i < 20; i++) cogserver.runLoopStep();
 
-        AtomSpace* as = cogserver.getAtomSpace();
+       AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
 	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
 	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getSTIFunds(), agent->acceptableLobeSTIRange[1]);

@@ -2,7 +2,11 @@ INCLUDE_DIRECTORIES (
 	${GUILE_INCLUDE_DIRS}
 )
 
-ADD_LIBRARY (builtinreqs SHARED
+# XXX FIXME TODO Until such time that the learning-server messages are
+# removed from the spacemap, we have to build static, to avoid circular
+# dependencies. That's just plain wrong.
+#ADD_LIBRARY (builtinreqs SHARED
+ADD_LIBRARY (builtinreqs STATIC
 	BuiltinRequestsModule
 	Request
 	DataRequest
@@ -41,8 +45,8 @@ ADD_LIBRARY (server STATIC
 
 SET(SERVER_LINK_LIBS 
 	builtinreqs
-	atomspace
 	space_server
+	atomspace
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 	dl
@@ -62,16 +66,6 @@ ENDIF (ODBC_FOUND)
 
 TARGET_LINK_LIBRARIES(server ${SERVER_LINK_LIBS})
 
-ADD_EXECUTABLE(cogserver
-	CogServerMain
-)
-
-TARGET_LINK_LIBRARIES(cogserver
-	server
-	${Boost_SYSTEM_LIBRARY}
-	${GUILE_LIBRARIES}
-)
-
 # to ease testing/debugging modules on the source tree
 # IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 # XXX what is this shit?  The below is one wild and insane violation of everything that
@@ -88,19 +82,31 @@ IF (APPLE)
 	#	${PROJECT_BINARY_DIR}/opencog/guile)
 	#SET_TARGET_PROPERTIES(cogserver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 ELSE(APPLE)
-	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-		-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dotty:${PROJECT_BINARY_DIR}/opencog/ubigraph:${PROJECT_BINARY_DIR}/opencog/dynamics/attention:${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding:${PROJECT_BINARY_DIR}/opencog/nlp/wsd:${PROJECT_BINARY_DIR}/opencog/persist:${PROJECT_BINARY_DIR}/opencog/query:${PROJECT_BINARY_DIR}/opencog/server:${PROJECT_BINARY_DIR}/opencog/shell:${PROJECT_BINARY_DIR}/opencog/util:${PROJECT_BINARY_DIR}/opencog/web:${PROJECT_BINARY_DIR}/opencog/cython/)
+# This is just plain wrong, it won't link the test cases correctly.
+#
+#	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
+#		-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dotty:${PROJECT_BINARY_DIR}/opencog/ubigraph:${PROJECT_BINARY_DIR}/opencog/dynamics/attention:${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding:${PROJECT_BINARY_DIR}/opencog/nlp/wsd:${PROJECT_BINARY_DIR}/opencog/persist:${PROJECT_BINARY_DIR}/opencog/query:${PROJECT_BINARY_DIR}/opencog/server:${PROJECT_BINARY_DIR}/opencog/shell:${PROJECT_BINARY_DIR}/opencog/util:${PROJECT_BINARY_DIR}/opencog/web:${PROJECT_BINARY_DIR}/opencog/cython/)
 ENDIF (APPLE)
 #ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+ADD_EXECUTABLE(cogserver
+	CogServerMain
+)
+
+TARGET_LINK_LIBRARIES(cogserver
+	server
+	${Boost_SYSTEM_LIBRARY}
+	${GUILE_LIBRARIES}
+)
 
 SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_DIRECTORIES "${BOOST_LIBRARY_DIRS}")
 IF (WIN32)
 	SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libctm")
 ENDIF (WIN32)
 
-INSTALL (TARGETS cogserver builtinreqs
+INSTALL (TARGETS cogserver
 	RUNTIME DESTINATION "bin"
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+#	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES

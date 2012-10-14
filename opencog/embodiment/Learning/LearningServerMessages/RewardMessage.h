@@ -24,8 +24,8 @@
 #ifndef REWARDMESSAGE_H_
 #define REWARDMESSAGE_H_
 
-#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <vector>
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 
 namespace opencog { namespace learningserver { namespace messages {
 

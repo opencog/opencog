@@ -117,7 +117,7 @@ public:
 
     void test_Init() {
         OAC & oac = oacMock.getOAC(); 
-        AtomSpace & atomSpace = * ( oac.getAtomSpace() );
+        AtomSpace & atomSpace = oac.getAtomSpace();
 
         std::string demand_names = config().get("PSI_DEMANDS");
         int demand_num = std::count(demand_names.begin(), demand_names.end(), ',') + 1;  
@@ -144,7 +144,7 @@ public:
 
     void test_doPlanning_getPlan() {
         OAC & oac = oacMock.getOAC(); 
-        AtomSpace & atomSpace = * ( oac.getAtomSpace() );
+        AtomSpace & atomSpace = oac.getAtomSpace();
 
         /*
         SchemeEval & evaluator = SchemeEval::instance();    

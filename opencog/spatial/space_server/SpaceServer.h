@@ -574,8 +574,6 @@ private:
 
 //};
 
-SpaceServer& spaceServer();
-
 
 } // namespace opencog
 

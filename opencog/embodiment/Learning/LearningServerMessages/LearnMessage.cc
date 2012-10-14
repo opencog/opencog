@@ -24,7 +24,6 @@
 #include <vector>
 #include <boost/lexical_cast.hpp>
 
-#include "LearnMessage.h"
 
 #include <opencog/util/StringTokenizer.h>
 
@@ -33,9 +32,11 @@
 #include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/persist/xml/StringXMLBufferReader.h>
 
+#include <opencog/server/CogServer.h>
 #include <opencog/spatial/space_server/TimeServer.h>
 #include <opencog/spatial/space_server/SpaceServer.h>
 
+#include "LearnMessage.h"
 using namespace opencog::learningserver::messages;
 
 /**

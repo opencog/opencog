@@ -38,6 +38,7 @@
 
 #include <opencog/spatial/space_server/SpaceServer.h>
 #include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/server/CogServer.h>
 
 #include <opencog/embodiment/Control/AgentModeHandler.h>
 

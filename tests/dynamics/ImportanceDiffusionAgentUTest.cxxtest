@@ -75,10 +75,10 @@ void removeAll(AtomSpace* atomSpace)
     std::vector<Handle>::iterator i;
     std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
 
-    server().getAtomSpace()->getHandleSet(outputI, ATOM, true);
+    server().getAtomSpace().getHandleSet(outputI, ATOM, true);
 
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
-        server().getAtomSpace()->removeAtom(*i,false);
+        server().getAtomSpace().removeAtom(*i,false);
     }
 }
 
@@ -111,19 +111,19 @@ public:
         std::vector< Handle >::iterator i;
         AttentionValue::sti_t val = 0;
 
-        atoms = createHebbianGraph(cogserver.getAtomSpace(), "diffuse");
+        atoms = createHebbianGraph(&cogserver.getAtomSpace(), "diffuse");
         for (i = atoms.begin(); i != atoms.end(); i++) {
-            if (cogserver.getAtomSpace()->getType(*i) == CONCEPT_NODE) {
-                cogserver.getAtomSpace()->setSTI(*i, val);
-                cogserver.getAtomSpace()->updateMaxSTI(val);
+            if (cogserver.getAtomSpace().getType(*i) == CONCEPT_NODE) {
+                cogserver.getAtomSpace().setSTI(*i, val);
+                cogserver.getAtomSpace().updateMaxSTI(val);
                 val += 100;
             }
         }
-        cogserver.getAtomSpace()->setAttentionalFocusBoundary(0);
+        cogserver.getAtomSpace().setAttentionalFocusBoundary(0);
     }
 
     void tearDown(){
-        removeAll(cogserver.getAtomSpace());
+        removeAll(&cogserver.getAtomSpace());
     }
 
     void testGetSetMaxPercentage() {
@@ -152,25 +152,25 @@ public:
         agent->setDiffusionThreshold(0.0);
         cogserver.runLoopStep();
         
-        TS_ASSERT(abs(10-cogserver.getAtomSpace()->getSTI(atoms[0]))<=STI_ALLOWABLE_ERROR);
-        TS_ASSERT(abs(90-cogserver.getAtomSpace()->getSTI(atoms[1]))<=STI_ALLOWABLE_ERROR);
-        TS_ASSERT(abs(230-cogserver.getAtomSpace()->getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
-        TS_ASSERT(abs(270-cogserver.getAtomSpace()->getSTI(atoms[3]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(10-cogserver.getAtomSpace().getSTI(atoms[0]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(90-cogserver.getAtomSpace().getSTI(atoms[1]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(230-cogserver.getAtomSpace().getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(270-cogserver.getAtomSpace().getSTI(atoms[3]))<=STI_ALLOWABLE_ERROR);
 
         // 1. check atoms less than diffusion threshold are not spread from
         agent->setDiffusionThreshold(0.5);
         cogserver.runLoopStep();
-        TS_ASSERT(abs(10-cogserver.getAtomSpace()->getSTI(atoms[0]))<=STI_ALLOWABLE_ERROR);
-        TS_ASSERT(abs(90-cogserver.getAtomSpace()->getSTI(atoms[1]))<=STI_ALLOWABLE_ERROR);
-        TS_ASSERT(abs(257-cogserver.getAtomSpace()->getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
-        TS_ASSERT(abs(243-cogserver.getAtomSpace()->getSTI(atoms[3]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(10-cogserver.getAtomSpace().getSTI(atoms[0]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(90-cogserver.getAtomSpace().getSTI(atoms[1]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(257-cogserver.getAtomSpace().getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(243-cogserver.getAtomSpace().getSTI(atoms[3]))<=STI_ALLOWABLE_ERROR);
 
         // 2. no more than max percentage is spread, even if Hebbian link is
         // strong
         agent->setMaxSpreadPercentage(0.05);
         cogserver.runLoopStep();
 
-        TS_ASSERT(abs(269-cogserver.getAtomSpace()->getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
-        TS_ASSERT(abs(230-cogserver.getAtomSpace()->getSTI(atoms[3]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(269-cogserver.getAtomSpace().getSTI(atoms[2]))<=STI_ALLOWABLE_ERROR);
+        TS_ASSERT(abs(230-cogserver.getAtomSpace().getSTI(atoms[3]))<=STI_ALLOWABLE_ERROR);
     }
 };

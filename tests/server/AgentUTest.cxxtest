@@ -249,7 +249,7 @@ public:
         CogServer& cogserver = static_cast<CogServer&>(server());
         MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
                 (cogserver.createAgent(MyAgentWithDefaults::info().id));
-        AtomSpace *atomSpace = cogserver.getAtomSpace();
+        AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_atom\0");
 
         stimValue = 10;
@@ -279,7 +279,7 @@ public:
         CogServer& cogserver = static_cast<CogServer&>(server());
         MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
                 (cogserver.createAgent(MyAgentWithDefaults::info().id));
-        AtomSpace *atomSpace = cogserver.getAtomSpace();
+        AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_list");
         stimValue = 100;
 
@@ -308,7 +308,7 @@ public:
         CogServer& cogserver = static_cast<CogServer&>(server());
         MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
                 (cogserver.createAgent(MyAgentWithDefaults::info().id));
-        AtomSpace *atomSpace = cogserver.getAtomSpace();
+        AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_reset");
 
         stimValue = 100;

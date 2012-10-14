@@ -184,8 +184,7 @@ bool PMCB::solution(std::map<Handle, Handle> &pred_soln,
  */
 void PatternUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 	pme.set_atomspace(as);
 

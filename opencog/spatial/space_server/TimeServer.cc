@@ -254,8 +254,3 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
         }
     }
 }
-
-TimeServer& opencog::timeServer()
-{
-	return server().getTimeServer();
-}

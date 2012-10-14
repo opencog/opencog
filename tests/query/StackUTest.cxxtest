@@ -102,8 +102,7 @@ class TestPMCB :
 #define al as->addLink
 void StackUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pme.set_atomspace(as);
 
 	// Create an implication link that will be tested.

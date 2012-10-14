@@ -57,7 +57,7 @@ public:
         // add some nodes to test the SystemActivityTable
         char tmp[100];
         sprintf(tmp, "%s%d", _name.c_str(), _count);
-        Handle h = server->getAtomSpace()->addNode(NODE, tmp);
+        Handle h = server->getAtomSpace().addNode(NODE, tmp);
         HandleSet *s = new HandleSet();
         s->add(h);
         _utilizedHandleSets.push_back(s);
@@ -177,7 +177,7 @@ public:
         // the sets in the activity tables.
         Activity *firstAct = aat[a[0]][0];
         Handle h = firstAct->utilizedHandleSets[0]->keys()->next();
-        cogserver.getAtomSpace()->removeAtom(h);
+        cogserver.getAtomSpace().removeAtom(h);
         TS_ASSERT(firstAct->utilizedHandleSets[0]->getSize() == 0);
 
         // test max size of activity seq

@@ -26,6 +26,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 
 

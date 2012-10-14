@@ -59,7 +59,7 @@ public:
         logger().setLevel(Logger::DEBUG);
         AttentionValue::sti_t min_sti = config().get_int("MIN_STI");
 
-        AtomSpace *as = cogserver.getAtomSpace();
+        AtomSpace *as = &cogserver.getAtomSpace();
         Handle h = as->addNode(NUMBER_NODE, "1");
         as->setSTI(h,min_sti+5);
 

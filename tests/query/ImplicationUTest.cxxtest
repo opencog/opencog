@@ -96,8 +96,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void ImplicationUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 	SchemeEval::instance(as);
 
@@ -261,7 +260,6 @@ void ImplicationUTest::setUp(void)
 
 void ImplicationUTest::test_exec(void)
 {
-	AtomSpace *as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink

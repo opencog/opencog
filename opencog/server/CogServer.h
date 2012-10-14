@@ -290,15 +290,26 @@ public:
 }; // class
 
 // Handy dandy utiities
-static inline CogServer& cogserver(void)
+inline CogServer& cogserver(void)
 {
     return static_cast<CogServer&>(server());
 }
 
-static inline AtomSpace& atomspace(void)
+inline AtomSpace& atomspace(void)
 {
     return cogserver().getAtomSpace();
 }
+
+inline SpaceServer& spaceServer()
+{
+   return cogserver().getSpaceServer();
+}
+
+inline TimeServer& timeServer()
+{
+   return cogserver().getTimeServer();
+}
+
 
 }  // namespace
 

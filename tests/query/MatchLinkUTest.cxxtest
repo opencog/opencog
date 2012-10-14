@@ -79,8 +79,7 @@ class MatchLink :  public CxxTest::TestSuite
 #define al as->addLink
 void MatchLink::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 
 	// Load the required data
@@ -98,7 +97,7 @@ void MatchLink::setUp(void)
 		"../../../",
 		NULL
 	};
-	cogserver.loadSCMModules(paths);
+	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
 	untyped_link_match = SchemeEval::instance().apply("untyped-link-match", Handle::UNDEFINED);

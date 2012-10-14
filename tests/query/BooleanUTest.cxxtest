@@ -82,8 +82,7 @@ class BooleanUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void BooleanUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
@@ -230,7 +229,6 @@ void BooleanUTest::setUp(void)
 
 void BooleanUTest::test_isa(void)
 {
-	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink

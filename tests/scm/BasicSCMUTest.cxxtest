@@ -108,9 +108,8 @@ class BasicSCMUTest :  public CxxTest::TestSuite
  */
 void BasicSCMUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
-    eval = &SchemeEval::instance(as);
+	as = &cogserver().getAtomSpace();
+	eval = &SchemeEval::instance(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
 	// Do not use LC_ALL, as otherwise the printing of the numeric

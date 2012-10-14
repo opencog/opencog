@@ -81,8 +81,7 @@ class StackMoreUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void StackMoreUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 
 	// Load the required data
@@ -103,7 +102,7 @@ void StackMoreUTest::setUp(void)
 		"../../../",
 		NULL
 	};
-	cogserver.loadSCMModules(paths);
+	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
 	bind_oo = SchemeEval::instance().apply("bind_oo", Handle::UNDEFINED);
@@ -121,7 +120,6 @@ void StackMoreUTest::setUp(void)
 
 void StackMoreUTest::test_oo(void)
 {
-	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
@@ -138,7 +136,6 @@ void StackMoreUTest::test_oo(void)
 
 void StackMoreUTest::test_ou(void)
 {
-	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
@@ -155,7 +152,6 @@ void StackMoreUTest::test_ou(void)
 
 void StackMoreUTest::test_uo(void)
 {
-	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
@@ -172,7 +168,6 @@ void StackMoreUTest::test_uo(void)
 
 void StackMoreUTest::test_uu(void)
 {
-	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!

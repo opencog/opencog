@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CogServer.h"
-
 #include <time.h>
 #ifdef WIN32
 #include <winsock2.h>
@@ -52,6 +50,9 @@
 #ifdef HAVE_SQL_STORAGE
 #include <opencog/persist/sql/PersistModule.h>
 #endif /* HAVE_SQL_STORAGE */
+
+#include "CogServer.h"
+#include "BaseServer.h"
 
 using namespace opencog;
 

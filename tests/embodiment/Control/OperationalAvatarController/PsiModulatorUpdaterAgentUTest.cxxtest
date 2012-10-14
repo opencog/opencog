@@ -119,7 +119,7 @@ public:
 
     void test_runUpdater_updateModulator() {
         OAC & oac = oacMock.getOAC(); 
-        AtomSpace & atomSpace = * ( oac.getAtomSpace() );
+        AtomSpace & atomSpace = oac.getAtomSpace();
 
         int rand_index = (int) ( 1.0*rand()/RAND_MAX *
                                  (oac.psiModulatorUpdaterAgent->modulatorList.size()-0.5) 

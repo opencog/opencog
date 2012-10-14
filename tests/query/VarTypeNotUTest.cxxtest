@@ -78,8 +78,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 #define al as->addLink
 void VarTypeNot::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 
 	// Load the required data
@@ -97,7 +96,7 @@ void VarTypeNot::setUp(void)
 		"../../../",
 		NULL
 	};
-	cogserver.loadSCMModules(paths);
+	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
 	vscope_good = SchemeEval::instance().apply("rule-good", Handle::UNDEFINED);

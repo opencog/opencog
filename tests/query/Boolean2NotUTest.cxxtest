@@ -84,8 +84,7 @@ class Boolean2NotUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void Boolean2NotUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
@@ -262,7 +261,6 @@ void Boolean2NotUTest::setUp(void)
 
 void Boolean2NotUTest::test_isa(void)
 {
-	AtomSpace *as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink

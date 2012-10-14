@@ -19,8 +19,8 @@ ADD_DEPENDENCIES(query
 )
 
 TARGET_LINK_LIBRARIES(query
-	server
 	space_server
+	server
 )
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(query smob)

@@ -28,6 +28,8 @@
 #include <opencog/spatial/space_server/TemporalTable.h>
 #include <opencog/spatial/space_server/TimeServer.h>
 
+#include <opencog/server/CogServer.h>
+
 #include "BDTracker.h"
 
 using std::vector;

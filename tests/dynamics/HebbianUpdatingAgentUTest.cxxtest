@@ -71,7 +71,7 @@ vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
 std::vector<Handle> createCase(bool srcInAF, int srcSTI, bool targInAF,
         int targSTI, bool inverse, float linkStr, std::string baseName)
 {
-    AtomSpace* a = server().getAtomSpace();
+    AtomSpace* a = &server().getAtomSpace();
     AttentionBank& bank = a->getAttentionBank();
     vector<Handle> testAtoms;
     std::ostringstream buf1;
@@ -115,10 +115,10 @@ void removeAll(AtomSpace* atomSpace)
     std::vector<Handle>::iterator i;
     std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
 
-    server().getAtomSpace()->getHandleSet(outputI, ATOM, true);
+    server().getAtomSpace().getHandleSet(outputI, ATOM, true);
 
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
-        server().getAtomSpace()->removeAtom(*i,false);
+        server().getAtomSpace().removeAtom(*i,false);
     }
 }
 
@@ -149,12 +149,12 @@ public:
 
     void setUp() {
         std::vector< Handle >::iterator i;
-        cogserver.getAtomSpace()->setAttentionalFocusBoundary(0);
+        cogserver.getAtomSpace().setAttentionalFocusBoundary(0);
 
     }
 
     void tearDown(){
-        removeAll(cogserver.getAtomSpace());
+        removeAll(&cogserver.getAtomSpace());
     }
 
 //    void testGetSetMaxPercentage() {
@@ -167,7 +167,7 @@ public:
 //    }
 
     void testRunWithLinkConversion() {
-        AtomSpace* a = cogserver.getAtomSpace();
+        AtomSpace* a = &cogserver.getAtomSpace();
         agent->convertLinks = true;
         std::vector<Handle> in_in_norm;
         std::vector<Handle> in_in_inv;

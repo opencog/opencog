@@ -362,8 +362,6 @@ private:
 
 };
 
-TimeServer& timeServer();
-
 } // namespace opencog
 
 #endif // _OPENCOG_TIME_SERVER_H

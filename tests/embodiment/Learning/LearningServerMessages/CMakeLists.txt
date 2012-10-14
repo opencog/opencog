@@ -6,38 +6,40 @@ ADD_DEFINITIONS(-DATOM_SPACE_DUMP_FILE=\\"${CMAKE_CURRENT_SOURCE_DIR}/atomSpace.
 IF(0)
 ADD_CXXTEST(LearnMessageUTest)
 TARGET_LINK_LIBRARIES(LearnMessageUTest 
-    MessagingSystem
-    LearningServerMessages
-    util
-    Filter
-    ${PROJECT_LIBRARIES}
+	MessagingSystem
+	LearningServerMessages
+	util
+	Filter
+	${PROJECT_LIBRARIES}
 )
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(LearnMessageUTest winmm)
+	TARGET_LINK_LIBRARIES(LearnMessageUTest winmm)
 ENDIF(WIN32)
 ENDIF(0)
 
 ADD_CXXTEST(RewardMessageUTest)
 TARGET_LINK_LIBRARIES(RewardMessageUTest 
-    MessagingSystem
-    LearningServerMessages
-    SpaceMap
-    AvatarComboVocabulary
+	MessagingSystem
+	LearningServerMessages
+	SpaceMap
+	AvatarComboVocabulary
+	server
 )
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(RewardMessageUTest winmm)
+	TARGET_LINK_LIBRARIES(RewardMessageUTest winmm)
 ENDIF(WIN32)
 
 ADD_CXXTEST(SchemaMessageUTest)
 TARGET_LINK_LIBRARIES(SchemaMessageUTest 
-    MessagingSystem
-    LearningServerMessages
-    SpaceMap
-    AvatarComboVocabulary
+	MessagingSystem
+	LearningServerMessages
+	SpaceMap
+	AvatarComboVocabulary
+	server
 )
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(SchemaMessageUTest winmm)
+	TARGET_LINK_LIBRARIES(SchemaMessageUTest winmm)
 ENDIF(WIN32)

@@ -24,25 +24,24 @@
  */
 
 
-#include "WorldWrapperUtil.h"
-
-#include <opencog/util/functional.h>
-#include <opencog/util/mt19937ar.h>
+#include <sstream>
+#include <ext/functional>
+#include <typeinfo>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/any.hpp>
 
-#include <sstream>
-#include <ext/functional>
+#include <opencog/util/functional.h>
+#include <opencog/util/mt19937ar.h>
+
+#include <opencog/server/CogServer.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
-
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <sstream>
-#include <ext/functional>
-#include <typeinfo>
+
+#include "WorldWrapperUtil.h"
 
 using namespace PetCombo;
 using namespace opencog;

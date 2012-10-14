@@ -78,8 +78,7 @@ class BuggyStackUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void BuggyStackUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = cogserver.getAtomSpace();
+	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 
 	// Load the required data
@@ -97,7 +96,7 @@ void BuggyStackUTest::setUp(void)
 		"../../../",
 		NULL
 	};
-	cogserver.loadSCMModules(paths);
+	cogserver().loadSCMModules(paths);
 
 #ifdef HAVE_GUILE
 	// Create an implication link that will be tested.
@@ -113,7 +112,6 @@ void BuggyStackUTest::setUp(void)
 
 void BuggyStackUTest::test_exec(void)
 {
-	AtomSpace* as = cogserver().getAtomSpace();
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!

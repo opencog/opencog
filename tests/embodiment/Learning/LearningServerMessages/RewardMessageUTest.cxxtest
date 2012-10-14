@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 #include <string.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 
 using namespace opencog::learningserver::messages;
 

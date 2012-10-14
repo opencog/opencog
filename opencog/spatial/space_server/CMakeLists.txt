@@ -17,9 +17,7 @@ ADD_LIBRARY (space_server STATIC
 	TimeServer.cc
 )
 
-TARGET_LINK_LIBRARIES(space_server
-	SpaceMap
-)
+TARGET_LINK_LIBRARIES(space_server SpaceMap)
 
 INSTALL (FILES
 	HandleToTemporalEntryMap.h
