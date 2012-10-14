@@ -692,7 +692,7 @@ void OAC::loadAtomSpace(const std::string& petId)
 {
     // load atom space and other repositories
     std::string file = getPath(petId, config().get("ATOM_SPACE_DUMP"));
-    savingLoading.load(file.c_str(), *atomSpace);
+    savingLoading.load(file.c_str(), *atomSpace, spaceServer(), timeServer());
 }
 
 void OAC::saveState()
@@ -708,7 +708,7 @@ void OAC::saveState()
     std::string file = getPath(pet->getPetId(), config().get("ATOM_SPACE_DUMP"));
 
     remove(file.c_str());
-    savingLoading.save(file.c_str(), *atomSpace);
+    savingLoading.save(file.c_str(), *atomSpace, spaceServer(), timeServer());
 
     // save pet metadata
     file = getPath(pet->getPetId(), config().get("PET_DUMP"));

@@ -24,6 +24,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/server/CogServer.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 
@@ -50,7 +51,7 @@ public:
         string obj_str = "stick";
         string avatar_str = "Paul";
         //fill atomSpace with dummy_object and dummy_avatar definite object
-        AtomSpace atomSpace;
+        AtomSpace& atomSpace = atomspace();
 
         Handle obj_h = atomSpace.addNode(OBJECT_NODE, obj_str);
         Handle avatar_h = atomSpace.addNode(AVATAR_NODE, avatar_str);
@@ -147,7 +148,7 @@ public:
         string obj_str = "stick";
         string avatar_str = "Paul";
         //fill atomSpace with dummy_object and dummy_avatar definite object
-        AtomSpace atomSpace;
+        AtomSpace& atomSpace = atomspace();
 
         Handle obj_h = atomSpace.addNode(OBJECT_NODE, obj_str);
         Handle avatar_h = atomSpace.addNode(AVATAR_NODE, avatar_str);

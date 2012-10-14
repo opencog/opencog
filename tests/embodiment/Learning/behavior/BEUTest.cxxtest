@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/util/misc-test.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/embodiment/Learning/behavior/BE.h>
 #include <opencog/embodiment/Learning/behavior/BasicWorldProvider.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
@@ -50,7 +50,7 @@ public:
     //of the second action so that they do not overlap once
     //converted into behavior description
     void test_tempUpdateRec1() {
-        AtomSpace as;
+        AtomSpace& as = atomspace();
 
         string avatar_str = "Paul";
         string pet_str = "Fido";
