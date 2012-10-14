@@ -8,6 +8,12 @@ types.ConceptNode = 'ConceptNode'
 types.InheritanceLink = 'InheritanceLink'
 types.ListLink = 'ListLink'
 types.AtTimeLink = 'AtTimeLink'
+types.ObjectNode = 'ObjectNode'
+types.NumberNode = 'NumberNode'
+types.PredicateNode = 'PredicateNode'
+types.EvaluationLink = 'EvaluationLink'
+types.LatestLink = 'LatestLink'
+types.PetNode = 'PetNode'
 
 class TruthValue(object):
     def __init__(self,confidence, number_of_evidences):
@@ -28,16 +34,16 @@ class Node(object):
         return self.string == other.string
 
     def __repr__(self):
-        return self.string
+        return self.type + '(' + self.string + ')'
 
 class Link(object):
     def __init__(self, link_type, list_of_nodes, truth_value=DEFAULT_TRUTH_VALUE):
         self.type = link_type
-        self += list_of_nodes
+        self.list_of_nodes = list_of_nodes
         self.truth_value = truth_value
 
     def __repr__(self):
-        return self.link_type + repr(self.list_of_nodes)
+        return self.type + repr(self.list_of_nodes)
 
 class AtomSpace(object):
 
@@ -54,6 +60,10 @@ class AtomSpace(object):
         link = Link(link_type, list_of_nodes, truth_value)
         self.links.add(link)
         return link
+
+    def print_list(self):
+        for link in self.links:
+            print link
 
 
 class Atom(object):
