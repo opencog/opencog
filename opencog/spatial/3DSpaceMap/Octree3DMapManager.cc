@@ -21,13 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Octree3DMapManager.h"
 #include <iterator>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+
+#include <opencog/embodiment/Learning/LearningServerMessages/LearningMessage.info.pb.h>
 #include "BlockEntity.h"
 #include "Entity3D.h"
-#include <opencog/learning/statistics/LearningMessage.info.pb.h>
+#include "Octree3DMapManager.h"
 
 using namespace opencog;
 using namespace opencog::spatial;

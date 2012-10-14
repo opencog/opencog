@@ -1,4 +1,5 @@
 
+ADD_CUSTOM_TARGET(learing_message_info DEPENDS LearningMessage.info.pb.h)
 
 IF (PROTOBUF_FOUND)
     # Compile proto messages.
