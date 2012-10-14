@@ -6,21 +6,22 @@
 #     util
 # )
 
-ADD_CXXTEST(VisibilityMapUTest)
-TARGET_LINK_LIBRARIES(VisibilityMapUTest
+LINK_LIBRARIES(
     SpaceMap
     util
 )
 
+
+ADD_CXXTEST(VisibilityMapUTest)
+
 ADD_CXXTEST(HPASearchUTest)
 TARGET_LINK_LIBRARIES(HPASearchUTest
-    SpaceMap 
-    util
     HPASearch
 )
 
 ADD_CXXTEST(MathUTest)
-TARGET_LINK_LIBRARIES(MathUTest
-    SpaceMap
-    util
-)
+ADD_CXXTEST(TemporalUTest)
+ADD_CXXTEST(TemporalMapUTest)
+ADD_CXXTEST(TemporalTableUTest)
+ADD_CXXTEST(TimeServerUTest)
+

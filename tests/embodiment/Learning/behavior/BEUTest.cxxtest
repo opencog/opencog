@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/util/misc-test.h>
+#include <opencog/spatial/space_server/TimeServer.h>
 #include <opencog/embodiment/Learning/behavior/BE.h>
 #include <opencog/embodiment/Learning/behavior/BasicWorldProvider.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
@@ -100,16 +101,16 @@ public:
                                                 NULL);
 
         Handle action1_eval_h = addAtom(as, *action1_at, TruthValue::DEFAULT_TV());
-        Handle t1_h = as.getTimeServer().addTimeInfo(action1_eval_h, Temporal(tl1, tu1));
+        Handle t1_h = timeServer().addTimeInfo(action1_eval_h, Temporal(tl1, tu1));
 
         Handle action2_eval_h = addAtom(as, *action2_at, TruthValue::DEFAULT_TV());
-        Handle t2_h = as.getTimeServer().addTimeInfo(action2_eval_h, Temporal(tl2, tu2));
+        Handle t2_h = timeServer().addTimeInfo(action2_eval_h, Temporal(tl2, tu2));
 
         Handle action3_eval_h = addAtom(as, *action3_at, TruthValue::DEFAULT_TV());
-        Handle t3_h = as.getTimeServer().addTimeInfo(action3_eval_h, Temporal(tl3, tu3));
+        Handle t3_h = timeServer().addTimeInfo(action3_eval_h, Temporal(tl3, tu3));
 
         Temporal ex_temp(tl1, tu3);
-        Handle tt_h = as.getTimeServer().addTimeInfo(trick_h, ex_temp);
+        Handle tt_h = timeServer().addTimeInfo(trick_h, ex_temp);
 
         //instantiate the behavior encoder
         BasicWorldProvider bwp(as);

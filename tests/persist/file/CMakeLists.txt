@@ -9,6 +9,7 @@ ADD_CUSTOM_TARGET(test_custom_atom_types DEPENDS atom_types.h)
 LINK_LIBRARIES(
 	atomspace
 	savable
+	space_server
 	${Boost_SIGNALS_LIBRARY}
 )
 

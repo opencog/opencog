@@ -2,7 +2,6 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions ato
 
 LINK_LIBRARIES(
 	atomspace
-	savable
 	${Boost_SIGNALS_LIBRARY}
 )
 
@@ -12,6 +11,7 @@ IF (EXPAT_FOUND)
 	TARGET_LINK_LIBRARIES(AtomTableUTest xml ${EXPAT_LIBRARIES})
 ENDIF (EXPAT_FOUND)
 
+
 ADD_CXXTEST(ClassServerUTest)
 ADD_CXXTEST(AtomUTest)
 ADD_CXXTEST(NodeUTest)
@@ -19,16 +19,15 @@ ADD_CXXTEST(LinkUTest)
 ADD_CXXTEST(TruthValueUTest)
 ADD_CXXTEST(SimpleTruthValueUTest)
 ADD_CXXTEST(IndefiniteTruthValueUTest)
+
 ADD_CXXTEST(CompositeTruthValueUTest)
+TARGET_LINK_LIBRARIES(CompositeTruthValueUTest savable space_server)
+
 ADD_CXXTEST(AttentionValueUTest)
 ADD_CXXTEST(AtomSpaceUTest)
 ADD_CXXTEST(AtomSpaceImplUTest)
 ADD_CXXTEST(AtomSpaceAsyncUTest)
 ADD_CXXTEST(HandleEntryUTest)
 ADD_CXXTEST(HandleMapUTest)
-ADD_CXXTEST(TemporalUTest)
 ADD_CXXTEST(HandleSetUTest)
-ADD_CXXTEST(TemporalMapUTest)
-ADD_CXXTEST(TemporalTableUTest)
-ADD_CXXTEST(TimeServerUTest)
 ADD_CXXTEST(TLBUTest)

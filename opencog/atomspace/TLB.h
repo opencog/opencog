@@ -41,6 +41,7 @@ class CompositeTruthValueUTest;
 class HandleEntryUTest;
 class HandleSetUTest;
 class TemporalTableUTest;
+class TimeServerUTest;
 class BasicSaveUTest;
 class BasicSCMUTest;
 class AtomSpaceBenchmark;
@@ -81,6 +82,7 @@ class TLB
     friend class Trail;
     friend class TypeIndex;
     friend class ::TemporalTableUTest;
+    friend class ::TimeServerUTest;
     friend class ::CompositeTruthValueUTest;
     friend class AtomSpaceBenchmark;
 

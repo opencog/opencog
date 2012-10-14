@@ -34,6 +34,7 @@
 #include <opencog/persist/file/SavingLoading.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
+#include <opencog/spatial/space_server/TimeServer.h>
 #include <opencog/util/Logger.h>
 
 #include "atom_types.definitions"
@@ -127,12 +128,12 @@ public:
         Handle h9 = atomSpace.addLink(LIST_LINK, outgoing);
 
         // Associate some timestamps to existing atoms (to check save/load of TimeServer repository)
-        Handle h15 = atomSpace.getTimeServer().addTimeInfo(h1, Temporal(0, 0));
-        Handle h16 = atomSpace.getTimeServer().addTimeInfo(h4, Temporal(10, 100));
-        Handle h17 = atomSpace.getTimeServer().addTimeInfo(h6, Temporal(0, 0));
-        Handle h18 = atomSpace.getTimeServer().addTimeInfo(h9, Temporal(0, 0));
-        Handle h19 = atomSpace.getTimeServer().addTimeInfo(h9, Temporal(10, 100));
-        Handle h20 = atomSpace.getTimeServer().addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
+        Handle h15 = timeServer().addTimeInfo(h1, Temporal(0, 0));
+        Handle h16 = timeServer().addTimeInfo(h4, Temporal(10, 100));
+        Handle h17 = timeServer().addTimeInfo(h6, Temporal(0, 0));
+        Handle h18 = timeServer().addTimeInfo(h9, Temporal(0, 0));
+        Handle h19 = timeServer().addTimeInfo(h9, Temporal(10, 100));
+        Handle h20 = timeServer().addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
 
         Handle h10 = atomSpace.addNode(NUMBER_NODE, "1");
         Handle h11 = atomSpace.addNode(CONCEPT_NODE, "fido");
@@ -282,22 +283,22 @@ public:
 
         // Check TimeServer entries
         vector<HandleTemporalPair> result;
-        atomSpace.getTimeServer().getTimeInfo(back_inserter(result), h1);
+        timeServer().getTimeInfo(back_inserter(result), h1);
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
         result.clear();
-        atomSpace.getTimeServer().getTimeInfo(back_inserter(result), h4);
+        timeServer().getTimeInfo(back_inserter(result), h4);
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(10, 100));
 
         result.clear();
-        atomSpace.getTimeServer().getTimeInfo(back_inserter(result), h6);
+        timeServer().getTimeInfo(back_inserter(result), h6);
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
         result.clear();
-        atomSpace.getTimeServer().getTimeInfo(back_inserter(result), h9);
+        timeServer().getTimeInfo(back_inserter(result), h9);
         TS_ASSERT(result.size() == 3);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
         TS_ASSERT(*(result[1].getTemporal()) == Temporal(0, 10));

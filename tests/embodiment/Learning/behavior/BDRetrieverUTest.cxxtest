@@ -23,6 +23,7 @@
 
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spatial/space_server/TimeServer.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 
@@ -92,16 +93,16 @@ public:
         Handle bd2_h = atomSpace.addLink(EVALUATION_LINK, b2_seq);
         //add AtTimeLink
         //for goto_obj(dummy_object)
-        Handle t1_h = atomSpace.getTimeServer().addTimeInfo(bd1_h, Temporal(0, TIME_INTERVAL));
+        Handle t1_h = timeServer().addTimeInfo(bd1_h, Temporal(0, TIME_INTERVAL));
         //for grab(obj)
-        Handle t2_h = atomSpace.getTimeServer().addTimeInfo(bd2_h,
+        Handle t2_h = timeServer().addTimeInfo(bd2_h,
                                             Temporal(TIME_INTERVAL,
                                                      2 * TIME_INTERVAL));
         //add trick concept
         string trick_str = "snorf";
         Handle trick_h = atomSpace.addNode(CONCEPT_NODE, trick_str);
         //add AtTimeLink to it
-        Handle tt_h = atomSpace.getTimeServer().addTimeInfo(trick_h, Temporal(0, 2 * TIME_INTERVAL));
+        Handle tt_h = timeServer().addTimeInfo(trick_h, Temporal(0, 2 * TIME_INTERVAL));
         //add memberLinks to the concept node
         HandleSeq m1_seq;
         m1_seq.push_back(t1_h);
@@ -215,22 +216,22 @@ public:
         Handle bd4_h = atomSpace.addLink(EVALUATION_LINK, b4_seq);
         //add AtTimeLink
         //for goto_obj(dummy_object)
-        Handle t1_h = atomSpace.getTimeServer().addTimeInfo(bd1_h, Temporal(0, TIME_INTERVAL));
+        Handle t1_h = timeServer().addTimeInfo(bd1_h, Temporal(0, TIME_INTERVAL));
         //for grab(obj)
-        Handle t2_h = atomSpace.getTimeServer().addTimeInfo(bd2_h, Temporal(TIME_INTERVAL,
+        Handle t2_h = timeServer().addTimeInfo(bd2_h, Temporal(TIME_INTERVAL,
                                             2 * TIME_INTERVAL));
         //for wag
-        Handle t3_h = atomSpace.getTimeServer().addTimeInfo(bd3_h, Temporal(10 * TIME_INTERVAL,
+        Handle t3_h = timeServer().addTimeInfo(bd3_h, Temporal(10 * TIME_INTERVAL,
                                             11 * TIME_INTERVAL));
         //for back_flip
-        Handle t4_h = atomSpace.getTimeServer().addTimeInfo(bd4_h, Temporal(11 * TIME_INTERVAL,
+        Handle t4_h = timeServer().addTimeInfo(bd4_h, Temporal(11 * TIME_INTERVAL,
                                             12 * TIME_INTERVAL));
 
         //add trick concept
         string trick_str = "snorf";
         Handle trick_h = atomSpace.addNode(CONCEPT_NODE, trick_str);
         //add AtTimeLink to it
-        Handle tt1_h = atomSpace.getTimeServer().addTimeInfo(trick_h, Temporal(0, 2 * TIME_INTERVAL));
+        Handle tt1_h = timeServer().addTimeInfo(trick_h, Temporal(0, 2 * TIME_INTERVAL));
         //add memberLinks to the concept node
         HandleSeq m1_seq;
         m1_seq.push_back(t1_h);
@@ -241,7 +242,7 @@ public:
         m2_seq.push_back(tt1_h);
         atomSpace.addLink(MEMBER_LINK, m2_seq);
         //add AtTimeLink to it
-        Handle tt2_h = atomSpace.getTimeServer().addTimeInfo(trick_h, Temporal(10 * TIME_INTERVAL,
+        Handle tt2_h = timeServer().addTimeInfo(trick_h, Temporal(10 * TIME_INTERVAL,
                                              12 * TIME_INTERVAL));
         //add memberLinks to the concept node
         HandleSeq m3_seq;
