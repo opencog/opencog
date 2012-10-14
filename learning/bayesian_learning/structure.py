@@ -2,7 +2,7 @@ from learning.bayesian_learning.network import *
 from random import randrange, random as rand
 from sample_data.uci_adult_dataset.main import uci_adult
 from utility.evolutionary import *
-from dynamics import *
+from utility.numeric.information_theory import mutual_information
 from utility.generic import dim
 from math import log, factorial
 
@@ -11,8 +11,8 @@ __author__ = 'keyvan'
 
 class BayesNetPopulation(Population):
 
-    def __init__(self, variable_names, number_of_individuals=0):
-        data = generate_test_dataset(100)
+    def __init__(self, data, number_of_individuals=0):
+        variable_names = data.variable_names
         self.scoring_function = BayesianInformationCriterionScore(variable_names, data)
         Population.__init__(self, NetworkChromosomeRepresentation, number_of_individuals,
             variable_names=variable_names, scoring_function=self.scoring_function)
@@ -34,7 +34,7 @@ class BayesianInformationCriterionScore(ScoringFunction):
         M = float(len(self.data))
         for node in network:
             for parent in node.parents:
-                score += self.data.mutual_information(node.name, parent.name)
+                score += mutual_information(self.data, node.name, parent.name)
         score *= M
         score -= log(M)/2 * dim(network) # penalise complexity
         return score

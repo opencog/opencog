@@ -45,7 +45,7 @@ class SimpleRecord(list):
                     convertor_function(remove_white_space(element)))
 
 
-class CompositeRecord(object):
+class CompositeRecord(dict):
 
     is_incomplete = False
     _attributes_for_repr = None
@@ -81,7 +81,7 @@ class CompositeRecord(object):
                    value = _convert_value(
                        default_convertor_function, value)
 
-            self.__setattr__(attribute_names[index],value)
+            self[attribute_names[index]] = value
         self.index_in_dataset = dataset.number_of_records - 1
 
     def generate_lambda_dict(self, converter_by_names_tuples):
@@ -98,11 +98,11 @@ class CompositeRecord(object):
 
     def __repr__(self):
         if self._attributes_for_repr is None:
-            return object.__repr__(self)
+            return dict.__repr__(self)
         repr_str = 'Record[' + str(self.index_in_dataset) + ']{ '
         for name in self._attributes_for_repr:
             repr_str += name + ':' +\
-                        str(self.__getattribute__(name)) + ' '
+                        str(self[name]) + ' '
         return repr_str + '}'
 
 
@@ -130,7 +130,7 @@ class Dataset(list):
                 stream_open = False
 
         data = csv.reader(stream,delimiter=',', quotechar='|')
-
+        self.variable_names = None
         for row in data:
             if attribute_names == None:
                 self.append(SimpleRecord(row,default_convertor_expression))
@@ -143,6 +143,7 @@ class Dataset(list):
                 converter_by_names_tuples,
                 incomplete_value_evaluation_fn,ignore_if_incomplete)
             record.set_attribute_names_for_repr(names_for_repr)
+            self.variable_names = record.keys()
             if not ignore_if_incomplete or record.is_incomplete is not True:
                 self.append(record)
 
