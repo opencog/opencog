@@ -21,13 +21,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NoSpaceLife.h"
-#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
-#include <opencog/util/RandGen.h>
+#include <opencog/util/random.h>
+
 #include <opencog/atomspace/Node.h>
+
 #include <opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.h>
 #include <opencog/embodiment/AvatarComboVocabulary/avatar_perception.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+
+#include "NoSpaceLife.h"
 
 namespace ImaginaryLife
 {
