@@ -26,9 +26,9 @@
 #define _OPENCOG_TIME_SERVER_H
 
 #include <set>
+#include <boost/signal.hpp>
 
-#include <opencog/atomspace/AtomSpaceImpl.h>
-#include <opencog/atomspace/AtomSpaceAsync.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spatial/space_server/SpaceServer.h>
 #include <opencog/spatial/space_server/TemporalTable.h>
 
@@ -36,7 +36,7 @@
 namespace opencog
 {
 
-class AtomSpaceAsync;
+class AtomSpaceImpl;
 class TimeServerSavable;
 
 /**
@@ -340,8 +340,8 @@ private:
     boost::signals::connection removedAtomConnection;
     boost::signals::connection addedAtomConnection;
 
-    void atomAdded(AtomSpaceImpl* a, Handle h);
-    void atomRemoved(AtomSpaceImpl* a, Handle h);
+    void atomAdded(AtomSpaceImpl*, Handle);
+    void atomRemoved(AtomSpaceImpl*, Handle);
  
     /**
      * The temporal table used by this TimeServer

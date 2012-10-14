@@ -23,6 +23,7 @@
  */
 
 #include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/server/CogServer.h>
 #include "TimeServer.h"
 

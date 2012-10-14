@@ -40,12 +40,14 @@
 #include <string>
 #include <map>
 
+#include <boost/signal.hpp>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Config.h>
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/spatial/LocalSpaceMap2D.h>
+
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
 #include <opencog/spatial/3DSpaceMap/BlockEntity.h>
@@ -56,11 +58,12 @@ namespace opencog
 {
 
 class AtomSpace;
+class AtomSpaceImpl;
 class TimeServer;
 class SpaceServerSavable;
 
 /**
- * New SpaceServer for 3D map,using Octree3DMapManager, not using LocalSpaceMap2D anymore.
+ * New SpaceServer for 3D map, using Octree3DMapManager, not using LocalSpaceMap2D anymore.
  * The biggest change in orgnization is every Map handle match one map for a scene (such as a room)
  * The former SpaceServer would generate a new map copy when there is a change in the map (such as something moved)
  * Now, we don't save all the copies. Now one scene only has one map handle (not create a lot via the time)

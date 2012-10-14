@@ -23,6 +23,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+#include <cctype>
+#include <stack>
+
+#include <boost/algorithm/string.hpp>
+
+#include <opencog/util/misc.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+#include <opencog/util/random.h>
+
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
@@ -34,19 +45,9 @@
 #include <opencog/spatial/space_server/TemporalTable.h>
 #include <opencog/spatial/space_server/TimeServer.h>
 
-#include <opencog/util/misc.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/oc_assert.h>
-
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
 #include "CompareAtomTreeTemplate.h"
-
-#include <algorithm>
-#include <cctype>
-#include <stack>
-
-#include <boost/algorithm/string.hpp>
 
 using std::string;
 using std::list;

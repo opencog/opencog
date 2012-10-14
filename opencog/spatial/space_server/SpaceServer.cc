@@ -30,6 +30,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
