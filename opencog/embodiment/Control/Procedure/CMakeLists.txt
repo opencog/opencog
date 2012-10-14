@@ -26,9 +26,16 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
     Procedure
     WorldWrapper
     util
-    ${XERCESC_LIBRARIES}
     AvatarComboVocabulary
+    ${XERCESC_LIBRARIES}
 )
+IF (PROTOBUF_FOUND)
+   TARGET_LINK_LIBRARIES(combo_shell_stdio
+      LearningServerMessages
+      ${PROTOBUF_LIBRARY}
+   )
+ENDIF (PROTOBUF_FOUND)
+
 
 ADD_EXECUTABLE (combo_shell ComboPAIExecutable)
 TARGET_LINK_LIBRARIES (combo_shell
@@ -37,3 +44,11 @@ TARGET_LINK_LIBRARIES (combo_shell
     util
     ${XERCESC_LIBRARIES}
 )
+
+IF (PROTOBUF_FOUND)
+   TARGET_LINK_LIBRARIES(combo_shell
+      LearningServerMessages
+      ${PROTOBUF_LIBRARY}
+   )
+ENDIF (PROTOBUF_FOUND)
+

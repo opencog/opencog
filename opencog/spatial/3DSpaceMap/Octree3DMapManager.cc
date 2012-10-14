@@ -988,7 +988,7 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
 // spatial depends on th learning server, but the learning server depnds
 // on spatial. As a result, all the various libraries canot by linked,
 // at least no by CMake, as currently designed.
-#ifdef HAVE_PROTOBUF
+#ifdef HAVE_PROTOBUF_XXX
      // TODO: Send raw block clusters data to learning server
      // construct these adjacent blocks messages to send to the learning server
      learning::message::BlockClusterDataInput dataInput;

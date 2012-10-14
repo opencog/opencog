@@ -20,18 +20,18 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <limits>
+
+#include <opencog/util/functional.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/random.h>
+#include <opencog/util/StringManipulator.h>
 
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
 #include <opencog/spatial/LocalSpaceMap2D.h>
-#include <opencog/util/functional.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/StringManipulator.h>
-#include <opencog/util/random.h>
-
 #include <opencog/spatial/math/Vector3.h>
 #include <opencog/spatial/math/LineSegment.h>
 
-#include <limits>
 
 using namespace opencog;
 using namespace opencog::spatial;

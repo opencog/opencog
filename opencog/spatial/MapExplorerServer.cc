@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/spatial/MapExplorerServer.h>
-#include <opencog/util/Logger.h>
-
 #include <boost/bind.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/thread/xtime.hpp>
 #include <boost/functional/hash.hpp>
+
+#include <opencog/util/Logger.h>
+#include <opencog/spatial/MapExplorerServer.h>
 
 using namespace opencog::spatial;
 using namespace opencog;
