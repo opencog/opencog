@@ -242,13 +242,11 @@ void PsiModulatorUpdaterAgent::run(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petId
-    // const std::string & petId = oac->getPet().getPetId();
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get current time stamp
     unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   

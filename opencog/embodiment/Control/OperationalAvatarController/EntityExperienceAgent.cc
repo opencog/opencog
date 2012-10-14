@@ -47,7 +47,7 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
     logger().debug("EntityExperienceAgent::%s - Experiencing entities at moment '%d'", 
                    __FUNCTION__, this->elapsedMoments );
 
-    AtomSpace* atomSpace = server->getAtomSpace( );
+    AtomSpace& atomSpace = server->getAtomSpace( );
 
     if ( spaceServer().getLatestMapHandle( ) == Handle::UNDEFINED ) {
         logger().warn( "EntityExperienceAgent::%s - There is no map info available yet!",
@@ -64,11 +64,11 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         HandleSeq links, link(2);
         link[0] = Handle::UNDEFINED;
         link[1] = Handle::UNDEFINED;
-        atomSpace->getHandleSet( std::back_inserter(links), link, &type[0],
+        atomSpace.getHandleSet( std::back_inserter(links), link, &type[0],
                                  &subclasses[0], 2, REFERENCE_LINK, false );
         unsigned int i;
         for( i = 0; i < links.size( ); ++i ) {
-            semeNodes.push_back( atomSpace->getOutgoing( links[i], 1 ) );
+            semeNodes.push_back( atomSpace.getOutgoing( links[i], 1 ) );
         } // for
     }
 
@@ -83,19 +83,19 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         {
             Type type[] = { SEME_NODE, CONCEPT_NODE };
             HandleSeq link = { semeNodes[i], Handle::UNDEFINED };
-            atomSpace->getHandleSet( std::back_inserter( typeLinks ), link, 
+            atomSpace.getHandleSet( std::back_inserter( typeLinks ), link, 
                                      &type[0], NULL, 2, INHERITANCE_LINK, false );
         }
         {
             Type type[] = { CONCEPT_NODE, SEME_NODE };
             HandleSeq link = { Handle::UNDEFINED, semeNodes[i] };
-            atomSpace->getHandleSet( std::back_inserter( classLinks ), link, 
+            atomSpace.getHandleSet( std::back_inserter( classLinks ), link, 
                                      &type[0], NULL, 2, REFERENCE_LINK, false );
         }
         
 
-        const std::string& name = atomSpace->getName( semeNodes[i] );
-        TruthValuePtr tv = atomSpace->getTV( semeNodes[i]);
+        const std::string& name = atomSpace.getName( semeNodes[i] );
+        TruthValuePtr tv = atomSpace.getTV( semeNodes[i]);
 
         strength_t mean = 1.0;
         count_t count = 1.0;
@@ -120,19 +120,19 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         logger().debug("EntityExperienceAgent::%s - Entity '%s' now has strength '%f' and count '%f'", 
                        __FUNCTION__, name.c_str( ), mean, count );
 
-        atomSpace->setTV( semeNodes[i], SimpleTruthValue( mean, count ) );
+        atomSpace.setTV( semeNodes[i], SimpleTruthValue( mean, count ) );
 
 
         unsigned int j;
         for( j = 0; j < typeLinks.size( ); ++j ) {
-            Handle typeNode = atomSpace->getOutgoing( typeLinks[j], 1 );
+            Handle typeNode = atomSpace.getOutgoing( typeLinks[j], 1 );
             if ( nodeStatus.find( typeNode ) == nodeStatus.end( ) ) {
                 nodeStatus.insert( std::map<Handle, bool >::value_type( typeNode, false ) );
             } // if
             nodeStatus[ typeNode ] |= containsObject;
         } // for
         for( j = 0; j < classLinks.size( ); ++j ) {
-            Handle classNode = atomSpace->getOutgoing( classLinks[j], 0 );
+            Handle classNode = atomSpace.getOutgoing( classLinks[j], 0 );
             if ( nodeStatus.find( classNode ) == nodeStatus.end( ) ) {
                 nodeStatus.insert( std::map<Handle, bool >::value_type( classNode, false ) );
             } // if
@@ -146,7 +146,7 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
     // enhance the class count
     std::map<Handle, bool >::const_iterator it;
     for( it = nodeStatus.begin( ); it != nodeStatus.end( ); ++it ) {
-        TruthValuePtr tv = atomSpace->getTV( it->first );
+        TruthValuePtr tv = atomSpace.getTV( it->first );
 
         strength_t mean = 1;
         count_t count = 1;
@@ -164,9 +164,9 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         } // if
 
         logger().debug("EntityExperienceAgent::%s - Class '%s' now has strength '%f' and count '%f'", 
-                       __FUNCTION__, atomSpace->getName( it->first ).c_str( ), mean, count );
+                       __FUNCTION__, atomSpace.getName( it->first ).c_str( ), mean, count );
 
-        atomSpace->setTV( it->first, SimpleTruthValue( mean, count ) );
+        atomSpace.setTV( it->first, SimpleTruthValue( mean, count ) );
     } // for
     
 

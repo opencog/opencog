@@ -86,7 +86,7 @@ void SchemeShell::set_socket(ConsoleSocket *s)
 	//	Someone did this singleton instance crapola because 
 	//	some scheme threading somehow doesn't work somewhere.
 	//	buncha crap. fix this shit.
-	if (!evaluator) evaluator = &SchemeEval::instance(cogserver().getAtomSpace());
+	if (!evaluator) evaluator = &SchemeEval::instance(&cogserver().getAtomSpace());
 }
 
 void SchemeShell::socketClosed(void)

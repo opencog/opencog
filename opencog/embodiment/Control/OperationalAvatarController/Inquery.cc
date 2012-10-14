@@ -98,10 +98,10 @@ StateValue Inquery::inqueryAtLocation(vector<StateValue>& stateOwnerList)
 
      Entity* entity = boost::get<Entity>(&obj);
 
-    Handle h = AtomSpaceUtil::getObjectHandle(oac->getAtomSpaceReference(), entity->id);
+    Handle h = AtomSpaceUtil::getObjectHandle(oac->getAtomSpace(), entity->id);
     SpaceServer::SpaceMapPoint pos;
     if (h == Handle::UNDEFINED) // not an object, let try if it's an agent
-        h = AtomSpaceUtil::getAgentHandle(oac->getAtomSpaceReference(), entity->id);
+        h = AtomSpaceUtil::getAgentHandle(oac->getAtomSpace(), entity->id);
 
     if(h == Handle::UNDEFINED)
         return Vector(DOUBLE_MAX,DOUBLE_MAX,DOUBLE_MAX);

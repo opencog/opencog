@@ -62,10 +62,11 @@ DimEmbedModule::~DimEmbedModule() {
 	logger().info("[DimEmbedModule] destructor");
 }
 
-void DimEmbedModule::init() {    
+void DimEmbedModule::init()
+{    
     logger().info("[DimEmbedModule] init");
-    CogServer& cogServer = static_cast<CogServer&>(server());
-    this->as=cogServer.getAtomSpace();
+    CogServer& cogServer = cogserver();
+    this->as = &cogServer.getAtomSpace();
     as->atomSpaceAsync->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
                                   this, _1, _2));

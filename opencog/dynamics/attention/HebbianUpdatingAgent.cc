@@ -66,7 +66,7 @@ Logger* HebbianUpdatingAgent::getLogger()
 
 void HebbianUpdatingAgent::run(CogServer *server)
 {
-    a = server->getAtomSpace();
+    a = &server->getAtomSpace();
     hebbianUpdatingUpdate();
 }
 

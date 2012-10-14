@@ -98,7 +98,7 @@ class SchemeEval
                 if (!atomspace) {
                     // We create our own local AtomSpace to send calls to the
                     // event loop (otherwise the getType cache breaks)
-                    atomspace = new AtomSpace(*cogserver().getAtomSpace());
+                    atomspace = new AtomSpace(cogserver().getAtomSpace());
                 }
 				singletonInstance = new SchemeEval(atomspace);
             }

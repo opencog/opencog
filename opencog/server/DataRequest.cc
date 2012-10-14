@@ -56,7 +56,7 @@ bool DataRequest::execute()
     xmldata.erase(xmldata.find_last_not_of(" \t\n\r"));
     std::vector<XMLBufferReader*> readers(1, new StringXMLBufferReader(xmldata.c_str()));
     try {
-        NMXmlParser::loadXML(readers, server().getAtomSpace());
+        NMXmlParser::loadXML(readers, &server().getAtomSpace());
     } catch (StandardException &e) {
         std::ostringstream oss;
         oss << "Error: unable to load inline xml data (" << e.getMessage() << ")" << std::endl;

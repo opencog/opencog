@@ -51,13 +51,11 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petId
-//    const std::string & petId = oac->getPet().getPetId();
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Clear old relation list
     this->relationList.clear(); 
@@ -306,10 +304,11 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get petId and petName
     const std::string & petName = oac->getPet().getName();

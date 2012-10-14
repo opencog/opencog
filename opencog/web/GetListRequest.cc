@@ -46,10 +46,10 @@ using namespace opencog;
 bool getListSortByLTIPredicate (bool descending,
                                 const Handle& h1, const Handle& h2) {
     AttentionValue::lti_t lti1, lti2;
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
 
-    lti1 = as->getLTI(h1);
-    lti2 = as->getLTI(h2);
+    lti1 = as.getLTI(h1);
+    lti2 = as.getLTI(h2);
 
     if (descending)
         return lti1 > lti2;
@@ -64,10 +64,10 @@ bool getListSortByLTIPredicate (bool descending,
 bool getListSortBySTIPredicate (bool descending,
                                 const Handle& h1, const Handle& h2) {
     AttentionValue::sti_t sti1, sti2;
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
 
-    sti1 = as->getSTI(h1);
-    sti2 = as->getSTI(h2);
+    sti1 = as.getSTI(h1);
+    sti2 = as.getSTI(h2);
 
     if (descending)
         return sti1 > sti2;
@@ -82,10 +82,10 @@ bool getListSortBySTIPredicate (bool descending,
 bool getListSortByTVStrengthPredicate (bool descending,
                                 const Handle& h1, const Handle& h2) {
     float tv1, tv2;
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
 
-    tv1 = as->getMean(h1);
-    tv2 = as->getMean(h2);
+    tv1 = as.getMean(h1);
+    tv2 = as.getMean(h2);
 
     if (descending)
         return tv1 > tv2;
@@ -100,10 +100,10 @@ bool getListSortByTVStrengthPredicate (bool descending,
 bool getListSortByTVConfidencePredicate (bool descending,
                                 const Handle& h1, const Handle& h2) {
     float tv1, tv2;
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
 
-    tv1 = as->getConfidence(h1);
-    tv2 = as->getConfidence(h2);
+    tv1 = as.getConfidence(h1);
+    tv2 = as.getConfidence(h2);
 
     if (descending)
         return tv1 > tv2;
@@ -129,7 +129,7 @@ bool GetListRequest::execute()
     Handle handle = Handle::UNDEFINED;
     HandleSeq _handles;
     std::ostringstream errbuff;
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
 
     std::list<std::string>::const_iterator it;
     for (it = _parameters.begin(); it != _parameters.end(); ++it) {
@@ -143,7 +143,7 @@ bool GetListRequest::execute()
         if (keyvalue[0] == "handle") { // get by handle
             UUID uuid = strtol(keyvalue[1].c_str(), NULL, 0);
             handle = Handle(uuid);
-            if (!as->isValidHandle(handle)) {
+            if (!as.isValidHandle(handle)) {
                 errbuff << "Invalid handle: " << uuid;
                 sendError(errbuff.str());
                 return false;
@@ -203,12 +203,12 @@ bool GetListRequest::execute()
         //! @todo deal with refresh and unknown parameters
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
-        as->getHandleSet
+        as.getHandleSet
             (std::back_inserter(_handles), type, name.c_str(), subtypes);
     } else if (name != "") {     // filter by name
-        as->getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
+        as.getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
     } else if (type != NOTYPE) { // filter by type
-        as->getHandleSet(std::back_inserter(_handles), type, subtypes);
+        as.getHandleSet(std::back_inserter(_handles), type, subtypes);
     }
     if (order_by != "") {
         bool sortResult = sortHandles(_handles, order_by, descending);
@@ -373,7 +373,7 @@ void GetListRequest::html_makeListHeader(unsigned int total_results)
 
 void GetListRequest::html_makeOutput(HandleSeq &hs)
 {
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
     // Make output from atom objects so we can access and create output from
     // them
     _output << "<table border=\"1\"><tr>";
@@ -389,10 +389,10 @@ void GetListRequest::html_makeOutput(HandleSeq &hs)
         _output << "<tr>" << std::endl;
         _output << "<td><a href=\"" << SERVER_PLACEHOLDER
             << "/atom?handle=" << h.value() << "\">"
-            << as->getName(h) << "</a></td>";
-        _output << "<td>" << classserver().getTypeName(as->getType(h)) << "</td> ";
-        AttentionValue::sti_t the_sti = as->getSTI(h) ;
-        AttentionValue::lti_t the_lti = as->getLTI(h) ;
+            << as.getName(h) << "</a></td>";
+        _output << "<td>" << classserver().getTypeName(as.getType(h)) << "</td> ";
+        AttentionValue::sti_t the_sti = as.getSTI(h) ;
+        AttentionValue::lti_t the_lti = as.getLTI(h) ;
         //! @todo make the sti/lti color scaled instead of just -ve/+ve
         if (the_sti > 0)
             _output << "<td style=\"background-color:#99FF66\">" << the_sti << "</td> ";
@@ -402,44 +402,44 @@ void GetListRequest::html_makeOutput(HandleSeq &hs)
             _output << "<td style=\"background-color:#99FF66\">" << the_lti << "</td> ";
         else
             _output << "<td style=\"background-color:#99FFFF\">" << the_lti << "</td> ";
-        _output << "<td>" << as->getTV(h)->toString() << "</td> ";
+        _output << "<td>" << as.getTV(h)->toString() << "</td> ";
 
         // Here the outgoing targets string is made
-        HandleSeq outgoing = as->getOutgoing(h);
+        HandleSeq outgoing = as.getOutgoing(h);
         _output << "<td>";
         for (uint i = 0; i < outgoing.size(); i++) {
             Handle ho = outgoing[i];
             _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list/" <<
-                classserver().getTypeName(as->getType(ho)) <<
+                classserver().getTypeName(as.getType(ho)) <<
                 "?max=" << maximum << "\">";
-            _output << classserver().getTypeName(as->getType(ho));
+            _output << classserver().getTypeName(as.getType(ho));
             _output << "</a>:";
             _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom/" <<
                 ho.value() << "\">";
-            if (as->getName(ho) == "")
+            if (as.getName(ho) == "")
                 _output << "#" + ho.value();
             else
-                _output << as->getName(ho);
+                _output << as.getName(ho);
             _output << "</a><br/>";
         }
         _output << "</td>";
 
         // Here the incoming string is made.
-        HandleSeq incoming = as->getIncoming(h);
+        HandleSeq incoming = as.getIncoming(h);
         _output << "<td>";
         for (uint i = 0; i < incoming.size(); i++) {
             Handle ho = incoming[i];
             _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list/" <<
-                classserver().getTypeName(as->getType(ho)) <<
+                classserver().getTypeName(as.getType(ho)) <<
                 "?max=" << maximum << "\">";
-            _output << classserver().getTypeName(as->getType(ho));
+            _output << classserver().getTypeName(as.getType(ho));
             _output << "</a>:";
             _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom/" <<
                 ho.value() << "\">";
-            if (as->getName(ho) == "")
+            if (as.getName(ho) == "")
                 _output << "#" << ho.value();
             else
-                _output << as->getName(ho) << ":";
+                _output << as.getName(ho) << ":";
             _output << "</a><br/>";
         }
         _output << "</td>";

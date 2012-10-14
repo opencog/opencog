@@ -245,7 +245,7 @@ void StimulusUpdaterAgent::init(opencog::CogServer * server)
 
     // Init stimulus
     foreach (Stimulus & stimulus, this->stimulusList) {
-        stimulus.initStimulus(*(oac->getAtomSpace()), timeStamp);
+        stimulus.initStimulus(oac->getAtomSpace(), timeStamp);
     }
 
     // Initialize ZeroMQ publisher and add it to the plaza
@@ -275,13 +275,11 @@ void StimulusUpdaterAgent::run(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petId
-    // const std::string & petId = oac->getPet().getPetId();
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get current time stamp
     unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   

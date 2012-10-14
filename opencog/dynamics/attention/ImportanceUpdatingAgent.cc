@@ -168,7 +168,7 @@ void ImportanceUpdatingAgent::calculateAtomWages(AtomSpace *a, const AgentSeq &a
 void ImportanceUpdatingAgent::run(CogServer *server)
 {
     AgentSeq agents = server->runningAgents();
-    AtomSpace* a = server->getAtomSpace();
+    AtomSpace* a = &server->getAtomSpace();
     HandleSeq hs;
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
     AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;

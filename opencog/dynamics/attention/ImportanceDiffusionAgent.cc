@@ -103,7 +103,7 @@ float ImportanceDiffusionAgent::getDiffusionThreshold() const
 
 void ImportanceDiffusionAgent::run(CogServer* server)
 {
-    a = server->getAtomSpace();
+    a = &server->getAtomSpace();
     spreadDecider->setFocusBoundary(diffusionThreshold);
 #ifdef DEBUG
     totalSTI = 0;
@@ -473,11 +473,11 @@ RandGen* SpreadDecider::getRNG() {
 
 float HyperbolicDecider::function(AttentionValue::sti_t s)
 {
-    AtomSpace *a = server().getAtomSpace();
+    AtomSpace& a = server().getAtomSpace();
     // Convert boundary from -1..1 to 0..1
-    float af = a->getAttentionalFocusBoundary();
-    float minSTI = a->getMinSTI(false);
-    float maxSTI = a->getMaxSTI(false);
+    float af = a.getAttentionalFocusBoundary();
+    float minSTI = a.getMinSTI(false);
+    float maxSTI = a.getMaxSTI(false);
     float norm_b = focusBoundary > 0.0f ?
         af + (focusBoundary * (maxSTI - af)) :
         af + (focusBoundary * (af - minSTI ));
@@ -502,12 +502,12 @@ float StepDecider::function(AttentionValue::sti_t s)
 
 void StepDecider::setFocusBoundary(float b)
 {
-    AtomSpace *a = server().getAtomSpace();
+    AtomSpace& a = server().getAtomSpace();
     // Convert to an exact STI amount
-    float af = a->getAttentionalFocusBoundary();
+    float af = a.getAttentionalFocusBoundary();
     focusBoundary = (b > 0.0f)?
-        (int) (af + (b * (a->getMaxSTI(false) - af))) :
-        (int) (af + (b * (af - a->getMinSTI(false))));
+        (int) (af + (b * (a.getMaxSTI(false) - af))) :
+        (int) (af + (b * (af - a.getMinSTI(false))));
 
 }
 

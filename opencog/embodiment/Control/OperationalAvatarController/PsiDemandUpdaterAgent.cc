@@ -305,10 +305,11 @@ void PsiDemandUpdaterAgent::init(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Clear old demandList 
     this->demandList.clear();
@@ -379,16 +380,11 @@ void PsiDemandUpdaterAgent::run(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server!");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get Pet
-    // Pet & pet = oac->getPet();
-
-    // Get petId
-    // const std::string & petId = pet.getPetId();
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get current time stamp
     unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp(); 

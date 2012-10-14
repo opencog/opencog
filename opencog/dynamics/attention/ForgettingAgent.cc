@@ -80,7 +80,7 @@ void ForgettingAgent::setLogger(Logger* _log)
 void ForgettingAgent::run(CogServer *c)
 {
     log->fine("=========== ForgettingAgent::run =======");
-    a = c->getAtomSpace();
+    a = &c->getAtomSpace();
     forget(forgetPercentage);
 }
 

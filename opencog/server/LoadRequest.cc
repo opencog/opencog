@@ -57,7 +57,7 @@ bool LoadRequest::execute()
     std::string& filename = _parameters.front();
     std::vector<XMLBufferReader*> readers(1, new FileXMLBufferReader(filename.c_str()));
     try {
-        NMXmlParser::loadXML(readers, server().getAtomSpace());
+        NMXmlParser::loadXML(readers, &server().getAtomSpace());
     } catch (StandardException &e) {
         oss << "Error: unable to load inline xml data (" << e.getMessage() << ")" << std::endl;
         send(oss.str());

@@ -61,7 +61,7 @@ void UpdateAtomRequest::setRequestResult(RequestResult* rr)
 
 bool UpdateAtomRequest::execute()
 {
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace* as = &server().getAtomSpace();
 
     Handle h;
     if (_parameters.size() != 2) {

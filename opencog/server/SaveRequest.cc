@@ -56,11 +56,11 @@ bool SaveRequest::execute()
         return false;
     }
 
-    AtomSpace* atomSpace = CogServer::getAtomSpace();
+    AtomSpace& atomSpace = CogServer::getAtomSpace();
 
     std::string& filename = _parameters.front();
 
-    bool result = atomSpace->atomSpaceAsync->saveToXML(filename);
+    bool result = atomSpace.atomSpaceAsync->saveToXML(filename);
     if (result)
         oss << "Info: done" << std::endl;
     else 

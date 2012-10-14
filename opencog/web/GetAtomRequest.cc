@@ -53,7 +53,7 @@ GetAtomRequest::~GetAtomRequest()
 bool GetAtomRequest::execute()
 {
     Handle handle = Handle::UNDEFINED;
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
 
     std::list<std::string>::const_iterator it;
     for (it = _parameters.begin(); it != _parameters.end(); ++it) {
@@ -73,7 +73,7 @@ bool GetAtomRequest::execute()
             if (keyvalue[1] == "json") output_format = json_format;
         }
     }
-    if (!as->isValidHandle(handle)) {
+    if (!as.isValidHandle(handle)) {
         _output << "Invalid handle: " << handle.value() << std::endl;
         send(_output.str());
         return false;
@@ -89,15 +89,15 @@ std::string GetAtomRequest::json_makeOutput(Handle h)
 {
     std::ostringstream output;
     
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
     output << "{\"handle\":" << h.value() << ",";// << std::endl;
 
-    output << "\"type\":\"" << classserver().getTypeName(as->getType(h)) <<
+    output << "\"type\":\"" << classserver().getTypeName(as.getType(h)) <<
         "\",";// << std::endl;
-    output << "\"name\":\"" << as->getName(h) << "\",";// << std::endl;
+    output << "\"name\":\"" << as.getName(h) << "\",";// << std::endl;
 
     // Here the outgoing targets string is made
-    HandleSeq outgoing = as->getOutgoing(h);
+    HandleSeq outgoing = as.getOutgoing(h);
     output << "\"outgoing\":[";
     for (uint i = 0; i < outgoing.size(); i++) {
         if (i != 0) output << ",";
@@ -106,17 +106,17 @@ std::string GetAtomRequest::json_makeOutput(Handle h)
     output << "],";// << std::endl;
 
     // Here the incoming string is made.
-    HandleSeq incoming = as->getIncoming(h);
+    HandleSeq incoming = as.getIncoming(h);
     output << "\"incoming\":[";
     for (uint i = 0; i < incoming.size(); i++) {
         if (i != 0) output << ",";
         output << incoming[i].value();
     }
     output << "],"; // << std::endl;
-    output << "\"sti\":" << as->getSTI(h) << ",";// <<std::endl;
-    output << "\"lti\":" << as->getLTI(h) << ",";// <<std::endl;
+    output << "\"sti\":" << as.getSTI(h) << ",";// <<std::endl;
+    output << "\"lti\":" << as.getLTI(h) << ",";// <<std::endl;
 
-    TruthValuePtr tvp = as->getTV(h);
+    TruthValuePtr tvp = as.getTV(h);
     output << "\"truthvalue\":" << tvToJSON(tvp.get());// << std::endl;
     output << "}";
 
@@ -168,7 +168,7 @@ std::string GetAtomRequest::tvToJSON(const TruthValue* tv)
 
 void GetAtomRequest::html_makeOutput(Handle h)
 {
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
     // Make output from atom objects so we can access and create output from
     // them
     _output << "<table border=\"1\"><tr>";
@@ -177,10 +177,10 @@ void GetAtomRequest::html_makeOutput(Handle h)
         "<th>TruthValue</th> <th>Outgoing</th> <th>Incoming</th> </tr>" << std::endl; 
 
     _output << "<tr>" << std::endl;
-    _output << "<td>" << as->getName(h) << "</td>";
-    _output << "<td>" << classserver().getTypeName(as->getType(h)) << "</td> ";
-    AttentionValue::sti_t the_sti = as->getSTI(h) ;
-    AttentionValue::lti_t the_lti = as->getLTI(h) ;
+    _output << "<td>" << as.getName(h) << "</td>";
+    _output << "<td>" << classserver().getTypeName(as.getType(h)) << "</td> ";
+    AttentionValue::sti_t the_sti = as.getSTI(h) ;
+    AttentionValue::lti_t the_lti = as.getLTI(h) ;
     //! @todo make the sti/lti color scaled instead of just -ve/+ve
     if (the_sti > 0)
         _output << "<td style=\"background-color:#99FF66\">" << the_sti << "</td> ";
@@ -190,42 +190,42 @@ void GetAtomRequest::html_makeOutput(Handle h)
         _output << "<td style=\"background-color:#99FF66\">" << the_lti << "</td> ";
     else
         _output << "<td style=\"background-color:#99FFFF\">" << the_lti << "</td> ";
-    _output << "<td>" << as->getTV(h)->toString() << "</td> ";
+    _output << "<td>" << as.getTV(h)->toString() << "</td> ";
 
     // Here the outgoing targets string is made
-    HandleSeq outgoing = as->getOutgoing(h);
+    HandleSeq outgoing = as.getOutgoing(h);
     _output << "<td>";
     for (uint i = 0; i < outgoing.size(); i++) {
         Handle ho = outgoing[i];
         _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
-            classserver().getTypeName(as->getType(ho)) << "\">";
-        _output << classserver().getTypeName(as->getType(ho));
+            classserver().getTypeName(as.getType(ho)) << "\">";
+        _output << classserver().getTypeName(as.getType(ho));
         _output << "</a>:";
         _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
             ho.value() << "\">";
-        if (as->getName(ho) == "")
+        if (as.getName(ho) == "")
             _output << "#" + ho.value();
         else
-            _output << as->getName(ho);
+            _output << as.getName(ho);
         _output << "</a><br/>";
     }
     _output << "</td>";
 
     // Here the incoming string is made.
-    HandleSeq incoming = as->getIncoming(h);
+    HandleSeq incoming = as.getIncoming(h);
     _output << "<td>";
     for (uint i = 0; i < incoming.size(); i++) {
         Handle ho = incoming[i];
         _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
-            classserver().getTypeName(as->getType(ho)) << "\">";
-        _output << classserver().getTypeName(as->getType(ho));
+            classserver().getTypeName(as.getType(ho)) << "\">";
+        _output << classserver().getTypeName(as.getType(ho));
         _output << "</a>:";
         _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
             ho.value() << "\">";
-        if (as->getName(ho) == "")
+        if (as.getName(ho) == "")
             _output << "#" << ho.value();
         else
-            _output << as->getName(ho) << ":";
+            _output << as.getName(ho) << ":";
         _output << "</a><br/>";
     }
     _output << "</td>";

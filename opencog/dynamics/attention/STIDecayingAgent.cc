@@ -41,5 +41,5 @@ STIDecayingAgent::~STIDecayingAgent()
 void STIDecayingAgent::run(CogServer *cogserver)
 {
     logger().info("[STIDecayingAgent] run");
-    cogserver->getAtomSpace()->decayShortTermImportance();;
+    cogserver->getAtomSpace().decayShortTermImportance();
 }

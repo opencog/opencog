@@ -151,7 +151,7 @@ void DottyModule::init()
 
 std::string DottyModule::do_dotty(Request *dummy, std::list<std::string> args)
 {
-    AtomSpace *space = CogServer::getAtomSpace();
+    AtomSpace *space = &CogServer::getAtomSpace();
     DottyGrapher g(space);
     while (!args.empty()) {
         if (args.front() == "with-incoming")

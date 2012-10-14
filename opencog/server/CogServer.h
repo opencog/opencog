@@ -297,7 +297,7 @@ static inline CogServer& cogserver(void)
 
 static inline AtomSpace& atomspace(void)
 {
-    return const_cast<AtomSpace&>(*cogserver().getAtomSpace());
+    return cogserver().getAtomSpace();
 }
 
 }  // namespace

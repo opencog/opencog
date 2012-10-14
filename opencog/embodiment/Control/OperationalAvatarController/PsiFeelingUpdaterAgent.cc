@@ -95,10 +95,11 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    const AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get petId
     const std::string & petId = oac->getPet().getPetId(); 
@@ -179,8 +180,8 @@ Handle PsiFeelingUpdaterAgent::getFeelingEvaluationLink(opencog::CogServer * ser
                                                         const std::string feelingName,
                                                         Handle petHandle)
 {
-    // Get the AtomSpace
-    AtomSpace & atomSpace = * ( server->getAtomSpace() ); 
+    // Get AtomSpace
+    AtomSpace& atomSpace = server->getAtomSpace();
 
     // Get the Handle to feeling (PredicateNode)
     Handle feelingPredicateHandle = atomSpace.getHandle(PREDICATE_NODE, feelingName);
@@ -243,10 +244,12 @@ void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
                   );
 
     // Get OAC
-//    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
-    // Get the AtomSpace
-    AtomSpace & atomSpace = * ( server->getAtomSpace() ); 
+    // Get AtomSpace
+    AtomSpace& atomSpace = oac->getAtomSpace();
+
 
 #if HAVE_GUILE    
 
@@ -315,10 +318,11 @@ void PsiFeelingUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Process feelings one by one
     std::map <std::string, FeelingMeta>::iterator iFeeling;

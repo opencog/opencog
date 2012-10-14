@@ -25,6 +25,9 @@
 #ifndef _OPENCOG_BASE_SERVER_H
 #define _OPENCOG_BASE_SERVER_H
 
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+
 namespace opencog
 {
 
@@ -52,13 +55,15 @@ class BaseServer
 protected:
 
     static AtomSpace* atomSpace;
+    static SpaceServer* spacer;
+    static TimeServer* timeser;
 
 public:
 
     /** Returns the atomspace instance. */
-    static AtomSpace* getAtomSpace();
-
-    static AtomSpace& getAtomSpaceReference();
+    static AtomSpace& getAtomSpace();
+    static SpaceServer& getSpaceServer();
+    static TimeServer& getTimeServer();
 
     /** Returns a new BaseServer instance. */
     static BaseServer* createInstance(void);

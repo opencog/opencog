@@ -29,11 +29,11 @@ class MyTestClass
 		Handle my_func(Handle h)
 		{
 			Handle hlist = Handle::UNDEFINED;
-            AtomSpace *as = cogserver().getAtomSpace();
-			if (as->isNode(h))
+            AtomSpace& as = cogserver().getAtomSpace();
+			if (as.isNode(h))
 			{
-				printf("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
-				hlist = as->addLink(LIST_LINK, h);
+				printf("Info: my_func instance %d received the node: %s\n", id, as.getName(h).c_str());
+				hlist = as.addLink(LIST_LINK, h);
 			}
 			else
 			{
@@ -52,10 +52,10 @@ class MyTestClass
 int main ()
 {
 	// Need to access the atomspace to get it to initialize itself.
-    AtomSpace *as = cogserver().getAtomSpace();
+    AtomSpace& as = cogserver().getAtomSpace();
 
 	// Do this early, so that the scheme system is initialized.
-	SchemeEval &eval = SchemeEval::instance(as);
+	SchemeEval &eval = SchemeEval::instance(&as);
 
 	printf("\nInfo: Start creating a scheme call into C++\n");
 

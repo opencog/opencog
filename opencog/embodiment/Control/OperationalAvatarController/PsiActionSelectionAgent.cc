@@ -54,10 +54,11 @@ void PsiActionSelectionAgent::init(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Initialize the list of Demand Goals
     this->initDemandGoalList(atomSpace);
@@ -493,10 +494,11 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get Language Comprehension Tool
     LanguageComprehension & languageTool = oac->getPAI().getLanguageTool(); 

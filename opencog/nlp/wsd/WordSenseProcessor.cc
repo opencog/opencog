@@ -103,7 +103,7 @@ void WordSenseProcessor::work_thread(void)
 
 void WordSenseProcessor::run_no_delay(CogServer *server)
 {
-	atom_space = server->getAtomSpace();
+	atom_space = &server->getAtomSpace();
 
 	wsd->set_atom_space(atom_space);
 

@@ -65,7 +65,7 @@ bool CreateAtomRequest::execute()
 {
     std::string& data = _parameters.front();
     decode(data);
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
     Type t = NOTYPE;
     std::string atomName;
     HandleSeq outgoing;
@@ -134,17 +134,17 @@ bool CreateAtomRequest::execute()
             delete tv; // remember to clean up TV if it's around
             return false;
         }
-        h = as->getHandle(t, outgoing);
-        if (as->isValidHandle(h)) exists = true;
-        h = as->addLink(t, outgoing, *tv);
+        h = as.getHandle(t, outgoing);
+        if (as.isValidHandle(h)) exists = true;
+        h = as.addLink(t, outgoing, *tv);
     } else {
-        h = as->getHandle(t, atomName);
-        if (as->isValidHandle(h)) exists = true;
-        h = as->addNode(t,atomName, *tv);
+        h = as.getHandle(t, atomName);
+        if (as.isValidHandle(h)) exists = true;
+        h = as.addNode(t,atomName, *tv);
     }
     delete tv;
 
-    if (!as->isValidHandle(h)) {
+    if (!as.isValidHandle(h)) {
         _output << "{\"error\":\"invalid handle returned\"}" << std::endl;
         send(_output.str());
         return false;

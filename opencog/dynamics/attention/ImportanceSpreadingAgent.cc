@@ -50,7 +50,7 @@ ImportanceSpreadingAgent::~ImportanceSpreadingAgent()
 
 void ImportanceSpreadingAgent::run(CogServer* server)
 {
-    a = server->getAtomSpace();
+    a = &server->getAtomSpace();
     spreadImportance();
 }
 

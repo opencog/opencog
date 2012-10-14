@@ -53,7 +53,7 @@ bool ListRequest::execute()
     Type type = NOTYPE;
     Handle handle = Handle::UNDEFINED;
     bool subtypes = false;
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
     std::ostringstream err;
 
     std::list<std::string>::const_iterator it;
@@ -63,7 +63,7 @@ bool ListRequest::execute()
             if (it == _parameters.end()) return syntaxError();
             UUID uuid = strtol((*it).c_str(), NULL, 0);
             handle = Handle(uuid);
-            if (!as->isValidHandle(handle)) {
+            if (!as.isValidHandle(handle)) {
                 _error << "invalid handle" << std::endl;
                 sendError();
                 return false;
@@ -95,14 +95,14 @@ bool ListRequest::execute()
         }
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
-        as->getHandleSet
+        as.getHandleSet
             (std::back_inserter(_handles), type, name.c_str(), subtypes);
     } else if (name != "") {     // filter by name
-        as->getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
+        as.getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
     } else if (type != NOTYPE) { // filter by type
-        as->getHandleSet(std::back_inserter(_handles), type, subtypes);
+        as.getHandleSet(std::back_inserter(_handles), type, subtypes);
     } else {
-        as->getHandleSet(back_inserter(_handles), ATOM, true);
+        as.getHandleSet(back_inserter(_handles), ATOM, true);
     }
     sendOutput();
     return true;
@@ -113,10 +113,10 @@ void ListRequest::sendOutput()
     std::ostringstream oss;
 
     if (_mimeType == "text/plain") {
-        AtomSpace* as = server().getAtomSpace();
+        AtomSpace& as = server().getAtomSpace();
         std::vector<Handle>::const_iterator it; 
         for (it = _handles.begin(); it != _handles.end(); ++it) {
-            oss << as->atomAsString(*it) << std::endl;
+            oss << as.atomAsString(*it) << std::endl;
         }
     } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
             _mimeType.c_str());

@@ -58,13 +58,11 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
     this->noveltyDecayFactor = config().get_double("PSI_NOVELTY_DECAY_FACTOR");
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    const AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petId
-//    const std::string & petId = oac->getPet().getPetId();
+    const AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get relation names from the configuration file
     std::string relationNames = config()["PSI_RELATIONS"];
@@ -258,10 +256,11 @@ Handle PsiRelationUpdaterAgent::getEntityHandle(const AtomSpace & atomSpace, con
 void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
 {
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get petId and petName
     // const std::string & petName = oac->getPet().getName();
@@ -540,10 +539,11 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get ProcedureInterpreter
     Procedure::ProcedureInterpreter & procedureInterpreter = oac->getProcedureInterpreter();
