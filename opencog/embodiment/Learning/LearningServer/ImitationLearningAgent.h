@@ -25,16 +25,17 @@
 #define MESSAGESYSTEM_LEARNINGTASK_H
 
 #include <algorithm>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/server/Agent.h>
 
 #include <opencog/embodiment/Learning/Filter/EntropyFilter.h>
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseVocabularyProvider.h>
 #include <opencog/embodiment/Learning/PetaverseHC/petaverse-hillclimber.h>
 #include <opencog/embodiment/Learning/PetaverseHC/HCPetaverseVocabularyProvider.h>
 
-#include <opencog/server/Agent.h>
 
 namespace opencog { namespace messaging {
 

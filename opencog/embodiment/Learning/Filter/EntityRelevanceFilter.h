@@ -24,15 +24,16 @@
 #ifndef ENTITYRELEVANCEFILTER_H_
 #define ENTITYRELEVANCEFILTER_H_
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-
-#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
-
 #include <set>
 #include <vector>
 #include <string>
+
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 
 typedef std::vector<opencog::combo::definite_object> definite_object_vec;
 typedef definite_object_vec::iterator definite_object_vec_it;

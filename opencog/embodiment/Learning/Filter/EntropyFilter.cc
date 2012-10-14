@@ -21,14 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+//just for debug and profiling
+#include <time.h>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/lru_cache.h>
 
 #include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/TimeServer.h>
 
-#include "EntropyFilter.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
@@ -36,8 +40,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
-//just for debug and profiling
-#include <time.h>
+#include "EntropyFilter.h"
 
 //this number defines the maximum number of optional input arguments
 //(that is in addition to the mandatory ones) when the perception
@@ -99,7 +102,7 @@ EntropyFilter::EntropyFilter(const std::string& self_id,
 
     //init spaceMapNode
 
-    _spaceMapNode = _atomSpace.getSpaceServer().getLatestMapHandle();
+    _spaceMapNode = spaceServer().getLatestMapHandle();
     OC_ASSERT(_spaceMapNode != Handle::UNDEFINED,
                      "There must a be a map node in the atomSpace");
 }
@@ -150,7 +153,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     std::vector<HandleTemporalPair> htps;
     //get the first map at tl or if not before tl
     Temporal temp_right_after(tl + 1, tu);
-    _atomSpace.getTimeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
+    timeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
                            TemporalTable::PREVIOUS_BEFORE_START_OF);
     OC_ASSERT(!htps.empty(),
                      "There must be a map that starts at %d or at least before %d",
@@ -158,7 +161,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     //try to get the map
     // get temporal pairs that start within temp_right_after, to not get
     //twice the first map
-    _atomSpace.getTimeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
+    timeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
                            TemporalTable::STARTS_WITHIN);
 
     const SpaceServer::SpaceMap* pre_sm = NULL; //previous spaceMap
@@ -167,10 +170,10 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     for (std::vector<HandleTemporalPair>::const_iterator htp_it = htps.begin();
             htp_it != htps.end(); ++htp_it) {
         //determine spaceMap
-        Handle smh = _atomSpace.getTimeServer().getAtTimeLink(*htp_it);
+        Handle smh = timeServer().getAtTimeLink(*htp_it);
         OC_ASSERT(smh != Handle::UNDEFINED,
                          "There must be a spaceMap for that handle");
-        const SpaceServer::SpaceMap& sm = _atomSpace.getSpaceServer().getMap(smh);
+        const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
         //determine lower and upper boundary of that spaceMap
         //if the space map started before the exemplar start time
         //ltl is the exemplar start time instead
@@ -287,7 +290,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 //retreive all actions of the agent involved in the perception
                 //in time interval of the SpaceMap
                 std::list<HandleTemporalPair> htp;
-                _atomSpace.getTimeServer().getTimeInfo(back_inserter(htp),
+                timeServer().getTimeInfo(back_inserter(htp),
                                        Handle::UNDEFINED,
                                        Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
 

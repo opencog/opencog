@@ -24,8 +24,9 @@
 #ifndef _ATOMSPACE_WORLD_PROVIDER_H_
 #define _ATOMSPACE_WORLD_PROVIDER_H_
 
-#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 
 
 class AtomSpaceWorldProvider : public WorldProvider
@@ -36,7 +37,7 @@ class AtomSpaceWorldProvider : public WorldProvider
 public:
     AtomSpaceWorldProvider(AtomSpace& _atomSpace): atomSpace(_atomSpace) {}
     unsigned long getLatestSimWorldTimestamp() const {
-        return atomSpace.getTimeServer().getLatestTimestamp();
+        return timeServer().getLatestTimestamp();
     }
     AtomSpace& getAtomSpace() const {
         return atomSpace;

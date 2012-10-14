@@ -24,20 +24,20 @@
 #ifndef ENTROPYFILTER_H_
 #define ENTROPYFILTER_H_
 
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
+
 #include <opencog/comboreduct/combo/vertex.h>
 
-#include <opencog/atomspace/Temporal.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/spatial/space_server/Temporal.h>
 
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 #include <opencog/embodiment/Learning/behavior/BehaviorCategory.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include "EntityRelevanceFilter.h"
-
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
 
 // Enable optimization of the algo based on _isMoving. It computes
 // _isMoving (via setIsMoving) for all entities over the given time

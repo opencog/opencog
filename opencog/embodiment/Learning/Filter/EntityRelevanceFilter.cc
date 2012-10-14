@@ -21,19 +21,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Node.h>
-
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 
-#include "EntityRelevanceFilter.h"
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Node.h>
+
+#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+
+#include "EntityRelevanceFilter.h"
 
 using namespace PetCombo;
 using namespace opencog::world;
@@ -82,16 +87,16 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
                      "EntityRelevanceFilter - There is no CONCEPT_NODE in AtomSpace for trick '%s'.",
                      trick_name.c_str());
     std::list<HandleTemporalPair> retP;
-    wp.getAtomSpace().getTimeServer().getTimeInfo(std::back_inserter(retP), h,
+    timeServer().getTimeInfo(std::back_inserter(retP), h,
                                   Temporal(wp.getLatestSimWorldTimestamp()),
                                   TemporalTable::STARTS_BEFORE);
     for (std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
             ip != retP.end(); ++ip) {
         Temporal temp = *(ip->getTemporal());
         HandleSeq resmh;
-        wp.getAtomSpace().getTimeServer().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
+        timeServer().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
         foreach(Handle h, resmh) {
-            const SpaceServer::SpaceMap& spacemap = wp.getAtomSpace().getSpaceServer().getMap(h);
+            const SpaceServer::SpaceMap& spacemap = spaceServer().getMap(h);
             //then make union of the object of that map with the result
             EntityRelevanceFilter erf(spacemap, selfID, ownerID);
             definite_object_set ires = erf.getEntities();
@@ -114,7 +119,7 @@ const message_set EntityRelevanceFilter::getMessages(const WorldProvider& wp,
     Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trickName);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        wp.getAtomSpace().getTimeServer().getTimeInfo(std::back_inserter(retP), h,
+        timeServer().getTimeInfo(std::back_inserter(retP), h,
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
@@ -160,7 +165,7 @@ const message_set EntityRelevanceFilter::getMessages(const AtomSpace& atomSpace,
         t = Temporal(t.getLowerBound() + 1, t.getUpperBound() - 1);
 
     std::list<HandleTemporalPair> htp;
-    atomSpace.getTimeServer().getTimeInfo(back_inserter(htp),
+    timeServer().getTimeInfo(back_inserter(htp),
                           Handle::UNDEFINED,
                           t, TemporalTable::STARTS_WITHIN);
     //define template to match
@@ -227,7 +232,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const WorldProvide
     Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trick);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        wp.getAtomSpace().getTimeServer().getTimeInfo(std::back_inserter(retP), h,
+        timeServer().getTimeInfo(std::back_inserter(retP), h,
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
@@ -283,7 +288,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const AtomSpace& a
     //  t = Temporal(t.getLowerBound()+1, t.getUpperBound()-1);
 
     std::list<HandleTemporalPair> htp;
-    as.getTimeServer().getTimeInfo(back_inserter(htp),
+    timeServer().getTimeInfo(back_inserter(htp),
                    Handle::UNDEFINED,
                    t, TemporalTable::ENDS_WITHIN);
     //define template to match
