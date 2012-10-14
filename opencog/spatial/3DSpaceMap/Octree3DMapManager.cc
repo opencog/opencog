@@ -25,7 +25,10 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#ifdef HAVE_PROTOBUF
 #include <opencog/embodiment/Learning/LearningServerMessages/LearningMessage.info.pb.h>
+#endif
+
 #include "BlockEntity.h"
 #include "Entity3D.h"
 #include "Octree3DMapManager.h"
@@ -978,6 +981,10 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
      vector<BlockEntity*>::const_iterator iter3;
      map<BlockEntity*,AdjacentInfo>::iterator iter4;
 
+// XXX FIXME TODO this will not even compile without protobuf.
+// It needs to be moved to some other directory and function, maybe
+// to the learning server or something like that.
+#ifdef HAVE_PROTOBUF
      // TODO: Send raw block clusters data to learning server
      // construct these adjacent blocks messages to send to the learning server
      learning::message::BlockClusterDataInput dataInput;
@@ -1025,6 +1032,7 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
          }
 
      }
+#endif // HAVE_PROTOBUF
 
  }
 

@@ -27,5 +27,6 @@ TARGET_LINK_LIBRARIES (LearningServerMessages
 	util
 	AtomSpaceExtensions
 	atomspace
+	space_server
 	${PROJECT_LIBRARIES}
 )

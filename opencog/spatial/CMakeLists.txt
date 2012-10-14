@@ -75,6 +75,11 @@ TARGET_LINK_LIBRARIES(tangentbug_test
 	TangentBug
 	util
 )
+IF (PROTOBUF_FOUND)
+	TARGET_LINK_LIBRARIES(tangentbug_test
+		LearningServerMessages
+	)
+ENDIF (PROTOBUF_FOUND)
 
 # Uncomment the following line to enable ncurses printing:
 #SET(TB_PRINT_NCURSES 1)
@@ -103,6 +108,11 @@ TARGET_LINK_LIBRARIES(astartest
 	AStar
 	util
 )
+IF (PROTOBUF_FOUND)
+	TARGET_LINK_LIBRARIES(astartest
+		LearningServerMessages
+	)
+ENDIF (PROTOBUF_FOUND)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 ADD_EXECUTABLE(MapTools
