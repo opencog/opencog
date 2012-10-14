@@ -1,6 +1,6 @@
 __author__ = 'Keyvan'
 
-from util.generic import Marker
+from utility.generic import Marker
 
 types = Marker()
 types.TimeNode = 'TimeNode'

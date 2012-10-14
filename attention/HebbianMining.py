@@ -1,4 +1,4 @@
-from util.enum import Enum
+from utility.enum import Enum
 from opencog.atomspace import AtomSpace, types, Atom, TruthValue
 import opencog.cogserver
 

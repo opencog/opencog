@@ -1,4 +1,4 @@
-from util.generic import subsets_of_len_two, subsets_of
+from utility.generic import subsets_of_len_two, subsets_of
 
 __author__ = 'keyvan'
 

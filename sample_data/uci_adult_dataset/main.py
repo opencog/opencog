@@ -1,6 +1,6 @@
 __author__ = 'keyvan-m-sadeghi'
 
-from util.csv_dataset_parser import *
+from utility.csv_dataset_parser import *
 import os
 
 def example1():

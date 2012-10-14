@@ -1,6 +1,6 @@
 __author__ = 'keyvan'
 
-from util.evolutionary import *
+from utility.evolutionary import *
 
 BIT_STRING_LENGTH = 32
 ALL_BITS_ONE = 2**BIT_STRING_LENGTH - 1

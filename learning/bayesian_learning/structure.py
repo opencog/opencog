@@ -1,9 +1,9 @@
 from learning.bayesian_learning.network import *
 from random import randrange, random as rand
 from sample_data.uci_adult_dataset.main import uci_adult
-from util.evolutionary import *
+from utility.evolutionary import *
 from dynamics import *
-from util.generic import dim
+from utility.generic import dim
 from math import log, factorial
 
 __author__ = 'keyvan'
@@ -117,7 +117,7 @@ class NetworkChromosomeRepresentation(IndividualSetBase):
         return offspring
 
 if __name__ == '__main__':
-    from util.evolutionary import GeneticAlgorithm
+    from utility.evolutionary import GeneticAlgorithm
 
     data = uci_adult()
 
