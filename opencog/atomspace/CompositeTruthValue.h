@@ -27,9 +27,9 @@
 
 #include <functional>
 
-#include <boost/iterator/transform_iterator.hpp>
 #include <boost/unordered_map.hpp>
 
+#include <opencog/util/functional.h>
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -183,7 +183,7 @@ public:
 
     // iterator over VersionHandles
 private:
-    typedef std::_Select1st<VersionedTruthValueMap::value_type> get_key;
+    typedef select1st<VersionedTruthValueMap::value_type> get_key;
     typedef VersionedTruthValueMap::const_iterator vhm_const_iterator;
 public:
     typedef boost::transform_iterator<get_key,
