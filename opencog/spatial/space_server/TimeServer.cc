@@ -22,9 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TimeServer.h"
-
 #include <opencog/util/Logger.h>
+#include <opencog/server/CogServer.h>
+#include "TimeServer.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -41,12 +41,12 @@ void TimeServer::init()
     latestTimestamp = 0;
 }
 
-TimeServer::TimeServer(AtomSpaceAsync& a, SpaceServer *_ss) : atomspace(&a), spaceServer(_ss)
+TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss) : atomspace(&a), spaceServer(_ss)
 {
     init();
     // Connect signals
-    a.addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1, _2));
-    a.removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1, _2));
+    a.atomSpaceAsync->addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1, _2));
+    a.atomSpaceAsync->removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1, _2));
 }
 
 TimeServer::~TimeServer()
@@ -104,7 +104,7 @@ void TimeServer::clear()
 
 Handle TimeServer::addTimeInfo(Handle h, unsigned long timestamp, const TruthValue& tv)
 {
-    OC_ASSERT(atomspace->isValidHandle(h)->get_result(),
+    OC_ASSERT(atomspace->isValidHandle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
     std::string nodeName = Temporal::getTimeNodeName(timestamp);
     return addTimeInfo(h, nodeName, tv);
@@ -112,7 +112,7 @@ Handle TimeServer::addTimeInfo(Handle h, unsigned long timestamp, const TruthVal
 
 Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
 {
-    OC_ASSERT(atomspace->isValidHandle(h)->get_result(),
+    OC_ASSERT(atomspace->isValidHandle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
     OC_ASSERT(t != UNDEFINED_TEMPORAL, "TimeServer::addTimeInfo: Got an UNDEFINED_TEMPORAL as argument\n");
     return addTimeInfo(h, t.getTimeNodeName(), tv);
@@ -121,12 +121,12 @@ Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv
 Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv)
 {
     DPRINTF("TimeServer::addTimeInfo - start\n");
-    Handle timeNode = atomspace->addNode(TIME_NODE, timeNodeName)->get_result();
+    Handle timeNode = atomspace->addNode(TIME_NODE, timeNodeName);
     DPRINTF("TimeServer::addTimeInfo - timeNode was %lu\n", timeNode.value());
     HandleSeq atTimeLinkOutgoing;
     atTimeLinkOutgoing.push_back(timeNode);
     atTimeLinkOutgoing.push_back(h);
-    Handle atTimeLink = atomspace->addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv)->get_result();
+    Handle atTimeLink = atomspace->addLink(AT_TIME_LINK, atTimeLinkOutgoing, tv);
     DPRINTF("TimeServer::addTimeInfo - atTimeLink was %lu\n", atTimeLink.value());
     DPRINTF("TimeServer::addTimeInfo - temp end\n");
     return atTimeLink;
@@ -142,7 +142,7 @@ bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
         TemporalTable::TemporalRelationship criterion,
         bool removeDisconnectedTimeNodes, bool recursive)
 {
-    DPRINTF("TimeServer::removeTimeInfo(%s, %s, %s, %d, %d)\n", atomspace->atomAsString(h)->get_result().c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
+    DPRINTF("TimeServer::removeTimeInfo(%s, %s, %s, %d, %d)\n", atomspace->atomAsString(h).c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
 
     std::list<HandleTemporalPair> existingEntries;
     get(back_inserter(existingEntries), h, t, criterion);
@@ -151,22 +151,22 @@ bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
             itr != existingEntries.end(); ++itr) {
         Handle atTimeLink = getAtTimeLink(*itr);
         DPRINTF("Got atTimeLink = %lu\n", atTimeLink.value());
-        if (atomspace->isValidHandle(atTimeLink)->get_result()) {
-            Handle timeNode = atomspace->getOutgoing(atTimeLink, 0)->get_result();
+        if (atomspace->isValidHandle(atTimeLink)) {
+            Handle timeNode = atomspace->getOutgoing(atTimeLink, 0);
             DPRINTF("Got timeNode = %lu\n", timeNode.value());
-            int arityOfTimeLink = atomspace->getArity(atTimeLink)->get_result();
+            int arityOfTimeLink = atomspace->getArity(atTimeLink);
             OC_ASSERT(arityOfTimeLink == 2,
                     "TimeServer::removeTimeInfo: Got invalid arity for AtTimeLink = %d\n",
                     arityOfTimeLink);
-            OC_ASSERT(atomspace->isValidHandle(timeNode)->get_result()
-                    && atomspace->getType(timeNode)->get_result() == TIME_NODE,
+            OC_ASSERT(atomspace->isValidHandle(timeNode)
+                    && atomspace->getType(timeNode) == TIME_NODE,
                     "TimeServer::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
-            if (atomspace->removeAtom(atTimeLink, recursive)->get_result()) {
+            if (atomspace->removeAtom(atTimeLink, recursive)) {
                 DPRINTF("atTimeLink removed from AT successfully\n");
                 if (removeDisconnectedTimeNodes &&
-                        atomspace->getIncoming(timeNode)->get_result().empty()) {
+                        atomspace->getIncoming(timeNode).empty()) {
                     DPRINTF("Trying to remove timeNode as well\n");
-                    atomspace->removeAtom(timeNode)->get_result();
+                    atomspace->removeAtom(timeNode);
                 }
             } else {
                 result = false;
@@ -184,15 +184,15 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
 
     const Temporal& t = *(htp.getTemporal());
     Handle h = htp.getHandle();
-    DPRINTF("TimeServer::getAtTimeLink: t = %s, h = %s\n", t.toString().c_str(), atomspace->atomAsString(h)->get_result().c_str());
+    DPRINTF("TimeServer::getAtTimeLink: t = %s, h = %s\n", t.toString().c_str(), atomspace->atomAsString(h).c_str());
 
-    Handle timeNode = atomspace->getHandle(TIME_NODE, t.getTimeNodeName())->get_result();
+    Handle timeNode = atomspace->getHandle(TIME_NODE, t.getTimeNodeName());
     DPRINTF("timeNode = %lu\n", timeNode.value());
-    if (atomspace->isValidHandle(timeNode)->get_result()) {
+    if (atomspace->isValidHandle(timeNode)) {
         HandleSeq atTimeLinkOutgoing(2);
         atTimeLinkOutgoing[0] = timeNode;
         atTimeLinkOutgoing[1] = h;
-        HandleSeq atTimeLinks = atomspace->getHandlesByOutgoingSet(atTimeLinkOutgoing,
+        HandleSeq atTimeLinks = atomspace->atomSpaceAsync->getHandlesByOutgoingSet(atTimeLinkOutgoing,
                 NULL, NULL, 2, AT_TIME_LINK, false)->get_result();
         if (!atTimeLinks.empty()) {
             result = atTimeLinks[0];
@@ -260,6 +260,6 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
 
 TimeServer& timeServer()
 {
-	static TimeServer global_server(&atomSpace, &spaceServer());
+	static TimeServer global_server(atomspace(), &spaceServer());
 	return global_server;
 }

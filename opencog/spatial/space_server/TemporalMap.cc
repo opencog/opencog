@@ -22,14 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TemporalMap.h"
-#include "Atom.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
+
+#include "TemporalMap.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)

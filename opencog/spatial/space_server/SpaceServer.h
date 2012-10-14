@@ -55,7 +55,7 @@
 namespace opencog
 {
 
-class AtomSpaceAsync;
+class AtomSpace;
 class TimeServer;
 class SpaceServerSavable;
 
@@ -86,7 +86,7 @@ public:
      */
     HandleToSpaceMap spaceMaps;
 
-    explicit SpaceServer(AtomSpaceAsync&);
+    explicit SpaceServer(AtomSpace&);
     virtual ~SpaceServer();
 
     //! Set the timeServer
@@ -205,8 +205,7 @@ private:
     /**
      * Container where SpaceServer is inserted to (usualy an AtomSpace)
      */
-    AtomSpaceAsync* atomspace;
-    TimeServer* timeServer;
+    AtomSpace* atomspace;
 
     // the current scene map, match the spaceMapNodeHandle
     SpaceMap* curMap;

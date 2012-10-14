@@ -22,14 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Atom.h"
-#include "HandleMap.h"
-#include "TemporalTable.h"
-#include "TLB.h"
-
 #include <set>
-
 #include <opencog/util/Logger.h>
+
+#include "TemporalTable.h"
+
 
 //#define DPRINTF printf
 #define DPRINTF(...)

@@ -22,14 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HandleTemporalPairEntry.h"
-
 #include <algorithm>
 
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/HandleEntry.h>
-#include <opencog/atomspace/TemporalEntry.h>
+
+#include "TemporalEntry.h"
+#include "HandleTemporalPairEntry.h"
 
 using namespace opencog;
 

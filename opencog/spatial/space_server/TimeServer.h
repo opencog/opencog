@@ -57,7 +57,7 @@ class TimeServer
      */
     void init();
 
-    AtomSpaceAsync* atomspace;
+    AtomSpace* atomspace;
     SpaceServer* spaceServer;
 
     // TS-wide mutex, since add/remove atom signals are called from AtomSpace event-loop
@@ -70,7 +70,7 @@ public:
     //static int timeServerEntries;
     //static std::set<Temporal> temporalSet;
 
-    TimeServer(AtomSpaceAsync& a, SpaceServer* ss);
+    TimeServer(AtomSpace& a, SpaceServer* ss);
     virtual ~TimeServer();
 
     /**
