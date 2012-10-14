@@ -22,10 +22,14 @@
  */
 
 
-#include "MockOpcHCTest.h"
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
-#include "HCTestAgent.h"
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
+
+#include "MockOpcHCTest.h"
+#include "HCTestAgent.h"
 
 //#define LEARNING_SCHEMA "fnorb"
 #define TRICK_NAME "fnorb"
@@ -100,15 +104,15 @@ void MockOpcHCTest::init(const std::string & myId,
                                  boost::lexical_cast<string>(2));
 
 
-    atomSpace->getSpaceServer().addSpaceInfo(pet_h, true,T1, PET_X, PET_Y, PET_Z,
+    spaceServer().addSpaceInfo(pet_h, true,T1, PET_X, PET_Y, PET_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"pet",petId);
-    atomSpace->getSpaceServer().addSpaceInfo(obj_h, false,T1, OBJ_X, OBJ_Y, OBJ_Z,
+    spaceServer().addSpaceInfo(obj_h, false,T1, OBJ_X, OBJ_Y, OBJ_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,false,"object",OBJ_NAME);
-    atomSpace->getSpaceServer().addSpaceInfo(owner_h, false,T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
+    spaceServer().addSpaceInfo(owner_h, false,T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
-    atomSpace->getSpaceServer().addSpaceInfo(owner_h, false, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
+    spaceServer().addSpaceInfo(owner_h, false, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
-    atomSpace->getSpaceServer().addSpaceInfo(owner_h,false, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
+    spaceServer().addSpaceInfo(owner_h,false, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
 
     //add necessary nodes to represent BDs
@@ -126,7 +130,7 @@ void MockOpcHCTest::init(const std::string & myId,
     //add the concept of the trick
     trick_h = atomSpace->addNode(CONCEPT_NODE, TRICK_NAME);
     //add AtTimeLink to it
-    tt1_h = atomSpace->getTimeServer().addTimeInfo(trick_h, Temporal(0,
+    tt1_h = timeServer().addTimeInfo(trick_h, Temporal(0,
                                    3 * TIME_INTERVAL));
     //add first behavior, goto to stick and wag the taile (subject : owner)
     //(yes the owner wag its taile)
@@ -142,7 +146,7 @@ void MockOpcHCTest::init(const std::string & myId,
     ev_goto_seq.push_back(argl_h);
     eval_goto_obj_h = atomSpace->addLink(EVALUATION_LINK, ev_goto_seq);
     //add atTimeLink to it
-    ebd1_h = atomSpace->getTimeServer().addTimeInfo(eval_goto_obj_h,
+    ebd1_h = timeServer().addTimeInfo(eval_goto_obj_h,
                                     Temporal(0, TIME_INTERVAL));
     //for grab
     HandleSeq grab_seq;
@@ -164,7 +168,7 @@ void MockOpcHCTest::init(const std::string & myId,
     ev_wag_seq.push_back(arglw_h);
     eval_wag_h = atomSpace->addLink(EVALUATION_LINK, ev_wag_seq);
     //add atTimeLink to it
-    ebdg_h = atomSpace->getTimeServer().addTimeInfo(eval_grab_obj_h,
+    ebdg_h = timeServer().addTimeInfo(eval_grab_obj_h,
                                     Temporal(2 * TIME_INTERVAL,
                                              3 * TIME_INTERVAL));
     //add member link to trick concept
@@ -254,17 +258,17 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
                 //set up second exemplar to be sent later
                 //add the concept of the trick
                 //add AtTimeLink to it
-                Handle tt2_h = atomSpace->getTimeServer().addTimeInfo(trick_h,
+                Handle tt2_h = timeServer().addTimeInfo(trick_h,
                                                       Temporal(10 * TIME_INTERVAL,
                                                                13 * TIME_INTERVAL));
                 //for goto_obj
                 //add atTimeLink to it
-                Handle ebd2_h = atomSpace->getTimeServer().addTimeInfo(eval_goto_obj_h,
+                Handle ebd2_h = timeServer().addTimeInfo(eval_goto_obj_h,
                                                        Temporal(10 * TIME_INTERVAL,
                                                                 11 * TIME_INTERVAL));
                 //for grab
                 //add atTimeLink to it
-                Handle ebdw_h = atomSpace->getTimeServer().addTimeInfo(eval_wag_h,
+                Handle ebdw_h = timeServer().addTimeInfo(eval_wag_h,
                                                        Temporal(12 * TIME_INTERVAL,
                                                                 13 * TIME_INTERVAL));
                 //add member link to trick concept

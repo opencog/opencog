@@ -19,14 +19,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <boost/tokenizer.hpp>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/web/json_spirit/json_spirit.h>
 
 #include "OAC.h"
 #include "PsiFeelingUpdaterAgent.h"
 
-#include "opencog/guile/SchemeEval.h"
-#include "opencog/web/json_spirit/json_spirit.h"
 
-#include<boost/tokenizer.hpp>
 
 using namespace opencog::oac;
 

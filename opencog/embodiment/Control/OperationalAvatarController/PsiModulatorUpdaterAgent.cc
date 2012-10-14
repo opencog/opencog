@@ -20,12 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/tokenizer.hpp>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+
+#include <opencog/web/json_spirit/json_spirit.h>
+
 #include "OAC.h"
 #include "PsiModulatorUpdaterAgent.h"
 
-#include "opencog/web/json_spirit/json_spirit.h"
 
-#include <boost/tokenizer.hpp>
 
 using namespace opencog::oac;
 
@@ -82,7 +86,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
     atomSpace.setTV(evaluationLink, stv); 
 
 //    Handle evaluationLink = AtomSpaceUtil::setPredicateValue(atomSpace, predicateName, stv); 
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(evaluationLink, timeStamp, stv); 
+    Handle atTimeLink = timeServer().addTimeInfo(evaluationLink, timeStamp, stv); 
 
     AtomSpaceUtil::updateLatestModulator(atomSpace, atTimeLink, modulatorPredicateNode); 
 

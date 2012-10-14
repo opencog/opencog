@@ -27,7 +27,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 
@@ -45,7 +45,6 @@ class MockOpcHCTest : public opencog::messaging::EmbodimentCogServer
 private:
     Pet * pet;
     AtomSpace * atomSpace;
-    SpaceServer * spaceServer;
     PetMessageSender * lsMessageSender;
 
     HCTestAgent* _HCTa;

@@ -24,12 +24,14 @@
 #ifndef _OAC_INQUERY_H
 #define _OAC_INQUERY_H
 
-#include "PlanningHeaderFiles.h"
 #include <vector>
-#include <opencog/atomspace/SpaceServer.h>
+
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
+
 #include "OAC.h"
+#include "PlanningHeaderFiles.h"
 
 using namespace std;
 using namespace opencog;

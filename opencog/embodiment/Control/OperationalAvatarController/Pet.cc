@@ -21,12 +21,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Pet.h"
-#include "OAC.h"
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+
+#include <boost/format.hpp>
 
 #include <opencog/util/files.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/mt19937ar.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spatial/space_server/TimeServer.h>
 
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
@@ -39,13 +47,9 @@
 
 #include "LearningAgentModeHandler.h"
 #include "DefaultAgentModeHandler.h"
+#include "Pet.h"
+#include "OAC.h"
 
-#include <cstdlib>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-
-#include <boost/format.hpp>
 
 using namespace behavior;
 using namespace opencog::world;
@@ -490,7 +494,7 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement,
             endLearningSessionTimestamp);
     Handle trickConceptNode = AtomSpaceUtil::addNode(*atomSpace, CONCEPT_NODE,
             learningSchema.front());
-    Handle atTimeLink = atomSpace->getTimeServer().addTimeInfo(trickConceptNode,
+    Handle atTimeLink = timeServer().addTimeInfo(trickConceptNode,
             learningTimeInterval);
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestLearningSession(atomSpace, atTimeLink);
@@ -627,7 +631,7 @@ void Pet::executeBehaviorEncoder()
     // (commandStatement[1], commandStatement[2], ...)  are beging ignored
     Handle trickConceptNode = atomSpace->addNode(CONCEPT_NODE,
             learningSchema.front());
-    Handle trickExemplarAtTimeLink = atomSpace->getTimeServer().addTimeInfo(trickConceptNode,
+    Handle trickExemplarAtTimeLink = timeServer().addTimeInfo(trickConceptNode,
             exemplarTimeInterval);
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestTrickExemplar(atomSpace,
@@ -959,10 +963,10 @@ void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actio
     logger().debug("Pet::getAllActionsDoneObservedAtTime");
 
     std::vector<HandleTemporalPair> everyEventThatHappened;
-    atomSpace->getTimeServer().getTimeInfo(back_inserter(everyEventThatHappened),
+    timeServer().getTimeInfo(back_inserter(everyEventThatHappened),
             Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
     foreach(HandleTemporalPair event, everyEventThatHappened) {
-        Handle eventAtTime = atomSpace->getTimeServer().getAtTimeLink(event);
+        Handle eventAtTime = timeServer().getAtTimeLink(event);
         if (atomSpace->getArity(eventAtTime) >= 2) {
             Handle evaluationLink = atomSpace->getOutgoing(eventAtTime, 1);
             if (atomSpace->getType(evaluationLink) == EVALUATION_LINK) {
@@ -995,7 +999,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                 std::vector<HandleTemporalPair> learningSessionIntervals;
                 // Get temporal info for all the Handles that pertain to this
                 // trick
-                atomSpace->getTimeServer().getTimeInfo(back_inserter(learningSessionIntervals),
+                timeServer().getTimeInfo(back_inserter(learningSessionIntervals),
                         learningSessionHandle, time, TemporalTable::OVERLAPS);
                 // get all action that occurred during each interval
                 foreach(HandleTemporalPair learningSessionInterval,
@@ -1004,15 +1008,15 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                         learningSessionInterval.getTemporal();
                     std::vector<HandleTemporalPair> actionsInLearningSession;
                     Handle learningSessionIntervalHandle =
-                        atomSpace->getTimeServer().getAtTimeLink(learningSessionInterval);
-                    atomSpace->getTimeServer().getTimeInfo(back_inserter(actionsInLearningSession),
+                        timeServer().getAtTimeLink(learningSessionInterval);
+                    timeServer().getTimeInfo(back_inserter(actionsInLearningSession),
                             learningSessionIntervalHandle,
                             *learningSessionIntervalTemporal,
                             TemporalTable::OVERLAPS);
 
                     foreach(HandleTemporalPair action,
                             actionsInLearningSession) {
-                        Handle evaluationLink = atomSpace->getTimeServer().getAtTimeLink(action);
+                        Handle evaluationLink = timeServer().getAtTimeLink(action);
                         Handle predicateNode =
                             atomSpace->getOutgoing(evaluationLink)[1];
                         if (atomSpace->getName(predicateNode) ==

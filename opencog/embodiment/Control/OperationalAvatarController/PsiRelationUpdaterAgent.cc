@@ -19,12 +19,15 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <boost/tokenizer.hpp>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 
 #include "OAC.h"
 #include "PsiRelationUpdaterAgent.h"
 #include "PsiRuleUtil.h"
 
-#include<boost/tokenizer.hpp>
 
 using namespace opencog::oac;
 
@@ -277,7 +280,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
     }
 
     // Get SpaceMap
-    const SpaceServer::SpaceMap & spaceMap  = atomSpace.getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap & spaceMap  = spaceServer().getLatestMap();
 
     // Get all the entities
     std::vector<std::string> entities;
@@ -565,7 +568,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     }
 
     // Check if map info data is available
-    if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
+    if ( spaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().warn("PsiRelationUpdaterAgent::%s - There is no map info available yet [ cycle = %d ]", 
                         __FUNCTION__, 
                         this->cycleCount
@@ -574,7 +577,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
     }
 
     // Check if the pet spatial info is already received
-    if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(petHandle ))  {
+    if ( !spaceServer().getLatestMap().containsObject(petHandle ))  {
         logger().warn("PsiRelationUpdaterAgent::%s - Pet was not inserted in the space map yet [ cycle = %d ]", 
                       __FUNCTION__, 
                       this->cycleCount

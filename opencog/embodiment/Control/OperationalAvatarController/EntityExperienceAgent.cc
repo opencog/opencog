@@ -22,6 +22,9 @@
  */
 
 
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
 
@@ -46,13 +49,13 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
 
     AtomSpace* atomSpace = server->getAtomSpace( );
 
-    if ( atomSpace->getSpaceServer().getLatestMapHandle( ) == Handle::UNDEFINED ) {
+    if ( spaceServer().getLatestMapHandle( ) == Handle::UNDEFINED ) {
         logger().warn( "EntityExperienceAgent::%s - There is no map info available yet!",
             __FUNCTION__ );
         return;
     } // if
 
-    const SpaceServer::SpaceMap& map = atomSpace->getSpaceServer( ).getLatestMap( );
+    const SpaceServer::SpaceMap& map = spaceServer( ).getLatestMap( );
 
     HandleSeq semeNodes;
     {

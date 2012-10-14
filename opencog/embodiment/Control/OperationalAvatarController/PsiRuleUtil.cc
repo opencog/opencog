@@ -20,8 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PsiRuleUtil.h"
 #include <opencog/comboreduct/combo/vertex.h>
+
+#include <opencog/spatial/space_server/SpaceServer.h>
+
+#include "PsiRuleUtil.h"
 
 using namespace opencog;
 using namespace oac;
@@ -252,7 +255,7 @@ void PsiRuleUtil::initVarBindCandidates(const AtomSpace & atomSpace,
                                         std::vector<std::string> & varBindCandidates)
 {
     varBindCandidates.clear(); 
-    const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap(); 
+    const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap(); 
     spaceMap.findAllEntities( back_inserter(varBindCandidates) );
 }
 

@@ -26,13 +26,6 @@
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/reasoning/pln/PLN.h>
-#include <opencog/reasoning/pln/PLNUtils.h>
-#include <opencog/reasoning/pln/rules/Rules.h>
-#include <opencog/reasoning/pln/rules/RuleProvider.h>
-#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
-#include <opencog/reasoning/pln/BackInferenceTreeNode.h>
-
 class PsiActionSelectionAgentUTest; 
 
 namespace opencog { namespace oac {

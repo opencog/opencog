@@ -19,13 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OAC.h"
-#include "PsiActionSelectionAgent.h"
-#include "PsiRuleUtil.h"
-
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
+
+#include <opencog/spatial/space_server/SpaceServer.h>
+
+#include "OAC.h"
+#include "PsiActionSelectionAgent.h"
+#include "PsiRuleUtil.h"
 
 using namespace opencog::oac;
 
@@ -515,7 +517,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     const std::string & petId = pet.getPetId();
 
     // Check if map info data is available
-    if ( atomSpace.getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
+    if ( spaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
         logger().warn( "PsiActionSelectionAgent::%s - There is no map info available yet [cycle = %d]", 
                         __FUNCTION__, 
                         this->cycleCount
@@ -524,7 +526,7 @@ void PsiActionSelectionAgent::run(opencog::CogServer * server)
     }
 
     // Check if the pet spatial info is already received
-    if ( !atomSpace.getSpaceServer().getLatestMap().containsObject(AtomSpaceUtil::getAgentHandle( atomSpace, petId ) ) ) {
+    if ( !spaceServer().getLatestMap().containsObject(AtomSpaceUtil::getAgentHandle( atomSpace, petId ) ) ) {
         logger().warn( "PsiActionSelectionAgent::%s - Pet was not inserted in the space map yet [cycle = %d]", 
                        __FUNCTION__, 
                        this->cycleCount

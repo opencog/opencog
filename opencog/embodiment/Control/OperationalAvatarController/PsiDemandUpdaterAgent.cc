@@ -19,16 +19,19 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+
+#include <opencog/web/json_spirit/json_spirit.h>
 
 #include "OAC.h"
 #include "PsiDemandUpdaterAgent.h"
 
 #include "PsiRuleUtil.h"
 
-#include "opencog/web/json_spirit/json_spirit.h"
-
-#include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
 
 using namespace opencog::oac;
 
@@ -185,7 +188,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     atomSpace.setTV(this->hDemandGoal, demand_satisfaction);
 
     // Add AtTimeLink around EvaluationLink of  DemandGoal, which is required by fishgram
-    Handle atTimeLink = atomSpace.getTimeServer().addTimeInfo(this->hDemandGoal,
+    Handle atTimeLink = timeServer().addTimeInfo(this->hDemandGoal,
                                                               timeStamp, 
                                                               demand_satisfaction
                                                              );
@@ -201,7 +204,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     Handle evaluationLink = atomSpace.addLink(EVALUATION_LINK, outgoings); 
     atomSpace.setTV(evaluationLink, demand_satisfaction); 
 
-    atTimeLink = atomSpace.getTimeServer().addTimeInfo(evaluationLink, timeStamp, demand_satisfaction);
+    atTimeLink = timeServer().addTimeInfo(evaluationLink, timeStamp, demand_satisfaction);
 
     AtomSpaceUtil::updateLatestDemand(atomSpace, atTimeLink, demandPredicateNode); 
 
