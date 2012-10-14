@@ -67,7 +67,7 @@ T gaussian_rand(T mean, T std_dev, RandGen& rng = randGen())
 
 // linear biased random bool, b in [0,1] when b tends to 1 the result
 // tends to be true
-bool biased_randbool(float b, RandGen& rng = randGen()) {
+static inline bool biased_randbool(float b, RandGen& rng = randGen()) {
     return b > rng.randfloat();
 }
 
