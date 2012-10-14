@@ -333,11 +333,16 @@ public:
         return outIt;
     }
 
-    void atomAdded(AtomSpaceImpl* a, Handle h);
-
-    void atomRemoved(AtomSpaceImpl* a, Handle h);
 private:
+    /**
+     * signal connections used to keep track of atom removal in the SpaceMap
+     */
+    boost::signals::connection removedAtomConnection;
+    boost::signals::connection addedAtomConnection;
 
+    void atomAdded(AtomSpaceImpl* a, Handle h);
+    void atomRemoved(AtomSpaceImpl* a, Handle h);
+ 
     /**
      * The temporal table used by this TimeServer
      */

@@ -49,7 +49,8 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-SpaceServer::SpaceServer(AtomSpace &_atomspace): atomspace(&_atomspace)
+SpaceServer::SpaceServer(AtomSpace &_atomspace) :
+    atomspace(&_atomspace)
 {
     // Default values (should only be used for test purposes)
     agentRadius = 0.25;
@@ -64,16 +65,30 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace): atomspace(&_atomspace)
     curSpaceMapHandle = Handle::UNDEFINED;
     curMap = NULL;
 
-
+    // connect signals
+    removedAtomConnection = _atomspace.atomSpaceAsync->addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1, _2));
+    addedAtomConnection = _atomspace.atomSpaceAsync->removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1, _2));
 }
 
 SpaceServer::~SpaceServer()
 {
+    // disconnect signals
+    addedAtomConnection.disconnect();
+    removedAtomConnection.disconnect();
+
     clear();
 }
 
-void SpaceServer::setTimeServer(TimeServer *ts)
+void SpaceServer::atomAdded(AtomSpaceImpl* a, Handle h)
 {
+}
+
+void SpaceServer::atomRemoved(AtomSpaceImpl* a, Handle h)
+{
+    Type type = a->getType(h);
+    if (classserver().isA(type, OBJECT_NODE)) {
+        removeSpaceInfo(h);
+    }
 }
 
 void SpaceServer::setAgentRadius(unsigned int _radius)
@@ -528,8 +543,8 @@ Handle SpaceServer::addOrGetSpaceMap(unsigned long timestamp, std::string _mapNa
     return spaceMapNode;
 }
 
-void SpaceServer::removeSpaceInfo(Handle objectNode, unsigned long timestamp) {
-
+void SpaceServer::removeSpaceInfo(Handle objectNode, unsigned long timestamp)
+{
     if (curSpaceMapHandle == Handle::UNDEFINED)
     {
         logger().error("SpaceServer::addSpaceInfo - No space map now!");

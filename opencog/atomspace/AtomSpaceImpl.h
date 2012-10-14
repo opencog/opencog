@@ -1056,12 +1056,12 @@ private:
     /**
      * Handler of the 'atom removed' signal from self
      */
-    void atomRemoved(AtomSpaceImpl *a, Handle h);
+    void atomRemoved(AtomSpaceImpl*, Handle);
 
     /**
      * Handler of the 'atom added' signal from self
      */
-    void atomAdded(AtomSpaceImpl *a, Handle h);
+    void atomAdded(AtomSpaceImpl*, Handle);
 
 public:
     // pass on the signals from the Atom Table

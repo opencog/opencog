@@ -41,16 +41,21 @@ void TimeServer::init()
     latestTimestamp = 0;
 }
 
-TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss) : atomspace(&a), spaceServer(_ss)
+TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss)
+   : atomspace(&a), spaceServer(_ss)
 {
     init();
+
     // Connect signals
-    a.atomSpaceAsync->addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1, _2));
-    a.atomSpaceAsync->removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1, _2));
+    addedAtomConnection = a.atomSpaceAsync->addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1, _2));
+    removedAtomConnection = a.atomSpaceAsync->removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1, _2));
 }
 
 TimeServer::~TimeServer()
 {
+    // disconnect signals
+    addedAtomConnection.disconnect();
+    removedAtomConnection.disconnect();
     delete table;
 }
 
@@ -234,27 +239,18 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
         OC_ASSERT(a->getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", a->getArity(h));
         Handle timeNode = a->getOutgoing(h, 0);
         
-#if DOES_NOT_COMPILE_RIGHT_NOW
         // If it's not a TimeNode, then it's a VariableNode which can stand in for a TimeNode. So we can ignore it here.
         if (a->getType(timeNode) == TIME_NODE) {
             Handle timedAtom = a->getOutgoing(h, 1);
-            remove(timedAtom, Temporal::getFromTimeNodeName(a->getName(timeNode).c_str()));
     
+#if DOES_NOT_COMPILE_RIGHT_NOW
             // We have to do the check here instead of in the spaceServer
             // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
-            if( a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom ){
+            if (a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom)
                spaceServer->removeMap(h);
-            }
-        OC_ASSERT(a->getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
-        Handle timedAtom = a->getOutgoing(h, 1);
-        // We have to do the check here instead of in the spaceServer
-        // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
-        if( a->getType(timedAtom) == SPACE_MAP_NODE ){
-           spaceServer->removeMap(timedAtom);
-
-        }
-        remove(timedAtom, Temporal::getFromTimeNodeName(a->getName(timeNode).c_str()));
 #endif
+            remove(timedAtom, Temporal::getFromTimeNodeName(a->getName(timeNode).c_str()));
+        }
     }
 }
 

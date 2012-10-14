@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spatial/space_server/TimeServer.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
@@ -54,29 +55,27 @@ private:
     Temporal* times[N_TIMES];
     Handle handles[N_TIMES];
 
-    AtomSpace *atomspace;
 
 public:
 
     TimeServerUTest() {
-        atomspace = new AtomSpace();
         for (int i = 0; i < N_TIMES; i++) {
             times[i] = new Temporal(i*2, i*2);
             char name[16];
             sprintf(name, "%d", i);
-            handles[i] = atomspace->addNode(NUMBER_NODE, name);
+            handles[i] = atomspace().addNode(NUMBER_NODE, name);
         }
     }
 
     ~TimeServerUTest() {
         for (int i = 0; i < N_TIMES; i++) {
             delete times[i];
-            atomspace->removeAtom(handles[i]);
+            atomspace().removeAtom(handles[i]);
         }
     }
 
     void setUp() {
-        atomspace->clear();
+        atomspace().clear();
         timeServer().clear();
     }
 
@@ -1251,7 +1250,7 @@ public:
     }
 
     void testAddGetTimeInfo() {
-        AtomSpace& atomSpace = *atomspace;
+        AtomSpace& atomSpace = atomspace();
         atomSpace.clear();
         Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
         Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
@@ -1540,7 +1539,7 @@ public:
     }
 
     void testGetAtTimeLink() {
-        AtomSpace& atomSpace = *atomspace;
+        AtomSpace& atomSpace = atomspace();
         atomSpace.clear();
         Handle h1 = atomSpace.addNode(CONCEPT_NODE, "test1");
         Handle h2 = atomSpace.addNode(CONCEPT_NODE, "test2");
@@ -1610,7 +1609,7 @@ public:
     }
 
     void testTimeAtomsRemovalByDecay() {
-        AtomSpace& atomSpace = *atomspace;
+        AtomSpace& atomSpace = atomspace();
         atomSpace.clear();
 
         Handle node = atomSpace.addNode(CONCEPT_NODE, "test");
@@ -1637,7 +1636,7 @@ public:
     }
 
     void testRemoveTimeInfo() {
-        AtomSpace& atomSpace = *atomspace;
+        AtomSpace& atomSpace = atomspace();
         atomSpace.clear();
         Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
         TS_ASSERT(!timeServer().removeTimeInfo(node1, 1000));

@@ -89,9 +89,6 @@ public:
     explicit SpaceServer(AtomSpace&);
     virtual ~SpaceServer();
 
-    //! Set the timeServer
-    void setTimeServer(TimeServer *ts);
-
     /**
      * Gets a const reference to a specific SpaceMap for make queries
      * @throws RuntimeException if the given Handle is not a valid
@@ -203,9 +200,18 @@ public:
 private:
 
     /**
-     * Container where SpaceServer is inserted to (usualy an AtomSpace)
+     * Container where SpaceServer is inserted.
      */
     AtomSpace* atomspace;
+
+    /**
+     * signal connections used to keep track of atom removal in the SpaceMap
+     */
+    boost::signals::connection removedAtomConnection;
+    boost::signals::connection addedAtomConnection;
+
+    void atomRemoved(AtomSpaceImpl*, Handle);
+    void atomAdded(AtomSpaceImpl*, Handle);
 
     // the current scene map, match the spaceMapNodeHandle
     SpaceMap* curMap;

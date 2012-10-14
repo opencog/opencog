@@ -64,7 +64,7 @@ AtomSpaceImpl::AtomSpaceImpl(void) :
     emptyName = "";
     backing_store = NULL;
 
-    //connect signals
+    // connect signals
     addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1, _2));
     removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1, _2));
 
@@ -74,7 +74,7 @@ AtomSpaceImpl::AtomSpaceImpl(void) :
 
 AtomSpaceImpl::~AtomSpaceImpl()
 {
-    //disconnect signals
+    // disconnect signals
     addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
 
