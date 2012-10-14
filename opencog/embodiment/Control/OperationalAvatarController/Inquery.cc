@@ -21,28 +21,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Inquery.h"
 #include <set>
+#include <boost/variant.hpp>
+
 #include <opencog/util/oc_assert.h>
-#include <opencog/spatial/3DSpaceMap/Entity3D.h>
 #include <opencog/util/StringManipulator.h>
+
+#include <opencog/spatial/space_server/SpaceServer.h>
+
+#include <opencog/spatial/3DSpaceMap/Entity3D.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/Pathfinder3D.h>
-#include <boost/variant.hpp>
+
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+
+#include "Inquery.h"
 
 using namespace opencog::oac;
 using namespace opencog::pai;
 
- SpaceServer::SpaceMap* Inquery::spaceMap = 0;
- OAC* Inquery::oac = 0;
+OAC* Inquery::oac = 0;
+SpaceServer::SpaceMap *spaceMap = &spaceServer().getLatestMap();
 
 void Inquery::init(OAC* _oac)
 {
     oac = _oac;
-    spaceMap = (SpaceServer::SpaceMap*) (&(oac->getAtomSpace()->getSpaceServer().getLatestMap()));
 }
 
 StateValue Inquery::inqueryDistance(vector<StateValue>& stateOwnerList)

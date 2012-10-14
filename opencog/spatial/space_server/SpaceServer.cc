@@ -330,7 +330,7 @@ const bool SpaceServer::isLatestMapValid() const
     return ((curSpaceMapHandle != Handle::UNDEFINED)&&(curMap != 0));
 }
 
-const SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
+SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
     throw (opencog::AssertionException, std::bad_exception)
 {
     return *curMap;

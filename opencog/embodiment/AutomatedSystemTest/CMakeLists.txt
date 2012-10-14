@@ -12,6 +12,7 @@ TARGET_LINK_LIBRARIES (PBTester
 	PAI
 	Control
 	server
+	space_server
 	util
 	${XERCESC_LIBRARIES}
 )

@@ -46,7 +46,6 @@ class Inquery
 {
 
 protected:
-    static SpaceServer::SpaceMap* spaceMap;
     static OAC* oac;
     static set<spatial::SPATIAL_RELATION> getSpatialRelations(vector<StateValue>& stateOwnerList);
 

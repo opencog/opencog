@@ -109,7 +109,7 @@ public:
      * Gets a const reference to the latest (more recent) map in this
      * SpaceServer
      */
-    const SpaceMap& getLatestMap() const
+    SpaceMap& getLatestMap() const
         throw (opencog::AssertionException, std::bad_exception);
 
     /**
