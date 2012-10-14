@@ -11,7 +11,11 @@ INCLUDE_DIRECTORIES (
    ${CMAKE_BINARY_DIR}
 )
 
-ADD_LIBRARY(SpaceMap SHARED
+# XXX FIXME TODO Until such time that the learning-server messages are
+# removed from the spcemap, we have to build static, to avoid circular
+# dependencies. That's just plain wrong.
+# ADD_LIBRARY(SpaceMap SHARED
+ADD_LIBRARY(SpaceMap STATIC
 	LocalSpaceMap2DUtil
 	LocalSpaceMap2D
 	VisibilityMap
@@ -46,18 +50,24 @@ ADD_DEPENDENCIES(SpaceMap
 	learing_message_info
 )
 
-SET(SPACEMPA_LINK_LIBS
+TARGET_LINK_LIBRARIES(SpaceMap
+	server
 	${Boost_THREAD_LIBRARY}
-	statistics
 )
 
 IF (HAVE_ZMQ)
-	SET(SPACEMPA_LINK_LIBS ${SPACEMPA_LINK_LIBS} zmq)
+	TARGET_LINK_LIBRARIES(SpaceMap zmq)
 ENDIF (HAVE_ZMQ)
 
-TARGET_LINK_LIBRARIES(SpaceMap
-	${SPACEMPA_LINK_LIBS} 
-)
+# XXX TODO FIXME: this is a borken, cyclice dependency.  The problem is that
+# spacemap depends on learningserver depends on spacemap... arg.
+IF (PROTOBUF_FOUND)
+	TARGET_LINK_LIBRARIES(SpaceMap 
+		LearningServerMessages
+		${PROTOBUF_LIBRARY}
+	)
+ENDIF (PROTOBUF_FOUND)
+
 
 ADD_LIBRARY(HPASearch
 	HPASearch
@@ -76,9 +86,7 @@ TARGET_LINK_LIBRARIES(tangentbug_test
 	util
 )
 IF (PROTOBUF_FOUND)
-	TARGET_LINK_LIBRARIES(tangentbug_test
-		LearningServerMessages
-	)
+	TARGET_LINK_LIBRARIES(tangentbug_test LearningServerMessages)
 ENDIF (PROTOBUF_FOUND)
 
 # Uncomment the following line to enable ncurses printing:

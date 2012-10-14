@@ -258,7 +258,7 @@ void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
     }
 }
 
-TimeServer& timeServer()
+TimeServer& opencog::timeServer()
 {
 	static TimeServer global_server(atomspace(), &spaceServer());
 	return global_server;

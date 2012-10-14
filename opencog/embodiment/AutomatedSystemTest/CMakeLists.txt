@@ -21,5 +21,6 @@ ADD_EXECUTABLE (pbTest PBTesterExecutable)
 
 TARGET_LINK_LIBRARIES (pbTest 
 	PBTester
+	space_server
 )
 

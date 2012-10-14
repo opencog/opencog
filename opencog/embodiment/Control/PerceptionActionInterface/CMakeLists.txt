@@ -33,6 +33,7 @@ ADD_LIBRARY (PAI
 SET(PAI_LINK_LIBS
 	AtomSpaceExtensions
 	oac
+	space_server
 	util 
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 

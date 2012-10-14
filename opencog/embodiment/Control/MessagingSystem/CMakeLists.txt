@@ -37,6 +37,7 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 
 ADD_EXECUTABLE (router RouterExecutable.cc)
 TARGET_LINK_LIBRARIES (router 
+	space_server
 	MessagingSystem
 )
 
@@ -47,8 +48,14 @@ TARGET_LINK_LIBRARIES (spawner
 
 ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
 TARGET_LINK_LIBRARIES (msgtester
+	space_server
+	SpaceMap
 	MessagingSystem
 )
+IF (PROTOBUF_FOUND)
+	TARGET_LINK_LIBRARIES (msgtester ${PROTOBUF_LIBRARY})
+ENDIF (PROTOBUF_FOUND)
+
 
 #ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
 #TARGET_LINK_LIBRARIES (dummyserver

@@ -777,7 +777,7 @@ Handle SpaceServer::addPropertyPredicate(
 }
 
 // Return a single global instance
-SpaceServer& spaceServer()
+SpaceServer& opencog::spaceServer()
 {
 	static SpaceServer global_server(atomspace());
 
