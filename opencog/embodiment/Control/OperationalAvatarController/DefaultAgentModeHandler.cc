@@ -29,16 +29,18 @@
  *       2. Move contents in handleCommand to LanguageComprehension
  */
 
-#include "DefaultAgentModeHandler.h"
-#include "Pet.h"
+#include <vector>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <opencog/util/Logger.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string.hpp>
-#include <vector>
+#include "DefaultAgentModeHandler.h"
+#include "Pet.h"
 
 using namespace opencog;
 using namespace opencog::oac;
@@ -194,7 +196,7 @@ spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
         return this->visibilityMap;
     } // if
 
-    Handle spaceMapHandle = this->agent->getAtomSpace().getSpaceServer().getLatestMapHandle();
+    Handle spaceMapHandle = spaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
         logger().debug("DefaultAgentModeHandler - There is no space map loaded at this moment" );
         return 0;
@@ -203,7 +205,7 @@ spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
     unsigned int numberOfTilesPerSide =
         static_cast<unsigned int>(opencog::config().get_int( "MAP_XDIM" )) / 4;
 
-    const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
+    const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap();
     spatial::math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );
     spatial::math::Vector3 maximumExtent( spaceMap.xMax( ), 0, spaceMap.yMax( ) );
     this->visibilityMap = new spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );

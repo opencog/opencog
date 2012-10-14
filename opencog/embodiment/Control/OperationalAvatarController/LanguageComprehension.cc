@@ -22,17 +22,18 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <boost/regex.hpp>
+#include <boost/bind.hpp>
+#include <boost/asio/ip/tcp.hpp>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
 
 #include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/guile/SchemeSmob.h>
 
-#include <boost/regex.hpp>
-#include <boost/bind.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <opencog/atomspace/SpaceServer.h>
 
 using namespace opencog::oac;
 using namespace opencog::spatial;
@@ -733,8 +734,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     Handle objectC = (scm_is_pair(ground2SemeNode) && !scm_is_null(SCM_CAR(ground2SemeNode)) ) ? 
         SchemeSmob::scm_to_handle(SCM_CAR(ground2SemeNode)) : Handle::UNDEFINED;
     
-    const SpaceServer::SpaceMap& spaceMap = 
-        atomSpace.getSpaceServer( ).getLatestMap( );
+    const SpaceServer::SpaceMap& spaceMap = spaceServer( ).getLatestMap( );
     
     // double besideDistance = spaceMap.getNextDistance( );
     

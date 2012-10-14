@@ -29,17 +29,19 @@
  *       2. Move contents in handleCommand to LanguageComprehension
  */
 
-#include "BaseAgentModeHandler.h"
-#include "Pet.h"
+#include <vector>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <opencog/util/Logger.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/spatial/space_server/SpaceServer.h>
+
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string.hpp>
-#include <vector>
+#include "BaseAgentModeHandler.h"
+#include "Pet.h"
 
 
 using namespace opencog::oac;
@@ -78,7 +80,7 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
 
     }
     else if ( name == "notifyMapUpdate" ) {
-        this->agent->sendMapToVisualDebuggerClients( this->agent->getAtomSpace( ).getSpaceServer( ).getLatestMap( ) );
+        this->agent->sendMapToVisualDebuggerClients( spaceServer( ).getLatestMap( ) );
     } 
 }
 
