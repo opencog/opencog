@@ -26,7 +26,8 @@
 #ifndef _OPENCOG_SAVING_LOADING_H
 #define _OPENCOG_SAVING_LOADING_H
 
-#include <stdio.h>
+#include <string>
+#include <unordered_map>
 
 #include <opencog/util/platform.h>
 
@@ -54,7 +55,7 @@ class SavingLoading
 
 private:
 
-    typedef boost::unordered_map<std::string, SavableRepository*> RepositoryHash;
+    typedef std::unordered_map<std::string, SavableRepository*> RepositoryHash;
 
     /**
      * Stores the SavableRepositories actually loaded with Novamente.
