@@ -65,6 +65,10 @@ class SavingLoadingUTest :  public CxxTest::TestSuite
 
 private:
 
+    AtomSpace* as;
+    SpaceServer* ss;
+    TimeServer* ts;
+
     TruthValue* tvs[NUM_TVS];
 
 public:
@@ -128,12 +132,12 @@ public:
         Handle h9 = atomSpace.addLink(LIST_LINK, outgoing);
 
         // Associate some timestamps to existing atoms (to check save/load of TimeServer repository)
-        Handle h15 = timeServer().addTimeInfo(h1, Temporal(0, 0));
-        Handle h16 = timeServer().addTimeInfo(h4, Temporal(10, 100));
-        Handle h17 = timeServer().addTimeInfo(h6, Temporal(0, 0));
-        Handle h18 = timeServer().addTimeInfo(h9, Temporal(0, 0));
-        Handle h19 = timeServer().addTimeInfo(h9, Temporal(10, 100));
-        Handle h20 = timeServer().addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
+        Handle h15 = ts->addTimeInfo(h1, Temporal(0, 0));
+        Handle h16 = ts->addTimeInfo(h4, Temporal(10, 100));
+        Handle h17 = ts->addTimeInfo(h6, Temporal(0, 0));
+        Handle h18 = ts->addTimeInfo(h9, Temporal(0, 0));
+        Handle h19 = ts->addTimeInfo(h9, Temporal(10, 100));
+        Handle h20 = ts->addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
 
         Handle h10 = atomSpace.addNode(NUMBER_NODE, "1");
         Handle h11 = atomSpace.addNode(CONCEPT_NODE, "fido");
@@ -144,7 +148,7 @@ public:
         Handle h12 = atomSpace.addNode(CONCEPT_NODE, "fido");
         TS_ASSERT(h11 == h12);
 
-        savingLoading.save(DUMP_FILENAME, atomSpace);
+        savingLoading.save(DUMP_FILENAME, atomSpace, *ss, *ts);
 
         logger().debug("runSaving() ended");
     }
@@ -158,7 +162,7 @@ public:
         StatisticsMonitor* sm = StatisticsMonitor::getInstance();
         sm->reevaluateAllStatistics(atomSpace);
 
-        savingLoading.load(DUMP_FILENAME, atomSpace);
+        savingLoading.load(DUMP_FILENAME, atomSpace, *ss, *ts);
         logger().debug("loaded %s", DUMP_FILENAME);
 
 #if 0 // TODO: SM code has been disabled. So this test fails. We can get back with this when it is enabled again.
@@ -283,22 +287,22 @@ public:
 
         // Check TimeServer entries
         vector<HandleTemporalPair> result;
-        timeServer().getTimeInfo(back_inserter(result), h1);
+        ts->getTimeInfo(back_inserter(result), h1);
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
         result.clear();
-        timeServer().getTimeInfo(back_inserter(result), h4);
+        ts->getTimeInfo(back_inserter(result), h4);
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(10, 100));
 
         result.clear();
-        timeServer().getTimeInfo(back_inserter(result), h6);
+        ts->getTimeInfo(back_inserter(result), h6);
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
         result.clear();
-        timeServer().getTimeInfo(back_inserter(result), h9);
+        ts->getTimeInfo(back_inserter(result), h9);
         TS_ASSERT(result.size() == 3);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
         TS_ASSERT(*(result[1].getTemporal()) == Temporal(0, 10));
@@ -323,19 +327,33 @@ public:
     {
         
         AtomSpace *atomSpace1 = new AtomSpace();
+        ss = new SpaceServer(*atomSpace1);
+        ts = new TimeServer(*atomSpace1, ss);
+
         runSaving(*atomSpace1);
+        delete ts;
+        delete ss;
         delete atomSpace1;
 
         // MUST delete atomspace1 before loading atomspace2,
         // otherwise atoms in the TLB, which have the same
         // handles, will end up colliding with one another.
         AtomSpace *atomSpace2 = new AtomSpace();
+        ss = new SpaceServer(*atomSpace2);
+        ts = new TimeServer(*atomSpace2, ss);
+
         runLoading(*atomSpace2);
         runSaving(*atomSpace2);
+        delete ts;
+        delete ss;
         delete atomSpace2;
 
         AtomSpace *atomSpace4 = new AtomSpace();
+        ss = new SpaceServer(*atomSpace4);
+        ts = new TimeServer(*atomSpace4, ss);
         runLoading(*atomSpace4);
+        delete ts;
+        delete ss;
         delete atomSpace4;
 
         if (!CxxTest::TestTracker::tracker().testFailed())
@@ -345,6 +363,8 @@ public:
         SavingLoading savingLoading;
 
         AtomSpace *atomSpace5 = new AtomSpace();      
+        ss = new SpaceServer(*atomSpace5);
+        ts = new TimeServer(*atomSpace5, ss);
         
         HandleSeq execLinkOutgoing;
         execLinkOutgoing.push_back( atomSpace5->addNode( SAVING_LOADING_TEST_NODE, "test1") );
@@ -365,11 +385,17 @@ public:
 
         atomSpace5->addLink( SAVING_LOADING_TEST_LINK, frequeLink );
 
-        savingLoading.save( DUMP_FILENAME, *atomSpace5 );
+        savingLoading.save( DUMP_FILENAME, *atomSpace5, *ss, *ts);
+        delete ts;
+        delete ss;
         delete atomSpace5;
 
         AtomSpace* atomSpace6 = new AtomSpace( );
-        savingLoading.load( DUMP_FILENAME, *atomSpace6 );
+        ss = new SpaceServer(*atomSpace6);
+        ts = new TimeServer(*atomSpace6, ss);
+        savingLoading.load(DUMP_FILENAME, *atomSpace6, *ss, *ts);
+        delete ts;
+        delete ss;
         delete atomSpace6;
         
         if (!CxxTest::TestTracker::tracker().testFailed())

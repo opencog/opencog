@@ -64,7 +64,11 @@ SavingLoading::SavingLoading()
 {
 }
 
-void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOException)
+void SavingLoading::save(const char *fileName,
+                         AtomSpace& atomSpace,
+                         SpaceServer& spacs,
+                         TimeServer& tims)
+    throw (IOException)
 {
     logger().info("Saving OpenCog instance");
 
@@ -102,11 +106,11 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
     saveLinks(f, atomTable, atomCount);
 
     TimeServerSavable tss;
-    tss.setServer(&timeServer());
+    tss.setServer(&tims);
     tss.saveRepository(f);
 
     SpaceServerSavable sss;
-    sss.setServer(&spaceServer());
+    sss.setServer(&spacs);
     sss.saveRepository(f);
 
     saveRepositories(f);
@@ -252,7 +256,11 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     fseek(f, 0, SEEK_END);
 }
 
-void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (RuntimeException, IOException, InconsistenceException)
+void SavingLoading::load(const char *fileName,
+                         AtomSpace& atomSpace,
+                         SpaceServer& spacs,
+                         TimeServer& tims)
+    throw (RuntimeException, IOException, InconsistenceException)
 {
     clearRepositories();
 
@@ -312,11 +320,11 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     printProgress("load", (int) (100 * (((float) processed + (0.75 * ((total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR) - processed))) / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
 
     TimeServerSavable tss;
-    tss.setServer(&timeServer());
+    tss.setServer(&tims);
     tss.loadRepository(f, handles);
 
     SpaceServerSavable sss;
-    sss.setServer(&spaceServer());
+    sss.setServer(&spacs);
     sss.loadRepository(f, handles);
 
     loadRepositories(f, handles);

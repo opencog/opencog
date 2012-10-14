@@ -39,6 +39,9 @@
 
 #include <opencog/persist/file/SavableRepository.h>
 
+#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spatial/space_server/TimeServer.h>
+
 namespace opencog
 {
 
@@ -251,7 +254,7 @@ public:
      *
      * @param Filename where the binary image of the network will be saved.
      */
-    void save(const char *, AtomSpace&) throw (IOException);
+    void save(const char *, AtomSpace&, SpaceServer&, TimeServer&) throw (IOException);
 
     /**
      * This method loads atoms and indices from a binary image in a file.
@@ -261,7 +264,7 @@ public:
      * @param Filename from where the binary image of the network will be
      * loaded.
      */
-    void load(const char *, AtomSpace&) throw (RuntimeException, IOException, InconsistenceException);
+    void load(const char *, AtomSpace&, SpaceServer&, TimeServer&) throw (RuntimeException, IOException, InconsistenceException);
 
 
     /**
