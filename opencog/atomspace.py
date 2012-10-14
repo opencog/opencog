@@ -3,6 +3,9 @@ __author__ = 'Keyvan'
 from utility.generic import Marker
 
 types = Marker()
+types.Atom = 'Atom'
+types.Node = 'Node'
+types.Link = 'Link'
 types.TimeNode = 'TimeNode'
 types.ConceptNode = 'ConceptNode'
 types.InheritanceLink = 'InheritanceLink'
@@ -25,10 +28,16 @@ class TruthValue(object):
 
 DEFAULT_TRUTH_VALUE = TruthValue(1,1)
 
-class Node(object):
+
+class Atom(object):
+    pass
+
+class Node(Atom):
+
     def __init__(self, type, string):
         self.type = type
         self.string = string
+
 
     def __eq__(self, other):
         return self.string == other.string
@@ -36,7 +45,8 @@ class Node(object):
     def __repr__(self):
         return self.type + '(' + self.string + ')'
 
-class Link(object):
+class Link(Atom):
+
     def __init__(self, link_type, list_of_nodes, truth_value=DEFAULT_TRUTH_VALUE):
         self.type = link_type
         self.list_of_nodes = list_of_nodes
@@ -61,11 +71,15 @@ class AtomSpace(object):
         self.links.add(link)
         return link
 
+    def get_atoms_by_type(self, type):
+        atoms = list()
+        for atom in self.nodes + self.links:
+            if atom.type == type:
+                atoms += atom
+        return atoms
+
     def print_list(self):
         for link in self.links:
             print link
 
-
-class Atom(object):
-    pass
 
