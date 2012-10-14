@@ -7,8 +7,9 @@
 # )
 
 LINK_LIBRARIES(
-    SpaceMap
-    util
+	SpaceMap
+	space_server
+	util
 )
 
 
