@@ -25,7 +25,6 @@ ENDIF (HAVE_ATTENTION)
 
 IF (HAVE_SERVER)
     ADD_SUBDIRECTORY (server)
-    ADD_SUBDIRECTORY (adaptors) # adaptors depends on server
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_WEB)

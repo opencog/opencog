@@ -10,18 +10,28 @@ Source code overview:
 atomspace       -- Defines atoms, nodes, links, truth values, etc. 
                    Everything else depends on this.
 
-persist         -- Methods for saving/restoring the atomspace to disk,
-                   database, hypertable, etc.
+persist         -- Methods for communcation between servers, also,
+                   saving/restoring the atomspace to disk, database, etc.
+
+query           -- Pattern matching, evaluation for the atomspace.
 
 guile, scm      -- Scheme language bindings.
-python          -- Python langauge bindings.  
+python,cython   -- Python langauge bindings.  
+web             -- RESTful web interface.
+shell           -- Command-line shell interface.
+
+server          -- CogServer main server.
+benchmark       -- Performance benchmarks.
 
 nlp             -- English language processing
-pln             -- Backward-chainer
+reasoning       -- Backward-chainers
 
+dynamics        -- Attention allocation.
+spatial, spacetime -- Space and time matrix for avatars.
 embodiment      -- Avatars
 
-learning        -- Supervised program learning.
+comboreduct     -- Combo language, term-rewriting system.
+learning        -- Supervised program learning, including MOSES
 
 ubigraph, dotty -- Visualization, graphics.
 

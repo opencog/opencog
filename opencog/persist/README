@@ -10,11 +10,12 @@ as well as to be saved and restored from disk, file, database, network.
 
 Systems include:
 
-file -- file-based storage
+file       -- file-based storage
 hypertable -- experimental HyperTable support.
-memcache -- experimental/broken, uses memcached for persistence.
-sql -- works well for most uses -- with caveats
-xml -- XML-based file storage
+memcache   -- experimental/broken, uses memcached for persistence.
+sql        -- works well for most uses -- with caveats
+tulip      -- dump the AtomSpace to the Tulip tlp graph format
+xml        -- XML-based file storage
 
 
 The hypertable, memcache and sql systems all support networked,
