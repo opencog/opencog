@@ -137,6 +137,12 @@ Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features);
 
+ITable loadITable_optimized(const std::string& file_name,
+                            const std::vector<std::string>& ignore_features);
+
+Table loadTable_optimized(const std::string& file_name,
+                          const std::string& target_feature,
+                          const std::vector<std::string>& ignore_features);
 
 //////////////////
 // ostreamTable //

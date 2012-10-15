@@ -45,6 +45,12 @@
 
 namespace opencog { namespace combo {
 
+/**
+ * Get indices (aka positions or offsets) of a list of labels given a header
+ */
+std::vector<unsigned> get_indices(const std::vector<std::string>& labels,
+                                  const std::vector<std::string>& sub_labels);
+        
 ///////////////////
 // Generic table //
 ///////////////////

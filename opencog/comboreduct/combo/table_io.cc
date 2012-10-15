@@ -690,6 +690,52 @@ istream& istreamITable(istream& in, ITable& tab,
     return in;
 }
 
+/**
+ * Like istreamITable but add the option to ignore indices.
+ *
+ * It's akind of a temporary hack, till it's clear that this is much
+ * faster and we should recode istreamITable to ignore features
+ * head-on.
+ *
+ * Also, it assumes that the dataset is not sparse.
+ */
+istream& istreamITable_ignore_indices(istream& in, ITable& tab,
+                                      const vector<unsigned>& ignore_indices)
+{
+    istreamRawITable_ignore_indices(in, tab, ignore_indices);
+
+    // Determine the column types.
+    vector<type_node> col_types = infer_column_types(tab);
+    tab.set_types(col_types);
+
+    // If there is a header row, then it must be the column labels.
+    bool hdr = has_header(tab, col_types);
+    if (hdr) {
+        vector<vertex> hdr = *(tab.begin());
+        vector<string> labels;
+        for (const vertex& v : hdr) {
+            const string& tok = boost::get<string>(v);
+            labels.push_back(tok);
+        }
+        tab.set_labels(labels);
+        tab.erase(tab.begin());
+    }
+
+    // Finally, perform a column type conversion
+    arity_t arity = tab.get_arity();
+    const vector<type_node>& ig_types = tab.get_types();
+
+    OMP_ALGO::for_each (tab.begin(), tab.end(),
+        [&](vertex_seq& row) {
+            for (arity_t i=0; i<arity; i++) {
+                 const string& tok = boost::get<string>(row[i]);
+                 row[i] = token_to_vertex(ig_types[i], tok);
+            }
+        });
+    
+    return in;
+}
+
 OTable loadOTable(const string& file_name, const string& target_feature)
 {
     vector<string> ignore_features;
@@ -711,6 +757,28 @@ ITable loadITable(const string& file_name,
 
     ITable res;
     istreamITable(in, res, ignore_features);
+    return res;
+}
+
+/**
+ * Like loadITable but it is optimized by ignoring features head-on
+ * (rather than loading them, then removing them.
+ *
+ * WARNING: it assumes the dataset has a header!!!
+ */
+ITable loadITable_optimized(const string& file_name,
+                            const vector<string>& ignore_features)
+{
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+
+    // determined ignore_indices
+    vector<unsigned> ignore_indices = get_indices(ignore_features,
+                                                  get_header(file_name));
+    
+    ITable res;
+    istreamITable_ignore_indices(in, res, ignore_indices);
     return res;
 }
 
@@ -754,6 +822,40 @@ istream& istreamTable(istream& in, Table& tab,
 }
 
 /**
+ * Like istreamTable but optimize by ignoring features head-on rather
+ * than loading them then removing them.
+ *
+ * Warning: only works on dense data with header file.
+ */
+istream& istreamTable_ignore_indices(istream& in, Table& tab,
+                                     const string& target_feature,
+                                     const vector<unsigned>& ignore_indices)
+{    
+    istreamITable_ignore_indices(in, tab.itable, ignore_indices);
+
+    tab.otable = tab.itable.get_column_data(target_feature);
+    OC_ASSERT(0 != tab.otable.size(), 
+              "Fatal Error: target feature \"%s\" not found",
+              target_feature.c_str());
+
+    tab.target_pos = tab.itable.get_column_offset(target_feature);
+    if (tab.target_pos == tab.get_arity() - 1)
+        tab.target_pos = -1;    // the last position is -1
+    
+    type_node targ_type = tab.itable.get_type(target_feature);
+
+    string targ_feat = tab.itable.delete_column(target_feature);
+
+    tab.otable.set_label(targ_feat);
+    tab.otable.set_type(targ_type);
+
+    // Record the table signature.
+    tab.tt = gen_signature(tab.itable.get_types(), targ_type);
+
+    return in;
+}
+
+/**
  * istream. If the file name is not correct then an OC_ASSERT is
  * raised.
  */
@@ -767,6 +869,29 @@ Table loadTable(const string& file_name,
 
     Table res;
     istreamTable(in, res, target_feature, ignore_features);
+    return res;
+}
+
+/**
+ * Like loadTable but ignore the features head on instead of loading
+ * then removing them.
+ *
+ * Warning: only works on dense datasets with header.
+ */
+Table loadTable_optimized(const string& file_name,
+                          const string& target_feature,
+                          const vector<string>& ignore_features)
+{
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+
+    // determined ignore_indices
+    vector<unsigned> ignore_indices = get_indices(ignore_features,
+                                                  get_header(file_name));
+
+    Table res;
+    istreamTable_ignore_indices(in, res, target_feature, ignore_indices);
     return res;
 }
 
