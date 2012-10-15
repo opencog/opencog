@@ -113,7 +113,7 @@ std::istream& istreamRawITable(std::istream& in, ITable& tab)
 // case because of branch prediction) then it can replace
 // istreamRawITable (and rename to it) with an empty ignore_indices as
 // default.
-std::istream& istreamRawITable_ingore_indices(std::istream& in, ITable& tab,
+std::istream& istreamRawITable_ignore_indices(std::istream& in, ITable& tab,
                                               const std::vector<unsigned>& ignored_indices)
     throw(std::exception, AssertionException);
 

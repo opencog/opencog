@@ -342,7 +342,7 @@ istream& istreamRawITable(istream& in, ITable& tab)
 // XXX The code below is very nearly a cut-n-pste of above; lets not
 // do that, and instead simply provide a default argument for ignored indexes!
 // cut-n-paste == badness
-istream& istreamRawITable_ingore_indices(istream& in, ITable& tab,
+istream& istreamRawITable_ignore_indices(istream& in, ITable& tab,
                                          const vector<unsigned>& ignored_indices)
     throw(std::exception, AssertionException)
 {
