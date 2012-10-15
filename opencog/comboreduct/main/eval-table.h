@@ -148,22 +148,52 @@ void read_eval_output_results(evalTableParameters& pa)
               == pa.ignore_features_str.end(),
               "You cannot ignore the target feature %s",
               pa.target_feature_str.c_str());
+
+    // get all combo tree strings (from command line and file)
+    vector<string> all_combo_tree_str = get_all_combo_tree_str(pa);
+        
+    // parse all variables from all combo tree strings
+    vector<string> all_variables;
+    for (string combo_tree_str : all_combo_tree_str) {
+        vector<string> vars = parse_combo_variables(combo_tree_str);
+        all_variables.insert(all_variables.end(), vars.begin(), vars.end());
+    }
+    set<string> all_unique_variables(all_variables.begin(), all_variables.end());
+
+    /// HERE WE ARE ASSUMING THAT THE INPUT FILE HAS A HEADER!!!
+    vector<string> header = get_header(pa.input_table_file);
+
+    // get (header - all_unique_variables - target feature)
+    vector<string> ignore_variables;
+    for (string f : header)
+        if (f != pa.target_feature_str
+            && all_unique_variables.find(f) == all_unique_variables.end())
+            ignore_variables += f;
     
-    // read data ITable
+    // // read data ITable
+    // Table table;
+    // if (pa.target_feature_str.empty())
+    //     table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
+    // else {
+    //     table = loadTable(pa.input_table_file, pa.target_feature_str,
+    //                       pa.ignore_features_str);
+    // }
+
+    // read data ITable (using ignore_variables)
     Table table;
     if (pa.target_feature_str.empty())
-        table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
+        table.itable = loadITable_optimized(pa.input_table_file, ignore_variables);
     else {
-        table = loadTable(pa.input_table_file, pa.target_feature_str,
-                          pa.ignore_features_str);
+        table = loadTable_optimized(pa.input_table_file, pa.target_feature_str,
+                          ignore_variables);
     }
-
+    
     ITable& it = table.itable;
 
     // read combo programs
     vector<combo_tree> trs;
     // from command line
-    for (const string& tr_str : get_all_combo_tree_str(pa))
+    for (const string& tr_str : all_combo_tree_str)
         trs += str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
 
     // eval and output the results
