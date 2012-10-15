@@ -118,6 +118,28 @@ void eval_output_results(const evalTableParameters& pa,
     }
 }
 
+/**
+ * Get all combo tree strings, from the command line and the files
+ */
+vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
+{
+    vector<string> res(pa.combo_programs);     // from command line
+    
+    // from a file
+    if (!pa.combo_programs_file.empty()) {
+        ifstream in(pa.combo_programs_file.c_str());
+        while(in.good()) {
+            string line;
+            getline(in, line);
+            if(line.empty())
+                continue;
+            res += line;
+        }
+    }
+
+    return res;
+}
+
 void read_eval_output_results(evalTableParameters& pa)
 {
     ostreamContainer(logger().info() << "Ignore the following features: ",
@@ -126,7 +148,7 @@ void read_eval_output_results(evalTableParameters& pa)
               == pa.ignore_features_str.end(),
               "You cannot ignore the target feature %s",
               pa.target_feature_str.c_str());
-
+    
     // read data ITable
     Table table;
     if (pa.target_feature_str.empty())
@@ -141,19 +163,8 @@ void read_eval_output_results(evalTableParameters& pa)
     // read combo programs
     vector<combo_tree> trs;
     // from command line
-    foreach(const string& tr_str, pa.combo_programs)
+    for (const string& tr_str : get_all_combo_tree_str(pa))
         trs += str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
-    // from a file
-    if (!pa.combo_programs_file.empty()) {
-        ifstream in(pa.combo_programs_file.c_str());
-        while(in.good()) {
-            string line;
-            getline(in, line);
-            if(line.empty())
-                continue;
-            trs += str2combo_tree_label(line, pa.has_labels, it.get_labels());
-        }
-    }
 
     // eval and output the results
     eval_output_results(pa, table, trs);
