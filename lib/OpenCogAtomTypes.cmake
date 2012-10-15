@@ -1,12 +1,20 @@
+#
+# Definitions for automatically building the atom_types files, given
+# a master file "atom_types.script" that defines all of the type
+# relationships.
+#
 IF (NOT SCRIPT_FILE)
 	SET (SCRIPT_FILE "atom_types.script")
 ENDIF (NOT SCRIPT_FILE)
+
 IF (NOT HEADER_FILE)
 	SET (HEADER_FILE "atom_types.h")
 ENDIF (NOT HEADER_FILE)
+
 IF (NOT DEFINITIONS_FILE)
 	SET (DEFINITIONS_FILE "atom_types.definitions")
 ENDIF (NOT DEFINITIONS_FILE)
+
 IF (NOT INHERITANCE_FILE)
 	SET (INHERITANCE_FILE "atom_types.inheritance")
 ENDIF (NOT INHERITANCE_FILE)
