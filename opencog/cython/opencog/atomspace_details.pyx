@@ -326,10 +326,6 @@ cdef class AtomSpace:
     def get_atom_string(self, Handle h, terse=False):
         return self.atomspace.atomAsString(deref(h.h),terse).c_str()
 
-    #def get_time_server(self):
-        #timeserver = &self.atomspace.getTimeServer()
-        #return TimeServer(timeserver)
-
     # query methods
     # @todo it would be better if we got AtomSpaceAsync request objects directly
     # to avoid excessive copying
@@ -392,7 +388,7 @@ cdef class SpaceServer:
         pass
 
     def __dealloc__(self):
-        # Don't do anything because the AtomSpace takes care of cleaning up
+        # Don't do anything because the CogServer takes care of cleaning up
         pass
 
 

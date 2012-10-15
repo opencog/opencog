@@ -152,7 +152,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void clear()
         bint removeAtom(cHandle h, bint recursive) 
 
-        cTimeServer getTimeServer()
         void print_list "print" ()
 
         cpplist[cHandle] addAtomSignalQueue
@@ -166,7 +165,6 @@ cdef extern from "opencog/spatial/space_server/SpaceServer.h" namespace "opencog
 
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
-    cdef cTimeServer *timeserver
     cdef bint owns_atomspace
 
 cdef class Handle:
