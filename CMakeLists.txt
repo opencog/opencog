@@ -24,10 +24,10 @@ PROJECT(opencog)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 # uncomment to be in Release mode
-# SET(CMAKE_BUILD_TYPE Release)
+SET(CMAKE_BUILD_TYPE Release)
 
 # uncomment to build in debug mode
- SET(CMAKE_BUILD_TYPE Debug)
+# SET(CMAKE_BUILD_TYPE Debug)
 
 # uncomment to be in coverage testing mode
 # SET(CMAKE_BUILD_TYPE Coverage)
