@@ -471,6 +471,35 @@ string l2ph(const string& ce, const vector<string>& labels)
     return res;
 }
 
+vector<string> parse_combo_variables(const string& ce)
+{
+    /// @todo the implementation could be done in 1 lines with
+    /// boost.regex but I don't have Internet right now and I don't
+    /// know how to access boost doc!!!
+    /// :-(
+    vector<string> res;
+    string match;
+    bool matching = false;
+    for (char c : ce) {
+        if(!matching) {
+            if(c == '$') // matching starts
+                matching = true;
+        } else {
+            if(c == ' ' || c == ')' || c == '\n') { //matching ends
+                res.push_back(match);
+                match.clear();
+                matching = false;
+            } else // matching goes
+                match += c;
+        }
+    }
+    // if a matching is going on, add it to the result
+    if(matching)
+        res.push_back(match);
+
+    return res;    
+}
+
 ostream& operator<<(ostream& out, const ann_type& h)
 {
     switch (h.id) {

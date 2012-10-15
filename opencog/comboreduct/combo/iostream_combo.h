@@ -191,12 +191,26 @@ std::string ph2l(const std::string& ce,
 /**
  * l2ph where ph == "place holder" and l == "label"
  *
- * This is the converse of ph2l. Given, for instance "and($fat $pretty)"
- * it returns "and($1 $2)".  If a variable is not in labels
- * (that is it doesn't correspond to a place holder) (???)
+ * This is the converse of ph2l. Given, for instance "and($fat
+ * $pretty)" and the vector of labels {"fat", "pretty"}, it returns
+ * "and($1 $2)". If a variable is not in labels (that is it doesn't
+ * correspond to a place holder) an OC_ASSERT is raised.
  */
 std::string l2ph(const std::string& ce,
                  const std::vector<std::string>& labels);
+
+/**
+ * return the list of variables in a combo tree. Note that if some
+ * variables are found several times they will appear several times as
+ * well. So for instance,
+ *
+ * parse_combo_variables("and($small $fat $small)")
+ *
+ * returns
+ *
+ * {"small", "fat", "small"}
+ */
+std::vector<std::string> parse_combo_variables(const std::string& ce);
 
 std::ostream& operator<<(std::ostream&, const ann_type&);
 std::ostream& operator<<(std::ostream&, const builtin&);
