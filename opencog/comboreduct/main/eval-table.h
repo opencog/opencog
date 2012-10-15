@@ -24,12 +24,14 @@
 #ifndef _OPENCOG_EVAL_TABLE_H
 #define _OPENCOG_EVAL_TABLE_H
 
-#include <opencog/comboreduct/combo/table.h>
+#include <boost/assign/std/vector.hpp>
+
 #include <opencog/util/algorithm.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/Logger.h>
 
-#include <boost/assign/std/vector.hpp>
+#include "../combo/table_io.h"
+#include "../combo/table.h"
 
 using namespace std;
 using namespace boost::assign;
