@@ -11,12 +11,12 @@ INCLUDE_DIRECTORIES(
 add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
-  DEPENDS "opencog/atom.pyx" "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace_details.pyx")
+  DEPENDS "opencog/atom.pyx" "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace.pxd"  "opencog/atomspace_details.pyx")
 
 add_custom_command(OUTPUT opencog/cogserver.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
-  DEPENDS "opencog/cogserver.pyx" "opencog/request.pyx" "opencog/agent.pyx" "opencog/cogserver.pxd")
+  DEPENDS "opencog/cogserver.pyx" "opencog/request.pyx" "opencog/agent.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
 
 add_custom_command(OUTPUT opencog/util.cpp
   COMMAND

@@ -84,7 +84,7 @@ cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
 # TimeServer
-cdef extern from "opencog/atomspace/TimeServer.h" namespace "opencog":
+cdef extern from "opencog/spatial/space_server/TimeServer.h" namespace "opencog":
     cdef cppclass cTimeServer "opencog::TimeServer":
         TimeServer()
 
@@ -160,7 +160,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
 # SpaceServer
-cdef extern from "opencog/atomspace/SpaceServer.h" namespace "opencog":
+cdef extern from "opencog/spatial/space_server/SpaceServer.h" namespace "opencog":
     cdef cppclass cSpaceServer "opencog::SpaceServer":
         SpaceServer()
 
