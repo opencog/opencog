@@ -7,6 +7,9 @@ OPENCOG_ADD_ATOM_TYPES(
 )
 ADD_CUSTOM_TARGET(nlp_atom_types DEPENDS atom_types.h)
 
+# The atom_types.h file is written to the build directory
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+
 ADD_LIBRARY (nlp-types SHARED
 	atom_types
 	NLPTypes

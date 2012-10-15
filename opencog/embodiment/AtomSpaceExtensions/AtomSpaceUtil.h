@@ -41,7 +41,7 @@
 #include <opencog/spatial/space_server/Temporal.h>
 #include <opencog/spatial/space_server/TemporalTable.h>
 
-#include "atom_types.h"
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 
 using namespace opencog;
 

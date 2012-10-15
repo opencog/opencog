@@ -1,3 +1,7 @@
+
+# The atom_types.h file is written to the build directory
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+
 ADD_LIBRARY (smob SHARED
 	SchemeEval.cc
 	SchemeExec.cc
@@ -11,6 +15,8 @@ ADD_LIBRARY (smob SHARED
 	SchemeSmobVH.cc
 	load-file
 )
+
+ADD_DEPENDENCIES(smob opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}

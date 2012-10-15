@@ -26,7 +26,7 @@
 
 #include <opencog/server/CogServer.h>
 
-#include "atom_types.definitions"
+#include "opencog/dynamics/attention/atom_types.definitions"
 
 using namespace opencog;
 
@@ -74,7 +74,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     System::setModuleHandle(hinstDLL);
     switch(fdwReason) {
         case DLL_PROCESS_ATTACH:
-            #include "atom_types.inheritance"
+            #include "opencog/dynamics/attention/atom_types.inheritance"
             break;
         case DLL_THREAD_ATTACH:
             break;
@@ -88,7 +88,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
 #elif __GNUC__
 static __attribute__ ((constructor)) void _init(void)
 {
-    #include "atom_types.inheritance"
+    #include "opencog/dynamics/attention/atom_types.inheritance"
 }
 static __attribute__ ((constructor)) void _fini(void)
 {

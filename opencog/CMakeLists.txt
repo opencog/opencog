@@ -1,4 +1,7 @@
-# 
+
+# The atom_types.h file is written to the build directory
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+
 # The build order used here is loosely in terms of 
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
