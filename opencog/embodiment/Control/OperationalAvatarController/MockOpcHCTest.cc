@@ -22,8 +22,8 @@
  */
 
 
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>

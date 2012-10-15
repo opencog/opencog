@@ -36,7 +36,7 @@
 #endif
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/spacetime/Temporal.h>
 
 using namespace opencog;
 

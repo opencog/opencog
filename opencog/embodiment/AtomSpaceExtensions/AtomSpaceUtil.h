@@ -36,10 +36,10 @@
 
 #include <opencog/spatial/math/Vector3.h>
 
-#include <opencog/spatial/space_server/HandleTemporalPair.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/Temporal.h>
-#include <opencog/spatial/space_server/TemporalTable.h>
+#include <opencog/spacetime/HandleTemporalPair.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/Temporal.h>
+#include <opencog/spacetime/TemporalTable.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 

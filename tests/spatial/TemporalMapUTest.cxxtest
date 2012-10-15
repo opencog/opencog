@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/spatial/space_server/TemporalEntry.h>
-#include <opencog/spatial/space_server/TemporalMap.h>
+#include <opencog/spacetime/TemporalEntry.h>
+#include <opencog/spacetime/TemporalMap.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>

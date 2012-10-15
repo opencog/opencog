@@ -31,6 +31,6 @@ INSTALL (FILES
 	TemporalTable.h
 	TemporalToHandleSetMap.h
 	TimeServer.h
-	DESTINATION "include/${PROJECT_NAME}/spatial/space_server"
+	DESTINATION "include/${PROJECT_NAME}/spacetime"
 )
 

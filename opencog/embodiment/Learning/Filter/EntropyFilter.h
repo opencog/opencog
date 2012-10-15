@@ -32,7 +32,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/spacetime/Temporal.h>
 
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>

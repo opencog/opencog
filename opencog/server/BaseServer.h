@@ -25,8 +25,8 @@
 #ifndef _OPENCOG_BASE_SERVER_H
 #define _OPENCOG_BASE_SERVER_H
 
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 namespace opencog
 {

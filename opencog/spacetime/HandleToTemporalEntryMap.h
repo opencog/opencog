@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TemporalToHandleSetMap.h
+ * opencog/atomspace/HandleToTemporalEntryMap.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,38 +22,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_TEMPORAL_TO_HANDLE_SET_MAP_H
-#define _OPENCOG_TEMPORAL_TO_HANDLE_SET_MAP_H
+#ifndef _OPENCOG_HANDLE_TO_TEMPORAL_ENTRY_MAP_H
+#define _OPENCOG_HANDLE_TO_TEMPORAL_ENTRY_MAP_H
 
 #include <string>
 
-#include <opencog/spatial/space_server/TemporalMap.h>
-#include <opencog/atomspace/HandleSet.h>
+#include <opencog/atomspace/HandleMap.h>
+#include <opencog/spacetime/TemporalEntry.h>
 
 namespace opencog
 {
 
-class TemporalToHandleSetMap
+class HandleToTemporalEntryMap
 {
 
 private:
 
-    TemporalMap* internalMap;
+    HandleMap<TemporalEntry *> *internalMap;
 
 public:
 
     /**
      * Constructor for this class.
      */
-    TemporalToHandleSetMap();
+    HandleToTemporalEntryMap();
 
-    ~TemporalToHandleSetMap();
+    ~HandleToTemporalEntryMap();
 
     /**
      * @param Key.
      * @param Element.
      */
-    void add(Temporal*, HandleSet*);
+    void add(Handle, TemporalEntry*);
 
     /**
      * Returns the element for a given key.
@@ -61,15 +61,7 @@ public:
      * @param Key.
      * @return Element for a given key.
      */
-    HandleSet* get(Temporal*);
-
-    /**
-     * Returns the key Temporal object equals to the given parameter.
-     *
-     * @param t    reference to a Temporal object to make the lookup.
-     * @return pointer to the searched key Temporal object, if it exists. NULL, otherwise.
-     */
-    Temporal *getKey(const Temporal&);
+    TemporalEntry* get(Handle);
 
     /**
      * Checks if there exists an element for the given key.
@@ -77,7 +69,7 @@ public:
      * @param Key.
      * @return Whether there exists an element for the given key.
      */
-    bool contains(Temporal*);
+    bool contains(Handle);
 
     /**
      * Removes an element referred by a given key from the table and
@@ -86,7 +78,7 @@ public:
      * @param Key.
      * @return Removed element.
      */
-    HandleSet* remove(Temporal*);
+    TemporalEntry* remove(Handle);
 
     /**
      * Returns the total number of elements in the hash table.
@@ -109,17 +101,16 @@ public:
      *
      * @return An iterator through all keys stored in the hash table.
      */
-    TemporalMapIterator *keys();
+    HandleMapIterator<TemporalEntry *> * keys();
 
     /**
-     * Return a copy of the TemporalToHandleSetMap.
+     * Return a copy of the HandleToTemporalEntryMap.
      */
-    TemporalToHandleSetMap *clone();
+    HandleToTemporalEntryMap *clone();
 
     std::string toString();
-
 };
 
 } // namespace opencog
 
-#endif // _OPENCOG_TEMPORAL_TO_HANDLE_SET_MAP_H
+#endif // _OPENCOG_HANDLE_TO_TEMPORAL_ENTRY_MAP_H

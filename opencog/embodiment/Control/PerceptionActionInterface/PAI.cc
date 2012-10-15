@@ -56,8 +56,8 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/query/PatternMatch.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 #include "PAI.h"
 #include "PAIUtils.h"

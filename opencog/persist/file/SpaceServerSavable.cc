@@ -30,7 +30,7 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include <string>
 #include <vector>

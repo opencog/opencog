@@ -23,7 +23,7 @@
 
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>

@@ -28,7 +28,7 @@
 #include <set>
 
 #include <opencog/persist/file/SavableRepository.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 namespace opencog
 {

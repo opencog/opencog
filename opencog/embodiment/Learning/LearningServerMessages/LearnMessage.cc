@@ -33,8 +33,8 @@
 #include <opencog/persist/xml/StringXMLBufferReader.h>
 
 #include <opencog/server/CogServer.h>
-#include <opencog/spatial/space_server/TimeServer.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include "LearnMessage.h"
 using namespace opencog::learningserver::messages;

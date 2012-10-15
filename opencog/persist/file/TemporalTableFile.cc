@@ -26,7 +26,7 @@
 #include "TemporalTableFile.h"
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/spatial/space_server/TemporalTable.h>
+#include <opencog/spacetime/TemporalTable.h>
 
 #include <set>
 

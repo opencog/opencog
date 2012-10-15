@@ -22,7 +22,7 @@
 
 #include <opencog/comboreduct/combo/vertex.h>
 
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include "PsiRuleUtil.h"
 

@@ -29,7 +29,7 @@
 #define PSIRULEUTIL_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>

@@ -31,7 +31,7 @@ typedef unsigned long ulong;
 #include <opencog/util/misc.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>

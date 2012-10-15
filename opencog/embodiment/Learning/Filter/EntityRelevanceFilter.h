@@ -30,7 +30,7 @@
 
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>

@@ -1,10 +1,11 @@
 /*
- * opencog/atomspace/HandleTemporalPairEntry.h
+ * opencog/atomspace/TemporalEntry.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
  *
  * Written by Welter Silva <welter@vettalabs.com>
+ *            Carlos Lopes <dlopes@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,8 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HANDLE_TEMPORAL_PAIR_ENTRY_H
-#define _OPENCOG_HANDLE_TEMPORAL_PAIR_ENTRY_H
+#ifndef _OPENCOG_TEMPORAL_ENTRY_H
+#define _OPENCOG_TEMPORAL_ENTRY_H
 
 #include <string>
 #include <vector>
@@ -31,33 +32,18 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include <opencog/util/exceptions.h>
-
-#include <opencog/spatial/space_server/HandleTemporalPair.h>
+#include <opencog/spacetime/Temporal.h>
 
 namespace opencog
 {
 
 /**
- * This class implements a linked-list of HandleTemporalPair objects, and provides several
- * methods to perform operations between lists such as concatenation.
+ * This class implements a linked-list of times, and provides several
+ * methods to perform operations between lists such as concatenation,
+ * intersection, and filtering.
  */
-class HandleTemporalPairEntry
+class TemporalEntry
 {
-
-private:
-    /**
-     * HandleTemporalPair sort criterion used by qsort. It returns a negative value,
-     * zero or a positive value if the first argument is respectively
-     * smaller than, equal to, or larger then the second argument.
-     *
-     * @param The first handleTemporalPair element.
-     * @param The second handleTemporalPair element.
-     * @return A negative value, zero or a positive value if the first
-     * argument is respectively smaller than, equal to, or larger then the
-     * second argument.
-     */
-    static int compare(const HandleTemporalPair&, const HandleTemporalPair&);
 
 public:
 
@@ -66,45 +52,38 @@ public:
     /**
      * Cell dat
      */
-    HandleTemporalPair handleTemporalPair;
+    Temporal* time;
 
     /**
      * Next cell.
      */
-    HandleTemporalPairEntry *next;
+    TemporalEntry *next;
 
     /**
      * Constructor for this class.
      *
      * @param Cell data.
      */
-    HandleTemporalPairEntry(const HandleTemporalPair&);
-
-    /**
-     * Constructor for this class.
-     *
-     * @param Cell data.
-     */
-    HandleTemporalPairEntry(Handle, Temporal*);
+    TemporalEntry(Temporal*);
 
     /**
      * Destructor for this class.
      */
-    ~HandleTemporalPairEntry();
+    ~TemporalEntry();
 
     /**
-     * Clones the list that starts in this handleTemporalPair entry cell, preserving
+     * Clones the list that starts in this time entry cell, preserving
      * all cell data.
      *
      * @return Pointer to the new cloned list head.
      */
-    HandleTemporalPairEntry* clone();
+    TemporalEntry* clone();
 
     /**
-     * Returns the size of the linked-list from the current handleTemporalPair entry
+     * Returns the size of the linked-list from the current time entry
      * head.
      *
-     * @return Size of the linked-list from the current handleTemporalPair entry head.
+     * @return Size of the linked-list from the current time entry head.
      */
     int getSize();
 
@@ -113,27 +92,27 @@ public:
      *
      * @return last member of the linked-list
      */
-    HandleTemporalPairEntry* last();
+    TemporalEntry* last();
 
     /**
-     * Returns true iff this list contains the given handleTemporalPair.
+     * Returns true iff this list contains the given time.
      */
-    bool contains(const HandleTemporalPair&);
+    bool contains(Temporal*);
 
     /**
      * Returns a string representation of the list that starts in the
-     * handleTemporalPair entry cell. The string returned is allocated in the
+     * time entry cell. The string returned is allocated in the
      * activation registry stack, so it must be duplicated if not
      * immediately used.
      *
      * @return A string representation of the list that starts in the
-     * handleTemporalPair entry cell.
+     * time entry cell.
      */
     std::string toString();
 
     /**
-     * Returns a vector of handleTemporalPairs containing all data in the list that
-     * starts in the handleTemporalPair entry cell.
+     * Returns a vector of times containing all data in the list that
+     * starts in the time entry cell.
      *
      * @param Pointer passed by reference where the vector will be
      * allocated.
@@ -141,7 +120,7 @@ public:
      * @return Pointer passed by reference where the vector will be
      * allocated. Same as the first parameter.
      */
-    HandleTemporalPair* toHandleTemporalPairVector(HandleTemporalPair*&, int&) throw (InconsistenceException);
+    Temporal** toTemporalVector(Temporal**&, int&) throw (InconsistenceException);
 
     /**
      * Returns a HandlEntry containing all data in the array passed
@@ -149,29 +128,26 @@ public:
      *
      * @param Pointer where the vector is stored.
      * @param Length of the allocated vector.
-     * @return A HandleTemporalPairEntry containing the element s of the vector.
+     * @return A TemporalEntry containing the element s of the vector.
      */
-    static HandleTemporalPairEntry* fromHandleTemporalPairVector(HandleTemporalPair*, int);
+    static TemporalEntry* fromTemporalVector(Temporal**, int);
 
     /**
-     * Adds a handleTemporalPair to the list.
+     * Adds a time to the list.
      * @param The linked list
-     * @param The handleTemporalPair that should be added to the list
-     * @param Flat to indicate if it must keep the sorting
-     * @return The resulting linked list after adding the handleTemporalPair
-     * NOTE: The handleTemporalPair argument to be added will be cloned internally.
-     * So, the caller must take care of delete such argument when it is not used anymore.
+     * @param The time that should be added to the list
+     * @return The resulting linked list after adding the time
      */
-    static HandleTemporalPairEntry* add(HandleTemporalPairEntry*, const HandleTemporalPair&);
+    static TemporalEntry* add(TemporalEntry*, Temporal*);
 
     /**
-     * Removes a handleTemporalPair from the list.
+     * Removes a time from the list.
      * @param The linked list
-     * @param The handleTemporalPair from atom that should be removed from the
+     * @param The time from atom that should be removed from the
      *        list
      * @return The filtered linked list
      */
-    static HandleTemporalPairEntry* remove(HandleTemporalPairEntry*, const HandleTemporalPair&);
+    static TemporalEntry* remove(TemporalEntry*, Temporal*);
 
     /**
      * Returns the intersection between two linked-lists. The two
@@ -181,7 +157,7 @@ public:
      * @param Second linked-list.
      * @return The intersection between two linked-lists.
      */
-    static HandleTemporalPairEntry* intersection(HandleTemporalPairEntry*, HandleTemporalPairEntry*);
+    static TemporalEntry* intersection(TemporalEntry*, TemporalEntry*) throw (InconsistenceException);
 
     /**
      * Returns the intersection between several linked-lists. The n
@@ -191,7 +167,7 @@ public:
      * @param Length of the array of linked-lists.
      * @return Intersection between the given linked-lists.
      */
-    static HandleTemporalPairEntry* intersection(HandleTemporalPairEntry**, unsigned int) throw (InconsistenceException);
+    static TemporalEntry* intersection(TemporalEntry**, int) throw (InconsistenceException);
 
     /**
      * This method is internal for the intersection calculation methods.
@@ -199,11 +175,12 @@ public:
      * the element is present in all arrays.
      *
      * @param Array of vector where each represents a linked-list.
+     * @param Array of vector lengths.
      * @param Internal data structure that represents the current
      * searching position.
      * @return The position of a common element in the first array.
      */
-    static int nextMatch(std::vector<std::vector<HandleTemporalPair> >&, std::vector<unsigned int>&);
+    static int nextMatch(Temporal***, int*, std::vector<int>&);
 
     /**
      * This method is internal for the intersection calculation methods.
@@ -211,9 +188,11 @@ public:
      * represents a linked-list.
      *
      * @param Array of vector where each represents a linked-list.
+     * @param Array of vector lengths.
+     * @param Number of vectors.
      * @return Intersection between the given linked-lists.
      */
-    static HandleTemporalPairEntry* intersection(std::vector<std::vector<HandleTemporalPair> >&);
+    static TemporalEntry* intersection(Temporal***, int*, int);
 
     /**
      * This method returns the concatenation of two linked-lists, the
@@ -224,31 +203,36 @@ public:
      * @param Second linked-list.
      * @return Concatenation of the first list with the second list.
      */
-    static HandleTemporalPairEntry* concatenation(HandleTemporalPairEntry*, HandleTemporalPairEntry*);
+    static TemporalEntry* concatenation(TemporalEntry*, TemporalEntry*);
 
     /**
-     * HandleTemporalPair sort criterion used by qsort. It returns a negative value,
+     * Temporal* sort criterion used by qsort. It returns a negative value,
      * zero or a positive value if the first argument is respectively
      * smaller than, equal to, or larger then the second argument.
      *
-     * @param The first handleTemporalPair element.
-     * @param The second handleTemporalPair element.
+     * @param The first time element.
+     * @param The second time element.
      * @return A negative value, zero or a positive value if the first
      * argument is respectively smaller than, equal to, or larger then the
      * second argument.
      */
-    static int handleTemporalPairCompare(const void*, const void*);
+    static int temporalCompare(const void*, const void*);
 
-    class SortComparison
-    {
-    public:
-        bool operator()(const HandleTemporalPair& htp1, const HandleTemporalPair& htp2) const {
-            return(compare(htp1, htp2) < 0);
-        }
-    };
+    /**
+     * Temporal* sort criterion used by qsort. It returns a negative value,
+     * zero or a positive value if the first argument is respectively
+     * smaller than, equal to, or larger then the second argument.
+     *
+     * @param The first time element.
+     * @param The second time element.
+     * @return A negative value, zero or a positive value if the first
+     * argument is respectively smaller than, equal to, or larger then the
+     * second argument.
+     */
+    static int compare(const Temporal*, const Temporal*);
 
 };
 
 } // namespace opencog
 
-#endif // _OPENCOG_HANDLE_TEMPORAL_PAIR_ENTRY_H
+#endif // _OPENCOG_TEMPORAL_ENTRY_H

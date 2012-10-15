@@ -26,7 +26,7 @@
 
 #include <algorithm>
 
-#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/spacetime/Temporal.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 
 #include "BDTracker.h"

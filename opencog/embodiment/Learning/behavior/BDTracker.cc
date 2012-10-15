@@ -24,9 +24,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 
-#include <opencog/spatial/space_server/HandleTemporalPair.h>
-#include <opencog/spatial/space_server/TemporalTable.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/HandleTemporalPair.h>
+#include <opencog/spacetime/TemporalTable.h>
+#include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/server/CogServer.h>
 

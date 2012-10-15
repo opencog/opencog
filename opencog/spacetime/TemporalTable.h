@@ -26,9 +26,9 @@
 #ifndef _OPENCOG_TEMPORAL_TABLE_H
 #define _OPENCOG_TEMPORAL_TABLE_H
 
-#include <opencog/spatial/space_server/HandleToTemporalEntryMap.h>
-#include <opencog/spatial/space_server/TemporalToHandleSetMap.h>
-#include <opencog/spatial/space_server/HandleTemporalPairEntry.h>
+#include <opencog/spacetime/HandleToTemporalEntryMap.h>
+#include <opencog/spacetime/TemporalToHandleSetMap.h>
+#include <opencog/spacetime/HandleTemporalPairEntry.h>
 
 namespace opencog
 {

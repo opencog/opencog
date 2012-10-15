@@ -29,7 +29,7 @@
 #include "BasicPredicateUpdater.h"
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 namespace opencog { namespace oac {
 

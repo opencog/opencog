@@ -27,7 +27,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 

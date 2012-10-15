@@ -23,7 +23,7 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include "OAC.h"
 #include "PsiActionSelectionAgent.h"

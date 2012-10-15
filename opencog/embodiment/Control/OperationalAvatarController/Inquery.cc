@@ -27,7 +27,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/StringManipulator.h>
 
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/spatial/3DSpaceMap/Entity3D.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>

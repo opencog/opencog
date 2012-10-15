@@ -27,7 +27,7 @@
 
 #include <vector>
 #include <opencog/atomspace/types.h>
-#include <opencog/spatial/space_server/Temporal.h>
+#include <opencog/spacetime/Temporal.h>
 #include "PredicateHandleSet.h"
 #include "ElementaryBehaviorDescription.h"
 

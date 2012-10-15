@@ -40,8 +40,8 @@
 
 #include <opencog/persist/file/SavableRepository.h>
 
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 namespace opencog
 {

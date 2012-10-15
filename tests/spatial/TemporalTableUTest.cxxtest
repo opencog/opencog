@@ -24,7 +24,7 @@
 
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/TemporalTable.h>
+#include <opencog/spacetime/TemporalTable.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
 

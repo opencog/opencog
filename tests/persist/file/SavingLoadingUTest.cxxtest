@@ -34,7 +34,7 @@
 #include <opencog/persist/file/SavingLoading.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/TimeServer.h>
 #include <opencog/util/Logger.h>
 
 #include "atom_types.definitions"

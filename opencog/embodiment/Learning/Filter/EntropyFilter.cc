@@ -30,8 +30,8 @@
 #include <opencog/util/lru_cache.h>
 
 #include <opencog/comboreduct/combo/type_tree.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>

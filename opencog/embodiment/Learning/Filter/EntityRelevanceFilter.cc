@@ -28,9 +28,9 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 
-#include <opencog/spatial/space_server/Temporal.h>
-#include <opencog/spatial/space_server/TimeServer.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/Temporal.h>
+#include <opencog/spacetime/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>

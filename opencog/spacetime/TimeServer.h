@@ -29,8 +29,8 @@
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/TemporalTable.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/TemporalTable.h>
 
 
 namespace opencog

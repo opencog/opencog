@@ -28,7 +28,7 @@
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
+#include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>

@@ -25,7 +25,7 @@
 #define _ATOMSPACE_WORLD_PROVIDER_H_
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/TimeServer.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 

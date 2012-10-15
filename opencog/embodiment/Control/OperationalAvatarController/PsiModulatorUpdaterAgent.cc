@@ -22,7 +22,7 @@
 
 #include <boost/tokenizer.hpp>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/web/json_spirit/json_spirit.h>
 

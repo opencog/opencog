@@ -39,11 +39,11 @@
 
 #include <opencog/query/PatternMatch.h>
 
-#include <opencog/spatial/space_server/HandleTemporalPairEntry.h>
-#include <opencog/spatial/space_server/SpaceServer.h>
-#include <opencog/spatial/space_server/Temporal.h>
-#include <opencog/spatial/space_server/TemporalTable.h>
-#include <opencog/spatial/space_server/TimeServer.h>
+#include <opencog/spacetime/HandleTemporalPairEntry.h>
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/Temporal.h>
+#include <opencog/spacetime/TemporalTable.h>
+#include <opencog/spacetime/TimeServer.h>
 
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"

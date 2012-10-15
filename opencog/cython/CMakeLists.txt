@@ -21,7 +21,7 @@ add_custom_command(OUTPUT opencog/cogserver.cpp
 add_custom_command(OUTPUT opencog/util.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/util.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/util.pyx"
-  DEPENDS "opencog/util.pyx")
+  DEPENDS "opencog/util.pyx" "opencog/atomspace.pxd")
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp"
     "opencog/util.cpp")
@@ -41,7 +41,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h
 add_custom_command(OUTPUT scheme_wrapper.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
-  DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc")
+  DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd")
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
 # opencog.atomspace Python bindings
