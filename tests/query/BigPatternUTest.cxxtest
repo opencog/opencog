@@ -78,6 +78,7 @@ class BigPatternUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void BigPatternUTest::setUp(void)
 {
+	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 

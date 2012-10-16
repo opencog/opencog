@@ -136,7 +136,7 @@ public:
     static HebbianUpdatingAgentUTest* createSuite() { return new HebbianUpdatingAgentUTest(); }
     static void destroySuite(HebbianUpdatingAgentUTest* suite) { delete suite; }
 
-    HebbianUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+    HebbianUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(HebbianUpdatingAgent::info().id, &factory);
         agent = static_cast<HebbianUpdatingAgent*>(cogserver.createAgent(HebbianUpdatingAgent::info().id, true));
         logger().setLevel(Logger::FINE);

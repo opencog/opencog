@@ -96,7 +96,7 @@ public:
     static ImportanceDiffusionAgentUTest* createSuite() { return new ImportanceDiffusionAgentUTest(); }
     static void destroySuite(ImportanceDiffusionAgentUTest* suite) { delete suite; }
 
-    ImportanceDiffusionAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+    ImportanceDiffusionAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &factory);
         agent = static_cast<ImportanceDiffusionAgent*>(cogserver.createAgent(ImportanceDiffusionAgent::info().id, true));
         logger().setLevel(Logger::FINE);

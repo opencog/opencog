@@ -108,6 +108,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
  */
 void BasicSCMUTest::setUp(void)
 {
+	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	eval = &SchemeEval::instance(as);
 

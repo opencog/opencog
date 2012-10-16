@@ -44,7 +44,7 @@ public:
     static STIDecayingAgentUTest* createSuite() { return new STIDecayingAgentUTest(); }
     static void destroySuite(STIDecayingAgentUTest* suite) { delete suite; }
 
-    STIDecayingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+    STIDecayingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(STIDecayingAgent::info().id, &factory);
     }
 

@@ -78,6 +78,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 #define al as->addLink
 void VarTypeNot::setUp(void)
 {
+	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 

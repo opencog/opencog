@@ -88,7 +88,7 @@ public:
     static ImportanceUpdatingAgentUTest* createSuite() { return new ImportanceUpdatingAgentUTest(); }
     static void destroySuite(ImportanceUpdatingAgentUTest* suite) { delete suite; }
 
-	ImportanceUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server())) {
+	ImportanceUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(ImportanceUpdatingAgent::info().id, &factory);
     }
 

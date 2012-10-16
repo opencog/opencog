@@ -81,6 +81,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void ExecutionUTest::setUp(void)
 {
+	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 	// Initialise scheme

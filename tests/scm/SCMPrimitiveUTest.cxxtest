@@ -104,6 +104,7 @@ class MyExampleClass
  */
 void SCMPrimitiveUTest::setUp(void)
 {
+	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	eval = &(SchemeEval::instance(as));
 }

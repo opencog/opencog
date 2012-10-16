@@ -147,7 +147,7 @@ public:
     }
 
     void setUp() {    
-        CogServer& cogserver = static_cast<CogServer&>(server());
+        CogServer& cogserver = static_cast<CogServer&>(server(CogServer::createInstance));
         cogserver.registerAgent(MyAgentWithDefaults::info().id, &factory);
     }
 

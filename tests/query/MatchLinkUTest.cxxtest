@@ -79,6 +79,7 @@ class MatchLink :  public CxxTest::TestSuite
 #define al as->addLink
 void MatchLink::setUp(void)
 {
+	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 

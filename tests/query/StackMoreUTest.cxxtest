@@ -81,6 +81,7 @@ class StackMoreUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void StackMoreUTest::setUp(void)
 {
+	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 

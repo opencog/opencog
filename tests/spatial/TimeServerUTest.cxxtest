@@ -59,6 +59,7 @@ private:
 public:
 
     TimeServerUTest() {
+        server(CogServer::createInstance);
         for (int i = 0; i < N_TIMES; i++) {
             times[i] = new Temporal(i*2, i*2);
             char name[16];
