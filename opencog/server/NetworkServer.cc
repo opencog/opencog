@@ -35,7 +35,7 @@
 using namespace opencog;
 
 NetworkServer::NetworkServer()
-    : _running(false), _thread(0)
+    : _started(false), _running(false), _thread(0)
 {
     logger().debug("[NetworkServer] constructor");
 }
@@ -72,12 +72,15 @@ void NetworkServer::start()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
     // create thread
-    _running = true;
     int rc = pthread_create(&_thread, &attr, _opencog_run_wrapper, this);
     if (rc != 0) {
         logger().error("Unable to start network server thread: %d", rc);
         _running = false;
+        _started = false;
+        return;
     }
+    _started = true;
+    _running = true;
 }
 
 void NetworkServer::stop()
@@ -85,7 +88,8 @@ void NetworkServer::stop()
     logger().debug("[NetworkServer] stop");
     _running = false;
     io_service.stop();
-}
+    while (_started) { usleep(10000); }
+} 
 
 void NetworkServer::run()
 {
@@ -96,9 +100,10 @@ void NetworkServer::run()
         } catch (boost::system::system_error& e) {
             logger().error("Error in boost::asio io_service::run() => %s", e.what());
         }
-        usleep(500000); // avoids busy wait
+        usleep(50000); // avoids busy wait
     }
     logger().debug("[NetworkServer] end of run");
+    _started = false;
 }
 
 namespace opencog {
