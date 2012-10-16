@@ -93,12 +93,12 @@ void StorkeyAgent::run(CogServer *server)
 
 float StorkeyAgent::h(int i, int j, w_t& w)
 {
-    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
+    AtomSpace& a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     int n = w.size();
     float h_sum = 0.0f;
     for (int k=0; k < n; k++) {
         if (k == i || k == j) continue;
-        h_sum += ( w[i][k] * a->getNormalisedSTI(
+        h_sum += ( w[i][k] * a.getNormalisedSTI(
                     (static_cast<HopfieldServer&>(server())).hGrid[k],false) );
     }
     return h_sum;
@@ -106,11 +106,11 @@ float StorkeyAgent::h(int i, int j, w_t& w)
 
 float StorkeyAgent::h(int i, w_t& w)
 {
-    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
+    AtomSpace& a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     int n = w.size();
     float h_sum = 0.0f;
     for (int k=0; k < n; k++) {
-        h_sum += ( w[i][k] * a->getNormalisedSTI(
+        h_sum += ( w[i][k] * a.getNormalisedSTI(
                     (static_cast<HopfieldServer&>(server())).hGrid[k],false) );
     }
     return h_sum;
@@ -118,7 +118,7 @@ float StorkeyAgent::h(int i, w_t& w)
 
 StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
 {
-    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
+    AtomSpace& a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     int n = (static_cast<HopfieldServer&>(server())).hGrid.size();
     std::vector<std::vector<float> > w;
     for (int i=0; i < n; i++) {
@@ -139,13 +139,13 @@ StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
             HandleSeq outgoing;
             outgoing.push_back(iHandle);
             outgoing.push_back(jHandle);
-            Handle heb = a->getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
+            Handle heb = a.getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
             if (heb != Handle::UNDEFINED) {
-                iRow[j] = a->getTV(heb)->getMean();
+                iRow[j] = a.getTV(heb)->getMean();
             } else {
-                heb = a->getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
+                heb = a.getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
                 if (heb != Handle::UNDEFINED)
-                    iRow[j] = -(a->getTV(heb)->getMean());
+                    iRow[j] = -(a.getTV(heb)->getMean());
                 else {
                     iRow[j] = 0.0f;
                 }
@@ -164,7 +164,7 @@ StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
 
 void StorkeyAgent::setCurrentWeights(w_t& w)
 {
-    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
+    AtomSpace& a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     int n = (static_cast<HopfieldServer&>(server())).hGrid.size();
     for (int i=0; i < n; i++) {
         Handle iHandle = (static_cast<HopfieldServer&>(server())).hGrid[i];
@@ -175,24 +175,24 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
             outgoing.push_back(iHandle);
             outgoing.push_back(jHandle);
 
-            Handle heb = a->getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
+            Handle heb = a.getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
             if (heb != Handle::UNDEFINED) {
                 if (w[i][j] < 0.0f) {
-                    a->removeAtom(heb, true);
-                    a->addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing,
+                    a.removeAtom(heb, true);
+                    a.addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing,
                             SimpleTruthValue(-w[i][j],100));
                 } else {
-                    a->setMean(heb,w[i][j]);
+                    a.setMean(heb,w[i][j]);
                 }
             } else {
-                heb = a->getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
+                heb = a.getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
                 if (heb != Handle::UNDEFINED) {
                     if (w[i][j] > 0.0f) {
-                        a->removeAtom(heb, true);
-                        a->addLink(SYMMETRIC_HEBBIAN_LINK, outgoing,
+                        a.removeAtom(heb, true);
+                        a.addLink(SYMMETRIC_HEBBIAN_LINK, outgoing,
                                 SimpleTruthValue(w[i][j],100));
                     } else {
-                        a->setMean(heb,-w[i][j]);
+                        a.setMean(heb,-w[i][j]);
                     }
                 }
                 // If both == Handle::UNDEFINED, then don't add weight. Link
@@ -217,7 +217,7 @@ bool StorkeyAgent::checkWeightSymmetry(w_t& w) {
 
 void StorkeyAgent::storkeyUpdate()
 {
-    AtomSpace *a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
+    AtomSpace& a = (static_cast<HopfieldServer&>(server())).getAtomSpace();
     w_t currentWeights;
     w_t newWeights;
 
@@ -232,15 +232,15 @@ void StorkeyAgent::storkeyUpdate()
             }
             float val = currentWeights[i][j];
 /*            cout << " before val = " << val << endl;
-            cout << " hGrid[i] = " << a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false); 
-            cout << " hGrid[j] = " << a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false); 
+            cout << " hGrid[i] = " << a.getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false); 
+            cout << " hGrid[j] = " << a.getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false); 
             cout << " h_i = " << h(i,currentWeights);
             cout << " h_j = " << h(j,currentWeights) << endl; */
-            val += (1.0f/n) * a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false) *
-                a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false);
-            val -= (1.0f/n) * a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false) *
+            val += (1.0f/n) * a.getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false) *
+                a.getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false);
+            val -= (1.0f/n) * a.getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[i],false) *
                 h(j,currentWeights);
-            val -= (1.0f/n) * a->getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false) *
+            val -= (1.0f/n) * a.getNormalisedSTI((static_cast<HopfieldServer&>(server())).hGrid[j],false) *
                 h(i,currentWeights);
 //            cout << " after val = " << val << endl;
             iRow.push_back(val);

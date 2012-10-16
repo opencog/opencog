@@ -99,7 +99,7 @@ public:
     bool isConnected() { return connected; };
     std::string getServerString() { return serverString; };
 
-    AtomSpace *space;
+    AtomSpace& space;
 
     bool withIncoming;
     //! Whether to squash arity 2 links with no incoming set into a single edge.

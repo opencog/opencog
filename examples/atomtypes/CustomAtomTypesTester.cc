@@ -39,7 +39,7 @@ void CustomAtomTypesTester::createAtoms()
 {
     logger().info("[CustomAtomTypesTester.createAtoms]");
 
-    AtomSpace& as = *server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
 
     Handle number_handle = as.addNode(NUMBER_NODE,"1");
     logger().info("[CustomAtomTypesTester] new node: %s (%d)",
@@ -69,28 +69,28 @@ static void dumpHandleSeq(HandleSeq& hs, const char *id)
 {
     foreach( Handle handle, hs) {
         logger().info("[CustomAtomTypesTester] %s: %s",
-                id, server().getAtomSpace()->atomAsString(handle).c_str());
+                id, server().getAtomSpace().atomAsString(handle).c_str());
     }
 }
 
 void CustomAtomTypesTester::dumpAtoms()
 {
     logger().info("[CustomAtomTypesTester.dumpAtoms]");
-    AtomSpace* as = server().getAtomSpace();
+    AtomSpace& as = server().getAtomSpace();
     HandleSeq hs;
-    as->getHandleSet(back_inserter(hs), BAR_NODE);
+    as.getHandleSet(back_inserter(hs), BAR_NODE);
     dumpHandleSeq(hs, "bar node");
     hs.clear();
-    as->getHandleSet(back_inserter(hs), NODE, true);
+    as.getHandleSet(back_inserter(hs), NODE, true);
     dumpHandleSeq(hs, "node");
     hs.clear();
-    as->getHandleSet(back_inserter(hs), FOOBAR_LINK);
+    as.getHandleSet(back_inserter(hs), FOOBAR_LINK);
     dumpHandleSeq(hs, "foobar link");
     hs.clear();
-    as->getHandleSet(back_inserter(hs), UNORDERED_LINK, true);
+    as.getHandleSet(back_inserter(hs), UNORDERED_LINK, true);
     dumpHandleSeq(hs, "unordered link");
     hs.clear();
-    as->getHandleSet(back_inserter(hs), LINK, true);
+    as.getHandleSet(back_inserter(hs), LINK, true);
     dumpHandleSeq(hs, "link");
     hs.clear();
 }

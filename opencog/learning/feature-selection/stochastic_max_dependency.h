@@ -99,6 +99,7 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
     // Randomize order, so that different redundant features
     // get a chance to show up in the final list. Copy set to
     // vector, then shuffle the vector.
+    // LOL: I don't think this shuffling changes anything!!!
     std::vector<feature_id> shuffle(features.begin(), features.end());
     auto shr = [&](ptrdiff_t i) { return randGen().randint(i); };
     random_shuffle(shuffle.begin(), shuffle.end(), shr);

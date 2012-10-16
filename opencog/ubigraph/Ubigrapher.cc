@@ -61,8 +61,9 @@ std::string initials(std::string s)
     return ret;
 }
 
-Ubigrapher::Ubigrapher() : pushDelay(1), connected(false),
-    withIncoming(false), compact(false)
+Ubigrapher::Ubigrapher()
+    : pushDelay(1), connected(false), space(CogServer::getAtomSpace()),
+      withIncoming(false), compact(false)
 {
     space = &CogServer::getAtomSpace();
     serverIP = "";
@@ -95,9 +96,9 @@ void Ubigrapher::watchSignals()
 {
     if (isConnected()) {
         if (!listening) {
-            c_add = space->atomSpaceAsync->addAtomSignal(
+            c_add = space.atomSpaceAsync->addAtomSignal(
                     boost::bind(&Ubigrapher::handleAddSignal, this, _1, _2));
-            c_remove = space->atomSpaceAsync->removeAtomSignal(
+            c_remove = space.atomSpaceAsync->removeAtomSignal(
                     boost::bind(&Ubigrapher::handleRemoveSignal, this, _1, _2));
             assert(c_add.connected() && c_remove.connected());
             listening = true;
@@ -204,14 +205,14 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
     case NONE:
         break;
     case TV_STRENGTH:
-        scaler = space->getMean(h) * multiplier;
+        scaler = space.getMean(h) * multiplier;
         break;
     case STI:
-        scaler = space->getNormalisedZeroToOneSTI(h,false,true)
+        scaler = space.getNormalisedZeroToOneSTI(h,false,true)
             * multiplier;
     }
     ost << baseline + scaler;
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = space.cloneAtom(h);
     boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
@@ -232,7 +233,7 @@ void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier, float 
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    space->getHandleSet(out_hi, t, true);
+    space.getHandleSet(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         updateSizeOfHandle(h, p, multiplier, baseline);
@@ -261,10 +262,10 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
         scaler=1.0f;
         break;
     case TV_STRENGTH:
-        scaler = space->getMean(h);
+        scaler = space.getMean(h);
         break;
     case STI:
-        scaler = space->getNormalisedZeroToOneSTI(h,false,true);
+        scaler = space.getNormalisedZeroToOneSTI(h,false,true);
     }
     if (hard == 0.0f) {
         if (p == TV_STRENGTH) scaler *= multiplierForTV;
@@ -284,7 +285,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
         }
     }
 
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = space.cloneAtom(h);
     boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
@@ -313,7 +314,7 @@ void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB
     std::back_insert_iterator< HandleSeq > out_hi(hs);
     
     // Get all atoms (and subtypes) of type t
-    space->getHandleSet(out_hi, t, true);
+    space.getHandleSet(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         updateColourOfHandle(h, p, startRGB, endRGB, hard);
@@ -327,7 +328,7 @@ void Ubigrapher::applyStyleToType(Type t, int style)
     HandleSeq hs;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
     // Get all atoms (and subtypes) of type t
-    space->getHandleSet(out_hi, t, true);
+    space.getHandleSet(out_hi, t, true);
     applyStyleToHandleSeq(hs, style);
 }
 
@@ -338,7 +339,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    space->getHandleSet(out_hi, t, true);
+    space.getHandleSet(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         bool okToApply = true;
@@ -346,13 +347,13 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
         case NONE:
             break;
         case TV_STRENGTH:
-            if (space->getMean(h) < limit) okToApply = false;
+            if (space.getMean(h) < limit) okToApply = false;
             break;
         case STI:
-            if (space->getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
+            if (space.getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
         }
         if (okToApply) {
-            boost::shared_ptr<Atom> a = space->cloneAtom(h);
+            boost::shared_ptr<Atom> a = space.cloneAtom(h);
             boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
             if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
@@ -371,7 +372,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
     if (!isConnected()) return;
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
-        boost::shared_ptr<Atom> a = space->cloneAtom(h);
+        boost::shared_ptr<Atom> a = space.cloneAtom(h);
         if (!a) continue;
         boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
         if (l) {
@@ -387,10 +388,10 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
 bool Ubigrapher::addVertex(Handle h)
 {
 	// Policy: don't display PLN's FWVariableNodes, because it's annoying
-	if (classserver().isA(space->getType(h), FW_VARIABLE_NODE)) return false;
+	if (classserver().isA(space.getType(h), FW_VARIABLE_NODE)) return false;
 
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = space.cloneAtom(h);
     bool isNode = classserver().isA(a->getType(),NODE);
 
     int id = (int)h.value();
@@ -426,7 +427,7 @@ bool Ubigrapher::addVertex(Handle h)
             boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
             l = l; // TODO: anything to output for links?
         }*/
-        ost << ":" << space->getMean(h);
+        ost << ":" << space.getMean(h);
         ubigraph_set_vertex_attribute(id, "label", ost.str().c_str());
     }
     return false;
@@ -438,7 +439,7 @@ bool Ubigrapher::addVertex(Handle h)
 bool Ubigrapher::addEdges(Handle h)
 {
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = space.cloneAtom(h);
 
     usleep(pushDelay);
     boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
@@ -469,7 +470,7 @@ bool Ubigrapher::addEdges(Handle h)
                 } else {
                     ost << type;
                 }
-                ost << ":" << space->getMean(h);
+                ost << ":" << space.getMean(h);
                 ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
             }
             return false;
@@ -494,7 +495,7 @@ bool Ubigrapher::addEdges(Handle h)
 bool Ubigrapher::removeVertex(Handle h)
 {
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = space.cloneAtom(h);
 
     if (compact)
     {
@@ -516,7 +517,7 @@ bool Ubigrapher::removeVertex(Handle h)
 bool Ubigrapher::removeEdges(Handle h)
 {
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space->cloneAtom(h);
+    boost::shared_ptr<Atom> a = space.cloneAtom(h);
 
     // This method is only relevant to binary Links with no incoming.
     // Any other atoms will be represented by vertexes, and the edges
@@ -542,8 +543,8 @@ void Ubigrapher::graph()
     if (!isConnected()) return;
     ubigraph_clear();
     setStyles();
-    space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::addVertex, this, true);
-    space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::addEdges, this, true);
+    space.foreach_handle_of_type((Type)ATOM, &Ubigrapher::addVertex, this, true);
+    space.foreach_handle_of_type((Type)ATOM, &Ubigrapher::addEdges, this, true);
 }
 
 
