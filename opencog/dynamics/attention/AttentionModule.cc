@@ -47,6 +47,7 @@ AttentionModule::AttentionModule()
 
 AttentionModule::~AttentionModule()
 {
+    logger().debug("[AttentionModule] enter destructor");
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.unregisterAgent(ForgettingAgent::info().id);
     cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
@@ -56,6 +57,7 @@ AttentionModule::~AttentionModule()
 #endif
     cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
     cogserver.unregisterAgent(STIDecayingAgent::info().id);
+    logger().debug("[AttentionModule] exit destructor");
 }
 
 void AttentionModule::init()
@@ -86,11 +88,11 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     return TRUE;
 }
 #elif __GNUC__
-static __attribute__ ((constructor)) void _init(void)
+static __attribute__ ((constructor)) void attention_init(void)
 {
     #include "opencog/dynamics/attention/atom_types.inheritance"
 }
-static __attribute__ ((constructor)) void _fini(void)
+static __attribute__ ((destructor)) void attention_fini(void)
 {
 }
 #endif

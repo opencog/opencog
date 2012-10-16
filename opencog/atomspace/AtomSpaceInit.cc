@@ -49,12 +49,12 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
 }
 #elif __GNUC__
 #include <stdio.h>
-static __attribute__ ((constructor)) void _init(void)
+static __attribute__ ((constructor)) void atomspace_init(void)
 {
     opencog::classserver();
 }
 
-static __attribute__ ((constructor)) void _fini(void)
+static __attribute__ ((destructor)) void atomspace_fini(void)
 {
 }
 

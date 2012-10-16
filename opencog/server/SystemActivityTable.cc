@@ -39,9 +39,10 @@ SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100)
 
 SystemActivityTable::~SystemActivityTable()
 {
-    logger().debug("[SystemActivityTable] destructor");
+    logger().debug("[SystemActivityTable] enter destructor");
     conn.disconnect();
     clearActivity();
+    logger().debug("[SystemActivityTable] exit destructor");
 }
 
 void SystemActivityTable::init(CogServer *cogServer)

@@ -35,12 +35,12 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     return TRUE;
 }
 #elif __GNUC__
-static __attribute__ ((constructor)) void _init(void)
+static __attribute__ ((constructor)) void nlp_init(void)
 {
     #include "opencog/nlp/types/atom_types.inheritance"
 }
 
-static __attribute__ ((constructor)) void _fini(void)
+static __attribute__ ((destructor)) void nlp_fini(void)
 {
 }
 
