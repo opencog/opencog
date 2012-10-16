@@ -142,9 +142,8 @@ namespace opencog
         logger().debug("[" cmd_str " Request] execute");              \
         std::ostringstream oss;                                       \
                                                                       \
-        CogServer& cogserver = static_cast<CogServer&>(server());     \
         mod_type* mod =                                               \
-            static_cast<mod_type *>(cogserver.getModule(              \
+            static_cast<mod_type *>(cogserver().getModule(            \
                  "opencog::" #mod_type));                             \
                                                                       \
         std::string rs = mod->do_cmd(this, _parameters);              \

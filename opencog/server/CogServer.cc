@@ -65,7 +65,8 @@ struct equal_to_id : public std::binary_function<const Agent*, const std::string
 };
 }
 
-CogServer* CogServer::createInstance() {
+BaseServer* CogServer::createInstance()
+{
     return new CogServer();
 }
 

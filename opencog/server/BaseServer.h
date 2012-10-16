@@ -25,16 +25,12 @@
 #ifndef _OPENCOG_BASE_SERVER_H
 #define _OPENCOG_BASE_SERVER_H
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
 
 namespace opencog
 {
-
-class AtomSpace;
-class BaseServer; 
-
-typedef BaseServer* ServerFactory(void);
 
 /**
  * This class implements a base server class that provides basic functionality
@@ -47,7 +43,7 @@ typedef BaseServer* ServerFactory(void);
  *      2. the first call to the 'opencog::server()' global function explicitly
  *         passes the derived server's factory method as parameter.
  *
- * See the files CogServerMain.cc, CogServerh and CogServercc for examples.
+ * See the files CogServerMain.cc, CogServer.h and CogServer.cc for examples.
  */
 class BaseServer
 {
@@ -73,7 +69,22 @@ public:
 }; // class
 
 // singleton instance (following meyer's design pattern)
-BaseServer& server(ServerFactory* = BaseServer::createInstance);
+BaseServer& server(BaseServer* (*)() = BaseServer::createInstance);
+
+inline AtomSpace& atomspace(void)
+{
+    return server().getAtomSpace();
+}
+
+inline SpaceServer& spaceServer()
+{
+   return server().getSpaceServer();
+}
+
+inline TimeServer& timeServer()
+{
+   return server().getTimeServer();
+}
 
 }  // namespace
 

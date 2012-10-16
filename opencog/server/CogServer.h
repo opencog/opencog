@@ -134,7 +134,7 @@ public:
 
     /** Factory method. override's the base class factory method and returns an
      *  instance of CogServer instead */
-    static CogServer* createInstance(void);
+    static BaseServer* createInstance(void);
 
     /** CogServer's destructor. Disables the network server is unloads all
      * modules. */
@@ -292,24 +292,8 @@ public:
 // Handy dandy utiities
 inline CogServer& cogserver(void)
 {
-    return static_cast<CogServer&>(server());
+    return dynamic_cast<CogServer&>(server());
 }
-
-inline AtomSpace& atomspace(void)
-{
-    return cogserver().getAtomSpace();
-}
-
-inline SpaceServer& spaceServer()
-{
-   return cogserver().getSpaceServer();
-}
-
-inline TimeServer& timeServer()
-{
-   return cogserver().getTimeServer();
-}
-
 
 }  // namespace
 

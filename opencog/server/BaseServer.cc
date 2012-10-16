@@ -22,12 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BaseServer.h"
-
 #include <memory>
-
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
+#include "BaseServer.h"
 
 using namespace opencog;
 
@@ -37,7 +33,18 @@ TimeServer* BaseServer::timeser = NULL;
 
 BaseServer* BaseServer::createInstance()
 {
-    return new CogServer();
+    OC_ASSERT(0,
+        "Accidentally called the base class!\n"
+        "To fix this bug, be sure to make the following call in your code:\n"
+        "   server(MyServer::MyCreateInstance);\n"
+        "So, for example:\n"
+        "   server(OAC::createInstance);\n"
+        "or maybe this:\n"
+        "   server(CogServer::createInstance);\n"
+        "depending on which you want.  You only need to do this once,\n"
+        "early during the initialization of your program.\n"
+    );
+    return NULL;
 }
 
 BaseServer::BaseServer()
@@ -64,7 +71,7 @@ TimeServer& BaseServer::getTimeServer()
 }
 
 // create and return static singleton instance
-BaseServer& opencog::server(ServerFactory* factoryFunction)
+BaseServer& opencog::server(BaseServer* (*factoryFunction)())
 {
     static std::auto_ptr<BaseServer> instance((*factoryFunction)());
     return *instance;
