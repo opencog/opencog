@@ -338,6 +338,7 @@ void AtomStorage::init(const char * dbname,
 {
 	db_conn = new ODBCConnection(dbname, username, authentication);
 	type_map_was_loaded = false;
+	max_height = 0;
 
 	for (int i=0; i< TYPEMAP_SZ; i++)
 	{
@@ -348,7 +349,6 @@ void AtomStorage::init(const char * dbname,
 	if (!connected()) return;
 
 	reserve();
-	max_height = 0;
 }
 
 AtomStorage::AtomStorage(const char * dbname,
@@ -367,6 +367,13 @@ AtomStorage::AtomStorage(const std::string& dbname,
 
 AtomStorage::~AtomStorage()
 {
+	if (!connected())
+	{
+		delete db_conn;
+		db_conn = NULL;
+		return;
+	}
+
 	setMaxUUID(getMaxObservedUUID());
 	setMaxHeight(getMaxObservedHeight());
 	delete db_conn;
