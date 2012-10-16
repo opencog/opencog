@@ -457,7 +457,6 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
             }
             ((Link *)atom)->setTrail(newTrail);
             //newTrail->print();
-            delete(t);
         }
     }
     
@@ -542,7 +541,7 @@ void SavingLoading::readNode(FILE *f, Node* node, HandleMap<Atom *> *handles)
         char *name = new char[nameSize+1];
         fread(name, sizeof(char), nameSize, f);
         name[nameSize] = '\0';
-        node->name = name;
+        node->setName(name);
         delete[](name);
     }
 
