@@ -42,6 +42,14 @@
 }
 
 {
+   <very_deep_stack_mpn_grunge_cond>
+   Memcheck:Cond
+   ...
+   fun:__mpn_mul
+   ...
+}
+
+{
    <very_deep_stack_mpn_grunge>
    Memcheck:Value8
    ...
