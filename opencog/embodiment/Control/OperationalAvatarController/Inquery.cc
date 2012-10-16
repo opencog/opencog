@@ -42,12 +42,13 @@
 using namespace opencog::oac;
 using namespace opencog::pai;
 
-OAC* Inquery::oac = 0;
-SpaceServer::SpaceMap *spaceMap = &spaceServer().getLatestMap();
+OAC* Inquery::oac = NULL;
+SpaceServer::SpaceMap *spaceMap = NULL;
 
 void Inquery::init(OAC* _oac)
 {
     oac = _oac;
+    spaceMap = &oac->getSpaceServer().getLatestMap();
 }
 
 StateValue Inquery::inqueryDistance(vector<StateValue>& stateOwnerList)
