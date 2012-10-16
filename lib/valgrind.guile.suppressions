@@ -1,0 +1,22 @@
+{
+   <scm_gc_supp_cond>
+   Memcheck:Cond
+   ...
+   fun:scm_i_gc
+   ...
+}
+{
+   <guile_gc_supp_value>
+   Memcheck:Value8
+   ...
+   fun:scm_i_gc
+   ...
+}
+{
+   <guile_newcell>
+   Memcheck:Cond
+   ...
+   fun:scm_gc_for_newcell
+   ...
+}
+
