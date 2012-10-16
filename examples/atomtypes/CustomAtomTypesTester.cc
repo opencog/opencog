@@ -28,11 +28,10 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
-#include "atom_types.h"
+#include "examples/atomtypes/atom_types.h"
 
 using namespace opencog;
 
