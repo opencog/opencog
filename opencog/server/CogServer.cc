@@ -84,7 +84,7 @@ CogServer::~CogServer()
         // retest the key because it might have been removed already
         ModuleMap::iterator it = modules.find(*k);
         if (it != modules.end()) {
-            logger().debug("[CogServer] removing module %s\"", it->first.c_str());
+            logger().debug("[CogServer] removing module \"%s\"", it->first.c_str());
             ModuleData mdata = it->second;
 
             // cache filename and id to erase the entries from the modules map
@@ -321,6 +321,7 @@ bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> cons
 
 bool CogServer::unregisterAgent(const std::string& id)
 {
+    logger().debug("[CogServer] unregister agent \"%s\"", id.c_str());
     destroyAllAgents(id);
     return Registry<Agent>::unregister(id);
 }
@@ -351,11 +352,13 @@ void CogServer::stopAgent(Agent* agent)
     if (ai != agents.end())
         agents.erase(ai);
     pthread_mutex_unlock(&agentsLock);
+    logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
 void CogServer::destroyAgent(Agent *agent)
 {
     stopAgent(agent);
+    logger().debug("[CogServer] deleting agent \"%s\"", agent->to_string().c_str());
     delete agent;
 }
 
