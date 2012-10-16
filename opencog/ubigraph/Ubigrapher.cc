@@ -64,7 +64,7 @@ std::string initials(std::string s)
 Ubigrapher::Ubigrapher() : pushDelay(1), connected(false),
     withIncoming(false), compact(false)
 {
-    space = CogServer::getAtomSpace();
+    space = &CogServer::getAtomSpace();
     serverIP = "";
     serverPort = 0;
 
