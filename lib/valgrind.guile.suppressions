@@ -19,4 +19,35 @@
    fun:scm_gc_for_newcell
    ...
 }
+{
+   <eval_string>
+   Memcheck:Cond
+   ...
+   fun:scm_c_catch
+   ...
+}
+{
+   <eval_string>
+   Memcheck:Value8
+   ...
+   fun:scm_c_catch
+   ...
+}
+{
+   <deep_stack>
+   Memcheck:Cond
+   ...
+   fun:inner_eval_string
+   ...
+}
+
+{
+   <very_deep_stack_mpn_grunge>
+   Memcheck:Value8
+   ...
+   fun:__mpn_mul
+   ...
+}
+
+
 

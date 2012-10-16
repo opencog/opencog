@@ -1,0 +1,17 @@
+
+{
+   <lexical_cast_breakage>
+   Memcheck:Cond
+   ...
+   fun:_ZN5boost6detail12lexical_castISsdLb0EcEET_NS_11call_traitsIT0_E10param_typeEPT2_m
+   ...
+}
+{
+   <lexical_cast_breakage_v8>
+   Memcheck:Value8
+   ...
+   fun:_ZN5boost6detail12lexical_castISsdLb0EcEET_NS_11call_traitsIT0_E10param_typeEPT2_m
+   ...
+}
+
+
