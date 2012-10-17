@@ -37,8 +37,6 @@
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
-#include <opencog/server/CogServer.h>
-
 #include "SpaceServer.h"
 #include "TimeServer.h"
 
