@@ -33,16 +33,20 @@
 #include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
 
+#ifdef CIRCULAR_DEPENDENCY
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
+#endif // CIRCULAR_DEPENDENCY
 
 namespace opencog { namespace messaging {
     
+#ifdef CIRCULAR_DEPENDENCY
 using namespace opencog::learningserver::messages;
+#endif // CIRCULAR_DEPENDENCY
 
 Message::~Message()
 {
@@ -65,6 +69,7 @@ Message *Message::factory(const std::string &from, const std::string &to, int
         return new StringMessage(from, to, msg);
         break;
     }
+#ifdef CIRCULAR_DEPENDENCY
     case LEARN: {
         return new LearnMessage(from, to, msg);
         break;
@@ -94,6 +99,7 @@ Message *Message::factory(const std::string &from, const std::string &to, int
         return new LSCmdMessage(from, to, msg);
         break;
     }
+#endif // CIRCULAR_DEPENDENCY
     case TICK: {
         return new TickMessage(from, to);
         break;
