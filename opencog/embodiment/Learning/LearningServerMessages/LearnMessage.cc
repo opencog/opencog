@@ -2,8 +2,9 @@
  * opencog/embodiment/Learning/LearningServerMessages/LearnMessage.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
- * Author(s): Carlos Lopes
+ * Author(s): Carlos Lopes, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -24,13 +25,10 @@
 #include <vector>
 #include <boost/lexical_cast.hpp>
 
-
 #include <opencog/util/StringTokenizer.h>
 
 // Arghhh! the NMXML stuff is obsolete, please do not use in new code!
-// #include <opencog/persist/xml/NMXmlParser.h>
 #include <opencog/persist/xml/NMXmlExporter.h>
-// #include <opencog/persist/xml/StringXMLBufferReader.h>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/spacetime/TimeServer.h>
@@ -39,7 +37,23 @@
 #include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 
 #include "LearnMessage.h"
+
 using namespace opencog::learningserver::messages;
+using namespace opencog::messaging;
+
+int LearnMessage::_learnMsgType = init();
+
+static Message* learnFactory(const std::string &from, const std::string &to,
+                              int msgType, const std::string &msg)
+{
+    return new LearnMessage(from, to, msg);
+}
+
+int LearnMessage::init()
+{
+   _learnMsgType = registerMessageFactory((factory_t) learnFactory);
+   return registerMessageFactory((factory_t) learnFactory);
+}
 
 /**
  * Constructor and destructor
@@ -49,7 +63,7 @@ LearnMessage::~LearnMessage()
 }
 
 LearnMessage::LearnMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::LEARN)
+        Message(from, to, _learnMsgType)
 {
     schema.assign("");
     //spaceMap.assign("");
@@ -58,7 +72,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to) :
 
 LearnMessage::LearnMessage(const std::string &from, const std::string &to,
                            const std::string &msg) :
-        Message(from, to, opencog::messaging::LEARN)
+        Message(from, to, _learnMsgType)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -69,7 +83,7 @@ LearnMessage::LearnMessage(const std::string &from, const std::string &to,
                            const std::string &owId,
                            const std::string &avId, AtomSpace &atomSpace)
 throw (opencog::InvalidParamException, std::bad_exception):
-        Message(from, to, opencog::messaging::LEARN)
+        Message(from, to, _learnMsgType)
 {
 
 

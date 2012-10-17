@@ -39,7 +39,6 @@
 
 #ifdef CIRCULAR_DEPENDENCY
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
@@ -67,10 +66,6 @@ Message *messageFactory(const std::string &from, const std::string &to, int
         break;
     }
 #ifdef CIRCULAR_DEPENDENCY
-    case LEARN: {
-        return new LearnMessage(from, to, msg);
-        break;
-    }
     case REWARD: {
         return new RewardMessage(from, to, msg);
         break;

@@ -66,6 +66,13 @@ bool LSMocky::processNextMessage(opencog::messaging::Message *msg)
     learningserver::messages::RewardMessage * rm;
     learningserver::messages::LSCmdMessage  * cm;
 
+    lm = dynamic_cast<learningserver::messages::LearnMessage*>(msg);
+    if (lm) {
+        logger().info("LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
+                     lm->getFrom().c_str(),
+                     lm->getSchema().c_str());
+    }
+
     switch (msg->getType()) {
 
     case opencog::messaging::LS_CMD:
@@ -74,13 +81,6 @@ bool LSMocky::processNextMessage(opencog::messaging::Message *msg)
                      cm->getCommand().c_str(),
                      cm->getFrom().c_str(),
                      cm->getSchema().c_str());
-        break;
-
-    case opencog::messaging::LEARN:
-        lm = (learningserver::messages::LearnMessage *)msg;
-        logger().info("LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
-                     lm->getFrom().c_str(),
-                     lm->getSchema().c_str());
         break;
 
     case opencog::messaging::REWARD:

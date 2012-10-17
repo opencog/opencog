@@ -94,9 +94,10 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
             }
         }
         break;
+    }
 
-    case opencog::messaging::LEARN:
-        lm = (learningserver::messages::LearnMessage *)msg;
+    lm = dynamic_cast<learningserver::messages::LearnMessage*>(msg);
+    if (lm) {
 
         ownerID = lm->getOwnerId();
 
@@ -115,13 +116,12 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
 
             logger().info("LS - Starting new learning: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
             initLearn(lm);
-            break;
         }
 
         // learning in progress, message from the pet currently using LS
         // and the currently trick being learned (that is, it's a new
         // example)
-        if (learningPet == lm->getFrom() &&
+        else if (learningPet == lm->getFrom() &&
                 learningSchema == lm->getSchema()) {
 
             logger().info("LS - Adding example: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
@@ -129,14 +129,15 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
             // TODO verify if commented change has some effect
             //wp = new AtomSpaceWorldProvider(new AtomSpace());
             addLearnExample(lm);
-            break;
+        } else {
+
+            // currently the LS do not have a queue of tricks to learn or execute
+            // more than one learning process (no concurrency) soh just return
+            logger().warn("LS - LS does not support concurent learning (LS busy right now).");
         }
+    }
 
-        // currently the LS do not have a queue of tricks to learn or execute
-        // more than one learning process (no concurrency) soh just return
-        logger().warn("LS - LS does not support concurent learning (LS busy right now).");
-        break;
-
+    switch (msg->getType()) {
     case opencog::messaging::REWARD:
         rm = (learningserver::messages::RewardMessage *)msg;
 
