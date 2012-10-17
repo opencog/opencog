@@ -33,12 +33,23 @@ using namespace opencog::messaging;
 using namespace opencog::learningserver::messages;
 using namespace PetCombo;
 
-SchemaMessage::~SchemaMessage()
+int SchemaMessage::_schemaMsgType = -1;
+int SchemaMessage::_schemaCandMsgType = init();
+
+static Message* schemaFactory(const std::string &from, const std::string &to,
+                              int msgType, const std::string &msg)
 {
+    return new SchemaMessage(from, to, msg, msgType);
+}
+
+int SchemaMessage::init()
+{
+   _schemaMsgType = registerMessageFactory((factory_t) schemaFactory);
+   return registerMessageFactory((factory_t) schemaFactory);
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::SCHEMA)
+        Message(from, to, _schemaMsgType)
 {
     schema.assign("");
     schemaName.assign("");
@@ -49,23 +60,26 @@ SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
                              const std::string &msg, int msgType) :
         Message(from, to, msgType)
 {
-
+    if (-1 == msgType) setType(_schemaMsgType);
     loadPlainTextRepresentation(msg.c_str());
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
                              const opencog::combo::combo_tree & comboSchema, const std::string &schemaName,
                              const std::string &candidateSchemaName) :
-        Message(from, to, opencog::messaging::SCHEMA)
+        Message(from, to, _schemaMsgType)
 {
-
     this->schemaName.assign(schemaName);
     if (candidateSchemaName.size() != 0) {
         this->candidateSchemaName.assign(candidateSchemaName);
-        setType(CANDIDATE_SCHEMA);
+        setType(_schemaCandMsgType);
     }
 
     setSchema(comboSchema);
+}
+
+SchemaMessage::~SchemaMessage()
+{
 }
 
 const char * SchemaMessage::getPlainTextRepresentation()
@@ -75,7 +89,7 @@ const char * SchemaMessage::getPlainTextRepresentation()
     message.append(schemaName);
 
     // candidate schema messages has an extra parameter
-    if (getType() == CANDIDATE_SCHEMA) {
+    if (getType() == _schemaCandMsgType) {
         message.append(END_TOKEN);
         message.append(candidateSchemaName);
     }
@@ -87,7 +101,7 @@ const char * SchemaMessage::getPlainTextRepresentation()
 }
 
 void SchemaMessage::loadPlainTextRepresentation(const char *strMessage)
-throw (opencog::InvalidParamException, std::bad_exception)
+    throw (opencog::InvalidParamException, std::bad_exception)
 {
 
     opencog::StringTokenizer stringTokenizer((std::string)strMessage, (std::string)END_TOKEN);
@@ -97,7 +111,7 @@ throw (opencog::InvalidParamException, std::bad_exception)
         throw opencog::InvalidParamException(TRACE_INFO, "Cannot create a SchemaMessage with an empty name");
     }
 
-    if (getType() == CANDIDATE_SCHEMA) {
+    if (getType() == _schemaCandMsgType) {
 
         candidateSchemaName = stringTokenizer.nextToken();
         if (schemaName.empty()) {

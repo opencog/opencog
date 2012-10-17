@@ -892,7 +892,8 @@ bool OAC::processNextMessage(messaging::Message *msg)
 
     // message from learning server
     if (msg->getFrom() == config().get("LS_ID")) {
-        SchemaMessage * sm = (SchemaMessage *)msg;
+        SchemaMessage * sm = dynamic_cast<SchemaMessage*>(msg);
+
         logger().debug("OAC::%s - Got msg from LS: '%s'", __FUNCTION__, msg->getPlainTextRepresentation());
 
         // sanity check to see if LS does not return an empty
@@ -923,10 +924,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
                                                     tc));
         }
 
-        switch (sm->getType()) {
-            // note: assuming arity==0 for now - Moshe
-
-        case messaging::SCHEMA: {
+        if (sm->getType() == SchemaMessage::_schemaMsgType)  {
             // learning is finished, set pet to PLAYING state. This
             // design ensure that the learning info will not be lost
             // until a learned schema is received
@@ -938,9 +936,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
             // Add schema to RuleEngine learned schemata
 //            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
         }
-        break;
-
-        case messaging::CANDIDATE_SCHEMA: {
+        else if (sm->getType() == SchemaMessage::_schemaCandMsgType)  {
             // Add schema to RuleEngine learned schemata ...
 //            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
 
@@ -949,13 +945,9 @@ bool OAC::processNextMessage(messaging::Message *msg)
 //            ruleEngine->tryExecuteSchema( sm->getSchemaName( ) );
 
         }
-        break;
-
-        default: {
+        else {
             logger().error(
                          "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
-        }
-        break;
         }
     }
     return false;

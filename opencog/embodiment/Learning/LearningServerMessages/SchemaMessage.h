@@ -52,7 +52,7 @@ public:
     ~SchemaMessage();
     SchemaMessage(const std::string &from, const std::string &to);
     SchemaMessage(const std::string &from, const std::string &to,
-                  const std::string &msg, int msgType);
+                  const std::string &msg, int msgType = -1);
 
     // If candidate schema name isn't set then it is assumed that the
     // message carries the final schema
@@ -74,7 +74,8 @@ public:
      *
      * @param strMessage (char *) representation of the message to be built.
      */
-    void loadPlainTextRepresentation(const char *strMessage) throw (opencog::InvalidParamException, std::bad_exception);
+    void loadPlainTextRepresentation(const char *strMessage)
+        throw (opencog::InvalidParamException, std::bad_exception);
 
     /**
      * Set the schema to be sent by the message. This combo combo_tree
@@ -104,6 +105,10 @@ public:
     void setCandidateSchemaName(const std::string & candidateSchemaName);
     const std::string & getCandidateSchemaName();
 
+    static int _schemaMsgType; 
+    static int _schemaCandMsgType; 
+private:
+    static int init();
 }; // class
 } } } // namespace opencog::learningserver::messages
 

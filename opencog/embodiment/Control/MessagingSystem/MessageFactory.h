@@ -36,10 +36,8 @@ namespace opencog { namespace messaging {
     static const int STRING = 1;
     static const int LEARN  = 2;
     static const int REWARD = 3;
-    static const int SCHEMA = 4;
     static const int LS_CMD = 5;
     static const int ROUTER = 6;
-    static const int CANDIDATE_SCHEMA = 7;
     static const int TICK = 8;
     static const int FEEDBACK = 9;
     static const int TRY = 10;

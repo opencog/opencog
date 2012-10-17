@@ -65,18 +65,19 @@ public:
 
         std::string invalidMsg = "trick_name***";
         SchemaMessage message(from, to);
-        TS_ASSERT_THROWS(SchemaMessage(from, to, invalidMsg, SCHEMA), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(SchemaMessage(from, to, invalidMsg), opencog::InvalidParamException&);
     }
 
-    void testGetPlainTextRepresentation() {
+    void testGetPlainTextRepresentation()
+    {
         sm = new SchemaMessage(from, to, schema, trick);
         TS_ASSERT(sm);
 
         toLoad = sm->getPlainTextRepresentation();
-
     }
 
-    void testLoadPlainTextRepresentation() {
+    void testLoadPlainTextRepresentation()
+    {
         SchemaMessage sm2(from, to);
 
         sm2.loadPlainTextRepresentation(toLoad.c_str());

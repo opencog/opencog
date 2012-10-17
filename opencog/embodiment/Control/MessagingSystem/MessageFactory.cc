@@ -39,7 +39,6 @@
 
 #ifdef CIRCULAR_DEPENDENCY
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
@@ -82,14 +81,6 @@ Message *messageFactory(const std::string &from, const std::string &to, int
     }
     case STOP_LEARNING: {
         return new StopLearningMessage(from, to, msg);
-        break;
-    }
-    case SCHEMA:
-    case CANDIDATE_SCHEMA: {
-        // Same message class, but with different types.
-        // CANDIDATE_SCHEMA, besides the schema being learned,
-        // also has the name of the candidate to be tried out
-        return new SchemaMessage(from, to, msg, msgType);
         break;
     }
     case LS_CMD: {
@@ -136,7 +127,7 @@ Message *routerMessageFactory(const std::string &from, const std::string &to, in
 int registerMessageFactory(factory_t fac)
 {
     static int next_unissued_msg_id = 100;
-    int msg_id = next_unissued_msg_id;
+    int msg_id = next_unissued_msg_id++;
 
     factory_map.insert(pair<int, factory_t>(msg_id, fac));
 

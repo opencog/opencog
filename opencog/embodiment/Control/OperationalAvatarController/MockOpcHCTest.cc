@@ -232,13 +232,10 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
 
     // message from learning server
     if (msg->getFrom() == config().get("LS_ID")) {
-        SchemaMessage* sm
-        = (SchemaMessage *)msg;
+        SchemaMessage* sm = dynamic_cast<SchemaMessage*>(msg);
 
-        switch (sm->getType()) {
-            // note: assuming arity==0 for now - Moshe
+        if (sm->getType() == SchemaMessage::_schemaMsgType) {
 
-        case opencog::messaging::SCHEMA:
             std::cout << "SCHEMA" << std::endl;
             std::cout << "SCHEMA NAME : " << sm->getSchemaName() << std::endl;
             std::cout << "COMBO SCHEMA : " << sm->getComboSchema() << std::endl;
@@ -248,9 +245,8 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
             //          sm->getComboSchema()));
 
             //gai->addSchema(sm->getSchemaName());
-            break;
-
-        case opencog::messaging::CANDIDATE_SCHEMA:
+        }
+        else if (sm->getType() == SchemaMessage::_schemaCandMsgType) {
             std::cout << "CANDIDATE_SCHEMA" << std::endl;
             std::cout << "SCHEMA NAME : " << sm->getSchemaName() << std::endl;
             std::cout << "COMBO SCHEMA : " << sm->getComboSchema() << std::endl;
@@ -291,12 +287,9 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
                                             SCHEMA_NAME, REWARD_2);
                 _HCTa->setWait4();
             }
-            break;
-
-        default:
-            logger().error(
-                         "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
-            break;
+        } 
+        else {
+            logger().error("Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
         }
     }
     return false;
