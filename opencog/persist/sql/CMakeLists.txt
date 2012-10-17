@@ -30,8 +30,6 @@ ADD_EXECUTABLE(sniff
 
 TARGET_LINK_LIBRARIES(sniff
 	persist
-	SpaceMap
-	space_server
 	server
 	atomspace
 	${Boost_SIGNALS_LIBRARY}

@@ -29,6 +29,11 @@ namespace opencog {
 SpaceServer* SpaceTimeCogServer::spacer = NULL;
 TimeServer* SpaceTimeCogServer::timeser = NULL;
 
+BaseServer* SpaceTimeCogServer::createInstance(void)
+{
+    return new SpaceTimeCogServer();
+}
+
 SpaceServer& SpaceTimeCogServer::getSpaceServer()
 {
     return *spacer;
@@ -41,18 +46,20 @@ TimeServer& SpaceTimeCogServer::getTimeServer()
 
 SpaceTimeCogServer::SpaceTimeCogServer()
 {
+    logger().info("[SpaceTimeCogServer] constructor");
     spacer = new SpaceServer(getAtomSpace());
     timeser = new TimeServer(getAtomSpace(), spacer);
 }
 
 SpaceServer& spaceServer()
 {
-   return dynamic_cast<SpaceTimeCogServer&>(server()).getSpaceServer();
+    logger().info("[SpaceTimeCogServer] destructor");
+    return dynamic_cast<SpaceTimeCogServer*>(&server())->getSpaceServer();
 }
 
 TimeServer& timeServer()
 {
-   return dynamic_cast<SpaceTimeCogServer&>(server()).getTimeServer();
+    return dynamic_cast<SpaceTimeCogServer*>(&server())->getTimeServer();
 }
 
 } // namespace opencog

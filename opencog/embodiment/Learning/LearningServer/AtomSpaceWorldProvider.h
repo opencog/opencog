@@ -26,7 +26,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/TimeServer.h>
-#include <opencog/embodiment/Control/SpaceTime.h>
+#include <opencog/spacetime/SpaceTime.h>
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 
 namespace opencog {

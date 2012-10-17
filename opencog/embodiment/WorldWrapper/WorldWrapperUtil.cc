@@ -34,13 +34,12 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/mt19937ar.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/spacetime/SpaceTime.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <opencog/embodiment/Control/SpaceTime.h>
 
 #include "WorldWrapperUtil.h"
 

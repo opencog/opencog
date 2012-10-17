@@ -35,9 +35,6 @@ TARGET_LINK_LIBRARIES(PAI
 	Language
 	Control
 	AtomSpaceExtensions
-	space_server
-	SpaceMap
-	util 
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 
 	${Boost_REGEX_LIBRARY}

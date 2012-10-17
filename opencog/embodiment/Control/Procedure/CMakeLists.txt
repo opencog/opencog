@@ -43,9 +43,6 @@ TARGET_LINK_LIBRARIES (combo_shell
 	MessagingSystem
 	WorldWrapper
 	lslib
-	SpaceMap
-	space_server
-	util
 )
 
 IF (PROTOBUF_FOUND)

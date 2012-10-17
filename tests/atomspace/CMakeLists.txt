@@ -21,7 +21,7 @@ ADD_CXXTEST(SimpleTruthValueUTest)
 ADD_CXXTEST(IndefiniteTruthValueUTest)
 
 ADD_CXXTEST(CompositeTruthValueUTest)
-TARGET_LINK_LIBRARIES(CompositeTruthValueUTest savable SpaceMap space_server server atomspace)
+TARGET_LINK_LIBRARIES(CompositeTruthValueUTest savable spacetime)
 
 ADD_CXXTEST(AttentionValueUTest)
 ADD_CXXTEST(AtomSpaceUTest)

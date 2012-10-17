@@ -27,12 +27,8 @@ ADD_LIBRARY (MessagingSystem SHARED
 )
 
 TARGET_LINK_LIBRARIES (MessagingSystem
-	util
-	pthread 
-	${Boost_FILESYSTEM_LIBRARY}
-	${Boost_DATE_TIME_LIBRARY}
-	${Boost_SIGNALS_LIBRARY}
-	${Boost_THREAD_LIBRARY}
+	Control
+	spacetime
 )
 
 # ------------------------------------------------------
@@ -40,7 +36,6 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 ADD_EXECUTABLE (router RouterExecutable.cc)
 TARGET_LINK_LIBRARIES (router 
 	MessagingSystem
-	server
 )
 
 IF (PROTOBUF_FOUND)
@@ -51,8 +46,7 @@ ENDIF (PROTOBUF_FOUND)
 
 ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
 TARGET_LINK_LIBRARIES (spawner 
-   MessagingSystem
-	server
+	MessagingSystem
 )
 
 IF (PROTOBUF_FOUND)
@@ -65,8 +59,6 @@ ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
 TARGET_LINK_LIBRARIES (msgtester
 	MessagingSystem
 	Control
-	space_server
-	server
 )
 IF (PROTOBUF_FOUND)
 	TARGET_LINK_LIBRARIES (msgtester ${PROTOBUF_LIBRARY})

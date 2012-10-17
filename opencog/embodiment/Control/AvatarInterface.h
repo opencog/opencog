@@ -38,9 +38,9 @@
 
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/Temporal.h>
+#include <opencog/spacetime/SpaceTime.h>
 
 #include <opencog/embodiment/Control/AgentModeHandler.h>
-#include <opencog/embodiment/Control/SpaceTime.h>
 
 
 using namespace opencog;

@@ -27,14 +27,14 @@
 
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
-#include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
+#include <opencog/server/CogServer.h>
 
 namespace opencog {
 
 // At the moment, this is a cheap hack to provie all-things
 // embodiment related with access to spacetime.
 
-class SpaceTimeCogServer : public messaging::MessageCogServer
+class SpaceTimeCogServer : public CogServer
 {
 
 protected:
@@ -44,6 +44,8 @@ public:
     SpaceTimeCogServer();
     SpaceServer& getSpaceServer();
     TimeServer& getTimeServer();
+
+    static BaseServer* createInstance(void);
 };
 
 SpaceServer& spaceServer();

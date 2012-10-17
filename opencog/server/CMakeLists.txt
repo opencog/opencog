@@ -84,8 +84,6 @@ ADD_EXECUTABLE(cogserver
 )
 
 TARGET_LINK_LIBRARIES(cogserver
-	SpaceMap
-	space_server
 	server
 	${Boost_SYSTEM_LIBRARY}
 	${GUILE_LIBRARIES}

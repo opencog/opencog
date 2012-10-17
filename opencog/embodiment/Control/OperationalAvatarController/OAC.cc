@@ -38,7 +38,7 @@
 #include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
-#include <opencog/embodiment/Control/SpaceTime.h>
+#include <opencog/spacetime/SpaceTime.h>
 
 #include "OAC.h"
 #include "Inquery.h"

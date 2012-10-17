@@ -30,10 +30,9 @@
 // Arghhh! the NMXML stuff is obsolete, please do not use in new code!
 #include <opencog/persist/xml/NMXmlExporter.h>
 
-#include <opencog/server/CogServer.h>
-#include <opencog/spacetime/TimeServer.h>
 #include <opencog/spacetime/SpaceServer.h>
-#include <opencog/embodiment/Control/SpaceTime.h>
+#include <opencog/spacetime/SpaceTime.h>
+#include <opencog/spacetime/TimeServer.h>
 #include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 
 #include "LearnMessage.h"

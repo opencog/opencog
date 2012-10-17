@@ -7,10 +7,7 @@
 # )
 
 LINK_LIBRARIES(
-	Control
-	SpaceMap
-	space_server
-	util
+	spacetime
 )
 
 

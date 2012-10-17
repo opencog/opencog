@@ -29,11 +29,12 @@
 #include <string>
 #include <boost/thread/thread.hpp>
 
+#include <opencog/util/RandGen.h>
+
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
-
+#include <opencog/spacetime/SpaceTime.h>
 #include <opencog/persist/file/SavingLoading.h>
-#include <opencog/util/RandGen.h>
 
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
@@ -42,8 +43,8 @@
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/dynamics/attention/STIDecayingAgent.h>
 
-#include <opencog/embodiment/Control/SpaceTime.h>
 
+#include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
@@ -93,7 +94,7 @@ public:
     }
 };
 
-class OAC : public SpaceTimeCogServer
+class OAC : public opencog::messaging::MessageCogServer
 {
     friend class::PsiModulatorUpdaterAgentUTest; 
     friend class::PsiDemandUpdaterAgentUTest;

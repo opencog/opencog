@@ -7,7 +7,6 @@ ADD_LIBRARY (savable SHARED
 	TimeServerSavable.cc
 	TemporalTableFile.cc
 )
-TARGET_LINK_LIBRARIES(savable space_server)
 
 ADD_DEPENDENCIES(savable opencog_atom_types)
 

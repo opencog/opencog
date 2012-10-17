@@ -8,10 +8,7 @@ ADD_CUSTOM_TARGET(test_custom_atom_types DEPENDS atom_types.h)
 
 LINK_LIBRARIES(
 	savable
-	SpaceMap
-	space_server
-	atomspace
-	${Boost_SIGNALS_LIBRARY}
+	spacetime
 )
 
 ADD_CXXTEST(SavingLoadingUTest)

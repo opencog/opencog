@@ -11,8 +11,6 @@ ADD_LIBRARY(PBTester
 TARGET_LINK_LIBRARIES (PBTester 
 	PAI
 	Control
-	server
-	space_server
 	util
 )
 
@@ -23,9 +21,6 @@ TARGET_LINK_LIBRARIES (pbTest
 	LearningServerMessages
 	MessagingSystem
 	lslib
-	space_server
-	server
-	SpaceMap
 )
 
 IF(HAVE_GUILE)

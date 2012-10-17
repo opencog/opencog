@@ -10,8 +10,6 @@ ADD_LIBRARY(lslib
 TARGET_LINK_LIBRARIES (lslib
 	PetaverseMOSES
 	comboreduct
-	SpaceMap
-	space_server
 )
 
 IF (HAVE_ZMQ)
