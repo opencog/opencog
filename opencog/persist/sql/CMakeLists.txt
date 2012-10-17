@@ -14,18 +14,26 @@ ADD_LIBRARY (persist SHARED
 
 ADD_DEPENDENCIES(persist opencog_atom_types)
 
+TARGET_LINK_LIBRARIES(persist
+	atomspace
+	builtinreqs
+	${ODBC_LIBRARIES}
+)
+
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(persist smob)
+ENDIF (HAVE_GUILE)
+
 ADD_EXECUTABLE(sniff
 	sniff.cc
 )
 
-TARGET_LINK_LIBRARIES(persist
-	${ODBC_LIBRARIES}
-)
-
 TARGET_LINK_LIBRARIES(sniff
 	persist
-	atomspace
+	SpaceMap
+	space_server
 	server
+	atomspace
 	${Boost_SIGNALS_LIBRARY}
 	${ODBC_LIBRARIES}
 )

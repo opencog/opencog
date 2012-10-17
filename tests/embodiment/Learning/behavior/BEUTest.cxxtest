@@ -28,6 +28,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Learning/behavior/BDRetriever.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/Control/SpaceTime.h>
 
 using namespace behavior;
 using namespace opencog::control;

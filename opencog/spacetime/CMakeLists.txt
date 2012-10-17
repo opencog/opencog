@@ -1,10 +1,6 @@
 
 
-# XXX FIXME TODO Until such time that the learning-server messages are
-# removed from the spacemap, we have to build static, to avoid circular
-# dependencies. That's just plain wrong.
-# ADD_LIBRARY (space_server SHARED
-ADD_LIBRARY (space_server STATIC
+ADD_LIBRARY (space_server SHARED
 	HandleToTemporalEntryMap.cc
 	HandleTemporalPairEntry.cc
 	HandleTemporalPair.cc
@@ -17,7 +13,7 @@ ADD_LIBRARY (space_server STATIC
 	TimeServer.cc
 )
 
-TARGET_LINK_LIBRARIES(space_server SpaceMap)
+TARGET_LINK_LIBRARIES(space_server SpaceMap atomspace)
 
 INSTALL (FILES
 	HandleToTemporalEntryMap.h

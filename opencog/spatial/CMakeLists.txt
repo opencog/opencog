@@ -14,8 +14,8 @@ INCLUDE_DIRECTORIES (
 # XXX FIXME TODO Until such time that the learning-server messages are
 # removed from the spcemap, we have to build static, to avoid circular
 # dependencies. That's just plain wrong.
-# ADD_LIBRARY(SpaceMap SHARED
-ADD_LIBRARY(SpaceMap STATIC
+ADD_LIBRARY(SpaceMap SHARED
+# ADD_LIBRARY(SpaceMap STATIC
 	LocalSpaceMap2DUtil
 	LocalSpaceMap2D
 	VisibilityMap
@@ -59,13 +59,8 @@ IF (HAVE_ZMQ)
 	TARGET_LINK_LIBRARIES(SpaceMap zmq)
 ENDIF (HAVE_ZMQ)
 
-# XXX TODO FIXME: this is a borken, cyclice dependency.  The problem is that
-# spacemap depends on learningserver depends on spacemap... arg.
 IF (PROTOBUF_FOUND)
-	TARGET_LINK_LIBRARIES(SpaceMap 
-		LearningServerMessages
-		${PROTOBUF_LIBRARY}
-	)
+	TARGET_LINK_LIBRARIES(SpaceMap ${PROTOBUF_LIBRARY})
 ENDIF (PROTOBUF_FOUND)
 
 
@@ -117,9 +112,7 @@ TARGET_LINK_LIBRARIES(astartest
 	util
 )
 IF (PROTOBUF_FOUND)
-	TARGET_LINK_LIBRARIES(astartest
-		LearningServerMessages
-	)
+	TARGET_LINK_LIBRARIES(astartest LearningServerMessages)
 ENDIF (PROTOBUF_FOUND)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)

@@ -1,10 +1,9 @@
-INCLUDE_DIRECTORIES (
-	${XERCESC_INCLUDE_DIR}
-)
+
 LINK_LIBRARIES (
-	comboreduct
+	Control
 	behavior
-        util
+	comboreduct
+	util
 	${PROJECT_LIBRARIES}	
 )
 
@@ -14,8 +13,8 @@ ADD_CXXTEST(BehaviorCategoryUTest)
 ADD_CXXTEST(BDRetrieverUTest)
 
 LINK_LIBRARIES(
+	Control
 	AvatarComboVocabulary
-	${XERCESC_LIBRARIES}
 	comboreduct
 )
 

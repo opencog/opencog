@@ -1,11 +1,10 @@
-ADD_LIBRARY(ImaginaryLife
+ADD_LIBRARY(ImaginaryLife SHARED
 	NoSpaceLife
 )
 
 TARGET_LINK_LIBRARIES(ImaginaryLife
-        util
-	comboreduct
 	behavior
-	WorldWrapper
 	AtomSpaceExtensions
+	comboreduct
+	util
 )

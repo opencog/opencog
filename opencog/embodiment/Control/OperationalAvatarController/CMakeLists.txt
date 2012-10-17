@@ -1,4 +1,4 @@
-ADD_LIBRARY (oac 
+ADD_LIBRARY (oac SHARED
     Pet
     Plaza
     OAC
@@ -21,10 +21,6 @@ ADD_LIBRARY (oac
     BaseAgentModeHandler
     DefaultAgentModeHandler
     LearningAgentModeHandler
-    LanguageComprehension
-    FramesToRelexRuleEngine
-    NLGenClient
-    OutputRelex
     PlanningHeaderFiles.h
     Strips
     OCPlanner
@@ -38,32 +34,33 @@ INCLUDE_DIRECTORIES (
     ${CMAKE_BINARY_DIR}
 )
 
-SET(OAC_LINK_LIBS
-    ${XERCESC_LIBRARIES}
-    json_spirit
+TARGET_LINK_LIBRARIES (oac
     PredicateUpdaters
     PAI
+	Language
     behavior
     MessagingSystem
     Procedure
     savable
     attention
+	SpaceMap
+	json_spirit
+	${XERCESC_LIBRARIES}
 )
 
 IF (HAVE_CYTHON)
-    SET(OAC_LINK_LIBS
-        ${OAC_LINK_LIBS}
-        PythonEval
+	TARGET_LINK_LIBRARIES (oac
+		PythonEval
 		PythonModule
-#        logic_wrapper
-		${PYTHON_LIBRARIES})
+		${PYTHON_LIBRARIES}
+	)
 ENDIF (HAVE_CYTHON)    
 
+
 IF (HAVE_ZMQ)
-    SET(OAC_LINK_LIBS ${OAC_LINK_LIBS} ${ZMQ_LIBRARIES})
+	TARGET_LINK_LIBRARIES (oac ${ZMQ_LIBRARIES})
 ENDIF (HAVE_ZMQ)
 
-TARGET_LINK_LIBRARIES (oac ${OAC_LINK_LIBS})
 
 ADD_EXECUTABLE (OACTester OACTester.cc)
 TARGET_LINK_LIBRARIES (OACTester
@@ -86,6 +83,8 @@ TARGET_LINK_LIBRARIES (oac-exec
 )
 SET_TARGET_PROPERTIES(oac-exec PROPERTIES OUTPUT_NAME "oac")
 
+# ------------------------------------------------------
+
 ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)
 TARGET_LINK_LIBRARIES (opcHcTester
     oac
@@ -93,3 +92,7 @@ TARGET_LINK_LIBRARIES (opcHcTester
     AvatarComboVocabulary
     ImaginaryLife
 )
+IF (PROTOBUF_FOUND)
+	TARGET_LINK_LIBRARIES (opcHcTester LearningServerMessages ${PROTOBUF_LIBRARY})
+ENDIF (PROTOBUF_FOUND)
+

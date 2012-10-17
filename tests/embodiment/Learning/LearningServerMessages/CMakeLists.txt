@@ -22,6 +22,7 @@ ADD_CXXTEST(RewardMessageUTest)
 TARGET_LINK_LIBRARIES(RewardMessageUTest 
 	MessagingSystem
 	LearningServerMessages
+	Control
 	SpaceMap
 	AvatarComboVocabulary
 	server

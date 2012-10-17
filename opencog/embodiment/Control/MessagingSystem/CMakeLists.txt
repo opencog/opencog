@@ -1,8 +1,11 @@
 
 #TODO next line
+# XXX 1) the xml formats are obsolete,
+# 2) this kind of hard-coded link belongs in the config file
+# 3) this is for testing not for production
 ADD_DEFINITIONS(-D_REENTRANT -DACTION_PLAN_TEST_XML_FILE=\\"${PETAVERSE_SOURCE_DIR}/test/Control/OperationalAvatarController/ActionPlanExample.xml\\")
 
-ADD_LIBRARY (MessagingSystem
+ADD_LIBRARY (MessagingSystem SHARED
 	Message.cc
 	MessageCentral.cc
 	MemoryMessageCentral.cc
@@ -22,32 +25,52 @@ ADD_LIBRARY (MessagingSystem
 	EmbodimentCogServer
 )
 
-TARGET_LINK_LIBRARIES (MessagingSystem 
-	Control 
-	LearningServerMessages 
-	pthread 
-	server
+TARGET_LINK_LIBRARIES (MessagingSystem
+	SpaceMap
+	space_server
 	util
-	xml
+	pthread 
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
 	${Boost_SIGNALS_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
 
+# ------------------------------------------------------
+
 ADD_EXECUTABLE (router RouterExecutable.cc)
 TARGET_LINK_LIBRARIES (router 
-	space_server
 	MessagingSystem
+	space_server
+	SpaceMap
+	lslib
 )
+
+IF (PROTOBUF_FOUND)
+	TARGET_LINK_LIBRARIES (router LearningServerMessages ${PROTOBUF_LIBRARY})
+ENDIF (PROTOBUF_FOUND)
+
+# ------------------------------------------------------
 
 ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
 TARGET_LINK_LIBRARIES (spawner 
    MessagingSystem
+	space_server
+	SpaceMap
+	lslib
 )
+
+IF (PROTOBUF_FOUND)
+	TARGET_LINK_LIBRARIES (spawner LearningServerMessages ${PROTOBUF_LIBRARY})
+ENDIF (PROTOBUF_FOUND)
+
+# ------------------------------------------------------
 
 ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
 TARGET_LINK_LIBRARIES (msgtester
+	oac
+	lslib
+	LearningServerMessages
 	space_server
 	SpaceMap
 	MessagingSystem

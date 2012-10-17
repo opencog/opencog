@@ -5,11 +5,7 @@ ADD_CUSTOM_TARGET(embodiment_atom_types DEPENDS atom_types.h)
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-# XXX FIXME TODO Until such time that the learning-server messages are
-# removed from the spacemap, we have to build static, to avoid circular
-# dependencies. That's just plain wrong.
-# ADD_LIBRARY (AtomSpaceExtensions SHARED
-ADD_LIBRARY (AtomSpaceExtensions STATIC
+ADD_LIBRARY (AtomSpaceExtensions SHARED
     atom_types_init
     AtomSpaceUtil
     makeVirtualAtom

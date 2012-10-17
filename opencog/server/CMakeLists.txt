@@ -2,12 +2,9 @@ INCLUDE_DIRECTORIES (
 	${GUILE_INCLUDE_DIRS}
 )
 
-# XXX FIXME TODO Until such time that the learning-server messages are
-# removed from the spacemap, we have to build static, to avoid circular
-# dependencies. That's just plain wrong.
-#ADD_LIBRARY (builtinreqs SHARED
-ADD_LIBRARY (builtinreqs STATIC
+ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
+	Agent
 	Request
 	DataRequest
 	ExitRequest
@@ -21,31 +18,25 @@ ADD_LIBRARY (builtinreqs STATIC
 	UnloadModuleRequest
 )
 
-TARGET_LINK_LIBRARIES(builtinreqs util)
+TARGET_LINK_LIBRARIES(builtinreqs atomspace util)
 
 IF (EXPAT_FOUND)
 	TARGET_LINK_LIBRARIES(builtinreqs xml)
 ENDIF (EXPAT_FOUND)
 
 
-# XXX FIXME TODO Until such time that the learning-server messages are
-# removed from the spacemap, we have to build static, to avoid circular
-# dependencies. That's just plain wrong.
-#ADD_LIBRARY (server SHARED
-ADD_LIBRARY (server STATIC
+ADD_LIBRARY (server SHARED
 	BaseServer
 	CogServer
 	Request
 	NetworkServer
 	ServerSocket
 	ConsoleSocket
-	Agent
 	SystemActivityTable
 )
 
-SET(SERVER_LINK_LIBS 
+TARGET_LINK_LIBRARIES(server
 	builtinreqs
-	space_server
 	atomspace
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
@@ -53,18 +44,17 @@ SET(SERVER_LINK_LIBS
 )
 
 IF (EXPAT_FOUND)
-	SET(SERVER_LINK_LIBS xml ${SERVER_LINK_LIBS})
+	TARGET_LINK_LIBRARIES(server xml)
 ENDIF (EXPAT_FOUND)
 
 IF (HAVE_GUILE)
-	SET(SERVER_LINK_LIBS smob ${SERVER_LINK_LIBS})
+	TARGET_LINK_LIBRARIES(server smob)
 ENDIF (HAVE_GUILE)
 
 IF (ODBC_FOUND)
-	SET(SERVER_LINK_LIBS persist ${SERVER_LINK_LIBS})
+	TARGET_LINK_LIBRARIES(server persist)
 ENDIF (ODBC_FOUND)
 
-TARGET_LINK_LIBRARIES(server ${SERVER_LINK_LIBS})
 
 # to ease testing/debugging modules on the source tree
 # IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -94,6 +84,8 @@ ADD_EXECUTABLE(cogserver
 )
 
 TARGET_LINK_LIBRARIES(cogserver
+	SpaceMap
+	space_server
 	server
 	${Boost_SYSTEM_LIBRARY}
 	${GUILE_LIBRARIES}

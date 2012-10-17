@@ -26,7 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/embodiment/Control/SpaceTime.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
@@ -59,7 +59,7 @@ private:
 public:
 
     TimeServerUTest() {
-        server(CogServer::createInstance);
+        server(SpaceTimeCogServer::createInstance);
         for (int i = 0; i < N_TIMES; i++) {
             times[i] = new Temporal(i*2, i*2);
             char name[16];

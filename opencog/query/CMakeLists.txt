@@ -1,13 +1,7 @@
-#INCLUDE_DIRECTORIES(
-#	${PROJECT_SOURCE_DIR}/src/atomspace
-#	${PROJECT_SOURCE_DIR}/src/util
-#)
 
-# XXX FIXME TODO Until such time that the learning-server messages are
-# removed from the spacemap, we have to build static, to avoid circular
-# dependencies. That's just plain wrong.
-# ADD_LIBRARY(query SHARED
-ADD_LIBRARY(query STATIC
+# Build the query module
+
+ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
@@ -18,12 +12,8 @@ ADD_DEPENDENCIES(query
 	opencog_atom_types
 )
 
-TARGET_LINK_LIBRARIES(query
-	space_server
-	server
-)
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(query smob)
+	# TARGET_LINK_LIBRARIES(query smob)
 ENDIF (HAVE_GUILE)
 
 IF (WIN32)

@@ -1,4 +1,4 @@
-ADD_LIBRARY(behavior
+ADD_LIBRARY(behavior SHARED
     BDTracker
     BE
     PAIWorldProvider
@@ -11,15 +11,10 @@ ADD_LIBRARY(behavior
     BDRetriever
 )
 
-INCLUDE_DIRECTORIES (
-    ${XERCESC_INCLUDE_DIR}
-)
-
 TARGET_LINK_LIBRARIES (behavior
 	PAI
-	util
-	${XERCESC_LIBRARIES}
 	MessagingSystem
 	AtomSpaceExtensions
 	atomspace
+	util
 )

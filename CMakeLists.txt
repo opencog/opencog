@@ -59,7 +59,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS "-Wall -fPIC")
     SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
     SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-    SET(CMAKE_C_FLAGS_RELEASE "-O2 -fstack-protector")
+    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
   ENDIF (APPLE)
 
   # 1) -Wno-variadic-macros is to avoid warnings regarding using

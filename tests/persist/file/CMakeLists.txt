@@ -7,9 +7,10 @@ OPENCOG_ADD_ATOM_TYPES(
 ADD_CUSTOM_TARGET(test_custom_atom_types DEPENDS atom_types.h)
 
 LINK_LIBRARIES(
-	atomspace
 	savable
+	SpaceMap
 	space_server
+	atomspace
 	${Boost_SIGNALS_LIBRARY}
 )
 

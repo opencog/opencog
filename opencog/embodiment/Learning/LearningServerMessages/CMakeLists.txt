@@ -16,11 +16,7 @@ ELSE (PROTOBUF_FOUND)
 ENDIF (PROTOBUF_FOUND)
 
 
-# XXX FIXME TODO Until such time that the learning-server messages are
-# removed from the spcemap, we have to build static, to avoid circular
-# dependencies. That's just plain wrong.
-# ADD_LIBRARY (LearningServerMessages SHARED
-ADD_LIBRARY (LearningServerMessages STATIC
+ADD_LIBRARY (LearningServerMessages SHARED
 	LearnMessage
 	SchemaMessage
 	RewardMessage
@@ -34,10 +30,10 @@ ADD_LIBRARY (LearningServerMessages STATIC
 TARGET_LINK_LIBRARIES (LearningServerMessages
 	MessagingSystem
 	AvatarComboVocabulary
-	comboreduct
-	util
+	Control
 	AtomSpaceExtensions
 	atomspace
-	space_server
+	comboreduct
+	util
 	${PROJECT_LIBRARIES}
 )
