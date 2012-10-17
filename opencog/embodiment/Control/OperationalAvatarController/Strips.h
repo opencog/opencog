@@ -53,20 +53,9 @@ class Inquery;
         OP_ADD,     // only for numeric variables +=
         OP_SUB,     // only for numeric variables -=
         OP_MUL,     // only for numeric variables *=
-        OP_DIV      // only for numeric variables /=
+        OP_DIV,     // only for numeric variables /=
+        OP_NUM_OPS  // must always be the last one in this list.
     };
-
-    const char* EFFECT_OPERATOR_NAME[] =
-    {
-        "OP_REVERSE", // this is only for the bool variables
-        "OP_ASSIGN",  // this operator can be used in any variable type =
-        "OP_ASSIGN_NOT_EQUAL_TO", // this operator can be used in any variable type !=
-        "OP_ADD",     // only for numeric variables +=
-        "OP_SUB",     // only for numeric variables -=
-        "OP_MUL",     // only for numeric variables *=
-        "OP_DIV"      // only for numeric variables /=
-    };
-
 
     // There are 3 kinds of state types:
     // 1. equal, which can be used in non-numeric and numeric state values: e.g.: the price of Book1 is 15 dollors

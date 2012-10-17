@@ -27,6 +27,18 @@
 
 using namespace opencog::oac;
 
+const char* EFFECT_OPERATOR_NAME[OP_NUM_OPS] =
+{
+    "OP_REVERSE", // this is only for the bool variables
+    "OP_ASSIGN",  // this operator can be used in any variable type =
+    "OP_ASSIGN_NOT_EQUAL_TO", // this operator can be used in any variable type !=
+    "OP_ADD",     // only for numeric variables +=
+    "OP_SUB",     // only for numeric variables -=
+    "OP_MUL",     // only for numeric variables *=
+    "OP_DIV"      // only for numeric variables /=
+};
+
+
 State::State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
              vector<StateValue> _stateOwnerList, bool _need_inquery, InqueryFun _inqueryFun)
     : stateOwnerList(_stateOwnerList),need_inquery(_need_inquery),inqueryFun(_inqueryFun)
