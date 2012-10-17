@@ -2,8 +2,10 @@
  * opencog/embodiment/Control/MessagingSystem/MessageFactory.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
  * Author(s): Andre Senna
+ *            Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -49,6 +51,8 @@ namespace opencog { namespace messaging {
 #ifdef CIRCULAR_DEPENDENCY
 using namespace opencog::learningserver::messages;
 #endif // CIRCULAR_DEPENDENCY
+
+using namespace std;
 
 static std::map<int, factory_t> factory_map;
 
@@ -102,13 +106,21 @@ Message *messageFactory(const std::string &from, const std::string &to, int
         return new FeedbackMessage(from, to, msg);
         break;
     }
-	case RAW: {
-		return new RawMessage(from, to, msg);
-		break;
-	}
+    case RAW: {
+        return new RawMessage(from, to, msg);
+        break;
+    }
     default: {
-        throw opencog::InvalidParamException(TRACE_INFO,
+
+        map<int,factory_t>::iterator fit = factory_map.find(msgType);
+
+        if (fit == factory_map.end()) {
+            throw opencog::InvalidParamException(TRACE_INFO,
                      "Message - Unknown message type id: '%d'.", msgType);
+        }
+
+        factory_t& fac = fit->second;
+        return fac(from, to, msgType, msg);
     }
     }
 
@@ -121,14 +133,14 @@ Message *routerMessageFactory(const std::string &from, const std::string &to, in
     return new RouterMessage(from, to, encapsulateMsgType, msg);
 } 
 
-int registerMessageFactory(factory_t)
+int registerMessageFactory(factory_t fac)
 {
-	static int next_unissued_msg_id = 100;
-	int msg_id = next_unissued_msg_id;
+    static int next_unissued_msg_id = 100;
+    int msg_id = next_unissued_msg_id;
 
-	//factory_map.insert(
+    factory_map.insert(pair<int, factory_t>(msg_id, fac));
 
-	return msg_id;
+    return msg_id;
 }
 
 
