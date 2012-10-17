@@ -35,6 +35,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/embodiment/Control/SpaceTime.h>
 
 #include "LearnMessage.h"
 using namespace opencog::learningserver::messages;

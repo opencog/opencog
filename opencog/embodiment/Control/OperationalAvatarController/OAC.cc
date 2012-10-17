@@ -22,22 +22,22 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <fstream>
+#include <iostream>
 
-#include <opencog/comboreduct/combo/type_tree.h>
-
-#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
-#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
-
-// For loading Scheme scripts by C++ code
-#include <opencog/guile/load-file.h>
+#include <boost/format.hpp>
 
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>
 
-#include <boost/format.hpp>
+#include <opencog/comboreduct/combo/type_tree.h>
 
-#include <fstream>
-#include <iostream>
+// For loading Scheme scripts by C++ code
+#include <opencog/guile/load-file.h>
+
+#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
+#include <opencog/embodiment/Control/SpaceTime.h>
 
 #include "OAC.h"
 #include "Inquery.h"
@@ -48,7 +48,8 @@
  */
 //#define DELETE_ATOMSPACE
 
-namespace opencog { namespace oac {
+namespace opencog { 
+namespace oac {
 
 using namespace Procedure;
 using namespace PetCombo;
@@ -60,7 +61,9 @@ BaseServer* OAC::createInstance()
     return new OAC;
 }
 
-OAC::OAC() {}
+OAC::OAC()
+{
+}
 
 bool OAC::customLoopRun(void)
 {

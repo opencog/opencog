@@ -28,7 +28,7 @@
 #include <opencog/spacetime/TemporalTable.h>
 #include <opencog/spacetime/TimeServer.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/embodiment/Control/SpaceTime.h>
 
 #include "BDTracker.h"
 

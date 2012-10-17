@@ -26,8 +26,6 @@
 #define _OPENCOG_BASE_SERVER_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/spacetime/SpaceServer.h>
-#include <opencog/spacetime/TimeServer.h>
 
 namespace opencog
 {
@@ -51,15 +49,11 @@ class BaseServer
 protected:
 
     static AtomSpace* atomSpace;
-    static SpaceServer* spacer;
-    static TimeServer* timeser;
 
 public:
 
     /** Returns the atomspace instance. */
     static AtomSpace& getAtomSpace();
-    static SpaceServer& getSpaceServer();
-    static TimeServer& getTimeServer();
 
     /** Returns a new BaseServer instance. */
     static BaseServer* createInstance(void);
@@ -74,16 +68,6 @@ BaseServer& server(BaseServer* (*)() = BaseServer::createInstance);
 inline AtomSpace& atomspace(void)
 {
     return server().getAtomSpace();
-}
-
-inline SpaceServer& spaceServer()
-{
-   return server().getSpaceServer();
-}
-
-inline TimeServer& timeServer()
-{
-   return server().getTimeServer();
 }
 
 }  // namespace

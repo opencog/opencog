@@ -109,8 +109,6 @@ CogServer::CogServer() : cycleCount(1)
 {
     delete atomSpace;  // global static, declared in BaseServer.
     atomSpace = new AtomSpace();
-    spacer = new SpaceServer(*atomSpace);
-    timeser = new TimeServer(*atomSpace, spacer);
     _systemActivityTable.init(this);
 
     pthread_mutex_init(&messageQueueLock, NULL);

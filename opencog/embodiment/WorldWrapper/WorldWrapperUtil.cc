@@ -40,6 +40,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/Control/SpaceTime.h>
 
 #include "WorldWrapperUtil.h"
 

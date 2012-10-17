@@ -28,8 +28,6 @@
 using namespace opencog;
 
 AtomSpace* BaseServer::atomSpace = NULL;
-SpaceServer* BaseServer::spacer = NULL;
-TimeServer* BaseServer::timeser = NULL;
 
 BaseServer* BaseServer::createInstance()
 {
@@ -58,16 +56,6 @@ BaseServer::~BaseServer()
 AtomSpace& BaseServer::getAtomSpace()
 {
     return *atomSpace;
-}
-
-SpaceServer& BaseServer::getSpaceServer()
-{
-    return *spacer;
-}
-
-TimeServer& BaseServer::getTimeServer()
-{
-    return *timeser;
 }
 
 // create and return static singleton instance

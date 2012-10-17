@@ -44,6 +44,7 @@
 #include <opencog/spacetime/Temporal.h>
 #include <opencog/spacetime/TemporalTable.h>
 #include <opencog/spacetime/TimeServer.h>
+#include <opencog/embodiment/Control/SpaceTime.h>
 
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"

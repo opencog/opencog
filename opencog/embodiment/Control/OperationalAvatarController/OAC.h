@@ -29,8 +29,21 @@
 #include <string>
 #include <boost/thread/thread.hpp>
 
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/TimeServer.h>
+
 #include <opencog/persist/file/SavingLoading.h>
 #include <opencog/util/RandGen.h>
+
+#include <opencog/dynamics/attention/ForgettingAgent.h>
+#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
+//#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
+#include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
+#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
+#include <opencog/dynamics/attention/STIDecayingAgent.h>
+
+#include <opencog/embodiment/Control/SpaceTime.h>
+
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
@@ -55,13 +68,6 @@
 #include "PsiRelationUpdaterAgent.h"
 #include "PsiFeelingUpdaterAgent.h"
 #include "StimulusUpdaterAgent.h"
-
-#include <opencog/dynamics/attention/ForgettingAgent.h>
-#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
-//#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
-#include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
-#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
-#include <opencog/dynamics/attention/STIDecayingAgent.h>
 
 #ifdef HAVE_CYTHON
     #include <opencog/cython/PyMindAgent.h>
@@ -88,7 +94,7 @@ public:
     }
 };
 
-class OAC : public EmbodimentCogServer
+class OAC : public SpaceTimeCogServer
 {
     friend class::PsiModulatorUpdaterAgentUTest; 
     friend class::PsiDemandUpdaterAgentUTest;
