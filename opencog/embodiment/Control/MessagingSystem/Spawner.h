@@ -25,15 +25,15 @@
 #ifndef SPAWNER_H
 #define SPAWNER_H
 
-#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <exception>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
-#include "EmbodimentCogServer.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include "MessageCogServer.h"
 
 namespace opencog { namespace messaging {
 
-class Spawner : public EmbodimentCogServer
+class Spawner : public MessageCogServer
 {
 
 private:

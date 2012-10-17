@@ -20,14 +20,17 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include "LS.h"
-#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <sstream>
+
+#include <opencog/util/Config.h>
+
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
-#include <opencog/util/Config.h>
+
+#include "LS.h"
 
 using namespace opencog::learningserver;
 using namespace opencog::world;
@@ -74,7 +77,7 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
 
     switch (msg->getType()) {
 
-    case opencog::messaging::Message::LS_CMD:
+    case opencog::messaging::LS_CMD:
         cm = (learningserver::messages::LSCmdMessage *)msg;
 
         if (learningPet == cm->getFrom() &&
@@ -92,7 +95,7 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
         }
         break;
 
-    case opencog::messaging::Message::LEARN:
+    case opencog::messaging::LEARN:
         lm = (learningserver::messages::LearnMessage *)msg;
 
         ownerID = lm->getOwnerId();
@@ -134,7 +137,7 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
         logger().warn("LS - LS does not support concurent learning (LS busy right now).");
         break;
 
-    case opencog::messaging::Message::REWARD:
+    case opencog::messaging::REWARD:
         rm = (learningserver::messages::RewardMessage *)msg;
 
         if (!isBusy()) {
@@ -149,7 +152,7 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
             rewardCandidateSchema(rm);
         }
         break;
-    case opencog::messaging::Message::TRY:
+    case opencog::messaging::TRY:
         learningserver::messages::TrySchemaMessage  * tryMsg;
         tryMsg = (learningserver::messages::TrySchemaMessage  *)msg;
 
@@ -159,7 +162,7 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
         }
         break;
 
-    case opencog::messaging::Message::STOP_LEARNING:
+    case opencog::messaging::STOP_LEARNING:
         learningserver::messages::StopLearningMessage  * stopLearningMsg;
         stopLearningMsg = (learningserver::messages::StopLearningMessage  *)msg;
 

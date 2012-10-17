@@ -13,4 +13,7 @@ ADD_LIBRARY (Control SHARED
 
 TARGET_LINK_LIBRARIES(Control
 	MessagingSystem
+	space_server
+	SpaceMap
+	server
 )

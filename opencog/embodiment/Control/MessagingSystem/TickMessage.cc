@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
-
+#include "MessageFactory.h"
 #include "TickMessage.h"
 
 using namespace opencog::messaging;
@@ -34,7 +33,7 @@ TickMessage::~TickMessage()
 {
 }
 
-TickMessage::TickMessage(const std::string &from, const std::string &to) : Message(from, to, Message::TICK)
+TickMessage::TickMessage(const std::string &from, const std::string &to) : Message(from, to, TICK)
 {
 }
 

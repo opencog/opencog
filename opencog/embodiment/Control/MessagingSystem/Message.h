@@ -49,20 +49,6 @@ private:
 
 public:
 
-    // Message types (used in factory method)
-    static const int STRING = 1;
-    static const int LEARN  = 2;
-    static const int REWARD = 3;
-    static const int SCHEMA = 4;
-    static const int LS_CMD = 5;
-    static const int ROUTER = 6;
-    static const int CANDIDATE_SCHEMA = 7;
-    static const int TICK = 8;
-    static const int FEEDBACK = 9;
-    static const int TRY = 10;
-    static const int STOP_LEARNING = 11;
-    static const int RAW = 12;
-
     virtual ~Message();
 
     /**
@@ -83,24 +69,6 @@ public:
      * @param strMessage (char *) representation of the message to be built.
      */
     virtual void loadPlainTextRepresentation(const char *strMessage) = 0;
-
-    /**
-     * Builds Message object of given type
-     *
-     * @return A new Message of given type
-     */
-    static Message *factory(const std::string &from, const std::string &to,
-                int msgType, const std::string &msg)
-            throw (opencog::InvalidParamException, std::bad_exception);
-
-    /**
-     * Built a message object of RouterMessage type. This method should be
-     * called ONLY by Router related classes.
-     *
-     * @return A new message
-     */
-    static Message *routerMessageFactory(const std::string &from,
-            const std::string &to, int encapsulateMsgType, const std::string &msg);
 
     // Setters and getters
 

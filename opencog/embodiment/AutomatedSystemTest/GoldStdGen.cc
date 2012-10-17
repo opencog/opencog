@@ -22,9 +22,12 @@
  */
 
 
-#include "GoldStdGen.h"
-#include <opencog/util/Logger.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#include <opencog/util/Logger.h>
+
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
+#include "GoldStdGen.h"
 
 using namespace opencog::messaging;
 using namespace AutomatedSystemTest;
@@ -103,7 +106,7 @@ GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE
     }
     message.erase(message.length() - 1);
 
-    return new GoldStdMessage(timestamp, Message::factory(from, to, type, message));
+    return new GoldStdMessage(timestamp, messageFactory(from, to, type, message));
 }
 
 unsigned long GoldStdGen::getCurrentTimestamp()

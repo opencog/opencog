@@ -21,9 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
-#include "FeedbackMessage.h"
 #include <opencog/util/StringTokenizer.h>
+
+#include "MessageFactory.h"
+#include "FeedbackMessage.h"
 
 using namespace opencog::messaging;
 
@@ -35,7 +36,7 @@ FeedbackMessage::~FeedbackMessage()
 }
 
 FeedbackMessage::FeedbackMessage(const std::string &from, const std::string &to) :
-        Message(from, to, Message::FEEDBACK)
+        Message(from, to, FEEDBACK)
 {
     this->petId.assign("");
     this->feedback.assign("");
@@ -43,7 +44,7 @@ FeedbackMessage::FeedbackMessage(const std::string &from, const std::string &to)
 
 FeedbackMessage::FeedbackMessage(const std::string &from, const std::string &to,
                                  const std::string &msg) :
-        Message(from, to, Message::FEEDBACK)
+        Message(from, to, FEEDBACK)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -51,7 +52,7 @@ FeedbackMessage::FeedbackMessage(const std::string &from, const std::string &to,
 
 FeedbackMessage::FeedbackMessage(const std::string &from, const std::string &to,
                                  const std::string &petId, const std::string &feedback) :
-        Message(from, to, Message::FEEDBACK)
+        Message(from, to, FEEDBACK)
 {
 
     this->petId.assign(petId);

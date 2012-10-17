@@ -46,7 +46,6 @@
 
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
-#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/EventResponder.h>

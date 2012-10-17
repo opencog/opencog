@@ -29,7 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
 
-#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
 
 #include "Pet.h"
 #include "PetMessageSender.h"
@@ -39,7 +39,7 @@ using namespace opencog;
 
 namespace opencog { namespace oac {
 
-class MockOpcHCTest : public opencog::messaging::EmbodimentCogServer
+class MockOpcHCTest : public opencog::messaging::MessageCogServer
 {
 
 private:

@@ -23,14 +23,11 @@
 
 
 #include <vector>
-#include "TrySchemaMessage.h"
 
 #include <opencog/util/StringTokenizer.h>
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 
-// XXX TODO FIXME NMXML is obsolete code, please remove asap.
-#include <opencog/persist/xml/NMXmlParser.h>
-#include <opencog/persist/xml/NMXmlExporter.h>
-#include <opencog/persist/xml/StringXMLBufferReader.h>
+#include "TrySchemaMessage.h"
 
 using namespace opencog::learningserver::messages;
 
@@ -42,7 +39,7 @@ TrySchemaMessage::~TrySchemaMessage()
 }
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::Message::TRY)
+        Message(from, to, opencog::messaging::TRY)
 {
     schema.assign("");
     schemaArguments.clear();
@@ -50,16 +47,16 @@ TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &t
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to,
                                    const std::string &msg) :
-        Message(from, to, opencog::messaging::Message::TRY)
+        Message(from, to, opencog::messaging::TRY)
 {
 
     loadPlainTextRepresentation(msg.c_str());
 }
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to,
-                                   const std::string &schm,  const std::vector<std::string> &argumentsList)
+                                   const std::string &schm, const std::vector<std::string> &argumentsList)
 throw (opencog::InvalidParamException, std::bad_exception):
-        Message(from, to, opencog::messaging::Message::TRY)
+        Message(from, to, opencog::messaging::TRY)
 {
 
     schema.assign(schm);

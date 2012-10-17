@@ -21,16 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+#include <sstream>
 
 #ifndef WIN32
 #include <unistd.h>
 #endif
 
 #include <opencog/embodiment/Control/LoggerFactory.h>
+
 #include "Spawner.h"
 #include "StringMessage.h"
-#include <iostream>
-#include <sstream>
 #include "NetworkElementCommon.h"
 
 using std::string;
@@ -215,7 +216,11 @@ bool Spawner::processNextMessage(Message *message)
                      );
 
         if (!config().get_bool("MANUAL_OAC_LAUNCH")) {
-            system(command_ss.str().c_str( ) );
+            int rc = system(command_ss.str().c_str( ) );
+            if (rc) {
+                cerr << "Ohhhh Nooooo Mr. Bill !!!!!!!!" << endl;
+                _exit(1);
+            }
         } else {
             printf("\nSpawner Command: %s\n", command_ss.str().c_str());
         }

@@ -8,6 +8,7 @@ ADD_DEFINITIONS(-D_REENTRANT -DACTION_PLAN_TEST_XML_FILE=\\"${PETAVERSE_SOURCE_D
 ADD_LIBRARY (MessagingSystem SHARED
 	Message.cc
 	MessageCentral.cc
+	MessageFactory.cc
 	MemoryMessageCentral.cc
 	FileMessageCentral.cc
 	StringMessage.cc
@@ -22,12 +23,10 @@ ADD_LIBRARY (MessagingSystem SHARED
 	Router.cc
 	RouterServerSocket.cc
 	Spawner.cc
-	EmbodimentCogServer
+	MessageCogServer.cc
 )
 
 TARGET_LINK_LIBRARIES (MessagingSystem
-	SpaceMap
-	space_server
 	util
 	pthread 
 	${Boost_FILESYSTEM_LIBRARY}
@@ -41,9 +40,7 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 ADD_EXECUTABLE (router RouterExecutable.cc)
 TARGET_LINK_LIBRARIES (router 
 	MessagingSystem
-	space_server
-	SpaceMap
-	lslib
+	server
 )
 
 IF (PROTOBUF_FOUND)
@@ -55,9 +52,7 @@ ENDIF (PROTOBUF_FOUND)
 ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
 TARGET_LINK_LIBRARIES (spawner 
    MessagingSystem
-	space_server
-	SpaceMap
-	lslib
+	server
 )
 
 IF (PROTOBUF_FOUND)
@@ -68,12 +63,10 @@ ENDIF (PROTOBUF_FOUND)
 
 ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
 TARGET_LINK_LIBRARIES (msgtester
-	oac
-	lslib
-	LearningServerMessages
-	space_server
-	SpaceMap
 	MessagingSystem
+	Control
+	space_server
+	server
 )
 IF (PROTOBUF_FOUND)
 	TARGET_LINK_LIBRARIES (msgtester ${PROTOBUF_LIBRARY})

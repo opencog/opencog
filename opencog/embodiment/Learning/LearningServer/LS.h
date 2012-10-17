@@ -31,20 +31,22 @@
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
+#include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
+
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
+
 #include "ImitationLearningAgent.h"
 
-#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 
 namespace opencog { namespace learningserver {
 
 using namespace opencog::messaging;
 
-class LS : public EmbodimentCogServer
+class LS : public MessageCogServer
 {
 
 public:

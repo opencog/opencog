@@ -22,6 +22,7 @@
  */
 
 
+#include "MessageFactory.h"
 #include "RawMessage.h"
 
 using namespace opencog::messaging;
@@ -33,17 +34,17 @@ RawMessage::~RawMessage()
 {
 }
 
-RawMessage::RawMessage(const std::string &from, const std::string &to) : Message(from, to, Message::RAW)
+RawMessage::RawMessage(const std::string &from, const std::string &to) : Message(from, to, RAW)
 {
     message.assign("");
 }
 
-RawMessage::RawMessage(const std::string &from, const std::string &to, const std::string &msg) : Message(from, to, Message::RAW)
+RawMessage::RawMessage(const std::string &from, const std::string &to, const std::string &msg) : Message(from, to, RAW)
 {
     message.assign(msg);
 }
 
-RawMessage::RawMessage(const std::string &from, const std::string &to, const char *msg) : Message(from, to, Message::RAW)
+RawMessage::RawMessage(const std::string &from, const std::string &to, const char *msg) : Message(from, to, RAW)
 {
     message.assign(msg);
 }

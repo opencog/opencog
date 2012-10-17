@@ -21,12 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdlib.h>
 
-#include "RewardMessage.h"
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/foreach.h>
-#include "stdlib.h"
+
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
+
+#include "RewardMessage.h"
 
 using namespace opencog::learningserver::messages;
 
@@ -38,7 +41,7 @@ RewardMessage::~RewardMessage()
 }
 
 RewardMessage::RewardMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::Message::REWARD)
+        Message(from, to, opencog::messaging::REWARD)
 {
 
     schema.assign("");
@@ -48,7 +51,7 @@ RewardMessage::RewardMessage(const std::string &from, const std::string &to) :
 
 RewardMessage::RewardMessage(const std::string &from, const std::string &to,
                              const std::string &msg) :
-        Message(from, to, opencog::messaging::Message::REWARD)
+        Message(from, to, opencog::messaging::REWARD)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -58,7 +61,7 @@ RewardMessage::RewardMessage(const std::string &from, const std::string &to,
                              const std::string &schema,
                              const std::vector<std::string> & schemaArgs,
                              const std::string &candidateSchema,
-                             double reward) : Message(from, to, opencog::messaging::Message::REWARD)
+                             double reward) : Message(from, to, opencog::messaging::REWARD)
 {
     this->reward = reward;
     this->schema.assign(schema);

@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
+
 #include "OACMock.h"
 
 class PsiActionSelectionAgentUTest: public CxxTest::TestSuite {
@@ -79,7 +81,7 @@ public:
         // Load physiological state, such as energy, thirst etc
         p_message = oacMock.createMessageFromFile(config().get("PROXY_ID"),
                                                   oacMock.getAgentBrainId(), 
-                                                  Message::STRING,
+                                                  STRING,
                                                   "physiological_state.xml"
                                                  ); 
 
@@ -89,7 +91,7 @@ public:
         // Load map info
         p_message = oacMock.createMessageFromFile(config().get("PROXY_ID"),
                                                   oacMock.getAgentBrainId(), 
-                                                  Message::STRING,
+                                                  STRING,
                                                   "dog_park_map.xml"
                                                  ); 
 

@@ -28,6 +28,7 @@
 #endif
 
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
+
 #include "NetworkElement.h"
 #include "StringMessage.h"
 

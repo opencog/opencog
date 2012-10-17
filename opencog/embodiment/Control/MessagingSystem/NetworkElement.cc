@@ -22,12 +22,10 @@
  */
 
 
+#include <iostream>
 #include <sstream>
 #include <vector>
 #include <signal.h>
-
-#include "ServerSocket.h"
-#include <opencog/util/foreach.h>
 
 //for the random generator initilization
 #include <cmath>
@@ -37,13 +35,6 @@
 #include <unistd.h>
 #endif
 
-#include "Message.h"
-#include "NetworkElement.h"
-#include "NetworkElementCommon.h"
-
-#include <opencog/embodiment/Control/LoggerFactory.h>
-
-#include <iostream>
 #include <boost/regex.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -51,6 +42,14 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 
+#include <opencog/util/foreach.h>
+#include <opencog/embodiment/Control/LoggerFactory.h>
+
+#include "Message.h"
+#include "MessageFactory.h"
+#include "NetworkElement.h"
+#include "NetworkElementCommon.h"
+#include "ServerSocket.h"
 
 using namespace opencog::messaging;
 using namespace opencog;
@@ -267,7 +266,7 @@ void NetworkElement::newMessageRead(const std::string &from, const std::string &
 
     try {
 
-        Message *message = Message::factory(from, to, type, msg);
+        Message *message = messageFactory(from, to, type, msg);
         this->messageCentral.push(this->myId, message);
 
     } catch (opencog::InvalidParamException& e) {

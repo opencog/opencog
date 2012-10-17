@@ -35,6 +35,7 @@
 // For loading Scheme scripts by C++ code
 #include <opencog/guile/load-file.h>
 
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/Control/SpaceTime.h>
@@ -70,7 +71,7 @@ bool OAC::customLoopRun(void)
 #ifdef HAVE_ZMQ
     this->plaza->forwardMessages();
 #endif
-    return EmbodimentCogServer::customLoopRun();
+    return MessageCogServer::customLoopRun();
 }
 
 void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
@@ -822,7 +823,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
         // @note:
         // The message type RAW is used for unity environment to handle dialog.
 		// If you use multiverse, just ignore this.
-        if(msg->getType() == messaging::Message::RAW) {
+        if(msg->getType() == messaging::RAW) {
 			// message from OC Avatar, forward it to RelEx server.
             StringMessage rawMessage( getID(),
                                       config().get("RELEX_SERVER_ID"), 
@@ -925,7 +926,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
         switch (sm->getType()) {
             // note: assuming arity==0 for now - Moshe
 
-        case messaging::Message::SCHEMA: {
+        case messaging::SCHEMA: {
             // learning is finished, set pet to PLAYING state. This
             // design ensure that the learning info will not be lost
             // until a learned schema is received
@@ -939,7 +940,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
         }
         break;
 
-        case messaging::Message::CANDIDATE_SCHEMA: {
+        case messaging::CANDIDATE_SCHEMA: {
             // Add schema to RuleEngine learned schemata ...
 //            ruleEngine->addLearnedSchema( sm->getSchemaName( ) );
 

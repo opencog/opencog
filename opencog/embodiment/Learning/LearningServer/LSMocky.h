@@ -26,7 +26,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include "SleepAgent.h"
 
@@ -34,7 +34,7 @@ using namespace opencog;
 
 namespace opencog { namespace learningserver {
 
-class LSMocky : public opencog::messaging::EmbodimentCogServer
+class LSMocky : public opencog::messaging::MessageCogServer
 {
 
 public:

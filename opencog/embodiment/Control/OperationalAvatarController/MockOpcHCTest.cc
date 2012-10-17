@@ -25,6 +25,7 @@
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
 
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
@@ -237,7 +238,7 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
         switch (sm->getType()) {
             // note: assuming arity==0 for now - Moshe
 
-        case opencog::messaging::Message::SCHEMA:
+        case opencog::messaging::SCHEMA:
             std::cout << "SCHEMA" << std::endl;
             std::cout << "SCHEMA NAME : " << sm->getSchemaName() << std::endl;
             std::cout << "COMBO SCHEMA : " << sm->getComboSchema() << std::endl;
@@ -249,7 +250,7 @@ bool MockOpcHCTest::processNextMessage(opencog::messaging::Message *msg)
             //gai->addSchema(sm->getSchemaName());
             break;
 
-        case opencog::messaging::Message::CANDIDATE_SCHEMA:
+        case opencog::messaging::CANDIDATE_SCHEMA:
             std::cout << "CANDIDATE_SCHEMA" << std::endl;
             std::cout << "SCHEMA NAME : " << sm->getSchemaName() << std::endl;
             std::cout << "COMBO SCHEMA : " << sm->getComboSchema() << std::endl;

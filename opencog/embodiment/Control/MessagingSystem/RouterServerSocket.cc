@@ -21,19 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sstream>
+#include <string.h>
 
-#include "Message.h"
-#include "RouterMessage.h"
-#include "RouterServerSocket.h"
-#include "NetworkElementCommon.h"
+#include <boost/bind.hpp>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
 
-#include <boost/bind.hpp>
-
-#include <sstream>
-#include <string.h>
+#include "Message.h"
+#include "MessageFactory.h"
+#include "RouterMessage.h"
+#include "RouterServerSocket.h"
+#include "NetworkElementCommon.h"
 
 
 using namespace opencog::messaging;
@@ -331,7 +331,7 @@ void RouterServerSocket::storeNewMessage()
 
 
         logger().debug("RouterServerSocket - Building Message object.");
-        Message *message = Message::routerMessageFactory(currentMessageFrom, currentMessageTo,
+        Message *message = routerMessageFactory(currentMessageFrom, currentMessageTo,
                            currentMessageType, currentMessageText);
 
         logger().debug("RouterServerSocket - Queueing message.");

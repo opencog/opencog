@@ -26,11 +26,11 @@
 
 #include <string>
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
-#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
 
 namespace opencog { namespace messaging {
 
-class ComboShellServer : public EmbodimentCogServer
+class ComboShellServer : public MessageCogServer
 {
 
 public:

@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "MessageFactory.h"
 #include "RouterMessage.h"
 
 using namespace opencog::messaging;
@@ -30,7 +31,7 @@ RouterMessage::~RouterMessage()
 }
 
 RouterMessage::RouterMessage(const std::string &from, const std::string &to,
-                             int _encapsulateType) : Message(from, to, Message::ROUTER)
+                             int _encapsulateType) : Message(from, to, ROUTER)
 {
     encapsulateType = _encapsulateType;
     message.assign("");
@@ -38,7 +39,7 @@ RouterMessage::RouterMessage(const std::string &from, const std::string &to,
 
 RouterMessage::RouterMessage(const std::string &from, const std::string &to,
                              int _encapsulateType, const std::string& msg)
-        : Message(from, to, Message::ROUTER)
+        : Message(from, to, ROUTER)
 {
     encapsulateType = _encapsulateType;
     message.assign(msg);

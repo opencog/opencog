@@ -29,7 +29,7 @@
 #include <map>
 #include <set>
 
-#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/MessageCogServer.h>
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include "TestConfig.h"
 #include "GoldStdGen.h"
@@ -37,7 +37,7 @@
 namespace AutomatedSystemTest
 {
 
-class PBTester : public opencog::messaging::EmbodimentCogServer
+class PBTester : public opencog::messaging::MessageCogServer
 {
 
 private:

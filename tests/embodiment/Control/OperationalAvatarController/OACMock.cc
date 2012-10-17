@@ -21,8 +21,11 @@
  */
 
 #include "OACMock.h"
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 
-void OACMock::setConfig() {
+
+void OACMock::setConfig()
+{
     // Set arguments used by OAC::init
     // You can easily get these arguments by set MANUAL_OAC_LAUNCH true in 
     // config file, run the embodiment system and copy the command of 
@@ -127,7 +130,7 @@ Message * OACMock::createMessageFromFile(const std::string & from,
     if ( in.good() ) {
         std::istreambuf_iterator<char> beg(in), end; 
         std::string msgContent(beg, end); 
-        p_message = Message::factory(from, to, msgType, msgContent);
+        p_message = messageFactory(from, to, msgType, msgContent);
     }
     else {
         logger().error("OACMock::%s - Fail to create message from file '%s'", 

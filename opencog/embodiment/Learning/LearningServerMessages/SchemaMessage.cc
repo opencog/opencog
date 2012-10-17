@@ -22,10 +22,14 @@
  */
 
 #include <sstream>
-#include "SchemaMessage.h"
 #include <opencog/util/StringTokenizer.h>
+
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
+#include "SchemaMessage.h"
+
+using namespace opencog::messaging;
 using namespace opencog::learningserver::messages;
 using namespace PetCombo;
 
@@ -34,7 +38,7 @@ SchemaMessage::~SchemaMessage()
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::Message::SCHEMA)
+        Message(from, to, opencog::messaging::SCHEMA)
 {
     schema.assign("");
     schemaName.assign("");
@@ -52,7 +56,7 @@ SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
                              const opencog::combo::combo_tree & comboSchema, const std::string &schemaName,
                              const std::string &candidateSchemaName) :
-        Message(from, to, opencog::messaging::Message::SCHEMA)
+        Message(from, to, opencog::messaging::SCHEMA)
 {
 
     this->schemaName.assign(schemaName);

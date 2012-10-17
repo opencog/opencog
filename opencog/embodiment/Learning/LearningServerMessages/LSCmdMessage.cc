@@ -21,8 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LSCmdMessage.h"
 #include <opencog/util/StringTokenizer.h>
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
+
+#include "LSCmdMessage.h"
 
 using namespace opencog::learningserver::messages;
 
@@ -34,7 +36,7 @@ LSCmdMessage::~LSCmdMessage()
 }
 
 LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::Message::LS_CMD)
+        Message(from, to, opencog::messaging::LS_CMD)
 {
     schema.assign("");
     command.assign("");
@@ -42,7 +44,7 @@ LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to) :
 
 LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to,
                            const std::string &msg) :
-        Message(from, to, opencog::messaging::Message::LS_CMD)
+        Message(from, to, opencog::messaging::LS_CMD)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -50,7 +52,7 @@ LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to,
 
 LSCmdMessage::LSCmdMessage(const std::string &from, const std::string &to,
                            const std::string &command, const std::string &schema) :
-        Message(from, to, opencog::messaging::Message::LS_CMD)
+        Message(from, to, opencog::messaging::LS_CMD)
 {
 
     this->schema.assign(schema);

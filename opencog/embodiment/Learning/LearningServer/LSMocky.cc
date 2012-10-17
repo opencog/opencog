@@ -21,11 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LSMocky.h"
-#include "SleepAgent.h"
+
+#include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 #include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
+#include "LSMocky.h"
+#include "SleepAgent.h"
 
 using namespace opencog::learningserver;
 using namespace opencog;
@@ -66,7 +68,7 @@ bool LSMocky::processNextMessage(opencog::messaging::Message *msg)
 
     switch (msg->getType()) {
 
-    case opencog::messaging::Message::LS_CMD:
+    case opencog::messaging::LS_CMD:
         cm = (learningserver::messages::LSCmdMessage *)msg;
         logger().info("LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
                      cm->getCommand().c_str(),
@@ -74,14 +76,14 @@ bool LSMocky::processNextMessage(opencog::messaging::Message *msg)
                      cm->getSchema().c_str());
         break;
 
-    case opencog::messaging::Message::LEARN:
+    case opencog::messaging::LEARN:
         lm = (learningserver::messages::LearnMessage *)msg;
         logger().info("LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
                      lm->getFrom().c_str(),
                      lm->getSchema().c_str());
         break;
 
-    case opencog::messaging::Message::REWARD:
+    case opencog::messaging::REWARD:
         rm = (learningserver::messages::RewardMessage *)msg;
         logger().info("LSMocky - REWARD - Pet: %s, Tried Schema: %s.",
                      rm->getFrom().c_str(),

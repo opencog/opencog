@@ -26,28 +26,9 @@
 
 #include "Message.h"
 #include "MessagingSystemExceptions.h"
-#include "StringMessage.h"
-#include "RouterMessage.h"
-
-#include <opencog/embodiment/Control/MessagingSystem/TickMessage.h>
-#include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
-#include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
-
-#ifdef CIRCULAR_DEPENDENCY
-#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
-#endif // CIRCULAR_DEPENDENCY
 
 namespace opencog { namespace messaging {
     
-#ifdef CIRCULAR_DEPENDENCY
-using namespace opencog::learningserver::messages;
-#endif // CIRCULAR_DEPENDENCY
-
 Message::~Message()
 {
 }
@@ -57,74 +38,6 @@ Message::Message(const std::string &from, const std::string &to, int type)
     this->from = from;
     this->to = to;
     this->type = type;
-}
-
-Message *Message::factory(const std::string &from, const std::string &to, int
-        msgType, const std::string &msg)
-    throw (opencog::InvalidParamException, std::bad_exception)
-{
-
-    switch (msgType) {
-    case STRING: {
-        return new StringMessage(from, to, msg);
-        break;
-    }
-#ifdef CIRCULAR_DEPENDENCY
-    case LEARN: {
-        return new LearnMessage(from, to, msg);
-        break;
-    }
-    case REWARD: {
-        return new RewardMessage(from, to, msg);
-        break;
-    }
-    case TRY: {
-        return new TrySchemaMessage(from, to, msg);
-        break;
-    }
-    case STOP_LEARNING: {
-        return new StopLearningMessage(from, to, msg);
-        break;
-    }
-    case SCHEMA:
-    case CANDIDATE_SCHEMA: {
-        // Same message class, but with different types.
-        // CANDIDATE_SCHEMA, besides the schema being learned,
-        // also has the name of the candidate to be tried out
-        return new SchemaMessage(from, to, msg, msgType);
-        break;
-    }
-    case LS_CMD: {
-        std::cout << "LS_CMD : " << msg << std::endl;
-        return new LSCmdMessage(from, to, msg);
-        break;
-    }
-#endif // CIRCULAR_DEPENDENCY
-    case TICK: {
-        return new TickMessage(from, to);
-        break;
-    }
-    case FEEDBACK: {
-        return new FeedbackMessage(from, to, msg);
-        break;
-    }
-	case RAW: {
-		return new RawMessage(from, to, msg);
-		break;
-	}
-    default: {
-        throw opencog::InvalidParamException(TRACE_INFO,
-                     "Message - Unknown message type id: '%d'.", msgType);
-    }
-    }
-
-    // to remove compilation warning, execution should never reach here.
-    return NULL;
-}
-
-Message *Message::routerMessageFactory(const std::string &from, const std::string &to, int encapsulateMsgType, const std::string &msg)
-{
-    return new RouterMessage(from, to, encapsulateMsgType, msg);
 }
 
 // Setters and getters

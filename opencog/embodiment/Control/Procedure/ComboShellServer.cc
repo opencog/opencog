@@ -75,7 +75,7 @@ bool ComboShellServer::processNextMessage(opencog::messaging::Message *msg)
 bool ComboShellServer::customLoopRun()
 {
     if (_waiting) {
-        return EmbodimentCogServer::customLoopRun();
+        return MessageCogServer::customLoopRun();
     }
 
     combo_tree tr;

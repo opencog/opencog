@@ -23,6 +23,7 @@
 
 
 #include "StringMessage.h"
+#include "MessageFactory.h"
 
 using namespace opencog::messaging;
 
@@ -33,17 +34,17 @@ StringMessage::~StringMessage()
 {
 }
 
-StringMessage::StringMessage(const std::string &from, const std::string &to) : Message(from, to, Message::STRING)
+StringMessage::StringMessage(const std::string &from, const std::string &to) : Message(from, to, STRING)
 {
     message.assign("");
 }
 
-StringMessage::StringMessage(const std::string &from, const std::string &to, const std::string &msg) : Message(from, to, Message::STRING)
+StringMessage::StringMessage(const std::string &from, const std::string &to, const std::string &msg) : Message(from, to, STRING)
 {
     message.assign(msg);
 }
 
-StringMessage::StringMessage(const std::string &from, const std::string &to, const char *msg) : Message(from, to, Message::STRING)
+StringMessage::StringMessage(const std::string &from, const std::string &to, const char *msg) : Message(from, to, STRING)
 {
     message.assign(msg);
 }

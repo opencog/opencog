@@ -29,6 +29,7 @@
 #include <opencog/embodiment/Control/SpaceTime.h>
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 
+namespace opencog {
 
 class AtomSpaceWorldProvider : public WorldProvider
 {
@@ -44,6 +45,8 @@ public:
         return atomSpace;
     }
 };
+
+} // namespace opencog
 
 #endif // _ATOMSPACE_WORLD_PROVIDER_H_
 
