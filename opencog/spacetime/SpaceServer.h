@@ -200,12 +200,12 @@ public:
     // input raw data to the learning server for blockEntities identification learning
     void sendRawAdjancentBlocksDataToLS();
 
+    void setTimeServer(TimeServer*);
+
 private:
 
-    /**
-     * Container where SpaceServer is inserted.
-     */
     AtomSpace* atomspace;
+    TimeServer* timeser;
 
     /**
      * signal connections used to keep track of atom removal in the SpaceMap

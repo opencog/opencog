@@ -46,6 +46,7 @@ TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss)
    : atomspace(&a), spaceServer(_ss)
 {
     init();
+    spaceServer->setTimeServer(this);
 
     // Connect signals
     addedAtomConnection = a.atomSpaceAsync->addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1, _2));

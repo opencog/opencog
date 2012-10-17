@@ -80,6 +80,11 @@ SpaceServer::~SpaceServer()
     clear();
 }
 
+void SpaceServer::setTimeServer(TimeServer* ts)
+{
+    timeser = ts;
+}
+
 void SpaceServer::atomAdded(AtomSpaceImpl* a, Handle h)
 {
 }
@@ -497,7 +502,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, bool isSelfObject, unsigned lo
         return false;
     }
 
-    timeServer().addTimeInfo(curSpaceMapHandle, timestamp);
+    timeser->addTimeInfo(curSpaceMapHandle, timestamp);
 
     // we should distinguish to add a block or other object
     // because when adding a block, maybe cause some change in the terrain and structures
@@ -527,7 +532,7 @@ Handle SpaceServer::addOrGetSpaceMap(unsigned long timestamp, std::string _mapNa
     {
         spaceMapNode = atomspace->addNode(SPACE_MAP_NODE,_mapName);
         atomspace->setLTI(spaceMapNode, 1);
-        timeServer().addTimeInfo(spaceMapNode, timestamp);
+        timeser->addTimeInfo(spaceMapNode, timestamp);
 
         SpaceMap* newSpaceMap = new SpaceMap( _mapName, _xMin,  _yMin, _zMin,  _xDim,  _yDim,  _zDim,  _floorHeight);
 
@@ -553,7 +558,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, unsigned long timestamp)
     }
 
     if (timestamp != 0)
-        timeServer().addTimeInfo(curSpaceMapHandle, timestamp);
+        timeser->addTimeInfo(curSpaceMapHandle, timestamp);
 
     if (atomspace->getType(objectNode) == STRUCTURE_NODE)
     {
@@ -717,7 +722,7 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
     SimpleTruthValue tv(1.0, 1.0);
     Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
 
-    timeServer().addTimeInfo(evalLink,timeStamp);
+    timeser->addTimeInfo(evalLink,timeStamp);
 
 }
 
@@ -736,19 +741,19 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
     int x = _entity->getWidth();
     numberNode = atomspace->addNode(NUMBER_NODE,  opencog::toString(x).c_str() );
     evalLink = addPropertyPredicate( "width", _entity->mEntityNode, numberNode,tv);
-    timeServer().addTimeInfo(evalLink,timestamp);
+    timeser->addTimeInfo(evalLink,timestamp);
 
     // add length: the y extent
     int y = _entity->getHeight();
     numberNode = atomspace->addNode(NUMBER_NODE,  opencog::toString(y).c_str() );
     evalLink = addPropertyPredicate("length", _entity->mEntityNode, numberNode,tv);
-    timeServer().addTimeInfo(evalLink,timestamp);
+    timeser->addTimeInfo(evalLink,timestamp);
 
     // add height: how tall it's, the z extent
     int z = _entity->getHeight();
     numberNode = atomspace->addNode(NUMBER_NODE,  opencog::toString(z).c_str() );
     evalLink = addPropertyPredicate("height", _entity->mEntityNode, numberNode,tv);
-    timeServer().addTimeInfo(evalLink,timestamp);
+    timeser->addTimeInfo(evalLink,timestamp);
 
     // todo: add secondary properties
 
