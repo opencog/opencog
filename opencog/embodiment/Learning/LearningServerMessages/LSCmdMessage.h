@@ -2,8 +2,9 @@
  * opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
- * Author(s): Carlos Lopes
+ * Author(s): Carlos Lopes, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -67,6 +68,10 @@ public:
 
     void setSchema(const std::string & schema);
     const std::string & getSchema();
+
+    static int _lscmdMsgType;
+private:
+    static int init();
 
 }; // class
 } } } // namespace opencog::learningserver::messages

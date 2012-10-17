@@ -2,8 +2,9 @@
  * opencog/embodiment/Learning/LearningServer/LS.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
- * Author(s): Nil Geisweiller, Carlos Lopes
+ * Author(s): Nil Geisweiller, Carlos Lopes, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -71,15 +72,9 @@ void LS::init(const std::string &myId, const std::string &ip,
 
 bool LS::processNextMessage(opencog::messaging::Message *msg)
 {
-    learningserver::messages::LearnMessage  * lm;
-    learningserver::messages::RewardMessage * rm;
     learningserver::messages::LSCmdMessage  * cm;
-
-    switch (msg->getType()) {
-
-    case opencog::messaging::LS_CMD:
-        cm = (learningserver::messages::LSCmdMessage *)msg;
-
+    cm = dynamic_cast<learningserver::messages::LSCmdMessage*>(msg);
+    if (cm) {
         if (learningPet == cm->getFrom() &&
                 learningSchema == cm->getSchema()) {
 
@@ -93,14 +88,14 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
                 return false;
             }
         }
-        break;
+        return false;
     }
 
+    learningserver::messages::LearnMessage  * lm;
     lm = dynamic_cast<learningserver::messages::LearnMessage*>(msg);
-    if (lm) {
-
+    if (lm)
+    {
         ownerID = lm->getOwnerId();
-
         avatarID = lm->getAvatarId();
 
         // no learning in progress... start a new one
@@ -135,12 +130,12 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
             // more than one learning process (no concurrency) soh just return
             logger().warn("LS - LS does not support concurent learning (LS busy right now).");
         }
+        return false;
     }
 
-    switch (msg->getType()) {
-    case opencog::messaging::REWARD:
-        rm = (learningserver::messages::RewardMessage *)msg;
-
+    learningserver::messages::RewardMessage * rm;
+    rm = dynamic_cast<learningserver::messages::RewardMessage*>(msg);
+    if (rm) {
         if (!isBusy()) {
             logger().warn("LS - LS should be learning when receive a reward message.");
             return false;
@@ -152,30 +147,32 @@ bool LS::processNextMessage(opencog::messaging::Message *msg)
                 learningSchema == rm->getCandidateSchema()) {
             rewardCandidateSchema(rm);
         }
-        break;
-    case opencog::messaging::TRY:
-        learningserver::messages::TrySchemaMessage  * tryMsg;
-        tryMsg = (learningserver::messages::TrySchemaMessage  *)msg;
+        return false;
+    }
 
+    learningserver::messages::TrySchemaMessage  * tryMsg;
+    tryMsg = dynamic_cast<learningserver::messages::TrySchemaMessage*>(msg);
+    if (tryMsg)
+    {
         // TODO: verify if the arguments are the same?
         if (learningPet == tryMsg->getFrom() &&  learningSchema == tryMsg->getSchema()) {
             trySchema();
         }
-        break;
+        return false;
+    }
 
-    case opencog::messaging::STOP_LEARNING:
-        learningserver::messages::StopLearningMessage  * stopLearningMsg;
-        stopLearningMsg = (learningserver::messages::StopLearningMessage  *)msg;
-
+    learningserver::messages::StopLearningMessage  * stopLearningMsg;
+    stopLearningMsg = dynamic_cast<learningserver::messages::StopLearningMessage*>(msg);
+    if (stopLearningMsg)
+    {
         // TODO: verify if the arguments are the same?
         if (learningPet == stopLearningMsg->getFrom() &&  learningSchema == stopLearningMsg->getSchema()) {
             stopLearn();
         }
-        break;
-
-    default:
-        logger().error("LS - Unknown message type.");
+        return false;
     }
+
+    logger().error("LS - Unknown message type: %d", msg->getType());
     return false;
 }
 

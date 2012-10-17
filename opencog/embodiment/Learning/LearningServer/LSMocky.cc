@@ -2,8 +2,9 @@
  * opencog/embodiment/Learning/LearningServer/LSMocky.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
- * Author(s): Carlos Lopes
+ * Author(s): Carlos Lopes, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -62,38 +63,36 @@ LSMocky::~LSMocky()
 
 bool LSMocky::processNextMessage(opencog::messaging::Message *msg)
 {
-    learningserver::messages::LearnMessage  * lm;
-    learningserver::messages::RewardMessage * rm;
     learningserver::messages::LSCmdMessage  * cm;
+    cm = dynamic_cast<learningserver::messages::LSCmdMessage*>(msg);
+    if (cm) {
+        logger().info("LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
+                     cm->getCommand().c_str(),
+                     cm->getFrom().c_str(),
+                     cm->getSchema().c_str());
+        return false;
+    }
 
+    learningserver::messages::LearnMessage  * lm;
     lm = dynamic_cast<learningserver::messages::LearnMessage*>(msg);
     if (lm) {
         logger().info("LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
                      lm->getFrom().c_str(),
                      lm->getSchema().c_str());
+        return false;
     }
 
-    switch (msg->getType()) {
-
-    case opencog::messaging::LS_CMD:
-        cm = (learningserver::messages::LSCmdMessage *)msg;
-        logger().info("LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
-                     cm->getCommand().c_str(),
-                     cm->getFrom().c_str(),
-                     cm->getSchema().c_str());
-        break;
-
-    case opencog::messaging::REWARD:
-        rm = (learningserver::messages::RewardMessage *)msg;
+    learningserver::messages::RewardMessage * rm;
+    rm = dynamic_cast<learningserver::messages::RewardMessage*> (msg);
+    if (rm) {
         logger().info("LSMocky - REWARD - Pet: %s, Tried Schema: %s.",
                      rm->getFrom().c_str(),
                      rm->getCandidateSchema().c_str());
 
-        break;
-
-    default:
-        logger().error("LSMocky - Unknown message type.");
+        return false;
     }
+
+    logger().error("LSMocky - Unknown message type.");
     return false;
 }
 
