@@ -29,9 +29,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/AvatarInterface.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/OutputRelex.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/FramesToRelexRuleEngine.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/NLGenClient.h>
+#include <opencog/embodiment/Control/Language/OutputRelex.h>
+#include <opencog/embodiment/Control/Language/FramesToRelexRuleEngine.h>
+#include <opencog/embodiment/Control/Language/NLGenClient.h>
 
 #include <opencog/guile/SchemeEval.h>
 

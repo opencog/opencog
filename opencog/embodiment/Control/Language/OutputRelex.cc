@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/OutputRelex.cc
+ * opencog/embodiment/Control/Language/OutputRelex.cc
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/embodiment/Control/OperationalAvatarController/OutputRelex.h>
+#include <opencog/embodiment/Control/Language/OutputRelex.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 
 using namespace opencog::oac;

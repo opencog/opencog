@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/NLGenClient.cc
+ * opencog/embodiment/Control/Language/NLGenClient.cc
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/embodiment/Control/OperationalAvatarController/NLGenClient.h>
+#include <opencog/embodiment/Control/Language/NLGenClient.h>
 #include <opencog/util/Logger.h>
 #include <boost/lexical_cast.hpp>
 

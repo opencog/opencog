@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.cc
+ * opencog/embodiment/Control/Language/LanguageComprehension.cc
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
@@ -30,7 +30,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/spacetime/SpaceServer.h>
 
-#include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
+#include <opencog/embodiment/Control/Language/LanguageComprehension.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 

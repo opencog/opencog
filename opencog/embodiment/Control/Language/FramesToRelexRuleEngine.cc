@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalAvatarController/FramesToRelexRuleEngine.cc
+ * opencog/embodiment/Control/Language/FramesToRelexRuleEngine.cc
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved

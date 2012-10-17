@@ -38,7 +38,7 @@
 #include "ActionPlanSender.h"
 #include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/LanguageComprehension.h>
+#include <opencog/embodiment/Control/Language/LanguageComprehension.h>
 #include <map>
 #include <vector>
 #include <exception>
