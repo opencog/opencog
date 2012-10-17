@@ -29,7 +29,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/server/CogServer.h>
 
 using namespace opencog;
 

@@ -9,9 +9,6 @@
 #ifdef HAVE_GUILE
 
 #include <libguile.h>
-
-#include <opencog/server/CogServer.h>
-
 #include "SchemeSmob.h"
 
 using namespace opencog;
