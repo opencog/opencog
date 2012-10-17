@@ -2,8 +2,9 @@
  * opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
- * Author(s): Erickson Nascimento
+ * Author(s): Erickson Nascimento, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -30,6 +31,21 @@
 #include "TrySchemaMessage.h"
 
 using namespace opencog::learningserver::messages;
+using namespace opencog::messaging;
+
+int TrySchemaMessage::_tryMsgType = init();
+
+static Message* tryFactory(const std::string &from, const std::string &to,
+                           int msgType, const std::string &msg)
+{
+    return new TrySchemaMessage(from, to, msg);
+}
+
+int TrySchemaMessage::init()
+{
+   _tryMsgType = registerMessageFactory((factory_t) tryFactory);
+   return registerMessageFactory((factory_t) tryFactory);
+}
 
 /**
  * Constructor and destructor
@@ -39,7 +55,7 @@ TrySchemaMessage::~TrySchemaMessage()
 }
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::TRY)
+        Message(from, to, _tryMsgType)
 {
     schema.assign("");
     schemaArguments.clear();
@@ -47,7 +63,7 @@ TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &t
 
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to,
                                    const std::string &msg) :
-        Message(from, to, opencog::messaging::TRY)
+        Message(from, to, _tryMsgType)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -56,7 +72,7 @@ TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &t
 TrySchemaMessage::TrySchemaMessage(const std::string &from, const std::string &to,
                                    const std::string &schm, const std::vector<std::string> &argumentsList)
 throw (opencog::InvalidParamException, std::bad_exception):
-        Message(from, to, opencog::messaging::TRY)
+        Message(from, to, _tryMsgType)
 {
 
     schema.assign(schm);

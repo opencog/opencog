@@ -88,6 +88,9 @@ public:
     const std::vector<std::string> getSchemaArguments() {
         return schemaArguments;
     };
+    static int _rewardMsgType;
+private:
+    static int init();
 
 }; // class
 } } } // namespace opencog::learningserver::messages

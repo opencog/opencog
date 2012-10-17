@@ -2,8 +2,9 @@
  * opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
- * Author(s): Erickson Nascimento
+ * Author(s): Erickson Nascimento, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include <vector>
 
 #include <opencog/util/StringTokenizer.h>
@@ -31,6 +31,22 @@
 #include "StopLearningMessage.h"
 
 using namespace opencog::learningserver::messages;
+using namespace opencog::messaging;
+
+int StopLearningMessage::_stopMsgType = init();
+
+static Message* stopFactory(const std::string &from, const std::string &to,
+                              int msgType, const std::string &msg)
+{
+    return new StopLearningMessage(from, to, msg);
+}
+
+int StopLearningMessage::init()
+{
+   _stopMsgType = registerMessageFactory((factory_t) stopFactory);
+   return registerMessageFactory((factory_t) stopFactory);
+}
+
 
 /**
  * Constructor and destructor
@@ -40,14 +56,14 @@ StopLearningMessage::~StopLearningMessage()
 }
 
 StopLearningMessage::StopLearningMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::STOP_LEARNING)
+        Message(from, to, _stopMsgType)
 {
     schema.assign("");
 }
 
 StopLearningMessage::StopLearningMessage(const std::string &from, const std::string &to,
         const std::string &msg) :
-        Message(from, to, opencog::messaging::STOP_LEARNING)
+        Message(from, to, _stopMsgType)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -56,7 +72,7 @@ StopLearningMessage::StopLearningMessage(const std::string &from, const std::str
 StopLearningMessage::StopLearningMessage(const std::string &from, const std::string &to,
         const std::string &schm,  const std::vector<std::string> &argumentsList)
 throw (opencog::InvalidParamException, std::bad_exception):
-        Message(from, to, opencog::messaging::STOP_LEARNING)
+        Message(from, to, _stopMsgType)
 {
 
     schema.assign(schm);

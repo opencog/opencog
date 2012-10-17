@@ -37,18 +37,8 @@
 #include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/RawMessage.h>
 
-#ifdef CIRCULAR_DEPENDENCY
-#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
-#endif // CIRCULAR_DEPENDENCY
-
 namespace opencog { namespace messaging {
     
-#ifdef CIRCULAR_DEPENDENCY
-using namespace opencog::learningserver::messages;
-#endif // CIRCULAR_DEPENDENCY
-
 using namespace std;
 
 static std::map<int, factory_t> factory_map;
@@ -58,26 +48,11 @@ Message *messageFactory(const std::string &from, const std::string &to, int
         msgType, const std::string &msg)
     throw (opencog::InvalidParamException, std::bad_exception)
 {
-
     switch (msgType) {
     case STRING: {
         return new StringMessage(from, to, msg);
         break;
     }
-#ifdef CIRCULAR_DEPENDENCY
-    case REWARD: {
-        return new RewardMessage(from, to, msg);
-        break;
-    }
-    case TRY: {
-        return new TrySchemaMessage(from, to, msg);
-        break;
-    }
-    case STOP_LEARNING: {
-        return new StopLearningMessage(from, to, msg);
-        break;
-    }
-#endif // CIRCULAR_DEPENDENCY
     case TICK: {
         return new TickMessage(from, to);
         break;
@@ -108,7 +83,8 @@ Message *messageFactory(const std::string &from, const std::string &to, int
     return NULL;
 }
 
-Message *routerMessageFactory(const std::string &from, const std::string &to, int encapsulateMsgType, const std::string &msg)
+Message *routerMessageFactory(const std::string &from, const std::string &to,
+                              int encapsulateMsgType, const std::string &msg)
 {
     return new RouterMessage(from, to, encapsulateMsgType, msg);
 } 

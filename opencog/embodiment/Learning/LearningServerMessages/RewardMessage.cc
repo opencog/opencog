@@ -2,8 +2,9 @@
  * opencog/embodiment/Learning/LearningServerMessages/RewardMessage.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved
- * Author(s): Carlos Lopes
+ * Author(s): Carlos Lopes, Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,6 +33,21 @@
 #include "RewardMessage.h"
 
 using namespace opencog::learningserver::messages;
+using namespace opencog::messaging;
+
+int RewardMessage::_rewardMsgType = init();
+
+static Message* rewardFactory(const std::string &from, const std::string &to,
+                              int msgType, const std::string &msg)
+{
+    return new RewardMessage(from, to, msg);
+}
+
+int RewardMessage::init()
+{
+   _rewardMsgType = registerMessageFactory((factory_t) rewardFactory);
+   return registerMessageFactory((factory_t) rewardFactory);
+}
 
 const double RewardMessage::POSITIVE = 1.0;
 const double RewardMessage::NEGATIVE = 0.0;
@@ -41,7 +57,7 @@ RewardMessage::~RewardMessage()
 }
 
 RewardMessage::RewardMessage(const std::string &from, const std::string &to) :
-        Message(from, to, opencog::messaging::REWARD)
+        Message(from, to, _rewardMsgType)
 {
 
     schema.assign("");
@@ -51,7 +67,7 @@ RewardMessage::RewardMessage(const std::string &from, const std::string &to) :
 
 RewardMessage::RewardMessage(const std::string &from, const std::string &to,
                              const std::string &msg) :
-        Message(from, to, opencog::messaging::REWARD)
+        Message(from, to, _rewardMsgType)
 {
 
     loadPlainTextRepresentation(msg.c_str());
@@ -61,7 +77,7 @@ RewardMessage::RewardMessage(const std::string &from, const std::string &to,
                              const std::string &schema,
                              const std::vector<std::string> & schemaArgs,
                              const std::string &candidateSchema,
-                             double reward) : Message(from, to, opencog::messaging::REWARD)
+                             double reward) : Message(from, to, _rewardMsgType)
 {
     this->reward = reward;
     this->schema.assign(schema);

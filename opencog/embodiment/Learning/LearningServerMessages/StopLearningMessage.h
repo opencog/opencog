@@ -78,6 +78,10 @@ public:
     const std::vector<std::string> &getSchemaArguments();
     void setSchemaArguments(const std::vector<std::string> &argumentsList);
 
+    static int _stopMsgType;
+private:
+    static int init();
+
 }; // class
 } } } // namespace opencog::learningserver::messages
 #endif
