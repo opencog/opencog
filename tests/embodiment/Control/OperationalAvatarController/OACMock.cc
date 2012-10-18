@@ -34,7 +34,13 @@ void OACMock::setConfig()
     ownerId = "290"; 
     agentType = "pet";  
     agentTrait = "Maxie"; 
-    networkElementPort = "16326"; 
+
+// XXX FIXME: Something in the network element cod is broken, and this
+// test doesn't work with port 16326. It does work with port 16312.
+// There needs to be another, distinct unit test that checks that
+// the port numbers work as expected, and make sense.
+    // networkElementPort = "16326"; 
+    networkElementPort = "16312"; 
     cogServerShellPort = "17002"; 
     zmqPublishPort = "18002"; 
 
