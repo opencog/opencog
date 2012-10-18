@@ -131,7 +131,16 @@ void Config::load(const char* filename, bool resetFirst)
         {
             // Read and process the config file
             fin.open(configPath.string().c_str());
-            if (fin && fin.good() && fin.is_open()) break;
+            if (fin && fin.good() && fin.is_open()) 
+            {
+                if ('/' != configPath.string()[0])
+                {
+                    _path_where_found = get_current_dir_name();
+                    _path_where_found += '/';
+                }
+                _path_where_found += configPath.string();
+                break;
+            }
         }
     }
 
@@ -290,7 +299,7 @@ Config& opencog::config(ConfigFactory* factoryFunction,
                         bool overwrite)
 {
     static std::auto_ptr<Config> instance((*factoryFunction)());
-    if(overwrite)
+    if (overwrite)
         instance.reset((*factoryFunction)());
     return *instance;
 }

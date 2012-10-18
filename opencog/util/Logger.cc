@@ -9,6 +9,7 @@
  *
  * Written by Andre Senna <senna@vettalabs.com>
  *            Gustavo Gama <gama@vettalabs.com>
+ *            Linas Vepstas <linasvepstas@gmail.com>
  *            Joel Pitt <joel@opencog.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -192,8 +193,21 @@ void Logger::writeMsg(std::string &msg)
             disable();
             return;
         }
-        else
-            enable();
+
+        enable();
+
+        // Log the config file location. We do that here, because
+        // wwe can't do it any earlier, because the config file
+        // specifies the log location.
+        if (INFO <= currentLevel)
+        {
+            fprintf(f, "[INFO] Using config file found at: %s\n",
+                   config().path_where_found().c_str());
+
+            if (printToStdout)
+                printf("[INFO] Using config file found at: %s\n",
+                       config().path_where_found().c_str());
+        }
     }
 
     // write to file

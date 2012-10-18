@@ -68,6 +68,7 @@ protected:
 
     std::string emptyString;
     std::map<std::string, std::string> table;
+    std::string _path_where_found;
 
 public:
     // constructor and destructor
@@ -80,8 +81,10 @@ public:
     // reset configuration to default
     virtual void reset();
 
-    // Load passed file and redefines values for parameters.
+    /// Load passed file and redefines values for parameters.
     void load(const char* config_file, bool resetFirst = true);
+
+    const std::string& path_where_found() { return _path_where_found; }
 
     // Checks whether a parameter exists
     const bool has(const std::string &parameter_name) const;
