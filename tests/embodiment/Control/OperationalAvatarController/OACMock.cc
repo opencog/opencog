@@ -53,8 +53,12 @@ void OACMock::setConfig()
     config().set("SERVER_PORT", cogServerShellPort);
     config().set("ZMQ_PUBLISH_PORT", zmqPublishPort);
 
-    config().set("MODULES", "libquery.so, libbuiltinreqs.so, \
-                             libscheme-shell.so, libpersist.so");
+    // XXX FIXME: at this time, we need to specify explicit paths to
+    // to the modules that need to be loaded. I don't know why.
+    config().set("MODULES", "opencog/query/libquery.so, "
+                            "opencog/server/libbuiltinreqs.so, "
+                            "opencog/shell/libscheme-shell.so, "
+                            "opencog/persist/sql/libpersist.so");
 
     config().set("RUN_OAC_DEBUGGER", "false"); 
     config().set("MANUAL_OAC_LAUNCH", "false"); 
