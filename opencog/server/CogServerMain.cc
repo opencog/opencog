@@ -61,6 +61,8 @@ static const char* DEFAULT_MODULE_PATHS[] =
     DATADIR,
     "opencog",
     "../opencog",
+    "../build",    // autogened scm files go into the build dir!
+    "../bin",      // an alternate name for a build dir.
 #ifndef WIN32
     "/usr/share/opencog",
     "/usr/local/share/opencog",
