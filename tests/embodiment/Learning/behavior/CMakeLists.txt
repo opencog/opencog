@@ -13,6 +13,8 @@ ADD_CXXTEST(BehaviorCategoryUTest)
 ADD_CXXTEST(BDRetrieverUTest)
 
 LINK_LIBRARIES(
+	oac
+	lslib
 	Control
 	AvatarComboVocabulary
 	comboreduct

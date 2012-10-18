@@ -22,13 +22,15 @@
  */
 #include <opencog/util/misc-test.h>
 #include <opencog/spacetime/TimeServer.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/spacetime/SpaceTime.h>
 #include <opencog/embodiment/Learning/behavior/BE.h>
 #include <opencog/embodiment/Learning/behavior/BasicWorldProvider.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Learning/behavior/BDRetriever.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <opencog/embodiment/Control/SpaceTime.h>
+
+#include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
+#include <opencog/embodiment/Learning/LearningServer/LSMocky.h>
 
 using namespace behavior;
 using namespace opencog::control;
@@ -44,6 +46,10 @@ private:
 public:
 
     BEUTest () {
+        // XXX what is the right server to use here ??? OAC? LSMocky? something else ?
+        // I really don;'t know ... this test doesn't pass any more, it used to ...
+        // server(learningserver::LSMocky::createInstance);
+        server(OAC::createInstance);
         config(EmbodimentConfig::embodimentCreateInstance, true);
     }
 
