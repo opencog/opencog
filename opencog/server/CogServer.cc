@@ -72,7 +72,7 @@ BaseServer* CogServer::createInstance()
 
 CogServer::~CogServer()
 {
-    logger().error("[CogServer] enter destructor");
+    logger().debug("[CogServer] enter destructor");
     disableNetworkServer();
 
     std::vector<std::string> moduleKeys;
