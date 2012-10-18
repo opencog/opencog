@@ -16,7 +16,6 @@ ADD_DEPENDENCIES(persist opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(persist
 	atomspace
-	builtinreqs
 	${ODBC_LIBRARIES}
 )
 

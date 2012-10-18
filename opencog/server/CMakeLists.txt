@@ -4,7 +4,6 @@ INCLUDE_DIRECTORIES (
 
 ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
-	Agent
 	Request
 	DataRequest
 	ExitRequest
@@ -26,6 +25,7 @@ ENDIF (EXPAT_FOUND)
 
 
 ADD_LIBRARY (server SHARED
+	Agent
 	BaseServer
 	CogServer
 	Request
@@ -36,7 +36,6 @@ ADD_LIBRARY (server SHARED
 )
 
 TARGET_LINK_LIBRARIES(server
-	builtinreqs
 	atomspace
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
@@ -61,6 +60,9 @@ ENDIF (ODBC_FOUND)
 # XXX what is this shit?  The below is one wild and insane violation of everything that
 # cmake stands for ... why bother using cmake, if we are going to crap on every principle
 # of intelligent makefile design.  WTF. 
+#
+# XXX it is even worse than that .. many of the libraries sepcified below are supposed to
+# be dynamically loaded, not linked... 
 IF (APPLE)
 	# We should eventually do Apple builds with "packages"
 	# Apple's linker seems not to understand a colon-separated list of
