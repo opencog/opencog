@@ -65,7 +65,6 @@ Ubigrapher::Ubigrapher()
     : pushDelay(1), connected(false), space(CogServer::getAtomSpace()),
       withIncoming(false), compact(false)
 {
-    space = &CogServer::getAtomSpace();
     serverIP = "";
     serverPort = 0;
 
