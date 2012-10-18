@@ -18,7 +18,10 @@ STI_FUNDS_BUFFER      = 10000
 LTI_FUNDS_BUFFER      = 10000
 MIN_STI               = -400
 PROMPT                = "opencog> "
-MODULES               = libbuiltinreqs.so, libpersist.so, libquery.so, libscheme-shell.so
+MODULES               = opencog/server/libbuiltinreqs.so,
+                        opencog/persist/sql/libpersist.so,
+                        opencog/query/libquery.so,
+                        opencog/shell/libscheme-shell.so
 
 # Used in the PLNUTest
 PLN_LOG_LEVEL         = 2
