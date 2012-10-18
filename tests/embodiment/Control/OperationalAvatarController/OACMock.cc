@@ -53,10 +53,6 @@ void OACMock::setConfig()
     config().set("SERVER_PORT", cogServerShellPort);
     config().set("ZMQ_PUBLISH_PORT", zmqPublishPort);
 
-    // Reset module list to skip PLN module. Because BackChainingAgent and
-    // ForwardChainingAgent in PLN module will make OAC crash in unit test when
-    // unload the PLN module. In addition, it seems these two agents are never 
-    // started.  
     config().set("MODULES", "libquery.so, libbuiltinreqs.so, \
                              libscheme-shell.so, libpersist.so");
 
@@ -65,10 +61,9 @@ void OACMock::setConfig()
     config().set("ENABLE_UNITY_CONNECTOR", "false"); 
     //config().set("USE_3D_MAP", "false");
 
-    // OAC fails to create the log file in /tmp/... during unit test (why?), so
-    // we change the log file to user's home directory and also print log to 
-    // the screen. 
-    config().set("LOG_DIR", "/home/$USER"); 
+    // Put the log file in the current directory -- also print log
+    // location to the screen. 
+    config().set("LOG_DIR", "."); 
     config().set("PRINT_LOG_TO_STDOUT", "true");
 
     // Disable opencog::spatial::MapExplorerServer, which raises
