@@ -26,7 +26,7 @@
 #include <opencog/util/Logger.h>
 
 #ifdef HAVE_PROTOBUF
-#include <opencog/embodiment/Learning/LearningServerMessages/LearningMessage.info.pb.h>
+#include <opencog/embodiment/Learning/LearningSpace/LearningMessage.info.pb.h>
 #endif
 
 #include "BlockEntity.h"
