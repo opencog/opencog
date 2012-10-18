@@ -1,0 +1,18 @@
+
+IF (PROTOBUF_FOUND)
+
+   ADD_CUSTOM_TARGET(learning_message_info DEPENDS LearningMessage.info.pb.h)
+
+    # Compile proto messages.
+    SET(PROTO_ARGS 
+        PROTOFILES LearningMessage.info.proto
+        OUTPATH ${CMAKE_CURRENT_BUILD_DIR}
+    )
+    PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_ARGS})
+ENDIF (PROTOBUF_FOUND)
+
+ADD_LIBRARY(LearningSpace SHARED
+	   ${PROTO_SRCS}
+)
+
+# TARGET_LINK_LIBRARIES(LearningSpace MessagingSystem)

@@ -36,6 +36,7 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 ADD_EXECUTABLE (router RouterExecutable.cc)
 TARGET_LINK_LIBRARIES (router 
 	MessagingSystem
+	lslib
 )
 
 IF (PROTOBUF_FOUND)
@@ -47,6 +48,7 @@ ENDIF (PROTOBUF_FOUND)
 ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
 TARGET_LINK_LIBRARIES (spawner 
 	MessagingSystem
+	lslib
 )
 
 IF (PROTOBUF_FOUND)
@@ -59,6 +61,7 @@ ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
 TARGET_LINK_LIBRARIES (msgtester
 	MessagingSystem
 	Control
+	lslib
 )
 IF (PROTOBUF_FOUND)
 	TARGET_LINK_LIBRARIES (msgtester ${PROTOBUF_LIBRARY})

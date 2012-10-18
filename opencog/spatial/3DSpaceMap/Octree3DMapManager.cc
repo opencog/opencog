@@ -981,14 +981,14 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
      vector<BlockEntity*>::const_iterator iter3;
      map<BlockEntity*,AdjacentInfo>::iterator iter4;
 
-// XXX FIXME TODO this will not even compile without protobuf.
-// It needs to be moved to some other directory and function, maybe
-// to the learning server or something like that.
-// Another problem that this code forces on us is a circular dependency:
-// spatial depends on th learning server, but the learning server depnds
-// on spatial. As a result, all the various libraries canot by linked,
-// at least no by CMake, as currently designed.
-#ifdef HAVE_PROTOBUF_XXX
+// XXX FIXME TODO  The code below introduces a bit of a circular
+// dependency between spatial/spacetime code, and the whole learning
+// infrastructure.  It would be much much better if this was designed
+// so that the learning servers figured things out, and then poked
+// whatever stuff was needed into the 3D space.  i.e. so that the
+// learning servers called the spacemap, instead of the spacemap
+// calling the learning servers.
+#ifdef HAVE_PROTOBUF
      // TODO: Send raw block clusters data to learning server
      // construct these adjacent blocks messages to send to the learning server
      learning::message::BlockClusterDataInput dataInput;

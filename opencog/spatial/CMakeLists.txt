@@ -56,7 +56,7 @@ IF (HAVE_ZMQ)
 ENDIF (HAVE_ZMQ)
 
 IF (PROTOBUF_FOUND)
-	TARGET_LINK_LIBRARIES(SpaceMap ${PROTOBUF_LIBRARY})
+	TARGET_LINK_LIBRARIES(SpaceMap LearningSpace ${PROTOBUF_LIBRARY})
 ENDIF (PROTOBUF_FOUND)
 
 
@@ -76,9 +76,6 @@ TARGET_LINK_LIBRARIES(tangentbug_test
 	TangentBug
 	util
 )
-IF (PROTOBUF_FOUND)
-	TARGET_LINK_LIBRARIES(tangentbug_test LearningServerMessages)
-ENDIF (PROTOBUF_FOUND)
 
 # Uncomment the following line to enable ncurses printing:
 #SET(TB_PRINT_NCURSES 1)
@@ -102,14 +99,11 @@ ADD_LIBRARY (AStar
 
 ADD_EXECUTABLE (astartest AStarTest)
 TARGET_LINK_LIBRARIES(astartest
+	spacetime
 	SpaceMap
 	TangentBug
 	AStar
-	util
 )
-IF (PROTOBUF_FOUND)
-	TARGET_LINK_LIBRARIES(astartest LearningServerMessages)
-ENDIF (PROTOBUF_FOUND)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 ADD_EXECUTABLE(MapTools
