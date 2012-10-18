@@ -1,7 +1,7 @@
 
 IF (PROTOBUF_FOUND)
 
-	ADD_CUSTOM_TARGET(learing_message_info DEPENDS LearningMessage.info.pb.h)
+	ADD_CUSTOM_TARGET(learning_message_info DEPENDS LearningMessage.info.pb.h)
 
     # Compile proto messages.
     SET(PROTO_ARGS 
@@ -9,10 +9,6 @@ IF (PROTOBUF_FOUND)
         OUTPATH ${CMAKE_CURRENT_BUILD_DIR}
     )
     PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_ARGS})
-
-	SET(MSG_INFO LearningMessage.info.pb.cc)
-ELSE (PROTOBUF_FOUND)
-	SET(MSG_INFO "")
 ENDIF (PROTOBUF_FOUND)
 
 
@@ -23,7 +19,7 @@ ADD_LIBRARY (LearningServerMessages SHARED
 	LSCmdMessage
 	TrySchemaMessage
 	StopLearningMessage
-	${MSG_INFO}
+	${PROTO_SRCS}
 )
 
 

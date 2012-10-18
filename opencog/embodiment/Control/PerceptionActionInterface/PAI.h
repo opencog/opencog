@@ -28,6 +28,10 @@
 #ifndef PAI_H
 #define PAI_H
 
+#include <map>
+#include <vector>
+#include <exception>
+
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMDocument.hpp>
 
@@ -39,9 +43,6 @@
 #include <opencog/embodiment/Control/AvatarInterface.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/Control/Language/LanguageComprehension.h>
-#include <map>
-#include <vector>
-#include <exception>
 
 #include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
@@ -51,7 +52,7 @@
 #endif
 
 #ifdef HAVE_PROTOBUF
-#include "PAI.MapInfo.pb.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.MapInfo.pb.h>
 #endif
 
 // If this is defined, uses decimal of seconds as time unit. Otherwise, uses centesimal of seconds.

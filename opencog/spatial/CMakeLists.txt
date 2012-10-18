@@ -11,11 +11,7 @@ INCLUDE_DIRECTORIES (
    ${CMAKE_BINARY_DIR}
 )
 
-# XXX FIXME TODO Until such time that the learning-server messages are
-# removed from the spcemap, we have to build static, to avoid circular
-# dependencies. That's just plain wrong.
 ADD_LIBRARY(SpaceMap SHARED
-# ADD_LIBRARY(SpaceMap STATIC
 	LocalSpaceMap2DUtil
 	LocalSpaceMap2D
 	VisibilityMap
@@ -47,7 +43,7 @@ ADD_LIBRARY(SpaceMap SHARED
 
 ADD_DEPENDENCIES(SpaceMap
 	opencog_atom_types
-	learing_message_info
+	learning_message_info
 )
 
 TARGET_LINK_LIBRARIES(SpaceMap
