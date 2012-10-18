@@ -292,7 +292,7 @@ public:
 // Handy dandy utiities
 inline CogServer& cogserver(void)
 {
-    return dynamic_cast<CogServer&>(server());
+    return dynamic_cast<CogServer&>(server(CogServer::createInstance));
 }
 
 }  // namespace

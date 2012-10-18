@@ -178,19 +178,19 @@ int main(int argc, char *argv[])
     logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
     //logger().setLevel(Logger::DEBUG);
     
-    CogServer& cogserver = static_cast<CogServer&>(server());
+    CogServer& cogserve = cogserver();
 
     // Open database *before* loading modules, since the modules
     // might create atoms, and we can't have that happen until 
     // storage is open, as otherwise, there will be handle conflicts.
-    cogserver.openDatabase(); 
+    cogserve.openDatabase(); 
 
     // Load modules specified in config
-    cogserver.loadModules(); 
-    cogserver.loadSCMModules(DEFAULT_MODULE_PATHS);
+    cogserve.loadModules(); 
+    cogserve.loadSCMModules(DEFAULT_MODULE_PATHS);
 
     // enable the network server and run the server's main loop
-    cogserver.enableNetworkServer();
-    cogserver.serverLoop();
+    cogserve.enableNetworkServer();
+    cogserve.serverLoop();
     exit(0);
 }
