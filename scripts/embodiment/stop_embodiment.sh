@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/tcsh
 
 killall -9 oac >& /dev/null
 killall -9 spawner >& /dev/null

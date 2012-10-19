@@ -32,13 +32,25 @@
 namespace opencog { namespace messaging {
 
 
+//    // Message types (used in factory method)
+//    static const int STRING = 1;
+//    static const int ROUTER = 2;
+//    static const int TICK = 3;
+//    static const int FEEDBACK = 4;
+//    static const int RAW = 5;
     // Message types (used in factory method)
     static const int STRING = 1;
-    static const int ROUTER = 2;
-    static const int TICK = 3;
-    static const int FEEDBACK = 4;
-    static const int RAW = 5;
-
+    static const int LEARN  = 2;
+    static const int REWARD = 3;
+    static const int SCHEMA = 4;
+    static const int LS_CMD = 5;
+    static const int ROUTER = 6;
+    static const int CANDIDATE_SCHEMA = 7;
+    static const int TICK = 8;
+    static const int FEEDBACK = 9;
+    static const int TRY = 10;
+    static const int STOP_LEARNING = 11;
+    static const int RAW = 12;
 
     /**
      * Builds Message object of given type
