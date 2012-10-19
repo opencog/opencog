@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TemporalEntry.h
+ * opencog/spacetime/TemporalEntry.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

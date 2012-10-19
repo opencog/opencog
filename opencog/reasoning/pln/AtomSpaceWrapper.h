@@ -34,7 +34,7 @@
 #include <boost/config.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-#include <opencog/atomspace/TimeServer.h>
+#include <opencog/spacetime/TimeServer.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/lru_cache.h>
 

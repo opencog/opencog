@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/SpaceServer.cc
+ * opencog/spacetime/SpaceServer.cc
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC

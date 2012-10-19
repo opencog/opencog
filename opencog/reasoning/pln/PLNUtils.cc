@@ -40,7 +40,7 @@
 
 #include "PLNUtils.h"
 
-#include "opencog/atomspace/TimeServer.h"
+#include "opencog/spacetime/TimeServer.h"
 
 using std::string;
 using std::map;

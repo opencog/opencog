@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/HandleToTemporalEntryMap.cc
+ * opencog/spacetime/HandleToTemporalEntryMap.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

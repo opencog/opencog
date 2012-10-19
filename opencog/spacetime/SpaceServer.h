@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/SpaceServer.h
+ * opencog/spacetime/SpaceServer.h
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
@@ -45,7 +45,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Config.h>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/TruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>

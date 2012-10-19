@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/HandleTemporalPair.h
+ * opencog/spacetime/HandleTemporalPair.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_HANDLE_TEMPORAL_PAIR_H
 #define _OPENCOG_HANDLE_TEMPORAL_PAIR_H
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/spacetime/Temporal.h>
 
 namespace opencog

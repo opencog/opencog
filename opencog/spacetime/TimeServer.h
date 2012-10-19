@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TimeServer.h
+ * opencog/spacetime/TimeServer.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

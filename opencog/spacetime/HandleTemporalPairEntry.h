@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/HandleTemporalPairEntry.h
+ * opencog/spacetime/HandleTemporalPairEntry.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

@@ -1,6 +1,5 @@
-
 /*
- * opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.cc
+ * opencog/spacetime/SpaceTime.cc
  *
  * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved

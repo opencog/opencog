@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/SpaceServerContainer.h
+ * opencog/spacetime/SpaceServerContainer.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -26,7 +26,7 @@
 #define _SPACE_SERVER_CONTAINER_H
 
 #include <string>
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog
 {

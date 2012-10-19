@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TemporalToHandleSetMap.h
+ * opencog/spacetime/TemporalToHandleSetMap.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

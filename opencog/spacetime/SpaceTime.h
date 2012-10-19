@@ -1,6 +1,5 @@
-
 /*
- * opencog/embodiment/Control/SpaceTime.h
+ * opencog/spacetime/SpaceTime.h
  *
  * Copyright (C) 2012 Linas Vepstas
  * All Rights Reserved

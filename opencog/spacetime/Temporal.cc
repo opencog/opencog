@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Temporal.cc
+ * opencog/spacetime/Temporal.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
