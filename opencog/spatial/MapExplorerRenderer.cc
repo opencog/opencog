@@ -20,19 +20,17 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include <opencog/spatial/MapExplorer.h>
-#include <opencog/spatial/3DSpaceMap/Entity3D.h>
-
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-
-#include <opencog/atomspace/SpaceServer.h>
-
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_gfxPrimitives_font.h>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
+#include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spatial/MapExplorer.h>
+#include <opencog/spatial/3DSpaceMap/Entity3D.h>
 
 
 using namespace opencog;
