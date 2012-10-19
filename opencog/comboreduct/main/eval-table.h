@@ -100,7 +100,7 @@ void output_results(const evalTableParameters& pa,
     if(pa.output_file.empty())
         output_results(cout, pa, table, ot_tr);
     else {
-        ofstream of(pa.output_file.c_str(), ios_base::app);
+        ofstream of(pa.output_file.c_str());
         output_results(of, pa, table, ot_tr);
     }
 }
@@ -151,6 +151,9 @@ void read_eval_output_results(evalTableParameters& pa)
 
     // get all combo tree strings (from command line and file)
     vector<string> all_combo_tree_str = get_all_combo_tree_str(pa);
+
+    OC_ASSERT(all_combo_tree_str.size() == 1,
+              "Using more than 1 combo, not implemented yet!");
         
     // parse all variables from all combo tree strings
     vector<string> all_variables;
