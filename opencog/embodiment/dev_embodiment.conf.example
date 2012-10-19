@@ -58,16 +58,8 @@ LEARNING_SERVER_PULL_PORT       = 16501
 LEARNING_SERVER_PUSH_IP         = 127.0.0.1
 LEARNING_SERVER_PUSH_PORT       = 16502
 
-ENABLE_STATICS_MAP_LEARNING     = true
+ENABLE_STATICS_MAP_LEARNING     = false
 
-# For zmq based learning server, when the LS is running in the different machine from the OAC, 
-# please asign the LEARNING_SERVER_PULL_IP & LEARNING_SERVER_PUSH_IP as the Ip of the machine on which the LS is running 
-# because the OAC will push message to LEARNING_SERVER_PUSH_IP
-LEARNING_SERVER_PULL_IP         = 127.0.0.1
-LEARNING_SERVER_PULL_PORT       = 16500
-
-LEARNING_SERVER_PUSH_IP         = 127.0.0.1
-LEARNING_SERVER_PUSH_PORT       = 16501
 
 # ServerSocket port range for OACs 
 MIN_OAC_PORT                    = 16326 
@@ -132,11 +124,7 @@ ATOM_SPACE_DUMP = atomSpace.dump
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-
 PSI_DEMANDS = Energy #, Integrity, Certainty, Competence, Affiliation
-
-PSI_DEMANDS = Energy #, Integrity, Certainty , Competence, Affiliation
-
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
@@ -202,11 +190,17 @@ STI_DECAYING_CYCLE_PERIOD = 1
 # If you would like to use PLN planner, set it to true, otherwise it will use random breadth-first planner
 PSI_PLAN_BY_PLN = false
 
+# how many idle cycles the RuleEngine is called
+RE_CYCLE_PERIOD                                  = 2
+
 # how much cycles one moment will take
 ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD = 1
 
 # how much cycles the importance decay will take
 IMPORTANCE_DECAY_CYCLE_PERIOD = 1
+
+#RE_DEFAULT_COUNT	    18
+#RE_DEFAULT_MEAN		0.5  
 
 # Reward values
 #
@@ -281,12 +275,11 @@ SIZE_PENALTY_COEF_B             = 0.34
 ######################
 
 # SpaceMap grid X dimensions.
-#MAP_XDIM                        = 256
+MAP_XDIM                        = 256
 #MAP_XDIM 1024
 
 # SpaceMap grid Y dimensions.
-
-#MAP_YDIM                        = 256
+MAP_YDIM                        = 256
 #MAP_YDIM 1024
 
 # Parameters used to enable/disable the tasks to be executed during OAC idle
@@ -368,6 +361,31 @@ RL_GAUSSIAN_STD_DEVIATION       = 0.707
 # Maximum rule strength via reinforcement learning
 #MAX_RULE_STRENGTH              = 0.95
 
+#
+# Rule Engine configurations
+#
+#RE_FEELINGS_DECREASE_FACTOR    = 0.01
+#RE_CYCLES_DURING_NOVELTY       = 5   
+RE_CYCLES_FOR_REQUESTED_SCHEMA	= 10
+#RE_CYCLES_DURING_AGENT_LAST_ACTION = 3
+
+# default dog options: diablo|maxie|bob|princess|sleepy    
+#RE_DEFAULT_PET_TRAITS 			maxie
+#RE_DEFAULT_HUMANOID_TRAITS 	maria
+    
+#RE_CORE_FILE 				rules_core.lua    
+#RE_RULES_FILENAME_MASK       %s_rules.lua
+#RE_TRAITS_FILENAME_MASK      %s_traits_%s.lua
+#RE_PET_DEFINITIONS_FILE 	petDefinitions.lua
+
+#about the randomization of schema rule selection
+#0 means, no random noise, the engine chooses the rule with max weight
+#1 means maximal noise, and any float in between represents a noise intensity
+RE_SCHEMA_SELECTION_RANDOM_NOISE = 0.3
+#false means no random selection the first found is taken
+#true means with random selection (uniform here)
+RE_WILD_CARD_RANDOM_SELECTION   = false
+
 #Used by BE and BDTracker
 #Defines the distance (in percentage of the diagonal of the SpaceMap)
 #under which an avatar is considered approaching something
@@ -392,19 +410,10 @@ SERVER_PORT           = 17001
 
 
 # modules that will be loaded at the cogserver start
-MODULES               = opencog/query/libquery.so,
-                        opencog/server/libbuiltinreqs.so,
-                        opencog/shell/libscheme-shell.so,
-                        opencog/persist/sql/libpersist.so,
-                        opencog/cython/libPythonModule.so
+MODULES               = ./libquery.so, ./libbuiltinreqs.so, ./libscheme-shell.so, ./libpersist.so, ./libPythonModule.so
 
 # scheme script files that will be loaded during the system startup
 SCM_PRELOAD           = scm/type_constructors.scm, scm/utilities.scm, scm/file-utils.scm, scm/debug.scm, scm/embodiment/type_constructors.scm, scm/embodiment/predicates-frames.scm, scm/embodiment/language-comprehension.scm, scm/embodiment/reference-resolution-rules.scm, scm/embodiment/command-resolution-rules.scm, scm/embodiment/question-answering.scm, psi_util.scm, rules_core.scm, action_selection.scm, feeling_updaters.scm, demand_updaters.scm, modulator_updaters.scm, stimulus_updaters.scm
-
-PYTHON_EXTENSION_DIRS  = /home/jaredw/workspace/planning/opencog/python
-
-# Run these python modules on start up
-PYTHON_PRELOAD = pyshell
 
 # PLN settings (needed by OpenPsi among other components)
 PLN_RECORD_TRAILS        = true
@@ -455,5 +464,5 @@ RAMONA_SERVER_PORT	= 7003
 ENABLE_ACTION_COLLECT   = false
 
 # Whether to use 3D map, currently the 3D map is used by the Unity3D embodiment
-USE_3D_MAP = false
+USE_3D_MAP = true
 
