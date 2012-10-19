@@ -1,4 +1,8 @@
 
+INCLUDE_DIRECTORIES (
+	${PYTHON_INCLUDE_PATH}
+)
+
 LINK_LIBRARIES (
 	Control
 	behavior
