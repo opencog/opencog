@@ -89,14 +89,30 @@ Message *routerMessageFactory(const std::string &from, const std::string &to,
     return new RouterMessage(from, to, encapsulateMsgType, msg);
 } 
 
-int registerMessageFactory(factory_t fac)
+/// Dynamic run-time registrarion of a new message factory. 
+///
+/// This allows assorted modules to register new factories for whatever
+/// kinds of messages that they want to use, without having to hard-code
+/// them into the Mesage class.  The "desired_id" should be set to the 
+/// desired numeric ID corresponding to this message.  This is used only
+/// for backwards compatibility with old (broken) code that runs on Windows,
+/// viz the Unity game engine.  New code should allow the numbers to be 
+/// dynamically assigned.
+int registerMessageFactory(factory_t fac, int desired_id)
 {
     static int next_unissued_msg_id = 100;
-    int msg_id = next_unissued_msg_id++;
 
-    factory_map.insert(pair<int, factory_t>(msg_id, fac));
+    // If the desired ID is not being used, then use it. Otherwise, issue
+    // a new ID.
+    if (0 != desired_id) {
+        map<int,factory_t>::iterator fit = factory_map.find(desired_id);
+        if (fit != factory_map.end())
+            desired_id = next_unissued_msg_id++;
+    }
 
-    return msg_id;
+    factory_map.insert(pair<int, factory_t>(desired_id, fac));
+
+    return desired_id;
 }
 
 

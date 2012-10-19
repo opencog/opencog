@@ -43,8 +43,8 @@ static Message* stopFactory(const std::string &from, const std::string &to,
 
 int StopLearningMessage::init()
 {
-   _stopMsgType = registerMessageFactory((factory_t) stopFactory);
-   return registerMessageFactory((factory_t) stopFactory);
+   _stopMsgType = registerMessageFactory((factory_t) stopFactory, STOP_LEARNING);
+   return _stopMsgType;
 }
 
 

@@ -43,8 +43,8 @@ static Message* tryFactory(const std::string &from, const std::string &to,
 
 int TrySchemaMessage::init()
 {
-   _tryMsgType = registerMessageFactory((factory_t) tryFactory);
-   return registerMessageFactory((factory_t) tryFactory);
+   _tryMsgType = registerMessageFactory((factory_t) tryFactory, TRY);
+   return _tryMsgType;
 }
 
 /**

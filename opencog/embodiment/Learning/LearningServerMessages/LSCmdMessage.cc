@@ -40,8 +40,8 @@ static Message* lscmdFactory(const std::string &from, const std::string &to,
 
 int LSCmdMessage::init()
 {
-   _lscmdMsgType = registerMessageFactory((factory_t) lscmdFactory);
-   return registerMessageFactory((factory_t) lscmdFactory);
+   _lscmdMsgType = registerMessageFactory((factory_t) lscmdFactory, LS_CMD);
+   return _lscmdMsgType;
 }
 
 

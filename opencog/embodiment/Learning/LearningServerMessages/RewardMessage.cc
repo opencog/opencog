@@ -45,8 +45,8 @@ static Message* rewardFactory(const std::string &from, const std::string &to,
 
 int RewardMessage::init()
 {
-   _rewardMsgType = registerMessageFactory((factory_t) rewardFactory);
-   return registerMessageFactory((factory_t) rewardFactory);
+   _rewardMsgType = registerMessageFactory((factory_t) rewardFactory, REWARD);
+   return _rewardMsgType;
 }
 
 const double RewardMessage::POSITIVE = 1.0;

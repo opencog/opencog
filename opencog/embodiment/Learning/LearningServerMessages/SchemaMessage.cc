@@ -45,8 +45,9 @@ static Message* schemaFactory(const std::string &from, const std::string &to,
 
 int SchemaMessage::init()
 {
-   _schemaMsgType = registerMessageFactory((factory_t) schemaFactory);
-   return registerMessageFactory((factory_t) schemaFactory);
+   _schemaMsgType = registerMessageFactory((factory_t) schemaFactory, SCHEMA);
+   _schemaCandMsgType = registerMessageFactory((factory_t) schemaFactory, CANDIDATE_SCHEMA);
+   return _schemaCandMsgType;
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to) :

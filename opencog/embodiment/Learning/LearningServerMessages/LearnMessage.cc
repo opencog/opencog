@@ -50,8 +50,8 @@ static Message* learnFactory(const std::string &from, const std::string &to,
 
 int LearnMessage::init()
 {
-   _learnMsgType = registerMessageFactory((factory_t) learnFactory);
-   return registerMessageFactory((factory_t) learnFactory);
+   _learnMsgType = registerMessageFactory((factory_t) learnFactory, LEARN);
+   return _learnMsgType;
 }
 
 /**

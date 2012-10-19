@@ -31,26 +31,25 @@
 
 namespace opencog { namespace messaging {
 
-
-//    // Message types (used in factory method)
-//    static const int STRING = 1;
-//    static const int ROUTER = 2;
-//    static const int TICK = 3;
-//    static const int FEEDBACK = 4;
-//    static const int RAW = 5;
-    // Message types (used in factory method)
-    static const int STRING = 1;
-    static const int LEARN  = 2;
-    static const int REWARD = 3;
-    static const int SCHEMA = 4;
-    static const int LS_CMD = 5;
-    static const int ROUTER = 6;
-    static const int CANDIDATE_SCHEMA = 7;
-    static const int TICK = 8;
-    static const int FEEDBACK = 9;
-    static const int TRY = 10;
-    static const int STOP_LEARNING = 11;
-    static const int RAW = 12;
+    // Message types. The numbering and order of these must not be
+    // changed; these are statically assigned in other (non-opencog)
+    // code, such as the Unity game engine, and thus must remain
+    // numerically compiatible with the list below.
+    enum MsgId 
+    {
+        STRING = 1,
+        LEARN  = 2,
+        REWARD = 3,
+        SCHEMA = 4,
+        LS_CMD = 5,
+        ROUTER = 6,
+        CANDIDATE_SCHEMA = 7,
+        TICK = 8,
+        FEEDBACK = 9,
+        TRY = 10,
+        STOP_LEARNING = 11,
+        RAW = 12,
+    };
 
     /**
      * Builds Message object of given type
@@ -75,7 +74,7 @@ namespace opencog { namespace messaging {
      * Register a new message factory
      */
     typedef Message* (*factory_t)(const std::string, const std::string, int, const std::string);
-    int registerMessageFactory(factory_t);
+    int registerMessageFactory(factory_t, int desired_id = 0);
 
 } } // namespace opencog::messaging
 
