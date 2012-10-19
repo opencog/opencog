@@ -9,7 +9,6 @@ TARGET_LINK_LIBRARIES(PredicatesUpdaterUTest
 	server
 	PredicateUpdaters 
 	PAI 
-	${XERCESC_LIBRARIES}
 	${PROJECT_LIBRARIES}
 )
 

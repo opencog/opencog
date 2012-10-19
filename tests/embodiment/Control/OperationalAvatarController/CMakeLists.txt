@@ -19,7 +19,6 @@ TARGET_LINK_LIBRARIES(AvatarUTest
 	util
 	pthread
 	${Boost_DATE_TIME_LIBRARY}
-	${XERCESC_LIBRARIES}
 	${PROJECT_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
 )
@@ -34,7 +33,6 @@ IF (GUILE_FOUND)
 	TARGET_LINK_LIBRARIES(LanguageComprehensionUTest
 		oac
 		behavior
-		${XERCESC_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 	)
 
@@ -90,7 +88,6 @@ IF (TCL_TCLSH)
 		util
 		pthread
 		${Boost_DATE_TIME_LIBRARY}
-		${XERCESC_LIBRARIES}
 		${PROJECT_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
         
