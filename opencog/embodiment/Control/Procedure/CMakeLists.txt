@@ -28,12 +28,12 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
 	AvatarComboVocabulary
 	util
 )
-IF (PROTOBUF_FOUND)
+IF (HAVE_PROTOBUF)
    TARGET_LINK_LIBRARIES(combo_shell_stdio
 	  LearningServerMessages
 	  ${PROTOBUF_LIBRARY}
    )
-ENDIF (PROTOBUF_FOUND)
+ENDIF (HAVE_PROTOBUF)
 
 # -----------------------------------------------------
 
@@ -45,10 +45,10 @@ TARGET_LINK_LIBRARIES (combo_shell
 	lslib
 )
 
-IF (PROTOBUF_FOUND)
+IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES(combo_shell
 		LearningServerMessages
 		${PROTOBUF_LIBRARY}
 	)
-ENDIF (PROTOBUF_FOUND)
+ENDIF (HAVE_PROTOBUF)
 

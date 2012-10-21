@@ -90,7 +90,7 @@ TARGET_LINK_LIBRARIES (opcHcTester
     AvatarComboVocabulary
     ImaginaryLife
 )
-IF (PROTOBUF_FOUND)
+IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (opcHcTester LearningServerMessages ${PROTOBUF_LIBRARY})
-ENDIF (PROTOBUF_FOUND)
+ENDIF (HAVE_PROTOBUF)
 

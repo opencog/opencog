@@ -39,9 +39,9 @@ TARGET_LINK_LIBRARIES (router
 	lslib
 )
 
-IF (PROTOBUF_FOUND)
+IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (router LearningServerMessages ${PROTOBUF_LIBRARY})
-ENDIF (PROTOBUF_FOUND)
+ENDIF (HAVE_PROTOBUF)
 
 # ------------------------------------------------------
 
@@ -51,9 +51,9 @@ TARGET_LINK_LIBRARIES (spawner
 	lslib
 )
 
-IF (PROTOBUF_FOUND)
+IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (spawner LearningServerMessages ${PROTOBUF_LIBRARY})
-ENDIF (PROTOBUF_FOUND)
+ENDIF (HAVE_PROTOBUF)
 
 # ------------------------------------------------------
 
@@ -63,9 +63,9 @@ TARGET_LINK_LIBRARIES (msgtester
 	Control
 	lslib
 )
-IF (PROTOBUF_FOUND)
+IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (msgtester ${PROTOBUF_LIBRARY})
-ENDIF (PROTOBUF_FOUND)
+ENDIF (HAVE_PROTOBUF)
 
 
 #ADD_EXECUTABLE (dummyserver DummyServerExecutable.cc)
