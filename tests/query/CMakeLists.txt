@@ -29,7 +29,7 @@ ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
 
 # Its a *lot* easier to write scheme, than to write C++ code!
-IF (GUILE_FOUND)
+IF (HAVE_GUILE)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionUTest)
 	ADD_CXXTEST(BuggyStackUTest)
@@ -41,5 +41,5 @@ IF (GUILE_FOUND)
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		util
 	)
-ENDIF (GUILE_FOUND)
+ENDIF (HAVE_GUILE)
 

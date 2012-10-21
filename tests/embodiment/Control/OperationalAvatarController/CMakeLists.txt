@@ -28,7 +28,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Can't run language comprehension without guile.
-IF (GUILE_FOUND)
+IF (HAVE_GUILE)
 	ADD_CXXTEST(LanguageComprehensionUTest)
 	TARGET_LINK_LIBRARIES(LanguageComprehensionUTest
 		oac
@@ -39,9 +39,9 @@ IF (GUILE_FOUND)
 	IF(WIN32)
 		TARGET_LINK_LIBRARIES(LanguageComprehensionUTest winmm)
 	ENDIF(WIN32)
-ELSE (GUILE_FOUND)
-	SUMMARY_ADD("LanguageComprehensionUTest" "Requires Guile" GUILE_FOUND)
-ENDIF (GUILE_FOUND)
+ELSE (HAVE_GUILE)
+	SUMMARY_ADD("LanguageComprehensionUTest" "Requires Guile" HAVE_GUILE)
+ENDIF (HAVE_GUILE)
 
 ENDIF(0)
 

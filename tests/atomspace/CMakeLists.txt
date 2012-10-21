@@ -6,10 +6,10 @@ LINK_LIBRARIES(
 )
 
 # AtomTableUTest requires the XML libraries
-IF (EXPAT_FOUND)
+IF (HAVE_EXPAT)
 	ADD_CXXTEST(AtomTableUTest)
 	TARGET_LINK_LIBRARIES(AtomTableUTest xml ${EXPAT_LIBRARIES})
-ENDIF (EXPAT_FOUND)
+ENDIF (HAVE_EXPAT)
 
 
 ADD_CXXTEST(ClassServerUTest)

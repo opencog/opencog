@@ -138,7 +138,7 @@ SET_TARGET_PROPERTIES(logic_wrapper PROPERTIES
     PREFIX ""
     OUTPUT_NAME logic_wrapper)
 
-IF(GUILE_FOUND)
+IF(HAVE_GUILE)
 	ADD_LIBRARY(scheme_wrapper SHARED
 		scheme_wrapper.cpp
 	)
@@ -152,7 +152,7 @@ IF(GUILE_FOUND)
 	SET_TARGET_PROPERTIES(scheme_wrapper PROPERTIES
 		PREFIX ""
 		OUTPUT_NAME scheme_wrapper)
-ENDIF(GUILE_FOUND)
+ENDIF(HAVE_GUILE)
 
 # Python module to be loaded by CogServer
 ADD_LIBRARY (PythonModule SHARED

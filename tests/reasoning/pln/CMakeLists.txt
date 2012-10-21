@@ -47,7 +47,7 @@ ENDIF (HAVE_GUILE)
 
 # At this point, PLNUTest requires either libexpat or the Scheme
 # subsystem since axioms are loaded from files.
-IF (EXPAT_FOUND OR GUILE_FOUND)
+IF (HAVE_EXPAT OR HAVE_GUILE)
 	# Nil: PLNUTest and ForwardChainingUTest always fail and take
 	# a very long time so I disable them till they get fixed
 	ADD_CXXTEST(PLNUTest)
@@ -55,7 +55,7 @@ IF (EXPAT_FOUND OR GUILE_FOUND)
 		# ADD_CXXTEST(ForwardChainingUTest)
 	ADD_CXXTEST(DeterminismUTest)
 	# ENDIF (NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
-ENDIF (EXPAT_FOUND OR GUILE_FOUND)
+ENDIF (HAVE_EXPAT OR HAVE_GUILE)
 
 ADD_SUBDIRECTORY(formulas)
 ADD_SUBDIRECTORY(rules)
