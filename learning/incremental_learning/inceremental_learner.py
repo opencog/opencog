@@ -67,7 +67,7 @@ class IncrementalLearnerBase(object, IRunnable, IIncrementalLearner):
         t_min = self.CliqueDecomposition(graph_min)
 
         return t_min
-
+# comment
 #   INCOMPLETE
     def ConstructMpdTree(self, joinTree, moralizedGraph):
         for clique_i in joinTree:
