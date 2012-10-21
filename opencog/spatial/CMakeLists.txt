@@ -43,8 +43,14 @@ ADD_LIBRARY(SpaceMap SHARED
 
 ADD_DEPENDENCIES(SpaceMap
 	opencog_atom_types
-	learning_message_info
 )
+
+# Force LearningSpace to be buuilt before SpaceMap is. This is a hack, but its
+# needed because the spacemap calls the learning server for some reason.
+# XXX This should be fixed, so that the spacempa doesn't call the learning server.
+IF (PROTOBUF_FOUND)
+	ADD_DEPENDENCIES(SpaceMap LearningSpace)
+ENDIF (PROTOBUF_FOUND)
 
 TARGET_LINK_LIBRARIES(SpaceMap
 	server
