@@ -65,6 +65,8 @@ ADD_LIBRARY(cogserver_cython SHARED
     opencog/cogserver.cpp
 )
 
+ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
+
 # cogserver just has the MindAgent template class at the moment
 #TARGET_LINK_LIBRARIES(cogserver_cython
 #)
@@ -128,7 +130,6 @@ ADD_LIBRARY(logic_wrapper SHARED
 )
 
 TARGET_LINK_LIBRARIES(logic_wrapper
-#    pln
     atomspace
 )
 
