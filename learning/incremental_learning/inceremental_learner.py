@@ -22,14 +22,14 @@ class IIncrementalLearner:
 """INCOMPLETE"""
 """ABSTRACT"""
 class IncrementalLearnerBase(object, IRunnable, IIncrementalLearner):
-# ABSTRACT
+#   ABSTRACT
     def ThinOutGraph(self, graph):
         # I need some papers on this one
         # Should e-mail ben for some papers
         # Better be implemented in a child class
         pass
 
-    # INCOMPLETE
+#   INCOMPLETE
     def CliqueDecomposition(self, graph):
         # Bron and Kerbosch algorithm, version 2
         # its kinda abstract for now
@@ -67,8 +67,8 @@ class IncrementalLearnerBase(object, IRunnable, IIncrementalLearner):
         t_min = self.CliqueDecomposition(graph_min)
 
         return t_min
-    # comment
-    # INCOMPLETE
+# comment
+#   INCOMPLETE
     def ConstructMpdTree(self, joinTree, moralizedGraph):
         for clique_i in joinTree:
             for clique_j in joinTree:
@@ -91,28 +91,28 @@ class IncrementalLearnerBase(object, IRunnable, IIncrementalLearner):
                 # no idea what that is
 
                 raise Exception("not implemented")
-            # INCOMPLETE
+#   INCOMPLETE
     def IncrementalCompilation(self, modificationList):
         raise Exception("not implemented")
-    # INCOMPLETE
+#   INCOMPLETE
     def ModifyMoralGraph(self, modification):
         raise Exception("not implemented")
-    # INCOMPLETE
+#   INCOMPLETE
     def Connect(self, clusterTree, cluster_i, cluster_j):
         raise Exception("not implemented")
-    # INCOMPLETE
+#   INCOMPLETE
     def MarkAffectedMpsesByRemoveLink(self, mps_y, mps_z, linkList):
         raise Exception("not implemented")
-    # INCOMPLETE
+#   INCOMPLETE
     def RemoveNode(self, node, mps_x, mps_y):
         raise Exception("not implemented")
-    # INCOMPLETE
+#   INCOMPLETE
     def AddNode(self, node):
         raise Exception("not implemented")
-    # INCOMPLETE
+#   INCOMPLETE
     def MarkAffectedMpsesByAddLink(self, linkList):
         raise Exception("not implemented")
-    # INCOMPLETE
+#   INCOMPLETE
     def run(self):
         raise Exception("not implemented")
 
@@ -120,3 +120,7 @@ class IncrementalLearnerBase(object, IRunnable, IIncrementalLearner):
 class IncrementalLearnerMcm_m(IncrementalLearnerBase):
     def ThinOutGraph(self, graph):
         raise Exception("not implemented")
+
+
+
+
