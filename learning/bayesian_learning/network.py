@@ -182,7 +182,22 @@ class ConditionalProbabilityTable(dict):
             yield config, self[config]
 
 
-class Network(set): # A set of vertices
+class Graph(object):
+
+    def add(self, obj):
+        pass
+
+    def remove(self,obj):
+        pass
+
+
+    def vertices(self):
+        pass
+    def edges(self):
+        pass
+
+
+class Network(Graph):
 
     def __init__(self):
         self._edges = set()
@@ -202,7 +217,8 @@ class Network(set): # A set of vertices
 
     def __repr__(self):
         return 'Vertices = ' + repr(list(self)) + '\n' +\
-           'Edges = ' + str(self.edges)
+               'Edges = ' + str(self.edges)
+
 
 
 #class DAGOrganiser(object):
