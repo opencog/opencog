@@ -6,10 +6,9 @@ ADD_LIBRARY(PBTester
 	GoldStdMessage
 )
 
-#	MessagingSystem
-
 TARGET_LINK_LIBRARIES (PBTester 
 	PAI
+	MessagingSystem
 	Control
 	util
 )
