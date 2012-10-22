@@ -23,8 +23,8 @@ PROJECT(opencog)
 # Remove when CMake >= 2.8.4 is required to build the project
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
-# uncomment to be in Release mode
-SET(CMAKE_BUILD_TYPE Release)
+# uncomment to be in Release mode [default]
+# SET(CMAKE_BUILD_TYPE Release)
 
 # uncomment to build in debug mode
 # SET(CMAKE_BUILD_TYPE Debug)
