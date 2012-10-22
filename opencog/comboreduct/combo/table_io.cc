@@ -328,12 +328,11 @@ istream& istreamRawITable(istream& in, ITable& tab)
 
     if (-1 != arity_fail_row) {
         in.seekg(beg);
-        throw AssertionException
-            (TRACE_INFO,
-             "ERROR: Input file inconsistent: the %uth row has "
-             "a different number of columns than the rest of the file.  "
-             "All rows should have the same number of columns.\n",
-             arity_fail_row.load());
+        OC_ASSERT(false,
+                  "ERROR: Input file inconsistent: the %uth row has "
+                  "a different number of columns than the rest of the file.  "
+                  "All rows should have the same number of columns.\n",
+                  arity_fail_row.load());
     }
     return in;
 }
@@ -403,12 +402,11 @@ istream& istreamRawITable_ignore_indices(istream& in, ITable& tab,
 
     if (-1 != arity_fail_row) {
         in.seekg(beg);
-        throw AssertionException
-            (TRACE_INFO,
-             "ERROR: Input file inconsistent: the %uth row has "
-             "a different number of columns than the rest of the file.  "
-             "All rows should have the same number of columns.\n",
-             arity_fail_row.load());
+        OC_ASSERT(false,
+                  "ERROR: Input file inconsistent: the %uth row has "
+                  "a different number of columns than the rest of the file.  "
+                  "All rows should have the same number of columns.\n",
+                  arity_fail_row.load());
     }
     return in;
 }
