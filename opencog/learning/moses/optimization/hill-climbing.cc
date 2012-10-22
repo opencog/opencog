@@ -43,9 +43,9 @@ namespace opencog { namespace moses {
 ///////////////////
 
 unsigned hill_climbing::operator()(deme_t& deme,
-                    const instance& init_inst,
-                    const iscorer_base& iscorer, unsigned max_evals,
-                    unsigned* eval_best)
+                                   const instance& init_inst,
+                                   const iscorer_base& iscorer, unsigned max_evals,
+                                   unsigned* eval_best)
 {
     logger().debug("Local Search Optimization");
     logger().info() << "Demes: # "   /* Legend for graph stats */
@@ -357,8 +357,9 @@ unsigned hill_climbing::operator()(deme_t& deme,
         uint64_t usage = _instance_bytes * current_number_of_instances;
 
 #define ACCEPTABLE_SIZE 5000
-        if ((ACCEPTABLE_SIZE < current_number_of_instances) or
-            (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < usage))
+        if (hc_params.allow_resize_deme and
+            ((ACCEPTABLE_SIZE < current_number_of_instances) or
+             (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < usage)))
         {
             bool did_resize = resize_deme(deme, best_score);
 

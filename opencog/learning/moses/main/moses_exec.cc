@@ -464,6 +464,7 @@ int moses_exec(int argc, char** argv)
     bool hc_widen_search;
     bool hc_single_step;
     bool hc_crossover;
+    bool hc_allow_resize_deme;
     unsigned hc_max_nn;
     double   hc_frac_of_nn;
 
@@ -598,6 +599,14 @@ int moses_exec(int argc, char** argv)
                     "problem types, especially those with deceptive "
                     "scoring functions, this can hurt performance.\n"
                     ) % hc).c_str())
+
+        ("--hc-allow-resize-deme",
+         value<bool>(&hc_allow_resize_deme)->default_value(true),
+         str(format("Hillclimbing parameter (%s). If true then the deme "
+                    "is allowed to resized to fit in memory. Not that as it "
+                    "uses the RAM of the machine therefore it possibly introduces "
+                    "an indeterminism between instances run on machines with "
+                    "different RAM.\n") % hc).c_str())
 
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
@@ -1259,6 +1268,7 @@ int moses_exec(int argc, char** argv)
     hc_params.crossover = hc_crossover;
     hc_params.max_nn_evals = hc_max_nn;
     hc_params.fraction_of_nn = hc_frac_of_nn;
+    hc_params.allow_resize_deme = hc_allow_resize_deme;
 
     // Set moses_parameters.
     moses_parameters moses_params(vm, jobs);

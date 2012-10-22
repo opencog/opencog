@@ -103,12 +103,19 @@ struct hc_parameters
     // especially when most of the instances have terrible scores.
     score_t score_range;
 
-    // Maximum alllowed size of the deme. 
-    // Thisis used to keep the size of the deme in check.
+    // Maximum allowed size of the deme.
+    // This is used to keep the size of the deme in check.
     // The issue is that, for large feature sets, a large number of knobs
     // get created, which means that instances are huge.  It is easy to
     // end up with demes in the tens-of-gigabytes in size, and that's bad.
     size_t max_allowed_instances;
+
+    // Flag to allow resizing the deme to keep memory usage under
+    // control. Note however that it depends on the RAM of the
+    // machine, as such 2 execution of moses with identical inputs and
+    // parameters may not behave indentically between 2 machines, thus
+    // the motivation of that flag.
+    bool allow_resize_deme;
 };
 
 ///////////////////
