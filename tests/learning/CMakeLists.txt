@@ -1,4 +1,11 @@
 #ADD_SUBDIRECTORY (hillclimbing)
-ADD_SUBDIRECTORY (moses)
-ADD_SUBDIRECTORY (dimensionalembedding)
-ADD_SUBDIRECTORY (feature-selection)
+
+IF (HAVE_MOSES)
+	ADD_SUBDIRECTORY (moses)
+	ADD_SUBDIRECTORY (feature-selection)
+ENDIF (HAVE_MOSES)
+
+IF (HAVE_DIMEMBED)
+	ADD_SUBDIRECTORY (dimensionalembedding)
+ENDIF (HAVE_DIMEMBED)
+

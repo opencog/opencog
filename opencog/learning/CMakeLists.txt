@@ -1,6 +1,9 @@
 
-ADD_SUBDIRECTORY (moses)
-ADD_SUBDIRECTORY (feature-selection)
+IF (HAVE_MOSES)
+	ADD_SUBDIRECTORY (moses)
+	ADD_SUBDIRECTORY (feature-selection)
+ENDIF (HAVE_MOSES)
+
 ADD_SUBDIRECTORY (statistics)
 
 IF (HAVE_DIMEMBED)
