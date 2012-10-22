@@ -31,6 +31,7 @@
 #include <cstdlib>
 
 #include <errno.h>
+#include <unistd.h>
 
 // For backward compatibility as from boost 1.46 filesystem 3 is the default
 // as of boost 1.50 there is no version 2, and compiles will fail ;-(
@@ -135,8 +136,12 @@ void Config::load(const char* filename, bool resetFirst)
             {
                 if ('/' != configPath.string()[0])
                 {
-                    _path_where_found = get_current_dir_name();
-                    _path_where_found += '/';
+                    char buff[PATH_MAX+1];
+                    char *p = getcwd(buff, PATH_MAX);
+                    if (p) {
+                        _path_where_found = buff;
+                        _path_where_found += '/';
+                    }
                 }
                 _path_where_found += configPath.string();
                 break;
