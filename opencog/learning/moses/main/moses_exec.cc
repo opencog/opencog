@@ -600,7 +600,7 @@ int moses_exec(int argc, char** argv)
                     "scoring functions, this can hurt performance.\n"
                     ) % hc).c_str())
 
-        ("--hc-allow-resize-deme",
+        ("hc-allow-resize-deme",
          value<bool>(&hc_allow_resize_deme)->default_value(true),
          str(format("Hillclimbing parameter (%s). If true then the deme "
                     "is allowed to resized to fit in memory. Not that as it "
