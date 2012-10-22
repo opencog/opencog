@@ -29,6 +29,10 @@ ADD_LIBRARY (MessagingSystem SHARED
 TARGET_LINK_LIBRARIES (MessagingSystem
 	Control
 	spacetime
+	${Boost_DATE_TIME_LIBRARY}
+	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SIGNALS_LIBRARY}
+	${Boost_THREAD_LIBRARY}
 )
 
 # ------------------------------------------------------
