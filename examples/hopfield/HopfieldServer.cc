@@ -207,10 +207,9 @@ HopfieldServer::HopfieldServer()
 {
     struct timeval tv;
     struct timezone tz;
-    struct tm *tm;
     gettimeofday(&tv, &tz);
-    time_t t = tv.tv_sec;
-    tm = localtime(&t);
+    // time_t t = tv.tv_sec;
+    // struct tm *tm = localtime(&t);
 
 	patternStimulus = HDEMO_DEFAULT_PATTERN_STIM;
     width = HDEMO_DEFAULT_WIDTH;

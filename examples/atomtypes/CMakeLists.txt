@@ -10,6 +10,9 @@ ADD_CUSTOM_TARGET(examples_atom_types DEPENDS atom_types.h)
 # you must add a dependency to this target, as follows:
 # ADD_DEPENDENCIES(lib_or_exec_name example_atom_types)
 
+# The atom_types.h file is written to the build directory
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+
 ADD_LIBRARY (customatomtypes SHARED
 	atom_types
 	CustomAtomTypesTester
@@ -18,3 +21,4 @@ ADD_LIBRARY (customatomtypes SHARED
 
 ADD_DEPENDENCIES(customatomtypes opencog_atom_types)
 ADD_DEPENDENCIES(customatomtypes attention_atom_types)
+ADD_DEPENDENCIES(customatomtypes examples_atom_types)
