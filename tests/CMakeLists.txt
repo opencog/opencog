@@ -41,6 +41,8 @@ IF (CXXTEST_FOUND)
 			ADD_SUBDIRECTORY (server)
 		ENDIF (HAVE_SERVER)
 
+ 		ADD_SUBDIRECTORY (spatial)
+
 		# Rest interfaces assume that the cogserver is working;
 		# so run after the cogserver tests.
 		IF (HAVE_WEB)
@@ -67,10 +69,6 @@ IF (CXXTEST_FOUND)
 
 	# learning requires a working comboreduct.
 	ADD_SUBDIRECTORY (learning)
-
-	IF (HAVE_SPATIAL)
-	 	ADD_SUBDIRECTORY (spatial)
-	ENDIF (HAVE_SPATIAL)
 
 	# Embodiment requires that learning, reasoning, spatial, etc.
 	# all works fine. So run this last.
