@@ -353,6 +353,11 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // more or less scalable fashion on all machines, and still
         // allow instances that are dozens of megabytes in size.
         // (This is targeting machines with 4 GB to 100 GB of RAM).
+        //
+        // Currently, each disc knob takes 2 bits per instance, and
+        // each contin knob takes 10 bits per instance.  Thus, the
+        // practical limit is about 1M contin knobs on current-era
+        // machines, assuming that max_num_instances is about 10K.
 #define ACCEPTABLE_RAM_FRACTION 0.5
         uint64_t usage = _instance_bytes * current_number_of_instances;
 

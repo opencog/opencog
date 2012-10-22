@@ -3716,7 +3716,7 @@ It has 13117 rows total.
 Inferred arity = 2443
 
 "inst size" == size of one instance, in bytes.
-"inst MBytes" == above times 10K (since 10K is the max likely number of insts)
+"prod MBytes" == above times 10K (since 10K is the max likely number of insts)
 
        tot    disc    contin     inst   prod   final  final  final   deme  
 deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time  
