@@ -989,11 +989,11 @@ int moses_exec(int argc, char** argv)
 
         ("gen-best-tree",
          value<bool>(&gen_best_tree)->default_value(false),
-         "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.")
+         "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.\n")
 
         ("enable-fs",
          value<bool>(&enable_feature_selection)->default_value(false),
-         "Enable feature selection (happen before each representation building)")
+         "Enable feature selection (happen before each representation building).\n")
 
         ("fs-algo",
          value<string>(&fs_params.algorithm)->default_value(smd),
