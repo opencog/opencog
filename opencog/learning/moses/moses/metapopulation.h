@@ -591,14 +591,17 @@ struct metapopulation : bscored_combo_tree_ptr_set
                  bool output_score = true,
                  bool output_penalty = false,
                  bool output_bscore = false,
-                 bool output_only_bests = false,
+                 bool output_visited = false,
+                 bool output_only_best = false,
                  bool output_python = false)
     {
-        if (!output_only_bests) {
+        if (!output_only_best) {
             for (; from != to && n != 0; ++from, n--) {
                 ostream_bscored_combo_tree(out, *from, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
+                if (output_visited)
+                    out << "visited: " << has_been_visited(*from) << std::endl;
             }
             return out;
         }
@@ -622,6 +625,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 ostream_bscored_combo_tree(out, bt, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
+                if (output_visited)
+                    out << "visited:" << has_been_visited(*from) << std::endl;
             }
         }
         return out;
@@ -633,34 +638,22 @@ struct metapopulation : bscored_combo_tree_ptr_set
                  bool output_score = true,
                  bool output_penalty = false,
                  bool output_bscore = false,
-                 bool output_only_bests = false,
+                 bool output_visited = false,
+                 bool output_only_best = false,
                  bool output_python = false)
     {
         return ostream(out, begin(), end(),
-                       n, output_score, output_penalty,
-                       output_bscore, output_only_bests, output_python);
+                       n, output_score, output_penalty, output_bscore,
+                       output_visited, output_only_best, output_python);
     }
-
-    ///  hmmm, apparently it's ambiguous with the one below, strange
-    // // Like above but assumes that from = c.begin() and to = c.end()
-    // template<typename Out, typename C>
-    // Out& ostream(Out& out, const C& c, long n = -1,
-    //              bool output_score = true,
-    //              bool output_complexity = false,
-    //              bool output_bscore = false,
-    //              bool output_dominated = false)
-    // {
-    //     return ostream(out, c.begin(), c.end(),
-    //                    n, output_score, output_complexity,
-    //                    output_bscore, output_dominated);
-    // }
 
     // Like above, but using std::cout.
     void print(long n = -1,
                bool output_score = true,
                bool output_penalty = false,
                bool output_bscore = false,
-               bool output_only_bests = false);
+               bool output_visited = false,
+               bool output_only_best = false);
 
     deme_expander _dex;
 

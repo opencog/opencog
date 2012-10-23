@@ -59,7 +59,7 @@ struct metapop_printer
                     bool _output_score,
                     bool _output_penalty,
                     bool _output_bscore,
-                    bool _output_dominated,
+                    bool _output_only_best,
                     bool _output_eval_number,
                     bool _output_with_labels,
                     const vector<string>& _ilabels,
@@ -69,7 +69,7 @@ struct metapop_printer
         result_count(_result_count), output_score(_output_score),
         output_penalty(_output_penalty),
         output_bscore(_output_bscore),
-        output_dominated(_output_dominated),
+        output_only_best(_output_only_best),
         output_eval_number(_output_eval_number),
         output_with_labels(_output_with_labels),
         ilabels(_ilabels),
@@ -98,7 +98,8 @@ struct metapop_printer
                         output_score,
                         output_penalty,
                         output_bscore,
-                        output_dominated,
+                        false,  // output_visited
+                        output_only_best,
                         output_python); 
     
         if (output_eval_number)
@@ -148,7 +149,7 @@ private:
     bool output_score;
     bool output_penalty;
     bool output_bscore;
-    bool output_dominated;
+    bool output_only_best;
     bool output_eval_number;
     bool output_with_labels;
     const vector<string>& ilabels;

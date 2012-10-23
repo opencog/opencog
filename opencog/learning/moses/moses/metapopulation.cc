@@ -1004,10 +1004,11 @@ void metapopulation::print(long n,
            bool output_score,
            bool output_penalty,
            bool output_bscore,
-           bool output_only_bests)
+           bool output_visited,
+           bool output_only_best)
 {
     ostream(std::cout, n, output_score, output_penalty,
-            output_bscore, output_only_bests);
+            output_bscore, output_visited, output_only_best);
 }
 
 bool metapopulation::has_been_visited(const combo_tree& tr) const
