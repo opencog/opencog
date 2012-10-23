@@ -17,26 +17,52 @@ class IncrementalLearner:
         pass
 
 # pretty self explanatory
+"""ABSTRACT"""
 """INCOMPLETE"""
 class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
-    def thin_out_graph(self, graph):
-        # I need some papers on this one
-        # Should e-mail ben for some papers
-        # Better be implemented in a child class
+
+    def __init__(self, old_network, new_network):
+        self.old_network = old_network
+        self.new_network = new_network
+
+    def moralize(self,directed_graph):
+        gm = directed_graph.to_undirected()
+        for node in directed_graph.nodes_iter():
+            pres = directed_graph.predecessors(node)
+            for i in range(0,len(pres),1):
+                for j in range(i+1,len(pres),1):
+                    gm.add_edge(pres[i],pres[j])
+        return gm
+
+#   input graph should not be directed, use moralize first
+    def triangulate(self, graph):
+        # implemented in a child class
         pass
 
+    def thin_out_graph(self, graph):
+        # override in a child class if triangulation isn't minimal
+        return graph
+
     def clique_decomposition(self, graph):
-        # Bron and Kerbosch algorithm?
-        # Should e-mail ben for this one, maybe some papers?
-        # If there are any other algorithms, better be virtual
+        cliques = []
+
+        def bron_kerbosch(R,P,X):
+            if len(P) == 0 and len(X) == 0:
+                cliques.append(R)
+                return
+            u = (P|X).choose()
+            for v in P-u.neighbours:
+                bron_kerbosch(R|v,P-v.neibours(),X-v.neibours())
+                P = P - v.neibours()
+                X = X - v.neibours()
         pass
 
     def construct_join_tree(self, graph):
-        graph.moralise()
-        graph_t = graph.triangulate()
+        graph_m = self.moralize(graph)
+        graph_t = graph.triangulate(graph_m)
 
-        graph_min = self.ThinOutGraph(graph_t)
-        t_min = self.CliqueDecomposition(graph_min)
+        graph_min = self.thin_out_graph(graph_t)
+        t_min = self.clique_decomposition(graph_min)
 
         return t_min
 
