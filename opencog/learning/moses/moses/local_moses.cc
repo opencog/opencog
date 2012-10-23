@@ -166,6 +166,15 @@ void local_moses(metapopulation& mp,
             logger().info(ss.str());
         }
 
+        // I find this particularly useful for studying diversity but
+        // it could be relaxed and printed whatever
+        if (logger().isDebugEnabled() and mp.params.diversity_pressure > 0.0) {
+            stringstream ss;
+            ss << pa.max_cnd_output << " best candidates of the metapopulation (with scores and visited status):" << std::endl;
+            mp.ostream(ss, pa.max_cnd_output, true, true, false, true);
+            logger().debug(ss.str());
+        }
+        
         // In iterative hillclimbing, it is possible (but not likely)
         // that the metapop gets empty and expand returns false.
         // Alternately, the candidate callback may urge a premature
