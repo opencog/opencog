@@ -6,64 +6,52 @@ import networkx as nx
 class IncrementalLearner_Mcs(incLer.IncrementalLearnerBase):
 
     def triangulate(self, graph):
+        gt = nx.Graph()
+
         import operator
-        gt = graph.copy()
-        F = set()
-        weights = dict()
+        unnumbered = set(graph)
         numbered = set()
+        result = []
 
-        def check(y,z):
-            paths = nx.all_simple_paths(graph,y,z)
-
-            for path in paths:
-                if len(numbered.intersection(path)) > 0:
-                    continue
-
-                passed = True
-                for x in path:
-                    if x == y:
-                        continue
-
-                    if weights[x] >= weights[y]:
-                        passed = False
-                        break
-
-                if not passed:
-                    continue
-
-                return True
-
-            return False
-
+        weight = dict()
         for node in graph:
-            weights[node] = 0
+            weight[node] = 0
 
-        for k in range(1,len(graph),1):
-            ordered_weights = sorted(weights.iteritems(), key=operator.itemgetter(1))
-            print ordered_weights
-            z = ordered_weights.pop()[0]
-            while z in numbered:
-                z = ordered_weights.pop()[0]
+        while unnumbered:
+            sorted_weights = sorted(weight.iteritems(), key=operator.itemgetter(1))
 
-            for y in graph:
-                if y == z:
-                    continue
-                if y in numbered:
-                    continue
+            v = sorted_weights.pop()[0]
+            while v in numbered:
+                v = sorted_weights.pop()[0]
 
-                if check(y,z):
-                    weights[y] += 1
-                    temp = (y,z)
-                    F.add(temp)
+            result.insert(0,v)
+            unnumbered.remove(v)
 
-            numbered.add(z)
-        gt.add_edges_from(F)
+            for n in graph[v]:
+                weight[n] += 1
+
+            numbered.add(v)
+
+        processed = set()
+        for node in result:
+            neigh = set(graph[node])
+            wanna_be_clique = neigh.difference(processed)
+            wanna_be_clique.add(node)
+
+            for i in range(0,len(wanna_be_clique),1):
+                node_i = wanna_be_clique.pop()
+                for node_j in wanna_be_clique:
+                    gt.add_edge(node_i,node_j)
+
+            processed.add(node)
+
         return gt
 
-    #---------------test case-------------------
 
 
 
+
+#---------------test case-------------------
 if __name__ == "__main__":
 
     old_graph = nx.DiGraph()
@@ -74,8 +62,7 @@ if __name__ == "__main__":
 
     il = IncrementalLearner_Mcs(old_graph,new_graph)
     gm = il.moralize(old_graph)
-
     gt = il.triangulate(gm)
-
-    print '\n',gt.nodes()
-    print gt.edges()
+    print 'Is chordal? ',nx.is_chordal(gt)
+    print 'nodes: ',gt.nodes()
+    print 'edges: ',gt.edges()
