@@ -414,7 +414,7 @@ int moses_exec(int argc, char** argv)
     bool output_score;
     bool output_penalty;
     bool output_bscore;
-    bool output_dominated = false;
+    bool output_only_best;
     bool output_eval_number;
     bool output_with_labels;
     bool output_python = false;
@@ -830,10 +830,9 @@ int moses_exec(int argc, char** argv)
          value<bool>(&output_bscore)->default_value(false),
          "If 1, output the bscore (below each candidate).\n")
 
-        (opt_desc_str(output_dominated_opt).c_str(),
-         value<bool>(&output_dominated)->default_value(false),
-         "If 1, print the the entire metapopulation, and not just the "
-         "highest scoring candidates.\n")
+        (opt_desc_str(output_only_best_opt).c_str(),
+         value<bool>(&output_only_best)->default_value(false),
+         "If 1, print only the best candidates.\n")
 
         (opt_desc_str(output_eval_number_opt).c_str(),
          value<bool>(&output_eval_number)->default_value(false),
@@ -1333,7 +1332,7 @@ int moses_exec(int argc, char** argv)
                            output_score,
                            output_penalty,
                            output_bscore,
-                           output_dominated,
+                           output_only_best,
                            output_eval_number,
                            output_with_labels,
                            ilabels,
