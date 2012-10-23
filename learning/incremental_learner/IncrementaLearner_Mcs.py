@@ -63,6 +63,9 @@ if __name__ == "__main__":
     il = IncrementalLearner_Mcs(old_graph,new_graph)
     gm = il.moralize(old_graph)
     gt = il.triangulate(gm)
-    print 'Is chordal? ',nx.is_chordal(gt)
-    print 'nodes: ',gt.nodes()
-    print 'edges: ',gt.edges()
+    t_min = il.construct_join_tree(old_graph)
+
+    print len(t_min)
+
+    for n in t_min.nodes_iter():
+        print t_min[n]

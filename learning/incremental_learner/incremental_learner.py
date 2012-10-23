@@ -44,23 +44,28 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
         return graph
 
     def clique_decomposition(self, graph):
-        cliques = []
+        import networkx as nx
+        j_tree = nx.Graph()
+        cliques = list(graph.subgraph(c) for c in nx.find_cliques(graph))
 
-        def bron_kerbosch(R,P,X):
-            if len(P) == 0 and len(X) == 0:
-                cliques.append(R)
-                return
-            u = (P|X).choose()
-            for v in P-u.neighbours:
-                bron_kerbosch(R|v,P-v.neibours(),X-v.neibours())
-                P = P - v.neibours()
-                X = X - v.neibours()
-        pass
+        while cliques:
+            clique_i = cliques.pop()
+            l_i = len(clique_i)
+            for clique in cliques:
+                clique_j = clique
+                l_j = len(clique_j)
+                shared = set(clique_i).intersection(set(clique_j))
+
+                if len(shared) == min(l_i,l_j) - 1:
+#                    print clique_i,'-',shared,'-',clique_j,':',min(l_i,l_j) - 1
+                    j_tree.add_edge(clique_i, clique_j, val=shared)
+
+        return j_tree
+#        return nx.make_max_clique_graph(graph)
 
     def construct_join_tree(self, graph):
         graph_m = self.moralize(graph)
-        graph_t = graph.triangulate(graph_m)
-
+        graph_t = self.triangulate(graph_m)
         graph_min = self.thin_out_graph(graph_t)
         t_min = self.clique_decomposition(graph_min)
 
