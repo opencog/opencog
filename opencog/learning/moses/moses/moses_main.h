@@ -122,7 +122,7 @@ struct metapop_printer
         if (resb.empty())
             logger().warn("No candidate is good enough to be returned. Yeah that's bad!");
         else
-            logger().info("Best candidates (preceded by its score):\n%s", res.c_str());
+            logger().info("Best candidates:\n%s", res.c_str());
     
     #ifdef GATHER_STATS
         metapop._dex._optimize.hiscore /= metapop._dex._optimize.hicount;
