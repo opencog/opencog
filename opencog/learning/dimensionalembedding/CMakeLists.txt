@@ -1,9 +1,12 @@
 ADD_LIBRARY (dimensionalembedding SHARED
 	DimEmbedModule
-    CoverTreePoint
+	CoverTreePoint
 )
 
+ADD_DEPENDENCIES(dimensionalembedding opencog_atom_types)
+
 INCLUDE_DIRECTORIES (
+	${CMAKE_BINARY_DIR}
 	${ODBC_INCLUDE_DIRS}
 )
 
@@ -18,5 +21,5 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 TARGET_LINK_LIBRARIES (dimensionalembedding
-        util 
+	util 
 )
