@@ -298,7 +298,7 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     if (size() == 1) {
         const_iterator selex = cbegin();
         const combo_tree& tr = get_tree(*selex);
-        if (_visited_exemplars.find(tr) == _visited_exemplars.end())
+        if (!has_been_visited(tr))
             _visited_exemplars.insert(tr);
         else selex = cend();
         log_selected_exemplar(selex);
@@ -319,7 +319,7 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 
         // Skip any exemplars we've already used in the past.
         const combo_tree& tr = get_tree(*it);
-        if (_visited_exemplars.find(tr) == _visited_exemplars.end()) {
+        if (!has_been_visited(tr)) {
             probs.push_back(sc);
             found_exemplar = true;
             if (highest_score < sc) highest_score = sc;
@@ -507,8 +507,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
         // XXX To make merge_deme thread safe, this needs to be
         // locked too.  (to avoid collision with threads updating
         // _visited, e.g. the MPI case.
-        bool not_already_visited = this->_visited_exemplars.find(tr)
-            == this->_visited_exemplars.end();
+        bool not_already_visited = !this->has_been_visited(tr);
 
         // update the set of potential exemplars
         if (not_already_visited && thread_safe_tr_not_found()) {
@@ -1009,6 +1008,11 @@ void metapopulation::print(long n,
 {
     ostream(std::cout, n, output_score, output_penalty,
             output_bscore, output_only_bests);
+}
+
+bool metapopulation::has_been_visited(const combo_tree& tr) const
+{
+    return _visited_exemplars.find(tr) != _visited_exemplars.cend();
 }
 
 } // ~namespace moses

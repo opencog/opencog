@@ -739,6 +739,9 @@ protected:
 
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
+    
+    // return true iff tr has already been visited
+    bool has_been_visited(const combo_tree& tr) const;
 
     // lock to enable thread-safe deme merging.
     std::mutex _merge_mutex;
