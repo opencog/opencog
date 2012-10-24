@@ -45,9 +45,9 @@ const char * version_string =
 
 #else
 const char * version_string =
-    stringify(#MOSES_VERSION_MAJOR) "."
-    stringify(#MOSES_VERSION_MINOR) "."
-    stringify(#MOSES_VERSION_PATCH);
+    stringify(MOSES_VERSION_MAJOR) "."
+    stringify(MOSES_VERSION_MINOR) "."
+    stringify(MOSES_VERSION_PATCH);
 
 #endif
 
