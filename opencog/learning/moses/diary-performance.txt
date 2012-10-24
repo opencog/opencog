@@ -3727,3 +3727,19 @@ deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time
   4  7067679  947843  6119836  7886784  78GB  bonk
 
 looks like its about 10 bits per contin knob, 2 bits per disc knob
+
+TODO: limit number of knobs being created...
+
+Rerun the above, with RAM-limited number of instances (bzr rev 7880)
+output to -freut-red-2443-ramcap.log
+Note: deme 2: slower by 14% ! Yikes
+
+       tot    disc    contin     inst   prod   final  final  final   deme  
+deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time  
+----  -----   -----    -----     ----   ----    ----  -----   ----   ----- 
+  1   136808  136808      0      34232   342     209   4748    108   4301
+  2   772049  659579   112470   305512  3055     165   3375    187  62399
+  3  1070130  898980   171150   438712  4387      80   1566    186  42299
+  4  7062789  947843  6114946  7880672  78GB  bonk
+
+Arghhh .. mem usage chek didn't prevent this bonk!
