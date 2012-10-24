@@ -600,6 +600,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
 	"^${PROJECT_SOURCE_DIR}/vendor/"
 	"^${PROJECT_SOURCE_DIR}/.bzr/"
 	"^${PROJECT_SOURCE_DIR}/.bzrignore$"
+	"^${PROJECT_SOURCE_DIR}/.git/"
 	"^${PROJECT_BINARY_DIR}/opencog/server/cogserver$"
 	"^${PROJECT_BINARY_DIR}/examples/server/derivedserver$"
 	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
