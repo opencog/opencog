@@ -1,5 +1,5 @@
 __author__ = 'raminbarati'
-
+import networkx as nx
 """INTERFACE"""
 class Runnable:
     def run(self):
@@ -44,21 +44,18 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
         return graph
 
     def clique_decomposition(self, graph):
-        import networkx as nx
-        j_tree = nx.Graph()
+        cluster_graph = nx.Graph()
         cliques = list(graph.subgraph(c) for c in nx.find_cliques(graph))
 
         while cliques:
             clique_i = cliques.pop()
-            l_i = len(clique_i)
             for clique in cliques:
                 clique_j = clique
-                l_j = len(clique_j)
                 shared = set(clique_i).intersection(set(clique_j))
+                if len(shared) > 0:
+                    cluster_graph.add_edge(clique_i, clique_j, {'label':shared, 'weight':1.0/len(shared)})
 
-                if len(shared) == min(l_i,l_j) - 1:
-#                    print clique_i,'-',shared,'-',clique_j,':',min(l_i,l_j) - 1
-                    j_tree.add_edge(clique_i, clique_j, val=shared)
+        j_tree = nx.minimum_spanning_tree(cluster_graph)
 
         return j_tree
 #        return nx.make_max_clique_graph(graph)
@@ -67,32 +64,51 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
         graph_m = self.moralize(graph)
         graph_t = self.triangulate(graph_m)
         graph_min = self.thin_out_graph(graph_t)
-        t_min = self.clique_decomposition(graph_min)
+        jt_min = self.clique_decomposition(graph_min)
 
-        return t_min
+        return jt_min
 
-    def construct_mpd_tree(self, joinTree, moralisedGraph):
-        for clique_i in joinTree:
-            for clique_j in joinTree:
-                if clique_i == clique_j:
-                    continue
-                if len(clique_i) != len(clique_j):
-                    continue
+    def construct_mpd_tree(self, jt_min, graph_m):
+        def is_complete(nbunch):
+            sub_g = graph_m.subgraph(nbunch)
+            n = len(nbunch)
+            if n == 1:
+                return True
+            m = sub_g.size()
+            if n*(n-1)/2 == m:
+                return True
+            return False
 
-                n = len(clique_i)
-                k = 0
+        def aggregate(node_i,node_j):
+            union = set(node_i).union(set(node_j))
+            sub_g = graph_m.subgraph(union)
+            jt_mpd.add_node(sub_g)
+            sub_g_n = set(sub_g)
+            neigh = set(jt_mpd[node_i]).union(jt_mpd[node_j])
+            for n_i in neigh:
+                sep = set(n_i).intersection(sub_g_n)
+                jt_mpd.add_edge(n_i,sub_g, label = sep)
+            jt_mpd.remove_node(node_i)
+            jt_mpd.remove_node(node_j)
 
-                for node in clique_i:
-                    if node in clique_j:
-                        k += 1
-
-                if k != n-1:
-                    continue
-
-                # Here I should find i they're connected by an "incomplete separator"
-                # no idea what that is
-
-                raise Exception("not implemented")
+        jt_mpd = jt_min.copy()
+        while True:
+#        for i in range(0,3):
+            nodes = jt_mpd.nodes()
+#            node = nodes.pop()
+            complete = True
+            for node in nodes:
+                for neighbor in jt_mpd[node]:
+                    seperator = jt_mpd[neighbor][node]['label']
+                    if not is_complete(seperator):
+                        complete = False
+                        aggregate(neighbor,node)
+                        break
+                if not complete:
+                    break;
+            if complete:
+                break
+        return jt_mpd
 
     def incremental_compilation(self, modificationList):
         raise Exception("not implemented")
