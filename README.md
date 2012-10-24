@@ -133,7 +133,7 @@ under tests/server/atomSpace.xml
 
 To run a simple test, build everything and execute
 bin/opencog/server/cogserver. Then, from another terminal, run
-"telnet localhost 17001". Try loading the example XML file and ls
+```telnet localhost 17001``` Try loading the example XML file and ls
 to see all the nodes and links.
 
 
@@ -141,13 +141,13 @@ Config file
 -----------
 The operation of the server can be altered by means of a config file.
 This config file is in lib/opencog.conf. To make use of it, say 
-"cogserver -c <config-filename>" when starting the server.
+```cogserver -c <config-filename>``` when starting the server.
 
 
 Scheme shell
 ------------
 The cog server also includes a built-in scheme shell. The shell can be
-started by typing "scm" after entering the opencog server shell. It can
+started by typing ```scm``` after entering the opencog server shell. It can
 be exited by placing a single . on a line by itself.  This shell allows
 opencog atoms and truth values to be created, manipulated and destroyed
 using a very simple but powerful interface.  Examples and documentation
