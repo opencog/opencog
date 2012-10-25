@@ -67,13 +67,10 @@ GTAGS
 .pc
 patches
 
-#Embodiment installation dir
-dist
-
 cscope.out
 lib/opencog-test.conf
-../opencog/embodiment/embodiment.conf
-../opencog/embodiment/dev_embodiment.conf
+# opencog/embodiment/embodiment.conf
+# opencog/embodiment/dev_embodiment.conf
 
 #DeSTIN SWIG generated sources
 opencog/embodiment/DestinCuda/JavaDestin/gen_src/javadestin/*
