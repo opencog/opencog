@@ -36,6 +36,7 @@ set binDirH $pdh/$binDir
 set flist [list  \
 $binDirH/opencog/embodiment/Control/MessagingSystem/router \
 $binDirH/opencog/embodiment/Control/MessagingSystem/spawner \
+$binDirH/opencog/embodiment/Control/MessagingSystem/libMessagingSystem.so \
 $binDirH/opencog/embodiment/Control/OperationalAvatarController/oac \
 $binDirH/opencog/embodiment/Control/OperationalAvatarController/opcHcTester \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
