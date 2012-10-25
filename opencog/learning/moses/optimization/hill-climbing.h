@@ -232,7 +232,7 @@ public:
      *                  will be overwritten.
      * @prama init_inst Start the seach from this instance.
      * @param iscorer   the Scoring function.
-     * @param max_evals The maximum number of evaluations to eperform.
+     * @param max_evals The maximum number of evaluations to perform.
      * @param eval_best returned: The number of evaluations performed
      *                  to reach the best solution.
      * @return number of evaluations actually performed. This will always
