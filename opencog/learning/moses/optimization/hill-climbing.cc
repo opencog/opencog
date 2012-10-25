@@ -204,6 +204,36 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 number_of_new_instances = nleft;
 
         }
+
+        if (hc_params.allow_resize_deme) {
+            // To avoid being OOM-killed, set ACCEPTABLE_RAM_FRACTION to
+            // half of installed RAM on the machine. This should work in a
+            // more or less scalable fashion on all machines, and still
+            // allow instances that are dozens of megabytes in size.
+            // (This is targeting machines with 4 GB to 100 GB of RAM).
+            //
+            // Currently, each disc knob takes 2 bits per instance, and
+            // each contin knob takes 10 bits per instance.  Thus, the
+            // practical limit is about 1M contin knobs on current-era
+            // machines, assuming that max_num_instances is about 10K.
+            //
+            // Note: A similar calculation is performed when the scored
+            // instances are merged into the deme, to limit the deme size.
+#define ACCEPTABLE_RAM_FRACTION 0.5
+#define MAX_RAM_LIMIT 0.9
+            uint64_t new_usage = _instance_bytes * number_of_new_instances;
+            uint64_t deme_usage = _instance_bytes * current_number_of_instances;
+
+            if ((ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < new_usage) or
+                 (MAX_RAM_LIMIT * _total_RAM_bytes < (deme_usage + new_usage)))
+            {
+                // Cap ram usage at the lesser of the desired usage,
+                // or the actual available space.
+                uint64_t cap = min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
+                                 MAX_RAM_LIMIT * _total_RAM_bytes - deme_usage);
+                number_of_new_instances = cap / _instance_bytes;
+            }
+        }
         logger().debug(
             "Budget %u samples out of estimated %u neighbours",
             number_of_new_instances, total_number_of_neighbours);
@@ -340,42 +370,34 @@ unsigned hill_climbing::operator()(deme_t& deme,
         current_number_of_evals += number_of_new_instances;
         current_number_of_instances += number_of_new_instances;
 
-        // Keep the size of the deme at a managable level.
-        // Large populations can easily blow out the RAM on a machine,
-        // so we want to keep it at some reasonably trim level.
-        //
-        // To avoid wasting cpu time pointlessly, don't bother with
-        // population size management if its already small.  Thus, 
-        // ACCEPTABLE_SIZE is fairly "large".
-        //
-        // To avoid being OOM-killed, set ACCEPTABLE_RAM_FRACTION to
-        // half of installed RAM on the machine. This should work in a
-        // more or less scalable fashion on all machines, and still
-        // allow instances that are dozens of megabytes in size.
-        // (This is targeting machines with 4 GB to 100 GB of RAM).
-        //
-        // Currently, each disc knob takes 2 bits per instance, and
-        // each contin knob takes 10 bits per instance.  Thus, the
-        // practical limit is about 1M contin knobs on current-era
-        // machines, assuming that max_num_instances is about 10K.
-#define ACCEPTABLE_RAM_FRACTION 0.5
-        uint64_t usage = _instance_bytes * current_number_of_instances;
+        if (hc_params.allow_resize_deme) {
+            // Keep the size of the deme at a managable level.
+            // Large populations can easily blow out the RAM on a machine,
+            // so we want to keep it at some reasonably trim level.
+            //
+            // To avoid wasting cpu time pointlessly, don't bother with
+            // population size management if its already small.  Thus, 
+            // ACCEPTABLE_SIZE is fairly "large".
+            //
+            // "deme_usage" is the RAM usage; the goal is to avoid OOM
+            // kills by keeping RAM usage to a reasonable level.
+            uint64_t deme_usage = _instance_bytes * current_number_of_instances;
 
 #define ACCEPTABLE_SIZE 5000
-        if (hc_params.allow_resize_deme and
-            ((ACCEPTABLE_SIZE < current_number_of_instances) or
-             (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < usage)))
-        {
-            bool did_resize = resize_deme(deme, best_score);
+            if ((ACCEPTABLE_SIZE < current_number_of_instances) or
+                (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < deme_usage))
+            {
+                bool did_resize = resize_deme(deme, best_score);
 
-            // After resizing, some of the variables set above become
-            // invalid.  Some are not needed any more: e.g. ibest.
-            // Others, we need, esp prev_start and prev_size for the
-            // cross-over to work.
-            if (did_resize) {
-                current_number_of_instances = deme.size();
-                prev_start = 0;
-                prev_size = current_number_of_instances;
+                // After resizing, some of the variables set above become
+                // invalid.  Some are not needed any more: e.g. ibest.
+                // Others, we need, esp prev_start and prev_size for the
+                // cross-over to work.
+                if (did_resize) {
+                    current_number_of_instances = deme.size();
+                    prev_start = 0;
+                    prev_size = current_number_of_instances;
+                }
             }
         }
 
