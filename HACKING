@@ -19,6 +19,8 @@ To check wheter your code complies with our standard, you may use the tool
            --indent-preprocessor file.cc
   prompt-$ diff file.cc file.cc.orig
 
+See also http://wiki.opencog.org/w/Development_standards
+
 
 -------------------------------------------------------------------------------
 VIM USERS
