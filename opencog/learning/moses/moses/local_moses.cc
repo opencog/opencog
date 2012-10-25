@@ -44,7 +44,7 @@ using namespace combo;
  *
  */
 bool expand_deme(metapopulation& mp,
-     int max_evals, moses_statistics& stats)
+                 int max_evals, moses_statistics& stats)
 {
     if (mp.empty())
         return true;
