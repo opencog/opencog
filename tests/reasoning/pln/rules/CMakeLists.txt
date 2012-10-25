@@ -1,0 +1,3 @@
+ADD_CXXTEST(SubsetEvalRuleUTest)
+ADD_CXXTEST(IntensionalInheritanceRuleUTest)
+ADD_CXXTEST(StrictImplicationBreakdownRuleUTest)

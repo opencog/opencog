@@ -1,0 +1,3 @@
+ADD_CXXTEST(FormulaKitUTest)
+ADD_CXXTEST(IndefinitePLNFormulaUTest)
+ADD_CXXTEST(SubsetEvalFormulaUTest)
