@@ -27,7 +27,7 @@
 
 using namespace opencog::oac;
 
-const char* EFFECT_OPERATOR_NAME[OP_NUM_OPS] =
+const char* opencog::oac::EFFECT_OPERATOR_NAME[7] =
 {
     "OP_REVERSE", // this is only for the bool variables
     "OP_ASSIGN",  // this operator can be used in any variable type =
@@ -37,7 +37,6 @@ const char* EFFECT_OPERATOR_NAME[OP_NUM_OPS] =
     "OP_MUL",     // only for numeric variables *=
     "OP_DIV"      // only for numeric variables /=
 };
-
 
 State::State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
              vector<StateValue> _stateOwnerList, bool _need_inquery, InqueryFun _inqueryFun)
@@ -61,6 +60,13 @@ State::~State()
 void State::assignValue(const StateValue& newValue)
 {
     stateVariable->assignValue(newValue);
+}
+
+// I am the goal, I want to check if this @param value is satisfied me
+bool State::isSatisfiedMe(const StateValue& value)
+{
+    State other(this->name(),this->getStateValuleType(),this->stateType,value,this->stateOwnerList);
+    return other.isSatisfied(*this);
 }
 
 // pls make sure the goal describes the same state content with this state first

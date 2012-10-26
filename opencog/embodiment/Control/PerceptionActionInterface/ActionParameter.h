@@ -28,6 +28,7 @@
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMDocument.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include <boost/variant.hpp>
 
@@ -191,6 +192,8 @@ public:
 };
 
 typedef variant<string, Rotation, Vector, Entity,FuzzyIntervalInt,FuzzyIntervalFloat > ParamValue;
+
+extern ParamValue UNDEFINED_VALUE;
 
 /**
  * Boost visitor for checking real types inside ParamValue variants.

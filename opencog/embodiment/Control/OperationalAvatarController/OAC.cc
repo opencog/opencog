@@ -444,7 +444,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     } // if
 
-    Inquery::init(this);
+    Inquery::init(this,atomSpace);
 
     // Run demand/ feeling updater agents as soon as possible, then virtual
     // world (say unity) will not wait too much time to get the initial values

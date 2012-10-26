@@ -29,11 +29,16 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 
-namespace opencog { namespace oac {
+namespace opencog {
+
+extern opencog::pai::ParamValue opencog::pai::UNDEFINED_VALUE;
+
+namespace oac {
 
 typedef opencog::pai::ActionParameter StateVariable;
 typedef opencog::pai::ActionParamType StateValuleType;
 typedef opencog::pai::ParamValue StateValue;
+
 
 }}
 #endif

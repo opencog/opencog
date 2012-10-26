@@ -26,7 +26,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/StringManipulator.h>
-
+#include <opencog/spacetime/SpaceTime.h>
 #include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/spatial/3DSpaceMap/Entity3D.h>
@@ -36,22 +36,220 @@
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/server/BaseServer.h>
 
 #include "Inquery.h"
 
 using namespace opencog::oac;
 using namespace opencog::pai;
 
-OAC* Inquery::oac = NULL;
-SpaceServer::SpaceMap *spaceMap = NULL;
+AtomSpace* Inquery::atomSpace= 0;
+SpaceServer::SpaceMap* Inquery::spaceMap = 0;
+OAC* Inquery::oac = 0;
 
-void Inquery::init(OAC* _oac)
-{
+
+ void Inquery::init(OAC* _oac,AtomSpace* _atomSpace)
+ {
     oac = _oac;
-    spaceMap = &oac->getSpaceServer().getLatestMap();
-}
+    atomSpace = _atomSpace;
+    spaceMap = &(spaceServer().getLatestMap());
+ }
 
-StateValue Inquery::inqueryDistance(vector<StateValue>& stateOwnerList)
+ StateValue Inquery::getStateValueFromAtomspace(State& state)
+ {
+     vector<StateValue> stateOwnerList = state.getStateOwnerList();
+     Entity entity1, entity2, entity3;
+     Handle a, b, c = Handle::UNDEFINED;
+
+     entity1 = boost::get<Entity>(stateOwnerList[0]);
+     a = AtomSpaceUtil::getEntityHandle(*atomSpace,entity1.id);
+
+     if(stateOwnerList.size() > 0)
+     {
+         entity2 = boost::get<Entity>(stateOwnerList[1]);
+         b = AtomSpaceUtil::getEntityHandle(*atomSpace,entity2.id);
+     }
+     if(stateOwnerList.size() > 1)
+     {
+         entity3 = boost::get<Entity>(stateOwnerList[2]);
+         c = AtomSpaceUtil::getEntityHandle(*atomSpace,entity3.id);
+     }
+
+     Handle evalLink = AtomSpaceUtil::getLatestEvaluationLink(*atomSpace, state.name(), a , b, c);
+     if (evalLink == Handle::UNDEFINED)
+     {
+         logger().error("Inquery::getStateValueFromAtomspace : There is no evaluation link for predicate: "
+                  + state.name() );
+         return UNDEFINED_VALUE;
+     }
+
+
+     Handle listLink = atomSpace->getOutgoing(evalLink, 1);
+
+     if (listLink== Handle::UNDEFINED)
+     {
+         logger().error("Inquery::getStateValueFromAtomspace : There is no list link for the Evaluation Link: "
+                  + state.name());
+         return UNDEFINED_VALUE;
+     }
+
+     // So the value node is always after the owners.
+     // We need to know how many owners this state has
+
+     // the size of the state owners
+     int ownerSize = stateOwnerList.size();
+
+     HandleSeq listLinkOutgoings = atomSpace->getOutgoing(listLink);
+
+
+     if ( listLinkOutgoings.size() == ownerSize )
+     {   // some evalLink without a value node, e.g.:
+         /*    It means these two objects are far away from each other, we'll get its value from its truthvalue
+        (EvaluationLink (stv 1 0.0012484394) (av -14 1 0)
+           (PredicateNode "far" (av -21 1 0))
+           (ListLink (av -12 0 0)
+              (ObjectNode "id_-1522462" (av -12 1 0))
+              (ObjectNode "id_5640" (av -20 0 0))
+           )
+        )
+        */
+         // then the state value type should be boolean
+         if (state.getStateValuleType().getCode() != BOOLEAN_CODE)
+         {
+             logger().error("Inquery::getStateValueFromAtomspace : There is no value node for this Evaluation Link: "
+                      + state.name());
+             return UNDEFINED_VALUE;
+         }
+
+         if (atomSpace->getMean(evalLink) > 0.5)
+             return "true";
+         else
+             return "false";
+     }
+     else if ( listLinkOutgoings.size() - ownerSize == 1)
+     {
+         //         some state only has one value node, which is the most common state,e.g.:
+         //         (EvaluationLink (stv 1 0.0012484394) (av -23 1 0)
+         //            (PredicateNode "material" (av -23 1 0))
+         //            (ListLink (av -23 0 0)
+         //               (StructureNode "id_CHUNK_2_2_0_BLOCK_15_6_104" (av -23 0 0))
+         //               (ConceptNode "Stone" (av -23 0 0))
+         //            )
+         //         )
+         Handle valueHandle = atomSpace->getOutgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
+
+         if ( valueHandle == Handle::UNDEFINED )
+         {
+             logger().error("Inquery::getStateValueFromAtomspace : There is no list link for the Evaluation Link: "
+                      + state.name());
+             return UNDEFINED_VALUE;
+         }
+         // this kind of state value can only be bool,int,float,string or entity
+         switch (state.getStateValuleType().getCode())
+         {
+         case BOOLEAN_CODE:
+         case INT_CODE:
+         case FLOAT_CODE:
+         case STRING_CODE:
+
+             return (atomSpace->getName(valueHandle));
+
+         case ENTITY_CODE:
+             return Entity(atomSpace->getName(valueHandle) ,AtomSpaceUtil::getObjectTypeFromHandle(*atomSpace, valueHandle));
+
+         default:
+             logger().error("Inquery::getStateValueFromAtomspace : There is more than one value node for the Evaluation Link: "
+                      + state.name());
+             return UNDEFINED_VALUE;
+
+         }
+
+     }
+     else if (listLinkOutgoings.size() - ownerSize == 2)
+     {
+         // when this state value is fuzzy number interval, there will be 2 number nodes for the value
+         Handle valueHandle1 = atomSpace->getOutgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
+         Handle valueHandle2 = atomSpace->getOutgoing(listLink, ownerSize + 1);
+
+         if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) )
+         {
+             logger().error("Inquery::getStateValueFromAtomspace :Type error: The value type is fuzzy interval, but there are not 2 number nodes in its listlink , for the Evaluation Link: "
+                            + state.name() );
+             return UNDEFINED_VALUE;
+         }
+
+         switch (state.getStateValuleType().getCode())
+         {
+         case FUZZY_INTERVAL_INT_CODE:
+         {
+             int lowInt = atoi(atomSpace->getName(valueHandle1).c_str());
+             int highInt = atoi(atomSpace->getName(valueHandle2).c_str());
+             return FuzzyIntervalInt(lowInt,highInt);
+         }
+
+         case FUZZY_INTERVAL_FLOAT_CODE:
+         {
+             float lowf = atof(atomSpace->getName(valueHandle1).c_str());
+             float highf = atof(atomSpace->getName(valueHandle2).c_str());
+             return FuzzyIntervalFloat(lowf,highf);
+         }
+
+         default:
+             logger().error("Inquery::getStateValueFromAtomspace : Type error: There is 2 number nodes for the Evaluation Link: "
+                            + state.name() + ". But it is neighter a fuzzyIntervalInt nor a fuzzyIntervalFLoat");
+             return UNDEFINED_VALUE;
+         }
+     }
+     else if(listLinkOutgoings.size() - ownerSize == 3)
+     {// when it is a vector, it will have 3 number nodes, e.g.:
+         //        the link and nodes are like this:
+         //        (EvaluationLink (av -23 0 0) // this the "valueH"
+         //           (PredicateNode "AGISIM_position" (av -23 1 0))
+         //           (ListLink (av -23 0 0)
+         //              (StructureNode "id_CHUNK_2_2_0_BLOCK_6_6_104" (av -23 0 0))
+         //              (NumberNode "54.5" (av -23 0 0))
+         //              (NumberNode "54.5" (av -23 0 0))
+         //              (NumberNode "104.5" (av -23 0 0))
+         //           )
+         //        )
+         Handle valueHandle1 = atomSpace->getOutgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
+         Handle valueHandle2 = atomSpace->getOutgoing(listLink, ownerSize + 1);
+         Handle valueHandle3 = atomSpace->getOutgoing(listLink, ownerSize + 2);
+
+         if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
+         {
+             logger().error("Inquery::getStateValueFromAtomspace :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink , for the Evaluation Link: "
+                            + state.name() );
+             return UNDEFINED_VALUE;
+         }
+
+         double x = atof(atomSpace->getName(valueHandle1).c_str());
+         double y = atof(atomSpace->getName(valueHandle2).c_str());
+         double z = atof(atomSpace->getName(valueHandle3).c_str());
+
+         switch (state.getStateValuleType().getCode())
+         {
+         case VECTOR_CODE:
+             return Vector(x,y,z);
+
+         case ROTATION_CODE:
+             return Rotation(x,y,z);
+         default:
+             logger().error("Inquery::getStateValueFromAtomspace : Type error: There is 3 number nodes for the Evaluation Link: "
+                            + state.name() + ". But it is neighter a Vector nor a Rotation");
+             return UNDEFINED_VALUE;
+         }
+     }
+     else
+     {
+         logger().error("Inquery::getStateValueFromAtomspace :the number of value nodes is invalid for the Evaluation Link: "
+                        + state.name() );
+         return UNDEFINED_VALUE;
+     }
+
+ }
+
+StateValue Inquery::inqueryDistance(vector<StateValue> stateOwnerList)
 {
     double d = DOUBLE_MAX;
     StateValue var1 = stateOwnerList.front();
@@ -72,7 +270,7 @@ StateValue Inquery::inqueryDistance(vector<StateValue>& stateOwnerList)
     return (opencog::toString(d));
 }
 
-StateValue Inquery::inqueryExist(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryExist(vector<StateValue> stateOwnerList)
 {
     Entity entity = boost::get<Entity>(stateOwnerList.front());
     // if (! entity)
@@ -81,28 +279,28 @@ StateValue Inquery::inqueryExist(vector<StateValue>& stateOwnerList)
     return (opencog::toString(is_exist));
 }
 
-StateValue Inquery::inqueryEnergy(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryEnergy(vector<StateValue> stateOwnerList)
 {
-#if 0
+/*
     Entity entity = boost::get<Entity>(stateOwnerList.front());
     if (! entity)
        return (opencog::toString(0.0));
+*/
     double energyValue = oac->getPsiDemandUpdaterAgent()->getDemandValue("Energy");
     return (opencog::toString(energyValue));
-#endif
-    return (opencog::toString(0.0));
+
 }
 
-StateValue Inquery::inqueryAtLocation(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryAtLocation(vector<StateValue> stateOwnerList)
 {
      StateValue obj = stateOwnerList.front();
 
      Entity* entity = boost::get<Entity>(&obj);
 
-    Handle h = AtomSpaceUtil::getObjectHandle(oac->getAtomSpace(), entity->id);
+    Handle h = AtomSpaceUtil::getObjectHandle(*atomSpace, entity->id);
     SpaceServer::SpaceMapPoint pos;
     if (h == Handle::UNDEFINED) // not an object, let try if it's an agent
-        h = AtomSpaceUtil::getAgentHandle(oac->getAtomSpace(), entity->id);
+        h = AtomSpaceUtil::getAgentHandle(*atomSpace, entity->id);
 
     if(h == Handle::UNDEFINED)
         return Vector(DOUBLE_MAX,DOUBLE_MAX,DOUBLE_MAX);
@@ -115,7 +313,7 @@ StateValue Inquery::inqueryAtLocation(vector<StateValue>& stateOwnerList)
         return Vector(pos.x,pos.y,pos.z);
 }
 
-StateValue Inquery::inqueryIsSolid(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsSolid(vector<StateValue> stateOwnerList)
 {
     StateValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
@@ -128,7 +326,7 @@ StateValue Inquery::inqueryIsSolid(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsStandable(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsStandable(vector<StateValue> stateOwnerList)
 {
     StateValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
@@ -141,7 +339,7 @@ StateValue Inquery::inqueryIsStandable(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryExistPath(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryExistPath(vector<StateValue> stateOwnerList)
 {
     StateValue var1 = stateOwnerList.front();
     StateValue var2 = stateOwnerList.back();
@@ -180,7 +378,7 @@ StateValue Inquery::inqueryExistPath(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsAdjacent(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsAdjacent(vector<StateValue> stateOwnerList)
 {
     StateValue var1 = stateOwnerList.front();
     StateValue var2 = stateOwnerList.back();
@@ -200,7 +398,7 @@ StateValue Inquery::inqueryIsAdjacent(vector<StateValue>& stateOwnerList)
 
 }
 
-StateValue Inquery::inqueryIsAbove(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsAbove(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::ABOVE) != relations.end())
@@ -209,7 +407,7 @@ StateValue Inquery::inqueryIsAbove(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBeside(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsBeside(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BESIDE) != relations.end())
@@ -217,7 +415,7 @@ StateValue Inquery::inqueryIsBeside(vector<StateValue>& stateOwnerList)
     else
         return "false";
 }
-StateValue Inquery::inqueryIsNear(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsNear(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::NEAR) != relations.end())
@@ -226,7 +424,7 @@ StateValue Inquery::inqueryIsNear(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsFar(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsFar(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::FAR_) != relations.end())
@@ -235,7 +433,7 @@ StateValue Inquery::inqueryIsFar(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsTouching(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsTouching(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::TOUCHING) != relations.end())
@@ -244,7 +442,7 @@ StateValue Inquery::inqueryIsTouching(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsInside(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsInside(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::INSIDE) != relations.end())
@@ -253,7 +451,7 @@ StateValue Inquery::inqueryIsInside(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsOutside(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsOutside(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::OUTSIDE) != relations.end())
@@ -262,7 +460,7 @@ StateValue Inquery::inqueryIsOutside(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBelow(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsBelow(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BELOW) != relations.end())
@@ -271,7 +469,7 @@ StateValue Inquery::inqueryIsBelow(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsLeftOf(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsLeftOf(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::LEFT_OF) != relations.end())
@@ -280,7 +478,7 @@ StateValue Inquery::inqueryIsLeftOf(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsRightOf(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsRightOf(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::RIGHT_OF) != relations.end())
@@ -289,7 +487,7 @@ StateValue Inquery::inqueryIsRightOf(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBehind(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsBehind(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BEHIND) != relations.end())
@@ -298,7 +496,7 @@ StateValue Inquery::inqueryIsBehind(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsInFrontOf(vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryIsInFrontOf(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::IN_FRONT_OF) != relations.end())
@@ -307,16 +505,16 @@ StateValue Inquery::inqueryIsInFrontOf(vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(vector<StateValue>& stateOwnerList)
+set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(vector<StateValue> stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> empty;
     Entity entity1 = boost::get<Entity>( stateOwnerList.front());
     Entity entity2 = boost::get<Entity>( stateOwnerList[1]);
     Entity entity3 = boost::get<Entity>( stateOwnerList[2]);
-#if 0
+/*
     if ((entity1 == 0)||(entity2 == 0))
         return empty;
-#endif
+*/
 
     string entity3ID = "";
     if (stateOwnerList.size() == 3)

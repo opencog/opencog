@@ -25,13 +25,14 @@
 #define _OAC_INQUERY_H
 
 #include <vector>
-
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
 
 #include "OAC.h"
 #include "PlanningHeaderFiles.h"
+#include "Strips.h"
+
 
 using namespace std;
 using namespace opencog;
@@ -46,20 +47,27 @@ class Inquery
 {
 
 protected:
+
     static OAC* oac;
-    static set<spatial::SPATIAL_RELATION> getSpatialRelations(vector<StateValue>& stateOwnerList);
+    static AtomSpace* atomSpace;
+    static SpaceServer::SpaceMap* spaceMap;
+    static set<spatial::SPATIAL_RELATION> getSpatialRelations(vector<StateValue> stateOwnerList);
 
 public:
 
-    static void init(OAC* _oac);
+    static void init(OAC* _oac,AtomSpace* _atomSpace);
 
-    static StateValue inqueryDistance(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryExist(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryEnergy(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryAtLocation(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsSolid(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsStandable(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryExistPath(vector<StateValue>& stateOwnerList);
+    // If this is an simple state, which requires no real time calculation.
+    // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
+    static StateValue getStateValueFromAtomspace(State& state);
+
+    static StateValue inqueryDistance(vector<StateValue> stateOwnerList);
+    static StateValue inqueryExist(vector<StateValue> stateOwnerList);
+    static StateValue inqueryEnergy(vector<StateValue> stateOwnerList);
+    static StateValue inqueryAtLocation(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsSolid(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsStandable(vector<StateValue> stateOwnerList);
+    static StateValue inqueryExistPath(vector<StateValue> stateOwnerList);
 
     // inquery the spatial relationships
     // see the definition of SPATIAL_RELATION in Octree3DMapManager.h
@@ -82,22 +90,22 @@ public:
         TOTAL_RELATIONS
     };*/
     // relations for two objects themselves
-    static StateValue inqueryIsAbove(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsBeside(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsNear(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsFar(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsTouching(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsInside(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsOutside(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsBelow(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsLeftOf(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsRightOf(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsBehind(vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsInFrontOf(vector<StateValue>& stateOwnerList);
+    static StateValue inqueryIsAbove(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsBeside(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsNear(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsFar(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsTouching(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsInside(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsOutside(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsBelow(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsLeftOf(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsRightOf(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsBehind(vector<StateValue> stateOwnerList);
+    static StateValue inqueryIsInFrontOf(vector<StateValue> stateOwnerList);
 
     // only use in two position, in 3D block world, one is possible to be able to move from one position to the adjacent position
     // so the adjacent is the 24 neighbours, (the 26 neighbours except the block right above it and under it)
-    static StateValue inqueryIsAdjacent(vector<StateValue>& stateOwnerList);
+    static StateValue inqueryIsAdjacent(vector<StateValue> stateOwnerList);
 
     // relations for 3 objects
     static StateValue inqueryIsBetween(vector<StateValue> stateOwnerList);

@@ -30,6 +30,8 @@
 
 using namespace opencog::oac;
 
+set<State*> OCPlanner::virtualStates = set<State*>();
+
 const StateValue OCPlanner::access_distance = ACCESS_DISTANCE;
 const StateValue OCPlanner::SV_TRUE = "true";
 const StateValue OCPlanner::SV_FALSE = "false";
@@ -85,23 +87,55 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
 {
-#if 0
-    vector<State>::const_iterator it = goal.begin();
+
+    vector<State>::iterator it = goal.begin();
     for (;it != goal.end(); it ++)
     {
         State oneGoal = (State)*it;
 
+        bool satisfied = false;
+
         // First search this state in the virtualStates
-        set<State*>::const_iterator vit = virtualStates.begin();
+        set<State*>::iterator vit = virtualStates.begin();
         for (;vit != virtualStates.end(); vit ++)
         {
             State* vState = (State*)(*vit);
-
+            if (vState->isSameState(oneGoal))
+            {
+                if (vState->isSatisfied(oneGoal))
+                {
+                    satisfied = true;
+                    break;
+                }
+                else // this goal state has not been satisfied.
+                    return false;
+            }
 
         }
+
+        if (satisfied)
+            continue; // check next goal state
+
+        // has not been found in the virtualStates,
+        // then we should inquery this state from the run time environment
+        if (oneGoal.is_need_inquery())
+        {
+            // call its inquery funciton
+            InqueryFun f = oneGoal.getInqueryFun();
+            StateValue inqueryValue = f(oneGoal.getStateOwnerList());
+            if (oneGoal.isSatisfiedMe(inqueryValue))
+                continue;
+            else
+                return false;
+        }
+        else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
+        {
+
+        }
+
     }
-#endif
-    return false;
+
+    return true;
 }
 
 bool OCPlanner::doPlanning(vector<State> goal, vector<PetAction> &plan)
