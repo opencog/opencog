@@ -49,6 +49,7 @@
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
 #include "CompareAtomTreeTemplate.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 
 using std::string;
 using std::list;
@@ -479,6 +480,102 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
     OC_ASSERT(false);
     return false;
 }
+
+
+
+Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles)
+{
+    std::vector<HandleTemporalPair> handleTemporalPairs;
+
+    foreach(Handle h, handles)
+    {
+        timeServer().getTimeInfo( back_inserter(handleTemporalPairs), h);
+    }
+
+    std::vector<HandleTemporalPair>::iterator iHandleTemporalPair;
+    std::vector<HandleTemporalPair>::iterator iLatestHandleTemporalPair;
+
+    iHandleTemporalPair = handleTemporalPairs.begin();
+    iLatestHandleTemporalPair = handleTemporalPairs.begin();
+
+    while ( iHandleTemporalPair != handleTemporalPairs.end() )
+    {
+
+        if ( HandleTemporalPairEntry::handleTemporalPairCompare
+                (&*iHandleTemporalPair,
+                 &*iLatestHandleTemporalPair) > 0 ) {
+            iLatestHandleTemporalPair = iHandleTemporalPair;
+        }
+
+        iHandleTemporalPair ++;
+    }
+
+    if ( iLatestHandleTemporalPair == handleTemporalPairs.end() )
+    {
+        logger().warn("AtomSpaceUtil::getLatestHandle: - Failed to find the latest handle!");
+        return Handle::UNDEFINED;
+    }
+
+    // return the latest handle
+
+
+    return iLatestHandleTemporalPair->getHandle();
+}
+
+Handle AtomSpaceUtil::getLatestEvaluationLink(const AtomSpace &atomSpace,
+                             std::string predicateName,
+                             Handle a,
+                             Handle b,
+                             Handle c)
+throw(opencog::NotFoundException)
+{
+    HandleSeq seq0;
+    seq0.push_back(a);
+
+    // used for binary predicates like near, inside, above and below
+    if (b != Handle::UNDEFINED)
+    {
+        seq0.push_back(b);
+        if (c != Handle::UNDEFINED)
+            seq0.push_back(c);
+    } // if
+
+    // testing if there is a predicate already
+    Handle predicateHandle = atomSpace.getHandle(PREDICATE_NODE,
+                             predicateName);
+    if (predicateHandle == Handle::UNDEFINED) {
+        throw opencog::NotFoundException( TRACE_INFO,
+                  (std::string("AtomSpaceUtil - Predicate not found: ")
+                   + predicateName ).c_str( ) );
+    }
+
+    // testing if there is a list link already
+    Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, seq0);
+    if (listLinkHandle == Handle::UNDEFINED) {
+        throw opencog::NotFoundException( TRACE_INFO,
+                ( "AtomSpaceUtil - List link not found. "
+                  "predicateName[" + predicateName + "]").c_str( ) );
+    }
+
+    HandleSeq seq;
+    seq.push_back(predicateHandle);
+    seq.push_back(listLinkHandle);
+
+    HandleSeq evalLinkHandleset;
+    atomSpace.getHandleSet(back_inserter(evalLinkHandleset),
+                           seq, NULL, NULL, 2, EVALUATION_LINK, false);
+
+
+    if (evalLinkHandleset.size() == 0) {
+        throw opencog::NotFoundException(TRACE_INFO,
+               ("AtomSpaceUtil - getLatestEvaluationLink:There is no evaluation link for predicate: "
+                 + predicateName).c_str() );
+    }
+
+    return getLatestHandle(atomSpace,evalLinkHandleset);
+
+}
+
 
 float AtomSpaceUtil::getPredicateValue(const AtomSpace &atomSpace,
                                        std::string predicateName,
@@ -2693,6 +2790,29 @@ spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpa
     return spatial::math::Vector3( 0, 0, 0 );
 }
 
+std::string AtomSpaceUtil::getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH)
+{
+    Type objectType = atomSpace.getType(objectH);
+
+    if (objectType == OBJECT_NODE)
+        return ORDINARY_OBJECT_TYPE;
+    else if  (objectType == BLOCK_ENTITY_NODE)
+        return BLOCK_ENTITY_TYPE;
+    else if  (objectType == PET_NODE)
+        return PET_OBJECT_TYPE;
+    else if  (objectType == AVATAR_NODE)
+        return AVATAR_OBJECT_TYPE;
+    else if  (objectType == ACCESSORY_NODE)
+        return ACCESSORY_OBJECT_TYPE;
+    else if  (objectType == STRUCTURE_NODE)
+        return STRUCTURE_OBJECT_TYPE;
+    else if  (objectType == HUMANOID_NODE)
+        return HUMANOID_OBJECT_TYPE;
+    else
+        return UNKNOWN_OBJECT_TYPE;
+
+}
+
 Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
                                        const std::string& objectId )
 {
@@ -2750,6 +2870,20 @@ Handle AtomSpaceUtil::getAgentHandle( const AtomSpace& atomSpace,
         } // if
     } // if
     return agentHandle;
+}
+
+Handle AtomSpaceUtil::getEntityHandle( const AtomSpace& atomSpace,
+                                       const std::string& entityId )
+{
+    // try maybe it's an object
+    Handle h = getObjectHandle(atomSpace,entityId);
+    if (h == Handle::UNDEFINED)// it's not an object, try maybe it's an avatar
+    {
+        h = getAgentHandle(atomSpace,entityId);
+    }
+
+    return h;
+
 }
 
 Temporal AtomSpaceUtil::getTemporal(AtomSpace& as, Handle atTimeLink)

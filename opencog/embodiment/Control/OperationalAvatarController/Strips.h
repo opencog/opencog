@@ -57,6 +57,9 @@ class Inquery;
         OP_NUM_OPS  // must always be the last one in this list.
     };
 
+    extern const char* EFFECT_OPERATOR_NAME[7];
+
+
     // There are 3 kinds of state types:
     // 1. equal, which can be used in non-numeric and numeric state values: e.g.: the price of Book1 is 15 dollors
     // 2. fuzzy value, e.g.: the price of Book1 is between 10~20 dollors
@@ -73,7 +76,7 @@ class Inquery;
     // some kind of state values cannot directly get from the Atomspace.see inquery.h
     // so each of the state value need a coresponding funciton to inquery the state value in real time.
     // the vector<string> is the stateOwnerList
-    typedef StateValue (*InqueryFun)(vector<StateValue>&);
+    typedef StateValue (*InqueryFun)(vector<StateValue>);
 
     // A state is an environment variable representing some feature of the system in a certain time point
     // like the foodState of the egg(id_5904) is now RAW
@@ -133,6 +136,7 @@ class Inquery;
             return ((name() == other.name())&&(stateOwnerList == other.getStateOwnerList()));
         }
 
+        bool isSatisfiedMe(const StateValue& value);
         bool isSatisfied(const State& goal);
 
         inline bool operator == (State& other) const
