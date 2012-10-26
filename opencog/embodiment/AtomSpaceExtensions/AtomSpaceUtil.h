@@ -455,6 +455,41 @@ public:
                                       bool include_to = false);
 
     /**
+     * Return the lastest handle ( with the latest timestamp ) among a handle set
+     */
+    static Handle getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles);
+
+    /**
+     * Return the handle of the latest evaluationlink of the given predicate, with its objects
+     *
+     * @param predicateName The name of the predicate whose EvalLink is going to
+     *        be checked
+     * @param a The handle of the first object
+     * @param b The handle of the second object (optional). If this handle is
+     *        not informed then a unary predicate is assumed
+     */
+    static Handle getLatestEvaluationLink(const AtomSpace &atomSpace,
+                                 std::string predicateName,
+                                 Handle a,
+                                 Handle b = Handle::UNDEFINED,
+                                 Handle c = Handle::UNDEFINED) throw(opencog::NotFoundException);
+
+    /**
+     * Return the handle of the value node the given predicate, with its objects
+     *
+     * @param predicateName The name of the predicate whose EvalLink is going to
+     *        be checked
+     * @param a The handle of the first object
+     * @param b The handle of the second object (optional). If this handle is
+     *        not informed then a unary predicate is assumed
+     */
+    static Handle getPredicateValueNode(const AtomSpace &atomSpace,
+                                 std::string predicateName,
+                                 Handle a,
+                                 Handle b = Handle::UNDEFINED,
+                                 Handle c = Handle::UNDEFINED);
+
+    /**
      * Return the mean value of the given predicate, with its objects
      *
      * @param predicateName The name of the predicate whose EvalLink is going to
@@ -982,6 +1017,9 @@ public:
     static std::string convertPetExecLinkParametersToString(const AtomSpace& atomSpace,
             Handle execLink);
 
+
+    static std::string getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH);
+
     /**
      * Return the object (structure or accessory) handle using its id.
      *
@@ -1002,6 +1040,16 @@ public:
      * @return The agent's handle. Handle::UNDEFINED if the agent doesn't exist.
      */
     static Handle getAgentHandle( const AtomSpace& atomSpace, const std::string& agentID );
+
+    /**
+     * Return the entity handle using its agentID, it can be an object or an avatar
+     *
+     * @param atomSpace The AtomSpace
+     * @param entityId The entity's ID
+     * @return The object's handle. Handle::UNDEFINED if the agent doesn't exist.
+     */
+    static Handle getEntityHandle( const AtomSpace& atomSpace,
+                                           const std::string& entityId );
 
     /**
      * Return the Temporal pointed by a given AtTimeLink

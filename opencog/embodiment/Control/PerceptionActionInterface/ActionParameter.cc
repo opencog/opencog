@@ -29,8 +29,12 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/StringManipulator.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+
 
 using namespace opencog::pai;
+
+ParamValue opencog::pai::UNDEFINED_VALUE = "UNDEFINED_VALUE";
 
 Entity Entity::NON_Entity = Entity("","");
 
@@ -75,6 +79,8 @@ ActionParameter::ActionParameter(const string& _name, const ActionParamType& _ty
 ActionParameter::~ActionParameter()
 {
 }
+
+
 
 void ActionParameter::assignValue(const ParamValue& newValue)
 {
