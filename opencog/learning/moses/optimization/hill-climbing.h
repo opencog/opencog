@@ -71,6 +71,9 @@ struct hc_parameters
     //
     // XXX This parameter should probably be automatically adjusted with
     // free RAM availability!?  Or something like that !?
+    //
+    // Nil: If it is adjusted with free RAM it should be able to be
+    // turned off to keep as much determinism as possible
     unsigned max_nn_evals;
 
     // fraction_of_nn is the fraction of the nearest-neighbrohood (NN)
