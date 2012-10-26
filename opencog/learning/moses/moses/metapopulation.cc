@@ -191,7 +191,7 @@ void metapopulation::set_diversity()
 
     // if diversity_exponent is negative or null then the generalized
     // mean is replaced by the max
-    bool dp_max = params.diversity_exponent <= 0.0;
+    bool dp_max = params.diversity.exponent <= 0.0;
 
     auto update_diversity_penalty = [&](bsct_dp_pair& v) {
 
@@ -208,8 +208,8 @@ void metapopulation::set_diversity()
             // element of the pool
             const bscored_combo_tree& last = *pool.crbegin();
             dp_t last_dst = this->_cached_dst(&bsct, &last),
-            last_dp = params.diversity_pressure / (1.0 + last_dst),
-            last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity_exponent);
+            last_dp = params.diversity.pressure / (1.0 + last_dst),
+            last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity.exponent);
 
             // // debug
             // ++dp_count;
@@ -223,7 +223,8 @@ void metapopulation::set_diversity()
                 adp = v.second;
             } else {
                 v.second += last_ddp;
-                adp = this->aggregated_dps(v.second, pool.size());
+                unsigned N = params.diversity.normalize ? pool.size() : 1;
+                adp = this->aggregated_dps(v.second, N);
             }
 
             // update v.first
@@ -384,7 +385,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
     
     // Note that merge_nondominated() is very cpu-expensive and
     // complex...
-    if (params.include_dominated) {
+    if (params.diversity.include_dominated) {
         logger().debug("Insert all candidates in the metapopulation");
         for (const auto& cnd : candidates)
             insert(new bscored_combo_tree(cnd));
@@ -561,7 +562,8 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     // merging is asked for, or if the diversity penalty is in use.
     // Save CPU time by not computing them.
     if (params.keep_bscore
-        || !params.include_dominated || params.diversity_pressure > 0.0) {
+        || !params.diversity.include_dominated
+        || params.diversity.pressure > 0.0) {
         logger().debug("Compute behavioral score of %d selected candidates",
                        pot_candidates.size());
 
@@ -579,7 +581,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     logger().debug("Selected %u candidates (%u were in the metapopulation)",
                    candidates.size(), pot_candidates.size()-candidates.size());
 
-    if (!params.include_dominated) {
+    if (!params.diversity.include_dominated) {
 
         logger().debug("Remove dominated candidates");
         if (logger().isFineEnabled()) {
@@ -615,7 +617,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     merge_candidates(candidates);
 
     // update diversity penalties
-    if (params.diversity_pressure > 0.0) {
+    if (params.diversity.pressure > 0.0) {
         logger().debug("Compute diversity penalties of the metapopulation");
         set_diversity();
         if (logger().isFineEnabled()) {
