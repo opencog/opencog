@@ -437,15 +437,18 @@ int moses_exec(int argc, char** argv)
     int max_candidates;
     bool reduce_all;
     bool revisit = false;
-    bool include_dominated;
-    score_t diversity_pressure;
-    score_t diversity_exponent;
-    score_t diversity_p_norm;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     double cap_coef;
     unsigned cache_size;
     bool linear_regression;
+    
+    // diversity parameters
+    bool include_dominated;
+    score_t diversity_pressure;
+    score_t diversity_exponent;
+    bool diversity_normalize;
+    score_t diversity_p_norm;
 
     // optim_param
     double pop_size_ratio;
@@ -939,11 +942,20 @@ int moses_exec(int argc, char** argv)
 
         ("diversity-exponent",
          value<score_t>(&diversity_exponent)->default_value(-1.0),
-         "Set the exponent of the generalized mean aggregating "
+         "Set the exponent of the generalized mean (or sum, if "
+         "--diversity-normalize is set to 0) aggregating "
          "the penalties between a candidate and the set of all candidates better "
          "than itself (taking into account diversity). If the value tends "
          "towards 0 it tends to the geometric mean, towards +inf it tends "
          "to the max function. If negative or null is it the max function.\n")
+
+        ("diversity-normalize",
+         value<bool>(&diversity_normalize)->default_value(true),
+         "If set to 1 then the aggregating function is a generalized mean. "
+         "Otherwize it is a generalized sum (generalize mean * number of "
+         "elements). If --diversity-exponent is set to negatively then "
+         "this doesn't have any impact as the aggregating function is "
+         "the max anyway.\n")
 
         ("diversity-p-norm",
          value<score_t>(&diversity_p_norm)->default_value(2.0),
@@ -1247,9 +1259,6 @@ int moses_exec(int argc, char** argv)
     meta_params.max_candidates = max_candidates;
     meta_params.reduce_all = reduce_all;
     meta_params.revisit = revisit;
-    meta_params.include_dominated = include_dominated;
-    meta_params.diversity_pressure = diversity_pressure;
-    meta_params.diversity_exponent = diversity_exponent;
     meta_params.keep_bscore = output_bscore;
     meta_params.complexity_temperature = complexity_temperature;
     meta_params.cap_coef = cap_coef;
@@ -1258,6 +1267,13 @@ int moses_exec(int argc, char** argv)
     meta_params.cache_size = cache_size;          // is disabled
     meta_params.jobs = jobs[localhost];
     meta_params.linear_contin = linear_regression;
+
+    // diversity parameters
+    meta_params.diversity.include_dominated = include_dominated;
+    meta_params.diversity.pressure = diversity_pressure;
+    meta_params.diversity.exponent = diversity_exponent;
+    meta_params.diversity.normalize = diversity_normalize;
+    meta_params.diversity.p_norm = diversity_p_norm;
 
     // Set optim_parameters.
     optim_parameters opt_params(opt_algo, pop_size_ratio, max_score, max_dist);
