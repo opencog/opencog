@@ -71,6 +71,9 @@ struct hc_parameters
     //
     // XXX This parameter should probably be automatically adjusted with
     // free RAM availability!?  Or something like that !?
+    //
+    // Nil: If it is adjusted with free RAM it should be able to be
+    // turned off to keep as much determinism as possible
     unsigned max_nn_evals;
 
     // fraction_of_nn is the fraction of the nearest-neighbrohood (NN)
@@ -232,7 +235,7 @@ public:
      *                  will be overwritten.
      * @prama init_inst Start the seach from this instance.
      * @param iscorer   the Scoring function.
-     * @param max_evals The maximum number of evaluations to eperform.
+     * @param max_evals The maximum number of evaluations to perform.
      * @param eval_best returned: The number of evaluations performed
      *                  to reach the best solution.
      * @return number of evaluations actually performed. This will always
