@@ -1,6 +1,6 @@
 
-                          OpenCog
-                          -------
+OpenCog
+=======
 
 OpenCog is a framework for developing AI systems, especially appropriate
 for integrative multi-algorithm systems, and artificial general intelligence
@@ -9,8 +9,10 @@ it currently contains a functional core framework, and a number of
 cognitive agents at varying levels of completion, some already displaying
 interesting and useful functionalities alone and in combination.
 
-Prerequisites:
---------------
+Please see doc/ for platform and OS specific READMEs.
+
+Prerequisites
+-------------
 To build and run OpenCog, the following packages are required. With a
 few exceptions, most Linux distributions will have these packages.
 
@@ -19,102 +21,93 @@ some needed CMake scripts are included in lib, but others in lib/compat are
 provided if you are trying to build with an old version of CMake (although the
 best option is to get the latest CMake if possible).
 
-boost       -- a C++ utilities package -
-               http://www.boost.org/
-               Debian/Ubuntu package libboost-dev
+###### boost  
+> C++ utilities package  
+> http://www.boost.org/ | libboost-dev 
 
-cmake       -- a build management tool
-               http://www.cmake.org/
-               Debian/Ubuntu package cmake
+###### cmake  
+> Build management tool  
+> http://www.cmake.org/ | cmake
 
-cxxtest     -- a test framework
-               http://cxxtest.sourceforge.net/
-               (Not originally available in Debian/Ubuntu; get cxxtest 
-               from https://launchpad.net/~dhart/+archive/ppa)
+###### cxxtest     
+> Test framework  
+> http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
-guile       -- Embedded scheme interperter
-               http://www.gnu.org/software/guile/guile.html
-               Version 1.8.6 or newer is required.
-               Debian/Ubuntu package guile-1.8-dev
+###### guile       
+> Embedded scheme interperter (version 1.8.6 or newer is required)  
+> http://www.gnu.org/software/guile/guile.html | guile-1.8-dev
 
-libgsl      -- The GNU Scientific Library
-               Debian/Ubuntu package libgsl0-dev
+###### libgsl      
+> The GNU Scientific Library  
+> http://www.gnu.org/software/gsl/ | libgsl0-dev
 
-Optional prereqs
-----------------
+Optional Prerequisites
+----------------------
 The following packages are optional. If they are not installed, some
 optional parts of OpenCog will not be built.  The CMake command, during
 the build, will be more precise as to which parts will not be built.
 
-curl        -- cURL groks URLs
-               Optional package
-               Required by opencog/ubigraph
-               http://curl.haxx.se/
-               Debian/Ubuntu package libcurl4-gnutls-dev
+###### curl        
+> cURL groks URLs  
+> Used by opencog/ubigraph  
+> http://curl.haxx.se/ | libcurl4-gnutls-dev
 
-expat       -- an XML parsing library - 
-               Optional package, needed for embodiment support.
-               http://www.jclark.com/xml/expat.html (version 1.2)
-               Debian/Ubuntu package libexpat1-dev
-               Alternatively Debian/Ubuntu package libxmltok1-dev 
-               (supplies expat v1.2) Version 2 seems to work as well.  
-               http://expat.sourceforge.net/
+###### expat       
+> an XML parsing library  
+> Used by Embodiment subsystem  
+> http://expat.sourceforge.net/ | http://www.jclark.com/xml/expat.html (version 1.2) | libexpat1-dev  
 
-HyperTable  -- Distributed storage.
-               Optional package, needed only for experimental support.
-               http://hypertable.org.
-               This requires SIGAR as well. 
+###### HyperTable  
+> Distributed storage   
+> http://hypertable.org   
+> This requires SIGAR as well
 
-MPI         -- Message Passing Interface
-               Optional package
-               Required for compute-cluster version of MOSES.
-               Use either MPICHV2 or OpenMPI
+###### MPI         
+> Message Passing Interface  
+> Required for compute-cluster version of MOSES   
+> Use either MPICHV2 or OpenMPI
 
-OpenGL      -- Open Graphics Library
-               Optional package
-               Required by opencog/spatial/MapTool
-               info: http://www.opengl.org
-               Commonly provided with your video card driver
+###### OpenGL      
+> Open Graphics Library  
+> Used by opencog/spatial/MapTool  
+> http://www.opengl.org  
+> Commonly provided with your video card driver
 
-SDL         -- Simple DirectMedia Layer
-               Optional package
-               Required by opencog/spatial/MapTool
-               http://www.libsdl.org
-               Debian/Ubuntu package libsdl1.2-dev
+###### SDL         
+> Simple DirectMedia Layer  
+> Used by opencog/spatial/MapTool  
+> http://www.libsdl.org | libsdl1.2-dev
 
-SDL_gfx     -- Simple DirectMedia Layer extension
-               Optional package
-               Required by opencog/spatial/MapTool
-               http://www.ferzkopp.net/joomla/content/view/19/14/
-               Debian/Ubuntu package libsdl-gfx1.2-dev
+###### SDL_gfx     
+> Simple DirectMedia Layer extension  
+> Used by opencog/spatial/MapTool  
+> http://www.ferzkopp.net/joomla/content/view/19/14/ | libsdl-gfx1.2-dev
 
-unixODBC    -- Generic SQL Database client access libraries
-               Optional package
-               Required for the distributed-processing atomspace.
-               http://www.unixodbc.org/
-               Debian/Ubuntu packages unixodbc-dev
+###### unixODBC    
+> Generic SQL Database client access libraries  
+> Required for the distributed-processing atomspace.  
+> http://www.unixodbc.org/ | unixodbc-dev
 
-xercesc     -- Apache Xerces-C++ XML Parser
-               Optional package
-               Requied for embodiment
-               Debian/Ubuntu packages libxerces-c28 and libxerces-c2-dev
+###### xercesc     
+> Apache Xerces-C++ XML Parser  
+> Requied for embodiment  
+> http://xerces.apache.org/xerces-c/ | libxerces-c2-dev
  
-xmlrpc      -- XML-RPC support
-               Optional package
-               Required by opencog/ubigraph
-               http://www.xmlrpc.com
-               Debian/Ubuntu package libxmlrpc-c-dev
+###### xmlrpc      
+> XML-RPC support  
+> Required by opencog/ubigraph  
+> http://www.xmlrpc.com | libxmlrpc-c-dev
 
 
-To build opencog:
------------------
+Building OpenCog
+----------------
 Peform the following steps at the shell prompt:
 
-   cd to project root dir
-   mkdir bin
-   cd bin
-   cmake -DCMAKE_BUILD_TYPE=Release ..
-   make
+    cd to project root dir
+    mkdir bin
+    cd bin
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    make
 
 Libraries will be built into subdirectories within bin, mirroring the
 structure of the source directory root. The flag -DCMAKE_BUILD_TYPE=Release
@@ -122,16 +115,16 @@ results in binaries that are optimized for for performance; ommitting
 this flag will result in faster builds, but slower executables.
 
 
-Unit tests:
------------
+Unit tests
+----------
 To build and run the unit tests, from the ./bin directory enter (after
 building opencog as above): 
 
-   make test
+    make test
 
 
-Running the server:
--------------------
+Running the server
+------------------
 The cogserver provides a simple server interface to the reasoning
 system.
 
@@ -142,7 +135,7 @@ under tests/server/atomSpace.xml
 
 To run a simple test, build everything and execute
 bin/opencog/server/cogserver. Then, from another terminal, run
-"telnet localhost 17001". Try loading the example XML file and ls
+```telnet localhost 17001``` Try loading the example XML file and ls
 to see all the nodes and links.
 
 
@@ -150,13 +143,13 @@ Config file
 -----------
 The operation of the server can be altered by means of a config file.
 This config file is in lib/opencog.conf. To make use of it, say 
-"cogserver -c <config-filename>" when starting the server.
+```cogserver -c <config-filename>``` when starting the server.
 
 
 Scheme shell
 ------------
 The cog server also includes a built-in scheme shell. The shell can be
-started by typing "scm" after entering the opencog server shell. It can
+started by typing ```scm``` after entering the opencog server shell. It can
 be exited by placing a single . on a line by itself.  This shell allows
 opencog atoms and truth values to be created, manipulated and destroyed
 using a very simple but powerful interface.  Examples and documentation
