@@ -249,7 +249,7 @@ OAC* Inquery::oac = 0;
 
  }
 
-StateValue Inquery::inqueryDistance(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryDistance(const vector<StateValue>& stateOwnerList)
 {
     double d = DOUBLE_MAX;
     StateValue var1 = stateOwnerList.front();
@@ -270,7 +270,7 @@ StateValue Inquery::inqueryDistance(vector<StateValue> stateOwnerList)
     return (opencog::toString(d));
 }
 
-StateValue Inquery::inqueryExist(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryExist(const vector<StateValue>& stateOwnerList)
 {
     Entity entity = boost::get<Entity>(stateOwnerList.front());
     // if (! entity)
@@ -279,7 +279,7 @@ StateValue Inquery::inqueryExist(vector<StateValue> stateOwnerList)
     return (opencog::toString(is_exist));
 }
 
-StateValue Inquery::inqueryEnergy(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryEnergy(const vector<StateValue>& stateOwnerList)
 {
 /*
     Entity entity = boost::get<Entity>(stateOwnerList.front());
@@ -291,7 +291,7 @@ StateValue Inquery::inqueryEnergy(vector<StateValue> stateOwnerList)
 
 }
 
-StateValue Inquery::inqueryAtLocation(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryAtLocation(const vector<StateValue>& stateOwnerList)
 {
      StateValue obj = stateOwnerList.front();
 
@@ -313,7 +313,7 @@ StateValue Inquery::inqueryAtLocation(vector<StateValue> stateOwnerList)
         return Vector(pos.x,pos.y,pos.z);
 }
 
-StateValue Inquery::inqueryIsSolid(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsSolid(const vector<StateValue>& stateOwnerList)
 {
     StateValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
@@ -326,7 +326,7 @@ StateValue Inquery::inqueryIsSolid(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsStandable(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsStandable(const vector<StateValue>& stateOwnerList)
 {
     StateValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
@@ -339,7 +339,7 @@ StateValue Inquery::inqueryIsStandable(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryExistPath(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryExistPath(const vector<StateValue>& stateOwnerList)
 {
     StateValue var1 = stateOwnerList.front();
     StateValue var2 = stateOwnerList.back();
@@ -378,7 +378,7 @@ StateValue Inquery::inqueryExistPath(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsAdjacent(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsAdjacent(const vector<StateValue>& stateOwnerList)
 {
     StateValue var1 = stateOwnerList.front();
     StateValue var2 = stateOwnerList.back();
@@ -398,7 +398,7 @@ StateValue Inquery::inqueryIsAdjacent(vector<StateValue> stateOwnerList)
 
 }
 
-StateValue Inquery::inqueryIsAbove(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsAbove(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::ABOVE) != relations.end())
@@ -407,7 +407,7 @@ StateValue Inquery::inqueryIsAbove(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBeside(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsBeside(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BESIDE) != relations.end())
@@ -415,7 +415,7 @@ StateValue Inquery::inqueryIsBeside(vector<StateValue> stateOwnerList)
     else
         return "false";
 }
-StateValue Inquery::inqueryIsNear(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsNear(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::NEAR) != relations.end())
@@ -424,7 +424,7 @@ StateValue Inquery::inqueryIsNear(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsFar(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsFar(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::FAR_) != relations.end())
@@ -433,7 +433,7 @@ StateValue Inquery::inqueryIsFar(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsTouching(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsTouching(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::TOUCHING) != relations.end())
@@ -442,7 +442,7 @@ StateValue Inquery::inqueryIsTouching(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsInside(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsInside(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::INSIDE) != relations.end())
@@ -451,7 +451,7 @@ StateValue Inquery::inqueryIsInside(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsOutside(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsOutside(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::OUTSIDE) != relations.end())
@@ -460,7 +460,7 @@ StateValue Inquery::inqueryIsOutside(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBelow(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsBelow(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BELOW) != relations.end())
@@ -469,7 +469,7 @@ StateValue Inquery::inqueryIsBelow(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsLeftOf(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsLeftOf(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::LEFT_OF) != relations.end())
@@ -478,7 +478,7 @@ StateValue Inquery::inqueryIsLeftOf(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsRightOf(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsRightOf(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::RIGHT_OF) != relations.end())
@@ -487,7 +487,7 @@ StateValue Inquery::inqueryIsRightOf(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBehind(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsBehind(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BEHIND) != relations.end())
@@ -496,7 +496,7 @@ StateValue Inquery::inqueryIsBehind(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsInFrontOf(vector<StateValue> stateOwnerList)
+StateValue Inquery::inqueryIsInFrontOf(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::IN_FRONT_OF) != relations.end())
@@ -505,7 +505,7 @@ StateValue Inquery::inqueryIsInFrontOf(vector<StateValue> stateOwnerList)
         return "false";
 }
 
-set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(vector<StateValue> stateOwnerList)
+set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(const vector<StateValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> empty;
     Entity entity1 = boost::get<Entity>( stateOwnerList.front());
