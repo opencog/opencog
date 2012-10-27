@@ -411,6 +411,8 @@ public:
      */
     bool hasPlanFailed(ActionPlanID planId) const;
 
+    static std::string getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH);
+
 private:
 
     /**
@@ -911,8 +913,8 @@ private:
      * @return true if the object is an obstacle.
      */
     bool isObjectAnObstacle(Handle objectNode, const std::string& entityClass, const MapInfo& mapinfo) const;
-    #endif
 
+    #endif
 
 
 }; // class

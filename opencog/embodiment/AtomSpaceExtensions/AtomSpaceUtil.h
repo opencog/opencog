@@ -1018,8 +1018,6 @@ public:
             Handle execLink);
 
 
-    static std::string getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH);
-
     /**
      * Return the object (structure or accessory) handle using its id.
      *
