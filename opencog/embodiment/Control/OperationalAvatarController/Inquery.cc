@@ -155,7 +155,7 @@ OAC* Inquery::oac = 0;
              return (atomSpace->getName(valueHandle));
 
          case ENTITY_CODE:
-             return Entity(atomSpace->getName(valueHandle) ,AtomSpaceUtil::getObjectTypeFromHandle(*atomSpace, valueHandle));
+             return Entity(atomSpace->getName(valueHandle) ,PAI::getObjectTypeFromHandle(*atomSpace, valueHandle));
 
          default:
              logger().error("Inquery::getStateValueFromAtomspace : There is more than one value node for the Evaluation Link: "
