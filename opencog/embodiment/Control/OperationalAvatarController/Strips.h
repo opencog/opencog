@@ -76,7 +76,7 @@ class Inquery;
     // some kind of state values cannot directly get from the Atomspace.see inquery.h
     // so each of the state value need a coresponding funciton to inquery the state value in real time.
     // the vector<string> is the stateOwnerList
-    typedef StateValue (*InqueryFun)(vector<StateValue>);
+    typedef StateValue (*InqueryFun)(const vector<StateValue>&);
 
     // A state is an environment variable representing some feature of the system in a certain time point
     // like the foodState of the egg(id_5904) is now RAW
@@ -110,7 +110,7 @@ class Inquery;
 
         StateValuleType getStateValuleType() const {return stateVariable->getType();}
 
-        vector<StateValue> getStateOwnerList() const {return stateOwnerList;}
+        const vector<StateValue>& getStateOwnerList() const {return stateOwnerList;}
 
         InqueryFun getInqueryFun() const {return inqueryFun;}
 

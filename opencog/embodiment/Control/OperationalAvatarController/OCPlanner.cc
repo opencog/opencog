@@ -130,7 +130,7 @@ bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
         }
         else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
         {
-
+            // TODO
         }
 
     }

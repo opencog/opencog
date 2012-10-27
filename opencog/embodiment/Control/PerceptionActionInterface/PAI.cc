@@ -4294,3 +4294,26 @@ void PAI::processBlockStructureSignal(DOMElement* element)
     }
 
 }
+
+std::string PAI::getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH)
+{
+    Type objectType = atomSpace.getType(objectH);
+
+    if (objectType == OBJECT_NODE)
+        return ORDINARY_OBJECT_TYPE;
+    else if  (objectType == BLOCK_ENTITY_NODE)
+        return BLOCK_ENTITY_TYPE;
+    else if  (objectType == PET_NODE)
+        return PET_OBJECT_TYPE;
+    else if  (objectType == AVATAR_NODE)
+        return AVATAR_OBJECT_TYPE;
+    else if  (objectType == ACCESSORY_NODE)
+        return ACCESSORY_OBJECT_TYPE;
+    else if  (objectType == STRUCTURE_NODE)
+        return STRUCTURE_OBJECT_TYPE;
+    else if  (objectType == HUMANOID_NODE)
+        return HUMANOID_OBJECT_TYPE;
+    else
+        return UNKNOWN_OBJECT_TYPE;
+
+}
