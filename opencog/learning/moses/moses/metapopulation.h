@@ -60,6 +60,51 @@ using namespace combo;
 
 static const operator_set empty_ignore_ops = operator_set();
 
+struct diversity_parameters
+{
+    diversity_parameters(bool _include_dominated = true)
+        : include_dominated(_include_dominated),
+          pressure(0.0),
+          exponent(-1.0),       // max
+          normalize(true),      // sum or mean (default mean)
+          p_norm(2.0)           // Euclidean
+    {}
+
+    // Ignore behavioral score domination when merging candidates in
+    // the metapopulation. Keeping dominated candidates may improves
+    // performance by avoiding local maxima. Discarding dominated
+    // candidates may increase the diversity of the metapopulation.
+    bool include_dominated;
+
+    // Diversity pressure of to enforce diversification of the
+    // metapop. 0 means no diversity pressure, the higher the value
+    // the strong the pressure.
+    score_t pressure;
+
+    // exponent of the generalized mean (or sum, see below) used to
+    // aggregate the diversity penalties of a candidate between a set
+    // of candidates. If the exponent is negative (default) then the
+    // max is used instead (generalized mean with infinite exponent).
+    score_t exponent;
+
+    // If normalize is false then the aggregation of diversity
+    // penalties is a generalize mean, otherwise it is a generalize
+    // sum, defined here as
+    //
+    // generalize_mean(X) * |X|
+    //
+    // in other words it is a generalized mean without normalization
+    // by the number of elements.
+    //
+    // If diversity_exponent is negative then this has no effect, it
+    // is the max anyway.
+    bool normalize;
+
+    // Parameter value of the p-norm used to compute the distance
+    // between 2 bscores
+    score_t p_norm;    
+};
+    
 /**
  * parameters about deme management
  */
@@ -68,22 +113,18 @@ struct metapop_parameters
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
                        bool _revisit = false,
-                       bool _include_dominated = true,
                        score_t _complexity_temperature = 3.0f,
                        const operator_set& _ignore_ops = empty_ignore_ops,
                        // bool _enable_cache = false,    // adaptive_cache
                        unsigned _cache_size = 100000,     // is disabled
                        unsigned _jobs = 1,
+                       diversity_parameters _diversity = diversity_parameters(),
                        const combo_tree_ns_set* _perceptions = NULL,
                        const combo_tree_ns_set* _actions = NULL,
                        const feature_selector* _fstor = NULL) :
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         revisit(_revisit),
-        include_dominated(_include_dominated),
-        diversity_pressure(0.0),
-        diversity_exponent(-1.0), // max
-        diversity_p_norm(2.0),    // Euclidean
         keep_bscore(false),
         complexity_temperature(_complexity_temperature),
         cap_coef(50),
@@ -91,6 +132,7 @@ struct metapop_parameters
         // enable_cache(_enable_cache),   // adaptive_cache
         cache_size(_cache_size),          // is disabled
         jobs(_jobs),
+        diversity(_diversity),
         perceptions(_perceptions),
         actions(_actions),
         merge_callback(NULL),
@@ -108,26 +150,6 @@ struct metapop_parameters
 
     // When true then visited exemplars can be revisited.
     bool revisit;
-
-    // Ignore behavioral score domination when merging candidates in
-    // the metapopulation.  Keeping dominated candidates improves
-    // performance by avoiding local maxima.
-    bool include_dominated;
-
-    // Diversity pressure of to enforce diversification of the
-    // metapop. 0 means no diversity pressure, the higher the value
-    // the strong the pressure.
-    score_t diversity_pressure;
-
-    // exponent of the generalized mean used to aggregate the
-    // diversity penalties of a candidate between a set of
-    // candidates. If the exponent is negative (default) then the max
-    // is used instead (generalized mean with infinite exponent).
-    score_t diversity_exponent;
-
-    // Parameter value of the p-norm used to compute the distance
-    // between 2 bscores
-    score_t diversity_p_norm;
 
     // keep track of the bscores even if not needed (in case the user
     // wants to keep them around)
@@ -155,6 +177,9 @@ struct metapop_parameters
     // candidates to the metapopulation.
     unsigned jobs;
 
+    // parameters to control diversity
+    diversity_parameters diversity;
+    
     // the set of perceptions of an optional interactive agent
     const combo_tree_ns_set* perceptions;
     // the set of actions of an optional interactive agent
@@ -294,7 +319,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_dst(pa.diversity_p_norm)
+        _cached_dst(pa.diversity.p_norm)
     {
         init(bases, si_ca, sc);
     }
@@ -311,7 +336,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_dst(pa.diversity_p_norm)
+        _cached_dst(pa.diversity.p_norm)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
@@ -360,15 +385,17 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * aggregated_dps)
      */
     dp_t distort_dp(dp_t dp) const {
-        return pow(dp, params.diversity_exponent);
+        return pow(dp, params.diversity.exponent);
     }
     /**
      * The inverse function of distort_dp normalized by the vector
-     * size. Basically aggregated_dps(1/N * sum_i distort_dp(x_i)) ==
-     * generalized_mean(x) where N is the size of x.
+     * size. Basically
+     *
+     * aggregated_dps(sum_i distort_dp(x_i), N) == generalized_mean(x)
+     * where N is the size of x.
      */
     dp_t aggregated_dps(dp_t ddp_sum, unsigned N) const {
-        return pow(ddp_sum / N, 1.0 / params.diversity_exponent);
+        return pow(ddp_sum / N, 1.0 / params.diversity.exponent);
     }
         
     /**

@@ -112,7 +112,7 @@ void local_moses(metapopulation& mp,
     optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
 
     // Print legend for the columns of the stats.
-    print_stats_header(os, mp.params.diversity_pressure > 0.0);
+    print_stats_header(os, mp.params.diversity.pressure > 0.0);
 
     struct timeval start;
     gettimeofday(&start, NULL);
@@ -145,7 +145,7 @@ void local_moses(metapopulation& mp,
                    << "\t" << os->nsteps  // number of iterations of optimizer
                    << "\t" << os->over_budget;  // exceeded max_evals
             }
-            if (mp.params.diversity_pressure > 0.0) {
+            if (mp.params.diversity.pressure > 0.0) {
                 // diversity stats over all metapopulation
                 auto ds = mp.gather_diversity_stats(-1);
                 ss << "\t" << ds.count // number of pairs of candidates
@@ -168,7 +168,7 @@ void local_moses(metapopulation& mp,
 
         // I find this particularly useful for studying diversity but
         // it could be relaxed and printed whatever
-        if (logger().isDebugEnabled() and mp.params.diversity_pressure > 0.0) {
+        if (logger().isDebugEnabled() and mp.params.diversity.pressure > 0.0) {
             stringstream ss;
             ss << pa.max_cnd_output << " best candidates of the metapopulation (with scores and visited status):" << std::endl;
             mp.ostream(ss, pa.max_cnd_output, true, true, false, true);
