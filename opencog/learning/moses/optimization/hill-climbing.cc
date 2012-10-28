@@ -232,6 +232,9 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 uint64_t cap = min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
                                  MAX_RAM_LIMIT * _total_RAM_bytes - deme_usage);
                 number_of_new_instances = cap / _instance_bytes;
+                logger().debug(
+                   "Cap new instances. Tot RAM=%Ld deme_suage=%Ld tot_usage=%Ld",
+                   _total_RAM_bytes, deme_usage, new_usage);
             }
         }
         logger().debug(
