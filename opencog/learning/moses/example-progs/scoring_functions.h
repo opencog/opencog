@@ -135,7 +135,7 @@ struct contin_uniform : public unary_function<instance, contin_t>
 };
 
 // Return, as the score, minus the sum of the squares of all
-// contiinuous knob settings in the instance.
+// continuous knob settings in the instance.
 //
 struct sphere : public unary_function<instance, contin_t>
 {

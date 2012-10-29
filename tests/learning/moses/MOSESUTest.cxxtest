@@ -55,15 +55,19 @@ public:
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k3", "-m100000", "-j4"});
     }
-    void test_3_mux() {
+    void test_1_mux() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hmux", "-k1"});
+    }
+    void test_2_mux() {
+        cout << BOOST_CURRENT_FUNCTION << endl;
+        moses_test_score({"-Hmux", "-k2"});
     }
     void test_sa_2_parity() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hpa", "-k2", "-asa"});
     }
-    void test_sa_3_mux() {
+    void test_sa_1_mux() {
         cout << BOOST_CURRENT_FUNCTION << endl;
         moses_test_score({"-Hmux", "-k1", "-asa"});
     }
