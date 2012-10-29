@@ -376,7 +376,7 @@ combo::arity_t infer_arity(const string& problem,
     }
     else if (problem == mux)
     {
-        return problem_size + (1<<problem_size);
+        return problem_size + pow2(problem_size);
     }
     else if (problem == sr)
     {
@@ -869,10 +869,11 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
-         str(format("For even parity (%s), disjunction (%s) and multiplex (%s)"
-                    " the problem size corresponds to the arity."
-                    " For regression of f(x)_o = sum_{i={1,o}} x^i (%s)"
-                    " the problem size corresponds to the order o.\n")
+         str(format("For even parity (%s), disjunction (%s) "
+                    "the problem size corresponds directly to the arity. "
+                    "For multiplex (%s) the arity is arg+2^arg. "
+                    "For regression of f(x)_o = sum_{i={1,o}} x^i (%s) "
+                    "the problem size corresponds to the order o.\n")
              % pa % dj % mux % sr).c_str())
 
         // The remaining options (TODO organize that)
@@ -1850,7 +1851,6 @@ int moses_exec(int argc, char** argv)
     else if (problem == mux)
     {
         // @todo: for the moment occam's razor and partial truth table are ignored
-        // arity = problem_size + 1<<problem_size
         multiplex func(problem_size);
 
         // If no exemplar has been provided in the options, use the
