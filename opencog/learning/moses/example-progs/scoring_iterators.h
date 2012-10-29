@@ -82,6 +82,19 @@ struct multiplex  : public iterator_function<bool>
     }
 };
 
+// majority(x1, ..., xn) = 0 iff n/2 or more arguments are false
+struct majority : public iterator_function<bool>
+{
+    majority(unsigned int n) : arity(n) { }
+    unsigned int arity;
+    // [from, to( corresponds to the sequence of inputs of the
+    // function, the result corresponds to its output
+    template<typename It>
+    bool operator()(It from, It to) const {
+        return std::count(from, to, true) > arity / 2;
+    }
+};
+
 // simple function : f(x)_o = sum_{i={1,o}} x^i
 // that is for instance:
 // f(x)_3 = x+x^2+x^3
