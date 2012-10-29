@@ -26,12 +26,17 @@
 
 namespace opencog { namespace moses {
 
+// Base functor for functors taking an iterator range of value type and result T
+template<typename T>
+struct iterator_function {
+    typedef T argument_type;
+    typedef T result_type;
+};
+        
 // even_parity(x1, ..., xn) = true iff (int)x1 + ... + (int)xn is even
 // where n is the arity of even_parity
-struct even_parity
+struct even_parity : public iterator_function<bool>
 {
-    typedef bool argument_type;
-    typedef bool result_type;
     // [from, to( corresponds to the sequence of inputs of the
     // function, the result corresponds to its output
     template<typename It>
@@ -44,10 +49,8 @@ struct even_parity
 };
 
 // disjunction(x1, ..., xn) = true iff there exists i such that xi is true
-struct disjunction
+struct disjunction : public iterator_function<bool>
 {
-    typedef bool argument_type;
-    typedef bool result_type;
     // [from, to( corresponds to the sequence of inputs of the
     // function, the result corresponds to its output
     template<typename It>
@@ -61,10 +64,8 @@ struct disjunction
 
 // multiplex(a1, ..., an, d1, ..., dm) = 1 iff m = 2^n and di = 1 if i
 // is the address of the string bit described by a1, ..., an.
-struct multiplex
+struct multiplex  : public iterator_function<bool>
 {
-    typedef bool argument_type;
-    typedef bool result_type;
     multiplex(unsigned int n) : arity(n) { }
     unsigned int arity;
     // [from, to( corresponds to the sequence of inputs of the
@@ -81,6 +82,18 @@ struct multiplex
     }
 };
 
+// majority(x1, ..., xn) = 0 iff n/2 or more arguments are false
+struct majority : public iterator_function<bool>
+{
+    majority(unsigned int n) : arity(n) { }
+    unsigned int arity;
+    // [from, to( corresponds to the sequence of inputs of the
+    // function, the result corresponds to its output
+    template<typename It>
+    bool operator()(It from, It to) const {
+        return std::count(from, to, true) > arity / 2;
+    }
+};
 
 // simple function : f(x)_o = sum_{i={1,o}} x^i
 // that is for instance:
@@ -88,10 +101,8 @@ struct multiplex
 // f(x)_2 = x+x^2
 // f(x)_1 = x
 // f(x)_0 = 0
-struct simple_symbolic_regression
+struct simple_symbolic_regression : public iterator_function<contin_t>
 {
-    typedef contin_t argument_type;
-    typedef contin_t result_type;
     simple_symbolic_regression(int o = 4) : order(o) { }
     int order;
     template<typename It>
