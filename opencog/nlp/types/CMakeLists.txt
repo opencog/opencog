@@ -24,7 +24,7 @@ ELSE (WIN32)
 ENDIF (WIN32)
 
 INSTALL (FILES
-	atom_types.h
+	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 #	NLPTypes.h
 	DESTINATION "include/${PROJECT_NAME}/nlp/types"
 )

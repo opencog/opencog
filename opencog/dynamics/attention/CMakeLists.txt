@@ -40,7 +40,7 @@ ENDIF (CYGWIN)
 
 
 INSTALL (FILES
-	atom_types.h
+	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	AttentionModule.h
 	ForgettingAgent.h
 	HebbianUpdatingAgent.h
