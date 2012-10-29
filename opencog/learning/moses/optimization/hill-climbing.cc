@@ -222,19 +222,18 @@ unsigned hill_climbing::operator()(deme_t& deme,
 #define ACCEPTABLE_RAM_FRACTION 0.5
 #define MAX_RAM_LIMIT 0.9
             uint64_t new_usage = _instance_bytes * number_of_new_instances;
-            uint64_t deme_usage = _instance_bytes * current_number_of_instances;
 
-            if ((ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < new_usage) or
-                 (MAX_RAM_LIMIT * _total_RAM_bytes < (deme_usage + new_usage)))
+            if (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < new_usage)
             {
                 // Cap ram usage at the lesser of the desired usage,
                 // or the actual available space.
+                uint64_t free_ram = getFreeRAM();
                 uint64_t cap = min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
-                                 MAX_RAM_LIMIT * _total_RAM_bytes - deme_usage);
+                                 MAX_RAM_LIMIT * free_ram);
                 number_of_new_instances = cap / _instance_bytes;
                 logger().debug(
-                   "Cap new instances. Tot RAM=%Ld deme_suage=%Ld tot_usage=%Ld",
-                   _total_RAM_bytes, deme_usage, new_usage);
+                   "Cap new instances. Tot RAM=%Ld new_usage=%Ld Free RAM=%Ld cap=%Ld",
+                   _total_RAM_bytes, new_usage, free_ram, cap);
             }
         }
         logger().debug(
