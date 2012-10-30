@@ -28,6 +28,8 @@ class TruthValue(object):
 
 DEFAULT_TRUTH_VALUE = TruthValue(1,1)
 
+class AttentionValue(object):
+    pass
 
 class Atom(object):
     pass
