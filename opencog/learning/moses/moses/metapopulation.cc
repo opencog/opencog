@@ -314,12 +314,12 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 
     // The exemplars are stored in order from best score to worst;
     // the iterator follows this order.
-    for (const_iterator it = begin(); it != end(); ++it) {
+    for (const bscored_combo_tree& bsct : *this) {
 
-        score_t sc = get_penalized_score(*it);
+        score_t sc = get_penalized_score(bsct);
 
         // Skip any exemplars we've already used in the past.
-        const combo_tree& tr = get_tree(*it);
+        const combo_tree& tr = get_tree(bsct);
         if (!has_been_visited(tr)) {
             probs.push_back(sc);
             found_exemplar = true;
@@ -350,6 +350,15 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
         sum += p;
     }
 
+    // log the distribution probs
+    if (logger().isFineEnabled())
+    {
+        stringstream ss;
+        ss << "Non-normalized probability distribution of candidate selection: ";
+        ostreamContainer(ss, probs);
+        logger().fine() << ss.str();
+    }
+    
     OC_ASSERT(sum > 0.0f, "There is an internal bug, please fix it");
 
     size_t fwd = distance(probs.begin(), roulette_select(probs.begin(),

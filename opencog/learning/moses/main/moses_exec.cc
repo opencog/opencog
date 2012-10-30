@@ -91,6 +91,7 @@ static const string cp="cp"; // regression based on combo program to fit
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
 static const string mux="mux"; // multiplex
+static const string maj="maj"; // majority
 static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
 static const string ann_it="ann-it"; // regression based on input table using ann
 static const string ann_cp="ann-cp"; // regression based on combo program using ann
@@ -370,13 +371,13 @@ combo::arity_t infer_arity(const string& problem,
             return -1;
         }
     }
-    else if (problem == pa || problem == dj)
+    else if (problem == pa || problem == dj || problem == maj)
     {
         return problem_size;
     }
     else if (problem == mux)
     {
-        return problem_size + (1<<problem_size);
+        return problem_size + pow2(problem_size);
     }
     else if (problem == sr)
     {
@@ -545,8 +546,9 @@ int moses_exec(int argc, char** argv)
                     "%s, demo, even parity problem\n\n"
                     "%s, demo, disjunction problem\n\n"
                     "%s, demo, multiplex problem\n\n"
+                    "%s, demo, majority problem\n\n"
                     "%s, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
-             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % sr).c_str())
+             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % maj % sr).c_str())
 
         // Input specification options
 
@@ -869,11 +871,12 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
-         str(format("For even parity (%s), disjunction (%s) and multiplex (%s)"
-                    " the problem size corresponds to the arity."
-                    " For regression of f(x)_o = sum_{i={1,o}} x^i (%s)"
-                    " the problem size corresponds to the order o.\n")
-             % pa % dj % mux % sr).c_str())
+         str(format("For even parity (%s), disjunction (%s) and majority (%s) "
+                    "the problem size corresponds directly to the arity. "
+                    "For multiplex (%s) the arity is arg+2^arg. "
+                    "For regression of f(x)_o = sum_{i={1,o}} x^i (%s) "
+                    "the problem size corresponds to the order o.\n")
+             % pa % dj % maj % mux % sr).c_str())
 
         // The remaining options (TODO organize that)
         
@@ -1850,8 +1853,28 @@ int moses_exec(int argc, char** argv)
     else if (problem == mux)
     {
         // @todo: for the moment occam's razor and partial truth table are ignored
-        // arity = problem_size + 1<<problem_size
         multiplex func(problem_size);
+
+        // If no exemplar has been provided in the options, use the
+        // default boolean_type exemplar (which is 'and').
+        if (exemplars.empty()) {
+            exemplars.push_back(type_to_exemplar(id::boolean_type));
+        }
+
+        type_tree tt = gen_signature(id::boolean_type, arity);
+        logical_bscore bscore(func, arity);
+        metapop_moses_results(exemplars, tt,
+                              bool_reduct, bool_reduct_rep, bscore,
+                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
+    }
+
+    // Demo/example problem: majority. Learn the combo program that
+    // return true iff the number of true arguments is scriptly
+    // greater than half of the arity
+    else if (problem == maj)
+    {
+        // @todo: for the moment occam's razor and partial truth table are ignored
+        majority func(problem_size);
 
         // If no exemplar has been provided in the options, use the
         // default boolean_type exemplar (which is 'and').
