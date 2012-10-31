@@ -46,8 +46,10 @@ void ImportanceDecayAgent::connectSignals(AtomSpace& as)
 
 void ImportanceDecayAgent::run(opencog::CogServer *server)
 {
+
     logger().fine("ImportanceDecayTask - Executing decayShortTermImportance().");
     ((OAC *) server)->decayShortTermImportance();
+
 }
 
 void ImportanceDecayAgent::atomMerged(AtomSpaceImpl* as, Handle h)

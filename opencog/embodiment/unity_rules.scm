@@ -659,17 +659,17 @@
 ;)
 
 ; TODO: very simple rules only for testing dialog_system
-(add_rule (stv 0.3 1.0) GetFoodGoal
-    (add_action (SpeechActSchemaNode "AskForFood") )
-    NULL_PRECONDITION
-)
+;(add_rule (stv 0.3 1.0) GetFoodGoal
+;    (add_action (SpeechActSchemaNode "AskForFood") )
+;    NULL_PRECONDITION
+;)
 
-(add_rule (stv 0.5 1.0) GetFoodGoal
-    (SequentialAndLink
-        (add_action (GroundedSchemaNode "lick") ) 
-    )    
-    NULL_PRECONDITION
-)
+;(add_rule (stv 0.5 1.0) GetFoodGoal
+;    (SequentialAndLink
+;        (add_action (GroundedSchemaNode "lick") ) 
+;    )    
+;    NULL_PRECONDITION
+;)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

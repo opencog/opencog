@@ -24,6 +24,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/util/platform.h>
 
 #include "OAC.h"
 #include "PsiActionSelectionAgent.h"
@@ -698,6 +699,15 @@ std::cout<<"current action is still running [SchemaId = "
         SchemeEval & evaluator = SchemeEval::instance();    
         std::string scheme_expression, scheme_return_value;
 
+        // test: skip for some circles before beginning next planning
+        // because there will be some results of the actions taken in last plan are need to changed by other agent due
+        static int count = 0;
+        if (count++ < 4)
+            return;
+        count = 0;
+
+        std::cout<<"Doing planning ... "<<std::endl;
+
         scheme_expression = "( do_planning )";
 
         // Run the Procedure that do planning
@@ -715,12 +725,14 @@ std::cout<<"current action is still running [SchemaId = "
         // Try to get the plan stored in AtomSpace
         if ( !this->getPlan(atomSpace) ) {
             logger().warn("PsiActionSelectionAgent::%s - "
-                           "'do_planning' can not find any suitable plan for the selected demand goal [cycle = %d]", 
+                           "'do_planning' can not find any suitable plan for the selected demand goal [cycle = %d]",
                            __FUNCTION__, 
                            this->cycleCount
                          ); 
 
-std::cout<<"'do_planning' can not find any suitable plan for the selected demand goal [cycle = "
+std::cout<<"'do_planning' can not find any suitable plan for the selected demand goal:"
+        << atomSpace.atomAsString(this->plan_selected_demand_goal)
+        <<", [cycle = "
          <<this->cycleCount<<"]."<<std::endl; 
             return;  
         }
