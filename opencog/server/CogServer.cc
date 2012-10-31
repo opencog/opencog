@@ -273,6 +273,9 @@ void CogServer::runAgent(Agent *agent)
     mem_start = getMemUsage();
     atoms_start = atomSpace->getSize();
 
+    logger().debug("[CogServer] begin to run mind agent: %s, [cycle = %d]",
+                   agent->classinfo().id.c_str(),  this->cycleCount);
+
     agent->resetUtilizedHandleSets();
     agent->run(this);
 

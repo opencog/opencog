@@ -60,8 +60,8 @@
 #include "Plaza.h"
 #include "ProcedureInterpreterAgent.h"
 #include "ActionSelectionAgent.h"
-#include "ImportanceDecayAgent.h"
-#include "EntityExperienceAgent.h"
+//#include "ImportanceDecayAgent.h"
+//#include "EntityExperienceAgent.h"
 #include "PsiModulatorUpdaterAgent.h"
 #include "PsiDemandUpdaterAgent.h"
 #include "PsiActionSelectionAgent.h"
@@ -165,8 +165,8 @@ private:
 
     /** opencog Agents */
     ProcedureInterpreterAgent* procedureInterpreterAgent;
-    ImportanceDecayAgent* importanceDecayAgent;
-    EntityExperienceAgent* entityExperienceAgent;
+//    ImportanceDecayAgent* importanceDecayAgent;
+//    EntityExperienceAgent* entityExperienceAgent;
 
     PsiModulatorUpdaterAgent * psiModulatorUpdaterAgent;
     PsiDemandUpdaterAgent * psiDemandUpdaterAgent;
@@ -344,8 +344,8 @@ public:
     const std::string getPath(const std::string & petId, const std::string & filename = "");
 
     SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
-    SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
-    SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
+//    SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
+//    SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
 
     SingletonFactory <PsiModulatorUpdaterAgent, Agent> psiModulatorUpdaterAgentFactory;
     SingletonFactory <PsiDemandUpdaterAgent, Agent> psiDemandUpdaterAgentFactory;

@@ -488,7 +488,7 @@ Block3D* Octree::mergeAllMyBlocks()
 
     // Now begin to merge
     // Create a new big block, as big as this octree
-    int blockLevel = mOctree3DMapManager->getTotalDepthOfOctree() - mOctreeDepth;
+    int blockLevel = mOctree3DMapManager->getTotalDepthOfOctree() - mOctreeDepth + 2;
 
     if (blockLevel <= 1)
     {
@@ -511,6 +511,7 @@ Block3D* Octree::mergeAllMyBlocks()
             {
                 newBlock->addBlockAtoms((HandleSeq&)((mAllMyBlocks[x][y][z])->getAllMyUnitBlockHandles()));
                 delete (mAllMyBlocks[x][y][z]);
+                mAllMyBlocks[x][y][z] = 0;
             }
 
     // add this new big block to the BlockEntity
