@@ -3762,3 +3762,11 @@ num_new=1603
 Ahh bug: current_number_of_instances == num in deme but not num in meta... 
 use getFreeRAM()
 
+       tot    disc    contin     inst   prod   final  final  final   deme  
+deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time  
+----  -----   -----    -----     ----   ----    ----  -----   ----   ----- 
+  1   136808  136808      0      34232   342     209   4748    108   4281
+  2   772049  659579   112470   305512  3055     165   3375    187  54461
+  3  1070130  898980   171150   438712  4387      80   1566    186  38525
+  4  7062789  947843  6114946  7880672  78GB  bonk
+
