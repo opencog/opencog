@@ -181,6 +181,9 @@ void metapopulation::set_diversity()
     std::vector<bsct_dp_pair> tmp;
     for (psi bsct_it = begin(); bsct_it != end(); ++bsct_it)
         tmp.push_back(bsct_dp_pair(bsct_it, 0.0));
+    
+    // pointer to the last candidate moved from tmp to pool
+    const bscored_combo_tree* last_ptr(nullptr);
 
     // // debug
     // std::atomic<unsigned> dp_count(0); // count the number of
@@ -198,7 +201,7 @@ void metapopulation::set_diversity()
         if (!pool.empty()) { // only do something if the pool is
                              // not empty (WARNING: this assumes
                              // that all diversity penalties are
-                             // initially zero
+                             // initially zero)
 
             bscored_combo_tree& bsct = *v.first;
             OC_ASSERT(get_bscore(bsct).size(),
@@ -206,8 +209,7 @@ void metapopulation::set_diversity()
 
             // compute diversity penalty between bs and the last
             // element of the pool
-            const bscored_combo_tree& last = *pool.crbegin();
-            dp_t last_dst = this->_cached_dst(&bsct, &last),
+            dp_t last_dst = this->_cached_dst(&bsct, last_ptr),
             last_dp = params.diversity.pressure / (1.0 + last_dst),
             last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity.exponent);
 
@@ -256,6 +258,10 @@ void metapopulation::set_diversity()
         // candidate with the best penalized score because we use
         // a greater_than function instead of a less_than function
         auto mit = OMP_ALGO::min_element(tmp.begin(), tmp.end(), gt);
+        // remember the last one added in the pool to calculate its
+        // distance with the other in tmp
+        last_ptr = &*mit->first;
+        // move the last candidate to the pool and remove it from tmp
         pool.transfer(mit->first, *this);
         tmp.erase(mit);
     }
