@@ -3576,6 +3576,8 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
         avatarInterface.setGrabbedObj(std::string(""));
     }
 
+    std::cout<<std::endl<<internalEntityId << "has been removed from the space map!"<<std::endl;
+
     return objectNode;
 }
 

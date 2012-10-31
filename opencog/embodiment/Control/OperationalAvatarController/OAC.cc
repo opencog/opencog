@@ -180,14 +180,14 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 //    actionSelectionAgent = static_cast<ActionSelectionAgent*>(
 //                               this->createAgent(ActionSelectionAgent::info().id, false));
 
-    this->registerAgent(ImportanceDecayAgent::info().id, &importanceDecayAgentFactory);
-    importanceDecayAgent = static_cast<ImportanceDecayAgent*>(
-                               this->createAgent(ImportanceDecayAgent::info().id, false));
-    importanceDecayAgent->connectSignals(*atomSpace);
+//    this->registerAgent(ImportanceDecayAgent::info().id, &importanceDecayAgentFactory);
+//    importanceDecayAgent = static_cast<ImportanceDecayAgent*>(
+//                               this->createAgent(ImportanceDecayAgent::info().id, false));
+//    importanceDecayAgent->connectSignals(*atomSpace);
 
-    this->registerAgent(EntityExperienceAgent::info().id, &entityExperienceAgentFactory);
-    entityExperienceAgent = static_cast<EntityExperienceAgent*>(
-                               this->createAgent(EntityExperienceAgent::info().id, false));
+//    this->registerAgent(EntityExperienceAgent::info().id, &entityExperienceAgentFactory);
+//    entityExperienceAgent = static_cast<EntityExperienceAgent*>(
+//                               this->createAgent(EntityExperienceAgent::info().id, false));
 
     // Three steps to run a MindAgent
     // registerAgent, createAgent and startAgent
@@ -308,17 +308,17 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 //        this->startAgent(procedureInterpreterAgent);
 //    }
 
-    if (config().get_bool("IMPORTANCE_DECAY_ENABLED")) {
-        importanceDecayAgent->setFrequency( 
-            config().get_int("IMPORTANCE_DECAY_CYCLE_PERIOD"));
-        this->startAgent(importanceDecayAgent);
-    }
+//    if (config().get_bool("IMPORTANCE_DECAY_ENABLED")) {
+//        importanceDecayAgent->setFrequency(
+//            config().get_int("IMPORTANCE_DECAY_CYCLE_PERIOD"));
+//        this->startAgent(importanceDecayAgent);
+//    }
 
-    if (config().get_bool("ENTITY_EXPERIENCE_ENABLED")) {
-        this->entityExperienceAgent->setFrequency(
-           config().get_int( "ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD" ) );
-        this->startAgent(entityExperienceAgent);
-    }
+//    if (config().get_bool("ENTITY_EXPERIENCE_ENABLED")) {
+//        this->entityExperienceAgent->setFrequency(
+//           config().get_int( "ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD" ) );
+//        this->startAgent(entityExperienceAgent);
+//    }
 
     if (config().get_bool("PSI_MODULATOR_UPDATER_ENABLED")) {
         this->psiModulatorUpdaterAgent->setFrequency(
@@ -636,7 +636,7 @@ OAC::~OAC()
 
     // agents
     delete (procedureInterpreterAgent);
-    delete (importanceDecayAgent);
+//    delete (importanceDecayAgent);
     delete (psiModulatorUpdaterAgent);
     delete (psiActionSelectionAgent);
     delete (psiRelationUpdaterAgent); 
