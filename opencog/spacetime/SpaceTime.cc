@@ -52,7 +52,6 @@ SpaceTimeCogServer::SpaceTimeCogServer()
 
 SpaceServer& spaceServer()
 {
-    logger().info("[SpaceTimeCogServer] destructor");
     return dynamic_cast<SpaceTimeCogServer*>(&server())->getSpaceServer();
 }
 
