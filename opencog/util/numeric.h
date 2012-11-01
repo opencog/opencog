@@ -36,6 +36,7 @@
 #include <map>
 
 #include <boost/math/special_functions.hpp>
+#include <boost/range/numeric.hpp>
 
 #include "exceptions.h"
 #include "oc_assert.h"
@@ -412,6 +413,38 @@ Float p_norm(const Vec& a, const Vec& b, Float p=1.0)
             sum += pow(log(diff), p);
     }
     return pow(sum, 1.0/p);
+}
+
+/**
+ * Return the Tanimoto distance, a continuous extension of the Jaccard
+ * distance, between 2 vector.
+ *
+ * See http://en.wikipedia.org/wiki/Jaccard_index
+ *
+ * More specifically we use
+ *
+ * 1 - f(a,b)
+ *
+ * where
+ *
+ * f(a,b) = (sum_i a_i * b_i) / (sum_i a_i^2 + sum_i b_i^2 - sum_i a_i * b_i)
+ *
+ * If a and b are binary vectors then this corresponds to the Jaccard
+ * distance. Otherwise, anything goes, it's not even a true metric
+ * anymore, but it could be useful anyway.
+ */
+template<typename Vec, typename Float>
+Float tanimoto_distance(const Vec& a, const Vec& b)
+{
+    OC_ASSERT (a.size() == b.size(),
+               "Cannot compare unequal-sized vectors!  %d %d\n",
+               a.size(), b.size());
+
+    Float ab = boost::inner_product(a, b, 0),
+        aa = boost::inner_product(a, a, 0),
+        bb = boost::inner_product(b, b, 0);
+
+    return 1 - (ab / (aa + bb - ab));
 }
 
 } // ~namespace opencog
