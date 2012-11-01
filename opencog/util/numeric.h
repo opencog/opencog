@@ -409,7 +409,7 @@ Float p_norm(const Vec& a, const Vec& b, Float p=1.0)
     for (; ia != a.end(); ia++, ib++) {
         Float diff = fabs (*ia - *ib);
         if (0.0 < diff)
-            sum += pow(log(diff), p);
+            sum += pow(diff, p);
     }
     return pow(sum, 1.0/p);
 }
