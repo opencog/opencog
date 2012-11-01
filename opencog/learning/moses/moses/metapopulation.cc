@@ -171,6 +171,8 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
 
 void metapopulation::set_diversity()
 {
+    logger().debug("Compute diversity penalties of the metapopulation");
+    
     bscored_combo_tree_ptr_set pool; // new metapopulation
 
     // structure to remember a partially aggredated distorted
@@ -279,6 +281,12 @@ void metapopulation::set_diversity()
 
     // Replace the existing metapopulation with the new one.
     swap(pool);
+
+    if (logger().isFineEnabled()) {
+        stringstream ss;
+        ss << "Metapopulation after setting diversity:" << std::endl;
+        logger().fine(ostream(ss, -1, true, true).str());
+    }
 }
 
 void metapopulation::log_selected_exemplar(const_iterator exemplar_it)
@@ -410,24 +418,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
         merge_nondominated(candidates, params.jobs);
         logger().debug("Inserted %u non-dominated candidates in the metapopulation",
                        size() - old_size);
-    }
-    
-    unsigned old_size = size();
-    logger().debug("Resize the metapopulation (current size=%u), removing worst candidates",
-                   old_size);
-    resize_metapop();
-
-    if (logger().isDebugEnabled()) {
-        logger().debug("Removed %u candidates from the metapopulation",
-                       old_size - size());
-    
-        logger().debug("Metapopulation size is %u", size());
-        if (logger().isFineEnabled()) {
-            stringstream ss;
-            ss << "Metapopulation:" << std::endl;
-            logger().fine(ostream(ss, -1, true, true).str());
-        }
-    }
+    }    
 }
 
 bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t evals)
@@ -632,23 +623,24 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     merge_candidates(candidates);
 
     // update diversity penalties
-    if (params.diversity.pressure > 0.0) {
-        logger().debug("Compute diversity penalties of the metapopulation");
+    if (params.diversity.pressure > 0.0)
         set_diversity();
-        if (logger().isFineEnabled()) {
-            stringstream ss;
-            ss << "Metapopulation after setting diversity:" << std::endl;
-            logger().fine(ostream(ss, -1, true, true).str());
-        }
-    }
+
+    // resize the metapopulation
+    resize_metapop();
 
     return done;
 }
 
 void metapopulation::resize_metapop()
-{
+{    
     if (size() <= min_pool_size)
         return;
+
+    unsigned old_size = size();
+    logger().debug("Resize the metapopulation (current size=%u), "
+                   "removing worst candidates",
+                   old_size);
 
     // pointers to deallocate
     std::vector<bscored_combo_tree*> ptr_seq;
@@ -710,6 +702,18 @@ void metapopulation::resize_metapop()
     // remove them from _cached_dst
     boost::sort(ptr_seq);
     _cached_dst.erase_ptr_seq(ptr_seq);
+
+    if (logger().isDebugEnabled()) {
+        logger().debug("Removed %u candidates from the metapopulation",
+                       old_size - size());
+        
+        logger().debug("Metapopulation size is %u", size());
+        if (logger().isFineEnabled()) {
+            stringstream ss;
+            ss << "Metapopulation:" << std::endl;
+            logger().fine(ostream(ss, -1, true, true).str());
+        }
+    }
 }
 
 // Return the set of candidates not present in the metapopulation.
