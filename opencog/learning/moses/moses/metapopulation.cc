@@ -171,6 +171,8 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
 
 void metapopulation::set_diversity()
 {
+    logger().debug("Compute diversity penalties of the metapopulation");
+    
     bscored_combo_tree_ptr_set pool; // new metapopulation
 
     // structure to remember a partially aggredated distorted
@@ -279,6 +281,12 @@ void metapopulation::set_diversity()
 
     // Replace the existing metapopulation with the new one.
     swap(pool);
+
+    if (logger().isFineEnabled()) {
+        stringstream ss;
+        ss << "Metapopulation after setting diversity:" << std::endl;
+        logger().fine(ostream(ss, -1, true, true).str());
+    }
 }
 
 void metapopulation::log_selected_exemplar(const_iterator exemplar_it)
@@ -615,15 +623,8 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     merge_candidates(candidates);
 
     // update diversity penalties
-    if (params.diversity.pressure > 0.0) {
-        logger().debug("Compute diversity penalties of the metapopulation");
+    if (params.diversity.pressure > 0.0)
         set_diversity();
-        if (logger().isFineEnabled()) {
-            stringstream ss;
-            ss << "Metapopulation after setting diversity:" << std::endl;
-            logger().fine(ostream(ss, -1, true, true).str());
-        }
-    }
 
     // resize the metapopulation
     resize_metapop();
