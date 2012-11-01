@@ -447,6 +447,35 @@ Float tanimoto_distance(const Vec& a, const Vec& b)
     return 1 - (ab / (aa + bb - ab));
 }
 
+/**
+ * Return the angular distance between 2 vectors.
+ *
+ * See http://en.wikipedia.org/wiki/Cosine_similarity
+ *
+ * Specifically it computes
+ *
+ * f(a,b) = alpha*cos^{-1}((sum_i a_i * b_i) /
+ *                         (sqrt(sum_i a_i^2) * sqrt(sum_i b_i^2))) / pi
+ *
+ * with alpha = 1 where vector coefficients may be positive or negative
+ * or   alpha = 2 where the vector coefficients are always positive.
+ *
+ * If pos_n_neg == true then alpha = 1, otherwise alpha = 2.
+ */
+template<typename Vec, typename Float>
+Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
+{
+    OC_ASSERT (a.size() == b.size(),
+               "Cannot compare unequal-sized vectors!  %d %d\n",
+               a.size(), b.size());
+
+    Float ab = boost::inner_product(a, b, 0),
+        aa = boost::inner_product(a, a, 0),
+        bb = boost::inner_product(b, b, 0);
+
+    return (pos_n_neg ? 1 : 2) * acos(ab / (sqrt(aa) * sqrt(bb))) / PI;
+}
+
 } // ~namespace opencog
 
 #endif // _OPENCOG_NUMERIC_H
