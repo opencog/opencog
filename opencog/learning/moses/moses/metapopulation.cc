@@ -42,6 +42,30 @@ using boost::logic::tribool;
 using boost::logic::indeterminate;
 using namespace combo;
 
+diversity_parameters::diversity_parameters(bool _include_dominated)
+    : include_dominated(_include_dominated),
+      pressure(0.0),
+      exponent(-1.0),       // max
+      normalize(true),      // sum or mean (default mean)
+      p_norm(2.0)           // Euclidean
+{
+    set_dst2dp(inverse);
+}
+
+void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
+{
+    switch(d2de) {
+    case inverse:
+        dst2dp = [&](dp_t dst) { return pressure / (1 + dst); };
+        break;
+    case complement:
+        dst2dp = [&](dp_t dst) { return pressure * (1 - dst); };
+        break;
+    default:
+        OC_ASSERT(false);
+    }
+}
+    
 // bool deme_expander::create_deme(bscored_combo_tree_set::const_iterator exemplar)
 bool deme_expander::create_deme(const combo_tree& exemplar)
 {

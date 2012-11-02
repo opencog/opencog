@@ -63,27 +63,8 @@ static const operator_set empty_ignore_ops = operator_set();
 struct diversity_parameters
 {
     typedef score_t dp_t;
-    enum struct dst2dp_enum_t { inverse, complement };
     
-    diversity_parameters(bool _include_dominated = true,
-                         dst2dp_enum_t d2de = dst2dp_enum_t::inverse)
-        : include_dominated(_include_dominated),
-          pressure(0.0),
-          exponent(-1.0),       // max
-          normalize(true),      // sum or mean (default mean)
-          p_norm(2.0)           // Euclidean
-    {
-        switch(d2de) {
-        case dst2dp_enum_t::inverse:
-            dst2dp = [&](dp_t dst) { return pressure / (1 + dst); };
-            break;
-        case dst2dp_enum_t::complement:
-            dst2dp = [&](dp_t dst) { return pressure * (1 - dst); };
-            break;
-        default:
-            OC_ASSERT(false);
-        }
-    }
+    diversity_parameters(bool _include_dominated = true);
 
     // Ignore behavioral score domination when merging candidates in
     // the metapopulation. Keeping dominated candidates may improves
@@ -134,7 +115,8 @@ struct diversity_parameters
     // tends to 0, and tends to 0 when the distance tends to its
     // maximum. Obviously the iverse is adequate when the maximum is
     // infinity and the complement is adequate when it is 1.
-    dst2dp_enum_t dst2dp_enum;
+    enum dst2dp_enum_t { inverse, complement };
+    void set_dst2dp(dst2dp_enum_t d2de);
     std::function<dp_t(dp_t)> dst2dp;
 };
 
