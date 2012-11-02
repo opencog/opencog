@@ -62,13 +62,28 @@ static const operator_set empty_ignore_ops = operator_set();
 
 struct diversity_parameters
 {
-    diversity_parameters(bool _include_dominated = true)
+    typedef score_t dp_t;
+    enum struct dst2dp_enum_t { inverse, complement };
+    
+    diversity_parameters(bool _include_dominated = true,
+                         dst2dp_enum_t d2de = dst2dp_enum_t::inverse)
         : include_dominated(_include_dominated),
           pressure(0.0),
           exponent(-1.0),       // max
           normalize(true),      // sum or mean (default mean)
           p_norm(2.0)           // Euclidean
-    {}
+    {
+        switch(d2de) {
+        case dst2dp_enum_t::inverse:
+            dst2dp = [&](dp_t dst) { return pressure / (1 + dst); };
+            break;
+        case dst2dp_enum_t::complement:
+            dst2dp = [&](dp_t dst) { return pressure * (1 - dst); };
+            break;
+        default:
+            OC_ASSERT(false);
+        }
+    }
 
     // Ignore behavioral score domination when merging candidates in
     // the metapopulation. Keeping dominated candidates may improves
@@ -79,19 +94,19 @@ struct diversity_parameters
     // Diversity pressure of to enforce diversification of the
     // metapop. 0 means no diversity pressure, the higher the value
     // the strong the pressure.
-    score_t pressure;
+    dp_t pressure;
 
     // exponent of the generalized mean (or sum, see below) used to
     // aggregate the diversity penalties of a candidate between a set
     // of candidates. If the exponent is negative (default) then the
     // max is used instead (generalized mean with infinite exponent).
-    score_t exponent;
+    dp_t exponent;
 
     // If normalize is false then the aggregation of diversity
     // penalties is a generalize mean, otherwise it is a generalize
     // sum, defined here as
     //
-    // generalize_mean(X) * |X|
+    // generalized_mean(X) * |X|
     //
     // in other words it is a generalized mean without normalization
     // by the number of elements.
@@ -102,9 +117,27 @@ struct diversity_parameters
 
     // Parameter value of the p-norm used to compute the distance
     // between 2 bscores
-    score_t p_norm;    
+    score_t p_norm;
+
+    // Function to convert the distance into diversity penalty. There
+    // are 2 possible functions
+    //
+    // The inserve (offset by 1)
+    //
+    // f(x) = pressure / (1+x)
+    //
+    // The complement
+    //
+    // f-x) = pressure * (1-x)
+    //
+    // The idea is that it should tends to pressure when the distance
+    // tends to 0, and tends to 0 when the distance tends to its
+    // maximum. Obviously the iverse is adequate when the maximum is
+    // infinity and the complement is adequate when it is 1.
+    dst2dp_enum_t dst2dp_enum;
+    std::function<dp_t(dp_t)> dst2dp;
 };
-    
+
 /**
  * parameters about deme management
  */
@@ -377,7 +410,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         return _best_candidates.begin()->first;
     }
 
-    typedef score_t dp_t;  // diversity_penalty type
+    typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
     
     /**
      * Distort a diversity penalty component between 2

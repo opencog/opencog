@@ -212,7 +212,7 @@ void metapopulation::set_diversity()
             // compute diversity penalty between bs and the last
             // element of the pool
             dp_t last_dst = this->_cached_dst(&bsct, last_ptr),
-            last_dp = params.diversity.pressure / (1.0 + last_dst),
+            last_dp = params.diversity.dst2dp(last_dst),
             last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity.exponent);
 
             // // debug
