@@ -364,12 +364,12 @@ typedef bscored_combo_tree_seq::const_iterator bscored_combo_tree_seq_cit;
 /// Compute the distance between two vectors, using the p-norm.
 score_t lp_distance(const behavioral_score& a,
                     const behavioral_score& b, double p=1.0);
-score_t lp_distance(const penalized_behavioral_score& a,
-                    const penalized_behavioral_score& b, double p=1.0);
-score_t lp_distance(const composite_behavioral_score& a,
-                    const composite_behavioral_score& b, double p=1.0);
-score_t lp_distance(const bscored_combo_tree& a,
-                    const bscored_combo_tree& b, double p=1.0);
+// score_t lp_distance(const penalized_behavioral_score& a,
+//                     const penalized_behavioral_score& b, double p=1.0);
+// score_t lp_distance(const composite_behavioral_score& a,
+//                     const composite_behavioral_score& b, double p=1.0);
+// score_t lp_distance(const bscored_combo_tree& a,
+//                     const bscored_combo_tree& b, double p=1.0);
 
 /// metapop_candidates provides an O(1) way of determining if a combo
 /// tree is in the map, or not (and getting its score, if it is).

@@ -124,20 +124,20 @@ score_t lp_distance(const behavioral_score& a, const behavioral_score& b, double
     return p_norm(a, b, p);
 }
 
-score_t lp_distance(const penalized_behavioral_score& a, const penalized_behavioral_score& b, double p)
-{
-    return lp_distance(a.first, b.first, p);
-}
+// score_t lp_distance(const penalized_behavioral_score& a, const penalized_behavioral_score& b, double p)
+// {
+//     return lp_distance(a.first, b.first, p);
+// }
 
-score_t lp_distance(const composite_behavioral_score& a, const composite_behavioral_score& b, double p)
-{
-    return lp_distance(a.first, b.first, p);
-}
+// score_t lp_distance(const composite_behavioral_score& a, const composite_behavioral_score& b, double p)
+// {
+//     return lp_distance(a.first, b.first, p);
+// }
 
-score_t lp_distance(const bscored_combo_tree& a, const bscored_combo_tree& b, double p)
-{
-    return lp_distance(a.second, b.second, p);
-}
+// score_t lp_distance(const bscored_combo_tree& a, const bscored_combo_tree& b, double p)
+// {
+//     return lp_distance(a.second, b.second, p);
+// }
         
 } // ~namespace moses
 } // ~namespace opencog
