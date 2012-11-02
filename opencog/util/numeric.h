@@ -473,7 +473,7 @@ Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
         aa = boost::inner_product(a, a, 0),
         bb = boost::inner_product(b, b, 0);
 
-    return (pos_n_neg ? 1 : 2) * acos(ab / (sqrt(aa) * sqrt(bb))) / PI;
+    return (pos_n_neg ? 1 : 2) * acos(ab / (sqrt(aa * bb))) / PI;
 }
 
 } // ~namespace opencog
