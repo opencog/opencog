@@ -450,7 +450,10 @@ Float tanimoto_distance(const Vec& a, const Vec& b)
 /**
  * Return the angular distance between 2 vectors.
  *
- * See http://en.wikipedia.org/wiki/Cosine_similarity
+ * See http://en.wikipedia.org/wiki/Cosine_similarity (Also, according
+ * to Linas this is also equivalent to Fubini-Study metric, Fisher
+ * information metric, and Kullbeck-Liebler divergence but they look
+ * so differently so that anyone can hardly see it).
  *
  * Specifically it computes
  *
