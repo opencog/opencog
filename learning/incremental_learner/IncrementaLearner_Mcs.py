@@ -3,7 +3,7 @@ __author__ = 'raminbarati'
 import incremental_learner as incLer
 import networkx as nx
 
-class IncrementalLearner_Mcs(incLer.IncrementalLearnerBase):
+class IncrementalLearnerMcsMinimal(incLer.IncrementalLearnerBase):
 
     def triangulate(self, graph):
         def check(start,goal):
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     new_graph = nx.DiGraph()
     new_graph.add_edges_from([('A','T'),('T','E'),('E','X'),('S','L'),('S','B'),('L','E'),('E','D')])
 
-    il = IncrementalLearner_Mcs(old_graph,new_graph)
+    il = IncrementalLearnerMcsMinimal(old_graph)
     gm = il.moralize(old_graph)
 #    gt = il.triangulate(gm)
 

@@ -1,5 +1,8 @@
 __author__ = 'raminbarati'
 import networkx as nx
+from util import switch
+from modification import Modification
+
 """INTERFACE"""
 class Runnable:
     def run(self):
@@ -21,9 +24,12 @@ class IncrementalLearner:
 """INCOMPLETE"""
 class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
 
-    def __init__(self, old_network, new_network):
-        self.old_network = old_network
-        self.new_network = new_network
+    def __init__(self, old_network):
+        self._old_network = old_network
+        self._graph_m = None
+        self._jt = None
+        self._jt_mpd = None
+        self._initialized = False
 
     def moralize(self,directed_graph):
         gm = directed_graph.to_undirected()
@@ -58,7 +64,6 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
         j_tree = nx.minimum_spanning_tree(cluster_graph)
 
         return j_tree
-#        return nx.make_max_clique_graph(graph)
 
     def construct_join_tree(self, graph):
         graph_m = self.moralize(graph)
@@ -111,22 +116,84 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
         return jt_mpd
 
     def incremental_compilation(self, modificationList):
+        for modification in modificationList:
+            L = self.modify_moral_graph(modification)
+
+            for case in switch(modification.type):
+                if case(Modification.ADD_NODE):
+                    self.add_node(modification.data)
+                    break
+                if case(Modification.REMOVE_NODE):
+                    self.remove_node(modification.data)
+                    break
+                if case(Modification.ADD_LINK):
+                    self.mark_affected_mps_by_add_link(L)
+                    break
+                if case(Modification.REMOVE_LINK):
+                    self.mark_affected_mps_by_remove_link(None,None,L)
+                    break
+                if case():
+                    pass
         raise Exception("not implemented")
 
     def modify_moral_graph(self, modification):
-        raise Exception("not implemented")
+        L = []
+
+        for case in switch(modification.type):
+            if case(Modification.ADD_NODE):
+                self.graph_m.add_node(modification.data)
+                break
+            if case(Modification.REMOVE_NODE):
+                self.graph_m.remove_node(modification.data)
+                break
+            if case(Modification.ADD_LINK):
+                pair = set(self.data)
+                parents = set(self._old_network.predecessors(modification.data[1]))
+                nodes = pair.union(parents)
+                subgraph = self.graph_m.subgraph(nodes)
+                complement = nx.complement(subgraph)
+                for edge in complement.edges_iter():
+                    L.append(edge)
+                break
+            if case(Modification.REMOVE_LINK):
+                head = modification.data[1]
+                tail = modification.data[0]
+
+                children_head = set(self._old_network.successors(head))
+                children_tail = set(self._old_network.successors(tail))
+
+                if len(children_tail.intersection(children_head)) <= 0:
+                    self.graph_m.remove_edge(self.data)
+                    L.append(self.data)
+
+                for parent in self._old_network.predecessors_iter(head):
+                    if parent == tail: continue
+                    children_z_i = set(self._old_network.successors(parent)).intersection(children_tail)
+
+                    if not len(children_z_i) == 1: continue
+                    if head not in children_z_i: continue
+                    if not self._old_network.has_edge(parent,tail): continue
+                    if self._old_network.has_edge(tail, parent): continue
+
+                    self.graph_m.remove_edge(tail,parent)
+                    L.append(tuple(tail,parent))
+                break
+            if case():
+                raise Exception('Not a defined modification')
+
+        return L
 
     def connect(self, clusterTree, cluster_i, cluster_j):
         raise Exception("not implemented")
 
-    def mark_affected_mpses_by_remove_link(self, mps_y, mps_z, linkList):
+    def mark_affected_mps_by_remove_link(self, mps_y, mps_z, linkList):
         raise Exception("not implemented")
 
-    def remove_node(self, node, mps_x, mps_y):
+    def remove_node(self, node, mps_x = None, mps_y = None):
         raise Exception("not implemented")
 
     def add_node(self, node):
         raise Exception("not implemented")
 
-    def mark_affected_mpses_by_add_link(self, linkList):
+    def mark_affected_mps_by_add_link(self, linkList):
         raise Exception("not implemented")
