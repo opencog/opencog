@@ -450,7 +450,10 @@ Float tanimoto_distance(const Vec& a, const Vec& b)
 /**
  * Return the angular distance between 2 vectors.
  *
- * See http://en.wikipedia.org/wiki/Cosine_similarity
+ * See http://en.wikipedia.org/wiki/Cosine_similarity (Also, according
+ * to Linas this is also equivalent to Fubini-Study metric, Fisher
+ * information metric, and Kullbeck-Liebler divergence but they look
+ * so differently so that anyone can hardly see it).
  *
  * Specifically it computes
  *
@@ -473,7 +476,7 @@ Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
         aa = boost::inner_product(a, a, 0),
         bb = boost::inner_product(b, b, 0);
 
-    return (pos_n_neg ? 1 : 2) * acos(ab / (sqrt(aa) * sqrt(bb))) / PI;
+    return (pos_n_neg ? 1 : 2) * acos(ab / (sqrt(aa * bb))) / PI;
 }
 
 } // ~namespace opencog
