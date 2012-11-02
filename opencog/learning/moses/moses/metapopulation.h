@@ -111,9 +111,9 @@ struct diversity_parameters
     //
     // f-x) = pressure * (1-x)
     //
-    // The idea is that it should tends to pressure when the distance
+    // The idea is that it should tend to pressure when the distance
     // tends to 0, and tends to 0 when the distance tends to its
-    // maximum. Obviously the iverse is adequate when the maximum is
+    // maximum. Obviously the inverse is adequate when the maximum is
     // infinity and the complement is adequate when it is 1.
     enum dst2dp_enum_t { inverse, complement };
     void set_dst2dp(dst2dp_enum_t d2de);
