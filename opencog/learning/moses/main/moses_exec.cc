@@ -99,15 +99,18 @@ static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
 static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
+void log_output_error_exit(string err_msg) {
+    logger().info() << "Error: " << err_msg;
+    cerr << "Error: " << err_msg << endl;
+    exit(1);    
+}
+        
 /**
  * Display error message about unspecified combo tree and exit
  */
 void unspecified_combo_exit()
 {
-    logger().info() << "Error: you must specify which combo tree to learn (option -y).";
-    cerr << "Error: you must specify which combo tree to learn (option -y)."
-         << endl;
-    exit(1);
+    log_output_error_exit("you must specify which combo tree to learn (option -y).");
 }
 
 /**
@@ -115,9 +118,9 @@ void unspecified_combo_exit()
  */
 void unsupported_type_exit(const type_tree& tt)
 {
-    logger().info() << "Error: type " << tt << " currently not supported.";
-    cerr << "Error: type " << tt << " currently not supported." << endl;
-    exit(1);
+    stringstream ss;
+    ss << "type " << tt << " currently not supported.";
+    log_output_error_exit(ss.str());
 }
 void unsupported_type_exit(type_node type)
 {
@@ -129,9 +132,9 @@ void unsupported_type_exit(type_node type)
  */
 void illformed_exit(const combo_tree& tr)
 {
-    logger().info() << "Error: the combo tree " << tr << " is not well formed.";
-    cerr << "Error: the combo tree " << tr << " is not well formed." << endl;
-    exit(1);
+    stringstream ss;
+    ss << "the combo tree " << tr << " is not well formed.";
+    log_output_error_exit(ss.str());
 }
 
 /**
@@ -139,11 +142,9 @@ void illformed_exit(const combo_tree& tr)
  */
 void unsupported_problem_exit(const string& problem)
 {
-    logger().info() << "Problem type \"" << problem
-         << "\" is currently unsupported.";
-    cerr << "Error: problem type \"" << problem
-         << "\" is currently unsupported." << endl;
-    exit(1);
+    stringstream ss;
+    ss << "problem type \"" << problem << "\" is currently unsupported.";
+    log_output_error_exit(ss.str());
 }
 
 /**
@@ -151,11 +152,10 @@ void unsupported_problem_exit(const string& problem)
  */
 void no_input_datafile_exit()
 {
-    logger().info() << "No input data file has been specified (option -"
-         << input_data_file_opt.second << ")";
-    cerr << "No input data file has been specified (option -"
-         << input_data_file_opt.second << ")" << endl;
-    exit(1);
+    stringstream ss;
+    ss << "no input data file has been specified (option -"
+       << input_data_file_opt.second << ")";
+    log_output_error_exit(ss.str());
 }
 
 /**
@@ -164,12 +164,10 @@ void no_input_datafile_exit()
 void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
                              const string& input_data_file2, arity_t arity2)
 {
-    logger().info() << "File " << input_data_file1 << " has arity " << arity1
-         << " while file " << input_data_file2 << "has_arity " << arity2;
-    cerr << "Error: File " << input_data_file1 << " has arity " << arity1
-         << " while file " << input_data_file2 << "has_arity "
-         << arity2 << endl;
-    exit(1);
+    stringstream ss;
+    ss << "File " << input_data_file1 << " has arity " << arity1
+       << " while file " << input_data_file2 << "has_arity " << arity2;
+    log_output_error_exit(ss.str());
 }
 
 /**
@@ -177,11 +175,9 @@ void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
  */
 void not_recognized_combo_operator(const string& ops_str)
 {
-    logger().info() << "Error: " << ops_str
-         << " is not recognized as combo operator.";
-    cerr << "Error: " << ops_str
-         << " is not recognized as combo operator." << endl;
-    exit(1);
+    stringstream ss;
+    ss << ops_str << " is not recognized as combo operator.";
+    log_output_error_exit(ss.str());
 }
 
 /**
