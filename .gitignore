@@ -76,3 +76,7 @@ lib/opencog-test.conf
 # DeSTIN SWIG generated sources
 opencog/embodiment/DestinCuda/JavaDestin/gen_src/javadestin/*
 opencog/embodiment/DestinCuda/DestinKernelJAVA_wrap.*
+
+# Python bytecode
+*.pyc
+*.pyo
