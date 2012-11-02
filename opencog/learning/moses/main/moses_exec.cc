@@ -446,6 +446,7 @@ int moses_exec(int argc, char** argv)
     score_t diversity_exponent;
     bool diversity_normalize;
     score_t diversity_p_norm;
+    string diversity_dst2dp;
 
     // optim_param
     double pop_size_ratio;
@@ -964,6 +965,12 @@ int moses_exec(int argc, char** argv)
          "the Euclidean distance. A value of 0.0 or less correspond to the "
          "max component-wise. Any other value corresponds to the general case.\n")
 
+        ("diversity-dst2dp",
+         value<string>(&diversity_dst2dp)->default_value(inverse),
+         str(format("Set the type of function to convert distance into penalty. "
+                    "2 options are available: %s and %s\n")
+             % inverse % complement).c_str())
+
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t>>(&discretize_thresholds),
          "If the domain is continuous, discretize the target feature. "
@@ -1273,6 +1280,16 @@ int moses_exec(int argc, char** argv)
     meta_params.diversity.exponent = diversity_exponent;
     meta_params.diversity.normalize = diversity_normalize;
     meta_params.diversity.p_norm = diversity_p_norm;
+    diversity_parameters::dst2dp_enum_t d2de;
+    if (diversity_dst2dp == inverse)
+        d2de = diversity_parameters::inverse;
+    else if (diversity_dst2dp == complement)
+        d2de = diversity_parameters::complement;
+    else {
+        // TODO add error
+        OC_ASSERT(false);
+    }        
+    meta_params.diversity.set_dst2dp(d2de);
 
     // Set optim_parameters.
     optim_parameters opt_params(opt_algo, pop_size_ratio, max_score, max_dist);
