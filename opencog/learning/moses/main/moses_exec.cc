@@ -1288,6 +1288,7 @@ int moses_exec(int argc, char** argv)
     else {
         // TODO add error
         OC_ASSERT(false);
+        d2de = diversity_parameters::inverse; // silent compiler warning
     }        
     meta_params.diversity.set_dst2dp(d2de);
 
