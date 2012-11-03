@@ -1008,11 +1008,11 @@ int moses_exec(int argc, char** argv)
         ("diversity-dst2dp",
          value<string>(&diversity_dst2dp)->default_value(auto_str),
          str(format("Set the type of function to convert distance into penalty. "
-                    "3 options are available: %s, %s and %s. "
+                    "3 options are available: %1%, %2% and %3%. "
                     "When %1% is selected the function is selected depending "
-                    "on the distance, is the distance is %s, "
+                    "on the distance, if the distance is %4%, "
                     "then %2% is selected, otherwise %3% is selected.\n")
-             % auto_str % inverse % complement).c_str())
+             % auto_str % inverse % complement % p_norm).c_str())
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t>>(&discretize_thresholds),
