@@ -3,13 +3,13 @@ import networkx as nx
 from util import switch
 from modification import Modification
 
-"""INTERFACE"""
 class Runnable:
+    """INTERFACE"""
     def run(self):
         pass
 
-"""INTERFACE"""
 class IncrementalLearner:
+    """INTERFACE"""
     def construct_join_tree(self, graph):
         pass
 
@@ -20,16 +20,15 @@ class IncrementalLearner:
         pass
 
 # pretty self explanatory
-"""ABSTRACT"""
-"""INCOMPLETE"""
 class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
-
+    """ABSTRACT, INCOMPLETE"""
     def __init__(self, old_network):
         self._old_network = old_network
         self._graph_m = None
         self._jt = None
         self._jt_mpd = None
         self._initialized = False
+        self._marked = []
 
     def moralize(self,directed_graph):
         gm = directed_graph.to_undirected()
@@ -92,15 +91,13 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
             neigh = set(jt_mpd[node_i]).union(jt_mpd[node_j])
             for n_i in neigh:
                 sep = set(n_i).intersection(sub_g_n)
-                jt_mpd.add_edge(n_i,sub_g, label = sep)
+                jt_mpd.add_edge(n_i,sub_g, {'label':sep})
             jt_mpd.remove_node(node_i)
             jt_mpd.remove_node(node_j)
 
         jt_mpd = jt_min.copy()
         while True:
-#        for i in range(0,3):
             nodes = jt_mpd.nodes()
-#            node = nodes.pop()
             complete = True
             for node in nodes:
                 for neighbor in jt_mpd[node]:
@@ -110,7 +107,7 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
                         aggregate(neighbor,node)
                         break
                 if not complete:
-                    break;
+                    break
             if complete:
                 break
         return jt_mpd
@@ -141,16 +138,16 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
 
         for case in switch(modification.type):
             if case(Modification.ADD_NODE):
-                self.graph_m.add_node(modification.data)
+                self._graph_m.add_node(modification.data)
                 break
             if case(Modification.REMOVE_NODE):
-                self.graph_m.remove_node(modification.data)
+                self._graph_m.remove_node(modification.data)
                 break
             if case(Modification.ADD_LINK):
-                pair = set(self.data)
+                pair = set(modification.data)
                 parents = set(self._old_network.predecessors(modification.data[1]))
                 nodes = pair.union(parents)
-                subgraph = self.graph_m.subgraph(nodes)
+                subgraph = self._graph_m.subgraph(nodes)
                 complement = nx.complement(subgraph)
                 for edge in complement.edges_iter():
                     L.append(edge)
@@ -163,8 +160,8 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
                 children_tail = set(self._old_network.successors(tail))
 
                 if len(children_tail.intersection(children_head)) <= 0:
-                    self.graph_m.remove_edge(self.data)
-                    L.append(self.data)
+                    self._graph_m.remove_edge(modification.data)
+                    L.append(modification.data)
 
                 for parent in self._old_network.predecessors_iter(head):
                     if parent == tail: continue
@@ -175,8 +172,8 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
                     if not self._old_network.has_edge(parent,tail): continue
                     if self._old_network.has_edge(tail, parent): continue
 
-                    self.graph_m.remove_edge(tail,parent)
-                    L.append(tuple(tail,parent))
+                    self._graph_m.remove_edge(tail,parent)
+                    L.append((tail,parent))
                 break
             if case():
                 raise Exception('Not a defined modification')
@@ -193,7 +190,11 @@ class IncrementalLearnerBase(object, Runnable, IncrementalLearner):
         raise Exception("not implemented")
 
     def add_node(self, node):
-        raise Exception("not implemented")
+        C_x = nx.Graph()
+
+        C_x.add_node(node, {'marked':False})
+        self._jt.add_node(C_x)
+        self._jt_mpd.add_node(C_x)
 
     def mark_affected_mps_by_add_link(self, linkList):
         raise Exception("not implemented")
