@@ -47,9 +47,15 @@ struct eval_diversity_params {
     bool display_stats,
         display_values;
     // parameters
+    std::string diversity_dst;
     float diversity_p_norm;
 };
 
+// diversity distance types
+static const std::string p_norm = "p_norm";
+static const std::string tanimoto = "tanimoto";
+static const std::string angular = "angular";
+        
 // define accumulator to gather stats
 typedef accumulator_set<float, stats<tag::count,
                                      tag::mean,
