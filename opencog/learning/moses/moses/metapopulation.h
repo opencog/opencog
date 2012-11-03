@@ -96,9 +96,11 @@ struct diversity_parameters
     // is the max anyway.
     bool normalize;
 
-    // Parameter value of the p-norm used to compute the distance
-    // between 2 bscores
-    score_t p_norm;
+    // There are 3 distances available to compare bscores, the p-norm,
+    // the Tanimoto and the angular distances.
+    enum dst_enum_t { p_norm, tanimoto, angular };
+    void set_dst(dst_enum_t de, dp_t p = 0.0 /* optional distance parameter */);
+    std::function<dp_t(const behavioral_score&, const behavioral_score&)> dst;
 
     // Function to convert the distance into diversity penalty. There
     // are 2 possible functions
@@ -797,7 +799,8 @@ protected:
      */
     struct cached_dst {
         // ctor
-        cached_dst(dp_t lp_norm) : p(lp_norm), misses(0), hits(0) {}
+        cached_dst(const diversity_parameters& _dparams)
+            : dparams(_dparams), misses(0), hits(0) {}
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
@@ -815,7 +818,7 @@ protected:
                 }
             }
             // miss
-            dp_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p);
+            dp_t dst = dparams.dst(get_bscore(*cl), get_bscore(*cr));
 
             // // debug
             // logger().fine("dst = %f, dp = %f, ddp = %f", dst, dp, ddp);
@@ -874,7 +877,7 @@ protected:
         typedef boost::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> Cache;
         cache_mutex mutex;
 
-        dp_t p;
+        const diversity_parameters& dparams;
         std::atomic<unsigned> misses, hits;
         Cache cache;
     };

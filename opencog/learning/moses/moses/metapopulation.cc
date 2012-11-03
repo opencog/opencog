@@ -30,6 +30,7 @@
 
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/selection.h>
+#include <opencog/util/numeric.h>
 
 #include "metapopulation.h"
 
@@ -46,10 +47,35 @@ diversity_parameters::diversity_parameters(bool _include_dominated)
     : include_dominated(_include_dominated),
       pressure(0.0),
       exponent(-1.0),       // max
-      normalize(true),      // sum or mean (default mean)
-      p_norm(2.0)           // Euclidean
+      normalize(true)       // sum or mean (default mean)
 {
+    set_dst(p_norm, 2.0 /* Euclidean */);
     set_dst2dp(inverse);
+}
+
+void diversity_parameters::set_dst(diversity_parameters::dst_enum_t de,
+                                   diversity_parameters::dp_t p)
+{
+    typedef behavioral_score bs_t;
+    switch(de) {
+    case p_norm:
+        dst = [p](const behavioral_score& a, const behavioral_score& b) {
+            return p_norm_distance(a, b, p);
+        };
+        break;
+    case tanimoto:
+        dst = [](const behavioral_score& a, const behavioral_score& b) {
+            return tanimoto_distance<behavioral_score, dp_t>(a, b);
+        };
+        break;
+    case angular:
+        dst = [](const behavioral_score& a, const behavioral_score& b) {
+            return angular_distance<behavioral_score, dp_t>(a, b);
+        };
+        break;
+    default:
+        OC_ASSERT(false);
+    }    
 }
 
 void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
