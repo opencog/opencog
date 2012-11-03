@@ -1330,8 +1330,10 @@ int moses_exec(int argc, char** argv)
         de = diversity_parameters::tanimoto;
     else if (diversity_dst == angular)
         de = diversity_parameters::angular;
-    else
+    else {
         not_recognized_dst(diversity_dst);
+        de = diversity_parameters::p_norm; // silent compiler warning
+    }
     meta_params.diversity.set_dst(de, diversity_p_norm);
     // set distance to penalty
     diversity_parameters::dst2dp_enum_t d2de;
