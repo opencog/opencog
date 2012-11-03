@@ -99,10 +99,6 @@ static const pair<string, string> hc_single_step_opt("hc-single-step", "L");
 static const pair<string, string> hc_widen_search_opt("hc-widen-search", "T");
 static const pair<string, string> hc_crossover_opt("hc-crossover", "Z");
 
-// diversity dst2dp types
-static const string inverse = "inverse";
-static const string complement = "complement";
-
 // Returns a string interpretable by Boost.Program_options
 // "name,abbreviation"
 string opt_desc_str(const pair<string, string>& opt);
