@@ -1,0 +1,533 @@
+strict digraph  {
+	"PDN Inversion (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+B:ConceptNode A:ConceptNode),B:ConceptNode,A:ConceptNode," -> "PDN (InheritanceLink B:ConceptNode A:ConceptNode)";
+	"PDN Inversion (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+B:ConceptNode A:ConceptNode),B:ConceptNode,A:ConceptNode," -> "PDN B:ConceptNode3";
+	"PDN Inversion (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+B:ConceptNode A:ConceptNode),B:ConceptNode,A:ConceptNode," -> "PDN A:ConceptNode10";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN C:ConceptNode7";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN (InheritanceLink A:ConceptNode B:ConceptNode)";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN A:ConceptNode7";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN B:ConceptNode";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode," -> "PDN (InheritanceLink B:ConceptNode C:ConceptNode)";
+	"PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode," -> "PDN $12";
+	"PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode," -> "PDN A:ConceptNode2";
+	"PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode," -> "PDN (InheritanceLink $1 A:ConceptNode)";
+	"PDN A:ConceptNode4" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,3";
+	"PDN A:ConceptNode4" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,3";
+	"PDN A:ConceptNode4" -> "PDN Lookup A:ConceptNode :- 3";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,5" -> "PDN $123";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,5" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)5";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,4" -> "PDN $120";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,4" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)4";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,3" -> "PDN $116";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,3" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)3";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,2" -> "PDN $19";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,2" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)2";
+	"PDN A:ConceptNode3" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,4";
+	"PDN A:ConceptNode3" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,4";
+	"PDN A:ConceptNode3" -> "PDN Lookup A:ConceptNode :- 4";
+	"PDN A:ConceptNode2" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,";
+	"PDN A:ConceptNode2" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,";
+	"PDN A:ConceptNode2" -> "PDN Lookup A:ConceptNode :- ";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,2" -> "PDN (PredictiveImplicationLink $1 B:ConceptNode)2";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,2" -> "PDN $139";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,5" -> "PDN (PredictiveImplicationLink $1 B:ConceptNode)5";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,5" -> "PDN $157";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256," -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256," -> "PDN $14";
+	"PDN Inversion (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode B:ConceptNode),C:ConceptNode,B:ConceptNode," -> "PDN (InheritanceLink C:ConceptNode B:ConceptNode)";
+	"PDN Inversion (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode B:ConceptNode),C:ConceptNode,B:ConceptNode," -> "PDN C:ConceptNode10";
+	"PDN Inversion (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode B:ConceptNode),C:ConceptNode,B:ConceptNode," -> "PDN B:ConceptNode5";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink C:ConceptNode A:ConceptNode) :-\
+ (SubsetLink C:ConceptNode A:ConceptNode)," -> "PDN (SubsetLink C:ConceptNode A:ConceptNode)";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,6" -> "PDN $129";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,6" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)6";
+	"PDN A:ConceptNode" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,2";
+	"PDN A:ConceptNode" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,2";
+	"PDN A:ConceptNode" -> "PDN Lookup A:ConceptNode :- 2";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,9" -> "PDN $151";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,9" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)9";
+	"PDN Deduction (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+B:ConceptNode $1000631),(InheritanceLink $1000631 C:ConceptNode),B:ConceptNode,$\
+1000631,C:ConceptNode," -> "PDN C:ConceptNode8";
+	"PDN Deduction (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+B:ConceptNode $1000631),(InheritanceLink $1000631 C:ConceptNode),B:ConceptNode,$\
+1000631,C:ConceptNode," -> "PDN B:ConceptNode4";
+	"PDN Deduction (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+B:ConceptNode $1000631),(InheritanceLink $1000631 C:ConceptNode),B:ConceptNode,$\
+1000631,C:ConceptNode," -> "PDN (InheritanceLink B:ConceptNode $1)";
+	"PDN Deduction (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+B:ConceptNode $1000631),(InheritanceLink $1000631 C:ConceptNode),B:ConceptNode,$\
+1000631,C:ConceptNode," -> "PDN $142";
+	"PDN Deduction (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+B:ConceptNode $1000631),(InheritanceLink $1000631 C:ConceptNode),B:ConceptNode,$\
+1000631,C:ConceptNode," -> "PDN (InheritanceLink $1 C:ConceptNode)2";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249," -> "PDN $13";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249," -> "PDN (ImplicationLink $1 A:ConceptNode)";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,10" -> "PDN $159";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,10" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)10";
+	"PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229,2" -> "PDN C:ConceptNode9";
+	"PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229,2" -> "PDN (InheritanceLink C:ConceptNode $1)3";
+	"PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229,2" -> "PDN $143";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699," -> "PDN (PredictiveImplicationLink $1 B:ConceptNode)";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699," -> "PDN $137";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,9" -> "PDN (ImplicationLink $1 A:ConceptNode)9";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,9" -> "PDN $140";
+	"PDN (InheritanceLink A:ConceptNode $1)" -> "PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode,";
+	"PDN (InheritanceLink A:ConceptNode $1)" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode $1000214) :- (Sub\
+setLink A:ConceptNode $1000214),";
+	"PDN A:ConceptNode9" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,7";
+	"PDN A:ConceptNode9" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,7";
+	"PDN A:ConceptNode9" -> "PDN Lookup A:ConceptNode :- 7";
+	"PDN (InheritanceLink A:ConceptNode $1)2" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode $1000214) :- (Sub\
+setLink A:ConceptNode $1000214),2";
+	"PDN (InheritanceLink A:ConceptNode $1)2" -> "PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode,2";
+	"PDN A:ConceptNode8" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,8";
+	"PDN A:ConceptNode8" -> "PDN Lookup A:ConceptNode :- 8";
+	"PDN A:ConceptNode8" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,8";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,7" -> "PDN $132";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,7" -> "PDN (ImplicationLink $1 A:ConceptNode)7";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,6" -> "PDN $128";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,6" -> "PDN (ImplicationLink $1 A:ConceptNode)6";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337," -> "PDN $16";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337," -> "PDN (ImplicationLink $1 C:ConceptNode)";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,4" -> "PDN $119";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,4" -> "PDN (ImplicationLink $1 A:ConceptNode)4";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,3" -> "PDN $115";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,3" -> "PDN (ImplicationLink $1 A:ConceptNode)3";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,2" -> "PDN $18";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,2" -> "PDN (ImplicationLink $1 A:ConceptNode)2";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,8" -> "PDN $134";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,8" -> "PDN (ImplicationLink $1 A:ConceptNode)8";
+	"PDN A:ConceptNode5" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,5";
+	"PDN A:ConceptNode5" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,5";
+	"PDN A:ConceptNode5" -> "PDN Lookup A:ConceptNode :- 5";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692," -> "PDN $136";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692," -> "PDN (ImplicationLink $1 B:ConceptNode)";
+	"PDN (SubsetLink A:ConceptNode C:ConceptNode)" -> "PDN Deduction (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink A:ConceptN\
+ode $1000482),(SubsetLink $1000482 C:ConceptNode),A:ConceptNode,$1000482,C:Conce\
+ptNode,";
+	"PDN (SubsetLink A:ConceptNode C:ConceptNode)" -> "PDN Inversion (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink C:ConceptN\
+ode A:ConceptNode),C:ConceptNode,A:ConceptNode,";
+	"PDN A:ConceptNode7" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,10";
+	"PDN A:ConceptNode7" -> "PDN Lookup A:ConceptNode :- 10";
+	"PDN A:ConceptNode7" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,10";
+	"PDN C:ConceptNode7" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,10";
+	"PDN C:ConceptNode7" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,10";
+	"PDN C:ConceptNode7" -> "PDN Lookup C:ConceptNode :- 10";
+	"PDN C:ConceptNode6" -> "PDN Lookup C:ConceptNode :- 6";
+	"PDN C:ConceptNode6" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,6";
+	"PDN C:ConceptNode6" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,6";
+	"PDN C:ConceptNode5" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,5";
+	"PDN C:ConceptNode5" -> "PDN Lookup C:ConceptNode :- 5";
+	"PDN C:ConceptNode5" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,5";
+	"PDN C:ConceptNode4" -> "PDN Lookup C:ConceptNode :- 3";
+	"PDN C:ConceptNode4" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,3";
+	"PDN C:ConceptNode4" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,3";
+	"PDN C:ConceptNode3" -> "PDN Lookup C:ConceptNode :- 4";
+	"PDN C:ConceptNode3" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,4";
+	"PDN C:ConceptNode3" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,4";
+	"PDN C:ConceptNode2" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,";
+	"PDN C:ConceptNode2" -> "PDN Lookup C:ConceptNode :- ";
+	"PDN C:ConceptNode2" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,";
+	"PDN C:ConceptNode9" -> "PDN Lookup C:ConceptNode :- 7";
+	"PDN C:ConceptNode9" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,7";
+	"PDN C:ConceptNode9" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,7";
+	"PDN C:ConceptNode8" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,8";
+	"PDN C:ConceptNode8" -> "PDN Lookup C:ConceptNode :- 8";
+	"PDN C:ConceptNode8" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,8";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,7" -> "PDN $144";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,7" -> "PDN (ImplicationLink $1 C:ConceptNode)7";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,6" -> "PDN $126";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,6" -> "PDN (ImplicationLink $1 C:ConceptNode)6";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,5" -> "PDN $124";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,5" -> "PDN (ImplicationLink $1 C:ConceptNode)5";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,4" -> "PDN $117";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,4" -> "PDN (ImplicationLink $1 C:ConceptNode)4";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,3" -> "PDN $113";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,3" -> "PDN (ImplicationLink $1 C:ConceptNode)3";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,2" -> "PDN $110";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,2" -> "PDN (ImplicationLink $1 C:ConceptNode)2";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,9" -> "PDN $150";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,9" -> "PDN (ImplicationLink $1 C:ConceptNode)9";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,8" -> "PDN (ImplicationLink $1 C:ConceptNode)8";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,8" -> "PDN $148";
+	"PDN A:ConceptNode6" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,6";
+	"PDN A:ConceptNode6" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,6";
+	"PDN A:ConceptNode6" -> "PDN Lookup A:ConceptNode :- 6";
+	"PDN (InheritanceLink A:ConceptNode B:ConceptNode)" -> "PDN Inversion (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+B:ConceptNode A:ConceptNode),B:ConceptNode,A:ConceptNode,";
+	"PDN (InheritanceLink A:ConceptNode B:ConceptNode)" -> "PDN Deduction (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000582),(InheritanceLink $1000582 B:ConceptNode),A:ConceptNode,$\
+1000582,B:ConceptNode,";
+	"PDN (InheritanceLink A:ConceptNode B:ConceptNode)" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode B:ConceptNode) :-\
+ (SubsetLink A:ConceptNode B:ConceptNode),";
+	"PDN (InheritanceLink A:ConceptNode B:ConceptNode)" -> "PDN Lookup (InheritanceLink A:ConceptNode B:ConceptNode) :- ";
+	"PDN (InheritanceLink $1 C:ConceptNode)" -> "PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229,";
+	"PDN (InheritanceLink $1 C:ConceptNode)" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink $1000240 C:ConceptNode) :- (Sub\
+setLink $1000240 C:ConceptNode),";
+	"PDN Deduction (InheritanceLink C:ConceptNode A:ConceptNode) :- (InheritanceLink \
+C:ConceptNode $1000390),(InheritanceLink $1000390 A:ConceptNode),C:ConceptNode,$\
+1000390,A:ConceptNode," -> "PDN (InheritanceLink C:ConceptNode $1)2";
+	"PDN Deduction (InheritanceLink C:ConceptNode A:ConceptNode) :- (InheritanceLink \
+C:ConceptNode $1000390),(InheritanceLink $1000390 A:ConceptNode),C:ConceptNode,$\
+1000390,A:ConceptNode," -> "PDN $112";
+	"PDN Deduction (InheritanceLink C:ConceptNode A:ConceptNode) :- (InheritanceLink \
+C:ConceptNode $1000390),(InheritanceLink $1000390 A:ConceptNode),C:ConceptNode,$\
+1000390,A:ConceptNode," -> "PDN A:ConceptNode4";
+	"PDN Deduction (InheritanceLink C:ConceptNode A:ConceptNode) :- (InheritanceLink \
+C:ConceptNode $1000390),(InheritanceLink $1000390 A:ConceptNode),C:ConceptNode,$\
+1000390,A:ConceptNode," -> "PDN C:ConceptNode4";
+	"PDN Deduction (InheritanceLink C:ConceptNode A:ConceptNode) :- (InheritanceLink \
+C:ConceptNode $1000390),(InheritanceLink $1000390 A:ConceptNode),C:ConceptNode,$\
+1000390,A:ConceptNode," -> "PDN (InheritanceLink $1 A:ConceptNode)2";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink B:ConceptNode C:ConceptNode) :-\
+ (SubsetLink B:ConceptNode C:ConceptNode)," -> "PDN (SubsetLink B:ConceptNode C:ConceptNode)";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,8" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)8";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,8" -> "PDN $149";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode $1000214) :- (Sub\
+setLink A:ConceptNode $1000214),2" -> "PDN (SubsetLink A:ConceptNode $1)3";
+	"PDN Deduction (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink A:ConceptN\
+ode $1000482),(SubsetLink $1000482 C:ConceptNode),A:ConceptNode,$1000482,C:Conce\
+ptNode," -> "PDN (SubsetLink $1 C:ConceptNode)2";
+	"PDN Deduction (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink A:ConceptN\
+ode $1000482),(SubsetLink $1000482 C:ConceptNode),A:ConceptNode,$1000482,C:Conce\
+ptNode," -> "PDN C:ConceptNode5";
+	"PDN Deduction (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink A:ConceptN\
+ode $1000482),(SubsetLink $1000482 C:ConceptNode),A:ConceptNode,$1000482,C:Conce\
+ptNode," -> "PDN A:ConceptNode5";
+	"PDN Deduction (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink A:ConceptN\
+ode $1000482),(SubsetLink $1000482 C:ConceptNode),A:ConceptNode,$1000482,C:Conce\
+ptNode," -> "PDN $121";
+	"PDN Deduction (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink A:ConceptN\
+ode $1000482),(SubsetLink $1000482 C:ConceptNode),A:ConceptNode,$1000482,C:Conce\
+ptNode," -> "PDN (SubsetLink A:ConceptNode $1)2";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000046),(InheritanceLink $1000046 C:ConceptNode),A:ConceptNode,$\
+1000046,C:ConceptNode," -> "PDN A:ConceptNode";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000046),(InheritanceLink $1000046 C:ConceptNode),A:ConceptNode,$\
+1000046,C:ConceptNode," -> "PDN (InheritanceLink $1 C:ConceptNode)";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000046),(InheritanceLink $1000046 C:ConceptNode),A:ConceptNode,$\
+1000046,C:ConceptNode," -> "PDN (InheritanceLink A:ConceptNode $1)";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000046),(InheritanceLink $1000046 C:ConceptNode),A:ConceptNode,$\
+1000046,C:ConceptNode," -> "PDN $1";
+	"PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000046),(InheritanceLink $1000046 C:ConceptNode),A:ConceptNode,$\
+1000046,C:ConceptNode," -> "PDN C:ConceptNode";
+	"PDN B:ConceptNode2" -> "PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,";
+	"PDN B:ConceptNode2" -> "PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,";
+	"PDN B:ConceptNode2" -> "PDN Lookup B:ConceptNode :- ";
+	"PDN B:ConceptNode3" -> "PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,2";
+	"PDN B:ConceptNode3" -> "PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,2";
+	"PDN B:ConceptNode3" -> "PDN Lookup B:ConceptNode :- 2";
+	"PDN B:ConceptNode4" -> "PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,3";
+	"PDN B:ConceptNode4" -> "PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,3";
+	"PDN B:ConceptNode4" -> "PDN Lookup B:ConceptNode :- 3";
+	"PDN Inversion (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode A:ConceptNode),C:ConceptNode,A:ConceptNode," -> "PDN A:ConceptNode3";
+	"PDN Inversion (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode A:ConceptNode),C:ConceptNode,A:ConceptNode," -> "PDN C:ConceptNode3";
+	"PDN Inversion (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode A:ConceptNode),C:ConceptNode,A:ConceptNode," -> "PDN (InheritanceLink C:ConceptNode A:ConceptNode)";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,5" -> "PDN $122";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,5" -> "PDN (ImplicationLink $1 A:ConceptNode)5";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode $1000214) :- (Sub\
+setLink A:ConceptNode $1000214)," -> "PDN (SubsetLink A:ConceptNode $1)";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,7" -> "PDN $133";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,7" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)7";
+	"PDN Deduction (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000582),(InheritanceLink $1000582 B:ConceptNode),A:ConceptNode,$\
+1000582,B:ConceptNode," -> "PDN $130";
+	"PDN Deduction (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000582),(InheritanceLink $1000582 B:ConceptNode),A:ConceptNode,$\
+1000582,B:ConceptNode," -> "PDN A:ConceptNode8";
+	"PDN Deduction (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000582),(InheritanceLink $1000582 B:ConceptNode),A:ConceptNode,$\
+1000582,B:ConceptNode," -> "PDN (InheritanceLink A:ConceptNode $1)2";
+	"PDN Deduction (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000582),(InheritanceLink $1000582 B:ConceptNode),A:ConceptNode,$\
+1000582,B:ConceptNode," -> "PDN B:ConceptNode2";
+	"PDN Deduction (InheritanceLink A:ConceptNode B:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000582),(InheritanceLink $1000582 B:ConceptNode),A:ConceptNode,$\
+1000582,B:ConceptNode," -> "PDN (InheritanceLink $1 B:ConceptNode)";
+	"PDN B:ConceptNode" -> "PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,5";
+	"PDN B:ConceptNode" -> "PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,5";
+	"PDN B:ConceptNode" -> "PDN Lookup B:ConceptNode :- 5";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,10" -> "PDN (ImplicationLink $1 C:ConceptNode)10";
+	"PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,10" -> "PDN $158";
+	"PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode,2" -> "PDN A:ConceptNode9";
+	"PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode,2" -> "PDN $131";
+	"PDN Inversion (InheritanceLink A:ConceptNode $1000203) :- (InheritanceLink $1000\
+203 A:ConceptNode),$1000203,A:ConceptNode,2" -> "PDN (InheritanceLink $1 A:ConceptNode)3";
+	"PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229," -> "PDN $15";
+	"PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229," -> "PDN C:ConceptNode2";
+	"PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229," -> "PDN (InheritanceLink C:ConceptNode $1)";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,9" -> "PDN $141";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,9" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)9";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode C:ConceptNode) :-\
+ (SubsetLink A:ConceptNode C:ConceptNode)," -> "PDN (SubsetLink A:ConceptNode C:ConceptNode)";
+	"PDN C:ConceptNode10" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,9";
+	"PDN C:ConceptNode10" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,9";
+	"PDN C:ConceptNode10" -> "PDN Lookup C:ConceptNode :- 9";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,3" -> "PDN $147";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,3" -> "PDN (PredictiveImplicationLink $1 B:ConceptNode)3";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,4" -> "PDN (PredictiveImplicationLink $1 B:ConceptNode)4";
+	"PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,4" -> "PDN $153";
+	"PDN (InheritanceLink A:ConceptNode C:ConceptNode)" -> "PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode B:ConceptNode),(InheritanceLink B:ConceptNode C:ConceptNode),A:Con\
+ceptNode,B:ConceptNode,C:ConceptNode,";
+	"PDN (InheritanceLink A:ConceptNode C:ConceptNode)" -> "PDN Deduction (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+A:ConceptNode $1000046),(InheritanceLink $1000046 C:ConceptNode),A:ConceptNode,$\
+1000046,C:ConceptNode,";
+	"PDN (InheritanceLink A:ConceptNode C:ConceptNode)" -> "PDN Inversion (InheritanceLink A:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode A:ConceptNode),C:ConceptNode,A:ConceptNode,";
+	"PDN (InheritanceLink A:ConceptNode C:ConceptNode)" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode C:ConceptNode) :-\
+ (SubsetLink A:ConceptNode C:ConceptNode),";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,3" -> "PDN $146";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,3" -> "PDN (ImplicationLink $1 B:ConceptNode)3";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,10" -> "PDN (ImplicationLink $1 A:ConceptNode)10";
+	"PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,10" -> "PDN $154";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink $1000240 C:ConceptNode) :- (Sub\
+setLink $1000240 C:ConceptNode),2" -> "PDN (SubsetLink $1 C:ConceptNode)3";
+	"PDN (InheritanceLink $1 C:ConceptNode)2" -> "PDN Inversion (InheritanceLink $1000229 C:ConceptNode) :- (InheritanceLink C:Con\
+ceptNode $1000229),C:ConceptNode,$1000229,2";
+	"PDN (InheritanceLink $1 C:ConceptNode)2" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink $1000240 C:ConceptNode) :- (Sub\
+setLink $1000240 C:ConceptNode),2";
+	"PDN C:ConceptNode" -> "PDN ModusPonens ImplicationLink C:ConceptNode :- (ImplicationLink $1000337 C:Con\
+ceptNode),$1000337,2";
+	"PDN C:ConceptNode" -> "PDN Lookup C:ConceptNode :- 2";
+	"PDN C:ConceptNode" -> "PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,2";
+	"PDN A:ConceptNode10" -> "PDN ModusPonens ImplicationLink A:ConceptNode :- (ImplicationLink $1000249 A:Con\
+ceptNode),$1000249,9";
+	"PDN A:ConceptNode10" -> "PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,9";
+	"PDN A:ConceptNode10" -> "PDN Lookup A:ConceptNode :- 9";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344," -> "PDN $17";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344," -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink A:ConceptNode B:ConceptNode) :-\
+ (SubsetLink A:ConceptNode B:ConceptNode)," -> "PDN (SubsetLink A:ConceptNode B:ConceptNode)";
+	"PDN Inversion (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink C:ConceptN\
+ode A:ConceptNode),C:ConceptNode,A:ConceptNode," -> "PDN C:ConceptNode6";
+	"PDN Inversion (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink C:ConceptN\
+ode A:ConceptNode),C:ConceptNode,A:ConceptNode," -> "PDN A:ConceptNode6";
+	"PDN Inversion (SubsetLink A:ConceptNode C:ConceptNode) :- (SubsetLink C:ConceptN\
+ode A:ConceptNode),C:ConceptNode,A:ConceptNode," -> "PDN (SubsetLink C:ConceptNode A:ConceptNode)2";
+	"PDN (InheritanceLink B:ConceptNode C:ConceptNode)" -> "PDN Inversion (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+C:ConceptNode B:ConceptNode),C:ConceptNode,B:ConceptNode,";
+	"PDN (InheritanceLink B:ConceptNode C:ConceptNode)" -> "PDN Deduction (InheritanceLink B:ConceptNode C:ConceptNode) :- (InheritanceLink \
+B:ConceptNode $1000631),(InheritanceLink $1000631 C:ConceptNode),B:ConceptNode,$\
+1000631,C:ConceptNode,";
+	"PDN (InheritanceLink B:ConceptNode C:ConceptNode)" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink B:ConceptNode C:ConceptNode) :-\
+ (SubsetLink B:ConceptNode C:ConceptNode),";
+	"PDN (InheritanceLink B:ConceptNode C:ConceptNode)" -> "PDN Lookup (InheritanceLink B:ConceptNode C:ConceptNode) :- ";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,7" -> "PDN $145";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,7" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)7";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,6" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)6";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,6" -> "PDN $127";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,5" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)5";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,5" -> "PDN $125";
+	"PDN SubsetLink=>InheritanceLink (InheritanceLink $1000240 C:ConceptNode) :- (Sub\
+setLink $1000240 C:ConceptNode)," -> "PDN (SubsetLink $1 C:ConceptNode)";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,4" -> "PDN $118";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,4" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)4";
+	"PDN B:ConceptNode5" -> "PDN Lookup B:ConceptNode :- 4";
+	"PDN B:ConceptNode5" -> "PDN ModusPonens PredictiveImplicationLink B:ConceptNode :- (PredictiveImplicatio\
+nLink $1000699 B:ConceptNode),$1000699,4";
+	"PDN B:ConceptNode5" -> "PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,4";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,3" -> "PDN $114";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,3" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)3";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,2" -> "PDN $111";
+	"PDN ModusPonens PredictiveImplicationLink C:ConceptNode :- (PredictiveImplicatio\
+nLink $1000344 C:ConceptNode),$1000344,2" -> "PDN (PredictiveImplicationLink $1 C:ConceptNode)2";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,5" -> "PDN $156";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,5" -> "PDN (ImplicationLink $1 B:ConceptNode)5";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,4" -> "PDN $152";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,4" -> "PDN (ImplicationLink $1 B:ConceptNode)4";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,10" -> "PDN $155";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,10" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)10";
+	"PDN (InheritanceLink C:ConceptNode A:ConceptNode)" -> "PDN SubsetLink=>InheritanceLink (InheritanceLink C:ConceptNode A:ConceptNode) :-\
+ (SubsetLink C:ConceptNode A:ConceptNode),";
+	"PDN (InheritanceLink C:ConceptNode A:ConceptNode)" -> "PDN Deduction (InheritanceLink C:ConceptNode A:ConceptNode) :- (InheritanceLink \
+C:ConceptNode $1000390),(InheritanceLink $1000390 A:ConceptNode),C:ConceptNode,$\
+1000390,A:ConceptNode,";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,2" -> "PDN $138";
+	"PDN ModusPonens ImplicationLink B:ConceptNode :- (ImplicationLink $1000692 B:Con\
+ceptNode),$1000692,2" -> "PDN (ImplicationLink $1 B:ConceptNode)2";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,8" -> "PDN $135";
+	"PDN ModusPonens PredictiveImplicationLink A:ConceptNode :- (PredictiveImplicatio\
+nLink $1000256 A:ConceptNode),$1000256,8" -> "PDN (PredictiveImplicationLink $1 A:ConceptNode)8";
+}
