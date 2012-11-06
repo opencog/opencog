@@ -27,6 +27,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <iterator>
+#include <opencog/spacetime/SpaceServer.h>
 
 using namespace opencog::oac;
 
@@ -152,6 +153,17 @@ bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
 
 bool OCPlanner::doPlanning(vector<State> goal, vector<PetAction> &plan)
 {
+    // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
+    // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
+    SpaceServer::SpaceMap* clonedMap = spaceServer().cloneTheLatestSpaceMap();
+
+    // Set this cloned spaceMap for Inquery
+    Inquery::setSpaceMap(clonedMap);
+
+    // TODO: planning process
+
+    // Reset the spaceMap for inquery back to the real spaceMap
+    Inquery::reSetSpaceMap();
 
     return false;
 }

@@ -55,6 +55,16 @@ OAC* Inquery::oac = 0;
     spaceMap = &(spaceServer().getLatestMap());
  }
 
+ void Inquery::setSpaceMap(SpaceServer::SpaceMap *_spaceMap)
+ {
+     spaceMap = _spaceMap;
+ }
+
+ void Inquery::reSetSpaceMap()
+ {
+     spaceMap = &(spaceServer().getLatestMap());
+ }
+
  StateValue Inquery::getStateValueFromAtomspace(State& state)
  {
      vector<StateValue> stateOwnerList = state.getStateOwnerList();
