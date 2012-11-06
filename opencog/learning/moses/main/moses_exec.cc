@@ -1055,7 +1055,8 @@ int moses_exec(int argc, char** argv)
 
         ("pre-subtract-neg-target",
          value<bool>(&pre_subtract_neg_target)->default_value(false),
-         "If set to 1 then the negation of the target counts for -1 instead of 0 [EXPERIMENTAL].\n")
+         "If set to 1 then the negation of the target counts for -1 instead of 0. "
+         "[EXPERIMENTAL].\n")
 
         ("it-abs-err",
          value<bool>(&it_abs_err)->default_value(false),
