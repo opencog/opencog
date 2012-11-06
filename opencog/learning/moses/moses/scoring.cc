@@ -695,23 +695,31 @@ precision_bscore::precision_bscore(const CTable& _ctable,
                                    float min_activation_,
                                    float max_activation_,
                                    bool positive_,
-                                   bool worst_norm_)
+                                   bool worst_norm_,
+                                   bool subtract_neg_target_)
     : orig_ctable(_ctable), wrk_ctable(orig_ctable),
       ctable_usize(orig_ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
-      precision_full_bscore(true)
+      subtract_neg_target(subtract_neg_target_), precision_full_bscore(true)
 {
+    if (subtract_neg_target)
+        penalty *= 2;
+    
     output_type = wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score
         // i.e. we found all of the true values correcty.  Count
         // 'F' is 'positive' is false.
-        vertex target = bool_to_vertex(positive);
-        sum_outputs = [target](const CTable::counter_t& c)->score_t
+        vertex target = bool_to_vertex(positive),
+            neg_target = negate_vertex(target);
+        sum_outputs = [this, target, neg_target](const CTable::counter_t& c)->score_t
         {
-            return c.get(target);
+            score_t res = c.get(target);
+            if (subtract_neg_target)
+                res -= c.get(neg_target);
+            return res;
         };
     } else if (output_type == id::contin_type) {
         // For contin tables, we return the sum of the row values.
@@ -720,7 +728,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
             score_t res = 0.0;
             for (const CTable::counter_t::value_type& cv : c)
                 res += get_contin(cv.first) * cv.second;
-            return (this->positive? res : -res);
+            return (positive? res : -res);
         };
     } else {
         OC_ASSERT(false, "Precision scorer, unsupported output type");
@@ -772,6 +780,9 @@ void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
             / ctable_usize;     // normalized by the size of the table
                                 // because the precision is normalized
                                 // as well
+
+    if (subtract_neg_target)
+        complexity_coef *= 2;
 
     logger().info() << "Precision scorer, noise = " << p
                     << " alphabest size = " << alphabet_size

@@ -508,6 +508,7 @@ int moses_exec(int argc, char** argv)
 
     // pre params
     bool pre_worst_norm;
+    bool pre_subtract_neg_target;
     bool gen_best_tree;
 
     // it params
@@ -1052,6 +1053,10 @@ int moses_exec(int argc, char** argv)
          value<bool>(&pre_worst_norm)->default_value(false),
          "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
 
+        ("pre-subtract-neg-target",
+         value<bool>(&pre_subtract_neg_target)->default_value(false),
+         "If set to 1 then the negation of the target counts for -1 instead of 0 [EXPERIMENTAL].\n")
+
         ("it-abs-err",
          value<bool>(&it_abs_err)->default_value(false),
          "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
@@ -1531,7 +1536,8 @@ int moses_exec(int argc, char** argv)
                                            min_rand_input,
                                            max_rand_input,
                                            hardness >= 0,
-                                           pre_worst_norm);
+                                           pre_worst_norm,
+                                           pre_subtract_neg_target);
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
                     if (gen_best_tree) {
