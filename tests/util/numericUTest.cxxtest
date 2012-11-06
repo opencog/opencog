@@ -65,4 +65,82 @@ public:
         TS_ASSERT_EQUALS(res_4, 2);
         TS_ASSERT_EQUALS(res_5, 4);
     }
+
+    void test_tanimoto_distance() {
+        typedef vector<float> Vec;
+        // test max distance
+        {
+            Vec a = {1, 0, 1, 0, 1, 0, 1},
+                b = {0, 1, 0, 1, 0, 1, 0};
+
+            float dst = tanimoto_distance<Vec, float>(a, b);
+            TS_ASSERT_EQUALS(dst, 1);
+        }
+
+        // test min distance
+        {
+            Vec a = {1, 0, 1, 0, 1, 0, 1},
+                b = {1, 0, 1, 0, 1, 0, 1};
+
+            float dst = tanimoto_distance<Vec, float>(a, b);
+            TS_ASSERT_EQUALS(dst, 0);
+        }
+
+        // test in between distance
+        {
+            Vec a = {0, 1, 1, 1, 1, 1, 0},
+                b = {1, 0, 1, 0, 1, 0, 1};
+
+            float dst = tanimoto_distance<Vec, float>(a, b);
+            TS_ASSERT_DELTA(dst, 1 - 2.0/7.0, 0.00001);
+        }
+
+        // test null case
+        {
+            Vec a = {0, 0, 0, 0, 0, 0, 0},
+                b = {0, 0, 0, 0, 0, 0, 0};
+
+            float dst = tanimoto_distance<Vec, float>(a, b);
+            TS_ASSERT_DELTA(dst, 0, 0.000001);
+        }        
+    }
+
+    void test_angular_distance() {
+        typedef vector<float> Vec;
+        // test max distance
+        {
+            Vec a = {1, 0, 1, 0, 1, 0, 1},
+                b = {0, 1, 0, 1, 0, 1, 0};
+
+            float dst = angular_distance<Vec, float>(a, b, false);
+            TS_ASSERT_EQUALS(dst, 1);
+        }
+
+        // test min distance
+        {
+            Vec a = {1, 0, 1, 0, 1, 0, 1},
+                b = {1, 0, 1, 0, 1, 0, 1};
+
+            float dst = angular_distance<Vec, float>(a, b, false);
+            TS_ASSERT_EQUALS(dst, 0);
+        }
+
+        // test in between distance
+        {
+            Vec a = {0, 1, 1, 1, 1, 1, 0},
+                b = {1, 0, 1, 0, 1, 0, 1};
+
+            float dst = angular_distance<Vec, float>(a, b, false);
+            TS_ASSERT_DELTA(dst, 2 * acos(2.0 / (sqrt(5 * 4))) / PI, 0.00001);
+        }
+
+        // test null case
+        {
+            Vec a = {0, 0, 0, 0, 0, 0, 0},
+                b = {0, 0, 0, 0, 0, 0, 0};
+
+                float dst = angular_distance<Vec, float>(a, b, false);
+            TS_ASSERT_EQUALS(dst, 0);
+        }        
+    }
 };
