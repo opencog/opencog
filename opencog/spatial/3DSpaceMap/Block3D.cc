@@ -29,19 +29,13 @@ using namespace opencog::spatial;
 
 extern const opencog::Handle opencog::Handle::UNDEFINED;
 
-Block3D::Block3D(int _composedLevel, BlockVector& _position, string _materialType, string _color, const Handle &_unitBlockAtom, bool _canDestroy )
+Block3D::Block3D(int _composedLevel, BlockVector& _position, string _materialType, string _color, bool _canDestroy )
 {
     mLevel = _composedLevel;
     mPosition = _position;
     mBlockMaterial.materialType = _materialType;
     mBlockMaterial.color = _color;
     mCanDestroy = _canDestroy;
-    mUnitBlockHandles.clear();
-
-    if (_composedLevel == 1 && _unitBlockAtom!= Handle::UNDEFINED)
-    {
-        mUnitBlockHandles.push_back(_unitBlockAtom);
-    }
 
     mBoundingBox.nearLeftBottomConer = mPosition;
 
@@ -64,12 +58,9 @@ Block3D::~Block3D()
         mBlockEntity->removeBlock(this);
 }
 
-void Block3D::addBlockAtoms(HandleSeq& _atoms)
+Block3D* Block3D::clone()
 {
-    mUnitBlockHandles.insert(mUnitBlockHandles.end(), _atoms.begin(),_atoms.end());
-}
+    Block3D* cloneBLock = new Block3D(mLevel,mPosition,mBlockMaterial.materialType,mBlockMaterial.color,mCanDestroy);
 
-void Block3D::addBlockAtom(Handle& _atom)
-{
-    mUnitBlockHandles.push_back(_atom);
+    return cloneBLock;
 }

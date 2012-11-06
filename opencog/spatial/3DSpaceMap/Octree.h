@@ -61,7 +61,7 @@ namespace opencog
             // Check whether this position has been filled by a solid block,
             // _pos is input para, block is output para
             // if solid, return the block in @ block
-            bool checkIsSolid(BlockVector& _pos, Block3D* & _block3d);
+            bool checkIsSolid(const BlockVector& _pos, Block3D* & _block3d) const;
 
             // Get the parent octree that contain this _block.
             // Note that this function is only used for finding, so make sure this _block already exists.
@@ -168,6 +168,8 @@ namespace opencog
             // the Octree3DMapManager
             Octree3DMapManager* mOctree3DMapManager;
 
+            Octree* clone(Octree3DMapManager* newOctree3DMapManager);
+
         protected:
 
             //parent octree
@@ -191,6 +193,12 @@ namespace opencog
 
             // the indexes in its parent if has a parent
             int mIndex_x, mIndex_y, mIndex_z;
+
+            // this constructor is only used in clone this instance
+            Octree(Octree3DMapManager* _octree3DMapManager,Octree * _parent, int _size, int _OctreeDepth, AxisAlignedBox& _boundingBox,
+                           BlockVector& _nearLeftBottomPoint,BlockVector& _centre, int index_x, int index_y, int index_z ):
+                mOctree3DMapManager(_octree3DMapManager),mParent(_parent),mSize(_size),mOctreeDepth(_OctreeDepth),mBoundingBox(_boundingBox),
+                mNearLeftBottomPoint(_nearLeftBottomPoint),mCentre(_centre),mIndex_x(index_x), mIndex_y(index_y), mIndex_z(index_z){}
 
         };
     }

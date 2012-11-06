@@ -78,6 +78,8 @@ Octree::Octree(Octree3DMapManager* _om, BlockVector& _nearLeftBottomPoint, Octre
 
 }
 
+//Octree::Octree(){}
+
 Octree::~Octree()
 {
     if (mParent != 0)
@@ -211,6 +213,10 @@ void Octree::addSolidBlock(Block3D * _block, bool byKnownIndexes, int _x, int _y
 
 Handle Octree::removeAnUnitSolidBlock(BlockVector& _pos)
 {
+    Handle h = mOctree3DMapManager->getUnitBlockHandleFromPosition(_pos);
+    if (h == Handle::UNDEFINED)
+        return h;
+
     // first, check if this _pos is inside this octree
     if (! mBoundingBox.isUnitBlockInsideMe(_pos))
     {
@@ -251,11 +257,9 @@ Handle Octree::removeAnUnitSolidBlock(BlockVector& _pos)
                     tree->getIndexesInParent(x,y,z);
                     tree = (Octree*) (tree->getParent());
 
-                    // return the unit block atom
-                    HandleSeq unitBlockAtoms = (tree->mAllMyBlocks[x][y][z])->getAllMyUnitBlockHandles();
                     delete (tree->mChildren[x][y][z]);
                     tree->mChildren[x][y][z] = 0;
-                    return unitBlockAtoms.front();
+                    return h;
                 }
                 else
                     break;
@@ -284,11 +288,9 @@ Handle Octree::removeAnUnitSolidBlock(BlockVector& _pos)
                 break;
         }
 
-        // return the unit block atom
-        HandleSeq unitBlockAtoms = (tree->mAllMyBlocks[x][y][z])->getAllMyUnitBlockHandles();
         delete tree->mAllMyBlocks[x][y][z];
         tree->mAllMyBlocks[x][y][z] = 0;
-        return unitBlockAtoms.front();
+        return h;
     }
 
     return Handle::UNDEFINED;
@@ -308,7 +310,7 @@ AxisAlignedBox& Octree::getChildBoundingBoxByIndex(int x, int y, int z)
     return childBox;
 }
 
-bool Octree::checkIsSolid(BlockVector& _pos, Block3D* & _block3d)
+bool Octree::checkIsSolid(const BlockVector& _pos, Block3D* & _block3d) const
 {
     Octree* tree = (Octree*)(mOctree3DMapManager->getRootOctree());
 
@@ -503,13 +505,11 @@ Block3D* Octree::mergeAllMyBlocks()
     // Get the blockEntity these blocks belong to
     BlockEntity* myEntity = mAllMyBlocks[0][0][0]->mBlockEntity;
 
-    // Move all the atoms in all these blocks to the new blocks.
-    // and at the same time delete all the old blocks in this octree.
+    // delete all the old blocks in this octree.
     for (int x = 0; x < 2; x ++)
         for (int y = 0; y < 2; y ++)
             for (int z = 0; z < 2; z ++)
             {
-                newBlock->addBlockAtoms((HandleSeq&)((mAllMyBlocks[x][y][z])->getAllMyUnitBlockHandles()));
                 delete (mAllMyBlocks[x][y][z]);
                 mAllMyBlocks[x][y][z] = 0;
             }
@@ -546,21 +546,21 @@ void Octree::breakBlockInto8Blocks(int x, int y, int z)
                     myEntity->addBlock(((mChildren[x][y][z])->mAllMyBlocks)[i][j][k]);
             }
 
-    // Move all the unit atom Hanldes in this big block to the right small blocks
-    HandleSeq unitBlockAtoms = bigBlock->getAllMyUnitBlockHandles();
-    HandleSeq::iterator iter = unitBlockAtoms.begin();
-    BlockVector atomPos;
-    int o,p,q;
-    map<Handle, BlockVector> AllUnitBlockatoms = (map<Handle, BlockVector>&)(mOctree3DMapManager->getAllUnitBlockatoms());
-    Handle handle;
-    for (; iter != unitBlockAtoms.end(); iter ++)
-    {
-        handle = (Handle)(*iter);
-        atomPos = (BlockVector)(AllUnitBlockatoms[handle]);
-        AxisAlignedBox atomBox(atomPos);
-        (mChildren[x][y][z])->getChildIndexes(atomBox, o,p,q);
-        (mChildren[x][y][z])->mAllMyBlocks[o][p][q]->addBlockAtom(*iter);
-    }
+    // Move all the unit blocks in this big block to the right small blocks
+//    vector<BlockVector> unitBlocks = bigBlock->getAllMyUnitBlockVectors();
+//    vector<BlockVector>::iterator iter = unitBlocks.begin();
+//    BlockVector atomPos;
+//    int o,p,q;
+//    map<Handle, BlockVector> AllUnitBlockatoms = (map<Handle, BlockVector>&)(mOctree3DMapManager->getAllUnitBlockatoms());
+//    Handle handle;
+//    for (; iter != unitBlockAtoms.end(); iter ++)
+//    {
+//        handle = (Handle)(*iter);
+//        atomPos = (BlockVector)(AllUnitBlockatoms[handle]);
+//        AxisAlignedBox atomBox(atomPos);
+//        (mChildren[x][y][z])->getChildIndexes(atomBox, o,p,q);
+//        (mChildren[x][y][z])->mAllMyBlocks[o][p][q]->addBlockAtom(*iter);
+//    }
 
     delete bigBlock;
 }
@@ -753,4 +753,29 @@ vector<BlockVector> Octree::getAllNeighbourSolidBlockVectors(BlockVector& curPos
                 }
 
         return vectorList;
+}
+
+Octree* Octree::clone(Octree3DMapManager* newOctree3DMapManager)
+{
+    Octree* cloneOctree = new Octree(newOctree3DMapManager,mParent,mSize,mOctreeDepth,mBoundingBox,mNearLeftBottomPoint,mCentre,mIndex_x,mIndex_y,mIndex_z);
+
+    for (int x = 0; x < 2; x ++)
+        for (int y = 0; y < 2; y ++)
+            for (int z = 0; z < 2; z ++)
+            {
+                // clone subtrees
+                if (mChildren[x][y][z] == 0)
+                    cloneOctree->mChildren[x][y][z] = 0;
+                else
+                    cloneOctree->mChildren[x][y][z] = (mChildren[x][y][z])->clone(newOctree3DMapManager);
+
+                // clone the blocks inside me
+                if (mAllMyBlocks[x][y][z] == 0)
+                    cloneOctree->mAllMyBlocks[x][y][z] = 0;
+                else
+                    cloneOctree->mAllMyBlocks[x][y][z] = mAllMyBlocks[x][y][z]->clone();
+            }
+
+    return cloneOctree;
+
 }
