@@ -93,6 +93,10 @@ bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
     {
         State oneGoal = (State)*it;
 
+        // if this goal doesn't really require an exact value, just skip it
+        if (oneGoal.getStateValue() == UNDEFINED_VALUE)
+            continue;
+
         bool satisfied = false;
 
         // First search this state in the virtualStates
@@ -131,6 +135,14 @@ bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
         else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
         {
             // TODO
+            StateValue value = Inquery::getStateValueFromAtomspace(oneGoal);
+            if (value == UNDEFINED_VALUE)
+                return false;
+            if (oneGoal.isSatisfiedMe(value))
+                continue;
+            else
+                return false;
+
         }
 
     }
@@ -140,6 +152,7 @@ bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
 
 bool OCPlanner::doPlanning(vector<State> goal, vector<PetAction> &plan)
 {
+
     return false;
 }
 

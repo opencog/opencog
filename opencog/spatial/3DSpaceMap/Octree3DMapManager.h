@@ -76,17 +76,17 @@ namespace opencog
 
             // to store the blockEntities's node handles just diasppear,
             // the ~Blockentity() will add its Handel into this list, DO NOT add to this list from other place
-            static vector<Handle>  newDisappearBlockEntityList;
+            vector<Handle>  newDisappearBlockEntityList;
 
             // to store the blockEntities just appear
             // the Blockentity() will add itself into this list, DO NOT add to this list from other place
-            static vector<BlockEntity*> newAppearBlockEntityList;
+            vector<BlockEntity*> newAppearBlockEntityList;
 
             // to store the blockentities need to be updated the predicates
-            static vector<BlockEntity*> updateBlockEntityList;
+            vector<BlockEntity*> updateBlockEntityList;
 
             // to store the super blockEntities need to be updated the predicates
-            static vector<BlockEntity*> updateSuperBlockEntityList;
+            vector<BlockEntity*> updateSuperBlockEntityList;
 
             static const int AccessDistance = 1;
 
@@ -98,9 +98,14 @@ namespace opencog
             Octree3DMapManager(std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
             ~Octree3DMapManager(){};
 
+            //deep clone this octree3DMapManager and return the new instance
+            // the cloned octree3DMapManager will have the same octress,blocks and entities,
+            // and all these are new instances, shared the same properties and atom handles with the old ones
+            Octree3DMapManager* clone();
+
             bool hasPerceptedMoreThanOneTimes;
 
-            const map<Handle, BlockVector>& getAllUnitBlockatoms(){return mAllUnitBlockAtoms;}
+            const map<Handle, BlockVector>& getAllUnitBlockatoms(){return mAllUnitAtomsToBlocksMap;}
 
             const map<int,BlockEntity*>& getBlockEntityList(){return mBlockEntityList;}
 
@@ -288,10 +293,20 @@ namespace opencog
             bool checkIsSolid(BlockVector& pos);
             bool checkIsSolid(int x, int y, int z);
 
+            // return the handle of the unit block in this position
+            Handle getUnitBlockHandleFromPosition(const BlockVector &pos);
+
+            // return the position of this unit block given its handle
+            BlockVector getPositionFromUnitBlockHandle(const Handle &h);
+
+            HandleSeq getAllUnitBlockHandlesOfABlock(Block3D& _block);
 
         protected:
 
-            map<Handle, BlockVector> mAllUnitBlockAtoms;
+            // We keep these 2 map for quick search. Memory consuming: 50k blocks take about 10M RAM for one map
+            map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
+            map<BlockVector,Handle> mAllUnitBlocksToAtomsMap;
+
             map<int,BlockEntity*> mBlockEntityList;
             map<int,BlockEntity*> mSuperBlockEntityList;
             map<Handle, Entity3D*> mAllNoneBlockEntities;
@@ -315,6 +330,14 @@ namespace opencog
             AxisAlignedBox mMapBoundingBox;
 
             Entity3D* selfAgentEntity;
+
+            bool getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles);
+
+            // this constructor is only used for clone
+            Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
+                               int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
+                               map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
+                               Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap);
 
 
 #ifdef HAVE_ZMQ
