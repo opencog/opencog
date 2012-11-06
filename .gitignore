@@ -55,10 +55,10 @@ debian/tmp/
 *.nmake
 CTestTestfile.cmake
 
-#CTAGS
+# CTAGS
 TAGS
 
-#GNU GLOBAL
+# GNU GLOBAL
 GPATH
 GRTAGS
 GSYMS
@@ -73,6 +73,10 @@ lib/opencog-test.conf
 # opencog/embodiment/embodiment.conf
 # opencog/embodiment/dev_embodiment.conf
 
-#DeSTIN SWIG generated sources
+# DeSTIN SWIG generated sources
 opencog/embodiment/DestinCuda/JavaDestin/gen_src/javadestin/*
 opencog/embodiment/DestinCuda/DestinKernelJAVA_wrap.*
+
+# Python bytecode
+*.pyc
+*.pyo

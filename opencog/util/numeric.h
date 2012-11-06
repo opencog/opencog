@@ -36,6 +36,7 @@
 #include <map>
 
 #include <boost/math/special_functions.hpp>
+#include <boost/range/numeric.hpp>
 
 #include "exceptions.h"
 #include "oc_assert.h"
@@ -409,9 +410,73 @@ Float p_norm(const Vec& a, const Vec& b, Float p=1.0)
     for (; ia != a.end(); ia++, ib++) {
         Float diff = fabs (*ia - *ib);
         if (0.0 < diff)
-            sum += pow(log(diff), p);
+            sum += pow(diff, p);
     }
     return pow(sum, 1.0/p);
+}
+
+/**
+ * Return the Tanimoto distance, a continuous extension of the Jaccard
+ * distance, between 2 vector.
+ *
+ * See http://en.wikipedia.org/wiki/Jaccard_index
+ *
+ * More specifically we use
+ *
+ * 1 - f(a,b)
+ *
+ * where
+ *
+ * f(a,b) = (sum_i a_i * b_i) / (sum_i a_i^2 + sum_i b_i^2 - sum_i a_i * b_i)
+ *
+ * If a and b are binary vectors then this corresponds to the Jaccard
+ * distance. Otherwise, anything goes, it's not even a true metric
+ * anymore, but it could be useful anyway.
+ */
+template<typename Vec, typename Float>
+Float tanimoto_distance(const Vec& a, const Vec& b)
+{
+    OC_ASSERT (a.size() == b.size(),
+               "Cannot compare unequal-sized vectors!  %d %d\n",
+               a.size(), b.size());
+
+    Float ab = boost::inner_product(a, b, 0),
+        aa = boost::inner_product(a, a, 0),
+        bb = boost::inner_product(b, b, 0);
+
+    return 1 - (ab / (aa + bb - ab));
+}
+
+/**
+ * Return the angular distance between 2 vectors.
+ *
+ * See http://en.wikipedia.org/wiki/Cosine_similarity (Also, according
+ * to Linas this is also equivalent to Fubini-Study metric, Fisher
+ * information metric, and Kullbeck-Liebler divergence but they look
+ * so differently so that anyone can hardly see it).
+ *
+ * Specifically it computes
+ *
+ * f(a,b) = alpha*cos^{-1}((sum_i a_i * b_i) /
+ *                         (sqrt(sum_i a_i^2) * sqrt(sum_i b_i^2))) / pi
+ *
+ * with alpha = 1 where vector coefficients may be positive or negative
+ * or   alpha = 2 where the vector coefficients are always positive.
+ *
+ * If pos_n_neg == true then alpha = 1, otherwise alpha = 2.
+ */
+template<typename Vec, typename Float>
+Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
+{
+    OC_ASSERT (a.size() == b.size(),
+               "Cannot compare unequal-sized vectors!  %d %d\n",
+               a.size(), b.size());
+
+    Float ab = boost::inner_product(a, b, 0),
+        aa = boost::inner_product(a, a, 0),
+        bb = boost::inner_product(b, b, 0);
+
+    return (pos_n_neg ? 1 : 2) * acos(ab / (sqrt(aa * bb))) / PI;
 }
 
 } // ~namespace opencog

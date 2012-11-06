@@ -563,9 +563,13 @@ struct metapopulation : bscored_combo_tree_ptr_set
     void merge_nondominated_iter(bscored_combo_tree_set& bcs);
 
     /**
-     * return true if x dominates y
-     *        false if y dominates x
-     *        indeterminate otherwise
+     * x dominates y if
+     *
+     * for all i x_i >= y_i and there exists i such that x_i > y_i
+     *
+     * this function returns true if x dominates y
+     *                       false if y dominates x
+     *                       indeterminate otherwise
      */
     static inline tribool dominates(const behavioral_score& x,
                                     const behavioral_score& y)
@@ -581,7 +585,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
 
         tribool res = indeterminate;
         for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
-             xit != x.end();++xit, ++yit)
+             xit != x.end(); ++xit, ++yit)
         {
             if (*xit > *yit) {
                 if (!res)
