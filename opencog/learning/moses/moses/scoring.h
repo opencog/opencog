@@ -455,18 +455,44 @@ protected:
  * false positives.  
  *
  * Note that an activation of zero corresponds to perfect precision:
- * there were no false positives.  Thus, to get reasonable results, one
- * wants to learn a function that predicts at least a few true postives,
- * i.e. has an activation greater than zero.  This is done by applying a
- * penalty when the activation is outside of the range of an interval
- * [min_activation, max_activation].  See the desciption of 
- * discriminating_bscore::get_threshold_penalty() for details.
+ * there were no false positives.  Thus, to get reasonable results,
+ * one wants to learn a function that predicts at least a few true
+ * postives, i.e. has an activation greater than zero.  This is done
+ * by applying a penalty when the activation is outside of the range
+ * of an interval [min_activation, max_activation].  See the
+ * description of discriminating_bscore::get_threshold_penalty() for
+ * details.
  *
  * If worst_norm is true, then the percision is divided by the absolute
  * average of the negative lower (resp. positive upper if
  * this->positive is false) decile or less. If there is no negative
  * (resp. positive if this->positive is false) values then it is not
  * normalized. (??)
+ *
+ * If substract_neg_target is true then the negation of the target (in
+ * the boolean case) count for -1 instead of 0. In other words the
+ * fitness to maximize is:
+ *
+ * (tp - fp) / (tp + fp)
+ *
+ * where tp and fp stand for true positive and false positive
+ * respectively. This is actually equivalent to
+ *
+ * (tp - tp + tp - fp) / (tp + fp)
+ * = (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
+ * = 2*tp / (tp + fp) - 1
+ * = 2*precision - 1
+ *
+ * For that reason the Occam's razor penalty and the activation
+ * penalty are multiplied by 2. One might ask then why use that
+ * fitness function instead of precision as they are equivalent up to
+ * an additive and a multiplicative constant. The reason is because
+ * the bscore will look differently, in such case when an element of
+ * the bscore is 0 it will likely correspond to no activity. Active
+ * data points contributing to a precision above half will have
+ * positive values, active data points contributing to a precision
+ * below half will have negative values, active data points
+ * contributing to precision of exactly 0.5 will have null values.
  *
  * XXX This class should be reworked to derive from
  * discriminating_bscore.  This would allow us to get rid of duplicate
@@ -481,7 +507,8 @@ struct precision_bscore : public bscore_base
                      float min_activation = 0.5f,
                      float max_activation = 1.0f,
                      bool positive = true,
-                     bool worst_norm = false);
+                     bool worst_norm = false,
+                     bool subtract_neg_target = false);
 
     penalized_behavioral_score operator()(const combo_tree& tr) const;
 
@@ -537,7 +564,7 @@ protected:
                         // boolean). This is used to normalized the
                         // precision in case the output isn't boolean.
     score_t penalty;
-    bool positive, worst_norm;
+    bool positive, worst_norm, subtract_neg_target;
 
     // if enabled then each datapoint is an entry in the bscore (its
     // part contributing to the precision, and the activation penalty
