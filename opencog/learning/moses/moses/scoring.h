@@ -470,29 +470,28 @@ protected:
  * normalized. (??)
  *
  * If substract_neg_target is true then the negation of the target (in
- * the boolean case) count for -1 instead of 0. In other words the
- * fitness to maximize is:
+ * the boolean case) count for -1/2 instead of 0 and 1/2 instead of
+ * 1. In other words the fitness to maximize is:
  *
- * (tp - fp) / (tp + fp)
+ * 1/2 * (tp - fp) / (tp + fp)
  *
  * where tp and fp stand for true positive and false positive
  * respectively. This is actually equivalent to
  *
- * (tp - tp + tp - fp) / (tp + fp)
- * = (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
- * = 2*tp / (tp + fp) - 1
- * = 2*precision - 1
+ * 1/2 * (tp - tp + tp - fp) / (tp + fp)
+ * = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
+ * = 1/2 * 2*tp / (tp + fp) - 1
+ * = precision - 1/2
  *
- * For that reason the Occam's razor penalty and the activation
- * penalty are multiplied by 2. One might ask then why use that
- * fitness function instead of precision as they are equivalent up to
- * an additive and a multiplicative constant. The reason is because
- * the bscore will look differently, in such case when an element of
- * the bscore is 0 it will likely correspond to no activity. Active
- * data points contributing to a precision above half will have
- * positive values, active data points contributing to a precision
- * below half will have negative values, active data points
- * contributing to precision of exactly 0.5 will have null values.
+ * One might ask then why use that fitness function instead of
+ * precision as they are equivalent up to an additive constant. The
+ * reason is because the bscore will look differently, in such case
+ * when an element of the bscore is 0 it will likely correspond to no
+ * activity. Active data points contributing to a precision above half
+ * will have positive values, active data points contributing to a
+ * precision below half will have negative values, active data points
+ * contributing to precision of exactly 0.5 will have null values
+ * (like inactive points, but it's rather unlikely).
  *
  * XXX This class should be reworked to derive from
  * discriminating_bscore.  This would allow us to get rid of duplicate

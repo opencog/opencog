@@ -703,9 +703,6 @@ precision_bscore::precision_bscore(const CTable& _ctable,
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
       subtract_neg_target(subtract_neg_target_), precision_full_bscore(true)
 {
-    if (subtract_neg_target)
-        penalty *= 2;
-    
     output_type = wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
@@ -781,9 +778,6 @@ void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
                                 // because the precision is normalized
                                 // as well
 
-    if (subtract_neg_target)
-        complexity_coef *= 2;
-
     logger().info() << "Precision scorer, noise = " << p
                     << " alphabest size = " << alphabet_size
                     << " complexity ratio = " << 1.0/complexity_coef;
@@ -836,6 +830,8 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
         if (active > 0) {
             // normalize all components by active
             score_t iac = 1.0/active; // inverse of activity to be faster
+            if (subtract_neg_target)  // we need to rescale by 1/2
+                iac /= 2;
             boost::transform(pbs.first, pbs.first.begin(),
                              [&](score_t e) { return e*iac; });
         }
@@ -952,7 +948,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
         score_t precision = (sao / active) / max_output,
             activation = active / (score_t)ctable_usize,
             activation_penalty = get_activation_penalty(activation),
-            sc = precision + activation_penalty;
+            sc = precision + activation_penalty - (subtract_neg_target ? 0.5 : 0);
+
         // update best score
         if (sc > best_sc) {
             best_sc = sc;
@@ -970,7 +967,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
     logger().fine("activation at best score = %f", best_activation);
     logger().fine("activation penalty at best score = %f", best_activation_penalty);
 
-    return {best_precision, best_activation_penalty};
+    /// @todo it's not really the best bscore but rather the best score
+    return {best_sc};
 }
 
 // Note that the logarithm is always negative, so this method always
