@@ -36,11 +36,6 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-vector<Handle> Octree3DMapManager::newDisappearBlockEntityList;
-vector<BlockEntity*> Octree3DMapManager::newAppearBlockEntityList;
-vector<BlockEntity*> Octree3DMapManager::updateBlockEntityList;
-vector<BlockEntity*> Octree3DMapManager::updateSuperBlockEntityList;
-
 Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight):
     mMapName(_mapName), mFloorHeight(_floorHeight)
 {
@@ -80,7 +75,7 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 
     mRootOctree = new Octree(this, rootPoint);
 
-    mAllUnitBlockAtoms.clear();
+    mAllUnitAtomsToBlocksMap.clear();
     mBlockEntityList.clear();
     mAllNoneBlockEntities.clear();
     mPosToNoneBlockEntityMap.clear();
@@ -88,6 +83,11 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
     hasPerceptedMoreThanOneTimes = false;
 
     selfAgentEntity = 0;
+
+    newDisappearBlockEntityList.clear();
+    newAppearBlockEntityList.clear();
+    updateBlockEntityList.clear();
+    updateSuperBlockEntityList.clear();
 
 #ifdef HAVE_ZMQ
     // set up the zmq socket to communicate with the learning server
@@ -112,6 +112,15 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
     this->enableStaticsMapLearning = config().get_bool("ENABLE_STATICS_MAP_LEARNING");
 
 }
+
+Octree3DMapManager* Octree3DMapManager::clone()
+{
+
+    Octree3DMapManager* cloneMap = new Octree3DMapManager(mTotalDepthOfOctree,mMapName, mRootOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,mMapBoundingBox,selfAgentEntity,
+                                    mAllUnitAtomsToBlocksMap, mAllUnitBlocksToAtomsMap,mBlockEntityList, mAllNoneBlockEntities,mPosToNoneBlockEntityMap);
+    return cloneMap;
+}
+
 
 void Octree3DMapManager::removeAnEntityFromList(BlockEntity* entityToRemove)
 {
@@ -217,9 +226,10 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
         return;
 
 
-    block = new Block3D(1, _pos, _materialType, _color, _unitBlockAtom);
+    block = new Block3D(1, _pos, _materialType, _color);
     mRootOctree->addSolidBlock(block);
-    mAllUnitBlockAtoms.insert(map<Handle, BlockVector>::value_type(_unitBlockAtom, _pos));
+    mAllUnitAtomsToBlocksMap.insert(map<Handle, BlockVector>::value_type(_unitBlockAtom, _pos));
+    mAllUnitBlocksToAtomsMap.insert(map<BlockVector,Handle>::value_type(_pos, _unitBlockAtom));
     mTotalUnitBlockNum ++;
 
     // when there is not the first time percept the world,
@@ -234,8 +244,8 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
     {
         //there is not any entity will combine with this block
         // so make this block as a new entity which only contains one block
-        BlockEntity* entity = new BlockEntity(*block);
-        Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
+        BlockEntity* entity = new BlockEntity(this,*block);
+        mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
         return;
     }
     else if (entities.size() == 1)
@@ -252,7 +262,7 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
         // there are existing more than 1 BlockEntities will combine with this new block
         // this new block join two or more existing entities together,
         // we remove these old entities, and add all their blocks to this new big one
-        BlockEntity* entity = new BlockEntity(*block);
+        BlockEntity* entity = new BlockEntity(this,*block);
 
         vector<BlockEntity*>::iterator iter;
         for (iter = entities.begin(); iter != entities.end(); ++iter)
@@ -274,13 +284,20 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
 void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
 {
     map<Handle, BlockVector>::iterator it;
-    it = mAllUnitBlockAtoms.find(blockNode);
-    if (it == mAllUnitBlockAtoms.end())
+    it = mAllUnitAtomsToBlocksMap.find(blockNode);
+    if (it == mAllUnitAtomsToBlocksMap.end())
     {
         logger().error("Octree3DMapManager::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
     }
 
     BlockVector _pos = (BlockVector)(it->second);
+    map<BlockVector,Handle>::iterator itp;
+    itp = mAllUnitBlocksToAtomsMap.find(_pos);
+    if (itp == mAllUnitBlocksToAtomsMap.end())
+    {
+        logger().error("Octree3DMapManager::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
+    }
+
     Block3D* block;
     // First, check is there a block in this position
     if (! mRootOctree->checkIsSolid(_pos, block))
@@ -289,7 +306,8 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
     BlockEntity* myEntity = block->mBlockEntity;
     Handle atom = mRootOctree->removeAnUnitSolidBlock(_pos);
 
-    mAllUnitBlockAtoms.erase(atom);
+    mAllUnitAtomsToBlocksMap.erase(it);
+    mAllUnitBlocksToAtomsMap.erase(itp);
     mTotalUnitBlockNum --;
 
     if (myEntity == 0)
@@ -333,8 +351,8 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
         myEntity->clearAllBlocks();
 
         // create the first entity we just found
-        BlockEntity* entity = new BlockEntity(neighbourblockList);
-        Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
+        BlockEntity* entity = new BlockEntity(this,neighbourblockList);
+        mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
 
         // get all the neighbour solid positions of this removed unit block
         vector<BlockVector> allNeighbours = mRootOctree->getAllNeighbourSolidBlockVectors(_pos);
@@ -354,7 +372,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
             vector<Block3D*> newBlockList = mRootOctree->findAllBlocksCombinedWith(&*it);
 
             // create a new entity for this part of original entity
-            BlockEntity* newEntity = new BlockEntity(newBlockList);
+            BlockEntity* newEntity = new BlockEntity(this,newBlockList);
             newEntity->addBlocks(newBlockList);
 
             mBlockEntityList.insert(map<int,BlockEntity*>::value_type(newEntity->getEntityID(), newEntity));
@@ -394,16 +412,39 @@ BlockEntity* Octree3DMapManager::findAllBlocksInBlockEntity(BlockVector& _pos)
     }
     else
     {
-        BlockEntity* entity = new BlockEntity(*block);
+        BlockEntity* entity = new BlockEntity(this,*block);
 
         // find all the blocks combine with this block
          vector<Block3D*> blockList = mRootOctree->findAllBlocksCombinedWith(&_pos);
          entity->addBlocks(blockList);
         // entity->SortBlockOrder();
 
-        Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
+        mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
         return entity;
     }
+}
+
+
+// return the handle of the unit block in this position
+Handle Octree3DMapManager::getUnitBlockHandleFromPosition(const BlockVector &pos)
+{
+    map<BlockVector,Handle>::iterator it = mAllUnitBlocksToAtomsMap.find(pos);
+
+    if (it == mAllUnitBlocksToAtomsMap.end())
+        return Handle::UNDEFINED;
+    else
+        return (Handle)(it->second);
+
+}
+
+// return the position of this unit block given its handle
+BlockVector Octree3DMapManager::getPositionFromUnitBlockHandle(const Handle &h)
+{
+    map<Handle, BlockVector>::iterator it = mAllUnitAtomsToBlocksMap.find(h);
+    if (it == mAllUnitAtomsToBlocksMap.end())
+        return BlockVector::ZERO;
+    else
+        return (BlockVector)(it->second);
 }
 
 void Octree3DMapManager::findAllBlockEntitiesOnTheMap()
@@ -414,7 +455,7 @@ void Octree3DMapManager::findAllBlockEntitiesOnTheMap()
 
     int newEntitiesNum = 0;
 
-    for (it =mAllUnitBlockAtoms.begin(); it != mAllUnitBlockAtoms.end(); ++ it)
+    for (it =mAllUnitAtomsToBlocksMap.begin(); it != mAllUnitAtomsToBlocksMap.end(); ++ it)
     {
         pos = (BlockVector)(it->second);
 
@@ -428,14 +469,14 @@ void Octree3DMapManager::findAllBlockEntitiesOnTheMap()
 
         if (block->mBlockEntity == 0)
         {
-            BlockEntity* entity = new BlockEntity(*block);
+            BlockEntity* entity = new BlockEntity(this,*block);
 
             // find all the blocks combine with this block
              vector<Block3D*> blockList = mRootOctree->findAllBlocksCombinedWith(&pos);
             //  entity->SortBlockOrder();
              entity->addBlocks(blockList);
 
-            Octree3DMapManager::mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
+            mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
             newEntitiesNum ++;
         }
 
@@ -531,8 +572,8 @@ BlockVector Octree3DMapManager::getObjectLocation(Handle objNode) const
 {
     // first if this object is a block, return the position of this block
     map<Handle, BlockVector>::const_iterator it2;
-    it2 = mAllUnitBlockAtoms.find(objNode);
-    if (it2 != mAllUnitBlockAtoms.end())
+    it2 = mAllUnitAtomsToBlocksMap.find(objNode);
+    if (it2 != mAllUnitAtomsToBlocksMap.end())
         return (BlockVector)it2->second;
 
     // if this object handle is not a block, then it should be an entity
@@ -557,8 +598,8 @@ BlockVector Octree3DMapManager::getObjectDirection(Handle objNode) const
 {
     // if it's a block, the direction make no sense, so we just use the x direction
     map<Handle, BlockVector>::const_iterator it2;
-    it2 = mAllUnitBlockAtoms.find(objNode);
-    if (it2 != mAllUnitBlockAtoms.end())
+    it2 = mAllUnitAtomsToBlocksMap.find(objNode);
+    if (it2 != mAllUnitAtomsToBlocksMap.end())
         return BlockVector::X_UNIT;
 
     Entity3D* entity = (Entity3D*)(getEntity(objNode));
@@ -739,8 +780,8 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
          return true;
 
      map<Handle, BlockVector>::const_iterator it2;
-     it2 = mAllUnitBlockAtoms.find(objectNode);
-     if (it2 != mAllUnitBlockAtoms.end())
+     it2 = mAllUnitAtomsToBlocksMap.find(objectNode);
+     if (it2 != mAllUnitAtomsToBlocksMap.end())
          return true;
 
      return false;
@@ -888,7 +929,42 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
  }
 
 
+HandleSeq Octree3DMapManager::getAllUnitBlockHandlesOfABlock(Block3D& _block)
+{
+    HandleSeq empty;
+    HandleSeq handles;
+    if (! getUnitBlockHandlesOfABlock(_block.getPosition(),_block.getLevel(),handles))
+        return empty;
+    else
+        return handles;
+}
 
+// a recursive funciton
+bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles)
+{
+    if (_blockLevel < 1)
+        return false;
+
+    if (_blockLevel == 1)
+    {
+        Handle h = getUnitBlockHandleFromPosition(_nearLeftPos);
+        if (h == Handle::UNDEFINED)
+            return false;
+
+        handles.push_back(h);
+    }
+    else
+    {
+        int newLevel = _blockLevel - 1;
+        for (int i = 0; i < 2; i ++)
+            for (int j = 0; j < 2; j ++)
+                for (int k = 0; k < 2; k ++)
+                {
+                    BlockVector pos(_nearLeftPos.x + newLevel * i,_nearLeftPos.y + newLevel * j, _nearLeftPos.z + newLevel * k);
+                    return (getUnitBlockHandlesOfABlock(pos, newLevel, handles));
+                }
+    }
+}
 
 
 // todo: to be completed
@@ -975,6 +1051,7 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
 
  void Octree3DMapManager::computeAllAdjacentBlockClusters()
  {
+     /* TODO
      map<int,BlockEntity*>::iterator iter2;
      vector<Block3D*>::const_iterator iter;
      vector<Handle>::const_iterator iter1;
@@ -1008,7 +1085,7 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
             unitBlockNum +=  unitBlockHandles.size();
             for (iter1 = unitBlockHandles.begin(); iter1 != unitBlockHandles.end(); ++ iter1)
             {
-                vector<BlockEntity*>  neighbourEntities = mRootOctree->getNeighbourEntities(mAllUnitBlockAtoms[(Handle)(*iter1)]);
+                vector<BlockEntity*>  neighbourEntities = mRootOctree->getNeighbourEntities(mAllUnitAtomsToBlocksMap[(Handle)(*iter1)]);
                 for (iter3 = neighbourEntities.begin(); iter3 != neighbourEntities.end(); ++ iter3)
                 {
                     iter4 = entity->NeighbourBlockEntities.find((BlockEntity*)(*iter3));
@@ -1037,6 +1114,7 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
 
      }
 #endif // HAVE_PROTOBUF
+*/
 
  }
 
@@ -1064,5 +1142,38 @@ bool Octree3DMapManager::containsObject(std::string & objectName) const
         return DOUBLE_MAX;
 
     return (entity->getPosition() - pos);
+
+ }
+
+
+ // this constructor is only used for clone
+ Octree3DMapManager::Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,int _TotalUnitBlockNum,
+                    AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap, map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,
+                    map<int,BlockEntity*>& _BlockEntityList,map<Handle,Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap):
+                mTotalDepthOfOctree(_TotalDepthOfOctree), mMapName(_MapName),mFloorHeight(_FloorHeight),mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum),
+                mMapBoundingBox(_MapBoundingBox), selfAgentEntity(_selfAgentEntity)
+
+ {
+    // the clone order should not be change here:
+    // should always clone the octree before the entity list
+    mRootOctree = _RootOctree->clone(this);
+
+    // copy all unit blocks
+    mAllUnitAtomsToBlocksMap = _AllUnitAtomsToBlocksMap;
+    mAllUnitBlocksToAtomsMap = _AllUnitBlocksToAtomsMap;
+
+    // clone all the BlockEnties
+    map<int,BlockEntity*>::iterator iter2;
+    for (iter2 = _BlockEntityList.begin(); iter2 != _BlockEntityList.end(); ++iter2)
+    {
+        BlockEntity* clonedEntity = ((BlockEntity*)(iter2->second))->clone(this);
+        mBlockEntityList.insert(map<int,BlockEntity*>::value_type(iter2->first, clonedEntity));
+    }
+
+    // clone all the SuperBlockEntities TODO
+
+    // copy all the NoneBlockEntities
+    mAllNoneBlockEntities = _AllNoneBlockEntities;
+    mPosToNoneBlockEntityMap = _PosToNoneBlockEntityMap;
 
  }

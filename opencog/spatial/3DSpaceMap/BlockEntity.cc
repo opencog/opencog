@@ -22,8 +22,8 @@
  */
 
 #include "BlockEntity.h"
-#include "Octree3DMapManager.h"
 #include <opencog/util/StringManipulator.h>
+#include <opencog/util/Logger.h>
 
 
 using namespace opencog;
@@ -31,8 +31,9 @@ using namespace opencog::spatial;
 
 int BlockEntity::BlockEntityIDCount = 0;
 
-void BlockEntity::_init(std::string entityName, bool _is_superBlockEntity)
+void BlockEntity::_init(Octree3DMapManager* map,std::string entityName, bool _is_superBlockEntity)
 {
+    this->spaceMap = map;
     mID = ++ BlockEntityIDCount;
     mName = entityName;
     mEntityClass = "block";
@@ -44,15 +45,15 @@ void BlockEntity::_init(std::string entityName, bool _is_superBlockEntity)
 
     is_superBlockEntity = _is_superBlockEntity;
 
-    Octree3DMapManager::newAppearBlockEntityList.push_back(this);
+    spaceMap->newAppearBlockEntityList.push_back(this);
 
     if (_is_superBlockEntity)
-        Octree3DMapManager::updateSuperBlockEntityList.push_back(this);
+        spaceMap->updateSuperBlockEntityList.push_back(this);
     else
-        Octree3DMapManager::updateBlockEntityList.push_back(this);
+        spaceMap->updateBlockEntityList.push_back(this);
 }
 
-BlockEntity::BlockEntity(Block3D& firstBlock, std::string entityName)
+BlockEntity::BlockEntity(Octree3DMapManager* map,Block3D& firstBlock, std::string entityName)
 {
     mMyBlocks.push_back(&firstBlock);
     firstBlock.mBlockEntity = this;
@@ -60,27 +61,37 @@ BlockEntity::BlockEntity(Block3D& firstBlock, std::string entityName)
 
     _ReCalculatCenterPosition();
 
-    _init(entityName, false);
+    _init(map,entityName, false);
 
 }
 
-BlockEntity::BlockEntity(vector<Block3D*>& blockList, std::string entityName)
+BlockEntity::BlockEntity(Octree3DMapManager* map,vector<Block3D*>& blockList, std::string entityName)
 {
     mBoundingBox = ((Block3D*)(blockList.front()))->getBoundingBox();
     addBlocks(blockList);
 
-    _init(entityName, false);
+    _init(map,entityName, false);
 }
 
-BlockEntity::BlockEntity(vector<BlockEntity*> subEntities, std::string entityName)
+BlockEntity::BlockEntity(Octree3DMapManager* map,vector<BlockEntity*> subEntities, std::string entityName)
 {
     addSubEntities(subEntities);
-    _init(entityName, true);
+    _init(map,entityName, true);
 }
 
 BlockEntity::~BlockEntity()
 {
-    Octree3DMapManager::newDisappearBlockEntityList.push_back(mEntityNode);
+    spaceMap->newDisappearBlockEntityList.push_back(mEntityNode);
+}
+
+BlockEntity* BlockEntity::clone(Octree3DMapManager* _newSpaceMap)
+{
+
+    BlockEntity* cloneBlockEntity = new BlockEntity(_newSpaceMap,is_superBlockEntity,mFartherEntity,mID,mName,
+                                                    mBoundingBox,mCenterPosition,mMyBlocks,mMySubEntities);
+
+    return cloneBlockEntity;
+
 }
 
 void BlockEntity::addBlock(Block3D* _block)
@@ -245,3 +256,43 @@ void BlockEntity::clearAllBlocks()
 
 }
 
+// this constructor is only for clone this instance (clone it from a spaceMap to another spaceMap)
+BlockEntity::BlockEntity(Octree3DMapManager* _newSpaceMap,bool _is_superBlockEntity,BlockEntity* _FartherEntity,
+            int _ID, std::string _Name, AxisAlignedBox& _BoundingBox, BlockVector& _CenterPosition,vector<Block3D*>& _MyBlocks,vector<BlockEntity*>& _MySubEntities):
+    spaceMap(_newSpaceMap),is_superBlockEntity(_is_superBlockEntity),mFartherEntity(_FartherEntity)
+{
+    mID = _ID;
+    mName = _Name;
+    mBoundingBox = _BoundingBox;
+    mCenterPosition = _CenterPosition;
+
+    mEntityClass = "block";
+    mYaw = 0.0f; // currently, we don't consider about the rotation of block entities
+
+    // blocks are always obstacle
+    is_obstacle = true;
+
+    vector<Block3D*>::iterator it;
+    for (it = _MyBlocks.begin(); it != _MyBlocks.end(); ++it)
+    {
+        Block3D* b = *it;
+        Block3D* blockInNewMap;
+        _newSpaceMap->getRootOctree()->checkIsSolid( b->getPosition(), blockInNewMap);
+        if (blockInNewMap != 0)
+        {
+            mMyBlocks.push_back(blockInNewMap);
+            blockInNewMap->mBlockEntity = this;
+        }
+        else
+        {
+            logger().error("BlockEntity::clone: Cannot find this block (%d,%d,%d) in new space map!/n Please Make sure you have clone the Octrees before clone the BlockEntities!/n",
+                           b->getPosition().x,b->getPosition().y,b->getPosition().z);
+        }
+    }
+
+    if (is_superBlockEntity)
+    {
+        //TODO:
+    }
+
+}

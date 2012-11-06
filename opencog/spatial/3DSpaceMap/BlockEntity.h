@@ -27,6 +27,7 @@
 #include "Block3DMapUtil.h"
 #include "Block3D.h"
 #include "Entity3D.h"
+#include "Octree3DMapManager.h"
 #include <vector>
 #include <map>
 
@@ -50,10 +51,13 @@ namespace opencog
             static int BlockEntityIDCount;
         public:
             // this will also add a node to the atom space representing this BlockEntity
-            BlockEntity(Block3D& firstBlock, std::string entityName = "");
-            BlockEntity(vector<Block3D*>& blockList, std::string entityName = "");
-            BlockEntity(vector<BlockEntity*> subEntities, std::string entityName = ""); // for super BlockEntity only
+            BlockEntity(Octree3DMapManager* map,Block3D& firstBlock, std::string entityName = "");
+            BlockEntity(Octree3DMapManager* map,vector<Block3D*>& blockList, std::string entityName = "");
+            BlockEntity(Octree3DMapManager* map,vector<BlockEntity*> subEntities, std::string entityName = ""); // for super BlockEntity only
             ~BlockEntity();
+
+            // Make sure a new octree has been cloned and all the blocks have been cloned before calling this function
+            BlockEntity* clone(Octree3DMapManager* _newSpaceMap);
 
             inline const vector<Block3D*>& getBlockList(){return mMyBlocks;}
             inline const vector<BlockEntity*>& getSubEntities() {return mMySubEntities;}
@@ -82,14 +86,19 @@ namespace opencog
             map<BlockEntity*,AdjacentInfo> NeighbourBlockEntities;
 
         protected:
+            Octree3DMapManager* spaceMap;
             bool is_superBlockEntity; // superBlockEntity is a BlockEntity composed of sub blockEntities
             BlockEntity* mFartherEntity; // the farther BlockEntity of this entity
             vector<Block3D*> mMyBlocks; // all the blocks in this entity
             vector<BlockEntity*> mMySubEntities; // all the subBlockEntities in this entity
 
-            void _init(std::string entityName, bool _is_superBlockEntity);
+            void _init(Octree3DMapManager* map,std::string entityName, bool _is_superBlockEntity);
             void _reCalculateBoundingBox();
             void _ReCalculatCenterPosition();
+
+            // this constructor is only for clone this instance (clone it from a spaceMap to another spaceMap)
+            BlockEntity(Octree3DMapManager* _newSpaceMap, bool _is_superBlockEntity,BlockEntity* _FartherEntity,
+                        int _ID, std::string _Name, AxisAlignedBox& _BoundingBox, BlockVector& _CenterPosition,vector<Block3D*>& _MyBlocks,vector<BlockEntity*>& _MySubEntities);
 
         };
     }

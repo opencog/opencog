@@ -25,8 +25,6 @@
 #define _SPATIAL_BLOCK3D_H_
 
 #include "Block3DMapUtil.h"
-#include <opencog/atomspace/Handle.h>
-
 #include <vector>
 
 using namespace std;
@@ -48,13 +46,15 @@ namespace opencog
         public:
             /**
              * @ _composedLevel: It indicates how big this block is.
-             *                   Level for a unit block is 1, level for a block composed by 8 units is 2, 16 unitts is 3
+             *                   Level for a unit block is 1, level for a block composed by 8 units is 2, 64 unitts is 3
              * @ _postion: The position of this block in block3DSpaceMap (the near-left-bottom point of this block).
              * @ _unitBlockAtom: Only when this block is an unit block , pass a valid atom that represent this block in the Atomspace
              */
-            Block3D(int _composedLevel, BlockVector& _position, string _materialType = "", string _color = "",const Handle &_unitBlockAtom = opencog::Handle::UNDEFINED, bool _canDestroy = true);
+            Block3D(int _composedLevel, BlockVector& _position, string _materialType = "", string _color = "",bool _canDestroy = true);
 
             ~Block3D();
+
+            Block3D* clone();
 
             inline int getLevel(){return mLevel;}
 
@@ -64,14 +64,9 @@ namespace opencog
 
             inline const AxisAlignedBox& getBoundingBox(){return mBoundingBox;}
 
-            inline const HandleSeq& getAllMyUnitBlockHandles(){return mUnitBlockHandles;}
-
             inline bool canDestroy(){return mCanDestroy;}
 
-            // add unit block atoms to this block
-            void addBlockAtoms(HandleSeq& _atoms);
-
-            void addBlockAtom(Handle& _atom);
+            //vector<BlockVector> getAllMyUnitBlockVectors();
 
             // The BlockEntity this Block belongs to, it is defaultly null
             BlockEntity* mBlockEntity;
@@ -84,9 +79,6 @@ namespace opencog
 
             // The global position of this block (the left-bottom point of this block)
             BlockVector mPosition;
-
-            // All the atoms for all the unit block this block contains
-            HandleSeq mUnitBlockHandles;
 
             // Material of this block
             BlockMaterial mBlockMaterial;

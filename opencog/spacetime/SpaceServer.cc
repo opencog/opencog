@@ -689,16 +689,16 @@ void SpaceServer::findAllBlockEntitiesOnTheMap()
 
 void SpaceServer::addBlockEntityNodes()
 {
-    vector<opencog::spatial::BlockEntity*>::iterator it = SpaceMap::newAppearBlockEntityList.begin();
+    vector<opencog::spatial::BlockEntity*>::iterator it = curMap->newAppearBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;
-    for (; it != SpaceMap::newAppearBlockEntityList.end(); ++it)
+    for (; it != curMap->newAppearBlockEntityList.end(); ++it)
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
         entity->mEntityNode = atomspace->addNode(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
         atomspace->setSTI(entity->mEntityNode, 1000);
     }
 
-    SpaceMap::newAppearBlockEntityList.clear();
+    curMap->newAppearBlockEntityList.clear();
 }
 
 // add blocklist to an entity
@@ -710,8 +710,7 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
     for (; it != blocks.end(); ++it)
     {
         opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
-        HandleSeq unitBlockNodes = b->getAllMyUnitBlockHandles();
-
+        HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
         blocklist.insert(blocklist.end(), unitBlockNodes.begin(),unitBlockNodes.end());
     }
 
@@ -759,15 +758,15 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
 
 void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp)
 {
-    vector<opencog::spatial::BlockEntity*>::iterator it = SpaceMap::updateBlockEntityList.begin();
+    vector<opencog::spatial::BlockEntity*>::iterator it = curMap->updateBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;
-    for (; it != opencog::spatial::Octree3DMapManager::updateBlockEntityList.end(); ++it)
+    for (; it != curMap->updateBlockEntityList.end(); ++it)
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
         updateBlockEntityProperties(entity, timestamp);
     }
 
-    SpaceMap::updateBlockEntityList.clear();
+    curMap->updateBlockEntityList.clear();
 }
 
 Handle SpaceServer::addPropertyPredicate(
