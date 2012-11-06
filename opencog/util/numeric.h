@@ -376,7 +376,7 @@ Float generalized_mean(const C& c, Float p = 1.0)
 /// Manhattan distance, and for p=0 or negative, this is the maximum
 /// difference for one element.
 template<typename Vec, typename Float>
-Float p_norm(const Vec& a, const Vec& b, Float p=1.0)
+Float p_norm_distance(const Vec& a, const Vec& b, Float p=1.0)
 {
     OC_ASSERT (a.size() == b.size(),
                "Cannot compare unequal-sized vectors!  %d %d\n",

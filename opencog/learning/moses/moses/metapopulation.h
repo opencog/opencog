@@ -62,13 +62,9 @@ static const operator_set empty_ignore_ops = operator_set();
 
 struct diversity_parameters
 {
-    diversity_parameters(bool _include_dominated = true)
-        : include_dominated(_include_dominated),
-          pressure(0.0),
-          exponent(-1.0),       // max
-          normalize(true),      // sum or mean (default mean)
-          p_norm(2.0)           // Euclidean
-    {}
+    typedef score_t dp_t;
+    
+    diversity_parameters(bool _include_dominated = true);
 
     // Ignore behavioral score domination when merging candidates in
     // the metapopulation. Keeping dominated candidates may improves
@@ -79,19 +75,19 @@ struct diversity_parameters
     // Diversity pressure of to enforce diversification of the
     // metapop. 0 means no diversity pressure, the higher the value
     // the strong the pressure.
-    score_t pressure;
+    dp_t pressure;
 
     // exponent of the generalized mean (or sum, see below) used to
     // aggregate the diversity penalties of a candidate between a set
     // of candidates. If the exponent is negative (default) then the
     // max is used instead (generalized mean with infinite exponent).
-    score_t exponent;
+    dp_t exponent;
 
     // If normalize is false then the aggregation of diversity
     // penalties is a generalize mean, otherwise it is a generalize
     // sum, defined here as
     //
-    // generalize_mean(X) * |X|
+    // generalized_mean(X) * |X|
     //
     // in other words it is a generalized mean without normalization
     // by the number of elements.
@@ -100,11 +96,32 @@ struct diversity_parameters
     // is the max anyway.
     bool normalize;
 
-    // Parameter value of the p-norm used to compute the distance
-    // between 2 bscores
-    score_t p_norm;    
+    // There are 3 distances available to compare bscores, the p-norm,
+    // the Tanimoto and the angular distances.
+    enum dst_enum_t { p_norm, tanimoto, angular };
+    void set_dst(dst_enum_t de, dp_t p = 0.0 /* optional distance parameter */);
+    std::function<dp_t(const behavioral_score&, const behavioral_score&)> dst;
+
+    // Function to convert the distance into diversity penalty. There
+    // are 2 possible functions
+    //
+    // The inserve (offset by 1)
+    //
+    // f(x) = pressure / (1+x)
+    //
+    // The complement
+    //
+    // f-x) = pressure * (1-x)
+    //
+    // The idea is that it should tend to pressure when the distance
+    // tends to 0, and tends to 0 when the distance tends to its
+    // maximum. Obviously the inverse is adequate when the maximum is
+    // infinity and the complement is adequate when it is 1.
+    enum dst2dp_enum_t { inverse, complement };
+    void set_dst2dp(dst2dp_enum_t d2de);
+    std::function<dp_t(dp_t)> dst2dp;
 };
-    
+
 /**
  * parameters about deme management
  */
@@ -377,7 +394,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         return _best_candidates.begin()->first;
     }
 
-    typedef score_t dp_t;  // diversity_penalty type
+    typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
     
     /**
      * Distort a diversity penalty component between 2
@@ -782,7 +799,8 @@ protected:
      */
     struct cached_dst {
         // ctor
-        cached_dst(dp_t lp_norm) : p(lp_norm), misses(0), hits(0) {}
+        cached_dst(const diversity_parameters& _dparams)
+            : dparams(_dparams), misses(0), hits(0) {}
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
@@ -800,7 +818,7 @@ protected:
                 }
             }
             // miss
-            dp_t dst = lp_distance(get_bscore(*cl), get_bscore(*cr), p);
+            dp_t dst = dparams.dst(get_bscore(*cl), get_bscore(*cr));
 
             // // debug
             // logger().fine("dst = %f, dp = %f, ddp = %f", dst, dp, ddp);
@@ -859,7 +877,7 @@ protected:
         typedef boost::unordered_map<ptr_pair, dp_t, boost::hash<ptr_pair>> Cache;
         cache_mutex mutex;
 
-        dp_t p;
+        const diversity_parameters& dparams;
         std::atomic<unsigned> misses, hits;
         Cache cache;
     };
