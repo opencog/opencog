@@ -99,6 +99,16 @@ static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
 static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
+// diversity distance types
+static const string p_norm = "p_norm";
+static const string tanimoto = "tanimoto";
+static const string angular = "angular";
+        
+// diversity dst2dp types
+static const string auto_str = "auto";        
+static const string inverse = "inverse";
+static const string complement = "complement";
+
 void log_output_error_exit(string err_msg) {
     logger().info() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
@@ -177,6 +187,29 @@ void not_recognized_combo_operator(const string& ops_str)
 {
     stringstream ss;
     ss << ops_str << " is not recognized as combo operator.";
+    log_output_error_exit(ss.str());
+}
+
+/**
+ * Display error message about not recognized diversity distance and exist
+ */
+void not_recognized_dst(const string& diversity_dst)
+{
+    stringstream ss;
+    ss << diversity_dst << " is not recognized. Valid distances are "
+       << p_norm << ", " << tanimoto << " and " << angular;
+    log_output_error_exit(ss.str());
+}
+
+/**
+ * Display error message about not recognized diversity distance to
+ * penalty function and exist
+ */
+void not_recognized_dst2dp(const string& diversity_dst2dp)
+{
+    stringstream ss;
+    ss << diversity_dst2dp << " is not recognized. Valid distances to penalty are "
+       << auto_str << ", " << inverse << " and " << complement;
     log_output_error_exit(ss.str());
 }
 
@@ -445,7 +478,9 @@ int moses_exec(int argc, char** argv)
     score_t diversity_pressure;
     score_t diversity_exponent;
     bool diversity_normalize;
+    string diversity_dst;
     score_t diversity_p_norm;
+    string diversity_dst2dp;
 
     // optim_param
     double pop_size_ratio;
@@ -956,13 +991,28 @@ int moses_exec(int argc, char** argv)
          "this doesn't have any impact as the aggregating function is "
          "the max anyway.\n")
 
+        ("diversity-dst",
+         value<string>(&diversity_dst)->default_value(p_norm),
+         str(format("Set the distance between behavioral scores, "
+                    "then used to determin the diversity penalty."
+                    "3 distances are available: %s, %s and %s.\n")
+             % p_norm % tanimoto % angular).c_str())
+
         ("diversity-p-norm",
          value<score_t>(&diversity_p_norm)->default_value(2.0),
-         "Set the parameter of the p-norm used to compute the distance between "
-         "behavioral scores used for the diversity penalty. A value of 1.0 "
+         "Set the parameter of the p_norm distance. A value of 1.0"
          "correspond to the Manhatan distance. A value of 2.0 corresponds to "
          "the Euclidean distance. A value of 0.0 or less correspond to the "
          "max component-wise. Any other value corresponds to the general case.\n")
+
+        ("diversity-dst2dp",
+         value<string>(&diversity_dst2dp)->default_value(auto_str),
+         str(format("Set the type of function to convert distance into penalty. "
+                    "3 options are available: %1%, %2% and %3%. "
+                    "When %1% is selected the function is selected depending "
+                    "on the distance, if the distance is %4%, "
+                    "then %2% is selected, otherwise %3% is selected.\n")
+             % auto_str % inverse % complement % p_norm).c_str())
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t>>(&discretize_thresholds),
@@ -1272,7 +1322,33 @@ int moses_exec(int argc, char** argv)
     meta_params.diversity.pressure = diversity_pressure;
     meta_params.diversity.exponent = diversity_exponent;
     meta_params.diversity.normalize = diversity_normalize;
-    meta_params.diversity.p_norm = diversity_p_norm;
+    // set distance
+    diversity_parameters::dst_enum_t de;
+    if (diversity_dst == p_norm)
+        de = diversity_parameters::p_norm;
+    else if (diversity_dst == tanimoto)
+        de = diversity_parameters::tanimoto;
+    else if (diversity_dst == angular)
+        de = diversity_parameters::angular;
+    else {
+        not_recognized_dst(diversity_dst);
+        de = diversity_parameters::p_norm; // silent compiler warning
+    }
+    meta_params.diversity.set_dst(de, diversity_p_norm);
+    // set distance to penalty
+    diversity_parameters::dst2dp_enum_t d2de;
+    if (diversity_dst2dp == auto_str)
+        d2de = diversity_dst == p_norm ?
+            diversity_parameters::inverse : diversity_parameters::complement;
+    else if (diversity_dst2dp == inverse)
+        d2de = diversity_parameters::inverse;
+    else if (diversity_dst2dp == complement)
+        d2de = diversity_parameters::complement;
+    else {
+        not_recognized_dst2dp(diversity_dst2dp);
+        d2de = diversity_parameters::inverse; // silent compiler warning
+    }
+    meta_params.diversity.set_dst2dp(d2de);
 
     // Set optim_parameters.
     optim_parameters opt_params(opt_algo, pop_size_ratio, max_score, max_dist);

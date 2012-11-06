@@ -26,17 +26,36 @@
  */
 
 #include <boost/program_options.hpp>
+#include <boost/format.hpp>
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/comboreduct/combo/table_io.h>
 #include <opencog/learning/moses/moses/types.h>
 
 #include "eval-diversity.h"
+#include "../moses/metapopulation.h"
 
 using namespace std;
 using namespace boost::program_options;
 using namespace opencog;
 using namespace moses;
+
+void log_output_error_exit(string err_msg) {
+    logger().info() << "Error: " << err_msg;
+    cerr << "Error: " << err_msg << endl;
+    exit(1);    
+}
+
+/**
+ * Display error message about not recognized diversity distance and exist
+ */
+void not_recognized_dst(const string& diversity_dst)
+{
+    stringstream ss;
+    ss << diversity_dst << " is not recognized. Valid distances are "
+       << p_norm << ", " << tanimoto << " and " << angular;
+    log_output_error_exit(ss.str());
+}
 
 // given the sequence of distances write the results
 void write_results(const eval_diversity_params& edp, const vector<float>& dsts) {
@@ -79,10 +98,16 @@ int main(int argc, char** argv) {
         ("display-values", value<bool>(&edp.display_values)->default_value(false),
          "Display the actually values (distances).\n")
 
+        ("diversity-dst",
+         value<string>(&edp.diversity_dst)->default_value(p_norm),
+         str(boost::format("Set the distance between behavioral scores, "
+                           "then used to determin the diversity penalty."
+                           "3 distances are available: %s, %s and %s.\n")
+             % p_norm % tanimoto % angular).c_str())
+
         ("diversity-p-norm",
-         value<float>(&edp.diversity_p_norm)->default_value(2.0),
-         "Set the parameter of the p-norm used to compute the distance between "
-         "behavioral scores used for the diversity penalty. A value of 1.0 "
+         value<score_t>(&edp.diversity_p_norm)->default_value(2.0),
+         "Set the parameter of the p_norm distance. A value of 1.0"
          "correspond to the Manhatan distance. A value of 2.0 corresponds to "
          "the Euclidean distance. A value of 0.0 or less correspond to the "
          "max component-wise. Any other value corresponds to the general case.\n")
@@ -104,6 +129,22 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // set diversity parameters
+    diversity_parameters diversity_params;
+    // set distance
+    diversity_parameters::dst_enum_t de;
+    if (edp.diversity_dst == p_norm)
+        de = diversity_parameters::p_norm;
+    else if (edp.diversity_dst == tanimoto)
+        de = diversity_parameters::tanimoto;
+    else if (edp.diversity_dst == angular)
+        de = diversity_parameters::angular;
+    else {
+        not_recognized_dst(edp.diversity_dst);
+        de = diversity_parameters::p_norm; // silent compiler warning
+    }
+    diversity_params.set_dst(de, edp.diversity_p_norm);
+
     if (!edp.moses_files.empty()) {
         // load the bscores
         vector<behavioral_score> bscores;
@@ -122,8 +163,8 @@ int main(int argc, char** argv) {
         vector<float> dsts;
         for (unsigned i = 0; i < bcts.size(); ++i)
             for (unsigned j = 0; j < i; ++j)
-                dsts.push_back(lp_distance(get_bscore(bcts[i]), get_bscore(bcts[j]),
-                                           edp.diversity_p_norm));
+                dsts.push_back(diversity_params.dst(get_bscore(bcts[i]),
+                                                    get_bscore(bcts[j])));
 
         // write the results
         write_results(edp, dsts);
@@ -144,8 +185,7 @@ int main(int argc, char** argv) {
         vector<float> dsts;
         for (unsigned i = 0; i < targets.size(); ++i)
             for (unsigned j = 0; j < i; ++j)
-                dsts.push_back(p_norm(targets[i], targets[j],
-                                      edp.diversity_p_norm));
+                dsts.push_back(diversity_params.dst(targets[i], targets[j]));
 
         // write the results
         write_results(edp, dsts);        
