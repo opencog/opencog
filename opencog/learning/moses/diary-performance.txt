@@ -3732,14 +3732,44 @@ TODO: limit number of knobs being created...
 
 Rerun the above, with RAM-limited number of instances (bzr rev 7880)
 output to -freut-red-2443-ramcap.log
-Note: deme 2: slower by 14% ! Yikes
+Arghhh .. mem usage check didn't prevent this bonk!  Problem was,
+number of new insances was not limited.
+
+Again, with git version of 25 October 2012:
+Again, with  -freut-red-2443-reramcap.log
+
+Cap max mem usage at 80%
+Again, with  -freut-red-2443-rrramcap.log
 
        tot    disc    contin     inst   prod   final  final  final   deme  
 deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time  
 ----  -----   -----    -----     ----   ----    ----  -----   ----   ----- 
-  1   136808  136808      0      34232   342     209   4748    108   4301
-  2   772049  659579   112470   305512  3055     165   3375    187  62399
-  3  1070130  898980   171150   438712  4387      80   1566    186  42299
+  1   136808  136808      0      34232   342     209   4748    108   4303
+  2   772049  659579   112470   305512  3055     165   3375    187  53454
+  3  1070130  898980   171150   438712  4387      80   1566    186  37322
   4  7062789  947843  6114946  7880672  78GB  bonk
 
-Arghhh .. mem usage chek didn't prevent this bonk!
+Why is it still bonking???
+
+total=25268977664 = 23.5GB 
+    so acceptable frac = 0.5*23.5 = 11.5GB
+    so max lim = 0.8*23.5 = 18.8GB
+new=39403360000 = 37GB
+deme=7880672
+cap=12634488832 = 12GB  --> 10947962470 = 10GB --> 9856670924
+num_new=1603 --> 1389 --> 1250
+
+Ahh bug: current_number_of_instances == num in deme but not num in meta... 
+use getFreeRAM()
+
+       tot    disc    contin     inst   prod   final  final  final   deme  
+deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time  
+----  -----   -----    -----     ----   ----    ----  -----   ----   ----- 
+  1   136808  136808      0      34232   342     209   4748    108   4281
+  2   772049  659579   112470   305512  3055     165   3375    187  53500
+  3  1070130  898980   171150   438712  4387      80   1566    186  37234
+  4  7062789  947843  6114946  7880672  78GB  bonk
+
+34232 * 5001 = 163MB expected usage
+20802281472 - 20713652224 = 84MB actual .. wtf ?
+
