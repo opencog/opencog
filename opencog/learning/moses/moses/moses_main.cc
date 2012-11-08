@@ -36,12 +36,12 @@ namespace opencog { namespace moses {
 #define strform(x) #x
 #define stringify(x) strform(x)
 
-#ifdef MOSES_BZR_REVNO
+#ifdef MOSES_GIT_DESCRIBE
 const char * version_string =
     stringify(MOSES_VERSION_MAJOR) "."
     stringify(MOSES_VERSION_MINOR) "."
-    stringify(MOSES_VERSION_PATCH) " (revno "
-    stringify(MOSES_BZR_REVNO) ")";
+    stringify(MOSES_VERSION_PATCH) " (git-describe "
+    stringify(MOSES_GIT_DESCRIBE) ")";
 
 #else
 const char * version_string =
