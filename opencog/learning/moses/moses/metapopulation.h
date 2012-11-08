@@ -336,7 +336,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_dst(pa.diversity.p_norm)
+        _cached_dst(pa.diversity)
     {
         init(bases, si_ca, sc);
     }
@@ -353,7 +353,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         _bscorer(bsc), params(pa),
         _merge_count(0),
         _best_cscore(worst_composite_score),
-        _cached_dst(pa.diversity.p_norm)
+        _cached_dst(pa.diversity)
     {
         std::vector<combo_tree> bases(1, base);
         init(bases, si, sc);
@@ -767,7 +767,7 @@ protected:
     const bscore_base& _bscorer; // behavioral score
 
 public:
-    metapop_parameters params;
+    const metapop_parameters& params;
     
 protected:
     size_t _merge_count;
