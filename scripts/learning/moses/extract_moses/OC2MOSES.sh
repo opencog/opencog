@@ -147,10 +147,10 @@ echo "ADD_SUBDIRECTORY(learning)" >> "$ABS_MOSES_DIR/$PROJECT/CMakeLists.txt"
 ABS_PLM_DIR="$ABS_MOSES_DIR/$PROJECT/learning/moses/"
 # cp "$ABS_PLM_DIR/CMakeLists.txt" "$ABS_PLM_DIR/CMakeLists.txt.orig"
 cd "$OC_PATH"
-REVNO=$(bzr revno)
+GIT_DESCRIBE=$(git describe)
 cd "$INIT_DIR"
-sed -i s/'EXECUTE_PROCESS(COMMAND bzr revno "${PROJECT_SOURCE_DIR}" OUTPUT_VARIABLE MOSES_BZR_REVNO)'/'# EXECUTE_PROCESS(COMMAND bzr revno OUTPUT_VARIABLE MOSES_BZR_REVNO)'/ "$ABS_PLM_DIR/CMakeLists.txt"
-sed -i "1i SET (MOSES_BZR_REVNO $REVNO)" "$ABS_PLM_DIR/CMakeLists.txt"
+sed -i s/'EXECUTE_PROCESS(COMMAND git describe "${PROJECT_SOURCE_DIR}" OUTPUT_VARIABLE MOSES_BZR_REVNO)'/'# EXECUTE_PROCESS(COMMAND git describe OUTPUT_VARIABLE MOSES_BZR_REVNO)'/ "$ABS_PLM_DIR/CMakeLists.txt"
+sed -i "1i SET (MOSES_BZR_REVNO $GIT_DESCRIBE)" "$ABS_PLM_DIR/CMakeLists.txt"
 
 # ----------
 # learning CMakeLists.txt
