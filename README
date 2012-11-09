@@ -3,10 +3,10 @@ OpenCog
 
 OpenCog is a framework for developing AI systems, especially appropriate
 for integrative multi-algorithm systems, and artificial general intelligence
-systems.  Though much work remains to be done,
-it currently contains a functional core framework, and a number of
-cognitive agents at varying levels of completion, some already displaying
-interesting and useful functionalities alone and in combination.
+systems.  Though much work remains to be done, it currently contains a 
+functional core framework, and a number of cognitive agents at varying levels
+of completion, some already displaying interesting and useful functionalities
+alone and in combination.
 
 Please see doc/ for platform and OS specific READMEs.
 
