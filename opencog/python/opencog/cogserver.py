@@ -16,4 +16,3 @@ class Server(object):
         while(True):
             for mind_agent in self.mind_agents:
                 mind_agent.run(atomspace)
-
