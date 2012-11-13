@@ -117,6 +117,12 @@ public:
      */
     Handle getLatestMapHandle() const;
 
+    /**
+     * Sometimes, like when doing planning, we need to clone a spaceMap for reasoning about the things just happen in imagination, but not really happen,
+     * to avoid really changing the real spaceMap.
+     */
+    SpaceMap* cloneTheLatestSpaceMap() const;
+
     // add create a new spaceMap for a new scene (it will create a new Octree3DMapMananger)
     // if there is already a spaceMap of this _mapName, just get it and set it to be the current map, not to created a new spaceMap
     Handle addOrGetSpaceMap(unsigned long timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);

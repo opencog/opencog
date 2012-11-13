@@ -460,6 +460,12 @@ void SpaceServer::clear()
     }
     spaceMaps.clear();
 }
+
+SpaceServer::SpaceMap* SpaceServer::cloneTheLatestSpaceMap() const
+{
+    return curMap->clone();
+}
+
 /*
 Handle SpaceServer::getSpaceMapNode(std::string _mapName)
 {
