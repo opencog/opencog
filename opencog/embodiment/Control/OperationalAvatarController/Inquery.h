@@ -57,9 +57,18 @@ public:
 
     static void init(OAC* _oac,AtomSpace* _atomSpace);
 
+    // when we are doing planning, we usually don't use the real spaceMap.
+    // Instead, we use a clone of the real spaceMap, which is kinda imaginary spaceMap
+    // Call this funciton to assign the imaginary spaceMap here
+    static void setSpaceMap(SpaceServer::SpaceMap* _spaceMap);
+
+    // After planning, please reset the spaceMap back to the real one via calling this function
+    static void reSetSpaceMap();
+
+
     // If this is an simple state, which requires no real time calculation.
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
-    static StateValue getStateValueFromAtomspace(State& state);
+    static StateValue getStateValueFromAtomspace(const State &state);
 
     static StateValue inqueryDistance(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryExist(const vector<StateValue>& stateOwnerList);

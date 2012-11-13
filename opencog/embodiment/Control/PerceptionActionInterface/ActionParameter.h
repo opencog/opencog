@@ -144,7 +144,7 @@ public:
         return ((bound_low == other.bound_low)&&(bound_high == other.bound_high));
     }
 
-    bool isInsideMe(float f)
+    bool isInsideMe(float f) const
     {
         if ((f <= bound_high) && (f >= bound_low))
            return true;
@@ -152,7 +152,7 @@ public:
            return false;
     }
 
-    bool isInsideMe(FuzzyIntervalFloat& other)
+    bool isInsideMe(const FuzzyIntervalFloat& other) const
     {
         return ((other.bound_high < bound_high) && (other.bound_low > bound_low));
     }
