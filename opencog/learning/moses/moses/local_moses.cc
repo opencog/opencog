@@ -171,7 +171,7 @@ void local_moses(metapopulation& mp,
         if (logger().isDebugEnabled() and mp.params.diversity.pressure > 0.0) {
             stringstream ss;
             ss << pa.max_cnd_output << " best candidates of the metapopulation (with scores and visited status):" << std::endl;
-            mp.ostream(ss, pa.max_cnd_output, true, true, false, true);
+            mp.ostream(ss, pa.max_cnd_output, true, true, true, true);
             logger().debug(ss.str());
         }
         
