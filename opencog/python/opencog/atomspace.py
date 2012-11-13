@@ -316,3 +316,10 @@ def test_scaling():
         #
         #except ImportError:
         #    pass
+
+
+from utility.generic import concat_lists
+def find_links_upward(atom):
+    level = [link for link in atom.incoming if link.tv.count > 0]
+    next_level = concat_lists([find_links_upward(link) for link in atom.incoming])
+    return level + next_level

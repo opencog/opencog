@@ -29,3 +29,7 @@ def subsets_of(collection, subsets_type=set):
 
 def dim(structure):
     return structure.__dim__()
+
+import operator
+def concat_lists(lists):
+    return reduce(operator.concat, lists, [])
