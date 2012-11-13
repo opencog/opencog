@@ -31,8 +31,6 @@
 
 using namespace opencog::oac;
 
-set<State*> OCPlanner::virtualStates = set<State*>();
-
 const StateValue OCPlanner::access_distance = ACCESS_DISTANCE;
 const StateValue OCPlanner::SV_TRUE = "true";
 const StateValue OCPlanner::SV_FALSE = "false";
@@ -86,72 +84,55 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 }
 
-bool OCPlanner::checkIsGoalAchieved(vector<State> goal)
+bool OCPlanner::checkIsGoalAchieved(const State& oneGoal, const vector<State> &curLayerStates, float& satisfiedDegree, const State* original_state)
 {
-
-    vector<State>::iterator it = goal.begin();
-    for (;it != goal.end(); it ++)
+    // if this goal doesn't really require an exact value, just return fully achieved
+    if (oneGoal.getStateValue() == UNDEFINED_VALUE)
     {
-        State oneGoal = (State)*it;
+        satisfiedDegree = 1.0f;
+        return 1.0f;
+    }
 
-        // if this goal doesn't really require an exact value, just skip it
-        if (oneGoal.getStateValue() == UNDEFINED_VALUE)
-            continue;
+    // First search this state in the curLayerStates
+    vector<State>::const_iterator vit = curLayerStates.begin();
+    for (;vit != curLayerStates.end(); vit ++)
+    {
+        State vState = (State)(*vit);
+        if (vState.isSameState(oneGoal))
+            return vState.isSatisfied(oneGoal,satisfiedDegree,original_state);
 
-        bool satisfied = false;
+    }
 
-        // First search this state in the virtualStates
-        set<State*>::iterator vit = virtualStates.begin();
-        for (;vit != virtualStates.end(); vit ++)
-        {
-            State* vState = (State*)(*vit);
-            if (vState->isSameState(oneGoal))
-            {
-                if (vState->isSatisfied(oneGoal))
-                {
-                    satisfied = true;
-                    break;
-                }
-                else // this goal state has not been satisfied.
-                    return false;
-            }
+    // has not been found in the curLayerStates,
+    // then we should inquery this state from the run time environment
+    if (oneGoal.is_need_inquery())
+    {
+        // call its inquery funciton
+        InqueryFun f = oneGoal.getInqueryFun();
+        StateValue inqueryValue = f(oneGoal.getStateOwnerList());
+        OC_ASSERT(!(inqueryValue == UNDEFINED_VALUE),
+                  "OCPlanner::checkIsGoalAchieved: the inqueried value for state: %s is invalid.\n",
+                  oneGoal.name().c_str());
 
-        }
+        return oneGoal.isSatisfiedMe(inqueryValue,satisfiedDegree,original_state);
 
-        if (satisfied)
-            continue; // check next goal state
+    }
+    else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
+    {
+        // TODO
+        StateValue value = Inquery::getStateValueFromAtomspace(oneGoal);
+        OC_ASSERT(!(value == UNDEFINED_VALUE),
+                  "OCPlanner::checkIsGoalAchieved: the inqueried value for state: %s is invalid.\n",
+                  oneGoal.name().c_str());
 
-        // has not been found in the virtualStates,
-        // then we should inquery this state from the run time environment
-        if (oneGoal.is_need_inquery())
-        {
-            // call its inquery funciton
-            InqueryFun f = oneGoal.getInqueryFun();
-            StateValue inqueryValue = f(oneGoal.getStateOwnerList());
-            if (oneGoal.isSatisfiedMe(inqueryValue))
-                continue;
-            else
-                return false;
-        }
-        else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
-        {
-            // TODO
-            StateValue value = Inquery::getStateValueFromAtomspace(oneGoal);
-            if (value == UNDEFINED_VALUE)
-                return false;
-            if (oneGoal.isSatisfiedMe(value))
-                continue;
-            else
-                return false;
-
-        }
+        return oneGoal.isSatisfiedMe(value,satisfiedDegree,original_state);
 
     }
 
     return true;
 }
 
-bool OCPlanner::doPlanning(vector<State> goal, vector<PetAction> &plan)
+bool OCPlanner::doPlanning(vector<State>& goal, vector<PetAction> &plan)
 {
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
@@ -160,7 +141,20 @@ bool OCPlanner::doPlanning(vector<State> goal, vector<PetAction> &plan)
     // Set this cloned spaceMap for Inquery
     Inquery::setSpaceMap(clonedMap);
 
-    // TODO: planning process
+    // we use the basic idea of the graph planner for plan searching :
+    // alternated state layers with action layers
+
+    // First, construct the goal state layer
+
+
+    // planning process: TODO:
+    while(true)
+    {
+//        if (checkIsGoalAchieved(goal,))
+//            return true;
+
+
+    }
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
