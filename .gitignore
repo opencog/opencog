@@ -80,3 +80,6 @@ opencog/embodiment/DestinCuda/DestinKernelJAVA_wrap.*
 # Python bytecode
 *.pyc
 *.pyo
+
+# ide
+.idea
