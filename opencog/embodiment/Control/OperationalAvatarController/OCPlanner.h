@@ -61,13 +61,7 @@ public:
 
      // the output plan:vector<PetAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
-     bool doPlanning(vector<State> goal, vector<PetAction>& plan);
-
-     // to store the planning time state value
-     // like during reasoning, if robotA moves to apple1, then the robotA is closed to apple1, but it is just a virtual state change,
-     // not really changed in the world. In the world, the robotA is still not closed to apple1 because it has not really perform moving to apple1
-     // but we have to store such virtual changing states for multi-step planning
-     static set<State*> virtualStates;
+     bool doPlanning(vector<State> &goal, vector<PetAction>& plan);
 
 protected:
 
@@ -80,8 +74,14 @@ protected:
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
 
-     // check if the given goal has been achieved now
-     bool checkIsGoalAchieved(vector<State> goal);
+     // check if a given single goal has been achieved now
+     // @ curLayerStates is a state layer in the planning graph
+     // @ satisfiedDegree is a return value between [0.0,1.0], which shows how many percentage has this goal been achieved
+     // when it's a boolean goal, only can be 0.0 or 1.0
+     // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
+     //                  to calculate its satisfiedDegree value.
+     // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
+     bool checkIsGoalAchieved(const State &oneGoal, const vector<State> &curLayerStates, float& satisfiedDegree, const State *original_state = 0);
 
 public:
      // define the variables for rules

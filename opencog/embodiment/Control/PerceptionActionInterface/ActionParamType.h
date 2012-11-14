@@ -102,6 +102,9 @@ public:
     static const ActionParamType& FUZZY_INTERVAL_INT();
     static const ActionParamType& FUZZY_INTERVAL_FLOAT();
 
+    // Only the INT,FLOAT,FUZZY_INTERVAL_INT and FUZZY_INTERVAL_FLOAT are Numberic type
+    static bool isNumbericValueType(ActionParamTypeCode valueTypeCode);
+
 private:
     // Attributes
     ActionParamTypeCode code;

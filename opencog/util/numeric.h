@@ -439,12 +439,12 @@ Float tanimoto_distance(const Vec& a, const Vec& b)
     OC_ASSERT (a.size() == b.size(),
                "Cannot compare unequal-sized vectors!  %d %d\n",
                a.size(), b.size());
-    
-    Float ab = boost::inner_product(a, b, 0),
-        aa = boost::inner_product(a, a, 0),
-        bb = boost::inner_product(b, b, 0),
+
+    Float ab = boost::inner_product(a, b, Float(0)),
+        aa = boost::inner_product(a, a, Float(0)),
+        bb = boost::inner_product(b, b, Float(0)),
         numerator = aa + bb - ab;
-    
+
     if (numerator != 0)
         return 1 - (ab / numerator);
     else
@@ -476,9 +476,9 @@ Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
                "Cannot compare unequal-sized vectors!  %d %d\n",
                a.size(), b.size());
 
-    Float ab = boost::inner_product(a, b, 0),
-        aa = boost::inner_product(a, a, 0),
-        bb = boost::inner_product(b, b, 0),
+    Float ab = boost::inner_product(a, b, Float(0)),
+        aa = boost::inner_product(a, a, Float(0)),
+        bb = boost::inner_product(b, b, Float(0)),
         numerator = sqrt(aa * bb);
     
     if (numerator != 0)

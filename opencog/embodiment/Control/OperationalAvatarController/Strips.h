@@ -104,7 +104,7 @@ class Inquery;
         // the state value needed real time inquery is represented as:
         // ExecutionOutputLink
         //         SchemaNode "Distance"
-        bool is_need_inquery(){return need_inquery;}
+        bool is_need_inquery() const {return need_inquery;}
 
         const StateValue& getStateValue() const {return stateVariable->getValue();}
 
@@ -121,8 +121,6 @@ class Inquery;
                bool _need_inquery = false, InqueryFun _inqueryFun = 0);
         ~State();
 
-
-
         void assignValue(const StateValue& newValue);
 
 
@@ -136,8 +134,38 @@ class Inquery;
             return ((name() == other.name())&&(stateOwnerList == other.getStateOwnerList()));
         }
 
-        bool isSatisfiedMe(const StateValue& value);
-        bool isSatisfied(const State& goal);
+        // @ satisfiedDegree is a return value between (-infinity,1.0], which shows how many percentage has this goal been achieved,
+        //   if the value is getting father away from goal, it will be negative
+        //   satisfiedDegree = |original - current|/|original - goal|
+        //   when it's a boolean goal, only can be 0.0 or 1.0
+        // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
+        //                  to calculate its satisfiedDegree value.
+        // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
+        bool isSatisfiedMe(const StateValue& value, float& satisfiedDegree, const State *original_state = 0) const;
+        bool isSatisfied(const State& goal, float &satisfiedDegree, const State *original_state = 0) const;
+
+
+        // To get int,float value or fuzzy int or float value from a state
+        // For convenience, we will also consider int value as float value
+        // if the value type is not numberic, return false and the floatVal and fuzzyFloat will not be assigned value
+        bool getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat) const;
+
+        // About the calculation of Satisfie Degree
+        // compare 3 statevalue for a same state: the original statevalue, the current statevalue and the goal statevalue
+        // to see how many persentage the current value has achieved the goal, compared to the original value
+        // it can be negative, when it's getting farther away from the goal than the original value
+        // For these 3, the state should be the same state, but the state operator type can be different, e.g.:
+        // the goal is to eat more than 10 apples, and at the beginning 2 apple has been eaten, and current has finished eaten 3 apples and begin to eat the 6th one, so:
+        // original: Num_eaten(apple) = 3
+        // current:  5 < Num_eaten(apple) < 6
+        // goal:     Num_eaten(apple) > 10
+        // so the distance between original and goal is 10 - 3 = 7
+        // the distance between current and goal is ((10 - 5) +(10 - 6)) / 2 = 5.5
+        // the SatifiedDegree = (7 - 5.5)/7 = 0.2143
+        float static calculateNumbericsatisfiedDegree(float goal, float current, float origin);
+        float static calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, float current, float origin);
+        float static calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, const FuzzyIntervalFloat& current, const FuzzyIntervalFloat& origin);
+        float static distanceBetween2FuzzyFloat(const FuzzyIntervalFloat& goal, const FuzzyIntervalFloat& other);
 
         inline bool operator == (State& other) const
         {
@@ -157,7 +185,6 @@ class Inquery;
     protected:
 
         StateVariable* stateVariable;
-
 
         // whose feature this state describes. e.g. the robot's energy
         // sometimes it's more than one ower, e.g. the relationship between RobotA and RobotB

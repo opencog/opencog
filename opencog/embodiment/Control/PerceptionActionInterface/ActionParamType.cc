@@ -92,6 +92,19 @@ const ActionParamType& ActionParamType::FUZZY_INTERVAL_FLOAT()
     return *result;
 }
 
+// Only the INT,FLOAT,FUZZY_INTERVAL_INT and FUZZY_INTERVAL_FLOAT are Numberic type
+bool ActionParamType::isNumbericValueType(ActionParamTypeCode valueTypeCode)
+{
+    if ( (valueTypeCode == INT_CODE ) ||
+         (valueTypeCode == FLOAT_CODE ) ||
+         (valueTypeCode == FUZZY_INTERVAL_INT_CODE ) ||
+         (valueTypeCode == FUZZY_INTERVAL_FLOAT_CODE ) )
+        return true;
+    else
+        return false;
+}
+
+
 // Constructors
 
 ActionParamType::ActionParamType() {};
