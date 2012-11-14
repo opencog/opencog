@@ -52,6 +52,7 @@ class DummyBlendingAgent(MindAgent):
 
         
         C3 = atomspace.add_node('ConceptNode', C1.name + C2.name)
+        print C3
         links = C1_links + C2_links
         for i in range(len(links)):
             link = links[randrange(0,len(links))]
