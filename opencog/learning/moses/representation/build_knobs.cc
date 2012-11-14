@@ -928,7 +928,7 @@ void build_knobs::rec_canonize(pre_it it)
 /// if 'i't points at *($3 ...) this would then result in creating
 /// *($3 +( *(0 $1) *(0 $2) *(0 $3) ...)...) which raises the degree.
 /// If you really want to raise the degree, on purpose, do it elsewhere,
-/// and do it explicitly, and not here, by quais-accident.
+/// and do it explicitly, and not here, by quasi-accident.
 //
 void build_knobs::append_linear_combination(pre_it it)
 {

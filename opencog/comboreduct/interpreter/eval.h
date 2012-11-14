@@ -55,6 +55,30 @@ struct Evaluator {
                                           variable_unifier&) = 0;
 };
 
+/// A subclass of Evaluator which only handles procedure calls. The other things
+/// are only for Embodiment. (This class is based on the RunningComboProcedure class in
+/// the Embodiment codebase.) Its functionality should probably be moved inside the eval* functions
+/// if possible.
+struct ProcedureEvaluator : public Evaluator {
+    ~ProcedureEvaluator() { }
+    ProcedureEvaluator(const combo::combo_tree& tr) : _tr(tr) { }
+
+    vertex eval_action(combo_tree::iterator, variable_unifier&) { }
+    vertex eval_percept(combo_tree::iterator, variable_unifier&) { }
+    vertex eval_procedure(combo_tree::iterator, variable_unifier&);
+    // eval_indefinite_object takes no arguments because it is assumed
+    // that it has no child, this assumption may change over time
+    vertex eval_indefinite_object(indefinite_object,
+                                          variable_unifier&) { }
+
+protected:
+    /// for evaluating procedures inplace
+    void expand_procedure_call(combo::combo_tree::iterator) throw
+        (ComboException, AssertionException, std::bad_exception);
+
+    combo::combo_tree _tr;
+};
+
 #define ALMOST_DEAD_EVAL_CODE 1
 #if ALMOST_DEAD_EVAL_CODE
 /// @todo all users of the code below should switch to using

@@ -67,11 +67,6 @@ namespace opencog { namespace combo {
 
     strongly_connected_components _ordered_scc;
 
-    //for all definite_objects in tr, check if the string matches the name
-    //of a procedure_call and replace it by it if so
-    void instantiate_procedure_calls(combo_tree& tr,
-                                     bool warn_on_definite_object=false) const;
-
     //return a set of all procedure_call contained in a given procedure_call
     std::set<const procedure_call_base*> procedure_call_dependencies(const procedure_call_base* pc) const;
 
@@ -106,6 +101,13 @@ namespace opencog { namespace combo {
 
     //apply instantiate_procedure_calls on the entire repository
     void instantiate_procedure_calls(bool warn_on_definite_object=false);
+
+    //for all definite_objects in tr, check if the string matches the name
+    //of a procedure_call and replace it by it if so. This can be used on
+    //trees that are not in the repository (i.e. just a random expression,
+    //not a defined procedure) -- Jade
+    void instantiate_procedure_calls(combo_tree& tr,
+                                     bool warn_on_definite_object=false) const;
 
     //check and infer the types of all procedure in the repository,
     //returns false if exists type error

@@ -29,6 +29,51 @@ namespace opencog { namespace combo {
 
 using namespace std;
 
+vertex ProcedureEvaluator::eval_procedure(combo::combo_tree::iterator it, combo::variable_unifier& vu)
+{
+    expand_procedure_call(it);
+    *it = eval_throws(it, this, vu);
+    _tr.erase_children(it);
+    return *it;
+}
+
+void ProcedureEvaluator::expand_procedure_call(combo::combo_tree::iterator it) throw (ComboException, AssertionException, std::bad_exception)
+{
+
+    // sanity checks
+    if (!is_procedure_call(*it)) {
+        throw ComboException(TRACE_INFO,
+                                      "RunningComboProcedure - combo_tree node does not represent a combo procedure call.");
+    }
+    procedure_call pc = get_procedure_call(*it);
+
+    arity_t ar = pc->arity();
+    bool fixed_arity = ar >= 0; //the procedure gets fix number of
+    //input arguments
+    combo::arity_t exp_arity = combo::abs_min_arity(ar);
+    arity_t ap_args = it.number_of_children();
+    //OC_ASSERT(ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
+    if (fixed_arity) {
+        if (ap_args != ar) {
+            throw ComboException(TRACE_INFO,
+                                          "RunningComboProcedure - %s arity differs from no. node's children. Arity: %d, number_of_children: %d",
+                                          get_procedure_call(*it)->get_name().c_str(), ar, ap_args);
+        }
+    } else {
+        if (ap_args < exp_arity) {
+            throw ComboException(TRACE_INFO,
+                                          "RunningComboProcedure - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_children: %d",
+                                          get_procedure_call(*it)->get_name().c_str(), exp_arity, ap_args);
+        }
+    }
+
+    combo::combo_tree tmp(get_procedure_call(*it)->get_body());
+    combo::set_bindings(tmp, it);
+    *it = *tmp.begin();
+    _tr.erase_children(it);
+    _tr.reparent(it, tmp.begin());
+}
+
 #if ALMOST_DEAD_EVAL_CODE
 // @todo all users of the code below should switch to using
 // eval_throws_binding() instead.
@@ -577,18 +622,25 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
                 return eval_throws_tree(bmap, itend, pe);
             }
 
+            // main case: foldr(f v l) = f(car foldr(f v cdr))
             // new tree: f(car foldr(f v cdr))
 
+            // cb_tr will be the call to f.
             sib_it f = it.begin();
             combo_tree cb_tr(f);
             sib_it loc = cb_tr.begin();
+
+            // eval: car(<the list>)
             combo_tree car_lst(id::car); 
             sib_it car_lst_it = car_lst.begin();
             car_lst.append_child(car_lst_it, itend);
             car_lst = eval_throws_tree(bmap,car_lst_it,pe);
             car_lst_it = car_lst.begin();
+
+            // cb_tr == f(<x>)
             cb_tr.append_child(loc, car_lst_it);
 
+            // copy {the combo subtree for this use of foldr} and change it to include the cdr of the list
             combo_tree cdr_lst(id::cdr);
             sib_it cdr_lst_it = cdr_lst.begin();
             cdr_lst.append_child(cdr_lst_it, itend);
@@ -599,6 +651,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             tr.append_child(tr_it, cdr_lst_it);
             tr = eval_throws_tree(bmap, tr_it, pe);
             tr_it = tr.begin();
+
             cb_tr.append_child(loc, tr_it);
 
             return eval_throws_tree(bmap, loc, pe); 
