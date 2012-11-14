@@ -46,6 +46,7 @@ class Atom(object):
     def __init__(self):
         self._tv = DEFAULT_TV
         self._av = DEFAULT_AV
+        self._in = []
 
         # legacy Cython-style interface
         self.out = []
@@ -75,7 +76,7 @@ class Atom(object):
 
     # Needs to be updated by the atomspace
     def getincoming(self):
-        return iter([])
+        return iter(self._in)
     incoming = property(getincoming)
 
     def __cmp__(self,other):
@@ -215,6 +216,10 @@ class AtomSpace(object):
 #        if isinstance(atom, Link):
 #            for o in atom.out:
 #                assert self._atom_object_is_in_atomspace(o)
+#        if isinstance(atom, Link):
+#            for o in atom.out:
+#                assert isinstance(o, Atom)
+#                o._in.append(atom)
 
         self.atoms_by_id.add(atom)
         self.atoms_by_signature[atom._signature()] = atom
