@@ -25,36 +25,36 @@ log.add_level(Logger.INFO)
 #
 # @return 
 def add_tree_to_atomspace(a, tree, root):
-     ''' add nodes of a tree to atomspace in postorder ''' 
-     out = []
-     fakeatom = tree.get_node_attr(root)['atom']
-     if not tree.neighbors(root):
-     ## a leaf in the tree
-         try:
+    ''' add nodes of a tree to atomspace in postorder '''
+    out = []
+    fakeatom = tree.get_node_attr(root)['atom']
+    if not tree.neighbors(root):
+    ## a leaf in the tree
+        try:
             if is_a(fakeatom.type, types.Node):
                 # a node
                 return a.add_node(fakeatom.type, fakeatom.name, fakeatom.tv).h
             else:
                 # empty link
                 return a.add_link(fakeatom.type, [], fakeatom.tv).h
-         except Exception, e:
-             log.error(" **** error occurs when adding to atomspace ****" )
-             log.error(str(e))
+        except Exception, e:
+            log.error(" **** error occurs when adding to atomspace ****" )
+            log.error(str(e))
 
-     ## an inner node in the tree(a link), constructing it's out 
-     ## ordering children as the scheme file, as there are no paticular order in the @G.neighbors function
-     order_child = { }
-     children = []
-     for child in tree.neighbors(root):
-         order_child[tree.get_edge_attr(root,child)['order']] = child
-     for order in sorted(order_child):
-         children.append(order_child[order])
-     ## 
-     for child in children:
-         out.append(add_tree_to_atomspace(a, tree, child))
-     ## construct the link
-     #print "adding %s + "%root + str(out)
-     return a.add_link(fakeatom.type, out, fakeatom.tv).h
+    ## an inner node in the tree(a link), constructing it's out
+    ## ordering children as the scheme file, as there are no paticular order in the @G.neighbors function
+    order_child = { }
+    children = []
+    for child in tree.neighbors(root):
+        order_child[tree.get_edge_attr(root,child)['order']] = child
+    for order in sorted(order_child):
+        children.append(order_child[order])
+        ##
+    for child in children:
+        out.append(add_tree_to_atomspace(a, tree, child))
+        ## construct the link
+    #print "adding %s + "%root + str(out)
+    return a.add_link(fakeatom.type, out, fakeatom.tv).h
 
 def load_scm_file(a, filename):
     log.info("loading...")
@@ -62,7 +62,6 @@ def load_scm_file(a, filename):
     ident_stack = []
     atom_stack = []
     root = None
-    no_link = { }
     define_dict = { }
     try:
         f = open(filename, "r")
@@ -75,21 +74,21 @@ def load_scm_file(a, filename):
                 temp = temp.split(' ')
                 define_dict[temp[1]] = temp[2]
                 continue
-            ##
+                ##
             if line.startswith('('):
                 if tree.number_of_nodes() > 0:
                 # deal with previous segment
                     add_tree_to_atomspace(a, tree, root)
                     tree.clear()
-                # 
+                    #
                 ident_stack[:] = []
                 atom_stack[:] = []
-            ## parase a new segment
-            name = "" 
-            t = "" 
+                ## parase a new segment
+            name = ""
+            t = ""
             stv = None
             av = {}
-            ident = line.find("(") 
+            ident = line.find("(")
             if ident != -1:
                 #log.debug(line.strip('\n'))
                 ident_stack.append(ident)
@@ -115,7 +114,7 @@ def load_scm_file(a, filename):
                     third = dict_sub(third, define_dict)
                 except Exception:
                     third = None
-                #log.debug("********************" )
+                    #log.debug("********************" )
                 #log.debug("first:%s*"%first)
                 #log.debug("second:%s*"%second)
                 #log.debug("third:%s*"%third)
@@ -158,14 +157,14 @@ def load_scm_file(a, filename):
                     #log.debug("*****************************" )
                 except Exception:
                     t = first.strip(' ')
-                ## add nodes to segment tree
+                    ## add nodes to segment tree
                 is_node = True if name else False
                 if is_node:
                     # node
                     try:
                         node = FakeAtom(name_type_dict[t], name, stv, av)
                     except KeyError:
-                        log.error("Unknown Atom type '%s' in line %s, pls add related type infomation to file 'types_inheritance.py' "% (t,line_no))
+                        log.error("Unknown Atom type '%s' in line %s, pls add related type infomation to file 'types_inheritance.py' and OpenCog"% (t,line_no))
                         raise KeyError
                     uni_node_id = tree.unique_id(name)
                     tree.add_node(uni_node_id, atom = node)
@@ -197,7 +196,7 @@ def load_scm_file(a, filename):
                         else:
                             log.debug("%s -> %s"%(atom_stack[i].name, uni_link_id))
                             tree.add_edge(atom_stack[i].name, uni_link_id)
-                        ## set the 'order' attribute
+                            ## set the 'order' attribute
                         tree.get_node_attr(atom_stack[i].name).setdefault('order',-1)
                         tree.get_node_attr(atom_stack[i].name)['order'] += 1
                         order = tree.get_node_attr(atom_stack[i].name)['order']
@@ -218,29 +217,7 @@ def load_scm_file(a, filename):
     else:
         f.close()
 
-def test_load_scm_file():
-
-    # load a scm file 
+if __name__ == "__main__":
     a = AtomSpace()
-    load_scm_file(a, "./test/scm/test_load_scm_file.scm")
-    #load_scm_file(a, "./air.scm")
-    # output atomspace  to file "diff_log" 
-    output_atomspace(a, "py_atomspace.log" )
-    # compare output with output of atomspace loaded with cogserver
-    if rough_compare_files("py_atomspace.log", "./test/log/server_atomspace.log") and rough_compare_files("./test/log/server_atomspace.log", "py_atomspace.log"):
-        log.info("test passed!")
-    else:
-        log.info("test failed!")
-        
-
-    #abserver = atomspace_abserver.Atomspace_Abserver(a)
-    #abserver.graph_info()
-    #abserver.filter_graph()
-    #abserver.write("test_load_scm_file.dot")
-if __name__ == '__main__':test_load_scm_file()
-    #import atomspace_abserver
-    #a = AtomSpace()
-    #load_scm_file(a, "test_load_scm_file_and_abserver.scm")
-    ##load_scm_file(a, "da.scm")
-    #links = a.get_atoms_by_type(types.Link)
-
+    load_scm_file(a, "./examples/test_load_scm_file.scm")
+    a.print_list()
