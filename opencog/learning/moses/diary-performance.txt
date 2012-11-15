@@ -3773,3 +3773,18 @@ deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time
 34232 * 5001 = 163MB expected usage
 20802281472 - 20713652224 = 84MB actual .. wtf ?
 
+pre-sample free ram is 14214971392
+num new instances requested be 801
+post-sample free ram is 7889281024
+
+Ahh ... RAM usage during scoring explodes:
+Serializing the scorer with a lock, get this:
+ post-sample free ram is 4736954368
+ score pid=0 cnt=1 pre get cand free=4736954368
+ score pid=0 cnt=1 post get cand free=74797056
+ score pid=0 cnt=1 treesize =338 bytes=24
+ score pid=0 cnt=1 post score free=75919360
+ score pid=8 cnt=2 pre get cand free=75919360
+
+OK, why did RAM not return back to normal?
+Is there a leak ... !? surely not ... valgrind crashes ... I don't get it.
