@@ -335,7 +335,7 @@ void metapopulation::set_diversity()
     if (logger().isFineEnabled()) {
         stringstream ss;
         ss << "Metapopulation after setting diversity:" << std::endl;
-        logger().fine(ostream(ss, -1, true, true).str());
+        logger().fine(ostream(ss, -1, true, true, true /*bscore*/).str());
     }
 }
 
