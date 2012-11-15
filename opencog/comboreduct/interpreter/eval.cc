@@ -33,8 +33,20 @@ vertex ProcedureEvaluator::eval_procedure(combo::combo_tree::iterator it, combo:
 {
     expand_procedure_call(it);
     *it = eval_throws(it, this, vu);
-    _tr.erase_children(it);
+    //_tr.erase_children(it);
     return *it;
+}
+
+combo_tree ProcedureEvaluator::eval_procedure_tree(combo::combo_tree::iterator it, combo::variable_unifier& vu)
+{
+    expand_procedure_call(it);
+    cout << combo_tree(*it) << endl;
+    // combo_tree eval_throws_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe = NULL)
+    const vertex_seq empty;
+    // copying ouch. needs to be refactored anyway
+    combo_tree ret(eval_throws_tree(empty, it, this));
+    cout << ret << endl;
+    return ret;
 }
 
 void ProcedureEvaluator::expand_procedure_call(combo::combo_tree::iterator it) throw (ComboException, AssertionException, std::bad_exception)
@@ -68,10 +80,20 @@ void ProcedureEvaluator::expand_procedure_call(combo::combo_tree::iterator it) t
     }
 
     combo::combo_tree tmp(get_procedure_call(*it)->get_body());
+    cout << tmp << endl;
     combo::set_bindings(tmp, it);
+    cout << tmp << endl;
     *it = *tmp.begin();
+    cout << *it << endl;
+
     _tr.erase_children(it);
+    cout << _tr << endl;
     _tr.reparent(it, tmp.begin());
+    cout << _tr << endl;
+
+    ///// Move all child nodes of 'from' to be children of 'position'.
+    //template<typename iter> iter reparent(iter position, iter from);
+
 }
 
 #if ALMOST_DEAD_EVAL_CODE
@@ -410,30 +432,30 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
         // Control operators
 
-        // XXX TODO: contin_if should go away.
-        case id::contin_if :
-        case id::cond : {
-            sib_it sib = it.begin();
-            while (1) {
-                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
-
-                vertex vcond = eval_throws_binding(bmap, sib, pe);
-                ++sib;  // move past the condition
-
-                // The very last value is the universal "else" clause,
-                // taken when none of the previous predicates were true.
-                if (sib == it.end())
-                    return vcond;
-
-                // If condition is true, then return the consequent
-                // (i.e. the value immediately following.) Else, skip
-                // the consequent, and loop around again.
-                if (vcond == id::logical_true)
-                    return eval_throws_binding(bmap, sib, pe);
-
-                ++sib;  // move past the consequent
-            }
-        }
+//        // XXX TODO: contin_if should go away.
+//        case id::contin_if :
+//        case id::cond : {
+//            sib_it sib = it.begin();
+//            while (1) {
+//                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
+//
+//                vertex vcond = eval_throws_binding(bmap, sib, pe);
+//                ++sib;  // move past the condition
+//
+//                // The very last value is the universal "else" clause,
+//                // taken when none of the previous predicates were true.
+//                if (sib == it.end())
+//                    return vcond;
+//
+//                // If condition is true, then return the consequent
+//                // (i.e. the value immediately following.) Else, skip
+//                // the consequent, and loop around again.
+//                if (vcond == id::logical_true)
+//                    return eval_throws_binding(bmap, sib, pe);
+//
+//                ++sib;  // move past the consequent
+//            }
+//        }
         case id::equ : {
             OC_ASSERT(false, "The equ operator is not handled yet...");
             return v;
@@ -467,10 +489,15 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_percept(it, combo::variable_unifier::DEFAULT_VU());
     }
-    // procedure
+    // eval_throw_bindings needs to be able to go back to eval_throw_tree so you can
+    // use a combo procedure call inside any operator that's handled by eval_throw_bindings.
     else if (is_procedure_call(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
+        //return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
+        combo_tree ret(eval_throws_tree(bmap, it, pe));
+        OC_ASSERT(!ret.empty() == 0, "A procedure returning a list in an invalid context");
+        vertex& v(*ret.begin());
+        return v;
     }
     // indefinite objects are evaluated by the pe
     else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
@@ -485,7 +512,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     else if (is_action_symbol(v)) {
         return v;
     } else {
-        // std::cerr << "unrecognized expression " << v << std::endl;
+        std::cerr << "unrecognized expression " << v << std::endl;
         throw EvalException(v);
         return v;
     }
@@ -722,9 +749,43 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return eval_throws_tree(bmap, exp_tr);
         }
 
+        // XXX TODO: contin_if should go away.
+        case id::contin_if :
+        case id::cond : {
+            sib_it sib = it.begin();
+            while (1) {
+                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
+
+                /// @todo tree copy
+                combo_tree trcond(eval_throws_tree(bmap, sib, pe));
+                ++sib;  // move past the condition
+
+                // The very last value is the universal "else" clause,
+                // taken when none of the previous predicates were true.
+                if (sib == it.end())
+                    return trcond;
+
+                // If condition is true, then return the consequent
+                // (i.e. the value immediately following.) Else, skip
+                // the consequent, and loop around again.
+                vertex vcond = *trcond.begin();
+                if (vcond == id::logical_true)
+                    return eval_throws_tree(bmap, sib, pe);
+
+                ++sib;  // move past the consequent
+            }
+            break;
+        }
+
         default:
             break;
         }
+    }
+    // procedure
+    else if (is_procedure_call(v) && pe) {
+        OC_ASSERT(pe, "Non null Evaluator must be provided");
+        //return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
+        return pe->eval_procedure_tree(it, combo::variable_unifier::DEFAULT_VU());
     }
 
     // If we got the here, its not a list operator, so just return

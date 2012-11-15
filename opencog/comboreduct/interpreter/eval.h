@@ -49,6 +49,7 @@ struct Evaluator {
     // there would be a way to specify with the procedure is lazy or note
     // in order to be fully compatible with the way it is already used
     virtual vertex eval_procedure(combo_tree::iterator, variable_unifier&) = 0;
+    virtual combo_tree eval_procedure_tree(combo_tree::iterator it, combo::variable_unifier& vu) = 0;
     // eval_indefinite_object takes no arguments because it is assumed
     // that it has no child, this assumption may change over time
     virtual vertex eval_indefinite_object(indefinite_object,
@@ -66,6 +67,7 @@ struct ProcedureEvaluator : public Evaluator {
     vertex eval_action(combo_tree::iterator, variable_unifier&) { }
     vertex eval_percept(combo_tree::iterator, variable_unifier&) { }
     vertex eval_procedure(combo_tree::iterator, variable_unifier&);
+    combo_tree eval_procedure_tree(combo::combo_tree::iterator it, combo::variable_unifier& vu);
     // eval_indefinite_object takes no arguments because it is assumed
     // that it has no child, this assumption may change over time
     vertex eval_indefinite_object(indefinite_object,
@@ -138,6 +140,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
 void set_bindings(combo_tree& tr, const std::vector<vertex>&);
 void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent);
 
+// @todo !!! wtf this seems to be a copy of eval_throws_binding
 template<typename It>
 vertex eval_throws(It it, Evaluator* pe = NULL,
                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
@@ -188,7 +191,7 @@ vertex eval_throws(It it, Evaluator* pe = NULL,
                     combo::variable_unifier work_vu(vu);
                     work_vu.setUpdated(false);
                     bool is_false = (eval_throws(sib, pe, work_vu)
-                                     == id::logical_false); 
+                                     == id::logical_false);
                     vu.unify(combo::UNIFY_AND, work_vu);
                     if(is_false) {
                         return id::logical_false;
@@ -209,11 +212,11 @@ vertex eval_throws(It it, Evaluator* pe = NULL,
                         return id::logical_true;
                     }
                 }
-                return id::logical_false;                
+                return id::logical_false;
             }
             // wild card case
             else {
-                
+
                 OC_ASSERT(vu.isOneVariableActiveTMP(),
                                   "the OR wild_card case relies on the fact"
                                   " that at least one variable is active");
