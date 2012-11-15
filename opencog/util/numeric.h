@@ -457,7 +457,7 @@ Float tanimoto_distance(const Vec& a, const Vec& b)
         bb = boost::inner_product(b, b, Float(0)),
         numerator = aa + bb - ab;
 
-    if (numerator != 0)
+    if (numerator >= Float(SMALL_EPSILON))
         return 1 - (ab / numerator);
     else
         return 0;
@@ -493,8 +493,11 @@ Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
         bb = boost::inner_product(b, b, Float(0)),
         numerator = sqrt(aa * bb);
     
-    if (numerator != 0)
-        return (pos_n_neg ? 1 : 2) * acos(ab / numerator) / PI;
+    if (numerator >= Float(SMALL_EPSILON)) {
+        // in case of rounding error
+        Float r = bound(ab / numerator, Float(-1), Float(1));
+        return (pos_n_neg ? 1 : 2) * acos(r) / PI;
+    }
     else
         return 0;
 }
