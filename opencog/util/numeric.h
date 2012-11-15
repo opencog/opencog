@@ -71,6 +71,7 @@ using __gnu_cxx::iota;
 #endif
 
 const double EPSILON = 1e-6; // default error when comparing 2 floats
+const double SMALL_EPSILON = 1e-32;
 const double PROB_EPSILON = 1e-127; // error when comparing 2 probabilities
 
 // absolute_value_order
