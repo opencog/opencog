@@ -192,7 +192,7 @@ void build_knobs::logical_canonize(pre_it it)
  * knobs, we want to avoid inserting useless/pointless knobs, as doing
  * so will only enlarge the search space of possible knob settings.
  * This routine "probes" the various knobs to see if they are "useful"
- * (as determined by the disc_probe() method). If some klnob settings
+ * (as determined by the disc_probe() method). If some knob settings
  * are "useless", they are excluded from the field set. If all knob
  * settings are useless, then the knob itself is never created.
  *
@@ -528,13 +528,10 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     if (logger().isDebugEnabled()) {
         logger().debug() << "Adding logical knobs to subtree of size="
                          << combo_tree(subtree).size()
-                         << "\nat location of size=" << combo_tree(it).size();
+                         << "at location of size=" << combo_tree(it).size();
     }
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
-
-    size_t np = perms.size();
-    logger().debug("Created %d logical knob subtrees", np);
 
     // recursive knob probing can be a significant performance
     // de-accelerator if the number of knobs is small, since the
@@ -546,10 +543,24 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     // too low.  For large exemplars, it might be too big !?
     // XXX TODO clarify actual breakeven on range of problems...
 #define BREAKEVEN 30000
+    size_t np = perms.size();
     int nthr = 1 + np / BREAKEVEN;
     int maxth = num_threads();
     if (nthr > maxth) nthr = maxth;
 
+    if (logger().isDebugEnabled()) {
+        logger().debug("Created %d logical knob subtrees", np);
+        logger().debug("will use %d threads for probing tree of size %d",
+            nthr, combo_tree(subtree).size());
+        if (_skip_disc_probe)
+            logger().debug("Will skip expensive disc_probe()");
+        else
+            logger().debug("Will perform expensive disc_probe()");
+    }
+
+    // The actual running time for logical_probe_rec seems to take
+    // 1.5 to 5 millisecs per subtree node, when disc_probe_rec is
+    // enabled.
     ptr_vector<logical_subtree_knob> kb_v =
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, nthr);
