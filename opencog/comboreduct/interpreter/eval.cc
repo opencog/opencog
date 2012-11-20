@@ -402,62 +402,8 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
         case id::rand :
             return randGen().randfloat();
 
-        // Almost all list ops are not supported by this function...
-        case id::list :
-        case id::cdr :
-        case id::cons :
-        case id::foldr :
-        case id::foldl :
-            throw ComboException(TRACE_INFO,
-                "Cannot handle lists; use eval_throws_tree() instead.");
-
-        // car returns the first elt of a list. The list better not
-        // be empty, and it's first elt better not be a list...
-        case id::car : {
-            sib_it lp = it.begin();
-
-            combo_tree evo;
-            if (*lp != id::list) {
-                evo = eval_throws_tree(bmap, lp, pe);
-                lp = evo.begin();
-            }
-            if (*lp != id::list)
-                throw ComboException(TRACE_INFO, "not a list!");
-
-            // If the list is empty, throw; user should have called
-            // eval_throws_tree(), and not eval_throws_binding().
-            if (lp.begin() == lp.end())
-                throw ComboException(TRACE_INFO,
-                   "Must not pass empty list to eval_throws_binding().");
-            return eval_throws_binding(bmap, lp.begin(), pe);
-        }
-
         // Control operators
 
-//        // XXX TODO: contin_if should go away.
-//        case id::contin_if :
-//        case id::cond : {
-//            sib_it sib = it.begin();
-//            while (1) {
-//                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
-//
-//                vertex vcond = eval_throws_binding(bmap, sib, pe);
-//                ++sib;  // move past the condition
-//
-//                // The very last value is the universal "else" clause,
-//                // taken when none of the previous predicates were true.
-//                if (sib == it.end())
-//                    return vcond;
-//
-//                // If condition is true, then return the consequent
-//                // (i.e. the value immediately following.) Else, skip
-//                // the consequent, and loop around again.
-//                if (vcond == id::logical_true)
-//                    return eval_throws_binding(bmap, sib, pe);
-//
-//                ++sib;  // move past the consequent
-//            }
-//        }
         case id::equ : {
             OC_ASSERT(false, "The equ operator is not handled yet...");
             return v;
@@ -490,16 +436,6 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
     else if (is_perception(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_percept(it, combo::variable_unifier::DEFAULT_VU());
-    }
-    // eval_throw_bindings needs to be able to go back to eval_throw_tree so you can
-    // use a combo procedure call inside any operator that's handled by eval_throw_bindings.
-    else if (is_procedure_call(v) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        //return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
-        combo_tree ret(eval_throws_tree(bmap, it, pe));
-        OC_ASSERT(!ret.empty() == 0, "A procedure returning a list in an invalid context");
-        vertex& v(*ret.begin());
-        return v;
     }
     // indefinite objects are evaluated by the pe
     else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
