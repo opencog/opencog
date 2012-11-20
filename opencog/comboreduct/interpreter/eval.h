@@ -49,7 +49,7 @@ struct Evaluator {
     // there would be a way to specify with the procedure is lazy or note
     // in order to be fully compatible with the way it is already used
     virtual vertex eval_procedure(combo_tree::iterator, variable_unifier&) = 0;
-    virtual combo_tree eval_procedure_tree(combo_tree::iterator it, combo::variable_unifier& vu)
+    virtual combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it)
     {
         OC_ASSERT(false, "eval_procedure_tree not supported");
     }
@@ -70,7 +70,7 @@ struct ProcedureEvaluator : public Evaluator {
     vertex eval_action(combo_tree::iterator, variable_unifier&) { }
     vertex eval_percept(combo_tree::iterator, variable_unifier&) { }
     vertex eval_procedure(combo_tree::iterator, variable_unifier&);
-    combo_tree eval_procedure_tree(combo::combo_tree::iterator it, combo::variable_unifier& vu);
+    combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it);
     // eval_indefinite_object takes no arguments because it is assumed
     // that it has no child, this assumption may change over time
     vertex eval_indefinite_object(indefinite_object,

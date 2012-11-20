@@ -37,13 +37,13 @@ vertex ProcedureEvaluator::eval_procedure(combo::combo_tree::iterator it, combo:
     return *it;
 }
 
-combo_tree ProcedureEvaluator::eval_procedure_tree(combo::combo_tree::iterator it, combo::variable_unifier& vu)
+combo_tree ProcedureEvaluator::eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterator it)
 {
     expand_procedure_call(it);
     // combo_tree eval_throws_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe = NULL)
-    const vertex_seq empty;
+    //const vertex_seq empty;
     // copying ouch. needs to be refactored anyway
-    combo_tree ret(eval_throws_tree(empty, it, this));
+    combo_tree ret(eval_throws_tree(bmap, it, this));
     return ret;
 }
 
@@ -487,6 +487,10 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
     typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
+    /// @todo there should be a general way to distinguish between "f" (the function f, being passed to fold)
+    /// vs "f" (the function f being called with no arguments). If you don't handle that you get weird errors
+    /// (because fold or other higher-order functions will attempt to evaluate the argument too soon).
+
     /// First handle the operators that allow/require returning a combo_tree
     /// (which can represent a combo list or combo lambda expression).
     /// Then handle the operators that can only return a single combo vertex.
@@ -608,21 +612,25 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             // cb_tr == f(<x>)
             cb_tr.append_child(loc, car_lst_it);
 
-            // copy {the combo subtree for this use of foldr} and change it to include the cdr of the list
-            combo_tree cdr_lst(id::cdr);
-            sib_it cdr_lst_it = cdr_lst.begin();
-            cdr_lst.append_child(cdr_lst_it, itend);
+            // copy {the combo subtree for this use of foldr} and change it to include the cdr of L instead of L
+            // let cdr_call = a new tree containing a call to cdr
+            combo_tree cdr_call(id::cdr);
+            sib_it cdr_call_it = cdr_call.begin();
+            cdr_call.append_child(cdr_call_it, itend);
             tr.erase(itend);
             sib_it tr_it = tr.begin();
-            cdr_lst = eval_throws_tree(bmap, cdr_lst_it,pe);
-            cdr_lst_it = cdr_lst.begin();
-            tr.append_child(tr_it, cdr_lst_it);
+
+            // let cdr_result = the result of the call to cdr
+            combo_tree cdr_result(eval_throws_tree(bmap, cdr_call_it,pe));
+            sib_it cdr_result_it = cdr_result.begin();
+            tr.append_child(tr_it, cdr_result_it);
+
             tr = eval_throws_tree(bmap, tr_it, pe);
             tr_it = tr.begin();
 
             cb_tr.append_child(loc, tr_it);
 
-            return eval_throws_tree(bmap, loc, pe); 
+            return eval_throws_tree(bmap, loc, pe);
         }
 
         case id::foldl : {
@@ -724,9 +732,12 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
     }
     // procedure
     else if (is_procedure_call(v) && pe) {
+        if (it.begin() == it.end()) // For correct foldr behaviour
+            return combo_tree(it);
+
         OC_ASSERT(pe, "Non null Evaluator must be provided");
         //return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
-        return pe->eval_procedure_tree(it, combo::variable_unifier::DEFAULT_VU());
+        return pe->eval_procedure_tree(bmap, it);
     }
 
     // Operators which only return a single vertex
