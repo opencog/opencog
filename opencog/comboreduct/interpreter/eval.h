@@ -49,7 +49,7 @@ struct Evaluator {
     // there would be a way to specify with the procedure is lazy or note
     // in order to be fully compatible with the way it is already used
     virtual vertex eval_procedure(combo_tree::iterator, variable_unifier&) = 0;
-    combo_tree eval_procedure_tree(combo_tree::iterator it, combo::variable_unifier& vu)
+    virtual combo_tree eval_procedure_tree(combo_tree::iterator it, combo::variable_unifier& vu)
     {
         OC_ASSERT(false, "eval_procedure_tree not supported");
     }
@@ -193,6 +193,11 @@ vertex eval_throws(const tree<T>& tr)
 /// The Evaluator is currently unused; we're waiting for variable unification
 /// to be made obsolete (!?)
 vertex eval_throws_binding(const vertex_seq& bmap,
+                           combo_tree::iterator it, Evaluator* pe = NULL)
+    throw(EvalException, ComboException,
+          AssertionException, std::bad_exception);
+
+vertex eval_throws_vertex(const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe = NULL)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception);

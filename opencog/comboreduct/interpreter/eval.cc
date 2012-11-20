@@ -252,7 +252,21 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     //     logger().fine(ss.str());
     // }
 
+    combo_tree ret(eval_throws_tree(bmap, it, pe));
+    // Make sure it has no children.
+    OC_ASSERT(ret.number_of_children(ret.begin()) == 0, "Invalid use of eval_throws_binding:"
+        "expression evaluates to a whole combo_tree, not just one vertex");
+
+    return *ret.begin();
+}
+
+vertex eval_throws_vertex(const vertex_seq& bmap,
+                           combo_tree::iterator it, Evaluator* pe)
+    throw(EvalException, ComboException,
+          AssertionException, std::bad_exception)
+{
     typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
     if (const argument* a = boost::get<argument>(&v)) {
@@ -537,6 +551,9 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
     typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
+    /// First handle the operators that allow/require returning a combo_tree
+    /// (which can represent a combo list or combo lambda expression).
+    /// Then handle the operators that can only return a single combo vertex.
     if (const builtin* b = boost::get<builtin>(&v)) {
         switch (*b) {
 
@@ -776,9 +793,18 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
         return pe->eval_procedure_tree(it, combo::variable_unifier::DEFAULT_VU());
     }
 
-    // If we got the here, its not a list operator, so just return
-    // a tree with a lone, simple type in it.
-    return combo_tree(eval_throws_binding(bmap, it, pe));
+    // Operators which only return a single vertex
+    vertex retv(eval_throws_vertex(bmap, it, pe));
+    /// @todo copying
+    combo_tree ret(retv);
+    return ret;
+
+//    OC_ASSERT(false, "That case is not handled");
+//    return v;
+//
+//    // If we got the here, its not a list operator, so just return
+//    // a tree with a lone, simple type in it.
+//    return combo_tree(eval_throws_binding(bmap, it, pe));
 }
 
 combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)
