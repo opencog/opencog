@@ -40,12 +40,10 @@ vertex ProcedureEvaluator::eval_procedure(combo::combo_tree::iterator it, combo:
 combo_tree ProcedureEvaluator::eval_procedure_tree(combo::combo_tree::iterator it, combo::variable_unifier& vu)
 {
     expand_procedure_call(it);
-    cout << combo_tree(*it) << endl;
     // combo_tree eval_throws_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe = NULL)
     const vertex_seq empty;
     // copying ouch. needs to be refactored anyway
     combo_tree ret(eval_throws_tree(empty, it, this));
-    cout << ret << endl;
     return ret;
 }
 
@@ -55,7 +53,7 @@ void ProcedureEvaluator::expand_procedure_call(combo::combo_tree::iterator it) t
     // sanity checks
     if (!is_procedure_call(*it)) {
         throw ComboException(TRACE_INFO,
-                                      "RunningComboProcedure - combo_tree node does not represent a combo procedure call.");
+                                      "ProcedureEvaluator - combo_tree node does not represent a combo procedure call.");
     }
     procedure_call pc = get_procedure_call(*it);
 
@@ -68,32 +66,22 @@ void ProcedureEvaluator::expand_procedure_call(combo::combo_tree::iterator it) t
     if (fixed_arity) {
         if (ap_args != ar) {
             throw ComboException(TRACE_INFO,
-                                          "RunningComboProcedure - %s arity differs from no. node's children. Arity: %d, number_of_children: %d",
+                                          "ProcedureEvaluator - %s arity differs from no. node's children. Arity: %d, number_of_children: %d",
                                           get_procedure_call(*it)->get_name().c_str(), ar, ap_args);
         }
     } else {
         if (ap_args < exp_arity) {
             throw ComboException(TRACE_INFO,
-                                          "RunningComboProcedure - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_children: %d",
+                                          "ProcedureEvaluator - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_children: %d",
                                           get_procedure_call(*it)->get_name().c_str(), exp_arity, ap_args);
         }
     }
 
     combo::combo_tree tmp(get_procedure_call(*it)->get_body());
-    cout << tmp << endl;
     combo::set_bindings(tmp, it);
-    cout << tmp << endl;
     *it = *tmp.begin();
-    cout << *it << endl;
-
     _tr.erase_children(it);
-    cout << _tr << endl;
     _tr.reparent(it, tmp.begin());
-    cout << _tr << endl;
-
-    ///// Move all child nodes of 'from' to be children of 'position'.
-    //template<typename iter> iter reparent(iter position, iter from);
-
 }
 
 #if ALMOST_DEAD_EVAL_CODE
