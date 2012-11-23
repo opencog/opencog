@@ -12,6 +12,7 @@ using namespace opencog;
 
     void enumerate_program_trees(generation_table& gtable, int depth, combo::type_tree& ttree, population& pop, const reduct::rule& reduction_rule) {
         pop.clear();
+        // For each generation node with the right return-type, add it to the pop
         for (std::vector<generation_node>::iterator it = gtable.begin(); it != gtable.end(); it++) {
             if (combo::equal_type_tree(it->node, combo::get_signature_output(ttree))) {
                 for (node_list::iterator it2 = it->glist.begin(); it2 != it->glist.end(); it2++)
@@ -19,8 +20,10 @@ using namespace opencog;
                 break;
             }
         }
+        // add the right number of arguments
         int from_arg = combo::get_signature_inputs(ttree).size();
         combo::arity_t needed_arg_count = combo::type_tree_arity(ttree);
+        std::cout << ttree << " " << needed_arg_count << std::endl;
         for (int i = 1; i < depth; i++) {
             fill_leaves(pop, from_arg);
             reduce(pop, reduction_rule);
