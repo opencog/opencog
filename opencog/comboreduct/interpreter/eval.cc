@@ -24,32 +24,14 @@
  */
 #include "eval.h"
 #include <iostream>
+#include <iterator>
 
 namespace opencog { namespace combo {
 
 using namespace std;
 
-vertex ProcedureEvaluator::eval_procedure(combo::combo_tree::iterator it, combo::variable_unifier& vu)
+combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterator it, Evaluator * pe)
 {
-    expand_procedure_call(it);
-    *it = eval_throws(it, this, vu);
-    //_tr.erase_children(it);
-    return *it;
-}
-
-combo_tree ProcedureEvaluator::eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterator it)
-{
-    expand_procedure_call(it);
-    // combo_tree eval_throws_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe = NULL)
-    //const vertex_seq empty;
-    // copying ouch. needs to be refactored anyway
-    combo_tree ret(eval_throws_tree(bmap, it, this));
-    return ret;
-}
-
-void ProcedureEvaluator::expand_procedure_call(combo::combo_tree::iterator it) throw (ComboException, AssertionException, std::bad_exception)
-{
-
     // sanity checks
     if (!is_procedure_call(*it)) {
         throw ComboException(TRACE_INFO,
@@ -77,11 +59,24 @@ void ProcedureEvaluator::expand_procedure_call(combo::combo_tree::iterator it) t
         }
     }
 
-    combo::combo_tree tmp(get_procedure_call(*it)->get_body());
-    combo::set_bindings(tmp, it);
-    *it = *tmp.begin();
-    _tr.erase_children(it);
-    _tr.reparent(it, tmp.begin());
+    // evaluate {the function body} with {the arguments to the function}
+    combo_tree body(pc->get_body());
+    cout << body << endl;
+
+    vertex_seq args;
+    //copy(body.begin(), body.end(), back_inserter(args));
+
+    // evaluate the arguments to the function (their variables are in the current scope, i.e. bmap)
+    for (combo_tree::sibling_iterator arg_it = it.begin(); arg_it != it.end(); arg_it++) {
+        combo_tree arg_result(eval_throws_tree(bmap, arg_it, pe));
+
+        OC_ASSERT(arg_it.number_of_children() == 0, "functions cannot have list arguments");
+        args.push_back(*arg_result.begin());
+        cout << (*arg_result.begin()) << endl;
+    }
+
+    combo_tree ret(eval_throws_tree(args, body.begin(), pe));
+    return ret;
 }
 
 #if ALMOST_DEAD_EVAL_CODE
@@ -731,13 +726,12 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
         }
     }
     // procedure
-    else if (is_procedure_call(v) && pe) {
+    else if (is_procedure_call(v)) {
         if (it.begin() == it.end()) // For correct foldr behaviour
             return combo_tree(it);
 
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
         //return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
-        return pe->eval_procedure_tree(bmap, it);
+        return eval_procedure_tree(bmap, it, pe);
     }
 
     // Operators which only return a single vertex

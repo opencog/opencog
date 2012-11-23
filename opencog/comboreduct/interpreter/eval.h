@@ -45,44 +45,20 @@ struct Evaluator {
     virtual ~Evaluator() { }
     virtual vertex eval_action(combo_tree::iterator, variable_unifier&) = 0;
     virtual vertex eval_percept(combo_tree::iterator, variable_unifier&) = 0;
-    // @todo : this could be generic and not in the Evaluator
+    // @todo : change the Embodiment code so it doesn't use instantiate this method.
+    // It has now been integrated into the eval functions
     // there would be a way to specify with the procedure is lazy or note
     // in order to be fully compatible with the way it is already used
     virtual vertex eval_procedure(combo_tree::iterator, variable_unifier&) = 0;
-    virtual combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it)
-    {
-        OC_ASSERT(false, "eval_procedure_tree not supported");
-    }
     // eval_indefinite_object takes no arguments because it is assumed
     // that it has no child, this assumption may change over time
     virtual vertex eval_indefinite_object(indefinite_object,
                                           variable_unifier&) = 0;
 };
 
-/// A subclass of Evaluator which only handles procedure calls. The other things
-/// are only for Embodiment. (This class is based on the RunningComboProcedure class in
-/// the Embodiment codebase.) Its functionality should probably be moved inside the eval* functions
-/// if possible.
-struct ProcedureEvaluator : public Evaluator {
-    ~ProcedureEvaluator() { }
-    ProcedureEvaluator(const combo::combo_tree& tr) : _tr(tr) { }
+// it has this name because it evaluates a procedure and returns a tree
+combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe);
 
-    vertex eval_action(combo_tree::iterator, variable_unifier&) { }
-    vertex eval_percept(combo_tree::iterator, variable_unifier&) { }
-    vertex eval_procedure(combo_tree::iterator, variable_unifier&);
-    combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it);
-    // eval_indefinite_object takes no arguments because it is assumed
-    // that it has no child, this assumption may change over time
-    vertex eval_indefinite_object(indefinite_object,
-                                          variable_unifier&) { }
-
-protected:
-    /// for evaluating procedures inplace
-    void expand_procedure_call(combo::combo_tree::iterator) throw
-        (ComboException, AssertionException, std::bad_exception);
-
-    combo::combo_tree _tr;
-};
 
 #define ALMOST_DEAD_EVAL_CODE 1
 #if ALMOST_DEAD_EVAL_CODE
