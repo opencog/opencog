@@ -473,6 +473,13 @@ unsigned hill_climbing::operator()(deme_t& deme,
             break;
         }
 
+        if (max_time <= elapsed.tv_sec) {
+            over_budget = true;
+            logger().debug("Terminate Local Search: Out of time");
+            break;
+        }
+        max_time -= elapsed.tv_sec; // count-down to zero.
+
         /* If we've aleady gotten the best possible score, we are done. */
         if (opt_params.terminate_if_gte <= best_raw_score) {
             logger().debug("Terminate Local Search: Found best score");
