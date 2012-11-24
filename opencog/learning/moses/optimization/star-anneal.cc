@@ -41,7 +41,9 @@ namespace opencog { namespace moses {
 
 unsigned simulated_annealing::operator()(deme_t& deme,
                     const instance& init_inst,
-                    const iscorer_base& iscorer, unsigned max_evals)
+                    const iscorer_base& iscorer,
+                    unsigned max_evals,
+                    time_t max_time)
 {
     const field_set& fields = deme.fields();
     max_distance = opt_params.max_distance(fields);

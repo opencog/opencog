@@ -255,11 +255,13 @@ struct deme_expander
     /**
      * Do some optimization according to the scoring function.
      *
-     * @param max_evals the max evals
+     * @param max_evals the maximum number of evaluations of the scoring
+     *                  function to perform.
+     * @param max_time the maximum elapsed (wall-clock) time to allow.
      *
      * @return return the number of evaluations actually performed,
      */
-    int optimize_deme(int max_evals);
+    int optimize_deme(int max_evals, time_t max_time);
 
     void free_deme();
 

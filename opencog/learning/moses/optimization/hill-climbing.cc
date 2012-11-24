@@ -44,7 +44,9 @@ namespace opencog { namespace moses {
 
 unsigned hill_climbing::operator()(deme_t& deme,
                                    const instance& init_inst,
-                                   const iscorer_base& iscorer, unsigned max_evals,
+                                   const iscorer_base& iscorer,
+                                   unsigned max_evals,
+                                   time_t max_time,
                                    unsigned* eval_best)
 {
     logger().debug("Local Search Optimization");

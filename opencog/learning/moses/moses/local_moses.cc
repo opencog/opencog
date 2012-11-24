@@ -44,7 +44,7 @@ using namespace combo;
  *
  */
 bool expand_deme(metapopulation& mp,
-                 int max_evals, moses_statistics& stats)
+                 int max_evals, time_t max_time, moses_statistics& stats)
 {
     if (mp.empty())
         return true;
@@ -71,7 +71,7 @@ bool expand_deme(metapopulation& mp,
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
-    size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
+    size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
     stats.n_evals += evals_this_deme;
     stats.n_expansions++;
 
@@ -116,6 +116,7 @@ void local_moses(metapopulation& mp,
 
     struct timeval start;
     gettimeofday(&start, NULL);
+    stats.elapsed_secs = 0;
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
@@ -123,7 +124,10 @@ void local_moses(metapopulation& mp,
            && (stats.elapsed_secs < pa.max_time))
     {
         // Run a generation
-        bool done = expand_deme(mp, pa.max_evals - stats.n_evals, stats);
+        bool done = expand_deme(mp,
+                                pa.max_evals - stats.n_evals, 
+                                pa.max_time - stats.elapsed_secs, 
+                                stats);
 
         struct timeval stop, elapsed;
         gettimeofday(&stop, NULL);

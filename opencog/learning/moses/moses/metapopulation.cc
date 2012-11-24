@@ -173,7 +173,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
     return true;
 }
 
-int deme_expander::optimize_deme(int max_evals)
+int deme_expander::optimize_deme(int max_evals, time_t max_time)
 {
     if (logger().isDebugEnabled()) {
         logger().debug()
@@ -183,7 +183,7 @@ int deme_expander::optimize_deme(int max_evals)
 
     complexity_based_scorer cpx_scorer =
         complexity_based_scorer(_cscorer, *_rep, _params.reduce_all);
-    return _optimize(*_deme, cpx_scorer, max_evals);
+    return _optimize(*_deme, cpx_scorer, max_evals, max_time);
 }
 
 void deme_expander::free_deme()

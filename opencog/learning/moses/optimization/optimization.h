@@ -93,7 +93,7 @@ struct optim_parameters
     /// The score must improve by at least 's' to be considered; else
     /// the search is terminated.  If 's' is negative, then it is
     /// interpreted as a fraction: so 's=0.05' means 'the score must
-    /// improve 5 percent'.  
+    /// improve 5 percent'.
     void set_min_score_improv(score_t s);
 
     score_t min_score_improv() const;
@@ -142,7 +142,7 @@ struct optim_stats
         : nsteps(0), deme_count(0), total_steps(0), total_evals(0),
         field_set_size(0), over_budget(false)
 #ifdef GATHER_STATS
-          , hiscore(0.0), hicount(0.0), 
+          , hiscore(0.0), hicount(0.0),
           num_improved(0.0), count_improved(0.0)
 #endif
     {}
@@ -172,7 +172,9 @@ struct optimizer_base : optim_stats
 {
     // Return # of evaluations actually performed
     virtual unsigned operator()(deme_t& deme,
-                        const iscorer_base& iscorer, unsigned max_evals) = 0;
+                        const iscorer_base& iscorer,
+                        unsigned max_evals,
+                        time_t max_time) = 0;
 
     virtual ~optimizer_base() {}
 };

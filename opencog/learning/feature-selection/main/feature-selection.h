@@ -76,7 +76,10 @@ struct feature_selection_parameters
     unsigned inc_interaction_terms;
 
     // hill-climbing parameters
+    // actually, these are generic for all optimizers,
+    // not just hill-climbing...
     unsigned int hc_max_evals;
+    time_t max_time;
     double hc_max_score;
     double hc_confi; //  confidence intensity
     unsigned long hc_cache_size;
@@ -106,7 +109,9 @@ feature_set optimize_deme_select_features(const field_set& fields,
 {
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
-    unsigned evals = optimize(deme, init_inst, scorer, fs_params.hc_max_evals, &ae);
+    unsigned evals = optimize(deme, init_inst, scorer, 
+                             fs_params.hc_max_evals, fs_params.max_time,
+                             &ae);
 
     // get the best one
     boost::sort(deme, std::greater<scored_instance<composite_score> >());
