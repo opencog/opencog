@@ -68,7 +68,9 @@ struct univariate_optimization : optimizer_base
 
     // Return # of evaluations actually performed
     unsigned operator()(deme_t& deme,
-                        const iscorer_base& iscorer, unsigned max_evals);
+                        const iscorer_base& iscorer,
+                        unsigned max_evals,
+                        time_t max_time);
 
     optim_parameters opt_params;
     eda_parameters eda_params;

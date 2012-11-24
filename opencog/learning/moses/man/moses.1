@@ -605,7 +605,7 @@ Reduce candidates before scoring evaluation. Otherwise, only dominating
 candidates are reduced, just before being added to the metapopulation.
 This flag may be useful if scoring function evaluation expense depends
 strongly one the structure of the candidate. It is particularly important
-to specify this flag when memoization is enabled (with \fB-s!\fR).
+to specify this flag when memoization is enabled (with \fB-s1\fR).
 .TP
 .BI \-E\  effort \fR,\ \fB\-\-reduct\-candidate\-effort= effort
 Effort allocated for reduction of candidates. Valid values are
@@ -1161,10 +1161,31 @@ remote machines.
 .\" ============================================================
 .SH TODO
 Finish documenting these algo flags:  -M
+--diversity-pressure
+--diversity-exponent
+--diversity-normalize
+--diversity-dst
+--diversity-p-norm
+--diversity-dst2dp
+.PP
+-R discretize target var
 .PP
 These input flags: -G
 .PP
-Other mystery flags: -J -K -U -X
+Interesting patterns flags: -J -K -U -X
+.PP
+Integrated feature selection:
+--enable-fs
+--fs-algo
+--fs-target-size
+--fs-threshold
+--fs-inc-redundant-intensity
+--fs-inc-target-size-epsilon
+--fs-inc-interaction-terms
+--fs-max-score
+--fs-confidence-penalty-intensity
+--fs-max-evals
+--fs-hc-fraction-of-remaining
 
 .SH SEE ALSO
 .br

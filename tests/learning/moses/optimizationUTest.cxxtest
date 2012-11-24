@@ -72,7 +72,8 @@ public:
         // empty deme
         instance_set<composite_score> deme(fs);
         // perform the search
-        unsigned int actual_evals = hc(deme, init_inst, scorer, eval_n);
+        time_t max_time = INT_MAX;
+        unsigned int actual_evals = hc(deme, init_inst, scorer, eval_n, max_time);
         std::cout << "actual_evals = " << actual_evals << std::endl;
         std::sort(deme.begin(), deme.end(),
                   std::greater<scored_instance<composite_score> >());

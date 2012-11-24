@@ -294,6 +294,9 @@ int main(int argc, char** argv)
 
         ;
 
+    // XXX TODO add an option to set this ... 
+    fs_params.max_time = INT_MAX;
+
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);
