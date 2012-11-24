@@ -1,4 +1,4 @@
-/** metapopulationUTest.cxxtest --- 
+/** metapopulationUTest.cxxtest ---
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -63,12 +63,14 @@ struct dummy_bscore : public bscore_base
 struct dummy_optimization : public optimizer_base
 {
     unsigned operator()(instance_set<composite_score>& deme,
-                        const iscorer_base& iscorer, unsigned max_evals)
+                        const iscorer_base& iscorer, unsigned max_evals,
+                        time_t max_time)
     { return 0; }
 };
 
 
-class metapopulationUTest : public CxxTest::TestSuite {
+class metapopulationUTest : public CxxTest::TestSuite
+{
     dummy_cscore _dcsc;
     dummy_bscore _dbsc;
     vertex_set ignore_ops;
@@ -143,7 +145,7 @@ public:
         bcs.insert(bct5);
 
         _metapopulation.remove_dominated(bcs);
-        
+
         // 2 is dominated
         TS_ASSERT_EQUALS(bcs.size(), 3);             // 2 are removed
         TS_ASSERT_EQUALS(bcs.find(bct2), bcs.end()); // bct2

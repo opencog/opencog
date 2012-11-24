@@ -440,6 +440,7 @@ int moses_exec(int argc, char** argv)
     float min_rand_input;
     float max_rand_input;
     unsigned long max_evals;
+    time_t max_time;
     long result_count;
     bool output_score;
     bool output_penalty;
@@ -663,6 +664,10 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
          "Maximum number of fitness function evaluations.\n")
+
+        ("max-time",
+         value<time_t>(&max_time)->default_value(INT_MAX),
+         "Longest allowed runtime, in seconds.\n")
 
         (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned>(&cache_size)->default_value(100000),
@@ -1373,6 +1378,7 @@ int moses_exec(int argc, char** argv)
     moses_params.max_evals = max_evals;
     moses_params.max_gens = max_gens;
     moses_params.max_score = max_score;
+    moses_params.max_time = max_time;
     moses_params.max_cnd_output = result_count;
 
     // Infer arity

@@ -47,7 +47,8 @@ namespace opencog { namespace moses {
 
 //return # of evaluations actually performed
 unsigned univariate_optimization::operator()(deme_t& deme,
-                    const iscorer_base& iscorer, unsigned max_evals)
+                    const iscorer_base& iscorer,
+                    unsigned max_evals, time_t max_time)
 {
     unsigned pop_size = opt_params.pop_size(deme.fields());
     unsigned max_gens_total = information_theoretic_bits(deme.fields());

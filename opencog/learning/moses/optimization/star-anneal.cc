@@ -39,9 +39,24 @@ namespace opencog { namespace moses {
 // Star-shaped search  //
 /////////////////////////
 
+// XXX TODO the annealing temperature control code should be ported over
+// to the hill-climbing code, thus rendering the below obsolete.  The
+// core problem is that the hill-climbing code is much more
+// sophisticated in every way: termination conditions, exploration of
+// likely instances via cross-over, sparse search when the problem
+// becomes large, etc. and so the code below is esentially obsolete,
+// except for the temperature-scaling idea.
+//
+// This ort is not urgent: it is not at all clear that simulated
+// annealing (for moses) actually improves results or speeds
+// convergence.  In particular, the optimal annealing schedule is
+// unknown. (i.e. what the temerpatures should be at each iteration).
+//
 unsigned simulated_annealing::operator()(deme_t& deme,
                     const instance& init_inst,
-                    const iscorer_base& iscorer, unsigned max_evals)
+                    const iscorer_base& iscorer,
+                    unsigned max_evals,
+                    time_t max_time)
 {
     const field_set& fields = deme.fields();
     max_distance = opt_params.max_distance(fields);
