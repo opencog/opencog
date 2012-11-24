@@ -106,8 +106,8 @@ void local_moses(metapopulation& mp,
                  const moses_parameters& pa,
                  moses_statistics& stats)
 {
-    logger().info("MOSES starts, max_evals=%d max_gens=%d",
-                  pa.max_evals, pa.max_gens);
+    logger().info("MOSES starts, max_evals=%d max_gens=%d max_time=%d",
+                  pa.max_evals, pa.max_gens, pa.max_time);
 
     optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
 
@@ -133,7 +133,7 @@ void local_moses(metapopulation& mp,
         gettimeofday(&stop, NULL);
         timersub(&stop, &start, &elapsed);
         start = stop;
-        stats.elapsed_secs = elapsed.tv_sec;
+        stats.elapsed_secs += elapsed.tv_sec;
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
