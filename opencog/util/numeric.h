@@ -285,6 +285,17 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
     return isApproxEq(x, y, static_cast<FloatT>(EPSILON));
 }
 
+/**
+ * Return x bounded by [l, u], that is it returns max(l, min(u, x))
+ *
+ * I'm not sure the name 'bound' is right...
+ */
+template<typename Float>
+Float bound(Float x, Float l, Float u)
+{
+    return std::max(l, std::min(u, x));
+}
+    
 // useful for entropy
 template<typename FloatT> FloatT weightInformation(FloatT p)
 {
