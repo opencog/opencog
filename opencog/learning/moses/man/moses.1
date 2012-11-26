@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "August 16, 2012" "3.2.5" "OpenCog Learning"
+.TH MOSES 1 "November 24, 2012" "3.2.13" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -70,6 +70,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR loglevel ]
 .RB [ \-m
 .IR max_evals ]
+.RB [ \-\-max\-time ]
+.IR seconds ]
 .RB [ \-\-mpi=1 ]
 .RB [ \-N
 .IR operator ]
@@ -400,7 +402,8 @@ Huh ???
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
 The most important of these, for controlling behavior, are the 
-\fB-A\fR, \fB\-a\fR, \fB\-m\fR, \fB\-r\fR, \fB\-v\fR and \fB\-z\fR flags.
+\fB-A\fR, \fB\-a\fR, \fB\-m\fR, \fB\-\-max\-time\fR, \fB\-r\fR,
+\fB\-v\fR and \fB\-z\fR flags.
 .TP
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
 Select the algorithm to apply to a single deme.  This is the algorithm
@@ -465,6 +468,16 @@ that has at least this score, then search is terminated.
 .BI \-m\  num \fR,\ \fB\-\-max\-evals= num
 Perform no more than \fInum\fR evaluations of the scoring function.
 Default value is 10000.
+.TP
+.BI \-\-max\-time=\ secs
+Run the optimizer for no longer than \fIsecs\fR seconds.  Note that
+timing is polled only in a small number of points in the algorithm;
+thus, actual execution time might exceed this limit by a few seconds,
+or even many minutes, depending on the problem type.  In particular,
+knob-building time is not accounted for right away, and thus problems
+with a long knob-building time will exceed this limit.  If using this
+option, be sure to set the \fB\-m\fR option to some very large value.
+Default value is 42 years.
 .TP
 .BI \-n\  oper \fR,\ \fB\-\-ignore\-operator= oper
 Exclude the operator \fIoper\fP from the program solution.
@@ -605,7 +618,7 @@ Reduce candidates before scoring evaluation. Otherwise, only dominating
 candidates are reduced, just before being added to the metapopulation.
 This flag may be useful if scoring function evaluation expense depends
 strongly one the structure of the candidate. It is particularly important
-to specify this flag when memoization is enabled (with \fB-s!\fR).
+to specify this flag when memoization is enabled (with \fB-s1\fR).
 .TP
 .BI \-E\  effort \fR,\ \fB\-\-reduct\-candidate\-effort= effort
 Effort allocated for reduction of candidates. Valid values are
@@ -1161,10 +1174,31 @@ remote machines.
 .\" ============================================================
 .SH TODO
 Finish documenting these algo flags:  -M
+--diversity-pressure
+--diversity-exponent
+--diversity-normalize
+--diversity-dst
+--diversity-p-norm
+--diversity-dst2dp
+.PP
+-R discretize target var
 .PP
 These input flags: -G
 .PP
-Other mystery flags: -J -K -U -X
+Interesting patterns flags: -J -K -U -X
+.PP
+Integrated feature selection:
+--enable-fs
+--fs-algo
+--fs-target-size
+--fs-threshold
+--fs-inc-redundant-intensity
+--fs-inc-target-size-epsilon
+--fs-inc-interaction-terms
+--fs-max-score
+--fs-confidence-penalty-intensity
+--fs-max-evals
+--fs-hc-fraction-of-remaining
 
 .SH SEE ALSO
 .br

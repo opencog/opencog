@@ -46,6 +46,7 @@ class Atom(object):
     def __init__(self):
         self._tv = DEFAULT_TV
         self._av = DEFAULT_AV
+        self._in = []
 
         # legacy Cython-style interface
         self.out = []
@@ -63,7 +64,7 @@ class Atom(object):
     def gettv(self):
         return self._tv
     def settv(self,tv):
-        assert isinstance(tv,TruthValue)
+#        assert isinstance(tv,TruthValue)
         self._tv = tv
     def getav(self):
         return self._av
@@ -75,7 +76,7 @@ class Atom(object):
 
     # Needs to be updated by the atomspace
     def getincoming(self):
-        return iter([])
+        return iter(self._in)
     incoming = property(getincoming)
 
     def __cmp__(self,other):
@@ -124,7 +125,7 @@ class Link(Atom):
         assert isinstance(type,AtomType)
 
         for o in outgoing:
-            assert isinstance(o,Atom)
+#            assert isinstance(o,Atom)
             if o is None:
                 import pdb; pdb.set_trace()
 
@@ -212,9 +213,13 @@ class AtomSpace(object):
         # Give an error if the outgoing list is not already in the AtomSpace.
         # Especially if it contains unique Atom objects that match an existing
         # Atom (but are different unique objects).
-        if isinstance(atom, Link):
-            for o in atom.out:
-                assert self._atom_object_is_in_atomspace(o)
+#        if isinstance(atom, Link):
+#            for o in atom.out:
+#                assert self._atom_object_is_in_atomspace(o)
+#        if isinstance(atom, Link):
+#            for o in atom.out:
+#                assert isinstance(o, Atom)
+#                o._in.append(atom)
 
         self.atoms_by_id.add(atom)
         self.atoms_by_signature[atom._signature()] = atom

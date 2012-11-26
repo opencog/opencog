@@ -3773,3 +3773,65 @@ deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time
 34232 * 5001 = 163MB expected usage
 20802281472 - 20713652224 = 84MB actual .. wtf ?
 
+pre-sample free ram is 14214971392
+num new instances requested be 801
+post-sample free ram is 7889281024
+
+Ahh ... RAM usage during scoring explodes:
+Serializing the scorer with a lock, get this:
+ post-sample free ram is 4736954368
+ score pid=0 cnt=1 pre get cand free=4736954368
+ score pid=0 cnt=1 post get cand free=74797056
+ score pid=0 cnt=1 treesize =338 bytes=24
+ score pid=0 cnt=1 post score free=75919360
+ score pid=8 cnt=2 pre get cand free=75919360
+
+OK, why did RAM not return back to normal?
+Is there a leak ... !? surely not ... valgrind crashes ... I don't get it.
+
+======================================================================
+
+Try to train:
+   poses moses -d reut-train-10-reduced-2443.csv -p targ -m model-binary 
+      -V -e100000 -s0 -n333
+      -M"-j12 --hc-max-nn-evals=5000 -n sin -n log -n exp -n div -Z1 -s1 -d1"
+
+Again: this dataset is 64MBytes 2443 features, 13K rows.  Takes python
+maybe 37 seconds and 350MB to read it.
+
+vast majority of time is spent in reduct, which is single-threaded.
+Something wrong here ... these expressions should not be so complicated...
+logical_subtree_knob .. disc_probe ... reduct ... 
+Ahh. that old bugaboo -- should have _skip_disc_probe=true, but it wasn't
+
+argh, bug: second SIGHUP put moses to sleep.... wchan = stext
+
+---------------------------------------------------
+Time spent in logical_probe_rec: 
+
+"Created 4886 logical knob subtrees"
+
+first col is elapse time,   1 thread.
+4th    col, elapsed time  n=2 threads.
+5th    col, elapsed time  n=3 threads.
+6th col, skip logical_disc_probe, n=1 threads.
+7th col, probe, but reduct effort=1, n=1 threads
+      wow .. is reduct effort 1 broken!? It must be ...
+
+  time     subtree sz    time/node    n=2  n=3    n=1    n=1
+  (secs)  (num nodes)    (msecs)     time  time  skip    r=1
+  ------   ----------    -------     ----  ----  ----    ---
+    11          2                      6    6     0.5    10
+    33       23233         1.42       30   39     0.5    22
+    75       46431         1.62       54   75     0.5    61
+   121       69658         1.74      140  115     0.5   117 
+   205       84238         2.43      135  201     0.5   541 (!!!!)
+            107415                   170  257     0.5   781 (!!!)
+
+-------------------------------------------------------------------
+Try again:
+
+   poses moses -d reut-train-10-reduced-2443.csv -p targ -m model-binary 
+      -V -e80000 -s0 -n333
+      -M"-j12 --hc-max-nn-evals=5000 -n sin -n log -n exp -n div -Z1"
+

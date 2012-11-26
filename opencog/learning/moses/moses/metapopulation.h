@@ -63,7 +63,7 @@ static const operator_set empty_ignore_ops = operator_set();
 struct diversity_parameters
 {
     typedef score_t dp_t;
-    
+
     diversity_parameters(bool _include_dominated = true);
 
     // Ignore behavioral score domination when merging candidates in
@@ -171,7 +171,7 @@ struct metapop_parameters
     // keep track of the bscores even if not needed (in case the user
     // wants to keep them around)
     bool keep_bscore;
-    
+
     // Boltzmann temperature ...
     score_t complexity_temperature;
 
@@ -182,7 +182,7 @@ struct metapop_parameters
     //
     // where x is the number of generations so far
     double cap_coef;
-    
+
     // the set of operators to ignore
     operator_set ignore_ops;
 
@@ -196,7 +196,7 @@ struct metapop_parameters
 
     // parameters to control diversity
     diversity_parameters diversity;
-    
+
     // the set of perceptions of an optional interactive agent
     const combo_tree_ns_set* perceptions;
     // the set of actions of an optional interactive agent
@@ -255,11 +255,13 @@ struct deme_expander
     /**
      * Do some optimization according to the scoring function.
      *
-     * @param max_evals the max evals
+     * @param max_evals the maximum number of evaluations of the scoring
+     *                  function to perform.
+     * @param max_time the maximum elapsed (wall-clock) time to allow.
      *
      * @return return the number of evaluations actually performed,
      */
-    int optimize_deme(int max_evals);
+    int optimize_deme(int max_evals, time_t max_time);
 
     void free_deme();
 
@@ -360,7 +362,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
     }
 
     ~metapopulation() {}
-        
+
     /**
      * Return the best composite score.
      */
@@ -395,7 +397,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
     }
 
     typedef diversity_parameters::dp_t dp_t;  // diversity_penalty type
-    
+
     /**
      * Distort a diversity penalty component between 2
      * candidates. (actually not used apart from a comment of
@@ -414,7 +416,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
     dp_t aggregated_dps(dp_t ddp_sum, unsigned N) const {
         return pow(ddp_sum / N, 1.0 / params.diversity.exponent);
     }
-        
+
     /**
      * Compute the diversity penalty for all models of the metapopulation.
      *
@@ -423,7 +425,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * This may not make any difference for the first dozen exemplars
      * choosen, but starts getting important once the metapopulation
      * gets large, and the search bogs down.
-     * 
+     *
      * XXX The implementation here results in a lot of copying of
      * behavioral scores and combo trees, and thus could hurt
      * performance by quite a bit.  To avoid this, we'd need to change
@@ -518,7 +520,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * so, so its quite OK to cut back on this value.
      */
     void resize_metapop();
-    
+
     // Return the set of candidates not present in the metapopulation.
     // This makes merging faster because it decreases the number of
     // calls of dominates.
@@ -734,7 +736,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
                                      tag::variance,
                                      tag::min,
                                      tag::max>> accumulator_t;
-            
+
             // compute the statistics
             accumulator_t acc;
             auto from_i = cbegin(),
@@ -748,7 +750,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
                     acc(it->second);
                 }
             }
-            
+
             // gather stats
             diversity_stats ds;
             ds.count = boost::accumulators::count(acc);
@@ -760,15 +762,15 @@ struct metapopulation : bscored_combo_tree_ptr_set
             return ds;
         }
     }
-    
+
 protected:
     static const unsigned min_pool_size = 250;
-    
+
     const bscore_base& _bscorer; // behavioral score
 
 public:
     const metapop_parameters& params;
-    
+
 protected:
     size_t _merge_count;
 
@@ -780,7 +782,7 @@ protected:
 
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
-    
+
     // return true iff tr has already been visited
     bool has_been_visited(const combo_tree& tr) const;
 
@@ -804,7 +806,7 @@ protected:
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
-        typedef std::set<const bscored_combo_tree*> ptr_pair; 
+        typedef std::set<const bscored_combo_tree*> ptr_pair;
         dp_t operator()(const bscored_combo_tree* cl, const bscored_combo_tree* cr)
         {
             ptr_pair cts = {cl, cr};
@@ -823,7 +825,7 @@ protected:
             // // debug
             // logger().fine("dst = %f, dp = %f, ddp = %f", dst, dp, ddp);
             // // ~debug
-            
+
             ++misses;
             {
                 unique_lock lock(mutex);
@@ -842,7 +844,7 @@ protected:
                     ++it;
             }
         }
-        
+
         /**
          * Gather some statistics about the diversity of the
          * population, such as mean, std, min, max of the distances.
@@ -854,7 +856,7 @@ protected:
                                      tag::variance,
                                      tag::min,
                                      tag::max>> accumulator_t;
-            
+
             // compute the statistics
             accumulator_t acc;
             for (const auto& v : cache) acc(v.second);

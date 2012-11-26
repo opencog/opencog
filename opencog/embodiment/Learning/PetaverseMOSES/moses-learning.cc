@@ -179,7 +179,11 @@ void moses_learning::operator()()
         std::cout << "NEPC : " << _nepc << std::endl;
         std::cout << "MFG : " << max_for_generation << std::endl;
 
-        int o = metapop->_dex.optimize_deme(max_for_generation - stats.n_evals);
+        // learning time is uncapped.
+        time_t max_time = INT_MAX;
+        int o = metapop->_dex.optimize_deme(
+                    max_for_generation - stats.n_evals,
+                    max_time);
         std::cout << "number of evaluations: " << o << std::endl;
 
         if (o < 0)

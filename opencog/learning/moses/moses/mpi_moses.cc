@@ -308,7 +308,10 @@ void mpi_moses_worker(metapopulation& mp,
             // XXX replace this with appropriate message back to root!
             OC_ASSERT(false, "Exemplar failed to expand!\n");
         }
-        size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
+
+        // XXX TODO should probably fetch max_time from somewhere...
+        time_t max_time = INT_MAX;
+        size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
 
         mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
         mp._dex.free_deme();
