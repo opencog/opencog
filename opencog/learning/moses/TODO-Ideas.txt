@@ -189,3 +189,4 @@ ToDo List
    and is deprecated.  Fixing it or improving it seems not
    important. Priority Low/Very Low.
 
+-- Log syntax vs semantic correlation
