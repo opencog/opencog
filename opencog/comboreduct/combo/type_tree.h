@@ -296,30 +296,49 @@ type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it);
 /// ill_formed_type
 type_tree infer_type_tree(const combo_tree& tr);
 
-// return the number of arguments of type contin
-arity_t contin_arity(const type_tree& ty);
+// ----------------------------------------------------------
+// Arity-related functions
 
-// return the number of arguments of type boolean
-arity_t boolean_arity(const type_tree& ty);
-
-// WARNING : should be action.h but could not do that due to dependency issues
-// return the number of arguments of type action_result
-arity_t action_result_arity(const type_tree& ty);
-
-// return the number of input arguments of type tree
-// That is :
-// ->(T1 ... Tn T)
-// if Tn != arg_list(T')
-// then returns n
-// else (i.e. Tn == arg_list(T'))
-// then return -n
-// And finaly if it's not a function then returns 0
-// Note that it is assumed that if there is arg_list in the arguments
-// then it solely one and it is the last argument
+/// Return the number of input arguments of type tree.
+///
+/// Given the input :
+///    ->(T_1 ... T_n T)
+/// if T_n != arg_list(T')
+///    then returns n
+/// else (i.e. T_n == arg_list(T'))
+///   then return -n
+///
+/// And finaly if it's not a function then returns 0
+/// Note that it is assumed that if there is arg_list in the arguments
+/// then it solely one and it is the last argument
 arity_t type_tree_arity(const type_tree& ty);
 
-// Return the root of the type tree, convenient function when one
-// assumes that the type is elementary
+/// Return the number of arguments of type contin.
+///
+/// If the input is of the form ->(T_1 ... T_n T) then this function
+/// returns the number of T_k that are contins; else it returns zero.
+arity_t contin_arity(const type_tree& ty);
+
+/// Return the number of arguments of type boolean.
+///
+/// If the input is of the form ->(T_1 ... T_n T) then this function
+/// returns the number of T_k that are boolean; else it returns zero.
+arity_t boolean_arity(const type_tree& ty);
+
+// WARNING : this should be defined in action.h but could not do that
+// due  to dependency issues
+//
+/// Return the number of arguments of type action_result
+///
+/// If the input is of the form ->(T_1 ... T_n T) then this function
+/// returns the number of T_k that are of type action_result; else it
+/// returns zero.
+arity_t action_result_arity(const type_tree& ty);
+
+// ----------------------------------------------------------
+
+/// Return the root of the type tree, convenient function when one
+/// assumes that the type is elementary
 type_node get_type_node(const type_tree& tt);
 
 // takes in argument the arity of an operator (or procedure) and an
