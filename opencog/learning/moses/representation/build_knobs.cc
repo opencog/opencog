@@ -83,11 +83,16 @@ build_knobs::build_knobs(combo_tree& exemplar,
         // variables and functions, but we want the end result to be
         // typed boolean.  Thus, any representation will consist of a
         // tree of logic ops, with anything else contin-valued wrapped
-        // up in a predicate (i.e. wrapped by greter_than_zero).
+        // up in a predicate (i.e. wrapped by greater_than_zero).
 
-        // Hmm. Probe, although this is expensive, it seems to be a net
-        // performance benefit for pure boolean problems, I think. Maybe.
-        _skip_disc_probe = false;
+        // The disc_probe function is wildly expensive, but appears to
+        // provide a performance advantage when the tree consists of
+        // mostly logical operators.  Thus, if the output, and at least
+        // 1/5th of the inputs are boolean, then disc_probe-ing is
+        // probably worth it, so we turn it on.  (MixedUTest provides
+        // an example where it really is worth it).
+        if (5*boolean_arity(_signature) > type_tree_arity(_signature))
+            _skip_disc_probe = false;
 
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());

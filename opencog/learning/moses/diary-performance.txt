@@ -3852,3 +3852,42 @@ Yikes! 14 hours to build knobs...
   2400
 
 
+========================================================================
+Unit tests, specifically mixedUTest for _skip_disc_probe
+
+time ./opencog/learning/moses/main/moses -Hit -upred -nimpulse -nsin
+-nexp -nlog -m150000 -rnnn -z1 -Z1 -i ../tests/learning/moses/predicates-1.3.csv
+
+The -m flag limits execution time to about 2 minutes, single threaded.
+Either it gets an answer or it fails.
+
+Without the skip_disc_probe=true (i.e. the old way)
+r0 -- 41 s
+r1 fail
+r2 -- 1m5.492s
+r3 fail
+r4 fail
+r5 fail
+r6 fail
+r7 -- 56 s
+r8 -- 1m59.511s
+r9 -- 37 s
+r10 fail
+r11 -- 21 s
+r12 -- 1m30
+
+
+disc_probe completely disabled:  this really makes mixedUTest
+suffer in a bad way -- I guess that proper probing really does
+matter for this case ... Hmm, this neeeds to be studeied more
+r0 - fail
+r1 - fail
+r2 - fail
+r3 - fail
+r4 - fail
+r5 - fail
+
+r8 -fail
+r11 - fail
+
+
