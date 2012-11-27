@@ -92,7 +92,7 @@ struct moses_statistics
     std::atomic<int> n_expansions;
 
     // elapsed wall-clock time, in seconds, since start of moses.
-    time_t elapsed_secs;
+    double elapsed_secs;
 };
 
 
