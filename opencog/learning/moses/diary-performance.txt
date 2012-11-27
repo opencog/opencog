@@ -3890,4 +3890,29 @@ r5 - fail
 r8 -fail
 r11 - fail
 
+Again, formally, via moses-perf:
+"skip" -- disable disc probe, completely. "steps" -- number of
+     iterations. 
+
+"probe" -- disc_probe enabled
+
+-fail- == the metapopulation was exhausted!! (metapop only got about 250
+total, and that's it...)
+
+  seed   skip  skip      probe
+         time  steps     time
+  ----   ----  -----     ----
+   0      101   158K       40
+   1    -fail-            132
+   2      111              63
+   3      123           -fail-
+   4      153             130
+   5    -fail-          -fail-
+   6    -fail-            117
+   7       60              54
+   8      116             125
+   9       53              39
+
+So, for the mixedUTest, looks like disc_probe does help, but not by a
+whole lot.
 
