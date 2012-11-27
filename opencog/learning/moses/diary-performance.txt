@@ -3832,6 +3832,23 @@ first col is elapse time,   1 thread.
 Try again:
 
    poses moses -d reut-train-10-reduced-2443.csv -p targ -m model-binary 
-      -V -e80000 -s0 -n333
-      -M"-j12 --hc-max-nn-evals=5000 -n sin -n log -n exp -n div -Z1"
+      -V -e123480000 -s0 -n333
+      -M"-j12 --hc-max-nn-evals=10000 --max-time=300"
+
+Data located in reut-2443-NNNs
+
+Evaluate by: poses score -m model-binary-600s -p targ  -d test-10.dat
+
+test-10.dat contains 4853 lines of data
+
+Yikes! 14 hours to build knobs... 
+
+  limit    time    CPU
+  (secs)  actual    %
+  ------  ------   ---
+   300   1:36:04   633
+   600   2:23:05   790
+  1200  18:10:12   307
+  2400
+
 
