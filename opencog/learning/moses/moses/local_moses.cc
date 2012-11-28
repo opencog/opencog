@@ -116,7 +116,7 @@ void local_moses(metapopulation& mp,
 
     struct timeval start;
     gettimeofday(&start, NULL);
-    stats.elapsed_secs = 0;
+    stats.elapsed_secs = 0.0;
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
@@ -133,7 +133,7 @@ void local_moses(metapopulation& mp,
         gettimeofday(&stop, NULL);
         timersub(&stop, &start, &elapsed);
         start = stop;
-        stats.elapsed_secs += elapsed.tv_sec;
+        stats.elapsed_secs += elapsed.tv_sec + 1.0e-6*elapsed.tv_usec;
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
@@ -142,7 +142,7 @@ void local_moses(metapopulation& mp,
             stringstream ss;
             ss << "Stats: " << stats.n_expansions
                << "\t" << stats.n_evals    // number of evaluations so far
-               << "\t" << stats.elapsed_secs  // wall-clock time.
+               << "\t" << ((int) stats.elapsed_secs)  // wall-clock time.
                << "\t" << mp.size()       // size of the metapopulation
                << "\t" << mp.best_score() // score of the highest-ranked exemplar.
                << "\t" << get_complexity(mp.best_composite_score()); // as above.
