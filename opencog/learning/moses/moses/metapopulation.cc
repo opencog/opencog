@@ -112,6 +112,8 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // return the set of selected features as column index
         // (left most column corresponds to 0)
         auto selected_features = (*_params.fstor)(_exemplar);
+        logger().info() << "Feature selection of " << selected_features.size()
+                        << " features for representation";
         // add the complementary of the selected features (not
         // present in the exemplar) in ignore_ops
         auto exemplar_features = get_argument_abs_idx_from_zero_set(_exemplar);
