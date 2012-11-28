@@ -1087,7 +1087,7 @@ int moses_exec(int argc, char** argv)
             "the dataset.  A value of 0 disables feature selection. \n")
 
         ("fs-algo",
-         value<string>(&fs_params.algorithm)->default_value(smd),
+         value<string>(&fs_params.algorithm)->default_value(inc),
          string("Feature selection algorithm. Supported algorithms are:\n")
          /*
           * We're not going to support univariate or sa any time
@@ -1096,8 +1096,8 @@ int moses_exec(int argc, char** argv)
           .append(un).append(" for univariate,\n")
           .append(sa).append(" for simulated annealing,\n")
          */
-         .append(smd).append(" for stochastic maximal dependency,\n")
          .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
+         .append(smd).append(" for stochastic maximal dependency,\n")
          .append(moses::hc).append(" for moses-hillclimbing,\n").c_str())
 
         ("fs-threshold",
