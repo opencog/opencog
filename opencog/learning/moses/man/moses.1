@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "November 24, 2012" "3.2.13" "OpenCog Learning"
+.TH MOSES 1 "November 27, 2012" "3.2.13" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -51,6 +51,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR reduct_effort ]
 .RB [ \-e
 .IR exemplar ]
+.RB [ \-\-enable\-fs=1 ]
 .RB [ \-F ]
 .RB [ \-f
 .IR logfile ]
@@ -565,6 +566,64 @@ problem types, especially those with large neighborhoods (i.e. those with
 high program complexity), this can lead to an order-of-magnitude
 speedup, or more.  For other problem types, especially those with 
 deceptive scoring functions, this can hurt performance.
+
+.PP
+.\" ============================================================
+.SS "Integrated feature selection"
+Problems with a large number of input features (typically, hundreds
+or more) can lead to excessively long run-times, and overwhelming
+amounts of memory usage.  Such problems can be tackled by limiting
+the number of features used during knob building, resulting in smaller
+demes that can be searched more quickly.  Integrated feature selection 
+is enabled with the \fB\-\-enable\-fs=1\fR option.  The number of 
+features to use during knob bilding is specified using the 
+\fB\-\-fs\-target\-size\fR option.  A number of additional flags
+control the behaviour of the feature selection algorithm; these are
+best left alone; the defaults should be adequate for almost all
+problems.  The man page for the \fBfeature\-selection\fR command
+describes these in greater detail.
+
+.TP
+.BI \-\-enable\-fs=1
+Enable integrated feature selection.  Feature selection is disabled
+by default.
+.TP
+.BI \-\-fs\-target\-size= num
+Select \fInum\fR features for use.  This argument is mandatory if
+feature selection is enabled.
+.TP
+.BI \-\-fs\-algo
+Choose the feature-selection algorithm.  Possible choices are 
+\fBinc\fR, \fBsmd\fR and \fBhc\fR.  The default value is \fbinc\fR,
+which is the fastest bu least accurate algo.
+.TP
+.BI \-\-fs\-threshold= num
+Set the minimum threshold for selecting a feature.
+.TP
+.BI \-\-fs\-inc\-redundant\-intensity= fraction
+When using the \fBinc\fR algorithm, set the threshold to reject
+redundant features.
+.TP
+.BI \-\-fs\-inc\-target\-size\-epsilon= tolerance
+When using the \fBinc\fR algorithm, set the smallest step size
+used.
+.TP
+.BI \-\-fs\-inc\-interaction\-terms= num_terms
+When using the \fBinc\fR algorithm, set the number of terms used
+when computing the joint entropy.
+.TP
+.BI \-\-fs\-hc\-max\-score
+TODO write description
+.TP
+.BI \-\-fs\-hc\-confidence\-penalty\-intensity
+TODO write description
+.TP
+.BI \-\-fs\-hc\-max\-evals
+TODO write description
+.TP
+.BI \-\-fs\-hc\-fraction\-of\-remaining
+TODO write description
+
 .PP
 .\" ============================================================
 .SS "Large problem parameters"
@@ -766,6 +825,7 @@ contains labels in its header.
 .BI \-x1\fR,\ \fB\-\-output\-complexity=1
 Print the complexity measure of the model, and the scoring penalty.
 
+.PP
 .\" ============================================================
 .SS "Precision, recall, BEP, F_1 and prerec problem types"
 The prerec, recall, bep, f_one and precision problem types are used
@@ -839,10 +899,8 @@ The harshness or hardness of the penalty may be specified by means
 of the \fB\-Q\fR or \fB\-\-alpha\fR option.  Values much greater
 than one enforce a hard boundary; values much less than one make
 for a very soft boundary.  Negative values are invalid.
+
 .PP
-
-
-
 .\" ============================================================
 .SS "Contin options"
 Options that affect the usage of continuously-valued variables.
@@ -865,6 +923,7 @@ Split a continuous domain into two pieces. This option maybe be used
 multiple times to split a continuous domain into multiple pieces:
 that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
 
+.PP
 .\" ============================================================
 .SS "Demo options"
 These options pertain to the various built-in demo and example problem
@@ -1186,19 +1245,6 @@ Finish documenting these algo flags:  -M
 These input flags: -G
 .PP
 Interesting patterns flags: -J -K -U -X
-.PP
-Integrated feature selection:
---enable-fs
---fs-algo
---fs-target-size
---fs-threshold
---fs-inc-redundant-intensity
---fs-inc-target-size-epsilon
---fs-inc-interaction-terms
---fs-max-score
---fs-confidence-penalty-intensity
---fs-max-evals
---fs-hc-fraction-of-remaining
 
 .SH SEE ALSO
 .br

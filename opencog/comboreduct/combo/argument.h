@@ -29,24 +29,27 @@
 
 namespace opencog { namespace combo {
 
-/*
-  class argument
-    represents the index, attribute idx, of an input variable
-    of a function coded into a combo tree. In the case of a boolean
-    argument a negative value corresponds to a negative literal.
-    idx == 0 is invalide.
-    For example idx == -3 represents the literal NOT($3) where $3 is the
-    third argument of the function.
-*/
+/**
+ * class argument
+ *
+ *  Represents the index of an input variable of a function coded as a
+ *  combo tree.  For boolean arguments, a negative value corresponds to
+ *  the negated literal (i.e. not of the argument).  For example,
+ *  idx == -3 represents the literal NOT($3) where $3 is the third
+ *  argument of the function.
+ *
+ *  idx == 0 is invalid.
+ */
 class argument
     : boost::less_than_comparable<argument>, // generate >, <= and >= given <
       boost::equality_comparable<argument>   // generate != given ==
 {
 public:
+    arity_t idx;
+
     explicit argument(arity_t i) : idx(i) {
         OC_ASSERT(idx != 0, "idx should be different than zero.");
     }
-    arity_t idx;
 
     void negate() {
         idx = -idx;
@@ -73,15 +76,15 @@ public:
     const static arity_t idx_from_zero_to_idx(arity_t idx_from_zero) {
         return idx_from_zero + 1;;
     }
-    // returns 0 for argument of idx 1 or -1, 1 for idx 2 or -2, and so on
+    /// Returns 0 for argument of idx 1 or -1, 1 for idx 2 or -2, and so on
     arity_t abs_idx_from_zero() const {
         return idx_to_abs_idx_from_zero(idx);
     }
-    // check if idx is in the possible range given arity a
-    // formally idx is in the range of a:
-    // if idx==0 then it is not valid anyway
-    // else if a>0 (that is no arg_list) then idx<=a
-    // else if a<0 then idx<-a
+    /// Check if the index of this arg is in the possible range given arity a.
+    /// Formally, idx is in the range of a if :
+    /// if idx==0 then it is not valid
+    /// else if a>0 (that is, no arg_list) then idx<=a
+    /// else if a<0 then idx < -a
     bool is_idx_valid(arity_t a) const {
         return (idx == 0 ? false : (a > 0 ? abs_idx() <= a : abs_idx() < -a));
     }

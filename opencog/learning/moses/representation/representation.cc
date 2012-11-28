@@ -89,8 +89,15 @@ representation::representation(const reduct::rule& simplify_candidate,
       _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
 {
+    // Log before and after ... knob building can take a HUGE amount
+    // of time for some situations ... capture these in the log file.
+    logger().info() << "Start knob building, rep size="
+                    << _exemplar.size()
+                    << " complexity="
+                    << tree_complexity(_exemplar);
     if (logger().isDebugEnabled()) {
-        logger().debug() << "Building representation from exemplar: " << _exemplar;
+        logger().debug() << "Building representation from exemplar: "
+                         << _exemplar;
     }
 
     // Build the knobs.
@@ -98,8 +105,11 @@ representation::representation(const reduct::rule& simplify_candidate,
                 perceptions, actions, linear_contin,
                 stepsize, expansion, depth);
 
-    if (logger().isDebugEnabled()) {
-        logger().debug() << "Representation size after knob building: " << _exemplar.size();
+    logger().info() << "After knob building, rep size="
+                    << _exemplar.size()
+                    << " complexity="
+                    << tree_complexity(_exemplar);
+    if (logger().isFineEnabled()) {
         logger().fine() << "Rep, after knob building: " << _exemplar;
     }
 #if 0
