@@ -13,6 +13,7 @@ INSTALL(FILES
 	definite_object.h
 	enum_type.h
 	eval.h
+    interpreter.h
 	indefinite_object.h
 	iostream_combo.h
 	message.h

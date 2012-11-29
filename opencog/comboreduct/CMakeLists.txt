@@ -17,6 +17,7 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/descriptions
 	combo/enum_type
 	combo/eval
+    combo/interpreter
 	combo/indefinite_object
 	combo/iostream_combo
 	combo/message
