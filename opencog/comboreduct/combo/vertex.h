@@ -763,6 +763,7 @@ inline bool vertex_to_bool(const vertex& v)
 // Note: don't rename it negate as it enters in conflict with
 // std::negate(string)
 vertex negate_vertex(const vertex& v);
+builtin negate_builtin(builtin b);
 
 inline bool is_complement(const vertex& x, const vertex& y)
 {
