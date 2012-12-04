@@ -87,8 +87,10 @@ if [ -d $RPM_BUILD_ROOT ]; then rm -rf $RPM_BUILD_ROOT; fi
 
 
 %changelog
-* Fri Jun 15 2012 Linas Vepstas <linavepstas@gmail.com>
-- Initial version
+* Tue Dec 4 2012 Linas Vepstas <linavepstas@gmail.com>
+- Bump version number, fix borken changelog order
 * Tue Aug 21 2012 Linas Vepstas <linavepstas@gmail.com>
 - Package lib*so, needed for MPI
+* Fri Jun 15 2012 Linas Vepstas <linavepstas@gmail.com>
+- Initial version
 
