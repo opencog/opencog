@@ -314,6 +314,10 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 												   highlights);
 			scm_newline (port);
 		}
+#ifdef HAVE_GUILE2
+      if (SCM_STACK_LENGTH (captured_stack))
+          captured_stack = scm_stack_ref (captured_stack, SCM_INUM0);
+#endif
 		scm_display_error (captured_stack, port, subr, message, parts, rest);
 	}
 	else
