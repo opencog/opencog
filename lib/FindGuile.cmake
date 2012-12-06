@@ -18,11 +18,13 @@ FIND_PATH(GUILE_INCLUDE_DIR libguile.h
 	/usr/local/include
 	/usr/include/libguile
 	/usr/local/include/libguile
+	/usr/include/guile/2.0
+	/usr/local/include/guile/2.0
 	/opt/local/include/guile
 )
 
 # Look for the library
-FIND_LIBRARY(GUILE_LIBRARY NAMES guile PATHS 
+FIND_LIBRARY(GUILE_LIBRARY NAMES guile guile-2.0 PATHS 
 	/usr/lib
 	/usr/local/lib
 	/opt/local/lib
