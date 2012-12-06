@@ -10,7 +10,9 @@
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
-#include <libguile/lang.h>
+#ifndef HAVE_GUILE2
+  #include <libguile/lang.h>
+#endif
 #include <pthread.h>
 
 #include <opencog/util/Logger.h>
