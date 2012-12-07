@@ -78,11 +78,14 @@ public:
     void test_incremental_selection_j4() {
         test_incremental_selection(4);
     }
-    void test_redundant_features_j1() {
-        test_redundant_features(1);
+    void test_redundant_features_small_table_j1() {
+        test_redundant_features_small_table(1);
     }
-    void test_redundant_features_j4() {
-        test_redundant_features(4);
+    void test_redundant_features_big_table_j1() {
+        test_redundant_features_big_table(1);
+    }
+    void test_redundant_features_big_table_j4() {
+        test_redundant_features_big_table(4);
     }
 
     void test_moses_based_feature_selection_j1() {
@@ -174,7 +177,27 @@ private:
         TS_ASSERT_EQUALS(selected_features.size(), 6);
     }
 
-    void test_redundant_features(unsigned n_jobs) {
+    void test_redundant_features_small_table(unsigned n_jobs) {
+        setting_omp(n_jobs);
+
+        CTable ctable = small_table.compressed();
+        FeatureScorer fs(ctable);
+
+        {
+            set<arity_t> features{1, 2};
+            set<arity_t> redundant = redundant_features(features, fs, 0.2);
+            ostreamContainer(cout, redundant) << endl;;
+            TS_ASSERT_EQUALS(redundant, set<arity_t>{1});
+        }
+        {
+            set<arity_t> features{0, 1};
+            set<arity_t> redundant = redundant_features(features, fs, 1.1);
+            ostreamContainer(cout, redundant) << endl;;
+            TS_ASSERT_EQUALS(redundant, set<arity_t>{1});
+        }
+    }
+    
+    void test_redundant_features_big_table(unsigned n_jobs) {
         setting_omp(n_jobs);
 
         CTable ctable = big_table.compressed();
