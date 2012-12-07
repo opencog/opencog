@@ -90,25 +90,30 @@ class SchemeEval
 		void clear_pending(void);
 		bool eval_error(void);
 	
-		// Someone thinks that there some scheme threading bug somewhere,
+		// Someone thinks that there is some scheme threading bug somewhere,
 		// and the current hack around this is to use a singleton instance.
+		// The whole concept of a singletonInstance sucks.
 		static SchemeEval& instance(AtomSpace* atomspace = NULL)
 		{
-			if (!singletonInstance) {
-                if (!atomspace) {
-                    // We create our own local AtomSpace to send calls to the
-                    // event loop (otherwise the getType cache breaks)
-                    atomspace = new AtomSpace(cogserver().getAtomSpace());
-                }
+			if (!singletonInstance)
+			{
+				if (!atomspace)
+				{
+					  // We create our own local AtomSpace to send calls to the
+					  // event loop (otherwise the getType cache breaks)
+					  atomspace = new AtomSpace(cogserver().getAtomSpace());
+				}
 				singletonInstance = new SchemeEval(atomspace);
-            }
-            else if (atomspace && singletonInstance->atomspace->atomSpaceAsync != atomspace->atomSpaceAsync) {
-                // Someone is trying to initialise the Scheme interpretator
-                // on a different AtomSpace. because of the singleton design
-                // there is no easy way to support this...
-                throw (RuntimeException(TRACE_INFO, "Trying to re-initialise"
-                            " scm interpretor with different AtomSpaceAsync ptr!"));
-            }
+			}
+			else if (atomspace && 
+				singletonInstance->atomspace->atomSpaceAsync != atomspace->atomSpaceAsync)
+			{
+				 // Someone is trying to initialise the Scheme interpretator
+				 // on a different AtomSpace. because of the singleton design
+				 // there is no easy way to support this...
+				 throw (RuntimeException(TRACE_INFO, "Trying to re-initialise"
+									 " scm interpretor with different AtomSpaceAsync ptr!"));
+			}
 			return *singletonInstance;
 		}
 };
@@ -118,47 +123,6 @@ std::string eval_scheme(std::string &s);
 
 }
 
-#else /* HAVE_GUILE */
-
-#include <opencog/atomspace/Handle.h>
-
-namespace opencog {
-
-class SchemeEval
-{
-	private:
-		static SchemeEval* singletonInstance;
-	public:
-		std::string eval(const std::string &s) { return ""; }
-		Handle eval_h(const std::string &s) { return Handle::UNDEFINED; }
-		Handle apply(const std::string &s, Handle args) {
-			return Handle::UNDEFINED; }
-		std::string apply_generic(const std::string& f, Handle args) {
-			return ""; }
-	
-		bool input_pending(void) { return false; }
-		void clear_pending(void) {}
-
-		// If guile is not installed, then *every* call to eval_error()
-		// must report that an error occurred! 
-		bool eval_error(void) { return true; }
-
-		static SchemeEval& instance(AtomSpace* atomspace = NULL)
-		{
-			if (!singletonInstance) {
-				singletonInstance = new SchemeEval();
-            }
-
-			return *singletonInstance;
-		}
-};
-
-std::string eval_scheme(std::string &s) {
-	std::string ret("");
-	return ret;
-}
-
-}
 #endif/* HAVE_GUILE */
 
 #endif /* OPENCOG_SCHEME_EVAL_H */

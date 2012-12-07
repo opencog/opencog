@@ -250,6 +250,7 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                                  atomSpace.getOutgoing(hActionExecutionLink, 0)
                                               );
 
+#if HAVE_GUILE    
     // Get scheme function name if any
     bool bSchemeFunction = false;   
     size_t scm_prefix_index = actionName.find("scm:");
@@ -274,7 +275,6 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
     //         ...
     // TODO: this is unnecessary, remove it later. 
     if (actionType == SPEECH_ACT_SCHEMA_NODE) {
-#if HAVE_GUILE    
         scheme_expression = "( " + actionName + " )";
 
         // Run the speech act schema to generate answers
@@ -292,7 +292,6 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                         actionName.c_str(), 
                         this->cycleCount
                       );
-#endif // HAVE_GUILE    
     }
     // If it is a scheme function, call scheme evaluator 
     else if ( bSchemeFunction ) {
@@ -326,7 +325,6 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                           );
         }
         else {
-#if HAVE_GUILE    
             scheme_expression = "( " + scheme_expression + " )";
 
             // Run scheme function
@@ -345,7 +343,6 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                                 this->cycleCount
                               );
             }
-#endif // HAVE_GUILE    
         } // if (actionName == "answer_question")
     }
     // If it is a combo function, call ProcedureInterpreter to execute the function
@@ -395,6 +392,7 @@ std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_ac
                       );
 
     } 
+#endif // HAVE_GUILE    
 
     // If the agent has something to say, generate a bunch of say actions 
     // (one for each sentence node) which would be executed from next cognitive cycle

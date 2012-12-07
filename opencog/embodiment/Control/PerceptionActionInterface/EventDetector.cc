@@ -97,6 +97,7 @@ void EventDetector::insertNodeToScmMap(Handle node)
 
 void EventDetector::exportActionConcernedNodesToSCM()
 {
+#ifdef HAVE_GUILE
     std::fstream fscm;
     fscm.open(ActionsExportToScmFileName,ios::out);
     std::map<UUID,Handle>::iterator iter = allNodesForScmActions.begin();
@@ -108,5 +109,6 @@ void EventDetector::exportActionConcernedNodesToSCM()
         fscm << nodeStr << endl;
     }
     fscm.close();
+#endif /* HAVE_GUILE */
 }
 
