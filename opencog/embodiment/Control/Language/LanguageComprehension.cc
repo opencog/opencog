@@ -84,11 +84,11 @@ void LanguageComprehension::init( void )
     if ( !initialized ) {
         initialized = true;
 
+#ifdef HAVE_GUILE
         // Ensure SchemeEval is initialised with AtomSpace.
         opencog::AtomSpace& as = this->agent.getAtomSpace();
         SchemeEval::instance(&as);
         
-#ifdef HAVE_GUILE
         std::stringstream script;
         script << "(define agentSemeNode (SemeNode \"";
         script << agent.getPetId( ) << "\") )" << std::endl;
