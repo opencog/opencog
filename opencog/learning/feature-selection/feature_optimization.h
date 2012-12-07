@@ -31,6 +31,7 @@
 #include <functional>
 
 #include <boost/range/algorithm/set_algorithm.hpp>
+#include <boost/range/algorithm/max_element.hpp>
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/lru_cache.h>
@@ -279,17 +280,19 @@ template<typename Scorer, typename FeatureSet>
 FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
                               double threshold)
 {
-    FeatureSet res;
-    for (const typename FeatureSet::value_type& f : features) {
-        FeatureSet sf = set_difference(features, res);
-        sf.erase(f);
-        if(!sf.empty() && (scorer(features) - scorer(sf) < threshold))
-            res.insert(f);
+    typedef FeatureSet FS;
+    // Take the best powerset(features) of size i, return its
+    // complementary with features if it good enough. We start with
+    // lower i because the fewer the features the better.
+    for (unsigned i = 1; i < features.size(); i++) {
+        auto sfs = powerset(features, i, true);
+        auto mit = boost::max_element(sfs, [&](const FS& fsl, const FS& fsr) {
+                return scorer(fsl) < scorer(fsr); });
+        if (scorer(features) - scorer(*mit) < threshold)
+            return set_difference(features, *mit);
     }
-    return res;
+    return FS();
 }
-
-
 
 } // ~namespace opencog
 
