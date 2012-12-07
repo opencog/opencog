@@ -84,11 +84,11 @@ void LanguageComprehension::init( void )
     if ( !initialized ) {
         initialized = true;
 
+#ifdef HAVE_GUILE
         // Ensure SchemeEval is initialised with AtomSpace.
         opencog::AtomSpace& as = this->agent.getAtomSpace();
         SchemeEval::instance(&as);
         
-#ifdef HAVE_GUILE
         std::stringstream script;
         script << "(define agentSemeNode (SemeNode \"";
         script << agent.getPetId( ) << "\") )" << std::endl;
@@ -101,9 +101,15 @@ void LanguageComprehension::init( void )
 
         loadFrames( );
 
+#ifdef HAVE_GUILE2
+ #define C(X) ((scm_t_subr) X)
+#else
+ #define C(X) ((SCM (*) ()) X)
+#endif
+
         LanguageComprehension::localAgent = &this->agent;
         scm_c_define_gsubr("cog-emb-compute-spatial-relations", 3, 0, 1, 
-                           (SCM (*)())&LanguageComprehension::execute );
+                           C(&LanguageComprehension::execute));
 #endif
                 
         this->nlgen_server_port = config().get_int("NLGEN_SERVER_PORT");
