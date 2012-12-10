@@ -1,0 +1,13 @@
+# This small data set is used to test moses based feature selection.
+# target wholly depends on f1 and f2 together but not f1 and f2
+# individually. f3 alone has a higher mutual information (MI) with the
+# target than f1 or f2, but f1 and f2 together maximize MI.
+target,f1,f3,f2
+1,1,0,0
+1,0,1,1
+1,1,1,0
+1,0,1,1
+0,0,0,0
+0,1,0,1
+0,0,1,0
+0,1,1,1
