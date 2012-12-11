@@ -68,7 +68,7 @@ public:
 
     // If this is an simple state, which requires no real time calculation.
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
-    static StateValue getStateValueFromAtomspace(const State &state);
+    static StateValue getStateValueFromAtomspace(State &state);
 
     static StateValue inqueryDistance(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryExist(const vector<StateValue>& stateOwnerList);

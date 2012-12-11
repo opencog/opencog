@@ -43,8 +43,88 @@ using namespace boost;
 
 namespace opencog { namespace oac {
 
-#define ACCESS_DISTANCE "2.1"
-#define CLOSED_DISTANCE "0.9"
+class RuleLayer;
+class StateLayerNode;
+class StateLayer;
+
+// a rule node in a Rule Layer planning graph
+
+
+class RuleLayerNode
+{
+public:
+    Rule* originalRule; // the original rule (usually not grounded)
+    Rule* curGroundedRule; // the currently applying grounded rule of the the original rule
+
+    RuleLayer* actionLayer; // the layer it belongs to
+    set<StateLayerNode*> forwardLinks; // all nodes in next layer connected to this nodes according to the currently applying rule
+    set<StateLayerNode*> backwardLinks; // all the links connect to the nodes in last layer
+
+    // all the different grounded parameters for this rules which have been tried are put int to this vector, to avoid try them again
+    //vector<> histroyParamValues;
+
+    RuleLayerNode(Rule* _originalRule)
+    {
+        originalRule = _originalRule;
+    }
+
+};
+
+class StateLayerNode
+{
+public:
+    State* state;
+    bool isAchieved;
+    StateLayer* stateLayer; // the layer it belongs to
+    set<RuleLayerNode*> forwardLinks; // all the links connect to the nodes in next layer,and the according rules applied
+    set<RuleLayerNode*> backwardLinks; // all the links connect to the nodes in last layer
+    StateLayerNode(State * _state){state = _state;isAchieved = false;}
+};
+
+class StateLayer
+{
+public:
+    set<StateLayerNode*> nodes; // all the nodes in this layer currently
+
+    RuleLayer* preRuleLayer;
+    RuleLayer* nextRuleLayer;
+
+    StateLayer()
+    {
+        preRuleLayer = 0;
+        nextRuleLayer = 0;
+    }
+
+    StateLayer(const vector<State*>& _states)
+    {
+        vector<State*>::const_iterator it;
+        for (it = _states.begin(); it != _states.end(); ++ it)
+        {
+            StateLayerNode* newStateNode = new StateLayerNode(*it);
+            nodes.insert(newStateNode);
+            newStateNode->backwardLinks.clear();
+            newStateNode->forwardLinks.clear();
+        }
+
+        StateLayer();
+    }
+};
+
+class RuleLayer
+{
+public:
+    set<RuleLayerNode*> nodes; // all the nodes in this layer currently
+    set<Rule*> forwardHistory; // to store all the rules has been applied in this layer
+    StateLayer* preStateLayer;
+    StateLayer* nextStateLayer;
+    RuleLayer()
+    {
+        preStateLayer = 0;
+        nextStateLayer = 0;
+    }
+
+
+};
 
 class OCPlanner
 {
@@ -61,7 +141,7 @@ public:
 
      // the output plan:vector<PetAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
-     bool doPlanning(vector<State> &goal, vector<PetAction>& plan);
+     bool doPlanning(const vector<State*> &goal, vector<PetAction>& plan);
 
 protected:
 
@@ -74,6 +154,10 @@ protected:
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
 
+     // to store the orginal state values, avoid inquery in every planning step
+     // this vector should be clear every time begin a new plan
+     vector<State> originalStatesCache;
+
      // check if a given single goal has been achieved now
      // @ curLayerStates is a state layer in the planning graph
      // @ satisfiedDegree is a return value between [0.0,1.0], which shows how many percentage has this goal been achieved
@@ -81,34 +165,14 @@ protected:
      // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
      //                  to calculate its satisfiedDegree value.
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-     bool checkIsGoalAchieved(const State &oneGoal, const vector<State> &curLayerStates, float& satisfiedDegree, const State *original_state = 0);
+     bool checkIsGoalAchieved(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
 
-public:
-     // define the variables for rules
-     // we have 6 kinds of typedef variant<string, Rotation, Vector, Entity, fuzzyInterval, fuzzyIntFloatInterval > StateValue
-     /*
-     BOOLEAN_CODE,
-     INT_CODE,
-     FLOAT_CODE,
-     STRING_CODE,
-     VECTOR_CODE,
-     ROTATION_CODE,
-     ENTITY_CODE,
-     FUZZY_INTERVAL_INT_CODE,
-     FUZZY_INTERVAL_FLOAT_CODE,*/
 
-     static const StateValue access_distance;
-     static const StateValue SV_TRUE;
-     static const StateValue SV_FALSE;
 
-     static const string bool_var[7];
-     static const string str_var[7];
-     static const string int_var[7];
-     static const string float_var[7];
-     static const Vector vector_var[7];
-     static const Entity entity_var[7];
 
 };
+
+
 
 }}
 

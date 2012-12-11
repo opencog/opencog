@@ -97,7 +97,7 @@ const ActionParamType& ActionParameter::getType() const
     return type;
 }
 
-const ParamValue& ActionParameter::getValue() const
+ParamValue& ActionParameter::getValue()
 {
     return value;
 }
@@ -325,4 +325,64 @@ std::string ActionParameter::stringRepresentation() const throw (opencog::Runtim
     }
 
     return answer;
+}
+
+
+
+std::string ActionParameter::ParamValueToString(const ParamValue& paramVal)
+{
+    std::string answer ="";
+
+    if(boost::get<Entity>(&(paramVal)))
+    {
+        answer = boost::get<std::string>(paramVal);
+
+    }
+    else if(boost::get<Entity>(&(paramVal)))
+    {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<Entity>(paramVal).id));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Entity>(paramVal).type));
+        answer.append(")");
+    }
+    else if(boost::get<Vector>(&(paramVal)))
+    {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<Vector>(paramVal).x));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Vector>(paramVal).y));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Vector>(paramVal).z));
+        answer.append(")");
+    }
+    else if(boost::get<Rotation>(&(paramVal)))
+    {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<Rotation>(paramVal).pitch));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Rotation>(paramVal).roll));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Rotation>(paramVal).yaw));
+        answer.append(")");
+    }
+    else if(boost::get<FuzzyIntervalInt>(&(paramVal)))
+    {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<FuzzyIntervalInt>(paramVal).bound_low));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<FuzzyIntervalInt>(paramVal).bound_high));
+        answer.append(")");
+    }
+    else if(boost::get<FuzzyIntervalFloat>(&(paramVal)))
+    {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<FuzzyIntervalFloat>(paramVal).bound_low));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<FuzzyIntervalFloat>(paramVal).bound_high));
+        answer.append(")");
+    }
+
+    return answer;
+
 }
