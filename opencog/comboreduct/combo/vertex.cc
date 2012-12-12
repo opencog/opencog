@@ -29,6 +29,168 @@
 
 namespace opencog { namespace combo {
 
+bool is_procedure_call(const vertex& v)
+{
+    return (boost::get<procedure_call>(&v));
+}
+
+// Return cont&, avoid running the copy constructor!
+const procedure_call& get_procedure_call(const vertex& v)
+{
+    return (boost::get<procedure_call>(v));
+}
+
+bool is_action_symbol(const vertex& v)
+{
+    return (boost::get<action_symbol>(&v));
+}
+
+// Return cont&, avoid running the copy constructor!
+const action_symbol& get_action_symbol(const vertex& v)
+{
+    return (boost::get<action_symbol>(v));
+}
+
+bool is_indefinite_object(const vertex& v)
+{
+    return (boost::get<indefinite_object>(&v));
+}
+
+// Return cont&, avoid running the copy constructor!
+const indefinite_object& get_indefinite_object(const vertex& v)
+{
+    return (boost::get<indefinite_object>(v));
+}
+
+bool is_message(const vertex& v)
+{
+    return (boost::get<message>(&v));
+}
+
+// Return cont&, avoid running the copy constructor!
+const message& get_message(const vertex& v)
+{
+    return (boost::get<message>(v));
+}
+
+bool is_enum_type(const vertex& v)
+{
+    return (boost::get<enum_t>(&v));
+}
+
+// Return cont&, avoid running the copy constructor!
+const enum_t& get_enum_type(const vertex& v)
+{
+    return (boost::get<enum_t>(v));
+}
+
+bool is_builtin(const vertex& v)
+{
+    return (boost::get<builtin>(&v));
+}
+
+builtin get_builtin(const vertex& v)
+{
+    return (boost::get<builtin>(v));
+}
+
+bool is_wild_card(const vertex& v)
+{
+    return (boost::get<wild_card>(&v));
+}
+
+wild_card get_wild_card(const vertex& v)
+{
+    return (boost::get<wild_card>(v));
+}
+
+bool is_contin(const vertex& v)
+{
+    return (boost::get<contin_t>(&v));
+}
+contin_t get_contin(const vertex& v)
+{
+    return (boost::get<contin_t>(v));
+}
+
+/**
+ * return true if the vertex is an argument. Note, however, that
+ * this does not take into account the type of the argument; thus,
+ * any code that uses this blindly runs the risk of accepting arguments
+ * of the wrong type (e.g. boolean instead of contin, or v.v.).
+ *
+ * This should be fixed, but we don't have the infrastructure for this.
+ */
+bool is_argument(const vertex& v)
+{
+    return (boost::get<argument>(&v));
+}
+argument& get_argument(vertex& v)
+{
+    return boost::get<argument>(v);
+}
+bool is_ann_type(const vertex& v)
+{
+    return (boost::get<ann_type>(&v));
+}
+ann_type& get_ann_type(vertex& v)
+{
+    return (boost::get<ann_type>(v));
+}
+const argument& get_argument(const vertex& v)
+{
+    return boost::get<argument>(v);
+}
+bool is_negated(vertex& v)
+{
+    if (argument* a = boost::get<argument>(&v))
+        return a->is_negated();
+    return false;
+}
+
+bool is_action(const vertex& v)
+{
+    return (boost::get<action>(&v));
+}
+
+action get_action(const vertex& v)
+{
+    return (boost::get<action>(v));
+}
+
+bool is_builtin_action(const vertex& v)
+{
+    return (boost::get<builtin_action>(&v));
+}
+builtin_action get_builtin_action(const vertex& v)
+{
+    return (boost::get<builtin_action>(v));
+}
+bool is_action_result(const vertex& v)
+{
+    return (v == id::action_failure || v == id::action_success);
+}
+
+bool is_perception(const vertex& v)
+{
+    return (boost::get<perception>(&v));
+}
+
+perception get_perception(const vertex& v)
+{
+    return (boost::get<perception>(v));
+}
+
+bool is_definite_object(const vertex& v)
+{
+    return (boost::get<definite_object>(&v));
+}
+
+definite_object get_definite_object(const vertex& v)
+{
+    return (boost::get<definite_object>(v));
+}
+
 contin_t cast_contin(const vertex& v)
 {
     if (is_boolean(v))
