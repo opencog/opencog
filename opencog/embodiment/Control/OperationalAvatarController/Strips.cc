@@ -64,16 +64,16 @@ void State::assignValue(const StateValue& newValue)
 }
 
 // I am the goal, I want to check if this @param value is satisfied me
-bool State::isSatisfiedMe(const StateValue& value, float &satisfiedDegree, const State *original_state) const
+bool State::isSatisfiedMe( StateValue& value, float &satisfiedDegree,  State *original_state)
 {
     State other(this->name(),this->getStateValuleType(),this->stateType,value,this->stateOwnerList);
     return other.isSatisfied(*this,satisfiedDegree,original_state);
 }
 
 // pls make sure the goal describes the same state content with this state first
-bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *original_state) const
+bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_state)
 {
-    if ((goal.getStateType() == getStateType())&&(getStateValue() == goal.getStateValue()))
+    if ((goal.stateType == stateType)&&(stateVariable == goal.stateVariable))
     {
        satisfiedDegree = 1.0f;
        return true;
@@ -83,14 +83,14 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
     // For non-numberic statevalues,  the satisfiedDegree is always 0.0 or 1.0
     if (! StateValuleType::isNumbericValueType( goal.getStateValuleType().getCode()))
     {
-       if (goal.getStateType() == STATE_EQUAL_TO)
+       if (goal.stateType == STATE_EQUAL_TO)
        {
            satisfiedDegree = 0.0f;
            return false;
        }
-       else if (goal.getStateType() == STATE_NOT_EQUAL_TO)
+       else if (goal.stateType == STATE_NOT_EQUAL_TO)
        {
-           if (!(getStateValue() == goal.getStateValue()))
+           if (!(stateVariable == goal.stateVariable))
            {
                satisfiedDegree = 1.0f;
                return true;
@@ -124,15 +124,15 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
     // TODO: finish all the combinations
     float ori,cur;
 
-    switch (goal.getStateType())
+    switch (goal.stateType)
     {
     case STATE_EQUAL_TO:
 
         if (original_state != 0)
         {
-            if (getStateType() ==  STATE_EQUAL_TO)
+            if (stateType ==  STATE_EQUAL_TO)
             {
-                if (original_state->getStateType() == STATE_EQUAL_TO)
+                if (original_state->stateType == STATE_EQUAL_TO)
                     satisfiedDegree = State::calculateNumbericsatisfiedDegree(floatGoalVal,floatVal,floatOriVal);
                 else
                     satisfiedDegree = 0.0f; //TODO
@@ -147,7 +147,7 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
 
         if (stateType  == STATE_EQUAL_TO)
         {
-            if (!(getStateValue() == goal.getStateValue()))
+            if (!(stateVariable == goal.stateVariable))
             {
                 satisfiedDegree = 1.0f; //TODO
                 return true;
@@ -235,7 +235,7 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
                 satisfiedDegree = 1.0f;
             else
             {
-                switch (original_state->getStateType())
+                switch (original_state->stateType)
                 {
                 case STATE_FUZZY_WITHIN:
                     ori = fuzzyOriFloat.bound_low ;
@@ -270,7 +270,7 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
                 satisfiedDegree = 1.0f;
             else
             {
-                switch (original_state->getStateType())
+                switch (original_state->stateType)
                 {
                 case STATE_FUZZY_WITHIN:
                     ori = fuzzyOriFloat.bound_high ;
@@ -303,9 +303,9 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
             {
                 if (original_state)
                 {
-                    if (original_state->getStateType() == STATE_EQUAL_TO)
+                    if (original_state->stateType == STATE_EQUAL_TO)
                         satisfiedDegree = State::calculateNumbericsatisfiedDegree(fuzzyGoalFloat,floatVal,floatOriVal);
-                    else if (original_state->getStateType() == STATE_FUZZY_WITHIN) //TODO:
+                    else if (original_state->stateType == STATE_FUZZY_WITHIN) //TODO:
                         satisfiedDegree = State::calculateNumbericsatisfiedDegree(floatGoalVal,floatVal,(fuzzyOriFloat.bound_high + fuzzyOriFloat.bound_low)/2.0f);
                     else
                         satisfiedDegree = 0.0f; // TODO
@@ -325,9 +325,9 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
             {
                 if (original_state)
                 {
-                    if (original_state->getStateType() == STATE_EQUAL_TO)  //TODO:
+                    if (original_state->stateType == STATE_EQUAL_TO)  //TODO:
                         satisfiedDegree = State::calculateNumbericsatisfiedDegree(fuzzyGoalFloat,(fuzzyFloat.bound_high + fuzzyFloat.bound_low)/2.0f,floatOriVal);
-                    else if (original_state->getStateType() == STATE_FUZZY_WITHIN)
+                    else if (original_state->stateType == STATE_FUZZY_WITHIN)
                         satisfiedDegree = State::calculateNumbericsatisfiedDegree(fuzzyGoalFloat,fuzzyFloat,fuzzyOriFloat);
                     else
                         satisfiedDegree = 0.0f; // TODO
@@ -349,26 +349,38 @@ bool State::isSatisfied(const State &goal, float& satisfiedDegree, const State *
 
 }
 
-bool State::getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat) const
+bool State::getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat)
 {
     if (getStateValuleType().getCode() == FUZZY_INTERVAL_INT_CODE)
     {
-       fuzzyInt = boost::get<opencog::pai::FuzzyIntervalInt>(getStateValue());
+       fuzzyInt = boost::get<opencog::pai::FuzzyIntervalInt>(stateVariable->getValue());
        fuzzyFloat = FuzzyIntervalFloat((float)fuzzyInt.bound_low, (float)fuzzyInt.bound_high);
     }
     else if (getStateValuleType().getCode() == FUZZY_INTERVAL_FLOAT_CODE)
-        fuzzyFloat = boost::get<opencog::pai::FuzzyIntervalFloat>(getStateValue());
+        fuzzyFloat = boost::get<opencog::pai::FuzzyIntervalFloat>(stateVariable->getValue());
     else if (getStateValuleType().getCode()  == INT_CODE)
     {
-        intVal = boost::get<int>(getStateValue());
+        intVal = boost::get<int>(stateVariable->getValue());
         floatVal = (float)intVal;
     }
     else if (getStateValuleType().getCode()  == FLOAT_CODE)
-        floatVal = boost::get<float>(getStateValue());
+        floatVal = boost::get<float>(stateVariable->getValue());
     else
         return false;
 
     return true;
+}
+
+bool State::isNumbericState() const
+{
+    if (  (stateVariable->getType().getCode() == INT_CODE) ||
+          (stateVariable->getType().getCode() == FLOAT_CODE) ||
+          (stateVariable->getType().getCode() == FUZZY_INTERVAL_INT_CODE) ||
+          (stateVariable->getType().getCode() == FUZZY_INTERVAL_FLOAT_CODE) )
+        return true;
+    else
+        return false;
+
 }
 
 float State::calculateNumbericsatisfiedDegree(float goal, float current, float origin)
@@ -447,12 +459,12 @@ bool Effect::executeEffectOp()
 {
     if (effectOp != OP_ASSIGN_NOT_EQUAL_TO)
     {
-        if (state->getStateType() != STATE_EQUAL_TO)
+        if (state->stateType != STATE_EQUAL_TO)
             state->changeStateType(STATE_EQUAL_TO);
     }
     else
     {
-        if (state->getStateType() != STATE_NOT_EQUAL_TO)
+        if (state->stateType != STATE_NOT_EQUAL_TO)
             state->changeStateType(STATE_NOT_EQUAL_TO);
     }
 
@@ -468,7 +480,7 @@ bool Effect::executeEffectOp()
     }
     else if (effectOp == OP_REVERSE)
     {
-        string oldStr = boost::get<string>(state->getStateValue());
+        string oldStr = boost::get<string>(state->stateVariable->getValue());
         if (oldStr == "true")
             state->assignValue(StateValue(string("false")));
         else if (oldStr == "false")
@@ -478,7 +490,7 @@ bool Effect::executeEffectOp()
     }
     else
     {
-        string oldStr = boost::get<string>(state->getStateValue());
+        string oldStr = boost::get<string>(state->stateVariable->getValue());
         string opvStr = boost::get<string>(opStateValue);
 
         double oldv = atof(oldStr.c_str());
@@ -526,7 +538,7 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
 {
     // first,make sure the value type of the operater value is the same with the value type of the state
 
-    if (! StateVariable::areFromSameType(_state.getStateValue(),_OPValue))
+    if (! StateVariable::areFromSameType(_state.stateVariable->getValue(),_OPValue))
         return false;
 
     // if the value type is string, Entity, Vector, Rotation or fuzzy values , it's only allow to use the OP_ASSIGN operator
@@ -564,4 +576,185 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
         return false;
 
     }
+}
+
+bool Rule::isUnGroundedString( string& s)
+{
+    for (int i = 0; i < PARAMETER_NUM; ++i)
+    {
+        if ( (s == bool_var[i]) ||
+             (s == str_var[i]) ||
+             (s == int_var[i]) ||
+             (s == float_var[i]) )
+            return true;
+    }
+
+    return false;
+}
+
+bool Rule::isUnGroundedVector( Vector& v)
+{
+    for (int i = 0; i < PARAMETER_NUM; ++i)
+    {
+        if (v == vector_var[i])
+            return true;
+    }
+
+    return false;
+}
+
+bool Rule::isUnGroundedEntity( Entity& e)
+{
+    for (int i = 0; i < PARAMETER_NUM; ++i)
+    {
+        if (e == entity_var[i])
+            return true;
+    }
+
+    return false;
+}
+
+bool Rule::isParameterUnGrounded( ActionParameter& param)
+{
+    switch(param.getType().getCode())
+    {
+    case ENTITY_CODE:
+        return isUnGroundedEntity(boost::get<Entity>(param.getValue()));
+
+    case VECTOR_CODE:
+        return isUnGroundedVector(boost::get<Vector>(param.getValue()));
+
+    case STRING_CODE:
+    case INT_CODE:
+    case FLOAT_CODE:
+    case BOOLEAN_CODE:
+        return isUnGroundedString(boost::get<string>(param.getValue()));
+    default:
+        return false;
+    }
+}
+
+bool Rule::isParamValueUnGrounded( StateValue& paramVal)
+{
+    if(boost::get<Entity>(&paramVal))
+        return isUnGroundedEntity(boost::get<Entity>(paramVal));
+
+    if(boost::get<Vector>(&paramVal))
+        return isUnGroundedVector(boost::get<Vector>(paramVal));
+
+    if(boost::get<string>(&paramVal))
+        return isUnGroundedString(boost::get<string>(paramVal));
+
+    return false;
+
+}
+
+bool Rule::isRuleUnGrounded( Rule* rule)
+{
+    // Check if the actor grounded
+    if (isParamValueUnGrounded(rule->actor))
+        return true;
+
+    // Check if all the action parameters grounded
+    list<ActionParameter> parameters = rule->action->getParameters();
+    list<ActionParameter>::iterator it;
+    for(it = parameters.begin(); it != parameters.end(); ++it)
+    {
+        if (isParameterUnGrounded(*it))
+            return true;
+    }
+
+    // Check if all the action parameters grounded
+
+
+
+}
+
+void Rule::addParameterIndex(StateValue& paramVal)
+{
+    string paramToStr = ActionParameter::ParamValueToString(paramVal);
+    map<string , vector<StateValue*> >::iterator it;
+    it = paraIndexMap.find(paramToStr);
+
+    if (it == paraIndexMap.end())
+    {
+        vector<StateValue*> addresses;
+        addresses.push_back(&paramVal);
+        paraIndexMap.insert(std::pair<string , vector<StateValue*> >(paramToStr,addresses));
+    }
+    else
+    {
+        ((vector<StateValue*>)(it->second)).push_back(&paramVal);
+    }
+
+}
+
+void Rule::preProcessRuleParameterIndexes()
+{
+    // map<string , vector<StateValue*> >
+    // the string is the string representation of an orginal ungrounded parameter,
+    // such like: OCPlanner::vector_var[3].stringRepresentation(), see ActionParameter::stringRepresentation()
+    // In vector<StateValue*>, the StateValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
+    // map<string , vector<StateValue*> > paraIndexMap;
+
+    // Go through all the parameters in this rule
+
+    // Check if the actor grounded
+    if (isParamValueUnGrounded(actor))
+    {
+        addParameterIndex(actor);
+    }
+
+    // check if all the preconditiion parameters grounded
+    vector<State*>::iterator itpre;
+    for (itpre = preconditionList.begin(); itpre != preconditionList.end(); ++ itpre)
+    {
+        State* s = *itpre;
+
+        // check if all the stateOwner parameters grounded
+        vector<StateValue>::iterator ownerIt;
+        for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+        {
+            if (isParamValueUnGrounded(*ownerIt))
+                addParameterIndex(*ownerIt);
+        }
+
+        // check the state value
+        if (isParameterUnGrounded(*(s->stateVariable)))
+                addParameterIndex(s->stateVariable->getValue());
+    }
+
+    // Check if all the action parameters grounded
+    list<ActionParameter> parameters = action->getParameters();
+    list<ActionParameter>::iterator it;
+    for(it = parameters.begin(); it != parameters.end(); ++it)
+    {
+        if (isParameterUnGrounded(*it))
+            addParameterIndex(((ActionParameter)(*it)).getValue());
+    }
+
+    // Check if all the effect parameters grounded
+    vector<EffectPair>::iterator effectIt;
+    for(effectIt = effectList.begin(); effectIt != effectList.end(); ++effectIt)
+    {
+        Effect* e = effectIt->second;
+
+        State* s = e->state;
+        // check if all the stateOwner parameters grounded
+        vector<StateValue>::iterator ownerIt;
+        for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+        {
+            if (isParamValueUnGrounded(*ownerIt))
+                addParameterIndex(*ownerIt);
+        }
+
+        // check the state value
+        if (isParameterUnGrounded( *(s->stateVariable)))
+                addParameterIndex(s->stateVariable->getValue());
+
+        // check the effect value
+        if (isParamValueUnGrounded(e->opStateValue))
+            addParameterIndex(e->opStateValue);
+    }
+
 }
