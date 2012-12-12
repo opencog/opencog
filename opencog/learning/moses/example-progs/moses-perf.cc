@@ -32,6 +32,7 @@ void measure(vector<string> arguments)
     int nstart = 0;
     int nreps = 10;
 
+#define DO_SEEDS 1
 #if DO_THREADING
     double baseline = 0;
     nstart = 1;
@@ -39,8 +40,11 @@ void measure(vector<string> arguments)
     printf("Will run test with 1 to %d threads\n", nreps);
     fflush (stdout);
 
-#else
+#elif DO_SEEDS
     printf("Will run %d repetitions with different random seeds\n", nreps);
+    fflush (stdout);
+#elif DO_REPS
+    printf("Will run increasing cutoffs for %d reps\n", nreps);
     fflush (stdout);
 #endif
 
@@ -49,7 +53,6 @@ void measure(vector<string> arguments)
         // Each run gets a new random seed (use the -r option for this).
         vector<string> args = arguments;
         stringstream ss;
-#define DO_REPS 1
 #if DO_THREADING
         ss << "-j" << i;
 #elif DO_SEEDS
@@ -68,7 +71,7 @@ void measure(vector<string> arguments)
         // fss << "-fmoses-perf-iris-r" << i << ".log";
         // fss << "-fmoses-perf-magic-bi-m" << i << ".log";
         // fss << "-fmoses-perf-yeast-m" << i << ".log";
-        fss << "-fmoses-perf-wdbc-m" << i << ".log";
+        fss << "-fmoses-perf-mixed-probe-r" << i << ".log";
         args.push_back(fss.str());
 #endif
 

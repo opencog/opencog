@@ -3773,3 +3773,146 @@ deme  knobs   knobs    knobs     size  MBytes   gens  score   cpxy   time
 34232 * 5001 = 163MB expected usage
 20802281472 - 20713652224 = 84MB actual .. wtf ?
 
+pre-sample free ram is 14214971392
+num new instances requested be 801
+post-sample free ram is 7889281024
+
+Ahh ... RAM usage during scoring explodes:
+Serializing the scorer with a lock, get this:
+ post-sample free ram is 4736954368
+ score pid=0 cnt=1 pre get cand free=4736954368
+ score pid=0 cnt=1 post get cand free=74797056
+ score pid=0 cnt=1 treesize =338 bytes=24
+ score pid=0 cnt=1 post score free=75919360
+ score pid=8 cnt=2 pre get cand free=75919360
+
+OK, why did RAM not return back to normal?
+Is there a leak ... !? surely not ... valgrind crashes ... I don't get it.
+
+======================================================================
+
+Try to train:
+   poses moses -d reut-train-10-reduced-2443.csv -p targ -m model-binary 
+      -V -e100000 -s0 -n333
+      -M"-j12 --hc-max-nn-evals=5000 -n sin -n log -n exp -n div -Z1 -s1 -d1"
+
+Again: this dataset is 64MBytes 2443 features, 13K rows.  Takes python
+maybe 37 seconds and 350MB to read it.
+
+vast majority of time is spent in reduct, which is single-threaded.
+Something wrong here ... these expressions should not be so complicated...
+logical_subtree_knob .. disc_probe ... reduct ... 
+Ahh. that old bugaboo -- should have _skip_disc_probe=true, but it wasn't
+
+argh, bug: second SIGHUP put moses to sleep.... wchan = stext
+
+---------------------------------------------------
+Time spent in logical_probe_rec: 
+
+"Created 4886 logical knob subtrees"
+
+first col is elapse time,   1 thread.
+4th    col, elapsed time  n=2 threads.
+5th    col, elapsed time  n=3 threads.
+6th col, skip logical_disc_probe, n=1 threads.
+7th col, probe, but reduct effort=1, n=1 threads
+      wow .. is reduct effort 1 broken!? It must be ...
+
+  time     subtree sz    time/node    n=2  n=3    n=1    n=1
+  (secs)  (num nodes)    (msecs)     time  time  skip    r=1
+  ------   ----------    -------     ----  ----  ----    ---
+    11          2                      6    6     0.5    10
+    33       23233         1.42       30   39     0.5    22
+    75       46431         1.62       54   75     0.5    61
+   121       69658         1.74      140  115     0.5   117 
+   205       84238         2.43      135  201     0.5   541 (!!!!)
+            107415                   170  257     0.5   781 (!!!)
+
+-------------------------------------------------------------------
+Try again:
+
+   poses moses -d reut-train-10-reduced-2443.csv -p targ -m model-binary 
+      -V -e123480000 -s0 -n333
+      -M"-j12 --hc-max-nn-evals=10000 --max-time=300"
+
+Data located in reut-2443-NNNs
+
+Evaluate by: poses score -m model-binary-600s -p targ  -d test-10.dat
+
+test-10.dat contains 4853 lines of data
+
+Yikes! 14 hours to build knobs... 
+
+  limit    time    CPU
+  (secs)  actual    %
+  ------  ------   ---
+   300   1:36:04   633
+   600   2:23:05   790
+  1200  18:10:12   307
+  2400
+
+
+========================================================================
+Unit tests, specifically mixedUTest for _skip_disc_probe
+
+time ./opencog/learning/moses/main/moses -Hit -upred -nimpulse -nsin
+-nexp -nlog -m150000 -rnnn -z1 -Z1 -i ../tests/learning/moses/predicates-1.3.csv
+
+The -m flag limits execution time to about 2 minutes, single threaded.
+Either it gets an answer or it fails.
+
+Without the skip_disc_probe=true (i.e. the old way)
+r0 -- 41 s
+r1 fail
+r2 -- 1m5.492s
+r3 fail
+r4 fail
+r5 fail
+r6 fail
+r7 -- 56 s
+r8 -- 1m59.511s
+r9 -- 37 s
+r10 fail
+r11 -- 21 s
+r12 -- 1m30
+
+
+disc_probe completely disabled:  this really makes mixedUTest
+suffer in a bad way -- I guess that proper probing really does
+matter for this case ... Hmm, this neeeds to be studeied more
+r0 - fail
+r1 - fail
+r2 - fail
+r3 - fail
+r4 - fail
+r5 - fail
+
+r8 -fail
+r11 - fail
+
+Again, formally, via moses-perf:
+"skip" -- disable disc probe, completely. "steps" -- number of
+     iterations. 
+
+"probe" -- disc_probe enabled
+
+-fail- == the metapopulation was exhausted!! (metapop only got about 250
+total, and that's it...)
+
+  seed   skip  skip      probe
+         time  steps     time
+  ----   ----  -----     ----
+   0      101   158K       40
+   1    -fail-            132
+   2      111              63
+   3      123           -fail-
+   4      153             130
+   5    -fail-          -fail-
+   6    -fail-            117
+   7       60              54
+   8      116             125
+   9       53              39
+
+So, for the mixedUTest, looks like disc_probe does help, but not by a
+whole lot.
+

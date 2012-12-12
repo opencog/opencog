@@ -1,3 +1,6 @@
+INCLUDE_DIRECTORIES(
+    ${GUILE_INCLUDE_DIR}
+)
 
 ADD_LIBRARY (smob SHARED
 	SchemeEval.cc

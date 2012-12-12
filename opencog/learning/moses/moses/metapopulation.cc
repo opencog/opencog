@@ -1,7 +1,7 @@
 /** metapopulation.cc ---
  *
  * Copyright (C) 2010 Novemente LLC
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012 Poulin Holdings LLC
  *
  * Authors: Nil Geisweiller, Moshe Looks, Linas Vepstas
  *
@@ -92,7 +92,6 @@ void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
     }
 }
     
-// bool deme_expander::create_deme(bscored_combo_tree_set::const_iterator exemplar)
 bool deme_expander::create_deme(const combo_tree& exemplar)
 {
     using namespace reduct;
@@ -113,6 +112,8 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // return the set of selected features as column index
         // (left most column corresponds to 0)
         auto selected_features = (*_params.fstor)(_exemplar);
+        logger().info() << "Feature selection of " << selected_features.size()
+                        << " features for representation";
         // add the complementary of the selected features (not
         // present in the exemplar) in ignore_ops
         auto exemplar_features = get_argument_abs_idx_from_zero_set(_exemplar);
@@ -134,9 +135,9 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // printlnContainer(ios);
         // ~debug print
 
-        // Reformat the data so that dedundant inputs are grouped
-        // (the number of redundant can possibly change from a
-        // deme to another given that ignored input features can
+        // Reformat the data so that redundant inputs are grouped
+        // (the number of redundant inputs can possibly change from
+        // one deme to another, given that ignored input features can
         // change as well) as to possibly speed-up evaluation (if
         // the scorer implement ignore_idxs).
         std::set<arity_t> idxs;
@@ -173,7 +174,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
     return true;
 }
 
-int deme_expander::optimize_deme(int max_evals)
+int deme_expander::optimize_deme(int max_evals, time_t max_time)
 {
     if (logger().isDebugEnabled()) {
         logger().debug()
@@ -183,7 +184,7 @@ int deme_expander::optimize_deme(int max_evals)
 
     complexity_based_scorer cpx_scorer =
         complexity_based_scorer(_cscorer, *_rep, _params.reduce_all);
-    return _optimize(*_deme, cpx_scorer, max_evals);
+    return _optimize(*_deme, cpx_scorer, max_evals, max_time);
 }
 
 void deme_expander::free_deme()
@@ -335,7 +336,7 @@ void metapopulation::set_diversity()
     if (logger().isFineEnabled()) {
         stringstream ss;
         ss << "Metapopulation after setting diversity:" << std::endl;
-        logger().fine(ostream(ss, -1, true, true).str());
+        logger().fine(ostream(ss, -1, true, true, true /*bscore*/).str());
     }
 }
 
@@ -476,17 +477,9 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     OC_ASSERT(__rep);
     OC_ASSERT(__deme);
 
-    // It seems that, when using univariate multi-threaded opt,
-    // the number of evals is (much) greater than the deme size.
-    // I suspect this is a bug? XXX This needs investigation and
-    // fixing.  On the other hand, univariate is quasi-obsolete...
-    // (Note from Nil : Univariate overwrites candidates of the
-    // deme during optimization so that is why the number of evals
-    // is greater than the deme size).
-    size_t eval_during_this_deme = std::min(evals, __deme->size());
-
-    logger().debug("Close deme; evaluations performed: %d",
-                   eval_during_this_deme);
+    // Note that univariate reports far more evals than the deme size;
+    // this is because univariate over-write deme entries.
+    logger().debug("Close deme; evaluations reported: %d", evals);
 
     // Add, as potential exemplars for future demes, all unique
     // trees in the final deme.
@@ -520,9 +513,6 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
                 __deme->pop_back();
             }
         }
-
-        eval_during_this_deme =
-            std::min(eval_during_this_deme, __deme->size());
     }
 
     ///////////////////////////////////////////////////////////////
@@ -577,38 +567,22 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
         }
     };
 
-    // We use
-    //
-    // deme->begin() + min(eval_during_this_deme, params.max_candidates)
-    //
-    // instead of
-    //
-    // deme->begin() + params.max_candidates,
-    //
-    // because we might have resized the deme to something larger
-    // than the actual number of instances we placed into it (XXX
-    // really?  Does this ever happen? Yes it did in very special
-    // situation when MOSES was used in a sliced manner).
-    //
-    // Also, before we used params.max_candidates during
-    // select_candidates, this was nice because it would discount
-    // redundant candidates, but it turns out this introduces some
-    // non-determinism when run with multiple threads. However
-    // using params.max_candidates to determine the end iterator
-    // doesn't introduce any indeterminism.
-    //
-    // Note: this step can be very time consuming; it currently
-    // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
-    // for me; my (reduced, simplified) instances have complexity
-    // of about 100. This seems too long/slow.
-    deme_cit deme_begin = __deme->begin();
-    unsigned max_pot_cnd = eval_during_this_deme;
+    // It can happen that the true number of evals is less than the
+    // deme size (certain cases involving the univariate optimizer)
+    // But also, the deme size can be smaller than the number of evals,
+    // if the deme was shrunk to save space. 
+    unsigned max_pot_cnd = std::min(evals, __deme->size());
     if (params.max_candidates >= 0)
         max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
 
     logger().debug("Select candidates to merge (amongst %u)", max_pot_cnd);
 
-    deme_cit deme_end = __deme->begin() + max_pot_cnd;
+    // select_candidates() can be very time consuming; it currently
+    // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
+    // for me; my (reduced, simplified) instances have complexity
+    // of about 100. This seems too long/slow (circa summer 2012).
+    deme_cit deme_begin = __deme->begin();
+    deme_cit deme_end = deme_begin + max_pot_cnd;
     OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
     logger().debug("Selected %u candidates to be merged",

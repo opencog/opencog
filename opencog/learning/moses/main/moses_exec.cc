@@ -440,6 +440,7 @@ int moses_exec(int argc, char** argv)
     float min_rand_input;
     float max_rand_input;
     unsigned long max_evals;
+    time_t max_time;
     long result_count;
     bool output_score;
     bool output_penalty;
@@ -663,6 +664,10 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
          "Maximum number of fitness function evaluations.\n")
+
+        ("max-time",
+         value<time_t>(&max_time)->default_value(INT_MAX),
+         "Longest allowed runtime, in seconds.\n")
 
         (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned>(&cache_size)->default_value(100000),
@@ -1066,12 +1071,23 @@ int moses_exec(int argc, char** argv)
          value<bool>(&gen_best_tree)->default_value(false),
          "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.\n")
 
+        // ======= Feature-selection params =======
         ("enable-fs",
          value<bool>(&enable_feature_selection)->default_value(false),
-         "Enable feature selection (happen before each representation building).\n")
+         "Enable integrated feature selection.  Feature selection is "
+         "performed immediately before knob building (representation "
+         "building), when creating a new deme.  Limiting the number "
+         "of features can sharply improve the run-time and memory "
+         "usage of large problems.\n")
+
+        ("fs-target-size",
+         value<unsigned>(&fs_params.target_size)->default_value(20),
+            "Feature count.  This option "
+            "specifies the number of features to be selected out of "
+            "the dataset.  A value of 0 disables feature selection. \n")
 
         ("fs-algo",
-         value<string>(&fs_params.algorithm)->default_value(smd),
+         value<string>(&fs_params.algorithm)->default_value(inc),
          string("Feature selection algorithm. Supported algorithms are:\n")
          /*
           * We're not going to support univariate or sa any time
@@ -1080,15 +1096,9 @@ int moses_exec(int argc, char** argv)
           .append(un).append(" for univariate,\n")
           .append(sa).append(" for simulated annealing,\n")
          */
+         .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
          .append(smd).append(" for stochastic maximal dependency,\n")
-         .append(moses::hc).append(" for moses-hillclimbing,\n")
-         .append(inc).append(" for incremental max-relevency, min-redundancy.\n").c_str())
-
-        ("fs-target-size",
-         value<unsigned>(&fs_params.target_size)->default_value(0),
-            "Feature count.  This option "
-            "specifies the number of features to be selected out of "
-            "the dataset.  A value of 0 disables this option. \n")
+         .append(moses::hc).append(" for moses-hillclimbing,\n").c_str())
 
         ("fs-threshold",
          value<double>(&fs_params.threshold)->default_value(0),
@@ -1099,6 +1109,7 @@ int moses_exec(int argc, char** argv)
             "will be selected. \n"
             "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
+        // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
          value<double>(&fs_params.inc_red_intensity)->default_value(0.1),
          "Incremental Selection parameter. Floating-point value must "
@@ -1118,13 +1129,13 @@ int moses_exec(int argc, char** argv)
          "selection. Higher values make the feature selection more "
          "accurate but is combinatorially more computationally expensive.\n")
 
-        // ======= Hill-climbing only params =======
-        ("fs-max-score",
+        // ======= Feature-selection hill-climbing only params =======
+        ("fs-hc-max-score",
          value<double>(&fs_params.hc_max_score)->default_value(1),
          "Hillclimbing parameter.  The max score to reach, once "
          "reached feature selection halts.\n")
 
-        ("fs-confidence-penalty-intensity",
+        ("fs-hc-confidence-penalty-intensity",
          value<double>(&fs_params.hc_confi)->default_value(1.0),
          "Hillclimbing parameter.  Intensity of the confidence "
          "penalty, in the range [0,+Inf).  Zero means no confidence "
@@ -1142,7 +1153,7 @@ int moses_exec(int argc, char** argv)
         //  "initial feature set is close to the one that maximizes the "
         //  "quality measure, the selection speed can be greatly increased.\n")
 
-        ("fs-max-evals",
+        ("fs-hc-max-evals",
          value<unsigned>(&fs_params.hc_max_evals)->default_value(10000),
          "Hillclimbing parameter.  Maximum number of fitness function "
          "evaluations.\n")
@@ -1373,6 +1384,7 @@ int moses_exec(int argc, char** argv)
     moses_params.max_evals = max_evals;
     moses_params.max_gens = max_gens;
     moses_params.max_score = max_score;
+    moses_params.max_time = max_time;
     moses_params.max_cnd_output = result_count;
 
     // Infer arity

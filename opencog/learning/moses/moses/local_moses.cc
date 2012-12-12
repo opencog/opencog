@@ -44,7 +44,7 @@ using namespace combo;
  *
  */
 bool expand_deme(metapopulation& mp,
-                 int max_evals, moses_statistics& stats)
+                 int max_evals, time_t max_time, moses_statistics& stats)
 {
     if (mp.empty())
         return true;
@@ -71,7 +71,7 @@ bool expand_deme(metapopulation& mp,
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
-    size_t evals_this_deme = mp._dex.optimize_deme(max_evals);
+    size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
     stats.n_evals += evals_this_deme;
     stats.n_expansions++;
 
@@ -106,8 +106,8 @@ void local_moses(metapopulation& mp,
                  const moses_parameters& pa,
                  moses_statistics& stats)
 {
-    logger().info("MOSES starts, max_evals=%d max_gens=%d",
-                  pa.max_evals, pa.max_gens);
+    logger().info("MOSES starts, max_evals=%d max_gens=%d max_time=%d",
+                  pa.max_evals, pa.max_gens, pa.max_time);
 
     optim_stats *os = dynamic_cast<optim_stats *> (&mp._dex._optimize);
 
@@ -116,27 +116,33 @@ void local_moses(metapopulation& mp,
 
     struct timeval start;
     gettimeofday(&start, NULL);
+    stats.elapsed_secs = 0.0;
 
     while ((stats.n_evals < pa.max_evals)
            && (pa.max_gens != stats.n_expansions)
-           && (mp.best_score() < pa.max_score))
+           && (mp.best_score() < pa.max_score)
+           && (stats.elapsed_secs < pa.max_time))
     {
         // Run a generation
-        bool done = expand_deme(mp, pa.max_evals - stats.n_evals, stats);
+        bool done = expand_deme(mp,
+                                pa.max_evals - stats.n_evals, 
+                                pa.max_time - stats.elapsed_secs, 
+                                stats);
+
+        struct timeval stop, elapsed;
+        gettimeofday(&stop, NULL);
+        timersub(&stop, &start, &elapsed);
+        start = stop;
+        stats.elapsed_secs += elapsed.tv_sec + 1.0e-6*elapsed.tv_usec;
 
         // Print stats in a way that makes them easy to graph.
         // (columns of tab-seprated numbers)
         if (logger().isInfoEnabled()) {
 
-            struct timeval stop, elapsed;
-            gettimeofday(&stop, NULL);
-            timersub(&stop, &start, &elapsed);
-            start = stop;
-
             stringstream ss;
             ss << "Stats: " << stats.n_expansions
                << "\t" << stats.n_evals    // number of evaluations so far
-               << "\t" << elapsed.tv_sec   // wall-clock time.
+               << "\t" << ((int) stats.elapsed_secs)  // wall-clock time.
                << "\t" << mp.size()       // size of the metapopulation
                << "\t" << mp.best_score() // score of the highest-ranked exemplar.
                << "\t" << get_complexity(mp.best_composite_score()); // as above.
@@ -171,7 +177,7 @@ void local_moses(metapopulation& mp,
         if (logger().isDebugEnabled() and mp.params.diversity.pressure > 0.0) {
             stringstream ss;
             ss << pa.max_cnd_output << " best candidates of the metapopulation (with scores and visited status):" << std::endl;
-            mp.ostream(ss, pa.max_cnd_output, true, true, false, true);
+            mp.ostream(ss, pa.max_cnd_output, true, true, true, true);
             logger().debug(ss.str());
         }
         

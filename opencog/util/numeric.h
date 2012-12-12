@@ -71,6 +71,7 @@ using __gnu_cxx::iota;
 #endif
 
 const double EPSILON = 1e-6; // default error when comparing 2 floats
+const double SMALL_EPSILON = 1e-32;
 const double PROB_EPSILON = 1e-127; // error when comparing 2 probabilities
 
 // absolute_value_order
@@ -285,6 +286,17 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
     return isApproxEq(x, y, static_cast<FloatT>(EPSILON));
 }
 
+/**
+ * Return x bounded by [l, u], that is it returns max(l, min(u, x))
+ *
+ * I'm not sure the name 'bound' is right...
+ */
+template<typename Float>
+Float bound(Float x, Float l, Float u)
+{
+    return std::max(l, std::min(u, x));
+}
+    
 // useful for entropy
 template<typename FloatT> FloatT weightInformation(FloatT p)
 {
@@ -439,13 +451,13 @@ Float tanimoto_distance(const Vec& a, const Vec& b)
     OC_ASSERT (a.size() == b.size(),
                "Cannot compare unequal-sized vectors!  %d %d\n",
                a.size(), b.size());
-    
-    Float ab = boost::inner_product(a, b, 0),
-        aa = boost::inner_product(a, a, 0),
-        bb = boost::inner_product(b, b, 0),
+
+    Float ab = boost::inner_product(a, b, Float(0)),
+        aa = boost::inner_product(a, a, Float(0)),
+        bb = boost::inner_product(b, b, Float(0)),
         numerator = aa + bb - ab;
-    
-    if (numerator != 0)
+
+    if (numerator >= Float(SMALL_EPSILON))
         return 1 - (ab / numerator);
     else
         return 0;
@@ -476,13 +488,16 @@ Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
                "Cannot compare unequal-sized vectors!  %d %d\n",
                a.size(), b.size());
 
-    Float ab = boost::inner_product(a, b, 0),
-        aa = boost::inner_product(a, a, 0),
-        bb = boost::inner_product(b, b, 0),
+    Float ab = boost::inner_product(a, b, Float(0)),
+        aa = boost::inner_product(a, a, Float(0)),
+        bb = boost::inner_product(b, b, Float(0)),
         numerator = sqrt(aa * bb);
     
-    if (numerator != 0)
-        return (pos_n_neg ? 1 : 2) * acos(ab / numerator) / PI;
+    if (numerator >= Float(SMALL_EPSILON)) {
+        // in case of rounding error
+        Float r = bound(ab / numerator, Float(-1), Float(1));
+        return (pos_n_neg ? 1 : 2) * acos(r) / PI;
+    }
     else
         return 0;
 }

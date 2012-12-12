@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "August 16, 2012" "3.2.5" "OpenCog Learning"
+.TH MOSES 1 "November 27, 2012" "3.2.13" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -51,6 +51,7 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR reduct_effort ]
 .RB [ \-e
 .IR exemplar ]
+.RB [ \-\-enable\-fs=1 ]
 .RB [ \-F ]
 .RB [ \-f
 .IR logfile ]
@@ -70,6 +71,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR loglevel ]
 .RB [ \-m
 .IR max_evals ]
+.RB [ \-\-max\-time ]
+.IR seconds ]
 .RB [ \-\-mpi=1 ]
 .RB [ \-N
 .IR operator ]
@@ -400,7 +403,8 @@ Huh ???
 .SS "Algorithm control options"
 These options provide overall control over the algorithm execution.
 The most important of these, for controlling behavior, are the 
-\fB-A\fR, \fB\-a\fR, \fB\-m\fR, \fB\-r\fR, \fB\-v\fR and \fB\-z\fR flags.
+\fB-A\fR, \fB\-a\fR, \fB\-m\fR, \fB\-\-max\-time\fR, \fB\-r\fR,
+\fB\-v\fR and \fB\-z\fR flags.
 .TP
 .BI \-a\  algorithm \fR,\ \fB\-\-algo= algorithm
 Select the algorithm to apply to a single deme.  This is the algorithm
@@ -465,6 +469,16 @@ that has at least this score, then search is terminated.
 .BI \-m\  num \fR,\ \fB\-\-max\-evals= num
 Perform no more than \fInum\fR evaluations of the scoring function.
 Default value is 10000.
+.TP
+.BI \-\-max\-time=\ secs
+Run the optimizer for no longer than \fIsecs\fR seconds.  Note that
+timing is polled only in a small number of points in the algorithm;
+thus, actual execution time might exceed this limit by a few seconds,
+or even many minutes, depending on the problem type.  In particular,
+knob-building time is not accounted for right away, and thus problems
+with a long knob-building time will exceed this limit.  If using this
+option, be sure to set the \fB\-m\fR option to some very large value.
+Default value is 42 years.
 .TP
 .BI \-n\  oper \fR,\ \fB\-\-ignore\-operator= oper
 Exclude the operator \fIoper\fP from the program solution.
@@ -552,6 +566,64 @@ problem types, especially those with large neighborhoods (i.e. those with
 high program complexity), this can lead to an order-of-magnitude
 speedup, or more.  For other problem types, especially those with 
 deceptive scoring functions, this can hurt performance.
+
+.PP
+.\" ============================================================
+.SS "Integrated feature selection"
+Problems with a large number of input features (typically, hundreds
+or more) can lead to excessively long run-times, and overwhelming
+amounts of memory usage.  Such problems can be tackled by limiting
+the number of features used during knob building, resulting in smaller
+demes that can be searched more quickly.  Integrated feature selection 
+is enabled with the \fB\-\-enable\-fs=1\fR option.  The number of 
+features to use during knob bilding is specified using the 
+\fB\-\-fs\-target\-size\fR option.  A number of additional flags
+control the behaviour of the feature selection algorithm; these are
+best left alone; the defaults should be adequate for almost all
+problems.  The man page for the \fBfeature\-selection\fR command
+describes these in greater detail.
+
+.TP
+.BI \-\-enable\-fs=1
+Enable integrated feature selection.  Feature selection is disabled
+by default.
+.TP
+.BI \-\-fs\-target\-size= num
+Select \fInum\fR features for use.  This argument is mandatory if
+feature selection is enabled.
+.TP
+.BI \-\-fs\-algo
+Choose the feature-selection algorithm.  Possible choices are 
+\fBinc\fR, \fBsmd\fR and \fBhc\fR.  The default value is \fbinc\fR,
+which is the fastest bu least accurate algo.
+.TP
+.BI \-\-fs\-threshold= num
+Set the minimum threshold for selecting a feature.
+.TP
+.BI \-\-fs\-inc\-redundant\-intensity= fraction
+When using the \fBinc\fR algorithm, set the threshold to reject
+redundant features.
+.TP
+.BI \-\-fs\-inc\-target\-size\-epsilon= tolerance
+When using the \fBinc\fR algorithm, set the smallest step size
+used.
+.TP
+.BI \-\-fs\-inc\-interaction\-terms= num_terms
+When using the \fBinc\fR algorithm, set the number of terms used
+when computing the joint entropy.
+.TP
+.BI \-\-fs\-hc\-max\-score
+TODO write description
+.TP
+.BI \-\-fs\-hc\-confidence\-penalty\-intensity
+TODO write description
+.TP
+.BI \-\-fs\-hc\-max\-evals
+TODO write description
+.TP
+.BI \-\-fs\-hc\-fraction\-of\-remaining
+TODO write description
+
 .PP
 .\" ============================================================
 .SS "Large problem parameters"
@@ -605,7 +677,7 @@ Reduce candidates before scoring evaluation. Otherwise, only dominating
 candidates are reduced, just before being added to the metapopulation.
 This flag may be useful if scoring function evaluation expense depends
 strongly one the structure of the candidate. It is particularly important
-to specify this flag when memoization is enabled (with \fB-s!\fR).
+to specify this flag when memoization is enabled (with \fB-s1\fR).
 .TP
 .BI \-E\  effort \fR,\ \fB\-\-reduct\-candidate\-effort= effort
 Effort allocated for reduction of candidates. Valid values are
@@ -753,6 +825,7 @@ contains labels in its header.
 .BI \-x1\fR,\ \fB\-\-output\-complexity=1
 Print the complexity measure of the model, and the scoring penalty.
 
+.PP
 .\" ============================================================
 .SS "Precision, recall, BEP, F_1 and prerec problem types"
 The prerec, recall, bep, f_one and precision problem types are used
@@ -826,10 +899,8 @@ The harshness or hardness of the penalty may be specified by means
 of the \fB\-Q\fR or \fB\-\-alpha\fR option.  Values much greater
 than one enforce a hard boundary; values much less than one make
 for a very soft boundary.  Negative values are invalid.
+
 .PP
-
-
-
 .\" ============================================================
 .SS "Contin options"
 Options that affect the usage of continuously-valued variables.
@@ -852,6 +923,7 @@ Split a continuous domain into two pieces. This option maybe be used
 multiple times to split a continuous domain into multiple pieces:
 that is, \fIn\fR uses of this option will create \fIn+1\fR domains.
 
+.PP
 .\" ============================================================
 .SS "Demo options"
 These options pertain to the various built-in demo and example problem
@@ -1161,10 +1233,18 @@ remote machines.
 .\" ============================================================
 .SH TODO
 Finish documenting these algo flags:  -M
+--diversity-pressure
+--diversity-exponent
+--diversity-normalize
+--diversity-dst
+--diversity-p-norm
+--diversity-dst2dp
+.PP
+-R discretize target var
 .PP
 These input flags: -G
 .PP
-Other mystery flags: -J -K -U -X
+Interesting patterns flags: -J -K -U -X
 
 .SH SEE ALSO
 .br

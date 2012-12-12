@@ -96,7 +96,11 @@ void SchemeSmob::init_smob_type(void)
 
 /* ============================================================== */
 
-#define C(X) ((SCM (*) ()) X)
+#ifdef HAVE_GUILE2
+ #define C(X) ((scm_t_subr) X)
+#else
+ #define C(X) ((SCM (*) ()) X)
+#endif
 
 void SchemeSmob::register_procs(void)
 {

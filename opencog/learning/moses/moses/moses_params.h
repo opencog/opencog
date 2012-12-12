@@ -69,6 +69,9 @@ struct moses_parameters
     // the max score
     score_t max_score;
 
+    // limit amount of time that process should run
+    time_t max_time;
+
     // the maximum number of candidates to output (if negative then it
     // output all candidates
     int max_cnd_output;
@@ -79,13 +82,17 @@ struct moses_parameters
  */
 struct moses_statistics
 {
-    moses_statistics() : n_evals(0), n_expansions(0) {}
+    moses_statistics() : n_evals(0), n_expansions(0), elapsed_secs(0)
+    {}
 
     // total number of scoring function evaluations
     std::atomic<int> n_evals;
 
     // total number of deme expansions (generations)
     std::atomic<int> n_expansions;
+
+    // elapsed wall-clock time, in seconds, since start of moses.
+    double elapsed_secs;
 };
 
 

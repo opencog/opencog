@@ -133,6 +133,13 @@ SET(Boost_USE_MULTITHREADED ON)
 # boost-1.49 no longer has a libboost_iostreams
 FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
 
+# Opencog won't compile with Boost 1.51, some kind of conflict with
+# hash functions, see github bugs 1 and 36
+IF(105100 EQUAL ${Boost_VERSION})
+    MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with OpenCog.  Please use a different version.")
+ENDIF(105100 EQUAL ${Boost_VERSION})
+MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
+
 # Optional boost packages; can build without these.
 # Arghhh. Except cmake is treating these as required, not optional. #$%**&
 FIND_PACKAGE(Boost 1.45 COMPONENTS python program_options QUIET)
@@ -183,6 +190,7 @@ FIND_PACKAGE(Guile 1.8.6)
 IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 	SET(HAVE_GUILE 1)
+	INCLUDE_DIRECTORIES(${GUILE_INCLUDE_DIR})
 	SET(GUILE_DIR_MESSAGE "Guile was found.")
 ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")

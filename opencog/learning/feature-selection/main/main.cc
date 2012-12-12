@@ -218,6 +218,10 @@ int main(int argc, char** argv)
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
 
+        ("max-time",
+         value<time_t>(&fs_params.max_time)->default_value(INT_MAX),
+         "Longest allowed runtime, in seconds (ONLY WORKS FOR hc).\n")
+
         // ======= Incremental selection params =======
         (opt_desc_str(inc_redundant_intensity_opt).c_str(),
          value<double>(&fs_params.inc_red_intensity)->default_value(0.1),
@@ -293,6 +297,9 @@ int main(int argc, char** argv)
          "(see moses --help or man moses for more info).\n")
 
         ;
+
+    // XXX TODO add an option to set this ... 
+    fs_params.max_time = INT_MAX;
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
