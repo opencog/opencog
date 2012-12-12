@@ -95,95 +95,6 @@ class Inquery;
     class State
     {
     public:
-        string name() const {return stateVariable->getName();}
-
-        StateType getStateType() const {return stateType;}
-
-        void changeStateType(StateType newType){this->stateType = newType;}
-
-        // the state value needed real time inquery is represented as:
-        // ExecutionOutputLink
-        //         SchemaNode "Distance"
-        bool is_need_inquery() const {return need_inquery;}
-
-        const StateValue& getStateValue() const {return stateVariable->getValue();}
-
-        StateValuleType getStateValuleType() const {return stateVariable->getType();}
-
-        const vector<StateValue>& getStateOwnerList() const {return stateOwnerList;}
-
-        InqueryFun getInqueryFun() const {return inqueryFun;}
-
-        State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
-              vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryFun _inqueryFun = 0);
-
-        State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
-               bool _need_inquery = false, InqueryFun _inqueryFun = 0);
-        ~State();
-
-        void assignValue(const StateValue& newValue);
-
-
-        void addOwner(StateValue& _owner)
-        {
-            stateOwnerList.push_back(_owner);
-        }
-
-        inline bool isSameState(const State& other) const
-        {
-            return ((name() == other.name())&&(stateOwnerList == other.getStateOwnerList()));
-        }
-
-        // @ satisfiedDegree is a return value between (-infinity,1.0], which shows how many percentage has this goal been achieved,
-        //   if the value is getting father away from goal, it will be negative
-        //   satisfiedDegree = |original - current|/|original - goal|
-        //   when it's a boolean goal, only can be 0.0 or 1.0
-        // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
-        //                  to calculate its satisfiedDegree value.
-        // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-        bool isSatisfiedMe(const StateValue& value, float& satisfiedDegree, const State *original_state = 0) const;
-        bool isSatisfied(const State& goal, float &satisfiedDegree, const State *original_state = 0) const;
-
-
-        // To get int,float value or fuzzy int or float value from a state
-        // For convenience, we will also consider int value as float value
-        // if the value type is not numberic, return false and the floatVal and fuzzyFloat will not be assigned value
-        bool getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat) const;
-
-        // About the calculation of Satisfie Degree
-        // compare 3 statevalue for a same state: the original statevalue, the current statevalue and the goal statevalue
-        // to see how many persentage the current value has achieved the goal, compared to the original value
-        // it can be negative, when it's getting farther away from the goal than the original value
-        // For these 3, the state should be the same state, but the state operator type can be different, e.g.:
-        // the goal is to eat more than 10 apples, and at the beginning 2 apple has been eaten, and current has finished eaten 3 apples and begin to eat the 6th one, so:
-        // original: Num_eaten(apple) = 3
-        // current:  5 < Num_eaten(apple) < 6
-        // goal:     Num_eaten(apple) > 10
-        // so the distance between original and goal is 10 - 3 = 7
-        // the distance between current and goal is ((10 - 5) +(10 - 6)) / 2 = 5.5
-        // the SatifiedDegree = (7 - 5.5)/7 = 0.2143
-        float static calculateNumbericsatisfiedDegree(float goal, float current, float origin);
-        float static calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, float current, float origin);
-        float static calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, const FuzzyIntervalFloat& current, const FuzzyIntervalFloat& origin);
-        float static distanceBetween2FuzzyFloat(const FuzzyIntervalFloat& goal, const FuzzyIntervalFloat& other);
-
-        inline bool operator == (State& other) const
-        {
-            if (name() != other.name())
-                return false;
-
-            if (!(getStateValue() == other.getStateValue()))
-                return false;
-
-            if ( !(this->stateOwnerList == other.stateOwnerList))
-                return false;
-
-            return true;
-
-        }
-
-    protected:
-
         StateVariable* stateVariable;
 
         // whose feature this state describes. e.g. the robot's energy
@@ -202,6 +113,84 @@ class Inquery;
 
         // if the need_inquery is true, then it needs a inquery funciton to get the value of the state in real-time
         InqueryFun inqueryFun;
+
+        string name() const {return stateVariable->getName();}
+
+        void changeStateType(StateType newType){this->stateType = newType;}
+
+        StateValue& getStateValue()  {return stateVariable->getValue();}
+
+        StateValuleType getStateValuleType()  {return stateVariable->getType();}
+
+        State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
+              vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+
+        State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
+               bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+        ~State();
+
+        void assignValue(const StateValue& newValue);
+
+        void addOwner(StateValue& _owner)
+        {
+            stateOwnerList.push_back(_owner);
+        }
+
+        inline bool isSameState(const State& other) const
+        {
+            return ((name() == other.name())&&(stateOwnerList == other.stateOwnerList));
+        }
+
+        // @ satisfiedDegree is a return value between (-infinity,1.0], which shows how many percentage has this goal been achieved,
+        //   if the value is getting father away from goal, it will be negative
+        //   satisfiedDegree = |original - current|/|original - goal|
+        //   when it's a boolean goal, only can be 0.0 or 1.0
+        // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
+        //                  to calculate its satisfiedDegree value.
+        // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
+        bool isSatisfiedMe( StateValue& value, float& satisfiedDegree,  State *original_state = 0);
+        bool isSatisfied( State& goal, float &satisfiedDegree,  State *original_state = 0) ;
+
+
+        // To get int,float value or fuzzy int or float value from a state
+        // For convenience, we will also consider int value as float value
+        // if the value type is not numberic, return false and the floatVal and fuzzyFloat will not be assigned value
+        bool getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat);
+
+        bool isNumbericState() const;
+
+        // About the calculation of Satisfie Degree
+        // compare 3 statevalue for a same state: the original statevalue, the current statevalue and the goal statevalue
+        // to see how many persentage the current value has achieved the goal, compared to the original value
+        // it can be negative, when it's getting farther away from the goal than the original value
+        // For these 3, the state should be the same state, but the state operator type can be different, e.g.:
+        // the goal is to eat more than 10 apples, and at the beginning 2 apple has been eaten, and current has finished eaten 3 apples and begin to eat the 6th one, so:
+        // original: Num_eaten(apple) = 3
+        // current:  5 < Num_eaten(apple) < 6
+        // goal:     Num_eaten(apple) > 10
+        // so the distance between original and goal is 10 - 3 = 7
+        // the distance between current and goal is ((10 - 5) +(10 - 6)) / 2 = 5.5
+        // the SatifiedDegree = (7 - 5.5)/7 = 0.2143
+        float static calculateNumbericsatisfiedDegree(float goal, float current, float origin);
+        float static calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, float current, float origin);
+        float static calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, const FuzzyIntervalFloat& current, const FuzzyIntervalFloat& origin);
+        float static distanceBetween2FuzzyFloat(const FuzzyIntervalFloat& goal, const FuzzyIntervalFloat& other);
+
+        inline bool operator == (State& other)
+        {
+            if (name() != other.name())
+                return false;
+
+            if (!(stateVariable == other.stateVariable))
+                return false;
+
+            if ( !(this->stateOwnerList == other.stateOwnerList))
+                return false;
+
+            return true;
+
+        }
+
 
     };
 
@@ -271,13 +260,13 @@ class Inquery;
     *                     Node:arguments
     *                     ...
     */
-    struct Rule
+    class Rule
     {
     public:
         PetAction* action;
 
-        // the avatar who carry out this action
-        Entity actor;
+        // the actor who carry out this action, usually an Entity
+        StateValue actor;
 
         // the cost of this action under the conditions of this rule (the cost value is between 0 ~ 100)
         int cost;
@@ -289,10 +278,17 @@ class Inquery;
         // there are probability for each effect
         vector<EffectPair> effectList;
 
-        Rule(PetAction* _action, Entity _actor, int _cost, vector<State*> _preconditionList, vector<EffectPair> _effectList):
+        // ungrounded parameter indexes
+        // map<string , vector<StateValue&> >
+        // the string is the string representation of an orginal ungrounded parameter,
+        // such like: OCPlanner::vector_var[3].stringRepresentation(), see ActionParameter::stringRepresentation()
+        // In vector<StateValue*>, the StateValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
+        map<string , vector<StateValue*> > paraIndexMap;
+
+        Rule(PetAction* _action, StateValue _actor, int _cost, vector<State*> _preconditionList, vector<EffectPair> _effectList):
             action(_action) , actor(_actor), cost(_cost), preconditionList(_preconditionList), effectList(_effectList){}
 
-        Rule(PetAction* _action, Entity _actor, int _cost):
+        Rule(PetAction* _action, StateValue _actor, int _cost):
             action(_action) , actor(_actor), cost(_cost){}
 
         void addEffect(EffectPair effect)
@@ -304,6 +300,25 @@ class Inquery;
         {
             preconditionList.push_back(precondition);
         }
+
+        // go through all the parameters in this rule and add their indexes to paraIndexMap
+        void preProcessRuleParameterIndexes();
+
+
+        bool static isRuleUnGrounded( Rule* rule);
+
+        // Check if a parameter is an ungrounded parameter
+        // Compared to the bool_var[PARAMETER_NUM],str_var[PARAMETER_NUM]...in PlanningHeaderFiles.h
+        bool static isParameterUnGrounded(ActionParameter &param);
+        bool static isParamValueUnGrounded( StateValue& paramVal);
+        bool static isUnGroundedString( string& s);
+        bool static isUnGroundedVector( Vector& v);
+        bool static isUnGroundedEntity( Entity& e);
+
+    protected:
+        // Add one parameter to index
+        void addParameterIndex(StateValue &paramVal);
+
 
     };
 
