@@ -270,7 +270,8 @@ const char *sparse_delim = " : ";
  * the appropriate type, and thunking for the header, and ignoring
  * certain features, must all be done as a separate step.
  */
-istream& istreamRawITable(istream& in, ITable& tab)
+istream& istreamRawITable(istream& in, ITable& tab,
+                          const vector<unsigned>& ignored_indices)
     throw(std::exception, AssertionException)
 {
     streampos beg = in.tellg();
@@ -299,88 +300,14 @@ istream& istreamRawITable(istream& in, ITable& tab)
         lines.push_back(line);
 
     // Determine the arity from the first line.
-    vector<string> fl = tokenizeRow<string>(lines[0]);
+    vector<string> fl = tokenizeRow<string>(lines[0], ignored_indices);
     arity_t arity = fl.size();
 
     atomic<int> arity_fail_row(-1);
     auto parse_line = [&](int i)
     {
         // tokenize the line
-        vector<string> io = tokenizeRow<string>(lines[i]);
-
-        // Check arity
-        if (arity != (arity_t)io.size())
-            arity_fail_row = i + 1;
-        
-        // Fill table with string-valued vertexes.
-        for (const string& tok : io) {
-            vertex v(tok);
-            tab[i].push_back(v);
-        }
-    };
-
-    // Vector of indices [0, lines.size())
-    size_t ls = lines.size();
-    tab.resize(ls);
-    auto ir = boost::irange((size_t)0, ls);
-    vector<size_t> indices(ir.begin(), ir.end());
-    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
-
-    if (-1 != arity_fail_row) {
-        in.seekg(beg);
-        OC_ASSERT(false,
-                  "ERROR: Input file inconsistent: the %uth row has "
-                  "a different number of columns than the rest of the file.  "
-                  "All rows should have the same number of columns.\n",
-                  arity_fail_row.load());
-    }
-    return in;
-}
-
-// like above but ignore indices
-// XXX The code below is very nearly a cut-n-pste of above; lets not
-// do that, and instead simply provide a default argument for ignored indexes!
-// cut-n-paste == badness
-istream& istreamRawITable_ignore_indices(istream& in, ITable& tab,
-                                         const vector<unsigned>& ignored_indices)
-    throw(std::exception, AssertionException)
-{
-    streampos beg = in.tellg();
-
-    // Get the entire dataset into memory
-    string line;
-    std::vector<string> lines;
-
-    // Read first few by hand.
-    // The first might be labels, so we must get the second line.
-    dorepeat(2) {
-        get_data_line(in, line);
-        lines.push_back(line);
-    }
-
-    // If it is a sparse file, we are outta here.
-    // Throw an std::exception, since we don't want to log this as an
-    // error (all the other exception types log to the log file).
-    if (string::npos != line.find (sparse_delim)) {
-        in.seekg(beg);
-        throw std::exception();
-    }
-
-    // Grab the rest of the file.
-    while (get_data_line(in, line))
-        lines.push_back(line);
-
-    // Determine the arity from the first line.
-    vector<string> fl = tokenizeRow_ignore_indices<string>(lines[0],
-                                                           ignored_indices);
-    arity_t arity = fl.size();
-
-    atomic<int> arity_fail_row(-1);
-    auto parse_line = [&](int i)
-    {
-        // tokenize the line
-        vector<string> io = tokenizeRow_ignore_indices<string>(lines[i],
-                                                               ignored_indices);
+        vector<string> io = tokenizeRow<string>(lines[i], ignored_indices);
 
         // Check arity
         if (arity != (arity_t)io.size())
@@ -700,7 +627,7 @@ istream& istreamITable(istream& in, ITable& tab,
 istream& istreamITable_ignore_indices(istream& in, ITable& tab,
                                       const vector<unsigned>& ignore_indices)
 {
-    istreamRawITable_ignore_indices(in, tab, ignore_indices);
+    istreamRawITable(in, tab, ignore_indices);
 
     // Determine the column types.
     vector<type_node> col_types = infer_column_types(tab);
