@@ -415,8 +415,8 @@ CTable Table::compressed() const
 
 // -------------------------------------------------------
 
-std::istream& istreamRawITable_ignore_indices(std::istream& in, ITable& tab,
-                                              const std::vector<unsigned>& ignored_indices)
+std::istream& istreamRawITable(std::istream& in, ITable& tab,
+                               const std::vector<unsigned>& ignored_indices)
     throw(std::exception, AssertionException);
 std::vector<std::string> get_header(const std::string& input_file);
 
@@ -478,7 +478,7 @@ void Table::add_features_from_file(const string& input_file,
         // my test case).
         ITable features_table;
         ifstream in(input_file.c_str());
-        istreamRawITable_ignore_indices(in, features_table, features_pos_comp);
+        istreamRawITable(in, features_table, features_pos_comp);
 
         // set the first row as header
         auto first_row_it = features_table.begin();
