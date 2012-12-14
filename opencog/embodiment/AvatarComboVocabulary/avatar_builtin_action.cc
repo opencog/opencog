@@ -22,7 +22,7 @@
  */
 
 #include "avatar_builtin_action.h"
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 
 using namespace opencog::combo;
 using namespace avatar_builtin_action_properties;

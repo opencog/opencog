@@ -28,7 +28,7 @@
 #define _OPENCOG_FEATURE_SCORER_H
 
 #include <opencog/util/numeric.h>
-#include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/table/table.h>
 
 namespace opencog {
 

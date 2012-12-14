@@ -39,8 +39,8 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/type_tree.h>
-#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <opencog/comboreduct/interpreter/eval.h>
 
 #include <stack>
 #include <exception>

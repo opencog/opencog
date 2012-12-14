@@ -29,7 +29,7 @@
 #include "vertex.h"
 #include "procedure_repository.h"
 #include "iostream_combo.h"
-#include "eval.h"
-#include "table.h"
+#include "../interpreter/eval.h"
+#include "../table/table.h"
 
 #endif // _OPENCOG_COMBO_H

@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ant_indefinite_object.h"
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 
 namespace opencog { namespace combo {
 

@@ -22,7 +22,7 @@
  */
 
 #include "avatar_indefinite_object.h"
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 
 using namespace opencog::combo;
 using namespace avatar_indefinite_object_properties;

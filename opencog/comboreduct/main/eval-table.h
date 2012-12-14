@@ -30,8 +30,8 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/Logger.h>
 
-#include "../combo/table_io.h"
-#include "../combo/table.h"
+#include "../table/table_io.h"
+#include "../table/table.h"
 
 using namespace std;
 using namespace boost::assign;

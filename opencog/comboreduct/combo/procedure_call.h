@@ -24,17 +24,18 @@
 #ifndef _COMBO_PROCEDURE_CALL_H
 #define _COMBO_PROCEDURE_CALL_H
 
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
-
-#include "type_tree_def.h"
-#include "common_def.h"
 #include <iostream>
 #include <vector>
 #include <cassert>
+
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+
+#include "common_def.h"
 #include "operator_base.h"
 #include "vertex.h"
 #include "iostream_combo.h"
+#include "../type_checker/type_tree_def.h"
 
 namespace opencog { namespace combo {
 

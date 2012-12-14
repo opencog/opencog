@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/learning/feature-selection/main/feature-selection.h>
 
