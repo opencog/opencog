@@ -109,7 +109,7 @@ void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
     // check that the result is the expected one
     TS_ASSERT_LESS_THAN(fabs(result.first - expected_sc), 1.0e-8);
     auto t2 = microsec_clock::local_time();
-    std::cout << "Real time: " << (t2 - t1) << std::endl;
+    std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
 }
 
 // test that the first candidate is one of the expected combo tree
@@ -131,7 +131,7 @@ void moses_test_combo(vector<string> arguments,
                                    return tr == result.second;});
     TS_ASSERT(f_it != expected_tr_strs.end());
     auto t2 = microsec_clock::local_time();
-    std::cout << "Real time: " << (t2 - t1) << std::endl;
+    std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
 }
 // like above but uses cheap_parse_result instead of parse_result
 void cheap_moses_test_combo(vector<string> arguments,
@@ -149,5 +149,5 @@ void cheap_moses_test_combo(vector<string> arguments,
             return trim_copy(result.second) == trim_copy(tr_str); });
     TS_ASSERT(f_it != expected_tr_strs.end());
     auto t2 = microsec_clock::local_time();
-    std::cout << "Real time: " << (t2 - t1) << std::endl;
+    std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
 }

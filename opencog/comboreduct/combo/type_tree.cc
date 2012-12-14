@@ -306,7 +306,7 @@ type_tree get_input_type_tree(const vertex& v, arity_t i)
 arity_t contin_arity(const type_tree& ty)
 {
     typedef type_tree_sib_it sib_it;
-    int res = 0;
+    arity_t res = 0;
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type)
         for (sib_it sib = ty_it.begin();sib != sib_it(ty.last_child(ty_it));++sib)
@@ -318,7 +318,7 @@ arity_t contin_arity(const type_tree& ty)
 arity_t boolean_arity(const type_tree& ty)
 {
     typedef type_tree_sib_it sib_it;
-    int res = 0;
+    arity_t res = 0;
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type)
         for (sib_it sib = ty_it.begin(); sib != ty.last_child(ty_it); ++sib)
@@ -330,7 +330,7 @@ arity_t boolean_arity(const type_tree& ty)
 arity_t action_result_arity(const type_tree& ty)
 {
     typedef type_tree_sib_it sib_it;
-    int res = 0;
+    arity_t res = 0;
     type_tree_pre_it ty_it = ty.begin();
     if (*ty_it == id::lambda_type)
         for (sib_it sib = ty_it.begin(); sib != ty.last_child(ty_it); ++sib)

@@ -28,11 +28,7 @@
 #include <boost/version.hpp>
 
 // There is some kind of bug in Boost version 1.40 through 1.44
-// There's a different bug in Boost 1.49:  the graph classes define a
-// boost::get() template function which interferes with the 
-// boost::get() defined by boost::variant (needed by combo::vertex).
-#if ((BOOST_VERSION >= 104000) && (BOOST_VERSION <= 104400)) || \
-    (BOOST_VERSION == 104900)
+#if ((BOOST_VERSION >= 104000) && (BOOST_VERSION <= 104400))
 #define IGNORE_BOOST_GRAPH
 #endif
 
@@ -84,14 +80,18 @@ void procedure_repository::instantiate_procedure_calls(bool wodo) {
 void procedure_repository::instantiate_procedure_calls(combo_tree& tr,
                                                        bool wodo) const {
     for(pre_it it = tr.begin(); it != tr.end(); ++it) {
-        if(std::string* str=boost::get<std::string>(&*it)) {
-            str_proc_map_const_it proc=_repo.find(*str);
+        // is_definite_object is used here because it corresponds to a
+        // string which is where procedure names are typed before
+        // resolution has appended.
+        if(is_definite_object(*it)) {
+            std::string str = get_definite_object(*it);
+            str_proc_map_const_it proc=_repo.find(str);
             if(proc==_repo.end()) {
                 if(wodo) {
-                    opencog::logger().debug("ComboProcedureRepository - Creating definite_object '%s'.", str->c_str());
+                    opencog::logger().debug("ComboProcedureRepository - Creating definite_object '%s'.", str.c_str());
                 }
             } else {
-                opencog::logger().debug("ComboProcedureRepository - Replacing procedure name by procedure object '%s'", str->c_str());
+                opencog::logger().debug("ComboProcedureRepository - Replacing procedure name by procedure object '%s'", str.c_str());
                 *it=proc->second;
             }
         }

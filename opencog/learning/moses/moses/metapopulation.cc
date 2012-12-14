@@ -92,7 +92,6 @@ void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
     }
 }
     
-// bool deme_expander::create_deme(bscored_combo_tree_set::const_iterator exemplar)
 bool deme_expander::create_deme(const combo_tree& exemplar)
 {
     using namespace reduct;
@@ -113,6 +112,8 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // return the set of selected features as column index
         // (left most column corresponds to 0)
         auto selected_features = (*_params.fstor)(_exemplar);
+        logger().info() << "Feature selection of " << selected_features.size()
+                        << " features for representation";
         // add the complementary of the selected features (not
         // present in the exemplar) in ignore_ops
         auto exemplar_features = get_argument_abs_idx_from_zero_set(_exemplar);
@@ -134,9 +135,9 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // printlnContainer(ios);
         // ~debug print
 
-        // Reformat the data so that dedundant inputs are grouped
-        // (the number of redundant can possibly change from a
-        // deme to another given that ignored input features can
+        // Reformat the data so that redundant inputs are grouped
+        // (the number of redundant inputs can possibly change from
+        // one deme to another, given that ignored input features can
         // change as well) as to possibly speed-up evaluation (if
         // the scorer implement ignore_idxs).
         std::set<arity_t> idxs;

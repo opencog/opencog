@@ -505,6 +505,7 @@ int OAC::addRulesToAtomSpace()
                       );
     
 */
+#ifdef HAVE_GUILE
     // Set PET_HANDLE and OWNER_HANDLE for the Scheme shell before loading rules file
     SchemeEval & evaluator = SchemeEval::instance(this->atomSpace);
     std::string scheme_expression, scheme_return_value;
@@ -614,6 +615,7 @@ int OAC::addRulesToAtomSpace()
                           );
         }
     }
+#endif /* HAVE_GUILE */
 
 
     return 0;

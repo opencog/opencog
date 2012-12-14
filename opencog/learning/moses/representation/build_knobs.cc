@@ -83,11 +83,16 @@ build_knobs::build_knobs(combo_tree& exemplar,
         // variables and functions, but we want the end result to be
         // typed boolean.  Thus, any representation will consist of a
         // tree of logic ops, with anything else contin-valued wrapped
-        // up in a predicate (i.e. wrapped by greter_than_zero).
+        // up in a predicate (i.e. wrapped by greater_than_zero).
 
-        // Hmm. Probe, although this is expensive, it seems to be a net
-        // performance benefit for pure boolean problems, I think. Maybe.
-        _skip_disc_probe = false;
+        // The disc_probe function is wildly expensive, but appears to
+        // provide a performance advantage when the tree consists of
+        // mostly logical operators.  Thus, if the output, and at least
+        // 1/5th of the inputs are boolean, then disc_probe-ing is
+        // probably worth it, so we turn it on.  (MixedUTest provides
+        // an example where it really is worth it).
+        if (5*boolean_arity(_signature) > type_tree_arity(_signature))
+            _skip_disc_probe = false;
 
         // Make sure top node of exemplar is a logic op.
         logical_canonize(_exemplar.begin());
@@ -448,15 +453,14 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         return;
 
     type_tree_sib_it arg_types = _signature.begin(_signature.begin());  // first child
-    lazy_random_selector select(max_pairs);
+    lazy_random_selector randpair(max_pairs);
 
     // Actual number of pairs to create ...
     unsigned int n_pairs =
         _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
     dorepeat (n_pairs) {
-        //while (!select.empty())
         combo_tree v(swap_and_or(*it));
-        int x = select();
+        int x = randpair();
         int a = x / (_arity - 1);
         int b = x - a * (_arity - 1);
         if (b == a)
@@ -1152,7 +1156,7 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    lazy_random_selector select(number_of_actions*(number_of_actions - 1));
+    lazy_random_selector randpair(number_of_actions*(number_of_actions - 1));
 
     dorepeat(n) {
         combo_tree v(id::action_boolean_if);
@@ -1166,7 +1170,7 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
         combo_tree vp(*p_it);
         v.append_child(iv, vp.begin());
 
-        int x = select();
+        int x = randpair();
         int a = x / (number_of_actions - 1);
         int b = x - a * (number_of_actions - 1);
         if (b == a)

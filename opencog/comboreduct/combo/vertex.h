@@ -582,89 +582,42 @@ inline bool is_identity_of_indiscernibles(const T& v)
 
 // -------------------------------------------------------
 
-inline bool is_procedure_call(const vertex& v)
-{
-    return (boost::get<procedure_call>(&v));
-}
+bool is_procedure_call(const vertex& v);
 
 // Return cont&, avoid running the copy constructor!
-inline const procedure_call& get_procedure_call(const vertex& v)
-{
-    return (boost::get<procedure_call>(v));
-}
+const procedure_call& get_procedure_call(const vertex& v);
 
-inline bool is_action_symbol(const vertex& v)
-{
-    return (boost::get<action_symbol>(&v));
-}
+bool is_action_symbol(const vertex& v);
 
 // Return cont&, avoid running the copy constructor!
-inline const action_symbol& get_action_symbol(const vertex& v)
-{
-    return (boost::get<action_symbol>(v));
-}
+const action_symbol& get_action_symbol(const vertex& v);
 
-inline bool is_indefinite_object(const vertex& v)
-{
-    return (boost::get<indefinite_object>(&v));
-}
+bool is_indefinite_object(const vertex& v);
 
 // Return cont&, avoid running the copy constructor!
-inline const indefinite_object& get_indefinite_object(const vertex& v)
-{
-    return (boost::get<indefinite_object>(v));
-}
+const indefinite_object& get_indefinite_object(const vertex& v);
 
-inline bool is_message(const vertex& v)
-{
-    return (boost::get<message>(&v));
-}
+bool is_message(const vertex& v);
 
 // Return cont&, avoid running the copy constructor!
-inline const message& get_message(const vertex& v)
-{
-    return (boost::get<message>(v));
-}
+const message& get_message(const vertex& v);
 
-inline bool is_enum_type(const vertex& v)
-{
-    return (boost::get<enum_t>(&v));
-}
+bool is_enum_type(const vertex& v);
 
 // Return cont&, avoid running the copy constructor!
-inline const enum_t& get_enum_type(const vertex& v)
-{
-    return (boost::get<enum_t>(v));
-}
+const enum_t& get_enum_type(const vertex& v);
 
-inline bool is_builtin(const vertex& v)
-{
-    return (boost::get<builtin>(&v));
-}
+bool is_builtin(const vertex& v);
 
-inline builtin get_builtin(const vertex& v)
-{
-    return (boost::get<builtin>(v));
-}
+builtin get_builtin(const vertex& v);
 
-inline bool is_wild_card(const vertex& v)
-{
-    return (boost::get<wild_card>(&v));
-}
+bool is_wild_card(const vertex& v);
 
-inline wild_card get_wild_card(const vertex& v)
-{
-    return (boost::get<wild_card>(v));
-}
+wild_card get_wild_card(const vertex& v);
 
-inline bool is_contin(const vertex& v)
-{
-    return (boost::get<contin_t>(&v));
-}
-inline contin_t get_contin(const vertex& v)
-{
-    return (boost::get<contin_t>(v));
-}
+bool is_contin(const vertex& v);
+
+contin_t get_contin(const vertex& v);
 
 /**
  * return true if the vertex is an argument. Note, however, that
@@ -674,75 +627,35 @@ inline contin_t get_contin(const vertex& v)
  *
  * This should be fixed, but we don't have the infrastructure for this.
  */
-inline bool is_argument(const vertex& v)
-{
-    return (boost::get<argument>(&v));
-}
-inline argument& get_argument(vertex& v)
-{
-    return boost::get<argument>(v);
-}
-inline bool is_ann_type(const vertex& v)
-{
-    return (boost::get<ann_type>(&v));
-}
-inline ann_type& get_ann_type(vertex& v)
-{
-    return (boost::get<ann_type>(v));
-}
-inline const argument& get_argument(const vertex& v)
-{
-    return boost::get<argument>(v);
-}
-inline bool is_negated(vertex& v)
-{
-    if (argument* a = boost::get<argument>(&v))
-        return a->is_negated();
-    return false;
-}
+bool is_argument(const vertex& v);
 
-inline bool is_action(const vertex& v)
-{
-    return (boost::get<action>(&v));
-}
+argument& get_argument(vertex& v);
 
-inline action get_action(const vertex& v)
-{
-    return (boost::get<action>(v));
-}
+bool is_ann_type(const vertex& v);
 
-inline bool is_builtin_action(const vertex& v)
-{
-    return (boost::get<builtin_action>(&v));
-}
-inline builtin_action get_builtin_action(const vertex& v)
-{
-    return (boost::get<builtin_action>(v));
-}
-inline bool is_action_result(const vertex& v)
-{
-    return (v == id::action_failure || v == id::action_success);
-}
+ann_type& get_ann_type(vertex& v);
 
-inline bool is_perception(const vertex& v)
-{
-    return (boost::get<perception>(&v));
-}
+const argument& get_argument(const vertex& v);
 
-inline perception get_perception(const vertex& v)
-{
-    return (boost::get<perception>(v));
-}
+bool is_negated(vertex& v);
 
-inline bool is_definite_object(const vertex& v)
-{
-    return (boost::get<definite_object>(&v));
-}
+bool is_action(const vertex& v);
 
-inline definite_object get_definite_object(const vertex& v)
-{
-    return (boost::get<definite_object>(v));
-}
+action get_action(const vertex& v);
+
+bool is_builtin_action(const vertex& v);
+
+builtin_action get_builtin_action(const vertex& v);
+
+bool is_action_result(const vertex& v);
+
+bool is_perception(const vertex& v);
+
+perception get_perception(const vertex& v);
+
+bool is_definite_object(const vertex& v);
+
+definite_object get_definite_object(const vertex& v);
 
 // -------------------------------------------------------
 // Boolean utility functions
