@@ -1,4 +1,4 @@
-#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/interpreter/eval.h>
 
 #include <iostream>
 #include "../moses/moses_main.h"

@@ -32,7 +32,7 @@
 
 #include <opencog/util/functional.h>
 
-#include <opencog/comboreduct/combo/type_tree.h>
+#include "../type_checker/type_tree.h"
 #include "reduct.h"
 
 namespace opencog { namespace reduct {

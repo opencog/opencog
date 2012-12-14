@@ -26,7 +26,7 @@
 #include <opencog/util/Logger.h>
 
 #include "type_tree.h"
-#include "descriptions.h"
+#include "../combo/descriptions.h"
 
 namespace opencog { namespace combo {
 

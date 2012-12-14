@@ -36,7 +36,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "table.h"
-#include "type_tree.h"
+#include "../type_checker/type_tree.h"
 
 namespace opencog { namespace combo {
 

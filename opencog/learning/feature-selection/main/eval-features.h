@@ -25,7 +25,7 @@
 #define _OPENCOG_EVAL_FEATURES_H
 
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
-#include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/table/table.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/numeric.h>
 

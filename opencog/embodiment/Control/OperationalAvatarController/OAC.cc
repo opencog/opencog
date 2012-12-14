@@ -30,7 +30,7 @@
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>
 
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 
 // For loading Scheme scripts by C++ code
 #include <opencog/guile/load-file.h>

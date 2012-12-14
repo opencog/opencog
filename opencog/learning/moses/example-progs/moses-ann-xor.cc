@@ -4,7 +4,7 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/interpreter/eval.h>
 
 #include "../moses/moses_main.h"
 #include "../moses/scoring.h"
