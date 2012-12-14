@@ -27,7 +27,7 @@
 #include <opencog/util/numeric.h>
 
 #include "action.h"
-#include "type_tree.h"
+#include "../type_checker/type_tree.h"
 
 #include <opencog/util/tree.h>
 

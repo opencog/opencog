@@ -22,8 +22,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/comboreduct/combo/table.h>
-#include <opencog/comboreduct/combo/table_io.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/comboreduct/table/table_io.h>
 
 #include <opencog/learning/feature-selection/feature_optimization.h>
 #include <opencog/learning/feature-selection/feature_scorer.h>

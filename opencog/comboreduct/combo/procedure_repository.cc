@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "procedure_repository.h"
-#include "type_tree.h"
+#include "../type_checker/type_tree.h"
 #include "iostream_combo.h"
 
 #include <boost/version.hpp>

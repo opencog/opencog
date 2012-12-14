@@ -31,7 +31,7 @@
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/representation/instance_set.h>
 #include <opencog/learning/moses/moses/scoring.h>
-#include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/table/table.h>
 
 #include "../feature_scorer.h"
 #include "../stochastic_max_dependency.h"

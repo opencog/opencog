@@ -23,7 +23,7 @@
  */
 
 #include "descriptions.h"
-#include "type_tree.h"
+#include "../type_checker/type_tree.h"
 
 namespace opencog { namespace combo {
 

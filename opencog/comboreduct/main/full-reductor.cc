@@ -26,10 +26,10 @@
 #include <opencog/util/mt19937ar.h>
 
 #include "../reduct/reduct.h"
-#include "../combo/eval.h"
-#include "../combo/table.h"
-#include "../combo/table_io.h"
-#include "../combo/type_tree.h"
+#include "../interpreter/eval.h"
+#include "../table/table.h"
+#include "../table/table_io.h"
+#include "../type_checker/type_tree.h"
 
 using namespace std;
 using namespace opencog;

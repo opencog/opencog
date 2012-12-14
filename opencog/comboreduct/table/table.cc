@@ -36,9 +36,9 @@
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/Logger.h>
 
-#include "ann.h"
-#include "simple_nn.h"
-#include "convert_ann_combo.h"
+#include "../combo/ann.h"
+#include "../combo/simple_nn.h"
+#include "../combo/convert_ann_combo.h"
 
 namespace opencog { namespace combo {
 

@@ -31,7 +31,7 @@
 #include <opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/interpreter/eval.h>
 
 namespace opencog { namespace Procedure {
 

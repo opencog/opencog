@@ -30,13 +30,13 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/exceptions.h>
 
-#include <opencog/comboreduct/crutil/exception.h>
 #include "type_tree_def.h"
-#include "vertex.h"
-#include "using.h"
-#include "common_def.h"
-#include "perception.h"
-#include "procedure_call.h"
+#include "../crutil/exception.h"
+#include "../combo/vertex.h"
+#include "../combo/using.h"
+#include "../combo/common_def.h"
+#include "../combo/perception.h"
+#include "../combo/procedure_call.h"
 
 namespace opencog { namespace combo {
 

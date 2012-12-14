@@ -35,9 +35,9 @@
 #include <opencog/util/Counter.h>
 #include <opencog/util/algorithm.h>
 
-#include "eval.h"   /* Needed for binding map, and then obsolete */
-#include "vertex.h"
-#include "common_def.h"
+#include "../interpreter/eval.h"   /* Needed for binding map, and then obsolete */
+#include "../combo/vertex.h"
+#include "../combo/common_def.h"
 
 #define COEF_SAMPLE_COUNT 20.0 // involved in the formula that counts
                                // the number of trials needed to check
