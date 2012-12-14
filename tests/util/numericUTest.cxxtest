@@ -21,7 +21,7 @@
  */
 
 #include <opencog/util/numeric.h>
-#include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/table/table.h>
 
 using namespace std;
 using namespace opencog;

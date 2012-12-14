@@ -33,9 +33,9 @@
 #include "../reduct/contin_rules.h"
 #include "../reduct/general_rules.h"
 #include "../reduct/fold_rules.h"
-#include "../combo/eval.h"
-#include "../combo/table.h"
-#include "../combo/type_tree.h"
+#include "../interpreter/eval.h"
+#include "../table/table.h"
+#include "../type_checker/type_tree.h"
 
 using namespace std;
 using namespace opencog;

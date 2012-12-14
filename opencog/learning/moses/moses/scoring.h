@@ -41,7 +41,7 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/KLD.h>
 
-#include <opencog/comboreduct/combo/table.h>
+#include <opencog/comboreduct/table/table.h>
 
 #include "using.h"
 #include "../representation/representation.h"

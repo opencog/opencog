@@ -27,7 +27,7 @@
 #include <opencog/util/RandGen.h>
 
 #include "reduct.h"
-#include <opencog/comboreduct/combo/eval.h>
+#include "../interpreter/eval.h"
 
 namespace opencog { namespace reduct {
 

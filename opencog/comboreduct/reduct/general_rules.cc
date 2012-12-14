@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "general_rules.h"
-#include <opencog/comboreduct/combo/eval.h>
+#include "../interpreter/eval.h"
 #include <opencog/comboreduct/combo/assumption.h>
 
 namespace opencog { namespace reduct {

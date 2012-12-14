@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "../combo/eval.h"
+#include "../interpreter/eval.h"
 #include "../ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace ant_combo;
