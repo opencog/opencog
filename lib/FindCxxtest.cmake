@@ -10,17 +10,10 @@
 # Find path to the cxxtestgen.py script (NB: this stuff should move to FindCXXTEST.cmake)
 # CXXTEST_BIN_DIR enviroment variable must have been defined already
 
-# In case it has already been found it in a previous run of cmake
-IF (CXXTEST_PYTHON_BIN_DIR)
-    SET(CXXTEST_FOUND 1)
-ELSE (CXXTEST_PYTHON_BIN_DIR)
-    SET(CXXTEST_FOUND 0)
-ENDIF (CXXTEST_PYTHON_BIN_DIR)
-
 # cxxtest has a Python version and a Perl version. First, look
 # for the Python version.
 FIND_PACKAGE(PythonInterp)
-IF (PYTHONINTERP_FOUND AND NOT CXXTEST_FOUND)
+IF (PYTHONINTERP_FOUND)
 	FIND_PATH(CXXTEST_PYTHON_BIN_DIR cxxtestgen.py
 		$ENV{CXXTEST_BIN_DIR}
 		/usr/bin
@@ -46,7 +39,7 @@ IF (PYTHONINTERP_FOUND AND NOT CXXTEST_FOUND)
 			SET(CXXTEST_GEN "${CXXTEST_PYTHON_BIN_DIR}/cxxtestgen" CACHE FILEPATH "CxxTest binary filepath")
 		ENDIF (CXXTEST_PYTHON_BIN_DIR)
 	ENDIF (NOT CXXTEST_FOUND)
-ENDIF (PYTHONINTERP_FOUND AND NOT CXXTEST_FOUND)
+ENDIF (PYTHONINTERP_FOUND)
 
 # If we still haven't found it, try the perl version.
 IF (NOT CXXTEST_FOUND)
