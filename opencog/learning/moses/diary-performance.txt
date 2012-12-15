@@ -3916,3 +3916,46 @@ total, and that's it...)
 So, for the mixedUTest, looks like disc_probe does help, but not by a
 whole lot.
 
+==================================================================
+
+sparse-BA2012-10.dat
+
+./opencog/learning/moses/example-progs/moses-perf
+-Hit -W1 --hc-max-nn-evals=5000 -n sin -n log -n exp -n div -Z1
+-uchange_percent -isparse-BA2012-10.dat --enable-fs=1
+
+arity=6573 rows=864
+
+Below are for -j1, except the last row, for -j12.  But there is
+a bug ... -j12 runs only 10% faster than -j1 so wtf ... that's 
+impossible... wtf.  I dunno ... conclude that its thrashing the cache
+badly, and is completely memory-bus-bound?  Evidence for this: on
+athalon, where the core is faster than the Xeon for any task that fits
+in cache, evaluating 5K instances on single cpu takes 132 seconds.
+On the xeon, whose cache is 12x larger, it takes 42 secs.  Wow!
+
+xeon cache: 12288 KB
+athalon cache: 1024 KB
+
+I believe the xeon probably has bigger/wider/faster memory bus (?)
+
+So although the athalon is faster, the xeon beats it by 3x.   This,
+coupled with the fact that adding more cores results in a pathetic
+speedup indicates that performance is memory-bus bound.
+
+I am guessing that if feature-selection re-arranged the columns of  the
+CTable according to some feature-selection score, that locality of
+reference would improve during scoring, and so evaluation time would
+speed up.  
+ 
+         -j1            -j12   speedup
+  -m    time    score   time   percent
+ ----   ----    -----   ----   -------
+  10K     85    -2319     78      8.2%
+  20K    175    -2110    154     12.0%
+  40K    350    -1897    308     12.0%
+  80K   1732    -1187   1281     26.0%
+ 160K            -235  15048
+
+
+
