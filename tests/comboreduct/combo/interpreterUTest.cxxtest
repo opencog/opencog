@@ -1,5 +1,5 @@
 #include <opencog/util/iostreamContainer.h>
-#include <opencog/comboreduct/combo/interpreter.h>
+#include <opencog/comboreduct/interpreter/interpreter.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace ant_combo;

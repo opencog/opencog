@@ -21,7 +21,7 @@
  */
 
 #include "interpreter.h"
-#include "iostream_combo.h"
+#include "../combo/iostream_combo.h"
 #include "../crutil/exception.h"
 
 #include <opencog/util/numeric.h>
