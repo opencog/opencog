@@ -36,11 +36,12 @@ using namespace combo;
 using namespace std;
 using boost::counting_iterator;
 
-class feature_selectionUTest : public CxxTest::TestSuite {
+class feature_selectionUTest : public CxxTest::TestSuite
+{
     Table big_table, small_table, small_table_swap_f2_f3,
-        ignore_enforce_target_table;
+        ignore_enforce_target_table, sparse_table;
     string big_table_path, small_table_path, small_table_swap_f2_f3_path,
-        ignore_enforce_target_table_path;
+        ignore_enforce_target_table_path, sparse_table_path;
 
 public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
@@ -49,7 +50,8 @@ public:
         : big_table_path(FEATURE_SELECTION_TEST_DIR"big-dataset.csv"),
           small_table_path(FEATURE_SELECTION_TEST_DIR"small-dataset.csv"),
           small_table_swap_f2_f3_path(FEATURE_SELECTION_TEST_DIR"small-dataset_swap_f2_f3.csv"),
-          ignore_enforce_target_table_path(FEATURE_SELECTION_TEST_DIR"ignore-enfore-target-dataset.csv")
+          ignore_enforce_target_table_path(FEATURE_SELECTION_TEST_DIR"ignore-enfore-target-dataset.csv"),
+          sparse_table_path(FEATURE_SELECTION_TEST_DIR"contin-sparse.data")
     {
         logger().setPrintToStdoutFlag(true);
         logger().setLevel(Logger::FINE);
@@ -65,6 +67,9 @@ public:
 
         // load small table with f2 and f3 swapped
         small_table_swap_f2_f3 = loadTable(small_table_swap_f2_f3_path, target_feature, ignore_features);
+
+        // load contin table
+        sparse_table = loadTable(sparse_table_path, target_feature, ignore_features);
 
         // load ignore_enfore_target table
         ignore_features.push_back("timestamp");
@@ -150,6 +155,20 @@ public:
         // run and test feature selection
         test_feature_selection(small_table, fsp, "target,f1,f2");
     }
+
+#ifdef UNDER_CONSTRUCTION
+    void test_inc_sparse_contin() {
+        // set feature selection parameters
+        feature_selection_parameters fsp;
+        fsp.algorithm = inc;
+        fsp.input_file = sparse_table_path;
+        fsp.jobs = 1;
+        setting_omp(fsp.jobs);
+
+        // run and test feature selection
+        test_feature_selection(sparse_table, fsp, "change_percent");
+    }
+#endif
 
 private:
 
