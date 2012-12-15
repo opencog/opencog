@@ -29,7 +29,7 @@
 #include <boost/format.hpp>
 
 #include <opencog/util/log_prog_name.h>
-#include <opencog/comboreduct/combo/table_io.h>
+#include <opencog/comboreduct/table/table_io.h>
 #include <opencog/learning/moses/moses/moses_main.h> // for version string
 
 using namespace std;
@@ -217,6 +217,10 @@ int main(int argc, char** argv)
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "Random seed.\n")
+
+        ("max-time",
+         value<time_t>(&fs_params.max_time)->default_value(INT_MAX),
+         "Longest allowed runtime, in seconds (ONLY WORKS FOR hc).\n")
 
         // ======= Incremental selection params =======
         (opt_desc_str(inc_redundant_intensity_opt).c_str(),

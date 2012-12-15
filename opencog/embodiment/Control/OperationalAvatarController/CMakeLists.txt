@@ -21,7 +21,7 @@ ADD_LIBRARY (oac SHARED
     BaseAgentModeHandler
     DefaultAgentModeHandler
     LearningAgentModeHandler
-    PlanningHeaderFiles.h
+    PlanningHeaderFiles
     Strips
     OCPlanner
     Inquery

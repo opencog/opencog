@@ -49,6 +49,10 @@
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
+// Dst cache is temporarily disabled because it creates some
+// indeterminism
+// #define ENABLE_DST_CACHE
+
 namespace opencog {
 namespace moses {
 
@@ -743,11 +747,15 @@ struct metapopulation : bscored_combo_tree_ptr_set
                 to = std::next(cbegin(), std::min(n, (int)size()));
             for (; from_i != to; ++from_i) {
                 for (auto from_j = cbegin(); from_j != from_i; ++from_j) {
+#ifdef ENABLE_DST_CACHE
                     cached_dst::ptr_pair cts = {&*from_j, &*from_i};
                     auto it = _cached_dst.cache.find(cts);
                     OC_ASSERT(it != _cached_dst.cache.cend(),
                               "Candidate isn't in the cache that must be a bug");
                     acc(it->second);
+#else
+                    acc(_cached_dst(&*from_j, &*from_i));
+#endif
                 }
             }
 
@@ -809,6 +817,7 @@ protected:
         typedef std::set<const bscored_combo_tree*> ptr_pair;
         dp_t operator()(const bscored_combo_tree* cl, const bscored_combo_tree* cr)
         {
+#ifdef ENABLE_DST_CACHE
             ptr_pair cts = {cl, cr};
             // hit
             {
@@ -823,7 +832,7 @@ protected:
             dp_t dst = dparams.dst(get_bscore(*cl), get_bscore(*cr));
 
             // // debug
-            // logger().fine("dst = %f, dp = %f, ddp = %f", dst, dp, ddp);
+            // logger().fine("&cl = %p, &cr = %p, dst = %f", cl, cr, dst);
             // // ~debug
 
             ++misses;
@@ -831,18 +840,23 @@ protected:
                 unique_lock lock(mutex);
                 return cache[cts] = dst;
             }
+#else
+            return dparams.dst(get_bscore(*cl), get_bscore(*cr));
+#endif
         }
 
         /**
          * Remove all keys containing any element of ptr_seq
          */
         void erase_ptr_seq(std::vector<bscored_combo_tree*> ptr_seq) {
+#ifdef ENABLE_DST_CACHE
             for (Cache::iterator it = cache.begin(); it != cache.end();) {
                 if (!is_disjoint(ptr_seq, it->first))
                     it = cache.erase(it);
                 else
                     ++it;
             }
+#endif
         }
 
         /**

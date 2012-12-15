@@ -124,6 +124,12 @@ public:
        return ((id == other.id) && (type == other.type) );
 
     }
+
+    std::string stringRepresentation() const
+    {
+        return "(" + id + "," + type + ")";
+    }
+
 };
 
 struct FuzzyIntervalFloat
@@ -257,7 +263,7 @@ public:
      */
     const string& getName() const;
     const ActionParamType& getType() const;
-    const ParamValue& getValue() const;
+    ParamValue &getValue();
 
     void assignValue(const ParamValue& newValue);
 
@@ -284,6 +290,7 @@ public:
     const FuzzyIntervalFloat& getFuzzyIntervalFloatValue() const;
 
     std::string stringRepresentation() const throw (opencog::RuntimeException, std::bad_exception);
+    std::string static ParamValueToString(const ParamValue& paramVal);
 
     inline bool operator == (ActionParameter& other) const
     {

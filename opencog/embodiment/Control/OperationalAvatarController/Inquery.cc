@@ -65,9 +65,9 @@ OAC* Inquery::oac = 0;
      spaceMap = &(spaceServer().getLatestMap());
  }
 
- StateValue Inquery::getStateValueFromAtomspace(const State& state)
+ StateValue Inquery::getStateValueFromAtomspace( State& state)
  {
-     vector<StateValue> stateOwnerList = state.getStateOwnerList();
+     vector<StateValue> stateOwnerList = state.stateOwnerList;
      Entity entity1, entity2, entity3;
      Handle a, b, c = Handle::UNDEFINED;
 

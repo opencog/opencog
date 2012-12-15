@@ -22,8 +22,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/comboreduct/combo/table.h>
-#include <opencog/comboreduct/combo/table_io.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/comboreduct/table/table_io.h>
 
 #include <opencog/learning/feature-selection/feature_optimization.h>
 #include <opencog/learning/feature-selection/feature_scorer.h>
@@ -38,8 +38,10 @@ using boost::counting_iterator;
 
 class feature_selectionUTest : public CxxTest::TestSuite
 {
-    Table big_table, small_table, ignore_enforce_target_table, sparse_table;
-    string big_table_path, small_table_path, ignore_enforce_target_table_path, sparse_table_path;
+    Table big_table, small_table, small_table_swap_f2_f3,
+        ignore_enforce_target_table, sparse_table;
+    string big_table_path, small_table_path, small_table_swap_f2_f3_path,
+        ignore_enforce_target_table_path, sparse_table_path;
 
 public:
     typedef MutualInformation<set<arity_t>> FeatureScorer;
@@ -47,6 +49,7 @@ public:
     feature_selectionUTest()
         : big_table_path(FEATURE_SELECTION_TEST_DIR"big-dataset.csv"),
           small_table_path(FEATURE_SELECTION_TEST_DIR"small-dataset.csv"),
+          small_table_swap_f2_f3_path(FEATURE_SELECTION_TEST_DIR"small-dataset_swap_f2_f3.csv"),
           ignore_enforce_target_table_path(FEATURE_SELECTION_TEST_DIR"ignore-enfore-target-dataset.csv"),
           sparse_table_path(FEATURE_SELECTION_TEST_DIR"contin-sparse.data")
     {
@@ -61,6 +64,9 @@ public:
 
         // load small table
         small_table = loadTable(small_table_path, target_feature, ignore_features);
+
+        // load small table with f2 and f3 swapped
+        small_table_swap_f2_f3 = loadTable(small_table_swap_f2_f3_path, target_feature, ignore_features);
 
         // load contin table
         sparse_table = loadTable(sparse_table_path, target_feature, ignore_features);
@@ -80,6 +86,9 @@ public:
     }
     void test_redundant_features_small_table_j1() {
         test_redundant_features_small_table(1);
+    }
+    void test_redundant_features_small_table_swap_f2_f3_j1() {
+        test_redundant_features_small_table_swap_f2_f3(1);
     }
     void test_redundant_features_big_table_j1() {
         test_redundant_features_big_table(1);
@@ -147,6 +156,7 @@ public:
         test_feature_selection(small_table, fsp, "target,f1,f2");
     }
 
+#ifdef UNDER_CONSTRUCTION
     void test_inc_sparse_contin() {
         // set feature selection parameters
         feature_selection_parameters fsp;
@@ -158,6 +168,7 @@ public:
         // run and test feature selection
         test_feature_selection(sparse_table, fsp, "change_percent");
     }
+#endif
 
 private:
 
@@ -197,6 +208,26 @@ private:
         }
     }
     
+    void test_redundant_features_small_table_swap_f2_f3(unsigned n_jobs) {
+        setting_omp(n_jobs);
+
+        CTable ctable = small_table_swap_f2_f3.compressed();
+        FeatureScorer fs(ctable);
+
+        {
+            set<arity_t> features{1, 2};
+            set<arity_t> redundant = redundant_features(features, fs, 0.2);
+            ostreamContainer(cout, redundant) << endl;;
+            TS_ASSERT_EQUALS(redundant, set<arity_t>{2});
+        }
+        {
+            set<arity_t> features{0, 1};
+            set<arity_t> redundant = redundant_features(features, fs, 0.2);
+            ostreamContainer(cout, redundant) << endl;;
+            TS_ASSERT_EQUALS(redundant, set<arity_t>{0});
+        }
+    }
+
     void test_redundant_features_big_table(unsigned n_jobs) {
         setting_omp(n_jobs);
 
@@ -221,6 +252,7 @@ private:
         fsp.jobs = n_jobs;
         setting_omp(n_jobs);
         fsp.hc_max_evals = 10000;
+        fsp.max_time = INT_MAX;
         fsp.hc_confi = 1;
         fsp.hc_cache_size = 100000;
         fsp.hc_max_score = 1;

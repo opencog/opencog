@@ -22,7 +22,7 @@
  */
 
 #include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>

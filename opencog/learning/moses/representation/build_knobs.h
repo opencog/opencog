@@ -27,7 +27,7 @@
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 #include <opencog/comboreduct/combo/action.h>
 #include <opencog/comboreduct/combo/perception.h>
 

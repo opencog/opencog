@@ -26,10 +26,10 @@
 #include <opencog/util/random.h>
 #include <opencog/util/log_prog_name.h>
 
-#include <opencog/comboreduct/combo/eval.h>
-#include <opencog/comboreduct/combo/table.h>
-#include <opencog/comboreduct/combo/table_io.h>
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/interpreter/eval.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/comboreduct/table/table_io.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 
 using namespace boost::program_options;
 using namespace opencog;

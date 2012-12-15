@@ -28,7 +28,7 @@
 
 #include "reduct.h"
 #include "flat_normal_form.h"
-#include <opencog/comboreduct/combo/type_tree.h>
+#include "../type_checker/type_tree.h"
 
 namespace opencog { namespace reduct {
 

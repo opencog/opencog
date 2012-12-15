@@ -1,7 +1,7 @@
 #include <list>
 
 #include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
 

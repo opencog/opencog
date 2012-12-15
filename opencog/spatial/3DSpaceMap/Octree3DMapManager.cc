@@ -693,8 +693,6 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
     int z ;
     Block3D* block;
 
-    BlockVector startD(startDirection.x * -1, startDirection.y * -1, 0);
-
     while (ztimes <3)
     {
         // we'll first search for the grids of the same high, so begin with z = 0,
@@ -709,7 +707,7 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
         ztimes++;
 
         // we first search at the startdirection, if cannot find a proper position then go on with the complete search
-        BlockVector curpos(position.x + startD.x, position.y + startD.y, position.z + z);
+        BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
         if (toBeStandOn)
         {
             if (checkStandable(curpos))

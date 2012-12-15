@@ -27,7 +27,7 @@
 #include <opencog/util/tree.h>
 
 #include "vertex.h"
-#include "type_tree.h"
+#include "../type_checker/type_tree.h"
 
 namespace opencog { namespace trees {
 

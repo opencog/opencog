@@ -27,36 +27,11 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <iterator>
+#include <list>
 #include <opencog/spacetime/SpaceServer.h>
 
 using namespace opencog::oac;
 
-const StateValue OCPlanner::access_distance = ACCESS_DISTANCE;
-const StateValue OCPlanner::SV_TRUE = "true";
-const StateValue OCPlanner::SV_FALSE = "false";
-
- const string OCPlanner::bool_var[] = { "$bool_var0","$bool_var1", "$bool_var2","$bool_var3", "$bool_var4","$bool_var5","$bool_var6"};
- const  string  OCPlanner::str_var[] = { "$str_var0","$str_var1", "$str_var2","$str_var3", "$str_var4","$str_var5","$str_var6" };
- const  string  OCPlanner::int_var[] = { "$int_var0","$int_var1", "$int_var2", "$int_var3", "$int_var4","$int_var5","$int_var6"};
- const  string  OCPlanner::float_var[] = { "$float_var0","$float_var1","$float_var2","$float_var3","$float_var4","$float_var5","$float_var6"};
- const  Vector OCPlanner::vector_var[] = {
-    Vector(999999.00000,999999.00000,999999.00000),
-    Vector(999999.01000,999999.01000,999999.01000),
-    Vector(999999.02000,999999.02000,999999.02000),
-    Vector(999999.03000,999999.03000,999999.03000),
-    Vector(999999.04000,999999.04000,999999.04000),
-    Vector(999999.05000,999999.05000,999999.05000),
-    Vector(999999.06000,999999.06000,999999.06000) };
-
- const  Entity OCPlanner::entity_var[] = {
-   Entity("&entity_var0", "undefined"),
-   Entity("&entity_var1", "undefined"),
-   Entity("&entity_var2", "undefined"),
-   Entity("&entity_var3", "undefined"),
-   Entity("&entity_var4", "undefined"),
-   Entity("&entity_var5", "undefined"),
-   Entity("&entity_var6", "undefined"),
-   };
 
 OCPlanner::OCPlanner()
 {
@@ -84,18 +59,19 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 }
 
-bool OCPlanner::checkIsGoalAchieved(const State& oneGoal, const vector<State> &curLayerStates, float& satisfiedDegree, const State* original_state)
+// basically, we only care about the satisfied degree of the numberic state
+bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  State* original_state)
 {
     // if this goal doesn't really require an exact value, just return fully achieved
-    if (oneGoal.getStateValue() == UNDEFINED_VALUE)
+    if (oneGoal.stateVariable->getValue() == UNDEFINED_VALUE)
     {
         satisfiedDegree = 1.0f;
         return 1.0f;
     }
 
-    // First search this state in the curLayerStates
-    vector<State>::const_iterator vit = curLayerStates.begin();
-    for (;vit != curLayerStates.end(); vit ++)
+    // First search this state in the originalStatesCache
+    vector<State>::const_iterator vit = originalStatesCache.begin();
+    for (;vit != originalStatesCache.end(); vit ++)
     {
         State vState = (State)(*vit);
         if (vState.isSameState(oneGoal))
@@ -103,13 +79,13 @@ bool OCPlanner::checkIsGoalAchieved(const State& oneGoal, const vector<State> &c
 
     }
 
-    // has not been found in the curLayerStates,
+    // has not been found in the originalStatesCache,
     // then we should inquery this state from the run time environment
-    if (oneGoal.is_need_inquery())
+    if (oneGoal.need_inquery)
     {
         // call its inquery funciton
-        InqueryFun f = oneGoal.getInqueryFun();
-        StateValue inqueryValue = f(oneGoal.getStateOwnerList());
+        InqueryFun f = oneGoal.inqueryFun;
+        StateValue inqueryValue = f(oneGoal.stateOwnerList);
         OC_ASSERT(!(inqueryValue == UNDEFINED_VALUE),
                   "OCPlanner::checkIsGoalAchieved: the inqueried value for state: %s is invalid.\n",
                   oneGoal.name().c_str());
@@ -125,15 +101,20 @@ bool OCPlanner::checkIsGoalAchieved(const State& oneGoal, const vector<State> &c
                   "OCPlanner::checkIsGoalAchieved: the inqueried value for state: %s is invalid.\n",
                   oneGoal.name().c_str());
 
-        return oneGoal.isSatisfiedMe(value,satisfiedDegree,original_state);
+        // put this state into the cache, so we don't need to search for it next time
+        State curState(oneGoal.name(),oneGoal.getStateValuleType(),oneGoal.stateType,value,oneGoal.stateOwnerList);
+
+        return curState.isSatisfied(oneGoal, satisfiedDegree,original_state);
 
     }
 
-    return true;
 }
 
-bool OCPlanner::doPlanning(vector<State>& goal, vector<PetAction> &plan)
+
+bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 {
+    originalStatesCache.clear();
+
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
     SpaceServer::SpaceMap* clonedMap = spaceServer().cloneTheLatestSpaceMap();
@@ -141,18 +122,100 @@ bool OCPlanner::doPlanning(vector<State>& goal, vector<PetAction> &plan)
     // Set this cloned spaceMap for Inquery
     Inquery::setSpaceMap(clonedMap);
 
-    // we use the basic idea of the graph planner for plan searching :
+    // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
+    // But we use backward depth-first chaining, instead of forward breadth-frist reasoning
+    // Because our embodiment game world is not a simple finite boolean-state world, we cannot use a full forward breadth-frist which will be too slowly
 
-    // First, construct the goal state layer
+    // Firstly, we construct the goal state layer
+    StateLayer goalLayer(goal);
 
+    StateLayer* curStateLayer = &goalLayer;
 
-    // planning process: TODO:
+    // All the ActionLayers, All the StateLayers
+    set<RuleLayer*> allRuleLayers;
+    set<StateLayer*> allStateLayers;
+
+    // All the layers except the final goalLayer should be grounded
+
+    // planning process:
+    set<StateLayerNode*>::iterator stateLayerIter;
     while(true)
-    {
-//        if (checkIsGoalAchieved(goal,))
-//            return true;
+    {/*
+        bool goalsAllAchieved = true;
+        float satisfiedDegree;
+        for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
+        {
+            StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
+            if (curStateNode->isAchieved)
+                continue;
 
+            if (checkIsGoalAchieved(*(curStateNode->state), satisfiedDegree))
+            {
+                curStateNode->isAchieved = true;
+                continue;
+            }
+            else
+            {
+                curStateNode->isAchieved = false;
+                goalsAllAchieved = false;
+            }
+
+        }
+
+        if (goalsAllAchieved)
+            return true; // the goal has been achieve!
+        else
+        {
+            // not all the states in the current state layer are satisfied,
+            // we need to creat an action layer backward trying to achieve these states
+            // and also create a new state Layer which required by this new action layer
+            RU* newActionLayer = new ActionLayer();
+            StateLayer* newStateLayer = new StateLayer();
+            allActionLayers.insert(newActionLayer);
+            allStateLayers.insert(newStateLayer);
+
+            newActionLayer->nextStateLayer = curStateLayer;
+            newActionLayer->preStateLayer = newStateLayer;
+
+            newStateLayer->nextActionLayer = newActionLayer;
+            curStateLayer->preActionLayer = newActionLayer;
+
+            // The ungrounded states goals go first
+            // Select parameters to ground these states
+            // If there are "Exist States", always these "Exist States" go first
+
+            for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
+            {
+                StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
+                if (curStateNode->isAchieved)
+                {
+                    // create a do nothing action node, to bring this state to next state layer
+                    PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
+                    ActionLayerNode* donothingActionLayerNode = new ActionLayerNode(doNothingAction);
+                    newActionLayer->nodes.insert(donothingActionLayerNode);
+                    donothingActionLayerNode->actionLayer = newActionLayer;
+
+                    State* cloneState = new State(*(curStateNode->state));
+                    StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
+                    cloneStateNode->stateLayer = newStateLayer;
+                    cloneStateNode->isAchieved = true;
+                    cloneStateNode->forwardLinks.insert(std::pair<ActionLayerNode*,Rule*>(donothingActionLayerNode,0));
+
+                    donothingActionLayerNode->backwardLinks.insert(std::pair<StateLayerNode*,Rule*>(cloneStateNode,0));
+                }
+                else
+                {
+                    // For non-numberic goals
+
+                    // For numberic goals, We use a bidirection searching, doing backward and forward reasoning in turn.
+                }
+            }
+
+
+        }
+
+*/
 
     }
 
@@ -161,6 +224,8 @@ bool OCPlanner::doPlanning(vector<State>& goal, vector<PetAction> &plan)
 
     return false;
 }
+
+//
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
@@ -486,5 +551,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---------------------
 }
+
+
 
 

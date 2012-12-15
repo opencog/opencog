@@ -26,7 +26,7 @@
 
 #include <opencog/util/exceptions.h>
 
-#include "type_tree_def.h"
+#include "../type_checker/type_tree_def.h"
 #include "operator_base.h"
 
 namespace opencog { namespace combo {

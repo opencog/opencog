@@ -38,8 +38,8 @@
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/oc_omp.h>
 
-#include <opencog/comboreduct/combo/table.h>
-#include <opencog/comboreduct/combo/table_io.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/comboreduct/table/table_io.h>
 
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/optimization/hill-climbing.h>
