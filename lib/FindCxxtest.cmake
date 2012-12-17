@@ -14,7 +14,7 @@
 # for the Python version.
 FIND_PACKAGE(PythonInterp)
 IF (PYTHONINTERP_FOUND)
-	FIND_PATH(CXXTEST_PYTHON_BIN_DIR cxxtestgen.py
+	FIND_PATH(CXXTEST_PYTHON_BIN_DIR cxxtestgen
 		$ENV{CXXTEST_BIN_DIR}
 		/usr/bin
 		/usr/local/bin
@@ -22,13 +22,13 @@ IF (PYTHONINTERP_FOUND)
 	)
 	IF (CXXTEST_PYTHON_BIN_DIR)
 		SET(CXXTEST_FOUND 1)
-		SET(CXXTEST_GEN "${CXXTEST_PYTHON_BIN_DIR}/cxxtestgen.py" CACHE FILEPATH "CxxTest binary filepath")
+		SET(CXXTEST_GEN "${CXXTEST_PYTHON_BIN_DIR}/cxxtestgen" CACHE FILEPATH "CxxTest binary filepath")
 	ENDIF (CXXTEST_PYTHON_BIN_DIR)
 
 	# Sometimes, the python version doesn't have a .py extension.
 	# repeat the above search, without the extension.
 	IF (NOT CXXTEST_FOUND)
-		FIND_PATH(CXXTEST_PYTHON_BIN_DIR cxxtestgen
+		FIND_PATH(CXXTEST_PYTHON_BIN_DIR cxxtestgen.py
 			$ENV{CXXTEST_BIN_DIR}
 			/usr/bin
 			/usr/local/bin
@@ -36,7 +36,7 @@ IF (PYTHONINTERP_FOUND)
 		)
 		IF (CXXTEST_PYTHON_BIN_DIR)
 			SET(CXXTEST_FOUND 1)
-			SET(CXXTEST_GEN "${CXXTEST_PYTHON_BIN_DIR}/cxxtestgen" CACHE FILEPATH "CxxTest binary filepath")
+			SET(CXXTEST_GEN "${CXXTEST_PYTHON_BIN_DIR}/cxxtestgen.py" CACHE FILEPATH "CxxTest binary filepath")
 		ENDIF (CXXTEST_PYTHON_BIN_DIR)
 	ENDIF (NOT CXXTEST_FOUND)
 ENDIF (PYTHONINTERP_FOUND)
