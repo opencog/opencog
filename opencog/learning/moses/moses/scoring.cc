@@ -515,11 +515,13 @@ score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 }
 
 /// Return the recall for this ctable row.
-/// This does not necessarily correspond to the most accurate model for
-/// this row; see remarks above.
+///
+/// If we summed over all rows, there would be _postive_total entries
+/// that have a positive answer (and thus totalling to a recal of
+/// exactly 1.0).  This compressed row has exactly 'pos' of those entries.
 score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_recall = 1.0 / _positive_total;
+    contin_t best_possible_recall = pos / _positive_total;
     return best_possible_recall;
 }
 
