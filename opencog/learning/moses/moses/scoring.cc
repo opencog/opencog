@@ -358,11 +358,15 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
 
         contin_t vary = get_variable(sum_pos, sum_neg, total);
         contin_t fix = get_fixed(sum_pos, sum_neg, total);
+
+        logger().fine() << "Disc: total=" << total << " pos=" << sum_pos
+                        << " neg=" << sum_neg << " vary=" << vary
+                        << " fix=" << fix;
         auto lmnt = std::make_pair(vary, std::make_pair(vary, fix));
         max_vary.insert(lmnt);
     }
 
-    // Sum up the best score, until the maximum fixed threshold is
+    // Sum up the best score, until the minimum fixed threshold is
     // reached.  It's not clear this actually gives the best score one
     // can get if min_threshold isn't reached, but we don't want to go
     // below min_threshold anyway, so it's an acceptable inacurracy.
@@ -441,6 +445,7 @@ void discriminating_bscore::set_complexity_coef(score_t ratio)
     if (occam)
         complexity_coef = 1.0 / (_ctable_usize * ratio);
 
+    logger().info() << "Discriminating scorer, table size = " << _ctable_usize;
     logger().info() << "Discriminating scorer, complexity ratio = " << 1.0f/complexity_coef;
 }
 
@@ -485,13 +490,24 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
 }
 
 /// Return the best possible precision for this ctable row.
+/// That is, if a model was able to maximize precision in it's fit to
+/// the data, this would be the highest possible precision score that
+/// this ctable row could contribute to the total precision.
+///
+/// Because input data may
+///
 /// (This does not necessarily correspnd to the most accurate model
 /// for this row, since, if the row has one postive and N negative
 /// values (for N>0), then the most precise model returns True to get
 /// a precision of 1/(N+1), whereas the most accurate model returns
 /// False to get a precision of zero.)
 ///
-/// FWIW, true_positives == pos  true_pos+false_pos = cnt
+/// For this ctable row collection, we have that:
+/// pos == true_positives in this ctable row
+/// neg == false_positives in this ctable row
+/// cnt == true_positives + false_positives.
+///
+/// _positive_total is the total number of rows that are positive.
 score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
     contin_t best_possible_precision = pos / (cnt * _positive_total);
@@ -499,7 +515,7 @@ score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 }
 
 /// Return the recall for this ctable row.
-/// This does not necessarily correspnd to the most accurate model for
+/// This does not necessarily correspond to the most accurate model for
 /// this row; see remarks above.
 score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
