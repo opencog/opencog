@@ -373,6 +373,13 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     // entries.  I think this is good enough for the purposes at hand,
     // which is to obtain a 'best score' at which to stop moses.)
     //
+    // XXX I dunno, this is rather confusing, actually, and for certain
+    // pathological datasets, this doesn't really provide the right
+    // answer. This should be fixed.  The problem is that if the inferred
+    // "best score" is too low, moses will stop, when it could have gone
+    // farther, and gottten a better answer.  The manual over-ride to this
+    // is to use the -A flag on moses. 
+    //
     score_t fix_avg = 1;
     score_t best_score = 0.0;
     score_t n = 1;
@@ -579,19 +586,22 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     return pbs;
 }
 
-/// Return the precision for this ctable row.
+/// Return an approximation for the precision that this ctable row 
+/// will contribute to the total precision.
 score_t prerec_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    // XXX TODO FIXME is this really correct?
-    contin_t best_possible_precision = pos / (cnt * _positive_total);
-    return best_possible_precision;
+    return pos / (cnt * _positive_total);
 }
 
-/// Return the recall for this ctable row.
+/// Return the best-possible recall for this ctable row.
 score_t prerec_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    // XXX TODO FIXME is this really correct?
-    return ( 0.0 < pos) ? 1.0 : 0.0;
+    // If this ctable row has any positive entries at all, then any
+    // model that picks it will have perfect recall (1.0) on this row. 
+    // However, since we are sorting on the fixed score, we wnat to
+    // consider rows with negatives in them later, since they'll cause
+    // the precision to drop.
+    return ( 0.0 < pos) ? ((0.0 < neg) ? 0.99999 : 1.0) : 0.0;
 }
 
 ////////////////
