@@ -24,7 +24,7 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/interpreter/eval.h>
 
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"

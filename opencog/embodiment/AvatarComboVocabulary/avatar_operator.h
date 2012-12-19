@@ -25,7 +25,7 @@
 #define _AVATAR_OPERATOR_H
 
 #include <opencog/comboreduct/combo/operator_base.h>
-#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
 
 namespace opencog { namespace combo {
 

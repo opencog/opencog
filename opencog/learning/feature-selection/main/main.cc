@@ -29,7 +29,7 @@
 #include <boost/format.hpp>
 
 #include <opencog/util/log_prog_name.h>
-#include <opencog/comboreduct/combo/table_io.h>
+#include <opencog/comboreduct/table/table_io.h>
 #include <opencog/learning/moses/moses/moses_main.h> // for version string
 
 using namespace std;

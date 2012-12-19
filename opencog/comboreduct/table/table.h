@@ -32,12 +32,14 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/adjacent_find.hpp>
 
-#include <opencog/util/Counter.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/Counter.h>
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/KLD.h>
 
-#include "eval.h"   /* Needed for binding map, and then obsolete */
-#include "vertex.h"
-#include "common_def.h"
+#include "../interpreter/eval.h"   /* Needed for binding map, and then obsolete */
+#include "../combo/vertex.h"
+#include "../combo/common_def.h"
 
 #define COEF_SAMPLE_COUNT 20.0 // involved in the formula that counts
                                // the number of trials needed to check
@@ -467,7 +469,8 @@ double OTEntropy(const OTable& ot);
  *
  * The target (output) feature Y is provided in the output table OTable,
  * whereas the input features are specified as a set of indexes giving
- * columns in the input table ITable.
+ * columns in the input table ITable. That is, the columns X1..Xn are 
+ * specified by the feature set fs.
  *
  * The mutual information
  *
@@ -544,8 +547,8 @@ double mutualInformation(const Table& table, const FeatureSet& fs)
 template<typename FeatureSet>
 double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 {
-    // Let X1, ..., Xn be the input columns on the table, and
-    // Y be the output column.  We need to compute the joint entropies
+    // Let X1, ..., Xn be the input columns on the table (as given by fs),
+    // and Y be the output column.  We need to compute the joint entropies
     // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
     // To do this, we need to count how often the vertex sequence
     // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
@@ -637,6 +640,38 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         auto div_total = [&](unsigned c) { return c/total; };
         transform(ycount | map_values, yprob.begin(), div_total);
         yentropy =  entropy(yprob);
+    }
+    else if (id::contin_type == otype)
+    {
+        if (1 < fs.size()) {
+            OC_ASSERT(0, "Contin MI currently supports only 1 feature.");
+        }
+// XXX FIXME TODO under construction, unfinished.  Ask Linas about status.
+        unsigned idx = *(fs.begin());
+logger().info() <<"duuude here we are!! idx="<<idx;
+        std::vector<contin_t> p, q;
+        for (const auto& row : ctable)
+        {
+            contin_t x = get_contin(row.first[idx]);
+
+logger().info() <<"duuude row x=" << x;
+            // for each contin counted in the row,
+            for (const auto& val_pair : row.second) {
+                const vertex& v = val_pair.first; // key of map
+                contin_t y = get_contin(v); // typecast
+
+logger().info() <<"duuude row x=" << x <<" and y=" << y;
+                unsigned flt_count = row.second.get(y);
+                dorepeat(flt_count) {
+                    q.push_back(x);
+                    p.push_back(y);
+                }
+            }
+        }
+// XXX TODO FIXME: need to sort p,q into order.
+        contin_t ic = KLD(p,q);
+logger().info() <<"duuude ic=" << ic;
+        return ic;
     }
     else
     {

@@ -44,8 +44,9 @@ namespace opencog {
  * Implementation of the algorithm described in the paper
  * Kullback-Leibler Divergence Estimation of Continuous Distributions
  * by Fernando Perez-Cruz.
+ * http://eprints.pascal-network.org/archive/00004910/01/bare_conf3.pdf
  *
- * That structure (will) allow to evaluate KLD(P|Q) over different Q
+ * This structure allows evaluation of KLD(P||Q) over different Q
  * for a fixed P and access to intermediary results. A function
  * returning the direct KLD is defined further below for convenience.
  */

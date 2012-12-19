@@ -1,4 +1,7 @@
 ADD_SUBDIRECTORY(combo)
+ADD_SUBDIRECTORY(interpreter)
+ADD_SUBDIRECTORY(type_checker)
+ADD_SUBDIRECTORY(table)
 ADD_SUBDIRECTORY(reduct)
 ADD_SUBDIRECTORY(ant_combo_vocabulary)
 ADD_SUBDIRECTORY(main)
@@ -16,23 +19,26 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/definite_object
 	combo/descriptions
 	combo/enum_type
-	combo/eval
 	combo/indefinite_object
 	combo/iostream_combo
 	combo/message
 	combo/perception
-	combo/perception_eval
 	combo/procedure_call
 	combo/procedure_repository
 	combo/simple_nn
-	combo/table
-	combo/table_io
 	combo/tree_generation
-	combo/type_tree_def
-	combo/type_tree
 	combo/using
 	combo/variable_unifier
 	combo/vertex
+
+	table/table
+	table/table_io
+
+	interpreter/eval
+	interpreter/perception_eval
+
+	type_checker/type_tree_def
+	type_checker/type_tree
 
 	reduct/action_reduction
 	reduct/action_rules

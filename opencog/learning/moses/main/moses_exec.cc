@@ -31,8 +31,8 @@
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
-#include <opencog/comboreduct/combo/table.h>
-#include <opencog/comboreduct/combo/table_io.h>
+#include <opencog/comboreduct/table/table.h>
+#include <opencog/comboreduct/table/table_io.h>
 
 #include "moses_exec.h"
 #include "moses_exec_def.h"
@@ -428,7 +428,7 @@ int moses_exec(int argc, char** argv)
 
     // program options, see options_description below for their meaning
     vector<string> jobs_str;
-    bool enable_mpi;
+    bool enable_mpi = false;
 
     unsigned long rand_seed;
     vector<string> input_data_files;
@@ -1299,8 +1299,8 @@ int moses_exec(int argc, char** argv)
 
     setting_omp(jobs[localhost]);
 
-    if (enable_mpi) {
 #ifdef HAVE_MPI
+    if (enable_mpi) {
         if (!local) {
             logger().error("MPI-bsed distributed processing should not "
                 "be mixed with host-based distributed processing!  "
@@ -1309,11 +1309,11 @@ int moses_exec(int argc, char** argv)
         }
         local = false;
         logger().info("Will run MOSES with MPI distributed processing.\n");
-#else
-        logger().warn("WARNING: This version of MOSES does NOT have MPI support!\n");
-        enable_mpi = false;
-#endif
     }
+#else
+    logger().warn("WARNING: This version of MOSES does NOT have MPI support!\n");
+    enable_mpi = false;
+#endif
 
     // Set parameter structures. Please don't systematically use their
     // constructors (if you can avoid it), as it is prone to error,
@@ -1561,10 +1561,10 @@ int moses_exec(int argc, char** argv)
                         exemplars.push_back(tr);
                     }
                 }
-                /// Enable feature selection while selecting exemplar
+
+                // Enable feature selection while selecting exemplar
                 if (enable_feature_selection) {
-                    // use the first table, normally it should
-                    // probably use the concatenation of all of them
+                    // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
                                                              fs_params);
                 }
@@ -1597,10 +1597,10 @@ int moses_exec(int argc, char** argv)
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
                 }
-                /// Enable feature selection while selecting exemplar
+
+                // Enable feature selection while selecting exemplar
                 if (enable_feature_selection) {
-                    // use the first table, normally it should
-                    // probably use the concatenation of all of them
+                    // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
                                                              fs_params);
                 }

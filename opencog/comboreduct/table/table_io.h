@@ -36,7 +36,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "table.h"
-#include "type_tree.h"
+#include "../type_checker/type_tree.h"
 
 namespace opencog { namespace combo {
 
@@ -63,29 +63,20 @@ bool checkCarriageReturn(std::istream& in);
 typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
 table_tokenizer get_row_tokenizer(const std::string& line);
 
+static const std::vector<unsigned> empty_unsigned_vec =
+    std::vector<unsigned>();
+static const std::vector<std::string> empty_string_vec =
+    std::vector<std::string>();
+
 /**
  * Take a line and return a vector containing the elements parsed.
  * Used by istreamTable. This will modify the line to remove leading
  * non-ASCII characters, as well as stripping of any carriage-returns.
  */
 template<typename T>
-std::vector<T> tokenizeRow(const std::string& line)
-{
-    table_tokenizer tok = get_row_tokenizer(line);
-    std::vector<T> res;
-    for (const std::string& t : tok)
-        res.push_back(boost::lexical_cast<T>(t));
-    return res;
-}
-// like tokenizerRow but take a vector of indices to ignore, this
-// duplication is here possible temporary in case that method is
-// substantially slower than tokenizerRow when ignored_indices is
-// empty. As soon as it is measured it is not (which I think is the
-// case because of branch prediction) then it can replace tokenizerRow
-// (and rename to it) with an empty ignore_indices as default.
-template<typename T>
-std::vector<T> tokenizeRow_ignore_indices(const std::string& line,
-                                          const std::vector<unsigned>& ignored_indices)
+std::vector<T> tokenizeRow(const std::string& line,
+                           const std::vector<unsigned>& ignored_indices =
+                           empty_unsigned_vec)
 {
     table_tokenizer tok = get_row_tokenizer(line);
     std::vector<T> res;
@@ -103,18 +94,9 @@ std::vector<T> tokenizeRow_ignore_indices(const std::string& line,
 // some hacky function to get the header of a DSV file (assuming there is one)
 std::vector<std::string> get_header(const std::string& input_file);
         
-std::istream& istreamRawITable(std::istream& in, ITable& tab)
-    throw(std::exception, AssertionException);
-
-// like istreamRawITable but take a vector of indices to ignore, this
-// duplication is here possible temporary in case that method is
-// substantially slower than istreamRawITable when ignored_indices is
-// empty. As soon as it is measured it is not (which I think is the
-// case because of branch prediction) then it can replace
-// istreamRawITable (and rename to it) with an empty ignore_indices as
-// default.
-std::istream& istreamRawITable_ignore_indices(std::istream& in, ITable& tab,
-                                              const std::vector<unsigned>& ignored_indices)
+std::istream& istreamRawITable(std::istream& in, ITable& tab,
+                               const std::vector<unsigned>& ignored_indices =
+                               empty_unsigned_vec)
     throw(std::exception, AssertionException);
 
 std::istream& istreamITable(std::istream& in, ITable& tab,

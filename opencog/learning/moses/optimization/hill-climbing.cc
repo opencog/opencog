@@ -260,9 +260,17 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // intentionally over-estimates by a factor of two. So the
         // breakeven point would be 6*TOP_POP_SIZE, and we pad this
         // a bit, as small exhaustive searches do beat guessing...
+        //
+        // current_number_of_instances can drop as low as 1 if the
+        // population trimmer wiped out everything, which can happen.
+        // Anyway, cross-over generates nothing when its that small.
 #define TOP_POP_SIZE 40
-        if (!hc_params.crossover || (iteration <= 2) || rescan ||
-            total_number_of_neighbours < 10*TOP_POP_SIZE) {
+        if (!hc_params.crossover
+            || (iteration <= 2)
+            || rescan
+            || total_number_of_neighbours < 10*TOP_POP_SIZE
+            || current_number_of_instances < 3)
+        {
 
             // The current_number_of_instances arg is needed only to
             // be able to manage the size of the deme appropriately.
