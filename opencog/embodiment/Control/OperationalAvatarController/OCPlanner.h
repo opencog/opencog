@@ -56,7 +56,7 @@ public:
     Rule* originalRule; // the original rule (usually not grounded)
     Rule* curGroundedRule; // the currently applying grounded rule of the the original rule
 
-    RuleLayer* actionLayer; // the layer it belongs to
+    RuleLayer* ruleLayer; // the layer it belongs to
     set<StateLayerNode*> forwardLinks; // all nodes in next layer connected to this nodes according to the currently applying rule
     set<StateLayerNode*> backwardLinks; // all the links connect to the nodes in last layer
 
@@ -110,11 +110,26 @@ public:
     }
 };
 
+// map to save grounded values for one rule:
+// e.g.: <$Entity0,Robot001>
+//       <$Vector0,Vector(45,82,29)>
+//       <$Entity1,Battery83483>
+typedef map<string, StateValue> paramGroundedMapInARule;
+
+// map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
+// Rule* is pointing to one of the rules in the OCPlanner::AllRules
+typedef map<Rule*, paramGroundedMapInARule> paramGroundedMaps;
+
 class RuleLayer
 {
 public:
     set<RuleLayerNode*> nodes; // all the nodes in this layer currently
-    set<Rule*> forwardHistory; // to store all the rules has been applied in this layer
+
+    // history of all the rules with grounded parameters used to be applied in this layer
+    // every paramGroundedMaps is like a screenshot, and the current using grounded parameter map is always the last element in this vector
+    // this is to prevent repeatedly applying the same set of rules with the same gournded parameter values.
+    vector<paramGroundedMaps> rulesHistory;
+
     StateLayer* preStateLayer;
     StateLayer* nextStateLayer;
     RuleLayer()
@@ -122,7 +137,6 @@ public:
         preStateLayer = 0;
         nextStateLayer = 0;
     }
-
 
 };
 
@@ -143,10 +157,20 @@ public:
      // if failed in generating a plan to achieve the goal, return false.
      bool doPlanning(const vector<State*> &goal, vector<PetAction>& plan);
 
+public:
+     Rule* DO_NOTHING_RULE;
+
 protected:
 
      // to store all the rules can be used in reasoning
      vector<Rule*> AllRules;
+
+     // map <stateName, all rules have an effect to this state>
+     // so that we can quickly find what rules have effect on a specific state during planning
+     map<string,vector<Rule*> > ruleEffectIndexes;
+
+     // add the indexes to ruleEffectIndexes, about which states this rule has effects on
+     void addRuleEffectIndex(Rule* r);
 
      // load All Rules from the Atomspace
      void loadAllRulesFromAtomSpace();
@@ -166,8 +190,6 @@ protected:
      //                  to calculate its satisfiedDegree value.
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
      bool checkIsGoalAchieved(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
-
-
 
 
 };
