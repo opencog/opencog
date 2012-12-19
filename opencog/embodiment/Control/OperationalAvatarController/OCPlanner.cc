@@ -35,10 +35,51 @@ using namespace opencog::oac;
 
 OCPlanner::OCPlanner()
 {
+
     loadAllRulesFromAtomSpace();
 
     // currently, for experiment, we dirctly add the rules by C++ codes
     loadTestRulesFromCodes();
+
+    // preprocess the rule:
+    vector<Rule*>::iterator it;
+    for (it = AllRules.begin(); it != AllRules.end(); ++ it)
+    {
+        Rule* r = (Rule*)(*it);
+
+        // adding indexes about the ungrounded parameters in it.
+        r->preProcessRuleParameterIndexes();
+
+        // adding indexes about which rules have effects to which stateName
+        addRuleEffectIndex(r);
+
+    }
+}
+
+void OCPlanner::addRuleEffectIndex(Rule* r)
+{
+    vector<EffectPair>::iterator effectIt;
+    for(effectIt = r->effectList.begin(); effectIt != r->effectList.end(); ++effectIt)
+    {
+        Effect* e = effectIt->second;
+
+        State* s = e->state;
+
+        map<string,vector<Rule*> >::iterator it;
+        it = ruleEffectIndexes.find(s->name());
+
+        if (it == ruleEffectIndexes.end())
+        {
+            vector<Rule*> rules;
+            rules.push_back(r);
+            ruleEffectIndexes.insert(std::pair<string , vector<Rule*> >(s->name(),rules));
+        }
+        else
+        {
+            ((vector<Rule*>)(it->second)).push_back(r);
+        }
+
+    }
 }
 
 //TODO: need to load from Atomspace
@@ -132,16 +173,16 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     StateLayer* curStateLayer = &goalLayer;
 
-    // All the ActionLayers, All the StateLayers
+    // All the ActionLayers & All the StateLayers
     set<RuleLayer*> allRuleLayers;
     set<StateLayer*> allStateLayers;
 
-    // All the layers except the final goalLayer should be grounded
+    // All the rules should be grounded during planning
 
     // planning process:
     set<StateLayerNode*>::iterator stateLayerIter;
     while(true)
-    {/*
+    {
         bool goalsAllAchieved = true;
         float satisfiedDegree;
         for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
@@ -168,54 +209,55 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         else
         {
             // not all the states in the current state layer are satisfied,
-            // we need to creat an action layer backward trying to achieve these states
-            // and also create a new state Layer which required by this new action layer
-            RU* newActionLayer = new ActionLayer();
+            // we need to creat an rule layer backward trying to achieve these states
+            // and also create a new state Layer which are the preconditions of this rule layer
+            RuleLayer* newRuleLayer = new RuleLayer();
             StateLayer* newStateLayer = new StateLayer();
-            allActionLayers.insert(newActionLayer);
+
+            allRuleLayers.insert(newRuleLayer);
             allStateLayers.insert(newStateLayer);
 
-            newActionLayer->nextStateLayer = curStateLayer;
-            newActionLayer->preStateLayer = newStateLayer;
+            newRuleLayer->nextStateLayer = curStateLayer;
+            newRuleLayer->preStateLayer = newStateLayer;
 
-            newStateLayer->nextActionLayer = newActionLayer;
-            curStateLayer->preActionLayer = newActionLayer;
+            newStateLayer->nextRuleLayer = newRuleLayer;
+            curStateLayer->preRuleLayer = newRuleLayer;
 
-            // The ungrounded states goals go first
-            // Select parameters to ground these states
-            // If there are "Exist States", always these "Exist States" go first
+            // Some states in current goal statelayer have been grounded through its preRuleLayer.
+            // So, we find out all the ungrounded states goals, and select paravalues to ground them
+            // If there are "Exist States" among these ungrounded states, always these "Exist States" go first
 
             for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
             {
                 StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
                 if (curStateNode->isAchieved)
                 {
-                    // create a do nothing action node, to bring this state to next state layer
-                    PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
-                    ActionLayerNode* donothingActionLayerNode = new ActionLayerNode(doNothingAction);
-                    newActionLayer->nodes.insert(donothingActionLayerNode);
-                    donothingActionLayerNode->actionLayer = newActionLayer;
+                    // create a do nothing rule node, to bring this state to next state layer
+                    RuleLayerNode* donothingRuleLayerNode = new RuleLayerNode(DO_NOTHING_RULE);
+                    newRuleLayer->nodes.insert(donothingRuleLayerNode);
+                    donothingRuleLayerNode->ruleLayer = newRuleLayer;
 
                     State* cloneState = new State(*(curStateNode->state));
                     StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
                     cloneStateNode->stateLayer = newStateLayer;
                     cloneStateNode->isAchieved = true;
-                    cloneStateNode->forwardLinks.insert(std::pair<ActionLayerNode*,Rule*>(donothingActionLayerNode,0));
+                    cloneStateNode->forwardLinks.insert(donothingRuleLayerNode);
 
-                    donothingActionLayerNode->backwardLinks.insert(std::pair<StateLayerNode*,Rule*>(cloneStateNode,0));
+                    donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
                 }
                 else
                 {
                     // For non-numberic goals
+                    // First, check if there is any rules's effect can achieve this goal
+                    map<string,vector<Rule*> >::iterator it;
+                    it = ruleEffectIndexes.find(curStateNode->state->name());
 
                     // For numberic goals, We use a bidirection searching, doing backward and forward reasoning in turn.
+
                 }
             }
 
-
         }
-
-*/
 
     }
 
@@ -225,7 +267,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     return false;
 }
 
-//
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
@@ -277,8 +318,8 @@ void OCPlanner::loadTestRulesFromCodes()
     // rule: increasing energy by eat an edible object held in hand
     Rule* eatRule = new Rule(eatAction,boost::get<Entity>(var_avatar),1);
     eatRule->addPrecondition(existState);
-    eatRule->addPrecondition(holderState);
     eatRule->addPrecondition(edibleState);
+    eatRule->addPrecondition(holderState);
 
     eatRule->addEffect(EffectPair(1.0f,energyIncreaseEffect));
     eatRule->addEffect(EffectPair(1.0f,nonHolderEffect));
@@ -550,6 +591,10 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(pathTransmitRule);
 
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---------------------
+
+    //Define the DO_NOTHING_RULE , this rule is a class member, not need to add it to the AllRules
+    this->DO_NOTHING_RULE = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0);
+
 }
 
 
