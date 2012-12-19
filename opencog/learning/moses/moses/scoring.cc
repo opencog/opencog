@@ -476,8 +476,11 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     // We are maximizing recall, so that is the first part of the score.
     penalized_behavioral_score pbs;
@@ -486,7 +489,7 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
     score_t precision_penalty = get_threshold_penalty(precision);
     pbs.first.push_back(precision_penalty);
     if (logger().isFineEnabled()) 
-        logger().fine("precision = %f  recall=%f  precision penalty=%e",
+        logger().fine("recall_bcore: precision = %f  recall=%f  precision penalty=%e",
                      precision, recall, precision_penalty);
  
     // Add the Complexity penalty
@@ -551,8 +554,11 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     // We are maximizing recall, so that is the first part of the score.
     penalized_behavioral_score pbs;
@@ -561,7 +567,7 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     score_t recall_penalty = get_threshold_penalty(recall);
     pbs.first.push_back(recall_penalty);
     if (logger().isFineEnabled()) 
-        logger().fine("precision = %f  recall=%f  recall penalty=%e",
+        logger().fine("prerec_bscore: precision = %f  recall=%f  recall penalty=%e",
                      precision, recall, recall_penalty);
  
     // Add the Complexity penalty
@@ -605,8 +611,11 @@ penalized_behavioral_score bep_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     score_t bep = (precision + recall) / 2;
     // We are maximizing bep, so that is the first part of the score.
@@ -667,8 +676,12 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
+
     score_t f_one = 2 * precision * recall / (precision + recall);
 
     // We are maximizing f_one, so that is the first part of the score.
@@ -676,7 +689,7 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
     pbs.first.push_back(f_one);
     
     if (logger().isFineEnabled()) 
-        logger().fine("precision = %f recall = %f f_one=%f",
+        logger().fine("f_one_bscore: precision = %f recall = %f f_one=%f",
                      precision, recall, f_one);
  
     // Add the Complexity penalty
