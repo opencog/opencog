@@ -220,14 +220,20 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
 {
     cscorer_t c_scorer(bscorer);
 
-    // update terminate_if_gte and max_score criteria
-    score_t bps = c_scorer.best_possible_score();
-    score_t target_score = std::min(moses_params.max_score, bps);
+    // Update terminate_if_gte and max_score criteria. An explicit
+    // user-specified max score always over-rides the inferred score.
+    score_t target_score = c_scorer.best_possible_score();
+    if (very_best_score != moses_params.max_score) {
+        target_score = moses_params.max_score;
+        logger().info("Target score = %f", target_score);
+    } else {
+        logger().info("Inferred target score = %f", target_score);
+    }
+
     opt_params.terminate_if_gte = target_score;
     // update minimum score improvement
     opt_params.set_min_score_improv(c_scorer.min_improv());
     moses_params.max_score = target_score;
-    logger().info("Target score = %f", target_score);
 
     if (meta_params.cache_size > 0) {
         // WARNING: adaptive_cache is not thread safe (and therefore
