@@ -120,6 +120,10 @@ public:
     static StateValue inqueryIsBetween(const vector<StateValue>& stateOwnerList);
 
 
+    // When want to ground a rule, when there is exist state precondition,
+    // Call this funciton to search for all the handles of the Entities meet the given condition from the Atomspace
+    static HandleSeq findAllObjectsByGivenCondition(vector<State*> states);
+
 };
 
 

@@ -693,7 +693,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<SpaceServer::Space
         PetAction action;
 
         // Now in Unity, we consider jump up one block as normal walking action:
-        /*
+
         // The agent need to jump when this pos is higher than last pos
         if (((SpaceServer::SpaceMapPoint)(*(it_point))).z > ((SpaceServer::SpaceMapPoint)(*(it_point-1))).z )
         {
@@ -705,7 +705,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<SpaceServer::Space
                                                        ((SpaceServer::SpaceMapPoint)(*it_point)).z )));
         }
         else
-        {*/
+        {
             action = PetAction(ActionType::WALK());
             action.addParameter(ActionParameter("target",
                                                 ActionParamType::VECTOR(),
@@ -720,7 +720,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( std::vector<SpaceServer::Space
             action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(),
                     lexical_cast<string>( speed) ) );
 
-        //}
+        }
         pai.addAction( planID, action );
         it_point++;
     } // while
