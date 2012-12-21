@@ -45,6 +45,9 @@
 #include <opencog/learning/moses/optimization/hill-climbing.h>
 
 #include "feature-selection.h"
+#include "../deme_optimize.h"
+#include "../stochastic_max_dependency.h"
+#include "../incremental.h"
 
 namespace opencog {
     
