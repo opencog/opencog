@@ -32,6 +32,7 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/adjacent_find.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
+#include <boost/range/algorithm_ext/push_back.hpp>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/Logger.h>
@@ -46,6 +47,16 @@ using namespace std;
 using namespace boost;
 using namespace boost::adaptors;
 
+string vertex_to_str(const vertex& v)
+{
+    stringstream ss;
+    if (is_boolean(v))
+        ss << vertex_to_bool(v);
+    else
+        ss << v;
+    return ss.str();
+}
+        
 // -------------------------------------------------------
 
 ITable::ITable() {}
@@ -156,33 +167,34 @@ type_node ITable::get_type(const string& name) const
 
 // -------------------------------------------------------
 
-void ITable::insert_col(const std::string& clab,
-                        const vertex_seq& col,
-                        int off)
-{
-    // Infer the column type
-    // If it exists use the second row, just in case the first holds labels...
-    unsigned idx = col.size() > 1 ? 1 : 0;
-    type_node col_type = get_type_node(get_type_tree(col[idx]));
-    types.insert(off >= 0 ? types.begin() + off : types.end(), col_type);
+// void ITable::insert_col(const std::string& clab,
+//                         const multi_type_seq& col,
+//                         int off)
+// {
+//     // Infer the column type
+//     // If it exists use the second row, just in case the first holds labels...
+//     unsigned idx = col.size() > 1 ? 1 : 0;
+//     type_tree col_tt = boost::apply_visitor(get_type_tree_at_visitor(idx), col);
+//     type_node col_type = get_type_node(col_tt);
+//     types.insert(off >= 0 ? types.begin() + off : types.end(), col_type);
 
-    // Insert label
-    labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
+//     // Insert label
+//     labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
 
-    // Insert values
-    if (empty()) {
-        OC_ASSERT(off < 0);
-        for (const auto& v : col)
-            push_back({v});
-        return;
-    }
+//     // Insert values
+//     if (empty()) {
+//         OC_ASSERT(off < 0);
+//         for (const auto& v : col)
+//             push_back({v});
+//         return;
+//     }
 
-    OC_ASSERT (col.size() == size(), "Incorrect column length!");
-    for (unsigned i = 0; i < col.size(); i++) {
-        auto& row = (*this)[i];
-        row.insert(off >= 0 ? row.begin() + off : row.end(), col[i]);
-    }
-}
+//     OC_ASSERT (col.size() == size(), "Incorrect column length!");
+//     for (unsigned i = 0; i < col.size(); i++) {
+//         auto& row = (*this)[i];
+//         row.insert(off >= 0 ? row.begin() + off : row.end(), col[i]);
+//     }
+// }
 
 int ITable::get_column_offset(const std::string& name) const
 {
@@ -209,8 +221,11 @@ vertex_seq ITable::get_column_data(int offset) const
     if (-1 == offset)
         return col;
 
-    for (const auto& row : *this)
-        col.push_back(row[offset]);
+    get_vertex_at_visitor gvav(offset);
+    auto agva = boost::apply_visitor(gvav);
+    for (const auto& row : *this) {
+        col.push_back(agva(row.get_variant()));
+    }
     return col;
 }
 
@@ -226,8 +241,8 @@ string ITable::delete_column(const string& name)
         return string();
 
     // Delete the column
-    for (vertex_seq& row : *this)
-        row.erase(row.begin() + off);
+    for (multi_type_seq& row : *this)
+        row.erase_at(off);
 
     // Delete the label as well.
     string rv;
@@ -272,9 +287,8 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
         // input, so the order within itable does matter
         ann net = tree_transform().decodify_tree(tr);
         int depth = net.feedforward_depth();
-        for (const vertex_seq& vv : itable) {
-            vector<contin_t> tmp(vv.size());
-            transform(vv, tmp.begin(), get_contin);
+        for (const multi_type_seq& vv : itable) {
+            contin_seq tmp = vv.get_contin_seq();
             tmp.push_back(1.0); // net uses that in case the function
                                 // to learn needs some kind of offset
             net.load_inputs(tmp);
@@ -283,8 +297,10 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
             push_back(net.outputs[0]->activation);
         }
     } else {
-        for (const vertex_seq& vs : itable)
-            push_back(eval_throws_binding(vs, tr));
+        interpreter_visitor iv(tr);
+        auto ai = boost::apply_visitor(iv);
+        for (const multi_type_seq& vs : itable)
+            push_back(ai(vs.get_variant()));
     }
 
     // Be sure to set the column type as well ... 
@@ -295,8 +311,10 @@ OTable::OTable(const combo_tree& tr, const CTable& ctable, const string& ol)
     : label(ol)
 {
     arity_set as = get_argument_abs_idx_set(tr);
-    for_each(ctable | map_keys, [&](const vertex_seq& vs) {
-            this->push_back(eval_throws_binding(vs, tr));
+    interpreter_visitor iv(tr);
+    auto ai = boost::apply_visitor(iv);
+    for_each(ctable | map_keys, [&](const multi_type_seq& mts) {
+            this->push_back(ai(mts.get_variant()));
         });
 
     // Be sure to set the column type as well ... 
@@ -483,8 +501,9 @@ void Table::add_features_from_file(const string& input_file,
         // set the first row as header
         auto first_row_it = features_table.begin();
         vector<string> features_labels;
-        for (const vertex& v : *first_row_it)
-            features_labels.push_back(boost::get<string>(v));
+        OC_ASSERT(false, "TODO");
+        // for (size_t i = 0; i < first_row_it->size(); ++i)
+        //     features_labels.push_back(boost::get<string>(first_row_it->get_copy_at(i)));
         features_table.set_labels(features_labels);
         features_table.erase(first_row_it);
 
@@ -502,7 +521,8 @@ void Table::add_features_from_file(const string& input_file,
             while(rit != header_pos.cend() && *lit > *rit) ++rit;
             int rpos = rit != header_pos.cend() ?
                 distance(header_pos.cbegin(), rit) + lpos : -1;
-            itable.insert_col(cl, cd, rpos);
+            OC_ASSERT(false, "TODO");
+            // itable.insert_col(cl, cd, rpos);
         }
 
         // update target_pos, does union of features_pos and

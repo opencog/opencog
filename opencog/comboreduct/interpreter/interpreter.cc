@@ -37,9 +37,11 @@ namespace opencog { namespace combo {
 boolean_interpreter::boolean_interpreter(const std::vector<builtin>& inputs)
     : boolean_inputs(inputs) {}
 
-builtin boolean_interpreter::operator()(const combo_tree& tr) const
-{
+builtin boolean_interpreter::operator()(const combo_tree& tr) const {
     return boolean_eval(tr.begin());
+}
+builtin boolean_interpreter::operator()(const combo_tree::iterator it) const {
+    return boolean_eval(it);
 }
 
 builtin boolean_interpreter::boolean_eval(combo_tree::iterator it) const
@@ -106,9 +108,11 @@ builtin boolean_interpreter::boolean_eval(combo_tree::iterator it) const
 contin_interpreter::contin_interpreter(const std::vector<contin_t>& inputs)
     : contin_inputs(inputs) {}
 
-contin_t contin_interpreter::operator()(const combo_tree& tr) const
-{
+contin_t contin_interpreter::operator()(const combo_tree& tr) const {
     return contin_eval(tr.begin());
+}
+contin_t contin_interpreter::operator()(const combo_tree::iterator it) const {
+    return contin_eval(it);
 }
 
 contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
@@ -221,9 +225,11 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 mixed_interpreter::mixed_interpreter(const std::vector<vertex>& inputs)
     : mixed_inputs(inputs) {}
 
-vertex mixed_interpreter::operator()(const combo_tree& tr) const
-{
+vertex mixed_interpreter::operator()(const combo_tree& tr) const {
     return mixed_eval(tr.begin());
+}
+vertex mixed_interpreter::operator()(const combo_tree::iterator it) const {
+    return mixed_eval(it);
 }
 
 builtin mixed_interpreter::boolean_eval(combo_tree::iterator it) const

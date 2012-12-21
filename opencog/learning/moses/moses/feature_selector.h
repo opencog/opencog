@@ -45,8 +45,10 @@ struct feature_selector
     {
         combo::CTable act_ctable(ctable.get_labels(), ctable.get_signature());
         // select active rows
+        interpreter_visitor iv(tr);
+        auto ai = boost::apply_visitor(iv);
         for (const combo::CTable::value_type& vct : ctable)
-            if (eval_binding(vct.first, tr) == combo::id::logical_true)
+            if (ai(vct.first.get_variant()) == combo::id::logical_true)
                 act_ctable.insert(vct);
         // Call feature selection
         return select_features(act_ctable, fs_params);

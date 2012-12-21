@@ -51,7 +51,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
     SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
     SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
-    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
+    SET(CMAKE_C_FLAGS_RELEASE "-O2 -fshort-enums -g0")
     # Vital to do this otherwise unresolved symbols everywhere:
     SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
     SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
@@ -59,7 +59,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS "-Wall -fPIC")
     SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
     SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
+    SET(CMAKE_C_FLAGS_RELEASE "-O2 -fshort-enums -g -fstack-protector")
   ENDIF (APPLE)
 
   # 1) -Wno-variadic-macros is to avoid warnings regarding using

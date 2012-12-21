@@ -3082,7 +3082,7 @@ struct lexicographic_subtree_order {
     lexicographic_subtree_order() { }
     lexicographic_subtree_order(const compare& comp_) : comp(comp_) { }
 
-    compare comp;
+    compare comp; // @todo comp is not used???
 
     template<typename iter>
     bool operator()(const tree<T>& tr1,iter it2) const {

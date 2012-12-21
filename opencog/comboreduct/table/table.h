@@ -31,11 +31,13 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/adjacent_find.hpp>
+#include <boost/operators.hpp>
 
 #include <opencog/util/Counter.h>
 #include <opencog/util/algorithm.h>
 
 #include "../interpreter/eval.h"   /* Needed for binding map, and then obsolete */
+#include "../interpreter/interpreter.h"
 #include "../combo/vertex.h"
 #include "../combo/common_def.h"
 
@@ -54,6 +56,233 @@ std::vector<unsigned> get_indices(const std::vector<std::string>& labels,
 ///////////////////
 // Generic table //
 ///////////////////
+
+///////////////////////////////////
+// Collection of useful visitors //
+///////////////////////////////////
+
+typedef std::vector<builtin> builtin_seq;
+typedef std::vector<contin_t> contin_seq;
+typedef std::vector<std::string> string_seq;
+
+// Push back to a multi_type_seq
+template<typename T /* type being pushed */>
+struct push_back_visitor : public boost::static_visitor<> {
+    push_back_visitor(const T& value) : _value(value) {}
+    void operator()(std::vector<T>& seq) const {
+        seq.push_back(_value);
+    }
+    void operator()(vertex_seq& seq) const {
+        seq.push_back(_value);
+    }
+    template<typename Seq> void operator()(Seq& seq) const {
+        std::stringstream ss;
+        ss << "You can't push_back " << _value << " in container ";
+        ostreamContainer(ss, seq);
+        OC_ASSERT(false, ss.str());
+    }
+    const T& _value;
+};
+struct pop_back_visitor : public boost::static_visitor<> {
+    template<typename Seq> void operator()(Seq& seq) const {
+        seq.pop_back();
+    }
+};
+struct get_vertex_at_visitor : public boost::static_visitor<vertex> {
+    get_vertex_at_visitor(size_t pos) : _pos(pos) {}
+    vertex operator()(const combo_tree_seq& seq) const {
+        return *seq[_pos].begin();
+    }
+    template<typename Seq> vertex operator()(const Seq& seq) const {
+        return seq[_pos];
+    }
+    size_t _pos;
+};
+struct erase_at_visitor : public boost::static_visitor<> {
+    erase_at_visitor(size_t pos) : _pos(pos) {}
+    template<typename Seq> void operator()(Seq& seq) const {
+        seq.erase(seq.begin() + _pos);
+    }
+    size_t _pos;
+};
+struct size_visitor : public boost::static_visitor<size_t> {
+    template<typename Seq> size_t operator()(const Seq& seq) {
+        return seq.size();
+    }
+};
+struct empty_visitor : public boost::static_visitor<bool> {
+    template<typename Seq> bool operator()(const Seq& seq) {
+        return seq.empty();
+    }
+};
+std::string vertex_to_str(const vertex& v);
+struct to_strings_visitor : public boost::static_visitor<string_seq> {
+    string_seq operator()(const string_seq& seq) {
+        return seq;
+    }
+    string_seq operator()(const vertex_seq& seq) {
+        string_seq res;
+        boost::transform(seq, back_inserter(res), vertex_to_str);
+        return res;
+    }
+    template<typename Seq> string_seq operator()(const Seq& seq) {
+        string_seq res;
+        boost::transform(seq, back_inserter(res),
+                         [](const typename Seq::value_type& v) {
+                             std::stringstream ss;
+                             ss << v;
+                             return ss.str();
+                         });
+        return res;
+    }
+};
+struct ostreamlnContainer_visitor : public boost::static_visitor<std::ostream&> {
+    ostreamlnContainer_visitor(std::ostream& out,
+                               const std::string& delimiter = " ",
+                               const std::string& left = "",
+                               const std::string& right = "")
+        : _out(out), _delimiter(delimiter), _left(left), _right(right) {}
+    template<typename Seq> std::ostream& operator()(const Seq& seq) {
+        return ostreamlnContainer(_out, seq, _delimiter, _left, _right);
+    }
+    std::ostream& _out;
+    const std::string& _delimiter;
+    const std::string& _left;
+    const std::string& _right;
+};
+struct get_type_tree_at_visitor : public boost::static_visitor<type_tree> {
+    get_type_tree_at_visitor(size_t pos) : _pos(pos) {}
+    template<typename Seq> type_tree operator()(const Seq& seq) {
+        return get_type_tree(seq[_pos]);
+    }    
+    size_t _pos;
+};
+/**
+ * Interpreter visitor, depending on the type of the row choose which
+ * interpreter to use. Note that returning the same type (here vertex)
+ * is not the right long term solution, it should return the type
+ * returned by the interpreter, however given the way Tables are
+ * implemented it makes sense for now.
+ */
+struct interpreter_visitor : public boost::static_visitor<vertex> {
+    interpreter_visitor(const combo_tree& tr) : _it(tr.begin()) {}
+    interpreter_visitor(const combo_tree::iterator& it) : _it(it) {}
+    vertex operator()(const std::vector<builtin>& inputs) {
+        return boolean_interpreter(inputs)(_it);
+    }    
+    vertex operator()(const std::vector<contin_t>& inputs) {
+        return contin_interpreter(inputs)(_it);
+    }    
+    vertex operator()(const std::vector<vertex>& inputs) {
+        return mixed_interpreter(inputs)(_it);
+    }
+    vertex operator()(const string_seq& inputs) {
+        OC_ASSERT(false, "Not implemented");
+        return vertex();
+    }
+    vertex operator()(const std::vector<combo_tree>& inputs) {
+        OC_ASSERT(false, "Not implemented");
+        return vertex();
+    }
+    combo_tree::iterator _it;
+};
+        
+/**
+ * multi_type_seq is a variant of sequences of primitive combo types,
+ * vertex and tree. That way the Table, ITable or CTable can store
+ * primitive inputs without the boost.variant overhead for each
+ * entry. combo_tree_seq is also present to store combo_trees as
+ * inputs instead of vertex (or primitive types) to have inputs of
+ * lists, functions or any structured combo object.
+ */
+struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
+                        public boost::equality_comparable<multi_type_seq>
+{
+    typedef boost::variant<builtin_seq,
+                           contin_seq,
+                           string_seq,
+                           vertex_seq,
+                           combo_tree_seq> multi_type_variant;
+    multi_type_seq() {
+        logger().debug("sizeof(builtin) = %u", sizeof(builtin));
+        logger().debug("sizeof(vertex) = %u", sizeof(vertex));
+    }
+    template<typename T> multi_type_seq(const std::initializer_list<T>& il)
+        : _variant(std::vector<T>(il)) {}
+    template<typename T> multi_type_seq(const T& v) : _variant(v) {}
+    template<typename T> void push_back(const T& e) {
+        boost::apply_visitor(push_back_visitor<T>(e), _variant);
+    }
+    void pop_back() {
+        pop_back_visitor popbv;
+        boost::apply_visitor(popbv, _variant);
+    }
+    bool operator<(const multi_type_seq& r) const {
+        return get_variant() < r.get_variant();
+    }
+    bool operator==(const multi_type_seq& r) const {
+        return get_variant() == r.get_variant();
+    }
+    size_t size() const {
+        size_visitor sv;
+        return boost::apply_visitor(sv, _variant);
+    }
+    bool empty() const {
+        empty_visitor ev;
+        return boost::apply_visitor(ev, _variant);
+    }
+    void erase_at(size_t pos) {
+        boost::apply_visitor(erase_at_visitor(pos), _variant);
+    }
+    std::vector<std::string> to_strings() const {
+        to_strings_visitor tsv;
+        return boost::apply_visitor(tsv, _variant);
+    }
+
+    multi_type_variant& get_variant() { return _variant; }
+    const multi_type_variant& get_variant() const { return _variant; }
+
+    // variant helpers
+    builtin_seq& get_builtin_seq() {
+        return boost::get<builtin_seq>(_variant);
+    }
+    const builtin_seq& get_builtin_seq() const {
+        return boost::get<builtin_seq>(_variant);
+    }
+    contin_seq& get_contin_seq() {
+        return boost::get<contin_seq>(_variant);
+    }
+    const contin_seq& get_contin_seq() const {
+        return boost::get<contin_seq>(_variant);
+    }
+    string_seq& get_string_seq() {
+        return boost::get<string_seq>(_variant);
+    }
+    const string_seq& get_string_seq() const {
+        return boost::get<string_seq>(_variant);
+    }
+    vertex_seq& get_vertex_seq() {
+        return boost::get<vertex_seq>(_variant);
+    }
+    const vertex_seq& get_vertex_seq() const {
+        return boost::get<vertex_seq>(_variant);
+    }
+    // I set it as mutable because the FUCKING boost::variant
+    // apply_visitor doesn't allow to deal with const variants. For
+    // the same reason I cannot define multi_type_seq as an inherited
+    // class from multi_type_variant (boost::variant kinda suck!).
+    mutable multi_type_variant _variant;
+};
+
+// Filter a multi_type_seq
+template<typename F>
+struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq> {
+    seq_filtered_visitor(const F& filter) : _filter(filter) {}
+    template<typename Seq> multi_type_seq operator()(const Seq& seq) {
+        return seq_filtered(seq, _filter);
+    }
+    const F& _filter;
+};
 
 /// CTable is a "compressed" table.  Compression is done by removing
 /// duplicated inputs, and the output column is replaced by a counter
@@ -78,10 +307,10 @@ std::vector<unsigned> get_indices(const std::vector<std::string>& labels,
 /// Most scoring functions work on CTable, as it avoids re-evaluating a
 /// combo program on duplicated inputs.
 //
-class CTable : public std::map<vertex_seq, Counter<vertex, unsigned>>
+class CTable : public std::map<multi_type_seq, Counter<vertex, unsigned>>
 {
 public:
-    typedef vertex_seq key_type;
+    typedef multi_type_seq key_type;
     typedef Counter<vertex, unsigned> counter_t;
     typedef std::map<key_type, counter_t> super;
     typedef typename super::value_type value_type;
@@ -136,9 +365,11 @@ public:
         // Filter the labels
         CTable res(olabel, seq_filtered(ilabels, filter), fsig);
 
-        // Filter the rows
+        // Filter the content
+        seq_filtered_visitor<F> sfv(filter);
+        auto asfv = boost::apply_visitor(sfv);
         for (const CTable::value_type v : *this)
-            res[seq_filtered(v.first, filter)] += v.second;
+            res[asfv(v.first.get_variant())] += v.second;
 
         // return the filtered CTable
         return res;
@@ -157,28 +388,6 @@ public:
                 res.push_back(id::null_vertex);
         }
         return seq;
-    }
-
-    /**
-     * Like filtered but preserve the indices on the columns,
-     * techincally it replaces all input values filtered out by
-     * id::null_vertex.
-     */
-    template<typename F>
-    CTable filtered_preverse_idxs(const F& filter) const
-    {
-        typedef type_tree::iterator pre_it;
-        typedef type_tree::sibling_iterator sib_it;
-
-        // Set new CTable
-        CTable res(olabel, ilabels, tsig);
-
-        // Filter the rows (replace filtered out values by id::null_vertex)
-        for (const CTable::value_type v : *this)
-            res[filtered_preverse_idxs(filter, v.first)] += v.second;
-
-        // return the filtered CTable
-        return res;
     }
 
     // return the output label + list of input labels
@@ -201,10 +410,11 @@ protected:
  * Columns represent input variables.
  * Optionally holds a list of column labels (input variable names)
  */
-class ITable : public std::vector<vertex_seq>
+class ITable : public std::vector<multi_type_seq>
 {
 public:
-    typedef std::vector<vertex_seq> super;
+    typedef std::vector<multi_type_seq> super;
+    typedef super::value_type value_type;
     typedef std::vector<std::string> string_seq;
     typedef std::vector<type_node> type_seq;
     ITable();
@@ -243,9 +453,10 @@ public:
      * If off is negative, then the insert is after the last column.
      * TODO: we really should use iterators here, not column numbers.
      */
-    void insert_col(const std::string& clab,
-                    const vertex_seq& col,
-                    int off = -1);
+    // void insert_col(const std::string& clab,
+    //                 const multi_type_seq& col,
+    //                 int off = -1);
+    
     /**
      * Delete the named feature from the input table.
      * If the feature is the empty string, then column zero is deleted.
@@ -275,12 +486,11 @@ public:
         res.set_types(seq_filtered(get_types(), filter));
 
         // filter content
-        for (const value_type& row : *this) {
-            vertex_seq new_row;
-            for (arity_t a : filter)
-                new_row.push_back(row[a]);
-            res.push_back(new_row);
-        }
+        seq_filtered_visitor<F> sfv(filter);
+        auto asf = boost::apply_visitor(sfv);
+        for (const value_type& row : *this)
+            res.push_back(asf(row.get_variant()));
+
         return res;
     }
 
@@ -342,8 +552,9 @@ public:
            const std::string& ol = default_output_label)
         : label(ol)
     {
-        for (const vertex_seq& vs : it)
-            push_back(f(vs.begin(), vs.end()));
+        for (const multi_type_seq& vs : it)
+            push_back(f(vs.get_vertex_seq().begin(),
+                        vs.get_vertex_seq().end()));
     }
 
     void set_label(const std::string&);
@@ -491,6 +702,10 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
     type_node otype = ot.get_type();
     OC_ASSERT(id::boolean_type == otype, "Only boolean types supported");
 
+    // declare useful visitors
+    seq_filtered_visitor<FeatureSet> sfv(fs);
+    auto asf = boost::apply_visitor(sfv);
+    
     // Let X1, ..., Xn be the input columns on the table, and
     // Y be the output column.  We need to compute the joint entropies
     // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
@@ -498,18 +713,17 @@ double mutualInformation(const ITable& it, const OTable& ot, const FeatureSet& f
     // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
     // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
     // occurs.
-    typedef Counter<vertex_seq, unsigned> VSCounter;
+    typedef Counter<multi_type_seq, unsigned> VSCounter;
     VSCounter ic, // for H(X1, ..., Xn)
         ioc; // for H(Y, X1, ..., Xn)
     ITable::const_iterator i_it = it.begin();
     OTable::const_iterator o_it = ot.begin();
+    
     for (; i_it != it.end(); ++i_it, ++o_it) {
-        vertex_seq ic_vec;
-        for (const typename FeatureSet::value_type& idx : fs)
-            ic_vec.push_back((*i_it)[idx]);
+        multi_type_seq ic_vec = asf(i_it->get_variant());
         ++ic[ic_vec];
-        vertex_seq ioc_vec(ic_vec);
-        ioc_vec.push_back(*o_it);
+        multi_type_seq ioc_vec(ic_vec);
+        ioc_vec.push_back(get_builtin(*o_it));
         ++ioc[ioc_vec];
     }
 
@@ -551,12 +765,16 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
     // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
     // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
     // occurs.
-    typedef Counter<vertex_seq, unsigned> VSCounter;
+    typedef Counter<CTable::key_type, unsigned> VSCounter;
     VSCounter ic;  // for H(X1, ..., Xn)
     VSCounter ioc; // for H(Y, X1, ..., Xn)
     double total = 0.0;
     double yentropy = 0.0;   // for H(Y)
 
+    // declare useful visitors
+    seq_filtered_visitor<FeatureSet> sfv(fs);
+    auto asf = boost::apply_visitor(sfv);
+    
     type_node otype = ctable.get_output_type();
     if (id::boolean_type == otype)
     {
@@ -565,9 +783,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         for (const auto& row : ctable)
         {
             // Create the filtered row.
-            vertex_seq vec;
-            for (unsigned idx : fs)
-                vec.push_back(row.first[idx]);
+            CTable::key_type vec = asf(row.first.get_variant());
 
             unsigned falses = row.second.get(id::logical_false);
             // update ioc (input-output counter)
@@ -596,7 +812,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         }
 
         // Compute H(Y)
-        yentropy =  binaryEntropy(oc/total);
+        yentropy = binaryEntropy(oc/total);
     }
     else if (id::enum_type == otype)
     {
@@ -607,9 +823,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         for (const auto& row : ctable)
         {
             // Create the filtered row.
-            vertex_seq vec;
-            for (unsigned idx : fs)
-                vec.push_back(row.first[idx]);
+            CTable::key_type vec = asf(row.first.get_variant());
 
             // update ic (input counter)
             unsigned row_total = row.second.total_count();
@@ -636,7 +850,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         std::vector<double> yprob(ycount.size());
         auto div_total = [&](unsigned c) { return c/total; };
         transform(ycount | map_values, yprob.begin(), div_total);
-        yentropy =  entropy(yprob);
+        yentropy = entropy(yprob);
     }
     else
     {

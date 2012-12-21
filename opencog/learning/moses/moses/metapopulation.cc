@@ -134,17 +134,6 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
         // printlnContainer(ios);
         // ~debug print
-
-        // Reformat the data so that redundant inputs are grouped
-        // (the number of redundant inputs can possibly change from
-        // one deme to another, given that ignored input features can
-        // change as well) as to possibly speed-up evaluation (if
-        // the scorer implement ignore_idxs).
-        std::set<arity_t> idxs;
-        for (const vertex& v : ignore_ops)
-            if (is_argument(v))
-                idxs.insert(get_argument(v).abs_idx_from_zero());
-        _cscorer.ignore_idxs(idxs);
     }
 
     // Build a representation by adding knobs to the exemplar,

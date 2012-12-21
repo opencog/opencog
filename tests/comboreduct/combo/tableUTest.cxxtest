@@ -77,7 +77,7 @@ public:
         vertex_seq o{id::logical_true, id::logical_false};
         OTable ot(o);
         ITable it;
-        it.push_back({id::logical_true, id::logical_false});
+        it.push_back(multi_type_seq({id::logical_true, id::logical_false}));
         it.push_back({id::logical_false, id::logical_true});
         testIStreamTable("1,1,0\n"
                          "0,0,1\n", it, ot, false,
@@ -101,9 +101,8 @@ public:
         vertex_seq o{0, 1, 10.1, 6.5};
         OTable ot(o);
         ITable it;
-        // first row looks boolean, do not be fooled!
-        it.push_back({1, 1});
-        it.push_back({0, 1});
+        it.push_back({1.0, 1.0});
+        it.push_back({0.0, 1.0});
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         testIStreamTable("0,1,1\n"
@@ -118,7 +117,7 @@ public:
         vertex_seq o{0, 10.1, 6.5};
         OTable ot(o, olabel);
         ITable it;
-        it.push_back({1, 1});
+        it.push_back({1.0, 1.0});
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         vector<string> il{label1, label2};
@@ -135,9 +134,9 @@ public:
         vertex_seq o{enum_t("sad"), enum_t("bored"), enum_t("super-happy")};
         OTable ot(o, olabel);
         ITable it;
-        it.push_back({1, 1, id::logical_false});
-        it.push_back({0.44, 244.2, id::logical_true});
-        it.push_back({9.5, 4.2, id::logical_false});
+        it.push_back(vertex_seq({1, 1, id::logical_false}));
+        it.push_back(vertex_seq({0.44, 244.2, id::logical_true}));
+        it.push_back(vertex_seq({9.5, 4.2, id::logical_false}));
         vector<string> il{label1, label2, "truth"};
         it.set_labels(il);
         vector<type_node> itypes({id::contin_type, id::contin_type, id::boolean_type});
@@ -224,9 +223,9 @@ public:
         vertex_seq o{1, 0.44, 9.5}; // price column
         OTable ot(o, label1);
         ITable it;
-        it.push_back({enum_t("sad"), id::logical_false});
-        it.push_back({enum_t("bored"), id::logical_true});
-        it.push_back({enum_t("super-happy"), id::logical_false});
+        it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
+        it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
+        it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
         vector<string> il{olabel, "truth"};
         it.set_labels(il);
         vector<type_node> itypes({id::enum_type, id::boolean_type});
@@ -243,9 +242,9 @@ public:
         vertex_seq o{1, 0.44, 9.5}; // price column
         OTable ot(o, label1);
         ITable it;
-        it.push_back({enum_t("sad"), id::logical_false});
-        it.push_back({enum_t("bored"), id::logical_true});
-        it.push_back({enum_t("super-happy"), id::logical_false});
+        it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
+        it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
+        it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
         vector<string> il{olabel, "truth"};
         it.set_labels(il);
         vector<type_node> itypes({id::enum_type, id::boolean_type});
@@ -290,29 +289,30 @@ public:
 
     void test_insert_get_pos()
     {
-        std::cout << "\n----------------------------" << std::endl;
-        ITable it;
-        vertex_seq col1 = {id::logical_true, id::logical_false};
-        it.insert_col("label1", col1);
-        {
-            stringstream ss_res;
-            ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("label1\nboolean\n1\n0\n"));
-        }
-        vertex_seq col2 = {id::logical_false, id::logical_true};
-        it.insert_col("label2", col2);
-        {
-            stringstream ss_res;
-            ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("label1,label2\nboolean,boolean\n1,0\n0,1\n"));
-        }
-        auto lc = it.get_column_data("label2");
-        it.insert_col("label3", lc, 0);
-        {
-            stringstream ss_res;
-            ss_res << it;
-            TS_ASSERT_EQUALS(ss_res.str(), string("label3,label1,label2\nboolean,boolean,boolean\n0,1,0\n1,0,1\n"));
-        }
+        // std::cout << "\n----------------------------" << std::endl;
+        // ITable it;
+        // vertex_seq col1 = {id::logical_true, id::logical_false};
+        // it.insert_col("label1", col1);
+        // {
+        //     stringstream ss_res;
+        //     ss_res << it;
+        //     TS_ASSERT_EQUALS(ss_res.str(), string("label1\nboolean\n1\n0\n"));
+        // }
+        // vertex_seq col2 = {id::logical_false, id::logical_true};
+        // it.insert_col("label2", col2);
+        // {
+        //     stringstream ss_res;
+        //     ss_res << it;
+        //     TS_ASSERT_EQUALS(ss_res.str(), string("label1,label2\nboolean,boolean\n1,0\n0,1\n"));
+        // }
+        // auto lc = it.get_column_data("label2");
+        // it.insert_col("label3", lc, 0);
+        // {
+        //     stringstream ss_res;
+        //     ss_res << it;
+        //     TS_ASSERT_EQUALS(ss_res.str(), string("label3,label1,label2\nboolean,boolean,boolean\n0,1,0\n1,0,1\n"));
+        // }
+        TS_ASSERT(false);
     }
 
     void test_force_feature()

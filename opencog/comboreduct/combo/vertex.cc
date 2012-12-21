@@ -29,6 +29,10 @@
 
 namespace opencog { namespace combo {
 
+bool operator<(const combo_tree& lt, const combo_tree& rt) {
+    return size_tree_order<vertex>()(lt, rt);
+}
+        
 bool is_procedure_call(const vertex& v)
 {
     return (boost::get<procedure_call>(&v));

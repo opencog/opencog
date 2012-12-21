@@ -32,7 +32,9 @@
 #include <vector>
 
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/count.hpp>
 #include <boost/range/algorithm/binary_search.hpp>
+#include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "table.h"
@@ -67,6 +69,41 @@ static const std::vector<unsigned> empty_unsigned_vec =
     std::vector<unsigned>();
 static const std::vector<std::string> empty_string_vec =
     std::vector<std::string>();
+
+builtin token_to_boolean(const std::string& token);
+contin_t token_to_contin(const std::string& token);
+vertex token_to_vertex(const type_node &tipe, const std::string& token);
+struct from_token_visitor : public boost::static_visitor<multi_type_seq> {
+    from_token_visitor(const std::vector<type_node>& types) : _types(types) {
+        all_boolean = boost::count(types, id::boolean_type) == (int)types.size();
+        all_contin = boost::count(types, id::contin_type) == (int)types.size();
+    }
+    result_type operator()(const string_seq& seq) {
+        result_type res;
+        if (all_boolean) {
+            res = builtin_seq();
+            builtin_seq& bs = res.get_builtin_seq();
+            boost::transform(seq, back_inserter(bs), token_to_boolean);
+        }
+        else if (all_contin) {
+            res = contin_seq();
+            contin_seq& cs = res.get_contin_seq();
+            boost::transform(seq, back_inserter(cs), token_to_contin);
+        }
+        else {
+            res = vertex_seq();
+            vertex_seq& vs = res.get_vertex_seq();
+            boost::transform(_types, seq, back_inserter(vs), token_to_vertex);
+        }
+        return res;
+    }
+    template<typename Seq> result_type operator()(const Seq& seq) {
+        OC_ASSERT(false, "You are not supposed to do that");
+        return result_type();
+    }
+    const std::vector<type_node>& _types;
+    bool all_boolean, all_contin;
+};
 
 /**
  * Take a line and return a vector containing the elements parsed.
@@ -130,8 +167,6 @@ Table loadTable_optimized(const std::string& file_name,
 // ostreamTable //
 //////////////////
 
-std::string vertex_to_str(const vertex& v);
-
 /// output the header of a data table in CSV format.
 template<typename Out>
 Out& ostreamTableHeader(Out& out, const ITable& it, const OTable& ot,
@@ -162,9 +197,7 @@ Out& ostreamTable(Out& out,
     // print data
     OC_ASSERT(it.empty() || it.size() == ot.size());
     for (size_t row = 0; row < ot.size(); ++row) {
-        std::vector<std::string> content;
-        if (!it.empty())
-            boost::transform(it[row], back_inserter(content), vertex_to_str);
+        std::vector<std::string> content = it[row].to_strings();
         std::string oc = vertex_to_str(ot[row]);
         if (target_pos < 0)
             content.push_back(oc);

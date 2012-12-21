@@ -50,6 +50,7 @@ struct boolean_interpreter {
 
     // interpreters
     builtin operator()(const combo_tree& tr) const;
+    builtin operator()(const combo_tree::iterator it) const;
     virtual builtin boolean_eval(combo_tree::iterator it) const;
 
 protected:
@@ -68,6 +69,7 @@ struct contin_interpreter {
 
     // interpreters
     contin_t operator()(const combo_tree& tr) const;
+    contin_t operator()(const combo_tree::iterator it) const;
     virtual contin_t contin_eval(combo_tree::iterator it) const;
 
 protected:
@@ -80,6 +82,7 @@ struct mixed_interpreter : public boolean_interpreter, public contin_interpreter
 
     // interpreters
     vertex operator()(const combo_tree& tr) const;
+    vertex operator()(const combo_tree::iterator it) const;
     virtual builtin boolean_eval(combo_tree::iterator it) const;
     virtual contin_t contin_eval(combo_tree::iterator it) const;
     virtual vertex mixed_eval(combo_tree::iterator it) const;

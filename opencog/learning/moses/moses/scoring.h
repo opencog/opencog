@@ -66,13 +66,6 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
     // default return 0)
     score_t min_improv() { return 0.0; }
 
-    // In case the fitness function can be sped-up when certain
-    // arguments are ignored. The arguments are indicated as set of
-    // values of the idx-1 when idx is the argument idx. So {1, 3}
-    // corresponds to the arguments {$2, $4}. The method provided by
-    // default does nothing (no speed-up).
-    void ignore_idxs(set<arity_t>&) const {}
-
     virtual ~cscore_base(){}
 };
 
@@ -93,13 +86,6 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
     // Return the minimum value considered for improvement (by defaut
     // return 0)
     score_t min_improv() const { return 0.0; }
-
-    // In case the fitness function can be sped-up when certain
-    // arguments are ignored. The arguments are indicated as set of
-    // values of the idx-1 when idx is the argument idx. So {1, 3}
-    // corresponds to the arguments {$2, $4}. The method provided by
-    // default does nothing (no speed-up).
-    void ignore_idxs(set<arity_t>&) const {}
 
     void set_complexity_coef(score_t complexity_ratio);
     void set_complexity_coef(unsigned alphabet_size, float p);
@@ -179,10 +165,6 @@ struct bscore_based_cscore : public cscore_base
         return _pbscorer.min_improv();
     }
 
-    void ignore_idxs(std::set<arity_t>& idxs) const {
-        _pbscorer.ignore_idxs(idxs);
-    }
-
     const PBScorer& _pbscorer;
 };
 
@@ -206,8 +188,6 @@ struct multibscore_based_bscore : public bscore_base
 
     // return the min of all min_improv
     score_t min_improv() const;
-
-    void ignore_idxs(std::set<arity_t>& idxs) const;
 
 protected:
     const BScorerSeq& _bscorers;
@@ -517,12 +497,6 @@ struct precision_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    /**
-     * Filter the table with all permitted idxs (the complementary
-     * with [0..arity).
-     */
-    void ignore_idxs(std::set<arity_t>& idxs) const;
-
     void set_complexity_coef(score_t complexity_ratio);
     void set_complexity_coef(unsigned alphabet_size, float stddev);
     
@@ -550,12 +524,7 @@ struct precision_bscore : public bscore_base
     combo_tree gen_canonical_best_candidate() const;
 
 protected:
-    const CTable& orig_ctable;  // ref to the original table
-
-    // table actually used for the evaluation. It is mutable because
-    // we want to be able to change it to ignore some features (it
-    // speeds-up evaluation)
-    mutable CTable wrk_ctable;
+    const CTable& ctable;  // ref to the original table
     
     size_t ctable_usize;   // uncompressed size of ctable
     score_t min_activation, max_activation;
@@ -597,22 +566,11 @@ struct precision_conj_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    /**
-     * Filter the table with all permitted idxs (the complementary
-     * with [0..arity).
-     */
-    void ignore_idxs(std::set<arity_t>& idxs) const;
-
     void set_complexity_coef(score_t complexity_ratio);
     void set_complexity_coef(unsigned alphabet_size, float stddev);
     
 protected:
-    const CTable& orig_ctable;  // ref to the original table
-
-    // table actually used for the evaluation. It is mutable because
-    // we want to be able to change it to ignore some features (it
-    // speeds-up evaluation)
-    mutable CTable wrk_ctable;
+    const CTable& ctable;
     
     size_t ctable_usize;   // uncompressed size of ctable
     float hardness;

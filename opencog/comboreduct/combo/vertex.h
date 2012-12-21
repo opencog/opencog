@@ -502,10 +502,18 @@ inline size_t hash_value(const vertex& v)
 // -------------------------------------------------------
 
 typedef tree<vertex> combo_tree;
+
+typedef std::vector<combo_tree> combo_tree_seq;
+typedef combo_tree_seq::iterator combo_tree_seq_it;
+typedef combo_tree_seq::const_iterator combo_tree_seq_const_it;
+
 // ns stands for normal size
 typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
 typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
+
+// default ordering between combo trees (size_tree_order<vertex>)
+bool operator<(const combo_tree& lt, const combo_tree& rt);
 
 // Disambiguate stream operator; use the one declared in util/tree.h
 std::istream& operator>>(std::istream& in, combo::combo_tree& tr);
@@ -688,7 +696,7 @@ inline bool is_complement(const vertex& x, const vertex& y)
     return false;
 }
 
-inline bool is_boolean(const vertex& v)
+template<typename T> bool is_boolean(const T& v)
 {
     return (v == id::logical_true || v == id::logical_false);
 }

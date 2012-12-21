@@ -29,6 +29,7 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/variant.hpp>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_omp.h>
@@ -215,26 +216,35 @@ type_node infer_type_from_token(type_node curr_guess, const string& token)
 }
 
 /// cast string "token" to a vertex of type "tipe"
+builtin token_to_boolean(const string& token)
+{
+    if ("0" == token || "F" == token || "f" == token)
+        return id::logical_false;
+    else if ("1" == token || "T" == token || "t" == token)
+        return id::logical_true;
+    else {
+        OC_ASSERT(false, "Expecting boolean value, got %s", token.c_str());
+        return builtin();
+    }
+}
+contin_t token_to_contin(const string& token)
+{
+    try {
+        return lexical_cast<contin_t>(token);
+    } catch(boost::bad_lexical_cast&) {
+        OC_ASSERT(false, "Could not cast %s to contin", token.c_str());
+        return contin_t();
+    }
+}
 vertex token_to_vertex(const type_node &tipe, const string& token)
 {
     switch (tipe) {
 
     case id::boolean_type:
-        if ("0" == token || "F" == token || "f" == token)
-            return id::logical_false;
-        else if ("1" == token || "T" == token || "t" == token)
-            return id::logical_true;
-        else
-            OC_ASSERT(false, "Expecting boolean value, got %s", token.c_str());
-        break;
+        return token_to_boolean(token);
 
     case id::contin_type:
-        try {
-            return lexical_cast<contin_t>(token);
-        } catch(boost::bad_lexical_cast&) {
-            OC_ASSERT(false, "Could not cast %s to contin", token.c_str());
-        }
-        break;
+        return token_to_contin(token);
 
     case id::enum_type:
         // Enum types must begin with an alpha character
@@ -306,18 +316,12 @@ istream& istreamRawITable(istream& in, ITable& tab,
     atomic<int> arity_fail_row(-1);
     auto parse_line = [&](int i)
     {
-        // tokenize the line
-        vector<string> io = tokenizeRow<string>(lines[i], ignored_indices);
+        // tokenize the line and fill the table with
+        tab[i] = tokenizeRow<string>(lines[i], ignored_indices);
 
         // Check arity
-        if (arity != (arity_t)io.size())
+        if (arity != (arity_t)tab[i].size())
             arity_fail_row = i + 1;
-        
-        // Fill table with string-valued vertexes.
-        for (const string& tok : io) {
-            vertex v(tok);
-            tab[i].push_back(v);
-        }
     };
 
     // Vector of indices [0, lines.size())
@@ -507,18 +511,15 @@ istream& istreamSparseITable(istream& in, ITable& tab)
 }
 
 /**
- * Infer the column types of the input table
+ * Infer the column types of the input table. It is assumed the
+ * table's rows are vector of strings.
  */
 vector<type_node> infer_column_types(const ITable& tab)
 {
-    vector<vertex_seq>::const_iterator rowit = tab.begin();
+    vector<multi_type_seq>::const_iterator rowit = tab.begin();
 
-    vector<type_node> types;
-    arity_t arity = (*rowit).size();
-    types.resize(arity);
-    for (arity_t i=0; i<arity; i++) {
-        types[i] = id::unknown_type;
-    }
+    arity_t arity = rowit->size();
+    vector<type_node> types(arity, id::unknown_type);
 
     // Skip the first line, it might be a header...
     // and that would confuse type inference.
@@ -526,12 +527,9 @@ vector<type_node> infer_column_types(const ITable& tab)
         rowit++;
     for (; rowit != tab.end(); rowit++)
     {
-        // TODO: could use a two-arg transform, here, but its tricky ...
-        for (arity_t i=0; i<arity; i++) {
-            const vertex &v = (*rowit)[i];
-            const string& tok = boost::get<string>(v);
-            types[i] = infer_type_from_token(types[i], tok);
-        }
+        const string_seq& tokens = rowit->get_string_seq();
+        for (arity_t i=0; i<arity; i++)
+            types[i] = infer_type_from_token(types[i], tokens[i]);
     }
     return types;
 }
@@ -544,14 +542,12 @@ vector<type_node> infer_column_types(const ITable& tab)
  */
 bool has_header(ITable& tab, vector<type_node> col_types)
 {
-    const vertex_seq& row = *tab.begin();
+    const string_seq& row = tab.begin()->get_string_seq();
 
     arity_t arity = row.size();
 
     for (arity_t i=0; i<arity; i++) {
-        const vertex& v = row[i];
-        const string& tok = boost::get<string>(v);
-        type_node flt = infer_type_from_token(col_types[i], tok);
+        type_node flt = infer_type_from_token(col_types[i], row[i]);
         if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
             return true;
     }
@@ -584,15 +580,8 @@ istream& istreamITable(istream& in, ITable& tab,
     tab.set_types(col_types);
 
     // If there is a header row, then it must be the column labels.
-    bool hdr = has_header(tab, col_types);
-    if (hdr) {
-        vector<vertex> hdr = *(tab.begin());
-        vector<string> labels;
-        for (const vertex& v : hdr) {
-            const string& tok = boost::get<string>(v);
-            labels.push_back(tok);
-        }
-        tab.set_labels(labels);
+    if (has_header(tab, col_types)) {
+        tab.set_labels(tab.begin()->get_string_seq());
         tab.erase(tab.begin());
     }
 
@@ -601,17 +590,13 @@ istream& istreamITable(istream& in, ITable& tab,
     tab.delete_columns(ignore_features);
 
     // Finally, perform a column type conversion
-    arity_t arity = tab.get_arity();
-    const vector<type_node>& ig_types = tab.get_types();
+    from_token_visitor ftv(tab.get_types());
+    auto aft = apply_visitor(ftv);
+    OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
+                        [&](multi_type_seq& seq) {
+                            return aft(seq.get_variant());
+                        });
 
-    OMP_ALGO::for_each (tab.begin(), tab.end(),
-        [&](vertex_seq& row) {
-            for (arity_t i=0; i<arity; i++) {
-                 const string& tok = boost::get<string>(row[i]);
-                 row[i] = token_to_vertex(ig_types[i], tok);
-            }
-        });
-    
     return in;
 }
 
@@ -634,29 +619,18 @@ istream& istreamITable_ignore_indices(istream& in, ITable& tab,
     tab.set_types(col_types);
 
     // If there is a header row, then it must be the column labels.
-    bool hdr = has_header(tab, col_types);
-    if (hdr) {
-        vector<vertex> hdr = *(tab.begin());
-        vector<string> labels;
-        for (const vertex& v : hdr) {
-            const string& tok = boost::get<string>(v);
-            labels.push_back(tok);
-        }
-        tab.set_labels(labels);
+    if (has_header(tab, col_types)) {
+        tab.set_labels(tab.begin()->get_string_seq());
         tab.erase(tab.begin());
     }
 
     // Finally, perform a column type conversion
-    arity_t arity = tab.get_arity();
-    const vector<type_node>& ig_types = tab.get_types();
-
-    OMP_ALGO::for_each (tab.begin(), tab.end(),
-        [&](vertex_seq& row) {
-            for (arity_t i=0; i<arity; i++) {
-                 const string& tok = boost::get<string>(row[i]);
-                 row[i] = token_to_vertex(ig_types[i], tok);
-            }
-        });
+    from_token_visitor ftv(tab.get_types());
+    auto aft = apply_visitor(ftv);
+    OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
+                        [&](multi_type_seq& seq) {
+                            return aft(seq.get_variant());
+                        });
     
     return in;
 }
@@ -823,16 +797,6 @@ Table loadTable_optimized(const string& file_name,
 // ===========================================================
 // ostream regular tables
 
-string vertex_to_str(const vertex& v)
-{
-    stringstream ss;
-    if (is_boolean(v))
-        ss << vertex_to_bool(v);
-    else
-        ss << v;
-    return ss.str();
-}
-
 void saveTable(const string& file_name, const Table& table)
 {
     OC_ASSERT(!file_name.empty(), "No filename specified!");
@@ -851,6 +815,9 @@ ostream& ostreamCTableHeader(ostream& out, const CTable& ct)
 
 ostream& ostreamCTable(ostream& out, const CTable& ct)
 {
+    ostreamlnContainer_visitor ocv(out, ",");
+    auto aoc = boost::apply_visitor(ocv);
+    
     // print header
     ostreamCTableHeader(out, ct);
     // print data
@@ -864,7 +831,7 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
         }
         out << "},";
         // print inputs
-        ostreamlnContainer(out, v.first, ",");
+        aoc(v.first.get_variant());
     }
     return out;
 }
@@ -907,11 +874,12 @@ ostream& operator<<(ostream& out, const ITable& it)
 {
     ostreamlnContainer(out, it.get_labels(), ",");
     ostreamlnContainer(out, it.get_types(), ",");
-    for (const vertex_seq& row : it) {
-        vector<string> row_str;
-        boost::transform(row, back_inserter(row_str), vertex_to_str);
-        ostreamlnContainer(out, row_str, ",");
-    }
+    OC_ASSERT(false, "TODO");
+    // for (const vertex_seq& row : it) {
+    //     vector<string> row_str;
+    //     boost::transform(row, back_inserter(row_str), vertex_to_str);
+    //     ostreamlnContainer(out, row_str, ",");
+    // }
     return out;
 }
 
