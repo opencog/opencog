@@ -45,8 +45,6 @@
 #include <opencog/learning/moses/optimization/hill-climbing.h>
 
 #include "feature-selection.h"
-#include "../feature_optimization.h"
-#include "../feature_scorer.h"
 
 namespace opencog {
     

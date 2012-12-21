@@ -35,7 +35,7 @@
 
 #include "../feature_scorer.h"
 #include "../stochastic_max_dependency.h"
-#include "../feature_optimization.h"
+#include "../incremental.h"
 #include "../moses_based_scorer.h"
 
 namespace opencog {
@@ -47,7 +47,7 @@ using namespace combo;
 static const string inc="inc"; // incremental_selection (see
                                // feature_optimization.h)
 static const string smd="smd"; // stochastic_max_dependency (see
-                               // stochastic_max_dependency_mi.h)
+                               // stochastic_max_dependency.h)
 
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)
@@ -76,7 +76,7 @@ struct feature_selection_parameters
     unsigned inc_interaction_terms;
 
     // hill-climbing parameters
-    // actually, these are generic for all optimizers,
+    // actually, these are generic for all moses optimizers,
     // not just hill-climbing...
     unsigned int hc_max_evals;
     time_t max_time;
@@ -91,7 +91,7 @@ struct feature_selection_parameters
     float pre_max_activation;
     bool pre_positive;
 
-    // something mutual dohh parameters
+    // stochastic max-dependency parameters
     unsigned smd_top_size;
 };
 

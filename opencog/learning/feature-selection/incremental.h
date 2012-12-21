@@ -1,8 +1,5 @@
-/// TODO rename that file incremental feature selection or something
-
-
 /** 
- * feature_optimization.h ---
+ * incremental.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -25,8 +22,8 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_SELECTION_ALGO_H
-#define _OPENCOG_FEATURE_SELECTION_ALGO_H
+#ifndef _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
+#define _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
 
 #include <functional>
 
@@ -296,4 +293,4 @@ FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_SELECTION_ALGO_H
+#endif // _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
