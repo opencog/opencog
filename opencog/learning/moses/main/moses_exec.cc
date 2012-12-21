@@ -29,8 +29,10 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
-#include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/oc_omp.h>
+
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 

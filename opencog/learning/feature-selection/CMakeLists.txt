@@ -1,11 +1,11 @@
 ADD_LIBRARY(feature_selection SHARED STATIC
-    moses_based_scorer
+	moses_based_scorer
 	main/feature-selection
 )
 
 TARGET_LINK_LIBRARIES(feature_selection
 	util
-    moses
+	moses
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 

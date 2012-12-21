@@ -1,8 +1,5 @@
-/// TODO rename that file incremental feature selection or something
-
-
 /** 
- * feature_optimization.h ---
+ * incremental.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -25,19 +22,18 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_SELECTION_ALGO_H
-#define _OPENCOG_FEATURE_SELECTION_ALGO_H
+#ifndef _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
+#define _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
 
 #include <functional>
 
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/algorithm/max_element.hpp>
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/functional.h>
-#include <opencog/util/oc_omp.h>
+#include <opencog/util/lru_cache.h>
+#include <opencog/util/numeric.h>
 
 namespace opencog {
 
@@ -296,4 +292,4 @@ FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_SELECTION_ALGO_H
+#endif // _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
