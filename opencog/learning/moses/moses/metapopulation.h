@@ -43,6 +43,7 @@
 
 #include "../representation/instance_set.h"
 #include "../representation/representation.h"
+#include "../optimization/optimization.h"
 #include "feature_selector.h"
 #include "scoring.h"
 #include "types.h"
