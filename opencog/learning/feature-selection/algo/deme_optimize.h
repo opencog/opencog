@@ -33,7 +33,7 @@
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/table/table.h>
 
-#include "main/feature-selection.h"
+#include "../main/feature-selection.h"
 
 namespace opencog {
 
