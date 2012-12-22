@@ -1,6 +1,7 @@
 /** stochastic_max_dependency.h ---
  *
  * Copyright (C) 2010,2012 OpenCog Foundation
+ * Copyright (C) 2012 Poulin Holdings LLC
  *
  * Authors: Nil Geisweiller <nilg@laptop>
  *          Linas Vepstas <linasvepstas@gmail.com>
@@ -33,16 +34,28 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/oc_omp.h>
 
+#include "../main/feature-selection.h" // needed for feature_set, feature_selection_parameters
+
 namespace opencog {
 
+feature_set smd_select_features(const CTable& ctable,
+                                const feature_selection_parameters& fs_params);
+
 /**
- * It looks like this algo resemble a stochastic version of the
- * algorithm coded in the Section 2.1 of the paper entitled "Feature
- * selection based on mutual information: criteria of max-dependency,
- * max-relevance, and min-redundancy." They call it "max-dependency",
- * so I'm calling this algorithm stochastic_max_dependency.
+ * This algo was was originally written to maximize the mutual
+ * information between a target variable, and a collection of
+ * input features. It has since been re-written to use any scoring
+ * system, and not just mutual information.  This is a pretty obvious
+ * basic algorithm, presumably described in textbooks on machine learning.
  *
- * Returns a set S of features following the algo:
+ * This algo resembles a stochastic version of the algorithm coded
+ * in the Section 2.1 of the paper entitled "Feature Selection Based
+ * on Mutual Information: Criteria of Max-dependency, Max-relevance,
+ * and Min-redundancy." by H Peng, 2005.  He calls it "max-dependency",
+ * so we'll call this stochastic_max_dependency.
+ *
+ * Returns a set S of features using the following algo:
+ *
  * 0) set<FeatureSet> tops = empty set
  * 1) For each FeatureSet fs in tops:
  * 2)     Add one feature, compute new score. Repeat 1)
@@ -50,7 +63,7 @@ namespace opencog {
  * 4) tops = the highest scorers.
  * 5) If score hasn't improved by threshold,
  *    then skip next step.
- * 6) Repeat, until tops holds FeatureSets of at most 
+ * 6) Repeat, until tops holds FeatureSets of at most
  *    'num_features' features.
  * 7) return highest scorer from tops.
  *
@@ -99,12 +112,15 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
     // Randomize order, so that different redundant features
     // get a chance to show up in the final list. Copy set to
     // vector, then shuffle the vector.
-    // LOL: I don't think this shuffling changes anything!!!
-    // ?? Of course it does; just print out the final list and compare!
-    // Think about it: which redundant feautres are discarded, and
-    // which ones are kept?  The first one encountered is kept, the
-    // rest are discarded.  Shuffling just changes which one is the
-    // first one found.
+    // This shuffling only makes a difference if:
+    // 1) the scorer returns exactly the same score for two )or more)
+    //    different features, and
+    // 2) tops_size is small enough that one of these is kept, while
+    //    the other is discarded.
+    // Because the features might have all kinds of crazy inter-
+    // dependencies, the shuffled order will typically cause a snowball
+    // effect of different features being picked up down the line.
+    //
     std::vector<feature_id> shuffle(features.begin(), features.end());
     auto shr = [&](ptrdiff_t i) { return randGen().randint(i); };
     random_shuffle(shuffle.begin(), shuffle.end(), shr);
@@ -122,14 +138,14 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
             OMP_ALGO::for_each(shuffle.cbegin(), shuffle.cend(),
                                [&](feature_id fid) {
                                    if (fs.end() == fs.find(fid)) {
-                                       
+
                                        // define new feature set
                                        FeatureSet prod = fs;
                                        prod.insert(fid);
-                                   
+
                                        // score it
                                        double sc = scorer(prod);
-                                   
+
                                        // insert it in ranks
                                        std::pair<double, FeatureSet> pdf(sc, prod);
                                        unique_lock lock(mutex);
@@ -141,8 +157,8 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
         // Discard all but the highest scorers.  When done, 'tops'
         // will hold FeatureSets with exactly 'i' elts each.
         tops.clear();
-        auto rb = ranks.rbegin(),
-            re = std::next(rb, std::min(top_size, (unsigned)ranks.size()));
+        auto rb = ranks.rbegin();
+        auto re = std::next(rb, std::min(top_size, (unsigned)ranks.size()));
         tops.insert(tops.begin(), rb, re);
 
         OC_ASSERT (!ranks.empty(), "Fatal Error: no ranked feature sets");
@@ -150,8 +166,11 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
         // Get the highest score found.  If these are not getting better,
         // then stop looking for new features.
         double high_score = ranks.rbegin()->first;
-        logger().debug("highest score: featureset size %d score=%f", i, high_score);
-        if (high_score - previous_high_score < threshold) break;
+        logger().debug("SMD: featureset size=%d highest score=%f", i, high_score);
+        if (high_score - previous_high_score < threshold) {
+            logger().debug("SMD: terminate, no improvment in score");
+            break;
+        }
 
         // Record the highest score found.
         previous_high_score = high_score;

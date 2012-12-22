@@ -1,5 +1,8 @@
 ADD_LIBRARY(feature_selection SHARED STATIC
 	moses_based_scorer
+	algo/deme_optimize
+	algo/incremental
+	algo/stochastic_max_dependency
 	main/feature-selection
 )
 

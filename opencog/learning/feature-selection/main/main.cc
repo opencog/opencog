@@ -280,7 +280,7 @@ int main(int argc, char** argv)
          "Stochastic max dependency parameter. Number of feature subset "
          "candidates to consider building the next superset.\n")
         
-        // options for pre scoring
+        // ================= pre scoring ====================
         ("pre-penalty",
          value<float>(&fs_params.pre_penalty)->default_value(1.0f),
          "Activation penalty (see moses --help or man moses for more info)")
