@@ -33,12 +33,17 @@
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/table/table.h>
 
-#include "../main/feature-selection.h"
+#include "../main/feature-selection.h" // needed for feature_selection_params
 
 namespace opencog {
 
 using namespace moses;
 using namespace combo;
+
+/** For the MOSES algo, generate the intial instance */
+instance initial_instance(const feature_selection_parameters& fs_params,
+                          const field_set& fields,
+                          const std::vector<std::string>& labels);
 
 template<typename Optimize, typename Scorer>
 feature_set optimize_deme_select_features(const field_set& fields,
