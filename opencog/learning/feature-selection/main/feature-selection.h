@@ -28,7 +28,7 @@
 #include <boost/range/algorithm/sort.hpp>
 
 #include "../feature_scorer.h"
-#include "../moses_based_scorer.h"
+#include "../moses_based_scorer.h"  // for pre_scorer
 
 
 namespace opencog {
@@ -97,11 +97,6 @@ void write_results(const Table& table,
  */
 feature_set initial_features(const vector<string>& labels,
                              const feature_selection_parameters& fs_params);
-
-/** For the MOSES algo, generate the intial instance */
-instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields,
-                          const std::vector<std::string>& labels);
 
 // A wrapper, simply so that optimizer gets the iscorer_base base class.
 // The only reason for this wrapper is that both iscorer_base, and

@@ -1,5 +1,6 @@
 ADD_LIBRARY(feature_selection SHARED STATIC
 	moses_based_scorer
+	algo/deme_optimize
 	main/feature-selection
 )
 

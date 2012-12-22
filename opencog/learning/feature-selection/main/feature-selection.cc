@@ -163,17 +163,6 @@ feature_set initial_features(const vector<string>& ilabels,
     return res;
 }
 
-instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields,
-                          const vector<string>& ilabels)
-{
-    feature_set init_features = initial_features(ilabels, fs_params);
-    instance res(fields.packed_width());
-    for (size_t idx : init_features)
-        *(fields.begin_bit(res) + idx) = true;
-    return res;
-}
-
 feature_set incremental_select_features(const CTable& ctable,
                                         const feature_selection_parameters& fs_params)
 {
