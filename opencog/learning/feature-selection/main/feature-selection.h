@@ -33,7 +33,7 @@
 
 namespace opencog {
 
-using namespace moses;
+// using namespace moses;
 
 // Feature selection algorithms
 static const string inc="inc"; // incremental_selection (see
@@ -159,12 +159,6 @@ protected:
     pre_scorer<FeatureSet>* _ptr_pre_scorer;
 };
 
-
-feature_set incremental_select_features(const CTable& ctable,
-                                        const feature_selection_parameters& fs_params);
-
-feature_set smd_select_features(const CTable& ctable,
-                                const feature_selection_parameters& fs_params);
 
 /**
  * Select the features according to the method described in fs_params.

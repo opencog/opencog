@@ -34,8 +34,14 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/numeric.h>
+#include <opencog/util/oc_omp.h>
+
+#include "../main/feature-selection.h"  // needed for feature_set, feature_selection_parameters
 
 namespace opencog {
+
+feature_set incremental_select_features(const CTable& ctable,
+                                        const feature_selection_parameters& fs_params);
 
 /**
  * Returns a set S of features following the algo:

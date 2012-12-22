@@ -33,7 +33,12 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/oc_omp.h>
 
+#include "../main/feature-selection.h" // needed for feature_set, feature_selection_parameters
+
 namespace opencog {
+
+feature_set smd_select_features(const CTable& ctable,
+                                const feature_selection_parameters& fs_params);
 
 /**
  * It looks like this algo resemble a stochastic version of the
