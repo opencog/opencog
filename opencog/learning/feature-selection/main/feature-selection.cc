@@ -27,22 +27,13 @@
 
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 #include <boost/range/algorithm/find.hpp>
-#include <boost/range/algorithm/adjacent_find.hpp>
-#include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/irange.hpp>
 
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/lru_cache.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
-
-#include <opencog/learning/moses/optimization/optimization.h>
-#include <opencog/learning/moses/optimization/hill-climbing.h>
+#include <opencog/learning/moses/optimization/hill-climbing.h> // for hc_params
 
 #include "feature-selection.h"
 #include "../algo/deme_optimize.h"
@@ -111,14 +102,17 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
  * Get indices (aka positions or offsets) of a list of labels given a header
  */
 vector<unsigned> get_indices(const vector<string>& labels,
-                             const vector<string>& header) {
+                             const vector<string>& header)
+{
     vector<unsigned> res;
     for (unsigned i = 0; i < header.size(); ++i)
         if (boost::find(labels, header[i]) != labels.end())
             res.push_back(i);
     return res;
 }
-unsigned get_index(const string& label, const vector<string>& header) {
+
+unsigned get_index(const string& label, const vector<string>& header)
+{
     return distance(header.begin(), boost::find(header, label));
 }
 
@@ -164,7 +158,8 @@ feature_set initial_features(const vector<string>& ilabels,
 }
 
 feature_set select_features(const CTable& ctable,
-                            const feature_selection_parameters& fs_params) {
+                            const feature_selection_parameters& fs_params)
+{
     if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
         double pop_size_ratio = 20;
@@ -196,7 +191,8 @@ feature_set select_features(const CTable& ctable,
 }
 
 feature_set select_features(const Table& table,
-                            const feature_selection_parameters& fs_params) {
+                            const feature_selection_parameters& fs_params)
+{
     CTable ctable = table.compressed();
     return select_features(ctable, fs_params);
 }
