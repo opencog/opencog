@@ -45,8 +45,8 @@ feature_set smd_select_features(const CTable& ctable,
  * This algo was was originally written to maximize the mutual
  * information between a target variable, and a collection of
  * input features. It has since been re-written to use any scoring
- * system, and not just mutual information.  This is a basic algorithm,
- * described in textbooks on machine learning.
+ * system, and not just mutual information.  This is a pretty obvious
+ * basic algorithm, presumably described in textbooks on machine learning.
  *
  * This algo resembles a stochastic version of the algorithm coded
  * in the Section 2.1 of the paper entitled "Feature Selection Based
@@ -63,7 +63,7 @@ feature_set smd_select_features(const CTable& ctable,
  * 4) tops = the highest scorers.
  * 5) If score hasn't improved by threshold,
  *    then skip next step.
- * 6) Repeat, until tops holds FeatureSets of at most 
+ * 6) Repeat, until tops holds FeatureSets of at most
  *    'num_features' features.
  * 7) return highest scorer from tops.
  *
@@ -112,14 +112,15 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
     // Randomize order, so that different redundant features
     // get a chance to show up in the final list. Copy set to
     // vector, then shuffle the vector.
-    // LOL: I don't think this shuffling changes anything!!!
-    // ?? Of course it does; just print out the final list and compare!
-    // Think about it: which redundant feautres are discarded, and
-    // which ones are kept?  The first one encountered is kept, the
-    // rest are discarded.  Shuffling just changes which one is the
-    // first one found.  Oh, wait, no. The aglorithm has been changed,
-    // its different than what it used to be. So, right, shuffling no
-    // longer has an effect... WTF.  This can't be correct...
+    // This shuffling only makes a difference if:
+    // 1) the scorer returns exactly the same score for two )or more)
+    //    different features, and
+    // 2) tops_size is small enough that one of these is kept, while
+    //    the other is discarded.
+    // Because the features might have all kinds of crazy inter-
+    // dependencies, the shuffled order will typically cause a snowball
+    // effect of different features being picked up down the line.
+    //
     std::vector<feature_id> shuffle(features.begin(), features.end());
     auto shr = [&](ptrdiff_t i) { return randGen().randint(i); };
     random_shuffle(shuffle.begin(), shuffle.end(), shr);
@@ -137,14 +138,14 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
             OMP_ALGO::for_each(shuffle.cbegin(), shuffle.cend(),
                                [&](feature_id fid) {
                                    if (fs.end() == fs.find(fid)) {
-                                       
+
                                        // define new feature set
                                        FeatureSet prod = fs;
                                        prod.insert(fid);
-                                   
+
                                        // score it
                                        double sc = scorer(prod);
-                                   
+
                                        // insert it in ranks
                                        std::pair<double, FeatureSet> pdf(sc, prod);
                                        unique_lock lock(mutex);
@@ -156,8 +157,8 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
         // Discard all but the highest scorers.  When done, 'tops'
         // will hold FeatureSets with exactly 'i' elts each.
         tops.clear();
-        auto rb = ranks.rbegin(),
-            re = std::next(rb, std::min(top_size, (unsigned)ranks.size()));
+        auto rb = ranks.rbegin();
+        auto re = std::next(rb, std::min(top_size, (unsigned)ranks.size()));
         tops.insert(tops.begin(), rb, re);
 
         OC_ASSERT (!ranks.empty(), "Fatal Error: no ranked feature sets");
