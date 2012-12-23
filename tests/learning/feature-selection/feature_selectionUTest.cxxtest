@@ -254,7 +254,7 @@ private:
         setting_omp(n_jobs);
         fsp.hc_max_evals = 10000;
         fsp.max_time = INT_MAX;
-        fsp.hc_confi = 1;
+        fsp.mi_confi = -1.0;
         fsp.hc_cache_size = 100000;
         fsp.hc_max_score = 1;
         fsp.hc_fraction_of_remaining = 1;
