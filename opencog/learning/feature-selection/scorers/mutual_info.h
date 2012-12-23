@@ -1,7 +1,4 @@
-/// TODO rename that file, mutual information scorer or something
-
-
-/** feature_scorer.h ---
+/** scorers/mutual_info.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *

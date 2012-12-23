@@ -27,8 +27,8 @@
 
 #include <boost/range/algorithm/sort.hpp>
 
-#include "../feature_scorer.h"
-#include "../moses_based_scorer.h"  // for pre_scorer
+#include "../scorers/mutual_info.h"
+#include "../scorers/moses_optim.h"  // for pre_scorer
 
 
 namespace opencog {

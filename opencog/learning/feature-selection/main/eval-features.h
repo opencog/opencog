@@ -32,7 +32,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/range/algorithm/find.hpp>
 
-#include "../feature_scorer.h"
+#include "../scorers/mutual_info.h"
 
 using namespace std;
 using namespace boost::assign;
