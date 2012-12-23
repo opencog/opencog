@@ -68,15 +68,20 @@ struct feature_selection_parameters
     double inc_red_intensity;
     unsigned inc_interaction_terms;
 
-    // hill-climbing parameters
+    // stochastic max-dependency selection parameters
+    unsigned smd_top_size;
+
+    // hill-climbing selection parameters
     // actually, these are generic for all moses optimizers,
     // not just hill-climbing...
     unsigned int hc_max_evals;
     time_t max_time;
     double hc_max_score;
-    double hc_confi; //  confidence intensity
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
+
+    // MI scorer parameters
+    double mi_confi; //  confidence intensity
 
     // precision scorer parameters
     float pre_penalty;
@@ -84,8 +89,6 @@ struct feature_selection_parameters
     float pre_max_activation;
     bool pre_positive;
 
-    // stochastic max-dependency parameters
-    unsigned smd_top_size;
 };
 
 typedef std::set<arity_t> feature_set;
@@ -129,7 +132,7 @@ struct fs_scorer : public unary_function<FeatureSet, double>
     {
         if (fs_params.scorer == mi) { // mutual information
             _ptr_mi_scorer =
-                new MICScorerCTable<FeatureSet>(ctable, fs_params.hc_confi);
+                new MICScorerCTable<FeatureSet>(ctable, fs_params.mi_confi);
         } else if (fs_params.scorer == pre) { // precision (see
             // opencog/learning/moses/moses/scoring.h)
             _ptr_pre_scorer =
