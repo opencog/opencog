@@ -26,7 +26,6 @@
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 
-#include <opencog/learning/feature-selection/feature_scorer.h>
 #include <opencog/learning/feature-selection/algo/incremental.h>
 #include <opencog/learning/feature-selection/main/feature-selection.h>
 #include <opencog/learning/moses/optimization/optimization.h>  // for moses::hc
