@@ -1,4 +1,4 @@
-/** moses_optim.cc --- 
+/** scorers/moses_optim.cc --- 
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
