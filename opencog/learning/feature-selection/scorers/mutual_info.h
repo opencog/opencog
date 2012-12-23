@@ -1,7 +1,4 @@
-/// TODO rename that file, mutual information scorer or something
-
-
-/** feature_scorer.h ---
+/** scorers/mutual_info.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -24,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_SCORER_H
-#define _OPENCOG_FEATURE_SCORER_H
+#ifndef _OPENCOG_FEATURE_SCORERS_MI_H
+#define _OPENCOG_FEATURE_SCORERS_MI_H
 
 #include <opencog/util/numeric.h>
 #include <opencog/comboreduct/table/table.h>
@@ -125,4 +122,4 @@ struct MICScorerCTable : public std::unary_function<FeatureSet, double>
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_SCORER_H
+#endif // _OPENCOG_FEATURE_SCORERS_MI_H

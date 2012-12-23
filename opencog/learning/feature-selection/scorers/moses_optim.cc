@@ -1,4 +1,4 @@
-/** moses_based_scorer.cc --- 
+/** scorers/moses_optim.cc --- 
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -20,12 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "moses_based_scorer.h"
+#include "moses_optim.h"
 
 namespace opencog {
 
 std::set<arity_t> get_feature_set(const field_set& fields,
-                                  const instance& inst) {
+                                  const instance& inst)
+{
     std::set<arity_t> fs;
     field_set::const_bit_iterator bit = fields.begin_bit(inst);
     for(arity_t i = 0; bit != fields.end_bit(inst); bit++, i++)

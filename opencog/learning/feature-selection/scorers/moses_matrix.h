@@ -1,4 +1,4 @@
-/** moses_based_scorer.h --- 
+/** scorers/moses_matrix.h --- 
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -21,14 +21,11 @@
  */
 
 
-#ifndef _OPENCOG_MOSES_BASED_SCORER_H
-#define _OPENCOG_MOSES_BASED_SCORER_H
+#ifndef _OPENCOG_FS_SCORERS_MATRIX_H
+#define _OPENCOG_FS_SCORERS_MATRIX_H
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/learning/moses/representation/field_set.h>
-#include <opencog/learning/moses/eda/eda.h>
-#include <opencog/learning/moses/moses/types.h>
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/comboreduct/combo/common_def.h>
 
@@ -38,15 +35,9 @@ using namespace moses;
 using namespace combo;
 
 /**
- * translate an instance into a feature set. Each feature is
- * represented by its index (the left most one is 0).
- */
-std::set<arity_t> get_feature_set(const field_set& fields,
-                                  const instance& inst);
-
-/**
  * Wrapper to use moses scoring precision (see
- * opencog/learning/moses/moses/scoring.h).
+ * opencog/learning/moses/moses/scoring.h).  This is one of the
+ * confusion-matrix based scorers.
  *
  * That wrapper uses the method best_possible_score() given a certain
  * feature set. And therefore attempts to maximize the best possible
@@ -54,7 +45,8 @@ std::set<arity_t> get_feature_set(const field_set& fields,
  * feature set being evaluated.
  */
 template<typename FeatureSet>
-struct pre_scorer : public unary_function<FeatureSet, double> {
+struct pre_scorer : public unary_function<FeatureSet, double>
+{
     pre_scorer(const CTable& ctable,
                float penalty = 1.0f,
                float min_activation = 0.5f,
@@ -78,40 +70,7 @@ protected:
     bool _positive;
 };
 
-/**
- * Wrapper to use a feature set scorer with MOSES's optimization
- * algorithms operating on a deme. Each deme is a binary string where
- * each bit represents whether a feature is selected or not.
- */
-template<typename FSScorer>
-struct deme_based_scorer : public iscorer_base
-{
-    deme_based_scorer(const FSScorer& fs_scorer, const field_set& fields)
-        : _fs_scorer(fs_scorer), _fields(fields) {}
-
-    /**
-     * The feature set is represented by an instance encoding a
-     * field of booleans. Each boolean represents whether its
-     * corresponding feature is in the feature set of not.
-     */
-    composite_score operator()(const instance& inst) const
-    {
-        std::set<arity_t> fs = get_feature_set(_fields, inst);
-        composite_score csc(_fs_scorer(fs), fs.size(), 0);
-        // Logger
-        if (logger().isFineEnabled()) {
-            logger().fine()
-               << "moses_based_scorer - Evaluate instance: " 
-               << _fields.stream(inst) << " " << csc;
-        }
-        // ~Logger
-        return csc;
-    }
-
-    const FSScorer& _fs_scorer;
-    const field_set& _fields;
-};
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_MOSES_BASED_SCORER_H
+#endif // _OPENCOG_FS_SCORERS_MATRIX_H
