@@ -251,7 +251,7 @@ int main(int argc, char** argv)
          "reached feature selection halts.\n")
 
         (opt_desc_str(hc_confidence_penalty_intensity_opt).c_str(),
-         value<double>(&fs_params.hc_confi)->default_value(1.0),
+         value<double>(&fs_params.hc_confi)->default_value(10.0),
          "Hillclimbing parameter.  Intensity of the confidence "
          "penalty, in the range [0,+Inf).  Zero means no confidence "
          "penalty. This parameter influences how much importance is "
