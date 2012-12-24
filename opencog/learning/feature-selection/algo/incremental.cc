@@ -25,7 +25,7 @@
 #include "incremental.h"
 
 namespace opencog {
-    
+
 using namespace std;
 
 feature_set incremental_select_features(const CTable& ctable,
@@ -33,24 +33,29 @@ feature_set incremental_select_features(const CTable& ctable,
 {
     auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end());
-    if (fs_params.threshold > 0 || fs_params.target_size > 0) {
-        typedef MutualInformation<feature_set> FeatureScorer;
-        FeatureScorer fsc(ctable);
-        return fs_params.target_size > 0?
-            cached_adaptive_incremental_selection(all_features, fsc,
-                                                  fs_params.target_size,
-                                                  fs_params.inc_interaction_terms,
-                                                  fs_params.inc_red_intensity,
-                                                  0, 1,
-                                                  fs_params.inc_target_size_epsilon)
-            : cached_incremental_selection(all_features, fsc,
-                                           fs_params.threshold,
-                                           fs_params.inc_interaction_terms,
-                                           fs_params.inc_red_intensity);
-    } else {
+
+    logger().info() << "incremental_select_features, targ sz="
+                    << fs_params.target_size
+                    << " thresh=" << fs_params.threshold;
+    if (fs_params.threshold <= 0 && fs_params.target_size <= 0) {
         // Nothing happened, return all features by default
         return all_features;
     }
+
+    typedef MutualInformation<feature_set> FeatureScorer;
+    FeatureScorer fsc(ctable);
+    if (0 < fs_params.target_size) {
+        return cached_adaptive_incremental_selection(all_features, fsc,
+                                              fs_params.target_size,
+                                              fs_params.inc_interaction_terms,
+                                              fs_params.inc_red_intensity,
+                                              0, 1,
+                                              fs_params.inc_target_size_epsilon);
+    }
+    return cached_incremental_selection(all_features, fsc,
+                                   fs_params.threshold,
+                                   fs_params.inc_interaction_terms,
+                                   fs_params.inc_red_intensity);
 }
 
 } // ~namespace opencog
