@@ -177,8 +177,13 @@ FeatureSet incremental_selection(const FeatureSet& features,
         std::stringstream ss;
         ss << "Exit incremental_selection(), selected: ";
         ostreamContainer(ss, res);
-        // Note: the score isn't necessarily the mutual information
-        ss << " Score = " << scorer(res);
+        // Do not print score.  Why?
+        // 1) Its totally misleading, since this computes the score of
+        //    all of the terms, interacting together.
+        // 2) This can be a huge performance killer for the smd scorer.
+        //    i.e this can takes vast amounts of cpu time,
+        // 3) The contin MI scorer does not support interaction terms > 1
+        // ss << " Score = " << scorer(res);
         logger().info() << ss.str();
     }
 
