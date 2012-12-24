@@ -53,6 +53,21 @@ static const string pre="pre";  // Precision (see
 // feature-selection.cc for their meaning
 struct feature_selection_parameters
 {
+    // avoid utter insanity by providing some reasonable values.
+    feature_selection_parameters() : algorithm(simple), scorer(mi),
+        target_size(1), threshold(0.0), jobs(1),
+        inc_target_size_epsilon(1.0e-10),
+        inc_red_intensity(1.0e-10),
+        inc_interaction_terms(1),
+        smd_top_size(100),
+        hc_max_evals(10000),
+        max_time(INT_MAX),
+        hc_max_score(1.0e50),
+        hc_cache_size(1000),
+        hc_fraction_of_remaining(1.0),
+        mi_confi(50.0)
+    {}
+
     std::string algorithm;
     std::string scorer;
     std::string input_file;
@@ -90,7 +105,6 @@ struct feature_selection_parameters
     float pre_min_activation;
     float pre_max_activation;
     bool pre_positive;
-
 };
 
 typedef std::set<arity_t> feature_set;
