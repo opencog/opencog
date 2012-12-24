@@ -37,10 +37,12 @@ namespace opencog {
 // using namespace moses;
 
 // Feature selection algorithms
+// XXX do we really need to have these in a heaer file ?? Can't we hide them?
 static const string inc="inc"; // incremental_selection (see
-                               // feature_optimization.h)
+                               // algo/incrementalh)
 static const string smd="smd"; // stochastic_max_dependency (see
-                               // stochastic_max_dependency.h)
+                               // algo/stochastic_max_dependency.h)
+static const string simple="simple"; // See algo/simple.h
 
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)

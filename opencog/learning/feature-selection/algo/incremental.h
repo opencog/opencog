@@ -132,7 +132,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
             FeatureSet red;
             auto filter_redundant = [&](const FeatureSet* fs) {
                 // Test whether the feature set tested is disjoint
-                // from red. WARNING: this is too speed up the
+                // from red. WARNING: this is to speed up the
                 // computation but it introduces some undeterminism
                 // when run in multi-thread.
                 // bool fs_red_disjoint = [&]() {
@@ -275,7 +275,7 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
 
 /**
  * Return a set of redundant features of a given set of features. It
- * look for a subset of features that do not manage to raise the score
+ * looks for a subset of features that do not manage to raise the score
  * above a given threshold.
  */
 template<typename Scorer, typename FeatureSet>

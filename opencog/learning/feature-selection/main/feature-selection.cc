@@ -37,8 +37,9 @@
 
 #include "feature-selection.h"
 #include "../algo/deme_optimize.h"
-#include "../algo/stochastic_max_dependency.h"
 #include "../algo/incremental.h"
+#include "../algo/stochastic_max_dependency.h"
+#include "../algo/simple.h"
 
 namespace opencog {
     
@@ -181,6 +182,8 @@ feature_set select_features(const CTable& ctable,
         return incremental_select_features(ctable, fs_params);
     } else if (fs_params.algorithm == smd) {
         return smd_select_features(ctable, fs_params);
+    } else if (fs_params.algorithm == simple) {
+        return simple_select_features(ctable, fs_params);
     } else {
         cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
              << "' is unknown, please consult the help for the "
