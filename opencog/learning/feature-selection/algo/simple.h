@@ -59,7 +59,7 @@ FeatureSet simple_selection(const FeatureSet& features,
     for (auto feat : features) {
         FeatureSet fs;
         fs.insert(feat);
-        double sc = scorer(fs);  // negative to reverse sort order
+        double sc = scorer(fs);
         if (threshold <= sc) {
             auto scf = std::make_pair(sc, fs);
             sorted_flist.insert(scf);
@@ -69,11 +69,14 @@ FeatureSet simple_selection(const FeatureSet& features,
     FeatureSet final;
     // for (auto pr : sorted_flist) {
     for (auto pr = sorted_flist.rbegin(); pr != sorted_flist.rend(); pr++) {
-// std::cout << "duuude sc="<< pr->first <<" fe="<< *pr->second.begin() << std::endl;
+        // std::cout << "sc="<< pr->first <<" fe=" << *pr->second.begin() << std::endl;
         final.insert(*pr->second.begin());
         num_desired --;
         if (num_desired <= 0) break;
     }
+
+    // TODO: if there is a non-negative red_threshold, then remove any
+    // pair-wise redundant features. 
 
     return final;
 }
