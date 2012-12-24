@@ -264,17 +264,17 @@ template<typename Set> std::set<Set> powerset(const Set& s, size_t n, bool exact
     typedef typename Set::const_iterator SetCIt;
     typedef typename std::set<Set>::const_iterator PowerSetCIt;
     std::set<Set> res;
-    if(n > 0) {
+    if (n > 0) {
         std::set<Set> ps = powerset(s, n-1, exact);
-        for(PowerSetCIt ss = ps.begin(); ss != ps.end(); ss++)
-            for(SetCIt el = s.begin(); el != s.end(); el++) {
+        for (PowerSetCIt ss = ps.begin(); ss != ps.end(); ss++)
+            for (SetCIt el = s.begin(); el != s.end(); el++) {
                 Set subset(*ss);
-                if(subset.find(*el) == subset.end()) {
+                if (subset.find(*el) == subset.end()) {
                     subset.insert(*el);
                     res.insert(subset);
                 }
             }
-        if(!exact)
+        if (!exact)
             res.insert(ps.begin(), ps.end());
     } else
         res.insert(Set());
