@@ -57,7 +57,7 @@ struct feature_selection_parameters
     feature_selection_parameters() : algorithm(simple), scorer(mi),
         target_size(1), threshold(0.0), jobs(1),
         inc_target_size_epsilon(1.0e-10),
-        inc_red_intensity(1.0e-10),
+        inc_red_intensity(-1.0),
         inc_interaction_terms(1),
         smd_top_size(100),
         hc_max_evals(10000),
