@@ -47,7 +47,8 @@ namespace opencog {
  */
 
 // base class for all unlimited caches
-struct inf_cache_base {
+struct inf_cache_base
+{
     typedef size_t size_type;
 
     inf_cache_base(const std::string& name) :
@@ -72,7 +73,8 @@ protected:
 };
 
 // base class for all caches limited in size
-struct cache_base : public inf_cache_base {
+struct cache_base : public inf_cache_base
+{
     cache_base(size_type n, const std::string& name)
         : inf_cache_base(name), _n(n) {}
 
@@ -83,7 +85,7 @@ struct cache_base : public inf_cache_base {
 protected:
     size_type _n;                            // cache size
 };
-    
+
 // Least Recently Used Cache. Non thread safe, use
 // lru_cache_threaded for that.
 template<typename F,
@@ -101,7 +103,7 @@ struct lru_cache : public F, public cache_base {
 
     lru_cache(size_type n, const F& f=F(), const std::string name = "lru_cache")
         : F(f), cache_base(n, name), _map(n+1) {}
-    
+
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
 
@@ -126,11 +128,11 @@ struct lru_cache : public F, public cache_base {
             map_iter it = _map.insert(make_pair(_lru.begin(), ifx_f(x))).first;
             return it->second;
         }
-      
+
         //search for it
         _lru.push_front(x);
         map_iter it=_map.find(_lru.begin());
-      
+
         //if we've found it, update lru and return
         if (it!=_map.end()) {
             _lru.pop_front();
@@ -138,21 +140,21 @@ struct lru_cache : public F, public cache_base {
             ++_hits;
             return it->second;
         }
-      
+
         //otherwise, call _f and do an insertion
         it = _map.insert(make_pair(_lru.begin(), ifx_f(x))).first;
-      
+
         //if full, remove least-recently-used
         if (_map.size() > _n) {
             _map.erase(--_lru.end());
             _lru.pop_back();
         }
-      
+
         OC_ASSERT(_map.size() <= _n,
                   "lru_cache - _map size greater than _n (%d).", _n);
         OC_ASSERT(_lru.size() == _map.size(),
                   "lru_cache - _lru size different from _map size.");
-      
+
         //return the result
         return it->second;
     }
@@ -175,13 +177,13 @@ struct lru_cache : public F, public cache_base {
         OC_ASSERT(_lru.size() == _map.size(),
                   "lru_cache - _lru size different from _map size.");
     }
-    
+
 protected:
     mutable map _map;
     mutable list _lru; // this list is only here so that we know what
                        // is the last used element to remove it from
                        // the cache when it gets full
-    
+
     inline result_type _f(const argument_type& x) const {
         return F::operator()(x);
     }
@@ -228,7 +230,7 @@ public:
     typedef typename super::map map;
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
-  
+
     lru_cache_threaded(size_type n, const F& f=F(),
                        const std::string name = "lru_cache_threaded")
         : super(n, f, name) {}
@@ -261,25 +263,25 @@ public:
     //         }
     //         lru_push_front(x);
     //         result_type r = ifx_f(x);
-            
+
     //         unique_lock lock(mutex);
     //         map_iter it =
     //             super::_map.insert(make_pair(super::_lru.begin(),r)).first;
     //         return it->second;
     //     }
-      
+
     //     //search for it
     //     super::_lru.push_front(x);
     //     map_iter it = super::_map.find(super::_lru.begin());
     //     super::_lru.pop_front();
-      
+
     //     //if we've found it, update lru and return
     //     if (it != super::_map.end()) {
     //         super::_lru.splice(super::_lru.begin(), super::_lru, it->first);
     //         super::_hits++;
     //         return it->second;
     //     }
-      
+
     //     //otherwise, call _f and do an insertion
     //     // briefly free lock for external call
     //     // lock.unlock();
@@ -288,18 +290,18 @@ public:
     //     //--
     //     super::_lru.push_front(x);
     //     it = super::_map.insert(make_pair(super::_lru.begin(), r)).first;
-      
+
     //     //if full, remove least-recently-used
     //     if (super::_map.size()>super::_n) {
     //         super::_map.erase(--super::_lru.end());
     //         super::_lru.pop_back();
     //     }
-      
+
     //     OC_ASSERT(super::_map.size() <= super::_n,
     //               "lru_cache - _map size greater than _n (%d).", super::_n);
     //     OC_ASSERT(super::_lru.size() == super::_map.size(),
     //               "lru_cache - _lru size different from _map size.");
-      
+
     //     //return the result
     //     return it->second;
     // }
@@ -313,7 +315,7 @@ public:
         unique_lock lock(mutex);
         super::clear();
     }
-    
+
 protected:
     mutable cache_mutex mutex;
 
@@ -345,21 +347,21 @@ protected:
             throw;
         }
     }
-
 };
- 
+
 // Pseudo Random Replacement Cache, very fast, but very dumb, it just
 // removes the first element of the hash table when the cache is
 // full. No thread safety, use prr_cache_threaded for that.
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct prr_cache : public F, public cache_base {
+struct prr_cache : public F, public cache_base
+{
     typedef typename F::argument_type argument_type;
     typedef typename F::result_type result_type;
     typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
     typedef typename map::iterator map_iter;
-  
+
     prr_cache(size_type n, const F& f=F(), const std::string name = "prr_cache")
         : F(f), cache_base(n, name), _map(n+1) {}
 
@@ -367,17 +369,17 @@ struct prr_cache : public F, public cache_base {
     bool empty() const { return _map.empty(); }
 
     result_type operator()(const argument_type& x) const
-    {        
+    {
         // search for x
         map_iter it = _map.find(x);
 
-        if(it != _map.end()) { // if we've found return 
+        if (it != _map.end()) { // if we've found return
             ++_hits;
             return it->second;
         }
         else { // otherwise evaluate, insert in _map then return
             result_type res = if_f(x);
-            if(full()) { // if the cache is full randomly remove an element
+            if (full()) { // if the cache is full randomly remove an element
                 _map.erase(_map.begin());
             }
             _map[x] = res;
@@ -385,25 +387,29 @@ struct prr_cache : public F, public cache_base {
         }
     }
 
-    void resize(unsigned n) {
+    void resize(unsigned n)
+    {
         _n = n;
-        while(_map.size() > _n)
+        while (_map.size() > _n)
             _map.erase(_map.begin());
     }
-    
-    void clear() {
+
+    void clear()
+    {
         _map.clear();
     }
 
 protected:
     mutable map _map;
 
-    inline result_type _f(const argument_type& x) const {
+    inline result_type _f(const argument_type& x) const
+    {
         return F::operator()(x);
     }
-    
+
     // increment misses and call
-    inline result_type if_f(const argument_type& x) const {
+    inline result_type if_f(const argument_type& x) const
+    {
         ++_misses;
         return _f(x);
     }
@@ -414,7 +420,8 @@ protected:
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
-struct prr_cache_threaded : public prr_cache<F, Hash, Equals> {
+struct prr_cache_threaded : public prr_cache<F, Hash, Equals>
+{
 private:
     typedef prr_cache<F, Hash, Equals> super;
     typedef boost::shared_mutex cache_mutex;
@@ -427,21 +434,25 @@ public:
     typedef typename super::map map;
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
-  
+
     prr_cache_threaded(size_type n, const F& f=F(),
                        const std::string name = "prr_cache_threaded")
         : super(n, f, name) {}
 
-    bool full() const {
+    bool full() const
+    {
         shared_lock lock(mutex);
         return super::full();
     }
-    bool empty() const {
+
+    bool empty() const
+    {
         shared_lock lock(mutex);
         return super::empty();
     }
 
-    unsigned max_size() const {
+    unsigned max_size() const
+    {
         shared_lock lock(mutex);
         return super::max_size();
     }
@@ -452,41 +463,48 @@ public:
             shared_lock lock(mutex);
             // search for x
             map_iter it = super::_map.find(x);
-            if(it != super::_map.end()) { // if we've found return 
+            if (it != super::_map.end()) { // if we've found return
                 ++super::_hits;
                 return it->second;
             }
         }
         // otherwise evaluate, insert in _map then return
         result_type res = incmis_f(x);
-        if(full()) { // if the cache is full remove an element
+        if (full()) { // if the cache is full remove an element
             unique_lock lock(mutex);
+            // if the size is zero, then begin()==end() and erase()
+            // crashes anyway. So at least explain why.
+            OC_ASSERT (0 < super::_n, "zero-sized cache is unusable!");
             super::_map.erase(super::_map.begin());
+            super::_map[x] = res;
+            return res;
         }
         unique_lock lock(mutex);
         super::_map[x] = res;
         return res;
     }
-    
-    void resize(unsigned n) {
+
+    void resize(unsigned n)
+    {
         unique_lock lock(mutex);
         super::resize(n);
     }
 
-    void clear() {
+    void clear()
+    {
         unique_lock lock(mutex);
         super::clear();
     }
-    
+
 protected:
     mutable cache_mutex mutex;
 
     // increment misses and call
-    inline result_type incmis_f(const argument_type& x) const {
+    inline result_type incmis_f(const argument_type& x) const
+    {
         ++super::_misses;
         return super::_f(x);
     }
-
 };
 
 /**
@@ -543,14 +561,14 @@ template<typename Cache>
 struct adaptive_cache {
     typedef typename Cache::result_type result_type;
     typedef typename Cache::argument_type argument_type;
-    
+
     /// If 1 - (free memory / total memory) > ulimit then the cache size is
     /// divided by ufrac. If used 1 - (free memory / total memory) < llimit then
     /// the cache size is multiplied by lfact.
     /// Try not to set ulimit above 90%, as otherwise, the Linux kernel
     /// obligingly tries to swap everything out to disk (see vm.swappiness
     /// setting & LKML discussions w/ AKPM)
-    adaptive_cache(Cache& cache, 
+    adaptive_cache(Cache& cache,
                    unsigned ncycles = 1000,
                    float llimit = 0.75, float lfact = 2,
                    float ulimit = 0.90, float ufrac = 2)
@@ -617,12 +635,12 @@ struct lru_cache_arg_result {
                                    deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
-  
+
     lru_cache_arg_result(size_type n) : _n(n), _map(n+1) { }
 
     inline bool full() const { return _map.size()==_n; }
     inline bool empty() const { return _map.empty(); }
-    
+
     //that method not only returns the map_iter corresponding to a
     //input but also places x in front of the lru list if found
     map_iter find(const argument_type& x) {
@@ -651,12 +669,12 @@ struct lru_cache_arg_result {
             _lru.pop_back();	
         }
     }
-    
+
     void clear() {
         _map.clear();
         _lru.clear();
     }
-    
+
 protected:
     size_type _n;
     mutable map _map;
