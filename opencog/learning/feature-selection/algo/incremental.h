@@ -195,7 +195,8 @@ FeatureSet cached_incremental_selection(const FeatureSet& features,
                                         unsigned max_interaction_terms = 1,
                                         double red_threshold = 0)
 {
-    std::cout << "cached_incremental_selection" << std::endl;
+    logger().debug() << "cached_incremental_selection(), num feats="
+                     << features.size();
     /// @todo replace by lru_cache once thread safe fixed
     prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
                                                      (int)max_interaction_terms),
@@ -261,6 +262,10 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
                                                  double min = 0, double max = 1,
                                                  double epsilon = 0.01)
 {
+    logger().debug() << "cached_adaptive_incremental_selection(),"
+                     << " target=" << features_size_target
+                     << " iterms=" << max_interaction_terms
+                     << " num feats=" << features.size();
     /// @todo replace by lru_cache once thread safe fixed
     prr_cache_threaded<Scorer> scorer_cache(std::pow((double)features.size(),
                                                      (int)max_interaction_terms),
