@@ -389,9 +389,18 @@ int main(int argc, char** argv)
     type_tree output_tt = get_signature_output(inferred_tt);
     type_node inferred_type = get_type_node(output_tt);
 
+    if ((inferred_type == id::contin_type) and
+        (1 < fs_params.inc_interaction_terms)) {
+        cerr << "Fatal Error: Currently, contin feature selection "
+                "does not support more than one interaction term."
+             << endl;
+        exit(1);
+    }
+
     // Go and do it.
     if ((inferred_type == id::boolean_type) or
-        (inferred_type == id::enum_type)) {
+        (inferred_type == id::enum_type) or
+        (inferred_type == id::contin_type)) {
         feature_selection(table, fs_params);
     } else {
         unsupported_type_exit(inferred_type);
