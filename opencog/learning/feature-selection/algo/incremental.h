@@ -61,7 +61,7 @@ feature_set incremental_select_features(const CTable& ctable,
  *                       0 for the lowest score and 1 for the higest score.
  * @param threshold      The threshold to select a set of feature, in [0,1]
  * @param max_interaction_terms The maximum size of each feature set tested in the scorer
- * @param red_threshold  If >0 it modulates the intensity of the
+ * @param red_threshold  If > 0.0 it modulates the intensity of the
  *                       threshold of redundant_features(), precisely
  *                       red_threshold * threshold
  *                       Otherwise redundant features are ignored.
@@ -78,7 +78,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
                                  const Scorer& scorer,
                                  double threshold,
                                  unsigned max_interaction_terms = 1,
-                                 double red_threshold = 0)
+                                 double red_threshold = -1.0)
 {
     FeatureSet rel; // set of relevant features for a given iteration
     FeatureSet res; // set of relevant non-redundant features to return
@@ -125,7 +125,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
         logger().debug("Iteration %d relevant features=%d",
                        i, rel.size());
 
-        if (red_threshold > 0) {
+        if (0.0 < red_threshold) {
             // Define the set of set of features to test for redundancy
             std::set<FeatureSet> nrfss = powerset(rel, i+1, true);
             // determine the set of redundant features and add then in red
@@ -193,7 +193,7 @@ FeatureSet cached_incremental_selection(const FeatureSet& features,
                                         const Scorer& scorer,
                                         double threshold,
                                         unsigned max_interaction_terms = 1,
-                                        double red_threshold = 0)
+                                        double red_threshold = -1.0)
 {
     logger().debug() << "cached_incremental_selection(), num feats="
                      << features.size();
@@ -215,7 +215,7 @@ FeatureSet adaptive_incremental_selection(const FeatureSet& features,
                                           const Scorer& scorer,
                                           unsigned features_size_target,
                                           unsigned max_interaction_terms = 1,
-                                          double red_threshold = 0,
+                                          double red_threshold = -1.0,
                                           double min = 0, double max = 1,
                                           double epsilon = 0.001)
 {
@@ -258,7 +258,7 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
                                                  const Scorer& scorer,
                                                  unsigned features_size_target,
                                                  unsigned max_interaction_terms = 1,
-                                                 double red_threshold = 0,
+                                                 double red_threshold = -1.0,
                                                  double min = 0, double max = 1,
                                                  double epsilon = 0.01)
 {
