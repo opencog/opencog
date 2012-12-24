@@ -672,8 +672,14 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
             p.push_back(pr.first);
             q.push_back(pr.second);
         }
-        contin_t ic = KLD(p,q);
-        // XXX remove this print, for better prformance.
+
+        // KLD is negative; we want the IC to be postive.
+        // XXX review this, is this really correct?  At any rate,
+        // feature selection utterly fails with negative IC.
+        // Also a problem, this is returning values greater than 1.0;
+        // I thought that IC was supposed to max out at 1.0 !?
+        contin_t ic = - KLD(p,q);
+        // XXX TODO remove this print, for better prformance.
         logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
         return ic;
     }
