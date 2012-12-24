@@ -1,8 +1,5 @@
-/// TODO rename that file incremental feature selection or something
-
-
 /** 
- * feature_optimization.h ---
+ * incremental.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -25,21 +22,26 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_SELECTION_ALGO_H
-#define _OPENCOG_FEATURE_SELECTION_ALGO_H
+#ifndef _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
+#define _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H
 
 #include <functional>
 
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/algorithm/max_element.hpp>
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/lru_cache.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/functional.h>
+#include <opencog/util/lru_cache.h>
+#include <opencog/util/numeric.h>
 #include <opencog/util/oc_omp.h>
 
+#include "../main/feature-selection.h"  // needed for feature_set, feature_selection_parameters
+
 namespace opencog {
+
+feature_set incremental_select_features(const CTable& ctable,
+                                        const feature_selection_parameters& fs_params);
 
 /**
  * Returns a set S of features following the algo:
@@ -130,7 +132,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
             FeatureSet red;
             auto filter_redundant = [&](const FeatureSet* fs) {
                 // Test whether the feature set tested is disjoint
-                // from red. WARNING: this is too speed up the
+                // from red. WARNING: this is to speed up the
                 // computation but it introduces some undeterminism
                 // when run in multi-thread.
                 // bool fs_red_disjoint = [&]() {
@@ -273,7 +275,7 @@ FeatureSet cached_adaptive_incremental_selection(const FeatureSet& features,
 
 /**
  * Return a set of redundant features of a given set of features. It
- * look for a subset of features that do not manage to raise the score
+ * looks for a subset of features that do not manage to raise the score
  * above a given threshold.
  */
 template<typename Scorer, typename FeatureSet>
@@ -296,4 +298,4 @@ FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_SELECTION_ALGO_H
+#endif // _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H

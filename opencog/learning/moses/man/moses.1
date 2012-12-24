@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "November 27, 2012" "3.2.13" "OpenCog Learning"
+.TH MOSES 1 "December 22, 2012" "3.2.13" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -834,7 +834,7 @@ is to sort inputs into one of two sets, while maximizing either
 the precision, the sensitivity, or some other figure of merit
 of the test.
 .PP
-In \fBmoses\fR, precision and recall (sensitivity) are defined as standard.
+In \fBmoses\fR, precision and recall (sensitivity) are defined as usual.
 Precision is defined as the number of true positives, divided by the number
 of true positives plus the number of false positives.  Classifiers 
 with a high precision make very few mistakes identifying positives:
@@ -851,13 +851,17 @@ thus ruining precision.
 A trivial way to maximize precision is to have a very low recall rate,
 and conversely, one can very easily have a good recall rate if one
 does not mind a poor precision.  Thus a common goal is to maximize
-one, while holding the other to a minimum standard.  One of the most
-common problems is find a classifier with the highest possible recall,
-while holding precision to a fixed minimum level; this may be accomplished
-with the \fB\-Hrecall\fR option.  The reversed situation is somewhat
-less common: to find the most precise test that guarantees a certain
-minimum sensitivity; this may be accomplished with the \fB\-Hprerec\fR
-option.
+one, while holding the other to a minimum standard.  One common
+problem is find a classifier with the highest possible recall, while
+holding precision to a fixed minimum level; this may be accomplished
+with the \fB\-Hrecall\fR option.  Alternately, one may desire to
+maximize precision, while maintaining a minimum sensitivity; this
+may be accomplished with the \fB\-Hprerec\fR option.  Note that,
+although these two proceedures seem superficially similar, they can
+often lead to dramatically different models of the input data.
+This is in part because, during early stages, \fBmoses\fP will choose
+exemplars that maximize one or the other, thus causing dramatically
+different parts of the solution space to be searched.
 .PP
 A common alternative to maximizing one or the other is to maximize
 wither the arithmetic or the harmonic mean of the two.  The arithmetic

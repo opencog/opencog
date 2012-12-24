@@ -29,6 +29,8 @@
 #include <boost/format.hpp>
 
 #include <opencog/util/log_prog_name.h>
+#include <opencog/util/oc_omp.h>
+
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/learning/moses/moses/moses_main.h> // for version string
 
@@ -73,10 +75,11 @@ static const pair<string, string> inc_interaction_terms_opt("inc-interaction-ter
 // hill-climbing flags
 static const pair<string, string> hc_max_evals_opt("max-evals", "m");
 static const pair<string, string> hc_max_score_opt("max-score", "A");
-static const pair<string, string> hc_confidence_penalty_intensity_opt("confidence-penalty-intensity", "c");
 static const pair<string, string> hc_fraction_of_remaining_opt("hc-fraction-of-remaining", "O");
 static const pair<string, string> hc_cache_size_opt("cache-size", "s");
 
+// mi scorer flags
+static const pair<string, string> mi_penalty_opt("mi-penalty", "c");
 
 // Returns a string interpretable by Boost.Program_options
 // "name,abbreviation"
@@ -248,15 +251,6 @@ int main(int argc, char** argv)
          "Hillclimbing parameter.  The max score to reach, once "
          "reached feature selection halts.\n")
 
-        (opt_desc_str(hc_confidence_penalty_intensity_opt).c_str(),
-         value<double>(&fs_params.hc_confi)->default_value(1.0),
-         "Hillclimbing parameter.  Intensity of the confidence "
-         "penalty, in the range [0,+Inf).  Zero means no confidence "
-         "penalty. This parameter influences how much importance is "
-         "attributed to the confidence of the quality measure. The "
-         "fewer samples in the data set, the more features the "
-         "less confidence in the feature set quality measure.\n")
-
         (opt_desc_str(hc_max_evals_opt).c_str(),
          value<unsigned>(&fs_params.hc_max_evals)->default_value(10000),
          "Hillclimbing parameter.  Maximum number of fitness function "
@@ -277,8 +271,19 @@ int main(int argc, char** argv)
          value<unsigned>(&fs_params.smd_top_size)->default_value(10),
          "Stochastic max dependency parameter. Number of feature subset "
          "candidates to consider building the next superset.\n")
+
+        // ================= mi scoring ====================
+        (opt_desc_str(mi_penalty_opt).c_str(),
+         value<double>(&fs_params.mi_confi)->default_value(100.0),
+         "Mutual-info scoring parameter.  Intensity of the confidence "
+         "penalty, in the range (-Inf,+Inf).  100 means no confidence "
+         "penalty. This parameter influences how much importance is "
+         "attributed to the confidence of the quality measure. The "
+         "fewer samples in the data set, the more features the "
+         "less confidence in the feature set quality measure.\n")
+
         
-        // options for pre scoring
+        // ================= pre scoring ====================
         ("pre-penalty",
          value<float>(&fs_params.pre_penalty)->default_value(1.0f),
          "Activation penalty (see moses --help or man moses for more info)")

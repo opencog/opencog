@@ -29,8 +29,10 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
-#include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/oc_omp.h>
+
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 
@@ -1135,15 +1137,6 @@ int moses_exec(int argc, char** argv)
          "Hillclimbing parameter.  The max score to reach, once "
          "reached feature selection halts.\n")
 
-        ("fs-hc-confidence-penalty-intensity",
-         value<double>(&fs_params.hc_confi)->default_value(1.0),
-         "Hillclimbing parameter.  Intensity of the confidence "
-         "penalty, in the range [0,+Inf).  Zero means no confidence "
-         "penalty. This parameter influences how much importance is "
-         "attributed to the confidence of the quality measure. The "
-         "fewer samples in the data set, the more features the "
-         "less confidence in the feature set quality measure.\n")
-
         // no need of that for now
         // (opt_desc_str(hc_initial_feature_opt).c_str(),
         //  value<vector<string> >(&fs_params.hc_initial_features),
@@ -1162,6 +1155,18 @@ int moses_exec(int argc, char** argv)
          value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.5),
          "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
+
+        // ======= Feature-selection MI scorer params =======
+        ("fs-mi-penalty",
+         value<double>(&fs_params.mi_confi)->default_value(100.0),
+         "Mutal-information scorer parameter.  Intensity of the confidence "
+         "penalty, in the range (-Inf, +Inf).  100 means no confidence "
+         "penalty. This parameter influences how much importance is "
+         "attributed to the confidence of the quality measure. The "
+         "fewer samples in the data set, the more features the "
+         "less confidence in the feature set quality measure.\n")
+
+        // ========== THE END of the options; note semicolon ===========
         ;
 
     variables_map vm;

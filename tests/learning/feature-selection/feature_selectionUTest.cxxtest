@@ -22,12 +22,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <opencog/util/oc_omp.h>
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 
-#include <opencog/learning/feature-selection/feature_optimization.h>
-#include <opencog/learning/feature-selection/feature_scorer.h>
+#include <opencog/learning/feature-selection/algo/incremental.h>
 #include <opencog/learning/feature-selection/main/feature-selection.h>
+#include <opencog/learning/moses/optimization/optimization.h>  // for moses::hc
 
 #define FEATURE_SELECTION_TEST_DIR PROJECT_SOURCE_DIR"/tests/learning/feature-selection/"
 
@@ -156,8 +157,8 @@ public:
         test_feature_selection(small_table, fsp, "target,f1,f2");
     }
 
-#ifdef UNDER_CONSTRUCTION
     void test_inc_sparse_contin() {
+#ifdef UNDER_CONSTRUCTION
         // set feature selection parameters
         feature_selection_parameters fsp;
         fsp.algorithm = inc;
@@ -167,8 +168,8 @@ public:
 
         // run and test feature selection
         test_feature_selection(sparse_table, fsp, "change_percent");
-    }
 #endif
+    }
 
 private:
 
@@ -253,7 +254,7 @@ private:
         setting_omp(n_jobs);
         fsp.hc_max_evals = 10000;
         fsp.max_time = INT_MAX;
-        fsp.hc_confi = 1;
+        fsp.mi_confi = -1.0;
         fsp.hc_cache_size = 100000;
         fsp.hc_max_score = 1;
         fsp.hc_fraction_of_remaining = 1;
