@@ -57,12 +57,10 @@ FeatureSet simple_selection(const FeatureSet& features,
     std::multimap<double, FeatureSet> sorted_flist;
 
     for (auto feat : features) {
-        FeatureSet fs;
-        fs.insert(feat);
+        FeatureSet fs{feat};
         double sc = scorer(fs);
         if (threshold <= sc) {
-            auto scf = std::make_pair(sc, fs);
-            sorted_flist.insert(scf);
+            sorted_flist.insert({sc, fs});
         }
     }
 
