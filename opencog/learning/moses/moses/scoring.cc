@@ -399,7 +399,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
 
     score_t fixation_penalty = get_threshold_penalty(fix_avg);
 
-    logger().info("Discriminating scorer, score at threshold = %f", best_score);
+    logger().info("Discriminating scorer, estimated score at threshold = %f", best_score);
     logger().info("Discriminating scorer, fixed component at threshold = %f", fix_avg);
     logger().info("Discriminating scorer, fixation penalty at threshold = %f", fixation_penalty);
 

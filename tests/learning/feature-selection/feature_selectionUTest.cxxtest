@@ -157,18 +157,19 @@ public:
         test_feature_selection(small_table, fsp, "target,f1,f2");
     }
 
-    void test_inc_sparse_contin() {
-#ifdef UNDER_CONSTRUCTION
+    void test_simple_sparse_contin() {
         // set feature selection parameters
         feature_selection_parameters fsp;
-        fsp.algorithm = inc;
+        fsp.algorithm = simple;
         fsp.input_file = sparse_table_path;
+        fsp.target_size = 20;
+        fsp.inc_red_intensity = -1.0;
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
 
         // run and test feature selection
-        test_feature_selection(sparse_table, fsp, "change_percent");
-#endif
+        test_feature_selection(sparse_table, fsp,
+            "change_percent,BECAUSE,BETWEEN,FEB,IN_PERSONBYRULE,NUMBER23,PERCENT,QUARTER,SECURITY,SHARES,STARTED,SUCH,SUSANNA,THROUGH,TOGETHER,TOLD,VERY,WAYS,WERE,WHICH,WORTH");
     }
 
 private:
@@ -269,7 +270,8 @@ private:
     // to put a temporary one.
     void test_feature_selection(const Table& table,
                                 feature_selection_parameters& fsp,
-                                const string& expected_selected_features) {
+                                const string& expected_selected_features)
+    {
         // create temporary file to put the results
         char tempfile[] = "/tmp/feature_selectionUTestXXXXXX";
         int fd = mkstemp(tempfile);
