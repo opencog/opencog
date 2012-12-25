@@ -646,31 +646,41 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         if (1 < fs.size()) {
             OC_ASSERT(0, "Contin MI currently supports only 1 feature.");
         }
-// XXX FIXME TODO under construction, unfinished.  Ask Linas about status.
         unsigned idx = *(fs.begin());
-logger().info() <<"duuude here we are!! idx="<<idx;
-        std::vector<contin_t> p, q;
+        std::multimap<contin_t, contin_t> sorted_list;
         for (const auto& row : ctable)
         {
             contin_t x = get_contin(row.first[idx]);
 
-logger().info() <<"duuude row x=" << x;
             // for each contin counted in the row,
             for (const auto& val_pair : row.second) {
                 const vertex& v = val_pair.first; // key of map
                 contin_t y = get_contin(v); // typecast
 
-logger().info() <<"duuude row x=" << x <<" and y=" << y;
                 unsigned flt_count = row.second.get(y);
                 dorepeat(flt_count) {
-                    q.push_back(x);
-                    p.push_back(y);
+                    auto pr = std::make_pair(x,y);
+                    sorted_list.insert(pr);
                 }
             }
         }
-// XXX TODO FIXME: need to sort p,q into order.
-        contin_t ic = KLD(p,q);
-logger().info() <<"duuude ic=" << ic;
+
+        // XXX TODO, it would be easier if KLD took a sorted list
+        // as the argument.
+        std::vector<contin_t> p, q;
+        for (auto pr : sorted_list) {
+            p.push_back(pr.first);
+            q.push_back(pr.second);
+        }
+
+        // KLD is negative; we want the IC to be postive.
+        // XXX review this, is this really correct?  At any rate,
+        // feature selection utterly fails with negative IC.
+        // Also a problem, this is returning values greater than 1.0;
+        // I thought that IC was supposed to max out at 1.0 !?
+        contin_t ic = - KLD(p,q);
+        // XXX TODO remove this print, for better prformance.
+        logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
         return ic;
     }
     else
