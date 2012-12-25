@@ -1,8 +1,10 @@
 /** moses_exec.cc ---
  *
  * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2012 Poulin Holdings LLC
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
+ *         Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -1514,6 +1516,12 @@ int moses_exec(int argc, char** argv)
 // exactly right.
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
 {                                                                \
+    /* Enable feature selection while selecting exemplar */      \
+    if (enable_feature_selection) {                              \
+        /* XXX FIXME: should use the concatenation of all */     \
+        /* tables, and not just the first. */                    \
+        meta_params.fstor = new feature_selector(TABLES.front(), fs_params); \
+    }                                                            \
     /* Keep the table input signature, just make sure */         \
     /* the output is the desired type. */                        \
     type_tree cand_sig = gen_signature(                          \
@@ -1533,7 +1541,7 @@ int moses_exec(int argc, char** argv)
                           opt_params, hc_params, meta_params, moses_params, \
                           mmr_pa);                               \
 }
-
+ 
             // problem == pre  precision-based scoring
             if (problem == pre) {
 
@@ -1673,6 +1681,8 @@ int moses_exec(int argc, char** argv)
 
                     // For enum targets, like boolean targets, the score
                     // can never exceed zero (perfect score).
+                    // XXX Eh ??? for precision/recall scorers,
+                    // the score range is 0.0 to 1.0 so this is wrong...
                     if (0.0 < moses_params.max_score) {
                         moses_params.max_score = 0.0;
                         opt_params.terminate_if_gte = 0.0;
