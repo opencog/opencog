@@ -46,13 +46,23 @@ struct feature_selector
         : _ctable(table.compressed()), _fs_params(fs_params)
     {}
 
+    /// Return a feature set that correlates well with all the rows
+    /// where the combo tree is predicting an incorrect result.
+    /// The hope is that these will be used to build a more accurate
+    /// models.
     feature_set operator()(const combo::combo_tree& tr) const
     {
         combo::CTable activ_ctable(_ctable.get_labels(), _ctable.get_signature());
-        // select active rows
-        for (const combo::CTable::value_type& vct : _ctable)
-            if (eval_binding(vct.first, tr) == combo::id::logical_true)
+        // Use only rows where the model is just plain wrong.  The
+        // feature selector will then look for any features that
+        // correlate well with these incorrect answers.
+        for (const combo::CTable::value_type& vct : _ctable) {
+            vertex predicted_out = eval_binding(vct.first, tr);
+            Counter<vertex, unsigned> cnt = vct.second;
+            vertex actual_out = cnt.most_frequent();
+            if (predicted_out != actual_out)
                 activ_ctable.insert(vct);
+        }
         // Call feature selection
         return select_features(activ_ctable, _fs_params);
         // return feature_set();
