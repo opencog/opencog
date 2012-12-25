@@ -1091,15 +1091,9 @@ int moses_exec(int argc, char** argv)
             "the dataset.  A value of 0 disables feature selection. \n")
 
         ("fs-algo",
-         value<string>(&fs_params.algorithm)->default_value(inc),
+         value<string>(&fs_params.algorithm)->default_value(simple),
          string("Feature selection algorithm. Supported algorithms are:\n")
-         /*
-          * We're not going to support univariate or sa any time
-          * soon, and maybe never; they're kind-of deprecated in
-          * MOSES, at the moment.
-          .append(un).append(" for univariate,\n")
-          .append(sa).append(" for simulated annealing,\n")
-         */
+         .append(simple).append(" for a simple, fast max-mutual-information algo.\n")
          .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
          .append(smd).append(" for stochastic maximal dependency,\n")
          .append(moses::hc).append(" for moses-hillclimbing,\n").c_str())
@@ -1115,14 +1109,14 @@ int moses_exec(int argc, char** argv)
 
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
-         value<double>(&fs_params.inc_red_intensity)->default_value(0.1),
+         value<double>(&fs_params.inc_red_intensity)->default_value(-1.0),
          "Incremental Selection parameter. Floating-point value must "
-         "lie between 0.0 and 1.0.  A value of 0.0 means that no "
+         "lie between 0.0 and 1.0.  A value of 0.0 or less means that no "
          "redundant features will discarded, while 1.0 will cause a "
          "maximal number will be discarded.\n")
 
         ("fs-inc-target-size-epsilon",
-         value<double>(&fs_params.inc_target_size_epsilon)->default_value(0.001),
+         value<double>(&fs_params.inc_target_size_epsilon)->default_value(1.0e-6),
          "Incremental Selection parameter. Tolerance applied when "
          "selecting for a fixed number of features (option -C).\n")
 
