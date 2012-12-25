@@ -37,12 +37,12 @@ struct feature_selector
     typedef std::set<combo::arity_t> feature_set;
 
     feature_selector(const combo::CTable& ctable,
-                     feature_selection_parameters fs_params)
+                     const feature_selection_parameters& fs_params)
         : _ctable(ctable), _fs_params(fs_params)
     {}
 
     feature_selector(const combo::Table& table,
-                     feature_selection_parameters fs_params)
+                     const feature_selection_parameters& fs_params)
         : _ctable(table.compressed()), _fs_params(fs_params)
     {}
 
