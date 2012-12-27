@@ -42,6 +42,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/KLD.h>
 #include <opencog/util/MannWhitneyU.h>
+#include <opencog/comboreduct/table/table_io.h>
 
 namespace opencog { namespace moses {
 
@@ -138,10 +139,12 @@ penalized_behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     // Take the input vectors cit, target, feed the elts to anon
     // funtion[] (which just computes square of the difference) and
     // put the results into bs.
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
     boost::transform(cti, target, back_inserter(pbs.first),
                      [&](const multi_type_seq& mts, const vertex& v) {
                          contin_t tar = get_contin(v),
-                             res = contin_interpreter(mts.get_seq<contin_t>())(tr);
+                             res = get_contin(interpret_tr(mts.get_variant()));
                          return -err_func(res, tar);
                      });
     // add the Occam's razor feature
@@ -819,6 +822,8 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     auto interpret_tr = boost::apply_visitor(iv);
     if (precision_full_bscore) {
         // compute active and sum of all active outputs
+        std::cout << "ctable = " << ctable;
+        std::cout << "tr = " << tr << std::endl;
         for (const CTable::value_type& vct : ctable) {
             const auto& ct = vct.second;
             contin_t sumo = 0.0;

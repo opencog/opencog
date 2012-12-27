@@ -248,7 +248,9 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
     const vertex& v = *it;
 
     if (const argument* a = boost::get<argument>(&v)) {
-        return mixed_inputs[a->idx - 1];
+        arity_t idx = a->idx;
+        return idx > 0 ? mixed_inputs[idx - 1]
+            : negate_vertex(mixed_inputs[-idx - 1]);
     }
     // mixed, boolean and contin builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
@@ -293,6 +295,31 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
             return (i == id::logical_true ? 1.0 : 0.0);
         }
 
+        // XXX TODO: contin_if should go away.
+        case id::contin_if :
+        case id::cond : {
+            sib_it sib = it.begin();
+            while (1) {
+                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
+
+                vertex vcond = mixed_eval(sib);
+                ++sib;  // move past the condition
+
+                // The very last value is the universal "else" clause,
+                // taken when none of the previous predicates were true.
+                if (sib == it.end())
+                    return vcond;
+
+                // If condition is true, then return the consequent
+                // (i.e. the value immediately following.) Else, skip
+                // the consequent, and loop around again.
+                if (vcond == id::logical_true)
+                    return mixed_eval(sib);
+
+                ++sib;  // move past the consequent
+            }
+        }
+
         default: {
             std::stringstream ss;
             ss << *b;
@@ -305,7 +332,12 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
     // contin constant
     else if (is_contin(v)) {
         return contin_interpreter::contin_eval(it);
-    } else {
+    }
+    // string constant
+    else if (is_definite_object(v)) {
+        return v;
+    }
+    else {
         std::stringstream ss;
         ss << v;
         OC_ASSERT(false, "mixed_interpreter does not handle vertex %s",

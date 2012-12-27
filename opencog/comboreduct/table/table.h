@@ -270,8 +270,8 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
                            vertex_seq,
                            combo_tree_seq> multi_type_variant;
     multi_type_seq() {
-        logger().debug("sizeof(builtin) = %u", sizeof(builtin));
-        logger().debug("sizeof(vertex) = %u", sizeof(vertex));
+        // logger().debug("sizeof(builtin) = %u", sizeof(builtin));
+        // logger().debug("sizeof(vertex) = %u", sizeof(vertex));
     }
     template<typename T> multi_type_seq(const std::initializer_list<T>& il)
         : _variant(std::vector<T>(il)) {}
