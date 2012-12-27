@@ -163,6 +163,26 @@ typedef argument_list_list::const_iterator argument_list_list_const_it;
 std::istream& operator>>(std::istream& in, combo::vertex& v);
 
 // -------------------------------------------------------
+// contin_t == vertex
+inline bool operator==(const vertex& v, contin_t c)
+{
+    if (const contin_t* vc = boost::get<contin_t>(&v))
+        return (*vc == c);
+    return false;
+}
+inline bool operator==(contin_t c, const vertex& v)
+{
+    return (v == c);
+}
+inline bool operator!=(const vertex& v, contin_t c)
+{
+    return !(v == c);
+}
+inline bool operator!=(contin_t c, const vertex& v)
+{
+    return !(v == c);
+}
+
 // builtin == vertex
 inline bool operator==(const vertex& v, builtin h)
 {
@@ -677,6 +697,12 @@ inline bool vertex_to_bool(const vertex& v)
     OC_ASSERT(v == id::logical_true || v == id::logical_false,
               "vertex should be 'id::logical_true' or 'id::logical_false'.");
     return (v == id::logical_true);
+}
+inline bool builtin_to_bool(const builtin& b)
+{
+    OC_ASSERT(b == id::logical_true || b == id::logical_false,
+              "builtin should be 'id::logical_true' or 'id::logical_false'.");
+    return (b == id::logical_true);
 }
 
 // Return logical_true if logical_false and vice versa

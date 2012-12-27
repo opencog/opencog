@@ -380,6 +380,9 @@ int main(int argc, char** argv)
                             fs_params.target_feature_str,
                             fs_params.ignore_features_str);
 
+    std::cout << "table loaded, let's sleep for a minute" << std::endl;
+    sleep(60);
+
     type_tree inferred_tt = table.get_signature();
     type_tree output_tt = get_signature_output(inferred_tt);
     type_node inferred_type = get_type_node(output_tt);

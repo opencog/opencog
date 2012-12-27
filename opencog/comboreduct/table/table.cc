@@ -47,6 +47,12 @@ using namespace std;
 using namespace boost;
 using namespace boost::adaptors;
 
+string builtin_to_str(const builtin& v)
+{
+    stringstream ss;
+    ss << vertex_to_bool(v);
+    return ss.str();
+}
 string vertex_to_str(const vertex& v)
 {
     stringstream ss;
@@ -104,10 +110,11 @@ ITable::ITable(const type_tree& tt, int nsamples,
 
 bool ITable::operator==(const ITable& rhs) const
 {
-    return
-        static_cast<const super&>(*this) == static_cast<const super&>(rhs)
-        && get_labels() == rhs.get_labels()
-        && get_types() == rhs.get_types();
+    // return
+    bool super_eq = static_cast<const super&>(*this) == static_cast<const super&>(rhs);
+    bool labels_eq = get_labels() == rhs.get_labels();
+    bool types_eq = get_types() == rhs.get_types();
+    return super_eq && labels_eq && types_eq;
 }
 
 // -------------------------------------------------------
@@ -167,34 +174,42 @@ type_node ITable::get_type(const string& name) const
 
 // -------------------------------------------------------
 
-// void ITable::insert_col(const std::string& clab,
-//                         const multi_type_seq& col,
-//                         int off)
-// {
-//     // Infer the column type
-//     // If it exists use the second row, just in case the first holds labels...
-//     unsigned idx = col.size() > 1 ? 1 : 0;
-//     type_tree col_tt = boost::apply_visitor(get_type_tree_at_visitor(idx), col);
-//     type_node col_type = get_type_node(col_tt);
-//     types.insert(off >= 0 ? types.begin() + off : types.end(), col_type);
+void ITable::insert_col(const std::string& clab,
+                        const vertex_seq& col,
+                        int off)
+{
+    // Infer the column type
+    // If it exists use the second row, just in case the first holds labels...
+    unsigned idx = col.size() > 1 ? 1 : 0;
+    type_tree col_tt = get_type_tree(col[idx]);
+    type_node col_type = get_type_node(col_tt);
+    types.insert(off >= 0 ? types.begin() + off : types.end(), col_type);
 
-//     // Insert label
-//     labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
+    // Insert label
+    labels.insert(off >= 0 ? labels.begin() + off : labels.end(), clab);
 
-//     // Insert values
-//     if (empty()) {
-//         OC_ASSERT(off < 0);
-//         for (const auto& v : col)
-//             push_back({v});
-//         return;
-//     }
+    // Insert values
+    if (empty()) {
+        OC_ASSERT(off < 0);
+        for (const auto& v : col)
+            push_back({v});
+        return;
+    }
 
-//     OC_ASSERT (col.size() == size(), "Incorrect column length!");
-//     for (unsigned i = 0; i < col.size(); i++) {
-//         auto& row = (*this)[i];
-//         row.insert(off >= 0 ? row.begin() + off : row.end(), col[i]);
-//     }
-// }
+    OC_ASSERT (col.size() == size(), "Incorrect column length!");
+    for (unsigned i = 0; i < col.size(); i++) {
+        auto& row = (*this)[i];
+
+        // convert row into vertex_seq
+        vertex_seq vs;
+        for (unsigned j = 0; j < row.size(); ++j)
+            vs.push_back(row.get_at<vertex>(j));
+        row = vs;
+
+        // insert the value from col at off
+        row.insert_at(off, col[i]);
+    }
+}
 
 int ITable::get_column_offset(const std::string& name) const
 {
@@ -216,12 +231,14 @@ int ITable::get_column_offset(const std::string& name) const
 
 vertex_seq ITable::get_column_data(int offset) const
 {
+    // @todo it outputs vertex_seq, it's not very general
+    
     vertex_seq col;
 
     if (-1 == offset)
         return col;
 
-    get_vertex_at_visitor gvav(offset);
+    get_at_visitor<vertex> gvav(offset);
     auto agva = boost::apply_visitor(gvav);
     for (const auto& row : *this) {
         col.push_back(agva(row.get_variant()));
@@ -288,7 +305,7 @@ OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
         ann net = tree_transform().decodify_tree(tr);
         int depth = net.feedforward_depth();
         for (const multi_type_seq& vv : itable) {
-            contin_seq tmp = vv.get_contin_seq();
+            contin_seq tmp = vv.get_seq<contin_t>();
             tmp.push_back(1.0); // net uses that in case the function
                                 // to learn needs some kind of offset
             net.load_inputs(tmp);
@@ -488,22 +505,14 @@ void Table::add_features_from_file(const string& input_file,
         // load the table with the features to insert with types
         // string that way the content is unchanged (convenient when
         // the data contains stuff that loadITable does not know how
-        // to interpret)/.
-        //
-        // I'm using istreamRawITable_ignore_indices because loading via
-        // LoadITable is too slow, usually only a handful of features are
-        // forced, deleting all the others takes time (several seconds in
-        // my test case).
+        // to interpret).
         ITable features_table;
         ifstream in(input_file.c_str());
         istreamRawITable(in, features_table, features_pos_comp);
 
         // set the first row as header
         auto first_row_it = features_table.begin();
-        vector<string> features_labels;
-        OC_ASSERT(false, "TODO");
-        // for (size_t i = 0; i < first_row_it->size(); ++i)
-        //     features_labels.push_back(boost::get<string>(first_row_it->get_copy_at(i)));
+        vector<string> features_labels = first_row_it->get_seq<string>();
         features_table.set_labels(features_labels);
         features_table.erase(first_row_it);
 
@@ -521,8 +530,7 @@ void Table::add_features_from_file(const string& input_file,
             while(rit != header_pos.cend() && *lit > *rit) ++rit;
             int rpos = rit != header_pos.cend() ?
                 distance(header_pos.cbegin(), rit) + lpos : -1;
-            OC_ASSERT(false, "TODO");
-            // itable.insert_col(cl, cd, rpos);
+            itable.insert_col(cl, cd, rpos);
         }
 
         // update target_pos, does union of features_pos and

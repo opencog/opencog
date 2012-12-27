@@ -141,7 +141,7 @@ penalized_behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     boost::transform(cti, target, back_inserter(pbs.first),
                      [&](const multi_type_seq& mts, const vertex& v) {
                          contin_t tar = get_contin(v),
-                             res = contin_interpreter(mts.get_contin_seq())(tr);
+                             res = contin_interpreter(mts.get_seq<contin_t>())(tr);
                          return -err_func(res, tar);
                      });
     // add the Occam's razor feature
@@ -1036,7 +1036,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
         // build the disjunctive clause
         auto dch = tr.append_child(head, id::logical_and);
         arity_t idx = 1;
-        for (const auto& input : v.second.first->first.get_builtin_seq()) {
+        for (const auto& input : v.second.first->first.get_seq<builtin>()) {
             argument arg(input == id::logical_true? idx++ : -idx++);
             tr.append_child(dch, arg);
         }

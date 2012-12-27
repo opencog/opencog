@@ -31,6 +31,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/adjacent_find.hpp>
+#include <boost/range/algorithm/equal.hpp>
 #include <boost/operators.hpp>
 
 #include <opencog/util/Counter.h>
@@ -88,12 +89,39 @@ struct pop_back_visitor : public boost::static_visitor<> {
         seq.pop_back();
     }
 };
-struct get_vertex_at_visitor : public boost::static_visitor<vertex> {
-    get_vertex_at_visitor(size_t pos) : _pos(pos) {}
+template<typename T> 
+struct get_at_visitor : public boost::static_visitor<T> {
+    get_at_visitor(size_t pos) : _pos(pos) {}
+    T operator()(const std::vector<T>& seq) const {
+        return seq[_pos];
+    }
+    T operator()(const vertex_seq& seq) const {
+        return boost::get<T>(seq[_pos]);
+    }
+    T operator()(const combo_tree_seq& seq) const {
+        return boost::get<T>(*seq[_pos].begin());
+    }
+    template<typename Seq> T operator()(const Seq& seq) const {
+        OC_ASSERT(false, "Impossible operation");
+        return T();
+    }
+    size_t _pos;
+};
+template<> 
+struct get_at_visitor<vertex> : public boost::static_visitor<vertex> {
+    get_at_visitor(size_t pos) : _pos(pos) {}
     vertex operator()(const combo_tree_seq& seq) const {
         return *seq[_pos].begin();
     }
     template<typename Seq> vertex operator()(const Seq& seq) const {
+        return seq[_pos];
+    }
+    size_t _pos;
+};
+template<> 
+struct get_at_visitor<combo_tree> : public boost::static_visitor<combo_tree> {
+    get_at_visitor(size_t pos) : _pos(pos) {}
+    template<typename Seq> combo_tree operator()(const Seq& seq) const {
         return seq[_pos];
     }
     size_t _pos;
@@ -105,6 +133,22 @@ struct erase_at_visitor : public boost::static_visitor<> {
     }
     size_t _pos;
 };
+template<typename T>
+struct insert_at_visitor : public boost::static_visitor<> {
+    // if pos is negative then it inserts at the end
+    insert_at_visitor(int pos, const T v) : _pos(pos), _v(v) {}
+    void operator()(std::vector<T>& seq) const {
+        seq.insert(_pos >= 0 ? seq.begin() + _pos : seq.end(), _v);
+    }
+    template<typename Seq> void operator()(Seq& seq) const {
+        std::stringstream ss;
+        ss << "You can't insert " << _v << " at " << _pos << " in container ";
+        ostreamContainer(ss, seq);
+        OC_ASSERT(false, ss.str());
+    }
+    int _pos;
+    const T& _v;
+};
 struct size_visitor : public boost::static_visitor<size_t> {
     template<typename Seq> size_t operator()(const Seq& seq) {
         return seq.size();
@@ -115,7 +159,38 @@ struct empty_visitor : public boost::static_visitor<bool> {
         return seq.empty();
     }
 };
+/**
+ * Allows to compare vertex_vec with vectors of different types.
+ */
+struct equal_visitor : public boost::static_visitor<bool> {
+#define __FALSE_EQ__(seql_t, seqr_t)                          \
+    bool operator()(const seql_t& l, const seqr_t& r) const { \
+        return false;                                         \
+    }
+    __FALSE_EQ__(builtin_seq, contin_seq);
+    __FALSE_EQ__(builtin_seq, string_seq);
+    __FALSE_EQ__(builtin_seq, combo_tree_seq);
+    __FALSE_EQ__(contin_seq, builtin_seq);
+    __FALSE_EQ__(contin_seq, string_seq);
+    __FALSE_EQ__(contin_seq, combo_tree_seq);
+    __FALSE_EQ__(string_seq, builtin_seq);
+    __FALSE_EQ__(string_seq, contin_seq);
+    __FALSE_EQ__(string_seq, combo_tree_seq);
+    __FALSE_EQ__(combo_tree_seq, builtin_seq);
+    __FALSE_EQ__(combo_tree_seq, contin_seq);
+    __FALSE_EQ__(combo_tree_seq, string_seq);
+    __FALSE_EQ__(combo_tree_seq, vertex_seq);
+    __FALSE_EQ__(vertex_seq, combo_tree_seq);
+#undef __FALSE_EQ__
+    template<typename SeqL, typename SeqR>
+    bool operator()(const SeqL& l, const SeqR& r) const {
+        return boost::equal(l, r);
+    }
+};
+     
+// function specifically for output table
 std::string vertex_to_str(const vertex& v);
+std::string builtin_to_str(const builtin& b);
 struct to_strings_visitor : public boost::static_visitor<string_seq> {
     string_seq operator()(const string_seq& seq) {
         return seq;
@@ -124,6 +199,11 @@ struct to_strings_visitor : public boost::static_visitor<string_seq> {
         string_seq res;
         boost::transform(seq, back_inserter(res), vertex_to_str);
         return res;
+    }
+    string_seq operator()(const builtin_seq& seq) {
+        string_seq res;
+        boost::transform(seq, back_inserter(res), builtin_to_str);
+        return res;        
     }
     template<typename Seq> string_seq operator()(const Seq& seq) {
         string_seq res;
@@ -135,20 +215,6 @@ struct to_strings_visitor : public boost::static_visitor<string_seq> {
                          });
         return res;
     }
-};
-struct ostreamlnContainer_visitor : public boost::static_visitor<std::ostream&> {
-    ostreamlnContainer_visitor(std::ostream& out,
-                               const std::string& delimiter = " ",
-                               const std::string& left = "",
-                               const std::string& right = "")
-        : _out(out), _delimiter(delimiter), _left(left), _right(right) {}
-    template<typename Seq> std::ostream& operator()(const Seq& seq) {
-        return ostreamlnContainer(_out, seq, _delimiter, _left, _right);
-    }
-    std::ostream& _out;
-    const std::string& _delimiter;
-    const std::string& _left;
-    const std::string& _right;
 };
 struct get_type_tree_at_visitor : public boost::static_visitor<type_tree> {
     get_type_tree_at_visitor(size_t pos) : _pos(pos) {}
@@ -221,7 +287,9 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
         return get_variant() < r.get_variant();
     }
     bool operator==(const multi_type_seq& r) const {
-        return get_variant() == r.get_variant();
+        equal_visitor ev;
+        return boost::apply_visitor(ev, get_variant(), r.get_variant());
+        // return get_variant() == r.get_variant();
     }
     size_t size() const {
         size_visitor sv;
@@ -234,6 +302,12 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
     void erase_at(size_t pos) {
         boost::apply_visitor(erase_at_visitor(pos), _variant);
     }
+    template<typename T> T get_at(size_t pos) const {
+        return boost::apply_visitor(get_at_visitor<T>(pos), _variant);
+    }
+    template<typename T> void insert_at(int pos, const T& v) {
+        boost::apply_visitor(insert_at_visitor<T>(pos, v), _variant);
+    }
     std::vector<std::string> to_strings() const {
         to_strings_visitor tsv;
         return boost::apply_visitor(tsv, _variant);
@@ -243,29 +317,13 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
     const multi_type_variant& get_variant() const { return _variant; }
 
     // variant helpers
-    builtin_seq& get_builtin_seq() {
-        return boost::get<builtin_seq>(_variant);
+    template<typename T>
+    std::vector<T>& get_seq() {
+        return boost::get<std::vector<T>>(_variant);
     }
-    const builtin_seq& get_builtin_seq() const {
-        return boost::get<builtin_seq>(_variant);
-    }
-    contin_seq& get_contin_seq() {
-        return boost::get<contin_seq>(_variant);
-    }
-    const contin_seq& get_contin_seq() const {
-        return boost::get<contin_seq>(_variant);
-    }
-    string_seq& get_string_seq() {
-        return boost::get<string_seq>(_variant);
-    }
-    const string_seq& get_string_seq() const {
-        return boost::get<string_seq>(_variant);
-    }
-    vertex_seq& get_vertex_seq() {
-        return boost::get<vertex_seq>(_variant);
-    }
-    const vertex_seq& get_vertex_seq() const {
-        return boost::get<vertex_seq>(_variant);
+    template<typename T>
+    const std::vector<T>& get_seq() const {
+        return boost::get<std::vector<T>>(_variant);
     }
     // I set it as mutable because the FUCKING boost::variant
     // apply_visitor doesn't allow to deal with const variants. For
@@ -308,6 +366,8 @@ struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq> {
 /// combo program on duplicated inputs.
 //
 class CTable : public std::map<multi_type_seq, Counter<vertex, unsigned>>
+                  // ,
+               // public boost::equality_comparable<CTable>
 {
 public:
     typedef multi_type_seq key_type;
@@ -396,6 +456,12 @@ public:
     const type_tree& get_signature() const {return tsig;}
     type_node get_output_type() const;
 
+    // hmmm, it doesn't compile, I give up
+    // bool operator==(const CTable& r) const {
+    //     return super::operator==(static_cast<super>(r))
+    //         && get_labels() == r.get_labels()
+    //         && get_signature() == r.get_signature();
+    // }
 protected:
     type_tree tsig;                   // table signature
     std::string olabel;               // output label
@@ -449,13 +515,21 @@ public:
     type_node get_type(const std::string&) const;
 
     /**
-     * Insert a column 'col', named 'clab', after position 'off'
-     * If off is negative, then the insert is after the last column.
+     * Insert a column 'col', named 'clab', after position 'off' If
+     * off is negative, then the insert is after the last column.
+     *
      * TODO: we really should use iterators here, not column numbers.
+     *
+     * TODO: should be generalized for multi_type_seq rather than
+     * vertex_seq
+     *
+     * WARNING: this function is automatically converting the ITable's
+     * rows into vertex_seq (this is also a hack till it handles
+     * multi_type_seq).
      */
-    // void insert_col(const std::string& clab,
-    //                 const multi_type_seq& col,
-    //                 int off = -1);
+    void insert_col(const std::string& clab,
+                    const vertex_seq& col,
+                    int off = -1);
     
     /**
      * Delete the named feature from the input table.
@@ -553,8 +627,8 @@ public:
         : label(ol)
     {
         for (const multi_type_seq& vs : it)
-            push_back(f(vs.get_vertex_seq().begin(),
-                        vs.get_vertex_seq().end()));
+            push_back(f(vs.get_seq<vertex>().begin(),
+                        vs.get_seq<vertex>().end()));
     }
 
     void set_label(const std::string&);

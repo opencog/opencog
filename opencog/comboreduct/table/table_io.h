@@ -73,8 +73,8 @@ static const std::vector<std::string> empty_string_vec =
 builtin token_to_boolean(const std::string& token);
 contin_t token_to_contin(const std::string& token);
 vertex token_to_vertex(const type_node &tipe, const std::string& token);
-struct from_token_visitor : public boost::static_visitor<multi_type_seq> {
-    from_token_visitor(const std::vector<type_node>& types) : _types(types) {
+struct from_tokens_visitor : public boost::static_visitor<multi_type_seq> {
+    from_tokens_visitor(const std::vector<type_node>& types) : _types(types) {
         all_boolean = boost::count(types, id::boolean_type) == (int)types.size();
         all_contin = boost::count(types, id::contin_type) == (int)types.size();
     }
@@ -82,17 +82,17 @@ struct from_token_visitor : public boost::static_visitor<multi_type_seq> {
         result_type res;
         if (all_boolean) {
             res = builtin_seq();
-            builtin_seq& bs = res.get_builtin_seq();
+            builtin_seq& bs = res.get_seq<builtin>();
             boost::transform(seq, back_inserter(bs), token_to_boolean);
         }
         else if (all_contin) {
             res = contin_seq();
-            contin_seq& cs = res.get_contin_seq();
+            contin_seq& cs = res.get_seq<contin_t>();
             boost::transform(seq, back_inserter(cs), token_to_contin);
         }
         else {
             res = vertex_seq();
-            vertex_seq& vs = res.get_vertex_seq();
+            vertex_seq& vs = res.get_seq<vertex>();
             boost::transform(_types, seq, back_inserter(vs), token_to_vertex);
         }
         return res;
@@ -103,6 +103,81 @@ struct from_token_visitor : public boost::static_visitor<multi_type_seq> {
     }
     const std::vector<type_node>& _types;
     bool all_boolean, all_contin;
+};
+
+/**
+ * parse a pair of key/value in a parse dataset, using ':' as
+ * delimiter. For instance
+ * 
+ * parse_key_val("key : val")
+ *
+ * returns
+ *
+ * {"key", "val"}
+ *
+ * If no such delimiter is found then it return a pair with empty key
+ * and empty val.
+ */
+static const char *sparse_delim = " : ";
+std::pair<std::string, std::string> parse_key_val(std::string chunk);
+
+/**
+ * The class below tokenizes one row, and jams it into the table
+ */
+struct from_sparse_tokens_visitor : public from_tokens_visitor {
+    from_sparse_tokens_visitor(const std::vector<type_node>& types,
+                               const std::map<const std::string, size_t>& index,
+                               size_t fixed_arity)
+        : from_tokens_visitor(types), _index(index), _fixed_arity(fixed_arity) {}
+    result_type operator()(const string_seq& seq) {
+        using std::transform;
+        using std::for_each;
+        result_type res;
+        if (all_boolean) {
+            res = builtin_seq(_types.size(), id::logical_false);
+            builtin_seq& bs = res.get_seq<builtin>();
+            auto begin_sparse = seq.begin() + _fixed_arity;
+            transform(seq.begin(), begin_sparse, bs.begin(), token_to_boolean);
+            for (auto it = begin_sparse; it != seq.end(); ++it) {
+                auto key_val = parse_key_val(*it);
+                if (key_val != std::pair<std::string, std::string>()) {
+                    size_t idx = _index.at(key_val.first);
+                    bs[idx] = token_to_boolean(key_val.second);
+                }
+            }
+        }
+        else if (all_contin) {
+            res = contin_seq(_types.size(), 0.0);
+            contin_seq& cs = res.get_seq<contin_t>();
+            auto begin_sparse = seq.cbegin() + _fixed_arity;
+            transform(seq.begin(), begin_sparse, cs.begin(), token_to_contin);
+            for (auto it = begin_sparse; it != seq.end(); ++it) {
+                auto key_val = parse_key_val(*it);
+                if (key_val != std::pair<std::string, std::string>()) {
+                    size_t idx = _index.at(key_val.first);
+                    cs[idx] = token_to_contin(key_val.second);
+                }
+            }
+        }
+        else {
+            res = vertex_seq(_types.size());
+            vertex_seq& vs = res.get_seq<vertex>();
+            auto begin_sparse_types = _types.cbegin() + _fixed_arity;
+            auto begin_sparse_seq = seq.cbegin() + _fixed_arity;
+            transform(_types.begin(), begin_sparse_types,
+                      seq.begin(), vs.begin(), token_to_vertex);
+            for (auto it = begin_sparse_seq; it != seq.end(); ++it) {
+                auto key_val = parse_key_val(*it);
+                if (key_val != std::pair<std::string, std::string>()) {
+                    size_t idx = _index.at(key_val.first);
+                    vs[idx] = token_to_vertex(_types[idx], key_val.second);
+                }
+            }
+        }
+        return res;
+    }
+    std::map<const std::string, size_t> _index;
+    size_t _fixed_arity;
 };
 
 /**

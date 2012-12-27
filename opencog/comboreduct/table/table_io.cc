@@ -111,6 +111,18 @@ istream &get_data_line(istream& is, string& line)
 
 // -------------------------------------------------------
 
+pair<string, string> parse_key_val(string chunk) {
+    pair<string, string> res;
+    size_t pos = chunk.find(sparse_delim);
+    if (string::npos == pos)
+        return res;
+    string key = chunk.substr(0, pos);
+    boost::trim(key);
+    string val = chunk.substr(pos + strlen(sparse_delim));
+    boost::trim(val);
+    return {key, val};
+}
+        
 table_tokenizer get_row_tokenizer(const string& line)
 {
     typedef boost::escaped_list_separator<char> separator;
@@ -270,8 +282,6 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 // ===========================================================
 // istream regular tables.
 
-const char *sparse_delim = " : ";
-
 /**
  * Fill the input table, given a file in DSV (delimiter-seperated values)
  * format.  The delimiters are ',', ' ' or '\t'.
@@ -407,7 +417,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
         while (string::npos == fixy[fixed_arity].find(sparse_delim)) 
             fixed_arity++;
     }
-    logger().info() << "Sparse file fixed column count="<<fixed_arity;
+    logger().info() << "Sparse file fixed column count=" << fixed_arity;
 
     // Get a list of all of the features.
     set<string> feats;
@@ -415,12 +425,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     type_node feat_type = id::unknown_type;
 
     // Fixed features may have different types, by column.
-    vector<type_node> types;
-    types.resize(fixed_arity);
-    for (size_t off = 0; off < fixed_arity; off++) 
-        types[off] = id::unknown_type;
-
-    size_t d_len = strlen(sparse_delim);
+    vector<type_node> types(fixed_arity, id::unknown_type);
 
     for (const string& line : lines) {
         vector<string> chunks = tokenizeSparseRow(line);
@@ -432,19 +437,13 @@ istream& istreamSparseITable(istream& in, ITable& tab)
             types[off] = infer_type_from_token(types[off], *pit);
 
         for (; pit != chunks.end(); pit++) {
-
             // Rip out the key-value pairs
-            size_t pos = pit->find(sparse_delim);
-            if (string::npos == pos)
+            auto key_val = parse_key_val(*pit);
+            if (key_val == pair<string, string>())
                 break;
-            string key = pit->substr(0, pos);
-            boost::trim(key);
-            string val = pit->substr(pos + d_len);
-            boost::trim(val);
-
             // Store the key, uniquely.  Store best guess as the type.
-            feats.insert(key);
-            feat_type = infer_type_from_token(feat_type, val);
+            feats.insert(key_val.first);
+            feat_type = infer_type_from_token(feat_type, key_val.second);
         }
     }
     logger().info() << "Sparse file unique features count=" << feats.size();
@@ -465,38 +464,13 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     tab.set_types(types);
 
     // And finally, stuff up the table.
-    // The function below tokenizes one row, and jams it into the table
-    size_t row_len = labs.size();
+    from_sparse_tokens_visitor fstv(types, index, fixed_arity);
     auto fill_line = [&](int i)
     {
         const string& line = lines[i];
-        vector<vertex> row;
-        row.resize(row_len);
-
         // Tokenize the line
         vector<string> chunks = tokenizeSparseRow(line);
-        vector<string>::const_iterator pit = chunks.begin();
-
-        // First, handle the fixed columns
-        // Cast them to the appropriate types
-        size_t off = 0;
-        for (; off < fixed_arity; off++, pit++) {
-            row[off] = token_to_vertex(types[off], *pit);
-        }
-
-        // Next, handle the key-value pairs, again, casting
-        // them to the appropriate types.
-        for (; pit != chunks.end(); pit++) {
-            size_t pos = pit->find(sparse_delim);
-            if (string::npos == pos)
-                break;
-            string key = pit->substr(0, pos);
-            boost::trim(key);
-            string val = pit->substr(pos + d_len);
-            boost::trim(val);
-            off = index[key];
-            row[off] = token_to_vertex(feat_type, val);
-        }
+        multi_type_seq row = fstv(chunks);
         tab[i] = row;
     };
 
@@ -527,7 +501,7 @@ vector<type_node> infer_column_types(const ITable& tab)
         rowit++;
     for (; rowit != tab.end(); rowit++)
     {
-        const string_seq& tokens = rowit->get_string_seq();
+        const string_seq& tokens = rowit->get_seq<string>();
         for (arity_t i=0; i<arity; i++)
             types[i] = infer_type_from_token(types[i], tokens[i]);
     }
@@ -542,7 +516,7 @@ vector<type_node> infer_column_types(const ITable& tab)
  */
 bool has_header(ITable& tab, vector<type_node> col_types)
 {
-    const string_seq& row = tab.begin()->get_string_seq();
+    const string_seq& row = tab.begin()->get_seq<string>();
 
     arity_t arity = row.size();
 
@@ -581,7 +555,7 @@ istream& istreamITable(istream& in, ITable& tab,
 
     // If there is a header row, then it must be the column labels.
     if (has_header(tab, col_types)) {
-        tab.set_labels(tab.begin()->get_string_seq());
+        tab.set_labels(tab.begin()->get_seq<string>());
         tab.erase(tab.begin());
     }
 
@@ -590,7 +564,7 @@ istream& istreamITable(istream& in, ITable& tab,
     tab.delete_columns(ignore_features);
 
     // Finally, perform a column type conversion
-    from_token_visitor ftv(tab.get_types());
+    from_tokens_visitor ftv(tab.get_types());
     auto aft = apply_visitor(ftv);
     OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
                         [&](multi_type_seq& seq) {
@@ -620,12 +594,12 @@ istream& istreamITable_ignore_indices(istream& in, ITable& tab,
 
     // If there is a header row, then it must be the column labels.
     if (has_header(tab, col_types)) {
-        tab.set_labels(tab.begin()->get_string_seq());
+        tab.set_labels(tab.begin()->get_seq<string>());
         tab.erase(tab.begin());
     }
 
     // Finally, perform a column type conversion
-    from_token_visitor ftv(tab.get_types());
+    from_tokens_visitor ftv(tab.get_types());
     auto aft = apply_visitor(ftv);
     OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
                         [&](multi_type_seq& seq) {
@@ -815,9 +789,8 @@ ostream& ostreamCTableHeader(ostream& out, const CTable& ct)
 
 ostream& ostreamCTable(ostream& out, const CTable& ct)
 {
-    ostreamlnContainer_visitor ocv(out, ",");
-    auto aoc = boost::apply_visitor(ocv);
-    
+    to_strings_visitor tsv;
+    auto ats = boost::apply_visitor(tsv);
     // print header
     ostreamCTableHeader(out, ct);
     // print data
@@ -831,7 +804,7 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
         }
         out << "},";
         // print inputs
-        aoc(v.first.get_variant());
+        ostreamlnContainer(out, ats(v.first.get_variant()), ",");
     }
     return out;
 }
@@ -874,12 +847,11 @@ ostream& operator<<(ostream& out, const ITable& it)
 {
     ostreamlnContainer(out, it.get_labels(), ",");
     ostreamlnContainer(out, it.get_types(), ",");
-    OC_ASSERT(false, "TODO");
-    // for (const vertex_seq& row : it) {
-    //     vector<string> row_str;
-    //     boost::transform(row, back_inserter(row_str), vertex_to_str);
-    //     ostreamlnContainer(out, row_str, ",");
-    // }
+    to_strings_visitor tsv;
+    for (const auto& row : it) {
+        vector<string> row_str = boost::apply_visitor(tsv, row.get_variant());
+        ostreamlnContainer(out, row_str, ",");
+    }
     return out;
 }
 
