@@ -798,7 +798,7 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
         // print map of outputs
         out << "{";
         for(auto it = v.second.begin(); it != v.second.end();) {
-            out << it->first << ":" << it->second;
+            out << vertex_to_str(it->first) << ":" << it->second;
             if(++it != v.second.end())
                 out << ",";
         }

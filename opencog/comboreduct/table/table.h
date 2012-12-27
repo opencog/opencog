@@ -350,7 +350,7 @@ struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq> {
 ///
 /// For example, if one has the following table:
 ///
-///   output, input1, input2
+///   output,input1,input2
 ///   1,1,0
 ///   0,1,1
 ///   1,1,0
@@ -358,7 +358,7 @@ struct seq_filtered_visitor : public boost::static_visitor<multi_type_seq> {
 ///
 /// Then the compressed table is
 ///
-///   output, input1, input2
+///   output,input1,input2
 ///   {0:1,1:2},1,0
 ///   {0:1},1,1
 ///
