@@ -599,7 +599,11 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         }
 
         // Compute H(Y)
-        yentropy =  binaryEntropy(oc/total);
+        if (0.0 < total) {
+            yentropy = binaryEntropy(oc/total);
+        } else {
+            yentropy = 0.0;
+        }
     }
     else if (id::enum_type == otype)
     {
