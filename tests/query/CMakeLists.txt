@@ -39,7 +39,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(StackMoreUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
-		util
+		cogutil
 	)
 ENDIF (HAVE_GUILE)
 

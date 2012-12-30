@@ -50,10 +50,10 @@ ADD_LIBRARY(atomspace_cython SHARED
 )
 
 TARGET_LINK_LIBRARIES(atomspace_cython
+	atomspace
+	cogutil
 	${Boost_THREAD_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    atomspace
-    util
+	${Boost_SYSTEM_LIBRARY}
 )
 
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
@@ -84,7 +84,7 @@ TARGET_LINK_LIBRARIES(util_cython
     #${Boost_THREAD_LIBRARY}
     #${Boost_SYSTEM_LIBRARY}
     #atomspace
-    util
+    cogutil
 )
 
 SET_TARGET_PROPERTIES(util_cython PROPERTIES

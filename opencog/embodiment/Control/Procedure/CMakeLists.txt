@@ -26,7 +26,7 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
 	Procedure
 	WorldWrapper
 	AvatarComboVocabulary
-	util
+	cogutil
 )
 IF (HAVE_PROTOBUF)
    TARGET_LINK_LIBRARIES(combo_shell_stdio

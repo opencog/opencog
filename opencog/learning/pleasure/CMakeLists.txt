@@ -12,6 +12,6 @@ ADD_LIBRARY (pleasure SHARED
 
 TARGET_LINK_LIBRARIES (pleasure
 	comboreduct
-	util 
+	cogutil 
 )
 

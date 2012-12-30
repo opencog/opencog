@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(NoSpaceLifeUTest
 	behavior
 	ImaginaryLife
 	comboreduct
-	util
+	cogutil
 	${PROJECT_LIBRARIES}
 )
 
