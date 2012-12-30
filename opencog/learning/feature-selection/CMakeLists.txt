@@ -8,8 +8,8 @@ ADD_LIBRARY(feature_selection SHARED STATIC
 )
 
 TARGET_LINK_LIBRARIES(feature_selection
-	util
 	moses
+	cogutil
 	${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 

@@ -8,7 +8,7 @@ ADD_LIBRARY (statistics SHARED
 
 
 TARGET_LINK_LIBRARIES (statistics
-	util
+	cogutil
 )
 
 INSTALL (TARGETS statistics

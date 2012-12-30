@@ -8,7 +8,7 @@ ADD_LIBRARY(RewritingRules
 )
 
 TARGET_LINK_LIBRARIES(RewritingRules
-	util
+	cogutil
 	comboreduct
 	AvatarComboVocabulary
 )

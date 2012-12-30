@@ -16,5 +16,5 @@ TARGET_LINK_LIBRARIES (behavior
 	MessagingSystem
 	AtomSpaceExtensions
 	atomspace
-	util
+	cogutil
 )

@@ -70,7 +70,7 @@ ADD_LIBRARY(comboreduct SHARED
 )
 
 TARGET_LINK_LIBRARIES (comboreduct
-	util
+	cogutil
 )
 
 #install library

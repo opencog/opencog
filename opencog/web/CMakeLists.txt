@@ -21,8 +21,8 @@ ADD_LIBRARY (ocweb SHARED
 
 
 TARGET_LINK_LIBRARIES(ocweb
-    util
     server
+    cogutil
     json_spirit
 )
 
