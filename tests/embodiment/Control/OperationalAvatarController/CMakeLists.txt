@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(AvatarUTest
 	MessagingSystem
 	Control
 	comboreduct
-	util
+	cogutil
 	pthread
 	${Boost_DATE_TIME_LIBRARY}
 	${PROJECT_LIBRARIES}
@@ -83,7 +83,7 @@ IF (TCL_TCLSH)
 		MessagingSystem
 		Control
 		comboreduct
-		util
+		cogutil
 		pthread
 		${Boost_DATE_TIME_LIBRARY}
 		${PROJECT_LIBRARIES}
@@ -120,7 +120,7 @@ IF (TCL_TCLSH)
 		    PythonModule
             logic_wrapper
             atomspace
-            util
+            cogutil
 		    ${PYTHON_LIBRARIES})
     ENDIF (HAVE_CYTHON)
 

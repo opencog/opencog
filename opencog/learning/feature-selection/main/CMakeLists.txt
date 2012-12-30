@@ -7,7 +7,7 @@ SET_TARGET_PROPERTIES(fs-main PROPERTIES OUTPUT_NAME "feature-selection")
 ADD_EXECUTABLE (eval-features eval-features.cc)
 TARGET_LINK_LIBRARIES(eval-features
   comboreduct
-  util
+  cogutil
   ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 

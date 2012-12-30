@@ -14,8 +14,8 @@ SET_TARGET_PROPERTIES(moses-exec PROPERTIES OUTPUT_NAME "moses")
 
 ADD_EXECUTABLE (eval-diversity eval-diversity)
 TARGET_LINK_LIBRARIES (eval-diversity
-    util
     moses
+    cogutil
     ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 SET_TARGET_PROPERTIES(moses-exec PROPERTIES OUTPUT_NAME "moses")

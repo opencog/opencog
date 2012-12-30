@@ -6,11 +6,11 @@ LINK_DIRECTORIES (
 #)
 
 ADD_EXECUTABLE (atomspace_bm
-    AtomSpaceBenchmark
-    atomspace_bm
+	AtomSpaceBenchmark
+	atomspace_bm
 )
 
 TARGET_LINK_LIBRARIES (atomspace_bm
-    atomspace
-    util
+	atomspace
+	cogutil
 )

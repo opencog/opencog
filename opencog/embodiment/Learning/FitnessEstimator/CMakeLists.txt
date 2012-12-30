@@ -12,5 +12,5 @@ TARGET_LINK_LIBRARIES (FitnessEstimator
 	Procedure
 	AtomSpaceExtensions
 	comboreduct
-	util
+	cogutil
 )
