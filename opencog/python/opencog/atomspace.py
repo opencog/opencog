@@ -64,7 +64,7 @@ class Atom(object):
     def gettv(self):
         return self._tv
     def settv(self,tv):
-#        assert isinstance(tv,TruthValue)
+        assert tv is None or isinstance(tv,TruthValue)
         self._tv = tv
     def getav(self):
         return self._av
@@ -76,7 +76,7 @@ class Atom(object):
 
     # Needs to be updated by the atomspace
     def getincoming(self):
-        return iter(self._in)
+        return list(self._in)
     incoming = property(getincoming)
 
     def __cmp__(self,other):
@@ -125,7 +125,7 @@ class Link(Atom):
         assert isinstance(type,AtomType)
 
         for o in outgoing:
-#            assert isinstance(o,Atom)
+            assert isinstance(o,Atom)
             if o is None:
                 import pdb; pdb.set_trace()
 
@@ -137,7 +137,7 @@ class Link(Atom):
     #    pass
 
     def _signature(self):
-        return (self.type,self.out)
+        return (self.type,tuple(o._signature() for o in self.out))
 
     # legacy Cython-style interface
     def is_node(self):
@@ -181,14 +181,25 @@ class AtomSpace(object):
 
     # legacy Cython-style interface
     def add_node(self,type,name,tv=DEFAULT_TV):
-        atom = self.add(Node(type,name))
+        atom = self.maybe_add(Node(type,name))
         atom.tv = tv
         return atom
 
     # legacy Cython-style interface
     def add_link(self,type,out,tv=DEFAULT_TV):
-        atom = self.add(Link(type,out))
+        atom = self.maybe_add(Link(type,out))
         atom.tv = tv
+
+        return atom
+
+    # legacy Cython-style interface. Adds a node or link depending on arguments
+    def add(self, type, name=None, out=None, tv=None):
+        if is_a(type,types.Node):
+            assert out is None, "Nodes can't have outgoing sets"
+            atom = self.add_node(type,name,tv)
+        else:
+            assert name is None, "Links can't have names"
+            atom = self.add_link(type,out,tv)
         return atom
 
     # legacy Cython-style interface
@@ -196,7 +207,7 @@ class AtomSpace(object):
         for atom in self:
             print atom
 
-    def add(self, atom):
+    def maybe_add(self, atom):
         '''If this atom hasn't been added, add it and return it. Otherwise, return the
         existing atom.'''
         assert isinstance(atom, Atom)
@@ -213,13 +224,15 @@ class AtomSpace(object):
         # Give an error if the outgoing list is not already in the AtomSpace.
         # Especially if it contains unique Atom objects that match an existing
         # Atom (but are different unique objects).
-#        if isinstance(atom, Link):
-#            for o in atom.out:
-#                assert self._atom_object_is_in_atomspace(o)
-#        if isinstance(atom, Link):
-#            for o in atom.out:
-#                assert isinstance(o, Atom)
-#                o._in.append(atom)
+        if isinstance(atom, Link):
+            for o in atom.out:
+                assert self._atom_object_is_in_atomspace(o)
+
+                # Also add atom to the incoming set of o.
+                # It may be there already, but only if 'o' is included in 'atom''s outgoing set
+                # more than once. In that case, this loop will have added it already.
+                if atom not in o._in:
+                    o._in.append(atom)
 
         self.atoms_by_id.add(atom)
         self.atoms_by_signature[atom._signature()] = atom
@@ -233,12 +246,22 @@ class AtomSpace(object):
     def _remove(self,atom):
         '''Removes an atom from all indexes. The object will still exist
         until it is garbage-collected. atom must be the unique object for this atom.'''
+
         self.atoms_by_id.remove(atom)
         del self.atoms_by_signature[atom._signature()]
 
         self.type2atom[atom.type].remove(atom)
 
+        # Look through the outgoing Atoms of 'atom' and delete 'atom' from their incoming sets.
+        if isinstance(atom, Link):
+            for o in atom.out:
+                assert atom in o._in
+                o._in.remove(atom)
+
     def get_atoms_by_type(self,type, subclass = True):
+        return list(self._get_atoms_by_type_generator(type, subclass))
+
+    def _get_atoms_by_type_generator(self,type, subclass = True):
         if subclass:
             for (t,atoms) in self.type2atom.items():
                 if is_a(t,type):
@@ -255,7 +278,7 @@ class AtomSpace(object):
         return atom in self.atoms_by_id
 
     def __iter__(self):
-        return self.get_atoms_by_type(t.Atom,True)
+        return iter(self.get_atoms_by_type(t.Atom,True))
 
 def test():
     a=AtomSpace()
@@ -321,10 +344,3 @@ def test_scaling():
         #
         #except ImportError:
         #    pass
-
-
-from utility.generic import concat_lists
-def find_links_upward(atom):
-    level = [link for link in atom.incoming if link.tv.count > 0]
-    next_level = concat_lists([find_links_upward(link) for link in atom.incoming])
-    return level + next_level
