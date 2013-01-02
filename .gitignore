@@ -1,5 +1,6 @@
 *.a
 opencog.log
+opencog-python.log
 
 # misc binaries
 bin
