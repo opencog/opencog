@@ -300,19 +300,20 @@ istream& istreamRawITable(istream& in, ITable& tab,
     string line;
     std::vector<string> lines;
 
-    // Read first few by hand.
-    // The first might be labels, so we must get the second line.
-    dorepeat(2) {
-        get_data_line(in, line);
+    // Read first few by hand. The first might be labels, so we must
+    // get at least the second line. But the second line might have
+    // all default feature values (i.e. no colon), so get the third...
+    dorepeat(20) {
+        if (!get_data_line(in, line))
+            break;
+        // If it is a sparse file, we are outta here.
+        // Throw an std::exception, since we don't want to log this as an
+        // error (all the other exception types log to the log file).
+        if (string::npos != line.find (sparse_delim)) {
+            in.seekg(beg);
+            throw std::exception();
+        }
         lines.push_back(line);
-    }
-
-    // If it is a sparse file, we are outta here.
-    // Throw an std::exception, since we don't want to log this as an
-    // error (all the other exception types log to the log file).
-    if (string::npos != line.find (sparse_delim)) {
-        in.seekg(beg);
-        throw std::exception();
     }
 
     // Grab the rest of the file.

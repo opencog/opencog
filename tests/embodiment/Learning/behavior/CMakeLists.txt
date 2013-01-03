@@ -7,7 +7,7 @@ LINK_LIBRARIES (
 	Control
 	behavior
 	comboreduct
-	util
+	cogutil
 	${PROJECT_LIBRARIES}	
 )
 

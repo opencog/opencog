@@ -9,7 +9,7 @@ TARGET_LINK_LIBRARIES(scheme-shell
 	smob
 	server
 	atomspace
-	util
+	cogutil
 	${Boost_SYSTEM_LIBRARY}
 )
 

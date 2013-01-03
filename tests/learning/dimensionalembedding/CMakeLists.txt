@@ -4,7 +4,7 @@ IF (HAVE_GUILE)
 		dimensionalembedding
 		server
 		atomspace
-		util
+		cogutil
 		${GUILE_LIBRARIES}
 	)
 ENDIF (HAVE_GUILE)

@@ -4,7 +4,7 @@ ADD_LIBRARY(PetaverseMOSES
 
 TARGET_LINK_LIBRARIES(PetaverseMOSES
     moses
-    util
+    cogutil
     comboreduct
     FitnessEstimator
     AvatarComboVocabulary

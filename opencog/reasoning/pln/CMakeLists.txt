@@ -70,7 +70,7 @@ INCLUDE_DIRECTORIES (
 SET(PLN_LINK_LIBS
 	atomspace
 	server
-	util
+	cogutil
 	#${Boost_SIGNALS_LIBRARY}
 )
 

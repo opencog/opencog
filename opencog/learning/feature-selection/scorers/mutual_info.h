@@ -1,7 +1,4 @@
-/// TODO rename that file, mutual information scorer or something
-
-
-/** feature_scorer.h ---
+/** scorers/mutual_info.h ---
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -24,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_FEATURE_SCORER_H
-#define _OPENCOG_FEATURE_SCORER_H
+#ifndef _OPENCOG_FEATURE_SCORERS_MI_H
+#define _OPENCOG_FEATURE_SCORERS_MI_H
 
 #include <opencog/util/numeric.h>
 #include <opencog/comboreduct/table/table.h>
@@ -66,16 +63,24 @@ protected:
  *
  * MI(fs) * confidence
  *
- * where confidence = N/(N+confi*|fs|), the confidence of MI (this is
- * a heuristic, in order to measure the true confidence one could
+ * where confidence = N / (N + exp(-confi*|fs|)), the confidence of MI.
+ * This is a heuristic.  In order to measure the true confidence, one could
  * compute several MI based on subsamples the dataset and estimate the
- * confidence based on the distribution of MI obtained)
+ * confidence based on the distribution of MI obtained.  (???)
+ *
+ * (???) I don't get it, for two reasons: 1) feature selection works
+ * independently of the overall scale of teh scorers; its only the relative
+ * rankings that matter.  2) In what sense is this a "confidence"?  That is,
+ * if we look at the MI of a subset of the dataset, we expect the distribution
+ * to be identical to the MI, measured on the whole set.  That is, the MI
+ * is independent of the sample size.  (or its supposed to be, perhaps there
+ * is a bug in our MI code???)
  */
 template<typename FeatureSet>
 struct MICScorer : public std::unary_function<FeatureSet, double>
 {
     MICScorer(const ITable& it, const OTable& ot,
-              double cpi = 1, double confi = 0, double resources = 10000)
+              double confi = 100)
         : _it(it), _ot(ot), _confi(confi) {}
 
     /**
@@ -87,7 +92,7 @@ struct MICScorer : public std::unary_function<FeatureSet, double>
     {
         double MI = mutualInformation(_it, _ot, fs);
         // double confidence = _it.size()/(_it.size() + _confi*fs.size());
-        double confidence = _it.size()/(_it.size() + exp(_confi*fs.size()));
+        double confidence = _it.size()/(_it.size() + exp(-_confi*fs.size()));
         return MI * confidence;
     }
 
@@ -100,7 +105,7 @@ struct MICScorer : public std::unary_function<FeatureSet, double>
 template<typename FeatureSet>
 struct MICScorerCTable : public std::unary_function<FeatureSet, double>
 {
-    MICScorerCTable(const CTable& ctable_, double confi_ = 0)
+    MICScorerCTable(const CTable& ctable_, double confi_ = 100)
         : ctable(ctable_), confi(confi_), usize(ctable.uncompressed_size()) {}
 
     /**
@@ -113,7 +118,7 @@ struct MICScorerCTable : public std::unary_function<FeatureSet, double>
         double MI = mutualInformation(ctable, fs);
         logger().fine("MI = %e", MI);
         // double confidence = usize / (usize + confi*fs.size());
-        double confidence = usize / (usize + exp(confi*fs.size()));
+        double confidence = usize / (usize + exp(-confi*fs.size()));
         logger().fine("confidence = %e", confidence);
         return MI * confidence;
     }
@@ -125,4 +130,4 @@ struct MICScorerCTable : public std::unary_function<FeatureSet, double>
 
 } // ~namespace opencog
 
-#endif // _OPENCOG_FEATURE_SCORER_H
+#endif // _OPENCOG_FEATURE_SCORERS_MI_H

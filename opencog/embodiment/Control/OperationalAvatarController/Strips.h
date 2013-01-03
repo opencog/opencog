@@ -217,6 +217,7 @@ class Inquery;
         // and also this value type can be the parameter of this operator
         static bool _AssertValueType(State& _state, EFFECT_OPERATOR_TYPE effectOp, StateValue &OPValue);
 
+
     };
 
 

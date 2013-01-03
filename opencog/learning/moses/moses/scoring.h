@@ -272,7 +272,7 @@ protected:
 
 /**
  * discriminating_bscore -- Base class for precision, recall,
- * senstivity, spcificty, F-score, etc. type discriminator scorers.
+ * senstivity, specificty, F-score, etc. type discriminator scorers.
  * Provides all the generic, common functions such scorer might need.
  */
 struct discriminating_bscore : public bscore_base, discriminator
@@ -295,8 +295,11 @@ struct discriminating_bscore : public bscore_base, discriminator
 protected:
     //* The two functions below are used to implement a generic
     //* best_possible_bscore() method.  They should return values
-    //* the the thing being held fixed, and the thing being maximized,
-    //* given a particular row of the ctable.
+    //* the the two conjugate classification dimensions.  For example,
+    //* one might return precision, and the other recall.  The 'fixed'
+    //* quantity is the one meant to be kept above a given threshold,
+    //* while the 'variable' one is to be maximized (while keeping the
+    //* other above the threshold).
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const = 0;
     virtual score_t get_variable(score_t pos, score_t neg, unsigned cnt) const = 0;
     /**

@@ -364,29 +364,49 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
 
         contin_t vary = get_variable(sum_pos, sum_neg, total);
         contin_t fix = get_fixed(sum_pos, sum_neg, total);
-        auto lmnt = std::make_pair(vary, std::make_pair(vary, fix));
+
+        logger().fine() << "Disc: total=" << total << " pos=" << sum_pos
+                        << " neg=" << sum_neg << " vary=" << vary
+                        << " fix=" << fix;
+        auto lmnt = std::make_pair(fix, std::make_pair(vary, fix));
         max_vary.insert(lmnt);
     }
 
-    // Sum up the best score, until the maximum fixed threshold is
-    // reached.  It's not clear this actually gives the best score one
-    // can get if min_threshold isn't reached, but we don't want to go
-    // below min_threshold anyway, so it's an acceptable inacurracy.
-    // (It would be a problem only if the threshold constraint is very loose.)
+    // Sum up the best score, until the minimum fixed threshold is
+    // reached.  This doesn't really give the true best score; its a
+    // rough approximation.  (Doing better than this approximation is
+    // rather hard, requiring extensive calculations over sorted table
+    // entries.  I think this is good enough for the purposes at hand,
+    // which is to obtain a 'best score' at which to stop moses.)
     //
-    score_t fix_sum = 0;
+    // XXX I dunno, this is rather confusing, actually, and for certain
+    // pathological datasets, this doesn't really provide the right
+    // answer. This should be fixed.  The problem is that if the inferred
+    // "best score" is too low, moses will stop, when it could have gone
+    // farther, and gottten a better answer.  The manual over-ride to this
+    // is to use the -A flag on moses. 
+    //
+    score_t fix_avg = 1;
     score_t best_score = 0.0;
+    score_t n = 1;
+    logger().fine() << "Disc: min_thresh=" << _min_threshold;
     reverse_foreach (const auto& mpv, max_vary) {
-        best_score += mpv.second.first;
-        fix_sum += mpv.second.second;
-        if (_max_threshold <= fix_sum)
+        // Keep an accumulated average
+        score_t avg = ((n-1.0)*fix_avg + mpv.second.second) / n;
+        if (_min_threshold >= avg)
             break;
+
+        fix_avg = avg;
+        best_score += mpv.second.first;
+        logger().fine() << "Disc: n=" << n << " fix_avg=" << fix_avg
+                        << " score=" << best_score;
+        n++;
     }
 
-    score_t fixation_penalty = get_threshold_penalty(fix_sum);
+    score_t fixation_penalty = get_threshold_penalty(fix_avg);
 
-    logger().info("Discriminating scorer, score at threshold = %f", best_score);
-    logger().info("Discriminating scorer, fixed component at threshold = %f", fix_sum);
+    logger().info("Discriminating scorer, estimated score at threshold = %f", best_score);
+    logger().info("Discriminating scorer, fixed component at threshold = %f", fix_avg);
     logger().info("Discriminating scorer, fixation penalty at threshold = %f", fixation_penalty);
 
     return {best_score, fixation_penalty};
@@ -447,6 +467,7 @@ void discriminating_bscore::set_complexity_coef(score_t ratio)
     if (occam)
         complexity_coef = 1.0 / (_ctable_usize * ratio);
 
+    logger().info() << "Discriminating scorer, table size = " << _ctable_usize;
     logger().info() << "Discriminating scorer, complexity ratio = " << 1.0f/complexity_coef;
 }
 
@@ -468,8 +489,11 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     // We are maximizing recall, so that is the first part of the score.
     penalized_behavioral_score pbs;
@@ -478,7 +502,7 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
     score_t precision_penalty = get_threshold_penalty(precision);
     pbs.first.push_back(precision_penalty);
     if (logger().isFineEnabled()) 
-        logger().fine("precision = %f  recall=%f  precision penalty=%e",
+        logger().fine("recall_bcore: precision = %f  recall=%f  precision penalty=%e",
                      precision, recall, precision_penalty);
  
     // Add the Complexity penalty
@@ -490,26 +514,37 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
     return pbs;
 }
 
-/// Return the best possible precision for this ctable row.
-/// (This does not necessarily correspnd to the most accurate model
-/// for this row, since, if the row has one postive and N negative
-/// values (for N>0), then the most precise model returns True to get
-/// a precision of 1/(N+1), whereas the most accurate model returns
-/// False to get a precision of zero.)
+/// Return the 'approximate' precision for this ctable row.
 ///
-/// FWIW, true_positives == pos  true_pos+false_pos = cnt
+/// Since this scorer is trying to maximize recall while holding
+/// precision fixed, We should return positive values as long as
+/// this table has some positive entries in it. (Why? Because the
+/// estimator sorts the table by the value returned here: so 
+/// entries with a perfect score should return 1, thos with no 
+/// positive entries should return 0, and everything else in the
+/// middle.
+///
+/// For this ctable row collection, we have that:
+/// pos == true_positives or false_negatives in this ctable row
+/// neg == false_positives or true_negatives in this ctable row
+/// cnt == pos + neg
+/// How the "best possible model" will score this row depends
+/// on what the precision threshold is.
+///
+/// _positive_total is the total number of rows that are positive.
 score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_precision = pos / (cnt * _positive_total);
-    return best_possible_precision;
+    return pos / cnt;
 }
 
 /// Return the recall for this ctable row.
-/// This does not necessarily correspnd to the most accurate model for
-/// this row; see remarks above.
+///
+/// If we summed over all rows, there would be _postive_total entries
+/// that have a positive answer (and thus totalling to a recal of
+/// exactly 1.0).  This compressed row has exactly 'pos' of those entries.
 score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_recall = 1.0 / _positive_total;
+    contin_t best_possible_recall = pos / _positive_total;
     return best_possible_recall;
 }
 
@@ -532,8 +567,11 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     // We are maximizing recall, so that is the first part of the score.
     penalized_behavioral_score pbs;
@@ -542,7 +580,7 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     score_t recall_penalty = get_threshold_penalty(recall);
     pbs.first.push_back(recall_penalty);
     if (logger().isFineEnabled()) 
-        logger().fine("precision = %f  recall=%f  recall penalty=%e",
+        logger().fine("prerec_bscore: precision = %f  recall=%f  recall penalty=%e",
                      precision, recall, recall_penalty);
  
     // Add the Complexity penalty
@@ -554,18 +592,22 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     return pbs;
 }
 
-/// Return the precision for this ctable row.
+/// Return an approximation for the precision that this ctable row 
+/// will contribute to the total precision.
 score_t prerec_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_precision = pos / (cnt * _positive_total);
-    return best_possible_precision;
+    return pos / (cnt * _positive_total);
 }
 
-/// Return the recall for this ctable row.
+/// Return the best-possible recall for this ctable row.
 score_t prerec_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_recall = 1.0 / _positive_total;
-    return best_possible_recall;
+    // If this ctable row has any positive entries at all, then any
+    // model that picks it will have perfect recall (1.0) on this row. 
+    // However, since we are sorting on the fixed score, we wnat to
+    // consider rows with negatives in them later, since they'll cause
+    // the precision to drop.
+    return ( 0.0 < pos) ? ((0.0 < neg) ? 0.99999 : 1.0) : 0.0;
 }
 
 ////////////////
@@ -585,8 +627,11 @@ penalized_behavioral_score bep_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     score_t bep = (precision + recall) / 2;
     // We are maximizing bep, so that is the first part of the score.
@@ -612,6 +657,7 @@ penalized_behavioral_score bep_bscore::operator()(const combo_tree& tr) const
 /// Return the break-even-point for this ctable row.
 score_t bep_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
+    // XXX TODO FIXME is this really correct?
     contin_t best_possible_precision = pos / (cnt * _positive_total);
     contin_t best_possible_recall = 1.0 / _positive_total;
     return (best_possible_precision + best_possible_recall) / 2;
@@ -620,8 +666,9 @@ score_t bep_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 /// Return the difference for this ctable row.
 score_t bep_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_precision = pos / (cnt * _positive_total);
-    contin_t best_possible_recall = 1.0 / _positive_total;
+    // XXX TODO FIXME is this really correct?
+    contin_t best_possible_precision = pos / (cnt);
+    contin_t best_possible_recall = (0.0 < pos) ? 1.0 : 0.0;
     return fabs(best_possible_precision - best_possible_recall);
 }
 
@@ -645,8 +692,12 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
     d_counts ctr = count(tr);
 
     // Compute normalized precision and recall.
-    score_t precision = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_positive_sum);
-    score_t recall = ctr.true_positive_sum / (ctr.true_positive_sum + ctr.false_negative_sum);
+    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
+
+    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
+    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
+
     score_t f_one = 2 * precision * recall / (precision + recall);
 
     // We are maximizing f_one, so that is the first part of the score.
@@ -654,7 +705,7 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
     pbs.first.push_back(f_one);
     
     if (logger().isFineEnabled()) 
-        logger().fine("precision = %f recall = %f f_one=%f",
+        logger().fine("f_one_bscore: precision = %f recall = %f f_one=%f",
                      precision, recall, f_one);
  
     // Add the Complexity penalty
@@ -670,12 +721,14 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
 // generation of best-possible score.
 score_t f_one_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    return 0.999999 / _ctable_usize; // since we add these together.
+    // XXX TODO FIXME is this really correct?
+    return 1.0;
 }
 
 /// Return the f_one for this ctable row.
 score_t f_one_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
+    // XXX TODO FIXME is this really correct?
     contin_t best_possible_precision = pos / cnt;
     contin_t best_possible_recall = 1.0;
     contin_t f_one = 2 * best_possible_precision * best_possible_recall 

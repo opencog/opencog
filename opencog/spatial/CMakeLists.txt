@@ -73,7 +73,7 @@ ADD_EXECUTABLE (tangentbug_test TangentBugTestExec.cc)
 TARGET_LINK_LIBRARIES(tangentbug_test
 	SpaceMap
 	TangentBug
-	util
+	cogutil
 )
 
 # Uncomment the following line to enable ncurses printing:
@@ -112,7 +112,7 @@ IF(HAVE_SPATIAL_TOOLS)
 	)
 	TARGET_LINK_LIBRARIES(MapTools
 		SpaceMap
-		util
+		cogutil
 		${SDL_LIBRARY}
 		${SDLGFX_LIBRARY}
 		${OPENGL_LIBRARY}

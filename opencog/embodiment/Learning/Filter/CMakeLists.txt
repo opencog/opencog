@@ -6,7 +6,7 @@ ADD_LIBRARY(Filter
 
 TARGET_LINK_LIBRARIES(Filter
 	PAI
-	util
+	cogutil
 	comboreduct
 	AvatarComboVocabulary
 	behavior

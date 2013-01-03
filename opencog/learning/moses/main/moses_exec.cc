@@ -1,8 +1,10 @@
 /** moses_exec.cc ---
  *
  * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2012 Poulin Holdings LLC
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
+ *         Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -29,8 +31,10 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
-#include <opencog/util/numeric.h>
 #include <opencog/util/log_prog_name.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/oc_omp.h>
+
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 
@@ -428,7 +432,7 @@ int moses_exec(int argc, char** argv)
 
     // program options, see options_description below for their meaning
     vector<string> jobs_str;
-    bool enable_mpi;
+    bool enable_mpi = false;
 
     unsigned long rand_seed;
     vector<string> input_data_files;
@@ -1087,15 +1091,9 @@ int moses_exec(int argc, char** argv)
             "the dataset.  A value of 0 disables feature selection. \n")
 
         ("fs-algo",
-         value<string>(&fs_params.algorithm)->default_value(inc),
+         value<string>(&fs_params.algorithm)->default_value(simple),
          string("Feature selection algorithm. Supported algorithms are:\n")
-         /*
-          * We're not going to support univariate or sa any time
-          * soon, and maybe never; they're kind-of deprecated in
-          * MOSES, at the moment.
-          .append(un).append(" for univariate,\n")
-          .append(sa).append(" for simulated annealing,\n")
-         */
+         .append(simple).append(" for a simple, fast max-mutual-information algo.\n")
          .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
          .append(smd).append(" for stochastic maximal dependency,\n")
          .append(moses::hc).append(" for moses-hillclimbing,\n").c_str())
@@ -1111,14 +1109,14 @@ int moses_exec(int argc, char** argv)
 
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
-         value<double>(&fs_params.inc_red_intensity)->default_value(0.1),
+         value<double>(&fs_params.inc_red_intensity)->default_value(-1.0),
          "Incremental Selection parameter. Floating-point value must "
-         "lie between 0.0 and 1.0.  A value of 0.0 means that no "
+         "lie between 0.0 and 1.0.  A value of 0.0 or less means that no "
          "redundant features will discarded, while 1.0 will cause a "
          "maximal number will be discarded.\n")
 
         ("fs-inc-target-size-epsilon",
-         value<double>(&fs_params.inc_target_size_epsilon)->default_value(0.001),
+         value<double>(&fs_params.inc_target_size_epsilon)->default_value(1.0e-6),
          "Incremental Selection parameter. Tolerance applied when "
          "selecting for a fixed number of features (option -C).\n")
 
@@ -1134,15 +1132,6 @@ int moses_exec(int argc, char** argv)
          value<double>(&fs_params.hc_max_score)->default_value(1),
          "Hillclimbing parameter.  The max score to reach, once "
          "reached feature selection halts.\n")
-
-        ("fs-hc-confidence-penalty-intensity",
-         value<double>(&fs_params.hc_confi)->default_value(1.0),
-         "Hillclimbing parameter.  Intensity of the confidence "
-         "penalty, in the range [0,+Inf).  Zero means no confidence "
-         "penalty. This parameter influences how much importance is "
-         "attributed to the confidence of the quality measure. The "
-         "fewer samples in the data set, the more features the "
-         "less confidence in the feature set quality measure.\n")
 
         // no need of that for now
         // (opt_desc_str(hc_initial_feature_opt).c_str(),
@@ -1162,6 +1151,18 @@ int moses_exec(int argc, char** argv)
          value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.5),
          "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
+
+        // ======= Feature-selection MI scorer params =======
+        ("fs-mi-penalty",
+         value<double>(&fs_params.mi_confi)->default_value(100.0),
+         "Mutal-information scorer parameter.  Intensity of the confidence "
+         "penalty, in the range (-Inf, +Inf).  100 means no confidence "
+         "penalty. This parameter influences how much importance is "
+         "attributed to the confidence of the quality measure. The "
+         "fewer samples in the data set, the more features the "
+         "less confidence in the feature set quality measure.\n")
+
+        // ========== THE END of the options; note semicolon ===========
         ;
 
     variables_map vm;
@@ -1299,8 +1300,8 @@ int moses_exec(int argc, char** argv)
 
     setting_omp(jobs[localhost]);
 
-    if (enable_mpi) {
 #ifdef HAVE_MPI
+    if (enable_mpi) {
         if (!local) {
             logger().error("MPI-bsed distributed processing should not "
                 "be mixed with host-based distributed processing!  "
@@ -1309,11 +1310,11 @@ int moses_exec(int argc, char** argv)
         }
         local = false;
         logger().info("Will run MOSES with MPI distributed processing.\n");
-#else
-        logger().warn("WARNING: This version of MOSES does NOT have MPI support!\n");
-        enable_mpi = false;
-#endif
     }
+#else
+    logger().warn("WARNING: This version of MOSES does NOT have MPI support!\n");
+    enable_mpi = false;
+#endif
 
     // Set parameter structures. Please don't systematically use their
     // constructors (if you can avoid it), as it is prone to error,
@@ -1509,6 +1510,12 @@ int moses_exec(int argc, char** argv)
 // exactly right.
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
 {                                                                \
+    /* Enable feature selection while selecting exemplar */      \
+    if (enable_feature_selection) {                              \
+        /* XXX FIXME: should use the concatenation of all */     \
+        /* tables, and not just the first. */                    \
+        meta_params.fstor = new feature_selector(TABLES.front(), fs_params); \
+    }                                                            \
     /* Keep the table input signature, just make sure */         \
     /* the output is the desired type. */                        \
     type_tree cand_sig = gen_signature(                          \
@@ -1528,7 +1535,7 @@ int moses_exec(int argc, char** argv)
                           opt_params, hc_params, meta_params, moses_params, \
                           mmr_pa);                               \
 }
-
+ 
             // problem == pre  precision-based scoring
             if (problem == pre) {
 
@@ -1561,10 +1568,10 @@ int moses_exec(int argc, char** argv)
                         exemplars.push_back(tr);
                     }
                 }
-                /// Enable feature selection while selecting exemplar
+
+                // Enable feature selection while selecting exemplar
                 if (enable_feature_selection) {
-                    // use the first table, normally it should
-                    // probably use the concatenation of all of them
+                    // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
                                                              fs_params);
                 }
@@ -1597,10 +1604,10 @@ int moses_exec(int argc, char** argv)
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
                 }
-                /// Enable feature selection while selecting exemplar
+
+                // Enable feature selection while selecting exemplar
                 if (enable_feature_selection) {
-                    // use the first table, normally it should
-                    // probably use the concatenation of all of them
+                    // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
                                                              fs_params);
                 }
@@ -1668,6 +1675,8 @@ int moses_exec(int argc, char** argv)
 
                     // For enum targets, like boolean targets, the score
                     // can never exceed zero (perfect score).
+                    // XXX Eh ??? for precision/recall scorers,
+                    // the score range is 0.0 to 1.0 so this is wrong...
                     if (0.0 < moses_params.max_score) {
                         moses_params.max_score = 0.0;
                         opt_params.terminate_if_gte = 0.0;

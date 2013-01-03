@@ -34,8 +34,10 @@
 #include <boost/range/algorithm/equal.hpp>
 #include <boost/operators.hpp>
 
-#include <opencog/util/Counter.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/Counter.h>
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/KLD.h>
 
 #include "../interpreter/eval.h"   /* Needed for binding map, and then obsolete */
 #include "../interpreter/interpreter.h"
@@ -752,7 +754,8 @@ double OTEntropy(const OTable& ot);
  *
  * The target (output) feature Y is provided in the output table OTable,
  * whereas the input features are specified as a set of indexes giving
- * columns in the input table ITable.
+ * columns in the input table ITable. That is, the columns X1..Xn are 
+ * specified by the feature set fs.
  *
  * The mutual information
  *
@@ -832,8 +835,8 @@ double mutualInformation(const Table& table, const FeatureSet& fs)
 template<typename FeatureSet>
 double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 {
-    // Let X1, ..., Xn be the input columns on the table, and
-    // Y be the output column.  We need to compute the joint entropies
+    // Let X1, ..., Xn be the input columns on the table (as given by fs),
+    // and Y be the output column.  We need to compute the joint entropies
     // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
     // To do this, we need to count how often the vertex sequence
     // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
@@ -886,7 +889,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         }
 
         // Compute H(Y)
-        yentropy = binaryEntropy(oc/total);
+        yentropy = 0.0 < total ? binaryEntropy(oc/total) : 0.0;
     }
     else if (id::enum_type == otype)
     {
@@ -925,6 +928,48 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         auto div_total = [&](unsigned c) { return c/total; };
         transform(ycount | map_values, yprob.begin(), div_total);
         yentropy = entropy(yprob);
+    }
+    else if (id::contin_type == otype)
+    {
+        if (1 < fs.size()) {
+            OC_ASSERT(0, "Contin MI currently supports only 1 feature.");
+        }
+        unsigned idx = *(fs.begin());
+        std::multimap<contin_t, contin_t> sorted_list;
+        for (const auto& row : ctable)
+        {
+            contin_t x = row.first.get_seq<contin_t>()[idx];
+
+            // for each contin counted in the row,
+            for (const auto& val_pair : row.second) {
+                const vertex& v = val_pair.first; // key of map
+                contin_t y = get_contin(v); // typecast
+
+                unsigned flt_count = row.second.get(y);
+                dorepeat(flt_count) {
+                    auto pr = std::make_pair(x,y);
+                    sorted_list.insert(pr);
+                }
+            }
+        }
+
+        // XXX TODO, it would be easier if KLD took a sorted list
+        // as the argument.
+        std::vector<contin_t> p, q;
+        for (auto pr : sorted_list) {
+            p.push_back(pr.first);
+            q.push_back(pr.second);
+        }
+
+        // KLD is negative; we want the IC to be postive.
+        // XXX review this, is this really correct?  At any rate,
+        // feature selection utterly fails with negative IC.
+        // Also a problem, this is returning values greater than 1.0;
+        // I thought that IC was supposed to max out at 1.0 !?
+        contin_t ic = - KLD(p,q);
+        // XXX TODO remove this print, for better prformance.
+        logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
+        return ic;
     }
     else
     {

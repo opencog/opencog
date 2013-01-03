@@ -104,24 +104,39 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
     if (logger().isDebugEnabled())
         logger().debug() << "Attempt to build rep from exemplar: " << _exemplar;
 
-    // [HIGHLY EXPERIMENTAL]. It allows to select features
-    // that provide the most information when combined with
-    // the exemplar
+    // [HIGHLY EXPERIMENTAL]. Limit the number of features used to build
+    // the exemplar to a more manageable number, by only working with a
+    // a list that is correlated with the output value.  Basically, this is
+    // 'on-the-fly' feature selection.  This differs from an ordinary, one-time
+    // only, up-front round of feature selection by using only those features
+    // which score well with the current exemplar.
     operator_set ignore_ops = _params.ignore_ops;
     if (_params.fstor) {
+        feature_selector festor = *_params.fstor;  // not read-only const
+
+        // If the combo tree is already using N features, we want to find
+        // and additional M features which might make it better.  So bump
+        // up the count.  Of course, the feat selector might not find any
+        // of the existing args in the exemplar; but we want to avoid the
+        // case where the feat sel is returning only those features already
+        // in the exemplar.
+        if (0 < festor._fs_params.target_size) {
+            festor._fs_params.target_size += infer_arity(_exemplar);
+        }
         // return the set of selected features as column index
         // (left most column corresponds to 0)
-        auto selected_features = (*_params.fstor)(_exemplar);
+        auto selected_features = festor(_exemplar);
         logger().info() << "Feature selection of " << selected_features.size()
                         << " features for representation";
-        // add the complementary of the selected features (not
-        // present in the exemplar) in ignore_ops
+
+        // add the complement of the selected features to ignore_ops
+        // (but only if they are not present in the exemplar).
         auto exemplar_features = get_argument_abs_idx_from_zero_set(_exemplar);
         // arity_set exemplar_features = arity_set();
-        unsigned arity = _params.fstor->ctable.get_arity();
+        unsigned arity = festor._ctable.get_arity();
         for (unsigned i = 0; i < arity; i++)
             if (selected_features.find(i) == selected_features.end()
-                && exemplar_features.find(i) == exemplar_features.end())
+                and exemplar_features.find(i) == exemplar_features.end())
                 ignore_ops.insert(argument(i + 1));
 
         // debug print

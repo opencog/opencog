@@ -48,7 +48,7 @@ ADD_LIBRARY (atomspace SHARED
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 SET(ATOMSPACE_LINK_LIBS
-	util
+	cogutil
 	${GSL_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 	${Boost_THREAD_LIBRARY}
@@ -127,6 +127,6 @@ ADD_EXECUTABLE (atomspace_async
 )
 
 TARGET_LINK_LIBRARIES (atomspace_async
-    atomspace
-    util
+	atomspace
+	cogutil
 )
