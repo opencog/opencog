@@ -875,8 +875,6 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     auto interpret_tr = boost::apply_visitor(iv);
     if (precision_full_bscore) {
         // compute active and sum of all active outputs
-        std::cout << "ctable = " << ctable;
-        std::cout << "tr = " << tr << std::endl;
         for (const CTable::value_type& vct : ctable) {
             const auto& ct = vct.second;
             contin_t sumo = 0.0;
