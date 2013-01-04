@@ -103,13 +103,13 @@ void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it
     if (fixed_arity) {
         if (ap_args != ar) {
             throw ComboException(TRACE_INFO,
-                                          "RunningComboProcedure - %s arity differs from no. node's children. Arity: %d, number_of_chindren: %d",
+                                          "RunningComboProcedure - %s arity differs from no. node's children. Arity: %d, number_of_children: %d",
                                           get_procedure_call(*it)->get_name().c_str(), ar, ap_args);
         }
     } else {
         if (ap_args < exp_arity) {
             throw ComboException(TRACE_INFO,
-                                          "RunningComboProcedure - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_chindren: %d",
+                                          "RunningComboProcedure - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_children: %d",
                                           get_procedure_call(*it)->get_name().c_str(), exp_arity, ap_args);
         }
     }
