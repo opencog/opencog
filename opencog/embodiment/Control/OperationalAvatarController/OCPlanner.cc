@@ -252,6 +252,26 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     map<string,vector<Rule*> >::iterator it;
                     it = ruleEffectIndexes.find(curStateNode->state->name());
 
+
+
+                    // Select a rule to apply
+                    Rule* curRule;
+
+                    if ( ((vector<Rule*>)(it->second)).size() == 1)
+                        curRule = ((vector<Rule*>)(it->second)).front();
+                    else
+                    {
+                        // if there are more than one rule are able to achieve this goal,
+                        // select the one with highest probability (50%) and lowest cost (50%)
+
+                        // because the cost value is between 0 ~ 100, need to divided by 100 first
+                       // (1 - curRule->cost/100.0f)
+
+                    }
+
+
+
+
                     // For numberic goals, We use a bidirection searching, doing backward and forward reasoning in turn.
 
                 }
