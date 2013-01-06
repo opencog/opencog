@@ -3718,6 +3718,8 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
     bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
+    const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
+
     bool isVisible = isObjectVisible(properties);
 
     const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
@@ -3770,6 +3772,25 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "material",
                                           SimpleTruthValue(1.0, 1.0), objectNode, materialConceptNode);
+    } // if
+
+    // Add color property predicate
+    if (color_name != NULL_ATTRIBUTE){
+       // printf("color_name found: %s\n",color_name.c_str());
+
+        Handle colorNameWordNode = atomSpace.addNode(WORD_NODE, color_name);
+        Handle colorNameConceptNode = atomSpace.addNode(CONCEPT_NODE, color_name);
+
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(colorNameConceptNode);
+        referenceLinkOutgoing.push_back(colorNameWordNode);
+
+        // Add a reference link
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+
+        AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
+                                          SimpleTruthValue(1.0, 1.0), objectNode, colorNameConceptNode);
     } // if
 
     // Add texture property predicate
