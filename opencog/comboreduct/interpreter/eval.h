@@ -45,7 +45,8 @@ struct Evaluator {
     virtual ~Evaluator() { }
     virtual vertex eval_action(combo_tree::iterator, variable_unifier&) = 0;
     virtual vertex eval_percept(combo_tree::iterator, variable_unifier&) = 0;
-    // @todo : this could be generic and not in the Evaluator
+    // @todo : change the Embodiment code so it doesn't use instantiate this method.
+    // It has now been integrated into the eval functions
     // there would be a way to specify with the procedure is lazy or note
     // in order to be fully compatible with the way it is already used
     virtual vertex eval_procedure(combo_tree::iterator, variable_unifier&) = 0;
@@ -54,6 +55,10 @@ struct Evaluator {
     virtual vertex eval_indefinite_object(indefinite_object,
                                           variable_unifier&) = 0;
 };
+
+// it has this name because it evaluates a procedure and returns a tree
+combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe);
+
 
 #define ALMOST_DEAD_EVAL_CODE 1
 #if ALMOST_DEAD_EVAL_CODE
@@ -114,6 +119,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
 void set_bindings(combo_tree& tr, const std::vector<vertex>&);
 void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent);
 
+// Used by Embodiment. Previously supported a tacky variable unification system, but now just calls the normal evaluator.
 template<typename It>
 vertex eval_throws(It it, Evaluator* pe = NULL,
                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
@@ -121,311 +127,8 @@ vertex eval_throws(It it, Evaluator* pe = NULL,
           AssertionException, std::bad_exception)
 {
 
-    // std::cout << "EVAL: " << combo_tree(it) << std::endl;
-
-    // std::cout << "VU: " << vu.toString() << std::endl;
-
-    typedef typename It::sibling_iterator sib_it;
-    vertex& v = *it;
-
-    if (const argument* a = boost::get<argument>(&v)) {
-        int idx = a->idx;
-        // assumption : when idx is negative the argument is necessary boolean
-        if (idx > 0) {
-            if (const vertex* v = boost::get<const vertex>(&binding(idx)))
-                return * v;
-            else
-                return eval_throws(boost::get<combo_tree::iterator>(binding(idx)),
-                                   pe, vu);
-        } else {
-            if (const vertex* v = boost::get<const vertex>(&binding(-idx)))
-                return negate_vertex(*v);
-            else
-                return negate_vertex(eval_throws(boost::get<combo_tree::iterator>(binding(-idx)),
-                                                 pe, vu));
-        }
-    }
-    // builtin
-    else if (const builtin* b = boost::get<builtin>(&v)) {
-        switch (*b) {
-            // boolean operators
-        case id::logical_true :
-            return v;
-        case id::logical_false :
-            return v;
-        case id::logical_and :
-            for (sib_it sib = it.begin();sib != it.end();++sib) {
-
-                if (vu.empty()) { // no wild_card case
-                    if (eval_throws(sib, pe, vu) == id::logical_false) {
-                        return id::logical_false;
-                    }
-                } else { // wild_card case
-                    combo::variable_unifier work_vu(vu);
-                    work_vu.setUpdated(false);
-                    bool is_false = (eval_throws(sib, pe, work_vu)
-                                     == id::logical_false); 
-                    vu.unify(combo::UNIFY_AND, work_vu);
-                    if(is_false) {
-                        return id::logical_false;
-                    }
-                }
-            }
-
-            OC_ASSERT(vu.empty() || vu.isOneVariableActiveTMP(),
-                      "Since it returns logical_true from that point"
-                      " there should be at least one active variable");
-
-            return id::logical_true;
-        case id::logical_or :
-            // default case, no wild card
-            if (vu.empty()) {
-                for (sib_it sib = it.begin();sib != it.end();++sib) {
-                    if (eval_throws(sib, pe, vu) == id::logical_true) {
-                        return id::logical_true;
-                    }
-                }
-                return id::logical_false;                
-            }
-            // wild card case
-            else {
-                
-                OC_ASSERT(vu.isOneVariableActiveTMP(),
-                                  "the OR wild_card case relies on the fact"
-                                  " that at least one variable is active");
-
-                combo::variable_unifier work_vu(vu);
-                work_vu.setUpdated(false);
-                for (sib_it sib = it.begin();sib != it.end();++sib) {
-
-                    combo::variable_unifier return_vu(work_vu);
-                    return_vu.setUpdated(false);
-                    bool res = vertex_to_bool(eval_throws(sib, pe, return_vu));
-
-                    if(!return_vu.isUpdated()) {
-                        if(res) { // then all activated entities are
-                                  // necessarily valid
-                            return id::logical_true;
-                        }
-                        else { // then all activated entities remains
-                               // to be checked to which can directly
-                               // go back to the next loop
-                            continue;
-                        }
-                    }
-
-                    work_vu.unify(combo::UNIFY_OR, return_vu);
-
-
-                    // if no variable remains to be checked
-                    // after OR unification it means that
-                    // the unification has succeeded
-                    // ASSUMING THAT unify has done actually something
-                    // which is only the case if updated is true
-                    if(!work_vu.isOneVariableActiveTMP()) {
-                        // OC_ASSERT(res,
-                        //           "res should be true because work_vu"
-                        //           " should start the iteration with"
-                        //           " at least one active variable");
-                        vu.unify(combo::UNIFY_OR, work_vu);
-                        return id::logical_true;
-                    }
-                }
-                work_vu.setUpdated(true);
-                vu.unify(combo::UNIFY_OR, work_vu);
-                return (vu.isOneVariableActiveTMP()?
-                        id::logical_true:
-                        id::logical_false);
-            }
-        case id::logical_not : {
-            OC_ASSERT(it.has_one_child(),
-                      "logical_not should have exactly one child,"
-                      " instead it has %u", it.number_of_children());
-            if (vu.empty()) {
-                return negate_vertex(eval_throws(it.begin(), pe, vu));
-            }
-
-            // variable unifier not empty, need to unify
-
-            // eval variable unifier
-            combo::variable_unifier work_vu(vu);
-            work_vu.setUpdated(false);
-
-            vertex vx = eval_throws(it.begin(), pe, work_vu);
-            vu.unify(combo::UNIFY_NOT, work_vu);
-
-            if (work_vu.isUpdated()) {
-                return bool_to_vertex(vu.isOneVariableActive());
-            }
-            return negate_vertex(vx);
-        }
-
-        // conditional operators
-        case id::contin_if : {
-            OC_ASSERT(it.number_of_children() == 3,
-                      "combo_tree node should have exactly three children"
-                      " (id::xxx_if)");
-            sib_it sib = it.begin();
-            vertex vcond = eval_throws(sib, pe, vu);
-            OC_ASSERT(is_boolean(vcond), "vertex should be a boolean.");
-            ++sib;
-            if (vcond == id::logical_true) {
-                return eval_throws(sib, pe, vu);
-            } else {
-                ++sib;
-                return eval_throws(sib, pe, vu);
-            }
-        }
-
-        // mixed operators
-        case id::greater_than_zero : {
-            OC_ASSERT(it.has_one_child(),
-                      "combo_tree node should have exactly three children"
-                      " (id::greater_than_zero).");
-            sib_it sib = it.begin();
-            vertex x = eval_throws(sib, pe, vu);
-            OC_ASSERT(is_contin(x),
-                      "vertex should be a contin.");
-            return bool_to_vertex(0 < get_contin(x));
-        }
-        case id::impulse : {
-            vertex i;
-            OC_ASSERT(it.has_one_child(),
-                      "combo_tree node should have exactly one child"
-                      " (id::impulse).");
-            i = eval_throws(it.begin(), pe, vu);
-            OC_ASSERT(is_boolean(i),
-                      "vetex should be a boolean).");
-            return (i == id::logical_true ? 1.0 : 0.0);
-        }
-        // continuous operator
-        case id::plus : {
-            contin_t res = 0;
-            // assumption : plus can have 1 or more arguments
-            for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws(sib, pe, vu);
-                OC_ASSERT(is_contin(vres), "vertex should be a contin.");
-                res += get_contin(vres);
-            }
-            return res;
-        }
-        case id::rand :
-            return randGen().randfloat();
-        case id::times : {
-            contin_t res = 1;
-            // assumption : times can have 1 or more arguments
-            for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws(sib, pe, vu);
-                OC_ASSERT(is_contin(vres), "vertex should be a contin");
-                res *= get_contin(vres);
-            }
-            return res;
-        }
-        case id::div : {
-            contin_t x, y;
-            OC_ASSERT(it.number_of_children() == 2,
-                      "combo_tree node should have exactly two children"
-                      " (id::div).");
-            sib_it sib = it.begin();
-            vertex vx = eval_throws(sib, pe, vu);
-            OC_ASSERT(is_contin(vx),
-                      "vertex should be a contin.");
-            x = get_contin(vx);
-            ++sib;
-            vertex vy = eval_throws(sib, pe, vu);
-            OC_ASSERT(is_contin(vy),
-                      "vertex should be a contin.");
-            y = get_contin(vy);
-            contin_t res = x / y;
-            if (isnan(res) || isinf(res))
-                throw EvalException(vertex(res));
-            return res;
-        }
-        case id::log : {
-            OC_ASSERT(it.has_one_child(),
-                      "combo_tree node should have exactly one child"
-                      " (id::log).");
-            vertex vx = eval_throws(it.begin(), pe, vu);
-            OC_ASSERT(is_contin(vx),
-                      "vertex should be a contin");
-#ifdef ABS_LOG
-            contin_t res = log(std::abs(get_contin(vx)));
-#else
-            contin_t res = log(get_contin(vx));
-#endif
-            if (isnan(res) || isinf(res))
-                throw EvalException(vertex(res));
-            return res;
-        }
-        case id::exp : {
-            OC_ASSERT(it.has_one_child(),
-                      "combo_tree node should have exactly one child"
-                      " (id::exp)");
-            vertex vx = eval_throws(it.begin(), pe, vu);
-            OC_ASSERT(is_contin(vx),
-                      "vertex should be an contin");
-            contin_t res = exp(get_contin(vx));
-            // this may happen in case the argument is too high, then exp will be infty
-            if (isinf(res)) throw EvalException(vertex(res));
-            return res;
-        }
-        case id::sin : {
-            OC_ASSERT(it.has_one_child(),
-                      "combo_tree node should have exactly one child"
-                      " (id::sin)");
-            vertex vx = eval_throws(it.begin(), pe, vu);
-            OC_ASSERT(is_contin(vx),
-                      "vertex should be a contin.");
-            return sin(get_contin(vx));
-        }
-        default :
-            OC_ASSERT(false,
-                      "That case is not handled");
-            return v;
-        }
-    }
-    // action
-    else if (is_action(*it) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_action(it, vu);
-    }
-    // perception
-    else if (is_perception(*it) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_percept(it, vu);
-    }
-    // procedure
-    else if (is_procedure_call(*it) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_procedure(it, vu);
-    }
-    // indefinite objects are evaluated by the pe
-    else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_indefinite_object(*io, vu);
-    }
-    // definite objects evaluate to themselves
-    else if (is_definite_object(*it)) {
-        OC_ASSERT(it.is_childless(),
-                  "combo_tree node should be childless (definite_object '%s').",
-                  get_definite_object(*it).c_str());
-        return v;
-    }
-    // contin constant
-    else if (const contin_t* c = boost::get<contin_t>(&v)) {
-      if (isnan(*c) || isinf(*c))
-          throw EvalException(vertex(*c));
-      return v;
-    }
-    // action symbol
-    else if (is_action_symbol(v)) {
-        return v;
-    } else {
-        // @todo: strangely this cannot compile
-        // std::cerr << "unrecognized expression " << combo_tree(it) << std::endl;
-        throw EvalException(*it);
-        return v;
-    }
+    vertex_seq empty;
+    return eval_throws_binding(empty, it, pe);
 }
 
 template<typename It>
@@ -466,6 +169,11 @@ vertex eval_throws(const tree<T>& tr)
 /// The Evaluator is currently unused; we're waiting for variable unification
 /// to be made obsolete (!?)
 vertex eval_throws_binding(const vertex_seq& bmap,
+                           combo_tree::iterator it, Evaluator* pe = NULL)
+    throw(EvalException, ComboException,
+          AssertionException, std::bad_exception);
+
+vertex eval_throws_vertex(const vertex_seq& bmap,
                            combo_tree::iterator it, Evaluator* pe = NULL)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception);
