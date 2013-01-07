@@ -143,7 +143,14 @@ class Link(Atom):
     def is_node(self):
         return False
 
+class _AtomTypeDict(dict):
+    def __getitem__(self, item):
+        return item
+
 class AtomTypeList(object):
+    def __init__(self):
+        self.__dict__ = _AtomTypeDict()
+
     def __getattr__(self,type):
         return type
 
