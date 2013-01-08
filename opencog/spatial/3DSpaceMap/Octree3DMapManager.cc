@@ -612,7 +612,7 @@ BlockVector Octree3DMapManager::getObjectDirection(Handle objNode) const
         return BlockVector::ZERO;
 }
 
-bool Octree3DMapManager::isAvatarEntity(const Entity3D *entity)
+bool Octree3DMapManager::isAvatarEntity(const Entity3D *entity) const
 {
     string _entityClass = entity->getEntityClass() ;
 

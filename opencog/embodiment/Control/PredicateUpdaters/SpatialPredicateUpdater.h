@@ -108,15 +108,15 @@ private:
 
     // compute all the relationships between all objects
     void computeRelationshipsBetweenAllObjects(const SpaceServer::SpaceMap & spaceMap,
-                                               vector<Entity3D *> &allEntities,
+                                               vector<const Entity3D *> &allEntities,
                                                Handle observer,
                                                unsigned long timestamp);
 
     // compute only the relationships between objects and avatar , which means every piece here descrips a relationship between an object and an avatar
     void computeRelationshipsBetweenObjectsAndAvatars(const SpaceServer::SpaceMap & spaceMap,
-                                                      set<spatial::Entity3D*> &avatars,
-                                                      vector<spatial::Entity3D*> &nonblockEntities,
-                                                      vector<spatial::Entity3D*> &blockEntities,
+                                                      std::set<const spatial::Entity3D*>& avatars,
+                                                      std::vector<const spatial::Entity3D*>& nonblockEntities,
+                                                      std::vector<const spatial::Entity3D*>& blockEntities,
                                                       Handle observer,
                                                       unsigned long timestamp);
 
@@ -196,9 +196,9 @@ private:
      *
      * It could be 2-size relations from A to B or 3-size relations among A, B and C. 
      */
-    void addSpatialRelations(const set<spatial::SPATIAL_RELATION>,
+    void addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
                              AtomSpace & atomSpace, unsigned long timestamp, 
-                             Handle objetA, 
+                             Handle objectA,
                              Handle objectB, 
                              Handle objectC = Handle::UNDEFINED
                             ); 

@@ -27,7 +27,8 @@
 
 #include "SpatialPredicateUpdater.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/Inquery.h>
+#include <opencog/spacetime/SpaceTime.h>
+#include <opencog/spacetime/SpaceServer.h>
 #include <vector>
 #include <iterator>
 #include <map>
@@ -60,10 +61,10 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
                                     )
 {
     // first get 3 Entity lists from the space map: Avatar list, Non-blockEntity list and blockEntity list
-    set<spatial::Entity3D*> avatarList;
-    vector<spatial::Entity3D*> nonBlockEntityList;
-    vector<spatial::Entity3D*> blockEntityList;
-    vector<spatial::Entity3D*> allEntities;
+    set<const spatial::Entity3D*> avatarList;
+    vector<const spatial::Entity3D*> nonBlockEntityList;
+    vector<const spatial::Entity3D*> blockEntityList;
+    vector<const spatial::Entity3D*> allEntities;
 
     const SpaceServer::SpaceMap & spaceMap = spaceServer().getLatestMap();
 
@@ -74,11 +75,11 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
         if (! e)
             continue;
         if (e->isBlockEntity())
-            blockEntityList.pushback(e);
+            blockEntityList.push_back(e);
         else if ( spaceMap.isAvatarEntity(e))
-            avatarList.add(e);
+            avatarList.insert(e);
         else
-            nonBlockEntityList.pushback(e);
+            nonBlockEntityList.push_back(e);
 
         allEntities.push_back(e);
     }
@@ -242,7 +243,7 @@ computeObserverInvolvedSpatialRelations(const SpaceServer::SpaceMap & spaceMap,
 
 // compute all the relationships between all objects
 void SpatialPredicateUpdater::computeRelationshipsBetweenAllObjects(const SpaceServer::SpaceMap & spaceMap,
-                                                                    vector<spatial::Entity3D*> &allEntities,
+                                                                    vector<const spatial::Entity3D*> &allEntities,
                                                                     Handle observer,
                                                                     unsigned long timestamp)
 {
@@ -252,9 +253,9 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenAllObjects(const SpaceS
 
 // compute only the relationships between objects and avatar , which means every piece here descrips a relationship between an object and an avatar
 void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const SpaceServer::SpaceMap & spaceMap,
-                                            std::set<spatial::Entity3D*>& avatars,
-                                            std::vector<spatial::Entity3D*>& nonblockEntities,
-                                            std::vector<spatial::Entity3D*>& blockEntities,
+                                            std::set<const spatial::Entity3D*>& avatars,
+                                            std::vector<const spatial::Entity3D*>& nonblockEntities,
+                                            std::vector<const spatial::Entity3D*>& blockEntities,
                                             Handle observer,
                                             unsigned long timestamp)
 {
@@ -265,9 +266,7 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const
 
         const map<int, spatial::BlockEntity*> allBlockEntities= spaceMap.getBlockEntityList();
 
-        if  (this->update_types == "block_entity_and_non_block_entity")
-
-        std::set<spatial::Entity3D*>::const_iterator avatarIt;
+        std::set<const spatial::Entity3D*>::const_iterator avatarIt;
         for (avatarIt = avatars.begin(); avatarIt != avatars.end(); avatarIt ++)
         {
             const Entity3D* avatar = (const Entity3D*)(*avatarIt);
@@ -281,6 +280,9 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const
 
                 set<spatial::SPATIAL_RELATION> relations = spaceMap.computeSpatialRelations(avatar,nonBE);
                 addSpatialRelations(relations,atomSpace,timestamp,avatar->mEntityNode, nonBE->mEntityNode);
+
+                set<spatial::SPATIAL_RELATION> relations2 = spaceMap.computeSpatialRelations(nonBE,avatar);
+                addSpatialRelations(relations2,atomSpace,timestamp, nonBE->mEntityNode,avatar->mEntityNode);
             }
 
             // update all the relationships between this avatar and all the block entities if needed
@@ -293,6 +295,9 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const
 
                     set<spatial::SPATIAL_RELATION> relations = spaceMap.computeSpatialRelations(avatar,bE);
                     addSpatialRelations(relations,atomSpace,timestamp,avatar->mEntityNode, bE->mEntityNode);
+
+                    set<spatial::SPATIAL_RELATION> relations2 = spaceMap.computeSpatialRelations(bE,avatar);
+                    addSpatialRelations(relations2,atomSpace,timestamp, bE->mEntityNode,avatar->mEntityNode);
                 }
             }
 
@@ -312,7 +317,7 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const
             continue;
 
         // first update all the relationships between this avatar and the changed nonblock entities
-        std::vector<spatial::Entity3D*>::const_iterator nonBlockIt;
+        std::vector<const spatial::Entity3D*>::const_iterator nonBlockIt;
         for (nonBlockIt = nonblockEntities.begin(); nonBlockIt != nonblockEntities.end(); nonBlockIt ++ )
         {
             const Entity3D* nonBE = (const Entity3D*)(*nonBlockIt);
@@ -321,18 +326,24 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const
 
             set<spatial::SPATIAL_RELATION> relations = spaceMap.computeSpatialRelations(avatar,nonBE);
             addSpatialRelations(relations,atomSpace,timestamp,avatar->mEntityNode, nonBE->mEntityNode);
+
+            set<spatial::SPATIAL_RELATION> relations2 = spaceMap.computeSpatialRelations(nonBE, avatar);
+            addSpatialRelations(relations2,atomSpace,timestamp, nonBE->mEntityNode ,avatar->mEntityNode);
         }
 
         // update all the relationships between this avatar and the changed block entities if needed
         if (this->update_types == "block_entity_and_non_block_entity") // see the config file
         {
-            std::vector<spatial::Entity3D*>::const_iterator blockIt;
+            std::vector<const spatial::Entity3D*>::const_iterator blockIt;
             for (blockIt = blockEntities.begin(); blockIt != blockEntities.end(); blockIt ++ )
             {
-                const Entity3D* bE = (const Entity3D*)(blockIt->second);
+                const Entity3D* bE = (const Entity3D*)(*blockIt);
 
                 set<spatial::SPATIAL_RELATION> relations = spaceMap.computeSpatialRelations(avatar,bE);
                 addSpatialRelations(relations,atomSpace,timestamp,avatar->mEntityNode, bE->mEntityNode);
+
+                set<spatial::SPATIAL_RELATION> relations2 = spaceMap.computeSpatialRelations(bE, avatar);
+                addSpatialRelations(relations2,atomSpace,timestamp,bE->mEntityNode,avatar->mEntityNode);
             }
         }
 
@@ -538,7 +549,7 @@ addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
     vector<spatial::SPATIAL_RELATION> ::const_iterator rit;
     for (rit = RELATIONS_NEED_TO_UPDATE.begin(); rit != RELATIONS_NEED_TO_UPDATE.end(); rit ++)
     {
-        string predicateName = spatial::spatialRelationToString((spatial::SPATIAL_RELATION)(*rit));
+        string predicateName = SpaceServer::SpaceMap::spatialRelationToString((spatial::SPATIAL_RELATION)(*rit));
         sit = relations.find((spatial::SPATIAL_RELATION)(*rit));
         Handle eval;
         if (sit != relations.end()) // these objects have this relation
@@ -559,7 +570,7 @@ addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
 
         }
 
-        TimeServer().addTimeInfo(eval, timestamp);
+        timeServer().addTimeInfo(eval, timestamp);
 
     }
 

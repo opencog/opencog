@@ -105,17 +105,17 @@ namespace opencog
 
             bool hasPerceptedMoreThanOneTimes;
 
-            const map<Handle, BlockVector>& getAllUnitBlockatoms(){return mAllUnitAtomsToBlocksMap;}
+            const map<Handle, BlockVector>& getAllUnitBlockatoms() const {return mAllUnitAtomsToBlocksMap;}
 
-            const map<int,BlockEntity*>& getBlockEntityList(){return mBlockEntityList;}
+            const map<int,BlockEntity*>& getBlockEntityList() const {return mBlockEntityList;}
 
-            const map<int,BlockEntity*>& getSuperBlockEntityList(){return mSuperBlockEntityList;}
+            const map<int,BlockEntity*>& getSuperBlockEntityList() const {return mSuperBlockEntityList;}
 
-            const map<Handle, Entity3D*>& getAllNoneBlockEntities(){return mAllNoneBlockEntities;}
+            const map<Handle, Entity3D*>& getAllNoneBlockEntities() const {return mAllNoneBlockEntities;}
 
-            const map<Handle, Entity3D*>& getAllAvatarList(){return mAllAvatarList;}
+            const map<Handle, Entity3D*>& getAllAvatarList() const {return mAllAvatarList;}
 
-            int getTotalDepthOfOctree(){return mTotalDepthOfOctree;}
+            int getTotalDepthOfOctree() const {return mTotalDepthOfOctree;}
 
             inline  int   getFloorHeight() const {return mFloorHeight;}
             inline  int   getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
@@ -303,7 +303,7 @@ namespace opencog
 
             HandleSeq getAllUnitBlockHandlesOfABlock(Block3D& _block);
 
-            bool isAvatarEntity(const Entity3D* entity);
+            bool isAvatarEntity(const Entity3D* entity) const;
 
         protected:
 
