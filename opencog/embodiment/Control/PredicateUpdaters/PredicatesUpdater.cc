@@ -30,6 +30,7 @@
 #include "IsPeePlacePredicateUpdater.h"
 #include "IsPickupablePredicateUpdater.h"
 #include "PetPsychePredicatesUpdater.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 // this time frame corresponde to one minute
 static const unsigned long timeWindow = 600;
@@ -50,7 +51,8 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
 
     // Spatial relation predicates
-    updaters.push_back(new SpatialPredicateUpdater(atomSpace));
+    if (Config().get_bool( "ENABLE_SPATIAL_RELATIONSHIP_UPDATER"))
+        updaters.push_back(new SpatialPredicateUpdater(atomSpace));
 
     petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
 }

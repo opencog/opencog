@@ -323,3 +323,17 @@ void AtomSpace::print(std::ostream& output,
 {
     atomSpaceAsync->print(output, type, subclass)->get_result();
 }
+
+
+bool AtomSpace::isHandleInSeq(Handle h, HandleSeq &seq)
+{
+    HandleSeq::const_iterator it;
+    for (it = seq.begin(); it != seq.end(); ++ it)
+    {
+        if ((Handle)(*it) == h)
+            return true;
+    }
+
+    return false;
+}
+

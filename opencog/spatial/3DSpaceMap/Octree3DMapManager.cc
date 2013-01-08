@@ -166,6 +166,9 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
 
         if (isSelfObject)
             selfAgentEntity = newEntity;
+
+        if (isAvatarEntity(newEntity))
+            mAllAvatarList.insert(map<Handle, Entity3D*>::value_type(entityNode, newEntity));
     }
     else
     {
@@ -609,6 +612,18 @@ BlockVector Octree3DMapManager::getObjectDirection(Handle objNode) const
         return BlockVector::ZERO;
 }
 
+bool Octree3DMapManager::isAvatarEntity(const Entity3D *entity)
+{
+    string _entityClass = entity->getEntityClass() ;
+
+    return( (_entityClass == "avatar") ||
+          (_entityClass == "npc")    ||
+          (_entityClass == "Player") ||
+          (_entityClass == "player"));
+
+}
+
+
 bool Octree3DMapManager::isTwoPositionsAdjacent(const BlockVector &pos1, const BlockVector &pos2)
 {
     int d_x = pos1.x - pos2.x;
@@ -993,6 +1008,14 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
 
      if (entityB->getBoundingBox().nearLeftBottomConer.z >= entityA->getBoundingBox().nearLeftBottomConer.z + entityA->getBoundingBox().size_z)
         spatialRelations.insert(BELOW);
+
+     // if A is near/far to B
+     double dis = entityB->getCenterPosition() - entityA->getCenterPosition();
+
+     if (dis <= (entityA->getRadius() + entityB->getRadius())*2.0 )
+        spatialRelations.insert(NEAR);
+     else if (dis > (entityA->getRadius() + entityB->getRadius())*10.0 )
+        spatialRelations.insert(FAR_);
 
 
      return spatialRelations;

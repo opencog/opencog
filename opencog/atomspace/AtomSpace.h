@@ -1201,6 +1201,9 @@ public:
     // of callbacks. It's accessible via the Cython wrapper.
     std::list<Handle> addAtomSignalQueue;
 
+
+    static bool isHandleInSeq(Handle h, HandleSeq &seq);
+
 private:
     /**
      * Remove stimulus from atom, only should be used when Atom is deleted.

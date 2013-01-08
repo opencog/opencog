@@ -113,6 +113,8 @@ namespace opencog
 
             const map<Handle, Entity3D*>& getAllNoneBlockEntities(){return mAllNoneBlockEntities;}
 
+            const map<Handle, Entity3D*>& getAllAvatarList(){return mAllAvatarList;}
+
             int getTotalDepthOfOctree(){return mTotalDepthOfOctree;}
 
             inline  int   getFloorHeight() const {return mFloorHeight;}
@@ -301,6 +303,8 @@ namespace opencog
 
             HandleSeq getAllUnitBlockHandlesOfABlock(Block3D& _block);
 
+            bool isAvatarEntity(const Entity3D* entity);
+
         protected:
 
             // We keep these 2 map for quick search. Memory consuming: 50k blocks take about 10M RAM for one map
@@ -310,6 +314,7 @@ namespace opencog
             map<int,BlockEntity*> mBlockEntityList;
             map<int,BlockEntity*> mSuperBlockEntityList;
             map<Handle, Entity3D*> mAllNoneBlockEntities;
+            map<Handle, Entity3D*> mAllAvatarList;
             multimap<BlockVector, Entity3D*> mPosToNoneBlockEntityMap;
 
             int mTotalDepthOfOctree;

@@ -693,7 +693,7 @@ void SpaceServer::findAllBlockEntitiesOnTheMap()
         curMap->findAllBlockEntitiesOnTheMap();
 }
 
-void SpaceServer::addBlockEntityNodes()
+void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles)
 {
     vector<opencog::spatial::BlockEntity*>::iterator it = curMap->newAppearBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;
@@ -701,7 +701,10 @@ void SpaceServer::addBlockEntityNodes()
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
         entity->mEntityNode = atomspace->addNode(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
-        atomspace->setSTI(entity->mEntityNode, 1000);
+        atomspace->setSTI(entity->mEntityNode, 10000);
+
+        if (! AtomSpace::isHandleInSeq(entity->mEntityNode, toUpdateHandles))
+            toUpdateHandles.push_back(entity->mEntityNode);
     }
 
     curMap->newAppearBlockEntityList.clear();
@@ -758,11 +761,12 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
     evalLink = addPropertyPredicate("height", _entity->mEntityNode, numberNode,tv);
     timeser->addTimeInfo(evalLink,timestamp);
 
+
     // todo: add secondary properties
 
 }
 
-void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp)
+void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp,HandleSeq &toUpdateHandles)
 {
     vector<opencog::spatial::BlockEntity*>::iterator it = curMap->updateBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;
@@ -770,9 +774,11 @@ void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp)
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
         updateBlockEntityProperties(entity, timestamp);
+        toUpdateHandles.push_back(entity->mEntityNode);
     }
 
     curMap->updateBlockEntityList.clear();
+
 }
 
 Handle SpaceServer::addPropertyPredicate(

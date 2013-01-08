@@ -466,3 +466,16 @@ ENABLE_ACTION_COLLECT   = false
 # Whether to use 3D map, currently the 3D map is used by the Unity3D embodiment
 USE_3D_MAP = true
 
+# How to update the spatial relationship predicates
+
+# if we update the spatial relationship predicates
+ENABLE_SPATIAL_RELATIONSHIP_UPDATER = false
+
+# if this is true, all the relationship links are between an avatar and another entity, not include the relations between two non-avatar entities
+UPDATE_SPATIAL_PREDICATES_ONLY_ABOUT_AVATAR = true
+
+# consider all kind of objects: options: all_objects, block_entity_and_non_block_entity, only_non_block_entity
+UPDATE_SPATIAL_PREDICATES_FOR = only_non_block_entity
+
+
+

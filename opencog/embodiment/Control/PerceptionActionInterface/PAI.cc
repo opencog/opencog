@@ -666,7 +666,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processTerrainInfo((DOMElement *)list->item(i));
+        processTerrainInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
@@ -737,7 +737,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i));
+        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d finished-first-time-percept-terrian-signal done", list->getLength());
@@ -3388,7 +3388,7 @@ std::string PAI::camelCaseToUnderscore(const char* s)
  * Private methods used to parse map info by protobuf.
  * ---------------------------------------------------
  */
-void PAI::processTerrainInfo(DOMElement * element)
+void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
 {
 
     // XML is to be replaced by protobuf, but currently, we use it to wrap a
@@ -3456,11 +3456,11 @@ void PAI::processTerrainInfo(DOMElement * element)
             if (!isFirstPerceptTerrian)
             {
                 // maybe it has created new BlockEntities, add them to the atomspace
-                spaceServer().addBlockEntityNodes();
+                spaceServer().addBlockEntityNodes(toUpdateHandles);
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-                spaceServer().updateBlockEntitiesProperties(timestamp);
+                spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles);
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -4203,7 +4203,7 @@ Handle PAI::getParmValueHanleFromXMLDoc(DOMElement* paramElement)
     return resultHandle;
 }
 
-void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element)
+void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, HandleSeq &toUpdateHandles)
 {
     unsigned long timestamp = getTimestampFromElement(element);
     // if it's the first time percept this world, then we should find out all the possible existing block-entities
@@ -4214,11 +4214,11 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element)
         spaceServer().findAllBlockEntitiesOnTheMap();
 
         // maybe it has created new BlockEntities, add them to the atomspace
-        spaceServer().addBlockEntityNodes();
+        spaceServer().addBlockEntityNodes(toUpdateHandles);
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        spaceServer().updateBlockEntitiesProperties(timestamp);
+        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles);
 
         int t2 = time(NULL);
 
