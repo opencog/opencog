@@ -29,6 +29,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/distributed_moses
 	moses/local_moses
 	moses/metapopulation
+	moses/feature_selector
 	moses/moses_main
 	moses/mpi_moses
 	moses/neighborhood_sampling

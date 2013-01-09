@@ -523,7 +523,8 @@ int moses_exec(int argc, char** argv)
     // feature selection happens before each representation building
     /// Enable feature selection while selecting exemplar
     bool enable_feature_selection;
-    feature_selection_parameters fs_params;
+    feature_selector_parameters festor_params;
+    feature_selection_parameters& fs_params = festor_params.fs_params;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
@@ -1086,9 +1087,25 @@ int moses_exec(int argc, char** argv)
 
         ("fs-target-size",
          value<unsigned>(&fs_params.target_size)->default_value(20),
-            "Feature count.  This option "
-            "specifies the number of features to be selected out of "
-            "the dataset.  A value of 0 disables feature selection. \n")
+         "Feature count.  This option "
+         "specifies the number of features to be selected out of "
+         "the dataset.  A value of 0 disables feature selection. \n")
+
+        ("fs-increase-target-size",
+         value<bool>(&festor_params.increase_target_size)->default_value(1),
+         "At each generation the target size of feature selection is increased"
+         " by the existing number of features in the exemplar chosen.")
+
+        ("fs-restrict-incorrect",
+         value<bool>(&festor_params.increase_target_size)->default_value(1),
+         "Restrict feature selection to observations corresponding to"
+         " incorrect answers given by the exemplar.")
+
+        ("fs-restrict-true",
+         value<bool>(&festor_params.increase_target_size)->default_value(0),
+         "Restrict feature selection to observations corresponding to when"
+         " the exemplar returns true (this may be useful in combination with"
+         " precision scorer as it corresponds to the focus of the exemplar)")
 
         ("fs-algo",
          value<string>(&fs_params.algorithm)->default_value(simple),
@@ -1096,16 +1113,24 @@ int moses_exec(int argc, char** argv)
          .append(simple).append(" for a simple, fast max-mutual-information algo.\n")
          .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
          .append(smd).append(" for stochastic maximal dependency,\n")
-         .append(moses::hc).append(" for moses-hillclimbing,\n").c_str())
+         .append(moses::hc).append(" for moses-hillclimbing.\n").c_str())
+
+        ("fs-scorer",
+         value<string>(&fs_params.scorer)->default_value(mi),
+         str(boost::format("Feature selection fitness function (scorer).\n"
+                           " Supported scorers are:\n"
+                           "%s, for mutual information\n"
+                           "%s, for precision (see moses -h for more info)\n")
+             % mi % pre).c_str())
 
         ("fs-threshold",
          value<double>(&fs_params.threshold)->default_value(0),
-            "Improvment threshold. Floating point number. "
-            "Specifies the threshold above which the mutual information "
-            "of a feature is considered to be significantly correlated "
+         "Improvement threshold. Floating point number. "
+         "Specifies the threshold above which the mutual information "
+         "of a feature is considered to be significantly correlated "
             "to the target.  A value of zero means that all features "
-            "will be selected. \n"
-            "For the -ainc algo only, the -C flag over-rides this setting.\n")
+         "will be selected. \n"
+         "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
@@ -1126,6 +1151,24 @@ int moses_exec(int argc, char** argv)
          "interaction terms considered during incremental feature "
          "selection. Higher values make the feature selection more "
          "accurate but is combinatorially more computationally expensive.\n")
+
+        // ======= Feature-selection pre scorer only params =======
+        ("pre-penalty",
+         value<float>(&fs_params.pre_penalty)->default_value(1.0f),
+         "Activation penalty (see moses --help or man moses for more info)")
+
+        ("pre-min-activation",
+         value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
+         "Minimum activation (see moses --help or man moses for more info).\n")
+
+        ("pre-max-activation",
+         value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
+         "Maximum activation (see moses --help or man moses for more info).\n")
+
+        ("pre-positive",
+         value<bool>(&fs_params.pre_positive)->default_value(true),
+         "If 1, then precision, otherwise negative predictive value "
+         "(see moses --help or man moses for more info).\n")
 
         // ======= Feature-selection hill-climbing only params =======
         ("fs-hc-max-score",
@@ -1511,10 +1554,10 @@ int moses_exec(int argc, char** argv)
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
 {                                                                \
     /* Enable feature selection while selecting exemplar */      \
-    if (enable_feature_selection) {                              \
+    if (enable_feature_selection && fs_params.target_size > 0) { \
         /* XXX FIXME: should use the concatenation of all */     \
         /* tables, and not just the first. */                    \
-        meta_params.fstor = new feature_selector(TABLES.front(), fs_params); \
+        meta_params.fstor = new feature_selector(TABLES.front(), festor_params); \
     }                                                            \
     /* Keep the table input signature, just make sure */         \
     /* the output is the desired type. */                        \
@@ -1570,10 +1613,10 @@ int moses_exec(int argc, char** argv)
                 }
 
                 // Enable feature selection while selecting exemplar
-                if (enable_feature_selection) {
+                if (enable_feature_selection && fs_params.target_size > 0) {
                     // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
-                                                             fs_params);
+                                                             festor_params);
                 }
 
                 multibscore_based_bscore bscore(bscores);
@@ -1606,10 +1649,10 @@ int moses_exec(int argc, char** argv)
                 }
 
                 // Enable feature selection while selecting exemplar
-                if (enable_feature_selection) {
+                if (enable_feature_selection && fs_params.target_size > 0) {
                     // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
-                                                             fs_params);
+                                                             festor_params);
                 }
 
                 multibscore_based_bscore bscore(bscores);

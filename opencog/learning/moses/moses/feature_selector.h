@@ -27,6 +27,44 @@
 #include <opencog/learning/feature-selection/main/feature-selection.h>
 
 namespace opencog {
+namespace moses {    
+
+/**
+ * Parameters of feature selector
+*/
+struct feature_selector_parameters {
+    feature_selection_parameters fs_params;
+
+    /**
+     * The target_size is increase at each generation by the number of
+     * features in the exemplar.
+     */
+    bool increase_target_size;
+
+    /**
+     * Ignore the features present in the exemplar when doing feature
+     * selection.
+     */
+    bool ignore_exemplar_features;
+
+    /**
+     * Only consider the rows when the combo tree is predicting an
+     * incorrect result.
+    */
+    bool restrict_incorrect;
+
+    /**
+     * Only consider the rows when the combo tree outputs true (this
+     * is useful for precision fitness function). That option is
+     * mutually exclusive with restrict_incorrect.
+     */
+    bool restrict_true;
+
+    // /**
+    //  * 
+    //  */
+    // bool
+};
 
 /**
  * Struct in charge of selecting features maximize the amount of
@@ -37,50 +75,20 @@ struct feature_selector
     typedef std::set<combo::arity_t> feature_set;
 
     feature_selector(const combo::CTable& ctable,
-                     const feature_selection_parameters& fs_params)
-        : _ctable(ctable), _fs_params(fs_params)
-    {}
+                     const feature_selector_parameters& festor_params);
 
     feature_selector(const combo::Table& table,
-                     const feature_selection_parameters& fs_params)
-        : _ctable(table.compressed()), _fs_params(fs_params)
-    {}
+                     const feature_selector_parameters& festor_params);
 
-    /// Return a feature set that correlates well with all the rows
-    /// where the combo tree is predicting an incorrect result.
-    /// The hope is that these will be used to build a more accurate
-    /// models.
-    feature_set operator()(const combo::combo_tree& tr) const
-    {
-        combo::CTable activ_ctable(_ctable.get_labels(), _ctable.get_signature());
-        interpreter_visitor iv(tr);
-        auto ai = boost::apply_visitor(iv);
-        for (const combo::CTable::value_type& vct : _ctable) {
-            vertex predicted_out = ai(vct.first.get_variant());
-#define __LOOKAT_MOST_FREQUENT__
-#ifdef __LOOKAT_MOST_FREQUENT__
-            // Use only rows where the model is just plain wrong.  The
-            // feature selector will then look for any features that
-            // correlate well with these incorrect answers.
-            Counter<vertex, unsigned> cnt = vct.second;
-            vertex actual_out = cnt.most_frequent();
-            if (predicted_out != actual_out)
-                activ_ctable.insert(vct);
-#else
-            // Use only rows where the model is right, that is in the
-            // case the prediction bscore is used because only
-            // positive answers matter
-            if (predicted_out == combo::id::logical_true)
-                act_ctable.insert(vct);
-#endif
-        }
-        // Call feature selection
-        return select_features(activ_ctable, _fs_params);
-        // return feature_set();
-    }
+    /// Return a feature set that is good when combined with the
+    /// exemplar.
+    feature_set operator()(const combo::combo_tree& tr) const;
+
+    // Parameters
+    feature_selector_parameters params;
 
     const combo::CTable& _ctable;
-    feature_selection_parameters _fs_params;
 };
 
+} // ~namespace moses
 } // ~namespace opencog
