@@ -29,6 +29,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/spacetime/SpaceServer.h>
+#include <cstdlib>
 #include <vector>
 #include <iterator>
 #include <map>
@@ -41,8 +42,8 @@ using namespace spatial;
 SpatialPredicateUpdater::SpatialPredicateUpdater(AtomSpace & _atomSpace) :
         BasicPredicateUpdater(_atomSpace)
 {
-    is_only_update_about_avatars = Config().get_bool("UPDATE_SPATIAL_PREDICATES_ONLY_ABOUT_AVATAR");
-    update_types = Config().get("UPDATE_SPATIAL_PREDICATES_FOR");
+    is_only_update_about_avatars = config().get_bool("UPDATE_SPATIAL_PREDICATES_ONLY_ABOUT_AVATAR");
+    update_types = config().get("UPDATE_SPATIAL_PREDICATES_FOR");
 
     RELATIONS_NEED_TO_UPDATE.push_back(ABOVE);
     RELATIONS_NEED_TO_UPDATE.push_back(BELOW);
@@ -60,11 +61,21 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
                                      unsigned long timestamp
                                     )
 {
+    static bool hasDoneFirstTimeUPdate = false;
+    if (objects.size() == 0)
+        return;
+
+    int beginTime = time(NULL);
+
+    if (! hasDoneFirstTimeUPdate)
+        printf("Begin the first time spatial predicate update! Begin time: %d. Wait...\n",beginTime);
+
     // first get 3 Entity lists from the space map: Avatar list, Non-blockEntity list and blockEntity list
     set<const spatial::Entity3D*> avatarList;
     vector<const spatial::Entity3D*> nonBlockEntityList;
     vector<const spatial::Entity3D*> blockEntityList;
     vector<const spatial::Entity3D*> allEntities;
+
 
     const SpaceServer::SpaceMap & spaceMap = spaceServer().getLatestMap();
 
@@ -91,7 +102,13 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
     else
         this->computeRelationshipsBetweenAllObjects(spaceMap, allEntities, pet, timestamp);
 
+    int endTime = time(NULL);
 
+    if (! hasDoneFirstTimeUPdate)
+    {
+        printf("End the spatial predicate update! %f seconds costed!\n",(endTime - beginTime)/1000.0f);
+        hasDoneFirstTimeUPdate = true;
+    }
     /*
 //struct timeval timer_start, timer_end;
 //time_t elapsed_time = 0;

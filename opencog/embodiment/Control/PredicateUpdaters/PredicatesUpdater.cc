@@ -51,7 +51,7 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
 
     // Spatial relation predicates
-    if (Config().get_bool( "ENABLE_SPATIAL_RELATIONSHIP_UPDATER"))
+    if (config().get_bool( "ENABLE_SPATIAL_RELATIONSHIP_UPDATER"))
         updaters.push_back(new SpatialPredicateUpdater(atomSpace));
 
     petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);

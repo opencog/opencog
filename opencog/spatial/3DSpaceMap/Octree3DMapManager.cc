@@ -188,7 +188,6 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,(Entity3D*)(it->second)));
     }
 
-
 }
 
 // currently we consider all the none block entities has no collision, agents can get through them
@@ -1009,12 +1008,15 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
      if (entityB->getBoundingBox().nearLeftBottomConer.z >= entityA->getBoundingBox().nearLeftBottomConer.z + entityA->getBoundingBox().size_z)
         spatialRelations.insert(BELOW);
 
+
      // if A is near/far to B
      double dis = entityB->getCenterPosition() - entityA->getCenterPosition();
-
-     if (dis <= (entityA->getRadius() + entityB->getRadius())*2.0 )
+     double AR = entityA->getRadius();
+     double BR = entityB->getRadius();
+     double nearDis = (AR + BR)*2.0;
+     if (dis <= nearDis )
         spatialRelations.insert(NEAR);
-     else if (dis > (entityA->getRadius() + entityB->getRadius())*10.0 )
+     else if (dis > nearDis*10.0 )
         spatialRelations.insert(FAR_);
 
 
