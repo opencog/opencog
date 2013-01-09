@@ -733,15 +733,13 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
     {
         opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
         HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
-
+        foreach(Handle blockNode, unitBlockNodes)
+        {
+            SimpleTruthValue tv(1.0, 1.0);
+            Handle evalLink =  addPropertyPredicate("part-of", blockNode, _entity->mEntityNode, tv);
+            timeser->addTimeInfo(evalLink,timeStamp);
+        }
     }
-
-    Handle blocklistLink = atomspace->addLink(LIST_LINK, blocklist);
-
-    SimpleTruthValue tv(1.0, 1.0);
-    Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
-
-    timeser->addTimeInfo(evalLink,timeStamp);
 
     /*
     //    (AtTimeLink (stv 1 1)
