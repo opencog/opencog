@@ -91,6 +91,19 @@ struct pop_back_visitor : public boost::static_visitor<> {
         seq.pop_back();
     }
 };
+
+/**
+ * Replace the value of multi_type_seq at pos by its initial value
+ */
+struct init_at_visitor : public boost::static_visitor<> {
+    init_at_visitor(size_t pos) : _pos(pos) {}
+    template<typename Seq>
+    void operator()(Seq& seq) const {
+        typedef typename Seq::value_type vt;
+        seq[_pos] = vt();
+    }
+    size_t _pos;
+};
 template<typename T> 
 struct get_at_visitor : public boost::static_visitor<T> {
     get_at_visitor(size_t pos) : _pos(pos) {}
