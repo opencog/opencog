@@ -127,6 +127,11 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
             festor.params.fs_params.target_size += xmplar_features.size();
         }
 
+        // Alternatively one can directly ignore the features in the
+        // exemplar during feature selection.
+        festor.params.ignore_features = festor.params.ignore_exemplar_features ?
+            xmplar_features : set<arity_t>();
+
         // return the set of selected features as column index
         // (left most column corresponds to 0)
         auto selected_features = festor(_exemplar);

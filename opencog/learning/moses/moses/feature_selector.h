@@ -48,6 +48,11 @@ struct feature_selector_parameters {
     bool ignore_exemplar_features;
 
     /**
+     * Ignore features when doing feature selection.
+     */
+    std::set<arity_t> ignore_features;
+
+    /**
      * Only consider the rows when the combo tree is predicting an
      * incorrect result.
     */

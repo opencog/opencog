@@ -1089,23 +1089,27 @@ int moses_exec(int argc, char** argv)
          value<unsigned>(&fs_params.target_size)->default_value(20),
          "Feature count.  This option "
          "specifies the number of features to be selected out of "
-         "the dataset.  A value of 0 disables feature selection. \n")
+         "the dataset.  A value of 0 disables feature selection.\n")
 
         ("fs-increase-target-size",
          value<bool>(&festor_params.increase_target_size)->default_value(1),
          "At each generation the target size of feature selection is increased"
-         " by the existing number of features in the exemplar chosen.")
+         " by the existing number of features in the exemplar chosen.\n")
+
+        ("fs-ignore-exemplar-features",
+         value<bool>(&festor_params.ignore_exemplar_features)->default_value(0),
+         "Ignore the features present in the exemplar during feature selection.\n")
 
         ("fs-restrict-incorrect",
          value<bool>(&festor_params.increase_target_size)->default_value(1),
          "Restrict feature selection to observations corresponding to"
-         " incorrect answers given by the exemplar.")
+         " incorrect answers given by the exemplar.\n")
 
         ("fs-restrict-true",
          value<bool>(&festor_params.increase_target_size)->default_value(0),
          "Restrict feature selection to observations corresponding to when"
          " the exemplar returns true (this may be useful in combination with"
-         " precision scorer as it corresponds to the focus of the exemplar)")
+         " precision scorer as it corresponds to the focus of the exemplar).\n")
 
         ("fs-algo",
          value<string>(&fs_params.algorithm)->default_value(simple),
@@ -1153,19 +1157,19 @@ int moses_exec(int argc, char** argv)
          "accurate but is combinatorially more computationally expensive.\n")
 
         // ======= Feature-selection pre scorer only params =======
-        ("pre-penalty",
+        ("fs-pre-penalty",
          value<float>(&fs_params.pre_penalty)->default_value(1.0f),
-         "Activation penalty (see moses --help or man moses for more info)")
+         "Activation penalty (see moses --help or man moses for more info).\n")
 
-        ("pre-min-activation",
+        ("fs-pre-min-activation",
          value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
          "Minimum activation (see moses --help or man moses for more info).\n")
 
-        ("pre-max-activation",
+        ("fs-pre-max-activation",
          value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
          "Maximum activation (see moses --help or man moses for more info).\n")
 
-        ("pre-positive",
+        ("fs-pre-positive",
          value<bool>(&fs_params.pre_positive)->default_value(true),
          "If 1, then precision, otherwise negative predictive value "
          "(see moses --help or man moses for more info).\n")

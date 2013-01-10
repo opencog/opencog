@@ -37,8 +37,12 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
 {
     // Build ctable used for feature selection
     combo::CTable fs_ctable(_ctable.get_labels(), _ctable.get_signature());
+    // define interpreter visitor
     interpreter_visitor iv(tr);
     auto ai = boost::apply_visitor(iv);
+    // define visitor to initialize the features to ignore
+    std::vector<init_at_visitor> iavs(params.ignore_features.begin(),
+                                      params.ignore_features.end());
     for (const combo::CTable::value_type& vct : _ctable) {
         vertex predicted_out = ai(vct.first.get_variant());
 
@@ -63,8 +67,15 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
         }
 
         // add the row
-        if (consider_row)
-            fs_ctable.insert(vct);
+        if (consider_row) {
+            if (params.ignore_exemplar_features) {
+                auto inputs = vct.first;
+                for (auto& iav : iavs)
+                    boost::apply_visitor(iav, inputs.get_variant());
+                fs_ctable.insert({inputs, vct.second});
+            }
+            else fs_ctable.insert(vct);
+        }
     }
 
     // Call feature selection
