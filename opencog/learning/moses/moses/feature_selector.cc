@@ -22,6 +22,10 @@
 
 #include "feature_selector.h"
 
+// Name given to the feature corresponding to the output of the
+// exemplar
+#define EXEMPLAR_FEATURE_NAME "__exemplar_feature__"
+
 namespace opencog {
 namespace moses {
 
@@ -45,7 +49,7 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
     auto cto = get_type_node(get_signature_output(sig));
     if (params.exemplar_as_feature) {
         // update labels and signature with the exemplar feature
-        labels.push_back("__exemplar_feature__");
+        labels.push_back(EXEMPLAR_FEATURE_NAME);
         auto head = sig.begin();
         // this assumes that the ctable output type equals the
         // exemplar output type.
@@ -118,8 +122,7 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
 
     feature_selection_parameters tmp_fs_params(params.fs_params);
     if (params.exemplar_as_feature) {
-        // TODO add exemplar_feature as initial feature (to speed
-        // things up a bit)
+        tmp_fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
         ++tmp_fs_params.target_size;
     }
 
