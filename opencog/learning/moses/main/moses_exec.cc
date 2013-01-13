@@ -1100,6 +1100,11 @@ int moses_exec(int argc, char** argv)
          value<bool>(&festor_params.ignore_exemplar_features)->default_value(0),
          "Ignore the features present in the exemplar during feature selection.\n")
 
+        ("fs-exemplar-as-feature",
+         value<bool>(&festor_params.exemplar_as_feature)->default_value(0),
+         "Use the output of the exemplar as feature as to consider feature sets "
+         "which is are scored well in combination with that feature.\n")
+
         ("fs-restrict-incorrect",
          value<bool>(&festor_params.increase_target_size)->default_value(1),
          "Restrict feature selection to observations corresponding to"

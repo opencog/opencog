@@ -35,14 +35,33 @@ feature_selector::feature_selector(const combo::Table& table,
 
 feature_set feature_selector::operator()(const combo::combo_tree& tr) const
 {
-    // Build ctable used for feature selection
+    /////////////////////////////////////////////
+    // Build ctable used for feature selection //
+    /////////////////////////////////////////////
+
+    // set labels and signature
+    auto labels = _ctable.get_labels();
+    auto sig = _ctable.get_signature();
+    auto cto = get_type_node(get_signature_output(sig));
+    if (params.exemplar_as_feature) {
+        // update labels and signature with the exemplar feature
+        labels.push_back("__exemplar_feature__");
+        auto head = sig.begin();
+        // this assumes that the ctable output type equals the
+        // exemplar output type.
+        sig.append_child(head, cto);
+    }
     combo::CTable fs_ctable(_ctable.get_labels(), _ctable.get_signature());
+
     // define interpreter visitor
     interpreter_visitor iv(tr);
     auto ai = boost::apply_visitor(iv);
+
     // define visitor to initialize the features to ignore
     std::vector<init_at_visitor> iavs(params.ignore_features.begin(),
                                       params.ignore_features.end());
+
+    // add each considered row
     for (const combo::CTable::value_type& vct : _ctable) {
         vertex predicted_out = ai(vct.first.get_variant());
 
@@ -66,20 +85,54 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
             consider_row = predicted_out == combo::id::logical_true;
         }
 
-        // add the row
+        // add row
         if (consider_row) {
-            if (params.ignore_exemplar_features) {
-                auto inputs = vct.first;
+            auto inputs = vct.first;
+
+            // initialize all values of the ignored features
+            if (params.ignore_exemplar_features)
                 for (auto& iav : iavs)
                     boost::apply_visitor(iav, inputs.get_variant());
-                fs_ctable.insert({inputs, vct.second});
+
+            // append exemplar feature at the end
+            if (params.exemplar_as_feature) {
+                if (cto == id::boolean_type)
+                    inputs.push_back(get_builtin(predicted_out));
+                else if (cto == id::contin_type)
+                    inputs.push_back(get_contin(predicted_out));
+                else
+                    OC_ASSERT(false, "Not implemented");
             }
-            else fs_ctable.insert(vct);
+
+            fs_ctable.insert({inputs, vct.second});
         }
     }
 
-    // Call feature selection
-    return select_features(fs_ctable, params.fs_params);
+    ////////////////////////////
+    // Call feature selection //
+    ////////////////////////////
+
+    if (params.exemplar_as_feature) {
+        // TODO add exemplar_feature as initial feature (to speed
+        // things up a bit)
+        ++params.fs_params.target_size;
+    }
+
+    auto self = select_features(fs_ctable, params.fs_params);
+
+    if (params.exemplar_as_feature)
+        --params.fs_params.target_size;
+
+    // remove last feature if it's the feature exemplar
+    if (params.exemplar_as_feature) {
+        size_t xmplar_f_pos = _ctable.get_labels().size();
+        auto xmplar_f_it = self.find(xmplar_f_pos);
+        OC_ASSERT(xmplar_f_it != self.end(),
+                  "The exemplar feature has not been selected, that's weird");
+        self.erase(xmplar_f_it);
+    }
+
+    return self;
 }
 
 } // ~namespace moses

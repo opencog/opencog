@@ -65,10 +65,11 @@ struct feature_selector_parameters {
      */
     bool restrict_true;
 
-    // /**
-    //  * 
-    //  */
-    // bool
+    /**
+     * Use exemplar as feature, so feature selection can search good
+     * features sets combined with the exemplar feature.
+     */
+    bool exemplar_as_feature;
 };
 
 /**
