@@ -1116,6 +1116,14 @@ int moses_exec(int argc, char** argv)
          " the exemplar returns true (this may be useful in combination with"
          " precision scorer as it corresponds to the focus of the exemplar).\n")
 
+        ("fs-subsampling-pbty",
+         value<float>(&festor_params.subsampling_pbty)->default_value(0),
+         "Probability of discarding an observation before carrying feature "
+         "selection. 0 means no observation is discard, 1 means all are discard. "
+         "This is to force to introduce some randomness in "
+         "feature selection, as not all feature selection algorithms "
+         "have some.\n")
+
         ("fs-algo",
          value<string>(&fs_params.algorithm)->default_value(simple),
          string("Feature selection algorithm. Supported algorithms are:\n")

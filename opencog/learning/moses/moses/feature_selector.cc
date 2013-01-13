@@ -85,6 +85,10 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
             consider_row = predicted_out == combo::id::logical_true;
         }
 
+        // subsample
+        if (consider_row && params.subsampling_pbty > 0)
+            consider_row = params.subsampling_pbty <= randGen().randfloat();
+
         // add row
         if (consider_row) {
             auto inputs = vct.first;
@@ -112,16 +116,14 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
     // Call feature selection //
     ////////////////////////////
 
+    feature_selection_parameters tmp_fs_params(params.fs_params);
     if (params.exemplar_as_feature) {
         // TODO add exemplar_feature as initial feature (to speed
         // things up a bit)
-        ++params.fs_params.target_size;
+        ++tmp_fs_params.target_size;
     }
 
-    auto self = select_features(fs_ctable, params.fs_params);
-
-    if (params.exemplar_as_feature)
-        --params.fs_params.target_size;
+    auto self = select_features(fs_ctable, tmp_fs_params);
 
     // remove last feature if it's the feature exemplar
     if (params.exemplar_as_feature) {

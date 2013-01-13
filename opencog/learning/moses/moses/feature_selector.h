@@ -70,6 +70,11 @@ struct feature_selector_parameters {
      * features sets combined with the exemplar feature.
      */
     bool exemplar_as_feature;
+
+    /**
+     * Probability of discarding a row
+     */
+    float subsampling_pbty;
 };
 
 /**
