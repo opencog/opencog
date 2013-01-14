@@ -649,10 +649,11 @@ def match_predicate(space,target):
     return candidates
 
 def match_subset(space,target):
-    
+
     A, B = target.args
-    if A.get_type() != t.ConceptNode or B.get_type() != t.ConceptNode:
-    #if A.get_type() != t.PredicateNode or B.get_type() != t.PredicateNode:
+    compatible = ((A.get_type() == t.ConceptNode and B.get_type() == t.ConceptNode) or
+                 (A.get_type() == t.PredicateNode and B.get_type() == t.PredicateNode))
+    if not compatible:
         return []
 
     def members(concept):
@@ -675,8 +676,9 @@ def match_subset(space,target):
         return mems
 
     # Find the members of each concept
-    memA = members(A)
-    memB = members(B)
+    # For single-argument predicates, this is the same as EvaluationLinks
+    memA = members(A) + evals(A)
+    memB = members(B) + evals(B)
 #    memA = evals(A)
 #    memB = evals(B)
 

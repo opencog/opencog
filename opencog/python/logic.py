@@ -151,7 +151,8 @@ class Chainer:
                 atom = atom_from_tree(tr, self.space)
                 # haxx
                 atom.tv = self.get_tvs(tr)[0]
-                ret.append(atom.h)
+                #ret.append(atom.h)
+                ret.append(atom)
             
             pprint(self.num_app_pdns_per_level)
             pprint(self.num_uses_per_rule_per_level)

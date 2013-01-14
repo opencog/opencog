@@ -2,6 +2,7 @@
 to linking issues.'''
 import ConfigParser
 from time import time
+from pprint import pprint
 
 import util
 from opencog.atomspace import AtomSpace, Atom, Handle
@@ -140,7 +141,7 @@ def run_pln_example(a, f):
     else:
         res = c.bc(target_tr, nsteps)
 
-    print res
+    print map(str, res)
 
     if len(res):
         print 'PASSED'
