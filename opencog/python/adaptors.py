@@ -145,6 +145,7 @@ class ForestExtractor:
                 else:
                     self.tree_embeddings[tree].append(substitution)
                     for obj in objects:
+                        # modifies self.incoming
                         tree_embeddings_for_obj = self.incoming[obj]
                         if substitution not in tree_embeddings_for_obj[tree]:
                             tree_embeddings_for_obj[tree].append(substitution)
@@ -195,7 +196,7 @@ class ForestExtractor:
     def is_object(self, atom):
         # only useful for pathfinding visualization!
         #return atom.name.startswith('at ')
-        return atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) or atom.name.startswith('at ') # or self.is_action_instance(atom)# or self.is_action_element(atom)
+        return atom.is_a(t.StructureNode) or atom.is_a(t.BlockEntityNode) or atom.is_a(t.ObjectNode) or atom.is_a(t.SemeNode) or atom.is_a(t.TimeNode) or atom.name.startswith('at ') # or self.is_action_instance(atom)# or self.is_action_element(atom)
         
     def is_action_instance(self, atom):        
         return atom.t == t.ConceptNode and len(atom.name) and atom.name[-1].isdigit()

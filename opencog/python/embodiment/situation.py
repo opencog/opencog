@@ -56,11 +56,11 @@ class SituationGenerator(object):
                                 predicate_node = self.atomspace.add_node(types.PredicateNode, property, _default_tv)
                                 value_node = self.atomspace.add_node(types.__dict__[predicate_type],
                                     predicate_value, _default_tv)
-                                list_link = self.atomspace.add_link(types.ListLink, [block, value_node], _default_tv)
+                                list_link = self.atomspace.add_link(types.ListLink, [block, value_node])
                                 self.atomspace.add_link(types.EvaluationLink, [predicate_node, list_link], _default_tv)
                         blocks_predicate = self.atomspace.add_node(types.PredicateNode, 'block-list', _default_tv)
-                        block_list = self.atomspace.add_link(types.ListLink, blocks, _default_tv)
-                        list_link = self.atomspace.add_link(types.ListLink, [entity_node, block_list], _default_tv)
+                        block_list = self.atomspace.add_link(types.ListLink, blocks)
+                        list_link = self.atomspace.add_link(types.ListLink, [entity_node, block_list])
                         self.atomspace.add_link(types.EvaluationLink, [blocks_predicate, list_link], _default_tv)
                     nodes.append(entity_node)
         return nodes
@@ -84,7 +84,7 @@ class SituationGenerator(object):
             for descriptor in spatial_relation_descriptors:
                 for i in range(descriptor.weight):
                     entity_nodes = self._generate_block_entity_node_from_descriptions(descriptor.type_descriptors)
-                    list_link = self.atomspace.add_link(types.ListLink, entity_nodes, _default_tv)
+                    list_link = self.atomspace.add_link(types.ListLink, entity_nodes)
                     predicate_node = self.atomspace.add_node(types.PredicateNode, descriptor.relation, _default_tv)
                     self.spatial_relations.add(predicate_node)
                     self.atomspace.add_link(types.EvaluationLink, [predicate_node, list_link], _default_tv)
@@ -99,7 +99,7 @@ class SituationGenerator(object):
                 if index_of_first_entity != index_of_second_entity:
                     break
             list_link = self.atomspace.add_link(types.ListLink,
-                [entity_nodes[index_of_first_entity], entity_nodes[index_of_second_entity]], _default_tv)
+                [entity_nodes[index_of_first_entity], entity_nodes[index_of_second_entity]])
             self.atomspace.add_link(types.EvaluationLink, [predicate_node, list_link], _default_tv)
 
 def generate_sample_situation(atomspace):
@@ -153,3 +153,8 @@ if __name__ == '__main__':
     generate_sample_situation(atomspace)
     atomspace.print_list()
 
+    from fishgram import *
+    fishAndChips = Fishgram(atomspace)
+    notice_changes(atomspace)
+    fishAndChips.forest.extractForest()
+    fishAndChips.run()

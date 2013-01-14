@@ -90,7 +90,7 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 2
+        self.min_embeddings = 10
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
@@ -117,12 +117,12 @@ class Fishgram:
         which finds frequent implication rules by first requiring very frequent rules and then needing less frequent
         ones if it can't find any."""
         # This number could be anything
-        self.min_embeddings = 77
+        self.min_embeddings = 20
         
         while self.min_embeddings > 0:
             #print "support =", self.min_embeddings
             self.implications()
-            self.min_embeddings -= 5
+            self.min_embeddings -= 2
 
     #import profiling
     #@profiling.profile_func()
@@ -153,15 +153,15 @@ class Fishgram:
         '''Just a helper function for closed_bfs_layers'''
         #next_layer_iter = self.extensions(prev_layer)
         next_layer_iter = self.extensions_simple(prev_layer)
-        #return self.prune_frequency(next_layer_iter)
+        return list(self.prune_frequency(next_layer_iter))
         #self.viz.outputTreeNode(target=[], parent=None, index=0)
         
         # This would find+store the whole layer of extensions before pruning them
         # Less efficient but may be easier to debug
-        next_layer = list(next_layer_iter)
+        #next_layer = list(next_layer_iter)
 
         ## @@c
-        return self.sort_surprise(next_layer)
+        #return self.sort_surprise(next_layer)
         #return next_layer
 
     def closed_bfs_layers(self):
@@ -187,12 +187,14 @@ class Fishgram:
                 del new_layer[self.max_per_layer+1:]
                 #conj_length = set(len(pe[0].conj+pe[0].seqs) for pe in new_layer)
                 conj_length = len(new_layer[0][0].conj) + len(new_layer[0][0].seqs)
-                log.info("****************layer prototype**************************************")
-                log.pprint(new_layer)
+                #log.info("****************layer prototype**************************************")
+                #log.pprint(new_layer)
                 #log.info("****************layer instance**************************************")
                 #self.print_layer_instance(new_layer)
                 # check every tree in every pattern of every layer is right
                 log.info(' Conjunctions of size%s, with %s patterns'%(conj_length, len(new_layer)))
+                for (pattern, bindings) in new_layer:
+                    print pattern
                 yield new_layer
             prev_layer = new_layer
         log.flush()
@@ -384,20 +386,21 @@ class Fishgram:
     #
     # @return (tree, [subgroup1, subgroup2, ...]), ...
     def lookup_extending_rel_embeddings(self, prev_emb):
-        extensions = defaultdict(set)
+        #extensions = defaultdict(set)
+        extensions = defaultdict(list)
         for obj in prev_emb.values():
             # forest.incoming: {obj1:{tree1:set([binding_group1, binding_group2, ...]), tree2:set([]), ... }, obj2:{...}}
             # tree_embeddings_for_obj: trees including @obj-----{tree1:[], tree2:[] }
             tree_embeddings_for_obj = self.forest.incoming[obj]
             for tr_, embs_ in tree_embeddings_for_obj.items():
-                # when two tree have the same structure, but different binding
                 for s in embs_:
-                    extensions[tr_].add(s)
+                    #extensions[tr_].add(s)
+                    if s not in extensions[tr_]: extensions[tr_].append(s)
         # you could also have an index for events being in the future
         # extensions: {tree: set([subgroup1, subgroup2, ...]), ...}
         # event_embeddings: {tree: [subgroup1, subgroup2, ...], ...}
         #rels_bindingsets = extensions.items() + self.forest.event_embeddings.items()
-        rels_bindingsets = extensions.items() 
+        rels_bindingsets = extensions.items()
         return rels_bindingsets
 
 
@@ -829,7 +832,7 @@ try:
             #print "runing Fishgram again......" 
             #print "*******************************************************************************************" 
             result = self.fish.run()
-            pprint(result)
+            #pprint(result)
             #print "Finished one Fishgram cycle"
             #print self.cycles
 
@@ -855,6 +858,6 @@ def test_fishgram(atomspace):
     #print (fish.forest.all_trees)
 
     
-    #fish.iterated_implications()
+    fish.iterated_implications()
     #self.fish.implications()
-    fish.run()
+    #fish.run()
