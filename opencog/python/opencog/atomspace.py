@@ -130,8 +130,8 @@ class Link(Atom):
                 import pdb; pdb.set_trace()
 
     def __repr__(self):
-        return '<'+self.type+' '+repr(
-            [repr(atom) for atom in self.out])+'>'
+        return '('+self.type+' '+repr(tuple(
+            [repr(atom) for atom in self.out]))+')'
 
     #def getout(self):
     #    pass
@@ -212,7 +212,8 @@ class AtomSpace(object):
     # legacy Cython-style interface
     def print_list(self):
         for atom in self:
-            print atom
+            if len(atom._in) is 0:
+                print atom
 
     def maybe_add(self, atom):
         '''If this atom hasn't been added, add it and return it. Otherwise, return the
