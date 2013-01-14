@@ -139,7 +139,9 @@ def run_pln_example(a, f):
         res = logic.do_planning(a, target_tr,c)
     else:
         res = c.bc(target_tr, nsteps)
-    
+
+    print res
+
     if len(res):
         print 'PASSED'
         passed.append(f)

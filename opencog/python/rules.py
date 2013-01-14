@@ -176,44 +176,44 @@ def rules(a, deduction_types):
                        name = 'Not', 
                        formula = formulas.notFormula))
 
-    for type in ['AndLink', 'SimultaneousAndLink']:
-        # A rule to create an AndLink from two AndLinks.
-        # There's no point in using size 2 because the premises wouldn't be in AndLinks
-        for totalsize in xrange(4,11):
-            for size_a in xrange(2, totalsize-1):
-                size_b = totalsize - size_a
-
-                vars = [new_var() for x in xrange(totalsize)]
-                and_result = T(type, vars)
-
-                and_a = T(type, vars[0:size_a])
-                and_b = T(type, vars[size_a:totalsize])
-
-                r = Rule(and_result,
-                         [and_a,
-                          and_b],
-                         name = type[:-4]+'Partition %s/%s' % (size_a, size_b),
-                         formula = formulas.andPartitionFormula
-                         )
-                rules.append(r)
-
-        # A rule to create an AndLink from an AndLink and a single premise
-        for totalsize in xrange(3,11):
-            size_b = totalsize-1
-
-            vars = [new_var() for x in xrange(totalsize)]
-            and_result = T(type, vars)
-
-            thing_a = vars[0]
-            and_b = T(type, vars[1:totalsize])
-
-            r = Rule(and_result,
-                [thing_a,
-                 and_b],
-                name = type[:-4]+'AndBuilding %s' % (size_b,),
-                formula = formulas.andPartitionFormula
-            )
-            rules.append(r)
+#    for type in ['AndLink', 'SimultaneousAndLink']:
+#        # A rule to create an AndLink from two AndLinks.
+#        # There's no point in using size 2 because the premises wouldn't be in AndLinks
+#        for totalsize in xrange(4,11):
+#            for size_a in xrange(2, totalsize-1):
+#                size_b = totalsize - size_a
+#
+#                vars = [new_var() for x in xrange(totalsize)]
+#                and_result = T(type, vars)
+#
+#                and_a = T(type, vars[0:size_a])
+#                and_b = T(type, vars[size_a:totalsize])
+#
+#                r = Rule(and_result,
+#                         [and_a,
+#                          and_b],
+#                         name = type[:-4]+'Partition %s/%s' % (size_a, size_b),
+#                         formula = formulas.andPartitionFormula
+#                         )
+#                rules.append(r)
+#
+#        # A rule to create an AndLink from an AndLink and a single premise
+#        for totalsize in xrange(3,11):
+#            size_b = totalsize-1
+#
+#            vars = [new_var() for x in xrange(totalsize)]
+#            and_result = T(type, vars)
+#
+#            thing_a = vars[0]
+#            and_b = T(type, vars[1:totalsize])
+#
+#            r = Rule(and_result,
+#                [thing_a,
+#                 and_b],
+#                name = type[:-4]+'AndBuilding %s' % (size_b,),
+#                formula = formulas.andPartitionFormula
+#            )
+#            rules.append(r)
 
     # PLN's heuristic Rules to convert one kind of link to another. There are other
     # variations on this Rule defined in the PLN book, but not implemented yet.
@@ -649,9 +649,10 @@ def match_predicate(space,target):
     return candidates
 
 def match_subset(space,target):
+    
     A, B = target.args
-    #if A.get_type() != t.ConceptNode or B.get_type() != t.ConceptNode:
-    if A.get_type() != t.PredicateNode or B.get_type() != t.PredicateNode:
+    if A.get_type() != t.ConceptNode or B.get_type() != t.ConceptNode:
+    #if A.get_type() != t.PredicateNode or B.get_type() != t.PredicateNode:
         return []
 
     def members(concept):
@@ -674,10 +675,10 @@ def match_subset(space,target):
         return mems
 
     # Find the members of each concept
-#    memA = members(A)
-#    memB = members(B)
-    memA = evals(A)
-    memB = evals(B)
+    memA = members(A)
+    memB = members(B)
+#    memA = evals(A)
+#    memB = evals(B)
 
     print memA
     print
