@@ -144,13 +144,13 @@ def rules(a, deduction_types):
                                     formula = formulas.deductionSimpleFormula))
     
     # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
-    for type in deduction_types:
-        rules.append(Rule( T(type, 2, 1), 
-                                     [T(type, 1, 2),
-                                      Var(1),
-                                      Var(2)], 
-                                     name='Inversion', 
-                                     formula = formulas.inversionFormula))
+#    for type in deduction_types:
+#        rules.append(Rule( T(type, 2, 1),
+#                                     [T(type, 1, 2),
+#                                      Var(1),
+#                                      Var(2)],
+#                                     name='Inversion',
+#                                     formula = formulas.inversionFormula))
 
     # Calculating logical And/Or/Not. These have probabilities attached,
     # but they work similarly to the Boolean versions.
@@ -261,6 +261,33 @@ def rules(a, deduction_types):
     rules += temporal_rules(a)
     
     rules += planning_rules(a)
+
+    r = Rule(
+        T('SubsetLink', new_var(), new_var()),
+        [],
+        name = 'SubsetEvaluation',
+        match = match_subset
+    )
+    rules.append(r)
+
+    r = Rule(
+        T('IntensionalInheritanceLink', new_var(), new_var()),
+        [],
+        name = 'IntensionalInheritanceEvaluation',
+        match = match_intensional_inheritance
+    )
+    rules.append(r)
+
+    a,b = new_var(), new_var()
+    rules.append(
+        Rule(
+            T('InheritanceLink', a, b),
+            [T('SubsetLink', a, b),
+             T('IntensionalInheritanceLink', a, b)],
+            name = 'InheritanceEvaluation',
+            formula = formulas.inheritanceFormula
+        )
+    )
 
     # Return every Rule specified above.
     return rules
@@ -503,6 +530,17 @@ def create_temporal_matching_function(formula):
 
 # See how they are used in rules() above.
 
+def match_wrapper(space, target, match):
+    candidate_heads_tvs = match(space, target)
+
+    heads_tvs = []
+    for (h, tv) in candidate_heads_tvs:
+        s = unify(h, target, {})
+        if s != None:
+            heads_tvs.append( (h,tv) )
+    return heads_tvs
+
+
 def match_axiom_slow(space,target,candidates = None):
     if isinstance(target.op, Atom):
         candidates = [target.op]
@@ -609,6 +647,123 @@ def match_predicate(space,target):
             candidates.append((c, None))
     
     return candidates
+
+def match_subset(space,target):
+    A, B = target.args
+    #if A.get_type() != t.ConceptNode or B.get_type() != t.ConceptNode:
+    if A.get_type() != t.PredicateNode or B.get_type() != t.PredicateNode:
+        return []
+
+    def members(concept):
+        '''For each member of concept, return the node and the strength of membership'''
+        template = T('MemberLink', new_var(), concept)
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        mems = [(tr.args[0], tv.mean) for (tr, tv) in trees_tvs]
+        return mems
+
+    def evals(concept):
+        template = T(
+            'EvaluationLink',
+                concept,
+                T('ListLink', new_var())
+        )
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        mems = [(tr.args[1].args[0], tv.mean) for (tr, tv) in trees_tvs]
+        return mems
+
+    # Find the members of each concept
+#    memA = members(A)
+#    memB = members(B)
+    memA = evals(A)
+    memB = evals(B)
+
+    print memA
+    print
+    print memB
+
+    # calculate P(x in B | x in A) = P(A^B) / P(A)
+    # based on the fuzzy-weighted average
+    #nodes_in_B = [m for (m,s) in memB]
+    nodesB = {m:s for (m,s) in memB}
+
+    N_AB = 0
+    for (mA, sA) in memA:
+        if mA in nodesB:
+            sB = nodesB[mA]
+
+            # min is the definition of fuzzy-AND
+            N_AB += min(sA,sB)
+    
+    #N_AB = sum(s for (m, s) in memA if m in nodes_in_B)
+    N_A = sum(s for (m, s) in memA)
+    if N_A > 0:
+        P = N_AB*1.0 / N_A
+    else:
+        return []
+
+    tv = TruthValue(P, confidence_to_count(1.0))
+
+    return [(target, tv)]
+
+def match_intensional_inheritance(space, target):
+    A, B = target.args
+    if A.get_type() != t.ConceptNode or B.get_type() != t.ConceptNode:
+        return []
+
+    def create_ASSOC(concept):
+        # ASSOC(x, concept) = [Subset x concept - Subset(Not x, concept)]+
+
+        assoc_name = 'ASSOC(%s)' % (concept.op.name,)
+        assoc_node = space.add_node(t.ConceptNode, assoc_name)
+
+        template = T('SubsetLink', new_var(), concept)
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        # for each x that is a subset of concept
+        for (tr, tv) in trees_tvs:
+            #print tr, tv
+            x = tr.args[0]
+            if x.get_type() != t.ConceptNode:
+                continue
+            # Now find Subset(Not x, concept)
+            # TODO currently it will just skip processing x if that's unavailable
+            template_not = T('SubsetLink',
+                T('NotLink', x),
+                concept
+            )
+            not_candidates = match_wrapper(space, template_not, match_axiom)
+            #print not_candidates
+            assert len(not_candidates) < 2
+            if len(not_candidates) == 0:
+                print 'missing link',template_not
+                continue
+
+            (_, tv_not) = not_candidates[0]
+            assoc_strength = tv.mean - tv_not.mean
+
+            # TODO obviously we're fudging the confidence values here
+            if assoc_strength > 0:
+                mem_tr = T('MemberLink',
+                    x,
+                    assoc_node
+                )
+                mem_link = atom_from_tree(mem_tr, space)
+                mem_link.tv = TruthValue(assoc_strength, confidence_to_count(1.0))
+                print mem_link
+
+        return T(assoc_node)
+
+    ASSOC_A = create_ASSOC(A)
+    ASSOC_B = create_ASSOC(B)
+
+    # IntInh A B = Subset ASSOC(A) ASSOC(B)
+    subset_target = T('SubsetLink', ASSOC_A, ASSOC_B)
+    [(_, tv)] = match_subset(space, subset_target)
+
+    int_inh = T('IntensionalInheritanceLink', A, B)
+    return [(int_inh, tv)]
 
 ## @} 
 class Rule :

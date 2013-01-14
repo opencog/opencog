@@ -29,7 +29,8 @@ class ForestExtractor:
         # policy
         # Whether to create miner-friendly output, rather than human-friendly output.
         # Makes it output all object-nodes with the same label. May be more useful for visualisation anyway.
-        self.miner_friendly = False
+        # Not relevant to the Fishgram algorithm, only to external miners (abandoned)
+        self.miner_friendly = True
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion

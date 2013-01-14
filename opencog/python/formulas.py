@@ -123,6 +123,14 @@ def ext2InhFormula(tvs, U):
     nABint = nAB * EXTENSION_TO_INTENSION_DISCOUNT_FACTOR
     return (sABint, nABint)
 
+def inheritanceFormula(tvs, U):
+    [(sExt, nExt), (sInt, nInt)] = tvs
+
+    s = (sExt + sInt) / 2.0
+    n = (nExt + nInt) / 2.0
+
+    return (s, n)
+
 def low(n):
     return max(n, 0.00001)
 

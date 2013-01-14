@@ -50,6 +50,8 @@ bc/plus_test.conf
 bc/new/before_test.conf
 ''')
 
+files_list = '''bc/new/subset_test.conf'''
+
 #files_list = '''bc/new/before_test.conf'''
 
 #files_list = '''bc/plus_test.conf'''
