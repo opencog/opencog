@@ -47,21 +47,19 @@ class SituationGenerator(object):
                     entity_node = self.atomspace.add_node(types.BlockEntityNode,
                         self._generate_unique_name(descriptor.object_type), _default_tv)
                     if descriptor.block_type_descriptions is not None:
-                        blocks = []
                         for property, predicate_type, predicate_value in descriptor.block_type_descriptions:
                             for i in range(randrange(1,10)):
                                 block = self.atomspace.add_node(types.StructureNode,
                                     self._generate_unique_name('CHUNK_BLOCK'), _default_tv)
-                                blocks.append(block)
                                 predicate_node = self.atomspace.add_node(types.PredicateNode, property, _default_tv)
                                 value_node = self.atomspace.add_node(types.__dict__[predicate_type],
                                     predicate_value, _default_tv)
-                                list_link = self.atomspace.add_link(types.ListLink, [block, value_node], _default_tv)
+                                list_link = self.atomspace.add_link(types.ListLink, [block, value_node])
                                 self.atomspace.add_link(types.EvaluationLink, [predicate_node, list_link], _default_tv)
-                        blocks_predicate = self.atomspace.add_node(types.PredicateNode, 'block-list', _default_tv)
-                        block_list = self.atomspace.add_link(types.ListLink, blocks, _default_tv)
-                        list_link = self.atomspace.add_link(types.ListLink, [entity_node, block_list], _default_tv)
-                        self.atomspace.add_link(types.EvaluationLink, [blocks_predicate, list_link], _default_tv)
+
+                                part_of_predicate = self.atomspace.add_node(types.PredicateNode, 'part-of', _default_tv)
+                                list_link = self.atomspace.add_link(types.ListLink, [block, entity_node])
+                                self.atomspace.add_link(types.EvaluationLink, [part_of_predicate, list_link], _default_tv)
                     nodes.append(entity_node)
         return nodes
 
@@ -84,10 +82,11 @@ class SituationGenerator(object):
             for descriptor in spatial_relation_descriptors:
                 for i in range(descriptor.weight):
                     entity_nodes = self._generate_block_entity_node_from_descriptions(descriptor.type_descriptors)
-                    list_link = self.atomspace.add_link(types.ListLink, entity_nodes, _default_tv)
-                    predicate_node = self.atomspace.add_node(types.PredicateNode, descriptor.relation, _default_tv)
-                    self.spatial_relations.add(predicate_node)
-                    self.atomspace.add_link(types.EvaluationLink, [predicate_node, list_link], _default_tv)
+                    for node in entity_nodes:
+                        list_link = self.atomspace.add_link(types.ListLink, entity_nodes)
+                        predicate_node = self.atomspace.add_node(types.PredicateNode, descriptor.relation, _default_tv)
+                        self.spatial_relations.add(predicate_node)
+                        self.atomspace.add_link(types.EvaluationLink, [predicate_node, list_link], _default_tv)
         entity_nodes += self._generate_block_entity_node_from_descriptions(type_descriptors)
         number_of_entities = len(entity_nodes)
 
@@ -99,47 +98,47 @@ class SituationGenerator(object):
                 if index_of_first_entity != index_of_second_entity:
                     break
             list_link = self.atomspace.add_link(types.ListLink,
-                [entity_nodes[index_of_first_entity], entity_nodes[index_of_second_entity]], _default_tv)
+                [entity_nodes[index_of_first_entity], entity_nodes[index_of_second_entity]])
             self.atomspace.add_link(types.EvaluationLink, [predicate_node, list_link], _default_tv)
 
 def generate_sample_situation(atomspace):
 
     garden_descriptor = TypeDescriptor(10, 'tree', [('color', 'ConceptNode', 'green'),
-                                                        ('color', 'ConceptNode', 'brown')])
-#     Describes 10 instances following Scheme definition of a tree:
-#
-#    (EvaluationLink (stv 1 0.0012484394)
-#        (PredicateNode "block-list")
-#        (ListLink
-#            (BlockEntityNode "tree" (av 1000 0 0))
-#            (ListLink
-#                (StructureNode "CHUNK_BLOCK_0")
-#                (StructureNode "CHUNK_BLOCK_1")
-#        )
-#    )
-#
-#    (EvaluationLink (stv 1 0.0012484394)
-#        (PredicateNode "color")
-#        (ListLink
-#            (StructureNode "CHUNK_BLOCK_0")
-#            (ConceptNode "green")
-#        )
-#    )
-#
-#    (EvaluationLink (stv 1 0.0012484394)
-#        (PredicateNode "color")
-#        (ListLink
-#            (StructureNode "CHUNK_BLOCK_1")
-#            (ConceptNode "brown")
-#        )
-#    )
-#
-#    Note: A random number >0 <10 of blocks with given description
-#    are generated, all bound to given 'block_type_descriptions' which
-#    is a list of tuples in form of:
-#    (property_name, predicate_type, predicate_value)
-#    e.g. for tree, block_type_descriptions would be:
-#    [('color', 'ConceptNode', 'green'), ('color', 'ConceptNode', 'brown')]
+                                                    ('color', 'ConceptNode', 'brown')])
+    #     Describes 10 instances following Scheme definition of a tree:
+    #
+    #    (EvaluationLink (stv 1 0.0012484394)
+    #        (PredicateNode "block-list")
+    #        (ListLink
+    #            (BlockEntityNode "tree" (av 1000 0 0))
+    #            (ListLink
+    #                (StructureNode "CHUNK_BLOCK_0")
+    #                (StructureNode "CHUNK_BLOCK_1")
+    #        )
+    #    )
+    #
+    #    (EvaluationLink (stv 1 0.0012484394)
+    #        (PredicateNode "color")
+    #        (ListLink
+    #            (StructureNode "CHUNK_BLOCK_0")
+    #            (ConceptNode "green")
+    #        )
+    #    )
+    #
+    #    (EvaluationLink (stv 1 0.0012484394)
+    #        (PredicateNode "color")
+    #        (ListLink
+    #            (StructureNode "CHUNK_BLOCK_1")
+    #            (ConceptNode "brown")
+    #        )
+    #    )
+    #
+    #    Note: A random number >0 <10 of blocks with given description
+    #    are generated, all bound to given 'block_type_descriptions' which
+    #    is a list of tuples in form of:
+    #    (property_name, predicate_type, predicate_value)
+    #    e.g. for tree, block_type_descriptions would be:
+    #    [('color', 'ConceptNode', 'green'), ('color', 'ConceptNode', 'brown')]
 
 
     house_descriptor = TypeDescriptor(1, 'house')
@@ -152,4 +151,12 @@ if __name__ == '__main__':
     atomspace = AtomSpace()
     generate_sample_situation(atomspace)
     atomspace.print_list()
+    print '\n==========================================='
+    print 'Fishgram'
+    print '===========================================\n'
 
+    from fishgram import *
+    fishAndChips = Fishgram(atomspace)
+    notice_changes(atomspace)
+    fishAndChips.forest.extractForest()
+    fishAndChips.run()
