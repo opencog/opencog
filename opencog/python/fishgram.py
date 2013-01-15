@@ -587,24 +587,68 @@ class Fishgram:
         id = 1001
         
         for layer in layers:
-            for (conj, embs) in layer:                
-                if (len(get_varlist(conj)) == 1):
-                    concept = self.atomspace.add_node(t.ConceptNode, 'fishgram_'+str(id))
-                    id+=1
-                    #print concept
-                    for tr in conj:
-                        s = {Var(0):concept}
-                        bound_tree = subst(s, tr)
-                        #print atom_from_tree(bound_tree, self.atomspace)
+            for (ptn, embs) in layer:
+                conj = ptn.conj + ptn.seqs
+
+
+                DEFAULT_TV = TruthValue(1,1)
+
+                # Alternative approach for one variable. It outputs the properties of the concept,
+                # but the new approach outputs the members.
+#                if (len(get_varlist(conj)) == 1):
+#                    concept = Tree(self.atomspace.add_node(t.ConceptNode, 'fishgram_'+str(id), DEFAULT_TV))
+#                    id+=1
+#                    print concept
+#
+#                    for tr in conj:
+#                        assert isinstance(tr, Tree)
+#                        s = {Var(0):concept}
+#                        bound_tree = subst(s, tr)
+#                        assert isinstance(bound_tree, Tree)
+#                        link = atom_from_tree(bound_tree, self.atomspace)
+#                        link.tv = DEFAULT_TV
+#                        print link
+#                else:
+                # Create concept nodes for each single variable.
+                # So if you have (AtTime $T (eats $1 $2))
+                # you get "times when eating happens",
+                # "things that eat something sometimes" and
+                # "things that get eaten sometimes.
+                for varnumber in xrange(0, len(get_varlist(conj))):
+                    var = Var(varnumber)
+
+                    concept_name = str(varnumber) + ' where '+str(conj)
+                    concept = Tree(self.atomspace.add_node(t.ConceptNode, concept_name, DEFAULT_TV))
+                    print concept
+
+                    # Output the members of this concept.
+                    members = set()
+                    for s in embs:
+                        # If the embedding (binding) is (AtTime $0=42 (eats $1=cat23 $2=mouse17)), and var is
+                        # $1, then the member is cat23
+                        member = s[var]
+                        members.add(member)
+
+                    for member in members:
+                        memberlink = Tree('MemberLink', [member, concept])
+                        #print memberlink
+                        link = atom_from_tree(memberlink, self.atomspace)
+                        link.tv = DEFAULT_TV
+                        print link
 
     def outputPredicateNodes(self, layers):
         id = 9001
         
         for layer in layers:
-            for (conj, embs) in layer:
+            for (ptn, embs) in layer:
                 predicate = self.atomspace.add_node(t.PredicateNode, 'fishgram_'+str(id))
                 id+=1
-                
+
+                assert isinstance(ptn, Pattern)
+                # TODO: this ignores the time sequence stuff...
+
+                conj = ptn.conj+ptn.seqs
+
                 vars = get_varlist(conj)
 
                 evalLink = T('EvaluationLink',
@@ -625,7 +669,7 @@ class Fishgram:
                 #eval_a = atom_from_tree(evalLink, self.atomspace)
                 #eval_a.tv = TruthValue(1, count)
                 
-                #print a
+                print a
 
 
     def output_causal_implications_for_last_layer(self, layers):
@@ -694,32 +738,32 @@ class Fishgram:
             #print a
 
 
-    def find_exists_embeddings(self, embs):
-        if not len(embs):
-            return embs
-        
-        # All embeddings for a conjunction have the same order of times.
-        # This can only be assumed in the magic-sequence version, where all possible sequence links are included.
-        # Making it a list rather than a generator because a) min complains if you give it a size-0 list and b) it's small anyway.
-        times = [ (var,obj) for (var,obj) in embs[0].items() if obj.get_type() == t.TimeNode ]
-        if not len(times):
-            return embs
-        
-        def int_from_var_obj(ce):
-            return int(ce[1].op.name)
-        
-        first_time_var_obj = min(times, key=int_from_var_obj)
-        first_time, _ = first_time_var_obj
-        
-        simplified_embs = set()
-        for s in embs:
-            simple_s = tuple( (var, obj) for (var, obj) in s.items() if obj.get_type() != t.TimeNode or var == first_time  )
-            simplified_embs.add(simple_s)
-        
-        #if len(simplified_embs) != len(embs):
-            #print '++find_exists_embeddings', embs, '=>', simplified_embs
-        
-        return simplified_embs
+#    def find_exists_embeddings(self, embs):
+#        if not len(embs):
+#            return embs
+#
+#        # All embeddings for a conjunction have the same order of times.
+#        # This can only be assumed in the magic-sequence version, where all possible sequence links are included.
+#        # Making it a list rather than a generator because a) min complains if you give it a size-0 list and b) it's small anyway.
+#        times = [ (var,obj) for (var,obj) in embs[0].items() if obj.get_type() == t.TimeNode ]
+#        if not len(times):
+#            return embs
+#
+#        def int_from_var_obj(ce):
+#            return int(ce[1].op.name)
+#
+#        first_time_var_obj = min(times, key=int_from_var_obj)
+#        first_time, _ = first_time_var_obj
+#
+#        simplified_embs = set()
+#        for s in embs:
+#            simple_s = tuple( (var, obj) for (var, obj) in s.items() if obj.get_type() != t.TimeNode or var == first_time  )
+#            simplified_embs.add(simple_s)
+#
+#        #if len(simplified_embs) != len(embs):
+#            #print '++find_exists_embeddings', embs, '=>', simplified_embs
+#
+#        return simplified_embs
 
 
 def notice_changes(atomspace):    
@@ -858,6 +902,12 @@ def test_fishgram(atomspace):
     #print (fish.forest.all_trees)
 
     
-    fish.iterated_implications()
+    #fish.iterated_implications()
     #self.fish.implications()
-    #fish.run()
+    layers = fish.run()
+
+    import pdb; pdb.set_trace()
+    print 'concept nodes'
+    fish.outputConceptNodes(layers)
+    #print 'predicate nodes'
+    #fish.outputPredicateNodes(layers)
