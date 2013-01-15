@@ -85,10 +85,10 @@ struct bscore_base : public unary_function<combo_tree, penalized_behavioral_scor
 
     // Return the minimum value considered for improvement (by defaut
     // return 0)
-    score_t min_improv() const { return 0.0; }
+    virtual score_t min_improv() const { return 0.0; }
 
-    void set_complexity_coef(score_t complexity_ratio);
-    void set_complexity_coef(unsigned alphabet_size, float p);
+    virtual void set_complexity_coef(score_t complexity_ratio);
+    virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:
     bool occam; // If true, then Occam's razor is taken into account.
@@ -104,6 +104,9 @@ protected:
  * This is a "minor" helper class, and exists for two reasons:
  * 1)  avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
+ *
+ * TODO: could be detemplatized, it's only instantiated with
+ * bscore_base.
  */
 template<typename PBScorer>
 struct bscore_based_cscore : public cscore_base
