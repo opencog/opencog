@@ -143,7 +143,7 @@ feature_set initial_features(const vector<string>& ilabels,
             vif += f;
         }
         else // feature not found
-            logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
+            logger().warn("No such a feature %s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
     }
     // Logger
     if(vif.empty())
