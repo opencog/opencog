@@ -532,7 +532,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
     if (logger().isDebugEnabled()) {
         logger().debug() << "Adding logical knobs to subtree of size="
                          << combo_tree(subtree).size()
-                         << "at location of size=" << combo_tree(it).size();
+                         << " at location of size=" << combo_tree(it).size();
     }
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
