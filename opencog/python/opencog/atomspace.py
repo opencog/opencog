@@ -130,8 +130,7 @@ class Link(Atom):
                 import pdb; pdb.set_trace()
 
     def __repr__(self):
-        return '('+self.type+' '+repr(tuple(
-            [repr(atom) for atom in self.out]))+')'
+        return '('+self.type+' '+repr([repr(atom) for atom in self.out])+')'
 
     #def getout(self):
     #    pass
