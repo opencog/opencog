@@ -54,8 +54,9 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
         // this assumes that the ctable output type equals the
         // exemplar output type.
         sig.append_child(head, cto);
+        logger().debug("Append exemplar feature");
     }
-    combo::CTable fs_ctable(_ctable.get_labels(), _ctable.get_signature());
+    combo::CTable fs_ctable(labels, sig);
 
     // define interpreter visitor
     interpreter_visitor iv(tr);
@@ -130,11 +131,17 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
 
     // remove last feature if it's the feature exemplar
     if (params.exemplar_as_feature) {
-        size_t xmplar_f_pos = _ctable.get_labels().size();
+        size_t xmplar_f_pos = fs_ctable.get_arity() - 1;
         auto xmplar_f_it = self.find(xmplar_f_pos);
-        OC_ASSERT(xmplar_f_it != self.end(),
-                  "The exemplar feature has not been selected, that's weird");
-        self.erase(xmplar_f_it);
+        if (xmplar_f_it == self.end()) {
+            logger().debug("The exemplar feature has not been selected, "
+                           "that exemplar must be pretty bad! As a result "
+                           "one more feature is returned by feature selection "
+                           "(as we obviously can't remove the exemplar feature).");
+        } else {
+            self.erase(xmplar_f_it);
+            logger().debug("Remove the exemplar feature");
+        }
     }
 
     return self;
