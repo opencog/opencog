@@ -651,10 +651,14 @@ def match_predicate(space,target):
 def match_subset(space,target):
 
     A, B = target.args
-    compatible = ((A.get_type() == t.ConceptNode and B.get_type() == t.ConceptNode) or
-                 (A.get_type() == t.PredicateNode and B.get_type() == t.PredicateNode))
-    if not compatible:
+    #compatible = ((A.get_type() == t.ConceptNode and B.get_type() == t.ConceptNode) or
+    #             (A.get_type() == t.PredicateNode and B.get_type() == t.PredicateNode))
+    #if not compatible:
+    #    return []
+    if A.is_variable() or B.is_variable():
         return []
+
+    print A, B
 
     def members(concept):
         '''For each member of concept, return the node and the strength of membership'''
