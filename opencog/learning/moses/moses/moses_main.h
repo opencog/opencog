@@ -229,11 +229,15 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     } else {
         logger().info("Inferred target score = %f", target_score);
     }
-
+    target_score -= c_scorer.min_improv();
+    logger().info("Subtract %f (minimum significant improvement) "
+                  "from the target score to deal with float imprecision = %f",
+                  c_scorer.min_improv(), target_score);
     opt_params.terminate_if_gte = target_score;
+    moses_params.max_score = target_score;
+    
     // update minimum score improvement
     opt_params.set_min_score_improv(c_scorer.min_improv());
-    moses_params.max_score = target_score;
 
     if (meta_params.cache_size > 0) {
         // WARNING: adaptive_cache is not thread safe (and therefore
