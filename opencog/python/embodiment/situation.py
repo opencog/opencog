@@ -112,7 +112,7 @@ class SituationGenerator(object):
 
 def generate_sample_situation(atomspace):
 
-    garden_descriptor = TypeDescriptor(10, 'tree', [('color', 'ConceptNode', 'green'),
+    garden_descriptor = TypeDescriptor(5, 'tree', [('color', 'ConceptNode', 'green'),
                                                     ('color', 'ConceptNode', 'brown')])
     #    Describes 10 instances following Scheme definition of a tree:
     #
@@ -152,7 +152,7 @@ def generate_sample_situation(atomspace):
 
     house_descriptor = TypeDescriptor(1, 'house')
 
-    village_descriptor = SpatialRelationDescriptor(3, [house_descriptor, garden_descriptor], 'adjacent-to')
+    village_descriptor = SpatialRelationDescriptor(2, [house_descriptor, garden_descriptor], 'adjacent-to')
 
     SituationGenerator(atomspace).generate_situation(spatial_relation_descriptors=[village_descriptor],randomness=0.2)
 
@@ -161,11 +161,11 @@ if __name__ == '__main__':
     generate_sample_situation(atomspace)
     atomspace.print_list()
 
-#    print '\n==========================================='
-#    print 'Fishgram'
-#    print '===========================================\n'
-#    from fishgram import *
-#    fishAndChips = Fishgram(atomspace)
-#    notice_changes(atomspace)
-#    fishAndChips.forest.extractForest()
-#    fishAndChips.run()
+    print '\n==========================================='
+    print 'Fishgram'
+    print '===========================================\n'
+    from fishgram import *
+    fishAndChips = Fishgram(atomspace)
+    notice_changes(atomspace)
+    fishAndChips.forest.extractForest()
+    fishAndChips.run()
