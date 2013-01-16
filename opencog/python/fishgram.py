@@ -90,12 +90,12 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 10
+        self.min_embeddings = 1
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
         
-        self.max_per_layer = 200
+        self.max_per_layer = 5
         
         self.viz = PLNviz(atomspace)
         self.viz.connect()
@@ -153,7 +153,8 @@ class Fishgram:
         '''Just a helper function for closed_bfs_layers'''
         #next_layer_iter = self.extensions(prev_layer)
         next_layer_iter = self.extensions_simple(prev_layer)
-        return list(self.prune_frequency(next_layer_iter))
+        return list(next_layer_iter)
+        #return list(self.prune_frequency(next_layer_iter))
         #self.viz.outputTreeNode(target=[], parent=None, index=0)
         
         # This would find+store the whole layer of extensions before pruning them
@@ -184,7 +185,9 @@ class Fishgram:
             # It's less efficient with memory but still allows returning results sooner.
             new_layer = self.closed_bfs_extend_layer(prev_layer)
             if len(new_layer):
-                del new_layer[self.max_per_layer+1:]
+                # Keep the best max_per_layer patterns (i.e. the most frequent)
+                new_layer = self.sort_frequency(new_layer)
+                del new_layer[self.max_per_layer:]
                 #conj_length = set(len(pe[0].conj+pe[0].seqs) for pe in new_layer)
                 conj_length = len(new_layer[0][0].conj) + len(new_layer[0][0].seqs)
                 #log.info("****************layer prototype**************************************")
@@ -194,7 +197,7 @@ class Fishgram:
                 # check every tree in every pattern of every layer is right
                 log.info(' Conjunctions of size%s, with %s patterns'%(conj_length, len(new_layer)))
                 for (pattern, bindings) in new_layer:
-                    print pattern
+                    print len(bindings), pattern
                 yield new_layer
             prev_layer = new_layer
         log.flush()
@@ -418,6 +421,13 @@ class Fishgram:
             if len(embeddings) >= self.min_embeddings and len(embeddings) <= self.max_embeddings:
             #if normalized_frequency > self.min_frequency:
                 yield (ptn, embeddings)
+
+    def sort_frequency(self, layer):
+        def get_frequency(ptn_embs):
+            (pattern, embeddings) = ptn_embs
+            return len(embeddings)
+
+        return sorted(layer, key=get_frequency, reverse=True)
 
     def sort_surprise(self, layer):
         # layer is a list of tuples
@@ -906,7 +916,6 @@ def test_fishgram(atomspace):
     #self.fish.implications()
     layers = fish.run()
 
-    import pdb; pdb.set_trace()
     print 'concept nodes'
     fish.outputConceptNodes(layers)
     #print 'predicate nodes'
