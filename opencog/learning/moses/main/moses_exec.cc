@@ -1106,12 +1106,12 @@ int moses_exec(int argc, char** argv)
          "which is are scored well in combination with that feature.\n")
 
         ("fs-restrict-incorrect",
-         value<bool>(&festor_params.increase_target_size)->default_value(1),
+         value<bool>(&festor_params.restrict_incorrect)->default_value(1),
          "Restrict feature selection to observations corresponding to"
          " incorrect answers given by the exemplar.\n")
 
         ("fs-restrict-true",
-         value<bool>(&festor_params.increase_target_size)->default_value(0),
+         value<bool>(&festor_params.restrict_true)->default_value(0),
          "Restrict feature selection to observations corresponding to when"
          " the exemplar returns true (this may be useful in combination with"
          " precision scorer as it corresponds to the focus of the exemplar).\n")
