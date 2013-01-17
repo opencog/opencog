@@ -63,6 +63,9 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
     auto ai = boost::apply_visitor(iv);
 
     // define visitor to initialize the features to ignore
+    if (!params.ignore_features.empty())
+        ostreamContainer(logger().debug() << "Ignore features: ",
+                         params.ignore_features);
     std::vector<init_at_visitor> iavs(params.ignore_features.begin(),
                                       params.ignore_features.end());
 
@@ -116,6 +119,8 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
             fs_ctable.insert({inputs, vct.second});
         }
     }
+    logger().debug("CTable size for feature selection = %u",
+                   fs_ctable.size());
 
     ////////////////////////////
     // Call feature selection //
