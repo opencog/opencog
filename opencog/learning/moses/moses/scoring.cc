@@ -973,9 +973,10 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // Also store the sumo and total, so that they don't need to be
     // recomputed later.  Note that this routine could be performance
     // critical if used as a fitness function for feature selection
-    // (which is actually being done).
-    typedef std::multimap<contin_t, std::pair<contin_t, // sum_outputs
-                                              unsigned> // total count
+    // (which is the case).
+    typedef std::multimap<contin_t,           // precision
+                          std::pair<contin_t, // sum_outputs
+                                    unsigned> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
     for (CTable::const_iterator it = ctable.begin();
