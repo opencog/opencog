@@ -31,6 +31,9 @@ class ForestExtractor:
         # Makes it output all object-nodes with the same label. May be more useful for visualisation anyway.
         # Not relevant to the Fishgram algorithm, only to external miners (abandoned)
         self.miner_friendly = True
+        # Whether to include events (i.e. anything in an AtTimeLink). Otherwise
+        # it will only include static properties of objects.
+        self.include_events = False
         # Only affects output
         self.compact_binary_links = True
         # Spatial relations are useful, but cause a big combinatorial explosion
@@ -236,6 +239,9 @@ class ForestExtractor:
         ## Policy: Only do objects not times
         #if link.is_a(t.AtTimeLink):
         #    return False
+
+        if (not self.include_events) and link.is_a(t.AtTimeLink):
+            return False
 
         # TODO check the TruthValue the same way as you would for other links.
         # work around hacks in other modules

@@ -169,3 +169,28 @@ if __name__ == '__main__':
     notice_changes(atomspace)
     fishAndChips.forest.extractForest()
     fishAndChips.run()
+
+    print 'concept nodes'
+    fish.outputConceptNodes(layers)
+
+    print '\n==========================================='
+    print 'PLN - all subsets'
+    print '===========================================\n'
+
+    from logic import *
+    chainer = Chainer(atomspace)
+
+    concept_nodes = (atomspace.get_atoms_by_type(types.ConceptNode, False)+
+                    atomspace.get_atoms_by_type(types.PredicateNode))
+    concept_nodes = [n for n in concept+nodes if n.type_name in ['ConceptNode', 'PredicateNode']]
+    concept_nodes = map(Tree, concept_nodes)
+
+    print len(concept_nodes),'concepts'
+
+    for A in concept_nodes:
+        for B in concept_nodes:
+            target = T('SubsetLink', A, B)
+
+            print target
+            results = chainer.bc(target)
+            print results

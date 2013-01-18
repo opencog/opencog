@@ -90,7 +90,7 @@ class Fishgram:
     def __init__(self,  atomspace):
         self.forest = adaptors.ForestExtractor(atomspace,  None)
         # settings
-        self.min_embeddings = 1
+        self.min_embeddings = 2
         self.max_embeddings = 2000000000
         self.min_frequency = 0.5
         self.atomspace = atomspace
@@ -153,8 +153,8 @@ class Fishgram:
         '''Just a helper function for closed_bfs_layers'''
         #next_layer_iter = self.extensions(prev_layer)
         next_layer_iter = self.extensions_simple(prev_layer)
-        return list(next_layer_iter)
-        #return list(self.prune_frequency(next_layer_iter))
+        #return list(next_layer_iter)
+        return list(self.prune_frequency(next_layer_iter))
         #self.viz.outputTreeNode(target=[], parent=None, index=0)
         
         # This would find+store the whole layer of extensions before pruning them
@@ -195,7 +195,7 @@ class Fishgram:
                 #log.info("****************layer instance**************************************")
                 #self.print_layer_instance(new_layer)
                 # check every tree in every pattern of every layer is right
-                log.info(' Conjunctions of size%s, with %s patterns'%(conj_length, len(new_layer)))
+                log.info(' Conjunctions of size %s, with %s patterns'%(conj_length, len(new_layer)))
                 for (pattern, bindings) in new_layer:
                     print len(bindings), pattern
                 yield new_layer
@@ -375,6 +375,7 @@ class Fishgram:
             entry=conj2ptn_emblist[canonical_conj]
             # collect each binding of ptn
             embs = entry[1]
+            # TODO This is a MAJOR order of complexity problem.
             if s not in embs:
                 embs.append(s)
             # a dict with ptn as key
@@ -595,6 +596,8 @@ class Fishgram:
 
     def outputConceptNodes(self, layers):
         id = 1001
+
+        resulting_nodes = []
         
         for layer in layers:
             for (ptn, embs) in layer:
@@ -624,12 +627,13 @@ class Fishgram:
                 # you get "times when eating happens",
                 # "things that eat something sometimes" and
                 # "things that get eaten sometimes.
-                for varnumber in xrange(0, len(get_varlist(conj))):
-                    var = Var(varnumber)
+                for var in get_varlist(conj):
 
-                    concept_name = str(varnumber) + ' where '+str(conj)
+
+                    concept_name = str(var) + ' where '+str(conj)
                     concept = Tree(self.atomspace.add_node(t.ConceptNode, concept_name, DEFAULT_TV))
                     print concept
+                    resulting_nodes.append(concept)
 
                     # Output the members of this concept.
                     members = set()
@@ -645,6 +649,8 @@ class Fishgram:
                         link = atom_from_tree(memberlink, self.atomspace)
                         link.tv = DEFAULT_TV
                         print link
+
+        return resulting_nodes
 
     def outputPredicateNodes(self, layers):
         id = 9001
