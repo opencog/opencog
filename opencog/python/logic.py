@@ -64,7 +64,8 @@ class Chainer:
 
     def __init__(self, space, planning_mode = False):
 
-        self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
+        #self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
+        self.deduction_types = ['ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
 
         self.pd = dict()
 
@@ -154,11 +155,11 @@ class Chainer:
                 #ret.append(atom.h)
                 ret.append(atom)
             
-            pprint(self.num_app_pdns_per_level)
-            pprint(self.num_uses_per_rule_per_level)
-            
-            pprint(Chainer.successful_num_app_pdns_per_level)
-            pprint(Chainer.successful_num_uses_per_rule_per_level)
+#            pprint(self.num_app_pdns_per_level)
+#            pprint(self.num_uses_per_rule_per_level)
+#
+#            pprint(Chainer.successful_num_app_pdns_per_level)
+#            pprint(Chainer.successful_num_uses_per_rule_per_level)
             
             return ret
         except Exception, e:
@@ -210,29 +211,27 @@ class Chainer:
         #next_target = self.get_fittest(self.bc_later) # Best-first search
         #next_target = self.select_stochastic() # A better version of best-first search (still a prototype)
 
-        #next_app = self.bc_later.pop_first() # Breadth-first search
+        next_app = self.bc_later.pop_first() # Breadth-first search
         #log.info(format_log('-BCQ', next_app))
 
-        #if len(self.bc_later) == 1:
-        #    next_apps = self.bc_later
-        #else:
-        next_apps = self.select_stochastic() # A better version of best-first search (still a prototype)
-        for next_app in next_apps:
-            # This step will also call propogate_results and propogate_specialization,
-            # so it will check for premises, compute the TV if possible, etc.
-            self.find_axioms_for_rule_app(next_app)
+        #next_apps = self.select_stochastic() # A better version of best-first search (still a prototype)
+        #for next_app in next_apps:
 
-            # This should probably use the extra things in found_axiom
-            self.propogate_result(next_app)
+        # This step will also call propogate_results and propogate_specialization,
+        # so it will check for premises, compute the TV if possible, etc.
+        self.find_axioms_for_rule_app(next_app)
 
-            #next_target = standardize_apart(next_target)
+        # This should probably use the extra things in found_axiom
+        self.propogate_result(next_app)
 
-            for goal in next_app.goals:
-                apps = self.find_rule_applications(goal)
+        #next_target = standardize_apart(next_target)
 
-                for a in apps:
-                    a = a.standardize_apart()
-                    self.add_app_if_good(a)
+        for goal in next_app.goals:
+            apps = self.find_rule_applications(goal)
+
+            for a in apps:
+                a = a.standardize_apart()
+                self.add_app_if_good(a)
 
         return None
 
