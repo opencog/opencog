@@ -47,10 +47,13 @@ using namespace std;
 using namespace boost;
 using namespace boost::adaptors;
 
-string builtin_to_str(const builtin& v)
+string builtin_to_str(const builtin& b)
 {
     stringstream ss;
-    ss << vertex_to_bool(v);
+    if (is_boolean(b))
+        ss << builtin_to_bool(b);
+    else
+        ss << b;
     return ss.str();
 }
 string vertex_to_str(const vertex& v)
