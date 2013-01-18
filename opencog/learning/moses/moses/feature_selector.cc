@@ -116,7 +116,7 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
                     OC_ASSERT(false, "Not implemented");
             }
 
-            fs_ctable.insert({inputs, vct.second});
+            fs_ctable[inputs] += vct.second;
         }
     }
     logger().debug("CTable size for feature selection = %u",
