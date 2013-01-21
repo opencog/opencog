@@ -53,12 +53,13 @@ build_knobs::build_knobs(combo_tree& exemplar,
                          bool linear_regression,
                          contin_t step_size,
                          contin_t expansion,
-                         field_set::width_t depth)
+                         field_set::width_t depth,
+                         float perm_ratio)
     : _exemplar(exemplar), _rep(rep), _skip_disc_probe(true),
       _arity(tt.begin().number_of_children() - 1), _signature(tt),
       _linear_contin(linear_regression),
       _step_size(step_size), _expansion(expansion), _depth(depth),
-      _perm_ratio(0.0),
+      _perm_ratio(perm_ratio),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
     type_tree ot = get_signature_output(_signature);

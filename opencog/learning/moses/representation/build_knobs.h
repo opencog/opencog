@@ -56,7 +56,8 @@ struct build_knobs : boost::noncopyable
                 bool linear_regression = true,
                 contin_t step_size = 1.0,
                 contin_t expansion = 1.0,
-                field_set::width_t depth = 4);
+                field_set::width_t depth = 4,
+                float perm_ratio = 0.0);
 
 protected:
     void build_logical(combo_tree::iterator sub,

@@ -84,7 +84,8 @@ representation::representation(const reduct::rule& simplify_candidate,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set* perceptions,
                                const combo_tree_ns_set* actions,
-                               bool linear_contin)
+                               bool linear_contin,
+                               float perm_ratio)
     : _exemplar(exemplar_),
       _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
@@ -103,7 +104,7 @@ representation::representation(const reduct::rule& simplify_candidate,
     // Build the knobs.
     build_knobs(_exemplar, tt, *this, ignore_ops,
                 perceptions, actions, linear_contin,
-                stepsize, expansion, depth);
+                stepsize, expansion, depth, perm_ratio);
 
     logger().info() << "After knob building, rep size="
                     << _exemplar.size()

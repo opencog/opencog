@@ -477,6 +477,7 @@ int moses_exec(int argc, char** argv)
     double cap_coef;
     unsigned cache_size;
     bool linear_regression;
+    float perm_ratio;
     
     // diversity parameters
     bool include_dominated;
@@ -699,6 +700,14 @@ int moses_exec(int argc, char** argv)
          "searches to linear expressions only; that is, do not use "
          "polynomials in the fit.  Specifying this option also "
          "automatically disables the use of div, sin, exp and log.\n")
+
+        ("logical-perm-ratio",
+         value<float>(&perm_ratio)->default_value(0.0),
+         "Defines how many pairs of literals constituting subtrees "
+         "op(L1 L2) are considered while creating the prototype of an "
+         "exemplar with boolean domain. It ranges from 0 to 1, 0 means "
+         "arity positive literals and arity pairs of literals, 1 means arity "
+         "positive literals and arity*(arity-1) pairs of literals.\n")
 
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
@@ -1394,6 +1403,7 @@ int moses_exec(int argc, char** argv)
     meta_params.cache_size = cache_size;          // is disabled
     meta_params.jobs = jobs[localhost];
     meta_params.linear_contin = linear_regression;
+    meta_params.perm_ratio = perm_ratio;
 
     // diversity parameters
     meta_params.diversity.include_dominated = include_dominated;

@@ -219,6 +219,13 @@ struct metapop_parameters
     // order to fit the data, linear expressions may not be as good,
     // and thus may require more time overall to find...
     bool linear_contin;
+
+    // Defines how many pairs of literals constituting subtrees op(l1
+    // l2) are considered while creating the prototype of an
+    // exemplar. It ranges from 0 to 1, 0 means arity positive
+    // literals and arity pairs of literals, 1 means arity positive
+    // literals and arity*(arity-1) pairs of literals
+    float perm_ratio;
 };
 
 void print_stats_header (optim_stats *os, bool diversity_enabled);

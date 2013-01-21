@@ -167,7 +167,8 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
                               ignore_ops,
                               _params.perceptions,
                               _params.actions,
-                              _params.linear_contin);
+                              _params.linear_contin,
+                              _params.perm_ratio);
 
     // If the representation is empty, try the next
     // best-scoring exemplar.
