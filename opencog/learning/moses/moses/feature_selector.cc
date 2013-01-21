@@ -37,7 +37,7 @@ feature_selector::feature_selector(const combo::Table& table,
                                    const feature_selector_parameters& festor_params)
     : params(festor_params), _ctable(table.compressed()) {}
 
-feature_set feature_selector::operator()(const combo::combo_tree& tr) const
+feature_set feature_selector::operator()(const combo::combo_tree& tr)
 {
     /////////////////////////////////////////////
     // Build ctable used for feature selection //
@@ -75,7 +75,14 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
 
         // determine whether the row should be considered
         bool consider_row = true;
-        if (params.restrict_incorrect) {
+        if (params.restrict_true) {
+            // Use only rows where the model output is true, that
+            // may be useful the prediction bscore is used because
+            // positive answers indicates where the exemplar focus
+            // is.
+            consider_row = predicted_out == combo::id::logical_true;
+        }
+        if (consider_row && params.restrict_incorrect) {
             // Use only rows where the model is just plain wrong.  The
             // feature selector will then look for any features that
             // correlate well with these incorrect answers. The hope
@@ -84,13 +91,6 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
             Counter<vertex, unsigned> cnt = vct.second;
             vertex actual_out = cnt.most_frequent();
             consider_row = predicted_out != actual_out;
-        }
-        else if (params.restrict_true) {
-            // Use only rows where the model output is true, that
-            // may be useful the prediction bscore is used because
-            // positive answers indicates where the exemplar focus
-            // is.
-            consider_row = predicted_out == combo::id::logical_true;
         }
 
         // subsample
@@ -126,13 +126,12 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr) const
     // Call feature selection //
     ////////////////////////////
 
-    feature_selection_parameters tmp_fs_params(params.fs_params);
     if (params.exemplar_as_feature) {
-        tmp_fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
-        ++tmp_fs_params.target_size;
+        params.fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
+        ++params.fs_params.target_size;
     }
 
-    auto self = select_features(fs_ctable, tmp_fs_params);
+    auto self = select_features(fs_ctable, params.fs_params);
 
     // remove last feature if it's the feature exemplar
     if (params.exemplar_as_feature) {

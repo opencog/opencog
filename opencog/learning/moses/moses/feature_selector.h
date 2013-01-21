@@ -66,6 +66,11 @@ struct feature_selector_parameters {
     bool restrict_true;
 
     /**
+     * Use the features in the exemplar as initial feature set
+     */
+    bool init_exemplar_features;
+
+    /**
      * Use exemplar as feature, so feature selection can search good
      * features sets combined with the exemplar feature.
      */
@@ -93,7 +98,7 @@ struct feature_selector
 
     /// Return a feature set that is good when combined with the
     /// exemplar.
-    feature_set operator()(const combo::combo_tree& tr) const;
+    feature_set operator()(const combo::combo_tree& tr);
 
     // Parameters
     feature_selector_parameters params;

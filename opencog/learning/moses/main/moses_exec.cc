@@ -1109,6 +1109,12 @@ int moses_exec(int argc, char** argv)
          value<bool>(&festor_params.ignore_exemplar_features)->default_value(0),
          "Ignore the features present in the exemplar during feature selection.\n")
 
+        ("fs-init-exemplar-features",
+         value<bool>(&festor_params.init_exemplar_features)->default_value(0),
+         "Use the features of the exemplar as initial feature set to seed the "
+         "feature selection algorithm. That way the other features selected "
+         "will be measured as good when combined with the exemplar.\n")
+
         ("fs-exemplar-as-feature",
          value<bool>(&festor_params.exemplar_as_feature)->default_value(0),
          "Use the output of the exemplar as feature as to consider feature sets "
@@ -1123,7 +1129,10 @@ int moses_exec(int argc, char** argv)
          value<bool>(&festor_params.restrict_true)->default_value(0),
          "Restrict feature selection to observations corresponding to when"
          " the exemplar returns true (this may be useful in combination with"
-         " precision scorer as it corresponds to the focus of the exemplar).\n")
+         " precision scorer as it corresponds to the focus of the exemplar). "
+         "This option can be combined with --fs-restrict-incorrect. In case "
+         "both are enabled then feature selection is restricted to the data "
+         "points which are both true and wrong.\n")
 
         ("fs-subsampling-pbty",
          value<float>(&festor_params.subsampling_pbty)->default_value(0),

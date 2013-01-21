@@ -112,10 +112,24 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
     // which score well with the current exemplar.
     operator_set ignore_ops = _params.ignore_ops;
     if (_params.fstor) {
-        feature_selector festor = *_params.fstor;  // not read-only const
+        // copy, any change in the parameters will not be remembered
+        feature_selector festor = *_params.fstor;
 
         // get the set of features of the exemplar
         auto xmplar_features = get_argument_abs_idx_from_zero_set(_exemplar);
+
+        // Use the features of the exemplar as initial feature set to
+        // seed the feature selection algorithm. That way the new
+        // features will be selected to combine well with the
+        // exemplar.
+        if (festor.params.init_exemplar_features) {
+            const auto& ilabels = festor._ctable.get_input_labels();
+            for (arity_t i : xmplar_features)
+                festor.params.fs_params.initial_features.push_back(ilabels[i]);
+            // we increase the size to output new features (not the
+            // ones already in the exemplar)
+            festor.params.increase_target_size = true;
+        }
 
         // If the combo tree is already using N features, we want to find
         // and additional M features which might make it better.  So bump
@@ -127,8 +141,8 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
             festor.params.fs_params.target_size += xmplar_features.size();
         }
 
-        // Alternatively one can directly ignore the features in the
-        // exemplar during feature selection.
+        // Alternatively one can ignore the features in the exemplar
+        // during feature selection.
         festor.params.ignore_features = festor.params.ignore_exemplar_features ?
             xmplar_features : set<arity_t>();
 
