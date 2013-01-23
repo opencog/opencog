@@ -40,6 +40,10 @@
 #include "representation.h"
 #include "build_knobs.h"
 
+// uncomment the following to fine log the candidates before and after
+// reduction during optimization
+// #define __FINE_LOG_CND_REDUCED__
+
 namespace opencog { namespace moses {
 
 // Stepsize should be roughly the standard-deviation of the expected
@@ -251,7 +255,7 @@ void representation::clean_combo_tree(combo_tree &tr,
     clean_reduce(tr);
 
     if (reduce) { //reduce
-#if DEBUG
+#ifdef __FINE_LOG_CND_REDUCED__
         // Save some cpu time by not even running this if-test.
         if (logger().isFineEnabled()) {
             logger().fine() << "Reduce "
@@ -263,7 +267,7 @@ void representation::clean_combo_tree(combo_tree &tr,
             (*get_simplify_knob_building())(tr);
         else
             (*get_simplify_candidate())(tr);
-#if DEBUG
+#ifdef __FINE_LOG_CND_REDUCED 
         if (logger().isFineEnabled()) {
             logger().fine() << "Reduced candidate: " << tr;
         }

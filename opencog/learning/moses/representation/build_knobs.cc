@@ -36,9 +36,6 @@
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/learning/moses/moses/ann_scoring.h>
 
-// uncomment this line for debug information to be given during execution
-// #define DEBUG_INFO
-
 namespace opencog { namespace moses {
 
 typedef combo_tree::sibling_iterator sib_it;
@@ -506,13 +503,8 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         }
     }
 
-#ifdef DEBUG_INFO
-    cerr << "---------------------------------" << endl;
-    cerr << endl << "Perms: " << endl;
-    for (const combo_tree& tr : perms)
-        cerr << tr << endl;
-    cerr << "---------------------------------" << endl;
-#endif
+    if (logger().isFineEnabled())
+        ostreamContainer(logger().fine() << "Perms:" << std::endl, perms, "\n");
 }
 
 /**
@@ -534,6 +526,10 @@ void build_knobs::add_logical_knobs(pre_it subtree,
         logger().debug() << "Adding logical knobs to subtree of size="
                          << combo_tree(subtree).size()
                          << " at location of size=" << combo_tree(it).size();
+    }
+    if (logger().isFineEnabled()) {
+        logger().fine() << "subtree = " << combo_tree(subtree);
+        logger().fine() << "it = " << combo_tree(it);
     }
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
@@ -570,7 +566,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
         logical_probe_rec(subtree, _exemplar, it, perms.begin(), perms.end(),
                           add_if_in_exemplar, nthr);
 
-    logger().debug("Adding  %d logical knobs", kb_v.size());
+    logger().debug("Adding %d logical knobs", kb_v.size());
     for (const logical_subtree_knob& kb : kb_v) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
     }
@@ -730,10 +726,6 @@ void build_knobs::contin_canonize(pre_it it)
         } else
             linear_canonize_times(it);
     }
-
-#ifdef DEBUG_INFO
-    cout << "after contin_canonize " << _exemplar << endl;
-#endif
 
 }
 
@@ -1120,9 +1112,6 @@ void build_knobs::build_action(pre_it it)
                 build_action(sib);
             }
     }
-#ifdef DEBUG_INFO
-    cout << "=========== current exemplar: " << endl << _exemplar << endl << endl;
-#endif
 }
 
 
@@ -1190,9 +1179,6 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
 void build_knobs::simple_action_probe(pre_it it, bool add_if_in_exemplar)
 {
     simple_action_subtree_knob kb(_exemplar, it);
-#ifdef DEBUG_INFO
-    cout << "simple knob - new exemplar : " << _exemplar << endl;
-#endif
 
     if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(kb) PJ*/)
         _rep.disc.insert(make_pair(kb.spec(), kb));
@@ -1203,9 +1189,6 @@ void build_knobs::action_probe(vector<combo_tree>& perms, pre_it it,
                                bool add_if_in_exemplar)
 {
     action_subtree_knob kb(_exemplar, it, perms);
-#ifdef DEBUG_INFO
-    cout << "action knob - new exemplar : " << _exemplar << endl;
-#endif
 
     if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(kb) PJ*/)
         _rep.disc.insert(make_pair(kb.spec(), kb));
