@@ -1240,6 +1240,12 @@ int moses_exec(int argc, char** argv)
          "fewer samples in the data set, the more features the "
          "less confidence in the feature set quality measure.\n")
 
+        // ======= Feature-selection SMD params =======
+        ("fs-smd-top-size",
+         value<unsigned>(&fs_params.smd_top_size)->default_value(10),
+         "Stochastic max dependency parameter. Number of feature subset "
+         "candidates to consider building the next superset.\n")
+
         // ========== THE END of the options; note semicolon ===========
         ;
 
