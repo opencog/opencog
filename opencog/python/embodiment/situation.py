@@ -113,32 +113,32 @@ class SituationGenerator(object):
 def generate_sample_situation(atomspace):
 
     garden_descriptor = TypeDescriptor(5, 'tree', [('color', 'ConceptNode', 'green'),
-                                                    ('color', 'ConceptNode', 'brown')])
+                                                   ('color', 'ConceptNode', 'brown')])
     #    Describes 10 instances following Scheme definition of a tree:
     #
     #    (EvaluationLink (stv 1 0.0012484394)
-    #        (PredicateNode "block-list")
+    #        (PredicateNode 'block-list')
     #        (ListLink
-    #            (BlockEntityNode "tree" (av 1000 0 0))
+    #            (BlockEntityNode 'tree' (av 1000 0 0))
     #            (ListLink
-    #                (StructureNode "CHUNK_BLOCK_0")
-    #                (StructureNode "CHUNK_BLOCK_1")
+    #                (StructureNode 'CHUNK_BLOCK_0')
+    #                (StructureNode 'CHUNK_BLOCK_1')
     #        )
     #    )
     #
     #    (EvaluationLink (stv 1 0.0012484394)
-    #        (PredicateNode "color")
+    #        (PredicateNode 'color')
     #        (ListLink
-    #            (StructureNode "CHUNK_BLOCK_0")
-    #            (ConceptNode "green")
+    #            (StructureNode 'CHUNK_BLOCK_0')
+    #            (ConceptNode 'green')
     #        )
     #    )
     #
     #    (EvaluationLink (stv 1 0.0012484394)
-    #        (PredicateNode "color")
+    #        (PredicateNode 'color')
     #        (ListLink
-    #            (StructureNode "CHUNK_BLOCK_1")
-    #            (ConceptNode "brown")
+    #            (StructureNode 'CHUNK_BLOCK_1')
+    #            (ConceptNode 'brown')
     #        )
     #    )
     #
@@ -156,33 +156,44 @@ def generate_sample_situation(atomspace):
 
     SituationGenerator(atomspace).generate_situation(spatial_relation_descriptors=[village_descriptor],randomness=0.2)
 
-if __name__ == '__main__':
-    atomspace = AtomSpace()
+from logic import *
+from fishgram import *
+def test(atomspace):
     generate_sample_situation(atomspace)
     atomspace.print_list()
 
     print '\n==========================================='
+    print 'Fishgram preprocessing'
+    print '===========================================\n'
+    chainer = Chainer(atomspace)
+    target = T('EvaluationLink',
+        atomspace.add(t.PredicateNode, 'contains-block-of-color'),
+        new_var()
+    )
+    chainer.bc(target);
+
+    import pdb; pdb.set_trace()
+
+    print '\n==========================================='
     print 'Fishgram'
     print '===========================================\n'
-    from fishgram import *
     fishAndChips = Fishgram(atomspace)
     notice_changes(atomspace)
     fishAndChips.forest.extractForest()
     fishAndChips.run()
 
     print 'concept nodes'
-    fish.outputConceptNodes(layers)
+    fishAndChips.outputConceptNodes(layers)
 
     print '\n==========================================='
     print 'PLN - all subsets'
     print '===========================================\n'
 
-    from logic import *
     chainer = Chainer(atomspace)
 
     concept_nodes = (atomspace.get_atoms_by_type(types.ConceptNode, False)+
-                    atomspace.get_atoms_by_type(types.PredicateNode))
-    concept_nodes = [n for n in concept+nodes if n.type_name in ['ConceptNode', 'PredicateNode']]
+                     atomspace.get_atoms_by_type(types.PredicateNode))
+    concept_nodes = [n for n in concept_nodes if n.type_name in ['ConceptNode', 'PredicateNode']]
     concept_nodes = map(Tree, concept_nodes)
 
     print len(concept_nodes),'concepts'
@@ -194,3 +205,51 @@ if __name__ == '__main__':
             print target
             results = chainer.bc(target)
             print results
+
+
+if __name__ == '__main__':
+    atomspace = AtomSpace()
+
+    # jade.ATOMS
+    ENTITY = atomspace.add_node('VariableNode', '$ENTITY')
+    BLOCK =  atomspace.add_node('VariableNode', '$BLOCK')
+    COLOR =  atomspace.add_node('VariableNode', '$COLOR')
+    
+    atomspace.add_link('ForAllLink',
+        [atomspace.add_link('ListLink', [ENTITY, BLOCK, COLOR]),
+         atomspace.add_link('ImplicationLink',
+             [atomspace.add_link('AndLink',
+                 [atomspace.add_link('EvaluationLink',
+                    [atomspace.add_node('PredicateNode', 'part-of'),
+                     atomspace.add_link('ListLink', [BLOCK, ENTITY])]),
+                  atomspace.add_link('EvaluationLink',
+                      [atomspace.add_node('PredicateNode', 'color'),
+                       atomspace.add_link('ListLink', [BLOCK, COLOR])])]),
+              atomspace.add_link('EvaluationLink',
+                  [atomspace.add_node('PredicateNode', 'contains-block-of-color'),
+                   atomspace.add_link('ListLink', [ENTITY, COLOR])
+                  ])
+             ])
+        ], _default_tv)
+
+    ENTITY1 = atomspace.add_node('VariableNode','$ENTITY1')
+    ENTITY2 = atomspace.add_node('VariableNode','$ENTITY2')
+    CATEGORY = atomspace.add_node('VariableNode','$CATEGORY')
+
+    atomspace.add_link('ForAllLink',
+        [atomspace.add_link('ListLink', [ENTITY1, ENTITY2, CATEGORY]),
+         atomspace.add_link('ImplicationLink',
+             [atomspace.add_link('AndLink',
+                 [atomspace.add_link('EvaluationLink',
+                     [atomspace.add_node('PredicateNode', 'adjacent-to'),
+                      atomspace.add_link('ListLink', [ENTITY1, ENTITY2])]),
+                  atomspace.add_link('MemberLink',[ENTITY2, CATEGORY])]),
+              atomspace.add_link('EvaluationLink',
+                  [atomspace.add_node('PredicateNode', 'near-object-of-type'),
+                   atomspace.add_link('ListLink', [ENTITY1, CATEGORY])
+                  ])
+             ])
+        ], _default_tv)
+
+
+    test(atomspace)
