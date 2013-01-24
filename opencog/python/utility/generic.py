@@ -33,3 +33,24 @@ def dim(structure):
 import operator
 def concat_lists(lists):
     return reduce(operator.concat, lists, [])
+
+
+def read_scheme_data(scheme_file_path, atomspace):
+    try:
+        stream = open(scheme_file_path,'r')
+    except:
+        import urllib2
+        stream = urllib2.urlopen(scheme_file_path)
+
+    lines = stream.readlines()
+    for line in lines:
+        for char in line:
+            print char
+
+
+    stream.close()
+
+if __name__ == '__main__':
+    from opencog.atomspace import AtomSpace
+    atomspace = AtomSpace()
+    read_scheme_data('https://dl.dropbox.com/s/wxjmg6etqsliot4/jade.scm?dl=1', atomspace)
