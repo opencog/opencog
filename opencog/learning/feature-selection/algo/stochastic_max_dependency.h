@@ -146,6 +146,12 @@ FeatureSet stochastic_max_dependency_selection(const FeatureSet& features,
                                        // score it
                                        double sc = scorer(prod);
 
+                                       if (logger().isFineEnabled())
+                                           ostreamContainer(logger().fine()
+                                                            << "feature set ",
+                                                            prod, ",", "{", "}")
+                                               << " is scored " << sc;
+
                                        // insert it in ranks
                                        std::pair<double, FeatureSet> pdf(sc, prod);
                                        unique_lock lock(mutex);
