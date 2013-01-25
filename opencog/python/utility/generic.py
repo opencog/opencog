@@ -34,7 +34,6 @@ import operator
 def concat_lists(lists):
     return reduce(operator.concat, lists, [])
 
-
 def read_scheme_data(scheme_file_path, atomspace):
     try:
         stream = open(scheme_file_path,'r')
@@ -42,10 +41,18 @@ def read_scheme_data(scheme_file_path, atomspace):
         import urllib2
         stream = urllib2.urlopen(scheme_file_path)
 
+    stack = []
     lines = stream.readlines()
     for line in lines:
         for char in line:
-            print char
+            if char in ['\n',chr(9)]:
+                continue
+            if char == '(':
+                stack.append(char)
+            elif char == ')':
+                pass
+
+
 
 
     stream.close()
