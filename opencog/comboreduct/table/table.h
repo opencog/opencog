@@ -951,7 +951,8 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         std::multimap<contin_t, contin_t> sorted_list;
         for (const auto& row : ctable)
         {
-            contin_t x = row.first.get_seq<contin_t>()[idx];
+            const multi_type_seq& mseq = row.first;
+            contin_t x = mseq.get_seq<contin_t>()[idx];
 
             // for each contin counted in the row,
             for (const auto& val_pair : row.second) {
