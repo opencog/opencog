@@ -180,7 +180,7 @@ def test(atomspace):
     fishAndChips = Fishgram(atomspace)
     notice_changes(atomspace)
     fishAndChips.forest.extractForest()
-    fishAndChips.run()
+    layers = fishAndChips.run()
 
     print 'concept nodes'
     fishAndChips.outputConceptNodes(layers)
