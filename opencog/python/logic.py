@@ -397,6 +397,7 @@ class Chainer:
             self.set_tv(app, app.tv)
             
             #log.info (format_log(app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)))
+            print app.name, 'produced:', app.head, app.tv, 'using', zip(app.goals, input_tvs)
             
             # make the app red, not only the expression
             self.viz.declareResult(str(app.canonical_tuple()))
