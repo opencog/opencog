@@ -538,6 +538,8 @@ def match_wrapper(space, target, match):
         s = unify(h, target, {})
         if s != None:
             heads_tvs.append( (h,tv) )
+
+    assert not (heads_tvs is None)
     return heads_tvs
 
 
@@ -559,6 +561,7 @@ def match_axiom(space,target):
         candidates = [target.op]
     else:
         # The nodes in the target, as Atoms
+        # TODO This may break if target is a Link with no Nodes underneath it!
         nodes = [tr.op for tr in target.flatten() if isinstance(tr.op, Atom) and tr.op.is_node()]
 
         links_of_type = space.get_atoms_by_type(target.get_type())
@@ -572,8 +575,8 @@ def match_axiom(space,target):
         #print target, len(smallest_set)
 
     # Then the chainer will try to unify against every candidate
-    candidate_trees = (tree_from_atom(atom) for atom in candidates)
-    candidate_tvs = (c.tv for c in candidates)
+    candidate_trees = (tree_from_atom(atom) for atom in smallest_set)
+    candidate_tvs = (c.tv for c in smallest_set)
     
     return zip(candidate_trees, candidate_tvs)
 
@@ -666,7 +669,41 @@ def match_subset(space,target):
         trees_tvs = match_wrapper(space, template, match_axiom)
 
         mems = [(tr.args[0], tv.mean) for (tr, tv) in trees_tvs]
+        assert not (mems is None)
         return mems
+
+    def all_member_links():
+        '''Find all ObjectNodes (or other nodes) that are members of any concept.
+        Returns a set of nodes (each node is wrapped in the Tree class)'''
+        template = T('MemberLink', new_var(), new_var())
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        mems = set(tr.args[0] for (tr, tv) in trees_tvs)
+        return mems
+
+    def non_members(concept):
+        # Find the members of Not(A).
+        # For example if A is 'the set of cats', then Not(A) is 'the set of things that aren't cats'.
+        # So for every entity E in the world, (MemberLink E Not(cat)).tv.mean == 1 - (MemberLink E cat).tv.mean.
+        # If the latter is not recorded in the AtomSpace, just assume it is 0.
+
+        # Find all objects/etc that are members of anything
+        # type: set(Tree)
+        everything = all_member_links()
+
+        # the type of members_of_concept is [(concept,frequency)]
+        members_of_concept = members(concept)
+        membershipStrengths = {member:strength for (member, strength) in members_of_concept}
+
+        result = []
+        for object in everything:
+            membershipStrength = 0
+            if object in membershipStrengths:
+                membershipStrength = membershipStrengths[object]
+            nonMembershipStrength = 1 - membershipStrength
+            result.append( (object,nonMembershipStrength) )
+
+        return result
 
     def evals(concept):
         template = T(
@@ -680,9 +717,18 @@ def match_subset(space,target):
         return mems
 
     # Find the members of each concept
-    # For single-argument predicates, this is the same as EvaluationLinks
-    memA = members(A) + evals(A)
-    memB = members(B) + evals(B)
+    # For single-argument predicates, this is the same as EvaluationLinks.
+    # TODO: can't handle negated predicates in EvaluationLinks...
+    # This means PredicateNodes can't be in IntensionalInheritanceLinks
+    if A.get_type() == t.NotLink:
+        # Members of Not(A)
+        assert B.get_type() == t.ConceptNode
+        memA = non_members(A)
+        memB = members(B)
+    else:
+        # Members of A
+        memA = members(A) + evals(A)
+        memB = members(B) + evals(B)
 #    memA = evals(A)
 #    memB = evals(B)
 
@@ -693,7 +739,8 @@ def match_subset(space,target):
     # calculate P(x in B | x in A) = P(A^B) / P(A)
     # based on the fuzzy-weighted average
     #nodes_in_B = [m for (m,s) in memB]
-    nodesB = {m:s for (m,s) in memB}
+    assert not (memB is None)
+    nodesB = {member:strength for (member,strength) in memB}
 
     N_AB = 0
     for (mA, sA) in memA:
@@ -707,10 +754,10 @@ def match_subset(space,target):
     N_A = sum(s for (m, s) in memA)
     if N_A > 0:
         P = N_AB*1.0 / N_A
+        tv = TruthValue(P, confidence_to_count(1.0))
     else:
-        return []
-
-    tv = TruthValue(P, confidence_to_count(1.0))
+        # If there are no items in A then conditional probability is not defined, so give a zero confidence
+        tv = TruthValue(0,0)
 
     return [(target, tv)]
 
@@ -729,13 +776,13 @@ def match_intensional_inheritance(space, target):
         trees_tvs = match_wrapper(space, template, match_axiom)
 
         # for each x that is a subset of concept
+        has_any_members = False
         for (tr, tv) in trees_tvs:
             #print tr, tv
             x = tr.args[0]
             if x.get_type() != t.ConceptNode:
                 continue
             # Now find Subset(Not x, concept)
-            # TODO currently it will just skip processing x if that's unavailable
             template_not = T('SubsetLink',
                 T('NotLink', x),
                 concept
@@ -759,6 +806,9 @@ def match_intensional_inheritance(space, target):
                 mem_link = atom_from_tree(mem_tr, space)
                 mem_link.tv = TruthValue(assoc_strength, confidence_to_count(1.0))
                 print mem_link
+                has_any_members = True
+
+        #assert has_any_members
 
         return T(assoc_node)
 
@@ -767,7 +817,9 @@ def match_intensional_inheritance(space, target):
 
     # IntInh A B = Subset ASSOC(A) ASSOC(B)
     subset_target = T('SubsetLink', ASSOC_A, ASSOC_B)
-    [(_, tv)] = match_subset(space, subset_target)
+    # There should always be one result
+    subset_result = match_subset(space, subset_target)
+    [(_, tv)] = subset_result
 
     int_inh = T('IntensionalInheritanceLink', A, B)
     return [(int_inh, tv)]
