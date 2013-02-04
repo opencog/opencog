@@ -148,10 +148,7 @@ extern const composite_score worst_composite_score;
 
 typedef std::vector<score_t> behavioral_score;
 
-// bscore tagged by complexity penalty (why is it tagged? could it be
-// std::pair instead?)
-typedef tagged_item<behavioral_score,
-                    score_t> penalized_bscore;
+typedef tagged_item<behavioral_score, score_t> penalized_bscore;
 
 typedef tagged_item<penalized_bscore,
                     composite_score> composite_penalized_bscore;
@@ -389,8 +386,8 @@ Out& ostream_pbscored_combo_tree(Out& out, const pbscored_combo_tree& candidate,
             << get_penalized_score(candidate) << std::endl;
 
     if (output_bscore)
-        ostream_penalized_bscore(out << behavioral_score_prefix_str << " ",
-                                 get_pbscore(candidate)) << std::endl;
+        ostream_behavioral_score(out << behavioral_score_prefix_str << " ",
+                                 get_bscore(candidate)) << std::endl;
 
     return out;
 }
