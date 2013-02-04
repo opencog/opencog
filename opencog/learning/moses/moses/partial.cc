@@ -131,7 +131,7 @@ cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcoun
 /// predicates are "good enough".  If we find one that is, then trim
 /// the scoring tables, and return (so as to run moses on the smaller
 /// problem).
-bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
+bool partial_solver::eval_candidates(const pbscored_combo_tree_set& cands)
 {
     logger().info() << "well-enough received " << cands.size() << " candidates";
     _most_good = 0;
@@ -154,7 +154,7 @@ bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
 /// of the pieces we've accumulated, and feed those back into the main
 /// algo as exemplars.  The main algo will realize that it's out of time,
 /// it will just score these, print them, and then all is done.
-void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
+void partial_solver::final_cleanup(const pbscored_combo_tree_ptr_set& cands)
 {
     logger().info() << "well-enough ending with " << cands.size()
                     << " exemplars. Prefix count= " << _prefix_count
@@ -249,7 +249,7 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 
 /// Refresh the exemplars list.  Basically, just copy the entire
 /// metapopulation from the previous run.
-void partial_solver::refresh(const bscored_combo_tree_ptr_set& cands)
+void partial_solver::refresh(const pbscored_combo_tree_ptr_set& cands)
 {
     for (const auto &item : cands)
         _exemplars.push_back(get_tree(item));
@@ -259,7 +259,7 @@ void partial_solver::refresh(const bscored_combo_tree_ptr_set& cands)
 void partial_solver::eval_candidate (const combo_tree& cand)
 {
     // Are we done yet?
-    penalized_behavioral_score pbs = _bscore->operator()(cand);
+    penalized_bscore pbs = _bscore->operator()(cand);
     score_t total_score = 0.0;
     for (const score_t& sc : pbs.first)
         total_score += sc;

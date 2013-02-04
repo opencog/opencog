@@ -70,13 +70,13 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
 };
 
 // Abstract bscoring function class to implement
-struct bscore_base : public unary_function<combo_tree, penalized_behavioral_score>
+struct bscore_base : public unary_function<combo_tree, penalized_bscore>
 {
     bscore_base() : occam(false), complexity_coef(0.0) {};
     virtual ~bscore_base() {};
 
     // Evaluate the candidate tr
-    virtual penalized_behavioral_score operator()(const combo_tree& tr) const = 0;
+    virtual penalized_bscore operator()(const combo_tree& tr) const = 0;
 
     // Return the best possible bscore achievable with that fitness
     // function. This is useful in order to stop running MOSES when
@@ -116,7 +116,7 @@ struct bscore_based_cscore : public cscore_base
     composite_score operator()(const combo_tree& tr) const
     {
         try {
-            penalized_behavioral_score pbs = _pbscorer(tr);
+            penalized_bscore pbs = _pbscorer(tr);
             return operator()(pbs, tree_complexity(tr));
         }
         catch (EvalException& ee)
@@ -139,7 +139,7 @@ struct bscore_based_cscore : public cscore_base
     }
 
     // Hmmm, this could be static, actually ... 
-    composite_score operator()(const penalized_behavioral_score& pbs,
+    composite_score operator()(const penalized_bscore& pbs,
                                complexity_t cpxy) const
     {
         const behavioral_score &bs = pbs.first;
@@ -185,7 +185,7 @@ struct multibscore_based_bscore : public bscore_base
     multibscore_based_bscore(const BScorerSeq& bscorers) : _bscorers(bscorers) {}
 
     // main operator
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     behavioral_score best_possible_bscore() const;
 
@@ -209,7 +209,7 @@ struct logical_bscore : public bscore_base
     logical_bscore(const combo_tree& tr, int a)
             : target(tr, a), arity(a) {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     behavioral_score best_possible_bscore() const;
 
@@ -348,7 +348,7 @@ struct recall_bscore : public discriminating_bscore
                   float max_precision = 1.0f,
                   float hardness = 1.0f);
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
@@ -366,7 +366,7 @@ struct prerec_bscore : public discriminating_bscore
                   float max_recall = 1.0f,
                   float hardness = 1.0f);
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
@@ -388,7 +388,7 @@ struct bep_bscore : public discriminating_bscore
                float max_diff = 0.5f,
                float hardness = 1.0f);
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
@@ -402,7 +402,7 @@ protected:
 struct f_one_bscore : public discriminating_bscore
 {
     f_one_bscore(const CTable& _ctable);
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
 protected:
     virtual score_t get_fixed(score_t pos, score_t neg, unsigned cnt) const;
@@ -495,7 +495,7 @@ struct precision_bscore : public bscore_base
                      bool worst_norm = false,
                      bool subtract_neg_target = false);
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -564,7 +564,7 @@ struct precision_conj_bscore : public bscore_base
     precision_conj_bscore(const CTable& _ctable, float hardness,
                           bool positive = true);
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -610,7 +610,7 @@ struct discretize_contin_bscore : public bscore_base
     //                          bool weighted_average,
     //                          float alphabet_size, float p);
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     // The best possible bscore is a vector of zeros. That's probably
     // not quite true, because there could be duplicated inputs, but
@@ -725,7 +725,7 @@ struct contin_bscore : public bscore_base
         init(eft);
     }
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     // The best possible bscore is a vector of zeros. That's probably
     // not quite true, because there could be duplicated inputs, but
@@ -874,7 +874,7 @@ struct ctruth_table_bscore : public bscore_base
     {}
     ctruth_table_bscore(const CTable& _ctt) : ctable(_ctt) {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -914,7 +914,7 @@ struct enum_table_bscore : public bscore_base
 {
     enum_table_bscore(const CTable& _ctt) : ctable(_ctt) {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     // Return the best possible bscore. Used as one of the
     // termination conditions (when the best bscore is reached).
@@ -952,7 +952,7 @@ struct enum_filter_bscore : public enum_table_bscore
         : enum_table_bscore(_ctt), punish(1.0)
     {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     score_t punish;
 };
@@ -996,7 +996,7 @@ struct enum_graded_bscore : public enum_table_bscore
         : enum_table_bscore(_ctt), grading(0.9)
     {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     virtual score_t min_improv() const;
 
@@ -1021,7 +1021,7 @@ struct enum_effective_bscore : public enum_graded_bscore
         : enum_graded_bscore(_ctt), _ctable_usize(_ctt.uncompressed_size())
     {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 protected:
     size_t _ctable_usize;
 };
@@ -1064,7 +1064,7 @@ struct interesting_predicate_bscore : public bscore_base
                                  bool positive = true,
                                  bool abs_skewness = false,
                                  bool decompose_kld = false);
-    penalized_behavioral_score operator()(const combo_tree& tr) const;
+    penalized_bscore operator()(const combo_tree& tr) const;
 
     // the KLD has no upper boundary so the best of possible score is
     // the maximum value a behavioral_score can represent

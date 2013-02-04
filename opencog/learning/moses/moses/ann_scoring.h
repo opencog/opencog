@@ -265,14 +265,14 @@ struct ann_pole2nv_bscore : public bscore_base
     {
         composite_score cs(ann_pole2nv_cscore()(tr));
 
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = get_score(cs);
         pbs.second = get_penalty(cs);
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = 0;
         pbs.second = 0;
         return pbs;
@@ -295,14 +295,14 @@ struct ann_pole2_bscore : public bscore_base
     {
         composite_score cs(ann_pole2_cscore()(tr));
 
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = get_score(cs);
         pbs.second = get_penalty(cs);
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = 0;
         pbs.second = 0;
         return pbs;
@@ -321,18 +321,18 @@ struct ann_pole_cscore  : public cscore_base
 
 struct ann_pole_bscore : public bscore_base
 {
-    penalized_behavioral_score operator()(const combo_tree& tr) const
+    penalized_bscore operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_pole_cscore()(tr));
 
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = get_score(cs);
         pbs.second = get_penalty(cs);
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = 0;
         pbs.second = 0;
         return pbs;
@@ -354,18 +354,18 @@ struct ann_cscore  : public cscore_base
 
 struct ann_bscore : public bscore_base
 {
-    penalized_behavioral_score operator()(const combo_tree& tr) const
+    penalized_bscore operator()(const combo_tree& tr) const
     {
         composite_score cs(ann_cscore()(tr));
 
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = get_score(cs);
         pbs.second = get_penalty(cs);
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first[0] = 0;
         pbs.second = 0;
         return pbs;

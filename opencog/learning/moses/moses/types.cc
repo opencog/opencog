@@ -29,9 +29,9 @@
 namespace opencog { namespace moses {
 
 using namespace std;
-        
-bool bscored_combo_tree_greater::operator()(const bscored_combo_tree& bs_tr1,
-                                            const bscored_combo_tree& bs_tr2) const
+
+bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
+                                            const pbscored_combo_tree& bs_tr2) const
 {
     composite_score csc1 = get_composite_score(bs_tr1);
     composite_score csc2 = get_composite_score(bs_tr2);
@@ -41,7 +41,7 @@ bool bscored_combo_tree_greater::operator()(const bscored_combo_tree& bs_tr1,
     if (lt) return false;
 
     // If we are here, then they are equal.  We are desperate to break
-    // a tie, because otherwise, the bscored_combo_tree_set will discard
+    // a tie, because otherwise, the pbscored_combo_tree_set will discard
     // anything that compares equal, and we really don't want that.
     score_t sc1 = get_score(csc1);
     score_t sc2 = get_score(csc2);

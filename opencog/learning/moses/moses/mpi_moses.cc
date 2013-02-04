@@ -199,7 +199,7 @@ void moses_mpi_comm::recv_exemplar(combo_tree& exemplar)
 ///
 /// This sends a pretty big glob.
 // XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
-void moses_mpi_comm::send_deme(const bscored_combo_tree_ptr_set& mp, int n_evals)
+void moses_mpi_comm::send_deme(const pbscored_combo_tree_ptr_set& mp, int n_evals)
 {
     MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
 
@@ -207,9 +207,9 @@ void moses_mpi_comm::send_deme(const bscored_combo_tree_ptr_set& mp, int n_evals
     MPI::COMM_WORLD.Send(&num_trees, 1, MPI::INT, ROOT_NODE, MSG_NUM_COMBO_TREES);
     sent_bytes += 2*sizeof(int);
 
-    bscored_combo_tree_ptr_set_cit it;
+    pbscored_combo_tree_ptr_set_cit it;
     for (it = mp.begin(); it != mp.end(); it++) {
-        const bscored_combo_tree& btr = *it;
+        const pbscored_combo_tree& btr = *it;
 
         // We are going to send only the composite score, and not the
         // full behavioural score.  Basically, the full bscore is just
@@ -241,7 +241,7 @@ int moses_mpi_comm::probe_for_deme()
 /// in an atomic, unfragmented way, from the first source that sent
 /// one to us.
 void moses_mpi_comm::recv_deme(int source,
-                               bscored_combo_tree_set& cands,
+                               pbscored_combo_tree_set& cands,
                                int& n_evals)
 {
     MPI::Status status;
@@ -263,9 +263,9 @@ void moses_mpi_comm::recv_deme(int source,
         // The vectore behavioural score will be empty; only the 
         // composite score gets a non-trivial value.
         behavioral_score bs;
-        penalized_behavioral_score pbs(bs, sc.get_complexity_penalty());
-        composite_behavioral_score cbs(pbs, sc);
-        bscored_combo_tree bsc_tr(tr, cbs);
+        penalized_bscore pbs(bs, sc.get_complexity_penalty());
+        composite_penalized_bscore cbs(pbs, sc);
+        pbscored_combo_tree bsc_tr(tr, cbs);
         cands.insert(bsc_tr);
     }
 }
@@ -428,7 +428,7 @@ void mpi_moses(metapopulation& mp,
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-        bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+        pbscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
         if (exemplar == mp.end()) {
             if (wrkpool.available() == tot_workers) {
                 logger().warn(
@@ -461,7 +461,7 @@ void mpi_moses(metapopulation& mp,
                 mompi.dispatch_deme(worker.rank, extree, max_evals);
 
                 int n_evals = 0;
-                bscored_combo_tree_set candidates;
+                pbscored_combo_tree_set candidates;
                 mompi.recv_deme(worker.rank, candidates, n_evals);
 cout<<"duuude master "<<getpid() <<" from="<<worker.rank << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
                 wrkpool.give_back(worker);
@@ -560,7 +560,7 @@ void mpi_moses(metapopulation& mp,
     {
         // Feeder: push work out to each worker.
         while ((0 < wrkpool.size()) && !done) {
-            bscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
+            pbscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
                 if ((tot_workers == wrkpool.size()) && (0 == source)) {
                     logger().warn(
@@ -595,7 +595,7 @@ void mpi_moses(metapopulation& mp,
         }
 
         int n_evals = 0;
-        bscored_combo_tree_set candidates;
+        pbscored_combo_tree_set candidates;
         mompi.recv_deme(source, candidates, n_evals);
         source = 0;
 

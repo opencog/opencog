@@ -61,13 +61,13 @@ class moses_mpi_comm
         // root methods, to be used only by root node.
         void dispatch_deme(int target, const combo_tree&, int max_evals);
         int probe_for_deme();
-        void recv_deme(int source, bscored_combo_tree_set&, int& n_evals);
+        void recv_deme(int source, pbscored_combo_tree_set&, int& n_evals);
         void send_finished(int target);
 
         // worker methods, to be used only by workers.
         int recv_more_work();
         void recv_exemplar(combo_tree&);
-        void send_deme(const bscored_combo_tree_ptr_set&, int);
+        void send_deme(const pbscored_combo_tree_ptr_set&, int);
 
         std::atomic<size_t> sent_bytes;
         std::atomic<size_t> recv_bytes;

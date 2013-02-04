@@ -232,17 +232,17 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
         combo_tree si_base(base);
         simplify_candidate(si_base);
 
-        penalized_behavioral_score pbs(_bscorer(si_base));
+        penalized_bscore pbs(_bscorer(si_base));
         // XXX Compute the bscore a second time.   The first time
         // was immediately above.  We do it again, because the
         // caching scorer lacks the correct signature.
         // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
         composite_score csc(cscorer(si_base));
 
-        candidates[si_base] = composite_behavioral_score(pbs, csc);
+        candidates[si_base] = composite_penalized_bscore(pbs, csc);
     }
 
-    bscored_combo_tree_set mps(candidates.begin(), candidates.end());
+    pbscored_combo_tree_set mps(candidates.begin(), candidates.end());
     update_best_candidates(mps);
     merge_candidates(mps);
 }
@@ -251,19 +251,19 @@ void metapopulation::set_diversity()
 {
     logger().debug("Compute diversity penalties of the metapopulation");
     
-    bscored_combo_tree_ptr_set pool; // new metapopulation
+    pbscored_combo_tree_ptr_set pool; // new metapopulation
 
     // structure to remember a partially aggredated distorted
     // diversity penalties between the candidates and the ones in
     // the pool (to avoid recomputing them)
-    typedef bscored_combo_tree_ptr_set_it psi;
+    typedef pbscored_combo_tree_ptr_set_it psi;
     typedef std::pair<psi, dp_t> bsct_dp_pair;
     std::vector<bsct_dp_pair> tmp;
     for (psi bsct_it = begin(); bsct_it != end(); ++bsct_it)
         tmp.push_back(bsct_dp_pair(bsct_it, 0.0));
     
     // pointer to the last candidate moved from tmp to pool
-    const bscored_combo_tree* last_ptr(nullptr);
+    const pbscored_combo_tree* last_ptr(nullptr);
 
     // // debug
     // std::atomic<unsigned> dp_count(0); // count the number of
@@ -283,7 +283,7 @@ void metapopulation::set_diversity()
                              // that all diversity penalties are
                              // initially zero)
 
-            bscored_combo_tree& bsct = *v.first;
+            pbscored_combo_tree& bsct = *v.first;
             OC_ASSERT(get_bscore(bsct).size(),
                       "Behavioral score is needed for diversity!");
 
@@ -318,9 +318,9 @@ void metapopulation::set_diversity()
 
         // // debug
         // logger().fine("Pool =");
-        // for (bscored_combo_tree* ptr : pool) {
+        // for (pbscored_combo_tree* ptr : pool) {
         //     stringstream ss;
-        //     ostream_bscored_combo_tree(ss, *ptr, true, true, true);
+        //     ostream_pbscored_combo_tree(ss, *ptr, true, true, true);
         //     logger().fine(ss.str());
         // }
         // // ~debug
@@ -329,7 +329,7 @@ void metapopulation::set_diversity()
         OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
 
         // take the max score, insert in the pool and remove from tmp
-        bscored_combo_tree_greater bsct_gt;
+        pbscored_combo_tree_greater bsct_gt;
         auto gt = [&](const bsct_dp_pair& l,
                       const bsct_dp_pair& r) {
             return bsct_gt(*l.first, *r.first);
@@ -380,7 +380,7 @@ void metapopulation::log_selected_exemplar(const_iterator exemplar_it)
     }
 }
 
-bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
+pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 {
     OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
 
@@ -406,7 +406,7 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 
     // The exemplars are stored in order from best score to worst;
     // the iterator follows this order.
-    for (const bscored_combo_tree& bsct : *this) {
+    for (const pbscored_combo_tree& bsct : *this) {
 
         score_t sc = get_penalized_score(bsct);
 
@@ -467,7 +467,7 @@ bscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     return selex;
 }
 
-void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
+void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
 {
     if (logger().isDebugEnabled()) {
         logger().debug("Going to merge %u candidates with the metapopulation",
@@ -476,7 +476,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
             stringstream ss;
             ss << "Candidates to merge with the metapopulation:" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_bscored_combo_tree(ss, cnd, true, true);
+                ostream_pbscored_combo_tree(ss, cnd, true, true);
             logger().fine(ss.str());
         }
     }
@@ -489,7 +489,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
     if (params.diversity.include_dominated) {
         logger().debug("Insert all candidates in the metapopulation");
         for (const auto& cnd : candidates)
-            insert(new bscored_combo_tree(cnd));
+            insert(new pbscored_combo_tree(cnd));
     } else {
         logger().debug("Insert non-dominated candidates in the metapopulation");
         unsigned old_size = size();
@@ -585,9 +585,9 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
 
         // update the set of potential exemplars
         if (not_already_visited && thread_safe_tr_not_found()) {
-            penalized_behavioral_score pbs; // empty bscore till
+            penalized_bscore pbs; // empty bscore till
                                             // it gets computed
-            composite_behavioral_score cbsc(pbs, inst_csc);
+            composite_penalized_bscore cbsc(pbs, inst_csc);
 
             unique_lock lock(pot_cnd_mutex);
             pot_candidates[tr] = cbsc;
@@ -626,15 +626,15 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
 
         auto compute_bscore = [this](metapop_candidates::value_type& cand) {
             composite_score csc = get_composite_score(cand.second);
-            penalized_behavioral_score pbs = this->_bscorer(cand.first);
-            cand.second = composite_behavioral_score(pbs, csc);
+            penalized_bscore pbs = this->_bscorer(cand.first);
+            cand.second = composite_penalized_bscore(pbs, csc);
         };
         OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
                            compute_bscore);
     }
 
     logger().debug("Select only candidates not already in the metapopulation");
-    bscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
+    pbscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
     logger().debug("Selected %u candidates (%u were in the metapopulation)",
                    candidates.size(), pot_candidates.size()-candidates.size());
 
@@ -646,7 +646,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
             ss << "Candidates with their bscores before"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_bscored_combo_tree(ss, cnd, true, true, true);
+                ostream_pbscored_combo_tree(ss, cnd, true, true, true);
             logger().fine(ss.str());
         }
 
@@ -660,7 +660,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
             ss << "Candidates with their bscores after"
                 " removing the dominated candidates" << std::endl;
             for (const auto& cnd : candidates)
-                ostream_bscored_combo_tree(ss, cnd, true, true, true);
+                ostream_pbscored_combo_tree(ss, cnd, true, true, true);
             logger().fine(ss.str());
         }
     }
@@ -694,7 +694,7 @@ void metapopulation::resize_metapop()
                    old_size);
 
     // pointers to deallocate
-    std::vector<bscored_combo_tree*> ptr_seq;
+    std::vector<pbscored_combo_tree*> ptr_seq;
 
     score_t top_score = get_penalized_score(*begin());
     score_t range = useful_score_range();
@@ -770,13 +770,13 @@ void metapopulation::resize_metapop()
 // Return the set of candidates not present in the metapopulation.
 // This makes merging faster because it decreases the number of
 // calls of dominates.
-bscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs)
+pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs)
 {
-    bscored_combo_tree_set res;
-    for (const bscored_combo_tree& cnd : mcs) {
+    pbscored_combo_tree_set res;
+    for (const pbscored_combo_tree& cnd : mcs) {
         const combo_tree& tr = get_tree(cnd);
         const_iterator fcnd =
-            OMP_ALGO::find_if(begin(), end(), [&](const bscored_combo_tree& v) {
+            OMP_ALGO::find_if(begin(), end(), [&](const pbscored_combo_tree& v) {
                     return tr == get_tree(v); });
         if (fcnd == end())
             res.insert(cnd);
@@ -785,37 +785,37 @@ bscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidat
 }
 
 // reciprocal of random_access_view
-bscored_combo_tree_set
-metapopulation::to_set(const bscored_combo_tree_ptr_vec& bcv)
+pbscored_combo_tree_set
+metapopulation::to_set(const pbscored_combo_tree_ptr_vec& bcv)
 {
-    bscored_combo_tree_set res;
-    for (const bscored_combo_tree* cnd : bcv)
+    pbscored_combo_tree_set res;
+    for (const pbscored_combo_tree* cnd : bcv)
         res.insert(*cnd);
     return res;
 }
 
-void metapopulation::remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs)
+void metapopulation::remove_dominated(pbscored_combo_tree_set& bcs, unsigned jobs)
 {
     // get the nondominated candidates
-    bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
-    bscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv, jobs);
+    pbscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
+    pbscored_combo_tree_ptr_vec res = get_nondominated_rec(bcv, jobs);
     // get the dominated by set difference
     boost::sort(bcv); boost::sort(res);
-    bscored_combo_tree_ptr_vec dif = set_difference(bcv, res);
+    pbscored_combo_tree_ptr_vec dif = set_difference(bcv, res);
     // remove the dominated ones
-    for (const bscored_combo_tree* cnd_ptr : dif)
+    for (const pbscored_combo_tree* cnd_ptr : dif)
         bcs.erase(*cnd_ptr);
 }
 
-bscored_combo_tree_set
-metapopulation::get_nondominated_iter(const bscored_combo_tree_set& bcs)
+pbscored_combo_tree_set
+metapopulation::get_nondominated_iter(const pbscored_combo_tree_set& bcs)
 {
-    typedef std::list<bscored_combo_tree> bscored_combo_tree_list;
-    typedef bscored_combo_tree_list::iterator bscored_combo_tree_list_it;
-    bscored_combo_tree_list mcl(bcs.begin(), bcs.end());
+    typedef std::list<pbscored_combo_tree> pbscored_combo_tree_list;
+    typedef pbscored_combo_tree_list::iterator pbscored_combo_tree_list_it;
+    pbscored_combo_tree_list mcl(bcs.begin(), bcs.end());
     // remove all dominated candidates from the list
-    for(bscored_combo_tree_list_it it1 = mcl.begin(); it1 != mcl.end();) {
-        bscored_combo_tree_list_it it2 = it1;
+    for(pbscored_combo_tree_list_it it1 = mcl.begin(); it1 != mcl.end();) {
+        pbscored_combo_tree_list_it it2 = it1;
         ++it2;
         if(it2 != mcl.end())
             for(; it2 != mcl.end();) {
@@ -833,21 +833,21 @@ metapopulation::get_nondominated_iter(const bscored_combo_tree_set& bcs)
         else
             ++it1;
     }
-    return bscored_combo_tree_set(mcl.begin(), mcl.end());
+    return pbscored_combo_tree_set(mcl.begin(), mcl.end());
 }
 
-typedef pair<bscored_combo_tree_set,
-             bscored_combo_tree_set> bscored_combo_tree_set_pair;
+typedef pair<pbscored_combo_tree_set,
+             pbscored_combo_tree_set> pbscored_combo_tree_set_pair;
 
-typedef std::vector<const bscored_combo_tree*> bscored_combo_tree_ptr_vec;
-typedef bscored_combo_tree_ptr_vec::iterator bscored_combo_tree_ptr_vec_it;
-typedef bscored_combo_tree_ptr_vec::const_iterator bscored_combo_tree_ptr_vec_cit;
-typedef pair<bscored_combo_tree_ptr_vec,
-             bscored_combo_tree_ptr_vec> bscored_combo_tree_ptr_vec_pair;
+typedef std::vector<const pbscored_combo_tree*> pbscored_combo_tree_ptr_vec;
+typedef pbscored_combo_tree_ptr_vec::iterator pbscored_combo_tree_ptr_vec_it;
+typedef pbscored_combo_tree_ptr_vec::const_iterator pbscored_combo_tree_ptr_vec_cit;
+typedef pair<pbscored_combo_tree_ptr_vec,
+             pbscored_combo_tree_ptr_vec> pbscored_combo_tree_ptr_vec_pair;
 
 
-bscored_combo_tree_ptr_vec
-metapopulation::get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv,
+pbscored_combo_tree_ptr_vec
+metapopulation::get_nondominated_rec(const pbscored_combo_tree_ptr_vec& bcv,
                      unsigned jobs)
 {
     ///////////////
@@ -865,27 +865,27 @@ metapopulation::get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv,
 #else
  #define LAUNCH_SYNC std::launch::deferred
 #endif
-    bscored_combo_tree_ptr_vec_pair bcv_p = split(bcv);
+    pbscored_combo_tree_ptr_vec_pair bcv_p = split(bcv);
     if (jobs > 1) { // multi-threaded
         auto s_jobs = split_jobs(jobs); // pair
         // recursive calls
-        std::future<bscored_combo_tree_ptr_vec> task =
+        std::future<pbscored_combo_tree_ptr_vec> task =
             std::async(jobs > 1 ? std::launch::async : LAUNCH_SYNC,
                        bind(&metapopulation::get_nondominated_rec, this,
                             bcv_p.first, s_jobs.first));
-        bscored_combo_tree_ptr_vec bcv2_nd =
+        pbscored_combo_tree_ptr_vec bcv2_nd =
             get_nondominated_rec(bcv_p.second, s_jobs.second);
-        bscored_combo_tree_ptr_vec_pair res_p =
+        pbscored_combo_tree_ptr_vec_pair res_p =
             get_nondominated_disjoint_rec(task.get(), bcv2_nd, jobs);
         // union and return
         append(res_p.first, res_p.second);
         return res_p.first;
     } else { // single-threaded
         // recursive calls
-        bscored_combo_tree_ptr_vec
+        pbscored_combo_tree_ptr_vec
             bcv1_nd = get_nondominated_rec(bcv_p.first),
             bcv2_nd = get_nondominated_rec(bcv_p.second);
-        bscored_combo_tree_ptr_vec_pair
+        pbscored_combo_tree_ptr_vec_pair
             res_p = get_nondominated_disjoint_rec(bcv1_nd, bcv2_nd);
         // union and return
         append(res_p.first, res_p.second);
@@ -893,21 +893,21 @@ metapopulation::get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv,
     }
 }
 
-bscored_combo_tree_set_pair
-metapopulation::get_nondominated_disjoint(const bscored_combo_tree_set& bcs1,
-                          const bscored_combo_tree_set& bcs2,
+pbscored_combo_tree_set_pair
+metapopulation::get_nondominated_disjoint(const pbscored_combo_tree_set& bcs1,
+                          const pbscored_combo_tree_set& bcs2,
                           unsigned jobs)
 {
-    bscored_combo_tree_ptr_vec_pair res_p =
+    pbscored_combo_tree_ptr_vec_pair res_p =
         get_nondominated_disjoint_rec(random_access_view(bcs1),
                                       random_access_view(bcs2),
                                       jobs);
     return make_pair(to_set(res_p.first), to_set(res_p.second));
 }
 
-bscored_combo_tree_ptr_vec_pair
-metapopulation::get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& bcv1,
-                              const bscored_combo_tree_ptr_vec& bcv2,
+pbscored_combo_tree_ptr_vec_pair
+metapopulation::get_nondominated_disjoint_rec(const pbscored_combo_tree_ptr_vec& bcv1,
+                              const pbscored_combo_tree_ptr_vec& bcv2,
                               unsigned jobs)
 {
     ///////////////
@@ -916,8 +916,8 @@ metapopulation::get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& 
     if (bcv1.empty() || bcv2.empty())
         return make_pair(bcv1, bcv2);
     else if (bcv1.size() == 1) {
-        bscored_combo_tree_ptr_vec bcv_res1, bcv_res2;
-        bscored_combo_tree_ptr_vec_cit it1 = bcv1.begin(),
+        pbscored_combo_tree_ptr_vec bcv_res1, bcv_res2;
+        pbscored_combo_tree_ptr_vec_cit it1 = bcv1.begin(),
             it2 = bcv2.begin();
         bool it1_insert = true; // whether *it1 is to be inserted
                                 // in bcv_res1
@@ -938,25 +938,25 @@ metapopulation::get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& 
     // rec case //
     //////////////
     // split bcs1 in 2
-    bscored_combo_tree_ptr_vec_pair bcv1_p = split(bcv1);
+    pbscored_combo_tree_ptr_vec_pair bcv1_p = split(bcv1);
     if(jobs > 1) { // multi-threaded
         unsigned jobs1 = jobs / 2;
         unsigned jobs2 = std::max(1U, jobs - jobs1);
-        std::future<bscored_combo_tree_ptr_vec_pair> task =
+        std::future<pbscored_combo_tree_ptr_vec_pair> task =
             std::async(std::launch::async,
                        bind(&metapopulation::get_nondominated_disjoint_rec, this,
                             bcv1_p.first, bcv2, jobs1));
-        bscored_combo_tree_ptr_vec_pair bcv_m2 =
+        pbscored_combo_tree_ptr_vec_pair bcv_m2 =
             get_nondominated_disjoint_rec(bcv1_p.second, bcv2, jobs2);
-        bscored_combo_tree_ptr_vec_pair bcv_m1 = task.get();
+        pbscored_combo_tree_ptr_vec_pair bcv_m1 = task.get();
         // merge results
         append(bcv_m1.first, bcv_m2.first);
         boost::sort(bcv_m1.second); boost::sort(bcv_m2.second);
-        bscored_combo_tree_ptr_vec bcv_m2_inter =
+        pbscored_combo_tree_ptr_vec bcv_m2_inter =
             set_intersection(bcv_m1.second, bcv_m2.second);
         return make_pair(bcv_m1.first, bcv_m2_inter);
     } else { // single-threaded
-        bscored_combo_tree_ptr_vec_pair
+        pbscored_combo_tree_ptr_vec_pair
             bcv_m1 = get_nondominated_disjoint_rec(bcv1_p.first, bcv2),
             bcv_m2 = get_nondominated_disjoint_rec(bcv1_p.second,
                                                    bcv_m1.second);
@@ -968,31 +968,31 @@ metapopulation::get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& 
 
 // merge nondominated candidate to the metapopulation assuming
 // that bcs contains no dominated candidates within itself
-void metapopulation::merge_nondominated(const bscored_combo_tree_set& bcs, unsigned jobs)
+void metapopulation::merge_nondominated(const pbscored_combo_tree_set& bcs, unsigned jobs)
 {
-    bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
-    bscored_combo_tree_ptr_vec bcv_mp;
-    for (const bscored_combo_tree& cnd : *this)
+    pbscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
+    pbscored_combo_tree_ptr_vec bcv_mp;
+    for (const pbscored_combo_tree& cnd : *this)
         bcv_mp.push_back(&cnd);
-    bscored_combo_tree_ptr_vec_pair bcv_p =
+    pbscored_combo_tree_ptr_vec_pair bcv_p =
         get_nondominated_disjoint_rec(bcv, bcv_mp, jobs);
     
     // remove the dominated ones from the metapopulation
     boost::sort(bcv_mp);
     boost::sort(bcv_p.second);
-    bscored_combo_tree_ptr_vec diff_bcv_mp =
+    pbscored_combo_tree_ptr_vec diff_bcv_mp =
         set_difference(bcv_mp, bcv_p.second);
-    for (const bscored_combo_tree* cnd : diff_bcv_mp)
+    for (const pbscored_combo_tree* cnd : diff_bcv_mp)
         erase(*cnd);
 
     // add the nondominated ones from bsc
-    for (const bscored_combo_tree* cnd : bcv_p.first)
-        insert(new bscored_combo_tree(*cnd));
+    for (const pbscored_combo_tree* cnd : bcv_p.first)
+        insert(new pbscored_combo_tree(*cnd));
 }
 
 /// Update the record of the best score seen, and the associated tree.
 /// Safe to call in a multi-threaded context.
-void metapopulation::update_best_candidates(const bscored_combo_tree_set& candidates)
+void metapopulation::update_best_candidates(const pbscored_combo_tree_set& candidates)
 {
     if (candidates.empty())
         return;
@@ -1009,7 +1009,7 @@ void metapopulation::update_best_candidates(const bscored_combo_tree_set& candid
     score_t best_sc = get_score(_best_cscore);
     complexity_t best_cpx = get_complexity(_best_cscore);
 
-    for (const bscored_combo_tree& it : candidates)
+    for (const pbscored_combo_tree& it : candidates)
     {
         const composite_score& cit = get_composite_score(it);
         score_t sc = get_score(cit);
@@ -1041,7 +1041,7 @@ void metapopulation::log_best_candidates() const
         logger().info()
            << "The following candidate(s) have the best score "
            << best_composite_score();
-        for (const bscored_combo_tree& cand : best_candidates()) {
+        for (const pbscored_combo_tree& cand : best_candidates()) {
             logger().info() << "" << get_tree(cand);
         }
     }
