@@ -146,9 +146,6 @@ protected:
 
 extern const composite_score worst_composite_score;
 
-typedef tagged_item<combo::combo_tree,
-                    composite_score> scored_combo_tree;
-
 typedef std::vector<score_t> behavioral_score;
 
 // bscore tagged by complexity penalty (why is it tagged? could it be
@@ -168,11 +165,6 @@ typedef tagged_item<combo::combo_tree,
 static inline score_t get_penalized_score(const composite_score& sc)
 {
    return sc.get_penalized_score();
-}
-
-inline const combo::combo_tree& get_tree(const scored_combo_tree& st)
-{
-    return st.first;
 }
 
 inline const combo::combo_tree& get_tree(const bscored_combo_tree& bst)
@@ -220,11 +212,6 @@ inline score_t get_score(const bscored_combo_tree& bst)
     return get_score(bst.second);
 }
 
-inline score_t get_score(const scored_combo_tree& st)
-{
-    return get_score(st.second);
-}
-
 inline complexity_t get_complexity(const composite_score& ts)
 {
     return ts.get_complexity();
@@ -238,11 +225,6 @@ inline complexity_t get_complexity(const composite_behavioral_score& ts)
 inline complexity_t get_complexity(const bscored_combo_tree& bst)
 {
     return get_complexity(bst.second);
-}
-
-inline complexity_t get_complexity(const scored_combo_tree& st)
-{
-    return get_complexity(st.second);
 }
 
 inline score_t get_complexity_penalty(const composite_score& ts)
@@ -260,11 +242,6 @@ inline score_t get_complexity_penalty(const bscored_combo_tree& bst)
     return get_complexity_penalty(bst.second);
 }
 
-inline score_t get_complexity_penalty(const scored_combo_tree& st)
-{
-    return get_complexity_penalty(st.second);
-}
-
 inline score_t get_diversity_penalty(const composite_score& ts)
 {
     return ts.get_diversity_penalty();
@@ -280,11 +257,6 @@ inline score_t get_diversity_penalty(const bscored_combo_tree& bst)
     return get_diversity_penalty(bst.second);
 }
 
-inline score_t get_diversity_penalty(const scored_combo_tree& st)
-{
-    return get_diversity_penalty(st.second);
-}
-
 inline score_t get_penalty(const composite_score& ts)
 {
     return ts.get_penalty();
@@ -298,11 +270,6 @@ inline score_t get_penalty(const composite_behavioral_score& ts)
 inline score_t get_penalty(const bscored_combo_tree& bst)
 {
     return get_penalty(bst.second);
-}
-
-inline score_t get_penalty(const scored_combo_tree& st)
-{
-    return get_penalty(st.second);
 }
 
 inline const penalized_behavioral_score& get_pbscore(const composite_behavioral_score& ts)
