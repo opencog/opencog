@@ -88,6 +88,12 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr)
             // correlate well with these incorrect answers. The hope
             // is that these will be used to build a more accurate
             // models.
+            //
+            // Nil: it's not exactly "plain wrong", plain wrong is
+            // more like the least frequent answer has count zero and
+            // the model predicts that. One could relax that
+            // constraint by specifying to which degree the model
+            // should be wrong so that the row is considered.
             Counter<vertex, unsigned> cnt = vct.second;
             vertex actual_out = cnt.most_frequent();
             consider_row = predicted_out != actual_out;
