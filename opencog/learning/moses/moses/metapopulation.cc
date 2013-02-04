@@ -990,30 +990,6 @@ void metapopulation::merge_nondominated(bscored_combo_tree_set& bcs, unsigned jo
         insert(new bscored_combo_tree(*cnd));
 }
 
-// Iterative version of merge_nondominated
-void metapopulation::merge_nondominated_iter(bscored_combo_tree_set& bcs)
-{
-    for (bscored_combo_tree_set_it it1 = bcs.begin(); it1 != bcs.end();) {
-        bscored_combo_tree_ptr_set_it it2 = begin();
-        if (it2 == end())
-            break;
-        for (; it2 != end();) {
-            tribool dom = dominates(get_bscore(*it1), get_bscore(*it2));
-            if (dom)
-                erase(it2++);
-            else if (!dom) {
-                bcs.erase(it1++);
-                it2 = end();
-            } else
-                ++it2;
-            if (it2 == end())
-                ++it1;
-        }
-    }
-    // insert the nondominated candidates from bcs
-    insert (bcs.begin(), bcs.end());
-}
-
 /// Update the record of the best score seen, and the associated tree.
 /// Safe to call in a multi-threaded context.
 void metapopulation::update_best_candidates(const bscored_combo_tree_set& candidates)

@@ -590,9 +590,6 @@ struct metapopulation : bscored_combo_tree_ptr_set
     // that bcs contains no dominated candidates within itself
     void merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs = 1);
 
-    // Iterative version of merge_nondominated
-    void merge_nondominated_iter(bscored_combo_tree_set& bcs);
-
     /**
      * x dominates y if
      *
