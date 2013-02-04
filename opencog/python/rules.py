@@ -122,36 +122,6 @@ def rules(a, deduction_types):
              match=match_predicate)
     rules.append(r)
 
-    # The three main logical rules in PLN. The code creates different versions of the Rule
-    # for different kinds of Links.
-    # The classic Modus Ponens rule, used (and over-emphasized) in classical logic everywhere.
-    for ty in ['ImplicationLink', 'PredictiveImplicationLink']:
-        rules.append(Rule(Var(2), 
-                                     [T(ty, 1, 2),
-                                      Var(1) ], 
-                                      name='ModusPonens '+ty,
-                                      formula = formulas.modusPonensFormula))
-    
-    # The PLN DeductionRule. Not to be confused with ModusPonens.
-    for type in deduction_types:
-        rules.append(Rule(T(type, 1,3), 
-                                     [T(type, 1, 2),
-                                      T(type, 2, 3), 
-                                      Var(1),
-                                      Var(2), 
-                                      Var(3)],
-                                    name='Deduction', 
-                                    formula = formulas.deductionSimpleFormula))
-    
-    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
-#    for type in deduction_types:
-#        rules.append(Rule( T(type, 2, 1),
-#                                     [T(type, 1, 2),
-#                                      Var(1),
-#                                      Var(2)],
-#                                     name='Inversion',
-#                                     formula = formulas.inversionFormula))
-
     # Calculating logical And/Or/Not. These have probabilities attached,
     # but they work similarly to the Boolean versions.
     type = 'AndLink'
@@ -241,26 +211,78 @@ def rules(a, deduction_types):
 #        r.tv = True
 #        rules.append(r)
 
+    rules += logical_rules(a, deduction_types)
+
+    rules += quantifier_rules(a)
+
+    rules += temporal_rules(a)
+    
+    rules += planning_rules(a)
+
+    #rules += subset_rules(a)
+
+    # Return every Rule specified above.
+    return rules
+
+def logical_rules(atomspace, deduction_types):
+    rules = []
+
+    # The three main logical rules in PLN. The code creates different versions of the Rule
+    # for different kinds of Links.
+    # The classic Modus Ponens rule, used (and over-emphasized) in classical logic everywhere.
+    for ty in ['ImplicationLink', 'PredictiveImplicationLink']:
+        rules.append(Rule(Var(2),
+            [T(ty, 1, 2),
+             Var(1) ],
+            name='ModusPonens '+ty,
+            formula = formulas.modusPonensFormula))
+
+    # The PLN DeductionRule. Not to be confused with ModusPonens.
+    for type in deduction_types:
+        rules.append(Rule(T(type, 1,3),
+            [T(type, 1, 2),
+             T(type, 2, 3),
+             Var(1),
+             Var(2),
+             Var(3)],
+            name='Deduction',
+            formula = formulas.deductionSimpleFormula))
+
+    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1),
+            [T(type, 1, 2),
+             Var(1),
+             Var(2)],
+            name='Inversion',
+            formula = formulas.inversionFormula))
+
+    return rules
+
+def quantifier_rules(atomspace):
+    rules = []
+
     # If an Atom is available in an Average/ForAll quantifier, you want to be
     # able to produce the Atom itself and send it through the other steps of the
     # inference.
-    for atom in a.get_atoms_by_type(t.AverageLink):
+    for atom in atomspace.get_atoms_by_type(t.AverageLink):
         # out[0] is the ListLink of VariableNodes, out[1] is the expression
         tr = tree_from_atom(atom.out[1])
         r = Rule(tr, [], name='Average')
         r.tv = atom.tv
         rules.append(r)
 
-    for atom in a.get_atoms_by_type(t.ForAllLink):
+    for atom in atomspace.get_atoms_by_type(t.ForAllLink):
         # out[0] is the ListLink of VariableNodes, out[1] is the expression
         tr = tree_from_atom(atom.out[1])
         r = Rule(tr, [], name='ForAll')
         r.tv = atom.tv
         rules.append(r)
 
-    rules += temporal_rules(a)
-    
-    rules += planning_rules(a)
+    return rules
+
+def subset_rules(atomspace):
+    rules = []
 
     r = Rule(
         T('SubsetLink', new_var(), new_var()),
@@ -289,7 +311,6 @@ def rules(a, deduction_types):
         )
     )
 
-    # Return every Rule specified above.
     return rules
 
 def planning_rules(atomspace):
@@ -558,7 +579,7 @@ def match_axiom_slow(space,target,candidates = None):
 
 def match_axiom(space,target):
     if isinstance(target.op, Atom):
-        candidates = [target.op]
+        smallest_set = [target.op]
     else:
         # The nodes in the target, as Atoms
         # TODO This may break if target is a Link with no Nodes underneath it!

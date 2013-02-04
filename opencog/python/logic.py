@@ -149,6 +149,7 @@ class Chainer:
     
             ret = []
             for tr in self.results:
+                # Create the Atom (before this point it's just a Tree)
                 atom = atom_from_tree(tr, self.space)
                 # haxx
                 atom.tv = self.get_tvs(tr)[0]
@@ -211,27 +212,30 @@ class Chainer:
         #next_target = self.get_fittest(self.bc_later) # Best-first search
         #next_target = self.select_stochastic() # A better version of best-first search (still a prototype)
 
-        next_app = self.bc_later.pop_first() # Breadth-first search
+        STOCHASTIC = False
+        if STOCHASTIC:
+            next_apps = self.select_stochastic()
+        else:
+            next_apps = [self.bc_later.pop_first()] # Breadth-first search
         #log.info(format_log('-BCQ', next_app))
 
-        #next_apps = self.select_stochastic() # A better version of best-first search (still a prototype)
-        #for next_app in next_apps:
+        for next_app in next_apps:
 
-        # This step will also call propogate_results and propogate_specialization,
-        # so it will check for premises, compute the TV if possible, etc.
-        self.find_axioms_for_rule_app(next_app)
+            # This step will also call propogate_results and propogate_specialization,
+            # so it will check for premises, compute the TV if possible, etc.
+            self.find_axioms_for_rule_app(next_app)
 
-        # This should probably use the extra things in found_axiom
-        self.propogate_result(next_app)
+            # This should probably use the extra things in found_axiom
+            self.propogate_result(next_app)
 
-        #next_target = standardize_apart(next_target)
+            #next_target = standardize_apart(next_target)
 
-        for goal in next_app.goals:
-            apps = self.find_rule_applications(goal)
+            for goal in next_app.goals:
+                apps = self.find_rule_applications(goal)
 
-            for a in apps:
-                a = a.standardize_apart()
-                self.add_app_if_good(a)
+                for a in apps:
+                    a = a.standardize_apart()
+                    self.add_app_if_good(a)
 
         return None
 
@@ -313,7 +317,7 @@ class Chainer:
             return goal.is_variable()
 
         if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head) or not all(g.is_variable() or self.check_domain_recursive(g) for g in list(app.goals)+[app.head]):
-            return
+            return None
 
         # If the app is a cycle or already added, don't add it or any of its goals
         (status, app_pdn) = self.add_app_to_pd(app)
@@ -324,7 +328,7 @@ class Chainer:
                 self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app)
 
         if status == 'CYCLE' or status == 'EXISTING':
-            return
+            return None
 
         self.num_app_pdns_per_level[app_pdn.depth] += 1
         self.num_uses_per_rule_per_level[app_pdn.depth][app.name] += 1
@@ -333,39 +337,6 @@ class Chainer:
         self.bc_later.append(app)
         
         return app_pdn
-
-    #def add_queries(self, app):
-    #    def goal_is_stupid(goal):
-    #        return goal.is_variable()
-    #
-    #    if any(map(self._app_is_stupid, app.goals)) or self._app_is_stupid(app.head) or not all(g.is_variable() or self.check_domain_recursive(g) for g in list(app.goals)+[app.head]):
-    #        return
-    #
-    #    # If the app is a cycle or already added, don't add it or any of its goals
-    #    (status, app_pdn) = self.add_app_to_pd(app)
-    #    if status == 'NEW':
-    #        # Only visualize it if it is actually new
-    #        # viz
-    #        for (i, input) in enumerate(app.goals):
-    #            self.viz.outputTarget(input.canonical(), app.head.canonical(), i, app)
-    #
-    #    if status == 'CYCLE' or status == 'EXISTING':
-    #        return
-    #    
-    #    # NOTE: For generators, the app_pdn will exist already for some reason
-    #    # It's useful to add the head if (and only if) it is actually more specific than anything currently in the BC tree.
-    #    # This happens all the time when atoms are found.
-    #    for goal in tuple(app.goals):
-    #        if     not goal_is_stupid(goal):
-    #            if  (not self.contains_isomorphic_tree(goal, self.bc_before) and
-    #                 not self.contains_isomorphic_tree(goal, self.bc_later) ):
-    #                assert goal not in self.bc_before
-    #                assert goal not in self.bc_later
-    #                self.add_tree_to_index(goal, self.bc_later)
-    #                #added_queries.append(goal)
-    #                log.info(format_log('+BCQ', goal, app.name))
-    #                #stdout.flush()
-    #    return app
 
     def check_goals_found_already(self, app):
         '''Check whether the given app can produce a result. This will happen if all its premises are
