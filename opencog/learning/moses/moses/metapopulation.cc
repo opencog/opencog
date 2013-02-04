@@ -496,7 +496,7 @@ void metapopulation::merge_candidates(bscored_combo_tree_set& candidates)
         merge_nondominated(candidates, params.jobs);
         logger().debug("Inserted %u non-dominated candidates in the metapopulation",
                        size() - old_size);
-    }    
+    }
 }
 
 bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t evals)
@@ -968,7 +968,7 @@ metapopulation::get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& 
 
 // merge nondominated candidate to the metapopulation assuming
 // that bcs contains no dominated candidates within itself
-void metapopulation::merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs)
+void metapopulation::merge_nondominated(const bscored_combo_tree_set& bcs, unsigned jobs)
 {
     bscored_combo_tree_ptr_vec bcv = random_access_view(bcs);
     bscored_combo_tree_ptr_vec bcv_mp;
