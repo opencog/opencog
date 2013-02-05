@@ -515,8 +515,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     logger().debug("Sort the deme");
 
     // Sort the deme according to composite_score (descending order)
-    std::sort(__deme->begin(), __deme->end(),
-              std::greater<scored_instance<composite_score> >());
+    boost::sort(*__deme, std::greater<scored_instance<composite_score> >());
 
     // Trim the deme down to size.  The point here is that the next
     // stage, select_candidates below, is very cpu-intensive; we
