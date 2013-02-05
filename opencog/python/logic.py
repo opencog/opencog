@@ -217,9 +217,9 @@ class Chainer:
             next_apps = self.select_stochastic()
         else:
             next_apps = [self.bc_later.pop_first()] # Breadth-first search
-        #log.info(format_log('-BCQ', next_app))
 
         for next_app in next_apps:
+            #log.info(format_log('-BCQ', next_app))
 
             # This step will also call propogate_results and propogate_specialization,
             # so it will check for premises, compute the TV if possible, etc.

@@ -65,6 +65,10 @@ bc/new/subset_test.conf
 files = files_list.split('\n')
 
 def test_all(a):
+    import plop.collector
+    plop_collector = plop.collector.Collector()
+    plop_collector.start()
+
     start = time()
     
     for f in files:
@@ -78,6 +82,12 @@ def test_all(a):
             print f
     
     print "Total time:",time() - start
+
+    plop_collector.stop()
+    profile_data = repr(dict(plop_collector.stack_counts))
+    f = open('pln_examples.plop_profile','w')
+    f.write(profile_data)
+    f.close()
 
 passed = []
 failed = []

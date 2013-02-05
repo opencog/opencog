@@ -194,13 +194,17 @@ class OrderedSet(collections.OrderedDict, collections.MutableSet):
     symmetric_difference_update = property(lambda self: self.__ixor__)
     union = property(lambda self: self.__or__)
 
-def format_log(offset, dsp_suffix = True, *args):
-    suffix = "" 
-    if dsp_suffix:
-        #stack = inspect.stack()
-        #suffix = " -- %s %s" % (stack[1][2], stack[1][3])
-        pass
-    out =  ' ' * offset +  ' '.join(map(str, args)) + suffix
+#def format_log(offset, dsp_suffix = True, *args):
+#    suffix = ""
+#    if dsp_suffix:
+#        #stack = inspect.stack()
+#        #suffix = " -- %s %s" % (stack[1][2], stack[1][3])
+#        pass
+#    out =  ' ' * offset +  ' '.join(map(str, args)) + suffix
+#    return out
+
+def format_log(*args):
+    out =  ' '.join(map(str, args))
     return out
 
 class Logger(object):

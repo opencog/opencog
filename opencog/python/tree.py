@@ -55,7 +55,8 @@ class Tree (object):
         else:
             self.args = args
         
-        self._tuple = None
+        #self._tuple = None
+        self._hash = None
 
     def __str__(self):
         if self.is_leaf():
@@ -90,7 +91,15 @@ class Tree (object):
             return "T('%s', %s)" % (self.op, repr(self.args))
 
     def __hash__(self):
-        return hash( self.to_tuple() )
+        if self._hash != None:
+            return self._hash
+        else:
+            hashcode = hash(self.op)
+            for x in self.args:
+                hashcode ^= hash(x)
+            return hashcode
+
+            #return hash( self.to_tuple() )
 
     def is_variable(self):
         "A variable is an int starting from 0"
@@ -112,28 +121,41 @@ class Tree (object):
     def is_leaf(self):
         return len(self.args) == 0
     
-    def __cmp__(self, other):
+#    def __cmp__(self, other):
+#        if not isinstance(other, Tree):
+#            return cmp(Tree, type(other))
+#
+#        #return cmp(self.to_tuple(), other.to_tuple())
+
+    def __eq__(self, other):
         if not isinstance(other, Tree):
-            return cmp(Tree, type(other))
-        #print self.to_tuple(), other.to_tuple()
-        return cmp(self.to_tuple(), other.to_tuple())
-    
-    def to_tuple(self):
-        # Simply cache the tuple.
-        # TODO: A more efficient alternative would be to adapt the hash function and compare function
-        # to work on Trees directly.
-        if self._tuple != None:
-            return self._tuple
+            return False
+
+        # Try using the hash instead in case it's faster?
+        if hash(self) != hash(other):
+            return False
+
+        if self.op != other.op:
+            return False
         else:
-            # Atom doesn't support comparing to different types in the Python-standard way.
-            if isinstance(self.op, Atom): # and not isinstance(self.op, FakeAtom):
-                #assert type(self.op.h) != type(None)
-                self._tuple = self.op.h.value()
-                return self._tuple
-                #return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
-            else:
-                self._tuple = tuple([self.op]+[x.to_tuple() for x in self.args])
-                return self._tuple
+            return self.args == other.args
+    
+#    def to_tuple(self):
+#        # Simply cache the tuple.
+#        # TODO: A more efficient alternative would be to adapt the hash function and compare function
+#        # to work on Trees directly.
+#        if self._tuple != None:
+#            return self._tuple
+#        else:
+#            # Atom doesn't support comparing to different types in the Python-standard way.
+#            if isinstance(self.op, Atom): # and not isinstance(self.op, FakeAtom):
+#                #assert type(self.op.h) != type(None)
+#                self._tuple = self.op.h.value()
+#                return self._tuple
+#                #return self.op.type_name+':'+self.op.name # Easier to understand, though a bit less efficient
+#            else:
+#                self._tuple = tuple([self.op]+[x.to_tuple() for x in self.args])
+#                return self._tuple
 
     def isomorphic(self, other):
         return isomorphic_conjunctions_ordered((self, ), (other, ))
@@ -535,7 +557,7 @@ def canonical_trees(trs, dic = {}):
         tr2 = standardize_apart(tr, dic)
         ret.append(tr2)
     _new_var_counter = tmp
-    
+
     return ret
 
 def get_varlist(t):

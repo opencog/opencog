@@ -54,31 +54,31 @@ def rules(a, deduction_types):
 
     #path_rules(a)
 
-    # PLN is able to do pathfinding (experimental). In the Minecraft world, there is a 3D grid
-    # similar to that used by A*. This Rule determines the grid squares (or rather grid cubes)
-    # that are next to a specified grid cube (i.e. the neighborhood, in the A* sense).
-    # You can represent the grid as a network of OpenCog links, which is more suitable for PLN
-    # than having an array (and more versatile in general).
-    # This version of the Rule calculates the neighborhood dynamically. The function path_rules()
-    # uses the simpler but much slower approach of adding thousands of links to the AtomSpace in advance.
-    r = Rule(T('EvaluationLink',
-                a.add(t.PredicateNode,'neighbor'),
-                T('ListLink',
-                    Var(1), # a ConceptNode representing the coordinates in a tacky format
-                    Var(2)
-                )),
-             [],
-             name='Neighbors',
-             match=match_neighbors)
-    rules.append(r)
-    #r = Rule(T('ImplicationLink',
-    #            Var(1),
-    #            Var(2)
-    #            ),
-    #         [],
-    #         name='Neighbors',
-    #         match=match_neighbors)
-    #rules.append(r)
+#    # PLN is able to do pathfinding (experimental). In the Minecraft world, there is a 3D grid
+#    # similar to that used by A*. This Rule determines the grid squares (or rather grid cubes)
+#    # that are next to a specified grid cube (i.e. the neighborhood, in the A* sense).
+#    # You can represent the grid as a network of OpenCog links, which is more suitable for PLN
+#    # than having an array (and more versatile in general).
+#    # This version of the Rule calculates the neighborhood dynamically. The function path_rules()
+#    # uses the simpler but much slower approach of adding thousands of links to the AtomSpace in advance.
+#    r = Rule(T('EvaluationLink',
+#                a.add(t.PredicateNode,'neighbor'),
+#                T('ListLink',
+#                    Var(1), # a ConceptNode representing the coordinates in a tacky format
+#                    Var(2)
+#                )),
+#             [],
+#             name='Neighbors',
+#             match=match_neighbors)
+#    rules.append(r)
+#    #r = Rule(T('ImplicationLink',
+#    #            Var(1),
+#    #            Var(2)
+#    #            ),
+#    #         [],
+#    #         name='Neighbors',
+#    #         match=match_neighbors)
+#    #rules.append(r)
 
     # You can add a separate Rule for every axiom (i.e. every Atom which has a TruthValue when PLN starts).
     # It won't add a new Rule for atoms that are created during the inference, rather they will be added to
@@ -215,9 +215,9 @@ def rules(a, deduction_types):
 
     rules += quantifier_rules(a)
 
-    rules += temporal_rules(a)
+    #rules += temporal_rules(a)
     
-    rules += planning_rules(a)
+    #rules += planning_rules(a)
 
     #rules += subset_rules(a)
 
