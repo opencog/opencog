@@ -73,16 +73,16 @@ bool expand_deme(metapopulation& mp,
 
     size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
     stats.n_evals += evals_this_deme;
-    stats.n_expansions++;
 
     bool done = mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
 
     if (logger().isInfoEnabled()) {
-        logger().info()
-           << "Expansion " << stats.n_expansions
-           << " total number of evaluations so far: " << stats.n_evals;
+        logger().info() << "Expansion " << stats.n_expansions << " done";
+        logger().info() << "Total number of evaluations so far: " << stats.n_evals;
         mp.log_best_candidates();
     }
+
+    stats.n_expansions++;
 
     mp._dex.free_deme();
 
