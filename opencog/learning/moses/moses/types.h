@@ -360,10 +360,10 @@ static const std::string penalized_score_prefix_str = "penalized score:";
 static const std::string behavioral_score_prefix_str = "behavioral score:";
 template<typename Out>
 Out& ostream_pbscored_combo_tree(Out& out, const pbscored_combo_tree& candidate,
-                                bool output_score = true,
-                                bool output_penalty = false,
-                                bool output_bscore = false,
-                                bool output_python = false)
+                                 bool output_score = true,
+                                 bool output_penalty = false,
+                                 bool output_bscore = false,
+                                 bool output_python = false)
 {
     if (output_python)
         return ostream_pbscored_combo_tree_python(out, candidate, output_score,
