@@ -660,7 +660,8 @@ struct metapopulation : pbscored_combo_tree_ptr_set
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
-                    out << "visited: " << has_been_visited(*from) << std::endl;
+                    out << "visited: " << has_been_visited(get_tree(*from))
+                        << std::endl;
             }
             return out;
         }
@@ -685,7 +686,8 @@ struct metapopulation : pbscored_combo_tree_ptr_set
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
-                    out << "visited:" << has_been_visited(*from) << std::endl;
+                    out << "visited:" << has_been_visited(get_tree(*from))
+                        << std::endl;
             }
         }
         return out;

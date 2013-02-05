@@ -147,13 +147,10 @@ protected:
 extern const composite_score worst_composite_score;
 
 typedef std::vector<score_t> behavioral_score;
-
 typedef std::pair<behavioral_score, score_t> penalized_bscore;
-
-typedef tagged_item<penalized_bscore,
-                    composite_score> composite_penalized_bscore;
-typedef tagged_item<combo::combo_tree,
-                    composite_penalized_bscore> pbscored_combo_tree;
+typedef std::pair<penalized_bscore, composite_score> composite_penalized_bscore;
+typedef std::pair<combo::combo_tree,
+                  composite_penalized_bscore> pbscored_combo_tree;
 
 ///////////////////////////
 // convenience accessors //
