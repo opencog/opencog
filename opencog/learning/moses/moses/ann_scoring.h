@@ -266,16 +266,13 @@ struct ann_pole2nv_bscore : public bscore_base
         composite_score cs(ann_pole2nv_cscore()(tr));
 
         penalized_bscore pbs;
-        pbs.first[0] = get_score(cs);
+        pbs.first.push_back(get_score(cs));
         pbs.second = get_penalty(cs);
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_bscore pbs;
-        pbs.first[0] = 0;
-        pbs.second = 0;
-        return pbs;
+        return {0.0};
     }
 };
 
@@ -296,16 +293,13 @@ struct ann_pole2_bscore : public bscore_base
         composite_score cs(ann_pole2_cscore()(tr));
 
         penalized_bscore pbs;
-        pbs.first[0] = get_score(cs);
+        pbs.first.push_back(get_score(cs));
         pbs.second = get_penalty(cs);
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_bscore pbs;
-        pbs.first[0] = 0;
-        pbs.second = 0;
-        return pbs;
+        return {0.0};
     }
 };
 
@@ -332,10 +326,7 @@ struct ann_pole_bscore : public bscore_base
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_bscore pbs;
-        pbs.first[0] = 0;
-        pbs.second = 0;
-        return pbs;
+        return {0.0};
     }
 };
 
@@ -365,10 +356,7 @@ struct ann_bscore : public bscore_base
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_bscore pbs;
-        pbs.first[0] = 0;
-        pbs.second = 0;
-        return pbs;
+        return {0.0};
     }
 };
 

@@ -1878,11 +1878,11 @@ penalized_bscore multibscore_based_bscore::operator()(const combo_tree& tr) cons
 
 behavioral_score multibscore_based_bscore::best_possible_bscore() const
 {
-    penalized_bscore pbs;
+    behavioral_score bs;
     for (const bscore_base& bsc : _bscorers) {
-        boost::push_back(pbs.first, bsc.best_possible_bscore());
+        boost::push_back(bs, bsc.best_possible_bscore());
     }
-    return pbs;
+    return bs;
 }
 
 // return the min of all min_improv

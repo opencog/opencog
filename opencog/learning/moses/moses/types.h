@@ -148,7 +148,7 @@ extern const composite_score worst_composite_score;
 
 typedef std::vector<score_t> behavioral_score;
 
-typedef tagged_item<behavioral_score, score_t> penalized_bscore;
+typedef std::pair<behavioral_score, score_t> penalized_bscore;
 
 typedef tagged_item<penalized_bscore,
                     composite_score> composite_penalized_bscore;

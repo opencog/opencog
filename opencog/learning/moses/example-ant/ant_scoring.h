@@ -246,10 +246,7 @@ struct ant_bscore : public bscore_base
 
     behavioral_score best_possible_bscore() const
     {
-        penalized_bscore pbs;
-        pbs.first[0] = 0;
-        pbs.second = 0;
-        return pbs;
+        return {0.0};
     }
 };
 
