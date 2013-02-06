@@ -238,6 +238,7 @@ struct ant_bscore : public bscore_base
     penalized_behavioral_score operator()(const combo_tree& tr) const
     {
         penalized_behavioral_score pbs;
+        pbs.first.reserve(2);
         pbs.first[0] = get_score(ant_score()(tr));
         pbs.second = tr.size();
 
