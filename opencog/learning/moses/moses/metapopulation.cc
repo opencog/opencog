@@ -116,16 +116,23 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         feature_selector festor = *_params.fstor;
 
         // get the set of features of the exemplar
-        auto xmplar_features = get_argument_abs_idx_from_zero_set(_exemplar);
+        auto xmplr_features = get_argument_abs_idx_from_zero_set(_exemplar);
+
+        // get labels corresponding to all the features
+        const auto& ilabels = festor._ctable.get_input_labels();
+
+        // names of the exemplar features
+        vector<string> xmplr_feature_names;
+        for (arity_t i : xmplr_features)
+                xmplr_feature_names.push_back(ilabels[i]);
 
         // Use the features of the exemplar as initial feature set to
         // seed the feature selection algorithm. That way the new
         // features will be selected to combine well with the
         // exemplar.
         if (festor.params.init_exemplar_features) {
-            const auto& ilabels = festor._ctable.get_input_labels();
-            for (arity_t i : xmplar_features)
-                festor.params.fs_params.initial_features.push_back(ilabels[i]);
+            auto& pif = festor.params.fs_params.initial_features;
+            pif.insert(pif.end(), xmplr_feature_names.begin(), xmplr_feature_names.end());
             // we increase the size to output new features (not the
             // ones already in the exemplar)
             festor.params.increase_target_size = true;
@@ -138,19 +145,28 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // case where the feat sel is returning only those features already
         // in the exemplar.
         if (festor.params.increase_target_size) {
-            festor.params.fs_params.target_size += xmplar_features.size();
+            festor.params.fs_params.target_size += xmplr_features.size();
         }
 
         // Alternatively one can ignore the features in the exemplar
         // during feature selection.
         festor.params.ignore_features = festor.params.ignore_exemplar_features ?
-            xmplar_features : set<arity_t>();
+            xmplr_features : set<arity_t>();
 
         // return the set of selected features as column index
         // (left most column corresponds to 0)
         auto selected_features = festor(_exemplar);
-        logger().info() << "Feature selection of " << selected_features.size()
-                        << " features for representation";
+
+        // log selected features
+        auto new_features = set_difference(selected_features, xmplr_features);
+        vector<string> new_feature_names;
+        for (arity_t i : new_features)
+            new_feature_names.push_back(ilabels[i]);
+        ostreamContainer(logger().info() << "Feature selection of " << selected_features.size()
+                         << " features for representation: ",
+                         new_feature_names, ",");
+        ostreamContainer(logger().info() << "In addition to the exemplar features: ",
+                         xmplr_feature_names, ",");
 
         // add the complement of the selected features to ignore_ops
         // (but only if they are not present in the exemplar as to not
@@ -158,19 +174,9 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         unsigned arity = festor._ctable.get_arity();
         for (unsigned i = 0; i < arity; i++)
             if (selected_features.find(i) == selected_features.end()
-                and xmplar_features.find(i) == xmplar_features.end())
+                and xmplr_features.find(i) == xmplr_features.end())
                 ignore_ops.insert(argument(i + 1));
 
-        // debug print
-        // std::vector<std::string> ios;
-        // auto vertex_to_str = [](const vertex& v) {
-        //     std::stringstream ss;
-        //     ss << v;
-        //     return ss.str();
-        // };
-        // boost::transform(ignore_ops, back_inserter(ios), vertex_to_str);
-        // printlnContainer(ios);
-        // ~debug print
     }
 
     // Build a representation by adding knobs to the exemplar,
