@@ -260,12 +260,12 @@ void moses_mpi_comm::recv_deme(int source,
         combo_tree tr;
         recv_tree(tr, source);
 
-        // The vectore behavioural score will be empty; only the 
+        // The vector behavioural score will be empty; only the
         // composite score gets a non-trivial value.
         behavioral_score bs;
         penalized_bscore pbs(bs, sc.get_complexity_penalty());
         composite_penalized_bscore cbs(pbs, sc);
-        pbscored_combo_tree bsc_tr(tr, cbs);
+        pbscored_combo_tree bsc_tr(tr, cbs, 0 /* @todo demeID */);
         cands.insert(bsc_tr);
     }
 }
@@ -313,7 +313,7 @@ void mpi_moses_worker(metapopulation& mp,
         time_t max_time = INT_MAX;
         size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
 
-        mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
+        mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme, /* @todo demeID */0);
         mp._dex.free_deme();
 
         // logger().info() << "Sending " << mp.size() << " results";

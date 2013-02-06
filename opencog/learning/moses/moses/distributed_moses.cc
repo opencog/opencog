@@ -254,15 +254,18 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
                 in.ignore(4123123, '\n');
             }
             // insert read element in candidates
-            pbscored_combo_tree candidate =
-                make_pair(tr, make_pair(pbs, composite_score(score, complexity, complexity_penalty)));
+            metapop_candidates::value_type candidate =
+                {tr, {pbs, composite_score(score, complexity,
+                                           complexity_penalty)}};
             candidates.insert(candidate);
 
             if (logger().isFineEnabled()) {
                 logger().fine("Parsed candidate:");
                 stringstream ss;
-                logger().fine(ostream_pbscored_combo_tree(ss, candidate,
-                                                         true, true).str());
+                ostream_combo_tree_composite_pbscore(ss, candidate.first,
+                                                     candidate.second,
+                                                     true, true);
+                logger().fine(ss.str());
             }
         }
     }
@@ -419,8 +422,11 @@ void distributed_moses(metapopulation& mp,
                 stats.n_evals += evals;
 
                 // update best and merge
-                pbscored_combo_tree_set mc(candidates.begin(),
-                                          candidates.end());
+                pbscored_combo_tree_set mc;
+                for (const auto& cnd : candidates) {
+                    pbscored_combo_tree pct(cnd.first, cnd.second, 0 /* @todo demeID*/);
+                    mc.insert(pct);
+                }
 
                 mp.update_best_candidates(mc);
                 mp.merge_candidates(mc);

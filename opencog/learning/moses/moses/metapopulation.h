@@ -508,7 +508,7 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      * _visited_exemplars is not yet protected. There may be other
      * things.
      */
-    bool merge_deme(deme_t* __deme, representation* __rep, size_t evals);
+    bool merge_deme(deme_t* __deme, representation* __rep, size_t evals, demeID_t demeID);
 
     /**
      * Weed out excessively bad scores. The select_exemplar() routine
@@ -536,7 +536,7 @@ struct metapopulation : pbscored_combo_tree_ptr_set
     // Return the set of candidates not present in the metapopulation.
     // This makes merging faster because it decreases the number of
     // calls of dominates.
-    pbscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs);
+    pbscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs, demeID_t demeID);
 
     typedef pair<pbscored_combo_tree_set,
                  pbscored_combo_tree_set> pbscored_combo_tree_set_pair;

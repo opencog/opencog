@@ -136,7 +136,7 @@ bool partial_solver::eval_candidates(const pbscored_combo_tree_set& cands)
     logger().info() << "well-enough received " << cands.size() << " candidates";
     _most_good = 0;
     for (auto &item : cands) {
-        const combo_tree& cand = item.first;
+        const combo_tree& cand = get_tree(item);
         eval_candidate(cand);
     }
 

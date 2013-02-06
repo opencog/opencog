@@ -224,8 +224,8 @@ void deme_expander::free_deme()
 
 // Init the metapopulation with the following set of exemplars.
 void metapopulation::init(const std::vector<combo_tree>& exemplars,
-          const reduct::rule& simplify_candidate,
-          const cscore_base& cscorer)
+                          const reduct::rule& simplify_candidate,
+                          const cscore_base& cscorer)
 {
     metapop_candidates candidates;
     for (const combo_tree& base : exemplars) {
@@ -242,7 +242,12 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
         candidates[si_base] = composite_penalized_bscore(pbs, csc);
     }
 
-    pbscored_combo_tree_set mps(candidates.begin(), candidates.end());
+    pbscored_combo_tree_set mps;
+    for (const auto& cnd : candidates) {
+        pbscored_combo_tree pct(get_tree(cnd), get_composite_penalized_bscore(cnd),
+                                0 /* initial demeID */);
+        mps.insert(pct);
+    }
     update_best_candidates(mps);
     merge_candidates(mps);
 }
@@ -373,8 +378,8 @@ void metapopulation::log_selected_exemplar(const_iterator exemplar_it)
         logger().debug() << "No exemplar found";
     } else {
         unsigned pos = std::distance(cbegin(), exemplar_it) + 1;
-        logger().debug() << "Selected the " << pos << "th exemplar: "
-                         << get_tree(*exemplar_it);
+        logger().debug() << "Selected the " << pos << "th exemplar, from deme "
+                         << get_demeID(*exemplar_it) << ": " << get_tree(*exemplar_it);
         logger().debug() << "With composite score :"
                          << get_composite_score(*exemplar_it);
     }
@@ -499,7 +504,7 @@ void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
     }
 }
 
-bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t evals)
+bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t evals, demeID_t demeID)
 {
     OC_ASSERT(__rep);
     OC_ASSERT(__deme);
@@ -633,7 +638,7 @@ bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t ev
     }
 
     logger().debug("Select only candidates not already in the metapopulation");
-    pbscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
+    pbscored_combo_tree_set candidates = get_new_candidates(pot_candidates, demeID);
     logger().debug("Selected %u candidates (%u were in the metapopulation)",
                    candidates.size(), pot_candidates.size()-candidates.size());
 
@@ -767,18 +772,20 @@ void metapopulation::resize_metapop()
 }
 
 // Return the set of candidates not present in the metapopulation.
-// This makes merging faster because it decreases the number of
-// calls of dominates.
-pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs)
+// This makes merging faster because at best it decreases the number
+// of calls of dominates.
+pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs, demeID_t demeID)
 {
     pbscored_combo_tree_set res;
-    for (const pbscored_combo_tree& cnd : mcs) {
+    for (const auto& cnd : mcs) {
         const combo_tree& tr = get_tree(cnd);
         const_iterator fcnd =
             OMP_ALGO::find_if(begin(), end(), [&](const pbscored_combo_tree& v) {
                     return tr == get_tree(v); });
-        if (fcnd == end())
-            res.insert(cnd);
+        if (fcnd == end()) {
+            pbscored_combo_tree pbt(tr, get_composite_penalized_bscore(cnd), demeID);
+            res.insert(pbt);
+        }
     }
     return res;
 }
@@ -1008,22 +1015,22 @@ void metapopulation::update_best_candidates(const pbscored_combo_tree_set& candi
     score_t best_sc = get_score(_best_cscore);
     complexity_t best_cpx = get_complexity(_best_cscore);
 
-    for (const pbscored_combo_tree& it : candidates)
+    for (const pbscored_combo_tree& cnd : candidates)
     {
-        const composite_score& cit = get_composite_score(it);
-        score_t sc = get_score(cit);
-        complexity_t cpx = get_complexity(cit);
+        const composite_score& csc = get_composite_score(cnd);
+        score_t sc = get_score(csc);
+        complexity_t cpx = get_complexity(csc);
         if ((sc > best_sc) || ((sc == best_sc) && (cpx <= best_cpx)))
         {
             if ((sc > best_sc) || ((sc == best_sc) && (cpx < best_cpx)))
             {
-                _best_cscore = cit;
+                _best_cscore = csc;
                 best_sc = get_score(_best_cscore);
                 best_cpx = get_complexity(_best_cscore);
                 _best_candidates.clear();
                 logger().debug() << "New best score: " << _best_cscore;
             }
-            _best_candidates.insert(it);
+            _best_candidates[get_tree(cnd)] = get_composite_penalized_bscore(cnd);
         }
     }
 }
@@ -1040,7 +1047,7 @@ void metapopulation::log_best_candidates() const
         logger().info()
            << "The following candidate(s) have the best score "
            << best_composite_score();
-        for (const pbscored_combo_tree& cand : best_candidates()) {
+        for (const auto& cand : best_candidates()) {
             logger().info() << "" << get_tree(cand);
         }
     }
