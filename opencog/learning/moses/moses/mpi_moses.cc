@@ -386,11 +386,11 @@ worker_pool::worker_pool(int num_workers)
 /// MPI_THREAD_MULTIPLE mode.
 ///
 /// This routine has been lightly tested, and seems to work. It has not
-/// been heavily teted, because I don't have a multi-node machine with
+/// been heavily tested, because I don't have a multi-node machine with
 /// an MPI implementation that supports threads.  There's no particular
 /// advantage of this class over the mono-threaded class; its just that
 /// the design of this class seemed to be intuitively simpler and easier
-/// than writing a home-grown dispatcher loop that the mono-threaed
+/// than writing a home-grown dispatcher loop that the mono-threaded
 /// version (below) needs.
 ///
 void mpi_moses(metapopulation& mp,
@@ -512,10 +512,10 @@ theend:
 ///
 /// Main entry point for MPI moses, for the cases where the MPI
 /// implementation does not support threading.  The algorithm is
-/// structured into a single send-recv loop: work is sent out, so
-/// as to give each worker something to do.  The a check for completed
+/// structured into a single send-recv loop: work is sent out, so as
+/// to give each worker something to do.  Then a check for completed
 /// work is made.  Any demes that are received are merged in a
-/// separate thread; meanwhile, this loops back and sens out more
+/// separate thread; meanwhile, this loops back and sends out more
 /// work.
 ///
 /// The implementation of this loop is very similar to that of 
@@ -533,7 +533,7 @@ void mpi_moses(metapopulation& mp,
 
     moses_mpi_comm mompi;
 
-    // main worker dispatch loop
+    // Worker or dispatcher?
     if (!mompi.is_mpi_root()) {
         mpi_moses_worker(mp, mompi);
         return;
@@ -542,7 +542,8 @@ void mpi_moses(metapopulation& mp,
     // If we are here, then we are the root node.  The root will act
     // as a dispatcher to all of the worker nodes.
 
-    // Pool of free workers maintained in a circular queue.
+    // Pool of free workers maintained in a circular queue. The
+    // content of wrkpool is the source of the workers (see below)
     std::queue<int> wrkpool;
     size_t tot_workers = mompi.num_workers();
     for (size_t i=0; i<tot_workers; i++)
@@ -550,18 +551,22 @@ void mpi_moses(metapopulation& mp,
 
     std::atomic<int> thread_count(0);
 
+    // worker source (from 1 to number of workers).
+    // OC_ASSERT(false, "TODO: understand what is the role source=0 exactly");
     int source = 0;
     bool done = false;
 
     // Print legend for the columns of the stats.
     print_stats_header(NULL, false /* XXX stats for diversity, should be fixed */);
 
+    // Main worker dispatch loop
     while (true)
     {
         // Feeder: push work out to each worker.
         while ((0 < wrkpool.size()) && !done) {
             pbscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
+
                 if ((tot_workers == wrkpool.size()) && (0 == source)) {
                     logger().warn(
                         "There are no more exemplars in the metapopulation "
