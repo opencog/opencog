@@ -242,7 +242,8 @@ int moses_mpi_comm::probe_for_deme()
 /// one to us.
 void moses_mpi_comm::recv_deme(int source,
                                pbscored_combo_tree_set& cands,
-                               int& n_evals)
+                               int& n_evals,
+                               demeID_t demeID)
 {
     MPI::Status status;
     MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, source, MSG_NUM_EVALS, status);
@@ -265,7 +266,7 @@ void moses_mpi_comm::recv_deme(int source,
         behavioral_score bs;
         penalized_bscore pbs(bs, sc.get_complexity_penalty());
         composite_penalized_bscore cbs(pbs, sc);
-        pbscored_combo_tree bsc_tr(tr, cbs, 0 /* @todo demeID */);
+        pbscored_combo_tree bsc_tr(tr, cbs, demeID);
         cands.insert(bsc_tr);
     }
 }
@@ -313,7 +314,7 @@ void mpi_moses_worker(metapopulation& mp,
         time_t max_time = INT_MAX;
         size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
 
-        mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme, /* @todo demeID */0);
+        mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme, /* demeID */0);
         mp._dex.free_deme();
 
         // logger().info() << "Sending " << mp.size() << " results";
@@ -601,10 +602,10 @@ void mpi_moses(metapopulation& mp,
 
         int n_evals = 0;
         pbscored_combo_tree_set candidates;
-        mompi.recv_deme(source, candidates, n_evals);
+        stats.n_expansions ++;
+        mompi.recv_deme(source, candidates, n_evals, stats.n_expansions);
         source = 0;
 
-        stats.n_expansions ++;
         stats.n_evals += n_evals;
 
         // Merge results back into population.
