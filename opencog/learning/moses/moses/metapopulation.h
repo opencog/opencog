@@ -134,7 +134,7 @@ struct metapop_parameters
 {
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
-                       bool _revisit = false,
+                       unsigned _revisit = 0,
                        score_t _complexity_temperature = 3.0f,
                        const operator_set& _ignore_ops = empty_ignore_ops,
                        // bool _enable_cache = false,    // adaptive_cache
@@ -170,8 +170,9 @@ struct metapop_parameters
     // If true then all candidates are reduced before evaluation.
     bool reduce_all;
 
-    // When true then visited exemplars can be revisited.
-    bool revisit;
+    // The number of times the same exemplar can be revisited. If 0
+    // then an exemplar can only be visited once.
+    unsigned revisit;
 
     // keep track of the bscores even if not needed (in case the user
     // wants to keep them around)
@@ -316,6 +317,8 @@ struct metapopulation : pbscored_combo_tree_ptr_set
     // to see if a combo tree is in the set, or not.
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
+    typedef boost::unordered_map<combo_tree, unsigned,
+                                 boost::hash<combo_tree> > combo_tree_hash_counter;
 
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars,
@@ -796,7 +799,8 @@ protected:
     metapop_candidates _best_candidates;
 
     // contains the exemplars of demes that have been searched so far
-    combo_tree_hash_set _visited_exemplars;
+    // (and the number of times they have been searched)
+    combo_tree_hash_counter _visited_exemplars;
 
     // return true iff tr has already been visited
     bool has_been_visited(const combo_tree& tr) const;

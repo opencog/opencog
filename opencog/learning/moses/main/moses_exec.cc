@@ -471,7 +471,7 @@ int moses_exec(int argc, char** argv)
     // metapop_param
     int max_candidates;
     bool reduce_all;
-    bool revisit = false;
+    unsigned revisit;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     double cap_coef;
@@ -865,6 +865,13 @@ int moses_exec(int argc, char** argv)
          "clause any further. In principle, this should speed "
          "convergence.  In practice, not so much; it can hurt "
          "performance.\n")
+
+        ("revisit", value<unsigned>(&revisit)->default_value(0),
+         "Number of times the same exemplar can be revisited. "
+         "This option is only worthwhile when there "
+         "is a great deal of stochasticity in the search so that exploring "
+         "a deme multiple times will yield substantially different results. "
+         "This might be the case is feature selection is used for instance.\n")
 
         // Output control options
         

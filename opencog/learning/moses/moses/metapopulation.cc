@@ -398,13 +398,14 @@ pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     logger().debug("Select exemplar");
 
     // Shortcut for special case, as sometimes, the very first time
-    // through, the score is invalid.
+    // though, the score is invalid.
     if (size() == 1) {
         const_iterator selex = cbegin();
         const combo_tree& tr = get_tree(*selex);
-        if (!has_been_visited(tr))
-            _visited_exemplars.insert(tr);
-        else selex = cend();
+        if(params.revisit + 1 > _visited_exemplars[tr]) // not enough visited
+            _visited_exemplars[tr]++;
+        else selex = cend();    // enough visited
+
         log_selected_exemplar(selex);
         return selex;
     }
@@ -421,14 +422,14 @@ pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
 
         score_t sc = get_penalized_score(bsct);
 
-        // Skip any exemplars we've already used in the past.
+        // Skip exemplars that have been visited enough
         const combo_tree& tr = get_tree(bsct);
-        if (!has_been_visited(tr)) {
+        if (params.revisit + 1 > _visited_exemplars[tr]) {
             probs.push_back(sc);
             found_exemplar = true;
             if (highest_score < sc) highest_score = sc;
-        } else // hack: if the tree is visited then put a positive
-               // score so we know it must be ignored
+        } else // hack: if the tree is visited enough then put a
+               // positive score so we know it must be ignored
 #define SKIP_OVER_ME (1.0e38)
             probs.push_back(SKIP_OVER_ME);
     }
@@ -471,8 +472,8 @@ pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
     // << " size=" << probs.size() << " frac=" << fwd/((float)probs.size()) << endl;
     const_iterator selex = std::next(begin(), fwd);
 
-    // Mark the exemplar so we won't look at it again.
-    _visited_exemplars.insert(get_tree(*selex));
+    // We increment _visited_exemplar
+    _visited_exemplars[get_tree(*selex)]++;
 
     log_selected_exemplar(selex);
     return selex;
