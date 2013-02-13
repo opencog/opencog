@@ -289,9 +289,6 @@ protected:
     const reduct::rule& simplify_knob_building; // during knob building
     const cscore_base& _cscorer; // composite score
     metapop_parameters _params;
-
-    // exemplar of the current deme; a copy, not a reference.
-    combo_tree _exemplar;
 };
 
 /**

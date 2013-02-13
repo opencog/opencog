@@ -66,6 +66,11 @@ struct feature_selector_parameters {
     bool restrict_true;
 
     /**
+     * Prune the exemplar of all not selected features
+     */
+    bool prune_xmplr;
+
+    /**
      * Use the features in the exemplar as initial feature set
      */
     bool init_xmplr_features;

@@ -99,10 +99,10 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
     OC_ASSERT(_rep == NULL);
     OC_ASSERT(_deme == NULL);
 
-    _exemplar = exemplar;
+    combo_tree xmplr = exemplar;
 
     if (logger().isDebugEnabled())
-        logger().debug() << "Attempt to build rep from exemplar: " << _exemplar;
+        logger().debug() << "Attempt to build rep from exemplar: " << xmplr;
 
     // [HIGHLY EXPERIMENTAL]. Limit the number of features used to
     // build the exemplar to a more manageable number.  Basically,
@@ -116,7 +116,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         feature_selector festor = *_params.fstor;
 
         // get the set of features of the exemplar
-        auto xmplr_features = get_argument_abs_idx_from_zero_set(_exemplar);
+        auto xmplr_features = get_argument_abs_idx_from_zero_set(xmplr);
 
         // get labels corresponding to all the features
         const auto& ilabels = festor._ctable.get_input_labels();
@@ -155,26 +155,44 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
 
         // return the set of selected features as column index
         // (left most column corresponds to 0)
-        auto selected_features = festor(_exemplar);
+        auto selected_features = festor(xmplr);
 
         // log selected features
         auto new_features = set_difference(selected_features, xmplr_features);
         vector<string> new_feature_names;
         for (arity_t i : new_features)
             new_feature_names.push_back(ilabels[i]);
-        ostreamContainer(logger().info() << "Feature selection of " << selected_features.size()
+        ostreamContainer(logger().info() << "Feature selection of "
+                         << selected_features.size()
                          << " features for representation: ",
                          new_feature_names, ",");
-        ostreamContainer(logger().info() << "In addition to the exemplar features: ",
+        ostreamContainer(logger().info()
+                         << "In addition to the exemplar features: ",
                          xmplr_feature_names, ",");
 
+        if (festor.params.prune_xmplr) {
+            // remove literals of non selected features from the
+            // exemplar
+            for (auto it = xmplr.begin(); it != xmplr.end();) {
+                if (is_argument(*it)) {
+                    arity_t feature = get_argument(*it).abs_idx_from_zero();
+                    auto fit = selected_features.find(feature);
+                    if (fit == selected_features.end())
+                        it = xmplr.erase(it); // not selected, prune it
+                    else
+                        ++it;
+                }
+            }
+        }
+        else {
+            // Insert exemplar features as they are not pruned
+            selected_features.insert(xmplr_features.begin(), xmplr_features.end());
+        }
+        
         // add the complement of the selected features to ignore_ops
-        // (but only if they are not present in the exemplar as to not
-        // ignore the exemplar features).
         unsigned arity = festor._ctable.get_arity();
         for (unsigned i = 0; i < arity; i++)
-            if (selected_features.find(i) == selected_features.end()
-                and xmplr_features.find(i) == xmplr_features.end())
+            if (selected_features.find(i) == selected_features.end())
                 ignore_ops.insert(argument(i + 1));
 
     }
@@ -183,7 +201,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
     // creating a field set, and a mapping from field set to knobs.
     _rep = new representation(simplify_candidate,
                               simplify_knob_building,
-                              _exemplar, _type_sig,
+                              xmplr, _type_sig,
                               ignore_ops,
                               _params.perceptions,
                               _params.actions,

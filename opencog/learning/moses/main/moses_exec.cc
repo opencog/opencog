@@ -1141,6 +1141,10 @@ int moses_exec(int argc, char** argv)
          "both are enabled then feature selection is restricted to the data "
          "points which are both true and wrong.\n")
 
+        ("fs-prune-exemplar",
+         value<bool>(&festor_params.prune_xmplr),
+         "Remove from the exemplar the literals of non-selected features.\n")
+
         ("fs-subsampling-pbty",
          value<float>(&festor_params.subsampling_pbty)->default_value(0),
          "Probability of discarding an observation before carrying feature "
