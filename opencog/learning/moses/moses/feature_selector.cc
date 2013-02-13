@@ -47,7 +47,7 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr)
     auto labels = _ctable.get_labels();
     auto sig = _ctable.get_signature();
     auto cto = get_type_node(get_signature_output(sig));
-    if (params.exemplar_as_feature) {
+    if (params.xmplr_as_feature) {
         // update labels and signature with the exemplar feature
         labels.push_back(EXEMPLAR_FEATURE_NAME);
         auto head = sig.begin();
@@ -108,12 +108,12 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr)
             auto inputs = vct.first;
 
             // initialize all values of the ignored features
-            if (params.ignore_exemplar_features)
+            if (params.ignore_xmplr_features)
                 for (auto& iav : iavs)
                     boost::apply_visitor(iav, inputs.get_variant());
 
             // append exemplar feature at the end
-            if (params.exemplar_as_feature) {
+            if (params.xmplr_as_feature) {
                 if (cto == id::boolean_type)
                     inputs.push_back(get_builtin(predicted_out));
                 else if (cto == id::contin_type)
@@ -132,7 +132,7 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr)
     // Call feature selection //
     ////////////////////////////
 
-    if (params.exemplar_as_feature) {
+    if (params.xmplr_as_feature) {
         params.fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
         ++params.fs_params.target_size;
     }
@@ -140,7 +140,7 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr)
     auto self = select_features(fs_ctable, params.fs_params);
 
     // remove last feature if it's the feature exemplar
-    if (params.exemplar_as_feature) {
+    if (params.xmplr_as_feature) {
         size_t xmplar_f_pos = fs_ctable.get_arity() - 1;
         auto xmplar_f_it = self.find(xmplar_f_pos);
         if (xmplar_f_it == self.end()) {

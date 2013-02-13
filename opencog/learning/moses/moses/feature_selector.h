@@ -45,7 +45,7 @@ struct feature_selector_parameters {
      * Ignore the features present in the exemplar when doing feature
      * selection.
      */
-    bool ignore_exemplar_features;
+    bool ignore_xmplr_features;
 
     /**
      * Ignore features when doing feature selection.
@@ -68,13 +68,13 @@ struct feature_selector_parameters {
     /**
      * Use the features in the exemplar as initial feature set
      */
-    bool init_exemplar_features;
+    bool init_xmplr_features;
 
     /**
      * Use exemplar as feature, so feature selection can search good
      * features sets combined with the exemplar feature.
      */
-    bool exemplar_as_feature;
+    bool xmplr_as_feature;
 
     /**
      * Probability of discarding a row
@@ -97,7 +97,7 @@ struct feature_selector
                      const feature_selector_parameters& festor_params);
 
     /// Return a feature set that is good when combined with the
-    /// exemplar.
+    /// exemplar tr.
     feature_set operator()(const combo::combo_tree& tr);
 
     // Parameters

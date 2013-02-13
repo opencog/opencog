@@ -104,12 +104,12 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
     if (logger().isDebugEnabled())
         logger().debug() << "Attempt to build rep from exemplar: " << _exemplar;
 
-    // [HIGHLY EXPERIMENTAL]. Limit the number of features used to build
-    // the exemplar to a more manageable number, by only working with a
-    // a list that is correlated with the output value.  Basically, this is
-    // 'on-the-fly' feature selection.  This differs from an ordinary, one-time
-    // only, up-front round of feature selection by using only those features
-    // which score well with the current exemplar.
+    // [HIGHLY EXPERIMENTAL]. Limit the number of features used to
+    // build the exemplar to a more manageable number.  Basically,
+    // this is 'on-the-fly' feature selection.  This differs from an
+    // ordinary, one-time only, up-front round of feature selection by
+    // using only those features which score well with the current
+    // exemplar.
     operator_set ignore_ops = _params.ignore_ops;
     if (_params.fstor) {
         // copy, any change in the parameters will not be remembered
@@ -130,7 +130,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // seed the feature selection algorithm. That way the new
         // features will be selected to combine well with the
         // exemplar.
-        if (festor.params.init_exemplar_features) {
+        if (festor.params.init_xmplr_features) {
             auto& pif = festor.params.fs_params.initial_features;
             pif.insert(pif.end(), xmplr_feature_names.begin(), xmplr_feature_names.end());
             // we increase the size to output new features (not the
@@ -150,7 +150,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
 
         // Alternatively one can ignore the features in the exemplar
         // during feature selection.
-        festor.params.ignore_features = festor.params.ignore_exemplar_features ?
+        festor.params.ignore_features = festor.params.ignore_xmplr_features ?
             xmplr_features : set<arity_t>();
 
         // return the set of selected features as column index

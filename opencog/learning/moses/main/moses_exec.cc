@@ -1113,17 +1113,17 @@ int moses_exec(int argc, char** argv)
          " by the existing number of features in the exemplar chosen.\n")
 
         ("fs-ignore-exemplar-features",
-         value<bool>(&festor_params.ignore_exemplar_features)->default_value(0),
+         value<bool>(&festor_params.ignore_xmplr_features)->default_value(0),
          "Ignore the features present in the exemplar during feature selection.\n")
 
         ("fs-init-exemplar-features",
-         value<bool>(&festor_params.init_exemplar_features)->default_value(0),
+         value<bool>(&festor_params.init_xmplr_features)->default_value(0),
          "Use the features of the exemplar as initial feature set to seed the "
          "feature selection algorithm. That way the other features selected "
          "will be measured as good when combined with the exemplar.\n")
 
         ("fs-exemplar-as-feature",
-         value<bool>(&festor_params.exemplar_as_feature)->default_value(0),
+         value<bool>(&festor_params.xmplr_as_feature)->default_value(0),
          "Use the output of the exemplar as feature as to consider feature sets "
          "which is are scored well in combination with that feature.\n")
 
