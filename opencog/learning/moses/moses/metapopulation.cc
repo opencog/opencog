@@ -383,11 +383,16 @@ void metapopulation::log_selected_exemplar(const_iterator exemplar_it)
     if (exemplar_it == cend()) {
         logger().debug() << "No exemplar found";
     } else {
-        unsigned pos = std::distance(cbegin(), exemplar_it) + 1;
-        logger().debug() << "Selected the " << pos << "th exemplar, from deme "
-                         << get_demeID(*exemplar_it) << ": " << get_tree(*exemplar_it);
-        logger().debug() << "With composite score :"
-                         << get_composite_score(*exemplar_it);
+        const auto& xmplr = *exemplar_it;
+        unsigned pos = std::distance(cbegin(), exemplar_it) + 1,
+            nth_vst = _visited_exemplars[get_tree(xmplr)];
+
+        logger().debug() << "Selected the " << pos
+                         << "th exemplar, from deme " << get_demeID(xmplr)
+                         << ", for the " << nth_vst << "th time(s)";
+        logger().debug() << "Exemplar tree : " << get_tree(xmplr);
+        logger().debug() << "With composite score : "
+                         << get_composite_score(xmplr);
     }
 }
 
