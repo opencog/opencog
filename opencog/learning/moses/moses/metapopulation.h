@@ -65,6 +65,11 @@ using namespace combo;
 
 static const operator_set empty_ignore_ops = operator_set();
 
+/**
+ * determine the initial exemplar given its output type
+ */
+combo_tree type_to_exemplar(type_node type);
+
 struct diversity_parameters
 {
     typedef score_t dp_t;

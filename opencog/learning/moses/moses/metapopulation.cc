@@ -43,6 +43,29 @@ using boost::logic::tribool;
 using boost::logic::indeterminate;
 using namespace combo;
 
+combo_tree type_to_exemplar(type_node type)
+{
+    switch(type) {
+    case id::boolean_type: return combo_tree(id::logical_and);
+    case id::contin_type: return combo_tree(id::plus);
+    case id::enum_type: {
+        combo_tree tr(id::cond);
+        tr.append_child(tr.begin(), enum_t::get_random_enum());
+        return tr;
+    }
+    case id::ill_formed_type:
+        OC_ASSERT(false, "Error: the data type is incorrect, "
+                  "perhaps it has not been possible to infer it from the "
+                  "input table.");
+    default: {
+        stringstream ss;
+        ss << "Error: type " << type << " not supported";
+        OC_ASSERT(false, ss.str());
+    }
+    }
+    return combo_tree();
+}
+
 diversity_parameters::diversity_parameters(bool _include_dominated)
     : include_dominated(_include_dominated),
       pressure(0.0),
@@ -101,9 +124,6 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
 
     combo_tree xmplr = exemplar;
 
-    if (logger().isDebugEnabled())
-        logger().debug() << "Attempt to build rep from exemplar: " << xmplr;
-
     // [HIGHLY EXPERIMENTAL]. Limit the number of features used to
     // build the exemplar to a more manageable number.  Basically,
     // this is 'on-the-fly' feature selection.  This differs from an
@@ -158,19 +178,28 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         auto selected_features = festor(xmplr);
 
         // log selected features
-        auto new_features = set_difference(selected_features, xmplr_features);
-        vector<string> new_feature_names;
-        for (arity_t i : new_features)
-            new_feature_names.push_back(ilabels[i]);
-        ostreamContainer(logger().info() << "Feature selection of "
-                         << selected_features.size()
-                         << " features for representation: ",
-                         new_feature_names, ",");
-        ostreamContainer(logger().info()
-                         << "In addition to the exemplar features: ",
-                         xmplr_feature_names, ",");
+        logger().info() << "Selected " << selected_features.size()
+                        << " features for representation";
+        auto xmplr_sf = set_intersection(selected_features, xmplr_features);
+        auto xmplr_nsf = set_difference(xmplr_features, selected_features);
+        auto new_sf = set_difference(selected_features, xmplr_features);
+        auto sf_to_names = [&](const set<arity_t>& sf) {
+            vector<string> sf_names;
+            for (arity_t i : sf)
+                sf_names.push_back(ilabels[i]);
+            return sf_names;
+        };
+        ostreamContainer(logger().info() << "From which were in the exemplar: ",
+                         sf_to_names(xmplr_sf), ",");
+        ostreamContainer(logger().info() << "From which are new: ",
+                         sf_to_names(new_sf), ",");
+        // ~log selected features
 
         if (festor.params.prune_xmplr) {
+            ostreamContainer(logger().debug() <<
+                             "Prune the exemplar from non-selected features: ",
+                             sf_to_names(xmplr_nsf));
+
             // remove literals of non selected features from the
             // exemplar
             for (auto it = xmplr.begin(); it != xmplr.end();) {
@@ -182,9 +211,18 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
                     else
                         ++it;
                 }
+                else
+                    ++it;
+            }
+            simplify_knob_building(xmplr);
+            // if the exemplar is empty use a seed
+            if (xmplr.empty()) {
+                type_node otn = get_type_node(get_signature_output(_type_sig));
+                xmplr = type_to_exemplar(otn);
             }
         }
         else {
+            logger().debug("Do not prune the exemplar from non-selected features");
             // Insert exemplar features as they are not pruned
             selected_features.insert(xmplr_features.begin(), xmplr_features.end());
         }
@@ -194,8 +232,10 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         for (unsigned i = 0; i < arity; i++)
             if (selected_features.find(i) == selected_features.end())
                 ignore_ops.insert(argument(i + 1));
-
     }
+
+    if (logger().isDebugEnabled())
+        logger().debug() << "Attempt to build rep from exemplar: " << xmplr;
 
     // Build a representation by adding knobs to the exemplar,
     // creating a field set, and a mapping from field set to knobs.

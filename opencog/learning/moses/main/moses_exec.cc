@@ -217,29 +217,6 @@ void not_recognized_dst2dp(const string& diversity_dst2dp)
     log_output_error_exit(ss.str());
 }
 
-/**
- * determine the initial exemplar of a given type
- */
-combo_tree type_to_exemplar(type_node type)
-{
-    switch(type) {
-    case id::boolean_type: return combo_tree(id::logical_and);
-    case id::contin_type: return combo_tree(id::plus);
-    case id::enum_type: {
-        combo_tree tr(id::cond);
-        tr.append_child(tr.begin(), enum_t::get_random_enum());
-        return tr;
-    }
-    case id::ill_formed_type:
-        cerr << "Error: The data type is incorrect, perhaps it has not been"
-             << " possible to infer it from the input table." << endl;
-        exit(1);
-    default:
-        unsupported_type_exit(type);
-    }
-    return combo_tree();
-}
-
 combo_tree ann_exemplar(combo::arity_t arity)
 {
     combo_tree ann_tr(ann_type(0, id::ann));
@@ -1142,7 +1119,7 @@ int moses_exec(int argc, char** argv)
          "points which are both true and wrong.\n")
 
         ("fs-prune-exemplar",
-         value<bool>(&festor_params.prune_xmplr),
+         value<bool>(&festor_params.prune_xmplr)->default_value(0),
          "Remove from the exemplar the literals of non-selected features.\n")
 
         ("fs-subsampling-pbty",
