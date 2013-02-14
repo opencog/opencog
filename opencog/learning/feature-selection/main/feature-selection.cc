@@ -158,8 +158,8 @@ feature_set initial_features(const vector<string>& ilabels,
     return res;
 }
 
-feature_set select_features(const CTable& ctable,
-                            const feature_selection_parameters& fs_params)
+feature_set_pop select_feature_sets(const CTable& ctable,
+                                    const feature_selection_parameters& fs_params)
 {
     if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
@@ -177,20 +177,28 @@ feature_set select_features(const CTable& ctable,
         hc_params.single_step = false;
         hc_params.crossover = false;
         hill_climbing hc(op_params, hc_params);
-        return moses_select_features(ctable, hc, fs_params);
+        return moses_select_feature_sets(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
-        return incremental_select_features(ctable, fs_params);
+        return incremental_select_feature_sets(ctable, fs_params);
     } else if (fs_params.algorithm == smd) {
-        return smd_select_features(ctable, fs_params);
+        return smd_select_feature_sets(ctable, fs_params);
     } else if (fs_params.algorithm == simple) {
-        return simple_select_features(ctable, fs_params);
+        return simple_select_feature_sets(ctable, fs_params);
     } else {
         cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
              << "' is unknown, please consult the help for the "
              << "list of algorithms." << endl;
         exit(1);
-        return feature_set(); // to please Mr compiler
+        return feature_set_pop(); // to please Mr compiler
     }
+}
+
+feature_set select_features(const CTable& ctable,
+                            const feature_selection_parameters& fs_params)
+{
+    feature_set_pop fs_pop = select_feature_sets(ctable, fs_params);
+    OC_ASSERT(!fs_pop.empty(), "There might a bug");
+    return fs_pop.begin()->second;
 }
 
 feature_set select_features(const Table& table,

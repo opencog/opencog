@@ -108,6 +108,8 @@ struct feature_selection_parameters
 };
 
 typedef std::set<arity_t> feature_set;
+// Population of feature sets, ordered by scores (higher is better)
+typedef std::multimap<double, feature_set, std::greater<double>> feature_set_pop;
 
 void write_results(const Table& table,
                    const feature_selection_parameters& fs_params);
@@ -179,6 +181,11 @@ protected:
     pre_scorer<FeatureSet>* _ptr_pre_scorer;
 };
 
+/**
+ * Select a population of feature sets
+ */
+feature_set_pop select_feature_sets(const CTable& ctable,
+                                    const feature_selection_parameters& fs_params);
 
 /**
  * Select the features according to the method described in fs_params.

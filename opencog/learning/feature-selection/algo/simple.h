@@ -31,8 +31,8 @@
 
 namespace opencog {
 
-feature_set simple_select_features(const CTable& ctable,
-                                   const feature_selection_parameters& fs_params);
+feature_set_pop simple_select_feature_sets(const CTable& ctable,
+                                           const feature_selection_parameters& fs_params);
 
 /**
  * Returns a set S of features following the algo:
