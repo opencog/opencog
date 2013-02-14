@@ -21,6 +21,7 @@
  */
 
 #include "feature_selector.h"
+#include <opencog/comboreduct/table/table_io.h>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
@@ -127,6 +128,13 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr)
     }
     logger().debug("CTable size for feature selection = %u",
                    fs_ctable.size());
+
+    if (logger().isFineEnabled()) {
+        logger().fine("fs_ctable:");
+        stringstream ss;
+        ostreamCTable(ss, fs_ctable);
+        logger().fine() << ss.str();
+    }
 
     ////////////////////////////
     // Call feature selection //
