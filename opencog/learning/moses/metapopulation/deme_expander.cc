@@ -25,6 +25,52 @@
 namespace opencog {
 namespace moses {
 
+string_seq deme_expander::fs_to_names(const set<arity_t>& fs,
+                                      const string_seq& ilabels) const
+{
+    vector<string> fs_names;
+    for (arity_t i : fs)
+        fs_names.push_back(ilabels[i]);
+    return fs_names;
+}
+
+void deme_expander::log_selected_features(const feature_set& selected_features,
+                                          const feature_set& xmplr_features,
+                                          const string_seq& ilabels) const {
+    logger().info() << "Selected " << selected_features.size()
+                    << " features for representation";
+    auto xmplr_sf = set_intersection(selected_features, xmplr_features);
+    auto new_sf = set_difference(selected_features, xmplr_features);
+    ostreamContainer(logger().info() << "From which were in the exemplar: ",
+                     fs_to_names(xmplr_sf, ilabels), ",");
+    ostreamContainer(logger().info() << "From which are new: ",
+                     fs_to_names(new_sf, ilabels), ",");
+}
+
+void deme_expander::prune_xmplr(combo_tree& xmplr,
+                                const feature_set& selected_features) const
+{
+    // remove literals of non selected features from the exemplar
+    for (auto it = xmplr.begin(); it != xmplr.end();) {
+        if (is_argument(*it)) {
+            arity_t feature = get_argument(*it).abs_idx_from_zero();
+            auto fit = selected_features.find(feature);
+            if (fit == selected_features.end())
+                it = xmplr.erase(it); // not selected, prune it
+            else
+                ++it;
+        }
+        else
+            ++it;
+    }
+    simplify_knob_building(xmplr);
+    // if the exemplar is empty use a seed
+    if (xmplr.empty()) {
+        type_node otn = get_type_node(get_signature_output(_type_sig));
+        xmplr = type_to_exemplar(otn);
+    }
+}
+
 bool deme_expander::create_deme(const combo_tree& exemplar)
 {
     using namespace reduct;
@@ -88,49 +134,14 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         auto sf_pop = festor(xmplr);
         auto selected_features = sf_pop.begin()->second;
 
-        // log selected features
-        logger().info() << "Selected " << selected_features.size()
-                        << " features for representation";
-        auto xmplr_sf = set_intersection(selected_features, xmplr_features);
-        auto xmplr_nsf = set_difference(xmplr_features, selected_features);
-        auto new_sf = set_difference(selected_features, xmplr_features);
-        auto sf_to_names = [&](const set<arity_t>& sf) {
-            vector<string> sf_names;
-            for (arity_t i : sf)
-                sf_names.push_back(ilabels[i]);
-            return sf_names;
-        };
-        ostreamContainer(logger().info() << "From which were in the exemplar: ",
-                         sf_to_names(xmplr_sf), ",");
-        ostreamContainer(logger().info() << "From which are new: ",
-                         sf_to_names(new_sf), ",");
-        // ~log selected features
+        log_selected_features(selected_features, xmplr_features, ilabels);
 
         if (festor.params.prune_xmplr) {
+            auto xmplr_nsf = set_difference(xmplr_features, selected_features);
             ostreamContainer(logger().debug() <<
                              "Prune the exemplar from non-selected features: ",
-                             sf_to_names(xmplr_nsf));
-
-            // remove literals of non selected features from the
-            // exemplar
-            for (auto it = xmplr.begin(); it != xmplr.end();) {
-                if (is_argument(*it)) {
-                    arity_t feature = get_argument(*it).abs_idx_from_zero();
-                    auto fit = selected_features.find(feature);
-                    if (fit == selected_features.end())
-                        it = xmplr.erase(it); // not selected, prune it
-                    else
-                        ++it;
-                }
-                else
-                    ++it;
-            }
-            simplify_knob_building(xmplr);
-            // if the exemplar is empty use a seed
-            if (xmplr.empty()) {
-                type_node otn = get_type_node(get_signature_output(_type_sig));
-                xmplr = type_to_exemplar(otn);
-            }
+                             fs_to_names(xmplr_nsf, ilabels));
+            prune_xmplr(xmplr, selected_features);
         }
         else {
             logger().debug("Do not prune the exemplar from non-selected features");
