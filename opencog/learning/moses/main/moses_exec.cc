@@ -1130,6 +1130,11 @@ int moses_exec(int argc, char** argv)
          "feature selection, as not all feature selection algorithms "
          "have some.\n")
 
+        ("fs-demes",
+         value<unsigned>(&festor_params.n_demes)->default_value(1),
+         "Number of feature sets to select out of feature selection and the "
+         "number of demes to accordingly spawn.\n")
+
         ("fs-algo",
          value<string>(&fs_params.algorithm)->default_value(simple),
          string("Feature selection algorithm. Supported algorithms are:\n")

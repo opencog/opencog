@@ -38,7 +38,7 @@ feature_selector::feature_selector(const combo::Table& table,
                                    const feature_selector_parameters& festor_params)
     : params(festor_params), _ctable(table.compressed()) {}
 
-feature_set feature_selector::operator()(const combo::combo_tree& tr)
+feature_set_pop feature_selector::operator()(const combo::combo_tree& tr)
 {
     /////////////////////////////////////////////
     // Build ctable used for feature selection //
@@ -145,24 +145,29 @@ feature_set feature_selector::operator()(const combo::combo_tree& tr)
         ++params.fs_params.target_size;
     }
 
-    auto self = select_features(fs_ctable, params.fs_params);
+    feature_set_pop sf_pop = select_feature_sets(fs_ctable, params.fs_params);
+
+    // retain only the params.n_demes best feature sets
+    sf_pop.erase(std::next(sf_pop.begin(), params.n_demes), sf_pop.end());
 
     // remove last feature if it's the feature exemplar
     if (params.xmplr_as_feature) {
         size_t xmplar_f_pos = fs_ctable.get_arity() - 1;
-        auto xmplar_f_it = self.find(xmplar_f_pos);
-        if (xmplar_f_it == self.end()) {
-            logger().debug("The exemplar feature has not been selected, "
-                           "that exemplar must be pretty bad! As a result "
-                           "one more feature is returned by feature selection "
-                           "(as we obviously can't remove the exemplar feature).");
-        } else {
-            self.erase(xmplar_f_it);
-            logger().debug("Remove the exemplar feature");
+        for (auto& sf : sf_pop) {
+            auto xmplar_f_it = sf.second.find(xmplar_f_pos);
+            if (xmplar_f_it == sf.second.end()) {
+                logger().debug("The exemplar feature has not been selected, "
+                               "that exemplar must be pretty bad! As a result "
+                               "one more feature is returned by feature selection "
+                               "(as we obviously can't remove the exemplar feature).");
+            } else {
+                sf.second.erase(xmplar_f_it);
+                logger().debug("Remove the exemplar feature");
+            }
         }
     }
 
-    return self;
+    return sf_pop;
 }
 
 } // ~namespace moses

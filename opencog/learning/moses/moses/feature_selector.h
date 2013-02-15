@@ -85,6 +85,12 @@ struct feature_selector_parameters {
      * Probability of discarding a row
      */
     float subsampling_pbty;
+
+    /**
+     * Number of feature sets to select out of feature selection and
+     * demes to spawn.
+     */
+    unsigned n_demes;
 };
 
 /**
@@ -101,9 +107,9 @@ struct feature_selector
     feature_selector(const combo::Table& table,
                      const feature_selector_parameters& festor_params);
 
-    /// Return a feature set that is good when combined with the
-    /// exemplar tr.
-    feature_set operator()(const combo::combo_tree& tr);
+    /// Return feature set population that is good when combined with
+    /// the exemplar tr.
+    feature_set_pop operator()(const combo::combo_tree& tr);
 
     // Parameters
     feature_selector_parameters params;

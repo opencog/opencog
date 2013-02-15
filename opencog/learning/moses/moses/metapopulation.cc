@@ -175,7 +175,8 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
 
         // return the set of selected features as column index
         // (left most column corresponds to 0)
-        auto selected_features = festor(xmplr);
+        auto sf_pop = festor(xmplr);
+        auto selected_features = sf_pop.begin()->second;
 
         // log selected features
         logger().info() << "Selected " << selected_features.size()
