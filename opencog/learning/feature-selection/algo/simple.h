@@ -57,7 +57,7 @@ FeatureSet simple_selection(const FeatureSet& features,
                             double threshold,
                             double red_threshold = 0)
 {
-    std::multimap<double, FeatureSet, std::greater<double> > sorted_flist;
+    std::multimap<double, FeatureSet> sorted_flist;
 
     // build vector of singleton feature sets
     std::vector<FeatureSet> singletons; 
@@ -79,8 +79,8 @@ FeatureSet simple_selection(const FeatureSet& features,
     // select num_desired best features from sorted_flist as final
     // feature set
     FeatureSet final;
-    for (const auto& pr : sorted_flist) {
-        final.insert(*pr.second.begin());
+    for (auto pr = sorted_flist.rbegin(); pr != sorted_flist.rend(); pr++) {
+        final.insert(*pr->second.begin());
         num_desired --;
         if (num_desired <= 0) break;
     }
