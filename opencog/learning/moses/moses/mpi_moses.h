@@ -29,7 +29,7 @@
 #include <future>
 #include <opencog/util/pool.h>
 
-#include "metapopulation.h"
+#include "../metapopulation/metapopulation.h"
 #include "moses_params.h"
 
 namespace opencog { namespace moses {

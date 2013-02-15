@@ -33,7 +33,7 @@
 #include <opencog/learning/moses/moses/types.h>
 
 #include "eval-diversity.h"
-#include "../moses/metapopulation.h"
+#include "../metapopulation/metapopulation.h"
 
 using namespace std;
 using namespace boost::program_options;

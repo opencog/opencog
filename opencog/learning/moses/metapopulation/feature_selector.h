@@ -22,6 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _OPENCOG_FEATURE_SELECTOR_H
+#define _OPENCOG_FEATURE_SELECTOR_H
+
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/learning/feature-selection/main/feature-selection.h>
@@ -119,3 +122,5 @@ struct feature_selector
 
 } // ~namespace moses
 } // ~namespace opencog
+
+#endif // _OPENCOG_FEATURE_SELECTOR_H

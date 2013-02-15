@@ -41,6 +41,11 @@ void set_expansion(double new_ex);
 void set_depth(int new_depth);
 
 /**
+ * determine the initial exemplar given its output type
+ */
+combo_tree type_to_exemplar(type_node type);
+        
+/**
  * Do the representation-building, create a field_set
  */
 struct representation : public knob_mapper, boost::noncopyable

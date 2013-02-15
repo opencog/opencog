@@ -27,7 +27,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include "../optimization/hill-climbing.h"
-#include "metapopulation.h"
+#include "../metapopulation/metapopulation.h"
 #include "moses_main.h"
 
 namespace opencog { namespace moses {

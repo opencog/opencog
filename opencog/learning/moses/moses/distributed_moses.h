@@ -40,7 +40,7 @@
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/log_prog_name.h>
 
-#include "metapopulation.h"
+#include "../metapopulation/metapopulation.h"
 #include "moses_params.h"
 
 namespace opencog { namespace moses {

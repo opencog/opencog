@@ -24,10 +24,10 @@
 
 #include <opencog/util/Logger.h>
 
+#include "../metapopulation/metapopulation.h"
 #include "distributed_moses.h"
 #include "local_moses.h"
 #include "mpi_moses.h"
-#include "metapopulation.h"
 
 #include "moses_main.h"
 

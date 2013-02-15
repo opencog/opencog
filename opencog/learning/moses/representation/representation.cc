@@ -81,6 +81,29 @@ void set_depth(int new_depth)
     depth = new_depth;
 }
 
+combo_tree type_to_exemplar(type_node type)
+{
+    switch(type) {
+    case id::boolean_type: return combo_tree(id::logical_and);
+    case id::contin_type: return combo_tree(id::plus);
+    case id::enum_type: {
+        combo_tree tr(id::cond);
+        tr.append_child(tr.begin(), enum_t::get_random_enum());
+        return tr;
+    }
+    case id::ill_formed_type:
+        OC_ASSERT(false, "Error: the data type is incorrect, "
+                  "perhaps it has not been possible to infer it from the "
+                  "input table.");
+    default: {
+        stringstream ss;
+        ss << "Error: type " << type << " not supported";
+        OC_ASSERT(false, ss.str());
+    }
+    }
+    return combo_tree();
+}
+
 representation::representation(const reduct::rule& simplify_candidate,
                                const reduct::rule& simplify_knob_building,
                                const combo_tree& exemplar_,
