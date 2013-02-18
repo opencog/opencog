@@ -283,7 +283,8 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      * _visited_exemplars is not yet protected. There may be other
      * things.
      */
-    bool merge_deme(deme_t* __deme, representation* __rep, size_t evals, demeID_t demeID);
+    bool merge_demes(deme_t* __deme, representation* __rep,
+                     size_t evals, demeID_t demeID);
 
     /**
      * Weed out excessively bad scores. The select_exemplar() routine

@@ -305,17 +305,19 @@ void mpi_moses_worker(metapopulation& mp,
         mompi.recv_exemplar(exemplar);
         logger().info() << "Allowed " << max_evals 
                         << " evals for recvd exemplar " << exemplar;
-        if (!mp._dex.create_deme(exemplar)) {
+        if (!mp._dex.create_demes(exemplar)) {
             // XXX replace this with appropriate message back to root!
             OC_ASSERT(false, "Exemplar failed to expand!\n");
         }
 
         // XXX TODO should probably fetch max_time from somewhere...
         time_t max_time = INT_MAX;
-        size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
+        size_t evals_this_deme = mp._dex.optimize_demes(max_evals, max_time);
 
-        mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme, /* demeID */0);
-        mp._dex.free_deme();
+        mp.merge_demes(&mp._dex._demes.front() /* TODO */,
+                       &mp._dex._reps.front() /* TODO */,
+                       evals_this_deme, /* demeID */0);
+        mp._dex.free_demes();
 
         // logger().info() << "Sending " << mp.size() << " results";
         mompi.send_deme(mp, evals_this_deme);

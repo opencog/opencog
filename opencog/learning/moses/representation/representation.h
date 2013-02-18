@@ -54,7 +54,6 @@ struct representation : public knob_mapper, boost::noncopyable
     typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >
     combo_tree_ns_set;
 
-
     // Optional arguments are used only for actions/Petbrain
     representation(const reduct::rule& simplify_candidate,
                    const reduct::rule& simplify_knob_building,
@@ -65,7 +64,6 @@ struct representation : public knob_mapper, boost::noncopyable
                    const combo_tree_ns_set* actions = NULL,
                    bool linear_contin = true,
                    float perm_ratio = 0.0);
-
 
     /**
      * Turn the knobs on this representation, so that they have the same

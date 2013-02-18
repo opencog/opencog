@@ -325,12 +325,13 @@ void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
         logger().debug("Insert non-dominated candidates in the metapopulation");
         unsigned old_size = size();
         merge_nondominated(candidates, params.jobs);
-        logger().debug("Inserted %u non-dominated candidates in the metapopulation",
-                       size() - old_size);
+        logger().debug("Inserted %u non-dominated candidates "
+                       "in the metapopulation", size() - old_size);
     }
 }
 
-bool metapopulation::merge_deme(deme_t* __deme, representation* __rep, size_t evals, demeID_t demeID)
+bool metapopulation::merge_demes(deme_t* __deme, representation* __rep,
+                                 size_t evals, demeID_t demeID)
 {
     OC_ASSERT(__rep);
     OC_ASSERT(__deme);

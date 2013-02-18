@@ -40,7 +40,6 @@ struct deme_expander
                   const cscore_base& sc,
                   optimizer_base& opt,
                   const metapop_parameters& pa = metapop_parameters()) :
-        _rep(NULL), _deme(NULL),
         _optimize(opt),
         _type_sig(type_signature),
         simplify_candidate(si_ca),
@@ -49,19 +48,15 @@ struct deme_expander
         _params(pa)
     {}
 
-    ~deme_expander()
-    {
-        if (_rep) delete _rep;
-        if (_deme) delete _deme;
-    }
+    ~deme_expander() {}
 
     /**
-     * Create the deme
+     * Create demes
      *
-     * @return return true if it creates deme successfully,otherwise false.
+     * @return return true if it creates demes successfully, otherwise false.
      */
     // bool create_deme(pbscored_combo_tree_set::const_iterator exemplar)
-    bool create_deme(const combo_tree& exemplar);
+    bool create_demes(const combo_tree& exemplar);
 
     /**
      * Do some optimization according to the scoring function.
@@ -72,13 +67,13 @@ struct deme_expander
      *
      * @return return the number of evaluations actually performed,
      */
-    int optimize_deme(int max_evals, time_t max_time);
+    int optimize_demes(int max_evals, time_t max_time);
 
-    void free_deme();
+    void free_demes();
 
     // Structures related to the current deme
-    representation* _rep; // representation of the current deme
-    deme_t* _deme; // current deme
+    boost::ptr_vector<representation> _reps; // representations of the demes
+    boost::ptr_vector<deme_t> _demes; // current demes
     optimizer_base &_optimize;
 
 protected:
@@ -96,15 +91,15 @@ protected:
      * Log selected features, the new ones and the ones part of the
      * exemplar.
      */
-    void log_selected_features(const feature_set& selected_features,
-                               const feature_set& xmplr_features,
-                               const string_seq& ilabels) const;
+    void log_selected_feature_sets(const feature_set_pop& sf_pop,
+                                   const feature_set& xmplr_features,
+                                   const string_seq& ilabels) const;
 
     /**
-     * Prune exemplar from non-selected features
+     * Return pruned exemplar from non-selected features
      */
-    void prune_xmplr(combo_tree& xmplr,
-                     const feature_set& selected_features) const;
+    combo_tree prune_xmplr(const combo_tree& xmplr,
+                           const feature_set& selected_features) const;
 
     const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule& simplify_candidate; // to simplify candidates
