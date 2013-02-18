@@ -38,12 +38,60 @@ feature_selector::feature_selector(const combo::Table& table,
                                    const feature_selector_parameters& festor_params)
     : params(festor_params), _ctable(table.compressed()) {}
 
-feature_set_pop feature_selector::operator()(const combo::combo_tree& tr)
+void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
 {
-    /////////////////////////////////////////////
-    // Build ctable used for feature selection //
-    /////////////////////////////////////////////
+    // Note that this is gonna overwrite some parameters. It is OK
+    // because feature_selector being copied before being called by
+    // deme_expander::create_deme
+    
+    // get the set of features of the exemplar
+    auto xmplr_features = get_argument_abs_idx_from_zero_set(xmplr);
 
+    // get labels corresponding to all the features
+    const auto& ilabels = _ctable.get_input_labels();
+
+    // names of the exemplar features
+    vector<string> xmplr_feature_names;
+    for (arity_t i : xmplr_features)
+        xmplr_feature_names.push_back(ilabels[i]);
+
+    // Use the features of the exemplar as initial feature set to
+    // seed the feature selection algorithm. That way the new
+    // features will be selected to combine well with the
+    // exemplar.
+    if (params.init_xmplr_features) {
+        auto& pif = params.fs_params.initial_features;
+        pif.insert(pif.end(),
+                   xmplr_feature_names.begin(),
+                   xmplr_feature_names.end());
+        // we increase the size to output new features (not the
+        // ones already in the exemplar)
+        params.increase_target_size = true;
+    }
+
+    // If the combo tree is already using N features, we want to
+    // find an additional M features which might make it better.
+    // So bump up the count.  Of course, the feat selector might
+    // not find any of the existing args in the exemplar; but we
+    // want to avoid the case where the feat sel is returning only
+    // those features already in the exemplar.
+    if (params.increase_target_size) {
+        params.fs_params.target_size += xmplr_features.size();
+    }
+
+    // Alternatively one can ignore the features in the exemplar
+    // during feature selection.
+    params.ignore_features = params.ignore_xmplr_features ?
+        xmplr_features : set<arity_t>();
+
+    // Or one can use the output of the exemplar as an initial feature
+    if (params.xmplr_as_feature) {
+        params.fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
+        ++params.fs_params.target_size;
+    }    
+}
+
+CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
     // set labels and signature
     auto labels = _ctable.get_labels();
     auto sig = _ctable.get_signature();
@@ -60,7 +108,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& tr)
     combo::CTable fs_ctable(labels, sig);
 
     // define interpreter visitor
-    interpreter_visitor iv(tr);
+    interpreter_visitor iv(xmplr);
     auto ai = boost::apply_visitor(iv);
 
     // define visitor to initialize the features to ignore
@@ -136,23 +184,20 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& tr)
         logger().fine() << ss.str();
     }
 
-    ////////////////////////////
-    // Call feature selection //
-    ////////////////////////////
+    return fs_ctable;
+}
 
-    if (params.xmplr_as_feature) {
-        params.fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
-        ++params.fs_params.target_size;
-    }
+feature_set_pop feature_selector::select_top_feature_sets(const feature_set_pop& fss) const
+{
+    feature_set_pop res(fss.begin(), std::next(fss.begin(), params.n_demes));
+    return res;
+}
 
-    feature_set_pop sf_pop = select_feature_sets(fs_ctable, params.fs_params);
-
-    // retain only the params.n_demes best feature sets
-    sf_pop.erase(std::next(sf_pop.begin(), params.n_demes), sf_pop.end());
-
+void feature_selector::remove_useless_features(feature_set_pop& sf_pop) const
+{
     // remove last feature if it's the feature exemplar
     if (params.xmplr_as_feature) {
-        size_t xmplar_f_pos = fs_ctable.get_arity() - 1;
+        size_t xmplar_f_pos = _ctable.get_arity();
         for (auto& sf : sf_pop) {
             auto xmplar_f_it = sf.second.find(xmplar_f_pos);
             if (xmplar_f_it == sf.second.end()) {
@@ -166,6 +211,24 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& tr)
             }
         }
     }
+}
+
+feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
+{
+    // Overwrite some parameters (it's OK to be overwritten because
+    // that struct, festor, has been been passed by copy in
+    // deme_expander::create_deme
+    preprocess_params(xmplr);
+
+    // Build ctable, possibly different than _ctable, used for feature
+    // selection
+    CTable fs_ctable = build_fs_ctable(xmplr);
+
+    // Feature selection itself. Returns a population of feature sets
+    feature_set_pop sf_pop = select_feature_sets(fs_ctable, params.fs_params);
+
+    // Select the top params.n_demes feature sets
+    feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
 
     return sf_pop;
 }

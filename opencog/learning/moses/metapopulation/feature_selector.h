@@ -112,12 +112,25 @@ struct feature_selector
 
     /// Return feature set population that is good when combined with
     /// the exemplar tr.
-    feature_set_pop operator()(const combo::combo_tree& tr);
+    feature_set_pop operator()(const combo::combo_tree& xmplr);
 
     // Parameters
     feature_selector_parameters params;
 
     const combo::CTable& _ctable;
+protected:
+    /// Overwrite some parameters
+    void preprocess_params(const combo::combo_tree& xmplr);
+
+    /// Build ctable used for feature selection (possibly different
+    /// than _ctable)
+    combo::CTable build_fs_ctable(const combo::combo_tree& xmplr) const;
+
+    /// Select top n feature sets
+    feature_set_pop select_top_feature_sets(const feature_set_pop& fss) const;
+
+    /// remove useless features (like the exemplar feature if any)
+    void remove_useless_features(feature_set_pop& fss) const;
 };
 
 } // ~namespace moses

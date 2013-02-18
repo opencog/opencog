@@ -91,49 +91,17 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
         // copy, any change in the parameters will not be remembered
         feature_selector festor = *_params.fstor;
 
-        // get the set of features of the exemplar
-        auto xmplr_features = get_argument_abs_idx_from_zero_set(xmplr);
-
-        // get labels corresponding to all the features
-        const auto& ilabels = festor._ctable.get_input_labels();
-
-        // names of the exemplar features
-        vector<string> xmplr_feature_names;
-        for (arity_t i : xmplr_features)
-                xmplr_feature_names.push_back(ilabels[i]);
-
-        // Use the features of the exemplar as initial feature set to
-        // seed the feature selection algorithm. That way the new
-        // features will be selected to combine well with the
-        // exemplar.
-        if (festor.params.init_xmplr_features) {
-            auto& pif = festor.params.fs_params.initial_features;
-            pif.insert(pif.end(), xmplr_feature_names.begin(), xmplr_feature_names.end());
-            // we increase the size to output new features (not the
-            // ones already in the exemplar)
-            festor.params.increase_target_size = true;
-        }
-
-        // If the combo tree is already using N features, we want to find
-        // and additional M features which might make it better.  So bump
-        // up the count.  Of course, the feat selector might not find any
-        // of the existing args in the exemplar; but we want to avoid the
-        // case where the feat sel is returning only those features already
-        // in the exemplar.
-        if (festor.params.increase_target_size) {
-            festor.params.fs_params.target_size += xmplr_features.size();
-        }
-
-        // Alternatively one can ignore the features in the exemplar
-        // during feature selection.
-        festor.params.ignore_features = festor.params.ignore_xmplr_features ?
-            xmplr_features : set<arity_t>();
-
         // return the set of selected features as column index
         // (left most column corresponds to 0)
         auto sf_pop = festor(xmplr);
         auto selected_features = sf_pop.begin()->second;
 
+        // get the set of features of the exemplar
+        auto xmplr_features = get_argument_abs_idx_from_zero_set(xmplr);
+
+        // get labels corresponding to all the features
+        const auto& ilabels = festor._ctable.get_input_labels();
+    
         log_selected_features(selected_features, xmplr_features, ilabels);
 
         if (festor.params.prune_xmplr) {
@@ -148,7 +116,7 @@ bool deme_expander::create_deme(const combo_tree& exemplar)
             // Insert exemplar features as they are not pruned
             selected_features.insert(xmplr_features.begin(), xmplr_features.end());
         }
-        
+
         // add the complement of the selected features to ignore_ops
         unsigned arity = festor._ctable.get_arity();
         for (unsigned i = 0; i < arity; i++)

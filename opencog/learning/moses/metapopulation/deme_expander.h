@@ -56,25 +56,6 @@ struct deme_expander
     }
 
     /**
-     * Takes a feature set, a header of the input features and return
-     * a vector of the names of the featire set.
-     */
-    string_seq fs_to_names(const feature_set& fs, const string_seq& ilabels) const;
-    /**
-     * Log selected features, the new ones and the ones part of the
-     * exemplar.
-     */
-    void log_selected_features(const feature_set& selected_features,
-                               const feature_set& xmplr_features,
-                               const string_seq& ilabels) const;
-
-    /**
-     * Prune exemplar from non-selected features
-     */
-    void prune_xmplr(combo_tree& xmplr,
-                     const feature_set& selected_features) const;
-
-    /**
      * Create the deme
      *
      * @return return true if it creates deme successfully,otherwise false.
@@ -101,6 +82,30 @@ struct deme_expander
     optimizer_base &_optimize;
 
 protected:
+    /**
+     * 
+     */
+    
+    /**
+     * Takes a feature set, a header of the input features and return
+     * a vector of the names of the featire set.
+     */
+    string_seq fs_to_names(const feature_set& fs, const string_seq& ilabels) const;
+
+    /**
+     * Log selected features, the new ones and the ones part of the
+     * exemplar.
+     */
+    void log_selected_features(const feature_set& selected_features,
+                               const feature_set& xmplr_features,
+                               const string_seq& ilabels) const;
+
+    /**
+     * Prune exemplar from non-selected features
+     */
+    void prune_xmplr(combo_tree& xmplr,
+                     const feature_set& selected_features) const;
+
     const combo::type_tree& _type_sig;    // type signature of the exemplar
     const reduct::rule& simplify_candidate; // to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building

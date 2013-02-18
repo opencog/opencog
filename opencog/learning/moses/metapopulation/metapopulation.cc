@@ -281,7 +281,7 @@ pbscored_combo_tree_ptr_set::const_iterator metapopulation::select_exemplar()
         ostreamContainer(ss, probs);
         logger().fine() << ss.str();
     }
-    
+
     OC_ASSERT(sum > 0.0f, "There is an internal bug, please fix it");
 
     size_t fwd = distance(probs.begin(), roulette_select(probs.begin(),
