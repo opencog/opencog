@@ -59,14 +59,17 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
         // caching scorer lacks the correct signature.
         // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
         composite_score csc(cscorer(si_base));
-
-        candidates[si_base] = composite_penalized_bscore(pbs, csc);
+        composite_penalized_bscore cpb(pbs, csc);
+        cpbscore_demeID cbs_demeID(cpb, 0 /* initial demeID */);
+        
+        candidates[si_base] = cbs_demeID;
     }
 
-    pbscored_combo_tree_set mps;
+    pbscored_combo_tree_set mps(candidates.begin(), candidates.end());
     for (const auto& cnd : candidates) {
-        pbscored_combo_tree pct(get_tree(cnd), get_composite_penalized_bscore(cnd),
-                                0 /* initial demeID */);
+        cpbscore_demeID cbs_demeID(get_composite_penalized_bscore(cnd),
+                                   0 /* initial demeID */);
+        pbscored_combo_tree pct(get_tree(cnd), cbs_demeID);
         mps.insert(pct);
     }
     update_best_candidates(mps);
@@ -330,25 +333,28 @@ void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
     }
 }
 
-bool metapopulation::merge_demes(deme_t* __deme, representation* __rep,
-                                 size_t evals, demeID_t demeID)
+bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
+                                 const boost::ptr_vector<representation>& reps,
+                                 const vector<size_t>& evals_seq,
+                                 const vector<demeID_t>& demeIDs)
 {
-    OC_ASSERT(__rep);
-    OC_ASSERT(__deme);
-
     // Note that univariate reports far more evals than the deme size;
     // this is because univariate over-write deme entries.
-    logger().debug("Close deme; evaluations reported: %d", evals);
+    logger().debug("Close deme(s); evaluations reported: %d",
+                   boost::accumulate(evals_seq, 0U));
 
     // Add, as potential exemplars for future demes, all unique
     // trees in the final deme.
     metapop_candidates pot_candidates;
 
-    logger().debug("Sort the deme");
+    logger().debug("Sort the deme(s)");
 
     // Sort the deme according to composite_score (descending order)
-    boost::sort(*__deme, std::greater<scored_instance<composite_score> >());
+    for (deme_t& deme : demes)
+        boost::sort(deme, std::greater<scored_instance<composite_score> >());
 
+    logger().debug("Trim down deme(s)");
+    
     // Trim the deme down to size.  The point here is that the next
     // stage, select_candidates below, is very cpu-intensive; we
     // should keep only those candidates that will survive in the
@@ -360,15 +366,17 @@ bool metapopulation::merge_demes(deme_t* __deme, representation* __rep,
     // However, trimming too much is bad: it can happen that none
     // of the best-scoring instances lead to a solution. So keep
     // around a reasonable pool. Wild choice ot 250 seems reasonable.
-    if (min_pool_size < __deme->size()) {
-        score_t top_sc = get_penalized_score(__deme->begin()->second);
-        score_t bot_sc = top_sc - useful_score_range();
+    for (deme_t& deme : demes) {
+        if (min_pool_size < deme.size()) {
+            score_t top_sc = get_penalized_score(deme.begin()->second);
+            score_t bot_sc = top_sc - useful_score_range();
 
-        for (size_t i = __deme->size()-1; 0 < i; --i) {
-            const composite_score &cscore = (*__deme)[i].second;
-            score_t score = get_penalized_score(cscore);
-            if (score < bot_sc) {
-                __deme->pop_back();
+            for (size_t i = deme.size()-1; 0 < i; --i) {
+                const composite_score &cscore = deme[i].second;
+                score_t score = get_penalized_score(cscore);
+                if (score < bot_sc) {
+                    deme.pop_back();
+                }
             }
         }
     }
@@ -382,67 +390,70 @@ bool metapopulation::merge_demes(deme_t* __deme, representation* __rep,
 
     mutex pot_cnd_mutex; // mutex for pot_candidates
 
-    // NB, this is an anonymous function. In particular, some
-    // compilers require that members be explicitly referenced
-    // with this-> as otherwise we get compile fails:
-    // https://bugs.launchpad.net/bugs/933906
-    auto select_candidates =
-        [&, this](const scored_instance<composite_score>& inst)
-    {
-        const composite_score& inst_csc = inst.second;
-        score_t inst_sc = get_score(inst_csc);
-        // if it's really bad stops
-        if (inst_sc <= very_worst_score || !isfinite(inst_sc))
-            return;
+    for (unsigned i = 0; i < demes.size(); i++) {
+        // NB, this is an anonymous function. In particular, some
+        // compilers require that members be explicitly referenced
+        // with this-> as otherwise we get compile fails:
+        // https://bugs.launchpad.net/bugs/933906
+        auto select_candidates =
+            [&, this](const scored_instance<composite_score>& inst) {
+            
+            const composite_score& inst_csc = inst.second;
+            score_t inst_sc = get_score(inst_csc);
+            // if it's really bad stops
+            if (inst_sc <= very_worst_score || !isfinite(inst_sc))
+                return;
 
-        // Get the combo_tree associated to inst, cleaned and reduced.
-        //
-        // @todo: below, the candidate is reduced possibly for the
-        // second time.  This second reduction could probably be
-        // avoided with some clever cache or something. (or a flag?)
-        combo_tree tr = __rep->get_candidate(inst, true);
+            // Get the combo_tree associated to inst, cleaned and reduced.
+            //
+            // @todo: below, the candidate is reduced possibly for the
+            // second time.  This second reduction could probably be
+            // avoided with some clever cache or something. (or a flag?)
+            combo_tree tr = reps[i].get_candidate(inst, true);
 
-        // Look for tr in the list of potential candidates.
-        // Return true if not found.
-        auto thread_safe_tr_not_found = [&]() {
-            shared_lock lock(pot_cnd_mutex);
-            return pot_candidates.find(tr) == pot_candidates.end();
+            // Look for tr in the list of potential candidates.
+            // Return true if not found.
+            auto thread_safe_tr_not_found = [&]() {
+                shared_lock lock(pot_cnd_mutex);
+                return pot_candidates.find(tr) == pot_candidates.end();
+            };
+
+            // XXX To make merge_deme thread safe, this needs to be
+            // locked too.  (to avoid collision with threads updating
+            // _visited, e.g. the MPI case.
+            bool not_already_visited = !this->has_been_visited(tr);
+            
+            // update the set of potential exemplars
+            if (not_already_visited && thread_safe_tr_not_found()) {
+                penalized_bscore pbs; // empty bscore till
+                                      // it gets computed
+                composite_penalized_bscore cbsc(pbs, inst_csc);
+                cpbscore_demeID cbs_demeID(cbsc, demeIDs[i]);
+
+                unique_lock lock(pot_cnd_mutex);
+                pot_candidates[tr] = cbs_demeID;
+            }
         };
 
-        // XXX To make merge_deme thread safe, this needs to be
-        // locked too.  (to avoid collision with threads updating
-        // _visited, e.g. the MPI case.
-        bool not_already_visited = !this->has_been_visited(tr);
+        // It can happen that the true number of evals is less than the
+        // deme size (certain cases involving the univariate optimizer)
+        // But also, the deme size can be smaller than the number of evals,
+        // if the deme was shrunk to save space. 
+        unsigned max_pot_cnd = std::min(evals_seq[i], demes[i].size());
+        if (params.max_candidates >= 0)
+            max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
 
-        // update the set of potential exemplars
-        if (not_already_visited && thread_safe_tr_not_found()) {
-            penalized_bscore pbs; // empty bscore till
-                                            // it gets computed
-            composite_penalized_bscore cbsc(pbs, inst_csc);
+        logger().debug("Select candidates to merge (amongst %u)", max_pot_cnd);
 
-            unique_lock lock(pot_cnd_mutex);
-            pot_candidates[tr] = cbsc;
-        }
-    };
-
-    // It can happen that the true number of evals is less than the
-    // deme size (certain cases involving the univariate optimizer)
-    // But also, the deme size can be smaller than the number of evals,
-    // if the deme was shrunk to save space. 
-    unsigned max_pot_cnd = std::min(evals, __deme->size());
-    if (params.max_candidates >= 0)
-        max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
-
-    logger().debug("Select candidates to merge (amongst %u)", max_pot_cnd);
-
-    // select_candidates() can be very time consuming; it currently
-    // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
-    // for me; my (reduced, simplified) instances have complexity
-    // of about 100. This seems too long/slow (circa summer 2012).
-    deme_cit deme_begin = __deme->begin();
-    deme_cit deme_end = deme_begin + max_pot_cnd;
-    OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
-
+        // select_candidates() can be very time consuming; it currently
+        // takes anywhere from 25 to 500(!!) millisecs per instance (!!)
+        // for me; my (reduced, simplified) instances have complexity
+        // of about 100. This seems too long/slow (circa summer 2012).
+        deme_cit deme_begin = demes[i].begin();
+        deme_cit deme_end = deme_begin + max_pot_cnd;
+        OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
+    }
+    
     logger().debug("Selected %u candidates to be merged",
                    pot_candidates.size());
 
@@ -456,16 +467,16 @@ bool metapopulation::merge_demes(deme_t* __deme, representation* __rep,
                        pot_candidates.size());
 
         auto compute_bscore = [this](metapop_candidates::value_type& cand) {
-            composite_score csc = get_composite_score(cand.second);
-            penalized_bscore pbs = this->_bscorer(cand.first);
-            cand.second = composite_penalized_bscore(pbs, csc);
+            penalized_bscore pbs = this->_bscorer(get_tree(cand));
+            composite_penalized_bscore cpb(pbs, get_composite_score(cand));
+            cand.second = cpbscore_demeID(cpb, get_demeID(cand));
         };
         OMP_ALGO::for_each(pot_candidates.begin(), pot_candidates.end(),
                            compute_bscore);
     }
 
     logger().debug("Select only candidates not already in the metapopulation");
-    pbscored_combo_tree_set candidates = get_new_candidates(pot_candidates, demeID);
+    pbscored_combo_tree_set candidates = get_new_candidates(pot_candidates);
     logger().debug("Selected %u candidates (%u were in the metapopulation)",
                    candidates.size(), pot_candidates.size()-candidates.size());
 
@@ -601,7 +612,7 @@ void metapopulation::resize_metapop()
 // Return the set of candidates not present in the metapopulation.
 // This makes merging faster because at best it decreases the number
 // of calls of dominates.
-pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs, demeID_t demeID)
+pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candidates& mcs)
 {
     pbscored_combo_tree_set res;
     for (const auto& cnd : mcs) {
@@ -609,10 +620,8 @@ pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candida
         const_iterator fcnd =
             OMP_ALGO::find_if(begin(), end(), [&](const pbscored_combo_tree& v) {
                     return tr == get_tree(v); });
-        if (fcnd == end()) {
-            pbscored_combo_tree pbt(tr, get_composite_penalized_bscore(cnd), demeID);
-            res.insert(pbt);
-        }
+        if (fcnd == end())
+            res.insert(cnd);
     }
     return res;
 }
@@ -857,7 +866,7 @@ void metapopulation::update_best_candidates(const pbscored_combo_tree_set& candi
                 _best_candidates.clear();
                 logger().debug() << "New best score: " << _best_cscore;
             }
-            _best_candidates[get_tree(cnd)] = get_composite_penalized_bscore(cnd);
+            _best_candidates.insert(cnd);
         }
     }
 }

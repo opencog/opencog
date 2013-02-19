@@ -266,7 +266,8 @@ void moses_mpi_comm::recv_deme(int source,
         behavioral_score bs;
         penalized_bscore pbs(bs, sc.get_complexity_penalty());
         composite_penalized_bscore cbs(pbs, sc);
-        pbscored_combo_tree bsc_tr(tr, cbs, demeID);
+        cpbscore_demeID cbs_demeID(cbs, demeID);
+        pbscored_combo_tree bsc_tr(tr, cbs_demeID);
         cands.insert(bsc_tr);
     }
 }
@@ -314,9 +315,10 @@ void mpi_moses_worker(metapopulation& mp,
         time_t max_time = INT_MAX;
         size_t evals_this_deme = mp._dex.optimize_demes(max_evals, max_time);
 
-        mp.merge_demes(&mp._dex._demes.front() /* TODO */,
-                       &mp._dex._reps.front() /* TODO */,
-                       evals_this_deme, /* demeID */0);
+        OC_ASSERT(false, "TODO");
+        vector<size_t> evals_seq(mp._dex._demes.size(), evals_this_deme); // TODO
+        vector<demeID_t> demeIDs(mp._dex._demes.size(), 0); // TODO
+        mp.merge_demes(mp._dex._demes, mp._dex._reps, evals_seq, demeIDs);
         mp._dex.free_demes();
 
         // logger().info() << "Sending " << mp.size() << " results";

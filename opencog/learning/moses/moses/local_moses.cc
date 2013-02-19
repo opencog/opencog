@@ -75,9 +75,10 @@ bool expand_deme(metapopulation& mp,
     stats.n_evals += evals_this_deme;
     stats.n_expansions++;
 
-    bool done = mp.merge_demes(&mp._dex._demes.front() /* TODO */,
-                               &mp._dex._reps.front() /* TODO */,
-                               evals_this_deme, stats.n_expansions /* TODO */);
+    OC_ASSERT(false, "TODO");
+    vector<size_t> evals_seq(mp._dex._demes.size(), evals_this_deme); // TODO
+    vector<demeID_t> demeIDs(mp._dex._demes.size(), stats.n_expansions); // TODO
+    bool done = mp.merge_demes(mp._dex._demes, mp._dex._reps, evals_seq, demeIDs);
 
     if (logger().isInfoEnabled()) {
         logger().info() << "Expansion " << stats.n_expansions << " done";

@@ -157,163 +157,63 @@ typedef size_t demeID_t;
 typedef std::vector<score_t> behavioral_score;
 typedef std::pair<behavioral_score, score_t> penalized_bscore;
 typedef std::pair<penalized_bscore, composite_score> composite_penalized_bscore;
-typedef std::tuple<combo::combo_tree,
-                   composite_penalized_bscore,
-                   demeID_t> pbscored_combo_tree;
+typedef std::pair<composite_penalized_bscore, demeID_t> cpbscore_demeID;
+typedef std::pair<combo::combo_tree, cpbscore_demeID> pbscored_combo_tree;
 
 ///////////////////////////
 // convenience accessors //
 ///////////////////////////
 
-static inline score_t get_penalized_score(const composite_score& sc)
-{
-   return sc.get_penalized_score();
-}
+score_t get_penalized_score(const composite_score& sc);
 
-inline const combo::combo_tree& get_tree(const pbscored_combo_tree& pbst)
-{
-    return std::get<0>(pbst);
-}
+const combo::combo_tree& get_tree(const pbscored_combo_tree& pbst);
+combo::combo_tree& get_tree(pbscored_combo_tree& pbst);
 
-inline const composite_penalized_bscore& get_composite_penalized_bscore(const pbscored_combo_tree& pbst)
-{
-    return std::get<1>(pbst);
-}
+const composite_penalized_bscore& get_composite_penalized_bscore(const pbscored_combo_tree& pbst);
+composite_penalized_bscore& get_composite_penalized_bscore(pbscored_combo_tree& pbst);
 
-inline demeID_t get_demeID(const pbscored_combo_tree& pbst)
-{
-    return std::get<2>(pbst);
-}
+const cpbscore_demeID& get_cpbscore_demeID(const pbscored_combo_tree& pbst);
+cpbscore_demeID& get_cpbscore_demeID(pbscored_combo_tree& pbst);
 
-inline const composite_score& get_composite_score(const composite_penalized_bscore& ctbs)
-{
-    return ctbs.second;
-}
+demeID_t get_demeID(const pbscored_combo_tree& pbst);
 
-inline const composite_score& get_composite_score(const pbscored_combo_tree& bsct)
-{
-    return get_composite_score(get_composite_penalized_bscore(bsct));
-}
+const composite_score& get_composite_score(const composite_penalized_bscore& ctbs);
+const composite_score& get_composite_score(const pbscored_combo_tree& bsct);
+composite_score& get_composite_score(composite_penalized_bscore& ctbs);
+composite_score& get_composite_score(pbscored_combo_tree& bsct);
 
-static inline score_t get_penalized_score(const composite_penalized_bscore& cpb)
-{
-    return get_penalized_score(get_composite_score(cpb));
-}
+score_t get_penalized_score(const composite_score& sc);
+score_t get_penalized_score(const composite_penalized_bscore& cpb);
+score_t get_penalized_score(const pbscored_combo_tree& st);
 
-static inline score_t get_penalized_score(const pbscored_combo_tree& st)
-{
-    return get_penalized_score(get_composite_score(st));
-}
+score_t get_score(const composite_score& ts);
+score_t get_score(const composite_penalized_bscore& ts);
+score_t get_score(const pbscored_combo_tree& bst);
 
-inline composite_score& get_composite_score(composite_penalized_bscore& ctbs)
-{
-    return ctbs.second;
-}
+complexity_t get_complexity(const composite_score& ts);
+complexity_t get_complexity(const composite_penalized_bscore& ts);
+complexity_t get_complexity(const pbscored_combo_tree& bst);
 
-inline composite_score& get_composite_score(pbscored_combo_tree& bsct)
-{
-    return get_composite_score(std::get<1>(bsct));
-}
+score_t get_complexity_penalty(const composite_score& ts);
+score_t get_complexity_penalty(const composite_penalized_bscore& ts);
+score_t get_complexity_penalty(const pbscored_combo_tree& bst);
 
-inline score_t get_score(const composite_score& ts)
-{
-    return ts.get_score();
-}
+score_t get_diversity_penalty(const composite_score& ts);
+score_t get_diversity_penalty(const composite_penalized_bscore& ts);
+score_t get_diversity_penalty(const pbscored_combo_tree& bst);
 
-inline score_t get_score(const composite_penalized_bscore& ts)
-{
-    return get_score(ts.second);
-}
+score_t get_penalty(const composite_score& ts);
+score_t get_penalty(const composite_penalized_bscore& ts);
+score_t get_penalty(const pbscored_combo_tree& bst);
 
-inline score_t get_score(const pbscored_combo_tree& bst)
-{
-    return get_score(get_composite_penalized_bscore(bst));
-}
+const penalized_bscore& get_pbscore(const composite_penalized_bscore& ts);
+const penalized_bscore& get_pbscore(const pbscored_combo_tree& bst);
+penalized_bscore& get_pbscore(composite_penalized_bscore& ts);
+penalized_bscore& get_pbscore(pbscored_combo_tree& bst);
 
-inline complexity_t get_complexity(const composite_score& ts)
-{
-    return ts.get_complexity();
-}
-
-inline complexity_t get_complexity(const composite_penalized_bscore& ts)
-{
-    return get_complexity(ts.second);
-}
-
-inline complexity_t get_complexity(const pbscored_combo_tree& bst)
-{
-    return get_complexity(get_composite_penalized_bscore(bst));
-}
-
-inline score_t get_complexity_penalty(const composite_score& ts)
-{
-    return ts.get_complexity_penalty();
-}
-
-inline score_t get_complexity_penalty(const composite_penalized_bscore& ts)
-{
-    return get_complexity_penalty(ts.second);
-}
-
-inline score_t get_complexity_penalty(const pbscored_combo_tree& bst)
-{
-    return get_complexity_penalty(get_composite_penalized_bscore(bst));
-}
-
-inline score_t get_diversity_penalty(const composite_score& ts)
-{
-    return ts.get_diversity_penalty();
-}
-
-inline score_t get_diversity_penalty(const composite_penalized_bscore& ts)
-{
-    return get_diversity_penalty(ts.second);
-}
-
-inline score_t get_diversity_penalty(const pbscored_combo_tree& bst)
-{
-    return get_diversity_penalty(get_composite_penalized_bscore(bst));
-}
-
-inline score_t get_penalty(const composite_score& ts)
-{
-    return ts.get_penalty();
-}
-
-inline score_t get_penalty(const composite_penalized_bscore& ts)
-{
-    return get_penalty(ts.second);
-}
-
-inline score_t get_penalty(const pbscored_combo_tree& bst)
-{
-    return get_penalty(get_composite_penalized_bscore(bst));
-}
-
-inline const penalized_bscore& get_pbscore(const composite_penalized_bscore& ts)
-{
-    return ts.first;
-}
-
-inline const penalized_bscore& get_pbscore(const pbscored_combo_tree& bst)
-{
-    return get_pbscore(get_composite_penalized_bscore(bst));
-}
-
-inline const behavioral_score& get_bscore(const penalized_bscore& pbs)
-{
-    return pbs.first;
-}
-
-inline const behavioral_score& get_bscore(const composite_penalized_bscore& cbs)
-{
-    return get_bscore(cbs.first);
-}
-
-inline const behavioral_score& get_bscore(const pbscored_combo_tree& bst)
-{
-    return get_bscore(get_composite_penalized_bscore(bst));
-}
+const behavioral_score& get_bscore(const penalized_bscore& pbs);
+const behavioral_score& get_bscore(const composite_penalized_bscore& cbs);
+const behavioral_score& get_bscore(const pbscored_combo_tree& bst);
 
 /**
  * greater_than operator for pbscored_combo_tree.  The order is
@@ -326,8 +226,8 @@ inline const behavioral_score& get_bscore(const pbscored_combo_tree& bst)
  * (as these are usually very bad candidates).
  */
 struct pbscored_combo_tree_greater : public binary_function<pbscored_combo_tree,
-                                                           pbscored_combo_tree,
-                                                           bool>
+                                                            pbscored_combo_tree,
+                                                            bool>
 {
     bool operator()(const pbscored_combo_tree& bs_tr1,
                     const pbscored_combo_tree& bs_tr2) const;
@@ -348,21 +248,12 @@ typedef pbscored_combo_tree_seq::const_iterator pbscored_combo_tree_seq_cit;
 
 /// metapop_candidates provides an O(1) way of determining if a combo
 /// tree is in the map, or not (and getting its score, if it is).
-typedef boost::unordered_map<combo::combo_tree, composite_penalized_bscore,
+typedef boost::unordered_map<combo::combo_tree,
+                             pbscored_combo_tree::second_type,
                              boost::hash<combo::combo_tree> > metapop_candidates;
 typedef metapop_candidates::value_type metapop_candidate;
 typedef metapop_candidates::iterator metapop_candidates_it;
 typedef metapop_candidates::const_iterator metapop_candidates_cit;
-
-inline const combo::combo_tree& get_tree(const metapop_candidate& cnd)
-{
-    return cnd.first;
-}
-
-inline const composite_penalized_bscore& get_composite_penalized_bscore(const metapop_candidate& cnd)
-{
-    return cnd.second;
-}
 
 // ostream functions
 template<typename Out>
@@ -513,7 +404,8 @@ pbscored_combo_tree istream_pbscored_combo_tree(In& in) {
     penalized_bscore pbs(bs, cpx_penalty);
     composite_score cs(sc, cpx, cpx_penalty, diversity_penalty);
     composite_penalized_bscore cbs(pbs, cs);
-    return pbscored_combo_tree(tr, cbs, /* default demeID */ 0);
+    cpbscore_demeID cbs_demeID(cbs, /* default demeID */ 0);
+    return pbscored_combo_tree(tr, cbs_demeID);
 }                                      
 
 /**
