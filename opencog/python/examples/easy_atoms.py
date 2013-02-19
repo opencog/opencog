@@ -27,4 +27,4 @@ results = chainer.bc(target)
 print '\n---------------------------\n'
 
 print results
-print AC
+print AC.tv
