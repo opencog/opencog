@@ -359,7 +359,7 @@ int main(int argc, char** argv)
     logger().setBackTraceLevel(Logger::ERROR);
 
     // Log command-line args
-    logger().info() << "feature-selction version "
+    logger().info() << "feature-selection version "
                     << opencog::moses::version_string;
     string cmdline = "Command line:";
     for (int i = 0; i < argc; ++i) {
