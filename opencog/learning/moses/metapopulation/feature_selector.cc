@@ -189,7 +189,8 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
 
 feature_set_pop feature_selector::select_top_feature_sets(const feature_set_pop& fss) const
 {
-    feature_set_pop res(fss.begin(), std::next(fss.begin(), params.n_demes));
+    unsigned res_size = std::min(params.n_demes, (unsigned)fss.size());
+    feature_set_pop res(fss.begin(), std::next(fss.begin(), res_size));
     return res;
 }
 
