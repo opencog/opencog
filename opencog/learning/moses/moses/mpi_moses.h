@@ -62,7 +62,7 @@ public:
     void dispatch_deme(int target, const combo_tree&, int max_evals);
     int probe_for_deme();
     void recv_deme(int source, pbscored_combo_tree_set&, int& n_evals,
-                   demeID_t demeID);
+                   const demeID_t& demeID);
     void send_finished(int target);
 
     // worker methods, to be used only by workers.

@@ -60,7 +60,7 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
         // composite_score csc(_cscorer (pbs, tree_complexity(si_base)));
         composite_score csc(cscorer(si_base));
         composite_penalized_bscore cpb(pbs, csc);
-        cpbscore_demeID cbs_demeID(cpb, 0 /* initial demeID */);
+        cpbscore_demeID cbs_demeID(cpb, demeID_t());
         
         candidates[si_base] = cbs_demeID;
     }
@@ -68,7 +68,7 @@ void metapopulation::init(const std::vector<combo_tree>& exemplars,
     pbscored_combo_tree_set mps(candidates.begin(), candidates.end());
     for (const auto& cnd : candidates) {
         cpbscore_demeID cbs_demeID(get_composite_penalized_bscore(cnd),
-                                   0 /* initial demeID */);
+                                   demeID_t());
         pbscored_combo_tree pct(get_tree(cnd), cbs_demeID);
         mps.insert(pct);
     }

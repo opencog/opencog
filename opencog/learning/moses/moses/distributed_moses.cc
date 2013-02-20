@@ -256,7 +256,7 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
             // insert read element in candidates
             composite_score cs(score, complexity, complexity_penalty);
             metapop_candidates::value_type candidate = {tr, {{pbs, cs},
-                                                             /* demeID */ 0}};
+                                                             demeID_t()}};
             candidates.insert(candidate);
 
             if (logger().isFineEnabled()) {

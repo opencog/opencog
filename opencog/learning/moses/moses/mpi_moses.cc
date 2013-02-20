@@ -243,7 +243,7 @@ int moses_mpi_comm::probe_for_deme()
 void moses_mpi_comm::recv_deme(int source,
                                pbscored_combo_tree_set& cands,
                                int& n_evals,
-                               demeID_t demeID)
+                               const demeID_t& demeID)
 {
     MPI::Status status;
     MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, source, MSG_NUM_EVALS, status);
@@ -607,7 +607,13 @@ void mpi_moses(metapopulation& mp,
         int n_evals = 0;
         pbscored_combo_tree_set candidates;
         stats.n_expansions ++;
-        mompi.recv_deme(source, candidates, n_evals, stats.n_expansions);
+
+        // XXX TODO instead of overwritting the demeID it should be
+        // correctly defined by the worker and send back to the
+        // dispatcher. That way we can have the breadth_first
+        // componant of the demeID right.
+        mompi.recv_deme(source, candidates, n_evals,
+                        demeID_t(stats.n_expansions));
         source = 0;
 
         stats.n_evals += n_evals;
