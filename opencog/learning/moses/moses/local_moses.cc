@@ -71,14 +71,20 @@ bool expand_deme(metapopulation& mp,
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
-    size_t evals_this_deme = mp._dex.optimize_demes(max_evals, max_time);
-    stats.n_evals += evals_this_deme;
+    vector<unsigned> actl_evals = mp._dex.optimize_demes(max_evals, max_time);
+    stats.n_evals += boost::accumulate(actl_evals, 0U);
     stats.n_expansions++;
 
-    OC_ASSERT(false, "TODO");
-    vector<size_t> evals_seq(mp._dex._demes.size(), evals_this_deme); // TODO
-    vector<demeID_t> demeIDs(mp._dex._demes.size(), stats.n_expansions); // TODO
-    bool done = mp.merge_demes(mp._dex._demes, mp._dex._reps, evals_seq, demeIDs);
+    // construct deme IDs
+    vector<demeID_t> demeIDs;
+    unsigned ds = mp._dex._demes.size();
+    for (unsigned i = 0; i < ds; i++)
+        if (ds == 1)
+            demeIDs.emplace_back(stats.n_expansions);
+        else
+            demeIDs.emplace_back(stats.n_expansions, i);
+
+    bool done = mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals, demeIDs);
 
     if (logger().isInfoEnabled()) {
         logger().info() << "Expansion " << stats.n_expansions << " done";

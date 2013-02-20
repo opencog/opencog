@@ -335,7 +335,7 @@ void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
 
 bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                                  const boost::ptr_vector<representation>& reps,
-                                 const vector<size_t>& evals_seq,
+                                 const vector<unsigned>& evals_seq,
                                  const vector<demeID_t>& demeIDs)
 {
     // Note that univariate reports far more evals than the deme size;
@@ -439,7 +439,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         // deme size (certain cases involving the univariate optimizer)
         // But also, the deme size can be smaller than the number of evals,
         // if the deme was shrunk to save space. 
-        unsigned max_pot_cnd = std::min(evals_seq[i], demes[i].size());
+        unsigned max_pot_cnd = std::min(evals_seq[i], (unsigned)demes[i].size());
         if (params.max_candidates >= 0)
             max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
 

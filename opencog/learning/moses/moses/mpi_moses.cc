@@ -313,16 +313,20 @@ void mpi_moses_worker(metapopulation& mp,
 
         // XXX TODO should probably fetch max_time from somewhere...
         time_t max_time = INT_MAX;
-        size_t evals_this_deme = mp._dex.optimize_demes(max_evals, max_time);
+        vector<unsigned> actl_evals = mp._dex.optimize_demes(max_evals, max_time);
 
-        OC_ASSERT(false, "TODO");
-        vector<size_t> evals_seq(mp._dex._demes.size(), evals_this_deme); // TODO
-        vector<demeID_t> demeIDs(mp._dex._demes.size(), 0); // TODO
-        mp.merge_demes(mp._dex._demes, mp._dex._reps, evals_seq, demeIDs);
+        // XXX TODO demeID not needed here because it overwritten by
+        // recv_deme. It's not clear that should be the case, instead
+        // the expansion index should be send to the worker, which
+        // would generate the rught demeID for each candidates and
+        // then this should be parsed back by the dispatcher
+        vector<demeID_t> demeIDs(mp._dex._demes.size());
+        mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals, demeIDs);
         mp._dex.free_demes();
 
         // logger().info() << "Sending " << mp.size() << " results";
-        mompi.send_deme(mp, evals_this_deme);
+        unsigned total_evals = boost::accumulate(actl_evals, 0U);
+        mompi.send_deme(mp, total_evals);
 
         // Print timing stats and counts for this work unit.
         if (logger().isInfoEnabled()) {
@@ -333,7 +337,7 @@ void mpi_moses_worker(metapopulation& mp,
             ss << "Unit: " << cnt <<"\t" 
                << elapsed.tv_sec << "\t"
                << wait_time << "\t"
-               << evals_this_deme << "\t"
+               << total_evals << "\t"
                << max_evals << "\t"
                << mp.size() << "\t"  // size of the metapopulation
                << mp.best_score() <<"\t"

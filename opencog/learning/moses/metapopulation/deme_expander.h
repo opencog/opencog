@@ -65,9 +65,10 @@ struct deme_expander
      *                  function to perform.
      * @param max_time the maximum elapsed (wall-clock) time to allow.
      *
-     * @return return the number of evaluations actually performed,
+     * @return return the number of evaluations actually performed per
+     *         deme (in case of breadth-first search).
      */
-    int optimize_demes(int max_evals, time_t max_time);
+    vector<unsigned> optimize_demes(int max_evals, time_t max_time);
 
     void free_demes();
 

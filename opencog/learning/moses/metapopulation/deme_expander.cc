@@ -173,23 +173,25 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
     return true;
 }
 
-int deme_expander::optimize_demes(int max_evals, time_t max_time)
+vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
 {
-    int actl_max_evals = max_evals;
+    vector<unsigned> actl_evals;
+    int max_evals_per_deme = max_evals / _demes.size();
     for (unsigned i = 0; i < _demes.size(); i++)
     {
         if (logger().isDebugEnabled()) {
             logger().debug()
                 << "Optimize deme; max evaluations allowed: "
-                << actl_max_evals;
+                << max_evals_per_deme;
         }
         
         complexity_based_scorer cpx_scorer =
             complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
-        actl_max_evals -= _optimize(_demes[i], cpx_scorer,
-                                    actl_max_evals, max_time);
+
+        actl_evals.push_back(_optimize(_demes[i], cpx_scorer,
+                                       max_evals_per_deme, max_time));
     }
-    return max_evals - actl_max_evals;
+    return actl_evals;
 }
 
 void deme_expander::free_demes()
