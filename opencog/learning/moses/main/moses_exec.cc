@@ -1874,6 +1874,9 @@ int moses_exec(int argc, char** argv)
     // program.
     else if (combo_based_problem(problem))
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         combo_tree tr = str_to_combo_tree(combo_str);
 
         // If the user specifies the combo program from bash or similar
@@ -1985,6 +1988,9 @@ int moses_exec(int argc, char** argv)
     // program will be a boolean circuit that computes parity.
     else if (problem == pa)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         even_parity func;
 
         // If no exemplar has been provided in the options, use the
@@ -2008,6 +2014,9 @@ int moses_exec(int argc, char** argv)
     // k is the number of inputs specified by the -k option.
     else if (problem == dj)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         // @todo: for the moment occam's razor and partial truth table are ignored
         disjunction func;
 
@@ -2030,6 +2039,9 @@ int moses_exec(int argc, char** argv)
     // one and exactly one wire out of 2^k wires.  Here, k==problem_size.
     else if (problem == mux)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         // @todo: for the moment occam's razor and partial truth table are ignored
         multiplex func(problem_size);
 
@@ -2047,10 +2059,13 @@ int moses_exec(int argc, char** argv)
     }
 
     // Demo/example problem: majority. Learn the combo program that
-    // return true iff the number of true arguments is scriptly
+    // return true iff the number of true arguments is strictly
     // greater than half of the arity
     else if (problem == maj)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         // @todo: for the moment occam's razor and partial truth table are ignored
         majority func(problem_size);
 
@@ -2075,7 +2090,9 @@ int moses_exec(int argc, char** argv)
     // *(+(1 $1) $1) (that is, the  solution is p(x)=x(x+1) in the usual
     // arithmetical notation).
     else if (problem == sr)
-    { // simple regression of f(x)_o = sum_{i={1,o}} x^i
+    {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
 
         // If no exemplar has been provided in the options, use the
         // default contin_type exemplar (+)
