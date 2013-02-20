@@ -53,15 +53,26 @@ struct feature_selector
     feature_set operator()(const combo::combo_tree& tr) const
     {
         combo::CTable activ_ctable(_ctable.get_labels(), _ctable.get_signature());
-        // Use only rows where the model is just plain wrong.  The
-        // feature selector will then look for any features that
-        // correlate well with these incorrect answers.
+        interpreter_visitor iv(tr);
+        auto ai = boost::apply_visitor(iv);
         for (const combo::CTable::value_type& vct : _ctable) {
-            vertex predicted_out = eval_binding(vct.first, tr);
+            vertex predicted_out = ai(vct.first.get_variant());
+#define __LOOKAT_MOST_FREQUENT__
+#ifdef __LOOKAT_MOST_FREQUENT__
+            // Use only rows where the model is just plain wrong.  The
+            // feature selector will then look for any features that
+            // correlate well with these incorrect answers.
             Counter<vertex, unsigned> cnt = vct.second;
             vertex actual_out = cnt.most_frequent();
             if (predicted_out != actual_out)
                 activ_ctable.insert(vct);
+#else
+            // Use only rows where the model is right, that is in the
+            // case the prediction bscore is used because only
+            // positive answers matter
+            if (predicted_out == combo::id::logical_true)
+                act_ctable.insert(vct);
+#endif
         }
         // Call feature selection
         return select_features(activ_ctable, _fs_params);

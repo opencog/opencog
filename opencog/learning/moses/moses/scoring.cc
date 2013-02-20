@@ -42,6 +42,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/KLD.h>
 #include <opencog/util/MannWhitneyU.h>
+#include <opencog/comboreduct/table/table_io.h>
 
 namespace opencog { namespace moses {
 
@@ -138,10 +139,12 @@ penalized_behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     // Take the input vectors cit, target, feed the elts to anon
     // funtion[] (which just computes square of the difference) and
     // put the results into bs.
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
     boost::transform(cti, target, back_inserter(pbs.first),
-                     [&](const vertex_seq& vs, const vertex& v) {
+                     [&](const multi_type_seq& mts, const vertex& v) {
                          contin_t tar = get_contin(v),
-                             res = get_contin(eval_binding(vs, tr));
+                             res = get_contin(interpret_tr(mts.get_variant()));
                          return -err_func(res, tar);
                      });
     // add the Occam's razor feature
@@ -250,6 +253,9 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
 {
     d_counts ctr;
 
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
+
     for (const CTable::value_type& vct : _ctable) {
         // vct.first = input vector
         // vct.second = counter of outputs
@@ -263,7 +269,7 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
             sum_neg = -sum_pos;
         }
 
-        if (eval_binding(vct.first, tr) == id::logical_true)
+        if (interpret_tr(vct.first.get_variant()) == id::logical_true)
         {
             ctr.true_positive_sum += sum_pos;
             ctr.false_positive_sum += sum_neg;
@@ -750,13 +756,12 @@ precision_bscore::precision_bscore(const CTable& _ctable,
                                    bool positive_,
                                    bool worst_norm_,
                                    bool subtract_neg_target_)
-    : orig_ctable(_ctable), wrk_ctable(orig_ctable),
-      ctable_usize(orig_ctable.uncompressed_size()),
+    : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
       subtract_neg_target(subtract_neg_target_), precision_full_bscore(true)
 {
-    output_type = wrk_ctable.get_output_type();
+    output_type = ctable.get_output_type();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score
@@ -805,7 +810,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         // For contin tables, we search for the largest value in the table.
         // (or smallest, if positive == false)
         max_output = very_worst_score;
-        for (const auto& cr : wrk_ctable) {
+        for (const auto& cr : ctable) {
             const CTable::counter_t& c = cr.second;
             for (const auto& cv : c) {
                 score_t val = get_contin(cv.first);
@@ -866,13 +871,14 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
     
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
     if (precision_full_bscore) {
         // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : wrk_ctable) {
-            const vertex_seq& iv = vct.first;
+        for (const CTable::value_type& vct : ctable) {
             const auto& ct = vct.second;
             contin_t sumo = 0.0;
-            if (eval_binding(iv, tr) == id::logical_true) {
+            if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
                 sumo = sum_outputs(ct);
                 sao += sumo;
                 active += ct.total_count();
@@ -892,10 +898,10 @@ penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) co
     } else {
     
         // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : wrk_ctable) {
+        for (const CTable::value_type& vct : ctable) {
             // vct.first = input vector
             // vct.second = counter of outputs
-            if (eval_binding(vct.first, tr) == id::logical_true) {
+            if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
                 contin_t sumo = sum_outputs(vct.second);
                 unsigned totalc = vct.second.total_count();
                 // For boolean tables, sao == sum of all true positives,
@@ -972,8 +978,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
                                               unsigned> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
-    for (CTable::const_iterator it = wrk_ctable.begin();
-         it != wrk_ctable.end(); ++it) {
+    for (CTable::const_iterator it = ctable.begin();
+         it != ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         contin_t sumo = sum_outputs(c);
         unsigned total = c.total_count();
@@ -1044,16 +1050,6 @@ score_t precision_bscore::min_improv() const
     return 1.0 / ctable_usize;
 }
 
-void precision_bscore::ignore_idxs(std::set<arity_t>& idxs) const
-{
-    // Get permitted idxs.
-    auto irng = boost::irange(0, orig_ctable.get_arity());
-    std::set<arity_t> all_idxs(irng.begin(), irng.end());
-    std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
-
-    // Filter orig_table with permitted idxs.
-    wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
-}
 
 combo_tree precision_bscore::gen_canonical_best_candidate() const
 {
@@ -1070,8 +1066,8 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
                                     unsigned> // total count
                           > precision_to_count_t;
     precision_to_count_t ptc;
-    for (CTable::const_iterator it = wrk_ctable.begin();
-         it != wrk_ctable.end(); ++it) {
+    for (CTable::const_iterator it = ctable.begin();
+         it != ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         unsigned total = c.total_count();
         contin_t precision = sum_outputs(c) / total;
@@ -1096,7 +1092,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
         // build the disjunctive clause
         auto dch = tr.append_child(head, id::logical_and);
         arity_t idx = 1;
-        for (const auto& input : v.second.first->first) {
+        for (const auto& input : v.second.first->first.get_seq<builtin>()) {
             argument arg(input == id::logical_true? idx++ : -idx++);
             tr.append_child(dch, arg);
         }
@@ -1115,8 +1111,7 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
 precision_conj_bscore::precision_conj_bscore(const CTable& _ctable,
                                              float hardness_,
                                              bool positive_)
-    : orig_ctable(_ctable), wrk_ctable(orig_ctable),
-      ctable_usize(orig_ctable.uncompressed_size()),
+    : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
       hardness(hardness_), positive(positive_)
 {
     vertex target = bool_to_vertex(positive);
@@ -1165,10 +1160,12 @@ penalized_behavioral_score precision_conj_bscore::operator()(const combo_tree& t
     // compute active and sum of all active outputs
     unsigned active = 0;   // total number of active outputs by tr
     score_t sao = 0.0;     // sum of all active outputs (in the boolean case)
-    for (const CTable::value_type& vct : wrk_ctable) {
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
+    for (const CTable::value_type& vct : ctable) {
         // vct.first = input vector
         // vct.second = counter of outputs
-        if (eval_binding(vct.first, tr) == id::logical_true) {
+        if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
             contin_t sumo = sum_outputs(vct.second);
             unsigned totalc = vct.second.total_count();
             // For boolean tables, sao == sum of all true positives,
@@ -1221,17 +1218,6 @@ score_t precision_conj_bscore::min_improv() const
     return 0.0;
     // return 1.0 / ctable_usize;
 }
-
-void precision_conj_bscore::ignore_idxs(std::set<arity_t>& idxs) const {
-    // get permitted idxs
-    auto irng = boost::irange(0, orig_ctable.get_arity());
-    std::set<arity_t> all_idxs(irng.begin(), irng.end());
-    std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
-
-    // filter orig_table with permitted idxs
-    wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
-}
-
 
 //////////////////////////////
 // discretize_contin_bscore //
@@ -1332,11 +1318,13 @@ penalized_behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr)
     //    make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
     penalized_behavioral_score pbs;
 
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
     // Evaluate the bscore components for all rows of the ctable
     for (const CTable::value_type& vct : ctable) {
-        const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
-        pbs.first.push_back(-score_t(c.get(negate_vertex(eval_binding(vs, tr)))));
+        score_t sc = c.get(negate_vertex(interpret_tr(vct.first.get_variant())));
+        pbs.first.push_back(-sc);
     }
 
     // Add the Occam's razor feature
@@ -1382,11 +1370,12 @@ penalized_behavioral_score enum_table_bscore::operator()(const combo_tree& tr) c
     penalized_behavioral_score pbs;
 
     // Evaluate the bscore components for all rows of the ctable
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
     for (const CTable::value_type& vct : ctable) {
-        const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
         // The number that are wrong equals total minus num correct.
-        score_t sc = score_t(c.get(eval_binding(vs, tr)));
+        score_t sc = score_t(c.get(interpret_tr(vct.first.get_variant())));
         sc -= score_t(c.total_count());
         pbs.first.push_back(sc);
     }
@@ -1447,18 +1436,20 @@ penalized_behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) 
     vertex consequent = *next(predicate);
 
     // Evaluate the bscore components for all rows of the ctable
+    interpreter_visitor iv_tr(tr), iv_predicate(predicate);
+    auto interpret_tr = boost::apply_visitor(iv_tr);
+    auto interpret_predicate = boost::apply_visitor(iv_predicate);
     for (const CTable::value_type& vct : ctable) {
-        const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
 
         unsigned total = c.total_count();
 
         // The number that are wrong equals total minus num correct.
-        score_t sc = score_t(c.get(eval_binding(vs, tr)));
+        score_t sc = score_t(c.get(interpret_tr(vct.first.get_variant())));
         sc -= score_t(total);
 
         // Punish the first predicate, if it is wrong.
-        vertex pr = eval_throws_binding(vs, predicate);
+        vertex pr = interpret_predicate(vct.first.get_variant());
         if (pr == id::logical_true) {
             if (total != c.get(consequent))
                 sc -= punish * total;
@@ -1518,17 +1509,17 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
     if (is_enum_type(*it)) 
         return enum_table_bscore::operator()(tr);
 
-    OC_ASSERT(*it == id::cond, "Error: unexpcected candidate!");
+    OC_ASSERT(*it == id::cond, "Error: unexpected candidate!");
 
     // Evaluate the bscore components for all rows of the ctable
+    // TODO
+    sib_it predicate = it.begin();
     for (const CTable::value_type& vct : ctable) {
-        const vertex_seq& vs = vct.first;
         const CTable::counter_t& c = vct.second;
 
         unsigned total = c.total_count();
         score_t weight = 1.0;
 
-        sib_it predicate = it.begin();
         // The number that are wrong equals total minus num correct.
         score_t sc = -score_t(total);
         while (1) {
@@ -1541,7 +1532,8 @@ penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) 
             }
     
             // The first true predicate terminates.
-            vertex pr = eval_throws_binding(vs, predicate);
+            interpreter_visitor iv(predicate);
+            vertex pr = boost::apply_visitor(iv, vct.first.get_variant());
             if (pr == id::logical_true) {
                 vertex consequent = *next(predicate);
                 sc += c.get(consequent);
@@ -1644,13 +1636,13 @@ penalized_behavioral_score enum_effective_bscore::operator()(const combo_tree& t
         vector<bool>::iterator dit = done.begin();
 
         bool effective = false;
+        interpreter_visitor iv(predicate);
+        auto interpret_predicate = boost::apply_visitor(iv);
         for (const CTable::value_type& vct : ctable) {
             if (*dit == false) {
-                const vertex_seq& vs = vct.first;
-                const CTable::counter_t& c = vct.second;
-
-                vertex pr = eval_throws_binding(vs, predicate);
+                vertex pr = interpret_predicate(vct.first.get_variant());
                 if (pr == id::logical_true) {
+                    const CTable::counter_t& c = vct.second;
                     int sc = c.get(consequent);
                     // A predicate is effective if it evaluates to true,
                     // and at least gets a right answr when it does...
@@ -1902,13 +1894,6 @@ score_t multibscore_based_bscore::min_improv() const
         res = min(res, bs.min_improv());
     return res;
 }
-
-void multibscore_based_bscore::ignore_idxs(std::set<arity_t>& idxs) const
-{
-    for (const bscore_base& bs : _bscorers)
-        bs.ignore_idxs(idxs);
-}
-
 
 } // ~namespace moses
 } // ~namespace opencog

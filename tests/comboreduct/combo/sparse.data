@@ -1,7 +1,7 @@
 #
 # This is an example sparse dataset.
 #
-# First row is a heaer row.
+# First row is a header row.
 #
 target1, target2
 thing, 3.0, a : 1, b : 2, c : 3
