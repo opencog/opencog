@@ -53,10 +53,10 @@ struct feature_selector
     feature_set operator()(const combo::combo_tree& tr) const
     {
         combo::CTable activ_ctable(_ctable.get_labels(), _ctable.get_signature());
-        interpreter_visitor iv(tr);
-        auto ai = boost::apply_visitor(iv);
+        interpreter_visitor evaluator(tr);
+        auto apply_eval = boost::apply_visitor(evaluator);
         for (const combo::CTable::value_type& vct : _ctable) {
-            vertex predicted_out = ai(vct.first.get_variant());
+            vertex predicted_out = apply_eval(vct.first.get_variant());
 #define __LOOKAT_MOST_FREQUENT__
 #ifdef __LOOKAT_MOST_FREQUENT__
             // Use only rows where the model is just plain wrong.  The
