@@ -934,13 +934,11 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         if (1 < fs.size()) {
             OC_ASSERT(0, "Contin MI currently supports only 1 feature.");
         }
-        unsigned idx = *(fs.begin());
         std::multimap<contin_t, contin_t> sorted_list;
-OC_ASSERT(0, "Contin MI currently broken.");
-#if THIS_DOESNT_COMPILE_ANY_LONGER
         for (const auto& row : ctable)
         {
-            contin_t x = row.first.get_seq<contin_t>()[idx];
+            CTable::key_type vec = asf(row.first.get_variant());
+            contin_t x = vec.get_at<contin_t>(0);
 
             // for each contin counted in the row,
             for (const auto& val_pair : row.second) {
@@ -954,7 +952,6 @@ OC_ASSERT(0, "Contin MI currently broken.");
                 }
             }
         }
-#endif // THIS_DOESNT_COMPILE_ANY_LONGER
 
         // XXX TODO, it would be easier if KLD took a sorted list
         // as the argument.
@@ -971,6 +968,7 @@ OC_ASSERT(0, "Contin MI currently broken.");
         // I thought that IC was supposed to max out at 1.0 !?
         contin_t ic = - KLD(p,q);
         // XXX TODO remove this print, for better prformance.
+        unsigned idx = *(fs.begin());
         logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
         return ic;
     }
