@@ -13,7 +13,7 @@
 // not full_reduce(); the results should be the same, alghout the entry
 // point is different.
 //
-// The other big difference is the big, gnarly cond expressino at the end.
+// The other big difference is the big, gnarly cond expression at the end.
 
 using namespace std;
 using namespace opencog;
@@ -36,6 +36,7 @@ public:
 
         testno++;
         std::cout << "-------------------------------- bool test " << testno << std::endl;
+        std::cout << "combo tree = " << tr_in << std::endl;
         std::cout << "type tree = " << tt << std::endl;
 
         bool ct = is_well_formed(tt);

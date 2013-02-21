@@ -190,8 +190,8 @@ void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
 /// That is, return how many answers it got right, and how many got
 /// flat-out wrong.
 void partial_solver::effective(combo_tree::iterator pred,
-                       unsigned& good_count,  // return value
-                       unsigned& fail_count)  //return value
+                               unsigned& good_count,  // return value
+                               unsigned& fail_count)  //return value
 {
     sib_it predicate = pred;
     sib_it conq = next(predicate);
@@ -199,13 +199,13 @@ void partial_solver::effective(combo_tree::iterator pred,
 
     unsigned total_count = 0;
     // Count how many items the first predicate mis-identifies.
+    interpreter_visitor iv(predicate);
+    auto interpret_predicate = boost::apply_visitor(iv);
     for (CTable& ctable : _ctables) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
-            const vertex_seq& vs = cit->first;
+            vertex pr = interpret_predicate(cit->first.get_variant());
             const CTable::counter_t& c = cit->second;
-
             total_count += c.total_count();
-            vertex pr = eval_throws_binding(vs, predicate);
             if (pr == id::logical_true) {
                 unsigned num_right = c.get(consequent);
                 unsigned num_total = c.total_count();
@@ -229,15 +229,15 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
                                 unsigned& total)    // return value
 
 {
+    interpreter_visitor iv(predicate);
+    auto interpret_predicate = boost::apply_visitor(iv);
     for (CTable& ctable : tabs) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); ) {
-            const vertex_seq& vs = cit->first;
+            vertex pr = interpret_predicate(cit->first.get_variant());
             const CTable::counter_t& c = cit->second;
-
             unsigned tc = c.total_count();
             total += tc;
 
-            vertex pr = eval_throws_binding(vs, predicate);
             if (pr == id::logical_true) {
                 deleted += tc;
                 ctable.erase(cit++);
