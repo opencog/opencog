@@ -936,6 +936,8 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         }
         unsigned idx = *(fs.begin());
         std::multimap<contin_t, contin_t> sorted_list;
+OC_ASSERT(0, "Contin MI currently broken.");
+#if THIS_DOESNT_COMPILE_ANY_LONGER
         for (const auto& row : ctable)
         {
             contin_t x = row.first.get_seq<contin_t>()[idx];
@@ -952,6 +954,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
                 }
             }
         }
+#endif // THIS_DOESNT_COMPILE_ANY_LONGER
 
         // XXX TODO, it would be easier if KLD took a sorted list
         // as the argument.
