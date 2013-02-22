@@ -835,66 +835,30 @@ double mutualInformation(const Table& table, const FeatureSet& fs)
 template<typename FeatureSet>
 double mutualInformation(const CTable& ctable, const FeatureSet& fs)
 {
-    // Let X1, ..., Xn be the input columns on the table (as given by fs),
-    // and Y be the output column.  We need to compute the joint entropies
-    // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
-    // To do this, we need to count how often the vertex sequence
-    // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
-    // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
-    // occurs.
-    typedef Counter<CTable::key_type, unsigned> VSCounter;
-    VSCounter ic;  // for H(X1, ..., Xn)
-    VSCounter ioc; // for H(Y, X1, ..., Xn)
-    double total = 0.0;
-    double yentropy = 0.0;   // for H(Y)
-
     // declare useful visitors
     seq_filtered_visitor<FeatureSet> sfv(fs);
     auto asf = boost::apply_visitor(sfv);
-    
     type_node otype = ctable.get_output_type();
-    if (id::boolean_type == otype)
+
+    ///////////////////
+    // discrete case //
+    ///////////////////
+    if (id::enum_type == otype or id::boolean_type == otype)
     {
-        unsigned oc = 0; // for H(Y)
+        // Let X1, ..., Xn be the input columns on the table (as given by fs),
+        // and Y be the output column.  We need to compute the joint entropies
+        // H(Y, X1, ..., Xn) and H(X1, ..., Xn)
+        // To do this, we need to count how often the vertex sequence
+        // (X1, ..., Xn) occurs. This count is kept in "ic". Likewise, the
+        // "ioc" counter counts how often the vertex_seq (Y, X1, ..., Xn)
+        // occurs.
+        typedef Counter<CTable::key_type, unsigned> VSCounter;
+        VSCounter ic;  // for H(X1, ..., Xn)
+        VSCounter ioc; // for H(Y, X1, ..., Xn)
+        double total = 0.0;
 
-        for (const auto& row : ctable)
-        {
-            // Create the filtered row.
-            CTable::key_type vec = asf(row.first.get_variant());
-
-            unsigned falses = row.second.get(id::logical_false);
-            // update ioc (input-output counter)
-            if (falses > 0) {
-                vec.push_back(id::logical_false);
-                ioc[vec] += falses;
-                vec.pop_back();
-            }
-
-            unsigned trues = row.second.get(id::logical_true);
-            if (trues > 0) {
-                vec.push_back(id::logical_true);
-                ioc[vec] += trues;
-                vec.pop_back();
-            }
-
-            // update oc (output counter)
-            oc += trues;
-
-            // update ic (input counter)
-            unsigned row_total = falses + trues;
-            ic[vec] += row_total;
-
-            // update total
-            total += row_total;
-        }
-
-        // Compute H(Y)
-        yentropy = 0.0 < total ? binaryEntropy(oc/total) : 0.0;
-    }
-    else if (id::enum_type == otype)
-    {
         // Count the total number of times an enum appears in the table
-        Counter<enum_t, unsigned> ycount;
+        Counter<vertex, unsigned> ycount;
 
         // Same as above, but for enums.
         for (const auto& row : ctable)
@@ -909,14 +873,13 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
             // for each enum type counted in the row,
             for (const auto& val_pair : row.second) {
                 const vertex& v = val_pair.first; // key of map
-                const enum_t& renum = get_enum_type(v); // typecast
 
-                unsigned enum_count = row.second.get(renum);
-                ycount[renum] += enum_count;
+                unsigned count = row.second.get(v);
+                ycount[v] += count;
 
                 // update ioc == "input output counter"
-                vec.push_back(renum);
-                ioc[vec] += enum_count;
+                vec.push_back(v);
+                ioc[vec] += count;
                 vec.pop_back();
             }
 
@@ -924,11 +887,21 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
             total += row_total;
         }
 
-        std::vector<double> yprob(ycount.size());
+        // Compute the probability distributions; viz divide count by total.
+        // "c" == count, "p" == probability
+        std::vector<double> yprob(ycount.size()), ip(ic.size()), iop(ioc.size());
         auto div_total = [&](unsigned c) { return c/total; };
         transform(ycount | map_values, yprob.begin(), div_total);
-        yentropy = entropy(yprob);
+        transform(ic | map_values, ip.begin(), div_total);
+        transform(ioc | map_values, iop.begin(), div_total);
+
+        // Compute the entropies
+        return entropy(ip) + entropy(yprob) - entropy(iop);
     }
+
+    /////////////////////
+    // continuous case //
+    /////////////////////
     else if (id::contin_type == otype)
     {
         if (1 < fs.size()) {
@@ -972,20 +945,14 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
         return ic;
     }
+
+    //////////////////////////////////
+    // Other non implemented cases //
+    //////////////////////////////////
     else
     {
         OC_ASSERT(0, "Unsupported type for mutual information");
     }
-
-    // Compute the probability distributions; viz divide count by total.
-    // "c" == count, "p" == probability
-    std::vector<double> ip(ic.size()), iop(ioc.size());
-    auto div_total = [&](unsigned c) { return c/total; };
-    transform(ic | map_values, ip.begin(), div_total);
-    transform(ioc | map_values, iop.begin(), div_total);
-
-    // Compute the entropies
-    return entropy(ip) + yentropy - entropy(iop);
 }
 
 /**
