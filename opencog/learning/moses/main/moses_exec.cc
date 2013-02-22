@@ -113,12 +113,51 @@ static const string auto_str = "auto";
 static const string inverse = "inverse";
 static const string complement = "complement";
 
+// focus types (which data points feature selection within moses
+// should focus on)
+static const string focus_all = "all"; // all data points are considered
+
+static const string focus_active = "active"; // only active data points are
+                                             // considered
+static const string focus_incorrect = "incorrect"; // only incorrect answers
+                                                   // are considered
+static const string focus_ai = "ai"; // only active data points that
+                                     // are incorrectly classified are considered
+
+// seed type (how to use the features of the exemplar to seed feature
+// selection)
+
+// empty initial feature set, however the features of the exemplar are
+// simply removed from the dataset before feature selection
+// occurs. This is to prevent that new selected features are ones from
+// the exemplar.
+static const string seed_none = "none";
+
+// empty initial feature set, the features of the exemplar are not
+// removed from the dataset but the number of features of the exemplar
+// is added to the number of features to select. That is (for that
+// particular expansion):
+//
+// fs-target-size += number of features in exemplar
+static const string seed_add = "add";
+
+// the features of the exemplar are used as initial guess for feature
+// selection, also the number of features to select is also added to
+// the number of features of the exemplar, as for add
+static const string seed_init = "init";
+
+// the "exemplar feature" us used as initial guess. The exemplar
+// feature is the output of the exemplar. The number of features to
+// select is incremented by 1 (to account for the exemplar
+// feature). that is the number of feature to select is fs-target-size + 1
+static const string seed_xmplr = "xmplr";
+
 void log_output_error_exit(string err_msg) {
     logger().info() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
     exit(1);    
 }
-        
+
 /**
  * Display error message about unspecified combo tree and exit
  */
@@ -501,6 +540,8 @@ int moses_exec(int argc, char** argv)
     // feature selection happens before each representation building
     /// Enable feature selection while selecting exemplar
     bool enable_feature_selection;
+    string fs_focus;
+    string fs_seed;
     feature_selector_parameters festor_params;
     feature_selection_parameters& fs_params = festor_params.fs_params;
 
@@ -1084,10 +1125,47 @@ int moses_exec(int argc, char** argv)
          "specifies the number of features to be selected out of "
          "the dataset.  A value of 0 disables feature selection.\n")
 
-        ("fs-increase-target-size",
-         value<bool>(&festor_params.increase_target_size)->default_value(1),
-         "At each generation the target size of feature selection is increased"
-         " by the existing number of features in the exemplar chosen.\n")
+        ("fs-focus",
+         value<string>(&fs_focus)->default_value(focus_incorrect),
+         str(boost::format("Focus of feature selection (which data points "
+                           "feature will focus on):\n"
+                           "%s, all data points are considered\n"
+                           "%s, only active data points are considered\n"
+                           "%s, only incorrect answers are considered\n"
+                           "%s, only active data points that incorrectly "
+                           "answered are considered")
+             % focus_all % focus_active % focus_incorrect % focus_ai).c_str())
+
+        ("fs-seed",
+         value<string>(&fs_seed)->default_value(seed_add),
+         str(boost::format("Seed type (how to use the features of the "
+                           "exemplar to seed feature selection):\n"
+
+                           "%s, empty initial feature set, however the "
+                           "features of the exemplar are simply removed "
+                           "from the dataset before feature selection occurs. "
+                           "This is to prevent that new selected features "
+                           "are ones from the exemplar.\n"
+
+                           "%s, empty initial feature set, the features "
+                           "of the exemplar are not removed from the dataset "
+                           "but the number of features of the exemplar "
+                           "is added to the number of features to select. "
+                           "That is (for that particular expansion):\n"
+                           "fs_target_size += number of features in exemplar\n"
+
+                           "%s, the features of the exemplar are used as "
+                           "initial guess for feature selection, also the "
+                           "number of features to select is also added to "
+                           "the number of features of the exemplar, as for add.\n"
+
+                           "%s, the \"exemplar feature\" us used as initial "
+                           "guess. The exemplar feature is the output of the "
+                           "exemplar. The number of features to select is "
+                           "incremented by 1 (to account for the exemplar "
+                           "feature). that is the number of feature to select "
+                           "is fs_target_size + 1")
+             % seed_none % seed_add % seed_init % seed_xmplr).c_str())
 
         ("fs-ignore-exemplar-features",
          value<bool>(&festor_params.ignore_xmplr_features)->default_value(0),
@@ -1358,7 +1436,8 @@ int moses_exec(int argc, char** argv)
 
     // Set the initial exemplars.
     vector<combo_tree> exemplars;
-    boost::transform(exemplars_str, std::back_inserter(exemplars), str_to_combo_tree);
+    boost::transform(exemplars_str, std::back_inserter(exemplars),
+                     str_to_combo_tree);
 
     // Fill jobs
     jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
@@ -1397,7 +1476,44 @@ int moses_exec(int argc, char** argv)
     // constructors (if you can avoid it), as it is prone to error,
     // whenever the constructor changes it may silently set the wrong
     // things (as long as they have the same types).
-    
+
+    // set feature selection parameters
+    if (fs_focus == focus_all) {
+        festor_params.restrict_incorrect = false;
+        festor_params.restrict_true = false;
+    } else if (fs_focus == focus_active) {
+        festor_params.restrict_incorrect = false;
+        festor_params.restrict_true = true;
+    } else if (fs_focus == focus_incorrect) {
+        festor_params.restrict_incorrect = true;
+        festor_params.restrict_true = false;
+    } else if (fs_focus == focus_ai) {
+        festor_params.restrict_incorrect = true;
+        festor_params.restrict_true = true;
+    }
+
+    if (fs_seed == seed_none) {
+        festor_params.increase_target_size = false;
+        festor_params.ignore_xmplr_features = true;
+        festor_params.init_xmplr_features = false;
+        festor_params.xmplr_as_feature = false;
+    } else if (fs_seed == seed_add) {
+        festor_params.increase_target_size = true;
+        festor_params.ignore_xmplr_features = false;
+        festor_params.init_xmplr_features = false;
+        festor_params.xmplr_as_feature = false;
+    } else if (fs_seed == seed_init) {
+        festor_params.increase_target_size = false;
+        festor_params.ignore_xmplr_features = false;
+        festor_params.init_xmplr_features = true;
+        festor_params.xmplr_as_feature = false;
+    } else if (fs_seed == seed_xmplr) {
+        festor_params.increase_target_size = false;
+        festor_params.ignore_xmplr_features = false;
+        festor_params.init_xmplr_features = false;
+        festor_params.xmplr_as_feature = true;
+    }
+
     // Set metapopulation parameters
     metapop_parameters meta_params;
     meta_params.max_candidates = max_candidates;

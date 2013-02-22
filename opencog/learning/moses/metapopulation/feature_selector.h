@@ -30,7 +30,7 @@
 #include <opencog/learning/feature-selection/main/feature-selection.h>
 
 namespace opencog {
-namespace moses {    
+namespace moses {
 
 /**
  * Parameters of feature selector
