@@ -841,9 +841,6 @@ double mutualInformation(const Table& table, const FeatureSet& fs)
  * table.  Currently supports only boolean and enum outputs.  For contin
  * outputs, consider using KL instead (although, to be technically
  * correct, we really should use Fisher information. @todo this).
- *
- * The CTable cannot be passed as const because the use of the operator[]
- * may modify it's content (by adding default values for missing keys).
  */
 template<typename FeatureSet>
 double mutualInformation(const CTable& ctable, const FeatureSet& fs)
