@@ -799,7 +799,7 @@ ostream& ostreamCTable(ostream& out, const CTable& ct)
         // print map of outputs
         out << "{";
         for(auto it = v.second.begin(); it != v.second.end();) {
-            out << vertex_to_str(it->first) << ":" << it->second;
+            out << table_fmt_vertex_to_str(it->first) << ":" << it->second;
             if(++it != v.second.end())
                 out << ",";
         }
@@ -862,7 +862,7 @@ ostream& operator<<(ostream& out, const OTable& ot)
         out << ot.get_label() << endl;
     out << ot.get_type() << endl;
     for (const vertex& v : ot)
-        out << vertex_to_str(v) << endl;
+        out << table_fmt_vertex_to_str(v) << endl;
     return out;
 }
 

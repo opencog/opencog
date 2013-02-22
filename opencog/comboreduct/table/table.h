@@ -191,20 +191,20 @@ struct equal_visitor : public boost::static_visitor<bool> {
 };
      
 // function specifically for output table
-std::string vertex_to_str(const vertex& v);
-std::string builtin_to_str(const builtin& b);
+std::string table_fmt_vertex_to_str(const vertex& v);
+std::string table_fmt_builtin_to_str(const builtin& b);
 struct to_strings_visitor : public boost::static_visitor<string_seq> {
     string_seq operator()(const string_seq& seq) {
         return seq;
     }
     string_seq operator()(const vertex_seq& seq) {
         string_seq res;
-        boost::transform(seq, back_inserter(res), vertex_to_str);
+        boost::transform(seq, back_inserter(res), table_fmt_vertex_to_str);
         return res;
     }
     string_seq operator()(const builtin_seq& seq) {
         string_seq res;
-        boost::transform(seq, back_inserter(res), builtin_to_str);
+        boost::transform(seq, back_inserter(res), table_fmt_builtin_to_str);
         return res;        
     }
     template<typename Seq> string_seq operator()(const Seq& seq) {

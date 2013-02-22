@@ -273,7 +273,7 @@ Out& ostreamTable(Out& out,
     OC_ASSERT(it.empty() || it.size() == ot.size());
     for (size_t row = 0; row < ot.size(); ++row) {
         std::vector<std::string> content = it[row].to_strings();
-        std::string oc = vertex_to_str(ot[row]);
+        std::string oc = table_fmt_vertex_to_str(ot[row]);
         if (target_pos < 0)
             content.push_back(oc);
         else
