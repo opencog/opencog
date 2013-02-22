@@ -47,7 +47,7 @@ using namespace std;
 using namespace boost;
 using namespace boost::adaptors;
 
-string builtin_to_str(const builtin& b)
+string table_fmt_builtin_to_str(const builtin& b)
 {
     stringstream ss;
     if (is_boolean(b))
@@ -56,7 +56,7 @@ string builtin_to_str(const builtin& b)
         ss << b;
     return ss.str();
 }
-string vertex_to_str(const vertex& v)
+string table_fmt_vertex_to_str(const vertex& v)
 {
     stringstream ss;
     if (is_boolean(v))

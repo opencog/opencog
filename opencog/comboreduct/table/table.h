@@ -204,20 +204,20 @@ struct equal_visitor : public boost::static_visitor<bool> {
 };
      
 // function specifically for output table
-std::string vertex_to_str(const vertex& v);
-std::string builtin_to_str(const builtin& b);
+std::string table_fmt_vertex_to_str(const vertex& v);
+std::string table_fmt_builtin_to_str(const builtin& b);
 struct to_strings_visitor : public boost::static_visitor<string_seq> {
     string_seq operator()(const string_seq& seq) {
         return seq;
     }
     string_seq operator()(const vertex_seq& seq) {
         string_seq res;
-        boost::transform(seq, back_inserter(res), vertex_to_str);
+        boost::transform(seq, back_inserter(res), table_fmt_vertex_to_str);
         return res;
     }
     string_seq operator()(const builtin_seq& seq) {
         string_seq res;
-        boost::transform(seq, back_inserter(res), builtin_to_str);
+        boost::transform(seq, back_inserter(res), table_fmt_builtin_to_str);
         return res;        
     }
     template<typename Seq> string_seq operator()(const Seq& seq) {
@@ -944,12 +944,11 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         if (1 < fs.size()) {
             OC_ASSERT(0, "Contin MI currently supports only 1 feature.");
         }
-        unsigned idx = *(fs.begin());
         std::multimap<contin_t, contin_t> sorted_list;
         for (const auto& row : ctable)
         {
-            const multi_type_seq& mseq = row.first;
-            contin_t x = mseq.get_seq<contin_t>()[idx];
+            CTable::key_type vec = asf(row.first.get_variant());
+            contin_t x = vec.get_at<contin_t>(0);
 
             // for each contin counted in the row,
             for (const auto& val_pair : row.second) {
@@ -979,6 +978,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         // I thought that IC was supposed to max out at 1.0 !?
         contin_t ic = - KLD(p,q);
         // XXX TODO remove this print, for better prformance.
+        unsigned idx = *(fs.begin());
         logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
         return ic;
     }

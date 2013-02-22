@@ -5,12 +5,12 @@ class Marker(object): # Marker Class, usually used for marking!
 
 marker = Marker() # A Marker
 
-def subsets_of_len_two(set):
-    indexed_set = list(set)
-    length = len(indexed_set)
-    for i in range(length):
-        for j in range(i + 1, length):
-            yield (indexed_set[i], indexed_set[j])
+def subsets_of_len_two(seq):
+    indexed_seq = list(seq)
+    length = len(indexed_seq)
+    for i in xrange(length):
+        for j in xrange(i + 1, length):
+            yield (indexed_seq[i], indexed_seq[j])
 
 def new_instance_of_same_type(parent):
     """
@@ -33,3 +33,24 @@ def dim(structure):
 import operator
 def concat_lists(lists):
     return reduce(operator.concat, lists, [])
+
+
+def read_scheme_data(scheme_file_path, atomspace):
+    try:
+        stream = open(scheme_file_path,'r')
+    except:
+        import urllib2
+        stream = urllib2.urlopen(scheme_file_path)
+
+    lines = stream.readlines()
+    for line in lines:
+        for char in line:
+            print char
+
+
+    stream.close()
+
+if __name__ == '__main__':
+    from opencog.atomspace import AtomSpace
+    atomspace = AtomSpace()
+    read_scheme_data('https://dl.dropbox.com/s/wxjmg6etqsliot4/jade.scm?dl=1', atomspace)
