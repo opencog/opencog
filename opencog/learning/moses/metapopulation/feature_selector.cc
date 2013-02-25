@@ -1,4 +1,4 @@
-/** feature_selector.cc --- 
+/** feature_selector.cc ---
  *
  * Copyright (C) 2013 OpenCog Foundation
  *
@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -22,6 +22,8 @@
 
 #include "feature_selector.h"
 #include <opencog/comboreduct/table/table_io.h>
+
+#include <boost/range/algorithm/max_element.hpp>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
@@ -43,7 +45,7 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
     // Note that this is gonna overwrite some parameters. It is OK
     // because feature_selector being copied before being called by
     // deme_expander::create_deme
-    
+
     // get the set of features of the exemplar
     auto xmplr_features = get_argument_abs_idx_from_zero_set(xmplr);
 
@@ -88,7 +90,7 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
     if (params.xmplr_as_feature) {
         params.fs_params.initial_features.push_back(EXEMPLAR_FEATURE_NAME);
         ++params.fs_params.target_size;
-    }    
+    }
 }
 
 CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
@@ -232,6 +234,54 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
 
     return sf_pop;
+}
+
+csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& fs_pop) const {
+    csc_feature_set_pop res;    // hold all the feature sets ranked by diversity
+
+    // initialize csc_fs_pop (the temporary structure holding all the
+    // feature sets not yet ranked by diversity)
+    typedef pair<composite_score, feature_set> csc_feature_set;
+    vector<csc_feature_set> csc_fs_seq;
+    for (const auto& fs : fs_pop)
+        csc_fs_seq.emplace_back(composite_score(fs.first, fs.second.size()),
+                                fs.second);
+
+    // csc_feature_set less_than function
+    auto csc_fs_lt = [](const csc_feature_set& csc_fs_l,
+                        const csc_feature_set& csc_fs_r) {
+        return csc_fs_l.first < csc_fs_r.first;
+    };
+
+    while (!csc_fs_seq.empty()) {
+        // assign to all elements of csc_fs_seq the right diversity penality
+        for (csc_feature_set& csc_fs : csc_fs_seq) {
+            // compute all mis between csc_fs and current res
+            vector<double> mis;
+            for (const auto resv : res)  // WARNING: highly pessimized
+                mis.push_back(mi(resv.second, csc_fs.second));
+
+            // aggregate the results (here max)
+            double agg_mis = *boost::max_element(mis);
+
+            // compute and update the diversity penalty
+            double dp = params.diversity_pressure * agg_mis;
+            csc_fs.first.set_diversity_penalty(dp);
+        }
+
+        // insert the best candidate in res and delete it from csc_fs_pop
+        auto mit = boost::max_element(csc_fs_seq, csc_fs_lt);
+        res.insert(*mit);
+        csc_fs_seq.erase(mit);
+    }
+
+    return res;
+}
+
+double feature_selector::mi(const feature_set& fs_l, const feature_set& fs_r) const
+{
+    OC_ASSERT(false, "TODO");
+    return 0.0;
 }
 
 } // ~namespace moses

@@ -94,7 +94,29 @@ struct feature_selector_parameters {
      * demes to spawn.
      */
     unsigned n_demes;
+
+    /**
+     * When selecting several feature sets (n_demes > 1) a diversity
+     * pressure can be applied before selecting the best feature sets.
+     *
+     * The penalized score of a feature set fs_i is
+     * q(fs_i) - diversity_pressure * aggregate_{j=0}^{i-1}(mi(fs_i, fs_j))
+     *
+     * Where the feature sets fs_i are ordered by their penalized
+     * scores. aggregate can be either generalized mean or sum, or
+     * max.
+     */
+    float diversity_pressure;
+
+    /**
+     * Number of interactions to consider when computing mi. A
+     * negative value means all interactions.
+     */
+    int diversity_interaction;
 };
+
+// used for diversity ranking
+typedef std::multimap<composite_score, feature_set> csc_feature_set_pop;
 
 /**
  * Struct in charge of selecting features maximize the amount of
@@ -131,6 +153,13 @@ protected:
 
     /// remove useless features (like the exemplar feature if any)
     void remove_useless_features(feature_set_pop& fss) const;
+
+    // Rank feature sets, penalized by diversity
+    csc_feature_set_pop rank_feature_sets(const feature_set_pop& fs_pop) const;
+
+    // compute (or rather approximate) the mutual information between 2
+    // feature sets
+    double mi(const feature_set& fs_l, const feature_set& fs_r) const;
 };
 
 } // ~namespace moses
