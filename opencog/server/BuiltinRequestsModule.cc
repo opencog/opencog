@@ -37,9 +37,7 @@ BuiltinRequestsModule::BuiltinRequestsModule()
 {
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(ListRequest::info().id,         &listFactory); 
-    cogserver.registerRequest(LoadRequest::info().id,         &loadFactory);
-    cogserver.registerRequest(SaveRequest::info().id,         &saveFactory);
-    cogserver.registerRequest(DataRequest::info().id,         &dataFactory); 
+    cogserver.registerRequest(DataRequest::info().id,         &dataFactory);
     cogserver.registerRequest(HelpRequest::info().id,         &helpFactory); 
     cogserver.registerRequest(ExitRequest::info().id,         &exitFactory); 
     cogserver.registerRequest(SleepRequest::info().id,        &sleepFactory); 
