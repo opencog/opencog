@@ -878,7 +878,14 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
                 ycount[v] += count;
 
                 // update ioc == "input output counter"
-                vec.push_back(v);
+                switch(otype) {
+                case id::enum_type: vec.push_back(get_enum_type(v));
+                    break;
+                case id::boolean_type: vec.push_back(get_builtin(v));
+                    break;
+                default:
+                    OC_ASSERT(false, "case not implemented");
+                }
                 ioc[vec] += count;
                 vec.pop_back();
             }
@@ -952,6 +959,7 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
     else
     {
         OC_ASSERT(0, "Unsupported type for mutual information");
+        return 0.0;
     }
 }
 
