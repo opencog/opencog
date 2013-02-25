@@ -79,8 +79,8 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
         params.fs_params.target_size += xmplr_features.size();
     }
 
-    // Alternatively one can ignore the features in the exemplar
-    // during feature selection.
+    // Alternatively to params.increase_target_size, one can ignore
+    // the features in the exemplar during feature selection.
     params.ignored_features = params.ignore_xmplr_features ?
         xmplr_features : set<arity_t>();
 
