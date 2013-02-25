@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/feature_selector.cc
+ * opencog/learning/moses/moses/feature_selector.h
  *
  * Copyright (C) 2012 OpenCog Foundation
  * All Rights Reserved
@@ -53,7 +53,7 @@ struct feature_selector_parameters {
     /**
      * Ignore features when doing feature selection.
      */
-    std::set<arity_t> ignore_features;
+    std::set<arity_t> ignored_features;
 
     /**
      * Only consider the rows when the combo tree is predicting an

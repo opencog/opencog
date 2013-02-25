@@ -81,7 +81,7 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
 
     // Alternatively one can ignore the features in the exemplar
     // during feature selection.
-    params.ignore_features = params.ignore_xmplr_features ?
+    params.ignored_features = params.ignore_xmplr_features ?
         xmplr_features : set<arity_t>();
 
     // Or one can use the output of the exemplar as an initial feature
@@ -112,11 +112,11 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
     auto ai = boost::apply_visitor(iv);
 
     // define visitor to initialize the features to ignore
-    if (!params.ignore_features.empty())
+    if (!params.ignored_features.empty())
         ostreamContainer(logger().debug() << "Ignore features: ",
-                         params.ignore_features);
-    std::vector<init_at_visitor> iavs(params.ignore_features.begin(),
-                                      params.ignore_features.end());
+                         params.ignored_features);
+    std::vector<init_at_visitor> iavs(params.ignored_features.begin(),
+                                      params.ignored_features.end());
 
     // add each considered row
     for (const combo::CTable::value_type& vct : _ctable) {
