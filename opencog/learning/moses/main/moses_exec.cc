@@ -1128,10 +1128,10 @@ int moses_exec(int argc, char** argv)
         ("fs-focus",
          value<string>(&fs_focus)->default_value(focus_incorrect),
          str(boost::format("Focus of feature selection (which data points "
-                           "feature will focus on):\n"
-                           "%s, all data points are considered\n"
-                           "%s, only active data points are considered\n"
-                           "%s, only incorrect answers are considered\n"
+                           "feature will focus on):\n\n"
+                           "%s, all data points are considered\n\n"
+                           "%s, only active data points are considered\n\n"
+                           "%s, only incorrect answers are considered\n\n"
                            "%s, only active data points that incorrectly "
                            "answered are considered")
              % focus_all % focus_active % focus_incorrect % focus_ai).c_str())
@@ -1139,25 +1139,25 @@ int moses_exec(int argc, char** argv)
         ("fs-seed",
          value<string>(&fs_seed)->default_value(seed_add),
          str(boost::format("Seed type (how to use the features of the "
-                           "exemplar to seed feature selection):\n"
+                           "exemplar to seed feature selection):\n\n"
 
                            "%s, empty initial feature set, however the "
                            "features of the exemplar are simply removed "
                            "from the dataset before feature selection occurs. "
                            "This is to prevent that new selected features "
-                           "are ones from the exemplar.\n"
+                           "are ones from the exemplar.\n\n"
 
                            "%s, empty initial feature set, the features "
                            "of the exemplar are not removed from the dataset "
                            "but the number of features of the exemplar "
                            "is added to the number of features to select. "
                            "That is (for that particular expansion):\n"
-                           "fs_target_size += number of features in exemplar\n"
+                           "fs_target_size += number of features in exemplar\n\n"
 
                            "%s, the features of the exemplar are used as "
                            "initial guess for feature selection, also the "
                            "number of features to select is also added to "
-                           "the number of features of the exemplar, as for add.\n"
+                           "the number of features of the exemplar, as for add.\n\n"
 
                            "%s, the \"exemplar feature\" us used as initial "
                            "guess. The exemplar feature is the output of the "
@@ -1166,35 +1166,6 @@ int moses_exec(int argc, char** argv)
                            "feature). that is the number of feature to select "
                            "is fs_target_size + 1")
              % seed_none % seed_add % seed_init % seed_xmplr).c_str())
-
-        ("fs-ignore-exemplar-features",
-         value<bool>(&festor_params.ignore_xmplr_features)->default_value(0),
-         "Ignore the features present in the exemplar during feature selection.\n")
-
-        ("fs-init-exemplar-features",
-         value<bool>(&festor_params.init_xmplr_features)->default_value(0),
-         "Use the features of the exemplar as initial feature set to seed the "
-         "feature selection algorithm. That way the other features selected "
-         "will be measured as good when combined with the exemplar.\n")
-
-        ("fs-exemplar-as-feature",
-         value<bool>(&festor_params.xmplr_as_feature)->default_value(0),
-         "Use the output of the exemplar as feature as to consider feature sets "
-         "which is are scored well in combination with that feature.\n")
-
-        ("fs-restrict-incorrect",
-         value<bool>(&festor_params.restrict_incorrect)->default_value(1),
-         "Restrict feature selection to observations corresponding to"
-         " incorrect answers given by the exemplar.\n")
-
-        ("fs-restrict-true",
-         value<bool>(&festor_params.restrict_true)->default_value(0),
-         "Restrict feature selection to observations corresponding to when"
-         " the exemplar returns true (this may be useful in combination with"
-         " precision scorer as it corresponds to the focus of the exemplar). "
-         "This option can be combined with --fs-restrict-incorrect. In case "
-         "both are enabled then feature selection is restricted to the data "
-         "points which are both true and wrong.\n")
 
         ("fs-prune-exemplar",
          value<bool>(&festor_params.prune_xmplr)->default_value(0),
