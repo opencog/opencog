@@ -1133,7 +1133,7 @@ int moses_exec(int argc, char** argv)
                            "%s, only active data points are considered\n\n"
                            "%s, only incorrect answers are considered\n\n"
                            "%s, only active data points that incorrectly "
-                           "answered are considered")
+                           "answered are considered.\n")
              % focus_all % focus_active % focus_incorrect % focus_ai).c_str())
 
         ("fs-seed",
@@ -1164,7 +1164,7 @@ int moses_exec(int argc, char** argv)
                            "exemplar. The number of features to select is "
                            "incremented by 1 (to account for the exemplar "
                            "feature). that is the number of feature to select "
-                           "is fs_target_size + 1")
+                           "is fs_target_size + 1\n")
              % seed_none % seed_add % seed_init % seed_xmplr).c_str())
 
         ("fs-prune-exemplar",
@@ -1275,7 +1275,7 @@ int moses_exec(int argc, char** argv)
         // ======= Feature-selection MI scorer params =======
         ("fs-mi-penalty",
          value<double>(&fs_params.mi_confi)->default_value(100.0),
-         "Mutal-information scorer parameter.  Intensity of the confidence "
+         "Mutual-information scorer parameter.  Intensity of the confidence "
          "penalty, in the range (-Inf, +Inf).  100 means no confidence "
          "penalty. This parameter influences how much importance is "
          "attributed to the confidence of the quality measure. The "
