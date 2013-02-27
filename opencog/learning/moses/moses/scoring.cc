@@ -389,8 +389,8 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     // variable and fixed parts).
     unsigned acc_cnt = 0;
     contin_t acc_pos = 0.0,     // accumulation of positive
-        acc_neg = 0.0,      // accumulation of negative
-        best_sc = 0.0,      // best score
+        acc_neg = 0.0;          // accumulation of negative
+    score_t best_sc = 0.0,  // best score
         best_vary = 0.0,    // best score varying component
         best_fixed = 0.0,   // the best score fixed component
         best_fixation_penalty = 0.0; // best score fixed component penalty
