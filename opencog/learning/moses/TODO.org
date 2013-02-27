@@ -1,5 +1,7 @@
 * MOSES
 ** Code Improvements
+- [ ] fix discriminating_bscore::best_possible_bscore() for all
+  inherited bscores and add unit tests
 - [ ] Finish documenting varous moses flags in man page; see bottom
   of man page for the list.
 - [ ] Move as many thing as possible in body files to decrease
