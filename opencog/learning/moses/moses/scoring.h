@@ -295,7 +295,7 @@ struct discriminating_bscore : public bscore_base, discriminator
 protected:
     //* The two functions below are used to implement a generic
     //* best_possible_bscore() method.  They should return values
-    //* the the two conjugate classification dimensions.  For example,
+    //* the two conjugate classification dimensions.  For example,
     //* one might return precision, and the other recall.  The 'fixed'
     //* quantity is the one meant to be kept above a given threshold,
     //* while the 'variable' one is to be maximized (while keeping the

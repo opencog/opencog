@@ -34,6 +34,7 @@
 #include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -50,6 +51,7 @@ using namespace std;
 using boost::adaptors::map_values;
 using boost::adaptors::map_keys;
 using boost::adaptors::filtered;
+using boost::adaptors::reversed;
 using boost::adaptors::transformed;
 using boost::transform;
 using namespace boost::phoenix;
@@ -344,10 +346,17 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
 /// wasn't actually reached.
 behavioral_score discriminating_bscore::best_possible_bscore() const
 {
-    // create a list, maintained in sorted order.
-    typedef std::multimap<contin_t, std::pair<contin_t, // variable
-                                              contin_t> // fixed
-                          > max_vary_t;
+    // create a list, maintained in sorted order by the best row
+    // (meaning the row that contributes the most to the overall
+    // score). We keep sum positive/negative of that row to not have
+    // to recompute it again.
+    typedef std::tuple<contin_t, // row's sum positive
+                       contin_t, // row's sum negative
+                       unsigned> // row's count
+        pos_neg_cnt;
+
+    typedef std::multimap<contin_t, pos_neg_cnt> max_vary_t;
+
     max_vary_t max_vary;
     for (CTable::const_iterator it = _ctable.begin(); it != _ctable.end(); ++it)
     {
@@ -363,53 +372,64 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
         }
 
         contin_t vary = get_variable(sum_pos, sum_neg, total);
-        contin_t fix = get_fixed(sum_pos, sum_neg, total);
 
         logger().fine() << "Disc: total=" << total << " pos=" << sum_pos
-                        << " neg=" << sum_neg << " vary=" << vary
-                        << " fix=" << fix;
-        auto lmnt = std::make_pair(fix, std::make_pair(vary, fix));
-        max_vary.insert(lmnt);
+                        << " neg=" << sum_neg << " vary=" << vary;
+
+        const pos_neg_cnt pnc(sum_pos, sum_neg, total);
+        max_vary.insert({vary, pnc});
     }
 
-    // Sum up the best score, until the minimum fixed threshold is
-    // reached.  This doesn't really give the true best score; its a
-    // rough approximation.  (Doing better than this approximation is
-    // rather hard, requiring extensive calculations over sorted table
-    // entries.  I think this is good enough for the purposes at hand,
-    // which is to obtain a 'best score' at which to stop moses.)
+    // Compute best variable part of the score till minimum fixed part
+    // is reached. It is assumed that once the fixed part is reached
+    // the variable part will only get lower so we can stop doing the
+    // calculation.
     //
-    // XXX I dunno, this is rather confusing, actually, and for certain
-    // pathological datasets, this doesn't really provide the right
-    // answer. This should be fixed.  The problem is that if the inferred
-    // "best score" is too low, moses will stop, when it could have gone
-    // farther, and gottten a better answer.  The manual over-ride to this
-    // is to use the -A flag on moses. 
-    //
-    score_t fix_avg = 1;
-    score_t best_score = 0.0;
-    score_t n = 1;
+    // Then we select the best score obtained (accounting for both
+    // variable and fixed parts).
+    unsigned acc_cnt = 0;
+    contin_t acc_pos = 0.0,     // accumulation of positive
+        acc_neg = 0.0,      // accumulation of negative
+        best_sc = 0.0,      // best score
+        best_vary = 0.0,    // best score varying component
+        best_fixed = 0.0,   // the best score fixed component
+        best_fixation_penalty = 0.0; // best score fixed component penalty
+
     logger().fine() << "Disc: min_thresh=" << _min_threshold;
-    reverse_foreach (const auto& mpv, max_vary) {
-        // Keep an accumulated average
-        score_t avg = ((n-1.0)*fix_avg + mpv.second.second) / n;
-        if (_min_threshold >= avg)
-            break;
 
-        fix_avg = avg;
-        best_score += mpv.second.first;
-        logger().fine() << "Disc: n=" << n << " fix_avg=" << fix_avg
-                        << " score=" << best_score;
-        n++;
+    foreach (const pos_neg_cnt& pnc, max_vary | map_values | reversed) {
+        acc_pos += std::get<0>(pnc);
+        acc_neg += std::get<1>(pnc);
+        acc_cnt += std::get<2>(pnc);
+
+        // compute current score (and its varying and fixed parts)
+        score_t vary = get_variable(acc_pos, acc_neg, acc_cnt),
+            fixed = get_fixed(acc_pos, acc_neg, acc_cnt),
+            fixation_penalty = get_threshold_penalty(fixed),
+            sc = vary + fixation_penalty;
+
+        // update best score (and its varying and fixed parts)
+        if (sc > best_sc) {
+            best_sc = sc;
+            best_vary = vary;
+            best_fixed = fixed;
+            best_fixation_penalty = fixation_penalty;
+        }
+
+        logger().fine() << "Disc: vary=" << vary << " fixed=" << fixed
+                        << " score=" << sc;
+
+        // halt if fixed has reached _min_threshold
+        if (_min_threshold <= fixed)
+            break;
     }
 
-    score_t fixation_penalty = get_threshold_penalty(fix_avg);
+    logger().info("Discriminating scorer, best score = %f", best_sc);
+    logger().info("Discriminating scorer, variable component of best score = %f", best_vary);
+    logger().info("Discriminating scorer, fixed component of best score = %f", best_fixed);
+    logger().info("Discriminating scorer, fixation penalty of best score = %f", best_fixation_penalty);
 
-    logger().info("Discriminating scorer, estimated score at threshold = %f", best_score);
-    logger().info("Discriminating scorer, fixed component at threshold = %f", fix_avg);
-    logger().info("Discriminating scorer, fixation penalty at threshold = %f", fixation_penalty);
-
-    return {best_score, fixation_penalty};
+    return {best_vary, best_fixation_penalty};
 }
 
 score_t discriminating_bscore::min_improv() const
@@ -514,7 +534,7 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
     return pbs;
 }
 
-/// Return the 'approximate' precision for this ctable row.
+/// Return the precision for this ctable row(s).
 ///
 /// Since this scorer is trying to maximize recall while holding
 /// precision fixed, We should return positive values as long as
@@ -525,27 +545,22 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
 /// middle.
 ///
 /// For this ctable row collection, we have that:
-/// pos == true_positives or false_negatives in this ctable row
-/// neg == false_positives or true_negatives in this ctable row
+/// pos == true_positives or false_negatives in this ctable row(s)
+/// neg == false_positives or true_negatives in this ctable row(s)
 /// cnt == pos + neg
 /// How the "best possible model" will score this row depends
 /// on what the precision threshold is.
-///
-/// _positive_total is the total number of rows that are positive.
 score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
     return pos / cnt;
 }
 
-/// Return the recall for this ctable row.
+/// Return the recall for this ctable row(s).
 ///
-/// If we summed over all rows, there would be _postive_total entries
-/// that have a positive answer (and thus totalling to a recal of
-/// exactly 1.0).  This compressed row has exactly 'pos' of those entries.
+/// _positive_total is the total number of rows that are positive.
 score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    contin_t best_possible_recall = pos / _positive_total;
-    return best_possible_recall;
+    return pos / _positive_total;
 }
 
 ///////////////////
@@ -592,22 +607,17 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     return pbs;
 }
 
-/// Return an approximation for the precision that this ctable row 
+/// Return an approximation for the precision that this ctable row(s)
 /// will contribute to the total precision.
 score_t prerec_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    return pos / (cnt * _positive_total);
+    return pos / cnt;
 }
 
-/// Return the best-possible recall for this ctable row.
+/// Return the best-possible recall for this ctable row(s).
 score_t prerec_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    // If this ctable row has any positive entries at all, then any
-    // model that picks it will have perfect recall (1.0) on this row. 
-    // However, since we are sorting on the fixed score, we wnat to
-    // consider rows with negatives in them later, since they'll cause
-    // the precision to drop.
-    return ( 0.0 < pos) ? ((0.0 < neg) ? 0.99999 : 1.0) : 0.0;
+    return pos / _positive_total;
 }
 
 ////////////////
