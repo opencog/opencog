@@ -124,6 +124,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
                                "non-selected features");
                 // Insert exemplar features as they are not pruned
                 sf.second.insert(xmplr_features.begin(), xmplr_features.end());
+                xmplr_seq.push_back(exemplar);
             }
 
             // add the complement of the selected features to ignore_ops
