@@ -385,19 +385,27 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
  * Helper function for inserting arguments into a tree of logical
  * operators.  If the argument is of boolean type, then just insert it.
  * If it is of contin type, wrap it up into a predicate, and insert that.
+ *
+ * WARNING: if negate is true arg might be negated
  */
 void build_knobs::insert_typed_arg(combo_tree &tr,
                                    type_tree_sib_it arg_type,
-                                   argument &arg)
+                                   argument &arg,
+                                   bool negate)
 {
     if (*arg_type == id::boolean_type)
     {
+        if (negate)
+            arg.negate();
         tr.append_child(tr.begin(), arg);
     }
     else if (permitted_op(id::greater_than_zero) &&
          (*arg_type == id::contin_type))
     {
-        pre_it gt = tr.append_child(tr.begin(), id::greater_than_zero);
+        pre_it root = tr.begin();
+        if (negate)             // insert not
+            root = tr.append_child(root, id::logical_not);
+        pre_it gt = tr.append_child(root, id::greater_than_zero);
         tr.append_child(gt, arg);
     }
 }
@@ -422,6 +430,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     // An argument can be a subtree if it's boolean.
     // If its a contin, then wrap it with "greater_than_zero".
     type_tree_sib_it arg_type = _signature.begin(_signature.begin());  // first child
+
     foreach (int i, from_one(_arity))
     {
         vertex arg = argument(i);
@@ -457,7 +466,6 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     unsigned int n_pairs =
         _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
     dorepeat (n_pairs) {
-        combo_tree v(swap_and_or(*it));
         int x = randpair();
         int a = x / (_arity - 1);
         int b = x - a * (_arity - 1);
@@ -467,16 +475,18 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         argument arg_b(1 + b);
         argument arg_a(1 + a);
 
-        // Get the types of arguments a and b.
-        // Why doesn't the below just work?
-        // type_tree_sib_it type_a = arg_types + a;
-        // type_tree_sib_it type_b = arg_types + b;
-        type_tree_sib_it type_a = arg_types;
-        type_tree_sib_it type_b = arg_types;
-        type_a += a;
-        type_b += b;
-
         if (permitted_op(arg_a) && permitted_op(arg_b)) {
+            combo_tree v(swap_and_or(*it));
+
+            // Get the types of arguments a and b.
+            // Why doesn't the below just work?
+            // type_tree_sib_it type_a = arg_types + a;
+            // type_tree_sib_it type_b = arg_types + b;
+            type_tree_sib_it type_a = arg_types;
+            type_tree_sib_it type_b = arg_types;
+            type_a += a;
+            type_b += b;
+
             if (b < a) {
                 insert_typed_arg(v, type_b, arg_b);
                 insert_typed_arg(v, type_a, arg_a);
@@ -485,18 +495,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
                 // As above, but negate arg_a first. So we just
                 // inline-expand insert_typed_arg and put a logical
                 // not in front of it.
-                if (*type_a == id::boolean_type)
-                {
-                    arg_a.negate();
-                    v.append_child(v.begin(), arg_a);
-                }
-                else if (permitted_op(id::greater_than_zero) &&
-                     (*type_a == id::contin_type))
-                {
-                    pre_it nt = v.append_child(v.begin(), id::logical_not);
-                    pre_it gt = v.append_child(nt, id::greater_than_zero);
-                    v.append_child(gt, arg_a);
-                }
+                insert_typed_arg(v, type_a, arg_a, true /* negate */);
                 insert_typed_arg(v, type_b, arg_b);
             }
             perms.push_back(v);

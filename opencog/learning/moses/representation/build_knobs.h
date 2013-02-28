@@ -129,8 +129,10 @@ protected:
     void sample_logical_perms(combo_tree::iterator it,
                               vector<combo_tree>& perms);
 
+    // WARNING: arg can be changed (negated if negate is true)
     void insert_typed_arg(combo_tree &tr,
-                          type_tree_sib_it arg_type, argument &arg);
+                          type_tree_sib_it arg_type, argument &arg,
+                          bool negate = false);
 
     // ------------------------------------------------------
     /**
