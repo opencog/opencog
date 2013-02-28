@@ -388,7 +388,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     // Then we select the best score obtained (accounting for both
     // variable and fixed parts).
     unsigned acc_cnt = 0;
-    contin_t acc_pos = 0.0,     // accumulation of positive
+    score_t acc_pos = 0.0,     // accumulation of positive
         acc_neg = 0.0,      // accumulation of negative
         best_sc = 0.0,      // best score
         best_vary = 0.0,    // best score varying component
