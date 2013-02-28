@@ -61,6 +61,31 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
     return tr;
 }
 
+vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
+{
+    vector<string> res(pa.combo_programs);     // from command line
+    
+    // from a file
+    if (!pa.combo_programs_file.empty()) {
+        ifstream in(pa.combo_programs_file.c_str());
+        if (in) {
+            while (in.good()) {
+                string line;
+                getline(in, line);
+                if(line.empty())
+                    continue;
+                res += line;
+            }
+        } else {
+            logger().error("Error: file %s can not be found.",
+                           pa.combo_programs_file.c_str());
+            exit(1);
+        }
+    }
+
+    return res;
+}
+
 /**
  * Program to evaluate a combo program over a data set repsented as csv file.
  */
