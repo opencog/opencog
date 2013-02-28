@@ -1,12 +1,12 @@
 __author__ = 'keyvan&ramin'
 
 from opencog.atomspace import AtomSpace, TruthValue
-import reader
+import quad_reader
 
 DEFAULT_TV = TruthValue(1,1)
 
 def map_from_path(quad_dump_path, atomspace):
-    quads = reader.extract_quads(quad_dump_path)
+    quads = quad_reader.extract_quads(quad_dump_path)
     for quad in quads:
         try:
             value = int(quad.value)
