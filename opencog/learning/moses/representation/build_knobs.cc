@@ -386,18 +386,19 @@ bool build_knobs::disc_probe(pre_it subtree, disc_knob_base& kb) const
  * operators.  If the argument is of boolean type, then just insert it.
  * If it is of contin type, wrap it up into a predicate, and insert that.
  *
- * WARNING: if negate is true arg might be negated
+ * If negate is true the argument or the predicate if any is negated.
  */
 void build_knobs::insert_typed_arg(combo_tree &tr,
                                    type_tree_sib_it arg_type,
-                                   argument &arg,
+                                   const argument &arg,
                                    bool negate)
 {
     if (*arg_type == id::boolean_type)
     {
+        argument cpy_arg(arg);
         if (negate)
-            arg.negate();
-        tr.append_child(tr.begin(), arg);
+            cpy_arg.negate();
+        tr.append_child(tr.begin(), cpy_arg);
     }
     else if (permitted_op(id::greater_than_zero) &&
          (*arg_type == id::contin_type))
@@ -449,57 +450,62 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         }
         arg_type++;
     }
+    unsigned ps = perms.size(); // the actual number of arguments to consider
 
     // Also create n random pairs op($i $j) out of the total number
     // 2 * choose(n,2) == n * (n-1) of possible pairs.
 
+    // Generate all permitted permutations of 2 arguments. This code
+    // is very expensive when the number of permitted arguments is
+    // large (hundreds) but when that is the case (no feature
+    // selection is used) representation building is insanely
+    // expensive anyway.
+    type_tree_sib_it arg_types = _signature.begin(_signature.begin());  // first
+                                                                        // child
+    vector<combo_tree> permitted_perms;
+    for (arity_t a = 0; a < _arity; a++) {
+        // Get the argument a and its type
+        argument arg_a(a + 1);
+        type_tree_sib_it type_a = std::next(arg_types, a);
+        if (permitted_op(arg_a)) {
+            for (arity_t b = 0; b < _arity; b++) {
+                // Get the argument b and its type
+                argument arg_b(b + 1);
+                type_tree_sib_it type_b = std::next(arg_types, b);
+                if (permitted_op(arg_b) and a != b) {
+                    // Permitted permutation
+                    combo_tree perm(swap_and_or(*it));
+                    if (b < a) {
+                        insert_typed_arg(perm, type_b, arg_b);
+                        insert_typed_arg(perm, type_a, arg_a);
+                    } else {
+                        // As above, but negate arg_a first. So we just
+                        // inline-expand insert_typed_arg and put a logical
+                        // not in front of it.
+                        insert_typed_arg(perm, type_a, arg_a, true /* negate */);
+                        insert_typed_arg(perm, type_b, arg_b);
+                    }
+                    permitted_perms.push_back(perm);
+                }
+            }
+        }
+    }
+
     // TODO: should bias the selection of these, so that
     // larger subtrees are preferred .. !? why?
-    unsigned int max_pairs = _arity * (_arity - 1);
-    if (max_pairs <= 0)
+
+    unsigned max_pairs = permitted_perms.size();
+    if (max_pairs == 0)
         return;
 
-    type_tree_sib_it arg_types = _signature.begin(_signature.begin());  // first child
     lazy_random_selector randpair(max_pairs);
 
     // Actual number of pairs to create ...
-    unsigned int n_pairs =
-        _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
+    unsigned n_pairs =
+        ps + static_cast<unsigned int>(_perm_ratio * (max_pairs - ps));
     dorepeat (n_pairs) {
-        int x = randpair();
-        int a = x / (_arity - 1);
-        int b = x - a * (_arity - 1);
-        if (b == a)
-            b = _arity - 1;
-
-        argument arg_b(1 + b);
-        argument arg_a(1 + a);
-
-        if (permitted_op(arg_a) && permitted_op(arg_b)) {
-            combo_tree v(swap_and_or(*it));
-
-            // Get the types of arguments a and b.
-            // Why doesn't the below just work?
-            // type_tree_sib_it type_a = arg_types + a;
-            // type_tree_sib_it type_b = arg_types + b;
-            type_tree_sib_it type_a = arg_types;
-            type_tree_sib_it type_b = arg_types;
-            type_a += a;
-            type_b += b;
-
-            if (b < a) {
-                insert_typed_arg(v, type_b, arg_b);
-                insert_typed_arg(v, type_a, arg_a);
-
-            } else {
-                // As above, but negate arg_a first. So we just
-                // inline-expand insert_typed_arg and put a logical
-                // not in front of it.
-                insert_typed_arg(v, type_a, arg_a, true /* negate */);
-                insert_typed_arg(v, type_b, arg_b);
-            }
-            perms.push_back(v);
-        }
+        unsigned i = randpair();
+        perms.push_back(permitted_perms[i]);
     }
 
     if (logger().isFineEnabled())
