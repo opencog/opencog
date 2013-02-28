@@ -159,6 +159,9 @@ struct fs_scorer : public unary_function<FeatureSet, double>
                                            fs_params.pre_min_activation,
                                            fs_params.pre_max_activation,
                                            fs_params.pre_positive);
+        } else {
+            OC_ASSERT(false, "Unknown feature selection scorer %s",
+                      fs_params.scorer.c_str());
         }
     }
     ~fs_scorer() {
