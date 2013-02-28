@@ -106,11 +106,13 @@ int main(int argc,char** argv) {
         
         (opt_desc_str(input_table_opt).c_str(),
          value<string>(&pa.input_table_file),
-         "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
+         "Input table file in DSV format (seperators are comma, "
+         "whitespace and tabulation).\n")
         
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature_str),
-         "Target feature name.\n")
+         "Target feature name. If empty (default) then no target feature "
+         "is considered and the table is assumed to be all input data.\n")
         
         (opt_desc_str(ignore_feature_str_opt).c_str(),
          value<vector<string>>(&pa.ignore_features_str),
