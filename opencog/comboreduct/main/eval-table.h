@@ -121,24 +121,7 @@ void eval_output_results(const evalTableParameters& pa,
 /**
  * Get all combo tree strings, from the command line and the files
  */
-vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
-{
-    vector<string> res(pa.combo_programs);     // from command line
-    
-    // from a file
-    if (!pa.combo_programs_file.empty()) {
-        ifstream in(pa.combo_programs_file.c_str());
-        while(in.good()) {
-            string line;
-            getline(in, line);
-            if(line.empty())
-                continue;
-            res += line;
-        }
-    }
-
-    return res;
-}
+vector<string> get_all_combo_tree_str(const evalTableParameters& pa);
 
 void read_eval_output_results(evalTableParameters& pa)
 {
