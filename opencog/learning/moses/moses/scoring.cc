@@ -292,14 +292,14 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
 /////////////////////////
 
 discriminating_bscore::discriminating_bscore(const CTable& ct,
-                  float min_threshold,
-                  float max_threshold,
-                  float hardness) 
+                                             float min_threshold,
+                                             float max_threshold,
+                                             float hardness)
     : discriminator(ct),
-    _ctable_usize(ct.uncompressed_size()),
-    _min_threshold(min_threshold),
-    _max_threshold(max_threshold),
-    _hardness(hardness)
+      _ctable_usize(ct.uncompressed_size()),
+      _min_threshold(min_threshold),
+      _max_threshold(max_threshold),
+      _hardness(hardness)
 {
     logger().info("Discriminating scorer, hardness = %f, "
                   "min_threshold = %f, "
