@@ -233,7 +233,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     // Select the top params.n_demes feature sets
     feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
 
-    return sf_pop;
+    return top_sfs;
 }
 
 csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& fs_pop) const {
