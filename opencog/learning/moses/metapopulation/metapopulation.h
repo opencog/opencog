@@ -44,9 +44,10 @@
 #include "../representation/instance_set.h"
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
+#include "../moses/scoring.h"
+#include "../moses/types.h"
+#include "deme_expander.h"
 #include "feature_selector.h"
-#include "scoring.h"
-#include "types.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -63,228 +64,7 @@ using boost::logic::tribool;
 using boost::logic::indeterminate;
 using namespace combo;
 
-static const operator_set empty_ignore_ops = operator_set();
-
-struct diversity_parameters
-{
-    typedef score_t dp_t;
-
-    diversity_parameters(bool _include_dominated = true);
-
-    // Ignore behavioral score domination when merging candidates in
-    // the metapopulation. Keeping dominated candidates may improves
-    // performance by avoiding local maxima. Discarding dominated
-    // candidates may increase the diversity of the metapopulation.
-    bool include_dominated;
-
-    // Diversity pressure of to enforce diversification of the
-    // metapop. 0 means no diversity pressure, the higher the value
-    // the strong the pressure.
-    dp_t pressure;
-
-    // exponent of the generalized mean (or sum, see below) used to
-    // aggregate the diversity penalties of a candidate between a set
-    // of candidates. If the exponent is negative (default) then the
-    // max is used instead (generalized mean with infinite exponent).
-    dp_t exponent;
-
-    // If normalize is false then the aggregation of diversity
-    // penalties is a generalize mean, otherwise it is a generalize
-    // sum, defined here as
-    //
-    // generalized_mean(X) * |X|
-    //
-    // in other words it is a generalized mean without normalization
-    // by the number of elements.
-    //
-    // If diversity_exponent is negative then this has no effect, it
-    // is the max anyway.
-    bool normalize;
-
-    // There are 3 distances available to compare bscores, the p-norm,
-    // the Tanimoto and the angular distances.
-    enum dst_enum_t { p_norm, tanimoto, angular };
-    void set_dst(dst_enum_t de, dp_t p = 0.0 /* optional distance parameter */);
-    std::function<dp_t(const behavioral_score&, const behavioral_score&)> dst;
-
-    // Function to convert the distance into diversity penalty. There
-    // are 2 possible functions
-    //
-    // The inserve (offset by 1)
-    //
-    // f(x) = pressure / (1+x)
-    //
-    // The complement
-    //
-    // f-x) = pressure * (1-x)
-    //
-    // The idea is that it should tend to pressure when the distance
-    // tends to 0, and tends to 0 when the distance tends to its
-    // maximum. Obviously the inverse is adequate when the maximum is
-    // infinity and the complement is adequate when it is 1.
-    enum dst2dp_enum_t { inverse, complement };
-    void set_dst2dp(dst2dp_enum_t d2de);
-    std::function<dp_t(dp_t)> dst2dp;
-};
-
-/**
- * parameters about deme management
- */
-struct metapop_parameters
-{
-    metapop_parameters(int _max_candidates = -1,
-                       bool _reduce_all = true,
-                       bool _revisit = false,
-                       score_t _complexity_temperature = 3.0f,
-                       const operator_set& _ignore_ops = empty_ignore_ops,
-                       // bool _enable_cache = false,    // adaptive_cache
-                       unsigned _cache_size = 100000,     // is disabled
-                       unsigned _jobs = 1,
-                       diversity_parameters _diversity = diversity_parameters(),
-                       const combo_tree_ns_set* _perceptions = NULL,
-                       const combo_tree_ns_set* _actions = NULL,
-                       const feature_selector* _fstor = NULL) :
-        max_candidates(_max_candidates),
-        reduce_all(_reduce_all),
-        revisit(_revisit),
-        keep_bscore(false),
-        complexity_temperature(_complexity_temperature),
-        cap_coef(50),
-        ignore_ops(_ignore_ops),
-        // enable_cache(_enable_cache),   // adaptive_cache
-        cache_size(_cache_size),          // is disabled
-        jobs(_jobs),
-        diversity(_diversity),
-        perceptions(_perceptions),
-        actions(_actions),
-        merge_callback(NULL),
-        callback_user_data(NULL),
-        fstor(_fstor),
-        linear_contin(true)
-        {}
-
-    // The max number of candidates considered to be added to the
-    // metapopulation, if negative then all candidates are considered.
-    int max_candidates;
-
-    // If true then all candidates are reduced before evaluation.
-    bool reduce_all;
-
-    // When true then visited exemplars can be revisited.
-    bool revisit;
-
-    // keep track of the bscores even if not needed (in case the user
-    // wants to keep them around)
-    bool keep_bscore;
-
-    // Boltzmann temperature ...
-    score_t complexity_temperature;
-
-    // The metapopulation size is capped according to the following
-    // formula:
-    //
-    // cap = cap_coef*(x+250)*(1+2*exp(-x/500))
-    //
-    // where x is the number of generations so far
-    double cap_coef;
-
-    // the set of operators to ignore
-    operator_set ignore_ops;
-
-    // Enable caching of scores.
-    // bool enable_cache;   // adaptive_cache
-    unsigned cache_size;    // is disabled
-
-    // Number of jobs for metapopulation maintenance such as merging
-    // candidates to the metapopulation.
-    unsigned jobs;
-
-    // parameters to control diversity
-    diversity_parameters diversity;
-
-    // the set of perceptions of an optional interactive agent
-    const combo_tree_ns_set* perceptions;
-    // the set of actions of an optional interactive agent
-    const combo_tree_ns_set* actions;
-
-    bool (*merge_callback)(bscored_combo_tree_set&, void*);
-    void *callback_user_data;
-
-    const feature_selector* fstor;
-
-    // Build only linear expressions involving contin features.
-    // This can greatly decrease the number of knobs created during
-    // representation building, resulting in much smaller field sets,
-    // and instances that can be searched more quickly. However, in
-    // order to fit the data, linear expressions may not be as good,
-    // and thus may require more time overall to find...
-    bool linear_contin;
-};
-
 void print_stats_header (optim_stats *os, bool diversity_enabled);
-
-struct deme_expander
-{
-    typedef deme_t::iterator deme_it;
-    typedef deme_t::const_iterator deme_cit;
-
-    deme_expander(const type_tree& type_signature,
-                  const reduct::rule& si_ca,
-                  const reduct::rule& si_kb,
-                  const cscore_base& sc,
-                  optimizer_base& opt,
-                  const metapop_parameters& pa = metapop_parameters()) :
-        _rep(NULL), _deme(NULL),
-        _optimize(opt),
-        _type_sig(type_signature),
-        simplify_candidate(si_ca),
-        simplify_knob_building(si_kb),
-        _cscorer(sc),
-        _params(pa)
-    {}
-
-    ~deme_expander()
-    {
-        if (_rep) delete _rep;
-        if (_deme) delete _deme;
-    }
-
-    /**
-     * Create the deme
-     *
-     * @return return true if it creates deme successfully,otherwise false.
-     */
-    // bool create_deme(bscored_combo_tree_set::const_iterator exemplar)
-    bool create_deme(const combo_tree& exemplar);
-
-    /**
-     * Do some optimization according to the scoring function.
-     *
-     * @param max_evals the maximum number of evaluations of the scoring
-     *                  function to perform.
-     * @param max_time the maximum elapsed (wall-clock) time to allow.
-     *
-     * @return return the number of evaluations actually performed,
-     */
-    int optimize_deme(int max_evals, time_t max_time);
-
-    void free_deme();
-
-    // Structures related to the current deme
-    representation* _rep; // representation of the current deme
-    deme_t* _deme; // current deme
-    optimizer_base &_optimize;
-
-protected:
-    const combo::type_tree& _type_sig;    // type signature of the exemplar
-    const reduct::rule& simplify_candidate; // to simplify candidates
-    const reduct::rule& simplify_knob_building; // during knob building
-    const cscore_base& _cscorer; // composite score
-    metapop_parameters _params;
-
-    // exemplar of the current deme; a copy, not a reference.
-    combo_tree _exemplar;
-};
 
 /**
  * The metapopulation will store the expressions (as scored trees)
@@ -300,7 +80,7 @@ protected:
  *   cscore_base = scoring function (output composite scores)
  *   bscore_base = behavioral scoring function (output behaviors)
  */
-struct metapopulation : bscored_combo_tree_ptr_set
+struct metapopulation : pbscored_combo_tree_ptr_set
 {
     typedef deme_t::iterator deme_it;
     typedef deme_t::const_iterator deme_cit;
@@ -309,6 +89,8 @@ struct metapopulation : bscored_combo_tree_ptr_set
     // to see if a combo tree is in the set, or not.
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
+    typedef boost::unordered_map<combo_tree, unsigned,
+                                 boost::hash<combo_tree> > combo_tree_hash_counter;
 
     // Init the metapopulation with the following set of exemplars.
     void init(const std::vector<combo_tree>& exemplars,
@@ -434,7 +216,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * XXX The implementation here results in a lot of copying of
      * behavioral scores and combo trees, and thus could hurt
      * performance by quite a bit.  To avoid this, we'd need to change
-     * the use of bscored_combo_tree_set in this class. This would be
+     * the use of pbscored_combo_tree_set in this class. This would be
      * a fairly big task, and it's currently not clear that its worth
      * the effort, as diversity_penalty is not yet showing promising
      * results...
@@ -459,7 +241,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * @return the iterator of the selected exemplar, if no such
      *         exemplar exists then return end()
      */
-    bscored_combo_tree_ptr_set::const_iterator select_exemplar();
+    pbscored_combo_tree_ptr_set::const_iterator select_exemplar();
 
     /// Given the current complexity temp, return the range of scores that
     /// are likely to be selected by the select_exemplar routine. Due to
@@ -482,10 +264,10 @@ struct metapopulation : bscored_combo_tree_ptr_set
     /// Safe to call in a multi-threaded context.
     ///
     /// @todo it would probably be more efficient to use
-    /// bscored_combo_tree_ptr_set and not having to copy and
+    /// pbscored_combo_tree_ptr_set and not having to copy and
     /// reallocate candidates onces they are selected. It might be
     /// minor though in terms of performance gain.
-    void merge_candidates(bscored_combo_tree_set& candidates);
+    void merge_candidates(pbscored_combo_tree_set& candidates);
 
     /**
      * merge deme -- convert instances to trees, and save them.
@@ -501,7 +283,10 @@ struct metapopulation : bscored_combo_tree_ptr_set
      * _visited_exemplars is not yet protected. There may be other
      * things.
      */
-    bool merge_deme(deme_t* __deme, representation* __rep, size_t evals);
+    bool merge_demes(boost::ptr_vector<deme_t>& demes,
+                     const boost::ptr_vector<representation>& reps,
+                     const std::vector<unsigned>& evals_seq,
+                     const std::vector<demeID_t>& demeIDs);
 
     /**
      * Weed out excessively bad scores. The select_exemplar() routine
@@ -529,37 +314,37 @@ struct metapopulation : bscored_combo_tree_ptr_set
     // Return the set of candidates not present in the metapopulation.
     // This makes merging faster because it decreases the number of
     // calls of dominates.
-    bscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs);
+    pbscored_combo_tree_set get_new_candidates(const metapop_candidates& mcs);
 
-    typedef pair<bscored_combo_tree_set,
-                 bscored_combo_tree_set> bscored_combo_tree_set_pair;
+    typedef pair<pbscored_combo_tree_set,
+                 pbscored_combo_tree_set> pbscored_combo_tree_set_pair;
 
-    typedef std::vector<const bscored_combo_tree*> bscored_combo_tree_ptr_vec;
-    typedef bscored_combo_tree_ptr_vec::iterator bscored_combo_tree_ptr_vec_it;
-    typedef bscored_combo_tree_ptr_vec::const_iterator bscored_combo_tree_ptr_vec_cit;
-    typedef pair<bscored_combo_tree_ptr_vec,
-                 bscored_combo_tree_ptr_vec> bscored_combo_tree_ptr_vec_pair;
+    typedef std::vector<const pbscored_combo_tree*> pbscored_combo_tree_ptr_vec;
+    typedef pbscored_combo_tree_ptr_vec::iterator pbscored_combo_tree_ptr_vec_it;
+    typedef pbscored_combo_tree_ptr_vec::const_iterator pbscored_combo_tree_ptr_vec_cit;
+    typedef pair<pbscored_combo_tree_ptr_vec,
+                 pbscored_combo_tree_ptr_vec> pbscored_combo_tree_ptr_vec_pair;
 
     // reciprocal of random_access_view
-    static bscored_combo_tree_set
-    to_set(const bscored_combo_tree_ptr_vec& bcv);
+    static pbscored_combo_tree_set
+    to_set(const pbscored_combo_tree_ptr_vec& bcv);
 
-    void remove_dominated(bscored_combo_tree_set& bcs, unsigned jobs = 1);
+    void remove_dominated(pbscored_combo_tree_set& bcs, unsigned jobs = 1);
 
-    static bscored_combo_tree_set
-    get_nondominated_iter(const bscored_combo_tree_set& bcs);
+    static pbscored_combo_tree_set
+    get_nondominated_iter(const pbscored_combo_tree_set& bcs);
 
     // split in 2 of equal size
-    static bscored_combo_tree_ptr_vec_pair
-    inline split(const bscored_combo_tree_ptr_vec& bcv)
+    static pbscored_combo_tree_ptr_vec_pair
+    inline split(const pbscored_combo_tree_ptr_vec& bcv)
     {
-        bscored_combo_tree_ptr_vec_cit middle = bcv.begin() + bcv.size() / 2;
-        return make_pair(bscored_combo_tree_ptr_vec(bcv.begin(), middle),
-                         bscored_combo_tree_ptr_vec(middle, bcv.end()));
+        pbscored_combo_tree_ptr_vec_cit middle = bcv.begin() + bcv.size() / 2;
+        return make_pair(pbscored_combo_tree_ptr_vec(bcv.begin(), middle),
+                         pbscored_combo_tree_ptr_vec(middle, bcv.end()));
     }
 
-    bscored_combo_tree_ptr_vec
-    get_nondominated_rec(const bscored_combo_tree_ptr_vec& bcv,
+    pbscored_combo_tree_ptr_vec
+    get_nondominated_rec(const pbscored_combo_tree_ptr_vec& bcv,
                          unsigned jobs = 1);
 
     // return a pair of sets of nondominated candidates between bcs1
@@ -569,22 +354,19 @@ struct metapopulation : bscored_combo_tree_ptr_set
     // they are used in the code. The first (resp. second) element of
     // the pair corresponds to the nondominated candidates of bcs1
     // (resp. bcs2)
-    bscored_combo_tree_set_pair
-    get_nondominated_disjoint(const bscored_combo_tree_set& bcs1,
-                              const bscored_combo_tree_set& bcs2,
+    pbscored_combo_tree_set_pair
+    get_nondominated_disjoint(const pbscored_combo_tree_set& bcs1,
+                              const pbscored_combo_tree_set& bcs2,
                               unsigned jobs = 1);
 
-    bscored_combo_tree_ptr_vec_pair
-    get_nondominated_disjoint_rec(const bscored_combo_tree_ptr_vec& bcv1,
-                                  const bscored_combo_tree_ptr_vec& bcv2,
+    pbscored_combo_tree_ptr_vec_pair
+    get_nondominated_disjoint_rec(const pbscored_combo_tree_ptr_vec& bcv1,
+                                  const pbscored_combo_tree_ptr_vec& bcv2,
                                   unsigned jobs = 1);
 
     // merge nondominated candidate to the metapopulation assuming
     // that bcs contains no dominated candidates within itself
-    void merge_nondominated(bscored_combo_tree_set& bcs, unsigned jobs = 1);
-
-    // Iterative version of merge_nondominated
-    void merge_nondominated_iter(bscored_combo_tree_set& bcs);
+    void merge_nondominated(const pbscored_combo_tree_set& bcs, unsigned jobs = 1);
 
     /**
      * x dominates y if
@@ -628,7 +410,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
 
     /// Update the record of the best score seen, and the associated tree.
     /// Safe to call in a multi-threaded context.
-    void update_best_candidates(const bscored_combo_tree_set& candidates);
+    void update_best_candidates(const pbscored_combo_tree_set& candidates);
 
     // log the best candidates
     void log_best_candidates() const;
@@ -652,11 +434,12 @@ struct metapopulation : bscored_combo_tree_ptr_set
     {
         if (!output_only_best) {
             for (; from != to && n != 0; ++from, n--) {
-                ostream_bscored_combo_tree(out, *from, output_score,
+                ostream_pbscored_combo_tree(out, *from, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
-                    out << "visited: " << has_been_visited(*from) << std::endl;
+                    out << "visited: " << has_been_visited(get_tree(*from))
+                        << std::endl;
             }
             return out;
         }
@@ -665,7 +448,7 @@ struct metapopulation : bscored_combo_tree_ptr_set
         score_t best_score = very_worst_score;
 
         for (In f = from; f != to; ++f) {
-            const bscored_combo_tree& bt = *f;
+            const pbscored_combo_tree& bt = *f;
             score_t sc = get_score(bt);
             if (best_score < sc) best_score = sc;
         }
@@ -675,13 +458,14 @@ struct metapopulation : bscored_combo_tree_ptr_set
         // necessarily ranked highest, as the ranking is a linear combo
         // of both score and complexity.
         for (In f = from; f != to && n != 0; ++f, n--) {
-            const bscored_combo_tree& bt = *f;
+            const pbscored_combo_tree& bt = *f;
             if (best_score <= get_score(bt)) {
-                ostream_bscored_combo_tree(out, bt, output_score,
+                ostream_pbscored_combo_tree(out, bt, output_score,
                                            output_penalty, output_bscore,
                                            output_python);
                 if (output_visited)
-                    out << "visited:" << has_been_visited(*from) << std::endl;
+                    out << "visited:" << has_been_visited(get_tree(*from))
+                        << std::endl;
             }
         }
         return out;
@@ -790,7 +574,8 @@ protected:
     metapop_candidates _best_candidates;
 
     // contains the exemplars of demes that have been searched so far
-    combo_tree_hash_set _visited_exemplars;
+    // (and the number of times they have been searched)
+    combo_tree_hash_counter _visited_exemplars;
 
     // return true iff tr has already been visited
     bool has_been_visited(const combo_tree& tr) const;
@@ -800,7 +585,7 @@ protected:
 
     /**
      * Cache for bscore distance between (for diversity penalty). Maps
-     * a std::set<bscored_combo_tree*> (only 2 elements to represent
+     * a std::set<pbscored_combo_tree*> (only 2 elements to represent
      * an unordered pair) to a a bscore distance. We don't use
      * {lru,prr}_cache because
      *
@@ -815,8 +600,8 @@ protected:
 
         // We use a std::set instead of a std::pair, little
         // optimization to deal with the symmetry of the distance
-        typedef std::set<const bscored_combo_tree*> ptr_pair;
-        dp_t operator()(const bscored_combo_tree* cl, const bscored_combo_tree* cr)
+        typedef std::set<const pbscored_combo_tree*> ptr_pair;
+        dp_t operator()(const pbscored_combo_tree* cl, const pbscored_combo_tree* cr)
         {
 #ifdef ENABLE_DST_CACHE
             ptr_pair cts = {cl, cr};
@@ -849,7 +634,7 @@ protected:
         /**
          * Remove all keys containing any element of ptr_seq
          */
-        void erase_ptr_seq(std::vector<bscored_combo_tree*> ptr_seq) {
+        void erase_ptr_seq(std::vector<pbscored_combo_tree*> ptr_seq) {
 #ifdef ENABLE_DST_CACHE
             for (Cache::iterator it = cache.begin(); it != cache.end();) {
                 if (!is_disjoint(ptr_seq, it->first))

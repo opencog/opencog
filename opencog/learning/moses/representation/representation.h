@@ -41,6 +41,11 @@ void set_expansion(double new_ex);
 void set_depth(int new_depth);
 
 /**
+ * determine the initial exemplar given its output type
+ */
+combo_tree type_to_exemplar(type_node type);
+        
+/**
  * Do the representation-building, create a field_set
  */
 struct representation : public knob_mapper, boost::noncopyable
@@ -48,7 +53,6 @@ struct representation : public knob_mapper, boost::noncopyable
     typedef std::set<combo::vertex> operator_set;
     typedef std::set<combo::combo_tree, size_tree_order<combo::vertex> >
     combo_tree_ns_set;
-
 
     // Optional arguments are used only for actions/Petbrain
     representation(const reduct::rule& simplify_candidate,
@@ -58,8 +62,8 @@ struct representation : public knob_mapper, boost::noncopyable
                    const operator_set& ignore_ops = operator_set(),
                    const combo_tree_ns_set* perceptions = NULL,
                    const combo_tree_ns_set* actions = NULL,
-                   bool linear_contin = true);
-
+                   bool linear_contin = true,
+                   float perm_ratio = 0.0);
 
     /**
      * Turn the knobs on this representation, so that they have the same

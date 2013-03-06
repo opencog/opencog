@@ -27,7 +27,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include "../optimization/hill-climbing.h"
-#include "metapopulation.h"
+#include "../metapopulation/metapopulation.h"
 #include "moses_main.h"
 
 namespace opencog { namespace moses {
@@ -80,14 +80,14 @@ class partial_solver
                 refresh(metapop);
         }
 
-        static bool check_candidates(bscored_combo_tree_set& cands, void *ud)
+        static bool check_candidates(pbscored_combo_tree_set& cands, void *ud)
         {
             partial_solver *ps = (partial_solver *) ud;
             return ps->eval_candidates(cands);
         }
 
     protected:
-        bool eval_candidates(const bscored_combo_tree_set&);
+        bool eval_candidates(const pbscored_combo_tree_set&);
         void eval_candidate(const combo_tree&);
         void record_prefix();
         void effective(combo_tree::iterator,
@@ -97,9 +97,9 @@ class partial_solver
                         const combo_tree::iterator,
                         unsigned& deleted,   // return value
                         unsigned& total);    // return value
-        void refresh(const bscored_combo_tree_ptr_set&);
+        void refresh(const pbscored_combo_tree_ptr_set&);
 
-        void final_cleanup(const bscored_combo_tree_ptr_set&);
+        void final_cleanup(const pbscored_combo_tree_ptr_set&);
     private:
 
         // Copy, more or less, or arguments, so that moses

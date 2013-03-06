@@ -235,9 +235,9 @@ private:
 // @todo: it is probability not a good behavioral_score
 struct ant_bscore : public bscore_base
 {
-    penalized_behavioral_score operator()(const combo_tree& tr) const
+    penalized_bscore operator()(const combo_tree& tr) const
     {
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first.push_back(get_score(ant_score()(tr)));
         pbs.second = tr.size();
 
@@ -246,10 +246,7 @@ struct ant_bscore : public bscore_base
 
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
-        pbs.first.push_back(0);
-        pbs.second = 0;
-        return pbs;
+        return {0.0};
     }
 };
 

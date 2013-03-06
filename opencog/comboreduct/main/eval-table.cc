@@ -86,6 +86,98 @@ vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
     return res;
 }
 
+void output_results(const evalTableParameters& pa,
+                    const Table& table, const OTable& ot_tr)
+{
+    if(pa.output_file.empty())
+        output_results(cout, pa, table, ot_tr);
+    else {
+        ofstream of(pa.output_file.c_str());
+        output_results(of, pa, table, ot_tr);
+    }
+}
+
+void eval_output_results(const evalTableParameters& pa,
+                         const Table& table, const vector<combo_tree>& trs)
+{
+    foreach(const combo_tree& tr, trs) {
+        // evaluated tr over input table
+        OTable ot_tr(tr, table.itable);
+        if (!pa.target_feature_str.empty())
+            ot_tr.set_label(pa.target_feature_str);
+        // print results
+        output_results(pa, table, ot_tr);
+    }
+}
+
+void read_eval_output_results(evalTableParameters& pa)
+{
+    ostreamContainer(logger().info() << "Ignore the following features: ",
+                     pa.ignore_features_str);
+    OC_ASSERT(boost::find(pa.ignore_features_str, pa.target_feature_str)
+              == pa.ignore_features_str.end(),
+              "You cannot ignore the target feature %s",
+              pa.target_feature_str.c_str());
+
+    // get all combo tree strings (from command line and file)
+    vector<string> all_combo_tree_str = get_all_combo_tree_str(pa);
+
+    OC_ASSERT(all_combo_tree_str.size() == 1,
+              "Using more than 1 combo, not implemented yet!");
+
+    // parse all variables from all combo tree strings
+    vector<string> all_variables;
+    for (string combo_tree_str : all_combo_tree_str) {
+        vector<string> vars = parse_combo_variables(combo_tree_str);
+        all_variables.insert(all_variables.end(), vars.begin(), vars.end());
+    }
+    set<string> all_unique_variables(all_variables.begin(), all_variables.end());
+
+    /// HERE WE ARE ASSUMING THAT THE INPUT FILE HAS A HEADER!!!
+    vector<string> header = get_header(pa.input_table_file);
+
+    // get (header - all_unique_variables - target feature)
+    vector<string> ignore_variables;
+    for (string f : header)
+        if (f != pa.target_feature_str
+            && all_unique_variables.find(f) == all_unique_variables.end())
+            ignore_variables += f;
+
+    // // read data ITable
+    // Table table;
+    // if (pa.target_feature_str.empty())
+    //     table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
+    // else {
+    //     table = loadTable(pa.input_table_file, pa.target_feature_str,
+    //                       pa.ignore_features_str);
+    // }
+
+    // read data ITable (using ignore_variables)
+    Table table;
+    if (pa.target_feature_str.empty())
+        table.itable = loadITable_optimized(pa.input_table_file, ignore_variables);
+    else {
+        table = loadTable_optimized(pa.input_table_file, pa.target_feature_str,
+                                    ignore_variables);
+    }
+
+    ITable& it = table.itable;
+
+    // parse combo programs
+    vector<combo_tree> trs;
+    for (const string& tr_str : all_combo_tree_str) {
+        combo_tree tr = str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
+        if (logger().isFineEnabled()) {
+            logger().fine() << "Combo str: " << tr_str;
+            logger().fine() << "Parsed combo: " << tr;
+        }
+        trs += tr;
+    }
+
+    // eval and output the results
+    eval_output_results(pa, table, trs);
+}
+
 /**
  * Program to evaluate a combo program over a data set repsented as csv file.
  */
@@ -106,11 +198,13 @@ int main(int argc,char** argv) {
         
         (opt_desc_str(input_table_opt).c_str(),
          value<string>(&pa.input_table_file),
-         "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
+         "Input table file in DSV format (seperators are comma, "
+         "whitespace and tabulation).\n")
         
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature_str),
-         "Target feature name.\n")
+         "Target feature name. If empty (default) then no target feature "
+         "is considered and the table is assumed to be all input data.\n")
         
         (opt_desc_str(ignore_feature_str_opt).c_str(),
          value<vector<string>>(&pa.ignore_features_str),
