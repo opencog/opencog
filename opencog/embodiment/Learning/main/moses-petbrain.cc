@@ -54,15 +54,15 @@ struct interactive_cscore : public cscore_base
 
 struct interactive_bscore : public bscore_base
 {
-    result_type  operator()(const combo_tree& tr) const
+    result_type operator()(const combo_tree& tr) const
     {
         result_type pbs;
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_bscore pbs;
-        return pbs;
+        behavioral_score bs;
+        return bs;
     }
 };
 
