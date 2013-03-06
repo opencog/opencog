@@ -60,7 +60,7 @@ using namespace boost::accumulators;
 
 // helper to log a combo_tree and its behavioral score
 inline void log_candidate_pbscore(const combo_tree& tr,
-                                  const penalized_behavioral_score& pbs)
+                                  const penalized_bscore& pbs)
 {
     if (!logger().isFineEnabled())
         return;
@@ -97,10 +97,10 @@ void bscore_base::set_complexity_coef(score_t complexity_ratio)
 // logical_bscore //
 ////////////////////
         
-penalized_behavioral_score logical_bscore::operator()(const combo_tree& tr) const
+penalized_bscore logical_bscore::operator()(const combo_tree& tr) const
 {
     combo::complete_truth_table tt(tr, arity);
-    penalized_behavioral_score pbs(
+    penalized_bscore pbs(
         make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
 
     boost::transform(tt, target, pbs.first.begin(), [](bool b1, bool b2) {
@@ -132,10 +132,10 @@ score_t contin_complexity_coef(unsigned alphabet_size, double stdev)
     return log(alphabet_size) * 2 * sq(stdev);
 }
 
-penalized_behavioral_score contin_bscore::operator()(const combo_tree& tr) const
+penalized_bscore contin_bscore::operator()(const combo_tree& tr) const
 {
     // OTable target is the table of output we want to get.
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     // boost/range/algorithm/transform.
     // Take the input vectors cit, target, feed the elts to anon
@@ -292,14 +292,14 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
 /////////////////////////
 
 discriminating_bscore::discriminating_bscore(const CTable& ct,
-                  float min_threshold,
-                  float max_threshold,
-                  float hardness) 
+                                             float min_threshold,
+                                             float max_threshold,
+                                             float hardness)
     : discriminator(ct),
-    _ctable_usize(ct.uncompressed_size()),
-    _min_threshold(min_threshold),
-    _max_threshold(max_threshold),
-    _hardness(hardness)
+      _ctable_usize(ct.uncompressed_size()),
+      _min_threshold(min_threshold),
+      _max_threshold(max_threshold),
+      _hardness(hardness)
 {
     logger().info("Discriminating scorer, hardness = %f, "
                   "min_threshold = %f, "
@@ -504,7 +504,7 @@ recall_bscore::recall_bscore(const CTable& ct,
 {
 }
 
-penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
+penalized_bscore recall_bscore::operator()(const combo_tree& tr) const
 {
     d_counts ctr = count(tr);
 
@@ -516,7 +516,7 @@ penalized_behavioral_score recall_bscore::operator()(const combo_tree& tr) const
     score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     // We are maximizing recall, so that is the first part of the score.
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
     pbs.first.push_back(recall);
     
     score_t precision_penalty = get_threshold_penalty(precision);
@@ -577,7 +577,7 @@ prerec_bscore::prerec_bscore(const CTable& ct,
 
 // Nearly identical to recall_bscore, except that the roles of precision
 // and recall are switched.
-penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
+penalized_bscore prerec_bscore::operator()(const combo_tree& tr) const
 {
     d_counts ctr = count(tr);
 
@@ -589,7 +589,7 @@ penalized_behavioral_score prerec_bscore::operator()(const combo_tree& tr) const
     score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
     // We are maximizing recall, so that is the first part of the score.
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
     pbs.first.push_back(precision);
     
     score_t recall_penalty = get_threshold_penalty(recall);
@@ -632,7 +632,7 @@ bep_bscore::bep_bscore(const CTable& ct,
 {
 }
 
-penalized_behavioral_score bep_bscore::operator()(const combo_tree& tr) const
+penalized_bscore bep_bscore::operator()(const combo_tree& tr) const
 {
     d_counts ctr = count(tr);
 
@@ -645,7 +645,7 @@ penalized_behavioral_score bep_bscore::operator()(const combo_tree& tr) const
 
     score_t bep = (precision + recall) / 2;
     // We are maximizing bep, so that is the first part of the score.
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
     pbs.first.push_back(bep);
     
     score_t bep_diff = fabs(precision - recall);
@@ -697,7 +697,7 @@ f_one_bscore::f_one_bscore(const CTable& ct)
 {
 }
 
-penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
+penalized_bscore f_one_bscore::operator()(const combo_tree& tr) const
 {
     d_counts ctr = count(tr);
 
@@ -711,7 +711,7 @@ penalized_behavioral_score f_one_bscore::operator()(const combo_tree& tr) const
     score_t f_one = 2 * precision * recall / (precision + recall);
 
     // We are maximizing f_one, so that is the first part of the score.
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
     pbs.first.push_back(f_one);
     
     if (logger().isFineEnabled()) 
@@ -867,9 +867,9 @@ void precision_bscore::set_complexity_coef(score_t ratio)
     logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
 }
 
-penalized_behavioral_score precision_bscore::operator()(const combo_tree& tr) const
+penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     // associate sum of worst outputs with number of observations for
     // that sum
@@ -983,9 +983,10 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // Also store the sumo and total, so that they don't need to be
     // recomputed later.  Note that this routine could be performance
     // critical if used as a fitness function for feature selection
-    // (which is actually being done).
-    typedef std::multimap<double, std::pair<double, // sum_outputs
-                                              unsigned> // total count
+    // (which is the case).
+    typedef std::multimap<contin_t,           // precision
+                          std::pair<contin_t, // sum_outputs
+                                    unsigned> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
     for (CTable::const_iterator it = ctable.begin();
@@ -1163,9 +1164,9 @@ void precision_conj_bscore::set_complexity_coef(score_t ratio)
     logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
 }
 
-penalized_behavioral_score precision_conj_bscore::operator()(const combo_tree& tr) const
+penalized_bscore precision_conj_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     // compute active and sum of all active outputs
     unsigned active = 0;   // total number of active outputs by tr
@@ -1294,14 +1295,14 @@ size_t discretize_contin_bscore::class_idx_within(contin_t v,
         return class_idx_within(v, m_idx, u_idx);
 }
 
-penalized_behavioral_score discretize_contin_bscore::operator()(const combo_tree& tr) const
+penalized_bscore discretize_contin_bscore::operator()(const combo_tree& tr) const
 {
     /// @todo could be optimized by avoiding computing the OTable and
     /// directly using the results on the fly. On really big table
     /// (dozens of thousands of data points and about 100 inputs, this
     /// has overhead of about 10% of the overall time)
     OTable ct(tr, cit);
-    penalized_behavioral_score pbs(
+    penalized_bscore pbs(
         make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
     boost::transform(ct, classes, pbs.first.begin(), [&](const vertex& v, size_t c_idx) {
             return (c_idx != this->class_idx(get_contin(v))) * this->weights[c_idx];
@@ -1322,11 +1323,11 @@ penalized_behavioral_score discretize_contin_bscore::operator()(const combo_tree
 // ctruth_table_bscore //
 /////////////////////////
         
-penalized_behavioral_score ctruth_table_bscore::operator()(const combo_tree& tr) const
+penalized_bscore ctruth_table_bscore::operator()(const combo_tree& tr) const
 {
-    //penalized_behavioral_score pbs(
+    //penalized_bscore pbs(
     //    make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     interpreter_visitor iv(tr);
     auto interpret_tr = boost::apply_visitor(iv);
@@ -1375,9 +1376,9 @@ score_t ctruth_table_bscore::min_improv() const
 // enum_table_bscore //
 /////////////////////////
         
-penalized_behavioral_score enum_table_bscore::operator()(const combo_tree& tr) const
+penalized_bscore enum_table_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     // Evaluate the bscore components for all rows of the ctable
     interpreter_visitor iv(tr);
@@ -1430,9 +1431,9 @@ score_t enum_table_bscore::min_improv() const
 // enum_filter_bscore //
 /////////////////////////
         
-penalized_behavioral_score enum_filter_bscore::operator()(const combo_tree& tr) const
+penalized_bscore enum_filter_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
@@ -1508,9 +1509,9 @@ score_t enum_graded_bscore::graded_complexity(combo_tree::iterator it) const
     return cpxy;
 }
         
-penalized_behavioral_score enum_graded_bscore::operator()(const combo_tree& tr) const
+penalized_bscore enum_graded_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
@@ -1582,9 +1583,9 @@ score_t enum_graded_bscore::min_improv() const
 // inner and outer loops.  This makes the algo slower and bulkier, but
 // it does allow the effectiveness of predicates to be tracked.
 //
-penalized_behavioral_score enum_effective_bscore::operator()(const combo_tree& tr) const
+penalized_bscore enum_effective_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
 
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
@@ -1724,7 +1725,7 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
     logger().fine("skewness = %f", skewness);
 }
 
-penalized_behavioral_score interesting_predicate_bscore::operator()(const combo_tree& tr) const
+penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
     OTable pred_ot(tr, ctable);
 
@@ -1744,7 +1745,7 @@ penalized_behavioral_score interesting_predicate_bscore::operator()(const combo_
     logger().fine("total = %u", total);
     logger().fine("actives = %u", actives);
 
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
     behavioral_score &bs = pbs.first;
 
     // filter the output according to pred_ot
@@ -1874,11 +1875,11 @@ score_t interesting_predicate_bscore::min_improv() const
 //////////////////////////////
 
 // main operator
-penalized_behavioral_score multibscore_based_bscore::operator()(const combo_tree& tr) const
+penalized_bscore multibscore_based_bscore::operator()(const combo_tree& tr) const
 {
-    penalized_behavioral_score pbs;
+    penalized_bscore pbs;
     for (const bscore_base& bsc : _bscorers) {
-        penalized_behavioral_score apbs = bsc(tr);
+        penalized_bscore apbs = bsc(tr);
         boost::push_back(pbs.first, apbs.first);
         pbs.second += apbs.second;
     }
@@ -1887,11 +1888,11 @@ penalized_behavioral_score multibscore_based_bscore::operator()(const combo_tree
 
 behavioral_score multibscore_based_bscore::best_possible_bscore() const
 {
-    penalized_behavioral_score pbs;
+    behavioral_score bs;
     for (const bscore_base& bsc : _bscorers) {
-        boost::push_back(pbs.first, bsc.best_possible_bscore());
+        boost::push_back(bs, bsc.best_possible_bscore());
     }
-    return pbs;
+    return bs;
 }
 
 // return the min of all min_improv

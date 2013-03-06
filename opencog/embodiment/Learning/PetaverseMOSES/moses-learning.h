@@ -155,9 +155,9 @@ struct petaverse_bscore : public bscore_base
     petaverse_bscore(const petaverse_bscore& ps)
             : _fitnessEstimator(ps._fitnessEstimator) {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const
+    penalized_bscore operator()(const combo_tree& tr) const
     {
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         pbs.first.push_back(_fitnessEstimator(tr));
         pbs.second = tr.size();
         return pbs;
@@ -165,10 +165,7 @@ struct petaverse_bscore : public bscore_base
 
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
-        pbs.first.push_back(0); // @todo that is probably incorrect
-        pbs.second = 0;
-        return pbs;
+        return {0.0};           // @todo that might be wrong
     }
 
     ~petaverse_bscore() {}

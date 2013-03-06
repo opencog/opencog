@@ -25,10 +25,10 @@ ADD_SUBDIRECTORY (man)
 ADD_LIBRARY (moses SHARED STATIC
 	eda/initialization
 	eda/local_structure
+
 	moses/complexity
 	moses/distributed_moses
 	moses/local_moses
-	moses/metapopulation
 	moses/moses_main
 	moses/mpi_moses
 	moses/neighborhood_sampling
@@ -37,10 +37,17 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/scoring
 	moses/types
 	moses/using
+
+	metapopulation/metapopulation
+	metapopulation/metapop_params
+    metapopulation/deme_expander
+	metapopulation/feature_selector
+
 	optimization/hill-climbing
 	optimization/optimization
 	optimization/star-anneal
 	optimization/univariate
+
 	representation/build_knobs
 	representation/field_set
 	representation/knob_mapper

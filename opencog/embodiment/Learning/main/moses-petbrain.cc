@@ -61,7 +61,7 @@ struct interactive_bscore : public bscore_base
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
+        penalized_bscore pbs;
         return pbs;
     }
 };
