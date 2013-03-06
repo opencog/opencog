@@ -504,6 +504,7 @@ int moses_exec(int argc, char** argv)
     bool hc_widen_search;
     bool hc_single_step;
     bool hc_crossover;
+    unsigned hc_crossover_pop_size;
     bool hc_allow_resize_deme;
     unsigned hc_max_nn;
     double   hc_frac_of_nn;
@@ -641,6 +642,14 @@ int moses_exec(int argc, char** argv)
                     "problem types, especially those with deceptive "
                     "scoring functions, this can hurt performance.\n"
                     ) % hc).c_str())
+
+        ("hc-crossover-pop-size",
+         value<unsigned>(&hc_crossover_pop_size)->default_value(120),
+         "Number of new candidates created by crossover during each iteration "
+         "of hillclimbing. It also allows to control when crossover occurs over "
+         "exhaustive search. Specifically if the number of candidate to explore "
+         "by exhaustive search is more than 10/3 * crossover_pop_size, then "
+         "crossover kicks in.\n")
 
         ("hc-allow-resize-deme",
          value<bool>(&hc_allow_resize_deme)->default_value(true),
@@ -1374,6 +1383,7 @@ int moses_exec(int argc, char** argv)
     hc_params.widen_search = hc_widen_search;
     hc_params.single_step = hc_single_step;
     hc_params.crossover = hc_crossover;
+    hc_params.crossover_pop_size = hc_crossover_pop_size;
     hc_params.max_nn_evals = hc_max_nn;
     hc_params.fraction_of_nn = hc_frac_of_nn;
     hc_params.allow_resize_deme = hc_allow_resize_deme;
