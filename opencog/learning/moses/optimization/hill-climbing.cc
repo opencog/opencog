@@ -252,25 +252,26 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // work really quite well.
         //
         // Based on experiments, crossing over the 40 highest-scoring
-        // instances seems to offer plenty of luck, to TOP_POP_SIZE
-        // is currently defined to be 40.
+        // instances seems to offer plenty of luck, so
+        // crossover_pop_size is defined to be 120 by default (40 for
+        // cross_top_one, 40 for cross_top_two, 40 for
+        // cross_top_three).
         //
         // If the size of the nearest neighborhood is small enough,
         // then don't bother with the optimistic guessing.  The
-        // cross-over guessing will generate 3*TOP_POP_SIZE
+        // cross-over guessing will generate crossover_pop_size
         // instances.  Our guestimate for number of neighbors
         // intentionally over-estimates by a factor of two. So the
-        // breakeven point would be 6*TOP_POP_SIZE, and we pad this
+        // breakeven point would be 2*crossover_pop_size, and we pad this
         // a bit, as small exhaustive searches do beat guessing...
         //
         // current_number_of_instances can drop as low as 1 if the
         // population trimmer wiped out everything, which can happen.
         // Anyway, cross-over generates nothing when its that small.
-#define TOP_POP_SIZE 40
         if (!hc_params.crossover
             || (iteration <= 2)
             || rescan
-            || total_number_of_neighbours < 10*TOP_POP_SIZE
+            || total_number_of_neighbours < 10*(hc_params.crossover_pop_size/3)
             || current_number_of_instances < 3)
         {
 
@@ -285,19 +286,20 @@ unsigned hill_climbing::operator()(deme_t& deme,
             // These cross-over (in the genetic sense) the
             // top-scoring one, two and three instances,respectively.
             number_of_new_instances =
-                cross_top_one(deme, current_number_of_instances, TOP_POP_SIZE,
+                cross_top_one(deme, current_number_of_instances,
+                              hc_params.crossover_pop_size / 3,
                               prev_start, prev_size, prev_center);
 
             number_of_new_instances +=
                 cross_top_two(deme,
                               current_number_of_instances + number_of_new_instances,
-                              TOP_POP_SIZE,
+                              hc_params.crossover_pop_size / 3,
                               prev_start, prev_size, prev_center);
 
             number_of_new_instances +=
                 cross_top_three(deme,
                               current_number_of_instances + number_of_new_instances,
-                              TOP_POP_SIZE,
+                              hc_params.crossover_pop_size / 3,
                               prev_start, prev_size, prev_center);
         }
         prev_start = current_number_of_instances;
