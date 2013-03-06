@@ -91,11 +91,16 @@ struct feature_selection_parameters
     // hill-climbing selection parameters
     // actually, these are generic for all moses optimizers,
     // not just hill-climbing...
+    //
+    // @todo it might make sense to use directly hc_parameters from
+    // hill-climbing.h instead of replicating the options
     unsigned int hc_max_evals;
     time_t max_time;
     double hc_max_score;
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
+    bool hc_crossover;
+    bool hc_widen_search;
 
     // MI scorer parameters
     double mi_confi; //  confidence intensity

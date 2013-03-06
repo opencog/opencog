@@ -173,9 +173,9 @@ feature_set_pop select_feature_sets(const CTable& ctable,
         op_params.max_dist = max_dist;
         op_params.set_min_score_improv(min_score_improv);
         hc_parameters hc_params;
-        hc_params.widen_search = true;
+        hc_params.widen_search = fs_params.hc_widen_search;
         hc_params.single_step = false;
-        hc_params.crossover = false;
+        hc_params.crossover = fs_params.hc_crossover;
         hill_climbing hc(op_params, hc_params);
         return moses_select_feature_sets(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
