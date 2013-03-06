@@ -49,6 +49,7 @@ struct hc_parameters
         : widen_search(widen),
           single_step(step),
           crossover(cross),
+          crossover_pop_size(120),
           max_nn_evals (max_evals),
           fraction_of_nn(_fraction_of_nn),
           score_range(5.0),
@@ -60,6 +61,9 @@ struct hc_parameters
     bool widen_search;
     bool single_step;
     bool crossover;
+
+    // number of created instances by crossover
+    unsigned crossover_pop_size;
 
     // Evaluate no more than this number of instances per iteration.
     // Problems with 100 or more features easily lead to exemplars with
@@ -177,7 +181,7 @@ protected:
      * Cross the single top-scoring instance against the next-highest scorers.
      *
      * As arguments, accepts a range of scored instances ("the sample"),
-     * and a singlee instance from which these were all derived ("the base"
+     * and a single instance from which these were all derived ("the base"
      * or center instance).  This will create a number of new instances,
      * which will be a cross of the highest-scoring instance with the
      * next-highest scoring instances.
