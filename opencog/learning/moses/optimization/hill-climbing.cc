@@ -112,7 +112,9 @@ unsigned hill_climbing::operator()(deme_t& deme,
     size_t prev_start = 0;
     size_t prev_size = 0;
 
+    // in crossover mode, temporarily switch back to non-crossover
     bool rescan = false;
+
     bool last_chance = false;
 
     // Whether the score has improved during an iteration
@@ -162,10 +164,10 @@ unsigned hill_climbing::operator()(deme_t& deme,
         }
         else // distance two or greater
         {
-            // Distances greater than 1 occurs only when the -L1 flag
-            // is used.  This puts this algo into a very different mode
-            // of operation, in an attempt to overcome deceptive scoring
-            // functions.
+            // Distances greater than 1 occurs only when the -L1 or
+            // -T1 flags are used.  This puts this algo into a very
+            // different mode of operation, in an attempt to overcome
+            // deceptive scoring functions.
 
             // For large-distance searches, there is a combinatorial
             // explosion of the size of the search volume. Thus, be
@@ -242,12 +244,12 @@ unsigned hill_climbing::operator()(deme_t& deme,
             "Budget %u samples out of estimated %u neighbours",
             number_of_new_instances, total_number_of_neighbours);
 
-        // The first few times through, (or, if we decided on a
-        // full rescan), explore the entire nearest neighborhood.
-        // Otherwise, make the optimistic assumption that the best
-        // the best new instances are likely to be genric cross-overs
-        // of the current top-scoring instances.  This assumption
-        // seems to work really quite well.
+        // The first few times through, (or, if we decided on a full
+        // rescan), explore the entire nearest neighborhood.
+        // Otherwise, make the optimistic assumption that the best new
+        // instances are likely to be genetic cross-overs of the
+        // current top-scoring instances.  This assumption seems to
+        // work really quite well.
         //
         // Based on experiments, crossing over the 40 highest-scoring
         // instances seems to offer plenty of luck, to TOP_POP_SIZE
@@ -571,9 +573,6 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
     // We don't actually need them all sorted; we only need
     // the highest-scoring num_to_make+1 to appear first, and
     // after that, we don't care about the ordering.
-    // std::sort(next(deme.begin(), sample_start),
-    //          next(deme.begin(), sample_start + sample_size),
-    //          std::greater<deme_inst_t>());
     std::partial_sort(next(deme.begin(), sample_start),
                       next(deme.begin(), sample_start + num_to_make+1),
                       next(deme.begin(), sample_start + sample_size),
@@ -581,6 +580,7 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
 
     deme.resize(deme_size + num_to_make);
 
+    // best instance
     const instance &reference = deme[sample_start].first;
 
     // Skip the first entry; its the top scorer.
@@ -604,10 +604,6 @@ size_t hill_climbing::cross_top_two(deme_t& deme,
     unsigned max = sample_size * (sample_size-1) / 2;
     if (max < num_to_make) num_to_make = max;
 
-    // std::sort(next(deme.begin(), sample_start),
-    //          next(deme.begin(), sample_start + sample_size),
-    //          std::greater<deme_inst_t >());
-    //
     unsigned num_to_sort = sqrtf(2*num_to_make) + 3;
     if (sample_size < num_to_sort) num_to_sort = sample_size;
     std::partial_sort(next(deme.begin(), sample_start),
@@ -619,7 +615,13 @@ size_t hill_climbing::cross_top_two(deme_t& deme,
 
     // Summation is over a 2-simplex
     for (unsigned i = 1; i < sample_size; i++) {
+
+        // (i+1)th best instance
         const instance& reference = deme[sample_start+i].first;
+
+        // merge with all best instance (better than reference) but
+        // using reference as the one containing the mutations to pass
+        // on the other (better) instance.
         for (unsigned j = 0; j < i; j++) {
             unsigned n = i*(i-1)/2 + j;
             if (num_to_make <= n) return num_to_make;
@@ -642,10 +644,6 @@ size_t hill_climbing::cross_top_three(deme_t& deme,
     // sample_size choose three.
     unsigned max = sample_size * (sample_size-1) * (sample_size-2) / 6;
     if (max < num_to_make) num_to_make = max;
-
-    // std::sort(next(deme.begin(), sample_start),
-    //           next(deme.begin(), sample_start + sample_size),
-    //           std::greater<deme_inst_t>());
 
     unsigned num_to_sort = cbrtf(6*num_to_make) + 3;
     if (sample_size < num_to_sort) num_to_sort = sample_size;

@@ -177,7 +177,7 @@ protected:
      * Cross the single top-scoring instance against the next-highest scorers.
      *
      * As arguments, accepts a range of scored instances ("the sample"),
-     * and a singlee instance from which these were all derived ("the base"
+     * and a single instance from which these were all derived ("the base"
      * or center instance).  This will create a number of new instances,
      * which will be a cross of the highest-scoring instance with the
      * next-highest scoring instances.
