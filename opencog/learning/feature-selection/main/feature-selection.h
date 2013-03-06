@@ -100,6 +100,7 @@ struct feature_selection_parameters
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
     bool hc_crossover;
+    unsigned hc_crossover_pop_size;
     bool hc_widen_search;
 
     // MI scorer parameters
