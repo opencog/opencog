@@ -193,7 +193,9 @@ cpbscore_demeID& get_cpbscore_demeID(pbscored_combo_tree& pbst);
 
 demeID_t get_demeID(const pbscored_combo_tree& pbst);
 
-const composite_score& get_composite_score(const composite_penalized_bscore& ctbs);
+// The following function creates an overloading ambiguity in gcc
+// 4.6.3 (apparently fixed in gcc 4.7.2)
+// const composite_score& get_composite_score(const composite_penalized_bscore& ctbs);
 const composite_score& get_composite_score(const pbscored_combo_tree& bsct);
 composite_score& get_composite_score(composite_penalized_bscore& ctbs);
 composite_score& get_composite_score(pbscored_combo_tree& bsct);
