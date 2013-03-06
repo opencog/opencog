@@ -1272,6 +1272,14 @@ int moses_exec(int argc, char** argv)
          "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
 
+        ("fs-hc-crossover",
+         value<bool>(&fs_params.hc_crossover)->default_value(false),
+         "Hillclimber crossover (see --hc-crossover option)\n")
+
+        ("fs-hc-widen-search",
+         value<bool>(&fs_params.hc_widen_search)->default_value(true),
+         "Hillclimber widen_search (see --widen-search)\n")
+
         // ======= Feature-selection MI scorer params =======
         ("fs-mi-penalty",
          value<double>(&fs_params.mi_confi)->default_value(100.0),
