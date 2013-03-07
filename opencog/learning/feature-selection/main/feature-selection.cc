@@ -176,6 +176,7 @@ feature_set_pop select_feature_sets(const CTable& ctable,
         hc_params.widen_search = fs_params.hc_widen_search;
         hc_params.single_step = false;
         hc_params.crossover = fs_params.hc_crossover;
+        hc_params.crossover_pop_size = fs_params.hc_crossover_pop_size;
         hill_climbing hc(op_params, hc_params);
         return moses_select_feature_sets(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {

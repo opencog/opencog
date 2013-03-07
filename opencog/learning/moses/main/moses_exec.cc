@@ -1285,6 +1285,10 @@ int moses_exec(int argc, char** argv)
          value<bool>(&fs_params.hc_crossover)->default_value(false),
          "Hillclimber crossover (see --hc-crossover option)\n")
 
+        ("fs-hc-crossover-pop-size",
+         value<unsigned>(&fs_params.hc_crossover_pop_size)->default_value(false),
+         "Hillclimber crossover pop size (see --hc-crossover option)\n")
+
         ("fs-hc-widen-search",
          value<bool>(&fs_params.hc_widen_search)->default_value(true),
          "Hillclimber widen_search (see --widen-search)\n")

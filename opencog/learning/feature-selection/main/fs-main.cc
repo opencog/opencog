@@ -270,6 +270,10 @@ int main(int argc, char** argv)
          value<bool>(&fs_params.hc_crossover)->default_value(false),
          "Hillclimber crossover (see moses --help or man moses for more help)\n")
 
+        ("hc-crossover-pop-size",
+         value<unsigned>(&fs_params.hc_crossover_pop_size)->default_value(120),
+         "Hillclimber crossover pop size (see moses --help or man moses for more help)\n")
+
         ("hc-widen-search",
          value<bool>(&fs_params.hc_widen_search)->default_value(true),
          "Hillclimber widen_search (see moses --help or man moses for more help)\n")
