@@ -22,6 +22,8 @@
  */
 #include <ctime>
 
+#include <boost/range/numeric.hpp>
+
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/optimization/optimization.h>
@@ -181,9 +183,10 @@ void moses_learning::operator()()
 
         // learning time is uncapped.
         time_t max_time = INT_MAX;
-        int o = metapop->_dex.optimize_demes(
-                    max_for_generation - stats.n_evals,
-                    max_time);
+        auto evals = metapop->_dex.optimize_demes(max_for_generation
+                                                  - stats.n_evals,
+                                                  max_time);
+        int o = boost::accumulate(evals, 0);
         std::cout << "number of evaluations: " << o << std::endl;
 
         if (o < 0)
@@ -202,9 +205,10 @@ void moses_learning::operator()()
 
     case HC_FINISH_CANDIDATES:  {
 
-        metapop->merge_demes(metapop->_dex._demes,
-                             metapop->_dex._reps,
-                             stats.n_evals);
+        OC_ASSERT(false, "TODO");
+        // metapop->merge_demes(metapop->_dex._demes,
+        //                      metapop->_dex._reps,
+        //                      /* stats.n_evals */ {}, {} /* deme IDs */);
 
         //print the generation number and a best solution
         std::cout << "sampled " << stats.n_evals
