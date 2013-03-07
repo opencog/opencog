@@ -162,8 +162,8 @@ void moses_learning::operator()()
     case HC_BUILD_CANDIDATES:  {
 
         std::cout << "BUILD" << std::endl;
-        bscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
-        if (metapop->_dex.create_deme(*exemplar))
+        pbscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
+        if (metapop->_dex.create_deme(get_tree(*exemplar)))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
