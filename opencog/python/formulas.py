@@ -131,6 +131,23 @@ def inheritanceFormula(tvs, U):
 
     return (s, n)
 
+def inheritance2SimilarityFormula(tvs, U):
+    [(sAB, nAB), (sBA, nBA)] = tvs
+
+    s = 1.0/ ( 1.0/sAB + 1.0/sBA -1)
+    n = (nAB + nBA) / (1 + s)
+
+    return (s, n)
+
+def revisionFormula(tvs, U):
+    # revise two truth values
+    [(s1, n1), (s2, n2)] = tvs
+
+    s = (s1+s2)/2.0
+    n = n1+n2
+
+    return (s, n)
+
 def low(n):
     return max(n, 0.00001)
 

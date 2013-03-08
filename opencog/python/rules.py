@@ -192,6 +192,12 @@ def rules(a, deduction_types):
                        name = 'SubsetLink=>InheritanceLink', 
                        formula = formulas.ext2InhFormula))
 
+    rules.append(Rule(T('SimilarityLink', 1, 2),
+        [ T('InheritanceLink', 1, 2),
+          T('InheritanceLink', 2, 1)],
+        name = 'Inheritance=>Similarity',
+        formula = formulas.inheritance2SimilarityFormula))
+
 #        # Producing ForAll/Bind/AverageLinks.
 #        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
 #            rules.append(Rule(T(type, 1, 2),
