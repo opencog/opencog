@@ -81,21 +81,15 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
                            const feature_selection_parameters& fs_params)
 {
     // log the number selected features
-    logger().info("%d out of %d have been selected",
+    logger().info("%d out of %d features have been selected",
                   ftable.get_arity(), old_arity);
+
     // log set of selected feature set
+    const string_seq& labs = ftable.itable.get_labels();
+    const vector<double>& sco = score_individual_features(ftable, fs_params);
+    for (unsigned i=0; i<labs.size(); i++)
     {
-        stringstream ss;
-        ss << "The following features have been selected: ";
-        ostreamContainer(ss, ftable.itable.get_labels(), ",");
-        logger().info(ss.str());
-    }
-    // log the score of each feature individually
-    {
-        stringstream ss;
-        ss << "With the following scores (individually): ";
-        ostreamContainer(ss, score_individual_features(ftable, fs_params), ",");
-        logger().info(ss.str());            
+        logger().info() << labs[i] << " " << sco[i];
     }
 }
 
