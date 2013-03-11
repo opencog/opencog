@@ -177,6 +177,18 @@ struct hill_climbing : optimizer_base
     {}
 
 protected:
+    // log legend for graph stats
+    void log_stats_legend();
+
+    // Return an estimate of the size of the neighborhood at distance
+    // 'distance'
+    size_t estimate_neighborhood(size_t distance, const field_set& fields);
+
+    // Return an estimate of the number of new instances to search
+    size_t n_new_instances(size_t distance, unsigned max_evals,
+                           size_t current_number_of_evals,
+                           size_t total_number_of_neighbours);
+
     /**
      * Cross the single top-scoring instance against the next-highest scorers.
      *
@@ -224,6 +236,11 @@ protected:
                            size_t sample_start,
                            size_t sample_size,
                            const instance& base);
+
+    // chain the 3 crossovers methods above and return the number of new instances
+    size_t crossover(deme_t& deme, size_t deme_size,
+                     size_t sample_start, size_t sample_size,
+                     const instance& base);
 
     bool resize_deme(deme_t& deme, score_t score_cutoff);
     size_t resize_by_score(deme_t& deme, score_t score_cutoff);
