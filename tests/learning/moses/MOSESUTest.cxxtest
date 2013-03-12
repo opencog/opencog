@@ -43,85 +43,85 @@ public:
         // to control the log level use option -l
     }
 
-    void test_2_parity() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hpa", "-k2"});
-    }
-    void test_2_parity_with_labels() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hpa", "-k2", "-W1"});
-    }
-    void test_3_parity_multi_thread() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hpa", "-k3", "-m100000", "-j4"});
-    }
-    void test_1_mux() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hmux", "-k1"});
-    }
-    void test_2_mux() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hmux", "-k2"});
-    }
-    void test_sa_2_parity() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hpa", "-k2", "-asa"});
-    }
-    void test_sa_1_mux() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hmux", "-k1", "-asa"});
-    }
-    void test_un_3_pa_multi_thread() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-r3", "-Hpa", "-k3", "-aun", "-m500000", "-j4", "-c3000"});
-    }
+    // void test_2_parity() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hpa", "-k2"});
+    // }
+    // void test_2_parity_with_labels() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hpa", "-k2", "-W1"});
+    // }
+    // void test_3_parity_multi_thread() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hpa", "-k3", "-m100000", "-j4"});
+    // }
+    // void test_1_mux() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hmux", "-k1"});
+    // }
+    // void test_2_mux() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hmux", "-k2"});
+    // }
+    // void test_sa_2_parity() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hpa", "-k2", "-asa"});
+    // }
+    // void test_sa_1_mux() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hmux", "-k1", "-asa"});
+    // }
+    // void test_un_3_pa_multi_thread() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-r3", "-Hpa", "-k3", "-aun", "-m500000", "-j4", "-c3000"});
+    // }
 
-    void test_it() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
-        string max_evals("-m1000");
-        moses_test_score({data_file_path, max_evals}, -3);
-    }
-    void test_it_target_ignore() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        // try to predict arg1 given arg2
-        string data_file_path("-i" + MOSESUTest_dir + "dataset.csv"),
-            max_evals("-m1000"), target("-uarg2"), ignore_feature("-Yres");
-        moses_test_score({data_file_path, max_evals, target, ignore_feature},
-                         -3);
-    }
+    // void test_it() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string data_file_path("-i" + MOSESUTest_dir + "dataset.csv");
+    //     string max_evals("-m1000");
+    //     moses_test_score({data_file_path, max_evals}, -3);
+    // }
+    // void test_it_target_ignore() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     // try to predict arg1 given arg2
+    //     string data_file_path("-i" + MOSESUTest_dir + "dataset.csv"),
+    //         max_evals("-m1000"), target("-uarg2"), ignore_feature("-Yres");
+    //     moses_test_score({data_file_path, max_evals, target, ignore_feature},
+    //                      -3);
+    // }
 
-    /* SR is polynomial regression; it has a very deceptive scoring
-     * function, and hill-climbing will utterly fail on it. Use the
-     * -L1 flag to perform an exhaustive local search.
-     */
-    void test_sr_3() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        moses_test_score({"-Hsr", "-k3", "-m100000", "-L1"});
-    }
+    // /* SR is polynomial regression; it has a very deceptive scoring
+    //  * function, and hill-climbing will utterly fail on it. Use the
+    //  * -L1 flag to perform an exhaustive local search.
+    //  */
+    // void test_sr_3() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     moses_test_score({"-Hsr", "-k3", "-m100000", "-L1"});
+    // }
     
-    void test_cp_simple() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
+    // void test_cp_simple() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
 
-        // Sniff test, make sure -Hcp is at least minimally working.
-        string tr_str("and($1 $2)");
-        string cp_opt("-y");
-        moses_test_combo({"-Hcp", cp_opt + tr_str}, {tr_str});
-    }
+    //     // Sniff test, make sure -Hcp is at least minimally working.
+    //     string tr_str("and($1 $2)");
+    //     string cp_opt("-y");
+    //     moses_test_combo({"-Hcp", cp_opt + tr_str}, {tr_str});
+    // }
 
-    void test_cp() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr_str("or(and($2 !$3) $1 !$4 $5)");
-        string cp_opt("-y");
-        // Note: This test is very sensitive to algorithmic details;
-        // examples of perfect score solutions are:
-        // or(and(or(!$3 $4) $1) and($2 !$3) !$4 $5)
-        // or(and(or(and($4 $5) $2 $3) $1) and(or($1 $2) !$3) !$4 $5)
-        // or(and(or(!$2 $4) $1) and($2 !$3) !$4 $5) 
-        // or(and(or($1 $2) !$3) and(or(!$2 $4 !$5) $1) !$4 $5)
-        // ... and many many more.  Need the -E3 flag to shrink it down.
-        moses_test_combo({"-Hcp", cp_opt + tr_str, "-E3"}, {tr_str});
-    }
+    // void test_cp() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr_str("or(and($2 !$3) $1 !$4 $5)");
+    //     string cp_opt("-y");
+    //     // Note: This test is very sensitive to algorithmic details;
+    //     // examples of perfect score solutions are:
+    //     // or(and(or(!$3 $4) $1) and($2 !$3) !$4 $5)
+    //     // or(and(or(and($4 $5) $2 $3) $1) and(or($1 $2) !$3) !$4 $5)
+    //     // or(and(or(!$2 $4) $1) and($2 !$3) !$4 $5) 
+    //     // or(and(or($1 $2) !$3) and(or(!$2 $4 !$5) $1) !$4 $5)
+    //     // ... and many many more.  Need the -E3 flag to shrink it down.
+    //     moses_test_combo({"-Hcp", cp_opt + tr_str, "-E3"}, {tr_str});
+    // }
     
     void test_cp_contin() {
         cout << BOOST_CURRENT_FUNCTION << endl;
@@ -135,54 +135,54 @@ public:
                          {tr_str, "*(6 +(1 $1))"});
     }
 
-    void test_kl() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr1_str("or(and(!$1 $2) and($1 !$2))");
-        string tr2_str("and(or(!$1 !$2) or($1 $2))");
-        string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hip", data_file_path, "-m500", "-l debug", "-U0", "-X0", "-z100000"},
-                         {tr1_str, tr2_str});
-    }
-    void test_multi_kl() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr1_str("or(and(!$1 $2) and($1 !$2))");
-        string tr2_str("and(or(!$1 !$2) or($1 $2))");
-        string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
-        moses_test_combo({"-Hip", data_file_path,  data_file_path, "-m500", "-l debug", "-U0", "-X0", "-z100000"}, {tr1_str, tr2_str});
-    }
+    // void test_kl() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr1_str("or(and(!$1 $2) and($1 !$2))");
+    //     string tr2_str("and(or(!$1 !$2) or($1 $2))");
+    //     string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
+    //     moses_test_combo({"-Hip", data_file_path, "-m500", "-l debug", "-U0", "-X0", "-z100000"},
+    //                      {tr1_str, tr2_str});
+    // }
+    // void test_multi_kl() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr1_str("or(and(!$1 $2) and($1 !$2))");
+    //     string tr2_str("and(or(!$1 !$2) or($1 $2))");
+    //     string data_file_path("-i" + MOSESUTest_dir + "KL_test.csv");
+    //     moses_test_combo({"-Hip", data_file_path,  data_file_path, "-m500", "-l debug", "-U0", "-X0", "-z100000"}, {tr1_str, tr2_str});
+    // }
     
-    void test_precision() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr_str("$2");
-        string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
-        moses_test_combo({"-Hpre", data_file_path,  "-m100", "-q0.2", "-w0.5", "-Q1", "-z10000"}, {tr_str});
-    }
-    void test_negative_predictive_value() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr_str("$1");
-        string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
-        moses_test_combo({"-Hpre", data_file_path, "-m100", "-q0.2", "-w0.5", "-Q-1", "-z10000"}, {tr_str});
-    }    
+    // void test_precision() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr_str("$2");
+    //     string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
+    //     moses_test_combo({"-Hpre", data_file_path,  "-m100", "-q0.2", "-w0.5", "-Q1", "-z10000"}, {tr_str});
+    // }
+    // void test_negative_predictive_value() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr_str("$1");
+    //     string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
+    //     moses_test_combo({"-Hpre", data_file_path, "-m100", "-q0.2", "-w0.5", "-Q-1", "-z10000"}, {tr_str});
+    // }    
 
-    void test_contin_precision() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr_str("$2");
-        string data_file_path("-i" + MOSESUTest_dir + "contin_precision.csv");
-        moses_test_combo({"-Hpre", data_file_path,  "-m100", "-q0.2", "-w0.5", "-Q1", "-z10000"}, {tr_str});
-    }
-    void test_contin_negative_predictive_value() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr_str("$1"),
-            data_file_path("-i" + MOSESUTest_dir + "contin_precision.csv");
-        moses_test_combo({"-Hpre", data_file_path, "-m100", "-q0.2", "-w0.5", "-Q-1", "-z10000"}, {tr_str});
-    }
-    void test_output_labels() {
-        cout << BOOST_CURRENT_FUNCTION << endl;
-        string tr_str("and($arg1 $arg2)"),
-            data_file_path("-i" + MOSESUTest_dir + "dataset.csv"),
-            max_evals("-m1000"),
-            output_labels("-W1");
-        cheap_moses_test_combo({data_file_path, max_evals, output_labels},
-                               {tr_str});
-    }
+    // void test_contin_precision() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr_str("$2");
+    //     string data_file_path("-i" + MOSESUTest_dir + "contin_precision.csv");
+    //     moses_test_combo({"-Hpre", data_file_path,  "-m100", "-q0.2", "-w0.5", "-Q1", "-z10000"}, {tr_str});
+    // }
+    // void test_contin_negative_predictive_value() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr_str("$1"),
+    //         data_file_path("-i" + MOSESUTest_dir + "contin_precision.csv");
+    //     moses_test_combo({"-Hpre", data_file_path, "-m100", "-q0.2", "-w0.5", "-Q-1", "-z10000"}, {tr_str});
+    // }
+    // void test_output_labels() {
+    //     cout << BOOST_CURRENT_FUNCTION << endl;
+    //     string tr_str("and($arg1 $arg2)"),
+    //         data_file_path("-i" + MOSESUTest_dir + "dataset.csv"),
+    //         max_evals("-m1000"),
+    //         output_labels("-W1");
+    //     cheap_moses_test_combo({data_file_path, max_evals, output_labels},
+    //                            {tr_str});
+    // }
 };
