@@ -414,7 +414,7 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
 
 // -------------------------------------------------------
 
-Table::Table() {}
+Table::Table() : target_pos(0) {}
 
 Table::Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_)
     : tt(tt_), itable(itable_), otable(otable_), target_pos(0) {}
