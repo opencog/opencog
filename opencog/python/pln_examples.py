@@ -47,7 +47,7 @@ both/AnotBdemo_partial_test.conf
 both/28_test.conf
 bc/plus_test.conf
 #bc/new/pathfinding_test.conf
-bc/new/before_test.conf
+#bc/new/before_test.conf
 ''')
 
 #files_list = '''bc/new/before_test.conf'''
