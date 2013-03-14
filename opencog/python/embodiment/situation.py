@@ -170,7 +170,7 @@ def test(atomspace):
         atomspace.add(t.PredicateNode, 'contains-block-of-color'),
         new_var()
     )
-    chainer.bc(target);
+    chainer.bc(target, nsteps=5000, nresults=20)
 
     import pdb; pdb.set_trace()
 

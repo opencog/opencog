@@ -90,7 +90,7 @@ class Chainer:
         #profiler.add_function(self.bc)
 
     #@profile
-    def bc(self, target, nsteps = 2000):
+    def bc(self, target, nsteps = 2000, nresults = 1):
         try:
             #import prof3d; prof3d.profile_me()
             
@@ -120,7 +120,7 @@ class Chainer:
             steps_so_far = 0
             start = time()
 
-            while self.bc_later and len(self.results) < 5 and steps_so_far < nsteps:
+            while self.bc_later and steps_so_far < nsteps and (nresults == 0 or len(self.results) < nresults):
                 self.bc_step()
                 steps_so_far += 1
     
@@ -1032,26 +1032,26 @@ class PLNviz:
             self.g.add_node(parent_id, label=str(parent), **self.node_attributes)
             self.g.add_edge(link_id, parent_id, target_id, directed=True, label=str(index))
 
-import networkx as nx
-class Viz_Graph(object):
-    """ draw the graph """
-    def __init__(self):
-        self._nx_graph = nx.DiGraph()
-
-    def add_edge(self, source, target):
-        """docstring for add_edge"""
-        self._nx_graph.add_edge(source,target)
-
-    def write_dot(self, filename):
-        """docstring for write_dot"""
-        try:
-            nx.write_dot(self._nx_graph, filename)
-        except Exception, e:
-            print e
-            raise e
-    def clear(self):
-        """docstring for clear"""
-        self._nx_graph.clear()
+#import networkx as nx
+#class Viz_Graph(object):
+#    """ draw the graph """
+#    def __init__(self):
+#        self._nx_graph = nx.DiGraph()
+#
+#    def add_edge(self, source, target):
+#        """docstring for add_edge"""
+#        self._nx_graph.add_edge(source,target)
+#
+#    def write_dot(self, filename):
+#        """docstring for write_dot"""
+#        try:
+#            nx.write_dot(self._nx_graph, filename)
+#        except Exception, e:
+#            print e
+#            raise e
+#    def clear(self):
+#        """docstring for clear"""
+#        self._nx_graph.clear()
 
 class PLNPlanningMindAgent(opencog.cogserver.MindAgent):
     '''This agent should be run every cycle to cooperate with the C++

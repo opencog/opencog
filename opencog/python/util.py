@@ -266,26 +266,26 @@ log = Logger()
 #log = Logger()
 
 
-# Note. Due to various technical annoyances, the json save/load
-# functionality probably won't work atomspace_remote currently
-try:
-    from opencog.atomspace import types as t, TruthValue
-except ImportError:
-    from atomspace_remote import types as t, TruthValue
-
-import json
-from opencog.atomspace import get_type
-
-
-def save_atomspace_json(space, file='atomspace.json'):
-    f = open(file,'w')
-    for atom in space.get_atoms_by_type(t.Atom):
-        f.write(_json_from_atom(atom))
-
-def load_atomspace_json(space, file='atomspace.json'):    
-    f = open(file, 'r')
-    for line in f.readlines():
-        _atom_from_json(space, line)
+## Note. Due to various technical annoyances, the json save/load
+## functionality probably won't work atomspace_remote currently
+#try:
+#    from opencog.atomspace import types as t, TruthValue
+#except ImportError:
+#    from atomspace_remote import types as t, TruthValue
+#
+#import json
+#from opencog.atomspace import get_type
+#
+#
+#def save_atomspace_json(space, file='atomspace.json'):
+#    f = open(file,'w')
+#    for atom in space.get_atoms_by_type(t.Atom):
+#        f.write(_json_from_atom(atom))
+#
+#def load_atomspace_json(space, file='atomspace.json'):
+#    f = open(file, 'r')
+#    for line in f.readlines():
+#        _atom_from_json(space, line)
 
 # repeated here because the atomspace_remote version needs to be tied to the
 # Python AtomSpace internals (and this version is connected to the Cython

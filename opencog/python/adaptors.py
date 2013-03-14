@@ -104,6 +104,9 @@ class ForestExtractor:
         initial_links = [x for x in self.a.get_atoms_by_type(t.Link) if (x.tv.mean > 0.5 and x.tv.confidence > 0)]
         
         for link in initial_links:
+            if link.tv is None:
+                print link, 'has no TV!'
+                assert False
                      #or x.type_name in ['EvaluationLink', 'InheritanceLink']]: # temporary hack
                      #or x.is_a(t.AndLink)]: # temporary hack
             if self.attentional_focus and link.av['sti'] <= -10:

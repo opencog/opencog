@@ -1,7 +1,7 @@
-try:
-    from opencog.atomspace import AtomSpace, Atom, get_type, types
-except ImportError:
-    from atomspace_remote import AtomSpace, Atom, get_type, types
+#try:
+from opencog.atomspace import AtomSpace, Atom, get_type, types, TruthValue
+#except ImportError:
+#    from atomspace_remote import AtomSpace, Atom, get_type, types
 
 from copy import copy, deepcopy
 from functools import *
