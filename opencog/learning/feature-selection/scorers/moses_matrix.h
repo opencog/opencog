@@ -26,7 +26,7 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/comboreduct/combo/common_def.h>
 
 namespace opencog {
@@ -36,7 +36,7 @@ using namespace combo;
 
 /**
  * Wrapper to use moses scoring precision (see
- * opencog/learning/moses/moses/scoring.h).  This is one of the
+ * opencog/learning/moses/scoring/scoring.h).  This is one of the
  * confusion-matrix based scorers.
  *
  * That wrapper uses the method best_possible_score() given a certain

@@ -32,7 +32,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include "../representation/instance_set.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 
 namespace opencog { namespace moses {
 

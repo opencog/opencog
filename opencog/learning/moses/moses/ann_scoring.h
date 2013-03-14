@@ -31,7 +31,7 @@
 #include <opencog/comboreduct/combo/simple_nn.h>
 #include <opencog/comboreduct/reduct/ann_rules.h>
 
-#include "scoring.h"
+#include "../scoring/scoring.h"
 #include "pole_balancing.h"
 
 using namespace opencog;

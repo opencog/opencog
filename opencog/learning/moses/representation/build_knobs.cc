@@ -33,7 +33,7 @@
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_omp.h>
 
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/learning/moses/moses/ann_scoring.h>
 
 namespace opencog { namespace moses {

@@ -47,7 +47,7 @@ static const string simple="simple"; // See algo/simple.h
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)
 static const string pre="pre";  // Precision (see
-                                // opencog/learning/moses/moses/scoring.h)
+                                // opencog/learning/moses/scoring/scoring.h)
 
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
@@ -158,7 +158,7 @@ struct fs_scorer : public unary_function<FeatureSet, double>
             _ptr_mi_scorer =
                 new MICScorerCTable<FeatureSet>(ctable, fs_params.mi_confi);
         } else if (fs_params.scorer == pre) { // precision (see
-            // opencog/learning/moses/moses/scoring.h)
+            // opencog/learning/moses/scoring/scoring.h)
             _ptr_pre_scorer =
                 new pre_scorer<FeatureSet>(ctable,
                                            fs_params.pre_penalty,

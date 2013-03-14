@@ -34,9 +34,9 @@
 #include "../optimization/hill-climbing.h"
 #include "../optimization/star-anneal.h"
 #include "../optimization/univariate.h"
+#include "../scoring/scoring.h"
 #include "distributed_moses.h"
 #include "moses_params.h"
-#include "scoring.h"
 
 namespace opencog { namespace moses {
 

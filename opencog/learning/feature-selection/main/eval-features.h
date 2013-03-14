@@ -53,7 +53,7 @@ static const pair<string, string> confidence_penalty_intensity_opt("confidence-p
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)
 static const string pre="pre";  // Precision (see
-                                // opencog/learning/moses/moses/scoring.h)
+                                // opencog/learning/moses/scoring/scoring.h)
 
 string opt_desc_str(const pair<string, string>& opt)
 {

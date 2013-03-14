@@ -33,7 +33,7 @@
 #include <opencog/util/platform.h>
 
 #include "../representation/instance_set.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 #include "optimization.h"
 
 namespace opencog { namespace moses {
