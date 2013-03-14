@@ -619,7 +619,7 @@ size_t hill_climbing::cross_top_three(deme_t& deme,
     unsigned num_to_sort = cbrtf(6*num_to_make) + 3;
     if (sample_size < num_to_sort) num_to_sort = sample_size;
     std::partial_sort(next(deme.begin(), sample_start),
-                      next(deme.begin(), sample_start + num_to_make),
+                      next(deme.begin(), sample_start + num_to_sort),
                       next(deme.begin(), sample_start + sample_size),
                       std::greater<deme_inst_t>());
     deme.resize(deme_size + num_to_make);
