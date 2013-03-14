@@ -270,7 +270,16 @@ protected:
     score_t _positive_total;
     score_t _negative_total;
 
-    std::function<score_t(const CTable::counter_t&)> sum_outputs;
+    // Regarding the 2 functions below (sum_pos and sum_neg):
+    //
+    // When the output type is contin then the notion of
+    // positive/negative is fuzzy, with degree corresponding to the
+    // weight of the contin value.
+
+    // give a ctable's row return the sum of true positives
+    std::function<score_t(const CTable::counter_t&)> sum_pos;
+    // give a ctable's row return the sum of false positives
+    std::function<score_t(const CTable::counter_t&)> sum_neg;
 };
 
 /**

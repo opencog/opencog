@@ -200,18 +200,32 @@ discriminator::discriminator(const CTable& ct)
     _output_type = ct.get_output_type();
     if (_output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
-        // in the output. 
-        sum_outputs = [](const CTable::counter_t& c)->score_t
+        // in the output.
+        sum_pos = [](const CTable::counter_t& c)->score_t
         {
             return c.get(id::logical_true);
         };
+        // For boolean tables, sum the total number of 'F' values
+        // in the output.
+        sum_neg = [](const CTable::counter_t& c)->score_t
+        {
+            return c.get(id::logical_false);
+        };
     } else if (_output_type == id::contin_type) {
-        // For contin tables, we return the sum of the row values.
-        sum_outputs = [](const CTable::counter_t& c)->score_t
+        // For contin tables, we return the sum of the row values > 0
+        sum_pos = [](const CTable::counter_t& c)->score_t
         {
             score_t res = 0.0;
             for (const CTable::counter_t::value_type& cv : c)
-                res += get_contin(cv.first) * cv.second;
+                res += std::max(0.0, get_contin(cv.first) * cv.second);
+            return res;
+        };
+        // For contin tables, we return the sum of the row values < 0
+        sum_neg = [](const CTable::counter_t& c)->score_t
+        {
+            score_t res = 0.0;
+            for (const CTable::counter_t::value_type& cv : c)
+                res += std::min(0.0, get_contin(cv.first) * cv.second);
             return res;
         };
     } else {
@@ -224,17 +238,8 @@ discriminator::discriminator(const CTable& ct)
     for (const CTable::value_type& vct : _ctable) {
         // vct.first = input vector
         // vct.second = counter of outputs
-
-        double sum_pos = sum_outputs(vct.second);
-        double sum_neg;
-        unsigned totalc = vct.second.total_count();
-        if (_output_type == id::boolean_type) {
-            sum_neg = totalc - sum_pos;
-        } else {
-            sum_neg = -sum_pos;
-        }
-        _positive_total += sum_pos;
-        _negative_total += sum_neg;
+        _positive_total += sum_pos(vct.second);
+        _negative_total += sum_neg(vct.second);
     }
     logger().info() << "Discriminator: num_positive=" << _positive_total
                     << " num_negative=" << _negative_total;
@@ -262,25 +267,20 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
         // vct.first = input vector
         // vct.second = counter of outputs
 
-        double sum_pos = sum_outputs(vct.second);
-        double sum_neg;
+        double pos = sum_pos(vct.second);
+        double neg = sum_neg(vct.second);
         unsigned totalc = vct.second.total_count();
-        if (_output_type == id::boolean_type) {
-            sum_neg = totalc - sum_pos;
-        } else {
-            sum_neg = -sum_pos;
-        }
 
         if (interpret_tr(vct.first.get_variant()) == id::logical_true)
         {
-            ctr.true_positive_sum += sum_pos;
-            ctr.false_positive_sum += sum_neg;
+            ctr.true_positive_sum += pos;
+            ctr.false_positive_sum += neg;
             ctr.positive_count += totalc;
         }
         else
         {
-            ctr.true_negative_sum += sum_neg;
-            ctr.false_negative_sum += sum_pos;
+            ctr.true_negative_sum += neg;
+            ctr.false_negative_sum += pos;
             ctr.negative_count += totalc;
         }
     }
@@ -362,21 +362,16 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     {
         const CTable::counter_t& c = it->second;
 
+        double pos = sum_pos(c);
+        double neg = sum_neg(c);
         unsigned total = c.total_count();
-        double sum_pos = sum_outputs(c);
-        double sum_neg;
-        if (_output_type == id::boolean_type) {
-            sum_neg = total - sum_pos;
-        } else {
-            sum_neg = -sum_pos;
-        }
 
-        double vary = get_variable(sum_pos, sum_neg, total);
+        double vary = get_variable(pos, neg, total);
 
-        logger().fine() << "Disc: total=" << total << " pos=" << sum_pos
-                        << " neg=" << sum_neg << " vary=" << vary;
+        logger().fine() << "Disc: total=" << total << " pos=" << pos
+                        << " neg=" << neg << " vary=" << vary;
 
-        const pos_neg_cnt pnc(sum_pos, sum_neg, total);
+        const pos_neg_cnt pnc(pos, neg, total);
         max_vary.insert({vary, pnc});
     }
 
@@ -588,7 +583,7 @@ penalized_bscore prerec_bscore::operator()(const combo_tree& tr) const
     score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
     score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
 
-    // We are maximizing recall, so that is the first part of the score.
+    // We are maximizing precision, so that is the first part of the score.
     penalized_bscore pbs;
     pbs.first.push_back(precision);
     
