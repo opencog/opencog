@@ -31,7 +31,7 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 #include "../moses/types.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 
 using namespace ant_combo;
 using namespace opencog::moses;
