@@ -229,13 +229,19 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     } else {
         logger().info("Inferred target score = %g", target_score);
     }
-    target_score -= c_scorer.min_improv();
+
+    // negative min_improv is interpreted as percentage of
+    // improvement, if so then don't substract anything, since in that
+    // scenario the absolute min improvent can be arbitrarily small
+    score_t actual_min_improv = std::max(c_scorer.min_improv(), (score_t)0);
+    target_score -= actual_min_improv;
     logger().info("Subtract %g (minimum significant improvement) "
                   "from the target score to deal with float imprecision = %g",
-                  c_scorer.min_improv(), target_score);
+                  actual_min_improv, target_score);
+
     opt_params.terminate_if_gte = target_score;
     moses_params.max_score = target_score;
-    
+
     // update minimum score improvement
     opt_params.set_min_score_improv(c_scorer.min_improv());
 
