@@ -28,7 +28,7 @@
 
 #include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/moses/moses_params.h>
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>

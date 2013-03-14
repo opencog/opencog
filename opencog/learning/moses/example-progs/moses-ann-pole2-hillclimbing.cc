@@ -3,7 +3,7 @@
 #include <iostream>
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 #include "../moses/ann_scoring.h"
 
 #include <opencog/util/mt19937ar.h>

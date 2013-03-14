@@ -44,7 +44,7 @@
 #include "../representation/instance_set.h"
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 #include "../moses/types.h"
 #include "deme_expander.h"
 #include "feature_selector.h"

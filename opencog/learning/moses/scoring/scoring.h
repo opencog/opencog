@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/scoring.h
+ * opencog/learning/moses/scoring/scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -43,9 +43,9 @@
 
 #include <opencog/comboreduct/table/table.h>
 
-#include "using.h"
+#include "../moses/using.h"
+#include "../moses/types.h"
 #include "../representation/representation.h"
-#include "types.h"
 
 namespace opencog { namespace moses {
 

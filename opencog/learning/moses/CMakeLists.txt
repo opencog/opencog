@@ -34,9 +34,10 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/neighborhood_sampling
 	moses/partial
 	moses/pole_balancing
-	moses/scoring
 	moses/types
 	moses/using
+
+	scoring/scoring
 
 	metapopulation/metapopulation
 	metapopulation/metapop_params
