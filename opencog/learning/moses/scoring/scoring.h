@@ -264,13 +264,27 @@ struct discriminator
     };
     d_counts count(const combo_tree&) const;
 
+    // Like count but do the counting for each datapoint (each row of
+    // the ctable). This is useful for finer grain bscore (see
+    // variable discriminator_bscore::full_bscore)
+    std::vector<d_counts> counts(const combo_tree&) const;
+
 protected:
     CTable _ctable;
     type_node _output_type;
-    score_t _positive_total;
-    score_t _negative_total;
+    score_t _true_total;        // total number of Ts in the ctable
+    score_t _false_total;       // total number of Fs in the ctable
 
-    std::function<score_t(const CTable::counter_t&)> sum_outputs;
+    // Regarding the 2 functions below (sum_pos and sum_neg):
+    //
+    // When the output type is contin then the notion of
+    // positive/negative is fuzzy, with degree corresponding to the
+    // weight of the contin value.
+
+    // give a ctable's row return the sum of true positives
+    std::function<score_t(const CTable::counter_t&)> sum_true;
+    // give a ctable's row return the sum of false positives
+    std::function<score_t(const CTable::counter_t&)> sum_false;
 };
 
 /**
@@ -335,6 +349,15 @@ protected:
     float _min_threshold;
     float _max_threshold;
     float _hardness;
+
+    // if enabled then each datapoint is an entry in the bscore
+    // corresponding to its contribution to the variable score
+    // component, and the last element of the bscore correspong to the
+    // fix score component (like when disabled).
+    //
+    // All the datapoint contributions should sum up to the overall
+    // variable score
+    bool full_bscore;
 };
 
 /**
