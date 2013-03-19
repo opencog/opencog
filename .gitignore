@@ -4,7 +4,9 @@ opencog-python.log
 
 # misc binaries
 bin
+bin-debug
 build
+build-debug
 opencog/server/cogserver
 opencog/atomspace/type-definer
 opencog/persist/sniff
