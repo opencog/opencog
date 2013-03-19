@@ -200,18 +200,32 @@ discriminator::discriminator(const CTable& ct)
     _output_type = ct.get_output_type();
     if (_output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
-        // in the output. 
-        sum_outputs = [](const CTable::counter_t& c)->score_t
+        // in the output.
+        sum_true = [](const CTable::counter_t& c)->score_t
         {
             return c.get(id::logical_true);
         };
+        // For boolean tables, sum the total number of 'F' values
+        // in the output.
+        sum_false = [](const CTable::counter_t& c)->score_t
+        {
+            return c.get(id::logical_false);
+        };
     } else if (_output_type == id::contin_type) {
-        // For contin tables, we return the sum of the row values.
-        sum_outputs = [](const CTable::counter_t& c)->score_t
+        // For contin tables, we return the sum of the row values > 0
+        sum_true = [](const CTable::counter_t& c)->score_t
         {
             score_t res = 0.0;
             for (const CTable::counter_t::value_type& cv : c)
-                res += get_contin(cv.first) * cv.second;
+                res += std::max(0.0, get_contin(cv.first) * cv.second);
+            return res;
+        };
+        // For contin tables, we return the sum of the row values < 0
+        sum_false = [](const CTable::counter_t& c)->score_t
+        {
+            score_t res = 0.0;
+            for (const CTable::counter_t::value_type& cv : c)
+                res += std::min(0.0, get_contin(cv.first) * cv.second);
             return res;
         };
     } else {
@@ -219,25 +233,16 @@ discriminator::discriminator(const CTable& ct)
         return;
     }
 
-    _positive_total = 0.0;
-    _negative_total = 0.0;
+    _true_total = 0.0;
+    _false_total = 0.0;
     for (const CTable::value_type& vct : _ctable) {
         // vct.first = input vector
         // vct.second = counter of outputs
-
-        double sum_pos = sum_outputs(vct.second);
-        double sum_neg;
-        unsigned totalc = vct.second.total_count();
-        if (_output_type == id::boolean_type) {
-            sum_neg = totalc - sum_pos;
-        } else {
-            sum_neg = -sum_pos;
-        }
-        _positive_total += sum_pos;
-        _negative_total += sum_neg;
+        _true_total += sum_true(vct.second);
+        _false_total += sum_false(vct.second);
     }
-    logger().info() << "Discriminator: num_positive=" << _positive_total
-                    << " num_negative=" << _negative_total;
+    logger().info() << "Discriminator: num_true=" << _true_total
+                    << " num_false=" << _false_total;
 }
 
 
@@ -262,34 +267,62 @@ discriminator::d_counts discriminator::count(const combo_tree& tr) const
         // vct.first = input vector
         // vct.second = counter of outputs
 
-        double sum_pos = sum_outputs(vct.second);
-        double sum_neg;
+        double pos = sum_true(vct.second);
+        double neg = sum_false(vct.second);
         unsigned totalc = vct.second.total_count();
-        if (_output_type == id::boolean_type) {
-            sum_neg = totalc - sum_pos;
-        } else {
-            sum_neg = -sum_pos;
-        }
 
         if (interpret_tr(vct.first.get_variant()) == id::logical_true)
         {
-            ctr.true_positive_sum += sum_pos;
-            ctr.false_positive_sum += sum_neg;
+            ctr.true_positive_sum += pos;
+            ctr.false_positive_sum += neg;
             ctr.positive_count += totalc;
         }
         else
         {
-            ctr.true_negative_sum += sum_neg;
-            ctr.false_negative_sum += sum_pos;
+            ctr.true_negative_sum += neg;
+            ctr.false_negative_sum += pos;
             ctr.negative_count += totalc;
         }
     }
     return ctr;
 }
 
+vector<discriminator::d_counts> discriminator::counts(const combo_tree& tr) const
+{
+    std::vector<d_counts> ctr_seq;
+
+    interpreter_visitor iv(tr);
+    auto interpret_tr = boost::apply_visitor(iv);
+
+    for (const CTable::value_type& vct : _ctable) {
+        // vct.first = input vector
+        // vct.second = counter of outputs
+
+        double pos = sum_true(vct.second);
+        double neg = sum_false(vct.second);
+        unsigned totalc = vct.second.total_count();
+
+        d_counts ctr;
+        if (interpret_tr(vct.first.get_variant()) == id::logical_true)
+        {
+            ctr.true_positive_sum = pos;
+            ctr.false_positive_sum = neg;
+            ctr.positive_count = totalc;
+        }
+        else
+        {
+            ctr.true_negative_sum = neg;
+            ctr.false_negative_sum = pos;
+            ctr.negative_count = totalc;
+        }
+        ctr_seq.push_back(ctr);
+    }
+    return ctr_seq;
+}
+
 //////////////////////////
 // disciminating_bscore //
-/////////////////////////
+//////////////////////////
 
 discriminating_bscore::discriminating_bscore(const CTable& ct,
                                              float min_threshold,
@@ -299,7 +332,8 @@ discriminating_bscore::discriminating_bscore(const CTable& ct,
       _ctable_usize(ct.uncompressed_size()),
       _min_threshold(min_threshold),
       _max_threshold(max_threshold),
-      _hardness(hardness)
+      _hardness(hardness),
+      full_bscore(false)
 {
     logger().info("Discriminating scorer, hardness = %f, "
                   "min_threshold = %f, "
@@ -362,21 +396,16 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     {
         const CTable::counter_t& c = it->second;
 
+        double pos = sum_true(c);
+        double neg = sum_false(c);
         unsigned total = c.total_count();
-        double sum_pos = sum_outputs(c);
-        double sum_neg;
-        if (_output_type == id::boolean_type) {
-            sum_neg = total - sum_pos;
-        } else {
-            sum_neg = -sum_pos;
-        }
 
-        double vary = get_variable(sum_pos, sum_neg, total);
+        double vary = get_variable(pos, neg, total);
 
-        logger().fine() << "Disc: total=" << total << " pos=" << sum_pos
-                        << " neg=" << sum_neg << " vary=" << vary;
+        logger().fine() << "Disc: total=" << total << " pos=" << pos
+                        << " neg=" << neg << " vary=" << vary;
 
-        const pos_neg_cnt pnc(sum_pos, sum_neg, total);
+        const pos_neg_cnt pnc(pos, neg, total);
         max_vary.insert({vary, pnc});
     }
 
@@ -557,10 +586,11 @@ score_t recall_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 
 /// Return the recall for this ctable row(s).
 ///
-/// _positive_total is the total number of rows that are positive.
+/// _true_total is the total number of rows that are T (or positive
+/// weighted if contin)
 score_t recall_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
-    return pos / _positive_total;
+    return pos / _true_total;
 }
 
 ///////////////////
@@ -579,24 +609,69 @@ prerec_bscore::prerec_bscore(const CTable& ct,
 // and recall are switched.
 penalized_bscore prerec_bscore::operator()(const combo_tree& tr) const
 {
-    d_counts ctr = count(tr);
-
-    // Compute normalized precision and recall.
-    score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
-    score_t precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 0.0;
-
-    score_t tp_fn = ctr.true_positive_sum + ctr.false_negative_sum;
-    score_t recall = (0.0 < tp_fn) ? ctr.true_positive_sum / tp_fn : 0.0;
-
-    // We are maximizing recall, so that is the first part of the score.
     penalized_bscore pbs;
-    pbs.first.push_back(precision);
-    
+    score_t precision = 1.0,
+        recall = 0.0;
+    if (full_bscore) {
+        // each element of the bscore correspond to a data point
+        // contribution of the variable component of the score
+
+        vector<d_counts> ctr_seq = counts(tr);
+        score_t pos_total = 0.0;
+        for (const d_counts& ctr : ctr_seq) {
+            // here we actually store (tp-fp)/2 instead of tp, to have
+            // a more expressive bscore (so that bad datapoints are
+            // distict from non-positive ones)
+            pbs.first.push_back((ctr.true_positive_sum - ctr.false_positive_sum)
+                                / 2);
+            pos_total += ctr.positive_count;
+        }
+        // divide all element by pos_total (so it sums up to precision - 1/2)
+        boost::transform(pbs.first, pbs.first.begin(), arg1 / pos_total);
+
+        // By using (tp-fp)/2 the sum of all the per-row contributions
+        // is offset by -1/2 from the precision, as proved below
+        //
+        // 1/2 * (tp - fp) / (tp + fp)
+        // = 1/2 * (tp - tp + tp - fp) / (tp + fp)
+        // = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
+        // = 1/2 * 2*tp / (tp + fp) - 1
+        // = precision - 1/2
+        //
+        // So before adding the recall penalty we add +1/2 to
+        // compensate that
+        pbs.first.push_back(0.5);
+
+        // compute precision and recall
+        precision = boost::accumulate(pbs.first, 0);
+        for (const d_counts& ctr : ctr_seq)
+            recall += ctr.true_positive_sum;
+        if (0.0 < _true_total)
+            recall /= _true_total;
+    } else {
+        // the aggregated (across all datapoints) variable component
+        // of the score is the first value of the bscore
+
+        d_counts ctr = count(tr);
+
+        // Compute normalized precision and recall.
+        score_t tp_fp = ctr.true_positive_sum + ctr.false_positive_sum;
+        precision = (0.0 < tp_fp) ? ctr.true_positive_sum / tp_fp : 1.0;
+        recall = (0.0 < _true_total) ? ctr.true_positive_sum / _true_total : 0.0;
+
+        // We are maximizing precision, so that is the first part of the score.
+        pbs.first.push_back(precision);
+    }
+
+    // calculate recall_penalty
     score_t recall_penalty = get_threshold_penalty(recall);
     pbs.first.push_back(recall_penalty);
+
+    // Log precision, recall and penalty
     if (logger().isFineEnabled()) 
-        logger().fine("prerec_bscore: precision = %f  recall=%f  recall penalty=%e",
-                     precision, recall, recall_penalty);
+        logger().fine("prerec_bscore: precision = %f  "
+                      "recall=%f  recall penalty=%e",
+                      precision, recall, recall_penalty);
  
     // Add the Complexity penalty
     if (occam)
@@ -617,7 +692,7 @@ score_t prerec_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) cons
 /// Return the best-possible recall for this ctable row(s).
 score_t prerec_bscore::get_fixed(score_t pos, score_t neg, unsigned cnt) const
 {
-    return pos / _positive_total;
+    return pos / _true_total;
 }
 
 ////////////////
@@ -668,8 +743,8 @@ penalized_bscore bep_bscore::operator()(const combo_tree& tr) const
 score_t bep_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
 {
     // XXX TODO FIXME is this really correct?
-    double best_possible_precision = pos / (cnt * _positive_total);
-    double best_possible_recall = 1.0 / _positive_total;
+    double best_possible_precision = pos / (cnt * _true_total);
+    double best_possible_recall = 1.0 / _true_total;
     return (best_possible_precision + best_possible_recall) / 2;
 }
 
@@ -743,7 +818,7 @@ score_t f_one_bscore::get_variable(score_t pos, score_t neg, unsigned cnt) const
     double best_possible_recall = 1.0;
     double f_one = 2 * best_possible_precision * best_possible_recall 
               / (best_possible_recall + best_possible_precision);
-    f_one /= _positive_total; // since we add these together.
+    f_one /= _true_total; // since we add these together.
     return f_one;
 }
 
