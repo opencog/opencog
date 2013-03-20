@@ -84,27 +84,30 @@ def rules(a, deduction_types):
     # It won't add a new Rule for atoms that are created during the inference, rather they will be added to
     # the Proof DAG. It's simple to have a separate Rule for each axiom, but it's slow because the chainer
     # will try to unify a target against every axiom Rule.
-    #for obj in a.get_atoms_by_type(t.Atom):
-    #    # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-    #    if obj.tv.count > 0 and obj.tv.mean > 0:
-    #        tr = tree_from_atom(obj)
-    #        # A variable with a TV could just prove anything; that's evil!
-    #        if not tr.is_variable():
-    #            
-    #            # tacky filter
-    #            if 'CHUNK' in str(tr):
-    #                continue
-    #            
-    #            r = Rule(tr, [], '[axiom]', tv = obj.tv)
-    #            rules.append(r)
+    rule_for_every_atom = True
+    if rule_for_every_atom:
 
-    # Just lookup the rule rather than having separate rules. Would be faster
-    # with a large number of atoms (i.e. more scalable). Some examples will break if
-    # you use it due to bugs in the backward chainer.
-    r = Rule(Var(123),[],
-                      name='Lookup',
-                      match=match_axiom)
-    rules.append(r)
+        for obj in a.get_atoms_by_type(t.Atom):
+            # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+            #if obj.tv.count > 0 and obj.tv.mean > 0:
+            tr = tree_from_atom(obj)
+            # A variable with a TV could just prove anything; that's evil!
+            if not tr.is_variable():
+
+                # tacky filter
+                if 'CHUNK' in str(tr):
+                    continue
+
+                r = Rule(tr, [], '[axiom]', tv = obj.tv)
+                rules.append(r)
+    else:
+        # Just lookup the rule rather than having separate rules. Would be faster
+        # with a large number of atoms (i.e. more scalable). Some examples will break if
+        # you use it due to bugs in the backward chainer.
+        r = Rule(Var(123),[],
+                          name='Lookup',
+                          match=match_axiom)
+        rules.append(r)
 
     # A simple example Rule to test the mechanism. You're allowed to add a Rule which calls
     # any Python function to decide one of the Atoms. This one does the plus calculation.
@@ -219,13 +222,13 @@ def rules(a, deduction_types):
 
     rules += logical_rules(a, deduction_types)
 
-    rules += quantifier_rules(a)
+    #rules += quantifier_rules(a)
 
     #rules += temporal_rules(a)
     
     #rules += planning_rules(a)
 
-    #rules += subset_rules(a)
+    rules += subset_rules(a)
 
     # Return every Rule specified above.
     return rules
