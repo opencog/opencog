@@ -22,11 +22,13 @@
  */
 #include <ctime>
 
+#include <boost/range/numeric.hpp>
+
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/optimization/hill-climbing.h>
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 
@@ -162,8 +164,8 @@ void moses_learning::operator()()
     case HC_BUILD_CANDIDATES:  {
 
         std::cout << "BUILD" << std::endl;
-        bscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
-        if (metapop->_dex.create_deme(*exemplar))
+        pbscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
+        if (metapop->_dex.create_demes(get_tree(*exemplar)))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;
@@ -181,9 +183,10 @@ void moses_learning::operator()()
 
         // learning time is uncapped.
         time_t max_time = INT_MAX;
-        int o = metapop->_dex.optimize_deme(
-                    max_for_generation - stats.n_evals,
-                    max_time);
+        auto evals = metapop->_dex.optimize_demes(max_for_generation
+                                                  - stats.n_evals,
+                                                  max_time);
+        int o = boost::accumulate(evals, 0);
         std::cout << "number of evaluations: " << o << std::endl;
 
         if (o < 0)
@@ -202,9 +205,10 @@ void moses_learning::operator()()
 
     case HC_FINISH_CANDIDATES:  {
 
-        metapop->merge_deme(metapop->_dex._deme,
-                            metapop->_dex._rep,
-                            stats.n_evals);
+        OC_ASSERT(false, "TODO");
+        // metapop->merge_demes(metapop->_dex._demes,
+        //                      metapop->_dex._reps,
+        //                      /* stats.n_evals */ {}, {} /* deme IDs */);
 
         //print the generation number and a best solution
         std::cout << "sampled " << stats.n_evals
@@ -224,7 +228,7 @@ void moses_learning::operator()()
         std::cout << "best program total: " << _best_program_estimated << std::endl;
         std::cout << "best score total: " << _best_fitness_estimated << std::endl;
 
-        bscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
+        pbscored_combo_tree_ptr_set_cit exemplar = metapop->select_exemplar();
         if(exemplar == metapop->end())
             _hcState = HC_IDLE;
         else {
@@ -265,7 +269,7 @@ const combo_tree& moses_learning::best_program_estimated()
 const combo_tree& moses_learning::current_program()
 {
     //returns the best program which has never been sent to the owner
-    for(bscored_combo_tree_ptr_set_cit mci = metapop->begin();
+    for(pbscored_combo_tree_ptr_set_cit mci = metapop->begin();
         mci != metapop->end(); ++mci)  {
         _current_program = get_tree(*mci);
 

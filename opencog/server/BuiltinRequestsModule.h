@@ -50,8 +50,6 @@ class BuiltinRequestsModule : public Module
 private:
 
     Factory<ListRequest, Request>         listFactory;
-    Factory<LoadRequest, Request>         loadFactory;
-    Factory<SaveRequest, Request>         saveFactory;
     Factory<DataRequest, Request>         dataFactory;
     Factory<HelpRequest, Request>         helpFactory;
     Factory<ExitRequest, Request>         exitFactory;

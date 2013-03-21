@@ -131,7 +131,7 @@ public:
         // range, and moses will fail to find a solution.
         string tr_str("+(6 *(6 $1))");
         string cp_opt("-y");
-        moses_test_combo({"-Hcp", cp_opt + tr_str, "-nexp"}, 
+        moses_test_combo({"-Hcp", cp_opt + tr_str, "-nexp"},
                          {tr_str, "*(6 +(1 $1))"});
     }
 

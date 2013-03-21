@@ -28,34 +28,37 @@ namespace opencog {
 
 using namespace std;
 
-feature_set incremental_select_features(const CTable& ctable,
-                                        const feature_selection_parameters& fs_params)
+feature_set_pop incremental_select_feature_sets(const CTable& ctable,
+                                                const feature_selection_parameters& fs_params)
 {
     auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end());
+    typedef MutualInformation<feature_set> FeatureScorer;
+    FeatureScorer fsc(ctable);
 
     logger().info() << "incremental_select_features, targ sz="
                     << fs_params.target_size
                     << " thresh=" << fs_params.threshold;
     if (fs_params.threshold <= 0 && fs_params.target_size <= 0) {
         // Nothing happened, return all features by default
-        return all_features;
+        feature_set_pop::value_type sfs(fsc(all_features), all_features);
+        return {sfs};
     }
-
-    typedef MutualInformation<feature_set> FeatureScorer;
-    FeatureScorer fsc(ctable);
-    if (0 < fs_params.target_size) {
-        return cached_adaptive_incremental_selection(all_features, fsc,
+    
+    feature_set fs = 0 < fs_params.target_size ?
+        cached_adaptive_incremental_selection(all_features, fsc,
                                               fs_params.target_size,
                                               fs_params.inc_interaction_terms,
                                               fs_params.inc_red_intensity,
                                               0, 1,
-                                              fs_params.inc_target_size_epsilon);
-    }
-    return cached_incremental_selection(all_features, fsc,
-                                   fs_params.threshold,
-                                   fs_params.inc_interaction_terms,
-                                   fs_params.inc_red_intensity);
+                                              fs_params.inc_target_size_epsilon)
+        : cached_incremental_selection(all_features, fsc,
+                                       fs_params.threshold,
+                                       fs_params.inc_interaction_terms,
+                                       fs_params.inc_red_intensity);
+
+    feature_set_pop::value_type sfs(fsc(fs), fs);
+    return {sfs};
 }
 
 } // ~namespace opencog
