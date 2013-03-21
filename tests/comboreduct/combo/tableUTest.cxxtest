@@ -101,8 +101,9 @@ public:
         vertex_seq o{0, 1, 10.1, 6.5};
         OTable ot(o);
         ITable it;
-        it.push_back({1.0, 1.0});
-        it.push_back({0.0, 1.0});
+        // first row looks boolean, do not be fooled!
+        it.push_back({1, 1});
+        it.push_back({0, 1});
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         testIStreamTable("0,1,1\n"
@@ -117,7 +118,7 @@ public:
         vertex_seq o{0, 10.1, 6.5};
         OTable ot(o, olabel);
         ITable it;
-        it.push_back({1.0, 1.0});
+        it.push_back({1, 1});
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         vector<string> il{label1, label2};
@@ -134,9 +135,9 @@ public:
         vertex_seq o{enum_t("sad"), enum_t("bored"), enum_t("super-happy")};
         OTable ot(o, olabel);
         ITable it;
-        it.push_back(vertex_seq({1, 1, id::logical_false}));
-        it.push_back(vertex_seq({0.44, 244.2, id::logical_true}));
-        it.push_back(vertex_seq({9.5, 4.2, id::logical_false}));
+        it.push_back({1, 1, id::logical_false});
+        it.push_back({0.44, 244.2, id::logical_true});
+        it.push_back({9.5, 4.2, id::logical_false});
         vector<string> il{label1, label2, "truth"};
         it.set_labels(il);
         vector<type_node> itypes({id::contin_type, id::contin_type, id::boolean_type});
@@ -196,8 +197,8 @@ public:
         cout << ss.str();
         TS_ASSERT_EQUALS(ss.str(),
                          "troc,truc\n"
-                         "{1:1},1\n"
-                         "{0:1},0\n");
+                         "{true:1},true\n"
+                         "{false:1},false\n");
     }
 
     // Set target Price, and ignore column Temperature
@@ -223,9 +224,9 @@ public:
         vertex_seq o{1, 0.44, 9.5}; // price column
         OTable ot(o, label1);
         ITable it;
-        it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
-        it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
-        it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
+        it.push_back({enum_t("sad"), id::logical_false});
+        it.push_back({enum_t("bored"), id::logical_true});
+        it.push_back({enum_t("super-happy"), id::logical_false});
         vector<string> il{olabel, "truth"};
         it.set_labels(il);
         vector<type_node> itypes({id::enum_type, id::boolean_type});
@@ -242,9 +243,9 @@ public:
         vertex_seq o{1, 0.44, 9.5}; // price column
         OTable ot(o, label1);
         ITable it;
-        it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
-        it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
-        it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
+        it.push_back({enum_t("sad"), id::logical_false});
+        it.push_back({enum_t("bored"), id::logical_true});
+        it.push_back({enum_t("super-happy"), id::logical_false});
         vector<string> il{olabel, "truth"};
         it.set_labels(il);
         vector<type_node> itypes({id::enum_type, id::boolean_type});
@@ -259,22 +260,7 @@ public:
                          "2", {"3"});
     }
 
-    void test_sparseFile1()
-    {
-        std::cout << "\n----------------------------" << std::endl;
-        string target_feature = "target1";
-        vector<string> ignore_features = {"a", "b", "c", "target2"};
-        Table tt = loadTable(tableUTest_dir + "sparse.data", target_feature, ignore_features);
-
-        testIStreamTable("target1,d,e,f,g,x,y,z\n"
-                         "thing,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
-                         "some,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
-                         "other,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
-                         "last,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
-                         tt.itable, tt.otable, true, tt.tt);
-    }
-
-    void test_sparseFile2()
+    void test_sparseFile()
     {
         std::cout << "\n----------------------------" << std::endl;
         string target_feature = "target2";
@@ -282,10 +268,10 @@ public:
         Table tt = loadTable(tableUTest_dir + "sparse.data", target_feature, ignore_features);
 
         testIStreamTable("target2,d,e,f,g,x,y,z\n"
-                         "3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
-                         "4.4,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
-                         "5.5,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
-                         "6.6,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
+                         "3.0,0,0,0,0,0,0,0\n"
+                         "4.4,4,0,6,0,0,0,0\n"
+                         "5.5,0,5,0,7,0,0,0\n"
+                         "6.6,4,5,0,0,24,25,26\n",
                          tt.itable, tt.otable, true, tt.tt);
     }
 

@@ -915,7 +915,7 @@ void reduce_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
                       "sin_child isn't of type contin (reduce_sin).");
             contin_t c = get_contin(*c_it);
             OC_ASSERT(isfinite(c),
-                      "contin isn't finite (reduce_sin).");
+                      "contin isn't of infinite (reduce_sin).");
             if(c <= PI || c > PI)
                 *c_it = fmod((c+PI), 2.0*PI) - PI;
         }

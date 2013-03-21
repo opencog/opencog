@@ -25,17 +25,14 @@
 #ifndef _OPENCOG_FEATURE_SELECTION_SIMPLE_ALGO_H
 #define _OPENCOG_FEATURE_SELECTION_SIMPLE_ALGO_H
 
-#include <mutex>
-
 #include <opencog/util/numeric.h>
-#include <opencog/util/oc_omp.h>
 
 #include "../main/feature-selection.h"  // needed for feature_set, feature_selection_parameters
 
 namespace opencog {
 
-feature_set_pop simple_select_feature_sets(const CTable& ctable,
-                                           const feature_selection_parameters& fs_params);
+feature_set simple_select_features(const CTable& ctable,
+                                   const feature_selection_parameters& fs_params);
 
 /**
  * Returns a set S of features following the algo:
@@ -59,27 +56,18 @@ FeatureSet simple_selection(const FeatureSet& features,
 {
     std::multimap<double, FeatureSet> sorted_flist;
 
-    // build vector of singleton feature sets
-    std::vector<FeatureSet> singletons; 
-    for (auto feat : features)
-        singletons.push_back(FeatureSet({feat}));
+    for (auto feat : features) {
+        FeatureSet fs{feat};
+        double sc = scorer(fs);
+        if (threshold <= sc) {
+            sorted_flist.insert({sc, fs});
+        }
+    }
 
-    // compute score of all singletons and insert to sorted_flist
-    // those above threshold
-    std::mutex sfl_mutex;       // mutex for sorted_flist
-    OMP_ALGO::for_each(singletons.begin(), singletons.end(),
-                       [&](const FeatureSet& singleton) {
-                           double sc = scorer(singleton);
-                           if (threshold <= sc) {
-                               std::unique_lock<std::mutex> lock(sfl_mutex);
-                               sorted_flist.insert({sc, singleton});
-                           }
-                       });
-
-    // select num_desired best features from sorted_flist as final
-    // feature set
     FeatureSet final;
+    // for (auto pr : sorted_flist) {
     for (auto pr = sorted_flist.rbegin(); pr != sorted_flist.rend(); pr++) {
+        // std::cout << "sc="<< pr->first <<" fe=" << *pr->second.begin() << std::endl;
         final.insert(*pr->second.begin());
         num_desired --;
         if (num_desired <= 0) break;

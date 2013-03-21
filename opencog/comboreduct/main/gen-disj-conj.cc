@@ -77,8 +77,7 @@ int main(int argc, char** argv)
          "When selecting a variable, probability of selecting with "
          "replacement (rather than without replacement). This is a way "
          "to control the degree of intersection of variables between "
-         "conjunctions. 0 means no replacement (no intersection of variables), "
-         "1 means maximum intersection (uniform distribution with replacement).\n")
+         "conjunctions.\n")
 
         ("swap,w",
          "Swap conjunctions and disjunctions (that is generate a "

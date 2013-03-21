@@ -22,10 +22,6 @@
 
 #include "gen-table.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/random.h>
 #include <opencog/util/log_prog_name.h>
@@ -59,7 +55,6 @@ int main(int argc, char** argv) {
     unsigned long rand_seed;
     bool header;
     string combo_str;
-    string combo_file_str;
     int nsamples;
     float min_contin;
     float max_contin;
@@ -75,15 +70,10 @@ int main(int argc, char** argv) {
          "Random seed.\n")
         (opt_desc_str(header_opt).c_str(),
          value<bool>(&header)->default_value(true),
-         "If 1, the first row is the header of the DSV file (seperators are comma, whitespace and tabulation).\n")
-        (opt_desc_str(combo_program_opt).c_str(),
+         "If 1, the first row is the header of the DSV file (seperators are comma, withspace and tabulation).\n")
+        (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
-         "Combo program to generate the output (wrap it between single quotes "
-         "so that bash doesn't perform variable substitution).\n")
-        (opt_desc_str(combo_program_file_opt).c_str(),
-         value<string>(&combo_file_str),
-         "Name of a file containing a combo program to generate the output. "
-         "It has the precedence over option -y.\n")
+         string("Combo program to generate the output.\n").c_str())
         (opt_desc_str(nsamples_opt).c_str(),
          value<int>(&nsamples)->default_value(-1),
          "Size (number of rows) of the table. If negative then the number is determined automatically (a complete truth table is generated if the combo program has boolean inputs).\n")
@@ -114,10 +104,6 @@ int main(int argc, char** argv) {
 
     /// @todo translate in case the variables are names rather than
     /// place holders
-    if (!combo_file_str.empty()) {
-        ifstream combo_file(combo_file_str);
-        getline(combo_file, combo_str);
-    }
     combo_tree tr = str_to_combo_tree(combo_str);
     type_tree tt = infer_type_tree(tr);
     OC_ASSERT(is_well_formed(tt));
@@ -127,7 +113,7 @@ int main(int argc, char** argv) {
 
     // output the table
     if(output_file.empty())
-        ostreamTable(cout, table);
+        ostreamTable(std::cout, table);
     else {
         ofstream of(output_file.c_str());
         ostreamTable(of, table);

@@ -29,10 +29,6 @@
 
 namespace opencog { namespace combo {
 
-bool operator<(const combo_tree& lt, const combo_tree& rt) {
-    return size_tree_order<vertex>()(lt, rt);
-}
-        
 bool is_procedure_call(const vertex& v)
 {
     return (boost::get<procedure_call>(&v));
@@ -228,20 +224,17 @@ bool operator!=(procedure_call h, const vertex& v)
 
 vertex negate_vertex(const vertex& v)
 {
-    return negate_builtin(get_builtin(v));
-}
-builtin negate_builtin(builtin b) {
-    if (b == id::logical_true)
+    if (v == id::logical_true)
         return id::logical_false;
-    else if (b == id::logical_false)
+    else if (v == id::logical_false)
         return id::logical_true;
     else {
         std::stringstream ss;
-        ss << b;
+        ss << v;
         OC_ASSERT(false,
-                  "builtin %s should be id::logical_true or id::logical_false",
+                  "vertex %s should be id::logical_true or id::logical_false",
                   ss.str().c_str());
-        return builtin();
+        return vertex();
     }
 }
 

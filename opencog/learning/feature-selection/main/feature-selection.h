@@ -47,7 +47,7 @@ static const string simple="simple"; // See algo/simple.h
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)
 static const string pre="pre";  // Precision (see
-                                // opencog/learning/moses/scoring/scoring.h)
+                                // opencog/learning/moses/moses/scoring.h)
 
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
@@ -91,17 +91,11 @@ struct feature_selection_parameters
     // hill-climbing selection parameters
     // actually, these are generic for all moses optimizers,
     // not just hill-climbing...
-    //
-    // @todo it might make sense to use directly hc_parameters from
-    // hill-climbing.h instead of replicating the options
     unsigned int hc_max_evals;
     time_t max_time;
     double hc_max_score;
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
-    bool hc_crossover;
-    unsigned hc_crossover_pop_size;
-    bool hc_widen_search;
 
     // MI scorer parameters
     double mi_confi; //  confidence intensity
@@ -114,8 +108,6 @@ struct feature_selection_parameters
 };
 
 typedef std::set<arity_t> feature_set;
-// Population of feature sets, ordered by scores (higher is better)
-typedef std::multimap<double, feature_set, std::greater<double>> feature_set_pop;
 
 void write_results(const Table& table,
                    const feature_selection_parameters& fs_params);
@@ -158,16 +150,13 @@ struct fs_scorer : public unary_function<FeatureSet, double>
             _ptr_mi_scorer =
                 new MICScorerCTable<FeatureSet>(ctable, fs_params.mi_confi);
         } else if (fs_params.scorer == pre) { // precision (see
-            // opencog/learning/moses/scoring/scoring.h)
+            // opencog/learning/moses/moses/scoring.h)
             _ptr_pre_scorer =
                 new pre_scorer<FeatureSet>(ctable,
                                            fs_params.pre_penalty,
                                            fs_params.pre_min_activation,
                                            fs_params.pre_max_activation,
                                            fs_params.pre_positive);
-        } else {
-            OC_ASSERT(false, "Unknown feature selection scorer %s",
-                      fs_params.scorer.c_str());
         }
     }
     ~fs_scorer() {
@@ -190,11 +179,6 @@ protected:
     pre_scorer<FeatureSet>* _ptr_pre_scorer;
 };
 
-/**
- * Select a population of feature sets
- */
-feature_set_pop select_feature_sets(const CTable& ctable,
-                                    const feature_selection_parameters& fs_params);
 
 /**
  * Select the features according to the method described in fs_params.

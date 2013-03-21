@@ -30,34 +30,21 @@ namespace opencog {
     
 using namespace std;
 
-feature_set_pop simple_select_feature_sets(const CTable& ctable,
-                                           const feature_selection_parameters& fs_params)
+feature_set simple_select_features(const CTable& ctable,
+                                   const feature_selection_parameters& fs_params)
 {
-    typedef MutualInformation<feature_set> FeatureScorer;
-    FeatureScorer fsc(ctable);
     auto ir = boost::irange(0, ctable.get_arity());
     feature_set all_features(ir.begin(), ir.end());
-    if (0 == fs_params.target_size) {
+    if (0 == fs_params.target_size)
         // Nothing happened, return all features by default
+        return all_features;
         
-        // XXX: fsc(all_features) is skipped because that algorithm is
-        // used in combination with contin MI in
-        // feature_selectionUTest.cxxtest and contin MI does not
-        // support feature sets with more than 1 feature.
-        feature_set_pop::value_type sfs(/* fsc(all_features) */ 0,
-                                        all_features);
-        return {sfs};
-    }
-    feature_set fs = simple_selection(all_features, fsc,
-                                      fs_params.target_size,
-                                      fs_params.threshold,
-                                      fs_params.inc_red_intensity);
-    // XXX: fsc(all_features) is skipped because that algorithm is
-    // used in combination with contin MI in
-    // feature_selectionUTest.cxxtest and contin MI does not support
-    // feature sets with more than 1 feature.
-    feature_set_pop::value_type sfs(/* fsc(fs) */ 0, fs);
-    return {sfs};
+    typedef MutualInformation<feature_set> FeatureScorer;
+    FeatureScorer fsc(ctable);
+    return simple_selection(all_features, fsc,
+                            fs_params.target_size,
+                            fs_params.threshold,
+                            fs_params.inc_red_intensity);
 }
 
 } // ~namespace opencog

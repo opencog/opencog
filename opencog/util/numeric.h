@@ -313,14 +313,15 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
 
 /**
  * Compute entropy of an n-ary probability distribution, with the
- * probabilities pointed at by iterators (from, to[.
+ * probailities pointed at by iterators (from, to[.
  * Specifically it computes
  *
  * - Sum_i p_i log_2(p_i)
  * 
  * where the p_i are values pointed by (from, to[, 
  * It is assumed that Sum_i p_i == 1.0
- * That is, std::accumulate(from, to, 0) == 1.0
+ * That is, double tot=0.0; for(; from != to; ++from) tot += *from;
+ * will finish with tot == 1.0;
  */
 template<typename It> double entropy(It from, It to)
 {

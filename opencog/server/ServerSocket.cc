@@ -59,9 +59,7 @@ void ServerSocket::SetCloseAndDelete()
     logger().debug("ServerSocket::SetCloseAndDelete()");
     closed = true;
     socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    // Avoid crash on socket shutdown. is socket.close() buggy??? 
-    // investigate and FIXME ...
-    // socket.close();
+    socket.close();
 }
 
 void ServerSocket::SetLineProtocol(bool val)

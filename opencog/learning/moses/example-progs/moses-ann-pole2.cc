@@ -29,7 +29,7 @@
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
 #include "../moses/moses_main.h"
-#include "../scoring/scoring.h"
+#include "../moses/scoring.h"
 #include "../moses/ann_scoring.h"
 
 using namespace std;

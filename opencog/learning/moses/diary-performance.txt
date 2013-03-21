@@ -3879,7 +3879,7 @@ r12 -- 1m30
 
 disc_probe completely disabled:  this really makes mixedUTest
 suffer in a bad way -- I guess that proper probing really does
-matter for this case ... Hmm, this neeeds to be studied more
+matter for this case ... Hmm, this neeeds to be studeied more
 r0 - fail
 r1 - fail
 r2 - fail

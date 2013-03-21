@@ -199,7 +199,7 @@ void moses_mpi_comm::recv_exemplar(combo_tree& exemplar)
 ///
 /// This sends a pretty big glob.
 // XXX TODO -- trim the deme down, before sending, by using the worst acceptable score.
-void moses_mpi_comm::send_deme(const pbscored_combo_tree_ptr_set& mp, int n_evals)
+void moses_mpi_comm::send_deme(const bscored_combo_tree_ptr_set& mp, int n_evals)
 {
     MPI::COMM_WORLD.Send(&n_evals, 1, MPI::INT, ROOT_NODE, MSG_NUM_EVALS);
 
@@ -207,9 +207,9 @@ void moses_mpi_comm::send_deme(const pbscored_combo_tree_ptr_set& mp, int n_eval
     MPI::COMM_WORLD.Send(&num_trees, 1, MPI::INT, ROOT_NODE, MSG_NUM_COMBO_TREES);
     sent_bytes += 2*sizeof(int);
 
-    pbscored_combo_tree_ptr_set_cit it;
+    bscored_combo_tree_ptr_set_cit it;
     for (it = mp.begin(); it != mp.end(); it++) {
-        const pbscored_combo_tree& btr = *it;
+        const bscored_combo_tree& btr = *it;
 
         // We are going to send only the composite score, and not the
         // full behavioural score.  Basically, the full bscore is just
@@ -241,9 +241,8 @@ int moses_mpi_comm::probe_for_deme()
 /// in an atomic, unfragmented way, from the first source that sent
 /// one to us.
 void moses_mpi_comm::recv_deme(int source,
-                               pbscored_combo_tree_set& cands,
-                               int& n_evals,
-                               const demeID_t& demeID)
+                               bscored_combo_tree_set& cands,
+                               int& n_evals)
 {
     MPI::Status status;
     MPI::COMM_WORLD.Recv(&n_evals, 1, MPI::INT, source, MSG_NUM_EVALS, status);
@@ -261,13 +260,12 @@ void moses_mpi_comm::recv_deme(int source,
         combo_tree tr;
         recv_tree(tr, source);
 
-        // The vector behavioural score will be empty; only the
+        // The vectore behavioural score will be empty; only the 
         // composite score gets a non-trivial value.
         behavioral_score bs;
-        penalized_bscore pbs(bs, sc.get_complexity_penalty());
-        composite_penalized_bscore cbs(pbs, sc);
-        cpbscore_demeID cbs_demeID(cbs, demeID);
-        pbscored_combo_tree bsc_tr(tr, cbs_demeID);
+        penalized_behavioral_score pbs(bs, sc.get_complexity_penalty());
+        composite_behavioral_score cbs(pbs, sc);
+        bscored_combo_tree bsc_tr(tr, cbs);
         cands.insert(bsc_tr);
     }
 }
@@ -306,27 +304,20 @@ void mpi_moses_worker(metapopulation& mp,
         mompi.recv_exemplar(exemplar);
         logger().info() << "Allowed " << max_evals 
                         << " evals for recvd exemplar " << exemplar;
-        if (!mp._dex.create_demes(exemplar)) {
+        if (!mp._dex.create_deme(exemplar)) {
             // XXX replace this with appropriate message back to root!
             OC_ASSERT(false, "Exemplar failed to expand!\n");
         }
 
         // XXX TODO should probably fetch max_time from somewhere...
         time_t max_time = INT_MAX;
-        vector<unsigned> actl_evals = mp._dex.optimize_demes(max_evals, max_time);
+        size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
 
-        // XXX TODO demeID not needed here because it overwritten by
-        // recv_deme. It's not clear that should be the case, instead
-        // the expansion index should be send to the worker, which
-        // would generate the rught demeID for each candidates and
-        // then this should be parsed back by the dispatcher
-        vector<demeID_t> demeIDs(mp._dex._demes.size());
-        mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals, demeIDs);
-        mp._dex.free_demes();
+        mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
+        mp._dex.free_deme();
 
         // logger().info() << "Sending " << mp.size() << " results";
-        unsigned total_evals = boost::accumulate(actl_evals, 0U);
-        mompi.send_deme(mp, total_evals);
+        mompi.send_deme(mp, evals_this_deme);
 
         // Print timing stats and counts for this work unit.
         if (logger().isInfoEnabled()) {
@@ -337,7 +328,7 @@ void mpi_moses_worker(metapopulation& mp,
             ss << "Unit: " << cnt <<"\t" 
                << elapsed.tv_sec << "\t"
                << wait_time << "\t"
-               << total_evals << "\t"
+               << evals_this_deme << "\t"
                << max_evals << "\t"
                << mp.size() << "\t"  // size of the metapopulation
                << mp.best_score() <<"\t"
@@ -395,11 +386,11 @@ worker_pool::worker_pool(int num_workers)
 /// MPI_THREAD_MULTIPLE mode.
 ///
 /// This routine has been lightly tested, and seems to work. It has not
-/// been heavily tested, because I don't have a multi-node machine with
+/// been heavily teted, because I don't have a multi-node machine with
 /// an MPI implementation that supports threads.  There's no particular
 /// advantage of this class over the mono-threaded class; its just that
 /// the design of this class seemed to be intuitively simpler and easier
-/// than writing a home-grown dispatcher loop that the mono-threaded
+/// than writing a home-grown dispatcher loop that the mono-threaed
 /// version (below) needs.
 ///
 void mpi_moses(metapopulation& mp,
@@ -437,7 +428,7 @@ void mpi_moses(metapopulation& mp,
            && (pa.max_gens != stats.n_expansions)
            && (mp.best_score() < pa.max_score))
     {
-        pbscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
+        bscored_combo_tree_set::const_iterator exemplar = mp.select_exemplar();
         if (exemplar == mp.end()) {
             if (wrkpool.available() == tot_workers) {
                 logger().warn(
@@ -470,7 +461,7 @@ void mpi_moses(metapopulation& mp,
                 mompi.dispatch_deme(worker.rank, extree, max_evals);
 
                 int n_evals = 0;
-                pbscored_combo_tree_set candidates;
+                bscored_combo_tree_set candidates;
                 mompi.recv_deme(worker.rank, candidates, n_evals);
 cout<<"duuude master "<<getpid() <<" from="<<worker.rank << " got evals="<<n_evals <<" got cands="<<candidates.size()<<endl;
                 wrkpool.give_back(worker);
@@ -521,10 +512,10 @@ theend:
 ///
 /// Main entry point for MPI moses, for the cases where the MPI
 /// implementation does not support threading.  The algorithm is
-/// structured into a single send-recv loop: work is sent out, so as
-/// to give each worker something to do.  Then a check for completed
+/// structured into a single send-recv loop: work is sent out, so
+/// as to give each worker something to do.  The a check for completed
 /// work is made.  Any demes that are received are merged in a
-/// separate thread; meanwhile, this loops back and sends out more
+/// separate thread; meanwhile, this loops back and sens out more
 /// work.
 ///
 /// The implementation of this loop is very similar to that of 
@@ -542,7 +533,7 @@ void mpi_moses(metapopulation& mp,
 
     moses_mpi_comm mompi;
 
-    // Worker or dispatcher?
+    // main worker dispatch loop
     if (!mompi.is_mpi_root()) {
         mpi_moses_worker(mp, mompi);
         return;
@@ -551,8 +542,7 @@ void mpi_moses(metapopulation& mp,
     // If we are here, then we are the root node.  The root will act
     // as a dispatcher to all of the worker nodes.
 
-    // Pool of free workers maintained in a circular queue. The
-    // content of wrkpool is the source of the workers (see below)
+    // Pool of free workers maintained in a circular queue.
     std::queue<int> wrkpool;
     size_t tot_workers = mompi.num_workers();
     for (size_t i=0; i<tot_workers; i++)
@@ -560,22 +550,18 @@ void mpi_moses(metapopulation& mp,
 
     std::atomic<int> thread_count(0);
 
-    // worker source (from 1 to number of workers).
-    // OC_ASSERT(false, "TODO: understand what is the role source=0 exactly");
     int source = 0;
     bool done = false;
 
     // Print legend for the columns of the stats.
     print_stats_header(NULL, false /* XXX stats for diversity, should be fixed */);
 
-    // Main worker dispatch loop
     while (true)
     {
         // Feeder: push work out to each worker.
         while ((0 < wrkpool.size()) && !done) {
-            pbscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
+            bscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
             if (exemplar == mp.end()) {
-
                 if ((tot_workers == wrkpool.size()) && (0 == source)) {
                     logger().warn(
                         "There are no more exemplars in the metapopulation "
@@ -609,17 +595,11 @@ void mpi_moses(metapopulation& mp,
         }
 
         int n_evals = 0;
-        pbscored_combo_tree_set candidates;
-        stats.n_expansions ++;
-
-        // XXX TODO instead of overwritting the demeID it should be
-        // correctly defined by the worker and send back to the
-        // dispatcher. That way we can have the breadth_first
-        // componant of the demeID right.
-        mompi.recv_deme(source, candidates, n_evals,
-                        demeID_t(stats.n_expansions));
+        bscored_combo_tree_set candidates;
+        mompi.recv_deme(source, candidates, n_evals);
         source = 0;
 
+        stats.n_expansions ++;
         stats.n_evals += n_evals;
 
         // Merge results back into population.
