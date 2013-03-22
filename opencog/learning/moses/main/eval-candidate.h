@@ -36,8 +36,10 @@ struct eval_candidate_params {
     std::string problem;
     float noise;
     bool normalize;
+    float complexity_amplifier;
     // prerec parameters
-    float min_fixed;            // min recall
+    float prerec_min_recall;
+    bool prerec_simple_precision;
 };
 
 // problems

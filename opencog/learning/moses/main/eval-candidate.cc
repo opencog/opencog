@@ -184,12 +184,16 @@ vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
 double likelihood(const combo_tree& tr, const Table& table,
                   eval_candidate_params ecp) {
     OTable ot_tr(tr, table.itable);
+    unsigned size = ot_tr.size();
     arity_t arit = table.get_arity();
     complexity_t cplx = tree_complexity(tr);
-    double p = ecp.noise;
+    double p = std::min(0.5f, ecp.noise);
+
+    stringstream log_ss;
 
     // P(M)
-    double PM = exp(-cplx * log(arit));
+    double PM = exp(ecp.complexity_amplifier * -cplx * log(arit));
+    log_ss << "PM=" << PM << ",";
 
     // init P(D|M)
     double PDM = 1.0;
@@ -200,47 +204,82 @@ double likelihood(const combo_tree& tr, const Table& table,
                         [&](const vertex& y, const vertex& m) {
                             PDM *= p*(m != y) + (1-p)*(m == y); });
     } else if (ecp.problem == prerec) {
-        // compute P(D|M restricted to positive)
-        double PDM_rp = 1.0;
-        unsigned N0 = 0, N1, A0 = 0, A1 = 0;
-        for (unsigned i = 0; i < ot_tr.size(); i++) {
-            bool m = vertex_to_bool(ot_tr[i]);
-            bool y = vertex_to_bool(table.otable[i]);
+        vector<bool> M(size), Y(size);
+        boost::transform(ot_tr, M.begin(), vertex_to_bool);
+        boost::transform(table.otable, Y.begin(), vertex_to_bool);
+        // compute N0, N1, A0, A1
+        unsigned N0 = 0, N1 = 0, A0 = 0, A1 = 0;
+        for (unsigned i = 0; i < size; i++) {
+            bool m = M[i];
+            bool y = Y[i];
             // count N0, N1, A0, A1
             N0 += !m && !y;
             N1 += !m && y;
             A0 += m && !y;
             A1 += m && y;
-            // update P(D|M restricted to positive)
-            if (m)
-                PDM_rp *= p*!y+ (1-p)*y;
         }
+
+        // compute P(D|M restricted to positive)
+        double PDM_rp = 1.0;
+        if (ecp.prerec_simple_precision)
+            // compute simple version of P(D|M restricted to positive)
+            PDM_rp = ((1-p)*A1 + p*A0) / (A1+A0);
+        else {
+            // compute default probability of false restricted to negative
+            // data, taking into account the noise p
+            double dp0 = (p*N1 + (1-p)*N0) / (N0 + N1);
+            logger().fine() << "dp0 = " << dp0;
+            // compute complicated version of P(D|M restricted to positive)
+            for (unsigned i = 0; i < size; i++) {
+                bool m = M[i];
+                bool y = Y[i];
+                if(m)
+                    PDM_rp *= p*!y + (1-p)*y;
+                else
+                    PDM_rp *= dp0*!y + (1-dp0)*y;
+            }
+        }
+
+        log_ss << "PDM_rp=" << PDM_rp << ",";
+
         // compute P(recall(M) >= R)
         double PrMR = 0.0;
-        double R = ecp.min_fixed;
-        for (unsigned i = 0; i <= N0; i++)
-            for (unsigned j = 0; j <= N1; j++)
-                for (unsigned k = 0; k <= A0; k++)
-                    for (unsigned h = 0; h <= A1; h++)
-                        if ((i+j)/(1-R) <= k+h)
-                            PrMR += binomial_coefficient<double>(N0, i)
-                                * binomial_coefficient<double>(N1, j)
-                                * binomial_coefficient<double>(A0, k)
-                                * binomial_coefficient<double>(A1, h)
-                                * power(p, i + N1-j + k + A1-h)
-                                * power(1-p, N0-i + j + A0-k + h);
+        double R = ecp.prerec_min_recall;
+        if (R > 0.0) {
+            for (unsigned i = 0; i <= N0; i++)
+                for (unsigned j = 0; j <= N1; j++)
+                    for (unsigned k = 0; k <= A0; k++)
+                        for (unsigned h = 0; h <= A1; h++)
+                            if ((i+j)/(1-R) <= k+h)
+                                PrMR += binomial_coefficient<double>(N0, i)
+                                    * binomial_coefficient<double>(N1, j)
+                                    * binomial_coefficient<double>(A0, k)
+                                    * binomial_coefficient<double>(A1, h)
+                                    * power(p, i + N1-j + k + A1-h)
+                                    * power(1-p, N0-i + j + A0-k + h);
+        } else PrMR = 1.0;
+
+        log_ss << "PrMR=" << PrMR << ",";
+
         // compute P(D|M)
         PDM = PDM_rp * PrMR;
+
     } else {
         OC_ASSERT(false, "likelihood for problem %s is not implemented",
                   ecp.problem.c_str());
     }
+
+    log_ss << "PDM=" << PDM;
+    logger().debug(log_ss.str());
     return PDM * PM;
 }
 
 int main(int argc, char** argv) {
     eval_candidate_params ecp;
     unsigned long rand_seed;
+    string log_level;
+    static const string default_log_file("eval-candidate.log");
+    string log_file;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -264,6 +303,14 @@ int main(int argc, char** argv) {
         ("output-file,o", value<string>(&ecp.output_file),
          "File to write the results. If none is given it write on the stdout.\n")
 
+        ("level,l", value<string>(&log_level)->default_value("INFO"),
+         "Log level, possible levels are NONE, ERROR, WARN, INFO, "
+         "DEBUG, FINE. Case does not matter.\n")
+
+        ("log-file,f",
+         value<string>(&log_file)->default_value(default_log_file),
+         "File name where to write the log.\n")
+
         // Parameters
         ("problem,H", value<string>(&ecp.problem)->default_value(it),
          str(boost::format("Problem to solve, supported problems are:\n\n"
@@ -273,22 +320,43 @@ int main(int argc, char** argv) {
 
         ("noise,p", value<float>(&ecp.noise)->default_value(0.0),
          "Assumes that the data is noisy.   The noisier the data, the "
-         "stronger the model complexity penalty.  If the target feature "
+         "smoother the distribution will be.  That is there will be less "
+         "difference in weight between good and bad candidates.  "
+         "Also the noisier more impact the complexity of the candidate will "
+         "have.  If the target feature "
          "is discrete, the setting should correspond to the fraction of "
          "the input data that might be wrong (i.e. the probability p "
-         "that an output datum (row) is wrong).   In this case, only "
-         "values 0 <= p < 0.5 are meaningful (i.e. less than half the "
+         "that an output datum (row) is wrong).  In this case, only "
+         "values 0 < p < 0.5 are meaningful (i.e. less than half the "
          "data can be wrong). Suggested values are in the range 0.01 to "
          "0.001.  If the target feature is continuous, the value specified "
          "should correspond to the standard deviation of the (Gaussian) "
-         "noise centered around each candidate's output.\n")
+         "noise centered around each candidate's output.  "
+         "A null or negative value means no noise at all.  "
+         "Only perfect candidates (write for every data points) can have "
+         "a non-null weight.  "
+         "For values of 0.5 or above then the performance of the candidate "
+         "is simply neglected, only its complexity will be taken into account.\n")
+
+        ("complexity-amplifier",
+         value<float>(&ecp.complexity_amplifier)->default_value(1.0),
+         "Ranges from [0, +inf). For values below 1.0 it attenuates the "
+         "complexity penalty. For values above 1.0 it amplifies the "
+         "complexity penality.\n")
 
         ("normalize,n", value<bool>(&ecp.normalize)->default_value(false),
          "Normalize the output all weights so that they sums up to 1.\n")
 
         // prerec parameters
-        ("min-fixed", value<float>(&ecp.min_fixed)->default_value(1.0),
-         "For prerec problem set the minimum recall")
+        ("prerec-min-recall",
+         value<float>(&ecp.prerec_min_recall)->default_value(0.0),
+         "For prerec problem set the minimum recall.\n")
+
+        ("prerec-simple-precision",
+         value<bool>(&ecp.prerec_simple_precision)->default_value(false),
+         "When enabled the weight of prerec model "
+         "(aside the complexity and minimum recall) is simply it's precision, "
+         "instead of some more complicated P(D|M).\n")
 
         ;
 
@@ -307,14 +375,23 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // Set logger
+    logger().setFilename(log_file);
+    trim(log_level);
+    Logger::Level level = logger().getLevelFromString(log_level);
+    if (level != Logger::BAD_LEVEL)
+        logger().setLevel(level);
+    else {
+        cerr << "Error: Log level " << log_level << " is incorrect (see --help)." << endl;
+        exit(1);
+    }
+    logger().setBackTraceLevel(Logger::ERROR);
+
     // init random generator
     randGen().seed(rand_seed);
 
     // get all combo tree strings (from command line and file)
     vector<string> all_combo_tree_str = get_all_combo_tree_str(ecp);
-
-    OC_ASSERT(all_combo_tree_str.size() == 1,
-              "Using more than 1 combo, not implemented yet!");
 
     // read data ITable (using ignore_variables)
     Table table;
@@ -346,14 +423,15 @@ int main(int argc, char** argv) {
     // Normalize
     if (ecp.normalize) {
         double sum = boost::accumulate(ls, 0.0);
-        boost::transform(ls, ls.begin(), [&](const double l) { return l/sum; });
+        if (sum > 0)
+            boost::transform(ls, ls.begin(), [&](const double l) {return l/sum;});
     }
 
     // Output the values
     if(ecp.output_file.empty())
-        ostreamContainer(cout, ls, "\n");
+        ostreamlnContainer(cout, ls, "\n");
     else {
         ofstream of(ecp.output_file.c_str());
-        ostreamContainer(of, ls, "\n");
+        ostreamlnContainer(of, ls, "\n");
     }
 }
