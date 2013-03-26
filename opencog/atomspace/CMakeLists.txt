@@ -22,6 +22,7 @@ ADD_LIBRARY (atomspace SHARED
     FixedIntegerIndex.cc
     Handle.cc
     HandleEntry.cc
+    HandleIndex.cc
     HandleIterator.cc
     HandleSeqIndex.cc
     HandleSet.cc
@@ -95,6 +96,7 @@ INSTALL (FILES
     ForeachTwo.h
     Handle.h
     HandleEntry.h
+    HandleIndex.h
     HandleIterator.h
     HandleMap.h
     HandleSeqIndex.h
