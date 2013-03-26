@@ -626,7 +626,7 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 
 HandleEntry* AtomTable::decayShortTermImportance(void)
 {
-    return importanceIndex.decayShortTermImportance();
+    return importanceIndex.decayShortTermImportance(this);
 }
 
 bool AtomTable::decayed(Handle h)

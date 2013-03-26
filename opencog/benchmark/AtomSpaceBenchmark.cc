@@ -69,7 +69,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     if (a->isNode(h)) {
         Node* n = dynamic_cast<Node*>(TLB::getAtom(h));
         total = sizeof(Node);
-        total += sizeof(HandleEntry) * n->getIncomingSet()->getSize();
         if (&(n->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
             switch (n->getTruthValue().getType()) {
             case SIMPLE_TRUTH_VALUE:
@@ -91,7 +90,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     } else {
         Link* l = dynamic_cast<Link*>(TLB::getAtom(h));
         total = sizeof(Link);
-        total += sizeof(HandleEntry) * l->getIncomingSet()->getSize();
         if (&(l->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
             switch (l->getTruthValue().getType()) {
             case SIMPLE_TRUTH_VALUE:

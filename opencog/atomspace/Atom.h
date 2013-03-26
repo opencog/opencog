@@ -121,14 +121,6 @@ public:
      */
     inline Handle getHandle() const { return handle; }
 
-    /** Returns a pointer to a linked-list containing the atoms that are
-     * members of this one's incoming set.
-     *
-     * @return A pointer to a linked-list containing the atoms that are
-     * members of this one's incoming set.
-     */
-    HandleEntry* getIncomingSet() const;
-
     /** Returns the AttentionValue object of the atom.
      *
      * @return The const reference to the AttentionValue object
