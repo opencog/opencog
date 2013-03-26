@@ -138,7 +138,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Atom *atom = store->makeAtom(*this, handle);
-			table->add(atom, true);
+			table->add(atom);
 			return false;
 		}
 

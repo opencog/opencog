@@ -428,8 +428,7 @@ void AtomTable::merge(Handle h, const TruthValue& tvn)
     } 
 }
 
-// XXX remove the dont_defer_incoming_links flag
-Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (RuntimeException)
+Handle AtomTable::add(Atom *atom) throw (RuntimeException)
 {
     if (atom->getAtomTable() != NULL) {
         // Atom is already inserted
@@ -789,11 +788,6 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
     HandleEntry* result = this->getHandleSet(types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
-}
-
-// XXX Remove me later TODO
-void AtomTable::scrubIncoming(void)
-{
 }
 
 std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const
