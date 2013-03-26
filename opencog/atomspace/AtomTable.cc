@@ -185,6 +185,13 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
     return set;
 }
 
+HandleEntry* AtomTable::getIncomingSet(Handle handle) const
+{
+    HandleEntry* set = TLB::getAtom(handle)->getIncomingSet();
+    if (set != NULL) set = set->clone();
+    return set;
+}
+
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      Type* types,
                                      bool* subclasses,
