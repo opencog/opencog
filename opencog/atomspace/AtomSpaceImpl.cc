@@ -534,9 +534,7 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     //
     // TODO: solution where user can specify whether to poll storage/repository
 
-    Atom *a = atomTable.getAtom(h);
-    HandleEntry* he = NULL;
-    if (a) he = a->getIncomingSet();
+    HandleEntry* he = atomTable.getIncomingSet(h);
     if (he) return he->toHandleVector();
     else return HandleSeq();
 }

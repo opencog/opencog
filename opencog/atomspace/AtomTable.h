@@ -36,6 +36,7 @@
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/ImportanceIndex.h>
+#include <opencog/atomspace/IncomingIndex.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
@@ -103,6 +104,7 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
+    IncomingIndex incomingIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
@@ -360,6 +362,8 @@ public:
     /**
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).
+     * That is, returns the incoming set of Handle h, with some optional
+     * filtering.
      *
      * @param The handle that must be in the outgoing set of the atom.
      * @param The optional type of the atom.
@@ -370,6 +374,12 @@ public:
     HandleEntry* getHandleSet(Handle h,
                               Type type = ATOM,
                               bool subclass = true) const;
+
+
+    /**
+     * Return the incoming set associated with handle h.
+     */
+    HandleEntry* getIncomingSet(Handle h) const;
 
     /**
      * Returns the set of atoms with the given target handles and types
