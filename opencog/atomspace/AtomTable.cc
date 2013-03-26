@@ -428,6 +428,7 @@ void AtomTable::merge(Handle h, const TruthValue& tvn)
     } 
 }
 
+// XXX remove the dont_defer_incoming_links flag
 Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (RuntimeException)
 {
     if (atom->getAtomTable() != NULL) {
@@ -487,13 +488,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
 
-    // Updates incoming set of all targets.
     atom->setAtomTable(this);
-    if (dont_defer_incoming_links && (lll != NULL)) {
-        for (int i = 0; i < lll->getArity(); i++) {
-            lll->getOutgoingAtom(i)->addIncomingHandle(handle);
-        }
-    }
 
     if (useDSA) {
         StatisticsMonitor::getInstance()->add(atom);
@@ -597,15 +592,6 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
 
-    Link* link = dynamic_cast<Link*>(atom);
-    if (link) {
-        // Remove from incoming sets.
-        for (int i = 0; i < link->getArity(); i++) {
-            Atom* target = link->getOutgoingAtom(i);
-            target->removeIncomingHandle(handle);
-        }
-    }
-
     return HandleEntry::concatenation(new HandleEntry(handle), result);
 }
 
@@ -678,17 +664,6 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
         if (useDSA)
             // updates all global statistics regarding the removal of this atom
             StatisticsMonitor::getInstance()->remove(atom);
-
-        // remove from incoming sets
-        Link *lll = dynamic_cast<Link *>(atom);
-        if (lll) {
-            int arity = lll->getArity();
-            for (int i = 0; i < arity; i++) {
-                Atom *outgoing = lll->getOutgoingAtom(i);
-                if (outgoing)
-                    outgoing->removeIncomingHandle(h);
-            }
-        }
     }
 }
 
@@ -816,26 +791,9 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
     return result;
 }
 
+// XXX Remove me later TODO
 void AtomTable::scrubIncoming(void)
 {
-    AtomHashSet::const_iterator it;
-    for (it = atomSet.begin(); it != atomSet.end(); ++it) {
-        const Atom* atom = *it;
-        Handle handle = atom->getHandle();
-
-        // Updates incoming set of all targets.
-        const Link * link = dynamic_cast<const Link *>(atom);
-        if (link) {
-            for (int i = 0; i < link->getArity(); i++) {
-                Atom* oa = link->getOutgoingAtom(i);
-                Handle oh = link->getOutgoingHandle(i);
-                HandleEntry *he = getIncomingSet(oh);
-                if (false == he->contains(handle)) {
-                    oa->addIncomingHandle(handle);
-                }
-            }
-        }
-    }
 }
 
 std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const

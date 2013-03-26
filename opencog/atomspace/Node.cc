@@ -106,12 +106,11 @@ size_t Node::hashCode() const
     return getType() ^ boost::hash<std::string>()(name);
 }
 
+// XXX WTF it makes no sense to "clone" an atom!  That's fucking nuts, 
+// the concept is invalid!
 Atom* Node::clone() const
 {
     Atom *a = new Node(*this);
-    for (HandleEntry *h = getIncomingSet(); h != NULL; h = h ->next) {
-        a->addIncomingHandle(h->handle);
-    }
     a->handle = handle;
     return a;
 }

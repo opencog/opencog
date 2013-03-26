@@ -88,9 +88,6 @@ protected:
     Handle handle;
     AtomTable *atomTable;
 
-    //! Linked-list that dynamically changes when new links point to this atom.
-    HandleEntry *incoming;
-
     Type type;
     char flags;
 
@@ -107,18 +104,6 @@ protected:
      */
     Atom(Type, const TruthValue& = TruthValue::NULL_TV(),
             const AttentionValue& = AttentionValue::DEFAULT_AV());
-
-    /** Adds a new entry to this atom's incoming set.
-     *
-     * @param The handle of the atom to be included.
-     */
-    void addIncomingHandle(Handle);
-
-    /** Removes an entry from this atom's incoming set.
-     *
-     * @param The handle of the atom to be excluded.
-     */
-    void removeIncomingHandle(Handle) throw (RuntimeException);
 
 public:
 
@@ -142,7 +127,7 @@ public:
      * @return A pointer to a linked-list containing the atoms that are
      * members of this one's incoming set.
      */
-    inline HandleEntry* getIncomingSet() const { return incoming; }
+    HandleEntry* getIncomingSet() const;
 
     /** Returns the AttentionValue object of the atom.
      *

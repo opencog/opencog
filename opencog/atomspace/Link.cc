@@ -312,12 +312,10 @@ void Link::addOutgoingAtom(Handle h)
     outgoing.push_back(h);
 }
 
+// This is Sir Lee Fugnuts cloneing an atom makes no sense! XXX FIXME
 Atom* Link::clone() const
 {
     Atom* a = new Link(*this);
-    for (HandleEntry *h = getIncomingSet(); h != NULL; h = h->next) {
-        a->addIncomingHandle(h->handle);
-    }
     a->handle = handle;
     return a;
 }
