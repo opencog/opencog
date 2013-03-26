@@ -54,7 +54,6 @@ void Atom::init(Type t, const TruthValue& tv, const AttentionValue& av)
     handle = Handle::UNDEFINED;
     flags = 0;
     atomTable = NULL;
-    incoming = NULL;
     type = t;
 
     truthValue = NULL;
@@ -69,7 +68,6 @@ Atom::Atom(Type type, const TruthValue& tv, const AttentionValue& av)
 
 Atom::~Atom()
 {
-    if (incoming != NULL) delete incoming;
     if (truthValue != &(TruthValue::DEFAULT_TV())) delete truthValue;
 }
 
@@ -119,47 +117,9 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
     }
 }
 
-void Atom::addIncomingHandle(Handle handle)
+HandleEntry* Atom::getIncomingSet() const
 {
-    // creates a new entry with handle
-    HandleEntry* entry = new HandleEntry(handle);
-    // entry is placed in the first position of the incoming set
-    entry->next = incoming;
-    incoming = entry;
-}
-
-void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException)
-{
-    DPRINTF("Entering Atom::removeIncomingHandle(): handle:\n%lu\nincoming:\n%s\n", handle.value(), incoming->toString().c_str());
-    HandleEntry* current = incoming;
-    // checks if incoming set is empty
-    if (incoming == NULL) {
-        throw RuntimeException(TRACE_INFO, "unable to extract incoming element from empty set");
-    }
-
-    // checks if the handle to be removed is the first one
-    if (incoming->handle == handle) {
-        incoming = incoming->next;
-        current->next = NULL;
-        delete current;
-    } else {
-        if (current->next == NULL) {
-            throw RuntimeException(TRACE_INFO, "unable to extract incoming element");
-        }
-        // scans the list looking for the desired handle
-        while (current->next->handle != handle) {
-            current = current->next;
-            if (current->next == NULL) {
-                throw RuntimeException(TRACE_INFO, "unable to extract incoming element");
-            }
-        }
-        // deletes entry when the handle is found
-        HandleEntry* foundit = current->next;
-        current->next = foundit->next;
-        foundit->next = NULL;
-        delete foundit;
-    }
-    DPRINTF("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
+    return atomTable->getIncomingSet(handle);
 }
 
 bool Atom::getFlag(int flag) const
