@@ -69,7 +69,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 	HandleEntry* oldAtoms = NULL;
 
 	unsigned int bin;
-    if (IMPORTANCE_INDEX_SIZE != (1 << 16) ) {
+	if (IMPORTANCE_INDEX_SIZE != (1 << 16) ) {
         for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++) {
             UnorderedHandleSet move_it;
             UnorderedHandleSet & band = idx[bin];
@@ -160,7 +160,13 @@ HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
 		for (HandleEntry* in = atom->getIncomingSet();
                 in != NULL; in = in->next) {
 			Atom *a = TLB::getAtom(in->handle);
-			if (isOld(a,minSTI)) {
+
+			// XXX a should never be NULL; however, someone somewhere is
+			// removing atoms from the TLB, although they forgot to remove
+			// them from the atomTable, and so they are still showing up
+			// i the incoming set. XXX TODO uncomment the assert below.
+			// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
+			if (a and isOld(a, minSTI)) {
 				result = HandleEntry::concatenation(
 					extractOld(minSTI, in->handle, true), result);
 			}
@@ -170,7 +176,13 @@ HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
 	// Only return if there is at least one incoming atom that is
 	// not marked for removal by decay.
 	for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next) {
-		if (TLB::getAtom(in->handle)->getFlag(REMOVED_BY_DECAY) == false) {
+		Atom* a = TLB::getAtom(in->handle);
+		// XXX a should never be NULL; however, someone somewhere is
+		// removing atoms from the TLB, although they forgot to remove
+		// them from the atomTable, and so they are still showing up
+		// i the incoming set. XXX TODO uncomment the assert below.
+		// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
+		if (a and a->getFlag(REMOVED_BY_DECAY) == false) {
 			atom->setFlag(REMOVED_BY_DECAY, false);
 			return result;
 		}
