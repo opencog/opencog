@@ -54,10 +54,16 @@ void IncomingIndex::insertAtom(const Atom* a)
 		const HandleSeq& oldset = idx.get(h);
 
 		// Check to see if h is already listed; it should not be...
-		for (HandleSeq::const_iterator oit = oldset.begin(); oit != oldset.end(); oit++)
+		// Unless a given handle appears twice in the outgoing set
+		// of a link, in which case we should ignore the second
+		// (and other) instances.
+		HandleSeq::const_iterator oit = oldset.begin();
+		for (; oit != oldset.end(); oit++)
 		{
-			OC_ASSERT(*oit != hin, "Same atom seems to be getting inserted twice!");
+			// OC_ASSERT(*oit != hin, "Same atom seems to be getting inserted twice!");
+			if (*oit == hin) break;
 		}
+		if (oit != oldset.end()) continue;
 
 		// Add hin to the incoming set of h.
 		HandleSeq inset = oldset;
@@ -81,18 +87,23 @@ void IncomingIndex::removeAtom(const Atom* a)
 		const HandleSeq& oldset = idx.get(h);
 		HandleSeq inset = oldset;
 
-		// Check to see if h is already listed; it should not be...
 		HandleSeq::iterator oit = inset.begin();
 		for (; oit != inset.end(); oit++)
 		{
 			if (*oit == hin) break;
 		}
-		OC_ASSERT(oit != inset.end(), "Can't find atom in the incoming set!");
 
-		// Add hin to the incoming set of h.
-		inset.erase(oit);
-		idx.remove(h, oldset);
-		idx.insert(h, inset);
+		// Check to see if h was already deleted; it could happen that
+		// h appears twice, or more, in oset.  The first time we see it,
+		// it gets removed from the index.  The second and later times,
+		// we do nothing.
+		if (oit != inset.end())
+		{
+			// Remove hin from the incoming set of h.
+			inset.erase(oit);
+			idx.remove(h, oldset);
+			idx.insert(h, inset);
+		}
 	}
 }
 
@@ -101,7 +112,7 @@ const HandleSeq& IncomingIndex::getIncomingSet(Handle h) const
 	return idx.get(h);
 }
 
-void IncomingIndex::remove(bool (*filter)(const HandleSeq&))
+void IncomingIndex::remove(bool (*filter)(Handle))
 {
 	idx.remove(filter);
 }

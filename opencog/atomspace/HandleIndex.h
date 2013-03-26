@@ -49,6 +49,7 @@ class HandleIndex:
 		virtual void remove(Handle, const HandleSeq&);
 		virtual size_t size(void) const;
 		virtual void remove(bool (*)(const HandleSeq&));
+		void remove(bool (*)(Handle));
 };
 
 } //namespace opencog

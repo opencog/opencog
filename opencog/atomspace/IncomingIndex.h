@@ -43,7 +43,7 @@ class IncomingIndex
         IncomingIndex(void);
         void insertAtom(const Atom* a);
         void removeAtom(const Atom* a);
-        void remove(bool (*)(const HandleSeq&));
+        void remove(bool (*)(Handle));
         void resize();
 
         const HandleSeq& getIncomingSet(Handle) const;

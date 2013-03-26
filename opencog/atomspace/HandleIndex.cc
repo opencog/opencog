@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/HandleIndex.h>
 
 using namespace opencog;
@@ -51,6 +52,11 @@ size_t HandleIndex::size(void) const
 
 void HandleIndex::remove(bool (*filter)(const HandleSeq&))
 {
+	OC_ASSERT(0, "Unexpected call to unimplemented function!");
+}
+
+void HandleIndex::remove(bool (*filter)(Handle))
+{
 	std::map<Handle, const HandleSeq>::iterator i, j;
 	
 	i = idx.begin();
@@ -58,7 +64,7 @@ void HandleIndex::remove(bool (*filter)(const HandleSeq&))
 	{
 		j = i;
 		++i;
-		if (filter(j->second))
+		if (filter(j->first))
 			idx.erase(j->first);
 	}
 }
