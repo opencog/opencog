@@ -1,7 +1,7 @@
 /*
- * opencog/atomspace/LinkIndex.h
+ * opencog/atomspace/IncomingIndex.h
  *
- * Copyright (C) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2008,2009,2013 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,40 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LINK_INDEX_H
-#define _OPENCOG_LINK_INDEX_H
+#ifndef _OPENCOG_INCOMING_INDEX_H
+#define _OPENCOG_INCOMING_INDEX_H
 
 #include <set>
 #include <vector>
 
-#include <opencog/atomspace/HandleSeqIndex.h>
+#include <opencog/atomspace/HandleIndex.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog
 {
-class HandleEntry;
 
 /**
- * Implements an (type, HandleSeq) index array of RB-trees (C++ set)
- * That is, given both a type, and a HandleSeq, it returns a single,
- * unique Handle associated with that pair.  In other words, it returns
- * the single, unique Link which is that pair.
+ * Implements a Handle index array of RB-trees (C++ set)
+ * Given a Handle, this returns the incoming set of that handle.
  */
-class LinkIndex
+class IncomingIndex
 {
     private:
-        std::vector<HandleSeqIndex> idx;
+        HandleIndex idx;
     public:
-        LinkIndex(void);
+        IncomingIndex(void);
         void insertAtom(const Atom* a);
         void removeAtom(const Atom* a);
-        void remove(bool (*)(Handle));
+        void remove(bool (*)(const HandleSeq&));
         void resize();
 
-        Handle getHandle(Type type, const HandleSeq&) const;
-        HandleEntry* getHandleSet(Type type, const HandleSeq &, bool subclass) const;
+        const HandleSeq& getIncomingSet(Handle) const;
 };
 
 } //namespace opencog
 
-#endif // _OPENCOG_LINK_INDEX_H
+#endif // _OPENCOG_INCOMING_INDEX_H
