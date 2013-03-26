@@ -64,8 +64,9 @@ void HandleIndex::remove(bool (*filter)(Handle))
 	{
 		j = i;
 		++i;
-		if (filter(j->first))
-			idx.erase(j->first);
+		Handle h = j->first;
+		if (filter(h))
+			idx.erase(h);
 	}
 }
 

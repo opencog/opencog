@@ -36,6 +36,7 @@
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/ImportanceIndex.h>
+#include <opencog/atomspace/IncomingIndex.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
@@ -103,6 +104,7 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
+    IncomingIndex incomingIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
