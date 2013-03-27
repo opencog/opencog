@@ -119,6 +119,17 @@ For a fully functional example, check the ''examples/atomtypes/' directory.
 ======================================================================
 ======================================================================
 ======================================================================
+                       Index Design
+                       ------------
+
+The AtomTable holds indexes for a number of commonly needed abilities,
+so as to allow for fast searches.  This includes searches for atoms by
+type, by outgoing set and by incoming set.
+
+
+======================================================================
+======================================================================
+======================================================================
 
                    Foreach Iterators
                    -----------------
