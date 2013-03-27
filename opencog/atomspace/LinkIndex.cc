@@ -22,7 +22,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 

@@ -20,9 +20,7 @@
  */
 
 #include <opencog/atomspace/NameIndex.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 

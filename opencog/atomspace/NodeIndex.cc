@@ -20,9 +20,8 @@
  */
 
 #include <opencog/atomspace/NodeIndex.h>
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/atom_types.h>
 
 using namespace opencog;

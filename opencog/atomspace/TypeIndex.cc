@@ -20,9 +20,8 @@
  */
 
 #include "TypeIndex.h"
+#include "Atom.h"
 #include "ClassServer.h"
-#include "HandleEntry.h"
-#include "TLB.h"
 
 using namespace opencog;
 
