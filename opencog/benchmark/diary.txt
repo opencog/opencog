@@ -147,4 +147,42 @@ Rearrange in tabular form:
   getNodeHandles      29.3         26.1            13.76
 
 
+Clearly, raw access is much faster.  Clearly, the particular
+getHandleSet (one of dozens) was slowww.
+
+All operations were performed 100K times. To see how overheads actually
+work, its easier to consider the microseconds per call.  No calculator
+is necessary: just take the elapsed time (seconds) and multiply by 10
+to get microseconds:
+
+   test            AtomTable    AtomSpaceImpl    AtomSpace
+   name            usecs/call     usecs/call     usecs/call
+   ----            ---------    -------------    ---------
+  addNode             3.9           31.5           33.3
+  addLink             5.8           39.9           41.1
+  getType             0.4            1.2           38.3
+  getTV               0.5            1.6           22.6
+  setTV               0.6            1.6           15.7
+  getHandleSet      462.4          665.5          779
+  getNodeHandles     34.1           38.3           72.7
+
+So...
+The AtomSpceImpl adds an aprox 30 usec overhead to addNode/addLink and
+the client/server interface adds another 2 usecs
+
+Its not clear why AtomSpaceImple does NOT add an overhead to getType and
+get/setTV ... instead, there seems to be a very hefty communications 
+overhead for this?  This doesn't make sense when compared to addNode/Link
+
+It appears that both the AtomSpaceImpl, and the client/server design
+add large overheads to the two handle-set gets. I assume this overhead
+is because a lot of data is being moved around.
+
+getNodeHandles is asking for nodes by name and type.  This is serviced
+by the atom table, which maintains an index of these. (the NodeIndex)
+
+getHandleSet asks for all atoms of a given type. Again, there is an
+index in the AtomTable for this.  You'd think it should be faster;
+I'm guessing that perhaps there is a lot of data copying going on here...
+
 
