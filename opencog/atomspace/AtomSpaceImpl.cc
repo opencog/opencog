@@ -448,7 +448,7 @@ HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
     }
     HandleSeq answer;
 
-    for (HandleEntry *he = a->getIncomingSet(); he != NULL; he = he ->next) {
+    for (HandleEntry *he = atomTable.getIncomingSet(h); he != NULL; he = he ->next) {
         Link *link = atomTable.getLink(he->handle);
         Type linkType = link->getType();
         DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
@@ -534,9 +534,7 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     //
     // TODO: solution where user can specify whether to poll storage/repository
 
-    Atom *a = atomTable.getAtom(h);
-    HandleEntry* he = NULL;
-    if (a) he = a->getIncomingSet();
+    HandleEntry* he = atomTable.getIncomingSet(h);
     if (he) return he->toHandleVector();
     else return HandleSeq();
 }

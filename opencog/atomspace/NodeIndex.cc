@@ -32,10 +32,6 @@ NodeIndex::NodeIndex()
     resize();
 }
 
-void NodeIndex::connectAtomTable(const AtomTable* table) {
-    atomTable = table;
-}
-
 void NodeIndex::resize()
 {
     this->idx.resize(classserver().getNumberOfClasses());
@@ -86,14 +82,14 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name,
                           "Index out of bounds for atom type (s = %lu)", s);
                 const NameIndex &ni = idx[s];
                 Handle h = ni.get(name);
-                if (atomTable->holds(h))
+                if (Handle::UNDEFINED != h)
                     he = new HandleEntry(h, he);
             }
         }
         return he;
     } else {
         Handle h = getHandle(type, name); 
-        if (atomTable->holds(h)) return new HandleEntry(h);
+        if (Handle::UNDEFINED != h) return new HandleEntry(h);
         return NULL;
     }
 }

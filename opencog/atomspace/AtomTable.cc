@@ -55,7 +55,6 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     // This allows one to tune how often the unordered map resizes itself.
     //atomSet.max_load_factor(100.0f);
-    nodeIndex.connectAtomTable(this);
 
     //logger().fine("Max load factor for TLB handle map is: %f", TLB::handle_map.max_load_factor());
 
@@ -179,10 +178,14 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
                                      bool subclass) const
 {
-    HandleEntry* set = TLB::getAtom(handle)->getIncomingSet();
-    if (set != NULL) set = set->clone();
+    HandleEntry* set = HandleEntry::fromHandleVector(incomingIndex.getIncomingSet(handle));
     set = HandleEntry::filterSet(set, type, subclass);
     return set;
+}
+
+HandleEntry* AtomTable::getIncomingSet(Handle handle) const
+{
+    return HandleEntry::fromHandleVector(incomingIndex.getIncomingSet(handle));
 }
 
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
@@ -233,7 +236,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     // counted to be removed a posteriori
     for (int i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
-            sets[i] = TLB::getAtom(handles[i])->getIncomingSet()->clone();
+            sets[i] = getIncomingSet(handles[i]);
             sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
             // Also filter links that do not belong to this table
             //sets[i] = HandleEntry::filterSet(sets[i], tableId);
@@ -424,7 +427,7 @@ void AtomTable::merge(Handle h, const TruthValue& tvn)
     } 
 }
 
-Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (RuntimeException)
+Handle AtomTable::add(Atom *atom) throw (RuntimeException)
 {
     if (atom->getAtomTable() != NULL) {
         // Atom is already inserted
@@ -478,17 +481,12 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
+    incomingIndex.insertAtom(atom);
     targetTypeIndex.insertAtom(atom);
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
 
-    // Updates incoming set of all targets.
     atom->setAtomTable(this);
-    if (dont_defer_incoming_links && (lll != NULL)) {
-        for (int i = 0; i < lll->getArity(); i++) {
-            lll->getOutgoingAtom(i)->addIncomingHandle(handle);
-        }
-    }
 
     if (useDSA) {
         StatisticsMonitor::getInstance()->add(atom);
@@ -544,7 +542,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
         // in an incoming set. Hopefully we'll eventually use the right
         // container
         std::set<Handle> is;
-        for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next)
+        for (HandleEntry* in = getIncomingSet(handle); in != NULL; in = in->next)
             is.insert(in->handle);
 
         std::set<Handle>::iterator is_it;
@@ -556,15 +554,16 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
             }
         }
     }
-    if (atom->getIncomingSet())
+
+    HandleEntry* he = getIncomingSet(handle);
+    if (he)
     {
         Logger::Level save = logger().getBackTraceLevel();
         logger().setBackTraceLevel(Logger::NONE);
         logger().warn("AtomTable.extract(): "
            "attempting to extract atom with non-empty incoming set: %s\n",
            atom->toShortString().c_str());
-        for (HandleEntry* it = atom->getIncomingSet(); 
-             it != NULL; it = it->next)
+        for (HandleEntry* it = he; it != NULL; it = it->next)
         {
             logger().warn("\tincoming: %s\n", 
                  TLB::getAtom(it->handle)->toShortString().c_str());
@@ -586,18 +585,10 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
+    incomingIndex.removeAtom(atom);
     targetTypeIndex.removeAtom(atom);
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
-
-    Link* link = dynamic_cast<Link*>(atom);
-    if (link) {
-        // Remove from incoming sets.
-        for (int i = 0; i < link->getArity(); i++) {
-            Atom* target = link->getOutgoingAtom(i);
-            target->removeIncomingHandle(handle);
-        }
-    }
 
     return HandleEntry::concatenation(new HandleEntry(handle), result);
 }
@@ -634,12 +625,16 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 
 HandleEntry* AtomTable::decayShortTermImportance(void)
 {
-    return importanceIndex.decayShortTermImportance();
+    return importanceIndex.decayShortTermImportance(this);
 }
 
 bool AtomTable::decayed(Handle h)
 {
     Atom *a = TLB::getAtom(h);
+
+    // XXX This should be an assert ... I think something is seriously
+    // wrong if the handle isn't being found!  XXX FIXME
+    if (NULL == a) return false;
     return a->getFlag(REMOVED_BY_DECAY);
 }
 
@@ -647,12 +642,13 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
 {
     if (extractedHandles == NULL) return;
 
-    nodeIndex.remove(decayed);
-    linkIndex.remove(decayed);
-    typeIndex.remove(decayed);
     importanceIndex.remove(decayed);
     targetTypeIndex.remove(decayed);
     predicateIndex.remove(decayed);
+    incomingIndex.remove(decayed);
+    nodeIndex.remove(decayed);
+    linkIndex.remove(decayed);
+    typeIndex.remove(decayed);
 
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Handle h = curr->handle;
@@ -666,17 +662,6 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
         if (useDSA)
             // updates all global statistics regarding the removal of this atom
             StatisticsMonitor::getInstance()->remove(atom);
-
-        // remove from incoming sets
-        Link *lll = dynamic_cast<Link *>(atom);
-        if (lll) {
-            int arity = lll->getArity();
-            for (int i = 0; i < arity; i++) {
-                Atom *outgoing = lll->getOutgoingAtom(i);
-                if (outgoing)
-                    outgoing->removeIncomingHandle(h);
-            }
-        }
     }
 }
 
@@ -802,27 +787,6 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
     HandleEntry* result = this->getHandleSet(types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
-}
-
-void AtomTable::scrubIncoming(void)
-{
-    AtomHashSet::const_iterator it;
-    for (it = atomSet.begin(); it != atomSet.end(); ++it) {
-        const Atom* atom = *it;
-        Handle handle = atom->getHandle();
-
-        // Updates incoming set of all targets.
-        const Link * link = dynamic_cast<const Link *>(atom);
-        if (link) {
-            for (int i = 0; i < link->getArity(); i++) {
-                Atom *oa = link->getOutgoingAtom(i);
-                HandleEntry *he = oa->getIncomingSet();
-                if (false == he->contains(handle)) {
-                    oa->addIncomingHandle(handle);
-                }
-            }
-        }
-    }
 }
 
 std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const

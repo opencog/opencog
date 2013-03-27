@@ -494,7 +494,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Handle handle, Arity arity
 {
     // TODO: What is the arity parameter for?
 
-    HandleEntry* buffer = TLB::getAtom(handle)->getIncomingSet()->clone();
+    // HandleEntry* buffer = atomtable->getIncomingSet(h);
+    HandleEntry* buffer = NULL;
 
     return(intersection(set, buffer));
 }
