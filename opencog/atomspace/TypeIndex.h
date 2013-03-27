@@ -31,7 +31,6 @@
 
 namespace opencog
 {
-class HandleEntry;
 
 /**
  * Implements an integer index as an RB-tree (C++ set)
@@ -47,7 +46,7 @@ class TypeIndex:
 		void removeAtom(const Atom*);
 		void resize(void);
 
-		HandleEntry* getHandleSet(Type type, bool subclass) const;
+		UnorderedHandleSet getHandleSet(Type type, bool subclass) const;
 
 		class iterator
 		{

@@ -29,7 +29,6 @@
 namespace opencog
 {
 class Atom;
-class HandleEntry;
 
 /**
  * Implements an atom name index as an RB-tree (C++ map)
@@ -40,7 +39,7 @@ class NameIndex:
     public:
         void insertAtom(const Atom* a);
         void removeAtom(const Atom* a);
-        HandleEntry* getHandleSet(const char* name) const;
+        UnorderedHandleSet getHandleSet(const char* name) const;
 };
 
 } //namespace opencog

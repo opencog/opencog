@@ -49,20 +49,16 @@ void TypeIndex::removeAtom(const Atom* a)
 	remove(t,a->getHandle());
 }
 
-HandleEntry * TypeIndex::getHandleSet(Type type, bool subclass) const
+UnorderedHandleSet TypeIndex::getHandleSet(Type type, bool subclass) const
 {
 	iterator it = begin(type, subclass);
 	iterator itend = end();
 
-	HandleEntry *he = NULL;
+	UnorderedHandleSet rv;
 	while (it != itend)
-	{
-		HandleEntry *nhe = new HandleEntry(*it);
-		nhe->next = he;
-		he = nhe;
-		it++;
-	}
-	return he;
+		rv.insert(*it++);
+
+	return rv;
 }
 
 // ================================================================
