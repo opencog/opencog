@@ -133,10 +133,12 @@ vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
  *
  * where
  *
- *     P(yi|mi) = if (mi == 0) then 1 else p*!yi + (1-p)*yi
+ *     P(yi|mi) = if (mi == 0) then 1/2 else p*!yi + (1-p)*yi
  *
  * that is, the probability that model M restricted to positive data
- * points explains D. Now let's formalize P(recall(M) >= R)
+ * points explains D. On negative data the probability is always 1/2
+ * (that is prediction can be done regarding the target output). Now
+ * let's formalize P(recall(M) >= R)
  *
  *     P(recall(M) >= R) = Sum_{s in S} P(recall(s) >= R)
  *
@@ -236,7 +238,7 @@ double likelihood(const combo_tree& tr, const Table& table,
                 if(m)
                     PDM_rp *= p*!y + (1-p)*y;
                 else
-                    PDM_rp *= dp0*!y + (1-dp0)*y;
+                    PDM_rp *= 0.5; // 0.5 represent unbiased (unknown) prediction
             }
         }
 
