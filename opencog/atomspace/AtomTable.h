@@ -542,13 +542,10 @@ public:
      * code should ever attempt to delete the pointer that is passed 
      * into this method.
      *
-     * When adding atoms in bulk, it can be convenient to defer
-     * the setup of incoming links until a later stage.
-     *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(Atom*, bool dont_defer_incoming_links = true) throw (RuntimeException);
+    Handle add(Atom*) throw (RuntimeException);
 
     /**
      * Return true if the atom table holds this handle, else return false.
@@ -667,17 +664,6 @@ public:
         }
         return false;
     }
-
-    /**
-     * For use by atom table persistence systems only. When bulk-adding
-     * atoms to the atom table, it is convenient to avoid resolving
-     * incoming pointers until all atoms have been added. However, the
-     * incoming set of an atom *must* be set up before the atom can be
-     * used. This routine will review the contents of the AtomTable,
-     * and set up all incoming sets of each atom.
-     */
-    void scrubIncoming(void);
-
 };
 
 } //namespace opencog

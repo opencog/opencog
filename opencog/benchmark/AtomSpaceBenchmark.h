@@ -43,7 +43,8 @@ class AtomSpaceBenchmark
 
     float maxSize; //! never make the atomspace bigger than this while building it
 
-    AtomSpace* a;
+    AtomSpace* asp;
+    AtomTable* atab;
     //AtomSpaceImpl asBackend;
     MT19937RandGen* rng;
 
@@ -57,13 +58,14 @@ class AtomSpaceBenchmark
 
     std::vector<std::string>  methodNames;
 public:
-    int N;
+    int Nreps;
     int sizeIncrease;
     bool saveToFile;
     int saveInterval;
     bool doStats;
     bool buildTestData;
     bool testBackend;
+    bool testTable;
     UUID UUID_begin;
     typedef timepair_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;

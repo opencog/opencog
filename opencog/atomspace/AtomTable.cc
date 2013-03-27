@@ -55,7 +55,6 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     // This allows one to tune how often the unordered map resizes itself.
     //atomSet.max_load_factor(100.0f);
-    nodeIndex.connectAtomTable(this);
 
     //logger().fine("Max load factor for TLB handle map is: %f", TLB::handle_map.max_load_factor());
 
@@ -428,8 +427,7 @@ void AtomTable::merge(Handle h, const TruthValue& tvn)
     } 
 }
 
-// XXX remove the dont_defer_incoming_links flag
-Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (RuntimeException)
+Handle AtomTable::add(Atom *atom) throw (RuntimeException)
 {
     if (atom->getAtomTable() != NULL) {
         // Atom is already inserted
@@ -627,7 +625,7 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 
 HandleEntry* AtomTable::decayShortTermImportance(void)
 {
-    return importanceIndex.decayShortTermImportance();
+    return importanceIndex.decayShortTermImportance(this);
 }
 
 bool AtomTable::decayed(Handle h)
@@ -789,11 +787,6 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
     HandleEntry* result = this->getHandleSet(types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
-}
-
-// XXX Remove me later TODO
-void AtomTable::scrubIncoming(void)
-{
 }
 
 std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const

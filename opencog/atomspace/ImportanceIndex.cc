@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Config.h>
@@ -64,7 +65,7 @@ void ImportanceIndex::removeAtom(const Atom* atom)
 	remove(bin, atom->getHandle());
 }
 
-HandleEntry* ImportanceIndex::decayShortTermImportance(void)
+HandleEntry* ImportanceIndex::decayShortTermImportance(const AtomTable* atomtable)
 {
 	HandleEntry* oldAtoms = NULL;
 
@@ -131,7 +132,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 			// Remove it if too old.
 			if (isOld(atom,minSTI))
 				oldAtoms = HandleEntry::concatenation(
-					extractOld(minSTI, *hit, true), oldAtoms);
+					extractOld(atomtable, minSTI, *hit, true), oldAtoms);
 		}
 	}
 
@@ -145,7 +146,8 @@ bool ImportanceIndex::isOld(const Atom* atom,
             (atom->getAttentionValue().getLTI() < 1));
 }
 
-HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
+HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
+                                         AttentionValue::sti_t minSTI,
                                          Handle handle, bool recursive)
 {
 	HandleEntry* result = NULL;
@@ -157,7 +159,7 @@ HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
 	// If recursive-flag is set, also extract all the links in the
 	// atom's incoming set.
 	if (recursive) {
-		for (HandleEntry* in = atom->getIncomingSet();
+		for (HandleEntry* in = atomtable->getIncomingSet(handle);
                 in != NULL; in = in->next) {
 			Atom *a = TLB::getAtom(in->handle);
 
@@ -168,14 +170,14 @@ HandleEntry* ImportanceIndex::extractOld(AttentionValue::sti_t minSTI,
 			// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
 			if (a and isOld(a, minSTI)) {
 				result = HandleEntry::concatenation(
-					extractOld(minSTI, in->handle, true), result);
+					extractOld(atomtable, minSTI, in->handle, true), result);
 			}
 		}
 	}
 
 	// Only return if there is at least one incoming atom that is
 	// not marked for removal by decay.
-	for (HandleEntry* in = atom->getIncomingSet(); in != NULL; in = in->next) {
+	for (HandleEntry* in = atomtable->getIncomingSet(handle); in != NULL; in = in->next) {
 		Atom* a = TLB::getAtom(in->handle);
 		// XXX a should never be NULL; however, someone somewhere is
 		// removing atoms from the TLB, although they forgot to remove

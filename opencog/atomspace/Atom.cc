@@ -117,11 +117,6 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
     }
 }
 
-HandleEntry* Atom::getIncomingSet() const
-{
-    return atomTable->getIncomingSet(handle);
-}
-
 bool Atom::getFlag(int flag) const
 {
     return (flags & flag) != 0;

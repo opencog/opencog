@@ -139,8 +139,8 @@ std::string Link::toString(void) const
         if (i > 0) answer += ",";
         Handle h = outgoing[i];
         if (atomTable) {
-            if (atomTable->holds(h)) {
-                Atom *a = atomTable->getAtom(h);
+            Atom *a = atomTable->getAtom(h);
+            if (a) {
                 Node *nnn = dynamic_cast<Node *>(a);
                 if (nnn) {
                     snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
