@@ -89,16 +89,16 @@ void TemporalTableFile::save(FILE *fp, TemporalTable *tbl)
         unsigned long b = t->getB();
         fwrite(&b, sizeof(unsigned long), 1, fp);
         // writes the number of associated handles to the current temporal entry
-        HandleSet* hs = tbl->temporalMap->get(t);
-        int setSize = hs->getSize();
+        UnorderedHandleSet* hs = tbl->temporalMap->get(t);
+        int setSize = hs->size();
         fwrite(&setSize, sizeof(int), 1, fp);
-        HandleSetIterator* itr = hs->keys();
-        while (itr->hasNext()) {
+        UnorderedHandleSet::iterator itr = hs->begin();
+        while (itr != hs->end()) {
             // writes each associated handle
-            Handle handle = itr->next();
+            Handle handle = *itr;
+            itr++;
             fwrite(&handle, sizeof(Handle), 1, fp);
         }
-        delete (itr);
         currentEntry = currentEntry->next;
     }
 }

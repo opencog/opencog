@@ -147,7 +147,7 @@ bool ClassServer::isDefined(const std::string& typeName)
 Type ClassServer::getType(const std::string& typeName)
 {
     boost::mutex::scoped_lock l(type_mutex);
-    boost::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
+    std::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
     if (it == name2CodeMap.end()) {
         return NOTYPE;
     }
@@ -158,7 +158,7 @@ const std::string& ClassServer::getTypeName(Type type)
 {
     boost::mutex::scoped_lock l(type_mutex);
     static std::string nullString = "";
-    boost::unordered_map<Type, const std::string*>::iterator it;
+    std::unordered_map<Type, const std::string*>::iterator it;
     if ((it = code2NameMap.find(type)) != code2NameMap.end())
         return *(it->second);
     return nullString;

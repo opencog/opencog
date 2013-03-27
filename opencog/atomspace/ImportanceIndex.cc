@@ -24,7 +24,6 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Config.h>
 
 using namespace opencog;
@@ -77,7 +76,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(const AtomTable* atomtabl
             UnorderedHandleSet::iterator hit;
             for (hit = band.begin(); hit != band.end(); ++hit) {
                 Handle h = *hit;
-                Atom *atom = TLB::getAtom(h);
+                Atom *atom = atomtable->getAtom(h);
 
                 atom->attentionValue.decaySTI();
                 unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
@@ -102,7 +101,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(const AtomTable* atomtabl
         UnorderedHandleSet & band = idx[1];
         for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
             Handle h = *hit;
-            Atom *atom = TLB::getAtom(h);
+            Atom *atom = atomtable->getAtom(h);
             atom->attentionValue.decaySTI();
         }
         idx[0].insert(idx[1].begin(), idx[1].end());
@@ -112,7 +111,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(const AtomTable* atomtabl
             UnorderedHandleSet & band = idx[bin];
             for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
                 Handle h = *hit;
-                Atom *atom = TLB::getAtom(h);
+                Atom *atom = atomtable->getAtom(h);
                 atom->attentionValue.decaySTI();
             }
         }
@@ -127,7 +126,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(const AtomTable* atomtabl
 		UnorderedHandleSet::iterator hit;
 		UnorderedHandleSet & band = idx[bin];
 		for (hit = band.begin(); hit != band.end(); ++hit) {
-			Atom *atom = TLB::getAtom(*hit);
+			Atom *atom = atomtable->getAtom(*hit);
 
 			// Remove it if too old.
 			if (isOld(atom,minSTI))
@@ -151,7 +150,7 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
                                          Handle handle, bool recursive)
 {
 	HandleEntry* result = NULL;
-	Atom *atom = TLB::getAtom(handle);
+	Atom *atom = atomtable->getAtom(handle);
 
 	if (atom->getFlag(REMOVED_BY_DECAY)) return result;
 	else atom->setFlag(REMOVED_BY_DECAY, true);
@@ -161,7 +160,7 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
 	if (recursive) {
 		for (HandleEntry* in = atomtable->getIncomingSet(handle);
                 in != NULL; in = in->next) {
-			Atom *a = TLB::getAtom(in->handle);
+			Atom *a = atomtable->getAtom(in->handle);
 
 			// XXX a should never be NULL; however, someone somewhere is
 			// removing atoms from the TLB, although they forgot to remove
@@ -178,7 +177,7 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
 	// Only return if there is at least one incoming atom that is
 	// not marked for removal by decay.
 	for (HandleEntry* in = atomtable->getIncomingSet(handle); in != NULL; in = in->next) {
-		Atom* a = TLB::getAtom(in->handle);
+		Atom* a = atomtable->getAtom(in->handle);
 		// XXX a should never be NULL; however, someone somewhere is
 		// removing atoms from the TLB, although they forgot to remove
 		// them from the atomTable, and so they are still showing up

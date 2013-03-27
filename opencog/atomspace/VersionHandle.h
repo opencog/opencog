@@ -25,7 +25,6 @@
 #ifndef _OPENCOG_VERSIONHANDLE_H
 #define _OPENCOG_VERSIONHANDLE_H
 
-#include <boost/functional/hash.hpp>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/util/exceptions.h>
 #ifdef ZMQ_EXPERIMENT

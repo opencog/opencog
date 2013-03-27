@@ -255,8 +255,13 @@ void BiggerPatternUTest::test_prep(void)
 	// XXX actually, changes to atomspace internals caused this
 	// to flip-flop. XXX Caution: future changes to pattern matcher
 	// could re-flip this flop. 
+#ifndef FLIP
+	Handle result_france = getlink(imlist,0);
+	Handle result = getlink(imlist,1);
+#else
 	Handle result_france = getlink(imlist,1);
 	Handle result = getlink(imlist,0);
+#endif
 
 	Handle vbenode = getlink(result, 0);
 	Handle vvar0 = getlink(result, 1);

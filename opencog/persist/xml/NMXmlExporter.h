@@ -27,7 +27,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/HandleEntry.h>
-#include <opencog/atomspace/HandleSet.h>
 #include <opencog/persist/xml/NMXmlParser.h>
 
 namespace opencog
@@ -50,21 +49,21 @@ private:
      * Find the set of atoms to be exported based on an
      * initial seed.
      */
-    HandleSet *findExportables(HandleEntry *);
+    UnorderedHandleSet *findExportables(HandleEntry *);
 
     /**
      * Used to explor a subgraph of the AtomTable.
      */
-    void findExportables(HandleSet *, HandleSet *, Handle);
+    void findExportables(UnorderedHandleSet *, UnorderedHandleSet *, Handle);
 
     /**
      * Exports a subset of the AtomSpace to XML.
      * @param hs The set of Handles to be exported.
      *        After the handles are exported
-     *        the HandleSet is deleted.
+     *        the UnorderedHandleSet is deleted.
      * @return An string describing the subset of Atoms in XML.
      */
-    std::string toXML(HandleSet* hs);
+    std::string toXML(UnorderedHandleSet* hs);
 
     /**
      * Exports a subset of the AtomSpace to XML.

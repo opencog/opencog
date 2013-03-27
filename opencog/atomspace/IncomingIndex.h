@@ -25,7 +25,7 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atomspace/HandleIndex.h>
+#include <opencog/atomspace/HandleSetIndex.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog
@@ -38,7 +38,7 @@ namespace opencog
 class IncomingIndex
 {
     private:
-        HandleIndex idx;
+        HandleSetIndex idx;
     public:
         IncomingIndex(void);
         void insertAtom(const Atom* a);
@@ -46,7 +46,7 @@ class IncomingIndex
         void remove(bool (*)(Handle));
         void resize();
 
-        const HandleSeq& getIncomingSet(Handle) const;
+        const UnorderedHandleSet& getIncomingSet(Handle) const;
 };
 
 } //namespace opencog

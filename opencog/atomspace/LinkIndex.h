@@ -30,8 +30,6 @@
 
 namespace opencog
 {
-class HandleEntry;
-
 /**
  * Implements an (type, HandleSeq) index array of RB-trees (C++ set)
  * That is, given both a type, and a HandleSeq, it returns a single,
@@ -50,7 +48,7 @@ class LinkIndex
         void resize();
 
         Handle getHandle(Type type, const HandleSeq&) const;
-        HandleEntry* getHandleSet(Type type, const HandleSeq &, bool subclass) const;
+        UnorderedHandleSet getHandleSet(Type type, const HandleSeq &, bool subclass) const;
 };
 
 } //namespace opencog

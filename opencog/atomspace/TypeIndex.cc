@@ -20,9 +20,8 @@
  */
 
 #include "TypeIndex.h"
+#include "Atom.h"
 #include "ClassServer.h"
-#include "HandleEntry.h"
-#include "TLB.h"
 
 using namespace opencog;
 
@@ -49,20 +48,19 @@ void TypeIndex::removeAtom(const Atom* a)
 	remove(t,a->getHandle());
 }
 
-HandleEntry * TypeIndex::getHandleSet(Type type, bool subclass) const
+UnorderedHandleSet TypeIndex::getHandleSet(Type type, bool subclass) const
 {
 	iterator it = begin(type, subclass);
 	iterator itend = end();
 
-	HandleEntry *he = NULL;
-	while (it != itend)
+	UnorderedHandleSet rv;
+	for (; it != itend; it++)
 	{
-		HandleEntry *nhe = new HandleEntry(*it);
-		nhe->next = he;
-		he = nhe;
-		it++;
+		if (Handle::UNDEFINED != *it)
+			rv.insert(*it);
 	}
-	return he;
+
+	return rv;
 }
 
 // ================================================================
