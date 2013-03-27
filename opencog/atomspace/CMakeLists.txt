@@ -24,7 +24,6 @@ ADD_LIBRARY (atomspace SHARED
     HandleEntry.cc
     HandleIterator.cc
     HandleSeqIndex.cc
-    HandleSet.cc
     HandleSetIndex.cc
     ImportanceIndex.cc
     IncomingIndex.cc
@@ -100,7 +99,6 @@ INSTALL (FILES
     HandleIterator.h
     HandleMap.h
     HandleSeqIndex.h
-    HandleSet.h
     HandleSetIndex.h
     ImportanceIndex.h
     IncomingIndex.h

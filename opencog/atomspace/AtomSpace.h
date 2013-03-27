@@ -36,7 +36,6 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 
@@ -51,7 +50,6 @@
 namespace opencog
 {
 
-typedef std::vector<HandleSet*> HandleSetSeq;
 typedef boost::shared_ptr<TruthValue> TruthValuePtr;
 
 /**

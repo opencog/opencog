@@ -39,7 +39,6 @@ class LinkUTest;
 class NodeUTest;
 class CompositeTruthValueUTest;
 class HandleEntryUTest;
-class HandleSetUTest;
 class TemporalTableUTest;
 class TimeServerUTest;
 class BasicSaveUTest;
@@ -69,8 +68,6 @@ class TLB
     friend class ::LinkUTest;
     friend class HandleEntry;
     friend class ::HandleEntryUTest;
-    friend class HandleSet;
-    friend class ::HandleSetUTest;
     friend class HandleTemporalPair;
     friend class HandleToTemporalEntryMap;
     friend class ImportanceIndex;
