@@ -166,7 +166,7 @@ bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
             // don't make nodes for binary links with no incoming
             boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
             if (l && l->getOutgoingSet().size() == 2 &&
-                     l->getIncomingSet() == NULL)
+                     as->getIncoming(h).size() == 0)
                 return addEdges(h);
         }
         return (addVertex(h) || addEdges(h));
@@ -187,7 +187,7 @@ bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
             // don't make nodes for binary links with no incoming
             boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
             if (l && l->getOutgoingSet().size() == 2 &&
-                     l->getIncomingSet() == NULL)
+                     as->getIncoming(h).size() == 0)
                 return removeEdges(h);
         }
         return removeVertex(h);
@@ -215,7 +215,7 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
     boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
-        if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+        if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
             ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
         } else
             ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
@@ -288,7 +288,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
     boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
-        if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+        if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
             //ubigraph_set_edge_attribute(h.value(), "color", "#ffffff");
             ubigraph_set_edge_attribute(h.value(), "color", ost.str().c_str());
             //ubigraph_set_edge_attribute(h.value(), "width", "2");
@@ -356,7 +356,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
             boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
             if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
-                if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+                if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
                     ubigraph_change_edge_style(h.value(), style);
                 } else
                     ubigraph_change_vertex_style(h.value(), style);
@@ -376,7 +376,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
         boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
         if (l) {
             const std::vector<Handle> &out = l->getOutgoingSet();
-            if (compact && out.size() == 2 && l->getIncomingSet() == NULL) {
+            if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
                 ubigraph_change_edge_style(h.value(), style);
             } else
                 ubigraph_change_vertex_style(h.value(), style);
@@ -402,7 +402,7 @@ bool Ubigrapher::addVertex(Handle h)
         ubigraph_change_vertex_style(id, nodeStyle);
     } else {
         boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
-        if (l && compact && l->getOutgoingSet().size() == 2 && l->getIncomingSet() == NULL)
+        if (l && compact && l->getOutgoingSet().size() == 2 and space.getIncoming(h).size() == 0)
             return false;
         int status = ubigraph_new_vertex_w_id(id);
         if (status)
@@ -450,7 +450,7 @@ bool Ubigrapher::addEdges(Handle h)
 //      // it's later necessary to change this edge
 //      int status = ubigraph_new_edge_w_id(id,x,y);
 
-        if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
+        if (compact && out.size() == 2 and space.getIncoming(h).size() == 0)
         {
             int id = h.value();
             int status = ubigraph_new_edge_w_id(id, out[0].value(),out[1].value());
@@ -500,8 +500,8 @@ bool Ubigrapher::removeVertex(Handle h)
     {
         // Won't have made a node for a binary link with no incoming
         boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
-        if (l && l->getOutgoingSet().size() == 2 &&
-                 l->getIncomingSet() == NULL)
+        if (l and l->getOutgoingSet().size() == 2 
+              and space.getIncoming(h).size() == 0)
             return false;
     }
 
@@ -525,8 +525,8 @@ bool Ubigrapher::removeEdges(Handle h)
     if (compact)
     {
         boost::shared_ptr<Link> l = boost::shared_dynamic_cast<Link>(a);
-        if (l && l->getOutgoingSet().size() == 2 &&
-                 l->getIncomingSet() == NULL)
+        if (l and l->getOutgoingSet().size() == 2 
+              and space.getIncoming(h).size() == 0)
         {                     
             int id = h.value();
             int status = ubigraph_remove_edge(id);
