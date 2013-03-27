@@ -47,7 +47,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     saveToFile=false;
     saveInterval=1;
     buildTestData=false;
-    chanceUseDefaultTV=1.0f;
+    chanceUseDefaultTV=0.8f;
     doStats = false;
     testBackend = false;
     testTable = false;
