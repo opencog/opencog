@@ -178,14 +178,14 @@ HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type,
                                      bool subclass) const
 {
-    HandleEntry* set = HandleEntry::fromHandleVector(incomingIndex.getIncomingSet(handle));
+    HandleEntry* set = HandleEntry::fromHandleSet(incomingIndex.getIncomingSet(handle));
     set = HandleEntry::filterSet(set, type, subclass);
     return set;
 }
 
 HandleEntry* AtomTable::getIncomingSet(Handle handle) const
 {
-    return HandleEntry::fromHandleVector(incomingIndex.getIncomingSet(handle));
+    return HandleEntry::fromHandleSet(incomingIndex.getIncomingSet(handle));
 }
 
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
@@ -689,7 +689,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
       } else
         x -= atomSet.bucket_size(b);
     }
-    boost::unordered_set<const Atom*>::const_local_iterator l = atomSet.begin(b);
+    std::unordered_set<const Atom*>::const_local_iterator l = atomSet.begin(b);
     while(x>0) {
       l++;
       assert(l!=atomSet.end(b));

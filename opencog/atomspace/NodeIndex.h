@@ -30,8 +30,6 @@
 
 namespace opencog
 {
-class HandleEntry;
-
 /**
  * Implements an (type, name) index array of RB-trees (C++ set)
  * That is, given only the type and name of an atom, this will
@@ -51,7 +49,7 @@ class NodeIndex
 		void resize();
 
 		Handle getHandle(Type type, const char *) const;
-		HandleEntry* getHandleSet(Type type, const char *, bool subclass) const;
+		UnorderedHandleSet getHandleSet(Type type, const char *, bool subclass) const;
 };
 
 } //namespace opencog

@@ -24,7 +24,6 @@
 #include "Node.h"
 
 #include <stdio.h>
-#include <boost/functional/hash.hpp>
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -103,7 +102,7 @@ bool Node::operator!=(const Atom& other) const
 
 size_t Node::hashCode() const
 {
-    return getType() ^ boost::hash<std::string>()(name);
+    return getType() ^ std::hash<std::string>()(name);
 }
 
 // XXX WTF it makes no sense to "clone" an atom!  That's fucking nuts, 

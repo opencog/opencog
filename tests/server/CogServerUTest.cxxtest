@@ -58,8 +58,8 @@ public:
         char tmp[100];
         sprintf(tmp, "%s%d", _name.c_str(), _count);
         Handle h = server->getAtomSpace().addNode(NODE, tmp);
-        HandleSet *s = new HandleSet();
-        s->add(h);
+        UnorderedHandleSet s;
+        s.insert(h);
         _utilizedHandleSets.push_back(s);
         // Random loop doing random things so that agent's take more than one
         // cpu tick to complete
@@ -170,15 +170,15 @@ public:
                 // each should have 1 utilized handle set
                 TS_ASSERT(act->utilizedHandleSets.size() == 1);
                 // and one handle in the set
-                TS_ASSERT(act->utilizedHandleSets[0]->getSize() == 1);
+                TS_ASSERT(act->utilizedHandleSets[0].size() == 1);
             }
 
         // removing a handle from the atom space should also remove it from
         // the sets in the activity tables.
         Activity *firstAct = aat[a[0]][0];
-        Handle h = firstAct->utilizedHandleSets[0]->keys()->next();
+        Handle h = *firstAct->utilizedHandleSets[0].begin();
         cogserver.getAtomSpace().removeAtom(h);
-        TS_ASSERT(firstAct->utilizedHandleSets[0]->getSize() == 0);
+        TS_ASSERT(firstAct->utilizedHandleSets[0].size() == 0);
 
         // test max size of activity seq
         sat.setMaxAgentActivityTableSeqSize(13);

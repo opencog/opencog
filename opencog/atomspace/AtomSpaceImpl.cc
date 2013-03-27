@@ -39,7 +39,6 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>

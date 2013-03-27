@@ -20,44 +20,44 @@
  */
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/HandleIndex.h>
+#include <opencog/atomspace/HandleSetIndex.h>
 
 using namespace opencog;
 
-void HandleIndex::insert(Handle h, const HandleSeq &seq)
+void HandleSetIndex::insert(Handle h, const UnorderedHandleSet &uset)
 {
-	idx.insert(std::pair<Handle, const HandleSeq>(h, seq));
+	idx.insert(std::pair<Handle, const UnorderedHandleSet>(h, uset));
 }
 
-const HandleSeq& HandleIndex::get(Handle h) const
+const UnorderedHandleSet& HandleSetIndex::get(Handle h) const
 {
-	std::map<Handle, const HandleSeq>::const_iterator it;
+	std::map<Handle, const UnorderedHandleSet>::const_iterator it;
 
 	it = idx.find(h);
 	if (it != idx.end()) return it->second;
 
-	static HandleSeq empty;
+	static UnorderedHandleSet empty;
 	return empty;
 }
 
-void HandleIndex::remove(Handle h, const HandleSeq &seq)
+void HandleSetIndex::remove(Handle h, const UnorderedHandleSet &uset)
 {
 	idx.erase(h);
 }
 
-size_t HandleIndex::size(void) const
+size_t HandleSetIndex::size(void) const
 {
 	return idx.size();
 }
 
-void HandleIndex::remove(bool (*filter)(const HandleSeq&))
+void HandleSetIndex::remove(bool (*filter)(const UnorderedHandleSet&))
 {
 	OC_ASSERT(0, "Unexpected call to unimplemented function!");
 }
 
-void HandleIndex::remove(bool (*filter)(Handle))
+void HandleSetIndex::remove(bool (*filter)(Handle))
 {
-	std::map<Handle, const HandleSeq>::iterator i, j;
+	std::map<Handle, const UnorderedHandleSet>::iterator i, j;
 	
 	i = idx.begin();
 	while (i != idx.end())

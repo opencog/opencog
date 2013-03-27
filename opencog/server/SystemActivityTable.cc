@@ -81,9 +81,7 @@ void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, Handle h)
         for (size_t n = 0; n < seq.size(); n++) {
             Activity *a = seq[n];
             for (size_t i = 0; i < a->utilizedHandleSets.size(); i++) {
-                HandleSet *s = a->utilizedHandleSets[i];
-                if (s->contains(h))
-                    s->remove(h);
+                a->utilizedHandleSets[i].erase(h);
             }
         }
     }

@@ -33,7 +33,6 @@
 #include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/atomspace/HandleSet.h>
 
 using namespace opencog;
 

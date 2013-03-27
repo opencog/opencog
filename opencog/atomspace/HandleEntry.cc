@@ -991,5 +991,17 @@ HandleEntry* HandleEntry::fromHandleVector(const std::vector<Handle> &v)
         HandleEntry *temp = new HandleEntry(v[i]);
         ret = HandleEntry::concatenation(temp, ret);
     }
-    return(ret);
+    return ret;
+}
+
+HandleEntry* HandleEntry::fromHandleSet(const std::unordered_set<Handle> &s)
+{
+    HandleEntry *ret = NULL;
+    std::unordered_set<Handle>::const_iterator it = s.cbegin();
+    for (; it != s.cend(); it++)
+    {
+        HandleEntry *temp = new HandleEntry(*it);
+        ret = HandleEntry::concatenation(temp, ret);
+    }
+    return ret;
 }

@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 
 #include <boost/signal.hpp>
 
@@ -62,7 +63,7 @@ struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*,
 {
     bool operator()(const Atom* const& __x, const Atom* const& __y) const;
 };
-typedef boost::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
+typedef std::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
 
 class SavingLoading;
 
@@ -337,7 +338,7 @@ public:
      */
     HandleEntry* getHandleSet(Type type, bool subclass = false) const
     {
-        return typeIndex.getHandleSet(type, subclass);
+        return HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
     }
 
     /**
@@ -355,7 +356,7 @@ public:
                               bool subclass = false,
                               bool targetSubclass = false) const
     {
-        HandleEntry *set = targetTypeIndex.getHandleSet(targetType,targetSubclass);
+        HandleEntry *set = HandleEntry::fromHandleSet(targetTypeIndex.getHandleSet(targetType,targetSubclass));
         return HandleEntry::filterSet(set, type, subclass);
     }
 
@@ -424,10 +425,10 @@ public:
     {
         if (name == NULL || *name == 0)
         {
-            HandleEntry *set = typeIndex.getHandleSet(type, subclass);
+            HandleEntry *set = HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
             return HandleEntry::filterSet(set, "");
         }
-        return nodeIndex.getHandleSet(type, name, subclass);
+        return HandleEntry::fromHandleSet(nodeIndex.getHandleSet(type, name, subclass));
     }
 
     /**

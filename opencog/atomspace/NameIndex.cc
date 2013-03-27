@@ -20,9 +20,7 @@
  */
 
 #include <opencog/atomspace/NameIndex.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
@@ -40,8 +38,11 @@ void NameIndex::removeAtom(const Atom* a)
 	remove(n->getName().c_str(), a->getHandle());
 }
 
-HandleEntry * NameIndex::getHandleSet(const char* name) const
+UnorderedHandleSet NameIndex::getHandleSet(const char* name) const
 {
 	Handle h = get(name);
-	return new HandleEntry(h);
+	UnorderedHandleSet hs;
+	if (Handle::UNDEFINED != h)
+		hs.insert(h);
+	return hs;
 }
