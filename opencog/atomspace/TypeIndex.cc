@@ -55,8 +55,11 @@ UnorderedHandleSet TypeIndex::getHandleSet(Type type, bool subclass) const
 	iterator itend = end();
 
 	UnorderedHandleSet rv;
-	while (it != itend)
-		rv.insert(*it++);
+	for (; it != itend; it++)
+	{
+		if (Handle::UNDEFINED != *it)
+			rv.insert(*it);
+	}
 
 	return rv;
 }

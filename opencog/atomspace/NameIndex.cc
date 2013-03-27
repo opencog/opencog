@@ -44,6 +44,7 @@ UnorderedHandleSet NameIndex::getHandleSet(const char* name) const
 {
 	Handle h = get(name);
 	UnorderedHandleSet hs;
-	hs.insert(h);
+	if (Handle::UNDEFINED != h)
+		hs.insert(h);
 	return hs;
 }
