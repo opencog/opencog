@@ -1,0 +1,150 @@
+
+                            Benchmarking Diary
+                            ------------------
+
+This file contains benchmark assorted benchmark results.  This is meant
+to be a historical log: as changes to the atomspace are made, we can
+see how performance changes over time.
+
+26 March 2013
+-------------
+Benchamrks performed on 2008 vintage CPU and system:
+   AMD Athlon(tm) 64 X2 Dual Core Processor 6000+
+   3GHz  1024 KB cache
+   8GB ECC DDR2 RAM
+
+First, some raw data, and then some commentary & analysis.
+
+The below measures the performance of the raw AtomTable interface:
+    ./atomspace_bm -A -b -X     # Note the -X is uppercase!
+
+    Benchmarking AtomSpace's addNode method 100000 times ..........
+    0.664715 seconds elapsed (150440.40 per second)
+    Sum clock() time for all requests: 390000 (0.39 seconds, 256410 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's addLink method 100000 times ..........
+    0.784073 seconds elapsed (127539.17 per second)
+    Sum clock() time for all requests: 580000 (0.58 seconds, 172414 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getType method 100000 times ..........
+    0.138640 seconds elapsed (721291.70 per second)
+    Sum clock() time for all requests: 40000 (0.04 seconds, 2.5e+06 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getTV method 100000 times ..........
+    0.142129 seconds elapsed (703586.45 per second)
+    Sum clock() time for all requests: 50000 (0.05 seconds, 2e+06 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's setTV method 100000 times ..........
+    0.166353 seconds elapsed (601131.38 per second)
+    Sum clock() time for all requests: 60000 (0.06 seconds, 1.66667e+06 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+    46.604309 seconds elapsed (2145.72 per second)
+    Sum clock() time for all requests: 46240000 (46.24 seconds, 2162.63 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getNodeHandles method 100000 times ..........
+    3.733971 seconds elapsed (26781.14 per second)
+    Sum clock() time for all requests: 3410000 (3.41 seconds, 29325.5 requests per second)
+    ------------------------------
+
+
+The below measures the performance of the AtomSpaceImpl interface:
+    ./atomspace_bm -A -b -x     # Note the -x is lowercase!
+
+    Benchmarking AtomSpace's addNode method 100000 times ..........
+    4.878072 seconds elapsed (20499.90 per second)
+    Sum clock() time for all requests: 3150000 (3.15 seconds, 31746 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's addLink method 100000 times ..........
+    7.789448 seconds elapsed (12837.88 per second)
+    Sum clock() time for all requests: 3990000 (3.99 seconds, 25062.7 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getType method 100000 times ..........
+    3.509915 seconds elapsed (28490.72 per second)
+    Sum clock() time for all requests: 120000 (0.12 seconds, 833333 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getTV method 100000 times ..........
+    3.953390 seconds elapsed (25294.75 per second)
+    Sum clock() time for all requests: 160000 (0.16 seconds, 625000 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's setTV method 100000 times ..........
+    3.941879 seconds elapsed (25368.61 per second)
+    Sum clock() time for all requests: 160000 (0.16 seconds, 625000 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+    79.308176 seconds elapsed (1260.90 per second)
+    Sum clock() time for all requests: 66550000 (66.55 seconds, 1502.63 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getNodeHandles method 100000 times ..........
+    7.634395 seconds elapsed (13098.61 per second)
+    Sum clock() time for all requests: 3830000 (3.83 seconds, 26109.7 requests per second)
+    ------------------------------
+
+
+The below measures the performance of the AtomSpace interface:
+    ./atomspace_bm -A -b
+
+    Benchmarking AtomSpace's addNode method 100000 times ..........
+    5.710748 seconds elapsed (17510.84 per second)
+    Sum clock() time for all requests: 3330000 (3.33 seconds, 30030 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's addLink method 100000 times ..........
+    7.793599 seconds elapsed (12831.04 per second)
+    Sum clock() time for all requests: 4110000 (4.11 seconds, 24330.9 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getType method 100000 times ..........
+    7.581572 seconds elapsed (13189.88 per second)
+    Sum clock() time for all requests: 3830000 (3.83 seconds, 26109.7 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getTV method 100000 times ..........
+    6.203707 seconds elapsed (16119.39 per second)
+    Sum clock() time for all requests: 2260000 (2.26 seconds, 44247.8 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's setTV method 100000 times ..........
+    4.281147 seconds elapsed (23358.23 per second)
+    Sum clock() time for all requests: 1570000 (1.57 seconds, 63694.3 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getHandleSet method 100000 times ..........
+    81.959277 seconds elapsed (1220.12 per second)
+    Sum clock() time for all requests: 77910000 (77.91 seconds, 1283.53 requests per second)
+    ------------------------------
+    Benchmarking AtomSpace's getNodeHandles method 100000 times ..........
+    9.935555 seconds elapsed (10064.86 per second)
+    Sum clock() time for all requests: 7270000 (7.27 seconds, 13755.2 requests per second)
+    ------------------------------
+
+
+
+Commentary and Analysis
+-----------------------
+The "raw AtomTable" numbers are what one gets if one uses just the
+AtomTable, and naked pointers.  The AtomTable offers some indexes for
+quick lookup of atoms by name, type, etc.  Getting atom attributes is
+fast, as the atom table provides a direct pointer to the atom. 
+
+The AtomSpaceImpl interface is another "native" interface, but it hides
+all raw pointers, and conducts all business by using handles.  Performance
+is slower as a result.  We can estimate the overhead of this hiding by
+comparing performance figures to the raw AtomTable results.
+
+The AtomSpace interface attempts to provide thread safety by creating an
+atomspace server, and communicating with it via request/response messages.
+The server side itself uses the AtomSpaceImpl to do its work.  Again, 
+performance is slower.  Comparing to the AtomSpaceImpl numbers gives
+a hint of the overhead of the request/response architecture.
+
+Rearrange in tabular form:
+
+   test            AtomTable    AtomSpaceImpl    AtomSpace
+   name            K-ops/sec      K-ops/sec      K-ops/sec
+   ----            ---------    -------------    ---------
+  addNode            256.4         31.7            30.0
+  addLink            172.4         25.06           24.3
+  getType           2500          833              26.1
+  getTV             2000          625              44.2
+  setTV             1666          625              63.7
+  getHandleSet         2.16         1.50            1.28
+  getNodeHandles      29.3         26.1            13.76
+
+
+
