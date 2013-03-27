@@ -50,8 +50,10 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     chanceUseDefaultTV=1.0f;
     doStats = false;
     testBackend = false;
+    testTable = false;
 
     asp = NULL;
+    atab = NULL;
 
     rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
 
@@ -208,7 +210,11 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
             // Try to negate the memory increase due to adding atoms
             rssFromIncrease += (getMemUsage() - rssBeforeIncrease);
         }
-        size_t atomspaceSize = asp->getSize();
+        size_t atomspaceSize;
+        if (testTable)
+            atomspaceSize = atab->getSize();
+        else
+            atomspaceSize = asp->getSize();
         timepair_t timeTaken = CALL_MEMBER_FN(*this, methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
         counter++;
@@ -229,7 +235,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     }
     Handle rh = getRandomHandle();
     // This spurious line is to ensure the whole queue is complete
-    asp->atomSpaceAsync->getTVComplete(rh)->get_result();
+    if (not testTable)
+        asp->atomSpaceAsync->getTVComplete(rh)->get_result();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/Nreps));
@@ -258,11 +265,17 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
     for (unsigned int i = 0; i < methodNames.size(); i++) {
         UUID_begin = TLB::getMaxUUID();
-        asp = new AtomSpace();
+        if (testTable)
+            atab = new AtomTable();
+        else
+            asp = new AtomSpace();
         //asBackend = new AtomSpaceImpl();
         if (buildTestData) buildAtomSpace(atomCount,percentLinks,false);
         doBenchmark(methodNames[i],methodsToTest[i]);
-        delete asp;
+        if (testTable)
+            delete atab;
+        else
+            delete asp;
         //delete asBackend;
     }
 
@@ -280,26 +293,36 @@ Type AtomSpaceBenchmark::randomType(Type t)
     return randomType;
 }
 
-clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s) {
+clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
+{
     double p = rng->randdouble();
     Type t = defaultNodeType;
     if (p < chanceOfNonDefaultNode)
         t=randomType(NODE);
     if (s.size() > 0) {
         clock_t t_begin = clock();
-        asp->addNode(t,s); 
+        if (testTable)
+            atab->add(new Node(t,s));
+        else
+            asp->addNode(t,s); 
         return clock() - t_begin;
     } else {
         std::ostringstream oss;
         counter++;
         oss << "node " << counter;
         clock_t t_begin = clock();
-        asp->addNode(t,oss.str()); 
+        if (testTable) {
+            Node* n = new Node(t, oss.str());
+            atab->add(n);
+        }
+        else
+            asp->addNode(t, oss.str()); 
         return clock() - t_begin;
     }
 }
 
-clock_t AtomSpaceBenchmark::makeRandomLink() {
+clock_t AtomSpaceBenchmark::makeRandomLink()
+{
     Type t = defaultLinkType;
     double p = rng->randdouble();
     HandleSeq outgoing;
@@ -314,7 +337,10 @@ clock_t AtomSpaceBenchmark::makeRandomLink() {
         outgoing.push_back(getRandomHandle());
     }
     tAddLinkStart = clock();
-    asp->addLink(t,outgoing);
+    if (testTable)
+        atab->add(new Link(t, outgoing));
+    else
+        asp->addLink(t, outgoing);
     return clock() - tAddLinkStart;
 }
 
@@ -367,15 +393,20 @@ timepair_t AtomSpaceBenchmark::bm_addLink()
     return timepair_t(makeRandomLink(),0);
 }
 
-Handle AtomSpaceBenchmark::getRandomHandle() {
+Handle AtomSpaceBenchmark::getRandomHandle()
+{
     //tRandomStart = clock();
     // We need this TLB access as the only alternative to
     // getting a random handle this way scales badly:
     // (... plus we are not allowed access to the AtomTable either)
     //Handle h = asp->getAtomTable().getRandom(rng);
     //tRandomEnd = clock();
-    OC_ASSERT(asp->getSize() != 0, "Trying to get random handle of 0 size AtomSpace, "
-            "perhaps try using the -b option");
+    if (testTable)
+        OC_ASSERT(atab->getSize() != 0,
+                "AtomTable is emtpy, perhaps try using the -b option");
+    else
+        OC_ASSERT(asp->getSize() != 0,
+                "AtomSpace is emtpy, perhaps try using the -b option");
     return Handle(UUID_begin + rng->randint((TLB::getMaxUUID()-1)-UUID_begin));
 }
 
@@ -384,7 +415,11 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     Handle h = getRandomHandle();
     clock_t t_begin;
     clock_t time_taken;
-    if (this->testBackend) {
+    if (testTable) {
+        t_begin = clock();
+        atab->getAtom(h)->getType();
+        time_taken = clock() - t_begin;
+    } else if (testBackend) {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getType(h);
         time_taken = clock() - t_begin;
@@ -401,7 +436,11 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     Handle h = getRandomHandle();
     clock_t t_begin;
     clock_t time_taken;
-    if (this->testBackend) {
+    if (testTable) {
+        t_begin = clock();
+        atab->getAtom(h)->getTruthValue();
+        time_taken = clock() - t_begin;
+    } else if (testBackend) {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getTV(h);
         time_taken = clock() - t_begin;
@@ -438,7 +477,12 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     }
     clock_t t_begin;
     clock_t time_taken;
-    if (this->testBackend) {
+    if (testTable) {
+        t_begin = clock();
+        atab->getAtom(h)->setTruthValue(stv);
+        time_taken = clock() - t_begin;
+    }
+    else if (testBackend) {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.setTV(h,stv);
         time_taken = clock() - t_begin;
@@ -461,9 +505,14 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
 
     clock_t t_begin;
     clock_t time_taken;
-    if (this->testBackend) {
+    if (testTable) {
         t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),NODE,oss.str().c_str(),true);
+        delete atab->getHandleSet(oss.str().c_str(), NODE, true);
+        time_taken = clock() - t_begin;
+    }
+    else if (testBackend) {
+        t_begin = clock();
+        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), NODE, oss.str().c_str(), true);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
@@ -480,13 +529,17 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     HandleSeq results2;
     clock_t t_begin;
     clock_t time_taken;
-    if (this->testBackend) {
+    if (testTable) {
         t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),t,true);
+        delete atab->getHandleSet(t, true);
+        time_taken = clock() - t_begin;
+    } else if (testBackend) {
+        t_begin = clock();
+        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), t, true);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
-        asp->getHandleSet(back_inserter(results),t,true);
+        asp->getHandleSet(back_inserter(results), t, true);
         time_taken = clock() - t_begin;
     }
     return timepair_t(time_taken,0);
@@ -497,7 +550,13 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     Handle h = getRandomHandle();
     clock_t t_begin;
     clock_t time_taken;
-    if (this->testBackend) {
+    if (testTable) {
+        t_begin = clock();
+        Atom* a = atab->getAtom(h);
+        Link* l = dynamic_cast<Link*>(a);
+        if (l) l->getOutgoingSet();
+        time_taken = clock() - t_begin;
+    } else if (testBackend) {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getOutgoing(h);
         time_taken = clock() - t_begin;
@@ -510,7 +569,8 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 }
 
 AtomSpaceBenchmark::TimeStats::TimeStats(
-        const std::vector<record_t>& records) {
+        const std::vector<record_t>& records)
+{
     double sum = 0;
     t_min = 1 << 31;
     t_max = 0;
