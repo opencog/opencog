@@ -59,8 +59,8 @@ public:
         {
             // don't make nodes for binary links with no incoming
             boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
-            if (l && l->getOutgoingSet().size() == 2 &&
-                     l->getIncomingSet() == NULL)
+            if (l and l->getOutgoingSet().size() == 2 and
+                     space->getIncoming(h).size() == 0)
                 return false;
         }
 
@@ -96,7 +96,7 @@ public:
         {
             const std::vector<Handle> &out = l->getOutgoingSet();
 
-            if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
+            if (compact && out.size() == 2 and space->getIncoming(h).size() == 0)
             {
                 ost << out[0] << " -> " << out[1] << " [label=\""
                     << classserver().getTypeName(a->getType()) << "\"];\n";
