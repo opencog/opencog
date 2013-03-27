@@ -51,7 +51,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     doStats = false;
     testBackend = false;
 
-    a = NULL;
+    asp = NULL;
 
     rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
 
@@ -66,7 +66,7 @@ AtomSpaceBenchmark::~AtomSpaceBenchmark() {
 size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
-    if (a->isNode(h)) {
+    if (asp->isNode(h)) {
         Node* n = dynamic_cast<Node*>(TLB::getAtom(h));
         total = sizeof(Node);
         if (&(n->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
@@ -208,7 +208,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
             // Try to negate the memory increase due to adding atoms
             rssFromIncrease += (getMemUsage() - rssBeforeIncrease);
         }
-        size_t atomspaceSize = a->getSize();
+        size_t atomspaceSize = asp->getSize();
         timepair_t timeTaken = CALL_MEMBER_FN(*this, methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
         counter++;
@@ -229,7 +229,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     }
     Handle rh = getRandomHandle();
     // This spurious line is to ensure the whole queue is complete
-    a->atomSpaceAsync->getTVComplete(rh)->get_result();
+    asp->atomSpaceAsync->getTVComplete(rh)->get_result();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/Nreps));
@@ -258,11 +258,11 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
     for (unsigned int i = 0; i < methodNames.size(); i++) {
         UUID_begin = TLB::getMaxUUID();
-        a = new AtomSpace();
+        asp = new AtomSpace();
         //asBackend = new AtomSpaceImpl();
         if (buildTestData) buildAtomSpace(atomCount,percentLinks,false);
         doBenchmark(methodNames[i],methodsToTest[i]);
-        delete a;
+        delete asp;
         //delete asBackend;
     }
 
@@ -287,14 +287,14 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s) {
         t=randomType(NODE);
     if (s.size() > 0) {
         clock_t t_begin = clock();
-        a->addNode(t,s); 
+        asp->addNode(t,s); 
         return clock() - t_begin;
     } else {
         std::ostringstream oss;
         counter++;
         oss << "node " << counter;
         clock_t t_begin = clock();
-        a->addNode(t,oss.str()); 
+        asp->addNode(t,oss.str()); 
         return clock() - t_begin;
     }
 }
@@ -314,7 +314,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink() {
         outgoing.push_back(getRandomHandle());
     }
     tAddLinkStart = clock();
-    a->addLink(t,outgoing);
+    asp->addLink(t,outgoing);
     return clock() - tAddLinkStart;
 }
 
@@ -372,9 +372,9 @@ Handle AtomSpaceBenchmark::getRandomHandle() {
     // We need this TLB access as the only alternative to
     // getting a random handle this way scales badly:
     // (... plus we are not allowed access to the AtomTable either)
-    //Handle h = a->getAtomTable().getRandom(rng);
+    //Handle h = asp->getAtomTable().getRandom(rng);
     //tRandomEnd = clock();
-    OC_ASSERT(a->getSize() != 0, "Trying to get random handle of 0 size AtomSpace, "
+    OC_ASSERT(asp->getSize() != 0, "Trying to get random handle of 0 size AtomSpace, "
             "perhaps try using the -b option");
     return Handle(UUID_begin + rng->randint((TLB::getMaxUUID()-1)-UUID_begin));
 }
@@ -386,11 +386,11 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     clock_t time_taken;
     if (this->testBackend) {
         t_begin = clock();
-        a->atomSpaceAsync->atomspace.getType(h);
+        asp->atomSpaceAsync->atomspace.getType(h);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
-        a->getType(h); 
+        asp->getType(h); 
         time_taken = clock() - t_begin;
     }
     return timepair_t(time_taken,0);
@@ -403,14 +403,14 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     clock_t time_taken;
     if (this->testBackend) {
         t_begin = clock();
-        a->atomSpaceAsync->atomspace.getTV(h);
+        asp->atomSpaceAsync->atomspace.getTV(h);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
         // uncomment this line to test submitting async requests
-        //a->atomSpaceAsync->getTVComplete(h); 
+        //asp->atomSpaceAsync->getTVComplete(h); 
         // then comment the one below
-        a->getTV(h);
+        asp->getTV(h);
         time_taken = clock() - t_begin;
     }
     return timepair_t(time_taken,0);
@@ -421,7 +421,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValueZmq()
 {
     Handle h = getRandomHandle();
     clock_t t_begin = clock();
-    a->getTVZmq(h); 
+    asp->getTVZmq(h); 
     return clock() - t_begin;
 }
 #endif
@@ -440,11 +440,11 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     clock_t time_taken;
     if (this->testBackend) {
         t_begin = clock();
-        a->atomSpaceAsync->atomspace.setTV(h,stv);
+        asp->atomSpaceAsync->atomspace.setTV(h,stv);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
-        a->setTV(h,stv);
+        asp->setTV(h,stv);
         time_taken = clock() - t_begin;
     }
     return timepair_t(time_taken,0);
@@ -463,11 +463,11 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     clock_t time_taken;
     if (this->testBackend) {
         t_begin = clock();
-        a->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),NODE,oss.str().c_str(),true);
+        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),NODE,oss.str().c_str(),true);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
-        a->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
+        asp->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
         time_taken = clock() - t_begin;
     }
     return timepair_t(time_taken,0);
@@ -482,11 +482,11 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     clock_t time_taken;
     if (this->testBackend) {
         t_begin = clock();
-        a->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),t,true);
+        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2),t,true);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
-        a->getHandleSet(back_inserter(results),t,true);
+        asp->getHandleSet(back_inserter(results),t,true);
         time_taken = clock() - t_begin;
     }
     return timepair_t(time_taken,0);
@@ -499,11 +499,11 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     clock_t time_taken;
     if (this->testBackend) {
         t_begin = clock();
-        a->atomSpaceAsync->atomspace.getOutgoing(h);
+        asp->atomSpaceAsync->atomspace.getOutgoing(h);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();
-        a->getOutgoing(h);
+        asp->getOutgoing(h);
         time_taken = clock() - t_begin;
     }
     return timepair_t(time_taken,0);

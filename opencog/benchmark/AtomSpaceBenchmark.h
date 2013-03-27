@@ -43,7 +43,7 @@ class AtomSpaceBenchmark
 
     float maxSize; //! never make the atomspace bigger than this while building it
 
-    AtomSpace* a;
+    AtomSpace* asp;
     //AtomSpaceImpl asBackend;
     MT19937RandGen* rng;
 
