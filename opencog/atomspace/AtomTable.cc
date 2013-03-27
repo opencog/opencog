@@ -55,7 +55,6 @@ AtomTable::AtomTable(bool dsa)
     size = 0;
     // This allows one to tune how often the unordered map resizes itself.
     //atomSet.max_load_factor(100.0f);
-    nodeIndex.connectAtomTable(this);
 
     //logger().fine("Max load factor for TLB handle map is: %f", TLB::handle_map.max_load_factor());
 
