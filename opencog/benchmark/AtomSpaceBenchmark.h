@@ -57,7 +57,7 @@ class AtomSpaceBenchmark
 
     std::vector<std::string>  methodNames;
 public:
-    int N;
+    int Nreps;
     int sizeIncrease;
     bool saveToFile;
     int saveInterval;

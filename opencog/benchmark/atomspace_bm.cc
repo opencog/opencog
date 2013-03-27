@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
      "-x        \tTest the AtomSpaceImpl backend instead of the public AtomSpace API\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
-     "-n <int>  \tHow many times to repeat the method\n" 
+     "-n <int>  \tHow many times to call the method in the measurement loop\n" 
      "-S <int>  \tHow many random atoms to add after each measurement\n"
      "-- Build test data --\n"
      "-b        \tBefore benchmark, build a graph of random nodes/links\n"
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
              exit(0);
              break;
            case 'n':
-             benchmarker.N = atoi(optarg);
+             benchmarker.Nreps = atoi(optarg);
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);

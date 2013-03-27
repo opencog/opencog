@@ -42,7 +42,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     linkSize_std = 0.5f;
     counter = 0;
     showTypeSizes = false;
-    N = 10000;
+    Nreps = 100000;
     sizeIncrease=0;
     saveToFile=false;
     saveInterval=1;
@@ -184,32 +184,32 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     clock_t sumAsyncTime = 0;
     long rssStart;
     std::vector<record_t> records;
-    cout << "Benchmarking AtomSpace's " << methodName << " method " << N <<
+    cout << "Benchmarking AtomSpace's " << methodName << " method " << Nreps <<
         " times ";
     std::ofstream myfile;
     if (saveToFile)
     {
         myfile.open ((methodName + "_benchmark.csv").c_str());
     }
-    int diff = (N / PROGRESS_BAR_LENGTH);
+    int diff = (Nreps / PROGRESS_BAR_LENGTH);
     if (!diff) diff = 1;
     int counter=0;
     rssStart = getMemUsage();
     long rssFromIncrease = 0;
     timeval tim;
     gettimeofday(&tim, NULL);
-    double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
-    for (int i=0; i < N; i++)
+    double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
+    for (int i=0; i < Nreps; i++)
     {
         if (sizeIncrease)
         {
             long rssBeforeIncrease = getMemUsage();
-            buildAtomSpace(sizeIncrease,percentLinks,false);
+            buildAtomSpace(sizeIncrease, percentLinks, false);
             // Try to negate the memory increase due to adding atoms
             rssFromIncrease += (getMemUsage() - rssBeforeIncrease);
         }
         size_t atomspaceSize = a->getSize();
-        timepair_t timeTaken = CALL_MEMBER_FN(*this,methodToCall)();
+        timepair_t timeTaken = CALL_MEMBER_FN(*this, methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
         counter++;
         if (saveInterval && counter % saveInterval == 0)
@@ -232,11 +232,11 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     a->atomSpaceAsync->getTVComplete(rh)->get_result();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
-    printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/N));
+    printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/Nreps));
     // rssEnd = getMemUsage();
     cout << "Sum clock() time for all requests: " << sumAsyncTime << " (" <<
         (float) sumAsyncTime / CLOCKS_PER_SEC << " seconds, "<<
-        1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / N) << " requests per second)" << endl;
+        1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / Nreps) << " requests per second)" << endl;
     //cout << "Memory (max RSS) change after benchmark: " <<
     //    (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
 
