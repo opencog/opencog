@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HANDLE_INDEX_H
-#define _OPENCOG_HANDLE_INDEX_H
+#ifndef _OPENCOG_HANDLE_SET_INDEX_H
+#define _OPENCOG_HANDLE_SET_INDEX_H
 
 #include <cstddef>
 #include <map>
@@ -33,25 +33,25 @@ namespace opencog
 
 /**
  * Implements a Handle index as an RB-tree (C++ map)
- * That is, given a Handle, it will return a HandleSeq
+ * That is, given a Handle, it will return an UnorderedHandleSet
  * associated with that Handle.  This index is the "opposite" to the 
  * HandleSeqIndex; the map goes in the opposite direction.
  */
-class HandleIndex:
-	public AtomIndex<Handle, const HandleSeq&>
+class HandleSetIndex:
+	public AtomIndex<Handle, const UnorderedHandleSet&>
 {
 	private:
-		std::map<Handle, const HandleSeq> idx;
+		std::map<Handle, const UnorderedHandleSet> idx;
 
 	public:
-		virtual void insert(Handle, const HandleSeq&);
-		virtual const HandleSeq& get(Handle) const;
-		virtual void remove(Handle, const HandleSeq&);
+		virtual void insert(Handle, const UnorderedHandleSet&);
+		virtual const UnorderedHandleSet& get(Handle) const;
+		virtual void remove(Handle, const UnorderedHandleSet&);
 		virtual size_t size(void) const;
-		virtual void remove(bool (*)(const HandleSeq&));
+		virtual void remove(bool (*)(const UnorderedHandleSet&));
 		void remove(bool (*)(Handle));
 };
 
 } //namespace opencog
 
-#endif // _OPENCOG_HANDLE_INDEX_H
+#endif // _OPENCOG_HANDLE_SET_INDEX_H

@@ -26,12 +26,6 @@
 
 using namespace opencog;
 
-// XXX TODO:
-// This class uses a HandleIndex as the map, and HandleIndex uses the
-// ordered HandleSeq (i.e. a vector). For our purposes, we don't need
-// a vector; a std::set would have been enough.  In fact, using std::set
-// would make both insertion and removale a little bit simpler and faster.
-// Oh well. Later.
 IncomingIndex::IncomingIndex(void)
 {
 }
@@ -51,13 +45,13 @@ void IncomingIndex::insertAtom(const Atom* a)
 	{
 		Handle h = *it;
 		
-		const HandleSeq& oldset = idx.get(h);
+		const UnorderedHandleSet& oldset = idx.get(h);
 
 		// Check to see if h is already listed; it should not be...
 		// Unless a given handle appears twice in the outgoing set
 		// of a link, in which case we should ignore the second
 		// (and other) instances.
-		HandleSeq::const_iterator oit = oldset.begin();
+		UnorderedHandleSet::const_iterator oit = oldset.begin();
 		for (; oit != oldset.end(); oit++)
 		{
 			// OC_ASSERT(*oit != hin, "Same atom seems to be getting inserted twice!");
@@ -66,8 +60,8 @@ void IncomingIndex::insertAtom(const Atom* a)
 		if (oit != oldset.end()) continue;
 
 		// Add hin to the incoming set of h.
-		HandleSeq inset = oldset;
-		inset.push_back(hin);
+		UnorderedHandleSet inset = oldset;
+		inset.insert(hin);
 		idx.remove(h, oldset);
 		idx.insert(h, inset);
 	}
@@ -84,10 +78,10 @@ void IncomingIndex::removeAtom(const Atom* a)
 	{
 		Handle h = *it;
 		
-		const HandleSeq& oldset = idx.get(h);
-		HandleSeq inset = oldset;
+		const UnorderedHandleSet& oldset = idx.get(h);
+		UnorderedHandleSet inset = oldset;
 
-		HandleSeq::iterator oit = inset.begin();
+		UnorderedHandleSet::iterator oit = inset.begin();
 		for (; oit != inset.end(); oit++)
 		{
 			if (*oit == hin) break;
@@ -107,7 +101,7 @@ void IncomingIndex::removeAtom(const Atom* a)
 	}
 }
 
-const HandleSeq& IncomingIndex::getIncomingSet(Handle h) const
+const UnorderedHandleSet& IncomingIndex::getIncomingSet(Handle h) const
 {
 	return idx.get(h);
 }
