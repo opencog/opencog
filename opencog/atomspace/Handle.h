@@ -28,9 +28,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 
-#include <boost/unordered_set.hpp>
 
 namespace opencog
 {
@@ -97,7 +97,7 @@ public:
 
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
-typedef boost::unordered_set<Handle, boost::hash<opencog::Handle> > UnorderedHandleSet;
+typedef std::unordered_set<Handle> UnorderedHandleSet;
 
 static inline std::string operator+ (const char *lhs, Handle h)
 {
@@ -122,10 +122,18 @@ inline std::size_t hash_value(Handle const& h)
 } // namespace opencog
 
 namespace std { 
-inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h) {
+inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
+{
     out << h.value();
     return out;
 }
+
+template<>
+inline std::size_t std::hash<opencog::Handle>::operator()(opencog::Handle h) const
+{  
+   return (std::size_t) h.value();
+}
+
 } //namespace std
 
 #endif // _OPENCOG_HANDLE_H

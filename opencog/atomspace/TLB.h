@@ -24,11 +24,11 @@
 #ifndef _OPENCOG_TLB_H
 #define _OPENCOG_TLB_H
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
+#include <opencog/util/Logger.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/util/Logger.h>
 
 // WTF this is like, total bullshit!  Who did this? 
 // Get rid of these UTest class crap ...
@@ -94,8 +94,8 @@ class TLB
     friend class AtomStorage;
     friend class SenseSimilaritySQL;
 
-    typedef boost::unordered_map< Handle, Atom*,
-            boost::hash<opencog::Handle> > map_t;
+    typedef std::unordered_map< Handle, Atom*,
+            std::hash<opencog::Handle> > map_t;
 private:
 
     static map_t handle_map;

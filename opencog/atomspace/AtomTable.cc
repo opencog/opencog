@@ -689,7 +689,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
       } else
         x -= atomSet.bucket_size(b);
     }
-    boost::unordered_set<const Atom*>::const_local_iterator l = atomSet.begin(b);
+    std::unordered_set<const Atom*>::const_local_iterator l = atomSet.begin(b);
     while(x>0) {
       l++;
       assert(l!=atomSet.end(b));

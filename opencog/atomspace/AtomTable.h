@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 
 #include <boost/signal.hpp>
 
@@ -62,7 +63,7 @@ struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*,
 {
     bool operator()(const Atom* const& __x, const Atom* const& __y) const;
 };
-typedef boost::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
+typedef std::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
 
 class SavingLoading;
 
