@@ -675,6 +675,10 @@ protected:
  * the following thread
  * http://groups.google.com/group/opencog-news/browse_thread/thread/b7704419e082c6f1
  *
+ * It turns out this is closely related to the Akaike Information
+ * Criterion, see in particular
+ * http://en.wikipedia.org/wiki/Akaike_information_criterion#Relevance_to_chi-squared_fitting
+ *
  * Here's a summary:
  * Let M == model (the combo program being learned)
  * Let D == data (the table of values being modelled)
