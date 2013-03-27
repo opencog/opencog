@@ -26,11 +26,9 @@
 #ifndef _OPENCOG_HANDLE_ENTRY_H
 #define _OPENCOG_HANDLE_ENTRY_H
 
+#include <unordered_set>
 #include <string>
 #include <vector>
-
-#include <stdlib.h>
-#include <limits.h>
 
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/types.h>
@@ -147,6 +145,7 @@ public:
      * @return A HandleEntry containing the elements of the vector.
      */
     static HandleEntry* fromHandleVector(const std::vector<Handle> &);
+    static HandleEntry* fromHandleSet(const std::unordered_set<Handle> &);
 
     /**
      * Removes a handle from the list.
