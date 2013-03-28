@@ -357,7 +357,7 @@ protected:
     //
     // All the datapoint contributions should sum up to the overall
     // variable score
-    bool full_bscore;
+    bool _full_bscore;
 };
 
 /**
