@@ -717,9 +717,9 @@ bool AtomTable::usesDSA() const
 HandleEntry* AtomTable::getHandleSet(Type type, bool subclass,
                                      VersionHandle vh) const
 {
-    DPRINTF("AtomTable::getHandleSet(Type =%d, bool=%d, AtomTableList=%d)\n", type, subclass, tableId);
+    DPRINTF("AtomTable::getHandleSet(Type =%d, bool=%d)\n", type, subclass);
     DPRINTF("About to call AtomTable::getHandleSet()\n");
-    HandleEntry* result = this->getHandleSet(type, subclass);
+    HandleEntry* result = HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
     DPRINTF("Got handles from AtomTable\n");
     result = HandleEntry::filterSet(result, vh);
     DPRINTF("Returning %p\n", result);
