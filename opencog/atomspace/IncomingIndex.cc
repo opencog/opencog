@@ -112,3 +112,69 @@ void IncomingIndex::remove(bool (*filter)(Handle))
 }
 
 // ================================================================
+
+IncomingIndex::iterator IncomingIndex::begin(Handle h) const
+{
+	iterator it(h);
+	if (Handle::UNDEFINED != h)
+		it._iset = idx.get(h);
+   it._s = it._iset.begin();
+	it._e = it._iset.end();
+	return it;
+}
+
+IncomingIndex::iterator IncomingIndex::end(void) const
+{
+	iterator it(Handle::UNDEFINED);
+   it._s = it._iset.end();
+	it._e = it._iset.end();
+	return it;
+}
+
+// Note that his iterator makes a copy ofthe incoming set,
+// and is thusstable against insertions and deletions from
+// the incoming set in the parent class.
+IncomingIndex::iterator::iterator(Handle h)
+{
+	_h = h;
+}
+
+IncomingIndex::iterator& IncomingIndex::iterator::operator=(iterator v)
+{
+	_h = v._h;
+	_iset = v._iset;
+	_s = v._s;
+	_e = v._e;
+	return *this;
+}
+
+Handle IncomingIndex::iterator::operator*(void)
+{
+	if (_s == _e) return Handle::UNDEFINED;
+	return *_s;
+}
+
+bool IncomingIndex::iterator::operator==(iterator v)
+{
+	if (_h != v._h) return false;
+	return v._s == _s;
+}
+
+bool IncomingIndex::iterator::operator!=(iterator v)
+{
+	if (_h != v._h) return true;
+	return v._s != _s;
+}
+
+IncomingIndex::iterator& IncomingIndex::iterator::operator++()
+{
+	return operator++(1);
+}
+
+IncomingIndex::iterator& IncomingIndex::iterator::operator++(int i)
+{
+	while (0 < i and  _s != _e) { _s++; i--; }
+	return *this;
+}
+
+// ================================================================

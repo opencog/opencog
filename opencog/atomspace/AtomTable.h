@@ -405,6 +405,11 @@ public:
     }
 
     /**
+     * Return the incoming set associated with handle h.
+     */
+    HandleEntry* getIncomingSet(Handle h) const;
+
+    /**
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).
      * That is, returns the incoming set of Handle h, with some optional
@@ -419,12 +424,6 @@ public:
     HandleEntry* getHandleSet(Handle h,
                               Type type = ATOM,
                               bool subclass = true) const;
-
-
-    /**
-     * Return the incoming set associated with handle h.
-     */
-    HandleEntry* getIncomingSet(Handle h) const;
 
     /**
      * Returns the set of atoms with the given target handles and types
