@@ -526,10 +526,10 @@ public:
                  bool subclass,
                  bool targetSubclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(type, targetType, subclass, targetSubclass, vh, targetVh);
-        return (toOutputIterator(result, handleEntry));
+                 VersionHandle targetVh = NULL_VERSION_HANDLE) const
+    {
+        return atomTable.getHandlesByTargetTypeVH(result,
+               type, targetType, subclass, targetSubclass, vh, targetVh);
     }
 
     /**

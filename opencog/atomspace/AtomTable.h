@@ -282,7 +282,7 @@ public:
 
     /* Some basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
-    bool filterType(Handle h, Type t, bool subclass) const
+    bool isType(Handle h, Type t, bool subclass) const
     {
         Type at = getAtom(h)->getType();
         if (not subclass) return t != at;
@@ -364,7 +364,7 @@ public:
                             typeIndex.end(),
                             result,
              [&](Handle h)->bool { 
-                  return (h != Handle::UNDEFINED)
+                  return isDefined(h)
                       and (*pred)(*getAtom(h))
                       and containsVersionedTV(h, vh);
              });
@@ -382,26 +382,23 @@ public:
      *         (subclasses optionally).
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByTargetType(OutputIterator result,
-                           Type type,
-                           Type targetType,
-                           bool subclass = false,
-                           bool targetSubclass = false) const
+    getHandlesByTargetTypeVH(OutputIterator result,
+                             Type type,
+                             Type targetType,
+                             bool subclass,
+                             bool targetSubclass,
+                             VersionHandle vh = NULL_VERSION_HANDLE,
+                             VersionHandle targetVh = NULL_VERSION_HANDLE) const
     {
         return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
                             targetTypeIndex.end(),
                             result,
-             [&](Handle h)->bool{ return h != Handle::UNDEFINED;});
-    }
-
-    HandleEntry* getHandleSet(Type type, Type targetType,
-                              bool subclass = false,
-                              bool targetSubclass = false) const
-    {
-        HandleSeq hs;
-        getHandlesByTargetType(back_inserter(hs), type, targetType, subclass, targetSubclass);
-        HandleEntry *set = HandleEntry::fromHandleVector(hs);
-        return HandleEntry::filterSet(set, type, subclass);
+             [&](Handle h)->bool{
+                 return isDefined(h)
+                    and isType(h, type, subclass)
+                    and containsVersionedTV(h, vh)
+                    and containsVersionedTV(h, targetVh);
+             });
     }
 
     /**
@@ -670,8 +667,6 @@ public:
      */
     bool usesDSA() const;
 
-    HandleEntry* getHandleSet(Type type, Type targetType, bool subclass, bool
-            targetSubclass, VersionHandle vh, VersionHandle targetVh) const;
     HandleEntry* getHandleSet(Handle handle, Type type, bool subclass,
             VersionHandle vh) const;
     HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,

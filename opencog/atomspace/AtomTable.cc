@@ -217,7 +217,9 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             }
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             bool sub = subclasses == NULL ? false : subclasses[i];
-            sets[i] = getHandleSet(type, types[i], subclass, sub);
+            HandleSeq hs;
+            getHandlesByTargetTypeVH(back_inserter(hs), type, types[i], subclass, sub);
+            sets[i] = HandleEntry::fromHandleVector(hs);
             // Also filter links that do not belong to this table
             //sets[i] = HandleEntry::filterSet(sets[i], tableId);
             if (sets[i] == NULL) {
@@ -333,7 +335,9 @@ HandleEntry* AtomTable::getHandleSet(const char** names,
                     "Cannot make this search using only target name!\n");
             }
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
-            sets[i] = getHandleSet(type, types[i], subclass, sub);
+            HandleSeq hs;
+            getHandlesByTargetTypeVH(back_inserter(hs), type, types[i], subclass, sub);
+            sets[i] = HandleEntry::fromHandleVector(hs);
             sets[i] = HandleEntry::filterSet(sets[i], types[i], sub, i, arity);
         } else {
             countdown++;
@@ -656,15 +660,6 @@ Handle AtomTable::getRandom(RandGen *rng) const
 bool AtomTable::usesDSA() const
 {
     return useDSA;
-}
-
-HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh) const
-{
-    DPRINTF("AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
-    HandleEntry* result = this->getHandleSet(type, targetType, subclass, targetSubclass);
-    result = HandleEntry::filterSet(result, vh);
-    result = HandleEntry::filterSet(result, targetType, targetSubclass, targetVh);
-    return result;
 }
 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh) const
