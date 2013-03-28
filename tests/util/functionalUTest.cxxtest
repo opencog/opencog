@@ -31,22 +31,16 @@ class functionalUTest : public CxxTest::TestSuite
 {
 public:
     void test_powerset() {
-        set<int> s = list_of(1)(3)(5);
+        set<int> s = {1, 3, 5};
         set<set<int> > ps = powerset(s);
-        set<set<int> > expect_set = list_of
-            (set<int>())
-            (list_of(1))
-            (list_of(3))
-            (list_of(5))
-            (list_of(1)(3))
-            (list_of(1)(5))
-            (list_of(3)(5))
-            (list_of(1)(3)(5));
-
+        set<set<int> > expect_set = { {}, {1}, {3}, {5},
+                                      {1, 3}, {1, 5}, {3, 5},
+                                      {1, 3, 5} };
+        
         TS_ASSERT_EQUALS(ps, expect_set);
     }
     void test_powerset_exact() {
-        set<int> s = list_of(1)(3)(5);
+        set<int> s = {1, 3, 5};
         set<set<int> > ps = powerset(s, 2, true);
         set<set<int> > expect_set = { {1, 3}, {1, 5}, {3, 5} };
 
