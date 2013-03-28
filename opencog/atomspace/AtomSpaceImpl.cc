@@ -56,10 +56,8 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpaceImpl::AtomSpaceImpl(void) : 
-    type_itr(0,false)
+AtomSpaceImpl::AtomSpaceImpl(void)
 {
-    _handle_iterator = NULL;
     backing_store = NULL;
 
     // connect signals
@@ -75,12 +73,6 @@ AtomSpaceImpl::~AtomSpaceImpl()
     // disconnect signals
     addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
-
-    // Check if has already been deleted. See in code where it can be delete.
-    if (_handle_iterator) {
-        delete _handle_iterator;
-         _handle_iterator = NULL;
-    }
 }
 
 // ====================================================================
@@ -149,8 +141,7 @@ AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other):
-    type_itr(0,false)
+AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomSpaceImpl - Cannot copy an object of this class");

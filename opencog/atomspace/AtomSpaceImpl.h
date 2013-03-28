@@ -38,7 +38,6 @@
 #include <opencog/atomspace/AttentionBank.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/recent_val.h>
@@ -1019,11 +1018,6 @@ public:
     inline const Atom& getAtom(Handle h) {
         return *atomTable.getAtom(h);
     }
-
-protected:
-
-    HandleIterator* _handle_iterator;
-    TypeIndex::iterator type_itr;
 
 private:
 

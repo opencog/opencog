@@ -36,7 +36,6 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/HandleEntry.h>
-#include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/IncomingIndex.h>
 #include <opencog/atomspace/Link.h>
@@ -80,7 +79,6 @@ class AtomTable
     friend class SavingLoading;
     friend class AtomSpace;
     friend class AtomSpaceImpl;
-    friend class HandleIterator;
     friend class ::AtomTableUTest;
 
 private:
@@ -197,35 +195,6 @@ public:
      * Return the number of atoms contained in a table.
      */
     int getSize() const;
-
-    /**
-     * Creates a new handle iterator that iterates on all atoms of the
-     * atom table.
-     *
-     * @return The newly created iterator.
-     */
-    HandleIterator* getHandleIterator()
-    {
-        return new HandleIterator(this, (Type)ATOM, true);
-    }
-
-    /**
-     * Creates a new handle iterator that iterates on atoms of a specific
-     * type, and optionally in its subclasses as well.
-     *
-     * @param The type of atom to be iterated.
-     * @param Whether subclasses of the given type are to be iterated as
-     * well.
-     * @param VersionHandle for filtering the resulting atoms by context.
-     *         NULL_VERSION_HANDLE indicates no filtering
-     * @return The newly created iterator.
-     */
-    HandleIterator* getHandleIterator(Type type,
-                                      bool subclass = false,
-                                      VersionHandle vh = NULL_VERSION_HANDLE)
-    {
-        return new HandleIterator(this, type, subclass);
-    }
 
     /**
      * Makes a set from a index head. It receives a linked-list and an
