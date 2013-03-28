@@ -218,7 +218,10 @@ int main(int argc,char** argv) {
 
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
-         "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
+         "Combo program to evaluate against the input table. Note that in order "
+         "to have variables not being interpreted as shell variables you may "
+         "want to put the combi between single quotes. This option can be "
+         "used several times so that several programs are evaluated at once.\n")
         
         (opt_desc_str(combo_prog_file_opt).c_str(),
          value<string>(&pa.combo_programs_file),
