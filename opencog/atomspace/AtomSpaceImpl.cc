@@ -156,19 +156,6 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other):
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
-{
-    DPRINTF("AtomSpaceImpl::containsVersionedTV Atom space address: %p\n", this);
-
-    bool result = isNullVersionHandle(vh);
-    if (!result) {
-        const TruthValue& tv = this->getTV(h);
-        result = !tv.isNullTv() && tv.getType() == COMPOSITE_TRUTH_VALUE &&
-                 !(((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv());
-    }
-    return result;
-}
-
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
     HandleEntry* extractedHandles = atomTable.extract(h, recursive);
@@ -605,34 +592,6 @@ int AtomSpaceImpl::Links(VersionHandle vh) const
     int result = he->getSize();
     delete he;
     return result;
-}
-
-void AtomSpaceImpl::_getNextAtomPrepare()
-{
-    _handle_iterator = atomTable.getHandleIterator(ATOM, true);
-}
-
-Handle AtomSpaceImpl::_getNextAtom()
-{
-    if (_handle_iterator->hasNext())
-        return _handle_iterator->next();
-    else {
-        delete _handle_iterator;
-        _handle_iterator = NULL;
-        return Handle::UNDEFINED;
-    }
-}
-
-void AtomSpaceImpl::_getNextAtomPrepare_type(Type type)
-{
-    type_itr = atomTable.typeIndex.begin(type, true);
-}
-
-Handle AtomSpaceImpl::_getNextAtom_type(Type type)
-{
-    Handle h = *type_itr;
-    type_itr++;
-    return h;
 }
 
 bool AtomSpaceImpl::saveToXML(const std::string& filename) const {

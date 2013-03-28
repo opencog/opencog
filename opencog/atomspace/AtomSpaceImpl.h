@@ -945,7 +945,8 @@ public:
     int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
     int Links(VersionHandle = NULL_VERSION_HANDLE) const;
 
-    bool containsVersionedTV(Handle h, VersionHandle vh) const;
+    bool containsVersionedTV(Handle h, VersionHandle vh) const
+        { return atomTable.containsVersionedTV(h, vh); }
 
     //! Clear the atomspace, remove all atoms
     void clear();
@@ -954,24 +955,13 @@ public:
 
     HandleSeq filter(AtomPredicate* pred, VersionHandle vh = NULL_VERSION_HANDLE) {
         HandleSeq result;
-        // atomTable.getHandleSet(back_inserter(result), pred, vh);
-        _getNextAtomPrepare();
-        Handle next;
-        while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if ((*pred)(*atomTable.getAtom(next)) && containsVersionedTV(next, vh))
-                result.push_back(next);
+        atomTable.getHandleSet(back_inserter(result), pred, vh);
         return result;
     }
 
     template<typename OutputIterator>
-    OutputIterator filter(OutputIterator it, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        _getNextAtomPrepare();
-        Handle next;
-        while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if ((*compare)(*atomTable.getAtom(next)) && containsVersionedTV(next, vh))
-                * it++ = next;
-        return it;
-    }
+    OutputIterator filter(OutputIterator it, AtomPredicate* pred, VersionHandle vh = NULL_VERSION_HANDLE)
+        { atomTable.getHandleSet(it, pred, vh); }
 
     /**
      * Filter handles from a sequence according to the given criterion.
@@ -1034,11 +1024,6 @@ protected:
 
     HandleIterator* _handle_iterator;
     TypeIndex::iterator type_itr;
-    // these methods are used by the filter_* templates
-    void _getNextAtomPrepare();
-    Handle _getNextAtom();
-    void _getNextAtomPrepare_type(Type type);
-    Handle _getNextAtom_type(Type type);
 
 private:
 

@@ -31,6 +31,7 @@
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
@@ -308,6 +309,18 @@ public:
     Handle getHandle(Type t, const HandleSeq &seq) const;
     Handle getHandle(const Link* l) const;
 
+
+    /* Some basic predicates */
+    static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
+    bool containsVersionedTV(Handle h, VersionHandle vh) const
+    {
+        if (isNullVersionHandle(vh)) return true;
+        const TruthValue& tv = getAtom(h)->getTruthValue();
+        return (not tv.isNullTv())
+               and (tv.getType() == COMPOSITE_TRUTH_VALUE)
+               and (not (((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv()));
+    }
+
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
@@ -324,6 +337,24 @@ public:
                             typeIndex.end(),
                             result,
              [&](Handle h)->bool{ return h != Handle::UNDEFINED;});
+    }
+
+    /**
+     * Returns all atoms satisfying the predicate
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandleSet(OutputIterator result,
+                 AtomPredicate* pred,
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return std::copy_if(typeIndex.begin(ATOM, true),
+                            typeIndex.end(),
+                            result,
+             [&](Handle h)->bool { 
+                  return (h != Handle::UNDEFINED)
+                      and (*pred)(*getAtom(h))
+                      and containsVersionedTV(h, vh);
+             });
     }
 
     /**
