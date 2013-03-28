@@ -329,13 +329,6 @@ public:
              });
     }
 
-    HandleEntry* getHandleSet(Type type, bool subclass, VersionHandle vh) const
-    {
-        HandleSeq hs;
-        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
-        return HandleEntry::fromHandleVector(hs);
-    }
-
     /** Calls function 'func' on all atoms */
     template <typename Function> void
     foreachHandleByTypeVH(Function func,
@@ -356,11 +349,13 @@ public:
      * Returns all atoms satisfying the predicate
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByPredVH(OutputIterator result,
-                       AtomPredicate* pred,
-                       VersionHandle vh = NULL_VERSION_HANDLE) const
+    getHandlesByTypePredVH(OutputIterator result,
+                           Type type,
+                           bool subclass,
+                           AtomPredicate* pred,
+                           VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return std::copy_if(typeIndex.begin(ATOM, true),
+        return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
                             result,
              [&](Handle h)->bool { 
@@ -368,6 +363,14 @@ public:
                       and (*pred)(*getAtom(h))
                       and containsVersionedTV(h, vh);
              });
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getHandlesByPredVH(OutputIterator result,
+                       AtomPredicate* pred,
+                       VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getHandlesByTypePredVH(result, ATOM, true, pred, vh);
     }
 
     /**

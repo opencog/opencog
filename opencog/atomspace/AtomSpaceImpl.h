@@ -825,15 +825,10 @@ public:
     getHandleSetFiltered(OutputIterator result,
                  Type type,
                  bool subclass,
-                 AtomPredicate* compare,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
-        std::vector<Handle> hs;
-        // these two lines could be replaced using a function that filters
-        // a handleEntry list into an arbitrary sequence
-        toOutputIterator(back_inserter(hs), handleEntry);
-        return filter(hs.begin(), hs.end(), result, compare);
+                 AtomPredicate* pred,
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return atomTable.getHandlesByTypePredVH(result, type, subclass, pred, vh);
     }
 
     /**
@@ -940,8 +935,8 @@ public:
      */
     void decayShortTermImportance();
 
-    int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
-    int Links(VersionHandle = NULL_VERSION_HANDLE) const;
+    size_t Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
+    size_t Links(VersionHandle = NULL_VERSION_HANDLE) const;
 
     bool containsVersionedTV(Handle h, VersionHandle vh) const
         { return atomTable.containsVersionedTV(h, vh); }

@@ -538,7 +538,7 @@ float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool a
     }
 }
 
-int AtomSpaceImpl::Nodes(VersionHandle vh) const
+size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::Nodes Atom space address: %p\n", this);
 
@@ -549,10 +549,11 @@ int AtomSpaceImpl::Nodes(VersionHandle vh) const
      return agent->getNodeCount();
      */
     // The following implementation is still expensive, but already deals with VersionHandles:
-    HandleEntry* he = atomTable.getHandleSet(NODE, true, vh);
-    int result = he->getSize();
-    delete he;
-    return result;
+    // It would be cheaper if instead we just used foreachHandleByTypeVH
+    // and just had a function that simply counts!!
+    HandleSeq hs;
+    atomTable.getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
+    return hs.size();
 }
 
 void AtomSpaceImpl::decayShortTermImportance()
@@ -574,15 +575,16 @@ void AtomSpaceImpl::decayShortTermImportance()
     }
 }
 
-int AtomSpaceImpl::Links(VersionHandle vh) const
+size_t AtomSpaceImpl::Links(VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::Links Atom space address: %p\n", this);
 
     // The following implementation is still expensive, but already deals with VersionHandles:
-    HandleEntry* he = atomTable.getHandleSet(LINK, true, vh);
-    int result = he->getSize();
-    delete he;
-    return result;
+    // It would be cheaper if instead we just used foreachHandleByTypeVH
+    // and just had a function that simply counts!!
+    HandleSeq hs;
+    atomTable.getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
+    return hs.size();
 }
 
 bool AtomSpaceImpl::saveToXML(const std::string& filename) const {

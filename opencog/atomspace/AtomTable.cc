@@ -683,7 +683,9 @@ HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass,
     DPRINTF("AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = NULL;
     if (name == NULL) {
-        result = getHandleSet(type, subclass, vh);
+        HandleSeq hs;
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        result = HandleEntry::fromHandleVector(hs);
     } else {
         result = this->getHandleSet(name, type, subclass);
         result = HandleEntry::filterSet(result, vh);
