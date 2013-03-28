@@ -483,18 +483,17 @@ public:
                  Type type,
                  bool subclass = false) const 
     {
-        return atomTable.getHandleSet(result, type, subclass);
+        return atomTable.getHandlesByType(result, type, subclass);
     }
 
-    /* Same as above, but much slowwwer */
+    /* Same as above */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
                  Type type,
                  bool subclass,
                  VersionHandle vh) const
     {
-        HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        return atomTable.getHandlesByTypeVH(result, type, subclass, vh);
     }
 
     /**
@@ -954,13 +953,13 @@ public:
 
     HandleSeq filter(AtomPredicate* pred, VersionHandle vh = NULL_VERSION_HANDLE) {
         HandleSeq result;
-        atomTable.getHandleSet(back_inserter(result), pred, vh);
+        atomTable.getHandlesByPredVH(back_inserter(result), pred, vh);
         return result;
     }
 
     template<typename OutputIterator>
     OutputIterator filter(OutputIterator it, AtomPredicate* pred, VersionHandle vh = NULL_VERSION_HANDLE)
-        { atomTable.getHandleSet(it, pred, vh); }
+        { return atomTable.getHandlesByPredVH(it, pred, vh); }
 
     /**
      * Filter handles from a sequence according to the given criterion.

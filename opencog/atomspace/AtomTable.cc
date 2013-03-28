@@ -191,7 +191,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
 
     if (classserver().isA(type, LINK) && (arity == 0)) {
         HandleSeq hs;
-        getHandleSet(back_inserter(hs), type, subclass);
+        getHandlesByType(back_inserter(hs), type, subclass);
         HandleEntry* result = HandleEntry::fromHandleVector(hs);
         result = HandleEntry::filterSet(result, arity);
         return result;

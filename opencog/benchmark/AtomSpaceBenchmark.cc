@@ -531,7 +531,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     clock_t time_taken;
     if (testTable) {
         t_begin = clock();
-        atab->getHandleSet(back_inserter(results2), t, true);
+        atab->getHandlesByType(back_inserter(results2), t, true);
         time_taken = clock() - t_begin;
     } else if (testBackend) {
         t_begin = clock();

@@ -31,6 +31,7 @@
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
@@ -281,6 +282,12 @@ public:
 
     /* Some basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
+    bool filterType(Handle h, Type t, bool subclass) const
+    {
+        Type at = getAtom(h)->getType();
+        if (not subclass) return t != at;
+        return classserver().isA(at, t);
+    }
     bool containsVersionedTV(Handle h, VersionHandle vh) const
     {
         if (isNullVersionHandle(vh)) return true;
@@ -298,9 +305,9 @@ public:
      * @return The set of atoms of a given type (subclasses optionally).
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 Type type,
-                 bool subclass = false) const
+    getHandlesByType(OutputIterator result,
+                       Type type,
+                       bool subclass = false) const
     {
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
@@ -309,10 +316,10 @@ public:
     }
 
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 Type type,
-                 bool subclass,
-                 VersionHandle vh) const
+    getHandlesByTypeVH(OutputIterator result,
+                       Type type,
+                       bool subclass,
+                       VersionHandle vh) const
     {
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
@@ -325,16 +332,16 @@ public:
     HandleEntry* getHandleSet(Type type, bool subclass, VersionHandle vh) const
     {
         HandleSeq hs;
-        getHandleSet(back_inserter(hs), type, subclass, vh);
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
         return HandleEntry::fromHandleVector(hs);
     }
 
     /** Calls function 'func' on all atoms */
     template <typename Function> void
-    foreachHandle(Function func,
-                  Type type,
-                  bool subclass = false,
-                  VersionHandle vh = NULL_VERSION_HANDLE) const
+    foreachHandleByTypeVH(Function func,
+                        Type type,
+                        bool subclass = false,
+                        VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
@@ -349,9 +356,9 @@ public:
      * Returns all atoms satisfying the predicate
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 AtomPredicate* pred,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    getHandlesByPredVH(OutputIterator result,
+                       AtomPredicate* pred,
+                       VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         return std::copy_if(typeIndex.begin(ATOM, true),
                             typeIndex.end(),
@@ -375,11 +382,11 @@ public:
      *         (subclasses optionally).
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 Type type,
-                 Type targetType,
-                 bool subclass = false,
-                 bool targetSubclass = false) const
+    getHandlesByTargetType(OutputIterator result,
+                           Type type,
+                           Type targetType,
+                           bool subclass = false,
+                           bool targetSubclass = false) const
     {
         return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
                             targetTypeIndex.end(),
@@ -392,7 +399,7 @@ public:
                               bool targetSubclass = false) const
     {
         HandleSeq hs;
-        getHandleSet(back_inserter(hs), type, targetType, subclass, targetSubclass);
+        getHandlesByTargetType(back_inserter(hs), type, targetType, subclass, targetSubclass);
         HandleEntry *set = HandleEntry::fromHandleVector(hs);
         return HandleEntry::filterSet(set, type, subclass);
     }
@@ -463,7 +470,7 @@ public:
         if (name == NULL || *name == 0)
         {
             HandleSeq v;
-            getHandleSet(back_inserter(v), type, subclass);
+            getHandlesByType(back_inserter(v), type, subclass);
             HandleEntry *set = HandleEntry::fromHandleVector(v);
             return HandleEntry::filterSet(set, "");
         }

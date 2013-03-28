@@ -444,6 +444,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     return head;
 }
 
+#if 1
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
 {
 
@@ -484,6 +485,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
     // head contains the filtered list.
     return head;
 }
+#endif
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type type, bool subclass)
 {

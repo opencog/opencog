@@ -154,7 +154,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     fwrite(&numNodes, sizeof(int), 1, f);
 
     // writes nodes to file and increments node counter
-    atomTable.foreachHandle(
+    atomTable.foreachHandleByTypeVH(
         [&](Handle atomHandle)->void
         {
             Node* node = dynamic_cast<Node*>(atomTable.getAtom(atomHandle));
@@ -220,7 +220,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
      * 65560 requires 65559 but the the last one wasn't loaded yet.
      */
     std::set<Handle> linkHandles;
-    atomTable.getHandleSet(inserter(linkHandles), LINK, true);
+    atomTable.getHandlesByType(inserter(linkHandles), LINK, true);
 
     // writes links to file and increments link counter
     std::set<Handle>::iterator itLinks;
