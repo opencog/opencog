@@ -269,7 +269,7 @@ template<typename Set> std::set<Set> powerset(const Set& s, size_t n,
     if (n > 0) {
         std::set<Set> ps = powerset(s, n-1, exact);
         for (const Set& ss : ps)
-            for (const auto& el : ss) {
+            for (const auto& el : s) {
                 Set subset(ss);
                 if (subset.find(el) == subset.end()) {
                     subset.insert(el);
