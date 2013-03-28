@@ -278,10 +278,25 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
     return res;
 }
 
-double feature_selector::mi(const feature_set& fs_l, const feature_set& fs_r) const
+double feature_selector::mi(const feature_set& fs_l,
+                            const feature_set& fs_r) const
 {
-    OC_ASSERT(false, "TODO");
-    return 0.0;
+    if (params.diversity_pressure < 0)
+        return mutualInformationBtwSets(_ctable, fs_l, fs_r);
+    else {
+        // Compute the average mutual informations between subsets of
+        // size diversity_interaction + 1 of fs_l and fs_r
+        unsigned sss = params.diversity_pressure + 1;
+        double mi = 0.0;
+        // determine powersets of fs_l and fs_r, each containing
+        // feature sets of size diversity_interaction + 1
+        auto pfs_l = powerset(fs_l, sss, true);
+        auto pfs_r = powerset(fs_r, sss, true);
+        for (const feature_set& sub_fs_l : pfs_l)
+            for (const feature_set& sub_fs_r : pfs_r)
+                mi += mutualInformationBtwSets(_ctable, sub_fs_l, sub_fs_r);
+        return mi / (pfs_l.size() * pfs_r.size());
+    }
 }
 
 } // ~namespace moses
