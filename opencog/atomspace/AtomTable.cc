@@ -190,7 +190,9 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     }
 
     if (classserver().isA(type, LINK) && (arity == 0)) {
-        HandleEntry* result = HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
+        HandleSeq hs;
+        getHandleSet(back_inserter(hs), type, subclass);
+        HandleEntry* result = HandleEntry::fromHandleVector(hs);
         result = HandleEntry::filterSet(result, arity);
         return result;
     }
@@ -654,19 +656,6 @@ Handle AtomTable::getRandom(RandGen *rng) const
 bool AtomTable::usesDSA() const
 {
     return useDSA;
-}
-
-
-HandleEntry* AtomTable::getHandleSet(Type type, bool subclass,
-                                     VersionHandle vh) const
-{
-    DPRINTF("AtomTable::getHandleSet(Type =%d, bool=%d)\n", type, subclass);
-    DPRINTF("About to call AtomTable::getHandleSet()\n");
-    HandleEntry* result = HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
-    DPRINTF("Got handles from AtomTable\n");
-    result = HandleEntry::filterSet(result, vh);
-    DPRINTF("Returning %p\n", result);
-    return result;
 }
 
 HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh) const

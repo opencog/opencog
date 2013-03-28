@@ -308,6 +308,27 @@ public:
              [&](Handle h)->bool{ return h != Handle::UNDEFINED;});
     }
 
+    template <typename OutputIterator> OutputIterator
+    getHandleSet(OutputIterator result,
+                 Type type,
+                 bool subclass,
+                 VersionHandle vh) const
+    {
+        return std::copy_if(typeIndex.begin(type, subclass),
+                            typeIndex.end(),
+                            result,
+             [&](Handle h)->bool{
+                  return (h != Handle::UNDEFINED) and containsVersionedTV(h, vh);
+             });
+    }
+
+    HandleEntry* getHandleSet(Type type, bool subclass, VersionHandle vh) const
+    {
+        HandleSeq hs;
+        getHandleSet(back_inserter(hs), type, subclass, vh);
+        return HandleEntry::fromHandleVector(hs);
+    }
+
     /** Calls function 'func' on all atoms */
     template <typename Function> void
     foreachHandle(Function func,
@@ -353,11 +374,26 @@ public:
      * @return The set of atoms of a given type and target type
      *         (subclasses optionally).
      */
+    template <typename OutputIterator> OutputIterator
+    getHandleSet(OutputIterator result,
+                 Type type,
+                 Type targetType,
+                 bool subclass = false,
+                 bool targetSubclass = false) const
+    {
+        return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
+                            targetTypeIndex.end(),
+                            result,
+             [&](Handle h)->bool{ return h != Handle::UNDEFINED;});
+    }
+
     HandleEntry* getHandleSet(Type type, Type targetType,
                               bool subclass = false,
                               bool targetSubclass = false) const
     {
-        HandleEntry *set = HandleEntry::fromHandleSet(targetTypeIndex.getHandleSet(targetType,targetSubclass));
+        HandleSeq hs;
+        getHandleSet(back_inserter(hs), type, targetType, subclass, targetSubclass);
+        HandleEntry *set = HandleEntry::fromHandleVector(hs);
         return HandleEntry::filterSet(set, type, subclass);
     }
 
@@ -627,7 +663,6 @@ public:
      */
     bool usesDSA() const;
 
-    HandleEntry* getHandleSet(Type type, bool subclass, VersionHandle vh) const;
     HandleEntry* getHandleSet(Type type, Type targetType, bool subclass, bool
             targetSubclass, VersionHandle vh, VersionHandle targetVh) const;
     HandleEntry* getHandleSet(Handle handle, Type type, bool subclass,

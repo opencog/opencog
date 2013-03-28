@@ -773,6 +773,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, AttentionValue::sti_t lowe
 }
 
 
+#if 1
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
 {
 
@@ -813,6 +814,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
     // head contains the filtered list.
     return head;
 }
+#endif
 
 bool HandleEntry::matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, VersionHandle vh)
 {
