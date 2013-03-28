@@ -42,7 +42,6 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -154,31 +153,29 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     // here
     fwrite(&numNodes, sizeof(int), 1, f);
 
-    // creates an iterator to iterate on all nodes
-    HandleIterator* iter = atomTable.getHandleIterator(NODE, true);
-
     // writes nodes to file and increments node counter
-    while (iter->hasNext()) {
-        Handle atomHandle = iter->next();
-        Node* node = dynamic_cast<Node*>(atomTable.getAtom(atomHandle));
-        if ( node == NULL ) {
-            logger().error( "Trying to save a node which isn't in atomTable "
-                    "(%p). Handle %d", &atomTable, atomHandle.value() );
-            continue;
-        }
-        logger().fine( "Saving Node handle %d name %s", atomHandle.value(),
-                node->toString().c_str() );
-        writeNode(f, node);
-        numNodes++;
-        int percentage = (int) (100 * ((float) ++processed /
-                    (total * INDEX_REPORT_FACTOR)));
-        if ((percentage % 10) == 0) {
-            printf( "Memory dump: %d%% done.\r", percentage);
-            fflush(stdout);
-        }
-    }
+    atomTable.foreachHandle(
+        [&](Handle atomHandle)->void
+        {
+            Node* node = dynamic_cast<Node*>(atomTable.getAtom(atomHandle));
+            if ( node == NULL ) {
+                logger().error( "Trying to save a node which isn't in atomTable "
+                        "(%p). Handle %d", &atomTable, atomHandle.value() );
+                return;
+            }
+            logger().fine( "Saving Node handle %d name %s", atomHandle.value(),
+                    node->toString().c_str() );
+            writeNode(f, node);
+            numNodes++;
+            int percentage = (int) (100 * ((float) ++processed /
+                        (total * INDEX_REPORT_FACTOR)));
+            if ((percentage % 10) == 0) {
+                printf( "Memory dump: %d%% done.\r", percentage);
+                fflush(stdout);
+            }
+        },
+        NODE, true);
 
-    delete iter;
 
     // rewind to position where number of nodes must be written
     fseek(f, numNodesOffset, SEEK_SET);
@@ -205,9 +202,6 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     // here
     fwrite(&numLinks, sizeof(int), 1, f);
 
-    // creates a iterator to iterate on all links
-    HandleIterator* iter = atomTable.getHandleIterator(LINK, true);
-
     /**
      * All handles must be copied to a single set to keep the ordering
      * of all handle types. Ex. There are more than one types of links.
@@ -219,21 +213,18 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
      * Finally, a ListLink is inserted with handle.value() = 65560
      * The first and second links are outgoing of the third link.
      *
-     * If we use a simple HandleIterator, the links will be retrieved
+     * If we use a simple Handle iterator, the links will be retrieved
      * at the following sequence: 65558, 65560, 65559. This way, the links
      * will be saved in a non increasing sequence and when the loadLinks
      * was called, a segmentation fault will occour given that link
      * 65560 requires 65559 but the the last one wasn't loaded yet.
      */
     std::set<Handle> linkHandles;
-    while (iter->hasNext()) {
-        linkHandles.insert( iter->next() );
-    } // while
-    delete iter;
+    atomTable.getHandleSet(inserter(linkHandles), LINK, true);
 
     // writes links to file and increments link counter
     std::set<Handle>::iterator itLinks;
-    for( itLinks = linkHandles.begin( ); itLinks != linkHandles.end( );
+    for (itLinks = linkHandles.begin( ); itLinks != linkHandles.end( );
             ++itLinks ) {
         Link* link = dynamic_cast<Link*>(atomTable.getAtom(*itLinks));
         logger().fine( "Saving Link handle %d name %s", itLinks->value(), link->toString().c_str() );
@@ -287,9 +278,9 @@ void SavingLoading::load(const char *fileName,
 
     // reads the file format
     char format;
-    fread(&format, sizeof(char), 1, f);
+    size_t rc = fread(&format, sizeof(char), 1, f);
 
-    if (! (format & FULL_NETWORK_DUMP)) {
+    if (! (rc == 1 && format & FULL_NETWORK_DUMP)) {
         throw RuntimeException(TRACE_INFO, "SavingLoading - invalid file format '%c'.", format);
     }
 

@@ -339,6 +339,22 @@ public:
              [&](Handle h)->bool{ return h != Handle::UNDEFINED;});
     }
 
+    /** Calls function 'func' on all atoms */
+    template <typename Function> void
+    foreachHandle(Function func,
+                  Type type,
+                  bool subclass = false,
+                  VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        std::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+             [&](Handle h)->void { 
+                  if (h == Handle::UNDEFINED) return;
+                  if (not containsVersionedTV(h, vh)) return;
+                  (func)(h);
+             });
+    }
+
     /**
      * Returns all atoms satisfying the predicate
      */
