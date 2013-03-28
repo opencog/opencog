@@ -67,7 +67,7 @@ struct evalTableParameters
 {
     string input_table_file;
     vector<string> combo_programs;
-    string combo_programs_file;
+    vector<string> combo_programs_files;
     string target_feature_str;
     vector<string> ignore_features_str;
     vector<string> force_features_str;
@@ -76,6 +76,7 @@ struct evalTableParameters
     string features_file;
     bool display_inputs;
     string output_file;
+    bool split_output;
     string log_level;
     string log_file;
 };
@@ -95,7 +96,8 @@ Out& output_results(Out& out, const evalTableParameters& pa,
 }
 
 void output_results(const evalTableParameters& pa,
-                    const Table& table, const OTable& ot_tr);
+                    const Table& table, const OTable& ot_tr,
+                    const string output_file = "");
 
 void eval_output_results(const evalTableParameters& pa,
                          const Table& table, const vector<combo_tree>& trs);
