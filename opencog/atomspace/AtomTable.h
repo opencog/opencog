@@ -110,14 +110,6 @@ private:
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
 
-    /** iterators, used in an (incomplete) attempt at thread-safety. */
-    std::vector<HandleIterator*> iterators;
-    void lockIterators();
-    void unlockIterators();
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_t iteratorsLock;
-#endif
-
     /**
      * signal connection used to keep track of atom type addition in the
      * ClassServer 
@@ -206,31 +198,15 @@ public:
     int getSize() const;
 
     /**
-     * Registers an iterator. Iterators must be registered because when
-     * using a multi-threaded configuration, the contents of an active
-     * iterator may become invalid due to the removal of atoms. All
-     * registered iterators are then properly notified. This method is
-     * automatically called every time a new iterator is created.
-     *
-     * @param The iterator to be registered.
-     */
-    void registerIterator(HandleIterator*);
-
-    /**
-     * Unregisters an iterator. This method is automatically called every
-     * time a new iterator is deleted.
-     *
-     * @param The iterator to be unregistered.
-     */
-    void unregisterIterator(HandleIterator*) throw (RuntimeException);
-
-    /**
      * Creates a new handle iterator that iterates on all atoms of the
      * atom table.
      *
      * @return The newly created iterator.
      */
-    HandleIterator* getHandleIterator();
+    HandleIterator* getHandleIterator()
+    {
+        return new HandleIterator(this, (Type)ATOM, true);
+    }
 
     /**
      * Creates a new handle iterator that iterates on atoms of a specific
@@ -243,9 +219,12 @@ public:
      *         NULL_VERSION_HANDLE indicates no filtering
      * @return The newly created iterator.
      */
-    HandleIterator* getHandleIterator(Type,
+    HandleIterator* getHandleIterator(Type type,
                                       bool subclass = false,
-                                      VersionHandle vh = NULL_VERSION_HANDLE);
+                                      VersionHandle vh = NULL_VERSION_HANDLE)
+    {
+        return new HandleIterator(this, type, subclass);
+    }
 
     /**
      * Makes a set from a index head. It receives a linked-list and an

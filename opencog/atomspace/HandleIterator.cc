@@ -30,29 +30,7 @@
 
 using namespace opencog;
 
-HandleIterator::HandleIterator(AtomTable *t, Type type, bool subclass,
-                               VersionHandle vh) :
-	it(type, subclass)
-{
-    table = t;
-    it = table->typeIndex.begin(type, subclass);
-    table->registerIterator(this);
-    desiredVersionHandle = vh;
-}
-
-HandleIterator::~HandleIterator()
-{
-    table->unregisterIterator(this);
-}
-
-bool HandleIterator::hasNext(void)
-{
-    return it != table->typeIndex.end();
-}
-
-Handle HandleIterator::next(void)
-{
-    Handle h = *it;
-    it++;
-    return h;
-}
+HandleIterator::HandleIterator(AtomTable *table, Type type, bool subclass) :
+	it(table->typeIndex.begin(type, subclass)),
+   end(table->typeIndex.end())
+{}

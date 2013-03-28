@@ -38,18 +38,15 @@ class AtomTable;
 /**
  * This class provides an iterator that cycles through atoms in the AtomTable
  * according to specific criteria.
+ * XXX TODO eliminate this class entirely, ASAP
  */
 class HandleIterator
 {
     friend class AtomTable;
 
 private:
-
-    AtomTable* table;
-
     TypeIndex::iterator it;
-
-    VersionHandle desiredVersionHandle;
+    TypeIndex::iterator end;
 
     /**
      * Internal constructor that initializes an iterator for atoms of a
@@ -57,31 +54,24 @@ private:
      *
      * @param Atom type to be iterated.
      * @param Whether the above type should consider subclasses as well.
-     * @param VersionHandle for filtering the resulting atoms by context. NULL_VERSION_HANDLE indicates no filtering
-     *
      */
-    HandleIterator(AtomTable *, Type type = ATOM, bool subclass = false, VersionHandle vh = NULL_VERSION_HANDLE);
+    HandleIterator(AtomTable *, Type type = ATOM, bool subclass = false);
 
 public:
-
-    /**
-     * Destructor for this class.
-     */
-    ~HandleIterator();
 
     /**
      * Returns whether there still are atoms to be iterated.
      *
      * @return Whether there still are atoms to be iterated.
      */
-    bool hasNext(void);
+    bool hasNext(void) { return it != end; }
 
     /**
      * Returns the next atom of the iterator and advances.
      *
      * @return Next atom of the iterator and advances.
      */
-    Handle next(void);
+    Handle next(void) { Handle h = *it; it++; return h; }
 };
 
 } // namespace opencog

@@ -103,13 +103,6 @@ bool AtomTable::isCleared(void) const
     if (importanceIndex.size() != 0) return false;
     if (targetTypeIndex.size() != 0) return false;
     if (predicateIndex.size() != 0) return false;
-
-    for (unsigned int i = 0; i < iterators.size(); i++) {
-        if (iterators[i]->hasNext()) {
-            DPRINTF("iterators[%d] is not empty\n", i);
-            return false;
-        }
-    }
     return true;
 }
 
@@ -123,32 +116,6 @@ AtomTable::AtomTable(const AtomTable& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomTable - Cannot copy an object of this class");
-}
-
-void AtomTable::registerIterator(HandleIterator* iterator)
-{
-    lockIterators();
-    iterators.push_back(iterator);
-    unlockIterators();
-}
-
-void AtomTable::unregisterIterator(HandleIterator* iterator) throw (RuntimeException)
-{
-    lockIterators();
-
-    std::vector<HandleIterator*>::iterator it = iterators.begin();
-    while (it != iterators.end()) {
-        if (*it == iterator) {
-            iterators.erase(it);
-            unlockIterators();
-            return;
-        } else {
-            ++it;
-        }
-    }
-
-    unlockIterators();
-    throw RuntimeException(TRACE_INFO, "could not unregister iterator");
 }
 
 Handle AtomTable::getHandle(const char* name, Type t) const {
@@ -665,20 +632,6 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     }
 }
 
-void AtomTable::lockIterators()
-{
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_lock(&iteratorsLock);
-#endif
-}
-
-void AtomTable::unlockIterators()
-{
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_unlock(&iteratorsLock);
-#endif
-}
-
 Handle AtomTable::getRandom(RandGen *rng) const
 {
     size_t x = rng->randint(getSize());
@@ -696,16 +649,6 @@ Handle AtomTable::getRandom(RandGen *rng) const
       x--;
     }
     return (*l)->handle;
-}
-
-HandleIterator* AtomTable::getHandleIterator()
-{
-    return new HandleIterator(this, (Type)ATOM, true);
-}
-
-HandleIterator* AtomTable::getHandleIterator(Type type, bool subclass, VersionHandle vh)
-{
-    return new HandleIterator(this, type, subclass, vh);
 }
 
 bool AtomTable::usesDSA() const
