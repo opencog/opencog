@@ -38,6 +38,7 @@
 #include <opencog/atomspace/AttentionBank.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/recent_val.h>
@@ -74,7 +75,7 @@ public:
     AtomSpaceImpl(void);
     ~AtomSpaceImpl();
 
-    AttentionBank& getAttentionBank();
+    AttentionBank& getAttentionBank() {return bank; }
 
     /**
      * Register a provider of backing storage.
@@ -113,7 +114,7 @@ public:
     /**
      * @return a const reference to the AtomTable
      */
-    const AtomTable& getAtomTable() const;
+    const AtomTable& getAtomTable() const { return atomTable; }
 
     /**
      * Return the number of atoms contained in the space.
@@ -198,7 +199,8 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const std::string& str) const;
+    Handle getHandle(Type t, const std::string& str) const
+        { return atomTable.getHandle(str.c_str(), t); }
 
     /**
      * Retrieve from the Atom Table the Handle of a given link
@@ -206,7 +208,8 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getHandle(Type t, const HandleSeq& outgoing) const;
+    Handle getHandle(Type t, const HandleSeq& outgoing) const
+        { return atomTable.getHandle(t, outgoing); }
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const;
@@ -391,7 +394,10 @@ public:
 
     /** Convenience functions... */
     bool isNode(const Handle& h) const;
+        // { return classserver().isA(getType(h), LINK); }
+
     bool isLink(const Handle& h) const;
+        // { return classserver().isA(getType(h), NODE); }
 
     /**
      * Gets a set of handles that matches with the given arguments.
@@ -917,12 +923,13 @@ public:
 
 // ---- filter templates
 
-    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
+    HandleSeq filter(AtomPredicate* pred, VersionHandle vh = NULL_VERSION_HANDLE) {
         HandleSeq result;
+        // atomTable.getHandleSet(back_inserter(result), pred, vh);
         _getNextAtomPrepare();
         Handle next;
         while ((next = _getNextAtom()) != Handle::UNDEFINED)
-            if ((*compare)(*atomTable.getAtom(next)) && containsVersionedTV(next, vh))
+            if ((*pred)(*atomTable.getAtom(next)) && containsVersionedTV(next, vh))
                 result.push_back(next);
         return result;
     }

@@ -139,23 +139,9 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
 
 // ====================================================================
 
-const AtomTable& AtomSpaceImpl::getAtomTable() const
-{
-    DPRINTF("AtomSpaceImpl::getAtomTable this(%p), atomTable address = %p\n", this, &atomTable);
-    return atomTable;
-}
-
 void AtomSpaceImpl::print(std::ostream& output, Type type, bool subclass) const
 {
     atomTable.print(output, type, subclass);
-}
-
-Handle AtomSpaceImpl::getHandle(Type t, const std::string& str) const {
-    return atomTable.getHandle(str.c_str(), t);
-}
-
-Handle AtomSpaceImpl::getHandle(Type t, const HandleSeq& outgoing) const {
-    return atomTable.getHandle(t, outgoing);
 }
 
 AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
@@ -193,6 +179,8 @@ bool AtomSpaceImpl::isLink(const Handle& h) const
     return classserver().isA(t, LINK);
 }
 
+
+
 bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::containsVersionedTV Atom space address: %p\n", this);
@@ -205,8 +193,6 @@ bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
     }
     return result;
 }
-
-AttentionBank& AtomSpaceImpl::getAttentionBank() { return bank; }
 
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
