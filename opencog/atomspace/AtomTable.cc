@@ -199,7 +199,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     if (classserver().isA(type, LINK) && 
         (arity == 0 || !handles.empty()))
     {
-        DPRINTF("special case\n");
+        DPRINTF("special case arity=%d\n", arity);
         bool hasAllHandles = true;
         for (int i = 0; hasAllHandles && i < arity; i++) {
             hasAllHandles = TLB::isValidHandle(handles[i]);
@@ -223,7 +223,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     }
 
     if (classserver().isA(type, LINK) && (arity == 0)) {
-        HandleEntry* result = getHandleSet(type, subclass);
+        HandleEntry* result = HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
         result = HandleEntry::filterSet(result, arity);
         return result;
     }
@@ -717,9 +717,9 @@ bool AtomTable::usesDSA() const
 HandleEntry* AtomTable::getHandleSet(Type type, bool subclass,
                                      VersionHandle vh) const
 {
-    DPRINTF("AtomTable::getHandleSet(Type =%d, bool=%d, AtomTableList=%d)\n", type, subclass, tableId);
+    DPRINTF("AtomTable::getHandleSet(Type =%d, bool=%d)\n", type, subclass);
     DPRINTF("About to call AtomTable::getHandleSet()\n");
-    HandleEntry* result = this->getHandleSet(type, subclass);
+    HandleEntry* result = HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
     DPRINTF("Got handles from AtomTable\n");
     result = HandleEntry::filterSet(result, vh);
     DPRINTF("Returning %p\n", result);
@@ -746,7 +746,7 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, bool subclass, Ve
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
 {
     DPRINTF("AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
-    HandleEntry* result = this->getHandleSet(handles, types, subclasses, arity, type, subclass);
+    HandleEntry* result = getHandleSet(handles, types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
 }

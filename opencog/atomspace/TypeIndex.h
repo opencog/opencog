@@ -49,10 +49,12 @@ class TypeIndex:
 		UnorderedHandleSet getHandleSet(Type type, bool subclass) const;
 
 		class iterator
+			: public std::iterator<std::forward_iterator_tag, Handle>
 		{
 			friend class TypeIndex;
 			public:
 				iterator(Type, bool);
+				iterator& operator++();
 				iterator& operator++(int);
 				iterator& operator=(iterator);
 				bool operator==(iterator);

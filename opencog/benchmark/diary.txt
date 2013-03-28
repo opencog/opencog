@@ -188,6 +188,29 @@ I'm guessing that perhaps there is a lot of data copying going on here...
 
 27 March 2013
 -------------
+Provided a new implementation for the getHandleSet that doubled
+the performance. A major bottleneck was the generation of HandleEntry's
+and then the copying of them into an std::vector.  Eliminating this
+step saved a lot. See the template getHandleSet<OutputIterator> in 
+AtomTable.h for the right way to do these.
+
+In fact, *all* HandleEntry things should be eliminated and replaced
+by iterators, and should use std::copy_if instead of filterSet.
+
+   test            AtomTable    AtomSpaceImpl    AtomSpace
+   name            K-ops/sec      K-ops/sec      K-ops/sec
+   ----            ---------    -------------    ---------
+  getHandleSet-old     2.16         1.50            1.28
+  getHandleSet-new     4.33         4.33            0.658
+
+
+Basically, much/most of the overhead that AtomSpaceImpl adds to
+the AtomTable is due to the copying of HandleSets into vectors 
+and such.  
+
+
+27 March 2013
+-------------
 
 Rerun benchmarks:
 Intel(R) Xeon(R)  X5650  @ 2.67GHz  12MB cache per core, 12 cores.
