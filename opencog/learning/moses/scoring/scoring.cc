@@ -612,7 +612,7 @@ penalized_bscore prerec_bscore::operator()(const combo_tree& tr) const
     penalized_bscore pbs;
     score_t precision = 1.0,
         recall = 0.0;
-    if (full_bscore) {
+    if (_full_bscore) {
         // each element of the bscore correspond to a data point
         // contribution of the variable component of the score
 
