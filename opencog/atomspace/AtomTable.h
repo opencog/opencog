@@ -410,7 +410,9 @@ public:
     {
         if (name == NULL || *name == 0)
         {
-            HandleEntry *set = HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
+            HandleSeq v;
+            getHandleSet(back_inserter(v), type, subclass);
+            HandleEntry *set = HandleEntry::fromHandleVector(v);
             return HandleEntry::filterSet(set, "");
         }
         return HandleEntry::fromHandleSet(nodeIndex.getHandleSet(type, name, subclass));
