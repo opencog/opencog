@@ -336,9 +336,15 @@ public:
      * @param Whether type subclasses should be considered.
      * @return The set of atoms of a given type (subclasses optionally).
      */
-    HandleEntry* getHandleSet(Type type, bool subclass = false) const
+    template <typename OutputIterator> OutputIterator
+    getHandleSet(OutputIterator result,
+                 Type type,
+                 bool subclass = false) const
     {
-        return HandleEntry::fromHandleSet(typeIndex.getHandleSet(type, subclass));
+        return std::copy_if(typeIndex.begin(type, subclass),
+                            typeIndex.end(),
+                            result,
+             [&](Handle h)->bool{ return h != Handle::UNDEFINED;});
     }
 
     /**

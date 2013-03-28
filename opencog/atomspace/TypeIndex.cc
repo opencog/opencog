@@ -134,6 +134,11 @@ bool TypeIndex::iterator::operator!=(iterator v)
 	return false;
 }
 
+TypeIndex::iterator& TypeIndex::iterator::operator++()
+{
+	return operator++(1);
+}
+
 TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 {
 	if (s == send) return *this;
