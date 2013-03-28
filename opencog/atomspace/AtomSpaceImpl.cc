@@ -60,7 +60,6 @@ AtomSpaceImpl::AtomSpaceImpl(void) :
     type_itr(0,false)
 {
     _handle_iterator = NULL;
-    emptyName = "";
     backing_store = NULL;
 
     // connect signals
@@ -157,30 +156,6 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other):
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-Type AtomSpaceImpl::getType(Handle h) const
-{
-    DPRINTF("AtomSpaceImpl::getType Atom space address: %p\n", this);
-    Atom* a = atomTable.getAtom(h);
-    if (a) return a->getType();
-    else return NOTYPE;
-}
-
-bool AtomSpaceImpl::isNode(const Handle& h) const
-{
-    DPRINTF("AtomSpaceImpl::isNode Atom space address: %p\n", this);
-    Type t = getType(h);
-    return classserver().isA(t, NODE);
-}
-
-bool AtomSpaceImpl::isLink(const Handle& h) const
-{
-    DPRINTF("AtomSpaceImpl::isLink Atom space address: %p\n", this);
-    Type t = getType(h);
-    return classserver().isA(t, LINK);
-}
-
-
-
 bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::containsVersionedTV Atom space address: %p\n", this);
@@ -217,14 +192,6 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
         return true;
     }
     return false;
-}
-
-const HandleSeq& AtomSpaceImpl::getOutgoing(Handle h) const
-{
-    static HandleSeq hs;
-    Link *link = atomTable.getLink(h);
-    if (!link) return hs;
-    return link->getOutgoingSet();
 }
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
@@ -384,15 +351,6 @@ Handle AtomSpaceImpl::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-const string& AtomSpaceImpl::getName(Handle h) const
-{
-    Node * nnn = atomTable.getNode(h);
-    if (nnn)
-        return nnn->getName();
-    else
-        return emptyName;
-}
-
 boost::shared_ptr<Atom> AtomSpaceImpl::cloneAtom(const Handle& h) const
 {
     // TODO: Add timestamp to atoms and add vector clock to AtomSpace
@@ -451,25 +409,6 @@ HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
     return answer;
 }
 
-bool AtomSpaceImpl::isSource(Handle source, Handle link) const
-{
-    const Link *l = atomTable.getLink(link);
-    if (l != NULL) {
-        return l->isSource(source);
-    }
-    return false;
-}
-
-size_t AtomSpaceImpl::getAtomHash(const Handle& h) const 
-{
-    return atomTable.getAtom(h)->hashCode();
-}
-
-bool AtomSpaceImpl::isValidHandle(const Handle& h) const 
-{
-    return atomTable.holds(h);
-}
-
 bool AtomSpaceImpl::commitAtom(const Atom& a)
 {
     // TODO: Check for differences and abort if timestamp is out of date
@@ -485,25 +424,6 @@ bool AtomSpaceImpl::commitAtom(const Atom& a)
     original->setTruthValue(a.getTruthValue());
     original->setAttentionValue(a.getAttentionValue());
     return true;
-}
-
-Handle AtomSpaceImpl::getOutgoing(Handle h, int idx) const
-{
-    Link * l = atomTable.getLink(h);
-    if (NULL == l)
-        throw new IndexErrorException(TRACE_INFO,
-            "Asked for outgoing set on atom that is not a link!\n");
-    if (idx >= l->getArity())
-        throw new IndexErrorException(TRACE_INFO, "Invalid outgoing set index: %d (atom: %s)\n",
-                                      idx, l->toString().c_str());
-    return l->getOutgoingSet()[idx];
-}
-
-int AtomSpaceImpl::getArity(Handle h) const
-{
-    Link * l = atomTable.getLink(h);
-    if (NULL == l) return 0;
-    return l->getArity();
 }
 
 HandleSeq AtomSpaceImpl::getIncoming(Handle h)

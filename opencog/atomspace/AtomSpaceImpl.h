@@ -215,10 +215,62 @@ public:
     std::string atomAsString(Handle h, bool terse = true) const;
 
     /** Retrieve the name of a given Handle */
-    const std::string& getName(Handle) const;
+    const std::string& getName(Handle h) const
+    {
+        static std::string emptyName;
+        Node* nnn = atomTable.getNode(h);
+        if (nnn) return nnn->getName();
+        return emptyName;
+    }
+
+    /** Retrieve the outgoing set of a given link */
+    const HandleSeq& getOutgoing(Handle h) const
+    {
+        static HandleSeq hs;
+        Link* link = atomTable.getLink(h);
+        if (link) return link->getOutgoingSet();
+        return hs;
+    }
+
+    /** Retrieve a single Handle from the outgoing set of a given link */
+    Handle getOutgoing(Handle h, int idx) const
+        { return getOutgoing(h)[idx]; }
+
+    /** Retrieve the arity of a given link */
+    size_t getArity(Handle h) const
+    {
+        Link* link = atomTable.getLink(h);
+        if (link) return link->getArity();
+        return 0;
+    }
 
     /** Retrieve the type of a given Handle */
-    Type getType(Handle) const;
+    Type getType(Handle h) const
+    {
+        Atom* a = atomTable.getAtom(h);
+        if (a) return a->getType();
+        else return NOTYPE;
+    }
+
+    /** Return whether s is the source handle in a link l
+     * @note Only ORDERED_LINKs have a source handle.
+     */ 
+    bool isSource(Handle source, Handle link) const
+    {
+        const Link *l = atomTable.getLink(link);
+        if (l) return l->isSource(source);
+        return false;
+    }
+
+    /** Retrieve the incoming set of a given atom */
+    HandleSeq getIncoming(Handle);
+
+    /** Convenience functions... */
+    bool isNode(const Handle& h) const
+        { return classserver().isA(getType(h), NODE); }
+
+    bool isLink(const Handle& h) const
+        { return classserver().isA(getType(h), LINK); }
 
     /** Retrieve the TruthValue of a given Handle */
     const TruthValue& getTV(Handle, VersionHandle = NULL_VERSION_HANDLE) const;
@@ -355,11 +407,12 @@ public:
      */
     bool commitAtom(const Atom& a);
 
-    /** Get hash for an atom
-     */
-    size_t getAtomHash(const Handle& h) const;
+    /** Get hash for an atom */
+    size_t getAtomHash(const Handle h) const
+        { return atomTable.getAtom(h)->hashCode(); }
 
-    bool isValidHandle(const Handle& h) const;
+    bool isValidHandle(const Handle h) const
+        { return atomTable.holds(h); }
 
     /**
      * Returns neighboring atoms, following links and returning their
@@ -374,30 +427,6 @@ public:
      */
     HandleSeq getNeighbors(const Handle& h, bool fanin=true, bool fanout=true,
             Type linkType=LINK, bool subClasses=true) const;
-
-    /** Retrieve a single Handle from the outgoing set of a given link */
-    Handle getOutgoing(Handle, int idx) const;
-
-    /** Retrieve the arity of a given link */
-    int getArity(Handle) const;
-
-    /** Return whether s is the source handle in a link l
-     * @note Only ORDERED_LINKs have a source handle.
-     */ 
-    bool isSource(Handle source, Handle link) const;
-
-    /** Retrieve the outgoing set of a given link */
-    const HandleSeq& getOutgoing(Handle h) const;
-
-    /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle);
-
-    /** Convenience functions... */
-    bool isNode(const Handle& h) const;
-        // { return classserver().isA(getType(h), LINK); }
-
-    bool isLink(const Handle& h) const;
-        // { return classserver().isA(getType(h), NODE); }
 
     /**
      * Gets a set of handles that matches with the given arguments.
@@ -1014,7 +1043,6 @@ protected:
 private:
 
     AtomTable atomTable;
-    std::string emptyName;
 
     /** The AtomSpace currently acts like event loop, but some legacy code (such as
      * saving/loading) might not like the AtomSpace changing while acting upon
