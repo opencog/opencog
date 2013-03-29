@@ -154,7 +154,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     fwrite(&numNodes, sizeof(int), 1, f);
 
     // writes nodes to file and increments node counter
-    atomTable.foreachHandleByTypeVH(
+    atomTable.foreachHandleByType(
         [&](Handle atomHandle)->void
         {
             Node* node = dynamic_cast<Node*>(atomTable.getAtom(atomHandle));
@@ -697,20 +697,22 @@ void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (Ru
 {
     logger().fine("SavingLoading::loadRepositories");
     unsigned int size;
-    fread(&size, sizeof(unsigned int), 1, f);
+    size_t rc = fread(&size, sizeof(unsigned int), 1, f);
 
-    if (size != repositories.size()) {
-        logger().warn("Number of repositories in dump file (%d) is different from number of registered repositories (%d)", size, repositories.size());
+    if (rc != 1 or size != repositories.size()) {
+        logger().error("Number of repositories in dump file (%d) is different from number of registered repositories (%d)", size, repositories.size());
         return;
     }
 
     for (unsigned int i = 0; i < size; i++) {
         int idSize;
-        fread(&idSize, sizeof(int), 1, f);
+        rc = fread(&idSize, sizeof(int), 1, f);
+        if (rc != 1) { logger().error("Bad iidSize read, truncated. "); return; }
 
         std::auto_ptr<char> id(new char[idSize]);
 
-        fread(id.get(), sizeof(char), idSize, f);
+        rc = fread(id.get(), sizeof(char), idSize, f);
+        if (rc != idSize) { logger().error("Bad id read, truncated. "); return; }
 
         logger().debug("Loading repository: %s\n", id.get());
 
