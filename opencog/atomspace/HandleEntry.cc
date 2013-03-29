@@ -399,6 +399,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Arity arity)
 }
 
 
+#if 1
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
 {
     bool noName = (name == NULL || *name == 0);
@@ -443,6 +444,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     // head contains the filtered list.
     return head;
 }
+#endif
 
 #if 1
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)

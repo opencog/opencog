@@ -495,7 +495,11 @@ public:
 
     /**
      * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).
+     * optionally).  If the name is not null or the empty string, then
+     * this returns Nodes ONLY (of the requested name, of course). However,
+     * if the name is null (or empty string) then Links might be included!
+     * This behaviour is surprising, but is explicilty tested for in the
+     * AtomSpaceImplUTest. I don't know why its done like this.
      *
      * @param The desired name of the atoms.
      * @param The optional type of the atom.
