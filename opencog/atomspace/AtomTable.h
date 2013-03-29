@@ -198,21 +198,6 @@ public:
     int getSize() const;
 
     /**
-     * Makes a set from a index head. It receives a linked-list and an
-     * index. The received linked-list is the tail of the newly created
-     * list, where its head is created by iterating the received index
-     * head until the end.
-     *
-     * @param The tail linked-list.
-     * @param The first element of the index linked-list that will be
-     * placed in the beginning of the newly created linked-list.
-     * @param Which index is to be followed.
-     * @return The concatenation of the parameter list with the list
-     * created by following given index head.
-     */
-    HandleEntry* makeSet(HandleEntry*, Handle, int) const;
-
-    /**
      * Adds a new predicate index to this atom table given the Handle of
      * the PredicateNode.
      * @param The handle of the predicate node, whose name is the id
