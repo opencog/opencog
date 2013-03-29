@@ -105,8 +105,9 @@ private:
     void typeAdded(Type);
 
     static bool decayed(Handle h);
+
     // Warning, this should only be called by decayShortTermImportance
-    void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
+    void clearIndexesAndRemoveAtoms(const UnorderedHandleSet&);
 
     /**
      * Extracts atoms from the table. Table will not contain the
@@ -121,19 +122,16 @@ private:
      *        incoming set will also be extracted.
      * @return A list with the Handles of all extracted Atoms.
      */
-    HandleEntry* extract(Handle, bool recursive = false);
+    UnorderedHandleSet extract(Handle, bool recursive = false);
 
     /**
      * Removes the previously extracted Handles (using the extract
      * method) from this table.
      * @param The list of the Handles previously extracted.
      *
-     * NOTE: This method also frees the memory of both list
-     * and Atom objects corresponding to the Handles inside the list.
-     * XXX Huh ??? What if there are other things referenceing these
-     * atoms/handles?
+     * NOTE: This method also frees the memory of the Atom objects!
      */
-    void removeExtractedHandles(HandleEntry* extractedHandles);
+    void removeExtractedHandles(const UnorderedHandleSet&);
 
     // JUST FOR TESTS:
     bool isCleared() const;
@@ -632,11 +630,19 @@ public:
      * @param Importance range upper bound (inclusive).
      * @return The set of atoms within the given importance range.
      */
-    HandleEntry* getHandleSet(AttentionValue::sti_t lowerBound,
+    UnorderedHandleSet getHandleSet(AttentionValue::sti_t lowerBound,
                               AttentionValue::sti_t upperBound = 32767) const
-    {
-        return importanceIndex.getHandleSet(lowerBound, upperBound);
-    }
+        { return importanceIndex.getHandleSet(this, lowerBound, upperBound); }
+
+    /**
+     * Decays importance of all atoms in the table, reindexing
+     * importanceIndex accordingly and extracting the atoms that fall
+     * below the "LOWER_STI_VALUE" threshold.
+     * @return the list of the handles that should be removed.
+     */
+    UnorderedHandleSet decayShortTermImportance()
+        { return importanceIndex.decayShortTermImportance(this); }
+
 
     /**
      * Updates the importance index for the given atom. According to the
@@ -726,14 +732,6 @@ public:
      * Return a random atom in the AtomTable.
      */
     Handle getRandom(RandGen* rng) const;
-
-    /**
-     * Decays importance of all atoms in the table, reindexing
-     * importanceIndex accordingly and extracting the atoms that fall
-     * below the "LOWER_STI_VALUE" threshold.
-     * @return the list of the handles that should be removed.
-     */
-    HandleEntry* decayShortTermImportance();
 
     /**
      * Returns whether DynamicsStatisticsAgent is to be used with

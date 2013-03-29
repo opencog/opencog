@@ -149,27 +149,23 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
 
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
-    HandleEntry* extractedHandles = atomTable.extract(h, recursive);
-    if (extractedHandles) {
-        HandleEntry* currentEntry = extractedHandles;
-        while (currentEntry) {
-            Handle h = currentEntry->handle;
+    UnorderedHandleSet extractedHandles = atomTable.extract(h, recursive);
+    if (extractedHandles.size() == 0) return false;
 
-            // Also refund sti/lti to AtomSpace funds pool
-            bank.updateSTIFunds(getSTI(h));
-            bank.updateLTIFunds(getLTI(h));
+    UnorderedHandleSet::const_iterator it;
+    for (it = extractedHandles.begin(); it != extractedHandles.end(); it++) {
+        Handle h = *it;
 
-            // emit remove atom signal
-            _removeAtomSignal(this,h);
+        // Also refund sti/lti to AtomSpace funds pool
+        bank.updateSTIFunds(getSTI(h));
+        bank.updateLTIFunds(getLTI(h));
 
-            currentEntry = currentEntry->next;
-        }
-        atomTable.removeExtractedHandles(extractedHandles);
-        
-        delete extractedHandles;
-        return true;
+        // emit remove atom signal
+        _removeAtomSignal(this, h);
     }
-    return false;
+    atomTable.removeExtractedHandles(extractedHandles);
+        
+    return true;
 }
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
@@ -563,20 +559,18 @@ size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
 void AtomSpaceImpl::decayShortTermImportance()
 {
     DPRINTF("AtomSpaceImpl::decayShortTermImportance Atom space address: %p\n", this);
-    HandleEntry* oldAtoms = atomTable.decayShortTermImportance();
-    if (oldAtoms) {
-        // Remove from indexes
-        atomTable.clearIndexesAndRemoveAtoms(oldAtoms);
-        // Send signals
-        HandleEntry* current;
-        for (current = oldAtoms; current != NULL; current = current->next) {
-            // emit remove atom signal
-            _removeAtomSignal(this,current->handle);
-        }
-        // actually remove atoms from AtomTable
-        atomTable.removeExtractedHandles(oldAtoms);
-        delete oldAtoms;
-    }
+    UnorderedHandleSet oldAtoms = atomTable.decayShortTermImportance();
+
+    // Remove from indexes
+    atomTable.clearIndexesAndRemoveAtoms(oldAtoms);
+
+    // Send signals  -- emit remove atom signal
+    UnorderedHandleSet::const_iterator it;
+    for (it = oldAtoms.begin(); it != oldAtoms.end(); it++)
+        _removeAtomSignal(this, *it);
+
+    // actually remove atoms from AtomTable
+    atomTable.removeExtractedHandles(oldAtoms);
 }
 
 size_t AtomSpaceImpl::Links(VersionHandle vh) const

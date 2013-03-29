@@ -30,7 +30,6 @@ namespace opencog
 {
 class Atom;
 class AtomTable;
-class HandleEntry;
 
 /**
  * Implements an index with additional routines needed for managing 
@@ -39,8 +38,8 @@ class HandleEntry;
 class ImportanceIndex: public FixedIntegerIndex
 {
 private:
-    static HandleEntry* extractOld(const AtomTable*, AttentionValue::sti_t,
-		                             Handle, bool recursive = false);
+    static UnorderedHandleSet extractOld(const AtomTable*, AttentionValue::sti_t,
+		                                   Handle, bool recursive = false);
 public:
     ImportanceIndex(void);
     void insertAtom(const Atom*);
@@ -55,8 +54,9 @@ public:
      */
     void updateImportance(Atom*, int);
 
-    HandleEntry* decayShortTermImportance(const AtomTable*);
-    HandleEntry* getHandleSet(AttentionValue::sti_t,
+    UnorderedHandleSet decayShortTermImportance(const AtomTable*);
+    UnorderedHandleSet getHandleSet(const AtomTable*,
+                              AttentionValue::sti_t,
                               AttentionValue::sti_t) const;
 
     /**

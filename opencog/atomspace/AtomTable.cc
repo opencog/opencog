@@ -456,13 +456,14 @@ Handle AtomTable::getRandom(RandGen *rng) const
     return randy;
 }
 
-HandleEntry* AtomTable::extract(Handle handle, bool recursive)
+UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
 {
     // TODO: Check if this atom is really inserted in this AtomTable and get the
     // exact Atom object
-    HandleEntry* result = NULL;
+    UnorderedHandleSet result;
 
-    Atom *atom = TLB::getAtom(handle);
+    // Atom *atom = TLB::getAtom(handle);
+    Atom *atom = getAtom(handle);
     if (!atom || atom->isMarkedForRemoval()) return result;
     atom->markForRemoval();
 
@@ -473,32 +474,36 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
         // set' container is actually a list, so the same link may appear twice
         // in an incoming set. Hopefully we'll eventually use the right
         // container
-        std::set<Handle> is;
-        for (HandleEntry* in = getIncomingSetXXX(handle); in != NULL; in = in->next)
-            is.insert(in->handle);
+        const UnorderedHandleSet& is = getIncomingSet(handle);
 
-        std::set<Handle>::iterator is_it;
-        for (is_it = is.begin(); is_it != is.end(); ++is_it) {
-            logger().debug("[AtomTable::extract] incoming set: %s", TLB::isValidHandle(*is_it) ? TLB::getAtom(*is_it)->toString().c_str() : "INVALID HANDLE");
-            if (TLB::getAtom(*is_it)->isMarkedForRemoval() == false) {
-                logger().debug("[AtomTable::extract] marked for removal is false");
-                result = HandleEntry::concatenation(extract(*is_it, true), result);
+        UnorderedHandleSet::const_iterator is_it;
+        for (is_it = is.begin(); is_it != is.end(); ++is_it)
+        {
+            DPRINTF("[AtomTable::extract] incoming set: %s",
+                 TLB::isValidHandle(*is_it) ? TLB::getAtom(*is_it)->toString().c_str() : "INVALID HANDLE");
+            // if (TLB::getAtom(*is_it)->isMarkedForRemoval() == false) {
+            if (getAtom(*is_it)->isMarkedForRemoval() == false) {
+                DPRINTF("[AtomTable::extract] marked for removal is false");
+
+                UnorderedHandleSet ex = extract(*is_it, true);
+                result.insert(ex.begin(), ex.end());
             }
         }
     }
 
-    HandleEntry* he = getIncomingSetXXX(handle);
-    if (he)
+    const UnorderedHandleSet& is = getIncomingSet(handle);
+    if (0 < is.size())
     {
         Logger::Level save = logger().getBackTraceLevel();
         logger().setBackTraceLevel(Logger::NONE);
         logger().warn("AtomTable.extract(): "
            "attempting to extract atom with non-empty incoming set: %s\n",
            atom->toShortString().c_str());
-        for (HandleEntry* it = he; it != NULL; it = it->next)
+        UnorderedHandleSet::const_iterator it;
+        for (it = is.begin(); it != is.end(); it++)
         {
             logger().warn("\tincoming: %s\n", 
-                 TLB::getAtom(it->handle)->toShortString().c_str());
+                 getAtom(*it)->toShortString().c_str());
         }
         logger().setBackTraceLevel(save);
         logger().warn("AtomTable.extract(): stack trace for previous error follows");
@@ -520,42 +525,36 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
 
-    return HandleEntry::concatenation(new HandleEntry(handle), result);
+    result.insert(handle);
+    return result;
 }
 
 bool AtomTable::remove(Handle handle, bool recursive)
 {
-    HandleEntry* extractedHandles = extract(handle, recursive);
-    if (extractedHandles) {
+    UnorderedHandleSet extractedHandles = extract(handle, recursive);
+    if (0 < extractedHandles.size()) {
         removeExtractedHandles(extractedHandles);
-        delete extractedHandles;
         return true;
     }
     return false;
 }
 
-void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
+void AtomTable::removeExtractedHandles(const UnorderedHandleSet& exh)
 {
-    HandleSeq hs;
-    if (extractedHandles == NULL) return;
+    if (0 == exh.size()) return;
 
     // We must to iterate from the end to the begining of the list of atoms so that 
     // link's target atoms are not removed before the link   
     // TODO: this is inefficient. if we alter extract to build the HandleEntry
     // list in reverse, then we can avoid initialising a temporary vector.
-    hs = extractedHandles->toHandleVector();
 
-    for (HandleSeq::reverse_iterator it = hs.rbegin(); it < hs.rend(); ++it) {
+    UnorderedHandleSet::const_iterator it;
+    for (it = exh.begin(); it != exh.end(); ++it) {
         Atom* atom = TLB::removeAtom(*it);
         if (logger().isFineEnabled())
             logger().fine("Atom removed: %d => %s", it->value(), atom->toString().c_str());
         delete atom;
     }
-}
-
-HandleEntry* AtomTable::decayShortTermImportance(void)
-{
-    return importanceIndex.decayShortTermImportance(this);
 }
 
 bool AtomTable::decayed(Handle h)
@@ -568,10 +567,8 @@ bool AtomTable::decayed(Handle h)
     return a->getFlag(REMOVED_BY_DECAY);
 }
 
-void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
+void AtomTable::clearIndexesAndRemoveAtoms(const UnorderedHandleSet& exh)
 {
-    if (extractedHandles == NULL) return;
-
     importanceIndex.remove(decayed);
     targetTypeIndex.remove(decayed);
     predicateIndex.remove(decayed);
@@ -580,13 +577,16 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     linkIndex.remove(decayed);
     typeIndex.remove(decayed);
 
-    for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
-        Handle h = curr->handle;
-        Atom* atom = TLB::getAtom(h);
+    UnorderedHandleSet::const_iterator it;
+    for (it = exh.begin(); it != exh.end(); it++) {
+        Atom* atom = getAtom(*it);
 
         // update the AtomTable's size
         size--;
 
+        // XXX FIXME the DSA should be using signals to get
+        // notified of shit happening. None of this lazy-ass coding
+        // allowed here. XXX FIXME
         if (useDSA)
             // updates all global statistics regarding the removal of this atom
             StatisticsMonitor::getInstance()->remove(atom);
