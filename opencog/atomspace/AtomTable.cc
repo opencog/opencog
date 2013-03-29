@@ -457,6 +457,21 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
         type, subclass);
 }
 
+Handle AtomTable::getRandom(RandGen *rng) const
+{
+    size_t x = rng->randint(getSize());
+
+    Handle randy = Handle::UNDEFINED;
+
+    foreachHandleByTypeVH( 
+        [&](Handle h)->void {
+            if (0 == x) randy = h;
+            x--;
+        },
+        ATOM, true);
+    return randy;
+}
+
 HandleEntry* AtomTable::extract(Handle handle, bool recursive)
 {
     // TODO: Check if this atom is really inserted in this AtomTable and get the
@@ -596,25 +611,6 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
             // updates all global statistics regarding the removal of this atom
             StatisticsMonitor::getInstance()->remove(atom);
     }
-}
-
-Handle AtomTable::getRandom(RandGen *rng) const
-{
-    size_t x = rng->randint(getSize());
-    size_t b;
-    for(b=0; b<atomSet.bucket_count(); b++) {
-      if(x < atomSet.bucket_size(b)) {
-        break;
-      } else
-        x -= atomSet.bucket_size(b);
-    }
-    std::unordered_set<const Atom*>::const_local_iterator l = atomSet.begin(b);
-    while(x>0) {
-      l++;
-      assert(l!=atomSet.end(b));
-      x--;
-    }
-    return (*l)->handle;
 }
 
 bool AtomTable::usesDSA() const
