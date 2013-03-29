@@ -155,12 +155,8 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         DPRINTF("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
         if (hasAllHandles && !subclass) {
             DPRINTF("building link for lookup: type = %d, handles.size() = %zu\n", type, handles.size());
-            Link link(type, handles); // local var on stack, avoid malloc
-            AtomHashSet::const_iterator it = atomSet.find(&link);
-            Handle h = Handle::UNDEFINED;
-            if (it != atomSet.end()) {
-                h = (*it)->getHandle();
-            }
+            Handle h = getHandle(type, handles);
+
             HandleEntry* result = NULL;
             if (TLB::isValidHandle(h)) {
                 result = new HandleEntry(h);
@@ -443,24 +439,22 @@ int AtomTable::getSize() const
 
 void AtomTable::log(Logger& logger, Type type, bool subclass) const
 {
-    AtomHashSet::const_iterator it;
-    for (it = atomSet.begin(); it != atomSet.end(); ++it) {
-        const Atom* atom = *it;
-        bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
-        if (matched)
-            logger.debug("%d: %s", atom->getHandle().value(),
-                    atom->toString().c_str());
-    }
+    foreachHandleByTypeVH( 
+        [&](Handle h)->void {
+            Atom* atom = getAtom(h);
+            logger.debug("%d: %s", h.value(), atom->toString().c_str());
+        },
+        type, subclass);
 }
 
 void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
-    AtomHashSet::const_iterator it;
-    for (it = atomSet.begin(); it != atomSet.end(); ++it) {
-        const Atom* atom = *it;
-        bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
-        if (matched) output << atom->getHandle() << ": " << atom->toString() << std::endl;
-    }
+    foreachHandleByTypeVH( 
+        [&](Handle h)->void {
+            Atom* atom = getAtom(h);
+            output << h << ": " << atom->toString() << std::endl;
+        },
+        type, subclass);
 }
 
 HandleEntry* AtomTable::extract(Handle handle, bool recursive)
