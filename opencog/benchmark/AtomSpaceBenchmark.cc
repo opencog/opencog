@@ -555,8 +555,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     clock_t time_taken;
     if (testTable) {
         t_begin = clock();
-        Atom* a = atab->getAtom(h);
-        Link* l = dynamic_cast<Link*>(a);
+        Link* l = atab->getLink(h);
         if (l) l->getOutgoingSet();
         time_taken = clock() - t_begin;
     } else if (testBackend) {

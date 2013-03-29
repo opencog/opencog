@@ -659,15 +659,26 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
-                 const char* targetName,
+                 const std::string& targetName,
+                 Type targetType,
+                 Type type,
+                 bool subclass) const
+    {
+        return atomTable.getIncomingSetByName(result,
+                 targetName, targetType, type, subclass);
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getHandleSet(OutputIterator result,
+                 const std::string& targetName,
                  Type targetType,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(targetName, targetType, type, subclass, vh, targetVh);
-        return (toOutputIterator(result, handleEntry));
+                 VersionHandle vh,
+                 VersionHandle targetVh) const
+    {
+        return atomTable.getIncomingSetByNameVH(result,
+                 targetName, targetType, type, subclass, vh, targetVh);
     }
 
     /**

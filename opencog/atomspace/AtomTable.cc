@@ -118,17 +118,21 @@ AtomTable::AtomTable(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-Handle AtomTable::getHandle(const char* name, Type t) const {
-    return nodeIndex.getHandle(t, name);
+Handle AtomTable::getHandle(const std::string& name, Type t) const
+{
+    return nodeIndex.getHandle(t, name.c_str());
 }
-Handle AtomTable::getHandle(const Node* n) const {
-    return getHandle(n->getName().c_str(), n->getType());
+Handle AtomTable::getHandle(const Node* n) const
+{
+    return getHandle(n->getName(), n->getType());
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const {
+Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
+{
     return linkIndex.getHandle(t, seq);
 }
-Handle AtomTable::getHandle(const Link* l) const {
+Handle AtomTable::getHandle(const Link* l) const
+{
     return getHandle(l->getType(), l->getOutgoingSet());
 }
 
@@ -201,7 +205,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     // counted to be removed a posteriori
     for (int i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
-            sets[i] = getIncomingSetE(handles[i]);
+            sets[i] = getIncomingSetXXX(handles[i]);
             sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
             // Also filter links that do not belong to this table
             //sets[i] = HandleEntry::filterSet(sets[i], tableId);
@@ -270,23 +274,6 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     return set;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass) const
-{
-
-    // Gets the exact atom with the given name and type, in any AtomTable.
-    Handle handle = getHandle(targetName, targetType);
-
-    HandleEntry* result = NULL;
-    // then, if the atom returend is valid, the list with the given target name
-    // and types will be returned.
-    if (TLB::isValidHandle(handle)) {
-        HandleSeq hs;
-        getIncomingSetByType(back_inserter(hs), handle, type, subclass);
-        result = HandleEntry::fromHandleVector(hs);
-    }
-    return result;
-}
-
 HandleEntry* AtomTable::getHandleSet(const char** names, 
                                      Type* types, 
                                      bool* subclasses, 
@@ -306,7 +293,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names,
         bool sub = subclasses == NULL ? false : subclasses[i];
         if ((names != NULL) && (names[i] != NULL)) {
             if ((types != NULL) && (types[i] != NOTYPE)) {
-                sets[i] = getHandleSet(names[i], types[i], type, subclass);
+                sets[i] = getHandleSetXXX(names[i], types[i], type, subclass);
                 if (sub) {
                     // If subclasses are accepted, the subclasses are
                     // returned in the array types.
@@ -318,7 +305,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names,
                     // For all subclasses found, a set is concatenated
                     // to the answer set
                     for (unsigned int j = 0; j < subTypes.size(); j++) {
-                        HandleEntry *subSet = getHandleSet(names[i], 
+                        HandleEntry *subSet = getHandleSetXXX(names[i], 
                                           subTypes[j], type, subclass);
                         sets[i] = HandleEntry::concatenation(sets[i], subSet);
                     }
@@ -513,7 +500,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
         // in an incoming set. Hopefully we'll eventually use the right
         // container
         std::set<Handle> is;
-        for (HandleEntry* in = getIncomingSetE(handle); in != NULL; in = in->next)
+        for (HandleEntry* in = getIncomingSetXXX(handle); in != NULL; in = in->next)
             is.insert(in->handle);
 
         std::set<Handle>::iterator is_it;
@@ -526,7 +513,7 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
         }
     }
 
-    HandleEntry* he = getIncomingSetE(handle);
+    HandleEntry* he = getIncomingSetXXX(handle);
     if (he)
     {
         Logger::Level save = logger().getBackTraceLevel();
@@ -665,15 +652,6 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* t
     DPRINTF("AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = getHandleSet(handles, types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
-    return result;
-}
-
-HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh) const
-{
-    DPRINTF("AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
-    HandleEntry* result = this->getHandleSet(targetName, targetType, type, subclass);
-    result = HandleEntry::filterSet(result, vh);
-    result = HandleEntry::filterSet(result, targetName, targetType, targetVh);
     return result;
 }
 

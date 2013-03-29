@@ -255,7 +255,7 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(const char* name, Type t) const;
+    Handle getHandle(const std::string& name, Type t) const;
     Handle getHandle(const Node* n) const;
 
     Handle getHandle(Type t, const HandleSeq &seq) const;
@@ -454,6 +454,49 @@ public:
     }
 
     /**
+     * Returns the set of atoms whose outgoing set contains at least one
+     * atom with the given name and type (atom type and subclasses
+     * optionally).
+     *
+     * @param The name of the atom in the outgoing set of the searched
+     *        atoms.
+     * @param The type of the atom in the outgoing set of the searched
+     *        atoms.
+     * @param The optional type of the atom.
+     * @param Whether atom type subclasses should be considered.
+     * @return The set of atoms of the given type and name whose outgoing
+     *         set contains at least one atom of the given type and name.
+     */
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByName(OutputIterator result,
+                         const std::string& targetName,
+                         Type targetType,
+                         Type type = ATOM,
+                         bool subclass = true) const
+    {
+        // Gets the exact atom with the given name and type, in any AtomTable.
+        Handle targh = getHandle(targetName, targetType);
+        return getIncomingSetByType(result, targh, type, subclass);
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByNameVH(OutputIterator result,
+                           const std::string& targetName,
+                           Type targetType,
+                           Type type,
+                           bool subclass,
+                           VersionHandle vh,
+                           VersionHandle targetVh) const
+    {
+        // Gets the exact atom with the given name and type, in any AtomTable.
+        Handle targh = getHandle(targetName, targetType);
+        // XXX TODO what the heck with targetVH ?? Are we supposed to
+        // check if targh above has it ?? And if not, I guess return
+        // empty set ... Who needs this stuff, anyway?
+        return getIncomingSetByTypeVH(result, targh, type, subclass, vh);
+    }
+
+    /**
      * Returns the set of atoms with the given target handles and types
      * (order is considered) in their outgoing sets, where the type and
      * subclasses of the atoms are optional.
@@ -502,12 +545,8 @@ public:
                      bool subclass = true) const
     {
         if (name.c_str()[0] == 0)
-        {
-            return std::copy_if(typeIndex.begin(type, subclass),
-                                typeIndex.end(),
-                                result,
-                                isDefined);
-        }
+            return getHandlesByType(result, type, subclass);
+
         UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
         return std::copy(hs.begin(), hs.end(), result);
     }
@@ -520,33 +559,12 @@ public:
                        VersionHandle vh) const
     {
         if (name.c_str()[0] == 0)
-        {
-            return std::copy_if(typeIndex.begin(type, subclass),
-                                typeIndex.end(),
-                                result,
-             [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
-        }
+            return getHandlesByTypeVH(result, type, subclass, vh);
+
         UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
         return std::copy_if(hs.begin(), hs.end(), result,
              [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
     }
-
-    /**
-     * Returns the set of atoms whose outgoing set contains at least one
-     * atom with the given name and type (atom type and subclasses
-     * optionally).
-     *
-     * @param The name of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The type of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name whose outgoing
-     *         set contains at least one atom of the given type and name.
-     */
-    HandleEntry* getHandleSet(const char*, Type,
-                              Type type = ATOM, bool subclass = true) const;
 
     /**
      * Returns the set of atoms with the given target names and/or types
@@ -722,9 +740,6 @@ public:
     HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,
             bool* subclasses, Arity arity, Type type, bool subclass,
             VersionHandle vh) const;
-    HandleEntry* getHandleSet(const char* targetName, Type targetType,
-            Type type, bool subclass, VersionHandle vh,
-            VersionHandle targetVh) const;
     HandleEntry* getHandleSet(const char** names, Type* types, bool*
             subclasses, Arity arity, Type type, bool subclass,
             VersionHandle vh) const;
@@ -755,8 +770,17 @@ public:
     }
 
 private:
-    HandleEntry* getIncomingSetE(Handle h) const {
+    /* XXX TODO These routines are deprecated, obsolete, and should
+     * be eliminated ASAP. They are only haning out here for backwards
+     * compat with other grungy gunk that houldbe removed. XXX TODO.
+     */
+    HandleEntry* getIncomingSetXXX(Handle h) const {
         return HandleEntry::fromHandleSet(incomingIndex.getIncomingSet(h));
+    }
+    HandleEntry* getHandleSetXXX(const char *name, Type targt, Type type, bool subclass) const {
+        HandleSeq hs;
+        getIncomingSetByName(back_inserter(hs), name, targt, type, subclass);
+        return HandleEntry::fromHandleVector(hs);
     }
 };
 
