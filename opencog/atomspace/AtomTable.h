@@ -280,12 +280,13 @@ public:
     Handle getHandle(const Link* l) const;
 
 
+protected:
     /* Some basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
     bool isType(Handle h, Type t, bool subclass) const
     {
         Type at = getAtom(h)->getType();
-        if (not subclass) return t != at;
+        if (not subclass) return t == at;
         return classserver().isA(at, t);
     }
     bool containsVersionedTV(Handle h, VersionHandle vh) const
@@ -297,6 +298,7 @@ public:
                and (not (((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv()));
     }
 
+public:
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
