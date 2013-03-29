@@ -74,16 +74,19 @@ AtomTable::~AtomTable()
     //disconnect signals
     addedTypeConnection.disconnect();
 
-    // remove all atoms from AtomTable
-    AtomHashSet::iterator it = atomSet.begin();
+    // Make a copy.
+    HandleSeq all;
+    getHandlesByType(back_inserter(all), ATOM, true);
 
-    while (it != atomSet.end()) {
-        DPRINTF("Removing atom %s (atomSet size = %zu)\n",
-                (*it)->toString().c_str(), atomSet.size());
-        remove((*it)->getHandle(), true);
-        it = atomSet.begin();
+    // remove all atoms from AtomTable
+    // WTF!? XXX TODO why are we removing these one by one? Lets
+    // just blow away all the indexes. That would be more efficeient,
+    // right!?
+    for (HandleSeq::const_iterator it = all.begin(); it != all.end(); it++)
+    {
+        DPRINTF("Removing atom %s\n", (*it)->toString().c_str());
+        remove(*it, true);
     }
-    atomSet.clear();
 }
 
 bool AtomTable::isCleared(void) const
