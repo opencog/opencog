@@ -56,16 +56,6 @@
 namespace opencog
 {
 
-struct atom_ptr_hash : public std::unary_function<const Atom*, std::size_t>
-{
-    std::size_t operator()(const Atom* const& __x) const;
-};
-struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*, bool>
-{
-    bool operator()(const Atom* const& __x, const Atom* const& __y) const;
-};
-typedef std::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
-
 class SavingLoading;
 
 /**
@@ -85,13 +75,6 @@ class AtomTable
 private:
 
     int size;
-
-    /**
-     * Lookup table ... XXX is this really needed? The various indexes
-     * below should be enough, maybe? This should probably be eliminated
-     * if possible.
-     */
-    AtomHashSet atomSet;
 
     /**
      * Indicates whether DynamicStatisticsAgent should be used
@@ -335,10 +318,23 @@ public:
 
     /** Calls function 'func' on all atoms */
     template <typename Function> void
+    foreachHandleByType(Function func,
+                        Type type,
+                        bool subclass = false) const
+    {
+        std::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+             [&](Handle h)->void { 
+                  if (not isDefined(h)) return;
+                  (func)(h);
+             });
+    }
+
+    template <typename Function> void
     foreachHandleByTypeVH(Function func,
                         Type type,
-                        bool subclass = false,
-                        VersionHandle vh = NULL_VERSION_HANDLE) const
+                        bool subclass,
+                        VersionHandle vh) const
     {
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
@@ -677,11 +673,7 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(const Handle& h) const {
-        Atom *a = getAtom(h);
-        if (NULL == a) return false;
-        return true;
-    }
+    bool holds(const Handle& h) const { return (NULL != getAtom(h)); }
 
     /** Get Atom object already in the AtomTable.
      *
@@ -732,7 +724,6 @@ public:
 
     /**
      * Return a random atom in the AtomTable.
-     * @note Uses the atomSet buckets to provide reasonbly quick look-up.
      */
     Handle getRandom(RandGen* rng) const;
 
@@ -764,23 +755,6 @@ public:
     * AttentionValue instead of floats
     HandleEntry* getHandleSet(float lowerBound, float upperBound, VersionHandle vh) const;
     */
-
-    /**
-     * Invoke the callback cb for *every* atom in the AtomTable
-     * This assumes that the callback does *not* modify the AtomTable,
-     * specifically, does not insert or remove atoms from the atom table.
-     */
-    template<class T>
-    inline bool foreach_atom(bool (T::*cb)(const Atom *), T *data) const
-    {
-        AtomHashSet::const_iterator it;
-        for (it = atomSet.begin(); it != atomSet.end(); it++) {
-            const Atom* atom = *it;
-            bool rc = (data->*cb)(atom);
-            if (rc) return rc;
-        }
-        return false;
-    }
 
 private:
     /* XXX TODO These routines are deprecated, obsolete, and should

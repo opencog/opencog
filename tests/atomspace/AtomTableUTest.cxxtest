@@ -136,7 +136,7 @@ public:
     void testGetRandom() {
         AtomTable atomTable(false);
         ostringstream oss;
-        size_t numBuckets = atomTable.atomSet.bucket_count();
+        size_t numBuckets = atomTable.getSize() / 10;
         for (unsigned i=0; i < numBuckets + 10; i++){
             oss.clear();
             oss << i;

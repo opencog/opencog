@@ -346,3 +346,9 @@ FIXED ISSUES:
    malloc and free of the list, and un-needed data copying.
 
    Status: these functions were nuked sometime before 2011
+
+9) AtomTable::AtomHashSet uses up memory to store atoms, but is not
+   really needed, since everything it does is already done by the
+   indexes.  It should be removed to save space.
+
+   Status: removed, March 2013

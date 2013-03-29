@@ -1271,7 +1271,8 @@ void AtomStorage::store(const AtomTable &table)
 	rp.rs->release();
 #endif
 
-	table.foreach_atom(&AtomStorage::store_cb, this);
+	table.foreachHandleByType(
+       [&](Handle h)->void { store_cb(table.getAtom(h)); }, ATOM, true);
 
 #ifndef USE_INLINE_EDGES
 	// Create indexes

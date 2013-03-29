@@ -53,20 +53,11 @@ AtomTable::AtomTable(bool dsa)
 {
     useDSA = dsa;
     size = 0;
-    // This allows one to tune how often the unordered map resizes itself.
-    //atomSet.max_load_factor(100.0f);
-
-    //logger().fine("Max load factor for TLB handle map is: %f", TLB::handle_map.max_load_factor());
-
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_init(&iteratorsLock, NULL);
-#endif
 
     //connect signals
     addedTypeConnection =
         classserver().addTypeSignal().connect(boost::bind(&AtomTable::typeAdded,
                     this, _1));
-
 }
 
 AtomTable::~AtomTable()
@@ -93,11 +84,6 @@ bool AtomTable::isCleared(void) const
 {
     if (size != 0) {
         DPRINTF("AtomTable::size is not 0\n");
-        return false;
-    }
-
-    if (atomSet.size() != 0) {
-        DPRINTF("AtomTable[%d]::atomSet is not empty. size =%zu\n", tableId, atomSet.size());
         return false;
     }
 
@@ -392,11 +378,6 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
     // Increment the size of the table
     size++;
 
-    // Adds to the hash_set
-    DPRINTF("Inserting atom %p intoAtomTable (type=%d)\n", atom, atom->getType());
-    atomSet.insert(atom);
-    DPRINTF("AtomTable::add atomSet->insert(%p) => size = %zu\n", atom, atomSet.size());
-
     // Checks for null outgoing set members.
     if (lll) {
         const std::vector<Handle>& ogs = lll->getOutgoingSet();
@@ -442,7 +423,7 @@ int AtomTable::getSize() const
 
 void AtomTable::log(Logger& logger, Type type, bool subclass) const
 {
-    foreachHandleByTypeVH( 
+    foreachHandleByType( 
         [&](Handle h)->void {
             Atom* atom = getAtom(h);
             logger.debug("%d: %s", h.value(), atom->toString().c_str());
@@ -452,7 +433,7 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
 
 void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
-    foreachHandleByTypeVH( 
+    foreachHandleByType( 
         [&](Handle h)->void {
             Atom* atom = getAtom(h);
             output << h << ": " << atom->toString() << std::endl;
@@ -466,7 +447,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
 
     Handle randy = Handle::UNDEFINED;
 
-    foreachHandleByTypeVH( 
+    foreachHandleByType( 
         [&](Handle h)->void {
             if (0 == x) randy = h;
             x--;
@@ -527,8 +508,6 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
 
     //decrements the size of the table
     size--;
-
-    atomSet.erase(atom);
 
     // updates all global statistics regarding the removal of this atom
     if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
@@ -604,8 +583,6 @@ void AtomTable::clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles)
     for (HandleEntry* curr = extractedHandles; curr != NULL; curr = curr->next) {
         Handle h = curr->handle;
         Atom* atom = TLB::getAtom(h);
-        //Extracts atom from hash_set
-        atomSet.erase(atom);
 
         // update the AtomTable's size
         size--;
@@ -643,17 +620,6 @@ HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity,
     HandleEntry* result = this->getHandleSet(types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
-}
-
-std::size_t opencog::atom_ptr_hash::operator()(const Atom* const& x) const
-{
-    return x->hashCode();
-}
-
-bool opencog::atom_ptr_equal_to::operator()(const Atom* const& x, 
-                                            const Atom* const& y) const
-{
-    return *x == *y;
 }
 
 void AtomTable::typeAdded(Type t)
