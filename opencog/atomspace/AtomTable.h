@@ -259,10 +259,7 @@ public:
      *       context. NULL_VERSION_HANDLE indicates no filtering
      **/
     HandleEntry* findHandlesByGPN(Handle h,
-                                  VersionHandle vh = NULL_VERSION_HANDLE) const
-    {
-        return predicateIndex.findHandlesByGPN(h, vh);
-    }
+                                  VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     /**
      * Returns the exact atom for the given name and type.
@@ -597,11 +594,6 @@ public:
                               AttentionValue::sti_t upperBound = 32767) const
     {
         return importanceIndex.getHandleSet(lowerBound, upperBound);
-    }
-
-    HandleEntry* getPredicateHandleSet(int index)
-    {
-        return predicateIndex.getHandleSet(index);
     }
 
     /**

@@ -162,7 +162,9 @@ public:
         HandleEntry* expectedEntries[6];
         //logger().debug("building expectedEntries");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->getPredicateHandleSet(index);
+
+            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index]);
+
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             expectedEntries[index] = indexedHandles;
             //logger().debug("Handles in the index %d: ", index);

@@ -132,6 +132,15 @@ Handle AtomTable::getHandle(const Link* l) const {
     return getHandle(l->getType(), l->getOutgoingSet());
 }
 
+HandleEntry* AtomTable::findHandlesByGPN(Handle h,
+                                  VersionHandle vh) const
+{
+   HandleEntry* result = 
+       HandleEntry::fromHandleSet(predicateIndex.findHandlesByGPN(h));
+   result = HandleEntry::filterSet(result, vh);
+   return result;
+}
+
 HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle vh) const
 {
     DPRINTF("AtomTable::findHandlesByGPN(%s)\n", gpnNodeName);
