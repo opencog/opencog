@@ -32,8 +32,6 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/platform.h>
 
-#include <opencog/atomspace/AtomSpace.h>
-
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/VersionHandle.h>
@@ -44,6 +42,7 @@
 
 namespace opencog
 {
+class AtomSpace;
 
 typedef boost::unordered_map<VersionHandle, 
                              TruthValue*,
@@ -179,7 +178,7 @@ public:
      *
      * @param atomspace The AtomSpace to check the handles against
      */
-    void removeInvalidTVs(AtomSpace& atomspace);
+    void removeInvalidTVs(AtomSpace*);
 
     // iterator over VersionHandles
 private:

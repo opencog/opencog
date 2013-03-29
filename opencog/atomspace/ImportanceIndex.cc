@@ -64,15 +64,15 @@ void ImportanceIndex::removeAtom(const Atom* atom)
 	remove(bin, atom->getHandle());
 }
 
-HandleEntry* ImportanceIndex::decayShortTermImportance(const AtomTable* atomtable)
+UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* atomtable)
 {
-	HandleEntry* oldAtoms = NULL;
+	UnorderedHandleSet oldAtoms;
 
 	unsigned int bin;
 	if (IMPORTANCE_INDEX_SIZE != (1 << 16) ) {
-        for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++) {
+       for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++) {
             UnorderedHandleSet move_it;
-            UnorderedHandleSet & band = idx[bin];
+            UnorderedHandleSet& band = idx[bin];
             UnorderedHandleSet::iterator hit;
             for (hit = band.begin(); hit != band.end(); ++hit) {
                 Handle h = *hit;
@@ -129,9 +129,10 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(const AtomTable* atomtabl
 			Atom *atom = atomtable->getAtom(*hit);
 
 			// Remove it if too old.
-			if (isOld(atom,minSTI))
-				oldAtoms = HandleEntry::concatenation(
-					extractOld(atomtable, minSTI, *hit, true), oldAtoms);
+			if (isOld(atom,minSTI)) {
+				UnorderedHandleSet un = extractOld(atomtable, minSTI, *hit, true);
+            oldAtoms.insert(un.begin(), un.end());
+         }
 		}
 	}
 
@@ -145,11 +146,11 @@ bool ImportanceIndex::isOld(const Atom* atom,
             (atom->getAttentionValue().getLTI() < 1));
 }
 
-HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
+UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
                                          AttentionValue::sti_t minSTI,
                                          Handle handle, bool recursive)
 {
-	HandleEntry* result = NULL;
+   UnorderedHandleSet result;
 	Atom *atom = atomtable->getAtom(handle);
 
 	if (atom->getFlag(REMOVED_BY_DECAY)) return result;
@@ -158,9 +159,11 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
 	// If recursive-flag is set, also extract all the links in the
 	// atom's incoming set.
 	if (recursive) {
-		for (HandleEntry* in = atomtable->getIncomingSet(handle);
-                in != NULL; in = in->next) {
-			Atom *a = atomtable->getAtom(in->handle);
+		const UnorderedHandleSet& iset = atomtable->getIncomingSet(handle);
+		for (UnorderedHandleSet::const_iterator it = iset.begin();
+		     it != iset.end(); it++)
+		{
+			Atom* a = atomtable->getAtom(*it);
 
 			// XXX a should never be NULL; however, someone somewhere is
 			// removing atoms from the TLB, although they forgot to remove
@@ -168,16 +171,19 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
 			// i the incoming set. XXX TODO uncomment the assert below.
 			// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
 			if (a and isOld(a, minSTI)) {
-				result = HandleEntry::concatenation(
-					extractOld(atomtable, minSTI, in->handle, true), result);
+				UnorderedHandleSet un = extractOld(atomtable, minSTI, *it, true);
+            result.insert(un.begin(), un.end());
 			}
 		}
 	}
 
 	// Only return if there is at least one incoming atom that is
 	// not marked for removal by decay.
-	for (HandleEntry* in = atomtable->getIncomingSet(handle); in != NULL; in = in->next) {
-		Atom* a = atomtable->getAtom(in->handle);
+	const UnorderedHandleSet& iset = atomtable->getIncomingSet(handle);
+	for (UnorderedHandleSet::const_iterator it = iset.begin();
+	        it != iset.end(); it++)
+	{
+		Atom* a = atomtable->getAtom(*it);
 		// XXX a should never be NULL; however, someone somewhere is
 		// removing atoms from the TLB, although they forgot to remove
 		// them from the atomTable, and so they are still showing up
@@ -188,35 +194,35 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
 			return result;
 		}
 	}
-	result = HandleEntry::concatenation(new HandleEntry(handle), result);
+   result.insert(handle);
 	return result;
 }
 
-HandleEntry* ImportanceIndex::getHandleSet(
+UnorderedHandleSet ImportanceIndex::getHandleSet(
+        const AtomTable* atomtable,
         AttentionValue::sti_t lowerBound,
         AttentionValue::sti_t upperBound) const
 {
-	HandleEntry *set = NULL;
+	UnorderedHandleSet set;
 
 	// The indexes for the lower bound and upper bound lists is returned.
 	int lowerBin = importanceBin(lowerBound);
 	int upperBin = importanceBin(upperBound);
 
 	// Build a list of atoms whose importance is equal to the lower bound.
-	UnorderedHandleSet::const_iterator hit;
 	const UnorderedHandleSet &sl = idx[lowerBin];
-	for (hit = sl.begin(); hit != sl.end(); ++hit) {
-		HandleEntry *he = new HandleEntry(*hit);
-		he->next = set;
-		set = he;
-	}
 
 	// For the lower bound and upper bound index, the list is filtered,
 	// because there may be atoms that have the same importanceIndex
 	// and whose importance is lower than lowerBound or bigger than
 	// upperBound.
-	set = HandleEntry::filterSet(set, lowerBound, upperBound);
-
+	std::copy_if(sl.begin(), sl.end(), inserter(set),
+		[&](Handle h)->bool {
+			AttentionValue::sti_t sti = 
+				atomtable->getAtom(h)->getAttentionValue().getSTI();
+			return (lowerBound <= sti and sti <= upperBound);
+		});
+  
 	if (lowerBin == upperBin) {
 		// If both lower and upper bounds are in the same bin,
 		// Then we are done.
@@ -227,23 +233,18 @@ HandleEntry* ImportanceIndex::getHandleSet(
 	// add to the list.
 	while (++lowerBin < upperBin) {
 		const UnorderedHandleSet &ss = idx[lowerBin];
-		for (hit = ss.begin(); hit != ss.end(); ++hit) {
-			HandleEntry *he = new HandleEntry(*hit);
-			he->next = set;
-			set = he;
-		}
+		set.insert(ss.begin(), ss.end());
 	}
-
-	HandleEntry *uset = NULL;
-	const UnorderedHandleSet &su = idx[upperBin];
-	for (hit = su.begin(); hit != su.end(); ++hit) {
-		HandleEntry *he = new HandleEntry(*hit);
-		he->next = uset;
-		uset = he;
-	}
-	uset = HandleEntry::filterSet(uset, lowerBound, upperBound);
 
 	// The two lists are concatenated.
-	return HandleEntry::concatenation(uset, set);
+	const UnorderedHandleSet &uset = idx[upperBin];
+	std::copy_if(uset.begin(), uset.end(), inserter(set),
+		[&](Handle h)->bool {
+			AttentionValue::sti_t sti = 
+				atomtable->getAtom(h)->getAttentionValue().getSTI();
+			return (lowerBound <= sti and sti <= upperBound);
+		});
+
+	return set;
 }
 
