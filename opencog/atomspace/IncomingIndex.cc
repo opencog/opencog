@@ -118,7 +118,7 @@ IncomingIndex::iterator IncomingIndex::begin(Handle h) const
 	iterator it(h);
 	if (Handle::UNDEFINED != h)
 		it._iset = idx.get(h);
-   it._s = it._iset.begin();
+	it._s = it._iset.begin();
 	it._e = it._iset.end();
 	return it;
 }
@@ -126,8 +126,7 @@ IncomingIndex::iterator IncomingIndex::begin(Handle h) const
 IncomingIndex::iterator IncomingIndex::end(void) const
 {
 	iterator it(Handle::UNDEFINED);
-   it._s = it._iset.end();
-	it._e = it._iset.end();
+	it._s = it._e = it._iset.end();
 	return it;
 }
 
@@ -156,14 +155,17 @@ Handle IncomingIndex::iterator::operator*(void)
 
 bool IncomingIndex::iterator::operator==(iterator v)
 {
-	if (_h != v._h) return false;
-	return v._s == _s;
+	// If v is end(), then _h is undefined ...
+	if (v._h != Handle::UNDEFINED and
+	      _h != Handle::UNDEFINED and _h != v._h) return false;
+	return _s == v._s;
 }
 
 bool IncomingIndex::iterator::operator!=(iterator v)
 {
-	if (_h != v._h) return true;
-	return v._s != _s;
+	if (v._h != Handle::UNDEFINED and
+	      _h != Handle::UNDEFINED and _h != v._h) return true;
+	return _s != v._s;
 }
 
 IncomingIndex::iterator& IncomingIndex::iterator::operator++()

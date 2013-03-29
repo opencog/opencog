@@ -441,7 +441,9 @@ public:
         return std::copy_if(incomingIndex.begin(h),
                             incomingIndex.end(),
                             result,
-             [&](Handle h)->bool{ return isType(h, type, subclass); });
+             [&](Handle h)->bool{
+                     return isDefined(h)
+                        and isType(h, type, subclass); });
     }
 
     template <typename OutputIterator> OutputIterator
@@ -455,7 +457,9 @@ public:
                             incomingIndex.end(),
                             result,
              [&](Handle h)->bool{
-                   return isType(h, type, subclass) and containsVersionedTV(h, vh); });
+                   return isDefined(h)
+                      and isType(h, type, subclass)
+                      and containsVersionedTV(h, vh); });
     }
 
     /**
