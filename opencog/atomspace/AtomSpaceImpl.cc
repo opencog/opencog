@@ -627,13 +627,9 @@ bool AtomSpaceImpl::saveToXML(const std::string& filename) const {
 void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;
-    std::vector<Handle>::iterator i;
-    std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
-    bool result;
 
-    getHandleSet(outputI, ATOM, true);
+    getHandleSet(back_inserter(allAtoms), ATOM, true);
 
-    int j = 0;
     DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
     DPRINTF("atoms in allAtoms: %lu\n",allAtoms.size());
@@ -641,8 +637,10 @@ void AtomSpaceImpl::clear()
     Logger::Level save = logger().getLevel();
     logger().setLevel(Logger::DEBUG);
 
+    size_t j = 0;
+    std::vector<Handle>::iterator i;
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-        result = removeAtom(*i,true);
+        bool result = removeAtom(*i, true);
         if (result) {
             DPRINTF("%d: Atom %lu removed, %d nodes %d links left to delete\n",
                 j,i->value(),Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
@@ -651,8 +649,7 @@ void AtomSpaceImpl::clear()
     }
 
     allAtoms.clear();
-    std::back_insert_iterator< std::vector<Handle> > output2(allAtoms);
-    getHandleSet(output2, ATOM, true);
+    getHandleSet(back_inserter(allAtoms), ATOM, true);
     assert(allAtoms.size() == 0);
 
     logger().setLevel(save);
