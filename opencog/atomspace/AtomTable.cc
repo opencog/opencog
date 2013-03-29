@@ -467,22 +467,21 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
     if (!atom || atom->isMarkedForRemoval()) return result;
     atom->markForRemoval();
 
-    // if recursive-flag is set, also extract all the links in the atom's
+    // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
     if (recursive) {
-        // we need to make a copy of the incoming set because the 'incoming
-        // set' container is actually a list, so the same link may appear twice
-        // in an incoming set. Hopefully we'll eventually use the right
-        // container
-        const UnorderedHandleSet& is = getIncomingSet(handle);
+        // We need to make a copy of the incoming set because the
+        // recursive call will trash the incoming set when the atom
+        // is removed.  
+        UnorderedHandleSet is = getIncomingSet(handle);
 
         UnorderedHandleSet::const_iterator is_it;
         for (is_it = is.begin(); is_it != is.end(); ++is_it)
         {
             DPRINTF("[AtomTable::extract] incoming set: %s",
                  TLB::isValidHandle(*is_it) ? TLB::getAtom(*is_it)->toString().c_str() : "INVALID HANDLE");
-            // if (TLB::getAtom(*is_it)->isMarkedForRemoval() == false) {
-            if (getAtom(*is_it)->isMarkedForRemoval() == false) {
+
+            if (not getAtom(*is_it)->isMarkedForRemoval()) {
                 DPRINTF("[AtomTable::extract] marked for removal is false");
 
                 UnorderedHandleSet ex = extract(*is_it, true);
@@ -511,7 +510,7 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
         return result;
     }
 
-    //decrements the size of the table
+    // decrements the size of the table
     size--;
 
     // updates all global statistics regarding the removal of this atom
