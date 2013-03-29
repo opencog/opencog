@@ -778,7 +778,7 @@ public:
     }
 
     virtual void do_work() {
-        atomspace->getHandleSet(back_inserter(result),type,name,subclass,vh);
+        atomspace->getHandleSet(back_inserter(result), name, type, subclass, vh);
     }
 };
 

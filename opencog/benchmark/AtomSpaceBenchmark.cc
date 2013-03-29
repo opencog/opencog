@@ -153,6 +153,7 @@ void AtomSpaceBenchmark::showMethods() {
     cout << "  setTruthValue" << endl;
     cout << "  getHandleSet" << endl;
     cout << "  getNodeHandles" << endl;
+    cout << "  getOutgoingSet" << endl;
 
 }
 
@@ -175,6 +176,8 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName) {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandleSet);
     } else if (_methodName == "getNodeHandles") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getNodeHandles);
+    } else if (_methodName == "getOutgoingSet") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
     }
     methodNames.push_back( _methodName);
 }
@@ -507,12 +510,12 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     clock_t time_taken;
     if (testTable) {
         t_begin = clock();
-        delete atab->getHandleSet(oss.str().c_str(), NODE, true);
+        atab->getHandleSet(back_inserter(results2), NODE, oss.str(), true);
         time_taken = clock() - t_begin;
     }
     else if (testBackend) {
         t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), NODE, oss.str().c_str(), true);
+        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), NODE, oss.str(), true);
         time_taken = clock() - t_begin;
     } else {
         t_begin = clock();

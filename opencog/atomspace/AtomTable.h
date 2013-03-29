@@ -279,6 +279,13 @@ protected:
                and (tv.getType() == COMPOSITE_TRUTH_VALUE)
                and (not (((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv()));
     }
+    bool hasNullName(Handle h) const
+    {
+        Atom* a = getAtom(h);
+        if (dynamic_cast<Link*>(a)) return true;
+        if (dynamic_cast<Node*>(a)->getName().c_str()[0] == 0) return true;
+        return false;
+    }
 
 public:
     /**
@@ -488,17 +495,40 @@ public:
      * @param Whether atom type subclasses should be considered.
      * @return The set of atoms of the given type and name.
      */
-    HandleEntry* getHandleSet(const char* name,
-                              Type type = ATOM, bool subclass = true) const
+    template <typename OutputIterator> OutputIterator
+    getHandlesByName(OutputIterator result,
+                     const std::string& name,
+                     Type type = ATOM,
+                     bool subclass = true) const
     {
-        if (name == NULL || *name == 0)
+        if (name.c_str()[0] == 0)
         {
-            HandleSeq v;
-            getHandlesByType(back_inserter(v), type, subclass);
-            HandleEntry *set = HandleEntry::fromHandleVector(v);
-            return HandleEntry::filterSet(set, "");
+            return std::copy_if(typeIndex.begin(type, subclass),
+                                typeIndex.end(),
+                                result,
+                                isDefined);
         }
-        return HandleEntry::fromHandleSet(nodeIndex.getHandleSet(type, name, subclass));
+        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
+        return std::copy(hs.begin(), hs.end(), result);
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getHandlesByNameVH(OutputIterator result,
+                       const std::string& name,
+                       Type type,
+                       bool subclass,
+                       VersionHandle vh) const
+    {
+        if (name.c_str()[0] == 0)
+        {
+            return std::copy_if(typeIndex.begin(type, subclass),
+                                typeIndex.end(),
+                                result,
+             [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
+        }
+        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
+        return std::copy_if(hs.begin(), hs.end(), result,
+             [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
     }
 
     /**
@@ -692,8 +722,6 @@ public:
     HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,
             bool* subclasses, Arity arity, Type type, bool subclass,
             VersionHandle vh) const;
-    HandleEntry* getHandleSet(const char* name, Type type, bool subclass,
-            VersionHandle vh) const;
     HandleEntry* getHandleSet(const char* targetName, Type targetType,
             Type type, bool subclass, VersionHandle vh,
             VersionHandle targetVh) const;
@@ -730,7 +758,6 @@ private:
     HandleEntry* getIncomingSetE(Handle h) const {
         return HandleEntry::fromHandleSet(incomingIndex.getIncomingSet(h));
     }
-
 };
 
 } //namespace opencog

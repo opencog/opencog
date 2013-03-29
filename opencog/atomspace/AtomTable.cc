@@ -668,21 +668,6 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* t
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh) const
-{
-    DPRINTF("AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
-    HandleEntry* result = NULL;
-    if (name == NULL) {
-        HandleSeq hs;
-        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
-        result = HandleEntry::fromHandleVector(hs);
-    } else {
-        result = this->getHandleSet(name, type, subclass);
-        result = HandleEntry::filterSet(result, vh);
-    }
-    return result;
-}
-
 HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh) const
 {
     DPRINTF("AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");

@@ -453,10 +453,20 @@ public:
     getHandleSet(OutputIterator result,
                  Type type,
                  const std::string& name,
-                 bool subclass = true,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleEntry * handleEntry = atomTable.getHandleSet(name.c_str(), type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+                 bool subclass = true) const
+    {
+        return atomTable.getHandlesByName(result, name, type, subclass);
+    }
+
+    /** Same as above, but includes check for VH */
+    template <typename OutputIterator> OutputIterator
+    getHandleSet(OutputIterator result,
+                 const std::string& name,
+                 Type type,
+                 bool subclass,
+                 VersionHandle vh) const
+    {
+        return atomTable.getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -466,16 +476,19 @@ public:
      * @param result An output iterator.
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param vh only atoms that contains versioned TVs with the given
+     *        VersionHandle are returned.  If NULL_VERSION_HANDLE is
+     *        given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.
+     *        Example of call to this method, which would return all
+     *        entries in AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -504,19 +517,24 @@ public:
      * @param type The desired type.
      * @param targetType The desired target type.
      * @param subclass Whether type subclasses should be considered.
-     * @param targetSubclass Whether target type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     * @param targetVh only atoms whose target contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param targetSubclass Whether target type subclasses should be
+     *        considered.
+     * @param vh only atoms that contains versioned TVs with the given
+     *        VersionHandle are returned.  If NULL_VERSION_HANDLE is
+     *        given, it does not restrict the result.
+     * @param targetVh only atoms whose target contains versioned TVs
+     *        with the given VersionHandle are returned.  If
+     *        NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of a given type and target type (subclasses
-     * optionally).
+     *        optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -545,11 +563,13 @@ public:
      * @return The set of atoms of the given type with the given handle in
      * their outgoing set.
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -610,37 +630,6 @@ public:
         return (toOutputIterator(result, handleEntry));
     }
 
-    /**
-     * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).
-     *
-     * @param result An output iterator.
-     * @param name The desired name of the atoms.
-     * @param type The type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     * @return The set of atoms of the given type and name.
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.
-     *
-     * @note Example of call to this method, which would return all entries in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 const char* name,
-                 Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(name, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
-    }
 
     /**
      * Returns the set of atoms whose outgoing set contains at least one
@@ -659,11 +648,13 @@ public:
      * @return The set of atoms of the given type and name whose outgoing
      * set contains at least one atom of the given type and name.
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -706,11 +697,13 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -749,11 +742,13 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -781,11 +776,13 @@ public:
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace in the AttentionalFocus:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -813,11 +810,13 @@ public:
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace beyond 500 LTI:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace beyond 500 LTI:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+     *        std::list<Handle> ret;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -844,12 +843,14 @@ public:
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace, sorted by STI:
+     * @note  The matched entries are appended to a container whose
+     *        OutputIterator is passed as the first argument.  Example
+     *        of call to this method, which would return all entries in
+     *        AtomSpace sorted by STI:
      * @code
-     *         std::list<Handle> ret;
-     *         AttentionValue::STISort stiSort;
-     *         atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
+     *        std::list<Handle> ret;
+     *        AttentionValue::STISort stiSort;
+     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
