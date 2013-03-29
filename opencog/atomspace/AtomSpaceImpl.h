@@ -424,7 +424,7 @@ public:
      * @param linkType Follow only these types of links.
      * @param subClasses Follow subtypes of linkType too.
      */
-    HandleSeq getNeighbors(const Handle& h, bool fanin=true, bool fanout=true,
+    HandleSeq getNeighbors(Handle h, bool fanin=true, bool fanout=true,
             Type linkType=LINK, bool subClasses=true) const;
 
     /**
@@ -557,10 +557,9 @@ public:
                  Handle handle,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(handle, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return atomTable.getIncomingSetByTypeVH(result, handle, type, subclass, vh);
     }
 
     /**

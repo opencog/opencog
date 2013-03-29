@@ -312,7 +312,7 @@ public:
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
                             result,
-             [&](Handle h)->bool{ return h != Handle::UNDEFINED;});
+                            isDefined);
     }
 
     template <typename OutputIterator> OutputIterator
@@ -325,7 +325,7 @@ public:
                             typeIndex.end(),
                             result,
              [&](Handle h)->bool{
-                  return (h != Handle::UNDEFINED) and containsVersionedTV(h, vh);
+                  return isDefined(h) and containsVersionedTV(h, vh);
              });
     }
 
@@ -339,7 +339,7 @@ public:
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](Handle h)->void { 
-                  if (h == Handle::UNDEFINED) return;
+                  if (not isDefined(h)) return;
                   if (not containsVersionedTV(h, vh)) return;
                   (func)(h);
              });
@@ -407,7 +407,18 @@ public:
     /**
      * Return the incoming set associated with handle h.
      */
-    HandleEntry* getIncomingSet(Handle h) const;
+    const UnorderedHandleSet& getIncomingSet(Handle h) const
+        { return incomingIndex.getIncomingSet(h); }
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSet(OutputIterator result,
+                   Handle h) const
+    {
+        return std::copy(incomingIndex.begin(h),
+                         incomingIndex.end(),
+                         result);
+    }
+
 
     /**
      * Returns the set of atoms with a given target handle in their
@@ -421,9 +432,31 @@ public:
      * @return The set of atoms of the given type with the given handle in
      * their outgoing set.
      */
-    HandleEntry* getHandleSet(Handle h,
-                              Type type = ATOM,
-                              bool subclass = true) const;
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByType(OutputIterator result,
+                         Handle h,
+                         Type type,
+                         bool subclass = false) const
+    {
+        return std::copy_if(incomingIndex.begin(h),
+                            incomingIndex.end(),
+                            result,
+             [&](Handle h)->bool{ return isType(h, type, subclass); });
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByTypeVH(OutputIterator result,
+                           Handle h,
+                           Type type,
+                           bool subclass,
+                           VersionHandle vh) const
+    {
+        return std::copy_if(incomingIndex.begin(h),
+                            incomingIndex.end(),
+                            result,
+             [&](Handle h)->bool{
+                   return isType(h, type, subclass) and containsVersionedTV(h, vh); });
+    }
 
     /**
      * Returns the set of atoms with the given target handles and types
@@ -669,8 +702,6 @@ public:
      */
     bool usesDSA() const;
 
-    HandleEntry* getHandleSet(Handle handle, Type type, bool subclass,
-            VersionHandle vh) const;
     HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,
             bool* subclasses, Arity arity, Type type, bool subclass,
             VersionHandle vh) const;
@@ -707,6 +738,12 @@ public:
         }
         return false;
     }
+
+private:
+    HandleEntry* getIncomingSetE(Handle h) const {
+        return HandleEntry::fromHandleSet(incomingIndex.getIncomingSet(h));
+    }
+
 };
 
 } //namespace opencog

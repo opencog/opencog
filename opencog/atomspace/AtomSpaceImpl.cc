@@ -359,7 +359,7 @@ std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
     return std::string("ERROR: Bad handle");
 }
 
-HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
+HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
         bool fanout, Type desiredLinkType, bool subClasses) const 
 {
     Atom* a = atomTable.getAtom(h);
@@ -369,8 +369,11 @@ HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
     }
     HandleSeq answer;
 
-    for (HandleEntry *he = atomTable.getIncomingSet(h); he != NULL; he = he ->next) {
-        Link *link = atomTable.getLink(he->handle);
+    const UnorderedHandleSet& iset = atomTable.getIncomingSet(h);
+    for (UnorderedHandleSet::const_iterator it = iset.begin();
+         it != iset.end(); it++)
+    {
+        Link *link = atomTable.getLink(*it);
         Type linkType = link->getType();
         DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
         if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
@@ -417,9 +420,10 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     //
     // TODO: solution where user can specify whether to poll storage/repository
 
-    HandleEntry* he = atomTable.getIncomingSet(h);
-    if (he) return he->toHandleVector();
-    else return HandleSeq();
+    const UnorderedHandleSet& iset = atomTable.getIncomingSet(h);
+    HandleSeq hs;
+    std::copy(iset.begin(), iset.end(), back_inserter(hs));
+    return hs;
 }
 
 bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)

@@ -158,9 +158,11 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
 	// If recursive-flag is set, also extract all the links in the
 	// atom's incoming set.
 	if (recursive) {
-		for (HandleEntry* in = atomtable->getIncomingSet(handle);
-                in != NULL; in = in->next) {
-			Atom *a = atomtable->getAtom(in->handle);
+		const UnorderedHandleSet& iset = atomtable->getIncomingSet(handle);
+		for (UnorderedHandleSet::const_iterator it = iset.begin();
+		     it != iset.end(); it++)
+		{
+			Atom* a = atomtable->getAtom(*it);
 
 			// XXX a should never be NULL; however, someone somewhere is
 			// removing atoms from the TLB, although they forgot to remove
@@ -169,15 +171,18 @@ HandleEntry* ImportanceIndex::extractOld(const AtomTable* atomtable,
 			// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
 			if (a and isOld(a, minSTI)) {
 				result = HandleEntry::concatenation(
-					extractOld(atomtable, minSTI, in->handle, true), result);
+					extractOld(atomtable, minSTI, *it, true), result);
 			}
 		}
 	}
 
 	// Only return if there is at least one incoming atom that is
 	// not marked for removal by decay.
-	for (HandleEntry* in = atomtable->getIncomingSet(handle); in != NULL; in = in->next) {
-		Atom* a = atomtable->getAtom(in->handle);
+	const UnorderedHandleSet& iset = atomtable->getIncomingSet(handle);
+	for (UnorderedHandleSet::const_iterator it = iset.begin();
+	        it != iset.end(); it++)
+	{
+		Atom* a = atomtable->getAtom(*it);
 		// XXX a should never be NULL; however, someone somewhere is
 		// removing atoms from the TLB, although they forgot to remove
 		// them from the atomTable, and so they are still showing up
