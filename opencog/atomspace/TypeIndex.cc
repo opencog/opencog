@@ -48,21 +48,6 @@ void TypeIndex::removeAtom(const Atom* a)
 	remove(t,a->getHandle());
 }
 
-UnorderedHandleSet TypeIndex::getHandleSet(Type type, bool subclass) const
-{
-	iterator it = begin(type, subclass);
-	iterator itend = end();
-
-	UnorderedHandleSet rv;
-	for (; it != itend; it++)
-	{
-		if (Handle::UNDEFINED != *it)
-			rv.insert(*it);
-	}
-
-	return rv;
-}
-
 // ================================================================
 
 TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const

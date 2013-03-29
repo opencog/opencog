@@ -35,7 +35,7 @@ namespace opencog
  * Implements a string index as an RB-tree (C++ map)
  */
 class StringIndex:
-	public AtomIndex<const char *,Handle>
+	public AtomIndex<const char *, Handle>
 {
 	private:
 		std::map<std::string, Handle> idx;

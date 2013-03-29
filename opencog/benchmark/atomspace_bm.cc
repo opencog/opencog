@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
              benchmarker.setMethod("setTV");
              benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("getNodeHandles");
+             benchmarker.setMethod("getOutgoingSet");
              break;
            case 'x':
              benchmarker.testBackend = true;

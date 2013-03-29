@@ -399,6 +399,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Arity arity)
 }
 
 
+#if 1
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
 {
     bool noName = (name == NULL || *name == 0);
@@ -443,7 +444,9 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     // head contains the filtered list.
     return head;
 }
+#endif
 
+#if 1
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
 {
 
@@ -484,6 +487,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
     // head contains the filtered list.
     return head;
 }
+#endif
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Type type, bool subclass)
 {
@@ -773,6 +777,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, AttentionValue::sti_t lowe
 }
 
 
+#if 1
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
 {
 
@@ -813,6 +818,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
     // head contains the filtered list.
     return head;
 }
+#endif
 
 bool HandleEntry::matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, VersionHandle vh)
 {

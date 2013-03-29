@@ -136,7 +136,7 @@ public:
     void testGetRandom() {
         AtomTable atomTable(false);
         ostringstream oss;
-        size_t numBuckets = atomTable.atomSet.bucket_count();
+        size_t numBuckets = atomTable.getSize() / 10;
         for (unsigned i=0; i < numBuckets + 10; i++){
             oss.clear();
             oss << i;
@@ -162,7 +162,11 @@ public:
         HandleEntry* expectedEntries[6];
         //logger().debug("building expectedEntries");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->getPredicateHandleSet(index);
+
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index]);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
+
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             expectedEntries[index] = indexedHandles;
             //logger().debug("Handles in the index %d: ", index);
@@ -177,7 +181,9 @@ public:
         }
         //logger().debug("testPredicateIndices with NULL_VERSION_HANDLE");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index]);
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index]);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             //logger().debug("Handles that matches predicate %s: ", gpnNames[index]);
             HandleEntry* expectedEntry = expectedEntries[index];
@@ -219,7 +225,9 @@ public:
         }
         //logger().debug("testPredicateIndices with VH1");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH1);
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index], VH1);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
@@ -243,7 +251,9 @@ public:
         }
         //logger().debug("testPredicateIndices with VH2");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH2);
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index], VH2);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;

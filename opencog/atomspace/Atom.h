@@ -32,7 +32,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
@@ -47,7 +46,6 @@ namespace opencog
 {
 
 class AtomTable;
-class HandleEntry;
 
 /**
  * Atoms are the basic implementational unit in the system that

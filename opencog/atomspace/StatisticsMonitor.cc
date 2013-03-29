@@ -30,7 +30,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>

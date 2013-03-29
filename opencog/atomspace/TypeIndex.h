@@ -46,8 +46,6 @@ class TypeIndex:
 		void removeAtom(const Atom*);
 		void resize(void);
 
-		UnorderedHandleSet getHandleSet(Type type, bool subclass) const;
-
 		class iterator
 			: public std::iterator<std::forward_iterator_tag, Handle>
 		{

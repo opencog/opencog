@@ -281,6 +281,27 @@ Linas made the following observations/posted the following questions
 during review of the opencog internals, in April 2008. Some of these
 may already be fixed.
 
+5) class Atom has a AtomTable pointer that seems to be of little 
+   utility -- it seems to be used in only two places: by AtomTable
+   itself, and in SavingLoading. The first check is of little 
+   utility, since the check could be performed in other ways, and 
+   there is no need to have this check be computationally efficient.
+   The use in SavingLoading could probably be avoided as well.
+   Avoiding this pointer would provide a space-savings. 
+
+7) Class HandleEntry is implemented as a linked list. It implements
+   many O(N) and O(N^2) algorithms, such as set intersection, etc.
+   Performance will almost certainly be improved by using
+   std:map instead of linked lists.
+
+   In fact, all usage of HandleEntry should be completely eliminated.
+   The whole things is a boondoggle.  Its already partly eliminated
+   for many of the simpler functions, circa 2013.  The big nasties
+   remain...
+
+
+FIXED ISSUES:
+-------------
 1) typeIndex and atom->setNext() -- these seem to be trying to 
    maintain an unusual linked list of atoms based on type. 
    (unusual because it uses handles instead of pointers).
@@ -291,6 +312,8 @@ may already be fixed.
    Similar comments apply to targetTypes, importanceIndex, etc.
    See in particular point 1a) below.
 
+   Status: fixed in 2008 sometime.
+
 2) AtomTable::add(Atom *) uses AtomTable::getHandle() to see if
    the indicated atom aleady exists in the atom table. The 
    implementation of AtomTable::getHandle() is incredibly 
@@ -298,33 +321,34 @@ may already be fixed.
    instead, as the linear searches and filterings would be 
    replaced by O(log N) search.
 
+   Status: fixed in 2008 sometime.
+
 3) There are many uses of 
    ClassServer::isAssignableFrom(NODE, atom->getType()) 
    it would be more computationally efficient to replace these with
    (NULL != dynamic_cast<Node *>(atom);
 
+   Status: fixed in 2008 sometime.
+
 4) AtomTable::Add() computes a getNameHash() for all atoms, even
    when they are not of type Node. It would be more effcient to skip
-   this for Nodes.
+   this for Nodes. 
 
-5) class Atom has a AtomTable pointer that seems to be of little 
-   utility -- it seems to be used in only two places: by AtomTable
-   itself, and in SavingLoading. The first check is of little 
-   utility, since the check could be perormed in other ways, and 
-   there is no need to have this check be computationally efficient.
-   The use in SavingLoading could probably be avoided as well.
-   Avoiding this pointer would provide a space-savings. 
-
-7) Class HandleEntry is implemented as a linked list. It implements
-   many O(N) and O(N^2) algorithms, such as set intersection, etc.
-   Performance will almost certainly be improved by using
-   std:map instead of linked lists.
+   Status: fixed in 2008 sometime.
 
 8) AtomTable::makeSet() and AtomTable::buildSet() and
    the various flavors of getHandleSet() all create 
    linked lists. Presumably, some user will use these lists, 
-   and thn delete them. It would be much more computationally 
+   and then delete them. It would be much more computationally 
    efficient if the creation and destruction of the lists were
    skipped completely, and, instead, a foreach loop was used,
    to call the user's callback. This would avoid the cost of 
    malloc and free of the list, and un-needed data copying.
+
+   Status: these functions were nuked sometime before 2011
+
+9) AtomTable::AtomHashSet uses up memory to store atoms, but is not
+   really needed, since everything it does is already done by the
+   indexes.  It should be removed to save space.
+
+   Status: removed, March 2013
