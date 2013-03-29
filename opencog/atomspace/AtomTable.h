@@ -233,8 +233,14 @@ public:
      * @param VersionHandle for filtering the resulting atoms by
      *        context. NULL_VERSION_HANDLE indicates no filtering
      */
-    HandleEntry* findHandlesByGPN(const char*,
-                                  VersionHandle = NULL_VERSION_HANDLE) const;
+    template <typename OutputIterator> OutputIterator
+    getHandlesByGPN(OutputIterator result,
+                    const std::string& gpnNodeName,
+                    VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        Handle gpnHandle = getHandle(gpnNodeName, GROUNDED_PREDICATE_NODE);
+        return getHandlesByGPN(result, gpnHandle, vh);
+    }
 
     /**
      * Returns a list of handles that matches the GroundedPredicateNode
@@ -243,8 +249,15 @@ public:
      * @param VersionHandle for filtering the resulting atoms by
      *       context. NULL_VERSION_HANDLE indicates no filtering
      **/
-    HandleEntry* findHandlesByGPN(Handle h,
-                                  VersionHandle vh = NULL_VERSION_HANDLE) const;
+    template <typename OutputIterator> OutputIterator
+    getHandlesByGPN(OutputIterator result,
+                    Handle h,
+                    VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        const UnorderedHandleSet& hs = predicateIndex.findHandlesByGPN(h);
+        return std::copy_if(hs.begin(), hs.end(), result,
+                 [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
+    }
 
     /**
      * Returns the exact atom for the given name and type.

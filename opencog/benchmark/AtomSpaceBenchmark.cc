@@ -510,7 +510,7 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     clock_t time_taken;
     if (testTable) {
         t_begin = clock();
-        atab->getHandleSet(back_inserter(results2), NODE, oss.str(), true);
+        atab->getHandlesByName(back_inserter(results2), oss.str(), NODE, true);
         time_taken = clock() - t_begin;
     }
     else if (testBackend) {
