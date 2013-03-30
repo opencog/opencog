@@ -37,7 +37,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/IncomingIndex.h>
 #include <opencog/atomspace/Intersect.h>
@@ -600,8 +599,9 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const
+    UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
+                              Type type = ATOM, bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const
     throw (RuntimeException);
 
     /**
@@ -623,9 +623,10 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(Type* types, bool* subclasses, Arity arity,
-                              Type type = ATOM, bool subclass = true) const
-    { return getHandleSet((const char**) NULL, types, subclasses, arity, type, subclass); }
+    UnorderedHandleSet getHandlesByTypes(Type* types, bool* subclasses, Arity arity,
+                              Type type = ATOM, bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const
+    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass, vh); }
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -742,32 +743,6 @@ public:
      * this table or not.
      */
     bool usesDSA() const;
-
-    HandleEntry* getHandleSet(const char** names, Type* types, bool*
-            subclasses, Arity arity, Type type, bool subclass,
-            VersionHandle vh) const;
-    HandleEntry* getHandleSet(Type* types, bool* subclasses, Arity arity,
-            Type type, bool subclass, VersionHandle vh) const;
-
-    /*
-    * If this method is needed it needs to be refactored to use
-    * AttentionValue instead of floats
-    HandleEntry* getHandleSet(float lowerBound, float upperBound, VersionHandle vh) const;
-    */
-
-private:
-    /* XXX TODO These routines are deprecated, obsolete, and should
-     * be eliminated ASAP. They are only haning out here for backwards
-     * compat with other grungy gunk that houldbe removed. XXX TODO.
-     */
-    HandleEntry* getIncomingSetXXX(Handle h) const {
-        return HandleEntry::fromHandleSet(incomingIndex.getIncomingSet(h));
-    }
-    HandleEntry* getHandleSetXXX(const char *name, Type targt, Type type, bool subclass) const {
-        HandleSeq hs;
-        getIncomingSetByName(back_inserter(hs), name, targt, type, subclass);
-        return HandleEntry::fromHandleVector(hs);
-    }
 };
 
 } //namespace opencog

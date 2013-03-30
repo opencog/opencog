@@ -31,6 +31,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>

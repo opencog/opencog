@@ -284,46 +284,47 @@ public:
     //          <Element class="CWPixelPerceptNode" name="00065349"/>
     //          <Element class="NumberNode" name="on"/>
     //      </ListLink>
-    void testGetHandleSet() {
+    void testGetHandleSet()
+    {
         //== getHandleSet(const char**, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         const char* names1[] = {"00065349", "12"};
         Type types1[] = {CONCEPT_NODE, NUMBER_NODE};
-        HandleEntry* result = table->getHandleSet(names1, types1, NULL, 2, LIST_LINK, false);
+        HandleEntry* result = HandleEntry::fromHandleSet(table->getHandlesByNames(names1, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result != NULL);
         //logger().debug("result = %s", result->toString().c_str());
         delete (result);
 
         const char* names2[] = {"12", "00065349"};
         Type types2[] = {NUMBER_NODE, CONCEPT_NODE};
-        result = table->getHandleSet(names2, types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names2, types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result == NULL);
 
         const char* names3[] = {NULL, "12"};
         Type types3[] = {NOTYPE, NUMBER_NODE};
-        result = table->getHandleSet(names3, types3, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names3, types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result != NULL);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         const char* names4[] = {NULL, "00065349"};
         Type types4[] = {NOTYPE, CONCEPT_NODE};
-        result = table->getHandleSet(names4, types4, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names4, types4, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(result == NULL);
 
-        result = table->getHandleSet((const char**) NULL, types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames((const char**) NULL, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result != NULL);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet((const char**) NULL, types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames((const char**) NULL, types2, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(result == NULL);
 
-        TS_ASSERT_THROWS(table->getHandleSet(names1, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandleSet(names2, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandleSet(names3, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandleSet(names4, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names1, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names2, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names3, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names4, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
 
         //== getHandleSet(Handle*, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         std::vector<Handle> handles1(2);
@@ -385,20 +386,20 @@ public:
 
         //== getHandleSet(Type*, bool*, Arity, Type = ATOM, bool = true) ==/
 
-        result = table->getHandleSet(types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
 
-        result = table->getHandleSet(types3, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(types4, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types4, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
     }
