@@ -249,12 +249,12 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(const std::string& name, Type t) const;
-    Handle getHandle(const Node* n) const;
+    Handle getHandle(const std::string&, Type) const;
+    Handle getHandle(const Node*) const;
 
-    Handle getHandle(Type t, const HandleSeq &seq) const;
-    Handle getHandle(const Link* l) const;
-
+    Handle getHandle(Type, const HandleSeq&) const;
+    Handle getHandle(const Link*) const;
+    Handle getHandle(const Atom*) const;
 
 protected:
     /* Some basic predicates */

@@ -110,7 +110,8 @@ size_t Node::hashCode() const
 Atom* Node::clone() const
 {
     Atom *a = new Node(*this);
-    a->handle = handle;
+    // Atoms not in the TLB must not have a valid handle!
+    a->handle = Handle::UNDEFINED;
     return a;
 }
 

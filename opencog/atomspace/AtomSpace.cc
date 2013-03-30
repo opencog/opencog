@@ -248,6 +248,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
         }
     }
     do_merge_tv(result,newTV);
+    // XXX TODO should also merge Attention values, and also trails, right?
     return result;
 }
 

@@ -125,6 +125,19 @@ Handle AtomTable::getHandle(const Link* l) const
     return getHandle(l->getType(), l->getOutgoingSet());
 }
 
+Handle AtomTable::getHandle(const Atom* a) const
+{
+    const Node* nnn = dynamic_cast<const Node*>(a);
+    if (nnn) 
+         return getHandle(nnn);
+    else {
+        const Link* lll = dynamic_cast<const Link*>(a);
+        if (lll)
+            return getHandle(lll);
+    }
+    return Handle::UNDEFINED;
+}
+
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      Type* types,
                                      bool* subclasses,
@@ -357,19 +370,20 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
         // Atom is already inserted
         return atom->getHandle();
     }
-    Handle existingHandle = Handle::UNDEFINED;
-    Node * nnn = dynamic_cast<Node *>(atom);
-    Link * lll = dynamic_cast<Link *>(atom);
-    // Check if the node or link handle already exists in the indexers
-    if (nnn) {
-        existingHandle = getHandle(nnn);
-    } else if (lll) {
-        existingHandle = getHandle(lll);
-    }
+
+    // Check if there already is another atom, just like this one,
+    // already present in tha table.
+    Handle existingHandle = getHandle(atom);
 
     if (TLB::isValidHandle(existingHandle)) {
+        if (atom->handle != Handle::UNDEFINED)
+            throw RuntimeException(TRACE_INFO,
+              "AtomTable - Attempting to insert atom with handle already set!");
+
         DPRINTF("Merging existing Atom with the Atom being added ...\n");
         merge(existingHandle, atom->getTruthValue());
+        // XXX TODO -- should merege attention value, should also
+        // merge trails, right?
         delete atom;
         return existingHandle;
     }
@@ -379,6 +393,7 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
     size++;
 
     // Checks for null outgoing set members.
+    Link * lll = dynamic_cast<Link *>(atom);
     if (lll) {
         const std::vector<Handle>& ogs = lll->getOutgoingSet();
         size_t arity = ogs.size();
@@ -407,6 +422,8 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
 
     atom->setAtomTable(this);
 
+    // XXX the Statistics monitor should use signals, just like everyone else,
+    // it should not get special treatment here!.
     if (useDSA) {
         StatisticsMonitor::getInstance()->add(atom);
     }
@@ -542,14 +559,9 @@ void AtomTable::removeExtractedHandles(const UnorderedHandleSet& exh)
 {
     if (0 == exh.size()) return;
 
-    // We must to iterate from the end to the begining of the list of atoms so that 
-    // link's target atoms are not removed before the link   
-    // TODO: this is inefficient. if we alter extract to build the HandleEntry
-    // list in reverse, then we can avoid initialising a temporary vector.
-
     UnorderedHandleSet::const_iterator it;
     for (it = exh.begin(); it != exh.end(); ++it) {
-        Atom* atom = TLB::removeAtom(*it);
+        Atom* atom = getAtom(*it);
         if (logger().isFineEnabled())
             logger().fine("Atom removed: %d => %s", it->value(), atom->toString().c_str());
         delete atom;

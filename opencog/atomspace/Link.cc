@@ -312,11 +312,12 @@ void Link::addOutgoingAtom(Handle h)
     outgoing.push_back(h);
 }
 
-// This is Sir Lee Fugnuts cloneing an atom makes no sense! XXX FIXME
+// This is Sir Lee Fugnuts cloning an atom makes no sense! XXX FIXME
 Atom* Link::clone() const
 {
     Atom* a = new Link(*this);
-    a->handle = handle;
+    // Atoms not in the TLB must have a valid handle!
+    a->handle = Handle::UNDEFINED;
     return a;
 }
 

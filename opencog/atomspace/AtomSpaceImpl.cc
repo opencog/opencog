@@ -322,6 +322,7 @@ Handle AtomSpaceImpl::addRealAtom(const Atom& atom, const TruthValue& tvn)
         delete mergedTV;
     }
 
+    // XXX Should also merge Attention values and trails, right?
     return result;
 }
 
@@ -390,14 +391,15 @@ bool AtomSpaceImpl::commitAtom(const Atom& a)
 {
     // TODO: Check for differences and abort if timestamp is out of date
 
-    // Get the version in the atomTable
-    Atom* original = atomTable.getAtom(a.getHandle());
+    Handle h = atomTable.getHandle(&a);
+    Atom* original = atomTable.getAtom(h);
     if (original == NULL)
         // TODO: allow committing a new atom?
         return false;
     // The only mutable properties of atoms are the TV and AttentionValue
     // TODO: this isn't correct, trails, flags and other things might change
-    // too...
+    // too... XXX the AtomTable already has a merge function; shouldn't we
+    // be using that?
     original->setTruthValue(a.getTruthValue());
     original->setAttentionValue(a.getAttentionValue());
     return true;
