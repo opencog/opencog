@@ -406,10 +406,6 @@ public:
      */
     bool commitAtom(const Atom& a);
 
-    /** Get hash for an atom */
-    size_t getAtomHash(const Handle h) const
-        { return atomTable.getAtom(h)->hashCode(); }
-
     bool isValidHandle(const Handle h) const
         { return atomTable.holds(h); }
 

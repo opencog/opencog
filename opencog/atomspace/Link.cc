@@ -275,14 +275,6 @@ bool Link::operator!=(const Atom& other) const
     return !(*this == other);
 }
 
-size_t Link::hashCode(void) const
-{
-    size_t result = getType() + (getArity() << 8);
-    for (unsigned int i = 0; i < getArity(); i++)
-        result = result  ^ (((long) outgoing[i].value()) << i);
-    return result;
-}
-
 class HandleComparison
 {
     public:

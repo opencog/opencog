@@ -657,16 +657,6 @@ public:
     
 };
 
-class GetAtomHashASR : public OneParamASR<size_t,Handle> {
-public:
-    GetAtomHashASR (AtomSpaceImpl *a, const Handle& h) :
-        OneParamASR<size_t,Handle>(a,h) {}
-    
-    virtual void do_work() {
-        set_result(atomspace->getAtomHash(p1));
-    }
-};
-
 
 // -----------------
 // Search requests

@@ -187,15 +187,8 @@ public:
      */
     virtual bool operator!=(const Atom&) const = 0;
 
-    /** Returns the hashCode of the Atom.
-     *
-     * @return an unsigned integer value as the hashCode of the Atom.
-     */
-    virtual size_t hashCode(void) const = 0;
-
+    // XXX FIXME, atoms fundamentally must not be clonable! Yeah?
     virtual Atom* clone() const = 0;
-
-
 };
 
 } // namespace opencog

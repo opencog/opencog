@@ -307,14 +307,7 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 
-    /**
-     * Returns the hashCode of the link.
-     * @return an unsigned integer value as the hashCode of the link.
-     */
-    virtual size_t hashCode(void) const;
-
     virtual Atom* clone() const;
-
 };
 
 } // namespace opencog

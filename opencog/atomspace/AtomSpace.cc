@@ -257,11 +257,6 @@ boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle& h) const
     return atomSpaceAsync->getAtom(h)->get_result();
 }
 
-size_t AtomSpace::getAtomHash(const Handle& h) const 
-{
-    return atomSpaceAsync->getAtomHash(h)->get_result();
-}
-
 bool AtomSpace::isValidHandle(const Handle& h) const 
 {
     return atomSpaceAsync->isValidHandle(h)->get_result();
