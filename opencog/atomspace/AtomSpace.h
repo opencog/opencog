@@ -543,9 +543,6 @@ public:
         return atomSpaceAsync->getNormalisedSTI(h, average, clip, true)->get_result();
     }
 
-    /** Get hash for an atom */
-    size_t getAtomHash(const Handle& h) const;
-
     /**
      * Returns neighboring atoms, following links and returning their
      * target sets.

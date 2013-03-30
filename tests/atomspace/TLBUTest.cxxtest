@@ -66,8 +66,6 @@ public:
         Handle h = TLB::addAtom(n);
         TS_ASSERT_EQUALS(TLB::removeAtom(h),n);
         TS_ASSERT(TLB::removeAtom(h) == NULL);
-        TS_ASSERT_THROWS(TLB::removeAtom(Handle::UNDEFINED),InvalidParamException);
-
     }
 
 };

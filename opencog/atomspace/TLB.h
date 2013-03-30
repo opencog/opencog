@@ -38,6 +38,7 @@ class AtomTableUTest;
 class LinkUTest;
 class NodeUTest;
 class CompositeTruthValueUTest;
+class HandleEntry;
 class HandleEntryUTest;
 class TemporalTableUTest;
 class TimeServerUTest;
@@ -58,6 +59,7 @@ namespace opencog
 class TLB
 {
     friend class ::AtomSpaceUTest;
+    friend class Atom;
     friend class AtomTable;
     friend class ::AtomTableUTest;
     friend class ::TLBUTest;
@@ -66,7 +68,7 @@ class TLB
     // are allowed to access the TLB in the way that they do.
     friend class ::NodeUTest;
     friend class ::LinkUTest;
-    friend class HandleEntry;
+    friend class ::HandleEntry;
     friend class ::HandleEntryUTest;
     friend class HandleTemporalPair;
     friend class HandleToTemporalEntryMap;
@@ -185,18 +187,16 @@ inline Atom* TLB::getAtom(const Handle& handle)
 
 inline Atom* TLB::removeAtom(const Handle& h)
 {
-    if (h == Handle::UNDEFINED) {
-        throw InvalidParamException(TRACE_INFO,
-            "Cannot remove invalid Handle from TLB");
-    }
+    if (h == Handle::UNDEFINED) return NULL;
+
     Atom* atom = TLB::getAtom(h);
-    if (atom) {
-        // Remove from the map
-        handle_map.erase(h);
-        // blank the old handle so it is clear this Atom is no longer
-        // in the TLB
-        atom->handle = Handle::UNDEFINED;
-    }
+    if (NULL == atom) return NULL;
+
+    // Remove from the map
+    handle_map.erase(h);
+    // blank the old handle so it is clear this Atom is no longer
+    // in the TLB
+    atom->handle = Handle::UNDEFINED;
     return atom;
 }
 

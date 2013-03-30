@@ -7,7 +7,7 @@ LINK_LIBRARIES(
 
 # AtomTableUTest requires the XML libraries
 IF (HAVE_EXPAT)
-	ADD_CXXTEST(AtomTableUTest)
+	ADD_CXXTEST(AtomTableUTest HandleEntry.cc)
 	TARGET_LINK_LIBRARIES(AtomTableUTest xml ${EXPAT_LIBRARIES})
 ENDIF (HAVE_EXPAT)
 
@@ -24,9 +24,9 @@ ADD_CXXTEST(CompositeTruthValueUTest)
 TARGET_LINK_LIBRARIES(CompositeTruthValueUTest savable spacetime)
 
 ADD_CXXTEST(AttentionValueUTest)
-ADD_CXXTEST(AtomSpaceUTest)
-ADD_CXXTEST(AtomSpaceImplUTest)
+ADD_CXXTEST(AtomSpaceUTest HandleEntry.cc)
+ADD_CXXTEST(AtomSpaceImplUTest HandleEntry.cc)
 ADD_CXXTEST(AtomSpaceAsyncUTest)
-ADD_CXXTEST(HandleEntryUTest)
+ADD_CXXTEST(HandleEntryUTest HandleEntry.cc)
 ADD_CXXTEST(HandleMapUTest)
 ADD_CXXTEST(TLBUTest)

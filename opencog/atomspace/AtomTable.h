@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,9 +37,9 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/IncomingIndex.h>
+#include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
@@ -249,12 +250,12 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(const std::string& name, Type t) const;
-    Handle getHandle(const Node* n) const;
+    Handle getHandle(const std::string&, Type) const;
+    Handle getHandle(const Node*) const;
 
-    Handle getHandle(Type t, const HandleSeq &seq) const;
-    Handle getHandle(const Link* l) const;
-
+    Handle getHandle(Type, const HandleSeq&) const;
+    Handle getHandle(const Link*) const;
+    Handle getHandle(const Atom*) const;
 
 protected:
     /* Some basic predicates */
@@ -527,10 +528,11 @@ public:
      * @return The set of atoms of the given type with the matching
      *         criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(const std::vector<Handle>&,
+    UnorderedHandleSet getHandlesByOutgoing(const std::vector<Handle>&,
                               Type*, bool*, Arity,
                               Type type = ATOM,
-                              bool subclass = true) const;
+                              bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     /**
      * Returns the set of atoms of a given name (atom type and subclasses
@@ -597,8 +599,9 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const
+    UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
+                              Type type = ATOM, bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const
     throw (RuntimeException);
 
     /**
@@ -620,8 +623,10 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const;
+    UnorderedHandleSet getHandlesByTypes(Type* types, bool* subclasses, Arity arity,
+                              Type type = ATOM, bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const
+    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass, vh); }
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -738,35 +743,6 @@ public:
      * this table or not.
      */
     bool usesDSA() const;
-
-    HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,
-            bool* subclasses, Arity arity, Type type, bool subclass,
-            VersionHandle vh) const;
-    HandleEntry* getHandleSet(const char** names, Type* types, bool*
-            subclasses, Arity arity, Type type, bool subclass,
-            VersionHandle vh) const;
-    HandleEntry* getHandleSet(Type* types, bool* subclasses, Arity arity,
-            Type type, bool subclass, VersionHandle vh) const;
-
-    /*
-    * If this method is needed it needs to be refactored to use
-    * AttentionValue instead of floats
-    HandleEntry* getHandleSet(float lowerBound, float upperBound, VersionHandle vh) const;
-    */
-
-private:
-    /* XXX TODO These routines are deprecated, obsolete, and should
-     * be eliminated ASAP. They are only haning out here for backwards
-     * compat with other grungy gunk that houldbe removed. XXX TODO.
-     */
-    HandleEntry* getIncomingSetXXX(Handle h) const {
-        return HandleEntry::fromHandleSet(incomingIndex.getIncomingSet(h));
-    }
-    HandleEntry* getHandleSetXXX(const char *name, Type targt, Type type, bool subclass) const {
-        HandleSeq hs;
-        getIncomingSetByName(back_inserter(hs), name, targt, type, subclass);
-        return HandleEntry::fromHandleVector(hs);
-    }
 };
 
 } //namespace opencog

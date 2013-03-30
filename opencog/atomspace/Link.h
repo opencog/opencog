@@ -33,6 +33,7 @@
 #include "ProtocolBufferSerializer.h"
 #endif
 
+class HandleEntry;
 namespace opencog
 {
 
@@ -51,7 +52,7 @@ class Link : public Atom
     friend class NMXmlParser;
     friend class Atom;
     // Needs access to getOutgoingAtom
-    friend class HandleEntry;
+    friend class ::HandleEntry;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -307,14 +308,7 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 
-    /**
-     * Returns the hashCode of the link.
-     * @return an unsigned integer value as the hashCode of the link.
-     */
-    virtual size_t hashCode(void) const;
-
     virtual Atom* clone() const;
-
 };
 
 } // namespace opencog

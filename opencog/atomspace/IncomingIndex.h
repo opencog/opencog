@@ -34,6 +34,14 @@ namespace opencog
 /**
  * Implements a Handle index array of RB-trees (C++ set)
  * Given a Handle, this returns the incoming set of that handle.
+ *
+ * XXX TODO The iterator is NOT thread-safe against the insertion or
+ * removal of atoms!  Either inserting or removing an atom will cause
+ * the iterator references to be freed, leading to mystery crashes!
+ *
+ * The const UnorderedHandleSet& returned by the getIncomingSet()
+ * method will also become invalid if an atom is inserted or deleted
+ * (for that particular IncomingSet).
  */
 class IncomingIndex
 {

@@ -445,7 +445,7 @@ void NMXmlParser::setOutgoingSet(boost::shared_ptr<Link> link, const std::vector
     link->setOutgoingSet(outgoing);
 }
 
-HandleEntry*
+HandleSeq
 NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
                      AtomSpace * atomSpace,
                      bool fresh,
@@ -454,7 +454,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     logger().fine("NMXmlParser::loadXML");
     OC_ASSERT(atomSpace != NULL,
             "loadXML - atomSpace should pointer should not be NULL.");
-    HandleEntry* result = NULL;
+    HandleSeq result;
 
     if (xmlReaders.size() <= 0) return result;
 
@@ -491,7 +491,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
         // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + xmlReaders.size()) / (xmlReaders.size() * 2))));
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
         if (lastInsertedLinkHandle != Handle::UNDEFINED) {
-            result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
+            result.push_back(lastInsertedLinkHandle);
         }
     }
 

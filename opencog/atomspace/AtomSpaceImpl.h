@@ -406,10 +406,6 @@ public:
      */
     bool commitAtom(const Atom& a);
 
-    /** Get hash for an atom */
-    size_t getAtomHash(const Handle h) const
-        { return atomTable.getAtom(h)->hashCode(); }
-
     bool isValidHandle(const Handle h) const
         { return atomTable.holds(h); }
 
@@ -625,9 +621,9 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
-        HandleEntry * handleEntry = atomTable.getHandleSet(handles, types,
-                subclasses, arity, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        UnorderedHandleSet hs = atomTable.getHandlesByOutgoing(handles,
+                types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
 
@@ -725,10 +721,10 @@ public:
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(names, types, subclasses, arity, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = atomTable.getHandlesByNames(names, types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -769,10 +765,10 @@ public:
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleEntry * handleEntry = atomTable.getHandleSet(types, subclasses, arity, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = atomTable.getHandlesByTypes(types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -877,7 +873,7 @@ public:
         sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(&atomTable, compare));
 
         // copy the vector and return the iterator.
-        return copy(hs.begin(), hs.end(), result);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     // Wrapper for comparing atoms from a HandleSeq
@@ -1060,19 +1056,6 @@ private:
      * Remove stimulus from atom, only should be used when Atom is deleted.
      */
     void removeStimulus(Handle h);
-
-    template <typename OutputIterator> OutputIterator
-    toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const {
-
-        HandleEntry * toRemove = handleEntry;
-        while (handleEntry) {
-            *(result++) = handleEntry->handle;
-            handleEntry = handleEntry->next;
-        }
-        // free memory
-        if (toRemove) delete toRemove;
-        return result;
-    }
 
     /**
      * Creates the space map node, if not created yet.

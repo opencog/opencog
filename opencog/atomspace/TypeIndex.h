@@ -33,7 +33,17 @@ namespace opencog
 {
 
 /**
- * Implements an integer index as an RB-tree (C++ set)
+ * Implements an integer index as an RB-tree (C++ set) That is, given
+ * an atom Type, this returns all of the Handles for that Type.
+ *
+ * The primary interface for this is an iterator, and that is because
+ * the index will typically contain millions of atoms, and this is far
+ * to much to try to return in some temporary array.  Iterating is much
+ * safer.
+ *
+ * XXX TODO The iterator is NOT thread-safe against the insertion or
+ * removal of atoms!  Either inserting or removing an atom will cause
+ * the iterator references to be freed, leading to mystery crashes!
  */
 class TypeIndex:
 	public FixedIntegerIndex
