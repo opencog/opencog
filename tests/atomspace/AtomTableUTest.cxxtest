@@ -329,7 +329,7 @@ public:
         std::vector<Handle> handles1(2);
         handles1[0] = table->getHandle("00065349", CONCEPT_NODE);
         handles1[1] = table->getHandle("12", NUMBER_NODE);
-        result = table->getHandleSet(handles1, types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
@@ -337,14 +337,14 @@ public:
         std::vector<Handle> handles2(2);
         handles2[0] = table->getHandle("12", NUMBER_NODE);
         handles2[1] = table->getHandle("00065349", CONCEPT_NODE);
-        result = table->getHandleSet(handles2, types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles2, types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
 
         std::vector<Handle> handles3(2);
         handles3[0] = Handle::UNDEFINED;
         handles3[1] = table->getHandle("12", NUMBER_NODE);
-        result = table->getHandleSet(handles3, types3, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles3, types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
@@ -352,34 +352,34 @@ public:
         std::vector<Handle> handles4(2);
         handles4[0] = table->getHandle("12", NUMBER_NODE);
         handles4[1] = Handle::UNDEFINED;
-        result = table->getHandleSet(handles4, types4, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, types4, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
 
-        result = table->getHandleSet(std::vector<Handle>(), types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(std::vector<Handle>(), types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(std::vector<Handle>(), types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(std::vector<Handle>(), types2, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
-        result = table->getHandleSet(handles1, NULL , NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, NULL , NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(handles2, NULL, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles2, NULL, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
-        result = table->getHandleSet(handles3, NULL , NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles3, NULL , NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(handles4, NULL, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, NULL, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
@@ -405,17 +405,17 @@ public:
 
     void testGetHandleSet_bugfix1() {
         HandleSeq emptyOutgoing;
-        HandleEntry* result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false);
+        HandleEntry* result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false));
         TS_ASSERT(!result);
-        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true));
         TS_ASSERT(!result);
         Link* link = new Link(LIST_LINK, emptyOutgoing);
         Handle h = table->add(link);
         if (link->getHandle() != h) delete link;
-        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false));
         TS_ASSERT(result);
         delete result;
-        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true));
         TS_ASSERT(result);
         delete result;
     }

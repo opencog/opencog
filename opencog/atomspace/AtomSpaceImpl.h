@@ -621,9 +621,9 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
-        HandleEntry * handleEntry = atomTable.getHandleSet(handles, types,
-                subclasses, arity, type, subclass, vh);
-        return (toOutputIterator(result, handleEntry));
+        UnorderedHandleSet hs = atomTable.getHandlesByOutgoing(handles,
+                types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
 

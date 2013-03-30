@@ -35,6 +35,7 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
@@ -138,12 +139,14 @@ Handle AtomTable::getHandle(const Atom* a) const
     return Handle::UNDEFINED;
 }
 
-HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
+
+UnorderedHandleSet AtomTable::getHandlesByOutgoing(const std::vector<Handle>& handles,
                                      Type* types,
                                      bool* subclasses,
                                      Arity arity,
                                      Type type,
-                                     bool subclass) const
+                                     bool subclass,
+                                     VersionHandle vh) const
 {
     // Check if it is the special case of looking for an specific atom
     if (classserver().isA(type, LINK) && 
@@ -159,9 +162,9 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             DPRINTF("building link for lookup: type = %d, handles.size() = %zu\n", type, handles.size());
             Handle h = getHandle(type, handles);
 
-            HandleEntry* result = NULL;
-            if (TLB::isValidHandle(h)) {
-                result = new HandleEntry(h);
+            UnorderedHandleSet result;
+            if (TLB::isValidHandle(h) and containsVersionedTV(h, vh)) {
+                result.insert(h);
             }
             DPRINTF("Returning HandleSet by using atom hash_set!\n");
             return result;
@@ -169,14 +172,22 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     }
 
     if (classserver().isA(type, LINK) && (arity == 0)) {
-        HandleSeq hs;
-        getHandlesByType(back_inserter(hs), type, subclass);
-        HandleEntry* result = HandleEntry::fromHandleVector(hs);
-        result = HandleEntry::filterSet(result, arity);
+        UnorderedHandleSet uhs;
+        getHandlesByType(inserter(uhs), type, subclass);
+
+        UnorderedHandleSet result;
+        std::copy_if(uhs.begin(), uhs.end(), inserter(result), 
+            // result = HandleEntry::filterSet(result, arity);
+            [&](Handle h)->bool { 
+                Link* l = dynamic_cast<Link*>(getAtom(h));
+                // If a Node, then accept it.
+                if (NULL == l) return containsVersionedTV(h, vh);
+                return (0 == l->getArity()) and containsVersionedTV(h, vh);
+        });
         return result;
     }
 
-    std::vector<HandleEntry*> sets(arity, NULL);
+    std::vector<UnorderedHandleSet> sets(arity);
 
     int countdown = 0;
 
@@ -184,29 +195,27 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     // counted to be removed a posteriori
     for (int i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
-            sets[i] = getIncomingSetXXX(handles[i]);
-            sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
-            // Also filter links that do not belong to this table
-            //sets[i] = HandleEntry::filterSet(sets[i], tableId);
-            if (sets[i] == NULL) {
-                for (int j = 0; j < i; j++) {
-                    delete sets[j];
-                }
-                return NULL;
-            }
+            UnorderedHandleSet hs = getIncomingSet(handles[i]);
+
+            std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
+                // sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
+                [&](Handle h)->bool {
+                    Link* l = dynamic_cast<Link*>(getAtom(h));
+                    // If a Node, then accept it.
+                    if (NULL == l) return containsVersionedTV(h, vh);
+                    if (l->getArity() != arity) return false;
+                    if (handles[i] != l->getOutgoingSet()[i]) return false;
+                    return containsVersionedTV(h, vh);
+                });
+
+            if (sets[i].size() == 0)
+                return UnorderedHandleSet();
+
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             bool sub = subclasses == NULL ? false : subclasses[i];
-            HandleSeq hs;
-            getHandlesByTargetTypeVH(back_inserter(hs), type, types[i], subclass, sub);
-            sets[i] = HandleEntry::fromHandleVector(hs);
-            // Also filter links that do not belong to this table
-            //sets[i] = HandleEntry::filterSet(sets[i], tableId);
-            if (sets[i] == NULL) {
-                for (int j = 0; j < i; j++) {
-                    delete sets[j];
-                }
-                return NULL;
-            }
+            getHandlesByTargetTypeVH(inserter(sets[i]), type, types[i], subclass, sub);
+            if (sets[i].size() == 0)
+                return UnorderedHandleSet();
         } else {
             countdown++;
         }
@@ -218,11 +227,10 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     if (countdown > 0) {
         DPRINTF("newset allocated size = %d\n", (arity - countdown));
         // TODO: Perhaps it's better to simply erase the NULL entries of the sets
-        std::vector<HandleEntry*> newset;
+        std::vector<UnorderedHandleSet> newset;
         for (int i = 0; i < arity; i++) {
-            if (sets[i] != NULL) {
+            if (sets[i].size() != 0)
                 newset.push_back(sets[i]);
-            }
         }
         sets = newset;
     }
@@ -233,19 +241,35 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             // filters by type and subclass in order to remove unwanted elements.
             // This is done before the intersection method to reduce the number of
             // elements being passed (intersection uses qsort, which is n log n)
-            sets[i] = HandleEntry::filterSet(sets[i], type, subclass);
+            // sets[i] = HandleEntry::filterSet(sets[i], type, subclass);
+            UnorderedHandleSet hs;
+            std::copy_if(sets[i].begin(), sets[i].end(), inserter(hs),
+                [&](Handle h)->bool { return isType(h, type, subclass); });
         }
     }
 
     // computes the intersection of all non-empty sets
-    HandleEntry* set = HandleEntry::intersection(sets);
-    // TODO: Why not move this filtering to the begining... Pehaps it will filter more before the intersection (which seems to be the most expensive operation)
+    UnorderedHandleSet set = intersection(sets);
+    // TODO: Why not move this filtering to the begining...
+    // Pehaps it will filter more before the intersection
+    // (which seems to be the most expensive operation)
     // filters the answer set for every type in the array of target types
     if (types != NULL) {
         for (int i = 0; i < arity; i++) {
             if (types[i] != NOTYPE) {
                 bool sub = subclasses == NULL ? false : subclasses[i];
-                set = HandleEntry::filterSet(set, types[i], sub, i, arity);
+                // set = HandleEntry::filterSet(set, types[i], sub, i, arity);
+                UnorderedHandleSet filt;
+                std::copy_if(set.begin(), set.end(), inserter(filt),
+                    [&](Handle h)->bool {
+                        Link* l = dynamic_cast<Link*>(getAtom(h));
+                        // If a Node, then accept it.
+                        if (NULL == l) return containsVersionedTV(h, vh);
+                        if (l->getArity() != arity) return false;
+                        return isType(l->getOutgoingSet()[i], types[i], sub)
+                               and containsVersionedTV(h, vh);
+                    });
+                set = filt;
             }
         }
     }
@@ -337,11 +361,6 @@ HandleEntry* AtomTable::getHandleSet(const char** names,
     DPRINTF("AtomTable::getHandleSet: about to call intersection\n");
     HandleEntry* set = HandleEntry::intersection(sets);
     return  set;
-}
-
-HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const
-{
-    return getHandleSet((const char**) NULL, types, subclasses, arity, type, subclass);
 }
 
 void AtomTable::merge(Handle h, const TruthValue& tvn)
@@ -609,14 +628,6 @@ bool AtomTable::usesDSA() const
     return useDSA;
 }
 
-HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
-{
-    DPRINTF("AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
-    HandleEntry* result = getHandleSet(handles, types, subclasses, arity, type, subclass);
-    result = HandleEntry::filterSet(result, vh);
-    return result;
-}
-
 HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
 {
     DPRINTF("AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
@@ -641,3 +652,4 @@ void AtomTable::typeAdded(Type t)
     typeIndex.resize();
     targetTypeIndex.resize();
 }
+

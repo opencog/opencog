@@ -27,6 +27,7 @@ ADD_LIBRARY (atomspace SHARED
     ImportanceIndex.cc
     IncomingIndex.cc
     IndefiniteTruthValue.cc
+    Intersect.cc
     Link.cc
     LinkIndex.cc
     NameIndex.cc
@@ -101,6 +102,7 @@ INSTALL (FILES
     ImportanceIndex.h
     IncomingIndex.h
     IndefiniteTruthValue.h
+    Intersect.h
     Link.h
     LinkIndex.h
     NameIndex.h

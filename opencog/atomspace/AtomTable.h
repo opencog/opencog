@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,6 +40,7 @@
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/IncomingIndex.h>
+#include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
@@ -527,10 +529,11 @@ public:
      * @return The set of atoms of the given type with the matching
      *         criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(const std::vector<Handle>&,
+    UnorderedHandleSet getHandlesByOutgoing(const std::vector<Handle>&,
                               Type*, bool*, Arity,
                               Type type = ATOM,
-                              bool subclass = true) const;
+                              bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     /**
      * Returns the set of atoms of a given name (atom type and subclasses
@@ -620,8 +623,9 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const;
+    HandleEntry* getHandleSet(Type* types, bool* subclasses, Arity arity,
+                              Type type = ATOM, bool subclass = true) const
+    { return getHandleSet((const char**) NULL, types, subclasses, arity, type, subclass); }
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -739,9 +743,6 @@ public:
      */
     bool usesDSA() const;
 
-    HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,
-            bool* subclasses, Arity arity, Type type, bool subclass,
-            VersionHandle vh) const;
     HandleEntry* getHandleSet(const char** names, Type* types, bool*
             subclasses, Arity arity, Type type, bool subclass,
             VersionHandle vh) const;
