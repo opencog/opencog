@@ -31,7 +31,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -112,9 +111,9 @@ public:
      *        wants to use a registered Transaction.
      * @param boolean indicating whether the XML contains solely
      *        new Nodes. Note: Hypothetical links are always fresh.
-    * @return a HandleEntry with the last outter link inserted/merged in the atom table for each parsed NM-xml.
+    * @return a HandleSeq with the last outter link inserted/merged in the atom table for each parsed NM-xml.
      */
-    static HandleEntry* loadXML(const std::vector<XMLBufferReader*>&, AtomSpace*,  bool = true, bool = false);
+    static HandleSeq loadXML(const std::vector<XMLBufferReader*>&, AtomSpace*,  bool = true, bool = false);
 
     /**
      * Sets a node name. This method exists because Parser is friends with

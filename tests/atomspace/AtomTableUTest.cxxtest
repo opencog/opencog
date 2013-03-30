@@ -92,7 +92,7 @@ public:
 
         try {
             // Check for existing links because there are 2 identical links in the test xml file
-            HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
+            HandleEntry* result = HandleEntry::fromHandleVector(NMXmlParser::loadXML(readers, atomSpace, false));
             delete result;
 
             VH1 = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL"));
