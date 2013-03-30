@@ -209,6 +209,26 @@ the AtomTable is due to the copying of HandleSets into vectors
 and such.  
 
 
+29 March 2013
+-------------
+Replaced more uses of HandleEntry with C++11 unordered_set and etc.
+This improved performance across the board, except for setTV which
+got a lot slower (!?) and getNodeHandles which got a little slower.
+New results:
+
+   test            AtomTable    AtomSpaceImpl    AtomSpace
+   name            K-ops/sec      K-ops/sec      K-ops/sec
+   ----            ---------    -------------    ---------
+  addNode            270.3         28.5            33.2
+  addLink            178.6         24.8            25.8
+  getType           3333          833              33.0
+  getTV             2000          714              60.6
+  setTV             5000          666              44.4
+  getHandleSet         4.99         4.27            2.83
+  getNodeHandles      37.3         19.1            13.7
+  getOutgoingSet    3333         1000              44.6
+
+
 27 March 2013
 -------------
 
