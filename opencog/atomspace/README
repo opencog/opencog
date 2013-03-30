@@ -171,8 +171,9 @@ raw pointer access is two orders of magnitude faster than using
 the 'safe', Handle-oriented AtomSpace interface.
 
 TODO:
+-- conditionally add boehm GC
 -- convert outgoing set to hold Atom*
--- Atom destructor calls TLB::remove
+-- Add locks to TypeIndex iterator, etc.
 
 
 
@@ -338,16 +339,6 @@ may already be fixed.
    The use in SavingLoading could probably be avoided as well.
    Avoiding this pointer would provide a space-savings. 
 
-7) Class HandleEntry is implemented as a linked list. It implements
-   many O(N) and O(N^2) algorithms, such as set intersection, etc.
-   Performance will almost certainly be improved by using
-   std:map instead of linked lists.
-
-   In fact, all usage of HandleEntry should be completely eliminated.
-   The whole things is a boondoggle.  Its already partly eliminated
-   for many of the simpler functions, circa 2013.  The big nasties
-   remain...
-
 
 FIXED ISSUES:
 -------------
@@ -384,6 +375,16 @@ FIXED ISSUES:
    this for Nodes. 
 
    Status: fixed in 2008 sometime.
+
+7) Class HandleEntry is implemented as a linked list. It implements
+   many O(N) and O(N^2) algorithms, such as set intersection, etc.
+   Performance will almost certainly be improved by using
+   std:map instead of linked lists.
+
+   In fact, all usage of HandleEntry should be completely eliminated.
+   The whole things is a boondoggle.  Its already partly eliminated
+   for many of the simpler functions, circa 2013.  The big nasties
+   remain... Finished March 2013
 
 8) AtomTable::makeSet() and AtomTable::buildSet() and
    the various flavors of getHandleSet() all create 
