@@ -21,7 +21,6 @@ ADD_LIBRARY (atomspace SHARED
     CountTruthValue.cc
     FixedIntegerIndex.cc
     Handle.cc
-    HandleEntry.cc
     HandleSeqIndex.cc
     HandleSetIndex.cc
     ImportanceIndex.cc
@@ -95,7 +94,6 @@ INSTALL (FILES
     Foreach.h
     ForeachTwo.h
     Handle.h
-    HandleEntry.h
     HandleMap.h
     HandleSeqIndex.h
     HandleSetIndex.h

@@ -24,12 +24,13 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
+
+#include "HandleEntry.h"
 
 using namespace opencog;
 

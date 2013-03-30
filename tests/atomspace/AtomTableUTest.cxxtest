@@ -37,7 +37,6 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -48,6 +47,8 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/NMXmlParser.h>
+
+#include "HandleEntry.h"
 
 using namespace opencog;
 using namespace std;

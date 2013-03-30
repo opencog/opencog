@@ -38,6 +38,7 @@ class AtomTableUTest;
 class LinkUTest;
 class NodeUTest;
 class CompositeTruthValueUTest;
+class HandleEntry;
 class HandleEntryUTest;
 class TemporalTableUTest;
 class TimeServerUTest;
@@ -67,7 +68,7 @@ class TLB
     // are allowed to access the TLB in the way that they do.
     friend class ::NodeUTest;
     friend class ::LinkUTest;
-    friend class HandleEntry;
+    friend class ::HandleEntry;
     friend class ::HandleEntryUTest;
     friend class HandleTemporalPair;
     friend class HandleToTemporalEntryMap;
