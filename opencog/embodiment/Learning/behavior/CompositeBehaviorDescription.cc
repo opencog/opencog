@@ -37,8 +37,6 @@ using namespace behavior;
 CompositeBehaviorDescription::CompositeBehaviorDescription(AtomSpace *_atomspace) : atomspace(_atomspace)
 {
     timelineRepresentationIsValid = false;
-    hashCodeComputed = false;
-    hashCodeWarning = false;
 }
 
 CompositeBehaviorDescription::~CompositeBehaviorDescription()
@@ -67,17 +65,12 @@ void CompositeBehaviorDescription::clear()
     timelineIntervals.clear();
 
     timelineRepresentationIsValid = false;
-    hashCodeComputed = false;
-    hashCodeWarning = false;
 }
 
 void CompositeBehaviorDescription::addPredicate(const ElementaryBehaviorDescription& ebd)
 {
     entries.push_back(ebd);
     timelineRepresentationIsValid = false;
-    if (hashCodeComputed) {
-        hashCodeWarning = true;
-    }
 }
 
 void CompositeBehaviorDescription::addPredicate(Handle handle, const Temporal &interval)
@@ -85,9 +78,6 @@ void CompositeBehaviorDescription::addPredicate(Handle handle, const Temporal &i
     ElementaryBehaviorDescription newEntry(handle, interval);
     entries.push_back(newEntry);
     timelineRepresentationIsValid = false;
-    if (hashCodeComputed) {
-        hashCodeWarning = true;
-    }
 }
 
 void CompositeBehaviorDescription::addPredicate(Handle handle,
@@ -185,33 +175,6 @@ Temporal CompositeBehaviorDescription::getTimeInterval() const
 const std::vector<ElementaryBehaviorDescription> &CompositeBehaviorDescription::getEntries() const
 {
     return entries;
-}
-
-size_t CompositeBehaviorDescription::hashCode()
-{
-
-    if (hashCodeWarning) {
-        fprintf(stderr, "Warning: contents of CompositeBehaviorDescription has changed between two calls of hashCode(). previous hashCode may be misuses by hashtables.\n");
-    }
-
-    size_t answer = 0;
-
-    //printf("hashCode = 0");
-    for (unsigned int i = 0; i < entries.size(); i++) {
-        answer += atomspace->getAtomHash(entries[i].handle);
-        //printf(" => %u", answer);
-        // The line bellow was added to make hash code a bit stronger (CBDUTest
-        // was failing because hash colisions happened without this line)
-        answer += (answer << 10); 
-        //printf(" => %u", answer);
-        answer += boost::hash<unsigned int>()(entries[i].temporal.getLowerBound()
-                + entries[i].temporal.getUpperBound());
-        //printf(" => %u", answer);
-    }
-    //printf("\n");
-
-    hashCodeComputed = true;
-    return answer;
 }
 
 // ********************************************************************************
