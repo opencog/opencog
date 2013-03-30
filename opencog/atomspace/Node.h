@@ -122,12 +122,6 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 
-    /**
-     * Returns the hashCode of the node.
-     * @return a integer value as the hashCode of the node.
-     */
-    virtual size_t hashCode(void) const;
-
     virtual Atom* clone() const;
 
 };

@@ -28,7 +28,6 @@
 
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TLB.h>
 
 using namespace opencog;

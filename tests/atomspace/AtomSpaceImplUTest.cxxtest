@@ -37,6 +37,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
 
+#include "HandleEntry.h"
 #include "makeVirtualAtom.h"
 
 using namespace opencog;
