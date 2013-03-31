@@ -143,7 +143,7 @@ public:
     static void setOutgoingSet(boost::shared_ptr<Link>, const std::vector<Handle>&);
 
 
-    static Handle holdsHandle(const boost::shared_ptr<Atom> a) { return a->handle; } 
+    static Handle holdsHandle(const boost::shared_ptr<Atom> a) { return a->getHandle(); } 
 };
 
 } // namespace opencog

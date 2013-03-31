@@ -40,7 +40,7 @@ namespace opencog
  */
 class Node : public Atom
 {
-    friend class SavingLoading;
+    friend class AtomSpaceImpl;  // needs acces to clone()
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -55,6 +55,8 @@ private:
 #endif
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
+    // cloning atoms is a fundamental violation ofthe architecture. FIXME XXX
+    virtual Atom* clone() const;
 public:
 
     /**
@@ -121,9 +123,6 @@ public:
      * @return true if they are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const;
-
-    virtual Atom* clone() const;
-
 };
 
 } // namespace opencog

@@ -372,15 +372,15 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
     // reads each node from the file
     for (int i = 0; i < numNodes; i++) {
-        Node *node = new Node(NODE, "");
         
         Type oldType;
-        fread(&oldType, sizeof(Type), 1, f);        
+        size_t rc = fread(&oldType, sizeof(Type), 1, f);        
         if (dumpToCore[oldType] > classserver().getNumberOfClasses()) {
             throw InconsistenceException(TRACE_INFO,
                                          "SavingLoading - Type inconsistence clash '%d'.", oldType );
         }
-        node->type = dumpToCore[oldType];
+        Type newtype = dumpToCore[oldType];
+        Node *node = new Node(newtype, "");
         readNode(f, node, handles);
 
         atomTable.add( node );
@@ -436,7 +436,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     }
     
     // updates handles for trail
-    if (classserver().isA(atom->type, LINK)) {
+    if (classserver().isA(atom->getType(), LINK)) {
         Trail *t = ((Link *)atom)->getTrail();
         if (t->getSize()) {
             //logger().fine("SavingLoading::updateHandles: trails");
@@ -458,9 +458,11 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom)
     logger().fine("SavingLoading::writeAtom: %p (type = %d) (handle = %d)", atom, atom->getType(), atom->getHandle().value());
 
     // writes the atom type
-    fwrite(&atom->type, sizeof(Type), 1, f);
+    Type type = atom->getType();
+    fwrite(&type, sizeof(Type), 1, f);
     // writes the atom flags
-    fwrite(&atom->flags, sizeof(char), 1, f);
+    char flags = atom->flags;
+    fwrite(&flags, sizeof(char), 1, f);
 
     // writes the atom handle
     Handle handle = atom->getHandle();
@@ -481,7 +483,9 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
 
 
     // reads the atom flags
-    fread(&atom->flags, sizeof(char), 1, f);
+    char flags;
+    fread(&flags, sizeof(char), 1, f);
+    atom->flags = flags;
 
     // reads the atom handle
     Handle atomHandle;
@@ -511,10 +515,10 @@ void SavingLoading::writeNode(FILE *f, Node *node)
     writeAtom(f, node);
 
     // writes the node's name on the file
-    int nameSize = node->name.length();
+    int nameSize = node->getName().length();
     fwrite(&nameSize, sizeof(int), 1, f);
     if (nameSize > 0) {
-        fwrite(node->name.c_str(), sizeof(char), nameSize, f);
+        fwrite(node->getName().c_str(), sizeof(char), nameSize, f);
     }
 }
 
@@ -553,7 +557,8 @@ void SavingLoading::writeLink(FILE *f, Link *link)
     // the link's outgoing set is written on the file
     for (int i = 0; i < arity; i++) {
         //logger().fine("writeLink(): outgoing[%d] => %p: %s", i, link->outgoing[i], link->outgoing[i]->toString().c_str());
-        fwrite(&(link->outgoing[i]), sizeof(Handle), 1, f);
+        Handle h = link->getOutgoingHandle(i);
+        fwrite(&h, sizeof(Handle), 1, f);
     }
 
     // the trail
@@ -635,11 +640,13 @@ void SavingLoading::readLink(FILE *f, Link *link, HandleMap<Atom *> *handles)
     fread(&arity, sizeof(Arity), 1, f);
 
     // the link's outgoing set is read from the file
+    HandleSeq oset;
     for (int i = 0; i < arity; i++) {
         Handle h;
         fread(&h, sizeof(Handle), 1, f);
-        link->outgoing.push_back( handles->get(h)->getHandle() );
+        oset.push_back( handles->get(h)->getHandle() );
     }
+    link->setOutgoingSet(oset);  // XXX FIXME bad design, this is a protected method
 
     // the trail
     Trail *trail = link->getTrail();

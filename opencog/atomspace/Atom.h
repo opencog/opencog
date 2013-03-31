@@ -55,14 +55,11 @@ class AtomTable;
  */
 class Atom : public AttentionValueHolder
 {
-    friend class SavingLoading;
+    friend class CommitAtomASR;   // needs access to clone
+    friend class ImportanceIndex; // needs access attentionValue to directly change it.
+    friend class SavingLoading;   // needs to set flags diectly
     friend class AtomTable;
-    friend class AtomSpace;
-    friend class ImportanceIndex;
-    friend class NMXmlParser;
     friend class TLB;
-    friend class Node;
-    friend class Link;
     friend class ::AtomUTest;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
@@ -72,9 +69,6 @@ private:
 #ifdef ZMQ_EXPERIMENT
     Atom() {};
 #endif
-    //! Called by constructors to init this object
-    void init(Type, const TruthValue&,
-            const AttentionValue& av = AttentionValue::DEFAULT_AV());
 
     //! Sets the AtomTable in which this Atom is inserted.
     void setAtomTable(AtomTable *);
@@ -83,6 +77,9 @@ private:
     AtomTable *getAtomTable() const { return atomTable; }
 
 protected:
+    // XXX FIXME, atoms fundamentally must not be clonable! Yeah?
+    virtual Atom* clone() const = 0;
+
     Handle handle;
     AtomTable *atomTable;
 
@@ -186,9 +183,6 @@ public:
      * @return true if the atoms are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const = 0;
-
-    // XXX FIXME, atoms fundamentally must not be clonable! Yeah?
-    virtual Atom* clone() const = 0;
 };
 
 } // namespace opencog
