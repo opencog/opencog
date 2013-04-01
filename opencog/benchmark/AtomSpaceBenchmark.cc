@@ -323,6 +323,19 @@ Type AtomSpaceBenchmark::randomType(Type t)
 
 clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
 {
+#ifdef FIXME_LATER
+    // Some faction of the time, we create atoms with non-default
+    // truth values.  XXX implement this for making of links too...
+    bool useDefaultTV = (rng->randfloat() < chanceUseDefaultTV);
+    SimpleTruthValue stv(TruthValue::DEFAULT_TV()); 
+
+    if (not useDefaultTV) {
+        float strength = rng->randfloat();
+        float conf = rng->randfloat();
+        stv = SimpleTruthValue(strength, conf); 
+    }
+#endif
+
     double p = rng->randdouble();
     Type t = defaultNodeType;
     if (p < chanceOfNonDefaultNode)
@@ -386,6 +399,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
             return clock() - t_begin;
         }}
     }
+    return 0;
 }
 
 clock_t AtomSpaceBenchmark::makeRandomLink()
@@ -439,6 +453,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         asp->addLink(t, outgoing);
         return clock() - tAddLinkStart;
     }}
+    return 0;
 }
 
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks, bool display)
@@ -534,24 +549,28 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 
         clock_t t_begin = clock();
         scm->eval(gs);
-        return clock() - t_begin;
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getAtom(h)->getType();
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getType(h);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         t_begin = clock();
         asp->getType(h); 
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }}
-    return timepair_t(time_taken,0);
+    return timepair_t(0,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getTruthValue()
@@ -567,17 +586,20 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
 
         clock_t t_begin = clock();
         scm->eval(gs);
-        return clock() - t_begin;
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getAtom(h)->getTruthValue();
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getTV(h);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         t_begin = clock();
@@ -586,8 +608,9 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
         // then comment the one below
         asp->getTV(h);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }}
-    return timepair_t(time_taken,0);
+    return timepair_t(0,0);
 }
 
 #ifdef ZMQ_EXPERIMENT
@@ -603,32 +626,47 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValueZmq()
 timepair_t AtomSpaceBenchmark::bm_setTruthValue()
 {
     Handle h = getRandomHandle();
-    bool useDefaultTV = (rng->randfloat() < chanceUseDefaultTV);
-    SimpleTruthValue stv(TruthValue::DEFAULT_TV()); 
-    if (!useDefaultTV) {
-        float strength = rng->randfloat();
-        float conf = rng->randfloat();
-        stv = SimpleTruthValue(strength, conf); 
-    }
+
+    float strength = rng->randfloat();
+    float conf = rng->randfloat();
+
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+    case BENCH_SCM: {
+        std::ostringstream ss;
+        ss << "(cog-set-tv! (cog-atom " << h.value() << ")"
+           << "   (cog-new-stv " << strength << " " << conf << ")"
+           << ")\n";
+        std::string gs = ss.str();
+
+        clock_t t_begin = clock();
+        scm->eval(gs);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
     case BENCH_TABLE: {
         t_begin = clock();
+        SimpleTruthValue stv(strength, conf); 
         atab->getAtom(h)->setTruthValue(stv);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
         t_begin = clock();
+        SimpleTruthValue stv(strength, conf); 
         asp->atomSpaceAsync->atomspace.setTV(h,stv);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         t_begin = clock();
+        SimpleTruthValue stv(strength, conf); 
         asp->setTV(h,stv);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }}
-    return timepair_t(time_taken,0);
+    return timepair_t(0,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
@@ -647,18 +685,21 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
         t_begin = clock();
         atab->getHandlesByName(back_inserter(results2), oss.str(), NODE, true);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), NODE, oss.str(), true);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         t_begin = clock();
         asp->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }}
-    return timepair_t(time_taken,0);
+    return timepair_t(0,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getHandleSet()
@@ -673,18 +714,21 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
         t_begin = clock();
         atab->getHandlesByType(back_inserter(results2), t, true);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), t, true);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         t_begin = clock();
         asp->getHandleSet(back_inserter(results), t, true);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }}
-    return timepair_t(time_taken,0);
+    return timepair_t(0,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
@@ -693,23 +737,36 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+    case BENCH_SCM: {
+        std::ostringstream ss;
+        ss << "(cog-outgoing-set (cog-atom " << h.value() << ")\n";
+        std::string gs = ss.str();
+
+        clock_t t_begin = clock();
+        scm->eval(gs);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
     case BENCH_TABLE: {
         t_begin = clock();
         Link* l = atab->getLink(h);
         if (l) l->getOutgoingSet();
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getOutgoing(h);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         t_begin = clock();
         asp->getOutgoing(h);
         time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
     }}
-    return timepair_t(time_taken,0);
+    return timepair_t(0,0);
 }
 
 AtomSpaceBenchmark::TimeStats::TimeStats(
