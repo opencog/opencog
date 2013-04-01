@@ -195,6 +195,8 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName) {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getNodeHandles);
     } else if (_methodName == "getOutgoingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
+    } else if (_methodName == "getIncomingSet") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
     }
     methodNames.push_back( _methodName);
 }
@@ -459,7 +461,8 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks, bool display)
 {
     BenchType saveKind = testKind;
-    testKind = BENCH_TABLE;
+    if (testKind == BENCH_SCM)
+       testKind = BENCH_AS;
 
     clock_t tStart = clock();
     if (display) {
@@ -763,6 +766,43 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     case BENCH_AS: {
         t_begin = clock();
         asp->getOutgoing(h);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }}
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
+{
+    Handle h = getRandomHandle();
+    clock_t t_begin;
+    clock_t time_taken;
+    switch (testKind) {
+    case BENCH_SCM: {
+        std::ostringstream ss;
+        ss << "(cog-incoming-set (cog-atom " << h.value() << ")\n";
+        std::string gs = ss.str();
+
+        clock_t t_begin = clock();
+        scm->eval(gs);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+    case BENCH_TABLE: {
+        t_begin = clock();
+        atab->getIncomingSet(h);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+    case BENCH_IMPL: {
+        t_begin = clock();
+        asp->atomSpaceAsync->atomspace.getIncoming(h);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+    case BENCH_AS: {
+        t_begin = clock();
+        asp->getIncoming(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}

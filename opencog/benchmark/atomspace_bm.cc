@@ -61,6 +61,7 @@ int main(int argc, char** argv) {
              benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("getNodeHandles");
              benchmarker.setMethod("getOutgoingSet");
+             benchmarker.setMethod("getIncomingSet");
              break;
            case 'x':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_IMPL;

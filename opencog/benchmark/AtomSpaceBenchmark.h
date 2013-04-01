@@ -107,6 +107,7 @@ public:
     timepair_t bm_getNodeHandles();
     timepair_t bm_getHandleSet();
     timepair_t bm_getOutgoingSet();
+    timepair_t bm_getIncomingSet();
 
     void bm_getHandleNode() {};
     void bm_getHandleLink() {};
