@@ -349,11 +349,20 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
     if (s.size() > 0) {
         switch (testKind) {
         case BENCH_SCM: {
+#if ALL_AT_ONCE
             std::ostringstream ss;
             ss << "(cog-new-node '"
                << classserver().getTypeName(t) 
                << " \"" << s << "\")\n";
             std::string gs = ss.str();
+#else
+            std::ostringstream dss;
+            dss << "(define (mk) (cog-new-node '"
+               << classserver().getTypeName(t) 
+               << " \"" << s << "\"))\n";
+            scm->eval(dss.str());
+            std::string gs = "(mk)\n";
+#endif
             clock_t t_begin = clock();
             scm->eval_h(gs);
             return clock() - t_begin;
@@ -380,11 +389,20 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
 
         switch (testKind) {
         case BENCH_SCM: {
+#if ALL_AT_ONCE
             std::ostringstream ss;
             ss << "(cog-new-node '"
                << classserver().getTypeName(t) 
                << " \"" << oss.str() << "\")\n";
             std::string gs = ss.str();
+#else
+            std::ostringstream dss;
+            dss << "(define (mk) (cog-new-node '"
+               << classserver().getTypeName(t) 
+               << " \"" << oss.str() << "\"))\n";
+            scm->eval(dss.str());
+            std::string gs = "(mk)\n";
+#endif
             clock_t t_begin = clock();
             scm->eval_h(gs);
             return clock() - t_begin;
@@ -426,9 +444,10 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 
     switch (testKind) {
     case BENCH_SCM: {
+#if ALL_AT_ONCE
         // This is somewhat more cumbersome and slower than what
         // anyone would actually do in scheme, because handles are
-        // never handled in this way, but wtf, no much choice here.
+        // never handled in this way, but wtf, not much choice here.
         // I guess its quasi-realistic as a stand-in for other work
         // that might be done anyway...
         std::ostringstream ss;
@@ -439,6 +458,18 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         }
         ss << ")\n";
         std::string gs = ss.str();
+#else
+        // OK, here we memoize, the way it would normally be done ... 
+        std::ostringstream dss;
+        dss << "(define (mk) (cog-new-link '"
+           << classserver().getTypeName(t) << " ";
+        for (int j=0; j < arity; j++) {
+            dss << "(cog-atom " << outgoing[j].value() << ") ";
+        }
+        dss << "))\n";
+        scm->eval(dss.str());
+        std::string gs = "(mk)\n";
+#endif
 
         clock_t t_begin = clock();
         scm->eval_h(gs);
@@ -550,9 +581,16 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     clock_t time_taken;
     switch (testKind) {
     case BENCH_SCM: {
+#if ALL_AT_ONCE
         std::ostringstream ss;
         ss << "(cog-type (cog-atom " << h.value() << "))\n";
         std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (getty) (cog-type (cog-atom " << h.value() << ")))\n";
+        scm->eval(dss.str());
+        std::string gs = "(getty)";
+#endif
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -587,9 +625,16 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     clock_t time_taken;
     switch (testKind) {
     case BENCH_SCM: {
+#if ALL_AT_ONCE
         std::ostringstream ss;
         ss << "(cog-tv (cog-atom " << h.value() << "))\n";
         std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (getty) (cog-tv (cog-atom " << h.value() << ")))\n";
+        scm->eval(dss.str());
+        std::string gs = "(getty)";
+#endif
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -641,11 +686,20 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     clock_t time_taken;
     switch (testKind) {
     case BENCH_SCM: {
+#if ALL_AT_ONCE
         std::ostringstream ss;
         ss << "(cog-set-tv! (cog-atom " << h.value() << ")"
            << "   (cog-new-stv " << strength << " " << conf << ")"
            << ")\n";
         std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (setty) (cog-set-tv! (cog-atom " << h.value() << ")"
+            << "   (cog-new-stv " << strength << " " << conf << ")"
+            << "))\n";
+        scm->eval(dss.str());
+        std::string gs = "(setty)";
+#endif
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -746,7 +800,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     switch (testKind) {
     case BENCH_SCM: {
         std::ostringstream ss;
-        ss << "(cog-outgoing-set (cog-atom " << h.value() << ")\n";
+        ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
         std::string gs = ss.str();
 
         clock_t t_begin = clock();
@@ -784,7 +838,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     switch (testKind) {
     case BENCH_SCM: {
         std::ostringstream ss;
-        ss << "(cog-incoming-set (cog-atom " << h.value() << ")\n";
+        ss << "(cog-incoming-set (cog-atom " << h.value() << "))\n";
         std::string gs = ss.str();
 
         clock_t t_begin = clock();
