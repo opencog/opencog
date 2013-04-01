@@ -308,8 +308,6 @@ void Link::addOutgoingAtom(Handle h)
 Atom* Link::clone() const
 {
     Atom* a = new Link(*this);
-    // Atoms not in the TLB must have a valid handle!
-    a->handle = Handle::UNDEFINED;
     return a;
 }
 
