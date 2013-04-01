@@ -817,12 +817,12 @@ AtomSpaceBenchmark::TimeStats::TimeStats(
         const std::vector<record_t>& records)
 {
     double sum = 0;
-    t_min = 1 << 31;
+    t_min = 1 << 30;
     t_max = 0;
     foreach (record_t record, records) {
         sum += get<1>(record);
         if (get<1>(record) > t_max) t_max = get<1>(record);
-        else if (get<1>(record) < t_min) t_min = get<1>(record);
+        if (get<1>(record) < t_min) t_min = get<1>(record);
     }
     t_total = sum;
     t_N = records.size();
