@@ -39,7 +39,11 @@ using std::time;
 AtomSpaceBenchmark::AtomSpaceBenchmark()
 {
     percentLinks = 0.2;
-    atomCount = (1 << 16);
+
+    // Create an atomspace with a quarter-million atoms
+    // This is quasi-realistic for an atomspace doing language processing.
+    // Maybe a bit on the small side ... 
+    atomCount = (1 << 18);
     defaultNodeType = CONCEPT_NODE;
     chanceOfNonDefaultNode = 0.4f;
     defaultLinkType = INHERITANCE_LINK;
