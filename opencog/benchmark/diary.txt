@@ -139,13 +139,15 @@ Rearrange in tabular form:
    name            K-ops/sec      K-ops/sec      K-ops/sec
    ----            ---------    -------------    ---------
   addNode            256.4         31.7            30.0
-  addLink            172.4         25.06           24.3
+  addLink (***)      172.4         25.06           24.3
   getType           2500          833              26.1
   getTV             2000          625              44.2
   setTV             1666          625              63.7
   getHandleSet         2.16         1.50            1.28
   getNodeHandles      29.3         26.1            13.76
 
+
+(***) See comment below
 
 Clearly, raw access is much faster.  Clearly, the particular
 getHandleSet (one of dozens) was slowww.
@@ -159,12 +161,14 @@ to get microseconds:
    name            usecs/call     usecs/call     usecs/call
    ----            ---------    -------------    ---------
   addNode             3.9           31.5           33.3
-  addLink             5.8           39.9           41.1
+  addLink (***)       5.8           39.9           41.1
   getType             0.4            1.2           38.3
   getTV               0.5            1.6           22.6
   setTV               0.6            1.6           15.7
   getHandleSet      462.4          665.5          779
   getNodeHandles     34.1           38.3           72.7
+
+(***) See comment below
 
 So...
 The AtomSpceImpl adds an aprox 30 usec overhead to addNode/addLink and
@@ -184,6 +188,11 @@ by the atom table, which maintains an index of these. (the NodeIndex)
 getHandleSet asks for all atoms of a given type. Again, there is an
 index in the AtomTable for this.  You'd think it should be faster;
 I'm guessing that perhaps there is a lot of data copying going on here...
+
+(***) The benchmark was broken, it was creating Links with an average
+of 0.5 atoms in them, and a std deviation of 0.5. i.e. Most links had
+one atoms in them; that's not typical. Thus, the reported numbers are
+not realistic.
 
 
 27 March 2013

@@ -1,10 +1,12 @@
 #ifndef _OPENCOG_AS_BENCHMARK_H
 #define _OPENCOG_AS_BENCHMARK_H
 
+#include <random>
+#include <boost/tuple/tuple.hpp>
+
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/mt19937ar.h>
-#include <boost/tuple/tuple.hpp>
 
 using boost::tuple;
 
@@ -47,6 +49,9 @@ class AtomSpaceBenchmark
     AtomTable* atab;
     //AtomSpaceImpl asBackend;
     MT19937RandGen* rng;
+
+    std::default_random_engine randgen;
+    std::poisson_distribution<unsigned> *prg;
 
     Type randomType(Type t);
 

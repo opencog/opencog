@@ -1,21 +1,27 @@
-#include "AtomSpaceBenchmark.h"
 
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/random.h>
+/** AtomSpaceBenchmark.cc */
+
 #include <ctime>
+#include <iostream>
+#include <fstream>
 #include <sys/time.h>
 #include <sys/resource.h>
 
 #include <boost/tuple/tuple_io.hpp>
-#include <iostream>
-#include <fstream>
+
+#include "AtomSpaceBenchmark.h"
+
+#include <opencog/util/oc_assert.h>
+#include <opencog/util/random.h>
+
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/guile/SchemeEval.h>
 
 namespace opencog {
 
@@ -40,6 +46,8 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     chanceOfNonDefaultLink = 0.4f;
     linkSize_mean = 2.0f;
     linkSize_std = 0.5f;
+    prg = new std::poisson_distribution<unsigned>(linkSize_mean);
+
     counter = 0;
     showTypeSizes = false;
     Nreps = 100000;
@@ -51,6 +59,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     doStats = false;
     testBackend = false;
     testTable = false;
+    testScheme = false;
 
     asp = NULL;
     atab = NULL;
@@ -272,6 +281,10 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 
 void AtomSpaceBenchmark::startBenchmark(int numThreads)
 {
+    // Make sure we are using the correct link mean!
+    delete prg;
+    prg = new std::poisson_distribution<unsigned>(linkSize_mean);
+
     // num threads does nothing at the moment;
     if (showTypeSizes) printTypeSizes();
 
@@ -282,8 +295,10 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         else
             asp = new AtomSpace();
         //asBackend = new AtomSpaceImpl();
-        if (buildTestData) buildAtomSpace(atomCount,percentLinks,false);
+        if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
+
         doBenchmark(methodNames[i],methodsToTest[i]);
+
         if (testTable)
             delete atab;
         else
@@ -310,10 +325,13 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
     double p = rng->randdouble();
     Type t = defaultNodeType;
     if (p < chanceOfNonDefaultNode)
-        t=randomType(NODE);
+        t = randomType(NODE);
     if (s.size() > 0) {
         clock_t t_begin = clock();
-        if (testTable)
+        if (testScheme) {
+            int xxx  = 0;
+        }
+        else if (testTable)
             atab->add(new Node(t,s));
         else
             asp->addNode(t,s); 
@@ -323,9 +341,12 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
         counter++;
         oss << "node " << counter;
         clock_t t_begin = clock();
-        if (testTable) {
-            Node* n = new Node(t, oss.str());
-            atab->add(n);
+        if (testScheme) {
+cout<<"wtf"<<endl;
+            int xxx  = 0;
+        }
+        else if (testTable) {
+            atab->add(new Node(t, oss.str()));
         }
         else
             asp->addNode(t, oss.str()); 
@@ -340,9 +361,10 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     HandleSeq outgoing;
     //clock_t tRandomStart, tRandomEnd;
     clock_t tAddLinkStart;
-    if (p < chanceOfNonDefaultLink) t=randomType(LINK);
+    if (p < chanceOfNonDefaultLink) t = randomType(LINK);
 
-    int arity = gaussian_rand<unsigned>(linkSize_std, linkSize_std, *rng);
+    // int arity = gaussian_rand<unsigned>(linkSize_mean, linkSize_std, *rng);
+    int arity = (*prg)(randgen);
     if (arity==0) { ++arity; };
 
     for (int j=0; j < arity; j++) {
@@ -376,7 +398,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
     }
 
     // Add links
-     if (display) cout << endl << "Adding " << atomspaceSize - nodeCount << " links ";
+    if (display) cout << endl << "Adding " << atomspaceSize - nodeCount << " links ";
     diff = ((atomspaceSize - nodeCount)/PROGRESS_BAR_LENGTH);
     if (!diff) diff = 1;
     for (; i < atomspaceSize; i++) {
