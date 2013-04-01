@@ -212,8 +212,14 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     clock_t sumAsyncTime = 0;
     long rssStart;
     std::vector<record_t> records;
-    cout << "Benchmarking AtomSpace's " << methodName << " method " << Nreps <<
-        " times ";
+    cout << "Benchmarking ";
+    switch (testKind) {
+        case BENCH_AS:  cout << "AtomSpace's "; break;
+        case BENCH_IMPL:  cout << "AtomSpaceImpl's "; break;
+        case BENCH_TABLE:  cout << "AtomTable's "; break;
+        case BENCH_SCM:  cout << "Scheme's "; break;
+    }
+    cout << methodName << " method " << Nreps << " times ";
     std::ofstream myfile;
     if (saveToFile)
     {
@@ -742,6 +748,10 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+    case BENCH_SCM: {
+        // Currently not expose in the SCM API
+        return timepair_t(0,0);
+    }
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getHandlesByName(back_inserter(results2), oss.str(), NODE, true);
@@ -771,6 +781,10 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+    case BENCH_SCM: {
+        // Currently not expose in the SCM API
+        return timepair_t(0,0);
+    }
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getHandlesByType(back_inserter(results2), t, true);
@@ -799,9 +813,16 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     clock_t time_taken;
     switch (testKind) {
     case BENCH_SCM: {
+#if ALL_AT_ONCE
         std::ostringstream ss;
         ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
         std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (go) (cog-outgoing-set (cog-atom " << h.value() << ")))\n";
+        scm->eval(dss.str());
+        std::string gs = "(go)";
+#endif
 
         clock_t t_begin = clock();
         scm->eval(gs);
@@ -837,9 +858,16 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     clock_t time_taken;
     switch (testKind) {
     case BENCH_SCM: {
+#if ALL_AT_ONCE
         std::ostringstream ss;
         ss << "(cog-incoming-set (cog-atom " << h.value() << "))\n";
         std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (gi) (cog-incoming-set (cog-atom " << h.value() << ")))\n";
+        scm->eval(dss.str());
+        std::string gs = "(gi)";
+#endif
 
         clock_t t_begin = clock();
         scm->eval(gs);

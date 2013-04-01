@@ -238,6 +238,43 @@ New results:
   getOutgoingSet    3333         1000              44.6
 
 
+1 April 2013
+-------------
+Replaced all uses of HandleEntry with C++11 unordered_set and etc.
+HandleEntry is now extinct.  The nature of the benchmark changed
+as well: instead of creating 65536 atoms initially, the new bnechmark
+creates 256K atoms: four times more than before. This has an overall
+negative impact on addLink, getHandleSet and getNodeHandles.  However,
+the new size is more realistic, so the actuall perf is more realistic
+too.
+
+Added a no-op test. The no-op makes no calls to the atom-anything at
+all.  Thus it provides a measuremnt baseline. Based on the no-op test,
+we see that getType, getTV, setTV and getOutgoingSewt are running at
+near-noop speeds.
+
+Added scheme tests. The scheme tests create strings, and pass them to
+the scheme interpreter.  The scheme interpreter is currently build on
+top of the AtomSpace.  The scheme API does not currently expose the 
+getHandleSet and getNodeHandles API, so no measurements made for those.
+
+New results:
+
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop             2500         2500            1250         2500
+  addNode           333           97.1            30.1          5.10
+  addLink            92.6         39.1            19.7          3.87
+  getType          5000          769              76.3          3.90
+  getTV            1429          769              45.5          4.53
+  setTV            1429          667              47.2          2.30
+  getHandleSet        1.12         1.11            0.742         -
+  getNodeHandles     20.7         14.1            10.4           -
+  getOutgoingSet   1666          909              50.5          2.78
+  getIncomingSet   1111          476              75.8          1.82
+
+
 27 March 2013
 -------------
 
@@ -245,66 +282,3 @@ Rerun benchmarks:
 Intel(R) Xeon(R)  X5650  @ 2.67GHz  12MB cache per core, 12 cores.
 76GB RAM
 
-Below is ./atomspace_bm -A -b
-
-    Benchmarking AtomSpace's addNode method 100000 times ..........
-    4.194589 seconds elapsed (23840.24 per second)
-    Sum clock() time for all requests: 2350000 (2.35 seconds, 42553.2 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's addLink method 100000 times ..........
-    4.811355 seconds elapsed (20784.17 per second)
-    Sum clock() time for all requests: 2520000 (2.52 seconds, 39682.5 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getType method 100000 times ..........
-    3.118283 seconds elapsed (32068.93 per second)
-    Sum clock() time for all requests: 1880000 (1.88 seconds, 53191.5 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getTV method 100000 times ..........
-    2.717092 seconds elapsed (36804.05 per second)
-    Sum clock() time for all requests: 920000 (0.92 seconds, 108696 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's setTV method 100000 times ..........
-    2.528614 seconds elapsed (39547.36 per second)
-    Sum clock() time for all requests: 900000 (0.9 seconds, 111111 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getHandleSet method 100000 times ..........
-    23.157646 seconds elapsed (4318.23 per second)
-    Sum clock() time for all requests: 22030000 (22.03 seconds, 4539.26 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getNodeHandles method 100000 times ..........
-    4.907995 seconds elapsed (20374.92 per second)
-    Sum clock() time for all requests: 3690000 (3.69 seconds, 27100.3 requests per second)
-    ------------------------------
-
-
-And below the raw AtomTable perf: ./atomspace_bm -A -b -X -n400000
-
-    Benchmarking AtomSpace's addNode method 400000 times ..........
-    2.494395 seconds elapsed (160359.52 per second)
-    Sum clock() time for all requests: 1700000 (1.7 seconds, 235294 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's addLink method 400000 times ..........
-    2.437088 seconds elapsed (164130.31 per second)
-    Sum clock() time for all requests: 1860000 (1.86 seconds, 215054 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getType method 400000 times ..........
-    0.461312 seconds elapsed (867092.02 per second)
-    Sum clock() time for all requests: 120000 (0.12 seconds, 3.33333e+06 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getTV method 400000 times ..........
-    0.471470 seconds elapsed (848410.51 per second)
-    Sum clock() time for all requests: 100000 (0.1 seconds, 4e+06 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's setTV method 400000 times ..........
-    0.534952 seconds elapsed (747730.74 per second)
-    Sum clock() time for all requests: 190000 (0.19 seconds, 2.10526e+06 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getHandleSet method 400000 times ..........
-    69.438094 seconds elapsed (5760.53 per second)
-    Sum clock() time for all requests: 69120000 (69.12 seconds, 5787.04 requests per second)
-    ------------------------------
-    Benchmarking AtomSpace's getNodeHandles method 400000 times ..........
-    11.452438 seconds elapsed (34927.06 per second)
-    Sum clock() time for all requests: 10740000 (10.74 seconds, 37243.9 requests per second)
-    ------------------------------
-    
