@@ -65,6 +65,8 @@ AtomSpaceBenchmark::~AtomSpaceBenchmark() {
 
 }
 
+// This is wrong, because it failes to also count the amount of RAM
+// used by the AtomTable to store indexes.
 size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
@@ -132,6 +134,13 @@ void AtomSpaceBenchmark::printTypeSizes()
     // data/classes that these might point to.
     //cout << "CLOCKS_PER_SEC = " << CLOCKS_PER_SEC << endl;
     cout << "==sizeof() on various classes==" << endl;
+    cout << "FIXME: the report below is only for the sizes of the C++ objects\n"
+         << "themselves.  In addition, every atom consumes from 5 to 15 times\n"
+         << "the sizeof(Handle) in the AtomTable indexes. This depends on the\n"
+         << "atom type; Links store more than twice the the sizeof(Handle) per\n"
+         << "outgoing atoms.\n";
+    cout << "Type = " << sizeof(Type) << endl;
+    cout << "Handle = " << sizeof(Handle) << endl;
     cout << "Atom = " << sizeof(Atom) << endl;
     cout << "Node = " << sizeof(Node) << endl;
     cout << "Link = " << sizeof(Link) << endl;

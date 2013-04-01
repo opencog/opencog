@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
      "-A        \tBenchmark all methods\n"
      "-x        \tTest the AtomSpaceImpl backend instead of the public AtomSpace API\n"
      "-X        \tTest the AtomTable instead of the public AtomSpace API\n"
+     "-g        \tTest the Scheme API instead of the public AtomSpace API\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
      "-n <int>  \tHow many times to call the method in the measurement loop\n" 
@@ -21,7 +22,6 @@ int main(int argc, char** argv) {
      "-S <int>  \tHow many random atoms to add after each measurement\n"
      "          \t(default: 0)\n"
      "-- Build test data --\n"
-     "-b        \tBefore benchmark, build a graph of random nodes/links\n"
      "-p <float> \tSet the connection probability or coordination number\n"
      "         \t(default: 0.2)\n"
      "         \t(-p impact behaviour of -S too)\n"
@@ -41,13 +41,14 @@ int main(int argc, char** argv) {
     opencog::AtomSpaceBenchmark benchmarker;
 
     opterr = 0;
-    while ((c = getopt (argc, argv, "tAxXm:ln:S:bp:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAxXgm:ln:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
              benchmarker.showTypeSizes = true;
              break;
            case 'A':
+             benchmarker.buildTestData = true;
              benchmarker.setMethod("addNode");
              benchmarker.setMethod("addLink");
              benchmarker.setMethod("getType");
@@ -64,7 +65,11 @@ int main(int argc, char** argv) {
            case 'X':
              benchmarker.testTable = true;
              break;
+           case 'g':
+             benchmarker.testScheme = true;
+             break;
            case 'm':
+             benchmarker.buildTestData = true;
              benchmarker.setMethod(optarg);
              break;
            case 'l':
@@ -76,9 +81,6 @@ int main(int argc, char** argv) {
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);
-             break;
-           case 'b':
-             benchmarker.buildTestData = true;
              break;
            case 'p':
              benchmarker.percentLinks = atof(optarg);
