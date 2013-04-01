@@ -45,7 +45,6 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     defaultLinkType = INHERITANCE_LINK;
     chanceOfNonDefaultLink = 0.4f;
     linkSize_mean = 2.0f;
-    linkSize_std = 0.5f;
     prg = new std::poisson_distribution<unsigned>(linkSize_mean);
 
     counter = 0;
@@ -176,7 +175,9 @@ void AtomSpaceBenchmark::showMethods() {
 }
 
 void AtomSpaceBenchmark::setMethod(std::string _methodName) {
-    if (_methodName == "addNode") {
+    if (_methodName == "noop") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_noop);
+    } else if (_methodName == "addNode") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
     } else if (_methodName == "addLink") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
@@ -294,6 +295,8 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             atab = new AtomTable();
         else
             asp = new AtomSpace();
+            scm = &SchemeEval::instance(asp);
+
         //asBackend = new AtomSpaceImpl();
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
 
@@ -327,30 +330,54 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
     if (p < chanceOfNonDefaultNode)
         t = randomType(NODE);
     if (s.size() > 0) {
-        clock_t t_begin = clock();
         if (testScheme) {
-            int xxx  = 0;
+            std::ostringstream ss;
+            ss << "(cog-new-node '"
+               << classserver().getTypeName(t) 
+               << " " << s << ")\n";
+            std::string gs = ss.str();
+            clock_t t_begin = clock();
+            scm->eval_h(gs);
+            return clock() - t_begin;
         }
-        else if (testTable)
+        if (testTable) {
+            clock_t t_begin = clock();
             atab->add(new Node(t,s));
+            return clock() - t_begin;
+        }
         else
+        {
+            clock_t t_begin = clock();
             asp->addNode(t,s); 
-        return clock() - t_begin;
+            return clock() - t_begin;
+        }
     } else {
         std::ostringstream oss;
         counter++;
         oss << "node " << counter;
         clock_t t_begin = clock();
         if (testScheme) {
-cout<<"wtf"<<endl;
-            int xxx  = 0;
+            std::ostringstream ss;
+            ss << "(cog-new-node '"
+               << classserver().getTypeName(t) 
+               << " " << oss.str() << ")\n";
+            std::string gs = ss.str();
+            clock_t t_begin = clock();
+            scm->eval_h(gs);
+            return clock() - t_begin;
         }
-        else if (testTable) {
+        else 
+        if (testTable) {
+            clock_t t_begin = clock();
             atab->add(new Node(t, oss.str()));
+            return clock() - t_begin;
         }
         else
+        {
+            clock_t t_begin = clock();
             asp->addNode(t, oss.str()); 
-        return clock() - t_begin;
+            return clock() - t_begin;
+        }
     }
 }
 
@@ -363,7 +390,6 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     clock_t tAddLinkStart;
     if (p < chanceOfNonDefaultLink) t = randomType(LINK);
 
-    // int arity = gaussian_rand<unsigned>(linkSize_mean, linkSize_std, *rng);
     int arity = (*prg)(randgen);
     if (arity==0) { ++arity; };
 
@@ -413,6 +439,16 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
         cout << DIVIDER_LINE << endl;
     }
 
+}
+
+timepair_t AtomSpaceBenchmark::bm_noop()
+{
+    // Benchmark clock overhead.
+    clock_t t_begin;
+    clock_t time_taken;
+    t_begin = clock();
+    time_taken = clock() - t_begin;
+    return timepair_t(time_taken,0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_addNode()

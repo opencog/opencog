@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
              break;
            case 'A':
              benchmarker.buildTestData = true;
+             benchmarker.setMethod("noop");
              benchmarker.setMethod("addNode");
              benchmarker.setMethod("addLink");
              benchmarker.setMethod("getType");

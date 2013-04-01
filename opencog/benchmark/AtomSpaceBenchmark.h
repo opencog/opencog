@@ -4,9 +4,11 @@
 #include <random>
 #include <boost/tuple/tuple.hpp>
 
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/mt19937ar.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/guile/SchemeEval.h>
 
 using boost::tuple;
 
@@ -36,7 +38,6 @@ class AtomSpaceBenchmark
     void recordToFile(std::ofstream& file, const record_t record) const;
 
     float linkSize_mean;
-    float linkSize_std;
 
     Type defaultLinkType;
     float chanceOfNonDefaultLink;
@@ -48,6 +49,8 @@ class AtomSpaceBenchmark
     AtomSpace* asp;
     AtomTable* atab;
     //AtomSpaceImpl asBackend;
+    SchemeEval* scm;
+
     MT19937RandGen* rng;
 
     std::default_random_engine randgen;
@@ -94,6 +97,7 @@ public:
             bool display = true);
     Handle getRandomHandle();
 
+    timepair_t bm_noop();
     timepair_t bm_addNode();
     timepair_t bm_addLink();
 
