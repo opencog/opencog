@@ -105,8 +105,6 @@ bool Node::operator!=(const Atom& other) const
 Atom* Node::clone() const
 {
     Atom *a = new Node(*this);
-    // Atoms not in the TLB must not have a valid handle!
-    a->handle = Handle::UNDEFINED;
     return a;
 }
 

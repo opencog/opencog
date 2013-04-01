@@ -49,7 +49,7 @@
 
 using namespace opencog;
 
-void Atom::init(Type t, const TruthValue& tv, const AttentionValue& av)
+Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
 {
     handle = Handle::UNDEFINED;
     flags = 0;
@@ -59,11 +59,6 @@ void Atom::init(Type t, const TruthValue& tv, const AttentionValue& av)
     truthValue = NULL;
     setTruthValue(tv);
     setAttentionValue(av);
-}
-
-Atom::Atom(Type type, const TruthValue& tv, const AttentionValue& av)
-{
-    init(type, tv, av);
 }
 
 Atom::~Atom()
