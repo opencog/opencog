@@ -275,6 +275,41 @@ New results:
   getIncomingSet   1111          476              75.8          1.82
 
 
+Some comments about the scheme performance:
+Measuring scheme performance the way it is currently measured is rather
+misleading.  This is because the rate-limiting factor is the time it
+takes to enter and exit the scheme interpreter.  Specifically, it seems
+to take about 30 microseconds to camm scm_with_guile() and about 110
+microseconds to move from outside of scm_c_catch() to the inside, where
+the C code for the atomspace is being called.  Thus, these two steps 
+alone rate-limit the measurement to 7K-ops/sec max. 
+
+In 'real life', both of these steps would be infrequent, as normally,
+one would enter the interpeter, do a wholw lot of stuff, and then exit.
+In other words, the correct way to measure performance for the scheme
+bindings would be to create maybe 10 or 100 atoms, once one is 'inside'.
+
+The above can be tests: grep for ONE_SHOT in the code.  It defines the
+following loop, and then calls (crea 100)
+
+(define (crea n) 
+  (if (not (eq? n 0))
+    (let ()
+      (cog-new-node 'ParseNode
+        (string-join (list "stuff " (number->string n))))
+      (crea (- n 1))
+    )
+  )
+)
+
+Thus, 100 nodes are created for just one entry into the interpreter.
+The resulting crete performance works out to be 11.7K creates/sec
+which although is not stellar, clearly spends nearly half its time in
+the atomspace, as opposed to the scheme code ... which is BTW no longer
+trivial.  To conclude: the AtomSpace is a bottleneck, even for scheme.
+
+
+
 27 March 2013
 -------------
 

@@ -402,12 +402,33 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
                << " \"" << oss.str() << "\")\n";
             std::string gs = ss.str();
 #else
+#define ONE_SHOT
+#ifdef ONE_SHOT
             std::ostringstream dss;
             dss << "(define (mk) (cog-new-node '"
                << classserver().getTypeName(t) 
                << " \"" << oss.str() << "\"))\n";
             scm->eval(dss.str());
             std::string gs = "(mk)\n";
+#else
+            std::ostringstream dss;
+            dss << "(define (crea n) "
+                << "  (if (not (eq? n 0))"
+                << "    (let ()"
+                << "      (cog-new-node '"
+                <<          classserver().getTypeName(t)
+                << "        (string-join (list \""
+                <<            oss.str() << " \" (number->string n))))"
+                << "      (crea (- n 1))"
+                << "    )"
+                << "  )"
+                << ")\n";
+            scm->eval(dss.str());
+            std::string gs = "(crea 100)\n";
+            clock_t begin = clock();
+            scm->eval(gs);
+            return clock() - begin;
+#endif
 #endif
             clock_t t_begin = clock();
             scm->eval_h(gs);
