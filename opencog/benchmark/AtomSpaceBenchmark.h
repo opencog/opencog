@@ -72,9 +72,11 @@ public:
     int saveInterval;
     bool doStats;
     bool buildTestData;
-    bool testBackend;
-    bool testTable;
-    bool testScheme;
+
+
+    enum BenchType { BENCH_AS = 1, BENCH_IMPL, BENCH_TABLE, BENCH_SCM };
+    BenchType testKind;
+
     UUID UUID_begin;
     typedef timepair_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;

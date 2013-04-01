@@ -56,9 +56,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     buildTestData=false;
     chanceUseDefaultTV=0.8f;
     doStats = false;
-    testBackend = false;
-    testTable = false;
-    testScheme = false;
+    testKind = BENCH_AS;
 
     asp = NULL;
     atab = NULL;
@@ -233,7 +231,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
             rssFromIncrease += (getMemUsage() - rssBeforeIncrease);
         }
         size_t atomspaceSize;
-        if (testTable)
+        if (testKind == BENCH_TABLE)
             atomspaceSize = atab->getSize();
         else
             atomspaceSize = asp->getSize();
@@ -257,7 +255,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     }
     Handle rh = getRandomHandle();
     // This spurious line is to ensure the whole queue is complete
-    if (not testTable)
+    if (not testKind == BENCH_TABLE)
         asp->atomSpaceAsync->getTVComplete(rh)->get_result();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
@@ -291,7 +289,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
     for (unsigned int i = 0; i < methodNames.size(); i++) {
         UUID_begin = TLB::getMaxUUID();
-        if (testTable)
+        if (testKind == BENCH_TABLE)
             atab = new AtomTable();
         else
             asp = new AtomSpace();
@@ -302,7 +300,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
         doBenchmark(methodNames[i],methodsToTest[i]);
 
-        if (testTable)
+        if (testKind == BENCH_TABLE)
             delete atab;
         else
             delete asp;
@@ -330,54 +328,63 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
     if (p < chanceOfNonDefaultNode)
         t = randomType(NODE);
     if (s.size() > 0) {
-        if (testScheme) {
+        switch (testKind) {
+        case BENCH_SCM: {
             std::ostringstream ss;
             ss << "(cog-new-node '"
                << classserver().getTypeName(t) 
-               << " " << s << ")\n";
+               << " \"" << s << "\")\n";
             std::string gs = ss.str();
             clock_t t_begin = clock();
             scm->eval_h(gs);
             return clock() - t_begin;
         }
-        if (testTable) {
+        case BENCH_IMPL: {
+            clock_t t_begin = clock();
+            asp->atomSpaceAsync->atomspace.addNode(t,s); 
+            return clock() - t_begin;
+        }
+        case BENCH_TABLE: {
             clock_t t_begin = clock();
             atab->add(new Node(t,s));
             return clock() - t_begin;
         }
-        else
-        {
+        case BENCH_AS: {
             clock_t t_begin = clock();
             asp->addNode(t,s); 
             return clock() - t_begin;
-        }
+        }}
     } else {
         std::ostringstream oss;
         counter++;
         oss << "node " << counter;
-        clock_t t_begin = clock();
-        if (testScheme) {
+
+        switch (testKind) {
+        case BENCH_SCM: {
             std::ostringstream ss;
             ss << "(cog-new-node '"
                << classserver().getTypeName(t) 
-               << " " << oss.str() << ")\n";
+               << " \"" << oss.str() << "\")\n";
             std::string gs = ss.str();
             clock_t t_begin = clock();
             scm->eval_h(gs);
             return clock() - t_begin;
         }
-        else 
-        if (testTable) {
+        case BENCH_IMPL: {
+            clock_t t_begin = clock();
+            asp->atomSpaceAsync->atomspace.addNode(t,oss.str()); 
+            return clock() - t_begin;
+        }
+        case BENCH_TABLE: {
             clock_t t_begin = clock();
             atab->add(new Node(t, oss.str()));
             return clock() - t_begin;
         }
-        else
-        {
+        case BENCH_AS: {
             clock_t t_begin = clock();
             asp->addNode(t, oss.str()); 
             return clock() - t_begin;
-        }
+        }}
     }
 }
 
@@ -391,21 +398,54 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     if (p < chanceOfNonDefaultLink) t = randomType(LINK);
 
     int arity = (*prg)(randgen);
-    if (arity==0) { ++arity; };
+    if (arity == 0) { ++arity; };
 
     for (int j=0; j < arity; j++) {
         outgoing.push_back(getRandomHandle());
     }
-    tAddLinkStart = clock();
-    if (testTable)
+
+    switch (testKind) {
+    case BENCH_SCM: {
+        // This is somewhat more cumbersome and slower than what
+        // anyone would actually do in scheme, because handles are
+        // never handled in this way, but wtf, no much choice here.
+        // I guess its quasi-realistic as a stand-in for other work
+        // that might be done anyway...
+        std::ostringstream ss;
+        ss << "(cog-new-link '"
+           << classserver().getTypeName(t) << " ";
+        for (int j=0; j < arity; j++) {
+            ss << "(cog-atom " << outgoing[j].value() << ") ";
+        }
+        ss << ")\n";
+        std::string gs = ss.str();
+
+        clock_t t_begin = clock();
+        scm->eval_h(gs);
+        return clock() - t_begin;
+    }
+    case BENCH_IMPL: {
+        tAddLinkStart = clock();
+        asp->atomSpaceAsync->atomspace.addLink(t, outgoing);
+        return clock() - tAddLinkStart;
+    }
+    case BENCH_TABLE: {
+        tAddLinkStart = clock();
         atab->add(new Link(t, outgoing));
-    else
+        return clock() - tAddLinkStart;
+    }
+    case BENCH_AS: {
+        tAddLinkStart = clock();
         asp->addLink(t, outgoing);
-    return clock() - tAddLinkStart;
+        return clock() - tAddLinkStart;
+    }}
 }
 
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks, bool display)
 {
+    BenchType saveKind = testKind;
+    testKind = BENCH_TABLE;
+
     clock_t tStart = clock();
     if (display) {
         cout << "Building atomspace with " << atomspaceSize << " atoms (" <<
@@ -439,6 +479,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
         cout << DIVIDER_LINE << endl;
     }
 
+    testKind = saveKind;
 }
 
 timepair_t AtomSpaceBenchmark::bm_noop()
@@ -471,7 +512,7 @@ Handle AtomSpaceBenchmark::getRandomHandle()
     // (... plus we are not allowed access to the AtomTable either)
     //Handle h = asp->getAtomTable().getRandom(rng);
     //tRandomEnd = clock();
-    if (testTable)
+    if (testKind == BENCH_TABLE)
         OC_ASSERT(atab->getSize() != 0,
                 "AtomTable is emtpy, perhaps try using the -b option");
     else
@@ -485,19 +526,31 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     Handle h = getRandomHandle();
     clock_t t_begin;
     clock_t time_taken;
-    if (testTable) {
+    switch (testKind) {
+    case BENCH_SCM: {
+        std::ostringstream ss;
+        ss << "(cog-type (cog-atom " << h.value() << "))\n";
+        std::string gs = ss.str();
+
+        clock_t t_begin = clock();
+        scm->eval(gs);
+        return clock() - t_begin;
+    }
+    case BENCH_TABLE: {
         t_begin = clock();
         atab->getAtom(h)->getType();
         time_taken = clock() - t_begin;
-    } else if (testBackend) {
+    }
+    case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getType(h);
         time_taken = clock() - t_begin;
-    } else {
+    }
+    case BENCH_AS: {
         t_begin = clock();
         asp->getType(h); 
         time_taken = clock() - t_begin;
-    }
+    }}
     return timepair_t(time_taken,0);
 }
 
@@ -506,22 +559,34 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     Handle h = getRandomHandle();
     clock_t t_begin;
     clock_t time_taken;
-    if (testTable) {
+    switch (testKind) {
+    case BENCH_SCM: {
+        std::ostringstream ss;
+        ss << "(cog-tv (cog-atom " << h.value() << "))\n";
+        std::string gs = ss.str();
+
+        clock_t t_begin = clock();
+        scm->eval(gs);
+        return clock() - t_begin;
+    }
+    case BENCH_TABLE: {
         t_begin = clock();
         atab->getAtom(h)->getTruthValue();
         time_taken = clock() - t_begin;
-    } else if (testBackend) {
+    }
+    case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getTV(h);
         time_taken = clock() - t_begin;
-    } else {
+    }
+    case BENCH_AS: {
         t_begin = clock();
         // uncomment this line to test submitting async requests
         //asp->atomSpaceAsync->getTVComplete(h); 
         // then comment the one below
         asp->getTV(h);
         time_taken = clock() - t_begin;
-    }
+    }}
     return timepair_t(time_taken,0);
 }
 
@@ -547,20 +612,22 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     }
     clock_t t_begin;
     clock_t time_taken;
-    if (testTable) {
+    switch (testKind) {
+    case BENCH_TABLE: {
         t_begin = clock();
         atab->getAtom(h)->setTruthValue(stv);
         time_taken = clock() - t_begin;
     }
-    else if (testBackend) {
+    case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.setTV(h,stv);
         time_taken = clock() - t_begin;
-    } else {
+    }
+    case BENCH_AS: {
         t_begin = clock();
         asp->setTV(h,stv);
         time_taken = clock() - t_begin;
-    }
+    }}
     return timepair_t(time_taken,0);
 }
 
@@ -575,20 +642,22 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
 
     clock_t t_begin;
     clock_t time_taken;
-    if (testTable) {
+    switch (testKind) {
+    case BENCH_TABLE: {
         t_begin = clock();
         atab->getHandlesByName(back_inserter(results2), oss.str(), NODE, true);
         time_taken = clock() - t_begin;
     }
-    else if (testBackend) {
+    case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), NODE, oss.str(), true);
         time_taken = clock() - t_begin;
-    } else {
+    }
+    case BENCH_AS: {
         t_begin = clock();
         asp->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
         time_taken = clock() - t_begin;
-    }
+    }}
     return timepair_t(time_taken,0);
 }
 
@@ -599,19 +668,22 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     HandleSeq results2;
     clock_t t_begin;
     clock_t time_taken;
-    if (testTable) {
+    switch (testKind) {
+    case BENCH_TABLE: {
         t_begin = clock();
         atab->getHandlesByType(back_inserter(results2), t, true);
         time_taken = clock() - t_begin;
-    } else if (testBackend) {
+    }
+    case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), t, true);
         time_taken = clock() - t_begin;
-    } else {
+    }
+    case BENCH_AS: {
         t_begin = clock();
         asp->getHandleSet(back_inserter(results), t, true);
         time_taken = clock() - t_begin;
-    }
+    }}
     return timepair_t(time_taken,0);
 }
 
@@ -620,20 +692,23 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     Handle h = getRandomHandle();
     clock_t t_begin;
     clock_t time_taken;
-    if (testTable) {
+    switch (testKind) {
+    case BENCH_TABLE: {
         t_begin = clock();
         Link* l = atab->getLink(h);
         if (l) l->getOutgoingSet();
         time_taken = clock() - t_begin;
-    } else if (testBackend) {
+    }
+    case BENCH_IMPL: {
         t_begin = clock();
         asp->atomSpaceAsync->atomspace.getOutgoing(h);
         time_taken = clock() - t_begin;
-    } else {
+    }
+    case BENCH_AS: {
         t_begin = clock();
         asp->getOutgoing(h);
         time_taken = clock() - t_begin;
-    }
+    }}
     return timepair_t(time_taken,0);
 }
 

@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
      "-A        \tBenchmark all methods\n"
-     "-x        \tTest the AtomSpaceImpl backend instead of the public AtomSpace API\n"
+     "-x        \tTest the AtomSpaceImpl instead of the public AtomSpace API\n"
      "-X        \tTest the AtomTable instead of the public AtomSpace API\n"
      "-g        \tTest the Scheme API instead of the public AtomSpace API\n"
      "-m <methodname>\tMethod to benchmark\n" 
@@ -41,6 +41,8 @@ int main(int argc, char** argv) {
     opencog::AtomSpaceBenchmark benchmarker;
 
     opterr = 0;
+    benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
+
     while ((c = getopt (argc, argv, "tAxXgm:ln:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
@@ -61,13 +63,13 @@ int main(int argc, char** argv) {
              benchmarker.setMethod("getOutgoingSet");
              break;
            case 'x':
-             benchmarker.testBackend = true;
+             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_IMPL;
              break;
            case 'X':
-             benchmarker.testTable = true;
+             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;
              break;
            case 'g':
-             benchmarker.testScheme = true;
+             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_SCM;
              break;
            case 'm':
              benchmarker.buildTestData = true;
