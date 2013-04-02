@@ -256,6 +256,13 @@ FloatT logsum(size_t n)
     return sums[n];
 }
 
+// return the number of digits (in base 10 by default) of an integer
+template<typename Int> Int ndigits(Int x, Int base = 10) {
+    Int nd = 0;
+    while (x != 0) { x /= base; nd++; }
+    return nd;
+}
+
 // returns true iff x >= min and x <= max
 template<typename FloatT> bool isBetween(FloatT x, FloatT min, FloatT max)
 {
