@@ -157,8 +157,15 @@ protected:
     // Rank feature sets, penalized by diversity
     csc_feature_set_pop rank_feature_sets(const feature_set_pop& fs_pop) const;
 
-    // compute (or rather approximate) the mutual information between 2
-    // feature sets
+    // compute (or approximate) the mutual information between 2
+    // feature sets.
+    //
+    // If params.diversity_interaction is negative then it returns the
+    // mutual information between fs_l and fs_r.
+    //
+    // Otherwise it returns the average of mutual informations between
+    // all subsets of fs_l and fs_r of size
+    // params.diversity_interaction + 1
     double mi(const feature_set& fs_l, const feature_set& fs_r) const;
 };
 
