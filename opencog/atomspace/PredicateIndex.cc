@@ -28,9 +28,7 @@
 
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/VersionHandle.h>
 
 using namespace opencog;
 
@@ -45,10 +43,12 @@ PredicateIndex::PredicateIndex(void)
 void PredicateIndex::insertAtom(const Atom* atom)
 {
 	// Checks Atom against predicate indices and insert it if needed
+	// That is, the atom is inserted only if the predicate says "yes"
 	for (int i = 0; i < numberOfPredicateIndices; i++) {
-        Handle h = atom->getHandle();
+		Handle h = atom->getHandle();
 		PredicateEvaluator* evaluator = predicateEvaluators[i];
 		if (evaluator->evaluate(h)) {
+			// FixIndegerIndex is a set of handles for each index i.
 			insert(i, h);
 		}
 	}
@@ -56,25 +56,17 @@ void PredicateIndex::insertAtom(const Atom* atom)
 
 void PredicateIndex::removeAtom(const Atom* atom)
 {
-    Handle h = atom->getHandle();
+	Handle h = atom->getHandle();
+	// Erase the handle from each set ... there is a set per index.
 	std::vector<UnorderedHandleSet>::iterator s;
 	for (s = idx.begin(); s != idx.end(); ++s) {
 		s->erase(h);
 	}
 }
 
-HandleEntry * PredicateIndex::getHandleSet(int index) const
+const UnorderedHandleSet& PredicateIndex::getHandleSet(int index) const
 {
-	const UnorderedHandleSet &s = idx.at(index);
-	UnorderedHandleSet::const_iterator it;
-	HandleEntry *he = NULL;
-	for (it = s.begin(); it != s.end(); it++)
-	{
-		HandleEntry *nhe = new HandleEntry(*it);
-		nhe->next = he;
-		he = nhe;
-	}
-	return he;
+	return idx.at(index);
 }
 
 // ================================================================
@@ -146,22 +138,16 @@ PredicateEvaluator* PredicateIndex::getPredicateEvaluator(Handle gpnHandle) cons
  * @param VersionHandle for filtering the resulting atoms by
  *       context. NULL_VERSION_HANDLE indicates no filtering
  **/
-HandleEntry* PredicateIndex::findHandlesByGPN(Handle gpnHandle,
-                                                  VersionHandle vh) const
+const UnorderedHandleSet& PredicateIndex::findHandlesByGPN(Handle gpnHandle) const
 {
-	if (!TLB::isValidHandle(gpnHandle)) return NULL;
-
-	HandleEntry* result = NULL;
+	static UnorderedHandleSet emptySet;
+	if (!TLB::isValidHandle(gpnHandle)) return emptySet;
 
 	std::map<Handle, int>::const_iterator it;
 	it = predicateHandles2Indices.find(gpnHandle);
-	if (predicateHandles2Indices.end() != it)
-	{
-		int index = it->second;
-		result = getHandleSet(index);
-	}
-	result = HandleEntry::filterSet(result, vh);
-	return result;
+	if (it == predicateHandles2Indices.end()) return emptySet;
+
+	return getHandleSet(it->second);
 }
 
 // ================================================================

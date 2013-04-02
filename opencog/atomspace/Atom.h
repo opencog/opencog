@@ -32,7 +32,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
@@ -47,7 +46,6 @@ namespace opencog
 {
 
 class AtomTable;
-class HandleEntry;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -57,14 +55,11 @@ class HandleEntry;
  */
 class Atom : public AttentionValueHolder
 {
-    friend class SavingLoading;
+    friend class CommitAtomASR;   // needs access to clone
+    friend class ImportanceIndex; // needs access attentionValue to directly change it.
+    friend class SavingLoading;   // needs to set flags diectly
     friend class AtomTable;
-    friend class AtomSpace;
-    friend class ImportanceIndex;
-    friend class NMXmlParser;
     friend class TLB;
-    friend class Node;
-    friend class Link;
     friend class ::AtomUTest;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
@@ -74,9 +69,6 @@ private:
 #ifdef ZMQ_EXPERIMENT
     Atom() {};
 #endif
-    //! Called by constructors to init this object
-    void init(Type, const TruthValue&,
-            const AttentionValue& av = AttentionValue::DEFAULT_AV());
 
     //! Sets the AtomTable in which this Atom is inserted.
     void setAtomTable(AtomTable *);
@@ -85,6 +77,9 @@ private:
     AtomTable *getAtomTable() const { return atomTable; }
 
 protected:
+    // XXX FIXME, atoms fundamentally must not be clonable! Yeah?
+    virtual Atom* clone() const = 0;
+
     Handle handle;
     AtomTable *atomTable;
 
@@ -188,16 +183,6 @@ public:
      * @return true if the atoms are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const = 0;
-
-    /** Returns the hashCode of the Atom.
-     *
-     * @return an unsigned integer value as the hashCode of the Atom.
-     */
-    virtual size_t hashCode(void) const = 0;
-
-    virtual Atom* clone() const = 0;
-
-
 };
 
 } // namespace opencog

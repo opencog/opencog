@@ -11,6 +11,8 @@ ADD_EXECUTABLE (atomspace_bm
 )
 
 TARGET_LINK_LIBRARIES (atomspace_bm
+	smob
+   server
 	atomspace
 	cogutil
 )

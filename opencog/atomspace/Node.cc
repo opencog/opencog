@@ -100,17 +100,11 @@ bool Node::operator!=(const Atom& other) const
     return !(*this == other);
 }
 
-size_t Node::hashCode() const
-{
-    return getType() ^ std::hash<std::string>()(name);
-}
-
 // XXX WTF it makes no sense to "clone" an atom!  That's fucking nuts, 
 // the concept is invalid!
 Atom* Node::clone() const
 {
     Atom *a = new Node(*this);
-    a->handle = handle;
     return a;
 }
 

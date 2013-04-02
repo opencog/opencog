@@ -30,17 +30,16 @@
 #include <string>
 #include <vector>
 
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/VersionHandle.h>
 
 using std::string;
 
-namespace opencog
-{
+using namespace opencog;
 
-class Atom;
-class AtomTable;
 
 /**
  * This class implements a linked-list of handles, and provides several
@@ -412,6 +411,5 @@ public:
             Type targetType, VersionHandle vh);
 };
 
-} // namespace opencog
 
 #endif // _OPENCOG_HANDLE_ENTRY_H

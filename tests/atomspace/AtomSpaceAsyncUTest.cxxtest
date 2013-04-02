@@ -207,7 +207,7 @@ public:
 
 #define CHK(TYPE, OP) { \
     std::vector<Handle> blah; \
-    atomTable.getHandleSet(back_inserter(blah), TYPE); \
+    atomTable.getHandlesByType(back_inserter(blah), TYPE); \
     TS_ASSERT(blah.size() OP 0); \
 }
         // decay sti up to the threshold where the least important atoms

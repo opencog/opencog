@@ -1,10 +1,14 @@
 #ifndef _OPENCOG_AS_BENCHMARK_H
 #define _OPENCOG_AS_BENCHMARK_H
 
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/mt19937ar.h>
+#include <random>
 #include <boost/tuple/tuple.hpp>
+
+#include <opencog/util/mt19937ar.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/guile/SchemeEval.h>
 
 using boost::tuple;
 
@@ -34,7 +38,6 @@ class AtomSpaceBenchmark
     void recordToFile(std::ofstream& file, const record_t record) const;
 
     float linkSize_mean;
-    float linkSize_std;
 
     Type defaultLinkType;
     float chanceOfNonDefaultLink;
@@ -46,7 +49,12 @@ class AtomSpaceBenchmark
     AtomSpace* asp;
     AtomTable* atab;
     //AtomSpaceImpl asBackend;
+    SchemeEval* scm;
+
     MT19937RandGen* rng;
+
+    std::default_random_engine randgen;
+    std::poisson_distribution<unsigned> *prg;
 
     Type randomType(Type t);
 
@@ -64,8 +72,11 @@ public:
     int saveInterval;
     bool doStats;
     bool buildTestData;
-    bool testBackend;
-    bool testTable;
+
+
+    enum BenchType { BENCH_AS = 1, BENCH_IMPL, BENCH_TABLE, BENCH_SCM };
+    BenchType testKind;
+
     UUID UUID_begin;
     typedef timepair_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;
@@ -88,6 +99,7 @@ public:
             bool display = true);
     Handle getRandomHandle();
 
+    timepair_t bm_noop();
     timepair_t bm_addNode();
     timepair_t bm_addLink();
 
@@ -95,6 +107,7 @@ public:
     timepair_t bm_getNodeHandles();
     timepair_t bm_getHandleSet();
     timepair_t bm_getOutgoingSet();
+    timepair_t bm_getIncomingSet();
 
     void bm_getHandleNode() {};
     void bm_getHandleLink() {};

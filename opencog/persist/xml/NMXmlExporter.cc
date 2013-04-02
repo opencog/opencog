@@ -39,32 +39,33 @@ NMXmlExporter::NMXmlExporter(const AtomSpace* _as) :
 NMXmlExporter::~NMXmlExporter() {
 }
 
-std::string NMXmlExporter::toXML(HandleEntry *subset)
+std::string NMXmlExporter::toXML(const HandleSeq& subseq)
 {
+    UnorderedHandleSet subset;
+    std::copy(subseq.begin(), subseq.end(), inserter(subset));
     UnorderedHandleSet *exportable = findExportables(subset);
 
     return(toXML(exportable));
 }
 
-std::string NMXmlExporter::toXML(HandleSeq& subset)
+#if 0
+std::string NMXmlExporter::toXML(const UnorderedHandleSet* subset)
 {
-    HandleEntry* subset_he = HandleEntry::fromHandleVector(subset);
-    UnorderedHandleSet *exportable = findExportables(subset_he);
+    UnorderedHandleSet *exportable = findExportables(*subset);
     return(toXML(exportable));
 }
+#endif
 
-UnorderedHandleSet *NMXmlExporter::findExportables(HandleEntry *seed)
+UnorderedHandleSet *NMXmlExporter::findExportables(const UnorderedHandleSet& seed)
 {
     //Finds the subset.
     UnorderedHandleSet *exportables = new UnorderedHandleSet();
     UnorderedHandleSet *internalLinks  = new UnorderedHandleSet();
-    HandleEntry *it = seed;
-    while (it != NULL) {
-        exportables->insert(it->handle);
-        findExportables(exportables, internalLinks, it->handle);
-        it = it->next;
+    UnorderedHandleSet::const_iterator it;
+    for (it = seed.begin(); it != seed.end(); it++) {
+        exportables->insert(*it);
+        findExportables(exportables, internalLinks, *it);
     }
-    delete(seed);
     //Eliminates internalLinks.
     UnorderedHandleSet::iterator internals = internalLinks->begin();
     while (internals != internalLinks->end()) {
@@ -91,7 +92,7 @@ void NMXmlExporter::findExportables(UnorderedHandleSet *exportables, UnorderedHa
     }
 }
 
-std::string NMXmlExporter::toXML(UnorderedHandleSet *elements)
+std::string NMXmlExporter::toXML(const UnorderedHandleSet *elements)
 {
     bool typesUsed[classserver().getNumberOfClasses()];
     char aux[1<<16];
@@ -101,7 +102,7 @@ std::string NMXmlExporter::toXML(UnorderedHandleSet *elements)
     result += aux;
 
     memset(typesUsed, 0, sizeof(bool) * classserver().getNumberOfClasses());
-    UnorderedHandleSet::iterator it = elements->begin();
+    UnorderedHandleSet::const_iterator it = elements->begin();
     while (it != elements->end()) {
         exportAtom(*it, typesUsed, result);
         it++;

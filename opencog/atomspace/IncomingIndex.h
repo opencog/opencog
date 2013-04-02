@@ -34,19 +34,50 @@ namespace opencog
 /**
  * Implements a Handle index array of RB-trees (C++ set)
  * Given a Handle, this returns the incoming set of that handle.
+ *
+ * XXX TODO The iterator is NOT thread-safe against the insertion or
+ * removal of atoms!  Either inserting or removing an atom will cause
+ * the iterator references to be freed, leading to mystery crashes!
+ *
+ * The const UnorderedHandleSet& returned by the getIncomingSet()
+ * method will also become invalid if an atom is inserted or deleted
+ * (for that particular IncomingSet).
  */
 class IncomingIndex
 {
-    private:
-        HandleSetIndex idx;
-    public:
-        IncomingIndex(void);
-        void insertAtom(const Atom* a);
-        void removeAtom(const Atom* a);
-        void remove(bool (*)(Handle));
-        void resize();
+	private:
+		HandleSetIndex idx;
+	public:
+		IncomingIndex(void);
+		void insertAtom(const Atom* a);
+		void removeAtom(const Atom* a);
+		void remove(bool (*)(Handle));
+		void resize();
 
-        const UnorderedHandleSet& getIncomingSet(Handle) const;
+		const UnorderedHandleSet& getIncomingSet(Handle) const;
+
+		class iterator
+			: public std::iterator<std::forward_iterator_tag, Handle>
+		{
+			friend class IncomingIndex;
+			public:
+				iterator(Handle);
+				iterator& operator++();
+				iterator& operator++(int);
+				iterator& operator=(iterator);
+				bool operator==(iterator);
+				bool operator!=(iterator);
+				Handle operator*(void);
+			private:
+            Handle _h;
+            UnorderedHandleSet _iset;
+				UnorderedHandleSet::const_iterator _s;
+				UnorderedHandleSet::const_iterator _e;
+		};
+
+		iterator begin(Handle) const;
+		iterator end(void) const;
+
 };
 
 } //namespace opencog

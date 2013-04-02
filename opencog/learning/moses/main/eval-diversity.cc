@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 
         ;
 
-        variables_map vm;
+    variables_map vm;
     try {
         store(parse_command_line(argc, argv, desc), vm);
     }

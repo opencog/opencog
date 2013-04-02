@@ -225,18 +225,22 @@ OTable loadOTable(const std::string& file_name,
                   const std::string& target_feature);
         
 ITable loadITable(const std::string& file_name,
-                  const std::vector<std::string>& ignore_features);
+                  const std::vector<std::string>& ignore_features
+                  = empty_string_vec);
 
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
-                const std::vector<std::string>& ignore_features);
+                const std::vector<std::string>& ignore_features
+                = empty_string_vec);
 
 ITable loadITable_optimized(const std::string& file_name,
-                            const std::vector<std::string>& ignore_features);
+                            const std::vector<std::string>& ignore_features
+                            = empty_string_vec);
 
 Table loadTable_optimized(const std::string& file_name,
                           const std::string& target_feature,
-                          const std::vector<std::string>& ignore_features);
+                          const std::vector<std::string>& ignore_features
+                          = empty_string_vec);
 
 //////////////////
 // ostreamTable //

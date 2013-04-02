@@ -132,8 +132,6 @@ public:
      */
     static std::vector<unsigned long> *buildSeparatorsVector(const std::vector<ElementaryBehaviorDescription> &entries);
 
-    size_t hashCode();
-
     std::string toString() const;
 
     // ***********************************************/
@@ -153,8 +151,6 @@ private:
     mutable std::vector<PredicateHandleSet> timelineSets;
     mutable std::vector<long> timelineIntervals;
 
-    bool hashCodeComputed;
-    bool hashCodeWarning;
 
     /**
      * Timeline representation is used by BehaviorDescriptionMatcher. This flag is used
