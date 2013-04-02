@@ -26,8 +26,6 @@
 
 #include <opencog/util/platform.h>
 
-#include <opencog/atomspace/HandleEntry.h>
-
 #include "TemporalEntry.h"
 #include "HandleTemporalPairEntry.h"
 

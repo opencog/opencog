@@ -37,12 +37,3 @@ void NameIndex::removeAtom(const Atom* a)
 	if (NULL == n) return;
 	remove(n->getName().c_str(), a->getHandle());
 }
-
-UnorderedHandleSet NameIndex::getHandleSet(const char* name) const
-{
-	Handle h = get(name);
-	UnorderedHandleSet hs;
-	if (Handle::UNDEFINED != h)
-		hs.insert(h);
-	return hs;
-}

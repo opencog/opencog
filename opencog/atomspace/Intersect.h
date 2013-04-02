@@ -1,11 +1,8 @@
 /*
- * opencog/atomspace/HandleIterator.cc
+ * opencog/atomspace/Intersect.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,36 +20,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HandleIterator.h"
+#ifndef _OPENCOG_INTERSECT_H
+#define _OPENCOG_INTERSECT_H
 
-#include <opencog/util/platform.h>
-#include <opencog/atomspace/AtomTable.h>
+#include <vector>
 
-using namespace opencog;
+#include <opencog/util/exceptions.h>
+#include <opencog/atomspace/Handle.h>
 
-HandleIterator::HandleIterator(AtomTable *t, Type type, bool subclass,
-                               VersionHandle vh) :
-	it(type, subclass)
+namespace opencog
 {
-    table = t;
-    it = table->typeIndex.begin(type, subclass);
-    table->registerIterator(this);
-    desiredVersionHandle = vh;
-}
 
-HandleIterator::~HandleIterator()
-{
-    table->unregisterIterator(this);
-}
+UnorderedHandleSet intersection(const std::vector<UnorderedHandleSet> &)
+    throw (RuntimeException);
 
-bool HandleIterator::hasNext(void)
-{
-    return it != table->typeIndex.end();
-}
+} //namespace opencog
 
-Handle HandleIterator::next(void)
-{
-    Handle h = *it;
-    it++;
-    return h;
-}
+#endif // _OPENCOG_INTERSECT_H

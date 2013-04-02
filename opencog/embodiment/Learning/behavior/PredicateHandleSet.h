@@ -57,7 +57,6 @@ public:
     void insert(const Handle &handle);
     void clear();
     const std::set<Handle> &getSet() const;
-    int hashCode();
     int getSize() const;
     bool empty() const;
     bool equals(const PredicateHandleSet &other) const;

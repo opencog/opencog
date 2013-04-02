@@ -543,9 +543,6 @@ public:
         return atomSpaceAsync->getNormalisedSTI(h, average, clip, true)->get_result();
     }
 
-    /** Get hash for an atom */
-    size_t getAtomHash(const Handle& h) const;
-
     /**
      * Returns neighboring atoms, following links and returning their
      * target sets.
@@ -601,7 +598,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getHandlesByName(
                 std::string(name), type, subclass, vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -633,7 +630,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getHandlesByName(
                 name, type, subclass, vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -661,7 +658,7 @@ public:
                  bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getHandlesByType(type, subclass, vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -697,7 +694,7 @@ public:
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getHandlesByTarget(type, targetType,
                 subclass, targetSubclass, vh, targetVh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -731,7 +728,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getHandlesByTargetHandle(handle,
                 type, subclass, vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -779,7 +776,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getHandlesByOutgoingSet(
                 handles,types,subclasses,arity,type,subclass,vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -819,7 +816,7 @@ public:
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getHandlesByTargetName(
                targetName, targetType, type, subclass, vh, targetVh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -868,7 +865,7 @@ public:
 
         HandleSeq result_set = atomSpaceAsync->getHandlesByTargetNames(
                 names, types, subclasses, arity, type, subclass, vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -914,7 +911,7 @@ public:
 
         HandleSeq result_set = atomSpaceAsync->getHandlesByTargetTypes(
                 types, subclasses, arity, type, subclass, vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
     /**
@@ -979,7 +976,7 @@ public:
                  AtomPredicate* compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleSeq hs = atomSpaceAsync->filter(compare, type, subclass, vh)->get_result();
-        return toOutputIterator(result, hs);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -1014,7 +1011,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleSeq result_set = atomSpaceAsync->getSortedHandleSet(
                 type, subclass, compare, vh)->get_result();
-        return toOutputIterator(result, result_set);
+        return std::copy(result_set.begin(), result_set.end(), result);
     }
 
 
@@ -1204,29 +1201,6 @@ private:
      * Remove stimulus from atom, only should be used when Atom is deleted.
      */
     void removeStimulus(Handle h);
-
-    /** copy HandleSeq to an output iterator */
-    template <typename OutputIterator> OutputIterator
-    toOutputIterator(OutputIterator result, HandleSeq handles) const {
-        foreach(Handle h, handles) {
-            *(result++) = h;
-        }
-        return result;
-    }
-
-    /** copy HandleEntry to an output iterator */
-    template <typename OutputIterator> OutputIterator
-    toOutputIterator(OutputIterator result, HandleEntry * handleEntry) const {
-
-        HandleEntry * toRemove = handleEntry;
-        while (handleEntry) {
-            *(result++) = handleEntry->handle;
-            handleEntry = handleEntry->next;
-        }
-        // free memory
-        if (toRemove) delete toRemove;
-        return result;
-    }
 
     bool handleAddSignal(AtomSpaceImpl *as, Handle h);
 
