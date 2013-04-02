@@ -239,8 +239,16 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
 csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& fs_pop) const {
     csc_feature_set_pop res;    // hold all the feature sets ranked by diversity
 
+    // holds the last feature set inserted (to compute the next mis)
+    csc_feature_set_pop::const_iterator last_fs_cit = res.end();
+
     // initialize csc_fs_pop (the temporary structure holding all the
-    // feature sets not yet ranked by diversity)
+    // feature sets not yet ranked by diversity).  Each element will
+    // contain the current diversity penalty between itself and the
+    // ranked features sets (in res). Because the way the diversity
+    // penalties are aggregated (max) we only need to compute the
+    // diversity between the elements and the lastly added feature set
+    // in res.
     typedef pair<composite_score, feature_set> csc_feature_set;
     vector<csc_feature_set> csc_fs_seq;
     for (const auto& fs : fs_pop)
@@ -253,25 +261,28 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
         return csc_fs_l.first < csc_fs_r.first;
     };
 
+    auto mi_to_penalty = [](double mi) {
+        return 1 - mi;
+    };
+    
     while (!csc_fs_seq.empty()) {
         // assign to all elements of csc_fs_seq the right diversity penality
         for (csc_feature_set& csc_fs : csc_fs_seq) {
-            // compute all mis between csc_fs and current res
-            vector<double> mis;
-            for (const auto resv : res)  // WARNING: highly pessimized
-                mis.push_back(mi(resv.second, csc_fs.second));
+            // compute penalty between csc_fs and the last inserted feature set
+            float last_dp = mi_to_penalty(mi(last_fs_cit->second, csc_fs.second));
 
             // aggregate the results (here max)
-            double agg_mis = *boost::max_element(mis);
+            float agg_dp = std::max(csc_fs.first.get_diversity_penalty(),
+                                    last_dp);
 
             // compute and update the diversity penalty
-            double dp = params.diversity_pressure * agg_mis;
+            float dp = params.diversity_pressure * agg_dp;
             csc_fs.first.set_diversity_penalty(dp);
         }
 
         // insert the best candidate in res and delete it from csc_fs_pop
         auto mit = boost::max_element(csc_fs_seq, csc_fs_lt);
-        res.insert(*mit);
+        last_fs_cit = res.insert(*mit);
         csc_fs_seq.erase(mit);
     }
 
@@ -286,7 +297,7 @@ double feature_selector::mi(const feature_set& fs_l,
     else {
         // Compute the average mutual informations between subsets of
         // size diversity_interaction + 1 of fs_l and fs_r
-        unsigned sss = params.diversity_pressure + 1;
+        unsigned sss = params.diversity_interaction + 1;
         double mi = 0.0;
         // determine powersets of fs_l and fs_r, each containing
         // feature sets of size diversity_interaction + 1
