@@ -18,25 +18,27 @@
 #include <vector>
 
 #include <link-grammar/link-includes.h>
-#include "api-types.h"
-#include "read-dict.h"
-#include "structures.h"
+// #include <link-grammar/api-types.h>
+// #include <link-grammar/read-dict.h>
+// #include <link-grammar/structures.h>
 
-#include "atom.h"
+#include <opencog/atomspace/Atom.h>
+
+#if LATER
 #include "compile.h"
 #include "connect.h"
 #include "connector-utils.h"
 #include "disjoin.h"
 #include "garbage.h"
-#include "parser.h"
 #include "state.h"
 #include "viterbi.h"
+
+#include "parser.h"
 
 using namespace std;
 
 #define DBG(X) X;
 
-namespace link_grammar {
 namespace viterbi {
 
 Parser::Parser(Dictionary dict)
@@ -252,7 +254,6 @@ void viterbi_parse(Dictionary dict, const char * sentence)
 }
 
 } // namespace viterbi
-} // namespace link-grammar
 
 // ===================================================================
 
@@ -261,4 +262,5 @@ void viterbi_parse(const char * sentence, Dictionary dict)
 {
 	link_grammar::viterbi::viterbi_parse(dict, sentence);
 }
+#endif
 

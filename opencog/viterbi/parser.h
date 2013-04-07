@@ -14,7 +14,9 @@
 
 #include <string>
 
-#include "atom.h"
+#include <opencog/atomspace/Atom.h>
+
+#ifdef LATER
 #include "compile.h"
 #include "garbage.h"
 
@@ -22,7 +24,6 @@
 #include "api-types.h"
 #include "structures.h"
 
-namespace link_grammar {
 namespace viterbi {
 
 class Parser : public gc
@@ -46,8 +47,7 @@ class Parser : public gc
 		Set* _alternatives;
 };
 
-
 } // namespace viterbi
-} // namespace link-grammar
+#endif
 
 #endif // _LG_VITERBI_PARSER_H
