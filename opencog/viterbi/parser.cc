@@ -9,13 +9,13 @@
 /*                                                                       */
 /*************************************************************************/
 
-#include <ctype.h>
+// #include <ctype.h>
 
-#include <algorithm>
-#include <iostream>
+// #include <algorithm>
+// #include <iostream>
 #include <string>
-#include <sstream>
-#include <vector>
+// #include <sstream>
+// #include <vector>
 
 #include <link-grammar/link-includes.h>
 // #include <link-grammar/api-types.h>
@@ -32,6 +32,7 @@
 #include "garbage.h"
 #include "state.h"
 #include "viterbi.h"
+#endif
 
 #include "parser.h"
 
@@ -42,13 +43,15 @@ using namespace std;
 namespace viterbi {
 
 Parser::Parser(Dictionary dict)
-	: _dict(dict), _alternatives(NULL)
+	: _dict(dict)
+// , _alternatives(NULL)
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
-	lg_init_gc();
+	// lg_init_gc();
 	initialize_state();
 }
 
+#ifdef LATER
 // ===================================================================
 /**
  * Convert LG dictionary expression to atomic formula.
@@ -144,12 +147,15 @@ Set * Parser::word_consets(const string& word)
 	return new Set(djset);
 }
 
+#endif
+
 // ===================================================================
 /**
  * Set up initial viterbi state for the parser
  */
 void Parser::initialize_state()
 {
+#if LATER
 	const char * wall_word = "LEFT-WALL";
 
 	Set *wall_disj = word_consets(wall_word);
@@ -166,8 +172,10 @@ void Parser::initialize_state()
 			new Seq()
 		)
 	);
+#endif
 }
 
+#if LATER
 // ===================================================================
 /**
  * Add a single word to the parse.
@@ -252,15 +260,7 @@ void viterbi_parse(Dictionary dict, const char * sentence)
 		}
 	}
 }
+#endif
 
 } // namespace viterbi
-
-// ===================================================================
-
-// Wrapper to escape out from C++
-void viterbi_parse(const char * sentence, Dictionary dict)
-{
-	link_grammar::viterbi::viterbi_parse(dict, sentence);
-}
-#endif
 

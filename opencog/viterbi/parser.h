@@ -23,14 +23,19 @@
 // link-grammar include files, needed for Exp, Dict
 #include "api-types.h"
 #include "structures.h"
+#endif
 
 namespace viterbi {
 
-class Parser : public gc
+using namespace opencog;
+struct Exp;
+
+class Parser
 {
 	public:
 		Parser(Dictionary dict);
 
+#if 0
 		void streamin(const std::string&);
 		void stream_word(const std::string&);
 		void stream_word_conset(WordCset*);
@@ -38,16 +43,16 @@ class Parser : public gc
 		Set* word_consets(const std::string& word);
 
 		Set* get_alternatives();
+#endif
 	protected:
 		void initialize_state();
 		Atom* lg_exp_to_atom(Exp*);
 
 		Dictionary _dict;
 	private:
-		Set* _alternatives;
+		// Set* _alternatives;
 };
 
 } // namespace viterbi
-#endif
 
 #endif // _LG_VITERBI_PARSER_H
