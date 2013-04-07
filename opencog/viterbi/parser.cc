@@ -17,10 +17,7 @@
 // #include <sstream>
 // #include <vector>
 
-#include <link-grammar/link-includes.h>
-// #include <link-grammar/api-types.h>
-// #include <link-grammar/read-dict.h>
-// #include <link-grammar/structures.h>
+#include <link-grammar/read-dict.h>
 
 #include <opencog/atomspace/Atom.h>
 
@@ -130,7 +127,7 @@ Set * Parser::word_consets(const string& word)
 	if (!dn_head) return NULL;
 
 	OutList djset;
-	for (Dict_node*dn = dn_head; dn; dn= dn->right)
+	for (Dict_node* dn = dn_head; dn; dn = dn->right)
 	{
 		Exp* exp = dn->exp;
 		DBG({cout << "=============== Parser word: " << dn->string << ": ";

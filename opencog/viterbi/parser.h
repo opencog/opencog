@@ -14,21 +14,19 @@
 
 #include <string>
 
+// link-grammar include files, needed for Exp, Dict
+#include <link-grammar/read-dict.h>
 #include <opencog/atomspace/Atom.h>
 
 #ifdef LATER
 #include "compile.h"
 #include "garbage.h"
 
-// link-grammar include files, needed for Exp, Dict
-#include "api-types.h"
-#include "structures.h"
 #endif
 
 namespace viterbi {
 
 using namespace opencog;
-struct Exp;
 
 class Parser
 {

@@ -220,7 +220,8 @@ ENDIF (HYPERTABLE_FOUND)
 
 
 # Link-Gramar is needed for the Viterbi parser
-FIND_PACKAGE(LinkGrammar)
+# Only 4.7.12 or newer has the required read-dict API in it.
+FIND_PACKAGE(LinkGrammar 4.7.12)
 IF (LINK_GRAMMAR_FOUND)
 	SET(HAVE_LINK_GRAMMAR 1)
 	MESSAGE(STATUS "Link Grammar was found.")
