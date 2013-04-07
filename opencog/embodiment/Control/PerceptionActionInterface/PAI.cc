@@ -65,7 +65,7 @@
 #include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
 #include "EventResponder.h"
-#include "EventDetector.h"
+#include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
 
 using XERCES_CPP_NAMESPACE::Base64;
 using XERCES_CPP_NAMESPACE::XMLString;
@@ -1446,6 +1446,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     actionConcernedHandles.push_back(atTimeLink);
 
     // if this is a statechage action, add the new value of this state into the atomspace
+    EVENT_TYPE eventTYpe;
     if (nameStr == "state_change")
     {
         OC_ASSERT(changedStateName != "");
@@ -1457,7 +1458,11 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
         actionConcernedHandles.push_back(newStateValNode);
         actionConcernedHandles.push_back(newStateEvalLink);
+
+        eventTYpe = EVENT_TYPE_STATE_CHANGE;
     }
+    else
+        eventTYpe = EVENT_TYPE_ACTION;
 
     // Jared    
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
@@ -1472,7 +1477,10 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     
     // call the event detector
     if (enableCollectActions)
-        EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
+    {
+        //EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
+        EventDetectionAgent::addAnEvent(actionInstanceNode,tsValue,eventTYpe);
+    }
 
     // call the event responser
     EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles, tsValue);
@@ -4260,6 +4268,8 @@ void PAI::processBlockStructureSignal(DOMElement* element)
         {
             return;
         }
+
+        entity->SortBlockOrder();
 
         // Currently, for demo, once the oac figure out an blockEnity,
         // It will go to a random near place to build a same blockEnity by blocks.

@@ -29,6 +29,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
 #include <cstdlib>
 #include <vector>
 #include <iterator>
@@ -44,6 +45,8 @@ SpatialPredicateUpdater::SpatialPredicateUpdater(AtomSpace & _atomSpace) :
 {
     is_only_update_about_avatars = config().get_bool("UPDATE_SPATIAL_PREDICATES_ONLY_ABOUT_AVATAR");
     update_types = config().get("UPDATE_SPATIAL_PREDICATES_FOR");
+
+    enableCollectActions = config().get_bool("ENABLE_ACTION_COLLECT");
 
     RELATIONS_NEED_TO_UPDATE.push_back(ABOVE);
     RELATIONS_NEED_TO_UPDATE.push_back(BELOW);
@@ -575,7 +578,7 @@ addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
                                                        predicateName,
                                                        TruthValue::TRUE_TV(),
                                                        objectA, objectB, objectC
-                                                      );
+                                                      );            
         }
         else
         { // these objects do not have this relation
@@ -588,6 +591,9 @@ addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
         }
 
         timeServer().addTimeInfo(eval, timestamp);
+
+        if (enableCollectActions)
+            EventDetectionAgent::addAnEvent(eval,timestamp,EVENT_TYPE_SPATIAL_PREDICATE);
 
     }
 

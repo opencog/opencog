@@ -493,7 +493,7 @@ BlockEntity* Octree3DMapManager::getEntityInPos(BlockVector& _pos) const
 {
     Block3D* block;
     // First, check is there already a block in this position
-    if (mRootOctree->checkIsSolid(_pos, block))
+    if (! mRootOctree->checkIsSolid(_pos, block))
         return 0;
 
     return (block->mBlockEntity);

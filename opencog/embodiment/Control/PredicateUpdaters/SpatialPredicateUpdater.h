@@ -62,6 +62,8 @@ private:
     bool is_only_update_about_avatars;
     string update_types;
 
+    bool enableCollectActions;
+
     vector<spatial::SPATIAL_RELATION> RELATIONS_NEED_TO_UPDATE; // the spatial relations we need to update
 
     typedef std::vector <spatial::SPATIAL_RELATION> SPATIAL_RELATION_VECTOR;
