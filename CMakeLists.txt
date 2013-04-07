@@ -218,6 +218,18 @@ ELSE (HYPERTABLE_FOUND)
 
 ENDIF (HYPERTABLE_FOUND)
 
+
+# Link-Gramar is needed for the Viterbi parser
+FIND_PACKAGE(LinkGrammar)
+IF (LINK_GRAMMAR_FOUND)
+	SET(HAVE_LG 1)
+	MESSAGE(STATUS "Link Grammar was found.")
+	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
+ELSE (LINK_GRAMMAR_FOUND)
+	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
+ENDIF (LINK_GRAMMAR_FOUND)
+
+
 # MPI is needed for MOSES on compute clusters.
 FIND_PACKAGE(MPI)
 
