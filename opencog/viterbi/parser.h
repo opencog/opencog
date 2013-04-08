@@ -17,11 +17,11 @@
 // link-grammar include files, needed for Exp, Dict
 #include <link-grammar/read-dict.h>
 #include <opencog/atomspace/Atom.h>
+#include <opencog/guile/SchemeEval.h>
+
 
 #ifdef LATER
 #include "compile.h"
-#include "garbage.h"
-
 #endif
 
 namespace viterbi {
@@ -44,9 +44,10 @@ class Parser
 #endif
 	protected:
 		void initialize_state();
-		Atom* lg_exp_to_atom(Exp*);
+		Handle lg_exp_to_atom(Exp*);
 
 		Dictionary _dict;
+		SchemeEval& _scm_eval;
 	private:
 		// Set* _alternatives;
 };

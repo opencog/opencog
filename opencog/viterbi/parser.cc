@@ -40,7 +40,7 @@ using namespace std;
 namespace viterbi {
 
 Parser::Parser(Dictionary dict)
-	: _dict(dict)
+	: _dict(dict), _scm_eval(SchemeEval::instance())
 // , _alternatives(NULL)
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
@@ -48,7 +48,6 @@ Parser::Parser(Dictionary dict)
 	initialize_state();
 }
 
-#ifdef LATER
 // ===================================================================
 /**
  * Convert LG dictionary expression to atomic formula.
@@ -66,8 +65,10 @@ Parser::Parser(Dictionary dict)
  * not necessarily in any sort of normal form; the null connector can
  * appear anywhere.
  */
-Atom * Parser::lg_exp_to_atom(Exp* exp)
+Handle Parser::lg_exp_to_atom(Exp* exp)
 {
+	_scm_eval.eval_h("(Node \"asdf\")");
+#ifdef LATER
 	if (CONNECTOR_type == exp->type)
 	{
 		stringstream ss;
@@ -110,8 +111,11 @@ Atom * Parser::lg_exp_to_atom(Exp* exp)
 		return new Or(alist);
 
 	assert(0, "Not reached");
+#endif 
+	return Handle::UNDEFINED;
 }
 
+#ifdef LATER
 // ===================================================================
 /**
  * Return atomic formula connector expression for the given word.
