@@ -1,0 +1,9 @@
+
+//
+// Viterbi parser atom types
+//
+// Connector: same meaning and syntax as in link-grammar
+LGX_CONNECTOR_NODE <- NODE   // e.g. "MX"
+LGX_CONN_DIR_NODE <- NODE   // e.g. "+"
+
+LGX_CONNECTOR_LINK <- LINK   // e.g. "MX+"

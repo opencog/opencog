@@ -1,4 +1,13 @@
 
+OPENCOG_ADD_ATOM_TYPES(atom_types.script 
+	atom_types.h
+	atom_types.definitions
+	atom_types.inheritance
+	viterbi_types.scm) 
+
+ADD_CUSTOM_TARGET(viterbi_atom_types DEPENDS atom_types.h)
+
+
 INCLUDE_DIRECTORIES (
 	${LINK_GRAMMAR_INCLUDE_DIRS}
 )
@@ -9,7 +18,12 @@ ADD_LIBRARY (viterbi SHARED
 	parser.cc
 )
 
+ADD_DEPENDENCIES(viterbi opencog_atom_types)
+ADD_DEPENDENCIES(viterbi viterbi_atom_types)
+
 TARGET_LINK_LIBRARIES(viterbi
+	query
+	atomspace
 	${LINK_GRAMMAR_LIBRARIES}
 )
 
