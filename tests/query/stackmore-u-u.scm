@@ -53,7 +53,7 @@
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink (stv 1.0 1.0)
-		(CWColorNode "Big Red Button")
+		(AvatarNode "Big Red Button")
 		(ListLink
 			(LemmaNode "thing1")
 			(LemmaNode "thing2")
@@ -265,7 +265,7 @@
 
 ;; this should not match.
 (SimilarityLink (stv 1.0 1.0)
-	(CWColorNode "Big Red Button")
+	(AvatarNode "Big Red Button")
 	(NumberNode "0.24")
 	(SetLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")

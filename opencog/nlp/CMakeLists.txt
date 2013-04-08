@@ -1,5 +1,5 @@
 
-# Build C++ code in assorted NLP sibdirectories
+# Build C++ code in assorted NLP subdirectories
 
 ADD_SUBDIRECTORY (chatbot)
 
