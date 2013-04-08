@@ -5,12 +5,14 @@ INCLUDE_DIRECTORIES (
 )
 
 LINK_DIRECTORIES(
+	${PROJECT_BINARY_DIR}/opencog/nlp/types
 	${PROJECT_BINARY_DIR}/opencog/atomspace
 	${PROJECT_BINARY_DIR}/opencog/query
 	${PROJECT_BINARY_DIR}/opencog/util
 )
 
 LINK_LIBRARIES(
+	nlp-types
 	atomspace
 	query
 	server

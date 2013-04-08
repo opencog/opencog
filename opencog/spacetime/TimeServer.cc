@@ -24,6 +24,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpaceImpl.h>
+#include <opencog/spacetime/atom_types.h>
 #include "TimeServer.h"
 
 //#define DPRINTF printf

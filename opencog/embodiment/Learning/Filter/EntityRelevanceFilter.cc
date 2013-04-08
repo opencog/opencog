@@ -28,6 +28,8 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/Temporal.h>
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/spacetime/SpaceServer.h>

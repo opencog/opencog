@@ -23,6 +23,8 @@
 
 
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
