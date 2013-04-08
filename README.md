@@ -65,6 +65,11 @@ the build, will be more precise as to which parts will not be built.
 > http://hypertable.org
 > This requires SIGAR as well
 
+###### Link Grammar
+> Natural Language Parser for English, Russian, other languages.
+> Required for experimental Viterbi parser.
+> http://www.abisource.com/projects/link-grammar/
+
 ###### MPI
 > Message Passing Interface
 > Required for compute-cluster version of MOSES
@@ -107,12 +112,12 @@ Building OpenCog
 Peform the following steps at the shell prompt:
 
     cd to project root dir
-    mkdir bin
-    cd bin
+    mkdir build
+    cd build
     cmake -DCMAKE_BUILD_TYPE=Release ..
     make
 
-Libraries will be built into subdirectories within bin, mirroring the
+Libraries will be built into subdirectories within build, mirroring the
 structure of the source directory root. The flag -DCMAKE_BUILD_TYPE=Release
 results in binaries that are optimized for for performance; ommitting
 this flag will result in faster builds, but slower executables.
@@ -120,7 +125,7 @@ this flag will result in faster builds, but slower executables.
 
 Unit tests
 ----------
-To build and run the unit tests, from the ./bin directory enter (after
+To build and run the unit tests, from the ./build directory enter (after
 building opencog as above):
 
     make test
@@ -136,7 +141,7 @@ the server.  This command processor understands 3 simple commands:
 load <xml file name>, ls and shutdown. There is an example XML file
 under tests/server/atomSpace.xml
 
-To run a simple test, build everything, change directory to your opencog/bin
+To run a simple test, build everything, change directory to your opencog/build
 folder and execute opencog/server/cogserver. Then, from another terminal,
 run ```telnet localhost 17001``` Try loading the example XML file and ls
 to see all the nodes and links.
