@@ -2,6 +2,11 @@
 // Script for automatic "atom type" generation. For more more information,
 // consult  the documentation in the opencog/atomspace/README file.
 //
+// Please note: some of the types below are used only via the scheme bindings.
+// Thus, just because you can comment some of these out, and the code still
+// compiles, that does not mean that these types are unused!  Be sure to grep
+// for the CamelCase names, to see if they show up elsewhere!
+//
 // Special type designating that no atom type has been assigned
 NOTYPE
 
@@ -33,6 +38,14 @@ NOT_LINK <- UNORDERED_LINK
 FALSE_LINK <- ORDERED_LINK
 TRUE_LINK <- ORDERED_LINK
 
+// ====================================================================
+// Herbrand/First-order-logic/lambda-calc/model-theory style links
+// and nodes.  This are used to implement the pattern matcher, and
+// everything built from the pattern matcher, including the query
+// engine, the atomspace indexes, and the graph rewrite rules.
+//
+// Not all of these are in active use: e.g. SCHOLEM_LINK is not used ATM.
+
 // Universe of discourse
 CONTEXT_LINK <- ORDERED_LINK
 
@@ -50,6 +63,8 @@ SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations
 IMPLICATION_LINK <- ORDERED_LINK
+
+// To be used with PredicateNode
 EVALUATION_LINK <- ORDERED_LINK
 
 // ??? symbol link not used anywhere. What is it's semantics?
@@ -63,7 +78,11 @@ INHERITANCE_LINK <- ORDERED_LINK
 SIMILARITY_LINK <- UNORDERED_LINK
 
 
-// that one is redundant with SUBSET_LINK and officially disabled
+// ====================================================================
+// XXX its not clear which of these are in current use ... !?
+// Or who is using these?  Some of these are dead.
+//
+// ExtInh is redundant with SUBSET_LINK and officially disabled
 // EXTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
 EXTENSIONAL_SIMILARITY_LINK <- ORDERED_LINK
 INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
@@ -87,10 +106,14 @@ SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
-// Temporal Links
+// ====================================================================
+// Temporal Reasoning Links
+// XXX are these actually used anywhere? I think they're old dead PLN links
 
 PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
 TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
+
+// used in unity_rules.scm
 SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
 SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
 
@@ -99,18 +122,44 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 
 BEFORE_LINK <- ORDERED_LINK
 
+// ====================================================================
 /// PLN types:
 // These are used in PLN currently, but can perhaps be replaced/removed
-HYPOTHETICAL_LINK <- ORDERED_LINK
-MIXED_IMPLICATION_LINK <- ORDERED_LINK
-EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
+// But the PLN code is dead, cira 2012
+//
+// HYPOTHETICAL_LINK <- ORDERED_LINK
+// MIXED_IMPLICATION_LINK <- ORDERED_LINK
+// EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
 
 // Should be replaced by extensional and intensional equivalence
-EQUIVALENCE_LINK <- UNORDERED_LINK
+// EQUIVALENCE_LINK <- UNORDERED_LINK
 SIMULTANEOUS_EQUIVALENCE_LINK <- UNORDERED_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
+// EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
+
+// ====================================================================
+// Synchronization primitive, used to mark stages of a processing
+// pipeline; used as a fence or guard barrier, make sure that earlier
+// stages have completed processing before later ones start.
+// Basically, hypergraphs may be attached to the anchor, with a 
+// ListLink, to indicate that they are either done, or awaiting
+// processing.
+ANCHOR_NODE <- NODE
+
+// Holder of statistical truth values. 
+// XXX not clear if this is used anywhere ... maybe should remove this.
+COUNT_LINK <- ORDERED_LINK
+
+// ====================================================================
+// Viterbi Link-Grammar parser 
+//
+// Connector: same meaning and syntax as in link-grammar
+LG_CONNECTOR_NODE <- NODE   // e.g. "MX" 
+LG_CONN_DIR_NODE <- NODE   // e.g. "+"
+
+LG_CONNECTOR_LINK <- LINK   // e.g. "MX+"
 
 
+// ====================================================================
 // Older parsing and language handling nodes;
 // Commented out, as these are currently unused,
 // and are being replaced by newer RelEx forms.
@@ -135,18 +184,6 @@ EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
 // New RelEx nodes, added by Linas per names used by Ben
 // These are subject to change or deletion pending review.
 // Some of the link types may go away.
-
-// Synchronization primitive, used to mark stages of a processing
-// pipeline; used as a fence or guard barrier, make sure that earlier
-// stages have completed processing before later ones start.
-// Basically, hypergraphs may be attached to the anchor, with a 
-// ListLink, to indicate that they are either done, or awaiting
-// processing.
-ANCHOR_NODE <- NODE
-
-// Holder of statistical truth values. 
-// XXX not clear if this is used anywhere ... maybe should remove this.
-COUNT_LINK <- ORDERED_LINK
 
 WORD_NODE <- NODE
 REFERENCE_LINK <- ASSOCIATIVE_LINK
@@ -205,25 +242,43 @@ SEME_NODE <- CONCEPT_NODE
 SEMANTIC_RELATION_NODE <- SEME_NODE
 // CONTEXT_NODE <- CONCEPT_NODE // apparently useless
 
+// ====================================================================
+// Attention allocation atoms:
+HEBBIAN_LINK <- LINK
+ASYMMETRIC_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
+SYMMETRIC_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
+INVERSE_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
+SYMMETRIC_INVERSE_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
+
+// ====================================================================
 // AGISim related links and nodes
-AGISIM_SOUND_NODE <- NODE "AGISIMSoundNode"
-AGISIM_TASTE_NODE <- NODE "AGISIMTasteNode"
-AGISIM_SMELL_NODE <- NODE "AGISIMSmellNode"
-AGISIM_SELF_NODE <- NODE "AGISIMSelfNode"
-AGISIM_PERCEPT_NODE <- NODE "AGISIMPerceptNode"
-AGISIM_VISUAL_PERCEPT_NODE <- NODE "AGIMSIMVisualPerceptNode" // note
-AGISIM_PIXEL_PERCEPT_NODE <- NODE "AGISIMPixelPerceptNode"
-AGISIM_POLYGON_PERCEPT_NODE <- NODE "AGISIMPolygonPerceptNode"
-AGISIM_OBJECT_PERCEPT_NODE <- NODE "AGISIMObjectPerceptNode"
+// These are dead, there is no more AGISIM, as best I understand it.
+// AGISIM_SOUND_NODE <- NODE "AGISIMSoundNode"
+// AGISIM_TASTE_NODE <- NODE "AGISIMTasteNode"
+// AGISIM_SMELL_NODE <- NODE "AGISIMSmellNode"
+// AGISIM_SELF_NODE <- NODE "AGISIMSelfNode"
+// AGISIM_PERCEPT_NODE <- NODE "AGISIMPerceptNode"
+// AGISIM_VISUAL_PERCEPT_NODE <- NODE "AGIMSIMVisualPerceptNode" // note
+// AGISIM_PIXEL_PERCEPT_NODE <- NODE "AGISIMPixelPerceptNode"
+// AGISIM_POLYGON_PERCEPT_NODE <- NODE "AGISIMPolygonPerceptNode"
+// AGISIM_OBJECT_PERCEPT_NODE <- NODE "AGISIMObjectPerceptNode"
 
-CW_PIXEL_PERCEPT_NODE <- NODE "CWPixelPerceptNode"
-CW_COLOR_NODE <- NODE "CWColorNode"
+// XXX what are these ?
+// CW_PIXEL_PERCEPT_NODE <- NODE "CWPixelPerceptNode"
+// CW_COLOR_NODE <- NODE "CWColorNode"
+//
+// What is this ??
+// FW_VARIABLE_NODE <- NODE "FWVariableNode"
 
-FW_VARIABLE_NODE <- NODE "FWVariableNode"
-
+// ====================================================================
 // SpaceServer atoms
 SPACE_MAP_NODE <- NODE
 
+// Time-related atoms:
+AT_TIME_LINK <- ORDERED_LINK
+TIME_NODE <- NODE
+
+// ====================================================================
 // Embodiment atoms
 
 LATEST_LINK <- ORDERED_LINK
@@ -237,19 +292,6 @@ ACCESSORY_NODE <- OBJECT_NODE
 HUMANOID_NODE <- OBJECT_NODE
 UNKNOWN_OBJECT_NODE <- OBJECT_NODE
 
-// Time-related atoms:
-
-AT_TIME_LINK <- ORDERED_LINK
-TIME_NODE <- NODE
-
 // Perception specific terms
 IS_ACCEPTABLE_SECOND_ARG_LINK <- ORDERED_LINK
-
-// Attention allocation atoms:
-
-HEBBIAN_LINK <- LINK
-ASYMMETRIC_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
-SYMMETRIC_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
-INVERSE_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
-SYMMETRIC_INVERSE_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
 
