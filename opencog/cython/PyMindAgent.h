@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include <Python.h>
+#include "PyIncludeWrapper.h"
 
 #include <opencog/server/Agent.h>
 #include <opencog/server/Factory.h>

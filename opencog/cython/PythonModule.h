@@ -4,7 +4,7 @@
 #ifndef _OPENCOG_PYTHON_MODULE_H
 #define _OPENCOG_PYTHON_MODULE_H
 
-#include <Python.h>
+#include "PyIncludeWrapper.h"
 
 #include <string>
 
