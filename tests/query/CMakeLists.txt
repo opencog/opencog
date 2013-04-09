@@ -12,8 +12,8 @@ LINK_DIRECTORIES(
 )
 
 LINK_LIBRARIES(
-	nlp-types
 	atomspace
+	nlp-types
 	query
 	server
 	${Boost_SIGNALS_LIBRARY}
