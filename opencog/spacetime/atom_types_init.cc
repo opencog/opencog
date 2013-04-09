@@ -22,7 +22,6 @@
  */
 
 #include "opencog/spacetime/atom_types.definitions"
-#include "opencog/embodiment/AtomSpaceExtensions/atom_types.definitions"
 
 // library initialization
 #if defined(WIN32) && defined(_DLL)
@@ -38,7 +37,6 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     switch (fdwReason) {
         case DLL_PROCESS_ATTACH:
             #include "opencog/spacetime/atom_types.inheritance"
-            #include "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
             break;
         case DLL_THREAD_ATTACH:
             break;
@@ -54,7 +52,6 @@ __attribute__((constructor))
 static void init(void)
 {
     #include "opencog/spacetime/atom_types.inheritance"
-    #include "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
 }
 
 __attribute__((constructor))

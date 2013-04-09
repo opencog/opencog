@@ -25,6 +25,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/spacetime/atom_types.h>
 
 #include <opencog/embodiment/Learning/Filter/ActionFilter.h>
 #include <opencog/embodiment/Control/LoggerFactory.h>

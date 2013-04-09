@@ -34,6 +34,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>

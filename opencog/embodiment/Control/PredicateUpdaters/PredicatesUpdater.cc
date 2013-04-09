@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+
 #include "PredicatesUpdater.h"
 #include "SpatialPredicateUpdater.h"
 #include "IsSmallPredicateUpdater.h"

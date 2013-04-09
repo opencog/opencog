@@ -34,6 +34,7 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/mt19937ar.h>
 
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceTime.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
