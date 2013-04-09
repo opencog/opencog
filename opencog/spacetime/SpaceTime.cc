@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/spacetime/atom_types.h>
 #include "SpaceTime.h"
 
 namespace opencog {

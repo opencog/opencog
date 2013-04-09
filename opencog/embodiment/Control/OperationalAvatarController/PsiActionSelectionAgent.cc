@@ -23,6 +23,8 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/util/platform.h>
 

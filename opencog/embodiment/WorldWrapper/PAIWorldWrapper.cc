@@ -21,34 +21,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
-#include "PAIWorldWrapper.h"
-#include "WorldWrapperUtil.h"
-
-#include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
-#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
-#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
-#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
-
-#include <opencog/atomspace/Node.h>
-
-#include <opencog/spatial/3DSpaceMap/Pathfinder3D.h>
-#include <opencog/spatial/TangentBug.h>
-#include <opencog/spatial/AStarController.h>
-#include <opencog/spatial/AStar3DController.h>
-
-#include <opencog/util/RandGen.h>
+#include <sstream>
+#include <limits>
+#include <cstdio>
 
 #include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <opencog/util/RandGen.h>
 #include <opencog/util/tree.h>
 
-#include <sstream>
-#include <limits>
-#include <cstdio>
+#include <opencog/atomspace/Node.h>
+#include <opencog/spacetime/atom_types.h>
+
+#include <opencog/spatial/3DSpaceMap/Pathfinder3D.h>
+#include <opencog/spatial/AStarController.h>
+#include <opencog/spatial/AStar3DController.h>
+#include <opencog/spatial/TangentBug.h>
+
+#include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
+
+#include "PAIWorldWrapper.h"
+#include "WorldWrapperUtil.h"
 
 // The percentage bellow is related to the diagonal of the SpaceMap
 #define STEP_SIZE_PERCENTAGE 2.0

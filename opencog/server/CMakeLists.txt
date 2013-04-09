@@ -39,6 +39,7 @@ ADD_LIBRARY (server SHARED
 )
 
 TARGET_LINK_LIBRARIES(server
+	nlp-types
 	atomspace
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}

@@ -38,7 +38,7 @@
 (SimilarityLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(LatestLink (stv 1.0 1.0)
+	(AtTimeLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
