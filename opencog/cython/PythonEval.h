@@ -38,7 +38,7 @@
 #ifndef OPENCOG_PYTHON_EVAL_H
 #define OPENCOG_PYTHON_EVAL_H
 
-#include <Python.h>
+#include "PyIncludeWrapper.h"
 
 #include <string>
 
