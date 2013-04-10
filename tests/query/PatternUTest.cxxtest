@@ -62,10 +62,6 @@ class PatternUTest: public CxxTest::TestSuite
 
 	public:
 
-		// WTF ?? what are these for? Other tests don't need 'em ...
-		static PatternUTest* createSuite() { return new PatternUTest(); }
-		static void destroySuite(PatternUTest* suite) { delete suite; }
-
 		PatternUTest(void)
 		{
 			try
