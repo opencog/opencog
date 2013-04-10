@@ -26,7 +26,6 @@
 #include "connect.h"
 #include "connector-utils.h"
 #include "disjoin.h"
-#include "garbage.h"
 #include "state.h"
 #include "viterbi.h"
 #endif
@@ -44,7 +43,6 @@ Parser::Parser(Dictionary dict)
 // , _alternatives(NULL)
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
-	// lg_init_gc();
 	initialize_state();
 }
 
@@ -115,7 +113,6 @@ Handle Parser::lg_exp_to_atom(Exp* exp)
 	return Handle::UNDEFINED;
 }
 
-#ifdef LATER
 // ===================================================================
 /**
  * Return atomic formula connector expression for the given word.
@@ -124,19 +121,21 @@ Handle Parser::lg_exp_to_atom(Exp* exp)
  * the resulting link-grammar connective expression into an formula
  * composed of atoms.
  */
-Set * Parser::word_consets(const string& word)
+Handle Parser::word_consets(const string& word)
 {
 	// See if we know about this word, or not.
 	Dict_node* dn_head = dictionary_lookup_list(_dict, word.c_str());
-	if (!dn_head) return NULL;
+	if (!dn_head) return Handle::UNDEFINED;
 
-	OutList djset;
+	// OutList djset;
 	for (Dict_node* dn = dn_head; dn; dn = dn->right)
 	{
 		Exp* exp = dn->exp;
 		DBG({cout << "=============== Parser word: " << dn->string << ": ";
 			print_expression(exp); });
 
+		lg_exp_to_atom(exp);
+#ifdef LATER
 		Atom *dj = lg_exp_to_atom(exp);
 		dj = disjoin(dj);
 
@@ -144,11 +143,12 @@ Set * Parser::word_consets(const string& word)
 		// Second atom is the first disjuct that must be fulfilled.
 		Word* nword = new Word(dn->string);
 		djset.push_back(new WordCset(nword, dj));
+#endif
 	}
-	return new Set(djset);
+	// return new Set(djset);
+return Handle::UNDEFINED;
 }
 
-#endif
 
 // ===================================================================
 /**
@@ -156,9 +156,10 @@ Set * Parser::word_consets(const string& word)
  */
 void Parser::initialize_state()
 {
-#if LATER
 	const char * wall_word = "LEFT-WALL";
 
+	word_consets(wall_word);
+#if LATER
 	Set *wall_disj = word_consets(wall_word);
 
 	// We are expecting the initial wall to be unique.

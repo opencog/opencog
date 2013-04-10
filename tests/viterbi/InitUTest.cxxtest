@@ -70,13 +70,28 @@ void InitUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
+
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm");
+
+	// Blindly search a bunch of paths hoping to find the files
+	// in one of them ...
+	const char * paths[] =
+	{
+		"./",
+		"../",
+		"../../",
+		"../../../",
+		NULL
+	};
+	cogserver().loadSCMModules(paths);
 }
 
 void InitUTest::test_init(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	const char * dict_str = 
+	const char * dict_str =
 		"LEFT-WALL: Wd+;"
 		"Hello: Wd-;";
 
