@@ -152,6 +152,9 @@ Handle Parser::word_consets(const string& word)
 		djset.push_back(new WordCset(nword, dj));
 #endif
 	}
+
+	free_lookup_list(dn_head);
+
 	// return new Set(djset);
 return Handle::UNDEFINED;
 }

@@ -100,6 +100,7 @@ void InitUTest::test_init(void)
 
 	Parser pars(dict);
 
+	dictionary_delete(dict);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
