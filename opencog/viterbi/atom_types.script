@@ -4,6 +4,7 @@
 //
 // Connector: same meaning and syntax as in link-grammar
 LG_CONNECTOR_NODE <- NODE   // e.g. "MX"
-LG_CONN_DIR_NODE <- NODE   // e.g. "+"
+LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
+LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 
 LG_CONNECTOR_LINK <- LINK   // e.g. "MX+"

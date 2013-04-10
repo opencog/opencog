@@ -65,14 +65,21 @@ Parser::Parser(Dictionary dict)
  */
 Handle Parser::lg_exp_to_atom(Exp* exp)
 {
-	_scm_eval.eval_h("(Node \"asdf\")");
-#ifdef LATER
+	std::string scm = lg_exp_to_scm_string(exp);
+	return _scm_eval.eval_h(scm);
+}
+
+std::string Parser::lg_exp_to_scm_string(Exp* exp)
+{
 	if (CONNECTOR_type == exp->type)
 	{
 		stringstream ss;
-		if (exp->multi) ss << "@";
-		ss << exp->u.string << exp->dir;
-		return new Connector(ss.str());
+		ss << "(LgConnectorLink (LgConnectorNode ";
+		ss << "\"" << exp->u.string << "\")";
+		ss << "(LgConnDirNode \"" << exp->dir << "\")";
+		if (exp->multi) ss << "(LgConnMultiNode \"@\")";
+		ss << ")\n";
+		return ss.str();
 	}
 
 	// Whenever a null appears in an OR-list, it means the 
@@ -80,7 +87,7 @@ Handle Parser::lg_exp_to_atom(Exp* exp)
 	// in an AND-list.
 	E_list* el = exp->u.l;
 	if (NULL == el)
-		return new Connector(OPTIONAL_CLAUSE);
+		return "(LgConnectorLink (LgConnectorNode \"0\"))\n";
 
 	// The C data structure that link-grammar uses for connector
 	// expressions is totally insane, as witnessed by the loop below.
@@ -88,29 +95,29 @@ Handle Parser::lg_exp_to_atom(Exp* exp)
 	// with exp->u.l->e being the left hand side, and
 	//      exp->u.l->next->e being the right hand side.
 	// This means that exp->u.l->next->next is always null.
-	OutList alist;
-	alist.push_back(lg_exp_to_atom(el->e));
+	std::string alist;
+
+	if (AND_type == exp->type)
+		alist = "(AndLink ";
+
+	if (OR_type == exp->type)
+		alist = "(OrLink ";
+
+	alist += lg_exp_to_scm_string(el->e);
 	el = el->next;
 
 	while (el && exp->type == el->e->type)
 	{
 		el = el->e->u.l;
-		alist.push_back(lg_exp_to_atom(el->e));
+		alist += lg_exp_to_scm_string(el->e);
 		el = el->next;
 	}
 
 	if (el)
-		alist.push_back(lg_exp_to_atom(el->e));
+		alist += lg_exp_to_scm_string(el->e);
 
-	if (AND_type == exp->type)
-		return new And(alist);
-
-	if (OR_type == exp->type)
-		return new Or(alist);
-
-	assert(0, "Not reached");
-#endif 
-	return Handle::UNDEFINED;
+	alist.append (")\n");
+	return alist;
 }
 
 // ===================================================================

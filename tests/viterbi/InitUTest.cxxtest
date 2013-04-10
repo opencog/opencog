@@ -72,7 +72,8 @@ void InitUTest::setUp(void)
 	as = &cogserver().getAtomSpace();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm");
+		"opencog/atomspace/core_types.scm, "
+		"opencog/viterbi/viterbi_types.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...

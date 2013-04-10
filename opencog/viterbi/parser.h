@@ -46,6 +46,7 @@ class Parser
 #endif
 	protected:
 		void initialize_state();
+		std::string lg_exp_to_scm_string(Exp*);
 		Handle lg_exp_to_atom(Exp*);
 
 		Dictionary _dict;
