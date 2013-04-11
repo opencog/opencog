@@ -183,21 +183,17 @@ void Parser::initialize_state()
 	const char * wall_word = "LEFT-WALL";
 
 	Handle wall_conset_h = word_consets(wall_word);
-	AtomSpace& as = atomspace();
 
 	// We are expecting the initial wall to be unique.
-	OC_ASSERT(as.getArity(wall_conset_h) == 1, "Unexpected wall structure");
-	Handle wall_cset = as.getOutgoing(wall_conset_h, 0);
-
-	Handle anchor = _scm_eval.eval_h(alternatives_anchor);
+	OC_ASSERT(atomspace().getArity(wall_conset_h) == 1, "Unexpected wall structure");
 
 	// Initial state is anchored where it can be found.
 	stringstream pole;
-	pole << "(ListLink (cog-atom " << anchor << ")";
+	pole << "(ListLink " << alternatives_anchor;
 
 	// Initial state: no output, and only the wall cset.
-	pole << "(LgStatePair (LgSeq (cog-atom "
-	     << wall_cset << ")) (LgSeq)))\n";
+	pole << "(LgStatePair (LgSeq (car (cog-outgoing-set (cog-atom "
+	     << wall_conset_h << ")))) (LgSeq)))\n";
 	
 	_scm_eval.eval(pole);
 
