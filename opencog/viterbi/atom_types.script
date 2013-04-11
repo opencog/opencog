@@ -8,3 +8,7 @@ LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
 LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 
 LG_CONNECTOR_LINK <- LINK   // e.g. "MX+"
+
+// So as not to pollute the rest of the atomspace.
+LG_AND_LINK <- ORDERED_LINK  // must be ordered!
+LG_OR_LINK <- OR_LINK

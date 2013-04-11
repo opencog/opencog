@@ -38,6 +38,8 @@ using namespace std;
 
 namespace viterbi {
 
+const char * Parser::alternatives_anchor = "(AnchorNode \"Viterbi Alternatives\")";
+
 Parser::Parser(Dictionary dict)
 	: _dict(dict), _scm_eval(SchemeEval::instance())
 // , _alternatives(NULL)
@@ -98,10 +100,10 @@ std::string Parser::lg_exp_to_scm_string(Exp* exp)
 	std::string alist;
 
 	if (AND_type == exp->type)
-		alist = "(AndLink ";
+		alist = "(LgAndLink ";
 
 	if (OR_type == exp->type)
-		alist = "(OrLink ";
+		alist = "(LgOrLink ";
 
 	alist += lg_exp_to_scm_string(el->e);
 	el = el->next;
@@ -169,6 +171,7 @@ void Parser::initialize_state()
 	const char * wall_word = "LEFT-WALL";
 
 	word_consets(wall_word);
+	_scm_eval.eval_h(alternatives_anchor);
 #if LATER
 	Set *wall_disj = word_consets(wall_word);
 

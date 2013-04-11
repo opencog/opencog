@@ -45,6 +45,7 @@ class Parser
 		Set* get_alternatives();
 #endif
 	protected:
+		static const char *alternatives_anchor;
 		void initialize_state();
 		std::string lg_exp_to_scm_string(Exp*);
 		Handle lg_exp_to_atom(Exp*);
@@ -52,7 +53,6 @@ class Parser
 		Dictionary _dict;
 		SchemeEval& _scm_eval;
 	private:
-		// Set* _alternatives;
 };
 
 } // namespace viterbi
