@@ -38,6 +38,24 @@ using namespace std;
 
 namespace viterbi {
 
+// Print the atomspace contents.
+const char* dbg = 
+	"(define (prt-atomspace)\n"
+	"  (define (prt-atom h)\n"
+	"    ; print only the top-level atoms.\n"
+	"    (if (null? (cog-incoming-set h))\n"
+	"        (display h))\n"
+	"  #f)\n"
+	"  (define (prt-type type)\n"
+	"    (cog-map-type prt-atom type)\n"
+	"    ; We have to recurse over sub-types\n"
+	"    (for-each prt-type (cog-get-subtypes type))\n"
+	"  )\n"
+	"  (prt-type 'Atom)\n"
+	")\n"
+	"(prt-atomspace)\n";
+
+
 const char * Parser::alternatives_anchor = "(AnchorNode \"# Viterbi Alternatives\")";
 
 Parser::Parser(Dictionary dict)
@@ -204,23 +222,7 @@ void Parser::initialize_state()
 	clean << "(cog-delete (cog-atom " << wall_conset_h << "))";
 	_scm_eval.eval(clean);
 
-	const char* dbg = 
-		"(define (prt-atomspace)\n"
-		"  (define (prt-atom h)\n"
-		"    ; print only the top-level atoms.\n"
-		"    (if (null? (cog-incoming-set h))\n"
-		"        (display h))\n"
-		"  #f)\n"
-		"  (define (prt-type type)\n"
-		"    (cog-map-type prt-atom type)\n"
-		"    ; We have to recurse over sub-types\n"
-		"    (for-each prt-type (cog-get-subtypes type))\n"
-		"  )\n"
-		"  (prt-type 'Atom)\n"
-		")\n"
-		"(prt-atomspace)\n";
-
-	std::cout << _scm_eval.eval(dbg) << std::endl;
+	DBG(cout << _scm_eval.eval(dbg) << endl);
 }
 
 #if LATER
