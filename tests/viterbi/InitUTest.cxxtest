@@ -71,6 +71,10 @@ void InitUTest::setUp(void)
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 
+	// Load the required data
+	config().set("MODULES",
+		"opencog/nlp/types/libnlp-types.so");
+
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
@@ -86,6 +90,7 @@ void InitUTest::setUp(void)
 		"../../../",
 		NULL
 	};
+	cogserver().loadModules();
 	cogserver().loadSCMModules(paths);
 }
 

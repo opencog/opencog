@@ -159,7 +159,6 @@ Handle Parser::word_consets(const string& word)
 
 	set += ")\n";
 
-std::cout<<"duuude wtf" << set<<std::endl;
 // XXX TODO Need to disjoin the expression returned above!
 const char * dj = 
 "(define dj "
@@ -217,7 +216,7 @@ void Parser::initialize_state()
 		")\n"
 		"(prt-atomspace)\n";
 
-	_scm_eval.eval(dbg);
+	std::cout << _scm_eval.eval(dbg) << std::endl;
 }
 
 #if LATER
