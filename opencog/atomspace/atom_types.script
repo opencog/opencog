@@ -32,6 +32,7 @@ MEMBER_LINK <- ORDERED_LINK
 SUBSET_LINK <- ORDERED_LINK
 
 // Boolean set operations, logical constants
+// The ordered version of AND_LINK is SEQUENTIAL_AND_LINK, below.
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK

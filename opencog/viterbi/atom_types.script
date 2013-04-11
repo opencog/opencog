@@ -7,11 +7,12 @@ LG_CONNECTOR_NODE <- NODE   // e.g. "MX"
 LG_CONN_MULTI_NODE <- NODE  // multi-connector "@"
 LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 
-LG_CONNECTOR_LINK <- LINK   // e.g. "MX+"
+LG_CONNECTOR <- LINK   // e.g. "MX+"
 
 // So as not to pollute the rest of the atomspace.
-LG_AND_LINK <- ORDERED_LINK  // must be ordered!
-LG_OR_LINK <- OR_LINK
+LG_SEQ <- LIST_LINK   // Just an ordered sequence, without other semantics.
+LG_AND <- LG_SEQ      // must be ordered! (like SEQUNTIAL_AND_LINK)
+LG_OR  <- OR_LINK
 
 
 // Kind-of-like an EvaluationLink but different.
@@ -19,4 +20,8 @@ LG_OR_LINK <- OR_LINK
 // Second atom must be a "connector set": that is, a collection of
 // LgConnectors, joined with LgOrLink, LgAndLink.
 // Ideally, these are fully disjoined before use.
-LG_WORD_CSET_LINK <- LINK
+LG_WORD_CSET <- LIST_LINK
+
+// A pair, consisting of a sequence of unconnected connectors,
+// and a sequence of output words.
+LG_STATE_PAIR <- LIST_LINK

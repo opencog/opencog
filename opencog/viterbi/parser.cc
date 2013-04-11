@@ -14,7 +14,7 @@
 // #include <algorithm>
 // #include <iostream>
 #include <string>
-// #include <sstream>
+#include <sstream>
 // #include <vector>
 
 #include <link-grammar/read-dict.h>
@@ -38,7 +38,7 @@ using namespace std;
 
 namespace viterbi {
 
-const char * Parser::alternatives_anchor = "(AnchorNode \"Viterbi Alternatives\")";
+const char * Parser::alternatives_anchor = "(AnchorNode \"# Viterbi Alternatives\")";
 
 Parser::Parser(Dictionary dict)
 	: _dict(dict), _scm_eval(SchemeEval::instance())
@@ -76,7 +76,7 @@ std::string Parser::lg_exp_to_scm_string(Exp* exp)
 	if (CONNECTOR_type == exp->type)
 	{
 		stringstream ss;
-		ss << "(LgConnectorLink (LgConnectorNode ";
+		ss << "(LgConnector (LgConnectorNode ";
 		ss << "\"" << exp->u.string << "\")";
 		ss << "(LgConnDirNode \"" << exp->dir << "\")";
 		if (exp->multi) ss << "(LgConnMultiNode \"@\")";
@@ -89,7 +89,7 @@ std::string Parser::lg_exp_to_scm_string(Exp* exp)
 	// in an AND-list.
 	E_list* el = exp->u.l;
 	if (NULL == el)
-		return "(LgConnectorLink (LgConnectorNode \"0\"))\n";
+		return "(LgConnector (LgConnectorNode \"0\"))\n";
 
 	// The C data structure that link-grammar uses for connector
 	// expressions is totally insane, as witnessed by the loop below.
@@ -100,10 +100,10 @@ std::string Parser::lg_exp_to_scm_string(Exp* exp)
 	std::string alist;
 
 	if (AND_type == exp->type)
-		alist = "(LgAndLink ";
+		alist = "(LgAnd ";
 
 	if (OR_type == exp->type)
-		alist = "(LgOrLink ";
+		alist = "(LgOr ";
 
 	alist += lg_exp_to_scm_string(el->e);
 	el = el->next;
@@ -146,7 +146,7 @@ Handle Parser::word_consets(const string& word)
 
 		// First atom at the front of the outgoing set is the word itself.
 		// Second atom is the first disjuct that must be fulfilled.
-		std::string word_cset = "  (LgWordCsetLink (WordNode \"";
+		std::string word_cset = "  (LgWordCset (WordNode \"";
 		word_cset += word;
 		word_cset += "\")\n";
 		word_cset += lg_exp_to_scm_string(exp);
@@ -163,8 +163,8 @@ Handle Parser::word_consets(const string& word)
 const char * dj = 
 "(define dj "
 "  (ImplicationLink "
-"    (LgAndLink "
-"       (LgOrLink "
+"    (LgAnd "
+"       (LgOr "
 "       )"
 "    )"
 "  )"
@@ -182,24 +182,32 @@ void Parser::initialize_state()
 {
 	const char * wall_word = "LEFT-WALL";
 
-	word_consets(wall_word);
-	_scm_eval.eval_h(alternatives_anchor);
-#if LATER
-	Set *wall_disj = word_consets(wall_word);
+	Handle wall_conset_h = word_consets(wall_word);
+	AtomSpace& as = atomspace();
 
 	// We are expecting the initial wall to be unique.
-	assert(wall_disj->get_arity() == 1, "Unexpected wall structure");
-	OutList state_vec;
-	Atom* wall_cset = wall_disj->get_outgoing_atom(0);
+	OC_ASSERT(as.getArity(wall_conset_h) == 1, "Unexpected wall structure");
+	Handle wall_cset = as.getOutgoing(wall_conset_h, 0);
 
-	// Initial state: no output, and the wall cset.
-	_alternatives = new Set(
-		new StatePair(
-			new Seq(wall_cset),
-			new Seq()
-		)
-	);
-#endif
+	Handle anchor = _scm_eval.eval_h(alternatives_anchor);
+
+	// Initial state is anchored where it can be found.
+	stringstream pole;
+	pole << "(ListLink (cog-atom " << anchor << ")";
+
+	// Initial state: no output, and only the wall cset.
+	pole << "(LgStatePair (LgSeq (cog-atom "
+	     << wall_cset << ")) (LgSeq)))\n";
+	
+	_scm_eval.eval(pole);
+
+	// Hmmm.  Some cleanup.  We really don't need the left-wall
+	// connector set any more, so delete it.  It bugs me that we
+	// need to do this .. it should disappear on its own ...
+	stringstream clean;
+	clean << "(cog-delete (cog-atom " << wall_conset_h << "))";
+	_scm_eval.eval(clean);
+
 	const char* dbg = 
 		"(define (prt-atomspace)\n"
 		"  (define (prt-atom h)\n"
