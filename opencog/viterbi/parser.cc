@@ -136,29 +136,42 @@ Handle Parser::word_consets(const string& word)
 	Dict_node* dn_head = dictionary_lookup_list(_dict, word.c_str());
 	if (!dn_head) return Handle::UNDEFINED;
 
-	// OutList djset;
+	std::string set = "(SetLink\n";
+
 	for (Dict_node* dn = dn_head; dn; dn = dn->right)
 	{
 		Exp* exp = dn->exp;
 		DBG({cout << "=============== Parser word: " << dn->string << ": ";
 			print_expression(exp); });
 
-		lg_exp_to_atom(exp);
-#ifdef LATER
-		Atom *dj = lg_exp_to_atom(exp);
-		dj = disjoin(dj);
-
 		// First atom at the front of the outgoing set is the word itself.
 		// Second atom is the first disjuct that must be fulfilled.
-		Word* nword = new Word(dn->string);
-		djset.push_back(new WordCset(nword, dj));
-#endif
+		std::string word_cset = "  (LgWordCsetLink (WordNode \"";
+		word_cset += word;
+		word_cset += "\")\n";
+		word_cset += lg_exp_to_scm_string(exp);
+		word_cset += "  )\n";
+
+		set += word_cset;
 	}
 
 	free_lookup_list(dn_head);
 
-	// return new Set(djset);
-return Handle::UNDEFINED;
+	set += ")\n";
+
+std::cout<<"duuude wtf" << set<<std::endl;
+// XXX TODO Need to disjoin the expression returned above!
+const char * dj = 
+"(define dj "
+"  (ImplicationLink "
+"    (LgAndLink "
+"       (LgOrLink "
+"       )"
+"    )"
+"  )"
+")";
+
+	return _scm_eval.eval_h(set);
 }
 
 
@@ -188,6 +201,23 @@ void Parser::initialize_state()
 		)
 	);
 #endif
+	const char* dbg = 
+		"(define (prt-atomspace)\n"
+		"  (define (prt-atom h)\n"
+		"    ; print only the top-level atoms.\n"
+		"    (if (null? (cog-incoming-set h))\n"
+		"        (display h))\n"
+		"  #f)\n"
+		"  (define (prt-type type)\n"
+		"    (cog-map-type prt-atom type)\n"
+		"    ; We have to recurse over sub-types\n"
+		"    (for-each prt-type (cog-get-subtypes type))\n"
+		"  )\n"
+		"  (prt-type 'Atom)\n"
+		")\n"
+		"(prt-atomspace)\n";
+
+	_scm_eval.eval(dbg);
 }
 
 #if LATER

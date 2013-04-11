@@ -12,3 +12,11 @@ LG_CONNECTOR_LINK <- LINK   // e.g. "MX+"
 // So as not to pollute the rest of the atomspace.
 LG_AND_LINK <- ORDERED_LINK  // must be ordered!
 LG_OR_LINK <- OR_LINK
+
+
+// Kind-of-like an EvaluationLink but different.
+// First atom must be a word node. 
+// Second atom must be a "connector set": that is, a collection of
+// LgConnectors, joined with LgOrLink, LgAndLink.
+// Ideally, these are fully disjoined before use.
+LG_WORD_CSET_LINK <- LINK

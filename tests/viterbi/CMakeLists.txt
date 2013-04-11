@@ -10,6 +10,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	viterbi
+	nlp-types
 	atomspace
 	query
 	server

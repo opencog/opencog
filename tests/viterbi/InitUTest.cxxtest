@@ -73,6 +73,7 @@ void InitUTest::setUp(void)
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
 		"opencog/viterbi/viterbi_types.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
