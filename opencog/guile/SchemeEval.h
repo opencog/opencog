@@ -10,6 +10,7 @@
 #ifdef HAVE_GUILE
 
 #include <string>
+#include <sstream>
 #include <pthread.h>
 #include <libguile.h>
 #include <opencog/server/CogServer.h>
@@ -81,8 +82,12 @@ class SchemeEval
 		
 	public:
 					
-		std::string eval(const std::string &);
-		Handle eval_h(const std::string &);
+		std::string eval(const std::string&);
+		std::string eval(const std::stringstream& ss) { return eval(ss.str()); }
+
+		Handle eval_h(const std::string&);
+		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
+
 		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle varargs);
 	
