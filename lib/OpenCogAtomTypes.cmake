@@ -119,6 +119,13 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list '${TYPE_NAME}) x)))\n")
         ENDIF (ISLINK STREQUAL "LINK")
 
+        # If not named as a node or a link, assume its a link
+        # This is kind of hacky, but I don't know what else to do ... 
+        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+            FILE(APPEND "${SCM_FILE}" "(define (${TYPE_NAME} . x)\n")
+            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list '${TYPE_NAME}) x)))\n")
+        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+
         IF (PARENT_TYPES)
             STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
             FOREACH (PARENT_TYPE ${PARENT_TYPES})

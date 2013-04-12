@@ -43,6 +43,10 @@ IF (CXXTEST_FOUND)
 
  		ADD_SUBDIRECTORY (spatial)
 
+		IF (HAVE_VITERBI)
+			ADD_SUBDIRECTORY (viterbi)
+		ENDIF (HAVE_VITERBI)
+
 		# Rest interfaces assume that the cogserver is working;
 		# so run after the cogserver tests.
 		IF (HAVE_WEB)

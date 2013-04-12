@@ -14,6 +14,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 ADD_LIBRARY (nlp-types SHARED
 	atom_types
 	NLPTypes
+	NLPTypesModule
 )
 
 IF (WIN32)
