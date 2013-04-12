@@ -222,23 +222,25 @@ void Parser::initialize_state()
 	clean << "(cog-delete (cog-atom " << wall_conset_h << "))";
 	_scm_eval.eval(clean);
 
+	// Print out the atomspace contents
 	DBG(cout << _scm_eval.eval(dbg) << endl);
 }
 
-#if LATER
 // ===================================================================
 /**
  * Add a single word to the parse.
  */
 void Parser::stream_word(const string& word)
 {
-	Set *djset = word_consets(word);
-	if (!djset)
+	Handle djset = word_consets(word);
+	if (Handle::UNDEFINED == djset)
 	{
-		cout << "Unhandled error; word not in dict: " << word << endl;
+		logger().error() << "Unhandled error; word not in dict: " << word;
 		return;
 	}
+	DBG(cout << _scm_eval.eval(dbg) << endl);
 
+#if LATER
 	// Try to add each dictionary entry to the parse state.
 	Set* new_alts = new Set();
 	for (int i = 0; i < djset->get_arity(); i++)
@@ -249,15 +251,10 @@ void Parser::stream_word(const string& word)
 		new_alts = new_alts->add(stset.get_alternatives());
 	}
 	_alternatives = new_alts;
+#endif
 }
 
-// ===================================================================
-/** convenience wrapper */
-Set* Parser::get_alternatives()
-{
-	return _alternatives;
-}
-
+#if LATER
 // ===================================================================
 /**
  * Add a stream of text to the input.

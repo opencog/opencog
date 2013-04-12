@@ -35,9 +35,9 @@ class Parser
 
 #if 0
 		void streamin(const std::string&);
-		void stream_word(const std::string&);
 		void stream_word_conset(WordCset*);
 #endif
+		void stream_word(const std::string&);
 
 		Handle word_consets(const std::string& word);
 
