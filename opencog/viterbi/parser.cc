@@ -14,7 +14,7 @@
 // #include <algorithm>
 // #include <iostream>
 #include <string>
-// #include <sstream>
+#include <sstream>
 // #include <vector>
 
 #include <link-grammar/read-dict.h>
@@ -26,7 +26,6 @@
 #include "connect.h"
 #include "connector-utils.h"
 #include "disjoin.h"
-#include "garbage.h"
 #include "state.h"
 #include "viterbi.h"
 #endif
@@ -39,13 +38,35 @@ using namespace std;
 
 namespace viterbi {
 
+// Print the atomspace contents.
+const char* dbg = 
+	"(define (prt-atomspace)\n"
+	"  (define (prt-atom h)\n"
+	"    ; print only the top-level atoms.\n"
+	"    (if (null? (cog-incoming-set h))\n"
+	"        (display h))\n"
+	"  #f)\n"
+	"  (define (prt-type type)\n"
+	"    (cog-map-type prt-atom type)\n"
+	"    ; We have to recurse over sub-types\n"
+	"    (for-each prt-type (cog-get-subtypes type))\n"
+	"  )\n"
+	"  (prt-type 'Atom)\n"
+	")\n"
+	"(prt-atomspace)\n";
+
+
+const char * Parser::alternatives_anchor = "(AnchorNode \"# Viterbi Alternatives\")";
+
 Parser::Parser(Dictionary dict)
 	: _dict(dict), _scm_eval(SchemeEval::instance())
-// , _alternatives(NULL)
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
-	// lg_init_gc();
 	initialize_state();
+
+	// XXX TODO -- this should load up a bunch of scm files,
+	// and should also load the query module, as otherwise
+	// cog-bind will fail!
 }
 
 // ===================================================================
@@ -67,14 +88,21 @@ Parser::Parser(Dictionary dict)
  */
 Handle Parser::lg_exp_to_atom(Exp* exp)
 {
-	_scm_eval.eval_h("(Node \"asdf\")");
-#ifdef LATER
+	std::string scm = lg_exp_to_scm_string(exp);
+	return _scm_eval.eval_h(scm);
+}
+
+std::string Parser::lg_exp_to_scm_string(Exp* exp)
+{
 	if (CONNECTOR_type == exp->type)
 	{
 		stringstream ss;
-		if (exp->multi) ss << "@";
-		ss << exp->u.string << exp->dir;
-		return new Connector(ss.str());
+		ss << "(LgConnector (LgConnectorNode ";
+		ss << "\"" << exp->u.string << "\")";
+		ss << "(LgConnDirNode \"" << exp->dir << "\")";
+		if (exp->multi) ss << "(LgConnMultiNode \"@\")";
+		ss << ")\n";
+		return ss.str();
 	}
 
 	// Whenever a null appears in an OR-list, it means the 
@@ -82,7 +110,7 @@ Handle Parser::lg_exp_to_atom(Exp* exp)
 	// in an AND-list.
 	E_list* el = exp->u.l;
 	if (NULL == el)
-		return new Connector(OPTIONAL_CLAUSE);
+		return "(LgConnector (LgConnectorNode \"0\"))\n";
 
 	// The C data structure that link-grammar uses for connector
 	// expressions is totally insane, as witnessed by the loop below.
@@ -90,32 +118,31 @@ Handle Parser::lg_exp_to_atom(Exp* exp)
 	// with exp->u.l->e being the left hand side, and
 	//      exp->u.l->next->e being the right hand side.
 	// This means that exp->u.l->next->next is always null.
-	OutList alist;
-	alist.push_back(lg_exp_to_atom(el->e));
+	std::string alist;
+
+	if (AND_type == exp->type)
+		alist = "(LgAnd ";
+
+	if (OR_type == exp->type)
+		alist = "(LgOr ";
+
+	alist += lg_exp_to_scm_string(el->e);
 	el = el->next;
 
 	while (el && exp->type == el->e->type)
 	{
 		el = el->e->u.l;
-		alist.push_back(lg_exp_to_atom(el->e));
+		alist += lg_exp_to_scm_string(el->e);
 		el = el->next;
 	}
 
 	if (el)
-		alist.push_back(lg_exp_to_atom(el->e));
+		alist += lg_exp_to_scm_string(el->e);
 
-	if (AND_type == exp->type)
-		return new And(alist);
-
-	if (OR_type == exp->type)
-		return new Or(alist);
-
-	assert(0, "Not reached");
-#endif 
-	return Handle::UNDEFINED;
+	alist.append (")\n");
+	return alist;
 }
 
-#ifdef LATER
 // ===================================================================
 /**
  * Return atomic formula connector expression for the given word.
@@ -124,31 +151,51 @@ Handle Parser::lg_exp_to_atom(Exp* exp)
  * the resulting link-grammar connective expression into an formula
  * composed of atoms.
  */
-Set * Parser::word_consets(const string& word)
+Handle Parser::word_consets(const string& word)
 {
 	// See if we know about this word, or not.
 	Dict_node* dn_head = dictionary_lookup_list(_dict, word.c_str());
-	if (!dn_head) return NULL;
+	if (!dn_head) return Handle::UNDEFINED;
 
-	OutList djset;
+	std::string set = "(SetLink\n";
+
 	for (Dict_node* dn = dn_head; dn; dn = dn->right)
 	{
 		Exp* exp = dn->exp;
 		DBG({cout << "=============== Parser word: " << dn->string << ": ";
 			print_expression(exp); });
 
-		Atom *dj = lg_exp_to_atom(exp);
-		dj = disjoin(dj);
-
 		// First atom at the front of the outgoing set is the word itself.
 		// Second atom is the first disjuct that must be fulfilled.
-		Word* nword = new Word(dn->string);
-		djset.push_back(new WordCset(nword, dj));
+		std::string word_cset = "  (LgWordCset (WordNode \"";
+		word_cset += word;
+		word_cset += "\")\n";
+		word_cset += lg_exp_to_scm_string(exp);
+		word_cset += "  )\n";
+
+		set += word_cset;
 	}
-	return new Set(djset);
+
+	free_lookup_list(dn_head);
+
+	set += ")\n";
+
+#if 0
+// XXX TODO Need to disjoin the expression returned above!
+const char * dj = 
+"(define dj "
+"  (ImplicationLink "
+"    (LgAnd "
+"       (LgOr "
+"       )"
+"    )"
+"  )"
+")";
+#endif
+
+	return _scm_eval.eval_h(set);
 }
 
-#endif
 
 // ===================================================================
 /**
@@ -156,40 +203,54 @@ Set * Parser::word_consets(const string& word)
  */
 void Parser::initialize_state()
 {
-#if LATER
 	const char * wall_word = "LEFT-WALL";
 
-	Set *wall_disj = word_consets(wall_word);
+	Handle wall_conset_h = word_consets(wall_word);
 
 	// We are expecting the initial wall to be unique.
-	assert(wall_disj->get_arity() == 1, "Unexpected wall structure");
-	OutList state_vec;
-	Atom* wall_cset = wall_disj->get_outgoing_atom(0);
+	OC_ASSERT(atomspace().getArity(wall_conset_h) == 1, "Unexpected wall structure");
 
-	// Initial state: no output, and the wall cset.
-	_alternatives = new Set(
-		new StatePair(
-			new Seq(wall_cset),
-			new Seq()
-		)
-	);
-#endif
+	// Initial state is anchored where it can be found.
+	stringstream pole;
+	pole << "(ListLink " << alternatives_anchor;
+
+	// Initial state: no output, and only the wall cset.
+	pole << "(LgStatePair (LgSeq (car (cog-outgoing-set (cog-atom "
+	     << wall_conset_h << ")))) (LgSeq)))\n";
+	
+	_scm_eval.eval(pole);
+
+	// Hmmm.  Some cleanup.  We really don't need the left-wall
+	// connector set any more, so delete it.  It bugs me that we
+	// need to do this .. it should disappear on its own ...
+	stringstream clean;
+	clean << "(cog-delete (cog-atom " << wall_conset_h << "))";
+	_scm_eval.eval(clean);
+
+	// Print out the atomspace contents
+	DBG(cout << _scm_eval.eval(dbg) << endl);
 }
 
-#if LATER
 // ===================================================================
 /**
  * Add a single word to the parse.
  */
 void Parser::stream_word(const string& word)
 {
-	Set *djset = word_consets(word);
-	if (!djset)
+	Handle djset = word_consets(word);
+	if (Handle::UNDEFINED == djset)
 	{
-		cout << "Unhandled error; word not in dict: " << word << endl;
+		logger().error() << "Unhandled error; word not in dict: " << word;
 		return;
 	}
 
+	DBG(cout << _scm_eval.eval(dbg) << endl);
+	Handle rule = _scm_eval.eval_h("(cog-bind attach)");
+
+	DBG(cout << "---------- post match -------- " << endl);
+	DBG(cout << _scm_eval.eval(dbg) << endl);
+
+#if LATER
 	// Try to add each dictionary entry to the parse state.
 	Set* new_alts = new Set();
 	for (int i = 0; i < djset->get_arity(); i++)
@@ -200,15 +261,10 @@ void Parser::stream_word(const string& word)
 		new_alts = new_alts->add(stset.get_alternatives());
 	}
 	_alternatives = new_alts;
+#endif
 }
 
-// ===================================================================
-/** convenience wrapper */
-Set* Parser::get_alternatives()
-{
-	return _alternatives;
-}
-
+#if LATER
 // ===================================================================
 /**
  * Add a stream of text to the input.

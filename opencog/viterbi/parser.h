@@ -35,21 +35,24 @@ class Parser
 
 #if 0
 		void streamin(const std::string&);
-		void stream_word(const std::string&);
 		void stream_word_conset(WordCset*);
+#endif
+		void stream_word(const std::string&);
 
-		Set* word_consets(const std::string& word);
+		Handle word_consets(const std::string& word);
 
+#if 0
 		Set* get_alternatives();
 #endif
 	protected:
+		static const char *alternatives_anchor;
 		void initialize_state();
+		std::string lg_exp_to_scm_string(Exp*);
 		Handle lg_exp_to_atom(Exp*);
 
 		Dictionary _dict;
 		SchemeEval& _scm_eval;
 	private:
-		// Set* _alternatives;
 };
 
 } // namespace viterbi
