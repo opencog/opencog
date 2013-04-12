@@ -371,6 +371,33 @@ bool State::getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIn
     return true;
 }
 
+float State::getFloatValueFromNumbericState()
+{
+    // please make sure this a numberic state before call this function
+    if (getStateValuleType().getCode() == FUZZY_INTERVAL_INT_CODE)
+    {
+       int fuzzyInt = boost::get<opencog::pai::FuzzyIntervalInt>(stateVariable->getValue());
+       float fuzzyFloat = FuzzyIntervalFloat((float)fuzzyInt.bound_low, (float)fuzzyInt.bound_high);
+       return (fuzzyFloat.bound_low + fuzzyInt.bound_high)/2.0f;
+    }
+    else if (getStateValuleType().getCode() == FUZZY_INTERVAL_FLOAT_CODE)
+    {
+        fuzzyFloat = boost::get<opencog::pai::FuzzyIntervalFloat>(stateVariable->getValue());
+        return (fuzzyFloat.bound_low + fuzzyInt.bound_high)/2.0f;
+    }
+    else if (getStateValuleType().getCode()  == INT_CODE)
+    {
+        int intVal = boost::get<int>(stateVariable->getValue());
+        return (float)intVal;
+
+    }
+    else if (getStateValuleType().getCode()  == FLOAT_CODE)
+        return boost::get<float>(stateVariable->getValue());
+
+
+    return 0.0f;
+}
+
 bool State::isNumbericState() const
 {
     if (  (stateVariable->getType().getCode() == INT_CODE) ||
@@ -575,6 +602,25 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
     default:
         return false;
 
+    }
+}
+
+float Rule::getCost()
+{
+    // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
+    // the cost_cal_state is the state related to the cost, e.g.: if an action is move from A to B, then the cost will depend on the state distanceOf(A,B)
+    if (cost_cal_state == 0 || cost_coefficient == 0.0f)
+        return basic_cost;
+    else
+    {
+        // get numberic value from this cost_cal_state
+        if (! cost_cal_state->isNumbericState())
+        {
+            logger().error("Planner::Rule::getCost : The relatied state is not numberic state: "
+                     + cost_cal_state.name() );
+        }
+
+       return cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
     }
 }
 

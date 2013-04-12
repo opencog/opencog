@@ -157,6 +157,9 @@ class Inquery;
         // if the value type is not numberic, return false and the floatVal and fuzzyFloat will not be assigned value
         bool getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat);
 
+        // please make sure this a numberic state before call this function
+        float getFloatValueFromNumbericState();
+
         bool isNumbericState() const;
 
         // About the calculation of Satisfie Degree
@@ -269,8 +272,13 @@ class Inquery;
         // the actor who carry out this action, usually an Entity
         StateValue actor;
 
-        // the cost of this action under the conditions of this rule (the cost value is between 0 ~ 100)
-        int cost;
+        // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
+        // the cost of this action under the conditions of this rule
+        float basic_cost;
+
+        // for linear cost:
+        State* cost_cal_state;
+        float cost_coefficient;
 
         // All the precondition required to perform this action
         vector<State*> preconditionList;
@@ -286,11 +294,14 @@ class Inquery;
         // In vector<StateValue*>, the StateValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
         map<string , vector<StateValue*> > paraIndexMap;
 
-        Rule(PetAction* _action, StateValue _actor, int _cost, vector<State*> _preconditionList, vector<EffectPair> _effectList):
-            action(_action) , actor(_actor), cost(_cost), preconditionList(_preconditionList), effectList(_effectList){}
+        Rule(PetAction* _action, StateValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, State* _cost_cal_state = 0, float _cost_coefficient = 0):
+            action(_action) , actor(_actor),basic_cost(_basic_cost), preconditionList(_preconditionList), effectList(_effectList), cost_cal_state(_cost_cal_state), cost_coefficient(_cost_coefficient){}
 
-        Rule(PetAction* _action, StateValue _actor, int _cost):
-            action(_action) , actor(_actor), cost(_cost){}
+        Rule(PetAction* _action, StateValue _actor, float _basic_cost, State* _cost_cal_state = 0, float _cost_coefficient = 0):
+            action(_action) , actor(_actor), basic_cost(_basic_cost), cost_cal_state(_cost_cal_state), cost_coefficient(_cost_coefficient){}
+
+        // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
+        float getCost();
 
         void addEffect(EffectPair effect)
         {

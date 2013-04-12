@@ -336,7 +336,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* nonHolderEffect = new Effect(holderState, OP_ASSIGN, Entity::NON_Entity);
 
     // rule: increasing energy by eat an edible object held in hand
-    Rule* eatRule = new Rule(eatAction,boost::get<Entity>(var_avatar),1);
+    Rule* eatRule = new Rule(eatAction,boost::get<Entity>(var_avatar),1.0f);
     eatRule->addPrecondition(existState);
     eatRule->addPrecondition(edibleState);
     eatRule->addPrecondition(holderState);
@@ -385,7 +385,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* holderEffect = new Effect(holderState2, OP_ASSIGN, varAvatar);
 
     // rule:  pick up an object if closed enough, to hold it
-    Rule* pickupRule = new Rule(pickupAction,boost::get<Entity>(varAvatar),1);
+    Rule* pickupRule = new Rule(pickupAction,boost::get<Entity>(varAvatar),1.0f);
     pickupRule->addPrecondition(pickupableState);
     pickupRule->addPrecondition(closedState);
 
@@ -429,7 +429,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* changedLocationEffect2 = new Effect(atLocationState2, OP_ASSIGN_NOT_EQUAL_TO, var_oldpos);
 
     // rule:   Move_to an object to get closed to it
-    Rule* movetoObjRule = new Rule(moveToObjectAction,boost::get<Entity>(var_avatar) ,1);
+    Rule* movetoObjRule = new Rule(moveToObjectAction,boost::get<Entity>(var_avatar) ,0.0f, closedState2, 1.0f);
     movetoObjRule->addPrecondition(existPathState);
 
     movetoObjRule->addEffect(EffectPair(0.9f,getClosedEffect));
@@ -466,7 +466,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* changedLocationEffect = new Effect(atLocationState, OP_ASSIGN, var_pos);
 
     // rule:   Move_to an object to get closed to it
-    Rule* walkRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,1);
+    Rule* walkRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.0f, closedState3, 1.0f);
     walkRule->addPrecondition(existPathState2);
 
     walkRule->addEffect(EffectPair(0.9f,getClosedEffect2));
@@ -526,7 +526,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* becomeSolidEffect = new Effect(solidState, OP_ASSIGN, "true");
 
     // add rule:
-    Rule* buildBlockRule = new Rule(buildBlockAction,boost::get<Entity>(varAvatar) ,30);
+    Rule* buildBlockRule = new Rule(buildBlockAction,boost::get<Entity>(varAvatar) ,30.0f);
     buildBlockRule->addPrecondition(solidState);
     buildBlockRule->addPrecondition(closedState4);
     buildBlockRule->addPrecondition(atLocationState3);
@@ -567,7 +567,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // action: do nothing
     PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
     // add rule:
-    Rule* accessAdjacentRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0);
+    Rule* accessAdjacentRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
     accessAdjacentRule->addPrecondition(standableState2);
     accessAdjacentRule->addPrecondition(adjacentState);
 
@@ -602,7 +602,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* becomeExistPathEffect2 = new Effect(existPathState6, OP_ASSIGN, "true");
 
     // add rule:
-    Rule* pathTransmitRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0);
+    Rule* pathTransmitRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
     pathTransmitRule->addPrecondition(existPathState4);
     pathTransmitRule->addPrecondition(existPathState5);
 
