@@ -387,7 +387,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
 bool Ubigrapher::addVertex(Handle h)
 {
 	// Policy: don't display PLN's FWVariableNodes, because it's annoying
-	if (classserver().isA(space.getType(h), FW_VARIABLE_NODE)) return false;
+	// if (classserver().isA(space.getType(h), FW_VARIABLE_NODE)) return false;
 
     if (!isConnected()) return false;
     boost::shared_ptr<Atom> a = space.cloneAtom(h);
