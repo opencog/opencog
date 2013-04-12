@@ -60,11 +60,13 @@ const char * Parser::alternatives_anchor = "(AnchorNode \"# Viterbi Alternatives
 
 Parser::Parser(Dictionary dict)
 	: _dict(dict), _scm_eval(SchemeEval::instance())
-// , _alternatives(NULL)
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
-	_pm.set_atomspace(&cogserver().getAtomSpace());
 	initialize_state();
+
+	// XXX TODO -- this should load up a bunch of scm files,
+	// and should also load the query module, as otherwise
+	// cog-bind will fail!
 }
 
 // ===================================================================
@@ -243,8 +245,7 @@ void Parser::stream_word(const string& word)
 	}
 
 	DBG(cout << _scm_eval.eval(dbg) << endl);
-	Handle rule = _scm_eval.eval_h("(attach)");
-	_pm.bindlink(rule);
+	Handle rule = _scm_eval.eval_h("(cog-bind attach)");
 
 	DBG(cout << "---------- post match -------- " << endl);
 	DBG(cout << _scm_eval.eval(dbg) << endl);

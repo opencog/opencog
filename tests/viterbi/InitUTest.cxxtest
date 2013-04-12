@@ -74,7 +74,8 @@ void InitUTest::setUp(void)
 
 	// Load the required data
 	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so");
+		"opencog/nlp/types/libnlp-types.so, "
+		"opencog/query/libquery.so");
 
 	// XXX TODO these should be loaded by the parser itself,
 	// and not by the test-case.

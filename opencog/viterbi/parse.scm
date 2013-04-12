@@ -10,7 +10,7 @@
 ; found in triples/varscope.scm -- it just extracts the varaibles,
 ;
 
-(define (attach) 
+(define attach 
   (BindLink
     ; Bound variable declarations. These are the variables we expect
     ; to match up when connnecting the left and right words with a connector.
