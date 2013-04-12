@@ -107,36 +107,6 @@ EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
 // ====================================================================
-// Temporal Reasoning Links
-// XXX are these actually used anywhere? I think they're old dead PLN links
-
-PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-
-// used in unity_rules.scm
-SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
-SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
-
-EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
-EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
-
-BEFORE_LINK <- ORDERED_LINK
-
-// ====================================================================
-/// PLN types:
-// These are used in PLN currently, but can perhaps be replaced/removed
-// But the PLN code is dead, cira 2012
-//
-// HYPOTHETICAL_LINK <- ORDERED_LINK
-// MIXED_IMPLICATION_LINK <- ORDERED_LINK
-// EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
-
-// Should be replaced by extensional and intensional equivalence
-// EQUIVALENCE_LINK <- UNORDERED_LINK
-SIMULTANEOUS_EQUIVALENCE_LINK <- UNORDERED_LINK
-// EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
-
-// ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
 // stages have completed processing before later ones start.
