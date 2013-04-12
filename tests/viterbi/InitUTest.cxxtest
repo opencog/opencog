@@ -76,10 +76,13 @@ void InitUTest::setUp(void)
 	config().set("MODULES",
 		"opencog/nlp/types/libnlp-types.so");
 
+	// XXX TODO these should be loaded by the parser itself,
+	// and not by the test-case.
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
-		"opencog/viterbi/viterbi_types.scm");
+		"opencog/viterbi/viterbi_types.scm, "
+		"opencog/viterbi/parse.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...

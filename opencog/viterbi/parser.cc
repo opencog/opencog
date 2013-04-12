@@ -177,6 +177,7 @@ Handle Parser::word_consets(const string& word)
 
 	set += ")\n";
 
+#if 0
 // XXX TODO Need to disjoin the expression returned above!
 const char * dj = 
 "(define dj "
@@ -187,6 +188,7 @@ const char * dj =
 "    )"
 "  )"
 ")";
+#endif
 
 	return _scm_eval.eval_h(set);
 }
@@ -238,6 +240,11 @@ void Parser::stream_word(const string& word)
 		logger().error() << "Unhandled error; word not in dict: " << word;
 		return;
 	}
+
+	DBG(cout << _scm_eval.eval(dbg) << endl);
+	_scm_eval.eval_h("(attach)");
+
+	DBG(cout << "---------- post match -------- " << endl);
 	DBG(cout << _scm_eval.eval(dbg) << endl);
 
 #if LATER
