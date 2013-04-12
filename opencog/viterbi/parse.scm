@@ -12,10 +12,21 @@
 
 (define (attach) 
   (BindLink
+    ; Bound variable declarations. These are the variables we expect
+    ; to match up when connnecting the left and right words with a connector.
     (ListLink
-      (VariableNode "$left word")
-      (VariableNode "$right word")
-      (VariableNode "$connector")
+      (TypedVariableLink
+        (VariableNode "$left word")
+        (VariableTypeNode "WordNode")
+      )
+      (TypedVariableLink
+        (VariableNode "$right word")
+        (VariableTypeNode "WordNode")
+      )
+      (TypedVariableLink
+        (VariableNode "$connector")
+        (VariableTypeNode "LgConnectorNode")
+      )
     )
     (ImplicationLink
       ; First, a list of all the graphs we want to match
@@ -24,10 +35,8 @@
         (LgStatePair
           (LgSeq
             (LgWordCset
-              ; XXX TODO the type of this varnode should be WordNode
               (VariableNode "$left word")
               (LgConnector
-                ; XXX TODO the type of this should be LgConnectorNode
                 (VariableNode "$connector")
                 (LgConnDirNode "+")
               )
@@ -41,7 +50,6 @@
         )
         ; We also want to match up a word ...
         (LgWordCset
-          ; XXX TODO type of this should be WordNode
           (VariableNode "$right word")
           (LgConnector
             (VariableNode "$connector")
