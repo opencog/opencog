@@ -18,6 +18,7 @@
 #include <link-grammar/read-dict.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/PatternMatch.h>
 
 
 #ifdef LATER
@@ -52,6 +53,7 @@ class Parser
 
 		Dictionary _dict;
 		SchemeEval& _scm_eval;
+		PatternMatch _pm;
 	private:
 };
 

@@ -63,6 +63,7 @@ Parser::Parser(Dictionary dict)
 // , _alternatives(NULL)
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
+	_pm.set_atomspace(&cogserver().getAtomSpace());
 	initialize_state();
 }
 
@@ -242,7 +243,8 @@ void Parser::stream_word(const string& word)
 	}
 
 	DBG(cout << _scm_eval.eval(dbg) << endl);
-	_scm_eval.eval_h("(attach)");
+	Handle rule = _scm_eval.eval_h("(attach)");
+	_pm.bindlink(rule);
 
 	DBG(cout << "---------- post match -------- " << endl);
 	DBG(cout << _scm_eval.eval(dbg) << endl);
