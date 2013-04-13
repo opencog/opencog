@@ -95,7 +95,7 @@ void InitUTest::setUp(void)
 		"../../../",
 		NULL
 	};
-	cogserver().loadModules();
+	cogserver().loadModules(paths);
 	cogserver().loadSCMModules(paths);
 }
 

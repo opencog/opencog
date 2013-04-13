@@ -476,7 +476,7 @@ bool CogServer::loadModule(const std::string& filename)
 {
     if (modules.find(filename) !=  modules.end()) {
         logger().info("Module \"%s\" is already loaded.", filename.c_str());
-        return false;
+        return true;
     }
 
     // reset error
