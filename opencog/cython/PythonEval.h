@@ -37,6 +37,7 @@
 
 #ifndef OPENCOG_PYTHON_EVAL_H
 #define OPENCOG_PYTHON_EVAL_H
+#ifdef HAVE_CYTHON
 
 #include <string>
 #include "PyIncludeWrapper.h"
@@ -118,4 +119,5 @@ class PythonEval
 
 } /* namespace opencog */
 
+#endif /* HAVE_CYTHON */
 #endif /* OPENCOG_PYTHON_EVAL_H */
