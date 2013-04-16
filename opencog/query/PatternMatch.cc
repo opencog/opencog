@@ -21,14 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
+
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/cython/PythonEval.h>
+#include <opencog/guile/SchemeEval.h>
+
+#include <opencog/cython/PyIncludeWrapper.h>
+
 #include "PatternMatch.h"
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Logger.h>
 
 using namespace opencog;
 
@@ -216,12 +221,29 @@ Handle Instantiator::execution_link()
 		return Handle::UNDEFINED;
 #endif /* HAVE_GUILE */
 	}
-	else
+
+	if (0 == schema.compare(0, 3,"py:", 3))
 	{
-		// Unkown proceedure type.  Return it, maybe some other
-		// execution-link handler will be able to process it.
-		return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
+#ifdef HAVE_CYTHON
+		// Be freindly, and strip leading white-space, if any.
+		size_t pos = 3;
+		while (' ' == schema[pos]) pos++;
+
+		// PythonEval::instance();
+		// XXX TODO figure out how to pass a list of handles to python...
+		// Currently, this just core dumps. I don't know why.
+		PyRun_SimpleString(schema.substr(pos).c_str());
+		// XXX TODO figure out how to get handle from python...
+		// return h;
+		return Handle::UNDEFINED;
+#else
+		return Handle::UNDEFINED;
+#endif /* HAVE_CYTHON */
 	}
+
+	// Unkown proceedure type.  Return it, maybe some other
+	// execution-link handler will be able to process it.
+	return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
 }
 
 bool Instantiator::walk_tree(Handle expr)
