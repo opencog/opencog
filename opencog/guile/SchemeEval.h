@@ -58,7 +58,7 @@ class SchemeEval
 		static void * c_wrap_apply_scm(void *);
 	
 		// Error handling stuff
-		SCM error_string_port;
+		SCM error_string;
 		SCM captured_stack;
 		static SCM preunwind_handler_wrapper(void *, SCM, SCM);
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
