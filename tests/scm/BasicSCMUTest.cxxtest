@@ -90,6 +90,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	// Links
 	void check_link(const char *, Type, const char *, const char *,
 	                const char *, const char *, float, float);
+	void test_link_tv_setting(void);
 	void test_reference_link(void);
 	void test_word_instance_link(void);
 	void test_inheritance_link(void);
@@ -372,6 +373,40 @@ void BasicSCMUTest::test_parse_link()
 	check_parse_link("ParseLink", PARSE_LINK, "ParseNode", "SentenceNode",
 	                 "sentence@8c13ec38-0295-4632-9205-e095035e4364_parse_0",
 	                 "sentence@8c13ec38-0295-4632-9205-e095035e4364", 1.0, 1.0);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_link_tv_setting(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create initially with one set of trtuh values
+	Handle inh = eval->eval_h("(ListLink (stv 0.75 0.5) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create a link", !eval_err);
+
+	TruthValuePtr tv = as->getTV(inh);
+	float m = tv->getMean();
+	float c = tv->getConfidence();
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.5), 1.0e-6);
+
+	// Create it again, but with differeent truth values
+	// Make sure the new values grab hold.
+	inh = eval->eval_h("(ListLink (stv 0.6 0.42) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create a link", !eval_err);
+
+	tv = as->getTV(inh);
+	m = tv->getMean();
+	c = tv->getConfidence();
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.42), 1.0e-6);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
