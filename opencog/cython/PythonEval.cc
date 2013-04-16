@@ -24,17 +24,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PythonEval.h"
-#include "agent_finder_api.h"
-
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/util/Config.h>
-#include <opencog/util/misc.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/foreach.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/misc.h>
 
-using std::vector;
+#include <opencog/server/Agent.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/server/Request.h>
+
+#include "PythonEval.h"
+#include "agent_finder_types.h"
+#include "agent_finder_api.h"
+
 using std::string;
+using std::vector;
 
 using namespace opencog;
 
@@ -165,5 +172,34 @@ PythonEval::~PythonEval()
     PyEval_RestoreThread(mainThreadState);
     logger().info("PythonEval::%s destructor", __FUNCTION__);
     Py_Finalize();
+}
+
+
+// Use a singleton instance to avoid initializing python interpreter
+// twice.
+PythonEval& PythonEval::instance(AtomSpace * atomspace)
+{
+    if (!singletonInstance)
+    {
+        if (!atomspace) {
+            // Create our own local AtomSpace to send calls to
+            // the
+            // event loop (otherwise the getType cache breaks)
+            atomspace = new AtomSpace(cogserver().getAtomSpace());
+        }
+        singletonInstance = new PythonEval(atomspace);
+    }
+    else if (atomspace and singletonInstance->atomspace->atomSpaceAsync !=
+               atomspace->atomSpaceAsync)
+    {
+        // Someone is trying to initialize the Python
+        // interpreter
+        // on a different AtomSpace. because of the singleton
+        // design
+        // there is no easy way to support this...
+        throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
+              " python interpreter with different AtomSpaceAsync ptr!");
+   }
+   return *singletonInstance;
 }
 
