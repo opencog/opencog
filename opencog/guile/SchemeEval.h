@@ -72,6 +72,7 @@ class SchemeEval
 		// output port
 		SCM outport;
 		SCM saved_outport;
+		bool in_shell;
 	
 		// Make constructor, destructor private; force
 		// everyone to use the singleton instance, for now.

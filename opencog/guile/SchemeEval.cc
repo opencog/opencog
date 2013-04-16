@@ -42,6 +42,7 @@ void SchemeEval::init(void)
 	outport = scm_open_output_string();
 	// outport = scm_gc_protect_object(outport);
 	scm_set_current_output_port(outport);
+	in_shell = false;
 
 	pending_input = false;
 	caught_error = false;
@@ -361,7 +362,9 @@ std::string SchemeEval::eval(const std::string &expr)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	in_shell = true;
 	scm_with_guile(c_wrap_eval, this);
+	in_shell = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -551,7 +554,13 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		}
 		free(str);
 	}
-	scm_truncate_file(outport, scm_from_uint16(0));
+
+	// If we are not in a shell context, truncate the output, because
+	// it will never ever be displayed. (i.e. don't overflow the output
+	// buffers.) If we are in_shell, then we are here probably because
+	// some ExecutionLink called some scheme snippet.  Display that.
+	if (not in_shell)
+		scm_truncate_file(outport, scm_from_uint16(0));
 
 	return rc;
 }
