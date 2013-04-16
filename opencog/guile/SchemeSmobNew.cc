@@ -419,7 +419,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
             if ((tv == NULL) && (av == NULL)) {
                 // If its not an atom, and its not a truth value, and its
                 // not an attention value, then whatever it is, its bad.
-                scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
+                scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
             }
         }
         sl = SCM_CDR(sl);
