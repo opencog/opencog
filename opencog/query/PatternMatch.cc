@@ -205,8 +205,12 @@ Handle Instantiator::execution_link()
 	if (0 == schema.compare(0,4,"scm:", 4))
 	{
 #ifdef HAVE_GUILE
+		// Be freindly, and strip leading white-space, if any.
+		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
+
 		SchemeEval &applier = SchemeEval::instance();
-		Handle h = applier.apply(schema.substr(4), oset[1]);
+		Handle h = applier.apply(schema.substr(pos), oset[1]);
 		return h;
 #else
 		return Handle::UNDEFINED;
