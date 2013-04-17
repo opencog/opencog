@@ -26,6 +26,7 @@
 #define _OPENCOG_FEATURE_SELECTION_DEME_OPTIMIZE_H
 
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/representation/field_set.h>
@@ -58,12 +59,13 @@ feature_set_pop optimize_deme_select_feature_sets(const field_set& fields,
                               fs_params.hc_max_evals, fs_params.max_time,
                               &ae);
 
-    // convert the deme into feature_set_pop;
+    // convert the deme into feature_set_pop (ignoring redundant sets)
     feature_set_pop fs_pop;
     for (const auto& inst : deme) {
         feature_set_pop::value_type p(select_tag()(inst).get_score(),
                                       get_feature_set(fields, inst));
-        fs_pop.insert(p);
+        if (boost::find(fs_pop, p) == fs_pop.end())
+            fs_pop.insert(p);
     }
 
     // Logger
