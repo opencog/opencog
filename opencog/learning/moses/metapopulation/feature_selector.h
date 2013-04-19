@@ -123,7 +123,9 @@ struct feature_selector_parameters {
 };
 
 // used for diversity ranking
-typedef std::multimap<composite_score, feature_set> csc_feature_set_pop;
+typedef std::multimap<composite_score,
+                      feature_set,
+                      std::greater<composite_score>> csc_feature_set_pop;
 
 /**
  * Struct in charge of selecting features maximize the amount of

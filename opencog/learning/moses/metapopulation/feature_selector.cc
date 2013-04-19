@@ -22,6 +22,7 @@
 
 #include "feature_selector.h"
 #include <opencog/comboreduct/table/table_io.h>
+#include <opencog/util/oc_omp.h>
 
 #include <boost/range/algorithm/max_element.hpp>
 
@@ -192,8 +193,16 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
 feature_set_pop feature_selector::select_top_feature_sets(const feature_set_pop& fss) const
 {
     unsigned res_size = std::min(params.n_demes, (unsigned)fss.size());
-    feature_set_pop res(fss.begin(), std::next(fss.begin(), res_size));
-    return res;
+    if (params.diversity_pressure > 0.0) {
+        csc_feature_set_pop ranked_fss = rank_feature_sets(fss);
+        feature_set_pop res;
+        unsigned i = 0;
+        for (auto it = ranked_fss.begin(); i < res_size; ++i, ++it)
+            res.insert({it->first.get_penalized_score(), it->second});
+        return res;
+    } else {
+        return feature_set_pop(fss.begin(), std::next(fss.begin(), res_size));
+    }
 }
 
 void feature_selector::remove_useless_features(feature_set_pop& sf_pop) const
@@ -241,7 +250,9 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
 }
 
 csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& fs_pop) const {
-    csc_feature_set_pop res;    // hold all the feature sets ranked by diversity
+    logger().info() << "Ranking feature sets (acounting for feature diversity)";
+
+    csc_feature_set_pop res;    // to put all feature sets ranked by diversity
 
     // holds the last feature set inserted (to compute the next mis)
     csc_feature_set_pop::const_iterator last_fs_cit = res.end();
@@ -266,13 +277,15 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
     };
 
     auto mi_to_penalty = [](double mi) {
-        return 1 - mi;
+        return 1 / (1 + mi);
     };
     
     while (!csc_fs_seq.empty()) {
         // assign to all elements of csc_fs_seq the right diversity penality
-        for (csc_feature_set& csc_fs : csc_fs_seq) {
-            // compute penalty between csc_fs and the last inserted feature set
+        OMP_ALGO::for_each(csc_fs_seq.begin(), csc_fs_seq.end(),
+                           [&](csc_feature_set& csc_fs) {
+            // compute penalty between csc_fs and the last inserted
+            // feature set
             float last_dp = mi_to_penalty(mi(last_fs_cit->second, csc_fs.second));
 
             // aggregate the results (here max)
@@ -282,12 +295,22 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
             // compute and update the diversity penalty
             float dp = params.diversity_pressure * agg_dp;
             csc_fs.first.set_diversity_penalty(dp);
-        }
+        });
 
         // insert the best candidate in res and delete it from csc_fs_pop
-        auto mit = boost::max_element(csc_fs_seq, csc_fs_lt);
+        auto mit = OMP_ALGO::max_element(csc_fs_seq.begin(), csc_fs_seq.end(),
+                                         csc_fs_lt);
         last_fs_cit = res.insert(*mit);
         csc_fs_seq.erase(mit);
+    }
+
+    logger().info() << "Feature sets ranked";
+
+    if (logger().isFineEnabled()) {
+        for (const csc_feature_set& cfs : res) {
+            ostreamContainer(logger().fine() << "Feature set: ", cfs.second);
+            logger().fine() << "With composite score: " << cfs.first;
+        }
     }
 
     return res;
