@@ -34,6 +34,9 @@
 #include <boost/range/algorithm/equal.hpp>
 #include <boost/operators.hpp>
 
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Counter.h>
 #include <opencog/util/dorepeat.h>
@@ -49,6 +52,9 @@
                                // a formula
 
 namespace opencog { namespace combo {
+
+using namespace boost::phoenix;
+using boost::phoenix::arg_names::arg1;
 
 /**
  * Get indices (aka positions or offsets) of a list of labels given a header
@@ -982,6 +988,9 @@ double mutualInformationBtwSets(const CTable& ctable,
                                 const FeatureSet& fs_r) {
     // get union of fs_l and fs_r
     FeatureSet fs_u = set_union(fs_l, fs_r);
+
+    // Check that the arities are within permitted range
+    OC_ASSERT(all_of(fs_u.begin(), fs_u.end(), arg1 < ctable.get_arity()));
 
     // declare useful visitors
     seq_filtered_visitor<FeatureSet> sfv_u(fs_u), sfv_l(fs_l), sfv_r(fs_r);
