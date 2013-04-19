@@ -109,6 +109,13 @@ struct feature_selector_parameters {
     float diversity_pressure;
 
     /**
+     * Set a cap regarding the population of feature sets. Right have
+     * feature selection optimization, only diversity_cap found
+     * feature sets are kept, or all if diversity_cap <= 0
+     */
+    int diversity_cap;
+
+    /**
      * Number of interactions to consider when computing mi. A
      * negative value means all interactions.
      */
