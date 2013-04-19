@@ -28,11 +28,13 @@
 
 using namespace opencog::oac;
 
-const char* opencog::oac::EFFECT_OPERATOR_NAME[7] =
+const char* opencog::oac::EFFECT_OPERATOR_NAME[9] =
 {
     "OP_REVERSE", // this is only for the bool variables
     "OP_ASSIGN",  // this operator can be used in any variable type =
     "OP_ASSIGN_NOT_EQUAL_TO", // this operator can be used in any variable type !=
+    "OP_ASSIGN_GREATER_THAN", // only for numeric variables >
+    "OP_ASSIGN_LESS_THAN", // only for numeric variables <
     "OP_ADD",     // only for numeric variables +=
     "OP_SUB",     // only for numeric variables -=
     "OP_MUL",     // only for numeric variables *=
@@ -56,6 +58,16 @@ State::State(string _stateName, StateValuleType _valuetype ,StateType _stateType
 State::~State()
 {
     delete stateVariable;
+}
+
+State::clone()
+{
+    State* cloneState = new State();
+    cloneState->stateVariable = new StateVariable(this->name(),this->getStateValuleType(),this->stateType, this->getStateValue());
+    cloneState->stateOwnerList = this->stateOwnerList;
+    cloneState->need_inquery = this->need_inquery;
+    cloneState->inqueryFun = this->inqueryFun;
+    return cloneState;
 }
 
 void State::assignValue(const StateValue& newValue)
@@ -537,6 +549,16 @@ bool Effect::executeEffectOp()
         case OP_DIV:
             newV = oldv / opv;
             break;
+        case OP_ASSIGN_GREATER_THAN:
+            newV = opv;
+            if (state->stateType != STATE_GREATER_THAN)
+                state->changeStateType(STATE_GREATER_THAN);
+            break;
+        case OP_ASSIGN_LESS_THAN:
+            newV = opv;
+            if (state->stateType != STATE_LESS_THAN)
+                state->changeStateType(STATE_LESS_THAN);
+            break;
         default:
             return false;
         }
@@ -555,6 +577,7 @@ bool Effect::executeEffectOp()
         else
             return false;
     }
+
 
     return true;
 
@@ -589,6 +612,8 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
     case OP_SUB:// only for the numeric value types
     case OP_MUL:// only for the numeric value types
     case OP_DIV:// only for the numeric value types
+    case OP_ASSIGN_GREATER_THAN:// only for the numeric value types
+    case OP_ASSIGN_LESS_THAN:// only for the numeric value types
     {
        string* v =  boost::get<string>(&_OPValue);
        if ( v == 0)
@@ -604,6 +629,7 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
 
     }
 }
+
 
 float Rule::getCost()
 {

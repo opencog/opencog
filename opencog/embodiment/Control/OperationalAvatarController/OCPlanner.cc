@@ -177,9 +177,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     set<RuleLayer*> allRuleLayers;
     set<StateLayer*> allStateLayers;
 
-    // All the rules should be grounded during planning
-
-    // planning process:
+    // planning process: All the rules should be grounded during planning.
     set<StateLayerNode*>::iterator stateLayerIter;
     while(true)
     {
@@ -193,6 +191,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             if (checkIsGoalAchieved(*(curStateNode->state), satisfiedDegree))
             {
+                // has been checked and marked satisfed in last loop, so it doesn't need to be checked again
                 curStateNode->isAchieved = true;
                 continue;
             }
@@ -209,8 +208,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         else
         {
             // not all the states in the current state layer are satisfied,
-            // we need to creat an rule layer backward trying to achieve these states
-            // and also create a new state Layer which are the preconditions of this rule layer
+            // we need to creat a new rule layer backward trying to achieve these states
+            // and also create a new state Layer which are the preconditions of this new rule layer
             RuleLayer* newRuleLayer = new RuleLayer();
             StateLayer* newStateLayer = new StateLayer();
 
@@ -237,7 +236,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     newRuleLayer->nodes.insert(donothingRuleLayerNode);
                     donothingRuleLayerNode->ruleLayer = newRuleLayer;
 
-                    State* cloneState = new State(*(curStateNode->state));
+                    State* cloneState = (curStateNode->state)->clone();
                     StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
                     cloneStateNode->stateLayer = newStateLayer;
                     cloneStateNode->isAchieved = true;
@@ -247,12 +246,11 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 }
                 else
                 {
-                    // For non-numberic goals
+                    // For numberic goals
                     // First, check if there is any rules's effect can achieve this goal
+                    // If there are more than one rules can achieve it, we'll apply the recursive rule first in any
                     map<string,vector<Rule*> >::iterator it;
                     it = ruleEffectIndexes.find(curStateNode->state->name());
-
-
 
                     // Select a rule to apply
                     Rule* curRule;
@@ -268,11 +266,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                        // (1 - curRule->cost/100.0f)
 
                     }
-
-
-
-
-                    // For numberic goals, We use a bidirection searching, doing backward and forward reasoning in turn.
 
                 }
             }
@@ -420,7 +413,7 @@ void OCPlanner::loadTestRulesFromCodes()
     closedStateOwnerList2.push_back(var_avatar);
     closedStateOwnerList2.push_back(var_obj);
     State* closedState2 = new State("Distance",StateValuleType::BOOLEAN(),STATE_EQUAL_TO , float_dis , closedStateOwnerList2, true, &Inquery::inqueryDistance);
-    Effect* getClosedEffect = new Effect(closedState2, OP_ASSIGN, CLOSED_DISTANCE);
+    Effect* getClosedEffect = new Effect(closedState2, OP_ASSIGN_LESS_THAN, CLOSED_DISTANCE);
 
     // effect2: position changed
     vector<StateValue> atLocationStateOwnerList2;
@@ -457,7 +450,7 @@ void OCPlanner::loadTestRulesFromCodes()
     closedStateOwnerList3.push_back(var_avatar);
     closedStateOwnerList3.push_back(var_pos);
     State* closedState3 = new State("Distance",StateValuleType::FLOAT(),STATE_EQUAL_TO ,float_dis, closedStateOwnerList3, true, &Inquery::inqueryDistance);
-    Effect* getClosedEffect2 = new Effect(closedState3, OP_ASSIGN, CLOSED_DISTANCE);
+    Effect* getClosedEffect2 = new Effect(closedState3, OP_ASSIGN_LESS_THAN, CLOSED_DISTANCE);
 
     // effect2: position changed
     vector<StateValue> atLocationStateOwnerList;

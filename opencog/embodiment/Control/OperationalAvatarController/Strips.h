@@ -50,6 +50,8 @@ class Inquery;
         OP_REVERSE, // this is only for the bool variables
         OP_ASSIGN,  // this operator can be used in any variable type =
         OP_ASSIGN_NOT_EQUAL_TO, // this operator can be used in any variable type !=
+        OP_ASSIGN_GREATER_THAN, // this operator can be used in any variable type >
+        OP_ASSIGN_LESS_THAN, // this operator can be used in any variable type <
         OP_ADD,     // only for numeric variables +=
         OP_SUB,     // only for numeric variables -=
         OP_MUL,     // only for numeric variables *=
@@ -57,7 +59,7 @@ class Inquery;
         OP_NUM_OPS  // must always be the last one in this list.
     };
 
-    extern const char* EFFECT_OPERATOR_NAME[7];
+    extern const char* EFFECT_OPERATOR_NAME[9];
 
 
     // There are 3 kinds of state types:
@@ -127,6 +129,11 @@ class Inquery;
 
         State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
                bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+
+        State(){}
+
+        // clone a same state
+        State* clone();
         ~State();
 
         void assignValue(const StateValue& newValue);
@@ -210,7 +217,6 @@ class Inquery;
         StateValue opStateValue;
 
         Effect(State* _state, EFFECT_OPERATOR_TYPE _op, StateValue _OPValue);
-
 
         // only when there are misusge of the value type of opStateValue, it will return false,
         // e.g. if assign a string to a bool state, it will return false
