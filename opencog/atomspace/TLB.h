@@ -93,8 +93,7 @@ class TLB
     friend class AtomStorage;
     friend class SenseSimilaritySQL;
 
-    typedef std::unordered_map< Handle, Atom*,
-            std::hash<opencog::Handle> > map_t;
+    typedef std::unordered_map< Handle, Atom*, handle_hash > map_t;
 private:
 
     static map_t handle_map;
