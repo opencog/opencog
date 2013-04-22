@@ -1000,10 +1000,10 @@ HandleEntry* HandleEntry::fromHandleVector(const std::vector<Handle> &v)
     return ret;
 }
 
-HandleEntry* HandleEntry::fromHandleSet(const std::unordered_set<Handle> &s)
+HandleEntry* HandleEntry::fromHandleSet(const UnorderedHandleSet &s)
 {
     HandleEntry *ret = NULL;
-    std::unordered_set<Handle>::const_iterator it = s.cbegin();
+    UnorderedHandleSet::const_iterator it = s.cbegin();
     for (; it != s.cend(); it++)
     {
         HandleEntry *temp = new HandleEntry(*it);

@@ -48,8 +48,10 @@ class AtomSpaceBenchmark
 
     AtomSpace* asp;
     AtomTable* atab;
+#if HAVE_GUILE
     //AtomSpaceImpl asBackend;
     SchemeEval* scm;
+#endif
 
     MT19937RandGen* rng;
 
@@ -74,7 +76,11 @@ public:
     bool buildTestData;
 
 
-    enum BenchType { BENCH_AS = 1, BENCH_IMPL, BENCH_TABLE, BENCH_SCM };
+    enum BenchType { BENCH_AS = 1, BENCH_IMPL, BENCH_TABLE,
+#ifdef HAVE_GUILE
+        BENCH_SCM
+#endif 
+    };
     BenchType testKind;
 
     UUID UUID_begin;

@@ -144,7 +144,7 @@ public:
      * @return A HandleEntry containing the elements of the vector.
      */
     static HandleEntry* fromHandleVector(const std::vector<Handle> &);
-    static HandleEntry* fromHandleSet(const std::unordered_set<Handle> &);
+    static HandleEntry* fromHandleSet(const UnorderedHandleSet &);
 
     /**
      * Removes a handle from the list.
