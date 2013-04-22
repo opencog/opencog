@@ -17,6 +17,9 @@ ADD_LIBRARY (nlp-types SHARED
 	NLPTypesModule
 )
 
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(nlp-types nlp_atom_types)
+
 IF (WIN32)
     INSTALL (TARGETS nlp-types DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ELSEIF (CYGWIN)

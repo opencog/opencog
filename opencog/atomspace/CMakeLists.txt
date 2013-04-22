@@ -49,6 +49,7 @@ ADD_LIBRARY (atomspace SHARED
     VersionHandle.cc
 )
 
+# Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 SET(ATOMSPACE_LINK_LIBS

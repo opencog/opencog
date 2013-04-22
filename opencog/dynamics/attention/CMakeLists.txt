@@ -22,6 +22,7 @@ ADD_LIBRARY(attention SHARED
 	STIDecayingAgent
 )
 
+# Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(attention opencog_atom_types)
 ADD_DEPENDENCIES(attention attention_atom_types)
 
