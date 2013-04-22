@@ -166,6 +166,8 @@ protected:
     // Rank feature sets, penalized by diversity
     csc_feature_set_pop rank_feature_sets(const feature_set_pop& fs_pop) const;
 
+    void log_stats_top_feature_sets(const feature_set_pop& top_fs) const;
+
     // compute (or approximate) the mutual information between 2
     // feature sets.
     //

@@ -20,7 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+
 #include "feature_selector.h"
+#include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/util/oc_omp.h>
 
@@ -32,6 +41,8 @@
 
 namespace opencog {
 namespace moses {
+
+using namespace boost::accumulators;
 
 feature_selector::feature_selector(const combo::CTable& ctable,
                                    const feature_selector_parameters& festor_params)
@@ -205,6 +216,40 @@ feature_set_pop feature_selector::select_top_feature_sets(const feature_set_pop&
     }
 }
 
+void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs) const
+{
+    // Accumulator to gather statistics about mutual information
+    // between feature set candidates
+    typedef accumulator_set<float, stats<tag::count,
+                                         tag::mean,
+                                         tag::variance,
+                                         tag::min,
+                                         tag::max>> accumulator_t;
+    accumulator_t diversity_acc, score_acc;
+
+    // Stats about score and diversity
+    for (auto i_it = top_fs.cbegin(); i_it != top_fs.cend(); ++i_it) {
+        score_acc(i_it->first);
+        for (auto j_it = top_fs.cbegin(); j_it != i_it; ++j_it)
+            diversity_acc(mi(i_it->second, j_it->second));
+    }
+
+    logger().info() << "Feature sets score stats (accounting for diversity) = "
+                    << "(count: " << count(score_acc)
+                    << ", mean: " << mean(score_acc)
+                    << ", std dev: " << sqrt(variance(score_acc))
+                    << ", min: " << boost::accumulators::min(score_acc)
+                    << ", max: " << boost::accumulators::max(score_acc) << ")";
+
+    logger().info() << "feature sets diversity stats = "
+                    << "(count: " << count(diversity_acc)
+                    << ", mean: " << mean(diversity_acc)
+                    << ", std dev: " << sqrt(variance(diversity_acc))
+                    << ", min: " << boost::accumulators::min(diversity_acc)
+                    << ", max: " << boost::accumulators::max(diversity_acc) << ")";
+
+}
+
 void feature_selector::remove_useless_features(feature_set_pop& sf_pop) const
 {
     // remove last feature if it's the feature exemplar
@@ -246,6 +291,9 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     // Select the top params.n_demes feature sets
     feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
 
+    // Display stats about diversity of the top feature sets
+    log_stats_top_feature_sets(top_sfs);
+
     return top_sfs;
 }
 
@@ -281,21 +329,41 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
     };
     
     while (!csc_fs_seq.empty()) {
-        // assign to all elements of csc_fs_seq the right diversity penality
-        OMP_ALGO::for_each(csc_fs_seq.begin(), csc_fs_seq.end(),
-                           [&](csc_feature_set& csc_fs) {
-            // compute penalty between csc_fs and the last inserted
-            // feature set
-            float last_dp = mi_to_penalty(mi(last_fs_cit->second, csc_fs.second));
 
-            // aggregate the results (here max)
-            float agg_dp = std::max(csc_fs.first.get_diversity_penalty(),
-                                    last_dp);
+        if (last_fs_cit != res.end()) {
+            // assign to all elements of csc_fs_seq the right diversity penality
+            OMP_ALGO::for_each(csc_fs_seq.begin(), csc_fs_seq.end(),
+                               [&](csc_feature_set& csc_fs) {
+                // compute penalty between csc_fs and the last inserted
+                // feature set
+                float fsmi = mi(last_fs_cit->second, csc_fs.second),
+                    last_dp = mi_to_penalty(fsmi);
 
-            // compute and update the diversity penalty
-            float dp = params.diversity_pressure * agg_dp;
-            csc_fs.first.set_diversity_penalty(dp);
-        });
+                // // DEBUG
+                // ostreamContainer(logger().debug() << "last_fs_cit->second = ",
+                //                  last_fs_cit->second);
+                // logger().debug() << "With composite score: " << last_fs_cit->first;
+                // ostreamContainer(logger().debug() << "Feature set: ",
+                //                  csc_fs.second);
+                // logger().debug() << "With composite score (BEFORE): " << csc_fs.first;
+                // logger().debug() << "fsmi = " << fsmi;
+                // logger().debug() << "last_dp = " << last_dp;
+                // // ~DEBUG
+
+                // aggregate the results (here max)
+                float agg_dp = std::max(csc_fs.first.get_diversity_penalty(),
+                                        last_dp);
+
+                // compute and update the diversity penalty
+                float dp = params.diversity_pressure * agg_dp;
+                csc_fs.first.set_diversity_penalty(dp);
+
+                // // DEBUG
+                // logger().debug() << "With composite score (AFTER): " << csc_fs.first;
+                // // ~DEBUG
+
+            });
+        }
 
         // insert the best candidate in res and delete it from csc_fs_pop
         auto mit = OMP_ALGO::max_element(csc_fs_seq.begin(), csc_fs_seq.end(),
@@ -319,7 +387,7 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
 double feature_selector::mi(const feature_set& fs_l,
                             const feature_set& fs_r) const
 {
-    if (params.diversity_pressure < 0)
+    if (params.diversity_interaction < 0)
         return mutualInformationBtwSets(_ctable, fs_l, fs_r);
     else {
         // Compute the average mutual informations between subsets of
