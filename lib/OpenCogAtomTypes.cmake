@@ -28,8 +28,10 @@ ENDIF (NOT SCM_FILE)
 STRING(REGEX MATCH ".*/opencog/atomspace" OPENCOG_ATOMSPACE_MATCHED "${CMAKE_CURRENT_SOURCE_DIR}")
 IF (OPENCOG_ATOMSPACE_MATCHED)
     SET(CLASSSERVER_REFERENCE "")
+    SET(CLASSSERVER_INSTANCE "")
 ELSE (OPENCOG_ATOMSPACE_MATCHED)
     SET(CLASSSERVER_REFERENCE "opencog::classserver().")
+    SET(CLASSSERVER_INSTANCE "opencog::classserver()")
 ENDIF (OPENCOG_ATOMSPACE_MATCHED)
 #MESSAGE(STATUS "CLASSSERVER_REFERENCE=${CLASSSERVER_REFERENCE}")
 
@@ -126,6 +128,17 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list '${TYPE_NAME}) x)))\n")
         ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
 
+        # We need to touch the class-server before doing anything.
+        # This is in order to guarantee that the main atomspace types
+        # get created before other derived types. 
+        #
+        # There's still a potentially nasty bug here: if some third types.script 
+        # file depends on types defined in a second file, but the third initializer
+        # runs before the second, then any atoms in that third file that inherit
+        # from the second will get a type of zero.  This will crash code later on.
+        # The only fix for this is to make sure that the third script forces the
+        # initailzers for the second one to run first. :-(
+        FILE(APPEND "${INHERITANCE_FILE}" "${CLASSSERVER_INSTANCE};\n")
         IF (PARENT_TYPES)
             STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
             FOREACH (PARENT_TYPE ${PARENT_TYPES})
