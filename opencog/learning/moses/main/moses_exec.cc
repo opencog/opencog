@@ -448,6 +448,7 @@ int moses_exec(int argc, char** argv)
 
     // program options, see options_description below for their meaning
     vector<string> jobs_str;
+    unsigned min_pool;
     bool enable_mpi = false;
 
     unsigned long rand_seed;
@@ -575,6 +576,10 @@ int moses_exec(int argc, char** argv)
                     " files are gonna be generated when using this option on"
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
+
+        ("min-pool", value<unsigned>(&min_pool)->default_value(50),
+         "Minimum number of elements to process in the pool to enable "
+         " multi-threading.\n")
 
         (opt_desc_str(exemplars_str_opt).c_str(),
          value<vector<string>>(&exemplars_str),
@@ -1466,7 +1471,7 @@ int moses_exec(int argc, char** argv)
         }
     }
 
-    setting_omp(jobs[localhost]);
+    setting_omp(jobs[localhost], min_pool);
 
 #ifdef HAVE_MPI
     if (enable_mpi) {
