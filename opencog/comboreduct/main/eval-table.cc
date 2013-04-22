@@ -65,9 +65,9 @@ vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
 {
     vector<string> res(pa.combo_programs);     // from command line
     
-    // from a file
-    if (!pa.combo_programs_file.empty()) {
-        ifstream in(pa.combo_programs_file.c_str());
+    // from files
+    for (const string& combo_programs_file : pa.combo_programs_files) {
+        ifstream in(combo_programs_file.c_str());
         if (in) {
             while (in.good()) {
                 string line;
@@ -78,7 +78,7 @@ vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
             }
         } else {
             logger().error("Error: file %s can not be found.",
-                           pa.combo_programs_file.c_str());
+                           combo_programs_file.c_str());
             exit(1);
         }
     }
@@ -87,12 +87,13 @@ vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
 }
 
 void output_results(const evalTableParameters& pa,
-                    const Table& table, const OTable& ot_tr)
+                    const Table& table, const OTable& ot_tr,
+                    const string output_file)
 {
-    if(pa.output_file.empty())
+    if(output_file.empty())
         output_results(cout, pa, table, ot_tr);
     else {
-        ofstream of(pa.output_file.c_str());
+        ofstream of(output_file.c_str());
         output_results(of, pa, table, ot_tr);
     }
 }
@@ -100,13 +101,19 @@ void output_results(const evalTableParameters& pa,
 void eval_output_results(const evalTableParameters& pa,
                          const Table& table, const vector<combo_tree>& trs)
 {
-    foreach(const combo_tree& tr, trs) {
+    unsigned npad = ndigits(trs.size());
+    for (unsigned i = 0; i < trs.size(); i++) {
         // evaluated tr over input table
-        OTable ot_tr(tr, table.itable);
+        OTable ot_tr(trs[i], table.itable);
         if (!pa.target_feature_str.empty())
             ot_tr.set_label(pa.target_feature_str);
+        // determine output file name
+        stringstream of_ss;
+        of_ss << pa.output_file;
+        if (!pa.output_file.empty() && pa.split_output)
+            of_ss << setfill('0') << setw(npad) << i;
         // print results
-        output_results(pa, table, ot_tr);
+        output_results(pa, table, ot_tr, of_ss.str());
     }
 }
 
@@ -121,9 +128,6 @@ void read_eval_output_results(evalTableParameters& pa)
 
     // get all combo tree strings (from command line and file)
     vector<string> all_combo_tree_str = get_all_combo_tree_str(pa);
-
-    OC_ASSERT(all_combo_tree_str.size() == 1,
-              "Using more than 1 combo, not implemented yet!");
 
     // parse all variables from all combo tree strings
     vector<string> all_variables;
@@ -142,15 +146,6 @@ void read_eval_output_results(evalTableParameters& pa)
         if (f != pa.target_feature_str
             && all_unique_variables.find(f) == all_unique_variables.end())
             ignore_variables += f;
-
-    // // read data ITable
-    // Table table;
-    // if (pa.target_feature_str.empty())
-    //     table.itable = loadITable(pa.input_table_file, pa.ignore_features_str);
-    // else {
-    //     table = loadTable(pa.input_table_file, pa.target_feature_str,
-    //                       pa.ignore_features_str);
-    // }
 
     // read data ITable (using ignore_variables)
     Table table;
@@ -218,18 +213,38 @@ int main(int argc,char** argv) {
 
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
-         "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
+         "Combo program to evaluate against the input table. Note that in order "
+         "to have variables not being interpreted as shell variables you may "
+         "want to put the combi between single quotes. This option can be "
+         "used several times so that several programs are evaluated at once.\n")
         
         (opt_desc_str(combo_prog_file_opt).c_str(),
-         value<string>(&pa.combo_programs_file),
-         "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
+         value<vector<string>>(&pa.combo_programs_files),
+         "File containing combo programs to evaluate against the input table. "
+         "Each combo program in the file is seperated by a new line and each "
+         "results are displaied in the same order, seperated by a new line.\n")
         
         (opt_desc_str(labels_opt).c_str(),
          value<bool>(&pa.has_labels)->default_value(true),
-         "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program 'and($large $tall)' instead of 'and($24 $124)'. In such a case it is expected that the input data file contains the labels as first row. TODO could be detected automatically.\n")
+         "If enabled then the combo program is expected to contain variables "
+         "labels $labels1, etc, instead of place holders. For instance one "
+         "provide the combo program 'and($large $tall)' instead of "
+         "'and($24 $124)'. In such a case it is expected that the input data "
+         "file contains the labels as first row. "
+         "TODO could be detected automatically.\n")
         
         (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
-         "File where to save the results. If empty then it outputs on the stdout.\n")
+         "File where to save the results. If empty then it outputs on "
+         "the stdout.\n")
+
+        ("split-output", value<bool>(&pa.split_output)->default_value(true),
+         "If enabled, then if there are several combo programs the output file "
+         "is used as prefix for writing multiple output files corresponding to "
+         "each combo programs. In that case each output file name is appended "
+         "a suffix of digits representing the index of the combo program "
+         "(starting from 0). Suffixes are 0-padded to respect lexicographic "
+         "order as well. If disabled, or if no output file is provided "
+         "(stdout) all outputs are appended.\n")
                 
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
          "Display all inputs (as well as the output and the forced features), "

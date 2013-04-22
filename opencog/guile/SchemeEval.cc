@@ -42,11 +42,12 @@ void SchemeEval::init(void)
 	outport = scm_open_output_string();
 	// outport = scm_gc_protect_object(outport);
 	scm_set_current_output_port(outport);
+	in_shell = false;
 
 	pending_input = false;
 	caught_error = false;
 	input_line = "";
-	error_string_port = SCM_EOL;
+	error_string = SCM_EOL;
 	captured_stack = SCM_BOOL_F;
 	pexpr = NULL;
 }
@@ -281,8 +282,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	caught_error = true;
 
 	/* get string port into which we write the error message and stack. */
-	error_string_port = scm_open_output_string();
-	SCM port = error_string_port;
+	SCM port = scm_open_output_string();
 
 	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 1))
 	{
@@ -328,6 +328,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	scm_puts(restr, port);
 	free(restr);
 
+	error_string = scm_get_output_string(port);
+	scm_close_port(port);
 	return SCM_BOOL_F;
 }
 
@@ -360,7 +362,9 @@ std::string SchemeEval::eval(const std::string &expr)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+	in_shell = true;
 	scm_with_guile(c_wrap_eval, this);
+	in_shell = false;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_unlock();
@@ -424,13 +428,10 @@ std::string SchemeEval::do_eval(const std::string &expr)
 
 	if (caught_error)
 	{
-		std::string rv;
-		rc = scm_get_output_string(error_string_port);
-		char * str = scm_to_locale_string(rc);
-		rv = str;
+		char * str = scm_to_locale_string(error_string);
+		std::string rv = str;
 		free(str);
-		scm_close_port(error_string_port);
-		error_string_port = SCM_EOL;
+		error_string = SCM_EOL;
 		captured_stack = SCM_BOOL_F;
 
 		scm_truncate_file(outport, scm_from_uint16(0));
@@ -440,12 +441,11 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	}
 	else
 	{
-		std::string rv;
 		// First, we get the contents of the output port,
 		// and pass that on.
 		SCM out = scm_get_output_string(outport);
 		char * str = scm_to_locale_string(out);
-		rv = str;
+		std::string rv = str;
 		free(str);
 		scm_truncate_file(outport, scm_from_uint16(0));
 
@@ -519,10 +519,11 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 
 	if (caught_error)
 	{
-		rc = scm_get_output_string(error_string_port);
-		char * str = scm_to_locale_string(rc);
-		scm_close_port(error_string_port);
-		error_string_port = SCM_EOL;
+		char * str = scm_to_locale_string(error_string);
+		// Don't blank out the error string yet.... we need it later.
+		// (probably because someone called cog-bind with an ExecutionLink
+		// in it with a bad scheme schema node.)
+		// error_string = SCM_EOL;
 		captured_stack = SCM_BOOL_F;
 
 		scm_truncate_file(outport, scm_from_uint16(0));
@@ -553,7 +554,13 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		}
 		free(str);
 	}
-	scm_truncate_file(outport, scm_from_uint16(0));
+
+	// If we are not in a shell context, truncate the output, because
+	// it will never ever be displayed. (i.e. don't overflow the output
+	// buffers.) If we are in_shell, then we are here probably because
+	// some ExecutionLink called some scheme snippet.  Display that.
+	if (not in_shell)
+		scm_truncate_file(outport, scm_from_uint16(0));
 
 	return rc;
 }
@@ -615,10 +622,8 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 
 	if (caught_error)
 	{
-		rc = scm_get_output_string(error_string_port);
-		char * str = scm_to_locale_string(rc);
-		scm_close_port(error_string_port);
-		error_string_port = SCM_EOL;
+		char * str = scm_to_locale_string(error_string);
+		error_string = SCM_EOL;
 		captured_stack = SCM_BOOL_F;
 
 		scm_truncate_file(outport, scm_from_uint16(0));
@@ -733,21 +738,23 @@ void * SchemeEval::c_wrap_apply_scm(void * p)
 	return self;
 }
 
-std::string opencog::eval_scheme(std::string &s) {
+// Convenience wrapper, for stand-alone usage.
+std::string opencog::eval_scheme(std::string &s)
+{
     SchemeEval & evaluator = SchemeEval::instance();    
     std::string scheme_return_value;
 
 	// Run the speech act schema to generate answers
     scheme_return_value = evaluator.eval(s);
 	
-	if ( evaluator.eval_error() ) {
+	if (evaluator.eval_error()) {
 		logger().error( "SchemeEval::%s - Failed to execute '%s'", 
 						 __FUNCTION__, 
 						 s.c_str() 
 					  );
 	}
 
-	if (evaluator.input_pending() ) {
+	if (evaluator.input_pending()) {
 		logger().error( "SchemeEval::%s - Scheme syntax error in input: '%s'", 
 				 __FUNCTION__, 
 				 s.c_str() 

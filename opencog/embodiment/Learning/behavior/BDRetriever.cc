@@ -24,6 +24,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/Temporal.h>
 #include <opencog/spacetime/TemporalTable.h>
 #include <opencog/spacetime/TimeServer.h>

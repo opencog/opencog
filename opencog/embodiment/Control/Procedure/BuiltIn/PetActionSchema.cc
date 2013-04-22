@@ -24,9 +24,10 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/comboreduct/combo/iostream_combo.h>
+#include <opencog/spacetime/atom_types.h>
 
-#include "PetActionSchema.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
+#include "PetActionSchema.h"
 
 namespace opencog { namespace Procedure {
 

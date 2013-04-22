@@ -21,12 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BasicPredicateUpdater.h"
+
+#include <opencog/atomspace/Link.h>
+#include <opencog/spacetime/atom_types.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/atomspace/Link.h>
+
+#include "BasicPredicateUpdater.h"
 
 using namespace opencog::oac;
 using namespace opencog;

@@ -218,6 +218,19 @@ ELSE (HYPERTABLE_FOUND)
 
 ENDIF (HYPERTABLE_FOUND)
 
+
+# Link-Gramar is needed for the Viterbi parser
+# Only 4.7.12 or newer has the required read-dict API in it.
+FIND_PACKAGE(LinkGrammar 4.7.12)
+IF (LINK_GRAMMAR_FOUND)
+	SET(HAVE_LINK_GRAMMAR 1)
+	MESSAGE(STATUS "Link Grammar was found.")
+	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
+ELSE (LINK_GRAMMAR_FOUND)
+	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
+ENDIF (LINK_GRAMMAR_FOUND)
+
+
 # MPI is needed for MOSES on compute clusters.
 FIND_PACKAGE(MPI)
 
@@ -445,9 +458,9 @@ IF(HAVE_SERVER) # because web depends on server
 	SET(HAVE_WEB 1)
 ENDIF(HAVE_SERVER)
 
-IF(ODBC_FOUND) # SQL persistance
+IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
-ENDIF(ODBC_FOUND)
+ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
 
 # Here's the catch: much of embodiment relies on the MessagingSystem,
 # which uses NMXML as the message format.  And NMXML needs expat,
@@ -460,6 +473,10 @@ IF (CURL_FOUND AND XMLRPC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
 	SET(HAVE_UBIGRAPH 1)
 ENDIF (CURL_FOUND AND XMLRPC_FOUND)
+
+IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+	SET(HAVE_VITERBI 1)
+ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 # At this time, there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
@@ -682,5 +699,6 @@ SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
 SUMMARY_ADD("SQL Persist" "Interfaces for SQL persistance of the AtomSpace" HAVE_PERSIST)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
+SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
 SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)
 SUMMARY_SHOW()

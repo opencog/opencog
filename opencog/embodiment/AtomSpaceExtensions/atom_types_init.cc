@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "opencog/spacetime/atom_types.definitions"
 #include "opencog/embodiment/AtomSpaceExtensions/atom_types.definitions"
 
 // library initialization
@@ -36,6 +37,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     System::setModuleHandle(hinstDLL);
     switch (fdwReason) {
         case DLL_PROCESS_ATTACH:
+            #include "opencog/spacetime/atom_types.inheritance"
             #include "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
             break;
         case DLL_THREAD_ATTACH:
@@ -51,6 +53,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
 __attribute__((constructor))
 static void init(void)
 {
+    #include "opencog/spacetime/atom_types.inheritance"
     #include "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
 }
 

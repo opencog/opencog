@@ -476,7 +476,7 @@ bool CogServer::loadModule(const std::string& filename)
 {
     if (modules.find(filename) !=  modules.end()) {
         logger().info("Module \"%s\" is already loaded.", filename.c_str());
-        return false;
+        return true;
     }
 
     // reset error
@@ -610,14 +610,32 @@ Module* CogServer::getModule(const std::string& moduleId)
     return getModuleData(moduleId).module;
 }
 
-void CogServer::loadModules() 
+void CogServer::loadModules(const char* module_paths[]) 
 {
     // Load modules specified in the config file
     std::vector<std::string> modules;
     tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
-    for (std::vector<std::string>::const_iterator it = modules.begin();
-         it != modules.end(); ++it) {
-        loadModule(*it);
+    std::vector<std::string>::const_iterator it;
+    for (it = modules.begin(); it != modules.end(); ++it) {
+        bool rc = false;
+        const char * mod = (*it).c_str();
+        if ( module_paths != NULL ) {
+            for (int i = 0; module_paths[i] != NULL; ++i) {
+                boost::filesystem::path modulePath(module_paths[i]);
+                modulePath /= *it;
+                if (boost::filesystem::exists(modulePath)) {
+                    mod = modulePath.string().c_str();
+                    rc = loadModule(mod);
+                    if (rc) break;
+                }
+            }
+        } else {
+            rc = loadModule(mod);
+        }
+        if (!rc)
+        {
+           logger().error("Failed to load %s", mod);
+        }
     }
 }
 
