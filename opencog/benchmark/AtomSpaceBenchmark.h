@@ -48,8 +48,10 @@ class AtomSpaceBenchmark
 
     AtomSpace* asp;
     AtomTable* atab;
+#if HAVE_GUILE
     //AtomSpaceImpl asBackend;
     SchemeEval* scm;
+#endif
 
     MT19937RandGen* rng;
 

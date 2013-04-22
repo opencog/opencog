@@ -217,7 +217,14 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_AS:  cout << "AtomSpace's "; break;
         case BENCH_IMPL:  cout << "AtomSpaceImpl's "; break;
         case BENCH_TABLE:  cout << "AtomTable's "; break;
+#if HAVE_GUILE
         case BENCH_SCM:  cout << "Scheme's "; break;
+#else
+        case BENCH_SCM:
+            cout << endl;
+            cerr << "Fatal Error: Benchmark not compiled with scheme bindings."<<endl;
+            exit(1);
+#endif /* HAVE_GUILE */
     }
     cout << methodName << " method " << Nreps << " times ";
     std::ofstream myfile;
@@ -305,7 +312,9 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             atab = new AtomTable();
         else
             asp = new AtomSpace();
+#if HAVE_GUILE
             scm = &SchemeEval::instance(asp);
+#endif
 
         //asBackend = new AtomSpaceImpl();
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
@@ -354,6 +363,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
         t = randomType(NODE);
     if (s.size() > 0) {
         switch (testKind) {
+#if HAVE_GUILE
         case BENCH_SCM: {
 #if ALL_AT_ONCE
             std::ostringstream ss;
@@ -373,6 +383,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
             scm->eval_h(gs);
             return clock() - t_begin;
         }
+#endif /* HAVE_GUILE */
         case BENCH_IMPL: {
             clock_t t_begin = clock();
             asp->atomSpaceAsync->atomspace.addNode(t,s); 
@@ -394,6 +405,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
         oss << "node " << counter;
 
         switch (testKind) {
+#if HAVE_GUILE
         case BENCH_SCM: {
 #if ALL_AT_ONCE
             std::ostringstream ss;
@@ -434,6 +446,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
             scm->eval_h(gs);
             return clock() - t_begin;
         }
+#endif /* HAVE_GUILE */
         case BENCH_IMPL: {
             clock_t t_begin = clock();
             asp->atomSpaceAsync->atomspace.addNode(t,oss.str()); 
@@ -470,6 +483,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     }
 
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
         // This is somewhat more cumbersome and slower than what
@@ -502,6 +516,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         scm->eval_h(gs);
         return clock() - t_begin;
     }
+#endif /* HAVE_GUILE */
     case BENCH_IMPL: {
         tAddLinkStart = clock();
         asp->atomSpaceAsync->atomspace.addLink(t, outgoing);
@@ -523,8 +538,10 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks, bool display)
 {
     BenchType saveKind = testKind;
+#if HAVE_GUILE
     if (testKind == BENCH_SCM)
        testKind = BENCH_AS;
+#endif /* HAVE_GUILE */
 
     clock_t tStart = clock();
     if (display) {
@@ -607,6 +624,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
         std::ostringstream ss;
@@ -624,6 +642,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
+#endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getAtom(h)->getType();
@@ -651,6 +670,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
         std::ostringstream ss;
@@ -668,6 +688,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
+#endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getAtom(h)->getTruthValue();
@@ -712,6 +733,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
         std::ostringstream ss;
@@ -733,6 +755,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
+#endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
         SimpleTruthValue stv(strength, conf); 
@@ -769,10 +792,12 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
         // Currently not expose in the SCM API
         return timepair_t(0,0);
     }
+#endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getHandlesByName(back_inserter(results2), oss.str(), NODE, true);
@@ -802,10 +827,12 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
         // Currently not expose in the SCM API
         return timepair_t(0,0);
     }
+#endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getHandlesByType(back_inserter(results2), t, true);
@@ -833,6 +860,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
         std::ostringstream ss;
@@ -850,6 +878,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
+#endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
         Link* l = atab->getLink(h);
@@ -878,6 +907,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
         std::ostringstream ss;
@@ -895,6 +925,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
+#endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getIncomingSet(h);
