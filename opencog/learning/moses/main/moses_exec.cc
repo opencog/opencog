@@ -448,6 +448,7 @@ int moses_exec(int argc, char** argv)
 
     // program options, see options_description below for their meaning
     vector<string> jobs_str;
+    unsigned min_pool;
     bool enable_mpi = false;
 
     unsigned long rand_seed;
@@ -575,6 +576,10 @@ int moses_exec(int argc, char** argv)
                     " files are gonna be generated when using this option on"
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
+
+        ("min-pool", value<unsigned>(&min_pool)->default_value(50),
+         "Minimum number of elements to process in the pool to enable "
+         " multi-threading.\n")
 
         (opt_desc_str(exemplars_str_opt).c_str(),
          value<vector<string>>(&exemplars_str),
@@ -1218,6 +1223,26 @@ int moses_exec(int argc, char** argv)
          "will be selected. \n"
          "For the -ainc algo only, the -C flag over-rides this setting.\n")
 
+        // ======= Feature-selection diveristy pressure =======
+        ("fs-diversity-pressure",
+         value<float>(&festor_params.diversity_pressure)->default_value(0),
+         "Multiplicative coefficient of the diversity penalty "
+         "(itself being in [0,1]).\n")
+
+        ("fs-diversity-cap",
+         value<int>(&festor_params.diversity_cap)->default_value(100),
+         "Place a cap on the maximum number of feature set to consider. "
+         "If negative, no cap is used (warning could be very slow)"
+         "Use this to speed up diversity computation on feature sets.\n")
+
+        ("fs-diversity-interaction",
+         value<int>(&festor_params.diversity_interaction)->default_value(-1),
+         "Maximum number of interactions to be considered when computing "
+         "the mutual information between feature sets. "
+         "This is used in case the number of selected features tends to "
+         "be high compared to the number of datapoints to decrease inacuracy "
+         "of the mutual information.\n")
+
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
          value<double>(&fs_params.inc_red_intensity)->default_value(-1.0),
@@ -1446,7 +1471,7 @@ int moses_exec(int argc, char** argv)
         }
     }
 
-    setting_omp(jobs[localhost]);
+    setting_omp(jobs[localhost], min_pool);
 
 #ifdef HAVE_MPI
     if (enable_mpi) {

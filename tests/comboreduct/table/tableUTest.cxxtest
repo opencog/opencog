@@ -29,7 +29,7 @@ using namespace std;
 const string olabel = "happiness";
 const string label1 = "price";
 const string label2 = "temperature";
-const string tableUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/comboreduct/combo/";
+const string tableUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/comboreduct/table/";
 
 class tableUTest : public CxxTest::TestSuite
 {
@@ -300,6 +300,20 @@ public:
         double mi = mutualInformation(ctt, fs);
         cout << "mi = " << mi << endl;
         TS_ASSERT_DELTA(0.419973, mi, 0.0001);
+    }
+
+    void test_mutualInformationBtwSets()
+    {
+        std::cout << "\n----------------------------" << std::endl;
+        string target_feature;
+        vector<string> ignore_features;
+        Table tt = loadTable(tableUTest_dir + "dataset.csv", target_feature, ignore_features);
+        set<arity_t> fs1{0};
+        set<arity_t> fs2{1};
+        CTable ctt = tt.compressed();
+        double mi = mutualInformationBtwSets(ctt, fs1, fs2);
+        cout << "mi = " << mi << endl;
+        TS_ASSERT_DELTA(0.3219, mi, 0.0001);
     }
 
     void test_insert_get_pos()

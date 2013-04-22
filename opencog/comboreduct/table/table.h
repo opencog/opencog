@@ -870,7 +870,6 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         // Count the total number of times an enum appears in the table
         Counter<vertex, unsigned> ycount;
 
-        // Same as above, but for enums.
         for (const auto& row : ctable)
         {
             // Create the filtered row.
@@ -961,6 +960,98 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
         unsigned idx = *(fs.begin());
         logger().debug() <<"Contin MI for feat=" << idx << " ic=" << ic;
         return ic;
+    }
+
+    //////////////////////////////////
+    // Other non implemented cases //
+    //////////////////////////////////
+    else
+    {
+        OC_ASSERT(0, "Unsupported type for mutual information");
+        return 0.0;
+    }
+}
+
+/**
+ * Compute the mutual information between 2 sets of a ctable (only
+ * discrete types are supported.
+ */
+template<typename FeatureSet>
+double mutualInformationBtwSets(const CTable& ctable,
+                                const FeatureSet& fs_l,
+                                const FeatureSet& fs_r) {
+    // get union of fs_l and fs_r
+    FeatureSet fs_u = set_union(fs_l, fs_r);
+
+    // Check that the arities are within permitted range
+    OC_ASSERT(all_of(fs_u.begin(), fs_u.end(),
+                     [&](const typename FeatureSet::value_type& f) {
+                         return f < ctable.get_arity();}));
+
+    // declare useful visitors
+    seq_filtered_visitor<FeatureSet> sfv_u(fs_u), sfv_l(fs_l), sfv_r(fs_r);
+    auto asf_u = boost::apply_visitor(sfv_u),
+        asf_l = boost::apply_visitor(sfv_l),
+        asf_r = boost::apply_visitor(sfv_r);
+    type_node otype = ctable.get_output_type();
+
+    ///////////////////
+    // discrete case //
+    ///////////////////
+    if (id::enum_type == otype or id::boolean_type == otype)
+    {
+        // Let U1, ..., Un the features resulting from the union
+        // between fs_l and fs_r.
+        //
+        // Let L1, ..., Lm the features of fs_l
+        //
+        // Let R1, ..., Rl the features of fs_r
+        //
+        // We need to compute the entropies
+        //
+        //       H(U1, ..., Un)
+        //       H(L1, ..., Lm)
+        //       H(R1, ..., Rl)
+        //
+        // Then the mutual information is
+        //
+        // MI(fs_l, fs_r) = H(L1, ..., Lm) + H(R1, ..., Rl) - H(U1, ..., Un)
+        //
+        // To do this, we need to count how often those events occurs.
+        typedef Counter<CTable::key_type, unsigned> VSCounter;
+        VSCounter
+            uc, // for H(U1, ..., Un)
+            lc, // for H(L1, ..., Lm)
+            rc; // for H(R1, ..., Rl)
+        double total = 0.0;
+
+        for (const auto& row : ctable)
+        {
+            // Create the filtered row.
+            CTable::key_type vec_u = asf_u(row.first.get_variant()),
+                vec_l = asf_l(row.first.get_variant()),
+                vec_r = asf_r(row.first.get_variant());
+            unsigned row_total = row.second.total_count();
+
+            // update uc, lc and rc
+            uc[vec_u] += row_total;
+            lc[vec_l] += row_total;
+            rc[vec_r] += row_total;
+
+            // update total numer of data points
+            total += row_total;
+        }
+
+        // Compute the probability distributions; viz divide count by total.
+        // "c" == count, "p" == probability
+        std::vector<double> up(uc.size()), lp(lc.size()), rp(rc.size());
+        auto div_total = [&](unsigned c) { return c/total; };
+        transform(uc | map_values, up.begin(), div_total);
+        transform(lc | map_values, lp.begin(), div_total);
+        transform(rc | map_values, rp.begin(), div_total);
+
+        // Compute the entropies
+        return entropy(lp) + entropy(rp) - entropy(up);
     }
 
     //////////////////////////////////
