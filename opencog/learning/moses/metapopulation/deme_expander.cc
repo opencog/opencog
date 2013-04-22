@@ -37,7 +37,9 @@ string_seq deme_expander::fs_to_names(const set<arity_t>& fs,
 void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                                               const feature_set& xmplr_features,
                                               const string_seq& ilabels) const {
+    unsigned sfps = sf_pop.size(), i = 1;
     for (const auto& sf : sf_pop) {
+        logger().info() << "Breadth-first deme expansion : " << i++ << "/" << sfps;
         logger().info() << "Selected " << sf.second.size()
                         << " features for representation";
         auto xmplr_sf = set_intersection(sf.second, xmplr_features);
@@ -90,7 +92,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
     // ordinary, one-time only, up-front round of feature selection by
     // using only those features which score well with the current
     // exemplar.
-    vector<operator_set> ignore_ops_seq;
+    vector<operator_set> ignore_ops_seq, considered_args_seq;
     vector<combo_tree> xmplr_seq;
     if (_params.fstor) {
         // copy, any change in the parameters will not be remembered
@@ -105,9 +107,13 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
 
         // get labels corresponding to all the features
         const auto& ilabels = festor._ctable.get_input_labels();
-    
+
+        if (festor.params.n_demes > 1)
+            logger().info() << "Breadth-first deme expansion (same exemplar, multiple feature sets): " << festor.params.n_demes;
+
         log_selected_feature_sets(sf_pop, xmplr_features, ilabels);
 
+        unsigned sfi = 1;
         for (auto& sf : sf_pop) {
             // Either prune the exemplar, or add all exemplars
             // features to the feature sets
@@ -115,13 +121,15 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
                 auto xmplr_nsf = set_difference(xmplr_features,
                                                 sf.second);
                 ostreamContainer(logger().debug() <<
-                                 "Prune the exemplar from non-selected features: ",
+                                 "Prune the exemplar from non-selected features "
+                                 << "(" << sfi << "/" << sf_pop.size() << ")",
                                  fs_to_names(xmplr_nsf, ilabels));
                 xmplr_seq.push_back(prune_xmplr(exemplar, sf.second));
             }
             else {
-                logger().debug("Do not prune the exemplar from "
-                               "non-selected features");
+                logger().debug() << "Do not prune the exemplar from "
+                                 << "non-selected features "
+                                 << "(" << sfi << "/" << sf_pop.size() << ")";
                 // Insert exemplar features as they are not pruned
                 sf.second.insert(xmplr_features.begin(), xmplr_features.end());
                 xmplr_seq.push_back(exemplar);
@@ -129,11 +137,18 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
 
             // add the complement of the selected features to ignore_ops
             unsigned arity = festor._ctable.get_arity();
-            vertex_set ignore_ops;
-            for (unsigned i = 0; i < arity; i++)
+            vertex_set ignore_ops, considered_args;
+            for (unsigned i = 0; i < arity; i++) {
+                argument arg(i + 1);
                 if (sf.second.find(i) == sf.second.end())
-                    ignore_ops.insert(argument(i + 1));
+                    ignore_ops.insert(arg);
+                else
+                    considered_args.insert(arg);
+            }
             ignore_ops_seq.push_back(ignore_ops);
+            considered_args_seq.push_back(considered_args);
+
+            sfi++;
         }
     }
     else {                      // no feature selection within moses
@@ -142,9 +157,14 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
     }
 
     for (unsigned i = 0; i < xmplr_seq.size(); i++) {
-        if (logger().isDebugEnabled())
-            logger().debug() << "Attempt to build rep from exemplar: "
-                             << xmplr_seq[i];
+        if (logger().isDebugEnabled()) {
+            logger().debug() << "Attempt to build rep from exemplar "
+                             << "(" << i+1 << "/" << xmplr_seq.size() << ")"
+                             << ": " << xmplr_seq[i];
+            if (!considered_args_seq.empty())
+                ostreamContainer(logger().debug() << "Using arguments: ",
+                                 considered_args_seq[i]);
+        }
 
         // Build a representation by adding knobs to the exemplar,
         // creating a field set, and a mapping from field set to knobs.

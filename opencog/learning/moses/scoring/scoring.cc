@@ -495,7 +495,7 @@ void discriminating_bscore::set_complexity_coef(unsigned alphabet_size, float p)
                                 // because the precision is normalized
                                 // as well
 
-    logger().info() << "Discriminiating scorer, noise = " << p
+    logger().info() << "Discriminating scorer, noise = " << p
                     << " alphabest size = " << alphabet_size
                     << " complexity ratio = " << 1.0/complexity_coef;
 }

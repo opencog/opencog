@@ -109,6 +109,13 @@ struct feature_selector_parameters {
     float diversity_pressure;
 
     /**
+     * Set a cap regarding the population of feature sets. Right have
+     * feature selection optimization, only diversity_cap found
+     * feature sets are kept, or all if diversity_cap <= 0
+     */
+    int diversity_cap;
+
+    /**
      * Number of interactions to consider when computing mi. A
      * negative value means all interactions.
      */
@@ -116,7 +123,9 @@ struct feature_selector_parameters {
 };
 
 // used for diversity ranking
-typedef std::multimap<composite_score, feature_set> csc_feature_set_pop;
+typedef std::multimap<composite_score,
+                      feature_set,
+                      std::greater<composite_score>> csc_feature_set_pop;
 
 /**
  * Struct in charge of selecting features maximize the amount of
@@ -157,8 +166,17 @@ protected:
     // Rank feature sets, penalized by diversity
     csc_feature_set_pop rank_feature_sets(const feature_set_pop& fs_pop) const;
 
-    // compute (or rather approximate) the mutual information between 2
-    // feature sets
+    void log_stats_top_feature_sets(const feature_set_pop& top_fs) const;
+
+    // compute (or approximate) the mutual information between 2
+    // feature sets.
+    //
+    // If params.diversity_interaction is negative then it returns the
+    // mutual information between fs_l and fs_r.
+    //
+    // Otherwise it returns the average of mutual informations between
+    // all subsets of fs_l and fs_r of size
+    // params.diversity_interaction + 1
     double mi(const feature_set& fs_l, const feature_set& fs_r) const;
 };
 

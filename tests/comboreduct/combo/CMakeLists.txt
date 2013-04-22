@@ -52,12 +52,6 @@ TARGET_LINK_LIBRARIES(interpreterUTest
     cogutil
 )
 
-ADD_CXXTEST(tableUTest)
-TARGET_LINK_LIBRARIES(tableUTest
-	comboreduct
-	cogutil
-)
-
 ADD_CXXTEST(listUTest)
 TARGET_LINK_LIBRARIES(listUTest
 	comboreduct

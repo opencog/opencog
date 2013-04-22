@@ -443,7 +443,14 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         if (params.max_candidates >= 0)
             max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
 
-        logger().debug("Select candidates to merge (amongst %u)", max_pot_cnd);
+        stringstream ss;
+        if (demes.size() > 1)
+            logger().debug() << "From deme (" << i+1 << "/" << demes.size() << ")";
+
+        ss << "Select candidates to merge amongst " << max_pot_cnd;
+        if (demes.size() > 1)
+            ss << " (deme " << i+1 << "/" << demes.size() << ")";
+        logger().debug(ss.str());
 
         // select_candidates() can be very time consuming; it currently
         // takes anywhere from 25 to 500(!!) millisecs per instance (!!)

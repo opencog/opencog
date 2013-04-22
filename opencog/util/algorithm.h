@@ -254,23 +254,25 @@ Out n_way_partition(It begin, It end, const Pred p, int n, Out out)
  * subsets of size n or below.
  *
  * @param s       the input set
- * @param n       the size of the largest subset of s
+ *
+ * @param n       the size of the largest subset of s. If n is larger than
+ *                |s| then the size of the largest subset of s will be |s|
+ *
  * @param exact   if true then do not include subsets of size below n
  *
  * @return        the power set of s with subsets up to size n
  */
-template<typename Set> std::set<Set> powerset(const Set& s, size_t n, bool exact = false)
+template<typename Set> std::set<Set> powerset(const Set& s, size_t n,
+                                              bool exact = false)
 {
-    typedef typename Set::const_iterator SetCIt;
-    typedef typename std::set<Set>::const_iterator PowerSetCIt;
     std::set<Set> res;
     if (n > 0) {
         std::set<Set> ps = powerset(s, n-1, exact);
-        for (PowerSetCIt ss = ps.begin(); ss != ps.end(); ss++)
-            for (SetCIt el = s.begin(); el != s.end(); el++) {
-                Set subset(*ss);
-                if (subset.find(*el) == subset.end()) {
-                    subset.insert(*el);
+        for (const Set& ss : ps)
+            for (const auto& el : s) {
+                Set subset(ss);
+                if (subset.find(el) == subset.end()) {
+                    subset.insert(el);
                     res.insert(subset);
                 }
             }
