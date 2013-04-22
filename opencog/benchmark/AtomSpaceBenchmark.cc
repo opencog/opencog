@@ -219,11 +219,6 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_TABLE:  cout << "AtomTable's "; break;
 #if HAVE_GUILE
         case BENCH_SCM:  cout << "Scheme's "; break;
-#else
-        case BENCH_SCM:
-            cout << endl;
-            cerr << "Fatal Error: Benchmark not compiled with scheme bindings."<<endl;
-            exit(1);
 #endif /* HAVE_GUILE */
     }
     cout << methodName << " method " << Nreps << " times ";

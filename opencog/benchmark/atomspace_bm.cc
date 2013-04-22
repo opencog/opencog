@@ -70,7 +70,12 @@ int main(int argc, char** argv) {
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;
              break;
            case 'g':
+#ifdef HAVE_GUILE
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_SCM;
+#else
+             cerr << "Fatal Error: Benchmark not compiled with scheme support!" << endl;
+             exit(1);
+#endif
              break;
            case 'm':
              benchmarker.buildTestData = true;
