@@ -28,12 +28,13 @@
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 
+#include <boost/range/algorithm/max_element.hpp>
+
 #include "feature_selector.h"
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
 #include <opencog/util/oc_omp.h>
 
-#include <boost/range/algorithm/max_element.hpp>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
@@ -286,7 +287,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
 
     // Cap, retain best feature sets
     if (params.diversity_cap > 0)
-        sf_pop.erase(next(sf_pop.begin(), params.diversity_cap), sf_pop.end());
+        sf_pop.erase(std::next(sf_pop.begin(), params.diversity_cap), sf_pop.end());
 
     // Select the top params.n_demes feature sets
     feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
