@@ -241,7 +241,7 @@ void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs)
                     << ", min: " << boost::accumulators::min(score_acc)
                     << ", max: " << boost::accumulators::max(score_acc) << ")";
 
-    logger().info() << "feature sets diversity stats = "
+    logger().info() << "feature sets diversity stats (MI) = "
                     << "(count: " << count(diversity_acc)
                     << ", mean: " << mean(diversity_acc)
                     << ", std dev: " << sqrt(variance(diversity_acc))
@@ -324,8 +324,8 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
         return csc_fs_l.first < csc_fs_r.first;
     };
 
-    auto mi_to_penalty = [](double mi) {
-        return 1 / (1 + mi);
+    auto mi_to_penalty = [&](double mi) {
+        return params.diversity_pressure * mi;
     };
     
     while (!csc_fs_seq.empty()) {
@@ -355,8 +355,7 @@ csc_feature_set_pop feature_selector::rank_feature_sets(const feature_set_pop& f
                                         last_dp);
 
                 // compute and update the diversity penalty
-                float dp = params.diversity_pressure * agg_dp;
-                csc_fs.first.set_diversity_penalty(dp);
+                csc_fs.first.set_diversity_penalty(agg_dp);
 
                 // // DEBUG
                 // logger().debug() << "With composite score (AFTER): " << csc_fs.first;
