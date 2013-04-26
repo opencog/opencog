@@ -33,6 +33,9 @@ if {[llength $argv] > 0} {
 
 set binDirH $pdh/$binDir
 
+puts "Project Directory from here = $pdh"
+puts "Build Directory = $binDirH"
+
 set flist [list  \
 $binDirH/opencog/embodiment/Control/MessagingSystem/router \
 $binDirH/opencog/embodiment/Control/MessagingSystem/spawner \
@@ -80,15 +83,18 @@ if  [file exists $binDirH/opencog/cython/libPythonModule.so] then {
 }
 
 set schemeOpencogFiles [list \
-$pdh/opencog/scm/type_constructors.scm \
 $pdh/opencog/scm/utilities.scm \
 $pdh/opencog/scm/file-utils.scm \
 $pdh/opencog/scm/persistence.scm \
 $pdh/opencog/scm/debug.scm \
+$pdh/build/opencog/atomspace/core_types.scm \
+$pdh/build/opencog/nlp/types/nlp_types.scm \
+$pdh/build/opencog/spacetime/spacetime_types.scm \
+$pdh/build/opencog/dynamics/attention/attention_types.scm \
+$pdh/build/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
 ]
 
 set schemeEmbodimentFiles [list \
-$pdh/opencog/embodiment/scm/type_constructors.scm \
 $pdh/opencog/embodiment/scm/predicates-frames.scm \
 $pdh/opencog/embodiment/scm/language-comprehension.scm \
 $pdh/opencog/embodiment/scm/reference-resolution-rules.scm \

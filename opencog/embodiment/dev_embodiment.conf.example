@@ -417,11 +417,11 @@ MODULES               = ./libquery.so,
                         ./libPythonModule.so
 
 # scheme script files that will be loaded during the system startup
-SCM_PRELOAD           = atomspace/core_types.scm,
-                        spacetime/spacetime_types.scm,
-                        nlp/types/nlp_types.scm,
-                        dynamics/attention/attention_types.scm,
-                        embodiment/AtomSpaceExtensions/embodiment_types.scm,
+SCM_PRELOAD           = scm/core_types.scm,
+                        scm/spacetime_types.scm,
+                        scm/nlp_types.scm,
+                        scm/attention_types.scm,
+                        scm/embodiment_types.scm,
                         viterbi/viterbi_types.scm,
                         scm/persistence.scm,
                         scm/utilities.scm,
