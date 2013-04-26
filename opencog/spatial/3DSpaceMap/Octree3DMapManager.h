@@ -88,7 +88,7 @@ namespace opencog
             // to store the super blockEntities need to be updated the predicates
             vector<BlockEntity*> updateSuperBlockEntityList;
 
-            static const int AccessDistance = 1;
+            static const int AccessDistance = 2;
 
             /**
              * @ min_x and min_y is the start position of this octree space
