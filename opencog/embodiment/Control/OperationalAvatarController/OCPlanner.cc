@@ -65,18 +65,21 @@ void OCPlanner::addRuleEffectIndex(Rule* r)
 
         State* s = e->state;
 
-        map<string,vector<Rule*> >::iterator it;
+        map<string,map<float,Rule*> >::iterator it;
         it = ruleEffectIndexes.find(s->name());
 
         if (it == ruleEffectIndexes.end())
         {
-            vector<Rule*> rules;
-            rules.push_back(r);
-            ruleEffectIndexes.insert(std::pair<string , vector<Rule*> >(s->name(),rules));
+            map<float,Rule*> rules;
+            rules.insert(std::pair<float,Rule*>(effectIt->first,r));
+            ruleEffectIndexes.insert(std::pair<string , map<float,Rule*> >(s->name(),rules));
         }
         else
         {
-            ((vector<Rule*>)(it->second)).push_back(r);
+            // the map can make sure the rules are put in the list in the order of their probabilities from large to small
+
+            ((map<float,Rule*>)(it->second)).insert(std::pair<float,Rule*>(effectIt->first,r));
+
         }
 
     }
@@ -178,99 +181,135 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     set<StateLayer*> allStateLayers;
 
     // planning process: All the rules should be grounded during planning.
+
     set<StateLayerNode*>::iterator stateLayerIter;
     while(true)
     {
+
+        // not all the states in the current state layer are satisfied,
+        // we need to creat a new rule layer backward trying to achieve these states
+        // and also create a new state Layer which are the preconditions of this new rule layer
+        RuleLayer* newRuleLayer = new RuleLayer();
+        StateLayer* newStateLayer = new StateLayer();
+
+        allRuleLayers.insert(newRuleLayer);
+        allStateLayers.insert(newStateLayer);
+
+        newRuleLayer->nextStateLayer = curStateLayer;
+        newRuleLayer->preStateLayer = newStateLayer;
+
+        newStateLayer->nextRuleLayer = newRuleLayer;
+        curStateLayer->preRuleLayer = newRuleLayer;
+
+        // Some states in current goal statelayer have been grounded through its preRuleLayer.
+        // So, we find out all the ungrounded states goals, and select paravalues to ground them
+        // If there are "Exist States" among these ungrounded states, always these "Exist States" go first
+
+        // in every rule layer, there is always only one rule is applied
+        // so as, in every state layer, there is always only one non-satisfied state being deal with every time
+
+        // first for loop, find a unsatisfied state and try to do one step backward chaining to satisfy it
+        // todo: there should some function to decide the order that which state should be achieved frist
+
         bool goalsAllAchieved = true;
         float satisfiedDegree;
+        bool alreadyDealOneState = false;
+
         for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
         {
             StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
-            if (curStateNode->isAchieved)
+
+            // some state has been checked in last circle, so we only need to check the states remain unknown
+            if (curStateNode->isAchieved == StateLayerNode::ACHIEVED)
                 continue;
 
-            if (checkIsGoalAchieved(*(curStateNode->state), satisfiedDegree))
+
+            if ((curStateNode->isAchieved == StateLayerNode::UNKNOWN))
             {
-                // has been checked and marked satisfed in last loop, so it doesn't need to be checked again
-                curStateNode->isAchieved = true;
-                continue;
+                if (checkIsGoalAchieved(*(curStateNode->state), satisfiedDegree))
+                {
+                    curStateNode->isAchieved = StateLayerNode::ACHIEVED;
+                    continue;
+                }
+                else
+                {
+                    curStateNode->isAchieved = StateLayerNode::NOT_ACHIEVED;
+                    goalsAllAchieved = false;
+                }
+
             }
+
+
+            // if this state has been achieved , then it has been continue above.
+            // only a state has not been achieved will come to here
+            OC_ASSERT(curStateNode->isAchieved == StateLayerNode::NOT_ACHIEVED, "OCPLanner::doPlanning: The state " + curStateNode->state->name() + "is not not-achieved!/n");
+
+            // In every layer, we only deal with one not_achieved state
+            if (alreadyDealOneState)
+                continue;
+
+            alreadyDealOneState = true;
+
+            // For numberic goals
+            // First, check if there is any rules's effect can achieve this goal
+            // If there are more than one rules can achieve it, we'll apply the recursive rule first if any
+            map<string,map<float,Rule*> >::iterator it;
+            it = ruleEffectIndexes.find(curStateNode->state->name());
+
+            // Select a rule to apply
+            Rule* curRule;
+
+            if ( ((map<float,Rule*>)(it->second)).size() == 1)
+                curRule = (((map<float,Rule*>)(it->second)).begin())->second;
             else
             {
-                curStateNode->isAchieved = false;
-                goalsAllAchieved = false;
+                // if there are more than one rule are able to achieve this goal,
+                // select the one with highest probability (50%) and lowest cost (50%)
+
+                // because the cost value is between 0 ~ 100, need to divided by 100 first
+               // (1 - curRule->cost/100.0f)
+
             }
+
+            break;
 
         }
 
         if (goalsAllAchieved)
-            return true; // the goal has been achieve!
-        else
+            return true;
+
+        // Second for loop, for the rest states,create a do nothing rule node, to bring this state to the new state layer
+        // except the states have been affected by the rule applied in the first for loop
+        for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
         {
-            // not all the states in the current state layer are satisfied,
-            // we need to creat a new rule layer backward trying to achieve these states
-            // and also create a new state Layer which are the preconditions of this new rule layer
-            RuleLayer* newRuleLayer = new RuleLayer();
-            StateLayer* newStateLayer = new StateLayer();
 
-            allRuleLayers.insert(newRuleLayer);
-            allStateLayers.insert(newStateLayer);
+            StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
+            // check if this state has already been changed by a rule in this step during deal with other state
+            if (curStateNode->backwardLinks.size() != 0)
+                continue;
 
-            newRuleLayer->nextStateLayer = curStateLayer;
-            newRuleLayer->preStateLayer = newStateLayer;
+            // create a do nothing rule node, to bring this state to the new state layer
+            RuleLayerNode* donothingRuleLayerNode = new RuleLayerNode(DO_NOTHING_RULE);
+            newRuleLayer->nodes.insert(donothingRuleLayerNode);
+            donothingRuleLayerNode->ruleLayer = newRuleLayer;
 
-            newStateLayer->nextRuleLayer = newRuleLayer;
-            curStateLayer->preRuleLayer = newRuleLayer;
+            curStateNode->backwardLinks.insert(donothingRuleLayerNode);
 
-            // Some states in current goal statelayer have been grounded through its preRuleLayer.
-            // So, we find out all the ungrounded states goals, and select paravalues to ground them
-            // If there are "Exist States" among these ungrounded states, always these "Exist States" go first
+            State* cloneState = (curStateNode->state)->clone();
+            StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
+            cloneStateNode->stateLayer = newStateLayer;
+            cloneStateNode->isAchieved = curStateNode->isAchieved;
+            cloneStateNode->forwardLinks.insert(donothingRuleLayerNode);
 
-            for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
-            {
-                StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
-                if (curStateNode->isAchieved)
-                {
-                    // create a do nothing rule node, to bring this state to next state layer
-                    RuleLayerNode* donothingRuleLayerNode = new RuleLayerNode(DO_NOTHING_RULE);
-                    newRuleLayer->nodes.insert(donothingRuleLayerNode);
-                    donothingRuleLayerNode->ruleLayer = newRuleLayer;
+            donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
+            donothingRuleLayerNode->forwardLinks.insert(curStateNode);
 
-                    State* cloneState = (curStateNode->state)->clone();
-                    StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
-                    cloneStateNode->stateLayer = newStateLayer;
-                    cloneStateNode->isAchieved = true;
-                    cloneStateNode->forwardLinks.insert(donothingRuleLayerNode);
-
-                    donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
-                }
-                else
-                {
-                    // For numberic goals
-                    // First, check if there is any rules's effect can achieve this goal
-                    // If there are more than one rules can achieve it, we'll apply the recursive rule first in any
-                    map<string,vector<Rule*> >::iterator it;
-                    it = ruleEffectIndexes.find(curStateNode->state->name());
-
-                    // Select a rule to apply
-                    Rule* curRule;
-
-                    if ( ((vector<Rule*>)(it->second)).size() == 1)
-                        curRule = ((vector<Rule*>)(it->second)).front();
-                    else
-                    {
-                        // if there are more than one rule are able to achieve this goal,
-                        // select the one with highest probability (50%) and lowest cost (50%)
-
-                        // because the cost value is between 0 ~ 100, need to divided by 100 first
-                       // (1 - curRule->cost/100.0f)
-
-                    }
-
-                }
-            }
 
         }
+
+        curStateLayer = newStateLayer;
+
+
 
     }
 

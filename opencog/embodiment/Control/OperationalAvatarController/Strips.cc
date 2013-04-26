@@ -60,10 +60,11 @@ State::~State()
     delete stateVariable;
 }
 
-State::clone()
+State* State::clone()
 {
     State* cloneState = new State();
-    cloneState->stateVariable = new StateVariable(this->name(),this->getStateValuleType(),this->stateType, this->getStateValue());
+    cloneState->stateVariable = new StateVariable(this->name(),this->getStateValuleType(), this->getStateValue());
+    cloneState->stateType = this->stateType;
     cloneState->stateOwnerList = this->stateOwnerList;
     cloneState->need_inquery = this->need_inquery;
     cloneState->inqueryFun = this->inqueryFun;
@@ -388,14 +389,14 @@ float State::getFloatValueFromNumbericState()
     // please make sure this a numberic state before call this function
     if (getStateValuleType().getCode() == FUZZY_INTERVAL_INT_CODE)
     {
-       int fuzzyInt = boost::get<opencog::pai::FuzzyIntervalInt>(stateVariable->getValue());
-       float fuzzyFloat = FuzzyIntervalFloat((float)fuzzyInt.bound_low, (float)fuzzyInt.bound_high);
+       FuzzyIntervalInt fuzzyInt = boost::get<opencog::pai::FuzzyIntervalInt>(stateVariable->getValue());
+       FuzzyIntervalFloat fuzzyFloat = FuzzyIntervalFloat((float)fuzzyInt.bound_low, (float)fuzzyInt.bound_high);
        return (fuzzyFloat.bound_low + fuzzyInt.bound_high)/2.0f;
     }
     else if (getStateValuleType().getCode() == FUZZY_INTERVAL_FLOAT_CODE)
     {
-        fuzzyFloat = boost::get<opencog::pai::FuzzyIntervalFloat>(stateVariable->getValue());
-        return (fuzzyFloat.bound_low + fuzzyInt.bound_high)/2.0f;
+        FuzzyIntervalFloat fuzzyFloat = boost::get<opencog::pai::FuzzyIntervalFloat>(stateVariable->getValue());
+        return (fuzzyFloat.bound_low + fuzzyFloat.bound_high)/2.0f;
     }
     else if (getStateValuleType().getCode()  == INT_CODE)
     {
@@ -642,8 +643,7 @@ float Rule::getCost()
         // get numberic value from this cost_cal_state
         if (! cost_cal_state->isNumbericState())
         {
-            logger().error("Planner::Rule::getCost : The relatied state is not numberic state: "
-                     + cost_cal_state.name() );
+            logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
         }
 
        return cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
