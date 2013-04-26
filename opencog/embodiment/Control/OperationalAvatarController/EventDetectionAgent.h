@@ -62,6 +62,8 @@ struct Frame
 
 //--------------------------Pattern mining -------------------------------------
 // the Skeleton of a group of links, all the nodes are variable nodes
+class Pattern;
+
 class Skeleton
 {
 public:
@@ -155,6 +157,7 @@ private:
 
     std::map<UUID,Handle> allNodesForScmActions;
 
+    int globalVarNum;
 
     // insert a node into allNodesForScmActions
     void insertNodeToScmMap(Handle node);
@@ -163,8 +166,9 @@ private:
     void processOneInputLink(Handle rootLink);
     void _processOneInputLink(Handle rootLink,std::map<Handle,Handle> varBindings);
     void extractPatternsBySharingSameVaiables(Handle oneLink);
-    void extractOneSkeleton(Handle oneLink);
+    void extractSkeleton(Handle oneLink);
 
+    bool isThisSkeletonAlreadyExisted(Skeleton* s, Skeleton** theExistedSkeleton);
 
     //--------------------------Pattern mining end-------------------------------------
 

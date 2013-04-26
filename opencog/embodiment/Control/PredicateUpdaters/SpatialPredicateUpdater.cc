@@ -592,8 +592,8 @@ addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
 
         timeServer().addTimeInfo(eval, timestamp);
 
-        if (enableCollectActions)
-            EventDetectionAgent::addAnEvent(eval,timestamp,EVENT_TYPE_SPATIAL_PREDICATE);
+//        if (enableCollectActions)
+//            oac::EventDetectionAgent::addAnEvent(eval,timestamp,oac::EVENT_TYPE_SPATIAL_PREDICATE);
 
     }
 

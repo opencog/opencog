@@ -32,26 +32,22 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
+#include "OAC.h"
 
 using namespace opencog::oac;
-using namespace opencog::control;
 using namespace opencog;
 
-void ActionInfo::addPara(string paraName, Handle paraVal)
-{
-    this->paraMap[paraName] = paraVal;
-}
+map<unsigned long,Frame*> EventDetectionAgent::frames;
 
-EventDetectionAgent::EventDetectionAgent(AtomSpace& _atomSpace )
+
+EventDetectionAgent::EventDetectionAgent(AtomSpace& _atomSpace ):atomSpace(_atomSpace)
 {
     this->cycleCount = 0;
-    dataProvider = new DataProvider(3, false);
-
-    atomSpace = _atomSpace;
+    // dataProvider = new DataProvider(3, false);
 
     // ----------------pattern mining -------------------
-    NGramSkeletonArray = new Skeleton*[MAX_PATTERN_GRAM];
-    NGramPatternArray = new Pattern*[MAX_PATTERN_GRAM];
+    // NGramSkeletonArray = new Skeleton*[MAX_PATTERN_GRAM];
+    // NGramPatternArray = new Pattern*[MAX_PATTERN_GRAM];
 
     iAtomSpace = new AtomSpace();
 
@@ -137,12 +133,15 @@ void EventDetectionAgent::run(opencog::CogServer * server)
 
 }
 
-void Skeleton::isSameSkeletonToMe(HandleSeq _rootLinks)
+bool Skeleton::isSameSkeletonToMe(HandleSeq _rootLinks)
 {
+    //TODO:
     foreach(Handle rh , _rootLinks)
     {
 
     }
+
+    return false;
 }
 
 // insert a node into allNodesForScmActions
@@ -212,7 +211,7 @@ void EventDetectionAgent::_processOneInputLink(Handle rootLink,std::map<Handle,H
             }
 
             // this variable already exists in the global var map
-            map
+         // TODO
 
         }
     }
@@ -220,7 +219,8 @@ void EventDetectionAgent::_processOneInputLink(Handle rootLink,std::map<Handle,H
 
 bool EventDetectionAgent::isThisSkeletonAlreadyExisted(Skeleton* s, Skeleton** theExistedSkeleton)
 {
-
+ // TODO
+    return true;
 }
 
 //--------------------------Pattern mining end-------------------------------------

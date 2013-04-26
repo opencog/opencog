@@ -1459,10 +1459,10 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
         actionConcernedHandles.push_back(newStateValNode);
         actionConcernedHandles.push_back(newStateEvalLink);
 
-        eventTYpe = EVENT_TYPE_STATE_CHANGE;
+        eventTYpe = oac::EVENT_TYPE_STATE_CHANGE;
     }
     else
-        eventTYpe = EVENT_TYPE_ACTION;
+        eventTYpe = oac::EVENT_TYPE_ACTION;
 
     // Jared    
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
@@ -1479,7 +1479,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     if (enableCollectActions)
     {
         //EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
-        EventDetectionAgent::addAnEvent(actionInstanceNode,tsValue,eventTYpe);
+        //oac::EventDetectionAgent::addAnEvent(actionInstanceNode,tsValue,eventTYpe);
     }
 
     // call the event responser
