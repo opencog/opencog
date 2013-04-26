@@ -205,39 +205,44 @@ public:
         Handle llHandle = atomSpace->addLink(LIST_LINK,os)->get_result();
         atomSpace->setSTI(llHandle,(AttentionValue::sti_t) (min_sti + 5));
 
+#define CHK(TYPE, OP) { \
+    std::vector<Handle> blah; \
+    atomTable.getHandlesByType(back_inserter(blah), TYPE); \
+    TS_ASSERT(blah.size() OP 0); \
+}
         // decay sti up to the threshold where the least important atoms
         // should be about to be removed
         for (int i = 0; i < 5; i++)
             atomSpace->decayShortTermImportance()->get_result();
         // and test the existance of each atom
         const AtomTable& atomTable = atomSpace->atomspace.getAtomTable();
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        != NULL);
+        CHK(NUMBER_NODE,      !=);
+        CHK(CONCEPT_NODE,     !=);
+        CHK(INHERITANCE_LINK, !=);
+        CHK(LIST_LINK,        !=);
 
         // run another decaying cycle; the list link node should have been
         // removed
         atomSpace->decayShortTermImportance()->get_result();
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+        CHK(NUMBER_NODE,      !=);
+        CHK(CONCEPT_NODE,     !=);
+        CHK(INHERITANCE_LINK, !=);
+        CHK(LIST_LINK,        ==);
 
         // an another one; the inheritance link and the sense node should have
         // been removed
         atomSpace->decayShortTermImportance()->get_result();
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      != NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+        CHK(NUMBER_NODE,      !=);
+        CHK(CONCEPT_NODE,     ==);
+        CHK(INHERITANCE_LINK, ==);
+        CHK(LIST_LINK,        ==);
 
         // and another, final one; by now all nodes should have been removed
         atomSpace->decayShortTermImportance()->get_result();
-        TS_ASSERT(atomTable.getHandleSet((Type) NUMBER_NODE)      == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) CONCEPT_NODE)     == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) INHERITANCE_LINK) == NULL);
-        TS_ASSERT(atomTable.getHandleSet((Type) LIST_LINK)        == NULL);
+        CHK(NUMBER_NODE,      ==);
+        CHK(CONCEPT_NODE,     ==);
+        CHK(INHERITANCE_LINK, ==);
+        CHK(LIST_LINK,        ==);
     }
 
     Type randomType(Type t) {

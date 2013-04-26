@@ -6,5 +6,5 @@ TARGET_LINK_LIBRARIES(ImaginaryLife
 	behavior
 	AtomSpaceExtensions
 	comboreduct
-	util
+	cogutil
 )

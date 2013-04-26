@@ -33,6 +33,9 @@ namespace opencog
 
 /**
  * Implements a Handle-sequence index as an RB-tree (C++ map)
+ * That is, given a HandleSeq, it will return a (single) Handle
+ * associated with that HandleSeq.  This map is in the "opposite"
+ * direction from the HandleIndex.
  *
  * XXX Notice that it this wastes a fair amount of RAM by storing a 
  * copy of a HandleSeq --- it could save a fair amount of space by storing

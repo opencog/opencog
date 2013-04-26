@@ -30,7 +30,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/moses/moses_main.h>
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
@@ -54,15 +54,15 @@ struct interactive_cscore : public cscore_base
 
 struct interactive_bscore : public bscore_base
 {
-    result_type  operator()(const combo_tree& tr) const
+    result_type operator()(const combo_tree& tr) const
     {
         result_type pbs;
         return pbs;
     }
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
-        return pbs;
+        behavioral_score bs;
+        return bs;
     }
 };
 

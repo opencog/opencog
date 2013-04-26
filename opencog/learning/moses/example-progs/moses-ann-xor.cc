@@ -7,7 +7,7 @@
 #include <opencog/comboreduct/interpreter/eval.h>
 
 #include "../moses/moses_main.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 #include "../moses/ann_scoring.h"
 #include "../optimization/optimization.h"
 #include "../representation/representation.h"

@@ -23,13 +23,13 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
+#include <unordered_map>
 #include <vector>
 
 #include <stdlib.h>
 
 #include <boost/signal.hpp>
 #include <boost/thread.hpp>
-#include <boost/unordered_map.hpp>
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/atom_types.h>
@@ -61,8 +61,8 @@ private:
 
     std::vector< std::vector<bool> > inheritanceMap;
     std::vector< std::vector<bool> > recursiveMap;
-    boost::unordered_map<std::string, Type> name2CodeMap;
-    boost::unordered_map<Type, const std::string*> code2NameMap;
+    std::unordered_map<std::string, Type> name2CodeMap;
+    std::unordered_map<Type, const std::string*> code2NameMap;
     boost::signal<void (Type)> _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type);

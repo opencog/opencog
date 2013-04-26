@@ -31,12 +31,12 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomSpaceImpl.h>
-#include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
+#include <opencog/spacetime/atom_types.h>
 #include "SpaceServer.h"
 #include "TimeServer.h"
 

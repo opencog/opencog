@@ -30,9 +30,6 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
-#ifdef ZMQ_EXPERIMENT
-#include <boost/foreach.hpp>
-#endif
 
 #define W() getU()-getL();
 

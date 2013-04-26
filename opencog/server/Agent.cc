@@ -83,15 +83,14 @@ std::string Agent::to_string() const
 void Agent::atomRemoved(AtomSpaceImpl* a, Handle h)
 {
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
-        if (_utilizedHandleSets[i]->contains(h))
-            _utilizedHandleSets[i]->remove(h);
+        _utilizedHandleSets[i].erase(h);
     removeAtomStimulus(h);
 }
 
 void Agent::resetUtilizedHandleSets()
 {
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
-        delete _utilizedHandleSets[i];
+        _utilizedHandleSets[i].clear();
     _utilizedHandleSets.clear();
 }
 

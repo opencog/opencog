@@ -207,7 +207,7 @@ public:
     virtual Module* getModule(const std::string& id);
 
     /** Load all modules specified in configuration file */
-    virtual void loadModules();
+    virtual void loadModules(const char* [] = NULL);
 
     /** Load all Scheme modules specified in configuration file */
     virtual void loadSCMModules(const char* [] = NULL);

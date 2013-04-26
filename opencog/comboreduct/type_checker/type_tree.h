@@ -361,8 +361,10 @@ const type_tree& argument_type_list_input_type(const type_tree_seq& atl,
                                                arity_t arity,
                                                arity_t index);
 
-// return the arity of a vertex, -1 if the arity is an arg_list 0 if
-// it is a constant
+/// Return the arity of a vertex.
+/// This is +1 if it is an argument, 0 if it is a constant, and -1 if
+/// it is an arg list.  If vertex is one of the built-in functions,
+/// then the returned arity is that of the function.
 arity_t get_arity(const vertex& v);
 
 // check if a type_tree is well formed
@@ -373,12 +375,16 @@ bool is_well_formed(const type_tree& tt);
 // is only called with n>=0
 bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n);
 
-// return the implicit arity of a given combo_tree without performing
-// type checking
+/// Return the sum of the arities of all the leaves of the tree.
+/// The arity of a leaf is measured with get_arity(Vertex&), above.
+/// Roughly speaking, this returns the total number of arguemnts in
+/// the combo tree.
+///
+/// No type checking is performed.
 arity_t infer_arity(const combo_tree& tr);
 
-// return the higher argument index of tr,
-// for instance if tr == +($1 $5) it returns 5
+/// Return the highest argument index of combo tree tr;
+/// for instance if tr == +($1 $5) it returns 5
 arity_t explicit_arity(const combo_tree& tr);
 
 /// Return the type tree of the output given the function signature ty

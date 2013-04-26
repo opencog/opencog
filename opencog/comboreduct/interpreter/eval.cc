@@ -24,10 +24,60 @@
  */
 #include "eval.h"
 #include <iostream>
+#include <iterator>
 
 namespace opencog { namespace combo {
 
 using namespace std;
+
+combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterator it, Evaluator * pe)
+{
+    // sanity checks
+    if (!is_procedure_call(*it)) {
+        throw ComboException(TRACE_INFO,
+                                      "ProcedureEvaluator - combo_tree node does not represent a combo procedure call.");
+    }
+    procedure_call pc = get_procedure_call(*it);
+
+    arity_t ar = pc->arity();
+    bool fixed_arity = ar >= 0; //the procedure gets fix number of
+    //input arguments
+    combo::arity_t exp_arity = combo::abs_min_arity(ar);
+    arity_t ap_args = it.number_of_children();
+    //OC_ASSERT(ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
+    if (fixed_arity) {
+        if (ap_args != ar) {
+            throw ComboException(TRACE_INFO,
+                                          "ProcedureEvaluator - %s arity differs from no. node's children. Arity: %d, number_of_children: %d",
+                                          get_procedure_call(*it)->get_name().c_str(), ar, ap_args);
+        }
+    } else {
+        if (ap_args < exp_arity) {
+            throw ComboException(TRACE_INFO,
+                                          "ProcedureEvaluator - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_children: %d",
+                                          get_procedure_call(*it)->get_name().c_str(), exp_arity, ap_args);
+        }
+    }
+
+    // evaluate {the function body} with {the arguments to the function}
+    combo_tree body(pc->get_body());
+    cout << body << endl;
+
+    vertex_seq args;
+    //copy(body.begin(), body.end(), back_inserter(args));
+
+    // evaluate the arguments to the function (their variables are in the current scope, i.e. bmap)
+    for (combo_tree::sibling_iterator arg_it = it.begin(); arg_it != it.end(); arg_it++) {
+        combo_tree arg_result(eval_throws_tree(bmap, arg_it, pe));
+
+        OC_ASSERT(arg_it.number_of_children() == 0, "functions cannot have list arguments");
+        args.push_back(*arg_result.begin());
+        cout << (*arg_result.begin()) << endl;
+    }
+
+    combo_tree ret(eval_throws_tree(args, body.begin(), pe));
+    return ret;
+}
 
 #if ALMOST_DEAD_EVAL_CODE
 // @todo all users of the code below should switch to using
@@ -197,7 +247,21 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     //     logger().fine(ss.str());
     // }
 
+    combo_tree ret(eval_throws_tree(bmap, it, pe));
+    // Make sure it has no children.
+    OC_ASSERT(ret.number_of_children(ret.begin()) == 0, "Invalid use of eval_throws_binding:"
+        "expression evaluates to a whole combo_tree, not just one vertex");
+
+    return *ret.begin();
+}
+
+vertex eval_throws_vertex(const vertex_seq& bmap,
+                           combo_tree::iterator it, Evaluator* pe)
+    throw(EvalException, ComboException,
+          AssertionException, std::bad_exception)
+{
     typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
     if (const argument* a = boost::get<argument>(&v)) {
@@ -333,62 +397,8 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         case id::rand :
             return randGen().randfloat();
 
-        // Almost all list ops are not supported by this function...
-        case id::list :
-        case id::cdr :
-        case id::cons :
-        case id::foldr :
-        case id::foldl :
-            throw ComboException(TRACE_INFO,
-                "Cannot handle lists; use eval_throws_tree() instead.");
-
-        // car returns the first elt of a list. The list better not
-        // be empty, and it's first elt better not be a list...
-        case id::car : {
-            sib_it lp = it.begin();
-
-            combo_tree evo;
-            if (*lp != id::list) {
-                evo = eval_throws_tree(bmap, lp, pe);
-                lp = evo.begin();
-            }
-            if (*lp != id::list)
-                throw ComboException(TRACE_INFO, "not a list!");
-
-            // If the list is empty, throw; user should have called
-            // eval_throws_tree(), and not eval_throws_binding().
-            if (lp.begin() == lp.end())
-                throw ComboException(TRACE_INFO,
-                   "Must not pass empty list to eval_throws_binding().");
-            return eval_throws_binding(bmap, lp.begin(), pe);
-        }
-
         // Control operators
 
-        // XXX TODO: contin_if should go away.
-        case id::contin_if :
-        case id::cond : {
-            sib_it sib = it.begin();
-            while (1) {
-                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
-
-                vertex vcond = eval_throws_binding(bmap, sib, pe);
-                ++sib;  // move past the condition
-
-                // The very last value is the universal "else" clause,
-                // taken when none of the previous predicates were true.
-                if (sib == it.end())
-                    return vcond;
-
-                // If condition is true, then return the consequent
-                // (i.e. the value immediately following.) Else, skip
-                // the consequent, and loop around again.
-                if (vcond == id::logical_true)
-                    return eval_throws_binding(bmap, sib, pe);
-
-                ++sib;  // move past the consequent
-            }
-        }
         case id::equ : {
             OC_ASSERT(false, "The equ operator is not handled yet...");
             return v;
@@ -422,11 +432,6 @@ vertex eval_throws_binding(const vertex_seq& bmap,
         OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_percept(it, combo::variable_unifier::DEFAULT_VU());
     }
-    // procedure
-    else if (is_procedure_call(v) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
-    }
     // indefinite objects are evaluated by the pe
     else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
@@ -440,7 +445,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     else if (is_action_symbol(v)) {
         return v;
     } else {
-        // std::cerr << "unrecognized expression " << v << std::endl;
+        std::cerr << "unrecognized expression " << v << std::endl;
         throw EvalException(v);
         return v;
     }
@@ -477,6 +482,13 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
     typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
+    /// @todo there should be a general way to distinguish between "f" (the function f, being passed to fold)
+    /// vs "f" (the function f being called with no arguments). If you don't handle that you get weird errors
+    /// (because fold or other higher-order functions will attempt to evaluate the argument too soon).
+
+    /// First handle the operators that allow/require returning a combo_tree
+    /// (which can represent a combo list or combo lambda expression).
+    /// Then handle the operators that can only return a single combo vertex.
     if (const builtin* b = boost::get<builtin>(&v)) {
         switch (*b) {
 
@@ -577,31 +589,43 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
                 return eval_throws_tree(bmap, itend, pe);
             }
 
+            // main case: foldr(f v l) = f(car foldr(f v cdr))
             // new tree: f(car foldr(f v cdr))
 
+            // cb_tr will be the call to f.
             sib_it f = it.begin();
             combo_tree cb_tr(f);
             sib_it loc = cb_tr.begin();
+
+            // eval: car(<the list>)
             combo_tree car_lst(id::car); 
             sib_it car_lst_it = car_lst.begin();
             car_lst.append_child(car_lst_it, itend);
             car_lst = eval_throws_tree(bmap,car_lst_it,pe);
             car_lst_it = car_lst.begin();
+
+            // cb_tr == f(<x>)
             cb_tr.append_child(loc, car_lst_it);
 
-            combo_tree cdr_lst(id::cdr);
-            sib_it cdr_lst_it = cdr_lst.begin();
-            cdr_lst.append_child(cdr_lst_it, itend);
+            // copy {the combo subtree for this use of foldr} and change it to include the cdr of L instead of L
+            // let cdr_call = a new tree containing a call to cdr
+            combo_tree cdr_call(id::cdr);
+            sib_it cdr_call_it = cdr_call.begin();
+            cdr_call.append_child(cdr_call_it, itend);
             tr.erase(itend);
             sib_it tr_it = tr.begin();
-            cdr_lst = eval_throws_tree(bmap, cdr_lst_it,pe);
-            cdr_lst_it = cdr_lst.begin();
-            tr.append_child(tr_it, cdr_lst_it);
+
+            // let cdr_result = the result of the call to cdr
+            combo_tree cdr_result(eval_throws_tree(bmap, cdr_call_it,pe));
+            sib_it cdr_result_it = cdr_result.begin();
+            tr.append_child(tr_it, cdr_result_it);
+
             tr = eval_throws_tree(bmap, tr_it, pe);
             tr_it = tr.begin();
+
             cb_tr.append_child(loc, tr_it);
 
-            return eval_throws_tree(bmap, loc, pe); 
+            return eval_throws_tree(bmap, loc, pe);
         }
 
         case id::foldl : {
@@ -669,14 +693,59 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return eval_throws_tree(bmap, exp_tr);
         }
 
+        // XXX TODO: contin_if should go away.
+        case id::contin_if :
+        case id::cond : {
+            sib_it sib = it.begin();
+            while (1) {
+                OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
+
+                /// @todo tree copy
+                combo_tree trcond(eval_throws_tree(bmap, sib, pe));
+                ++sib;  // move past the condition
+
+                // The very last value is the universal "else" clause,
+                // taken when none of the previous predicates were true.
+                if (sib == it.end())
+                    return trcond;
+
+                // If condition is true, then return the consequent
+                // (i.e. the value immediately following.) Else, skip
+                // the consequent, and loop around again.
+                vertex vcond = *trcond.begin();
+                if (vcond == id::logical_true)
+                    return eval_throws_tree(bmap, sib, pe);
+
+                ++sib;  // move past the consequent
+            }
+            break;
+        }
+
         default:
             break;
         }
     }
+    // procedure
+    else if (is_procedure_call(v)) {
+        if (it.begin() == it.end()) // For correct foldr behaviour
+            return combo_tree(it);
 
-    // If we got the here, its not a list operator, so just return
-    // a tree with a lone, simple type in it.
-    return combo_tree(eval_throws_binding(bmap, it, pe));
+        //return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
+        return eval_procedure_tree(bmap, it, pe);
+    }
+
+    // Operators which only return a single vertex
+    vertex retv(eval_throws_vertex(bmap, it, pe));
+    /// @todo copying
+    combo_tree ret(retv);
+    return ret;
+
+//    OC_ASSERT(false, "That case is not handled");
+//    return v;
+//
+//    // If we got the here, its not a list operator, so just return
+//    // a tree with a lone, simple type in it.
+//    return combo_tree(eval_throws_binding(bmap, it, pe));
 }
 
 combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)

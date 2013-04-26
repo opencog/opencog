@@ -414,12 +414,6 @@ public:
         return r;
     }
 
-    HashRequest getAtomHash(const Handle& h) {
-        HashRequest r(new GetAtomHashASR(&atomspace,h));
-        requestQueue.push(r);
-        return r;
-    }
-
     //--------------
     // These functions are query methods - they currently return HandleSeqs,
     // but in future the Request objects returned from these functions will be more

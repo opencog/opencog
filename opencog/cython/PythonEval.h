@@ -37,20 +37,10 @@
 
 #ifndef OPENCOG_PYTHON_EVAL_H
 #define OPENCOG_PYTHON_EVAL_H
-
-#include <Python.h>
+#ifdef HAVE_CYTHON
 
 #include <string>
-
-#include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/CogServer.h>
-
-#include "PyMindAgent.h"
-#include "PyRequest.h"
-#include "agent_finder_types.h"
+#include "PyIncludeWrapper.h"
 
 namespace opencog {
 
@@ -97,7 +87,7 @@ class PythonEval
 		static PythonEval * singletonInstance;
 
 		AtomSpace *atomspace;
-		
+
         PyThreadState * mainThreadState;
         PyInterpreterState * mainInterpreterState;
 
@@ -124,30 +114,10 @@ class PythonEval
         void printDict(PyObject* obj); 
 
 		// Use a singleton instance to avoid initializing python interpreter twice. 
-		static PythonEval & instance(AtomSpace * atomspace = NULL)
-		{
-			if (!singletonInstance) {
-                if (!atomspace) {
-                    // Create our own local AtomSpace to send calls to the
-                    // event loop (otherwise the getType cache breaks)
-                    atomspace = new AtomSpace(cogserver().getAtomSpace());
-                }
-				singletonInstance = new PythonEval(atomspace);
-            }
-            else if (atomspace && singletonInstance->atomspace->atomSpaceAsync != 
-                     atomspace->atomSpaceAsync) {
-                // Someone is trying to initialize the Python interpreter
-                // on a different AtomSpace. because of the singleton design
-                // there is no easy way to support this...
-                throw (RuntimeException(TRACE_INFO, "Trying to re-initialize"
-                            " python interpreter with different AtomSpaceAsync ptr!")
-                      );
-            }
-
-			return *singletonInstance;
-		}
+		static PythonEval & instance(AtomSpace * atomspace = NULL);
 };
 
 } /* namespace opencog */
 
+#endif /* HAVE_CYTHON */
 #endif /* OPENCOG_PYTHON_EVAL_H */

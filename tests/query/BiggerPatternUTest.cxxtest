@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/nlp/types/atom_types.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
@@ -70,15 +71,25 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 };
 
 /*
- * This function sets up both the implication link, and the 
+ * This function sets up both the implication link, and the
  * input data, for a typical, real-world preposition deduction.
  *
+ * The supplied data is:
+ *   _subj (<<be>>, <<capital>>)
+ *   _obj (<<be>>, <<Berlin>>)
+ *   of (<<capital>>, <<Germany>>)
+ *   of (<<capital>>, <<France>>)
+ * Note that, for this test case, we've made Berlin the capital of both
+ * Germany and France. This sounds crazy, but that's what we want this
+ * test case to do.
+ *
  * The actual rule encoded below is
- * 
- * # IF _subj(be,$var0) ^ _obj(be,$var1)  ; this is a comment
+ *
+ * # IF _subj(be,$var0)                   ; subject is now $var0
+ *       ^ _obj(be,$var1)                 ; object is $var1
  *       ^ $prep($var0,$var2)             ; preposition
- *       ^ %LemmaLink($var0,$word0)
- *       ^ $phrase($word0, $prep)          ; convert to phrase
+ *       ^ %LemmaLink($var0,$word0)       ; word of word instance.
+ *       ^ $phrase($word0, $prep)         ; convert to phrase
  *       THEN ^3_$phrase($var2, $var1)
  *
  * Note that there is an implicit LemmaLink created for 'be'.
@@ -92,7 +103,7 @@ void BiggerPatternUTest::setUp(void)
 	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
-	imake = 
+	imake =
 	al(IMPLICATION_LINK,
 		al(AND_LINK,
 			// _subj(be,$var0)
@@ -173,7 +184,7 @@ void BiggerPatternUTest::setUp(void)
 		hprep = an(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "of"),
 		al(LIST_LINK,
 			an(WORD_INSTANCE_NODE, "capital@14601ec7-4b6a-4739-b2d6-0213d43be682"),
-			hvar2_france = an(WORD_INSTANCE_NODE, "France@472c7cd3-a9c9-44bb-bc7b-5bb356dda358")
+			hvar2_france = an(WORD_INSTANCE_NODE, "France@11223344-a9c9-44bb-bc7b-5bb356dda358")
 		)
 	);
 
@@ -231,14 +242,24 @@ void BiggerPatternUTest::test_prep(void)
 	// Result should be a ListLink
 	Handle imlist = pm.imply(imake);
 
-	// Expect two answers: Berlin is the capital of Germany, 
+	// Expect two answers: Berlin is the capital of Germany,
 	// and of France. (just for this test case :-)
 	int arity = as->getArity(imlist);
 	TSM_ASSERT_EQUALS("incorrect arity", arity, 2);
 
 	// 0 has France, 1 has Germany
-	Handle result_france = getlink(imlist,0);
-	Handle result = getlink(imlist,1);
+	Handle result_france = getlink(imlist, 0);
+	Handle result = getlink(imlist, 1);
+
+	// Actually, changes to atomspace internals can cause this
+	// to flip-flop.  In fact, either order is valid. So just make
+	// this a run-time flip-flop, not a compile-time one.
+	// (For a fixed atomspace & pattern matcher, these won't change).
+	if (hvar2_france != getlink(result_france, 4))
+	{
+		result_france = getlink(imlist,1 );
+		result = getlink(imlist, 0);
+	}
 
 	Handle vbenode = getlink(result, 0);
 	Handle vvar0 = getlink(result, 1);

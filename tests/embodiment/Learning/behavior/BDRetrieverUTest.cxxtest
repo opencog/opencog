@@ -23,10 +23,12 @@
 
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/Learning/behavior/CompositeBehaviorDescription.h>
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>

@@ -1176,8 +1176,7 @@ type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it)
         head = tmp.wrap(head, id::application_type);
         for (combo_tree::sibling_iterator sib = it.begin();
                 sib != it.end(); ++sib) {
-            type_tree arg_app = get_type_tree(tr,
-                                              combo_tree::iterator(sib));
+            type_tree arg_app = get_type_tree(tr, combo_tree::iterator(sib));
             type_tree_pre_it arg_app_it = arg_app.begin();
             type_tree_pre_it arg_it = tmp.append_child(head);
             tmp.replace(arg_it, arg_app_it);

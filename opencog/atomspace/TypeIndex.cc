@@ -20,9 +20,8 @@
  */
 
 #include "TypeIndex.h"
+#include "Atom.h"
 #include "ClassServer.h"
-#include "HandleEntry.h"
-#include "TLB.h"
 
 using namespace opencog;
 
@@ -47,22 +46,6 @@ void TypeIndex::removeAtom(const Atom* a)
 {
 	Type t = a->getType();
 	remove(t,a->getHandle());
-}
-
-HandleEntry * TypeIndex::getHandleSet(Type type, bool subclass) const
-{
-	iterator it = begin(type, subclass);
-	iterator itend = end();
-
-	HandleEntry *he = NULL;
-	while (it != itend)
-	{
-		HandleEntry *nhe = new HandleEntry(*it);
-		nhe->next = he;
-		he = nhe;
-		it++;
-	}
-	return he;
 }
 
 // ================================================================
@@ -134,6 +117,11 @@ bool TypeIndex::iterator::operator!=(iterator v)
 	if ((v.s == v.send) && (s != send)) return v.se != se;
 	if ((v.s != v.send) && (s == send)) return v.se != se;
 	return false;
+}
+
+TypeIndex::iterator& TypeIndex::iterator::operator++()
+{
+	return operator++(1);
 }
 
 TypeIndex::iterator& TypeIndex::iterator::operator++(int i)

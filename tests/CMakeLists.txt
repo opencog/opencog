@@ -43,6 +43,10 @@ IF (CXXTEST_FOUND)
 
  		ADD_SUBDIRECTORY (spatial)
 
+		IF (HAVE_VITERBI)
+			ADD_SUBDIRECTORY (viterbi)
+		ENDIF (HAVE_VITERBI)
+
 		# Rest interfaces assume that the cogserver is working;
 		# so run after the cogserver tests.
 		IF (HAVE_WEB)
@@ -50,10 +54,10 @@ IF (CXXTEST_FOUND)
 		ENDIF (HAVE_WEB)
 	ENDIF (HAVE_ATOMSPACE)
 
-	IF (HAVE_CYTHON)
+	IF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
 		ADD_SUBDIRECTORY (cython)
 		ADD_SUBDIRECTORY (python)
-	ENDIF (HAVE_CYTHON)
+	ENDIF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
 
 	IF (HAVE_ATTENTION)
 		ADD_SUBDIRECTORY (dynamics)

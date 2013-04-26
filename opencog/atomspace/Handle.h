@@ -28,9 +28,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 
-#include <boost/unordered_set.hpp>
 
 namespace opencog
 {
@@ -94,10 +94,26 @@ public:
         return 0;
     }
 };
+ 
+// gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
+// (See very bottom of this file).
+struct handle_hash : public std::unary_function<Handle, size_t>
+{
+   size_t operator()(const Handle&h ) const
+   {
+       return static_cast<std::size_t>(h.value());
+   }
+};
+ 
+// Boost needs this function to be called by exactly this name.
+inline std::size_t hash_value(Handle const& h)
+{
+    return static_cast<std::size_t>(h.value());
+}
 
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
-typedef boost::unordered_set<Handle, boost::hash<opencog::Handle> > UnorderedHandleSet;
+typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
 static inline std::string operator+ (const char *lhs, Handle h)
 {
@@ -114,18 +130,26 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
     return lhs + buff;
 }
 
-inline std::size_t hash_value(Handle const& h)
-{
-    return static_cast<std::size_t>(h.value());
-}
-
 } // namespace opencog
 
 namespace std { 
-inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h) {
+inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
+{
     out << h.value();
     return out;
 }
+
+#ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
+// I have no clue why gcc-4.7.2 broke this, and neither does google or
+// stackoverflow.  Use handle_hash, above, instead.
+
+template<>
+inline std::size_t std::hash<opencog::Handle>::operator()(opencog::Handle h) const
+{  
+    return static_cast<std::size_t>(h.value());
+}
+#endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
+
 } //namespace std
 
 #endif // _OPENCOG_HANDLE_H

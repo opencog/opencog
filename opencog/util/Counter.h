@@ -60,33 +60,54 @@ public:
     typedef typename super::value_type value_type;
 
     Counter() {}
+
     template<typename IT>
-    Counter(IT from, IT to) {
+    Counter(IT from, IT to)
+    {
         init(from, to);
     }
+
     template<typename Container>
-    Counter(const Container& c) {
+    Counter(const Container& c)
+    {
         init(c.begin(), c.end());
     }
-    Counter(const std::initializer_list<value_type>& il) {
-        foreach(const auto& v, il)
+
+    Counter(const std::initializer_list<value_type>& il)
+    {
+        for(const auto& v : il)
             this->operator[](v.first) = v.second;
     }
 
-    // return the count of a key, possibly returning a default if none
-    // is present. That method different that operator[] because it
-    // doesn't insert the element if it is not present. This is very
-    // useful for multi-threading programming, and prevents data race
-    // bug
-    CT get(const T& key, CT c = CT()) const {
+    /// Return the count of a key, possibly returning a default if none
+    /// is present. That method different that operator[] because it
+    /// doesn't insert the element if it is not present. This is very
+    /// useful for multi-threading programming, by helping avoid race
+    /// conditions.
+    CT get(const T& key, CT c = CT()) const
+    {
         typename super::const_iterator it = this->find(key);
         return it == this->cend()? c : it->second;
     }
     
-    // return the total of all counted elements
-    CT total_count() const {
+    /// Return the total of all counted elements
+    CT total_count() const
+    {
         return boost::accumulate(*this | map_values, 0);
     }
+
+    /// Return the element that occurs most frequently
+    T most_frequent() const
+    {
+        T key = super::begin()->first;
+        CT cnt = super::begin()->second;
+        for (const auto& v : *this) {
+            if (cnt < v.second)
+                key = v.first;
+        }
+        return key;
+    }
+
     
     // add 2 counters, for example
     // c1 = {'a':1, 'b':1}
@@ -96,7 +117,7 @@ public:
     // now
     // c1 = {'a':1, 'b':2, 'c':3}
     Counter& operator+=(const Counter& other) {
-        foreach(const auto& v, other)
+        for (const auto& v : other)
             this->operator[](v.first) += v.second;
         return *this;
     }
@@ -105,10 +126,11 @@ public:
 };
 
 template<typename T, typename CT>
-std::ostream& operator<<(std::ostream& out, const Counter<T, CT>& c) {
+std::ostream& operator<<(std::ostream& out, const Counter<T, CT>& c)
+{
     typedef Counter<T, CT> counter_t;
     out << "{";
-    for(typename counter_t::const_iterator it = c.begin(); it != c.end();) {
+    for (typename counter_t::const_iterator it = c.begin(); it != c.end();) {
         out << it->first << ": " << it->second;
         ++it;
         if(it != c.end())

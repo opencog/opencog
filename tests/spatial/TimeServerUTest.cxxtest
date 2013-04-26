@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>

@@ -3,6 +3,15 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-deprecated -Wno-unused-variable")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
+
+OPENCOG_ADD_ATOM_TYPES(atom_types.script 
+   atom_types.h
+   atom_types.definitions
+   atom_types.inheritance
+   pln_types.scm)
+
+ADD_CUSTOM_TARGET(pln_atom_types DEPENDS atom_types.h)
+
 ADD_LIBRARY (pln SHARED
 	PLNModule.cc
 	AtomSpaceWrapper.cc
@@ -61,6 +70,9 @@ ADD_LIBRARY (pln SHARED
 	ASSOC
 )
 
+ADD_DEPENDENCIES(pln opencog_atom_types)
+ADD_DEPENDENCIES(pln pln_atom_types)
+
 INCLUDE_DIRECTORIES (
 	# For the Python PLN binding
 	${PYTHON_INCLUDE_PATH}
@@ -70,7 +82,7 @@ INCLUDE_DIRECTORIES (
 SET(PLN_LINK_LIBS
 	atomspace
 	server
-	util
+	cogutil
 	#${Boost_SIGNALS_LIBRARY}
 )
 

@@ -27,26 +27,19 @@
 
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 #include <boost/range/algorithm/find.hpp>
-#include <boost/range/algorithm/adjacent_find.hpp>
-#include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/irange.hpp>
 
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/lru_cache.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/table/table.h>
 #include <opencog/comboreduct/table/table_io.h>
-
-#include <opencog/learning/moses/optimization/optimization.h>
-#include <opencog/learning/moses/optimization/hill-climbing.h>
+#include <opencog/learning/moses/optimization/hill-climbing.h> // for hc_params
 
 #include "feature-selection.h"
-#include "../feature_optimization.h"
-#include "../feature_scorer.h"
+#include "../algo/deme_optimize.h"
+#include "../algo/incremental.h"
+#include "../algo/stochastic_max_dependency.h"
+#include "../algo/simple.h"
 
 namespace opencog {
     
@@ -88,21 +81,15 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
                            const feature_selection_parameters& fs_params)
 {
     // log the number selected features
-    logger().info("%d out of %d have been selected",
+    logger().info("%d out of %d features have been selected",
                   ftable.get_arity(), old_arity);
+
     // log set of selected feature set
+    const string_seq& labs = ftable.itable.get_labels();
+    const vector<double>& sco = score_individual_features(ftable, fs_params);
+    for (unsigned i=0; i<labs.size(); i++)
     {
-        stringstream ss;
-        ss << "The following features have been selected: ";
-        ostreamContainer(ss, ftable.itable.get_labels(), ",");
-        logger().info(ss.str());
-    }
-    // log the score of each feature individually
-    {
-        stringstream ss;
-        ss << "With the following scores (individually): ";
-        ostreamContainer(ss, score_individual_features(ftable, fs_params), ",");
-        logger().info(ss.str());            
+        logger().info() << labs[i] << " " << sco[i];
     }
 }
 
@@ -110,14 +97,17 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
  * Get indices (aka positions or offsets) of a list of labels given a header
  */
 vector<unsigned> get_indices(const vector<string>& labels,
-                             const vector<string>& header) {
+                             const vector<string>& header)
+{
     vector<unsigned> res;
     for (unsigned i = 0; i < header.size(); ++i)
         if (boost::find(labels, header[i]) != labels.end())
             res.push_back(i);
     return res;
 }
-unsigned get_index(const string& label, const vector<string>& header) {
+
+unsigned get_index(const string& label, const vector<string>& header)
+{
     return distance(header.begin(), boost::find(header, label));
 }
 
@@ -147,7 +137,7 @@ feature_set initial_features(const vector<string>& ilabels,
             vif += f;
         }
         else // feature not found
-            logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
+            logger().warn("No such a feature %s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
     }
     // Logger
     if(vif.empty())
@@ -162,63 +152,9 @@ feature_set initial_features(const vector<string>& ilabels,
     return res;
 }
 
-instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields,
-                          const vector<string>& ilabels)
+feature_set_pop select_feature_sets(const CTable& ctable,
+                                    const feature_selection_parameters& fs_params)
 {
-    feature_set init_features = initial_features(ilabels, fs_params);
-    instance res(fields.packed_width());
-    for (size_t idx : init_features)
-        *(fields.begin_bit(res) + idx) = true;
-    return res;
-}
-
-feature_set incremental_select_features(const CTable& ctable,
-                                        const feature_selection_parameters& fs_params)
-{
-    auto ir = boost::irange(0, ctable.get_arity());
-    feature_set all_features(ir.begin(), ir.end());
-    if (fs_params.threshold > 0 || fs_params.target_size > 0) {
-        typedef MutualInformation<feature_set> FeatureScorer;
-        FeatureScorer fsc(ctable);
-        return fs_params.target_size > 0?
-            cached_adaptive_incremental_selection(all_features, fsc,
-                                                  fs_params.target_size,
-                                                  fs_params.inc_interaction_terms,
-                                                  fs_params.inc_red_intensity,
-                                                  0, 1,
-                                                  fs_params.inc_target_size_epsilon)
-            : cached_incremental_selection(all_features, fsc,
-                                           fs_params.threshold,
-                                           fs_params.inc_interaction_terms,
-                                           fs_params.inc_red_intensity);
-    } else {
-        // Nothing happened, return all features by default
-        return all_features;
-    }
-}
-
-feature_set smd_select_features(const CTable& ctable,
-                                const feature_selection_parameters& fs_params)
-{
-    auto ir = boost::irange(0, ctable.get_arity());
-    feature_set all_features(ir.begin(), ir.end()),
-        init_features = initial_features(ctable.get_input_labels(), fs_params);
-    if (fs_params.target_size > 0) {
-        fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
-        return stochastic_max_dependency_selection(all_features, init_features,
-                                                   fs_sc,
-                                                   (unsigned) fs_params.target_size,
-                                                   fs_params.threshold,
-                                                   fs_params.smd_top_size);
-    } else {
-        // Nothing happened, return the all features by default
-        return all_features;
-    }
-}
-
-feature_set select_features(const CTable& ctable,
-                            const feature_selection_parameters& fs_params) {
     if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
         double pop_size_ratio = 20;
@@ -231,26 +167,38 @@ feature_set select_features(const CTable& ctable,
         op_params.max_dist = max_dist;
         op_params.set_min_score_improv(min_score_improv);
         hc_parameters hc_params;
-        hc_params.widen_search = true;
+        hc_params.widen_search = fs_params.hc_widen_search;
         hc_params.single_step = false;
-        hc_params.crossover = false;
+        hc_params.crossover = fs_params.hc_crossover;
+        hc_params.crossover_pop_size = fs_params.hc_crossover_pop_size;
         hill_climbing hc(op_params, hc_params);
-        return moses_select_features(ctable, hc, fs_params);
+        return moses_select_feature_sets(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
-        return incremental_select_features(ctable, fs_params);
+        return incremental_select_feature_sets(ctable, fs_params);
     } else if (fs_params.algorithm == smd) {
-        return smd_select_features(ctable, fs_params);
+        return smd_select_feature_sets(ctable, fs_params);
+    } else if (fs_params.algorithm == simple) {
+        return simple_select_feature_sets(ctable, fs_params);
     } else {
         cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
              << "' is unknown, please consult the help for the "
              << "list of algorithms." << endl;
         exit(1);
-        return feature_set(); // to please Mr compiler
+        return feature_set_pop(); // to please Mr compiler
     }
 }
 
+feature_set select_features(const CTable& ctable,
+                            const feature_selection_parameters& fs_params)
+{
+    feature_set_pop fs_pop = select_feature_sets(ctable, fs_params);
+    OC_ASSERT(!fs_pop.empty(), "There might a bug");
+    return fs_pop.begin()->second;
+}
+
 feature_set select_features(const Table& table,
-                            const feature_selection_parameters& fs_params) {
+                            const feature_selection_parameters& fs_params)
+{
     CTable ctable = table.compressed();
     return select_features(ctable, fs_params);
 }

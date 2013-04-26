@@ -34,7 +34,8 @@ using std::string;
 // program option names and abbreviations
 // for their meanings see options_description in moses-exec.cc
 static const pair<string, string> rand_seed_opt("random-seed", "r");
-static const pair<string, string> combo_str_opt("combo-program", "y");
+static const pair<string, string> combo_program_opt("combo-program", "y");
+static const pair<string, string> combo_program_file_opt("combo-program-file", "f");
 static const pair<string, string> nsamples_opt("nsamples", "n");
 static const pair<string, string> min_contin_opt("min-contin", "m");
 static const pair<string, string> max_contin_opt("max-contin", "M");

@@ -7,7 +7,7 @@ LINK_LIBRARIES (
 	Control
 	behavior
 	comboreduct
-	util
+	cogutil
 	${PROJECT_LIBRARIES}	
 )
 
@@ -24,4 +24,4 @@ LINK_LIBRARIES(
 	comboreduct
 )
 
-ADD_CXXTEST(BEUTest)
+#ADD_CXXTEST(BEUTest)

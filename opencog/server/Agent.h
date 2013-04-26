@@ -117,7 +117,7 @@ protected:
 
     /** The atoms utilized by the Agent in a single cycle, to be used by the
      *  System Activity Table to assign credit to this agent. */
-    HandleSetSeq _utilizedHandleSets;
+    std::vector<UnorderedHandleSet> _utilizedHandleSets;
 
     /** Total stimulus given out to atoms */
     stim_t totalStimulus;
@@ -157,7 +157,7 @@ public:
 
     /** Returns the sequence of handle sets for this cycle that the agent
      *  would like to claim credit for in the System Activity Table. */
-    virtual const HandleSetSeq& getUtilizedHandleSets() const
+    virtual const std::vector<UnorderedHandleSet>& getUtilizedHandleSets() const
     {
         return _utilizedHandleSets;
     }

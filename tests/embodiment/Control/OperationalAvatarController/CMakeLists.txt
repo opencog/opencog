@@ -7,7 +7,7 @@ INCLUDE_DIRECTORIES(
 # At this time, the AvaterUTest does not compile,
 # because of the 2D spacemap ->3D transition.
 IF(0)
-ADD_CXXTEST(AvatarUTest)
+#ADD_CXXTEST(AvatarUTest)
 TARGET_LINK_LIBRARIES(AvatarUTest
 	oac
 	Procedure
@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(AvatarUTest
 	MessagingSystem
 	Control
 	comboreduct
-	util
+	cogutil
 	pthread
 	${Boost_DATE_TIME_LIBRARY}
 	${PROJECT_LIBRARIES}
@@ -83,7 +83,7 @@ IF (TCL_TCLSH)
 		MessagingSystem
 		Control
 		comboreduct
-		util
+		cogutil
 		pthread
 		${Boost_DATE_TIME_LIBRARY}
 		${PROJECT_LIBRARIES}
@@ -95,22 +95,22 @@ IF (TCL_TCLSH)
     
 	ADD_DEPENDENCIES(oacmock DistributeOACStuff)
     
-	ADD_CXXTEST(PsiDemandUpdaterAgentUTest)
-	TARGET_LINK_LIBRARIES(PsiDemandUpdaterAgentUTest
-		oacmock
-	)
+#ADD_CXXTEST(PsiDemandUpdaterAgentUTest)
+#	TARGET_LINK_LIBRARIES(PsiDemandUpdaterAgentUTest
+#		oacmock
+#	)
 
-	ADD_CXXTEST(PsiModulatorUpdaterAgentUTest)
-	TARGET_LINK_LIBRARIES(PsiModulatorUpdaterAgentUTest
-		oacmock
-	)
+#ADD_CXXTEST(PsiModulatorUpdaterAgentUTest)
+#	TARGET_LINK_LIBRARIES(PsiModulatorUpdaterAgentUTest
+#		oacmock
+#	)
 
-	ADD_CXXTEST(PsiFeelingUpdaterAgentUTest)
-	TARGET_LINK_LIBRARIES(PsiFeelingUpdaterAgentUTest
-		oacmock
-	)
+#ADD_CXXTEST(PsiFeelingUpdaterAgentUTest)
+#	TARGET_LINK_LIBRARIES(PsiFeelingUpdaterAgentUTest
+#		oacmock
+#	)
 
-	ADD_CXXTEST(PsiActionSelectionAgentUTest)    
+#ADD_CXXTEST(PsiActionSelectionAgentUTest)    
 
     SET(PASA_TEST_LINK_LIBS oacmock)
     IF (HAVE_CYTHON)
@@ -120,13 +120,13 @@ IF (TCL_TCLSH)
 		    PythonModule
             logic_wrapper
             atomspace
-            util
+            cogutil
 		    ${PYTHON_LIBRARIES})
     ENDIF (HAVE_CYTHON)
 
-	TARGET_LINK_LIBRARIES(PsiActionSelectionAgentUTest
-		${PASA_TEST_LINK_LIBS}
-	)
+#	TARGET_LINK_LIBRARIES(PsiActionSelectionAgentUTest
+#		${PASA_TEST_LINK_LIBS}
+#	)
 ELSE (TCL_TCLSH)
 	SUMMARY_ADD("Psi*AgentUTest" "Requires TCL shell to load test data" 0)
 ENDIF (TCL_TCLSH)

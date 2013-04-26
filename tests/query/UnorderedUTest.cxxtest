@@ -86,8 +86,18 @@ void UnorderedUTest::setUp(void)
 	pm.set_atomspace(as);
 
 	// Load the required data
+	config().set("MODULES",
+		"opencog/nlp/types/libnlp-types.so, "
+		"opencog/spacetime/libspacetime.so, "
+		"opencog/dynamics/attention/libattention.so, "
+		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+
 	config().set("SCM_PRELOAD",
-		"opencog/scm/type_constructors.scm, "
+      "opencog/atomspace/core_types.scm, "
+      "opencog/nlp/types/nlp_types.scm, "
+      "opencog/spacetime/spacetime_types.scm, "
+      "opencog/dynamics/attention/attention_types.scm, "
+      "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
 		"tests/query/unordered.scm, "
 		"tests/query/unordered-more.scm");
 
@@ -101,7 +111,9 @@ void UnorderedUTest::setUp(void)
 		"../../../",
 		NULL
 	};
+	cogserver().loadModules(paths);
 	cogserver().loadSCMModules(paths);
+
 
 	// Create an implication link that will be tested.
 	disorder = SchemeEval::instance().apply("blink", Handle::UNDEFINED);

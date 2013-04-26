@@ -6,11 +6,16 @@ LINK_DIRECTORIES (
 #)
 
 ADD_EXECUTABLE (atomspace_bm
-    AtomSpaceBenchmark
-    atomspace_bm
+	AtomSpaceBenchmark
+	atomspace_bm
 )
 
+IF(HAVE_GUILE)
+	TARGET_LINK_LIBRARIES (atomspace_bm smob)
+ENDIF(HAVE_GUILE)
+
 TARGET_LINK_LIBRARIES (atomspace_bm
-    atomspace
-    util
+	server
+	atomspace
+	cogutil
 )

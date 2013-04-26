@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/nlp/types/atom_types.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
@@ -60,10 +61,6 @@ class PatternUTest: public CxxTest::TestSuite
 		Handle hshort_eval;
 
 	public:
-
-		// WTF ?? what are these for? Other tests don't need 'em ...
-		static PatternUTest* createSuite() { return new PatternUTest(); }
-		static void destroySuite(PatternUTest* suite) { delete suite; }
 
 		PatternUTest(void)
 		{

@@ -23,7 +23,7 @@ SET(EXE_LINK_LIBS
 	MessagingSystem
 	LearningServerMessages
 	Control
-	util
+	cogutil
 	comboreduct
 	pthread
 	Filter

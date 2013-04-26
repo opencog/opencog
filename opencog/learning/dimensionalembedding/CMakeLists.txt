@@ -21,5 +21,5 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 TARGET_LINK_LIBRARIES (dimensionalembedding
-	util 
+	cogutil 
 )

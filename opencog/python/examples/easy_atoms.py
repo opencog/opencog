@@ -11,6 +11,9 @@ AB = a.add_link(t.InheritanceLink, [A, B], TV)
 BC = a.add_link(t.InheritanceLink, [B, C], TV)
 AC = a.add_link(t.InheritanceLink, [A, C])
 
+print AB.incoming
+
+
 a.print_list()
 
 
@@ -24,4 +27,4 @@ results = chainer.bc(target)
 print '\n---------------------------\n'
 
 print results
-print AC
+print AC.tv

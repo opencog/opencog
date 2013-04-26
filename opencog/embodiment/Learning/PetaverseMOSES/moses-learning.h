@@ -26,9 +26,9 @@
 
 #include <opencog/util/tree.h>
 
-#include <opencog/learning/moses/moses/metapopulation.h>
+#include <opencog/learning/moses/metapopulation/metapopulation.h>
 #include <opencog/learning/moses/moses/moses_params.h>
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/learning/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
@@ -155,20 +155,17 @@ struct petaverse_bscore : public bscore_base
     petaverse_bscore(const petaverse_bscore& ps)
             : _fitnessEstimator(ps._fitnessEstimator) {}
 
-    penalized_behavioral_score operator()(const combo_tree& tr) const
+    penalized_bscore operator()(const combo_tree& tr) const
     {
-        penalized_behavioral_score pbs;
-        pbs.first[0] = _fitnessEstimator(tr);
+        penalized_bscore pbs;
+        pbs.first.push_back(_fitnessEstimator(tr));
         pbs.second = tr.size();
         return pbs;
     }
 
     behavioral_score best_possible_bscore() const
     {
-        penalized_behavioral_score pbs;
-        pbs.first[0] = 0;
-        pbs.second = 0;
-        return pbs;
+        return {0.0};           // @todo that might be wrong
     }
 
     ~petaverse_bscore() {}

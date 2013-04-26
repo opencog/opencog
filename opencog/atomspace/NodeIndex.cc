@@ -20,82 +20,77 @@
  */
 
 #include <opencog/atomspace/NodeIndex.h>
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/atom_types.h>
 
 using namespace opencog;
 
 NodeIndex::NodeIndex()
 {
-    resize();
-}
-
-void NodeIndex::connectAtomTable(const AtomTable* table) {
-    atomTable = table;
+	resize();
 }
 
 void NodeIndex::resize()
 {
-    this->idx.resize(classserver().getNumberOfClasses());
+	this->idx.resize(classserver().getNumberOfClasses());
 }
 
 void NodeIndex::insertAtom(Atom *a)
 {
-    Type t = a->getType();
-    NameIndex &ni = idx[t];
-    ni.insertAtom(a);
+	Type t = a->getType();
+	NameIndex &ni = idx[t];
+	ni.insertAtom(a);
 }
 
 void NodeIndex::removeAtom(Atom *a)
 {
-    Type t = a->getType();
-    NameIndex &ni = idx[t];
-    ni.removeAtom(a);
+	Type t = a->getType();
+	NameIndex &ni = idx[t];
+	ni.removeAtom(a);
 }
 
 Handle NodeIndex::getHandle(Type t, const char *name) const
 {
-    if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
-           "Index out of bounds for atom type (t = %lu)", t);
-    const NameIndex &ni = idx[t];
-    return ni.get(name);
+	if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
+		   "Index out of bounds for atom type (t = %lu)", t);
+	const NameIndex &ni = idx[t];
+	return ni.get(name);
 }
 
 void NodeIndex::remove(bool (*filter)(Handle))
 {
-    std::vector<NameIndex>::iterator s;
-    for (s = idx.begin(); s != idx.end(); ++s) {
-        s->remove(filter);
-    }
+	std::vector<NameIndex>::iterator s;
+	for (s = idx.begin(); s != idx.end(); ++s) {
+		s->remove(filter);
+	}
 }
 
-HandleEntry * NodeIndex::getHandleSet(Type type, const char *name,
-        bool subclass) const
+UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
+		bool subclass) const
 {
-    if (subclass) {
-        HandleEntry *he = NULL;
-        
-        int max = classserver().getNumberOfClasses();
-        for (Type s = 0; s < max; s++) {
-            // The 'AssignableFrom' direction is unit-tested in
-            // AtomSpaceUTest.cxxtest
-            if (classserver().isA(s, type)) {
-                if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
-                          "Index out of bounds for atom type (s = %lu)", s);
-                const NameIndex &ni = idx[s];
-                Handle h = ni.get(name);
-                if (atomTable->holds(h))
-                    he = new HandleEntry(h, he);
-            }
-        }
-        return he;
-    } else {
-        Handle h = getHandle(type, name); 
-        if (atomTable->holds(h)) return new HandleEntry(h);
-        return NULL;
-    }
+	UnorderedHandleSet hs;
+	if (subclass) {
+		
+		int max = classserver().getNumberOfClasses();
+		for (Type s = 0; s < max; s++) {
+			// The 'AssignableFrom' direction is unit-tested in
+			// AtomSpaceUTest.cxxtest
+			if (classserver().isA(s, type)) {
+				if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
+						  "Index out of bounds for atom type (s = %lu)", s);
+				const NameIndex &ni = idx[s];
+				Handle h = ni.get(name);
+				if (Handle::UNDEFINED != h)
+					hs.insert(h);
+			}
+		}
+	} else {
+		Handle h = getHandle(type, name); 
+		if (Handle::UNDEFINED != h) hs.insert(h);
+	}
+
+	return hs;
 }
 
 // ================================================================

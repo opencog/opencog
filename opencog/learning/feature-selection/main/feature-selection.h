@@ -1,5 +1,5 @@
 /**
- * main/feature-selection.h --- 
+ * main/feature-selection.h ---
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -9,12 +9,12 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
@@ -27,37 +27,47 @@
 
 #include <boost/range/algorithm/sort.hpp>
 
-#include <opencog/learning/moses/optimization/optimization.h>
-#include <opencog/learning/moses/representation/field_set.h>
-#include <opencog/learning/moses/representation/instance_set.h>
-#include <opencog/learning/moses/moses/scoring.h>
-#include <opencog/comboreduct/table/table.h>
+#include "../scorers/mutual_info.h"
+#include "../scorers/moses_optim.h"
+#include "../scorers/moses_matrix.h"  // for pre_scorer
 
-#include "../feature_scorer.h"
-#include "../stochastic_max_dependency.h"
-#include "../feature_optimization.h"
-#include "../moses_based_scorer.h"
 
 namespace opencog {
 
-using namespace moses;
-using namespace combo;
+// using namespace moses;
 
 // Feature selection algorithms
+// XXX do we really need to have these in a heaer file ?? Can't we hide them?
 static const string inc="inc"; // incremental_selection (see
-                               // feature_optimization.h)
+                               // algo/incrementalh)
 static const string smd="smd"; // stochastic_max_dependency (see
-                               // stochastic_max_dependency_mi.h)
+                               // algo/stochastic_max_dependency.h)
+static const string simple="simple"; // See algo/simple.h
 
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)
 static const string pre="pre";  // Precision (see
-                                // opencog/learning/moses/moses/scoring.h)
-    
+                                // opencog/learning/moses/scoring/scoring.h)
+
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
 struct feature_selection_parameters
 {
+    // avoid utter insanity by providing some reasonable values.
+    feature_selection_parameters() : algorithm(simple), scorer(mi),
+        target_size(1), threshold(0.0), jobs(1),
+        inc_target_size_epsilon(1.0e-10),
+        inc_red_intensity(-1.0),
+        inc_interaction_terms(1),
+        smd_top_size(100),
+        hc_max_evals(10000),
+        max_time(INT_MAX),
+        hc_max_score(1.0e50),
+        hc_cache_size(1000),
+        hc_fraction_of_remaining(1.0),
+        mi_confi(50.0)
+    {}
+
     std::string algorithm;
     std::string scorer;
     std::string input_file;
@@ -75,82 +85,46 @@ struct feature_selection_parameters
     double inc_red_intensity;
     unsigned inc_interaction_terms;
 
-    // hill-climbing parameters
-    // actually, these are generic for all optimizers,
+    // stochastic max-dependency selection parameters
+    unsigned smd_top_size;
+
+    // hill-climbing selection parameters
+    // actually, these are generic for all moses optimizers,
     // not just hill-climbing...
+    //
+    // @todo it might make sense to use directly hc_parameters from
+    // hill-climbing.h instead of replicating the options
     unsigned int hc_max_evals;
     time_t max_time;
     double hc_max_score;
-    double hc_confi; //  confidence intensity
     unsigned long hc_cache_size;
     double hc_fraction_of_remaining;
+    bool hc_crossover;
+    unsigned hc_crossover_pop_size;
+    bool hc_widen_search;
+
+    // MI scorer parameters
+    double mi_confi; //  confidence intensity
 
     // precision scorer parameters
     float pre_penalty;
     float pre_min_activation;
     float pre_max_activation;
     bool pre_positive;
-
-    // something mutual dohh parameters
-    unsigned smd_top_size;
 };
 
 typedef std::set<arity_t> feature_set;
+// Population of feature sets, ordered by scores (higher is better)
+typedef std::multimap<double, feature_set, std::greater<double>> feature_set_pop;
 
 void write_results(const Table& table,
                    const feature_selection_parameters& fs_params);
-
-template<typename Optimize, typename Scorer>
-feature_set optimize_deme_select_features(const field_set& fields,
-                                          instance_set<composite_score>& deme,
-                                          instance& init_inst,
-                                          Optimize& optimize, const Scorer& scorer,
-                                          const feature_selection_parameters& fs_params)
-{
-    // optimize feature set
-    unsigned ae; // actual number of evaluations to reached the best candidate
-    unsigned evals = optimize(deme, init_inst, scorer, 
-                             fs_params.hc_max_evals, fs_params.max_time,
-                             &ae);
-
-    // get the best one
-    boost::sort(deme, std::greater<scored_instance<composite_score> >());
-    instance best_inst = evals > 0 ? *deme.begin_instances() : init_inst;
-    composite_score best_score =
-        evals > 0 ? *deme.begin_scores() : worst_composite_score;
-
-    // get the best feature set
-    feature_set selected_features = get_feature_set(fields, best_inst);
-    // Logger
-    {
-        // log its score
-        stringstream ss;
-        ss << "Selected feature set has composite score: ";
-        if (evals > 0)
-            ss << best_score;
-        else
-            ss << "Unknown";
-        logger().info(ss.str());
-    }
-    {
-        // Log the actual number of evaluations
-        logger().info("Total number of evaluations performed: %u", evals);
-        logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
-    }
-    // ~Logger
-    return selected_features;
-}
 
 /**
  * Convert the initial features into feature_set (set of indices)
  */
 feature_set initial_features(const vector<string>& labels,
                              const feature_selection_parameters& fs_params);
-
-/** For the MOSES algo, generate the intial instance */
-instance initial_instance(const feature_selection_parameters& fs_params,
-                          const field_set& fields,
-                          const std::vector<std::string>& labels);
 
 // A wrapper, simply so that optimizer gets the iscorer_base base class.
 // The only reason for this wrapper is that both iscorer_base, and
@@ -172,40 +146,6 @@ struct iscorer_cache : public iscorer_base
     prr_cache_threaded<DBScorer> _cache;
 };
 
-// run feature selection given a moses optimizer and a scorer, create
-// a deme a define the wrap the scorer for that deme. Possibly add
-// cache as well.
-template<typename Optimize, typename Scorer>
-feature_set create_deme_select_features(const CTable& ctable,
-                                        Optimize& optimize,
-                                        const Scorer& scorer,
-                                        const feature_selection_parameters& fs_params)
-{
-    arity_t arity = ctable.get_arity();
-    field_set fields(field_set::disc_spec(2), arity);
-    instance_set<composite_score> deme(fields);
-    // determine the initial instance given the initial feature set
-    instance init_inst = initial_instance(fs_params, fields, ctable.get_input_labels());
-    // define moses based scorer
-    typedef deme_based_scorer<Scorer> DBScorer;
-    DBScorer db_sc(scorer, fields);
-    // possibly wrap in a cache
-    if(fs_params.hc_cache_size > 0) {
-        // typedef prr_cache_threaded<DBScorer> ScorerCache;
-        typedef iscorer_cache<DBScorer> ScorerCache;
-        ScorerCache sc_cache(fs_params.hc_cache_size, db_sc);
-        feature_set selected_features =
-            optimize_deme_select_features(fields, deme, init_inst, optimize,
-                                          sc_cache, fs_params);
-        // Logger
-        logger().info("Number of cache misses = %u", sc_cache.get_misses());
-        // ~Logger
-        return selected_features;
-    } else {
-        return optimize_deme_select_features(fields, deme, init_inst, optimize,
-                                             db_sc, fs_params);
-    }
-}
 
 template<typename FeatureSet>
 struct fs_scorer : public unary_function<FeatureSet, double>
@@ -216,15 +156,18 @@ struct fs_scorer : public unary_function<FeatureSet, double>
     {
         if (fs_params.scorer == mi) { // mutual information
             _ptr_mi_scorer =
-                new MICScorerCTable<FeatureSet>(ctable, fs_params.hc_confi);
+                new MICScorerCTable<FeatureSet>(ctable, fs_params.mi_confi);
         } else if (fs_params.scorer == pre) { // precision (see
-            // opencog/learning/moses/moses/scoring.h)
+            // opencog/learning/moses/scoring/scoring.h)
             _ptr_pre_scorer =
                 new pre_scorer<FeatureSet>(ctable,
                                            fs_params.pre_penalty,
                                            fs_params.pre_min_activation,
                                            fs_params.pre_max_activation,
                                            fs_params.pre_positive);
+        } else {
+            OC_ASSERT(false, "Unknown feature selection scorer %s",
+                      fs_params.scorer.c_str());
         }
     }
     ~fs_scorer() {
@@ -246,21 +189,12 @@ protected:
     MICScorerCTable<FeatureSet>* _ptr_mi_scorer;
     pre_scorer<FeatureSet>* _ptr_pre_scorer;
 };
-    
-// run feature selection given a moses optimizer
-template<typename Optimize>
-feature_set moses_select_features(const CTable& ctable,
-                                  Optimize& optimize,
-                                  const feature_selection_parameters& fs_params) {
-    fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
-    return create_deme_select_features(ctable, optimize, fs_sc, fs_params);
-}
 
-feature_set incremental_select_features(const CTable& ctable,
-                                        const feature_selection_parameters& fs_params);
-
-feature_set smd_select_features(const CTable& ctable,
-                                const feature_selection_parameters& fs_params);
+/**
+ * Select a population of feature sets
+ */
+feature_set_pop select_feature_sets(const CTable& ctable,
+                                    const feature_selection_parameters& fs_params);
 
 /**
  * Select the features according to the method described in fs_params.
@@ -281,5 +215,5 @@ void feature_selection(const Table& table,
                        const feature_selection_parameters& fs_params);
 
 } // ~namespace opencog
-    
+
 #endif // _OPENCOG_FEATURE-SELECTION_H

@@ -35,6 +35,7 @@ TARGET_LINK_LIBRARIES(PAI
 	Language
 	Control
 	AtomSpaceExtensions
+	nlp-types
 	query
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 

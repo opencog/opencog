@@ -35,14 +35,12 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
@@ -250,17 +248,13 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
         }
     }
     do_merge_tv(result,newTV);
+    // XXX TODO should also merge Attention values, and also trails, right?
     return result;
 }
 
 boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle& h) const
 {
     return atomSpaceAsync->getAtom(h)->get_result();
-}
-
-size_t AtomSpace::getAtomHash(const Handle& h) const 
-{
-    return atomSpaceAsync->getAtomHash(h)->get_result();
 }
 
 bool AtomSpace::isValidHandle(const Handle& h) const 

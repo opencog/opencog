@@ -24,6 +24,7 @@ FIND_LIBRARY(LINK_GRAMMAR_LIBRARY
 	PATHS
 		/usr/lib 
 		/usr/local/lib
+		/opt/link-grammar/lib
 		/opt/local/lib)
 
 # Copy the results to the output variables.

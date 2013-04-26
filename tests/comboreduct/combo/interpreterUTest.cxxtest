@@ -1,0 +1,112 @@
+#include <opencog/util/iostreamContainer.h>
+#include <opencog/comboreduct/interpreter/interpreter.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+
+using namespace ant_combo;
+using namespace opencog;
+using namespace std;
+
+class interpreterUTest :  public CxxTest::TestSuite {
+public:
+    void test_boolean_interpreter() {
+        combo_tree tr;
+        stringstream ss("and(or($1 $2) not($3))");
+        ss >> tr;
+
+        typedef vector<builtin> inputs_t;
+        typedef builtin output_t;
+        typedef pair<inputs_t, output_t> io_t;
+
+        inputs_t i1 = {id::logical_false, id::logical_false, id::logical_false};
+        output_t o1 = id::logical_false;
+        io_t io1 = {i1, o1};
+        inputs_t i2 = {id::logical_false, id::logical_true, id::logical_true};
+        output_t o2 = id::logical_false;
+        io_t io2 = {i2, o2};
+        inputs_t i3 = {id::logical_false, id::logical_true, id::logical_false};
+        output_t o3 = id::logical_true;
+        io_t io3 = {i3, o3};
+        inputs_t i4 = {id::logical_true, id::logical_false, id::logical_false};
+        output_t o4 = id::logical_true;
+        io_t io4 = {i4, o4};
+
+        vector<io_t> irs = {io1, io2, io3, io4};
+
+        for (const io_t& ir : irs) {
+            output_t res = boolean_interpreter(ir.first)(tr);
+            TS_ASSERT_EQUALS(res, ir.second);
+            ostreamContainer(cout << "inputs = ", ir.first)
+                << ", expected output = " << ir.second
+                << ", returned output = " << res << endl;
+        }
+    }
+
+    void test_contin_interpreter() {
+        combo_tree tr;
+        stringstream ss("+(*($1 $2) /($3 $4) log($5) exp($6) sin($7) 10.0)");
+        ss >> tr;
+
+        typedef vector<contin_t> inputs_t;
+        typedef contin_t output_t;
+        typedef pair<inputs_t, output_t> io_t;
+
+        inputs_t i1 = {1, 2, 0, 0, 1, 0, 0};
+        output_t o1 = 1*2 + 1 + 10.0;
+        io_t io1 = {i1, o1};
+        inputs_t i2 = {0, 0, 3, 4, 1, 0, 0};
+        output_t o2 = 3.0/4 + 1 + 10.0;
+        io_t io2 = {i2, o2};
+        inputs_t i3 = {0, 0, 0, 0, 5, 0, 0};
+        output_t o3 = log(5) + 1 + 10.0;
+        io_t io3 = {i3, o3};
+        inputs_t i4 = {0, 0, 0, 0, 1, 6, 0};
+        output_t o4 = exp(6) + 10.0;
+        io_t io4 = {i4, o4};
+        inputs_t i5 = {0, 0, 0, 0, 1, 0, 7};
+        output_t o5 = sin(7) + 1 + 10.0;
+        io_t io5 = {i5, o5};
+        inputs_t i6 = {1, 2, 3, 4, 5, 6, 7};
+        output_t o6 = 1*2 + 3.0/4 + log(5) + exp(6) + sin(7) + 10.0;
+        io_t io6 = {i6, o6};
+
+        vector<io_t> irs = {io1, io2, io3, io4, io5, io6};
+
+        for (const io_t& ir : irs) {
+            output_t res = contin_interpreter(ir.first)(tr);
+            TS_ASSERT_EQUALS(res, ir.second);
+            ostreamContainer(cout << "inputs = ", ir.first)
+                << ", expected output = " << ir.second
+                << ", returned output = " << res << endl;
+        }
+    }
+
+    void test_mixed_interpreter() {
+        combo_tree tr;
+        stringstream ss("sin(impulse(and(0<(+($1 $2)) $3)))");
+        ss >> tr;
+
+        typedef vector<vertex> inputs_t;
+        typedef vertex output_t;
+        typedef pair<inputs_t, output_t> io_t;
+
+        inputs_t i1 = {1, 2, id::logical_true};
+        output_t o1 = sin(1.0);
+        io_t io1 = {i1, o1};
+        inputs_t i2 = {1, -2, id::logical_true};
+        output_t o2 = 0.0;
+        io_t io2 = {i2, o2};
+        inputs_t i3 = {1, 2, id::logical_false};
+        output_t o3 = 0.0;
+        io_t io3 = {i3, o3};
+
+        vector<io_t> irs = {io1, io2, io3};
+
+        for (const io_t& ir : irs) {
+            output_t res = mixed_interpreter(ir.first)(tr);
+            TS_ASSERT_EQUALS(res, ir.second);
+            ostreamContainer(cout << "inputs = ", ir.first)
+                << ", expected output = " << ir.second
+                << ", returned output = " << res << endl;
+        }
+    }
+};

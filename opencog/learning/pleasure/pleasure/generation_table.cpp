@@ -9,7 +9,7 @@ using namespace opencog;
     void generate_generation_table(node_list& nlist, combo::type_tree& ttree, generation_table& gtable) {
         std::vector<combo::type_tree> type_node_list;
         std::vector<node_list> type_lists;
-        combo::argument_type_list atlist = combo::type_tree_input_arg_types(ttree);
+        combo::type_tree_seq atlist = combo::get_signature_inputs(ttree);
         for (std::set<combo::vertex>::iterator it = nlist.begin(); it != nlist.end(); it++) {
             generation_node gnode;
             combo::type_tree outttree = combo::get_output_type_tree(*it);
