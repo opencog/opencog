@@ -148,20 +148,32 @@ unsigned hill_climbing::operator()(deme_t& deme,
         size_t crossover_min_deme = 3;
 
         // whether crossover must be attempted for the current iteration
-        bool xover = hc_params.crossover
+        bool large_nbh = total_number_of_neighbours >= crossover_min_neighbours,
+            xover = hc_params.crossover
             && !already_crossover
             && (iteration > 2)
             && !rescan
             && current_number_of_instances >= crossover_min_deme
-            && (total_number_of_neighbours >= crossover_min_neighbours
-                || last_chance);
+            && (large_nbh || last_chance);
 
         if (xover) {
             number_of_new_instances =
                 crossover(deme, current_number_of_instances,
                           prev_start, prev_size, prev_center);
+
+            // why is cross over enabled?
+            stringstream why_xover;
+            if (large_nbh)
+                why_xover << "too large neighborhood "
+                          << total_number_of_neighbours << ">="
+                          << crossover_min_neighbours;
+            else if (last_chance)
+                why_xover << "last chance";
+            // log crossover and why
+            logger().debug() << "Crossover enabled for that iteration ("
+                             << why_xover.str() << ")";
+
             already_crossover = true;
-            logger().debug("Crossover enabled for that iteration");
         } else {
             // The current_number_of_instances arg is needed only to
             // be able to manage the size of the deme appropriately.
@@ -320,7 +332,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             double ram_usage = current_number_of_instances;
             ram_usage *= _instance_bytes;
             ram_usage /= 1024 * 1024;
-            logger().info() << "Demes: "
+            logger().info() << hc_params.prefix_stat_deme << ": "
                 << deme_count << "\t"
                 << iteration << "\t"
                 << total_steps << "\t"
@@ -764,7 +776,7 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
 }
 
 void hill_climbing::log_stats_legend() {
-    logger().info() << "Demes: # "   /* Legend for graph stats */
+    logger().info() << hc_params.prefix_stat_deme << ": # "   /* Legend for graph stats */
         "deme_count\t"
         "iteration\t"
         "total_steps\t"

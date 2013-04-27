@@ -123,6 +123,10 @@ struct hc_parameters
     // parameters may not behave indentically between 2 machines, thus
     // the motivation of that flag.
     bool allow_resize_deme;
+
+    // Deme stat name. String to indicate that TAB seperated deme
+    // statistics are logged. By default 'Demes'.
+    string prefix_stat_deme;
 };
 
 ///////////////////

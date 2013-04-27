@@ -1589,6 +1589,7 @@ int moses_exec(int argc, char** argv)
     hc_params.max_nn_evals = hc_max_nn;
     hc_params.fraction_of_nn = hc_frac_of_nn;
     hc_params.allow_resize_deme = hc_allow_resize_deme;
+    hc_params.prefix_stat_deme = "Demes";
 
     // Set moses_parameters.
     moses_parameters moses_params(vm, jobs);
