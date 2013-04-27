@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <set>
+#include <map>
 #include <boost/variant.hpp>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
@@ -60,9 +61,6 @@ public:
     set<StateLayerNode*> forwardLinks; // all nodes in next layer connected to this nodes according to the currently applying rule
     set<StateLayerNode*> backwardLinks; // all the links connect to the nodes in last layer
 
-    // all the different grounded parameters for this rules which have been tried are put int to this vector, to avoid try them again
-    //vector<> histroyParamValues;
-
     RuleLayerNode(Rule* _originalRule)
     {
         originalRule = _originalRule;
@@ -70,16 +68,56 @@ public:
 
 };
 
+
+// map to save grounded values for one rule:
+// map<parameter name, grounded value>
+// e.g.: <$Entity0,Robot001>
+//       <$Vector0,Vector(45,82,29)>
+//       <$Entity1,Battery83483>
+typedef map<string, StateValue> ParamGroundedMapInARule;
+
+// the already tried variable bindings history for one rule for achieve one planning state
+struct OneRuleHistory
+{
+    vector<ParamGroundedMapInARule> ParamGroundedHistories;
+
+    // if this rule still can be try next time with different variable binding.
+    // Default true, After try many different variable bindings, it may be marked false.
+    bool still_useful;
+
+    // the first time a new is tried , creat a history struct for it
+    OneRuleHistory(ParamGroundedMapInARule firstBindingRecord)
+    {
+        still_useful = true;
+        ParamGroundedHistories.push_back(firstBindingRecord);
+    }
+};
+
+
 class StateLayerNode
 {
 public:
+    enum ACHIEVE_STATE
+    {
+        ACHIEVED,
+        NOT_ACHIEVED,
+        UNKNOWN
+    };
+
     State* state;
-    bool isAchieved;
+    ACHIEVE_STATE isAchieved;
     StateLayer* stateLayer; // the layer it belongs to
     set<RuleLayerNode*> forwardLinks; // all the links connect to the nodes in next layer,and the according rules applied
     set<RuleLayerNode*> backwardLinks; // all the links connect to the nodes in last layer
-    StateLayerNode(State * _state){state = _state;isAchieved = false;}
+    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;}
+
+    // history of all the rules with grounded parameters used to be applied in this layer (to generate the backward RuleLayerNode)
+    // this is to prevent repeatedly applying the same set of rules with the same gournded parameter values.
+    // map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
+    // Rule* is pointing to one of the rules in the OCPlanner::AllRules
+    map<Rule*, OneRuleHistory> ruleHistory;
 };
+
 
 class StateLayer
 {
@@ -110,25 +148,12 @@ public:
     }
 };
 
-// map to save grounded values for one rule:
-// e.g.: <$Entity0,Robot001>
-//       <$Vector0,Vector(45,82,29)>
-//       <$Entity1,Battery83483>
-typedef map<string, StateValue> paramGroundedMapInARule;
 
-// map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
-// Rule* is pointing to one of the rules in the OCPlanner::AllRules
-typedef map<Rule*, paramGroundedMapInARule> paramGroundedMaps;
 
 class RuleLayer
 {
 public:
     set<RuleLayerNode*> nodes; // all the nodes in this layer currently
-
-    // history of all the rules with grounded parameters used to be applied in this layer
-    // every paramGroundedMaps is like a screenshot, and the current using grounded parameter map is always the last element in this vector
-    // this is to prevent repeatedly applying the same set of rules with the same gournded parameter values.
-    vector<paramGroundedMaps> rulesHistory;
 
     StateLayer* preStateLayer;
     StateLayer* nextStateLayer;
@@ -167,7 +192,8 @@ protected:
 
      // map <stateName, all rules have an effect to this state>
      // so that we can quickly find what rules have effect on a specific state during planning
-     map<string,vector<Rule*> > ruleEffectIndexes;
+     // map<float,Rule*> is map<probability, rule>
+     map<string,map<float,Rule*> > ruleEffectIndexes;
 
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
