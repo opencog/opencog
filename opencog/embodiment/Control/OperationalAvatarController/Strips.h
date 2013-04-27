@@ -50,6 +50,8 @@ class Inquery;
         OP_REVERSE, // this is only for the bool variables
         OP_ASSIGN,  // this operator can be used in any variable type =
         OP_ASSIGN_NOT_EQUAL_TO, // this operator can be used in any variable type !=
+        OP_ASSIGN_GREATER_THAN, // this operator can be used in any variable type >
+        OP_ASSIGN_LESS_THAN, // this operator can be used in any variable type <
         OP_ADD,     // only for numeric variables +=
         OP_SUB,     // only for numeric variables -=
         OP_MUL,     // only for numeric variables *=
@@ -57,7 +59,7 @@ class Inquery;
         OP_NUM_OPS  // must always be the last one in this list.
     };
 
-    extern const char* EFFECT_OPERATOR_NAME[7];
+    extern const char* EFFECT_OPERATOR_NAME[9];
 
 
     // There are 3 kinds of state types:
@@ -127,6 +129,11 @@ class Inquery;
 
         State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
                bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+
+        State(){}
+
+        // clone a same state
+        State* clone();
         ~State();
 
         void assignValue(const StateValue& newValue);
@@ -156,6 +163,9 @@ class Inquery;
         // For convenience, we will also consider int value as float value
         // if the value type is not numberic, return false and the floatVal and fuzzyFloat will not be assigned value
         bool getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat);
+
+        // please make sure this a numberic state before call this function
+        float getFloatValueFromNumbericState();
 
         bool isNumbericState() const;
 
@@ -207,7 +217,6 @@ class Inquery;
         StateValue opStateValue;
 
         Effect(State* _state, EFFECT_OPERATOR_TYPE _op, StateValue _OPValue);
-
 
         // only when there are misusge of the value type of opStateValue, it will return false,
         // e.g. if assign a string to a bool state, it will return false
@@ -269,8 +278,13 @@ class Inquery;
         // the actor who carry out this action, usually an Entity
         StateValue actor;
 
-        // the cost of this action under the conditions of this rule (the cost value is between 0 ~ 100)
-        int cost;
+        // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
+        // the cost of this action under the conditions of this rule
+        float basic_cost;
+
+        // for linear cost:
+        State* cost_cal_state;
+        float cost_coefficient;
 
         // All the precondition required to perform this action
         vector<State*> preconditionList;
@@ -286,11 +300,14 @@ class Inquery;
         // In vector<StateValue*>, the StateValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
         map<string , vector<StateValue*> > paraIndexMap;
 
-        Rule(PetAction* _action, StateValue _actor, int _cost, vector<State*> _preconditionList, vector<EffectPair> _effectList):
-            action(_action) , actor(_actor), cost(_cost), preconditionList(_preconditionList), effectList(_effectList){}
+        Rule(PetAction* _action, StateValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, State* _cost_cal_state = 0, float _cost_coefficient = 0):
+            action(_action) , actor(_actor),basic_cost(_basic_cost), preconditionList(_preconditionList), effectList(_effectList), cost_cal_state(_cost_cal_state), cost_coefficient(_cost_coefficient){}
 
-        Rule(PetAction* _action, StateValue _actor, int _cost):
-            action(_action) , actor(_actor), cost(_cost){}
+        Rule(PetAction* _action, StateValue _actor, float _basic_cost, State* _cost_cal_state = 0, float _cost_coefficient = 0):
+            action(_action) , actor(_actor), basic_cost(_basic_cost), cost_cal_state(_cost_cal_state), cost_coefficient(_cost_coefficient){}
+
+        // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
+        float getCost();
 
         void addEffect(EffectPair effect)
         {

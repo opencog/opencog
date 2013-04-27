@@ -3367,6 +3367,7 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
     return frameElementNameValueMap;
 }
 
+
 HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue ) 
 {
 
