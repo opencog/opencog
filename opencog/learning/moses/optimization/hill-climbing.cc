@@ -29,6 +29,8 @@
 
 #include <math.h>   // for sqrtf, cbrtf
 
+#include <boost/algorithm/minmax_element.hpp>
+
 #include <opencog/util/oc_omp.h>
 
 #include "../moses/neighborhood_sampling.h"
@@ -187,16 +189,35 @@ unsigned hill_climbing::operator()(deme_t& deme,
         prev_size = number_of_new_instances;
         prev_center = center_inst;
 
-        logger().debug("Evaluate %u neighbors at distance %u",
-                       number_of_new_instances, distance);
+        auto deme_from = next(deme.begin(), current_number_of_instances);
+        auto deme_inst_from = next(deme.begin_instances(), current_number_of_instances);
+        auto deme_score_from = next(deme.begin_scores(), current_number_of_instances);
+
+        // log neighborhood distance
+        if (logger().isDebugEnabled()) {
+            stringstream nbh_dst;
+            nbh_dst << "Evaluate " << number_of_new_instances << " neighbors ";
+            if (xover) {
+                // compute the min and max hamming distances between the
+                // center instance and the crossed-over instances
+                vector<int> dst_seq;
+                transform(deme_inst_from, deme.end_instances(), back_inserter(dst_seq),
+                          [&](const instance& inst) {
+                              return deme.fields().hamming_distance(inst, center_inst);
+                          });
+                auto pmm = boost::minmax_element(dst_seq.begin(), dst_seq.end());
+                nbh_dst << "from distance " << *pmm.first << " to " << *pmm.second;
+            }
+            else nbh_dst << "at distance " << distance;
+
+            logger().debug(nbh_dst.str());
+        }
 
         // score all new instances in the deme
-        OMP_ALGO::transform
-            (next(deme.begin(), current_number_of_instances), deme.end(),
-             next(deme.begin_scores(), current_number_of_instances),
-             // using bind cref so that score is passed by
-             // ref instead of by copy
-             boost::bind(boost::cref(iscorer), _1));
+        OMP_ALGO::transform(deme_from, deme.end(), deme_score_from,
+                            // using bind cref so that score is passed by
+                            // ref instead of by copy
+                            boost::bind(boost::cref(iscorer), _1));
 
         // Check if there is an instance in the deme better than
         // the best candidate
