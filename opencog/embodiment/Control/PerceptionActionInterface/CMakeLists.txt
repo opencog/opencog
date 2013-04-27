@@ -27,7 +27,6 @@ ADD_LIBRARY (PAI SHARED
 	EmbodimentDOMParser
 	EmbodimentErrorHandler
 	EventResponder
-	EventDetector
 	${PROTO_SRCS}
 )
 

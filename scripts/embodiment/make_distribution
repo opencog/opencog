@@ -103,10 +103,10 @@ $pdh/opencog/embodiment/scm/question-answering.scm \
 ]
 
 if {$type_dist == "dev"} {
-    # embodiment config - use example file if it doesn't exist
+    # embodiment config - use default file if it doesn't exist
     set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf
     if { [file exists $embodimentConf] != 1 } {
-        set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf.example
+        set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf.default
     }
     set flistconfig [list \
     $binDirH/opencog/embodiment/AutomatedSystemTest/pbTest \
@@ -117,10 +117,10 @@ if {$type_dist == "dev"} {
     run_system_test.sh \
     ]
 } elseif {$type_dist == "user"} {
-    # embodiment config - use example file if it doesn't exist
+    # embodiment config - use default file if it doesn't exist
     set embodimentConf $pdh/opencog/embodiment/embodiment.conf
     if { [file exists $embodimentConf] != 1 } {
-        set embodimentConf $pdh/opencog/embodiment/embodiment.conf.example
+        set embodimentConf $pdh/opencog/embodiment/embodiment.conf.default
     }
 }
 

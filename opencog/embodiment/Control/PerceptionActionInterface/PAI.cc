@@ -67,7 +67,7 @@
 #include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
 #include "EventResponder.h"
-#include "EventDetector.h"
+#include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
 
 using XERCES_CPP_NAMESPACE::Base64;
 using XERCES_CPP_NAMESPACE::XMLString;
@@ -668,7 +668,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processTerrainInfo((DOMElement *)list->item(i));
+        processTerrainInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
@@ -739,7 +739,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i));
+        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d finished-first-time-percept-terrian-signal done", list->getLength());
@@ -1448,6 +1448,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     actionConcernedHandles.push_back(atTimeLink);
 
     // if this is a statechage action, add the new value of this state into the atomspace
+    EVENT_TYPE eventTYpe;
     if (nameStr == "state_change")
     {
         OC_ASSERT(changedStateName != "");
@@ -1459,7 +1460,11 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
         actionConcernedHandles.push_back(newStateValNode);
         actionConcernedHandles.push_back(newStateEvalLink);
+
+        eventTYpe = oac::EVENT_TYPE_STATE_CHANGE;
     }
+    else
+        eventTYpe = oac::EVENT_TYPE_ACTION;
 
     // Jared    
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
@@ -1474,7 +1479,10 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     
     // call the event detector
     if (enableCollectActions)
-        EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
+    {
+        //EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
+        //oac::EventDetectionAgent::addAnEvent(actionInstanceNode,tsValue,eventTYpe);
+    }
 
     // call the event responser
     EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles, tsValue);
@@ -3390,7 +3398,7 @@ std::string PAI::camelCaseToUnderscore(const char* s)
  * Private methods used to parse map info by protobuf.
  * ---------------------------------------------------
  */
-void PAI::processTerrainInfo(DOMElement * element)
+void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
 {
 
     // XML is to be replaced by protobuf, but currently, we use it to wrap a
@@ -3458,11 +3466,11 @@ void PAI::processTerrainInfo(DOMElement * element)
             if (!isFirstPerceptTerrian)
             {
                 // maybe it has created new BlockEntities, add them to the atomspace
-                spaceServer().addBlockEntityNodes();
+                spaceServer().addBlockEntityNodes(toUpdateHandles);
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-                spaceServer().updateBlockEntitiesProperties(timestamp);
+                spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles);
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -3720,6 +3728,8 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
     bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
+    const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
+
     bool isVisible = isObjectVisible(properties);
 
     const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
@@ -3772,6 +3782,25 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "material",
                                           SimpleTruthValue(1.0, 1.0), objectNode, materialConceptNode);
+    } // if
+
+    // Add color property predicate
+    if (color_name != NULL_ATTRIBUTE){
+       // printf("color_name found: %s\n",color_name.c_str());
+
+        Handle colorNameWordNode = atomSpace.addNode(WORD_NODE, color_name);
+        Handle colorNameConceptNode = atomSpace.addNode(CONCEPT_NODE, color_name);
+
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(colorNameConceptNode);
+        referenceLinkOutgoing.push_back(colorNameWordNode);
+
+        // Add a reference link
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+
+        AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
+                                          SimpleTruthValue(1.0, 1.0), objectNode, colorNameConceptNode);
     } // if
 
     // Add texture property predicate
@@ -4184,7 +4213,7 @@ Handle PAI::getParmValueHanleFromXMLDoc(DOMElement* paramElement)
     return resultHandle;
 }
 
-void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element)
+void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, HandleSeq &toUpdateHandles)
 {
     unsigned long timestamp = getTimestampFromElement(element);
     // if it's the first time percept this world, then we should find out all the possible existing block-entities
@@ -4195,11 +4224,11 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element)
         spaceServer().findAllBlockEntitiesOnTheMap();
 
         // maybe it has created new BlockEntities, add them to the atomspace
-        spaceServer().addBlockEntityNodes();
+        spaceServer().addBlockEntityNodes(toUpdateHandles);
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        spaceServer().updateBlockEntitiesProperties(timestamp);
+        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles);
 
         int t2 = time(NULL);
 
@@ -4241,6 +4270,8 @@ void PAI::processBlockStructureSignal(DOMElement* element)
         {
             return;
         }
+
+        entity->SortBlockOrder();
 
         // Currently, for demo, once the oac figure out an blockEnity,
         // It will go to a random near place to build a same blockEnity by blocks.

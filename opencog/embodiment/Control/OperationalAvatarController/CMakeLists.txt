@@ -13,6 +13,7 @@ ADD_LIBRARY (oac SHARED
     PsiActionSelectionAgent
     PsiRelationUpdaterAgent
     PsiFeelingUpdaterAgent
+    EventDetectionAgent
     PsiRuleUtil
     StimulusUpdaterAgent
     SleepAgent

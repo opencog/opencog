@@ -192,7 +192,7 @@ public:
     void findAllBlockEntitiesOnTheMap();
 
     // add all the newly constructed BlockEntity nodes to the atomspace
-    void addBlockEntityNodes();
+    void addBlockEntityNodes(HandleSeq &toUpdateHandles);
 
     // add blocklist to an entity
     void addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity* _entity, const unsigned long timeStamp);
@@ -201,7 +201,7 @@ public:
     // this including addBlocksLisitPredicateToEntity
     void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, unsigned long timestamp);
 
-    void updateBlockEntitiesProperties(unsigned long timestamp);
+    void updateBlockEntitiesProperties(unsigned long timestamp, HandleSeq &toUpdateHandles);
 
     // input raw data to the learning server for blockEntities identification learning
     void sendRawAdjancentBlocksDataToLS();

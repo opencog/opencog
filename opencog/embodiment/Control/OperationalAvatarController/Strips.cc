@@ -28,11 +28,13 @@
 
 using namespace opencog::oac;
 
-const char* opencog::oac::EFFECT_OPERATOR_NAME[7] =
+const char* opencog::oac::EFFECT_OPERATOR_NAME[9] =
 {
     "OP_REVERSE", // this is only for the bool variables
     "OP_ASSIGN",  // this operator can be used in any variable type =
     "OP_ASSIGN_NOT_EQUAL_TO", // this operator can be used in any variable type !=
+    "OP_ASSIGN_GREATER_THAN", // only for numeric variables >
+    "OP_ASSIGN_LESS_THAN", // only for numeric variables <
     "OP_ADD",     // only for numeric variables +=
     "OP_SUB",     // only for numeric variables -=
     "OP_MUL",     // only for numeric variables *=
@@ -56,6 +58,17 @@ State::State(string _stateName, StateValuleType _valuetype ,StateType _stateType
 State::~State()
 {
     delete stateVariable;
+}
+
+State* State::clone()
+{
+    State* cloneState = new State();
+    cloneState->stateVariable = new StateVariable(this->name(),this->getStateValuleType(), this->getStateValue());
+    cloneState->stateType = this->stateType;
+    cloneState->stateOwnerList = this->stateOwnerList;
+    cloneState->need_inquery = this->need_inquery;
+    cloneState->inqueryFun = this->inqueryFun;
+    return cloneState;
 }
 
 void State::assignValue(const StateValue& newValue)
@@ -371,6 +384,33 @@ bool State::getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIn
     return true;
 }
 
+float State::getFloatValueFromNumbericState()
+{
+    // please make sure this a numberic state before call this function
+    if (getStateValuleType().getCode() == FUZZY_INTERVAL_INT_CODE)
+    {
+       FuzzyIntervalInt fuzzyInt = boost::get<opencog::pai::FuzzyIntervalInt>(stateVariable->getValue());
+       FuzzyIntervalFloat fuzzyFloat = FuzzyIntervalFloat((float)fuzzyInt.bound_low, (float)fuzzyInt.bound_high);
+       return (fuzzyFloat.bound_low + fuzzyInt.bound_high)/2.0f;
+    }
+    else if (getStateValuleType().getCode() == FUZZY_INTERVAL_FLOAT_CODE)
+    {
+        FuzzyIntervalFloat fuzzyFloat = boost::get<opencog::pai::FuzzyIntervalFloat>(stateVariable->getValue());
+        return (fuzzyFloat.bound_low + fuzzyFloat.bound_high)/2.0f;
+    }
+    else if (getStateValuleType().getCode()  == INT_CODE)
+    {
+        int intVal = boost::get<int>(stateVariable->getValue());
+        return (float)intVal;
+
+    }
+    else if (getStateValuleType().getCode()  == FLOAT_CODE)
+        return boost::get<float>(stateVariable->getValue());
+
+
+    return 0.0f;
+}
+
 bool State::isNumbericState() const
 {
     if (  (stateVariable->getType().getCode() == INT_CODE) ||
@@ -510,6 +550,16 @@ bool Effect::executeEffectOp()
         case OP_DIV:
             newV = oldv / opv;
             break;
+        case OP_ASSIGN_GREATER_THAN:
+            newV = opv;
+            if (state->stateType != STATE_GREATER_THAN)
+                state->changeStateType(STATE_GREATER_THAN);
+            break;
+        case OP_ASSIGN_LESS_THAN:
+            newV = opv;
+            if (state->stateType != STATE_LESS_THAN)
+                state->changeStateType(STATE_LESS_THAN);
+            break;
         default:
             return false;
         }
@@ -528,6 +578,7 @@ bool Effect::executeEffectOp()
         else
             return false;
     }
+
 
     return true;
 
@@ -562,6 +613,8 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
     case OP_SUB:// only for the numeric value types
     case OP_MUL:// only for the numeric value types
     case OP_DIV:// only for the numeric value types
+    case OP_ASSIGN_GREATER_THAN:// only for the numeric value types
+    case OP_ASSIGN_LESS_THAN:// only for the numeric value types
     {
        string* v =  boost::get<string>(&_OPValue);
        if ( v == 0)
@@ -575,6 +628,25 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
     default:
         return false;
 
+    }
+}
+
+
+float Rule::getCost()
+{
+    // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
+    // the cost_cal_state is the state related to the cost, e.g.: if an action is move from A to B, then the cost will depend on the state distanceOf(A,B)
+    if (cost_cal_state == 0 || cost_coefficient == 0.0f)
+        return basic_cost;
+    else
+    {
+        // get numberic value from this cost_cal_state
+        if (! cost_cal_state->isNumbericState())
+        {
+            logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
+        }
+
+       return cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
     }
 }
 

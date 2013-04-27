@@ -166,6 +166,9 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
 
         if (isSelfObject)
             selfAgentEntity = newEntity;
+
+        if (isAvatarEntity(newEntity))
+            mAllAvatarList.insert(map<Handle, Entity3D*>::value_type(entityNode, newEntity));
     }
     else
     {
@@ -184,7 +187,6 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
 
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,(Entity3D*)(it->second)));
     }
-
 
 }
 
@@ -491,7 +493,7 @@ BlockEntity* Octree3DMapManager::getEntityInPos(BlockVector& _pos) const
 {
     Block3D* block;
     // First, check is there already a block in this position
-    if (mRootOctree->checkIsSolid(_pos, block))
+    if (! mRootOctree->checkIsSolid(_pos, block))
         return 0;
 
     return (block->mBlockEntity);
@@ -608,6 +610,18 @@ BlockVector Octree3DMapManager::getObjectDirection(Handle objNode) const
     else
         return BlockVector::ZERO;
 }
+
+bool Octree3DMapManager::isAvatarEntity(const Entity3D *entity) const
+{
+    string _entityClass = entity->getEntityClass() ;
+
+    return( (_entityClass == "avatar") ||
+          (_entityClass == "npc")    ||
+          (_entityClass == "Player") ||
+          (_entityClass == "player"));
+
+}
+
 
 bool Octree3DMapManager::isTwoPositionsAdjacent(const BlockVector &pos1, const BlockVector &pos2)
 {
@@ -993,6 +1007,17 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
 
      if (entityB->getBoundingBox().nearLeftBottomConer.z >= entityA->getBoundingBox().nearLeftBottomConer.z + entityA->getBoundingBox().size_z)
         spatialRelations.insert(BELOW);
+
+
+     // if A is near/far to B
+     double dis = entityB->getCenterPosition() - entityA->getCenterPosition();
+     double AR = entityA->getRadius();
+     double BR = entityB->getRadius();
+     double nearDis = (AR + BR)*2.0;
+     if (dis <= nearDis )
+        spatialRelations.insert(NEAR);
+     else if (dis > nearDis*10.0 )
+        spatialRelations.insert(FAR_);
 
 
      return spatialRelations;
