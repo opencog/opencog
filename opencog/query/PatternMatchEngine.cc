@@ -172,7 +172,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 		// If the two links are both ordered, its enough to compare
 		// them "side-by-side"; the foreach_atom_pair iterator does
 		// this. If they are un-ordered, then we have to compare (at
-		// most) every possible permutation. 
+		// most) every possible permutation.
 		//
 		Type tp = as->getType(hp);
 		if (classserver().isA(tp, ORDERED_LINK))
@@ -222,7 +222,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 			//
 			// We don't try all possible groundings; this is not the place
 			// to do this; this is done elsewhere. Here, its enough to find
-			// any grounding that works (i.e. is consistent with all 
+			// any grounding that works (i.e. is consistent with all
 			// groundings up till now).
 			std::vector<Handle> osp = atom_space->getOutgoing(hp);
 			const std::vector<Handle> &osg = atom_space->getOutgoing(hg);
@@ -241,7 +241,7 @@ bool PatternMatchEngine::tree_compare(Handle hp, Handle hg)
 
 				if (false == mismatch)
 				{
-				   var_solutn_stack.pop();
+					var_solutn_stack.pop();
 					var_grounding[hp] = hg;
 					return false;
 				}
@@ -608,7 +608,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
  *            that appears in do_clause.
  * ah:        must be a (non-variable) node in the "starter" clause.
  *            That is, this must be one of the outgoing atoms of the
- *            "starter" link, it must be a node, and it must not be 
+ *            "starter" link, it must be a node, and it must not be
  *            a variable node.
  *
  * This routine is meant to be invoked on every candidate atom taken
