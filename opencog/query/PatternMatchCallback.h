@@ -137,7 +137,7 @@ class PatternMatchCallback
 		 * Called very early, before pattern-matching has begun. This
 		 * conveys how the variable declarations in a BindLink were
 		 * decoded.  The argument is nothing more than the variable
-		 * declarations, as given in the atomspace, but rexpressed
+		 * declarations, as given in the atomspace, but re-expressed
 		 * in a slightly more convenient C++ form, is all.
 		 */
 		virtual void set_type_restrictions(VariableTypeMap &tm) {}
