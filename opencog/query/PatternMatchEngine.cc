@@ -601,9 +601,18 @@ void PatternMatchEngine::get_next_untried_clause(void)
 
 /**
  * do_candidate - examine candidates, looking for matches.
+ * Inputs:
+ * do_clause: must be one of the clauses previously specified in the
+ *            clause list of the match() method.
+ * starter:   must be a sub-clause of do_clause; that is, must be a link
+ *            that appears in do_clause.
+ * ah:        must be a (non-variable) node in the "starter" clause.
+ *            That is, this must be one of the outgoing atoms of the
+ *            "starter" link, it must be a node, and it must not be 
+ *            a variable node.
  *
- * This routine is invoked on every candidate atom taken from
- * the atom space. That atom is assumed to anchor some part of
+ * This routine is meant to be invoked on every candidate atom taken
+ * from the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  */
 bool PatternMatchEngine::do_candidate(Handle do_clause, Handle starter, Handle ah)
