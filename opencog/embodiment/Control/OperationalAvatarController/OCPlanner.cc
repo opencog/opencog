@@ -201,10 +201,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         newStateLayer->nextRuleLayer = newRuleLayer;
         curStateLayer->preRuleLayer = newRuleLayer;
 
-        // Some states in current goal statelayer have been grounded through its preRuleLayer.
-        // So, we find out all the ungrounded states goals, and select paravalues to ground them
-        // If there are "Exist States" among these ungrounded states, always these "Exist States" go first
-
         // in every rule layer, there is always only one rule is applied
         // so as, in every state layer, there is always only one non-satisfied state being deal with every time
 
@@ -239,7 +235,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             }
 
-
             // if this state has been achieved , then it has been continue above.
             // only a state has not been achieved will come to here
             OC_ASSERT(curStateNode->isAchieved == StateLayerNode::NOT_ACHIEVED, "OCPLanner::doPlanning: The state " + curStateNode->state->name() + "is not not-achieved!/n");
@@ -250,24 +245,75 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             alreadyDealOneState = true;
 
-            // For numberic goals
-            // First, check if there is any rules's effect can achieve this goal
-            // If there are more than one rules can achieve it, we'll apply the recursive rule first if any
             map<string,map<float,Rule*> >::iterator it;
             it = ruleEffectIndexes.find(curStateNode->state->name());
 
             // Select a rule to apply
-            Rule* curRule;
+            Rule* curSelectedRule;
+            map<float,Rule*> rules = (map<float,Rule*>)(it->second);
 
-            if ( ((map<float,Rule*>)(it->second)).size() == 1)
-                curRule = (((map<float,Rule*>)(it->second)).begin())->second;
+            if ( rules.size() == 1)
+            {
+                // if there is one rule to achieve this goal, just select it
+                curSelectedRule = (((map<float,Rule*>)(it->second)).begin())->second;
+
+                // check in the rule using history for achieving this state, if found this rule bas been marked as not useful, then break
+                if ()
+            }
             else
             {
+                // if there are multiple rules,choose the most suitable one
+
+                // For non-numberic goals:
+                // 1. This rule has not been applied in this layer for this goal before,
+                //    or it has been applied but has not been used up yet (it only has been tried some variables for this rule, still can try other variables)
+                // 2. todo: with the highest fitness for the current heuristics, currently we don't consider heuristics for non-numberic goals
+
+
+                // Generate a score for each rules based on above criterions:
+                // score = less used time(20%) + probability (40%) + lowest cost (40%)
+                float highestScore = 0.0;
+                map<float,Rule*> ::iterator ruleIt;
+                bool allRulesUnuseful = true;
+                for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
+                {
+                    Rule* r = ruleIt->second;
+                    if (! curStateNode->IsRuleStillUsefule(r))
+                        continue;
+
+                    allRulesUnuseful = false;
+
+                    float curRuleScore =
+
+                    if (curRuleScore > highestScore)
+                    {
+                        curSelectedRule = r;
+                        highestScore = curRuleScore;
+                    }
+
+
+                }
+
+                // if find all the possible rules are already useless for current state (all rules have been tried but failed)
+                // it suggests that the current state is impossible to achieve, so that we need to go back to last step
+
+                //
+                // For numberic goals
+                // First, check if there is any rules's effect can achieve this goal
+                // If there are more than one rules can achieve it, we'll apply the recursive rule first if any
+
                 // if there are more than one rule are able to achieve this goal,
-                // select the one with highest probability (50%) and lowest cost (50%)
+                // select the one with highest
 
                 // because the cost value is between 0 ~ 100, need to divided by 100 first
-               // (1 - curRule->cost/100.0f)
+                // (1 - curRule->cost/100.0f)
+
+
+
+                // When apply a rule, we need to select proper variables to ground it.
+                // A rule should be grounded during its rule layer.
+                // So, we find out all the ungrounded variables in this rule.
+                // If there are "Exist States" among these ungrounded states in the precondiction list of this rule, always these "Exist States" go first
 
             }
 
@@ -323,11 +369,36 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
 {
+    // define a special action: do nothing
+    PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
+
+    //----------------------------Begin Rule: increase energy is to achieve energygoal-------------------------------------------
+    StateValue var_avatar = entity_var[1];
+    StateValue var_achieve_energy_goal = bool_var[1];
+
+    // precondition 1:
+    vector<StateValue> energyStateOwnerList0;
+    energyStateOwnerList0.push_back(var_avatar);
+    State* energyState0 = new State("Energy",StateValuleType::FLOAT(),STATE_GREATER_THAN ,0.8f, energyStateOwnerList, true, Inquery::inqueryEnergy);
+    // effect1: energy increases
+    State* energyGoalState = new State("EnergyGoal",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList);
+
+    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
+
+    Rule* increaseEnergyForEnergyGOal = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
+    accessAdjacentRule->addPrecondition(energyState0);
+
+    accessAdjacentRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
+
+    this->AllRules.push_back(increaseEnergyForEnergyGOal);
+
+    //----------------------------End Rule: increase energy is to achieve energygoal-------------------------------------------
+
     //----------------------------Begin Rule: eat food to increase energy-------------------------------------------
     // define variables:
     StateValue var_food = entity_var[0];
-    StateValue var_avatar = entity_var[1];
     StateValue var_energy = float_var[0];
+
     // Add rule: increasing energy by eat an edible object held in hand
 
     // precondition 1:food exists
@@ -596,8 +667,7 @@ void OCPlanner::loadTestRulesFromCodes()
      State* existPathState3 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList3, true, &Inquery::inqueryExistPath);
     Effect* becomeExistPathEffect = new Effect(existPathState3, OP_ASSIGN, "true");
 
-    // action: do nothing
-    PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
+
     // add rule:
     Rule* accessAdjacentRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
     accessAdjacentRule->addPrecondition(standableState2);

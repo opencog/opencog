@@ -81,13 +81,17 @@ struct OneRuleHistory
 {
     vector<ParamGroundedMapInARule> ParamGroundedHistories;
 
-    // if this rule still can be try next time with different variable binding.
-    // Default true, After try many different variable bindings, it may be marked false.
+    // How many times of this rule has been tried with different variable binding.
+    // This is for make a decision that if this rule has been tried and failed too many times, so that it would has a lower chance to be seleced
+    int appliedTimes;
+
+    // some times, we need to mark a rule as not useful anymore after try it and fail.(e.g. have tried every variable binding and still fail)
     bool still_useful;
 
     // the first time a new is tried , creat a history struct for it
     OneRuleHistory(ParamGroundedMapInARule firstBindingRecord)
     {
+        appliedTimes = 1;
         still_useful = true;
         ParamGroundedHistories.push_back(firstBindingRecord);
     }
@@ -116,6 +120,26 @@ public:
     // map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
     // Rule* is pointing to one of the rules in the OCPlanner::AllRules
     map<Rule*, OneRuleHistory> ruleHistory;
+
+    int getRuleAppliedTime(Rule* r)
+    {
+        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
+        if (it == ruleHistory.end())
+            return 0;
+
+        return (OneRuleHistory)(*it).appliedTimes;
+
+    }
+
+    bool IsRuleStillUsefule(Rule* r)
+    {
+        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
+        if (it == ruleHistory.end())
+            return true;
+
+        return (OneRuleHistory)(*it).still_useful;
+    }
+
 };
 
 
