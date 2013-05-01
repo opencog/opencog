@@ -258,7 +258,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 curSelectedRule = (((map<float,Rule*>)(it->second)).begin())->second;
 
                 // check in the rule using history for achieving this state, if found this rule bas been marked as not useful, then break
-                if ()
+
             }
             else
             {
@@ -283,16 +283,16 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
                     allRulesUnuseful = false;
 
-                    float curRuleScore =
+                    float curRuleScore = 0.2f * (1.0f/(curStateNode->getRuleAppliedTime(r) +1)) + 0.4f* ruleIt->first + 0.4*r->getCost();
 
                     if (curRuleScore > highestScore)
                     {
                         curSelectedRule = r;
                         highestScore = curRuleScore;
                     }
-
-
                 }
+
+
 
                 // if find all the possible rules are already useless for current state (all rules have been tried but failed)
                 // it suggests that the current state is impossible to achieve, so that we need to go back to last step
@@ -314,6 +314,10 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 // A rule should be grounded during its rule layer.
                 // So, we find out all the ungrounded variables in this rule.
                 // If there are "Exist States" among these ungrounded states in the precondiction list of this rule, always these "Exist States" go first
+
+                // this rule has not been applied in this state yet, add this rule to the history of this state node
+                //if (curStateNode->getRuleAppliedTime(curSelectedRule) == 0)
+                //    curStateNode->addRuleRecordWithVariableBindingsToHistory();
 
             }
 
@@ -372,25 +376,25 @@ void OCPlanner::loadTestRulesFromCodes()
     // define a special action: do nothing
     PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
 
-    //----------------------------Begin Rule: increase energy is to achieve energygoal-------------------------------------------
+    //----------------------------Begin Rule: if energy value is high enough, the energy goal is achieved-------------------------------------------
     StateValue var_avatar = entity_var[1];
     StateValue var_achieve_energy_goal = bool_var[1];
 
     // precondition 1:
     vector<StateValue> energyStateOwnerList0;
     energyStateOwnerList0.push_back(var_avatar);
-    State* energyState0 = new State("Energy",StateValuleType::FLOAT(),STATE_GREATER_THAN ,0.8f, energyStateOwnerList, true, Inquery::inqueryEnergy);
+    State* energyState0 = new State("Energy",StateValuleType::FLOAT(),STATE_GREATER_THAN ,StateValue("0.8"), energyStateOwnerList0, true, Inquery::inqueryEnergy);
     // effect1: energy increases
-    State* energyGoalState = new State("EnergyGoal",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList);
+    State* energyGoalState = new State("EnergyGoal",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList0);
 
     Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
 
-    Rule* increaseEnergyForEnergyGOal = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
-    accessAdjacentRule->addPrecondition(energyState0);
+    Rule* highEnergyAchieveEnergyGoalRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
+    highEnergyAchieveEnergyGoalRule->addPrecondition(energyState0);
 
-    accessAdjacentRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
+    highEnergyAchieveEnergyGoalRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
 
-    this->AllRules.push_back(increaseEnergyForEnergyGOal);
+    this->AllRules.push_back(highEnergyAchieveEnergyGoalRule);
 
     //----------------------------End Rule: increase energy is to achieve energygoal-------------------------------------------
 

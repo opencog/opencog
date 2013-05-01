@@ -646,7 +646,7 @@ float Rule::getCost()
             logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
         }
 
-       return cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
+       return basic_cost + cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
     }
 }
 
