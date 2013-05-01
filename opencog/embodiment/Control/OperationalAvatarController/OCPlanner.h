@@ -121,13 +121,47 @@ public:
     // Rule* is pointing to one of the rules in the OCPlanner::AllRules
     map<Rule*, OneRuleHistory> ruleHistory;
 
+    void addRuleRecordWithVariableBindingsToHistory(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
+    {
+        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
+        // this rule has not been applied on me before, add a new record before
+        if (it == ruleHistory.end())
+        {
+            ruleHistory.insert(std::pair<Rule*, OneRuleHistory >(r, OneRuleHistory(paramGroundingMap)));
+        }
+        else
+        {
+            (((OneRuleHistory)(it->second)).ParamGroundedHistories).push_back(paramGroundingMap);
+        }
+
+    }
+
+    // check if this rule with this specific variables bindings has been applied to this state node
+    bool checkIfBindingsHaveBeenApplied(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
+    {
+        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
+        if (it == ruleHistory.end())
+            return false;
+
+        vector<ParamGroundedMapInARule> ParamGroundedHistories = (((OneRuleHistory)(it->second)).ParamGroundedHistories);
+        vector<ParamGroundedMapInARule>::iterator paramMapit = ParamGroundedHistories.begin();
+        for (;paramMapit != ParamGroundedHistories.end(); ++ paramMapit)
+        {
+            if (paramGroundingMap == (ParamGroundedMapInARule)(*paramMapit) )
+                return true;
+        }
+
+        return false;
+
+    }
+
     int getRuleAppliedTime(Rule* r)
     {
         map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
         if (it == ruleHistory.end())
             return 0;
 
-        return (OneRuleHistory)(*it).appliedTimes;
+        return ((OneRuleHistory)(it->second)).appliedTimes;
 
     }
 
@@ -137,7 +171,7 @@ public:
         if (it == ruleHistory.end())
             return true;
 
-        return (OneRuleHistory)(*it).still_useful;
+        return ((OneRuleHistory)(it->second)).still_useful;
     }
 
 };
