@@ -631,6 +631,10 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
     }
 }
 
+float Rule::getBasicCost()
+{
+    return basic_cost;
+}
 
 float Rule::getCost()
 {
@@ -648,6 +652,35 @@ float Rule::getCost()
 
        return basic_cost + cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
     }
+}
+
+
+void Rule::preProcessRule()
+{
+    _preProcessRuleParameterIndexes();
+    IsRecursiveRule = _isRecursiveRule();
+}
+
+bool Rule::_isRecursiveRule()
+{
+    // if the all the preconditions and effects are of the same state, then it's a recursive rule
+    // e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
+
+    vector<EffectPair>::iterator iteffect;
+    for (iteffect = effectList.begin(); iteffect != effectList.end(); ++ iteffect)
+    {
+        Effect* e = (Effect*)(((EffectPair)(*iteffect)).second);
+
+        vector<State*>::iterator itpre;
+        for (itpre = preconditionList.begin(); itpre != preconditionList.end(); ++ itpre)
+        {
+            State* ps = *itpre;
+            if (ps->name() != e->state->name())
+                return false;
+        }
+    }
+
+    return true;
 }
 
 bool Rule::isUnGroundedString( string& s)
@@ -742,7 +775,7 @@ bool Rule::isRuleUnGrounded( Rule* rule)
 
 }
 
-void Rule::addParameterIndex(StateValue& paramVal)
+void Rule::_addParameterIndex(StateValue& paramVal)
 {
     string paramToStr = ActionParameter::ParamValueToString(paramVal);
     map<string , vector<StateValue*> >::iterator it;
@@ -761,7 +794,8 @@ void Rule::addParameterIndex(StateValue& paramVal)
 
 }
 
-void Rule::preProcessRuleParameterIndexes()
+
+void Rule::_preProcessRuleParameterIndexes()
 {
     // map<string , vector<StateValue*> >
     // the string is the string representation of an orginal ungrounded parameter,
@@ -774,7 +808,7 @@ void Rule::preProcessRuleParameterIndexes()
     // Check if the actor grounded
     if (isParamValueUnGrounded(actor))
     {
-        addParameterIndex(actor);
+        _addParameterIndex(actor);
     }
 
     // check if all the preconditiion parameters grounded
@@ -788,12 +822,12 @@ void Rule::preProcessRuleParameterIndexes()
         for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
         {
             if (isParamValueUnGrounded(*ownerIt))
-                addParameterIndex(*ownerIt);
+                _addParameterIndex(*ownerIt);
         }
 
         // check the state value
         if (isParameterUnGrounded(*(s->stateVariable)))
-                addParameterIndex(s->stateVariable->getValue());
+                _addParameterIndex(s->stateVariable->getValue());
     }
 
     // Check if all the action parameters grounded
@@ -802,7 +836,7 @@ void Rule::preProcessRuleParameterIndexes()
     for(it = parameters.begin(); it != parameters.end(); ++it)
     {
         if (isParameterUnGrounded(*it))
-            addParameterIndex(((ActionParameter)(*it)).getValue());
+            _addParameterIndex(((ActionParameter)(*it)).getValue());
     }
 
     // Check if all the effect parameters grounded
@@ -817,16 +851,16 @@ void Rule::preProcessRuleParameterIndexes()
         for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
         {
             if (isParamValueUnGrounded(*ownerIt))
-                addParameterIndex(*ownerIt);
+                _addParameterIndex(*ownerIt);
         }
 
         // check the state value
         if (isParameterUnGrounded( *(s->stateVariable)))
-                addParameterIndex(s->stateVariable->getValue());
+                _addParameterIndex(s->stateVariable->getValue());
 
         // check the effect value
         if (isParamValueUnGrounded(e->opStateValue))
-            addParameterIndex(e->opStateValue);
+            _addParameterIndex(e->opStateValue);
     }
 
 }

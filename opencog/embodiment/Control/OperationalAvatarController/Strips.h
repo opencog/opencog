@@ -293,6 +293,10 @@ class Inquery;
         // there are probability for each effect
         vector<EffectPair> effectList;
 
+        // return if this rule is recursive. A recursive rule means its precondition and effect are the same state
+        //  e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
+        bool IsRecursiveRule;
+
         // ungrounded parameter indexes
         // map<string , vector<StateValue&> >
         // the string is the string representation of an orginal ungrounded parameter,
@@ -306,8 +310,12 @@ class Inquery;
         Rule(PetAction* _action, StateValue _actor, float _basic_cost, State* _cost_cal_state = 0, float _cost_coefficient = 0):
             action(_action) , actor(_actor), basic_cost(_basic_cost), cost_cal_state(_cost_cal_state), cost_coefficient(_cost_coefficient){}
 
+        float getBasicCost();
+
         // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
         float getCost();
+
+
 
         void addEffect(EffectPair effect)
         {
@@ -319,9 +327,10 @@ class Inquery;
             preconditionList.push_back(precondition);
         }
 
-        // go through all the parameters in this rule and add their indexes to paraIndexMap
-        void preProcessRuleParameterIndexes();
 
+        // need to be called after a rule is finished added all its information (predictions, effects...)
+        // to add parameter index and check if it's a recursive rule
+        void preProcessRule();
 
         bool static isRuleUnGrounded( Rule* rule);
 
@@ -334,8 +343,16 @@ class Inquery;
         bool static isUnGroundedEntity( Entity& e);
 
     protected:
+
+        // go through all the parameters in this rule and add their indexes to paraIndexMap
+        void _preProcessRuleParameterIndexes();
+
         // Add one parameter to index
-        void addParameterIndex(StateValue &paramVal);
+        void _addParameterIndex(StateValue &paramVal);
+
+        // check if this rule is a recursive rule
+        // Recursive rule is to break a problem into the same problems of smaller scales
+        bool _isRecursiveRule();
 
 
     };
