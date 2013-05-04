@@ -315,8 +315,6 @@ class Inquery;
         // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
         float getCost();
 
-
-
         void addEffect(EffectPair effect)
         {
             effectList.push_back(effect);
@@ -327,6 +325,7 @@ class Inquery;
             preconditionList.push_back(precondition);
         }
 
+        Rule* clone();
 
         // need to be called after a rule is finished added all its information (predictions, effects...)
         // to add parameter index and check if it's a recursive rule

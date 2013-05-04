@@ -47,8 +47,9 @@ OCPlanner::OCPlanner()
     {
         Rule* r = (Rule*)(*it);
 
-        // adding indexes about the ungrounded parameters in it.
-        r->preProcessRuleParameterIndexes();
+        // preprocess the rule
+        // adding indexes about the ungrounded parameters in it and and check if it's a recursive rule
+        r->preProcessRule();
 
         // adding indexes about which rules have effects to which stateName
         addRuleEffectIndex(r);
@@ -186,30 +187,15 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     while(true)
     {
 
-        // not all the states in the current state layer are satisfied,
-        // we need to creat a new rule layer backward trying to achieve these states
-        // and also create a new state Layer which are the preconditions of this new rule layer
-        RuleLayer* newRuleLayer = new RuleLayer();
-        StateLayer* newStateLayer = new StateLayer();
-
-        allRuleLayers.insert(newRuleLayer);
-        allStateLayers.insert(newStateLayer);
-
-        newRuleLayer->nextStateLayer = curStateLayer;
-        newRuleLayer->preStateLayer = newStateLayer;
-
-        newStateLayer->nextRuleLayer = newRuleLayer;
-        curStateLayer->preRuleLayer = newRuleLayer;
-
-        // in every rule layer, there is always only one rule is applied
-        // so as, in every state layer, there is always only one non-satisfied state being deal with every time
-
-        // first for loop, find a unsatisfied state and try to do one step backward chaining to satisfy it
+        // first for loop, find a unsatisfied state
         // todo: there should some function to decide the order that which state should be achieved frist
 
         bool goalsAllAchieved = true;
         float satisfiedDegree;
         bool alreadyDealOneState = false;
+
+        StateLayerNode* selectedStateNode;
+        Rule* selectedRule;
 
         for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
         {
@@ -249,13 +235,13 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             it = ruleEffectIndexes.find(curStateNode->state->name());
 
             // Select a rule to apply
-            Rule* curSelectedRule;
+
             map<float,Rule*> rules = (map<float,Rule*>)(it->second);
 
             if ( rules.size() == 1)
             {
                 // if there is one rule to achieve this goal, just select it
-                curSelectedRule = (((map<float,Rule*>)(it->second)).begin())->second;
+                selectedRule = (((map<float,Rule*>)(it->second)).begin())->second;
 
                 // check in the rule using history for achieving this state, if found this rule bas been marked as not useful, then break
 
@@ -271,7 +257,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
 
                 // Generate a score for each rules based on above criterions:
-                // score = less used time(20%) + probability (40%) + lowest cost (40%)
+                // score = less used time(30%) + probability (35%) + lowest cost (35%)
+                // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
+
                 float highestScore = 0.0;
                 map<float,Rule*> ::iterator ruleIt;
                 bool allRulesUnuseful = true;
@@ -283,41 +271,32 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
                     allRulesUnuseful = false;
 
-                    float curRuleScore = 0.2f * (1.0f/(curStateNode->getRuleAppliedTime(r) +1)) + 0.4f* ruleIt->first + 0.4*r->getCost();
+                    // Because grounding every rule is time consuming, but some cost of rule requires the calculation of grounded variables.
+                    // So here we just use the basic cost of every rule as the cost value.
+                    float curRuleScore = 0.3f * (1.0f/(curStateNode->getRuleAppliedTime(r) +1)) + 0.35f* ruleIt->first + 0.35*(1.0f - r->getBasicCost());
+                    if (r->IsRecursiveRule)
+                        curRuleScore += 0.5f;
 
                     if (curRuleScore > highestScore)
                     {
-                        curSelectedRule = r;
+                        selectedRule = r;
                         highestScore = curRuleScore;
                     }
                 }
 
-
-
                 // if find all the possible rules are already useless for current state (all rules have been tried but failed)
                 // it suggests that the current state is impossible to achieve, so that we need to go back to last step
-
-                //
-                // For numberic goals
-                // First, check if there is any rules's effect can achieve this goal
-                // If there are more than one rules can achieve it, we'll apply the recursive rule first if any
-
-                // if there are more than one rule are able to achieve this goal,
-                // select the one with highest
-
-                // because the cost value is between 0 ~ 100, need to divided by 100 first
-                // (1 - curRule->cost/100.0f)
+                if (allRulesUnuseful)
+                {
+                    // we have to delete the current state layer and the forward rule layer
 
 
+                    curStateLayer = curStateLayer->preRuleLayer->preStateLayer;
+                }
 
-                // When apply a rule, we need to select proper variables to ground it.
-                // A rule should be grounded during its rule layer.
-                // So, we find out all the ungrounded variables in this rule.
-                // If there are "Exist States" among these ungrounded states in the precondiction list of this rule, always these "Exist States" go first
+                selectedStateNode = curStateNode;
 
-                // this rule has not been applied in this state yet, add this rule to the history of this state node
-                //if (curStateNode->getRuleAppliedTime(curSelectedRule) == 0)
-                //    curStateNode->addRuleRecordWithVariableBindingsToHistory();
+
 
             }
 
@@ -327,6 +306,41 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         if (goalsAllAchieved)
             return true;
+
+        // Till now have select the an unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
+        // Creat a new rule layer backward trying to achieve the
+        // and also create a new state Layer which are the preconditions of this new rule layer
+        RuleLayer* newRuleLayer = new RuleLayer();
+        StateLayer* newStateLayer = new StateLayer();
+
+        allRuleLayers.insert(newRuleLayer);
+        allStateLayers.insert(newStateLayer);
+
+        newRuleLayer->nextStateLayer = curStateLayer;
+        newRuleLayer->preStateLayer = newStateLayer;
+
+        newStateLayer->nextRuleLayer = newRuleLayer;
+        curStateLayer->preRuleLayer = newRuleLayer;
+
+        // in every rule layer, there is always only one rule is applied
+        // so as, in every state layer, there is always only one non-satisfied state being deal with every time
+
+        // create a new RuleLayerNode to apply this selected rule
+        RuleLayerNode* ruleNode = new RuleLayerNode(selectedRule);
+        newRuleLayer->nodes.insert(ruleNode);
+
+        // When apply a rule, we need to select proper variables to ground it.
+        // A rule should be grounded during its rule layer.
+
+        // To ground a rule, first, we get all the variable values from the current state node to ground it.
+        groundARuleNodeFromItsForwardState(ruleNode ,selectedStateNode);
+
+        // So, we find out all the ungrounded variables in this rule.
+        // If there are "Exist States" among these ungrounded states in the precondiction list of this rule, always these "Exist States" go first
+
+        // this rule has not been applied in this state yet, add this rule to the history of this state node
+        //if (curStateNode->getRuleAppliedTime(selectedRule) == 0)
+        //    curStateNode->addRuleRecordWithVariableBindingsToHistory();
 
         // Second for loop, for the rest states,create a do nothing rule node, to bring this state to the new state layer
         // except the states have been affected by the rule applied in the first for loop
@@ -369,6 +383,42 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     return false;
 }
 
+bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode)
+{
+    // first, find the state in the effect list of this rule which the same to this forward state
+    vector<EffectPair>::iterator effectIt;
+    Effect* e;
+    State* s;
+
+    // Todo: Maybe need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name
+    for(effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++effectIt)
+    {
+        e = effectIt->second;
+
+        s = e->state;
+        if (s->name() ==  forwardStateNode->state->name())
+            break;
+    }
+
+    if (effectIt == ruleNode->originalRule->effectList.end())
+        return false;
+
+    // check if all the stateOwner parameters grounded
+    vector<StateValue>::iterator f_ownerIt = forwardStateNode->state->stateOwnerList.begin(); // state owner list in forward state
+    vector<StateValue>::iterator r_ownerIt = s->stateOwnerList.begin(); // state owner list in rule effect state
+
+    for ( ; r_ownerIt != s->stateOwnerList.end(); ++ f_ownerIt, ++r_ownerIt)
+    {
+        if (Rule::isParamValueUnGrounded(*r_ownerIt))
+        {
+            string variableName = StateVariable::ParamValueToString((StateValue)(*r_ownerIt));
+            map<string, StateValue>::iterator paraIt = ruleNode->currentBindings.find(variableName);
+            if (paraIt == ruleNode->currentBindings.end())
+                ruleNode->currentBindings.insert(std::pair<string, StateValue>(variableName,*f_ownerIt));
+        }
+    }
+
+}
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
@@ -443,7 +493,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* nonHolderEffect = new Effect(holderState, OP_ASSIGN, Entity::NON_Entity);
 
     // rule: increasing energy by eat an edible object held in hand
-    Rule* eatRule = new Rule(eatAction,boost::get<Entity>(var_avatar),1.0f);
+    Rule* eatRule = new Rule(eatAction,boost::get<Entity>(var_avatar),0.2f);
     eatRule->addPrecondition(existState);
     eatRule->addPrecondition(edibleState);
     eatRule->addPrecondition(holderState);
@@ -463,7 +513,7 @@ void OCPlanner::loadTestRulesFromCodes()
     StateValue var_holder = entity_var[2];
 
 
-    // precondition 1: The agent and the object is closed enough ( < 2.0)
+    // precondition 1: The agent and the object is closed enough ( e.g. < 2.0)
     vector<StateValue> closedStateOwnerList;
     closedStateOwnerList.push_back(varAvatar);
     closedStateOwnerList.push_back(varFood);
@@ -492,7 +542,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* holderEffect = new Effect(holderState2, OP_ASSIGN, varAvatar);
 
     // rule:  pick up an object if closed enough, to hold it
-    Rule* pickupRule = new Rule(pickupAction,boost::get<Entity>(varAvatar),1.0f);
+    Rule* pickupRule = new Rule(pickupAction,boost::get<Entity>(varAvatar),0.1f);
     pickupRule->addPrecondition(pickupableState);
     pickupRule->addPrecondition(closedState);
 
@@ -536,7 +586,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* changedLocationEffect2 = new Effect(atLocationState2, OP_ASSIGN_NOT_EQUAL_TO, var_oldpos);
 
     // rule:   Move_to an object to get closed to it
-    Rule* movetoObjRule = new Rule(moveToObjectAction,boost::get<Entity>(var_avatar) ,0.0f, closedState2, 1.0f);
+    Rule* movetoObjRule = new Rule(moveToObjectAction,boost::get<Entity>(var_avatar) ,0.01f, closedState2, 0.01f);
     movetoObjRule->addPrecondition(existPathState);
 
     movetoObjRule->addEffect(EffectPair(0.9f,getClosedEffect));
@@ -573,7 +623,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* changedLocationEffect = new Effect(atLocationState, OP_ASSIGN, var_pos);
 
     // rule:   Move_to an object to get closed to it
-    Rule* walkRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.0f, closedState3, 1.0f);
+    Rule* walkRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f, closedState3, 0.01f);
     walkRule->addPrecondition(existPathState2);
 
     walkRule->addEffect(EffectPair(0.9f,getClosedEffect2));
@@ -633,7 +683,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* becomeSolidEffect = new Effect(solidState, OP_ASSIGN, "true");
 
     // add rule:
-    Rule* buildBlockRule = new Rule(buildBlockAction,boost::get<Entity>(varAvatar) ,30.0f);
+    Rule* buildBlockRule = new Rule(buildBlockAction,boost::get<Entity>(varAvatar) ,0.5f);
     buildBlockRule->addPrecondition(solidState);
     buildBlockRule->addPrecondition(closedState4);
     buildBlockRule->addPrecondition(atLocationState3);
@@ -719,7 +769,7 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---------------------
 
     //Define the DO_NOTHING_RULE , this rule is a class member, not need to add it to the AllRules
-    this->DO_NOTHING_RULE = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0);
+    this->DO_NOTHING_RULE = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
 
 }
 

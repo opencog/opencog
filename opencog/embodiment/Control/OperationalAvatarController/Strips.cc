@@ -654,7 +654,6 @@ float Rule::getCost()
     }
 }
 
-
 void Rule::preProcessRule()
 {
     _preProcessRuleParameterIndexes();
@@ -769,9 +768,50 @@ bool Rule::isRuleUnGrounded( Rule* rule)
             return true;
     }
 
-    // Check if all the action parameters grounded
+    // check if all the preconditiion parameters grounded
+    vector<State*>::iterator itpre;
+    for (itpre = rule->preconditionList.begin(); itpre != rule->preconditionList.end(); ++ itpre)
+    {
+        State* s = *itpre;
 
+        // check if all the stateOwner parameters grounded
+        vector<StateValue>::iterator ownerIt;
+        for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+        {
+            if (isParamValueUnGrounded(*ownerIt))
+                return true;
+        }
 
+        // check the state value
+        if (isParameterUnGrounded(*(s->stateVariable)))
+                return true;
+    }
+
+    // Check if all the effect parameters grounded
+    vector<EffectPair>::iterator effectIt;
+    for(effectIt = rule->effectList.begin(); effectIt != rule->effectList.end(); ++effectIt)
+    {
+        Effect* e = effectIt->second;
+
+        State* s = e->state;
+        // check if all the stateOwner parameters grounded
+        vector<StateValue>::iterator ownerIt;
+        for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+        {
+            if (isParamValueUnGrounded(*ownerIt))
+                return true;
+        }
+
+        // check the state value
+        if (isParameterUnGrounded( *(s->stateVariable)))
+                return true;
+
+        // check the effect value
+        if (isParamValueUnGrounded(e->opStateValue))
+            return true;
+    }
+
+    return false;
 
 }
 

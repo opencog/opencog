@@ -48,14 +48,20 @@ class RuleLayer;
 class StateLayerNode;
 class StateLayer;
 
+// map to save grounded values for one rule:
+// map<parameter name, grounded value>
+// e.g.: <$Entity0,Robot001>
+//       <$Vector0,Vector(45,82,29)>
+//       <$Entity1,Battery83483>
+typedef map<string, StateValue> ParamGroundedMapInARule;
+
 // a rule node in a Rule Layer planning graph
-
-
 class RuleLayerNode
 {
 public:
     Rule* originalRule; // the original rule (usually not grounded)
-    Rule* curGroundedRule; // the currently applying grounded rule of the the original rule
+
+    ParamGroundedMapInARule currentBindings; // the current bindings of variables
 
     RuleLayer* ruleLayer; // the layer it belongs to
     set<StateLayerNode*> forwardLinks; // all nodes in next layer connected to this nodes according to the currently applying rule
@@ -68,13 +74,6 @@ public:
 
 };
 
-
-// map to save grounded values for one rule:
-// map<parameter name, grounded value>
-// e.g.: <$Entity0,Robot001>
-//       <$Vector0,Vector(45,82,29)>
-//       <$Entity1,Battery83483>
-typedef map<string, StateValue> ParamGroundedMapInARule;
 
 // the already tried variable bindings history for one rule for achieve one planning state
 struct OneRuleHistory
@@ -274,6 +273,8 @@ protected:
      //                  to calculate its satisfiedDegree value.
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
      bool checkIsGoalAchieved(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
+
+     bool groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode);
 
 
 };
