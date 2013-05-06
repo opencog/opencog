@@ -55,6 +55,12 @@ class StateLayer;
 //       <$Entity1,Battery83483>
 typedef map<string, StateValue> ParamGroundedMapInARule;
 
+struct CostHeuristic //  cost = value(cost_cal_state) * cost_coefficient
+{
+    State* cost_cal_state;
+    float cost_coefficient;
+};
+
 // a rule node in a Rule Layer planning graph
 class RuleLayerNode
 {
@@ -64,8 +70,8 @@ public:
     ParamGroundedMapInARule currentBindings; // the current bindings of variables
 
     RuleLayer* ruleLayer; // the layer it belongs to
-    set<StateLayerNode*> forwardLinks; // all nodes in next layer connected to this nodes according to the currently applying rule
-    set<StateLayerNode*> backwardLinks; // all the links connect to the nodes in last layer
+    set<StateLayerNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
+    set<StateLayerNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
     RuleLayerNode(Rule* _originalRule)
     {
@@ -73,7 +79,6 @@ public:
     }
 
 };
-
 
 // the already tried variable bindings history for one rule for achieve one planning state
 struct OneRuleHistory
@@ -110,8 +115,8 @@ public:
     State* state;
     ACHIEVE_STATE isAchieved;
     StateLayer* stateLayer; // the layer it belongs to
-    set<RuleLayerNode*> forwardLinks; // all the links connect to the nodes in next layer,and the according rules applied
-    set<RuleLayerNode*> backwardLinks; // all the links connect to the nodes in last layer
+    RuleLayerNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
+    RuleLayerNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;}
 
     // history of all the rules with grounded parameters used to be applied in this layer (to generate the backward RuleLayerNode)
@@ -119,6 +124,11 @@ public:
     // map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
     // Rule* is pointing to one of the rules in the OCPlanner::AllRules
     map<Rule*, OneRuleHistory> ruleHistory;
+
+    // soft cost as heuristics inherited from its parents
+    // The total cost = cost1 + cost2 +cost3 + ....
+    // All the variables in these heuristics should be grounded
+    vector<CostHeuristic> costHeuristics;
 
     void addRuleRecordWithVariableBindingsToHistory(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
     {
@@ -274,8 +284,22 @@ protected:
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
      bool checkIsGoalAchieved(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
 
+     // ground the variables according to its forward state node,
+     // by finding the variables in this rule and its forward state node with the same semantic meaning,
+     // and put the value of the variables of the froward state to the rule variables.
      bool groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode);
 
+
+     // To ground all the variables which have not been grounded by "groundARuleNodeFromItsForwardState"
+     bool groundARuleNodeBySelectingValues(RuleLayerNode* ruleNode);
+
+     // select the most suitable vaule to ground a variable
+     // the value selection criterions are according to these two parts:
+     // 1. soft heuristics: the cost heuristics inherited from its parents
+     // 2. if it's a recursive rule, borrow some hard constraints from the preconditions of its non-recursive rule which has the same effect with it,
+     //    as hard  heuristics.
+     // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
+     bool selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr);
 
 };
 

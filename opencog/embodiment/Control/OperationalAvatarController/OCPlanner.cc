@@ -329,14 +329,18 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         RuleLayerNode* ruleNode = new RuleLayerNode(selectedRule);
         newRuleLayer->nodes.insert(ruleNode);
 
+        ruleNode->forwardLinks.insert(selectedStateNode);
+        selectedStateNode->backwardRuleNode = ruleNode;
+
         // When apply a rule, we need to select proper variables to ground it.
         // A rule should be grounded during its rule layer.
 
         // To ground a rule, first, we get all the variable values from the current state node to ground it.
-        groundARuleNodeFromItsForwardState(ruleNode ,selectedStateNode);
+        groundARuleNodeFromItsForwardState(ruleNode, selectedStateNode);
 
-        // So, we find out all the ungrounded variables in this rule.
-        // If there are "Exist States" among these ungrounded states in the precondiction list of this rule, always these "Exist States" go first
+        // And then is possible to still have some variables cannot be grounded by just copy from the forward state
+        // So we need to select suitable variables to ground them.
+        groundARuleNodeBySelectingValues(ruleNode);
 
         // this rule has not been applied in this state yet, add this rule to the history of this state node
         //if (curStateNode->getRuleAppliedTime(selectedRule) == 0)
@@ -368,12 +372,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
             donothingRuleLayerNode->forwardLinks.insert(curStateNode);
 
-
         }
 
         curStateLayer = newStateLayer;
-
-
 
     }
 
@@ -418,7 +419,22 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
         }
     }
 
+    return true;
+
 }
+
+bool OCPlanner::groundARuleNodeBySelectingValues(RuleLayerNode *ruleNode)
+{
+
+}
+
+bool OCPlanner::selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr)
+{
+
+}
+
+// hard constraints as heuristics for recursive rule, borrowed from the non-recursive rule has the same effect with it.
+// only applied for recursive rules.
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
@@ -752,9 +768,9 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // effect: it's possible to access from var_pos_from to var_pos_to
     vector<StateValue> existPathStateOwnerList6;
-     existPathStateOwnerList6.push_back(var_pos_1);
-     existPathStateOwnerList6.push_back(var_pos_2);
-     State* existPathState6 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList6, true, &Inquery::inqueryExistPath);
+    existPathStateOwnerList6.push_back(var_pos_1);
+    existPathStateOwnerList6.push_back(var_pos_2);
+    State* existPathState6 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList6, true, &Inquery::inqueryExistPath);
     Effect* becomeExistPathEffect2 = new Effect(existPathState6, OP_ASSIGN, "true");
 
     // add rule:
