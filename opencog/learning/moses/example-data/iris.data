@@ -3,7 +3,7 @@
 # The famous  R.A. Fisher 1936 dataset.
 # From http://archive.ics.uci.edu/ml/datasets/Iris
 #
-# Goal is to classify the last column, baed on the first four columns.
+# Goal is to classify the last column, based on the first four columns.
 # To run:
 #    moses -i iris.data -u5 -n sin -n log -n exp -n div -x1 -Z1 -W1
 #
@@ -14,7 +14,7 @@
 # -Z1 means use the cross-over algorithm during search.
 #
 # The classification works easily, if one focuses on the last column.
-# One class is linearly sperble from the other two, the remaining two
+# One class is linearly seperable from the other two, the remaining two
 # are not linearly seperable.
 #
 # Measureents in cm
