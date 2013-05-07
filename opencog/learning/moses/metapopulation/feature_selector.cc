@@ -235,14 +235,14 @@ void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs)
             diversity_acc(mi(i_it->second, j_it->second));
     }
 
-    logger().info() << "Feature sets score stats (accounting for diversity) = "
+    logger().debug() << "Feature sets score stats (accounting for diversity) = "
                     << "(count: " << count(score_acc)
                     << ", mean: " << mean(score_acc)
                     << ", std dev: " << sqrt(variance(score_acc))
                     << ", min: " << boost::accumulators::min(score_acc)
                     << ", max: " << boost::accumulators::max(score_acc) << ")";
 
-    logger().info() << "feature sets diversity stats (MI) = "
+    logger().debug() << "feature sets diversity stats (MI) = "
                     << "(count: " << count(diversity_acc)
                     << ", mean: " << mean(diversity_acc)
                     << ", std dev: " << sqrt(variance(diversity_acc))
@@ -293,7 +293,8 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
 
     // Display stats about diversity of the top feature sets
-    log_stats_top_feature_sets(top_sfs);
+    if (logger().isDebugEnabled())
+        log_stats_top_feature_sets(top_sfs);
 
     return top_sfs;
 }
