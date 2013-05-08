@@ -38,19 +38,21 @@ void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                                               const feature_set& xmplr_features,
                                               const string_seq& ilabels) const {
     unsigned sfps = sf_pop.size(), i = 1;
-    logger().info() << "Deme population size = " << sfps; 
-    if (not logger().isDebugEnabled())
-        return;
+    logger().info() << "Feature-selection deme population size = " << sfps; 
 
     for (const auto& sf : sf_pop) {
-        logger().debug() << "Breadth-first deme expansion : " << i++ << "/" << sfps;
-        logger().debug() << "Selected " << sf.second.size()
-                        << " features for representation";
+        logger().info() << "Breadth-first deme expansion : " << i++ << "/" << sfps;
+        logger().info() << "Selected " << sf.second.size()
+                        << " features for representation building";
         auto xmplr_sf = set_intersection(sf.second, xmplr_features);
         auto new_sf = set_difference(sf.second, xmplr_features);
-        ostreamContainer(logger().info() << "From which were in the exemplar: ",
+        logger().info() << "Of these, " << xmplr_sf.size()
+                        << " are already in the exemplar, and " << new_sf.size()
+                        << " are new.";
+ 
+        ostreamContainer(logger().info() << "Selected features which are in the exemplar: ",
                          fs_to_names(xmplr_sf, ilabels), ",");
-        ostreamContainer(logger().info() << "From which are new: ",
+        ostreamContainer(logger().info() << "Selected features which are new: ",
                          fs_to_names(new_sf, ilabels), ",");
     }
 }
