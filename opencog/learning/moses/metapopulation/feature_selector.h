@@ -35,7 +35,22 @@ namespace moses {
 /**
  * Parameters of feature selector
 */
-struct feature_selector_parameters {
+struct feature_selector_parameters
+{
+    feature_selector_parameters() :
+        increase_target_size(false),
+        ignore_xmplr_features(true),
+        restrict_incorrect(true),
+        restrict_true(false),
+        init_xmplr_features(false),
+        xmplr_as_feature(false),
+        subsampling_pbty(0.0),
+        n_demes(1),
+        diversity_pressure(0.0),
+        diversity_cap(0),
+        diversity_interaction(0)
+    {}
+
     feature_selection_parameters fs_params;
 
     /**
