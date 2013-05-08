@@ -76,6 +76,14 @@ void State::assignValue(const StateValue& newValue)
     stateVariable->assignValue(newValue);
 }
 
+StateValue& State::getStateValue()
+{
+    if (need_inquery)
+        stateVariable->assignValue(inqueryFun(stateOwnerList));
+
+    return stateVariable->getValue();
+}
+
 // I am the goal, I want to check if this @param value is satisfied me
 bool State::isSatisfiedMe( StateValue& value, float &satisfiedDegree,  State *original_state)
 {
@@ -631,23 +639,70 @@ bool Effect::_AssertValueType(State& _state, EFFECT_OPERATOR_TYPE _effectOp, Sta
     }
 }
 
+float Rule::getBasicCost()
+{
+    return basic_cost;
+}
 
-float Rule::getCost()
+float Rule::getCost(ParamGroundedMapInARule& groudings)
 {
     // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
     // the cost_cal_state is the state related to the cost, e.g.: if an action is move from A to B, then the cost will depend on the state distanceOf(A,B)
-    if (cost_cal_state == 0 || cost_coefficient == 0.0f)
+    if (CostHeuristics.size() == 0)
         return basic_cost;
     else
     {
-        // get numberic value from this cost_cal_state
-        if (! cost_cal_state->isNumbericState())
+        float totalcost = basic_cost;
+
+        vector<CostHeuristic>::iterator costIt;
+        for (costIt = CostHeuristics.begin(); costIt != CostHeuristics.end(); ++ costIt)
         {
-            logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
+            State* cost_cal_state = ((CostHeuristic)(*costIt)).cost_cal_state;
+            // get numberic value from this cost_cal_state
+            if (! cost_cal_state->isNumbericState())
+            {
+                logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
+                return 0.0f;
+            }
+
+            State* groundedState = groundAStateByRuleParamMap(cost_cal_state, groudings);
+            if (groundedState == 0)
+            {
+                logger().error("Planner::Rule::getCost : This state cannot be grounded: " + cost_cal_state->name() );
+                return 0.0f;
+            }
+            totalcost += groundedState->getFloatValueFromNumbericState() * ((CostHeuristic)(*costIt)).cost_coefficient;
         }
 
-       return cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
     }
+}
+
+void Rule::preProcessRule()
+{
+    _preProcessRuleParameterIndexes();
+    IsRecursiveRule = _isRecursiveRule();
+}
+
+bool Rule::_isRecursiveRule()
+{
+    // if the all the preconditions and effects are of the same state, then it's a recursive rule
+    // e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
+
+    vector<EffectPair>::iterator iteffect;
+    for (iteffect = effectList.begin(); iteffect != effectList.end(); ++ iteffect)
+    {
+        Effect* e = (Effect*)(((EffectPair)(*iteffect)).second);
+
+        vector<State*>::iterator itpre;
+        for (itpre = preconditionList.begin(); itpre != preconditionList.end(); ++ itpre)
+        {
+            State* ps = *itpre;
+            if (ps->name() != e->state->name())
+                return false;
+        }
+    }
+
+    return true;
 }
 
 bool Rule::isUnGroundedString( string& s)
@@ -721,6 +776,45 @@ bool Rule::isParamValueUnGrounded( StateValue& paramVal)
 
 }
 
+// in some planning step, need to ground some state to calculate the cost or others
+// return a new state which is the grounded version of s, by a parameter value map
+// if the "groundings" cannot ground all the variables in this state, return 0
+State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings)
+{
+    State* groundedState = s->clone();
+    vector<StateValue>::iterator ownerIt;
+    ParamGroundedMapInARule::iterator paramMapIt;
+
+    // check if all the stateOwner parameters grounded
+    for (ownerIt = groundedState->stateOwnerList.begin(); ownerIt != groundedState->stateOwnerList.end(); ++ ownerIt)
+    {
+        if (isParamValueUnGrounded(*ownerIt))
+        {
+            // look for the value of this variable in the parameter map
+            paramMapIt = groundings.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
+            if (paramMapIt == groundings.end())
+                return 0;
+            else
+                groundedState->stateVariable->assignValue(paramMapIt->second);
+        }
+    }
+
+    // check the state value
+    if (isParameterUnGrounded(*(groundedState->stateVariable)))
+    {
+        // look for the value of this variable in the parameter map
+        paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
+        if (paramMapIt == groundings.end())
+            return 0;
+        else
+            groundedState->stateVariable->assignValue(paramMapIt->second);
+    }
+
+
+    return groundedState;
+
+}
+
 bool Rule::isRuleUnGrounded( Rule* rule)
 {
     // Check if the actor grounded
@@ -736,13 +830,54 @@ bool Rule::isRuleUnGrounded( Rule* rule)
             return true;
     }
 
-    // Check if all the action parameters grounded
+    // check if all the preconditiion parameters grounded
+    vector<State*>::iterator itpre;
+    for (itpre = rule->preconditionList.begin(); itpre != rule->preconditionList.end(); ++ itpre)
+    {
+        State* s = *itpre;
 
+        // check if all the stateOwner parameters grounded
+        vector<StateValue>::iterator ownerIt;
+        for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+        {
+            if (isParamValueUnGrounded(*ownerIt))
+                return true;
+        }
 
+        // check the state value
+        if (isParameterUnGrounded(*(s->stateVariable)))
+                return true;
+    }
+
+    // Check if all the effect parameters grounded
+    vector<EffectPair>::iterator effectIt;
+    for(effectIt = rule->effectList.begin(); effectIt != rule->effectList.end(); ++effectIt)
+    {
+        Effect* e = effectIt->second;
+
+        State* s = e->state;
+        // check if all the stateOwner parameters grounded
+        vector<StateValue>::iterator ownerIt;
+        for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+        {
+            if (isParamValueUnGrounded(*ownerIt))
+                return true;
+        }
+
+        // check the state value
+        if (isParameterUnGrounded( *(s->stateVariable)))
+                return true;
+
+        // check the effect value
+        if (isParamValueUnGrounded(e->opStateValue))
+            return true;
+    }
+
+    return false;
 
 }
 
-void Rule::addParameterIndex(StateValue& paramVal)
+void Rule::_addParameterIndex(StateValue& paramVal)
 {
     string paramToStr = ActionParameter::ParamValueToString(paramVal);
     map<string , vector<StateValue*> >::iterator it;
@@ -761,7 +896,8 @@ void Rule::addParameterIndex(StateValue& paramVal)
 
 }
 
-void Rule::preProcessRuleParameterIndexes()
+
+void Rule::_preProcessRuleParameterIndexes()
 {
     // map<string , vector<StateValue*> >
     // the string is the string representation of an orginal ungrounded parameter,
@@ -774,7 +910,7 @@ void Rule::preProcessRuleParameterIndexes()
     // Check if the actor grounded
     if (isParamValueUnGrounded(actor))
     {
-        addParameterIndex(actor);
+        _addParameterIndex(actor);
     }
 
     // check if all the preconditiion parameters grounded
@@ -788,12 +924,12 @@ void Rule::preProcessRuleParameterIndexes()
         for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
         {
             if (isParamValueUnGrounded(*ownerIt))
-                addParameterIndex(*ownerIt);
+                _addParameterIndex(*ownerIt);
         }
 
         // check the state value
         if (isParameterUnGrounded(*(s->stateVariable)))
-                addParameterIndex(s->stateVariable->getValue());
+                _addParameterIndex(s->stateVariable->getValue());
     }
 
     // Check if all the action parameters grounded
@@ -802,7 +938,7 @@ void Rule::preProcessRuleParameterIndexes()
     for(it = parameters.begin(); it != parameters.end(); ++it)
     {
         if (isParameterUnGrounded(*it))
-            addParameterIndex(((ActionParameter)(*it)).getValue());
+            _addParameterIndex(((ActionParameter)(*it)).getValue());
     }
 
     // Check if all the effect parameters grounded
@@ -817,16 +953,16 @@ void Rule::preProcessRuleParameterIndexes()
         for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
         {
             if (isParamValueUnGrounded(*ownerIt))
-                addParameterIndex(*ownerIt);
+                _addParameterIndex(*ownerIt);
         }
 
         // check the state value
         if (isParameterUnGrounded( *(s->stateVariable)))
-                addParameterIndex(s->stateVariable->getValue());
+                _addParameterIndex(s->stateVariable->getValue());
 
         // check the effect value
         if (isParamValueUnGrounded(e->opStateValue))
-            addParameterIndex(e->opStateValue);
+            _addParameterIndex(e->opStateValue);
     }
 
 }
