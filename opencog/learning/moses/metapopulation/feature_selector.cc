@@ -286,7 +286,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     feature_set_pop sf_pop = select_feature_sets(fs_ctable, params.fs_params);
 
     // Cap, retain best feature sets
-    if (params.diversity_cap > 0)
+    if (0 < params.diversity_cap and params.diversity_cap < sf_pop.size())
         sf_pop.erase(std::next(sf_pop.begin(), params.diversity_cap), sf_pop.end());
 
     // Select the top params.n_demes feature sets
