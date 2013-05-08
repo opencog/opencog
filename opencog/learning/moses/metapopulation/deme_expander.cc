@@ -38,9 +38,13 @@ void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                                               const feature_set& xmplr_features,
                                               const string_seq& ilabels) const {
     unsigned sfps = sf_pop.size(), i = 1;
+    logger().info() << "Deme population size = " << sfps; 
+    if (not logger().isDebugEnabled())
+        return;
+
     for (const auto& sf : sf_pop) {
-        logger().info() << "Breadth-first deme expansion : " << i++ << "/" << sfps;
-        logger().info() << "Selected " << sf.second.size()
+        logger().debug() << "Breadth-first deme expansion : " << i++ << "/" << sfps;
+        logger().debug() << "Selected " << sf.second.size()
                         << " features for representation";
         auto xmplr_sf = set_intersection(sf.second, xmplr_features);
         auto new_sf = set_difference(sf.second, xmplr_features);

@@ -293,6 +293,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
 
     // Display stats about diversity of the top feature sets
+    logger().info() << "Number of demes selected: " << top_sfs.size();
     if (logger().isDebugEnabled())
         log_stats_top_feature_sets(top_sfs);
 
