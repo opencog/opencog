@@ -353,7 +353,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
             // check if this state has already been changed by a rule in this step during deal with other state
-            if (curStateNode->backwardLinks.size() != 0)
+            if (curStateNode->backwardRuleNode == 0)
                 continue;
 
             // create a do nothing rule node, to bring this state to the new state layer
@@ -361,13 +361,13 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             newRuleLayer->nodes.insert(donothingRuleLayerNode);
             donothingRuleLayerNode->ruleLayer = newRuleLayer;
 
-            curStateNode->backwardLinks.insert(donothingRuleLayerNode);
+            curStateNode->backwardRuleNode = donothingRuleLayerNode;
 
             State* cloneState = (curStateNode->state)->clone();
             StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
             cloneStateNode->stateLayer = newStateLayer;
             cloneStateNode->isAchieved = curStateNode->isAchieved;
-            cloneStateNode->forwardLinks.insert(donothingRuleLayerNode);
+            cloneStateNode->forwardRuleNode = donothingRuleLayerNode;
 
             donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
             donothingRuleLayerNode->forwardLinks.insert(curStateNode);
@@ -392,7 +392,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
     State* s;
 
     // Todo: Maybe need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name
-    for(effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++effectIt)
+    for(effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
         e = effectIt->second;
 
@@ -417,6 +417,25 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
             if (paraIt == ruleNode->currentBindings.end())
                 ruleNode->currentBindings.insert(std::pair<string, StateValue>(variableName,*f_ownerIt));
         }
+    }
+
+    // If there is no cost_cal_state in this rule, we need to borrow from the forward state node's foward rule node
+    if (ruleNode->originalRule->CostHeuristics.size() == 0)
+    {
+        if (forwardStateNode->forwardRuleNode)
+            return true;
+
+        if (forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.size() != 0)
+        {
+
+
+        }
+        else if (forwardStateNode->forwardRuleNode->costHeuristics.size() != 0)
+        {
+
+        }
+
+
     }
 
     return true;
@@ -602,11 +621,13 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* changedLocationEffect2 = new Effect(atLocationState2, OP_ASSIGN_NOT_EQUAL_TO, var_oldpos);
 
     // rule:   Move_to an object to get closed to it
-    Rule* movetoObjRule = new Rule(moveToObjectAction,boost::get<Entity>(var_avatar) ,0.01f, closedState2, 0.01f);
+    Rule* movetoObjRule = new Rule(moveToObjectAction,boost::get<Entity>(var_avatar) ,0.01f);
     movetoObjRule->addPrecondition(existPathState);
 
     movetoObjRule->addEffect(EffectPair(0.9f,getClosedEffect));
     movetoObjRule->addEffect(EffectPair(0.9f,changedLocationEffect2));
+
+    movetoObjRule->addCostHeuristic(CostHeuristic(closedState2, 0.01f));
 
     this->AllRules.push_back(movetoObjRule);
     //----------------------------End Rule: Move_to an object to get closed to it-------------------------------------------
@@ -639,11 +660,13 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* changedLocationEffect = new Effect(atLocationState, OP_ASSIGN, var_pos);
 
     // rule:   Move_to an object to get closed to it
-    Rule* walkRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f, closedState3, 0.01f);
+    Rule* walkRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f);
     walkRule->addPrecondition(existPathState2);
 
     walkRule->addEffect(EffectPair(0.9f,getClosedEffect2));
     walkRule->addEffect(EffectPair(0.9f,changedLocationEffect));
+
+    walkRule->addCostHeuristic(CostHeuristic(closedState3, 0.01f));
 
     this->AllRules.push_back(walkRule);
     //----------------------------End Rule: walk to a position to get closed to it-----------------------------------------

@@ -48,18 +48,6 @@ class RuleLayer;
 class StateLayerNode;
 class StateLayer;
 
-// map to save grounded values for one rule:
-// map<parameter name, grounded value>
-// e.g.: <$Entity0,Robot001>
-//       <$Vector0,Vector(45,82,29)>
-//       <$Entity1,Battery83483>
-typedef map<string, StateValue> ParamGroundedMapInARule;
-
-struct CostHeuristic //  cost = value(cost_cal_state) * cost_coefficient
-{
-    State* cost_cal_state;
-    float cost_coefficient;
-};
 
 // a rule node in a Rule Layer planning graph
 class RuleLayerNode
@@ -73,9 +61,15 @@ public:
     set<StateLayerNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
     set<StateLayerNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
+    // cost as soft heuristics inherited from its
+    // these carry the heuristics information for the backward steps to select variable values
+    // ungrounded, but the variable names should be consistent with its originalRule
+    vector<CostHeuristic> costHeuristics;
+
     RuleLayerNode(Rule* _originalRule)
     {
         originalRule = _originalRule;
+        costHeuristics.clear();
     }
 
 };
@@ -117,18 +111,13 @@ public:
     StateLayer* stateLayer; // the layer it belongs to
     RuleLayerNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleLayerNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
-    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;}
+    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0;}
 
     // history of all the rules with grounded parameters used to be applied in this layer (to generate the backward RuleLayerNode)
     // this is to prevent repeatedly applying the same set of rules with the same gournded parameter values.
     // map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
     // Rule* is pointing to one of the rules in the OCPlanner::AllRules
     map<Rule*, OneRuleHistory> ruleHistory;
-
-    // soft cost as heuristics inherited from its parents
-    // The total cost = cost1 + cost2 +cost3 + ....
-    // All the variables in these heuristics should be grounded
-    vector<CostHeuristic> costHeuristics;
 
     void addRuleRecordWithVariableBindingsToHistory(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
     {
@@ -207,8 +196,8 @@ public:
         {
             StateLayerNode* newStateNode = new StateLayerNode(*it);
             nodes.insert(newStateNode);
-            newStateNode->backwardLinks.clear();
-            newStateNode->forwardLinks.clear();
+            newStateNode->backwardRuleNode = 0;
+            newStateNode->forwardRuleNode = 0;
         }
 
         StateLayer();
@@ -290,7 +279,7 @@ protected:
      bool groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode);
 
 
-     // To ground all the variables which have not been grounded by "groundARuleNodeFromItsForwardState"
+     // To ground all the variables  which has not been grounded by "groundARuleNodeFromItsForwardState"
      bool groundARuleNodeBySelectingValues(RuleLayerNode* ruleNode);
 
      // select the most suitable vaule to ground a variable
@@ -300,6 +289,7 @@ protected:
      //    as hard  heuristics.
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
      bool selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr);
+
 
 };
 

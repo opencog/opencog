@@ -76,6 +76,14 @@ void State::assignValue(const StateValue& newValue)
     stateVariable->assignValue(newValue);
 }
 
+StateValue& State::getStateValue()
+{
+    if (need_inquery)
+        stateVariable->assignValue(inqueryFun(stateOwnerList));
+
+    return stateVariable->getValue();
+}
+
 // I am the goal, I want to check if this @param value is satisfied me
 bool State::isSatisfiedMe( StateValue& value, float &satisfiedDegree,  State *original_state)
 {
@@ -636,21 +644,36 @@ float Rule::getBasicCost()
     return basic_cost;
 }
 
-float Rule::getCost()
+float Rule::getCost(ParamGroundedMapInARule& groudings)
 {
     // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
     // the cost_cal_state is the state related to the cost, e.g.: if an action is move from A to B, then the cost will depend on the state distanceOf(A,B)
-    if (cost_cal_state == 0 || cost_coefficient == 0.0f)
+    if (CostHeuristics.size() == 0)
         return basic_cost;
     else
     {
-        // get numberic value from this cost_cal_state
-        if (! cost_cal_state->isNumbericState())
+        float totalcost = basic_cost;
+
+        vector<CostHeuristic>::iterator costIt;
+        for (costIt = CostHeuristics.begin(); costIt != CostHeuristics.end(); ++ costIt)
         {
-            logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
+            State* cost_cal_state = ((CostHeuristic)(*costIt)).cost_cal_state;
+            // get numberic value from this cost_cal_state
+            if (! cost_cal_state->isNumbericState())
+            {
+                logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
+                return 0.0f;
+            }
+
+            State* groundedState = groundAStateByRuleParamMap(cost_cal_state, groudings);
+            if (groundedState == 0)
+            {
+                logger().error("Planner::Rule::getCost : This state cannot be grounded: " + cost_cal_state->name() );
+                return 0.0f;
+            }
+            totalcost += groundedState->getFloatValueFromNumbericState() * ((CostHeuristic)(*costIt)).cost_coefficient;
         }
 
-       return basic_cost + cost_coefficient * (cost_cal_state->getFloatValueFromNumbericState());
     }
 }
 
@@ -750,6 +773,45 @@ bool Rule::isParamValueUnGrounded( StateValue& paramVal)
         return isUnGroundedString(boost::get<string>(paramVal));
 
     return false;
+
+}
+
+// in some planning step, need to ground some state to calculate the cost or others
+// return a new state which is the grounded version of s, by a parameter value map
+// if the "groundings" cannot ground all the variables in this state, return 0
+State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings)
+{
+    State* groundedState = s->clone();
+    vector<StateValue>::iterator ownerIt;
+    ParamGroundedMapInARule::iterator paramMapIt;
+
+    // check if all the stateOwner parameters grounded
+    for (ownerIt = groundedState->stateOwnerList.begin(); ownerIt != groundedState->stateOwnerList.end(); ++ ownerIt)
+    {
+        if (isParamValueUnGrounded(*ownerIt))
+        {
+            // look for the value of this variable in the parameter map
+            paramMapIt = groundings.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
+            if (paramMapIt == groundings.end())
+                return 0;
+            else
+                groundedState->stateVariable->assignValue(paramMapIt->second);
+        }
+    }
+
+    // check the state value
+    if (isParameterUnGrounded(*(groundedState->stateVariable)))
+    {
+        // look for the value of this variable in the parameter map
+        paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
+        if (paramMapIt == groundings.end())
+            return 0;
+        else
+            groundedState->stateVariable->assignValue(paramMapIt->second);
+    }
+
+
+    return groundedState;
 
 }
 
