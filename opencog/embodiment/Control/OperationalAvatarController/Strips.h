@@ -120,9 +120,13 @@ class Inquery;
 
         void changeStateType(StateType newType){this->stateType = newType;}
 
-        StateValue& getStateValue()  {return stateVariable->getValue();}
+        // If this state doesn't need real time inquery, this fuction will return the direct value of the variable.
+        // If it need real time inquery, it will do inquery and return the value.
+        StateValue& getStateValue();
 
         StateValuleType getStateValuleType()  {return stateVariable->getType();}
+
+        map<string , vector<StateValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
 
         State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
               vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryFun _inqueryFun = 0);
@@ -229,9 +233,28 @@ class Inquery;
 
     };
 
+    struct CostHeuristic //  cost = value(cost_cal_state) * cost_coefficient
+    {
+        State* cost_cal_state;
+        float cost_coefficient;
+        CostHeuristic(State* _state, float _coefficient)
+        {
+            cost_cal_state = _state;
+            cost_coefficient = _coefficient;
+        }
+    };
+
 
     // the float in this pair is the probability of the happenning of this Effect
     typedef pair<float,Effect*> EffectPair;
+
+
+    // map to save grounded values for one rule:
+    // map<parameter name, grounded value>
+    // e.g.: <$Entity0,Robot001>
+    //       <$Vector0,Vector(45,82,29)>
+    //       <$Entity1,Battery83483>
+    typedef map<string, StateValue> ParamGroundedMapInARule;
 
     // the rule to define the preconditions of an action and what effects it would cause
     // A rule will be represented in the Atomspace by ImplicationLink
@@ -278,13 +301,6 @@ class Inquery;
         // the actor who carry out this action, usually an Entity
         StateValue actor;
 
-        // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
-        // the cost of this action under the conditions of this rule
-        float basic_cost;
-
-        // for linear cost:
-        State* cost_cal_state;
-        float cost_coefficient;
 
         // All the precondition required to perform this action
         vector<State*> preconditionList;
@@ -293,6 +309,15 @@ class Inquery;
         // there are probability for each effect
         vector<EffectPair> effectList;
 
+        // The cost function as heuristics, linearly
+        // the totoal cost = basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
+        float basic_cost;
+        vector<CostHeuristic> CostHeuristics;
+
+        // return if this rule is recursive. A recursive rule means its precondition and effect are the same state
+        //  e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
+        bool IsRecursiveRule;
+
         // ungrounded parameter indexes
         // map<string , vector<StateValue&> >
         // the string is the string representation of an orginal ungrounded parameter,
@@ -300,14 +325,16 @@ class Inquery;
         // In vector<StateValue*>, the StateValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
         map<string , vector<StateValue*> > paraIndexMap;
 
-        Rule(PetAction* _action, StateValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, State* _cost_cal_state = 0, float _cost_coefficient = 0):
-            action(_action) , actor(_actor),basic_cost(_basic_cost), preconditionList(_preconditionList), effectList(_effectList), cost_cal_state(_cost_cal_state), cost_coefficient(_cost_coefficient){}
+        Rule(PetAction* _action, StateValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):
+            action(_action) , actor(_actor),basic_cost(_basic_cost), preconditionList(_preconditionList), effectList(_effectList){}
 
-        Rule(PetAction* _action, StateValue _actor, float _basic_cost, State* _cost_cal_state = 0, float _cost_coefficient = 0):
-            action(_action) , actor(_actor), basic_cost(_basic_cost), cost_cal_state(_cost_cal_state), cost_coefficient(_cost_coefficient){}
+        Rule(PetAction* _action, StateValue _actor, float _basic_cost):
+            action(_action) , actor(_actor), basic_cost(_basic_cost){}
 
-        // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
-        float getCost();
+        float getBasicCost();
+
+        // the cost calculation is : basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
+        float getCost(ParamGroundedMapInARule& groudings);
 
         void addEffect(EffectPair effect)
         {
@@ -319,9 +346,19 @@ class Inquery;
             preconditionList.push_back(precondition);
         }
 
-        // go through all the parameters in this rule and add their indexes to paraIndexMap
-        void preProcessRuleParameterIndexes();
+        void addCostHeuristic(CostHeuristic costH)
+        {
+            CostHeuristics.push_back(costH);
+        }
 
+        // need to be called after a rule is finished added all its information (predictions, effects...)
+        // to add parameter index and check if it's a recursive rule
+        void preProcessRule();
+
+        // in some planning step, need to ground some state to calculate the cost or others
+        // return a new state which is the grounded version of s, by a parameter value map
+        // if the "groundings" cannot ground all the variables in this state, return 0
+        State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
 
         bool static isRuleUnGrounded( Rule* rule);
 
@@ -334,8 +371,16 @@ class Inquery;
         bool static isUnGroundedEntity( Entity& e);
 
     protected:
+
+        // go through all the parameters in this rule and add their indexes to paraIndexMap
+        void _preProcessRuleParameterIndexes();
+
         // Add one parameter to index
-        void addParameterIndex(StateValue &paramVal);
+        void _addParameterIndex(StateValue &paramVal);
+
+        // check if this rule is a recursive rule
+        // Recursive rule is to break a problem into the same problems of smaller scales
+        bool _isRecursiveRule();
 
 
     };
