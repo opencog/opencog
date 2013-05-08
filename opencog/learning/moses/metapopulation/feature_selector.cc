@@ -225,6 +225,13 @@ feature_set_pop feature_selector::select_top_feature_sets(const feature_set_pop&
 
 void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs) const
 {
+    logger().info() << "Number of demes selected: " << top_fs.size();
+
+    // There aren't any stats, if there's just one feature set!
+    // (which is the case when diversity is turned off).
+    if (1 == top_fs.size())
+        return;
+
     // Accumulator to gather statistics about mutual information
     // between feature set candidates
     typedef accumulator_set<float, stats<tag::count,
@@ -241,14 +248,14 @@ void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs)
             diversity_acc(mi(i_it->second, j_it->second));
     }
 
-    logger().debug() << "Feature sets score stats (accounting for diversity) = "
+    logger().info() << "Feature sets score stats (accounting for diversity) = "
                     << "(count: " << count(score_acc)
                     << ", mean: " << mean(score_acc)
                     << ", std dev: " << sqrt(variance(score_acc))
                     << ", min: " << boost::accumulators::min(score_acc)
                     << ", max: " << boost::accumulators::max(score_acc) << ")";
 
-    logger().debug() << "feature sets diversity stats (MI) = "
+    logger().info() << "feature sets diversity stats (MI) = "
                     << "(count: " << count(diversity_acc)
                     << ", mean: " << mean(diversity_acc)
                     << ", std dev: " << sqrt(variance(diversity_acc))
@@ -299,9 +306,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     feature_set_pop top_sfs = select_top_feature_sets(sf_pop);
 
     // Display stats about diversity of the top feature sets
-    logger().info() << "Number of demes selected: " << top_sfs.size();
-    if (logger().isDebugEnabled())
-        log_stats_top_feature_sets(top_sfs);
+    log_stats_top_feature_sets(top_sfs);
 
     return top_sfs;
 }
