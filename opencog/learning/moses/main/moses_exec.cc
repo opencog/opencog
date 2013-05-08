@@ -1146,7 +1146,7 @@ int moses_exec(int argc, char** argv)
                            "%s, all data points are considered\n\n"
                            "%s, only active data points are considered\n\n"
                            "%s, only incorrect answers are considered\n\n"
-                           "%s, only active data points that incorrectly "
+                           "%s, only active data points that are incorrectly "
                            "answered are considered.\n")
              % focus_all % focus_active % focus_incorrect % focus_ai).c_str())
 
@@ -1155,29 +1155,29 @@ int moses_exec(int argc, char** argv)
          str(boost::format("Seed type (how to use the features of the "
                            "exemplar to seed feature selection):\n\n"
 
-                           "%s, empty initial feature set, however the "
-                           "features of the exemplar are simply removed "
+                           "%s, empty initial feature set.  The "
+                           "features used in the exemplar are removed "
                            "from the dataset before feature selection occurs. "
-                           "This is to prevent that new selected features "
-                           "are ones from the exemplar.\n\n"
+                           "This prevents newly selected features from "
+                           "being those already in the exemplar.\n\n"
 
-                           "%s, empty initial feature set, the features "
-                           "of the exemplar are not removed from the dataset "
-                           "but the number of features of the exemplar "
-                           "is added to the number of features to select. "
-                           "That is (for that particular expansion):\n"
-                           "fs_target_size += number of features in exemplar\n\n"
+                           "%s, empty initial feature set. The number of "
+                           "features currently in the exemplar are added"
+                           "to the number of features to be selected. "
+                           "This guarentees that at least fs_target_size "
+                           "features are not from the exemplar itself.\n\n"
 
                            "%s, the features of the exemplar are used as "
-                           "initial guess for feature selection, also the "
-                           "number of features to select is also added to "
-                           "the number of features of the exemplar, as for add.\n\n"
+                           "an initial guess for feature selection. "
+                           "The number of "
+                           "features currently in the exemplar are added"
+                           "to the number of features to be selected.\n\n"
 
-                           "%s, the \"exemplar feature\" us used as initial "
+                           "%s, the \"exemplar feature\" is used as initial "
                            "guess. The exemplar feature is the output of the "
                            "exemplar. The number of features to select is "
                            "incremented by 1 (to account for the exemplar "
-                           "feature). that is the number of feature to select "
+                           "feature). That is, the number of feature to select "
                            "is fs_target_size + 1\n")
              % seed_none % seed_add % seed_init % seed_xmplr).c_str())
 
@@ -1230,9 +1230,9 @@ int moses_exec(int argc, char** argv)
          "(itself being in [0,1]).\n")
 
         ("fs-diversity-cap",
-         value<int>(&festor_params.diversity_cap)->default_value(100),
+         value<size_t>(&festor_params.diversity_cap)->default_value(100),
          "Place a cap on the maximum number of feature set to consider. "
-         "If negative, no cap is used (warning could be very slow)"
+         "If zero, no cap is used (Warning: could be very slow). "
          "Use this to speed up diversity computation on feature sets.\n")
 
         ("fs-diversity-interaction",

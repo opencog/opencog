@@ -68,6 +68,7 @@ bool expand_deme(metapopulation& mp,
         // if create_deme returned true, we are good to go.
         if (mp._dex.create_demes(get_tree(*exemplar))) break;
 
+        logger().error() << "Exemplar: " << get_tree(*exemplar);
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
