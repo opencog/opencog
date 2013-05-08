@@ -1230,9 +1230,9 @@ int moses_exec(int argc, char** argv)
          "(itself being in [0,1]).\n")
 
         ("fs-diversity-cap",
-         value<int>(&festor_params.diversity_cap)->default_value(100),
+         value<size_t>(&festor_params.diversity_cap)->default_value(100),
          "Place a cap on the maximum number of feature set to consider. "
-         "If negative, no cap is used (warning could be very slow)"
+         "If zero, no cap is used (Warning: could be very slow). "
          "Use this to speed up diversity computation on feature sets.\n")
 
         ("fs-diversity-interaction",

@@ -126,9 +126,9 @@ struct feature_selector_parameters
     /**
      * Set a cap regarding the population of feature sets. Right have
      * feature selection optimization, only diversity_cap found
-     * feature sets are kept, or all if diversity_cap <= 0
+     * feature sets are kept, or all if diversity_cap == 0.
      */
-    int diversity_cap;
+    size_t diversity_cap;
 
     /**
      * Number of interactions to consider when computing mi. A
