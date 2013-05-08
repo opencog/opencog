@@ -106,7 +106,8 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
     }
 }
 
-CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
+CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
+{
     // set labels and signature
     auto labels = _ctable.get_labels();
     auto sig = _ctable.get_signature();
@@ -144,7 +145,7 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
             // may be useful the prediction bscore is used because
             // positive answers indicates where the exemplar focus
             // is.
-            consider_row = predicted_out == combo::id::logical_true;
+            consider_row = (predicted_out == combo::id::logical_true);
         }
         if (consider_row && params.restrict_incorrect) {
             // Use only rows where the model is just plain wrong.  The
@@ -153,11 +154,16 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
             // is that these will be used to build a more accurate
             // models.
             //
-            // Nil: it's not exactly "plain wrong", plain wrong is
-            // more like the least frequent answer has count zero and
-            // the model predicts that. One could relax that
-            // constraint by specifying to which degree the model
-            // should be wrong so that the row is considered.
+            // For compressed tables, it can happen that sometimes the
+            // same row has multiple different outcomes (different
+            // values for the output feature -- i.e. the uncompressed
+            // table had multiple rows with the same input features).
+            // In this case, "plain wrong" is a shade of grey.  Below,
+            // we use most_frequent() to determine wrongness, but this
+            // could be relaxed.
+            //
+            // But why bother? isn't it extremely rare that tables
+            // ever actually compress, anyway?
             Counter<vertex, unsigned> cnt = vct.second;
             vertex actual_out = cnt.most_frequent();
             consider_row = predicted_out != actual_out;

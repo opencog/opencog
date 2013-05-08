@@ -38,7 +38,7 @@ namespace moses {
 struct feature_selector_parameters
 {
     feature_selector_parameters() :
-        increase_target_size(false),
+        increase_target_size(true),
         ignore_xmplr_features(true),
         restrict_incorrect(true),
         restrict_true(false),
