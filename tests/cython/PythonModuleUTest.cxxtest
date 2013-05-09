@@ -80,7 +80,19 @@ public:
         // set cycle duration to a smaller value so that this test do not take too long.
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
-        cogserver.loadModule("libPythonModule.so");
+
+        config().set("MODULES", "opencog/cython/libPythonModule.so");
+        // Blindly search a bunch of paths hoping to find the python
+        // module in one of them ...
+        const char * paths[] =
+        {
+           "./",
+           "../",
+           "../../",
+           "../../../",
+           NULL
+        };
+        cogserver.loadModules(paths);
     }
 
     ~PythonModuleUTest() {
