@@ -1,3 +1,5 @@
+find_package(PythonLibs)
+
 INCLUDE_DIRECTORIES(
     ${PYTHON_INCLUDE_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -114,7 +116,7 @@ SET_TARGET_PROPERTIES(agent_finder PROPERTIES
     PREFIX ""
     OUTPUT_NAME agent_finder)
 
-ADD_LIBRARY (PythonEval SHARED
+ADD_LIBRARY(PythonEval SHARED
     PythonEval.cc
 )
 ADD_DEPENDENCIES(PythonEval agent_finder)
@@ -164,7 +166,7 @@ ADD_LIBRARY (PythonModule SHARED
 #ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
-SET(PYTHONMODULE_LINK_LIBS server ${PYTHON_LIBRARIES})
+SET(PYTHONMODULE_LINK_LIBS server PythonEval)
 
 TARGET_LINK_LIBRARIES(PythonModule
     ${PYTHONMODULE_LINK_LIBS}
