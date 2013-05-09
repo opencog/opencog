@@ -48,6 +48,8 @@ Request* PythonRequestFactory::create() const {
 PythonModule::PythonModule() : Module()
 { }
 
+static bool already_loaded = false;
+
 PythonModule::~PythonModule()
 {
     PyEval_RestoreThread(tstate);
@@ -55,6 +57,7 @@ PythonModule::~PythonModule()
     unregisterAgentsAndRequests();
     do_load_py_unregister();
     Py_Finalize();
+    already_loaded = false;
 }
 
 bool PythonModule::unregisterAgentsAndRequests()
@@ -74,6 +77,10 @@ bool PythonModule::unregisterAgentsAndRequests()
 
 void PythonModule::init()
 {
+    // Avoid hard crash if already loaded.
+    if (already_loaded) return;
+    already_loaded = true;
+
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
     // Start up Python (this init method skips registering signal handlers)
