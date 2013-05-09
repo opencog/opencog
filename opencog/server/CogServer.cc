@@ -546,6 +546,10 @@ bool CogServer::loadModule(const std::string& filename)
     // (by convention) be prefixed with its class namespace (i.e., "opencog::")
     std::string i = module_id;
     std::string f = filename;
+    // The filename does NOT include the file path!
+    size_t path_sep = f.rfind('/');
+    if (path_sep != std::string::npos)
+        f.erase(0, path_sep+1);
     ModuleData mdata = {module, i, f, load_func, unload_func, dynLibrary};
     modules[i] = mdata;
     modules[f] = mdata;
