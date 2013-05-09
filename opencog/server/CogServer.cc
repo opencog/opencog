@@ -474,8 +474,15 @@ int CogServer::getRequestQueueSize()
 
 bool CogServer::loadModule(const std::string& filename)
 {
-    if (modules.find(filename) !=  modules.end()) {
-        logger().info("Module \"%s\" is already loaded.", filename.c_str());
+// TODO FIXME I guess this needs to be different for windows.
+#define PATH_SEP '/'
+    // The module file identifier does NOT include the file path!
+    string fi = filename;
+    size_t path_sep = fi.rfind(PATH_SEP);
+    if (path_sep != std::string::npos)
+        fi.erase(0, path_sep+1);
+    if (modules.find(fi) !=  modules.end()) {
+        logger().info("Module \"%s\" is already loaded.", fi.c_str());
         return true;
     }
 
@@ -547,7 +554,7 @@ bool CogServer::loadModule(const std::string& filename)
     std::string i = module_id;
     std::string f = filename;
     // The filename does NOT include the file path!
-    size_t path_sep = f.rfind('/');
+    path_sep = f.rfind(PATH_SEP);
     if (path_sep != std::string::npos)
         f.erase(0, path_sep+1);
     ModuleData mdata = {module, i, f, load_func, unload_func, dynLibrary};
@@ -562,10 +569,15 @@ bool CogServer::loadModule(const std::string& filename)
 
 bool CogServer::unloadModule(const std::string& moduleId)
 {
-    logger().info("[CogServer] unloadModule(%s)", moduleId.c_str());
-    ModuleMap::const_iterator it = modules.find(moduleId);
+    // The module file identifier does NOT include the file path!
+    string f = moduleId;
+    size_t path_sep = f.rfind(PATH_SEP);
+    if (path_sep != std::string::npos)
+        f.erase(0, path_sep+1);
+    logger().info("[CogServer] unloadModule(%s)", f.c_str());
+    ModuleMap::const_iterator it = modules.find(f);
     if (it == modules.end()) {
-        logger().info("[CogServer::unloadModule] module \"%s\" is not loaded.", moduleId.c_str());
+        logger().info("[CogServer::unloadModule] module \"%s\" is not loaded.", f.c_str());
         return false;
     }
     ModuleData mdata = it->second;
