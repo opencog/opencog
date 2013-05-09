@@ -612,9 +612,15 @@ bool CogServer::unloadModule(const std::string& moduleId)
 
 CogServer::ModuleData CogServer::getModuleData(const std::string& moduleId)
 {
-    ModuleMap::const_iterator it = modules.find(moduleId);
+    // The module file identifier does NOT include the file path!
+    string f = moduleId;
+    size_t path_sep = f.rfind(PATH_SEP);
+    if (path_sep != std::string::npos)
+        f.erase(0, path_sep+1);
+
+    ModuleMap::const_iterator it = modules.find(f);
     if (it == modules.end()) {
-        logger().info("[CogServer::getModuleData] module \"%s\" was not found.", moduleId.c_str());
+        logger().info("[CogServer::getModuleData] module \"%s\" was not found.", f.c_str());
         ModuleData nulldata = {NULL, "", "", NULL, NULL, NULL};
         return nulldata;
     }
