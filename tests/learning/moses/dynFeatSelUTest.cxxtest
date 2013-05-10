@@ -26,7 +26,7 @@
 
 using namespace opencog::moses;
 
-const string mixedUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+const string test_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
 
 /**
  * Test operation of the dynamic feature selector.
@@ -40,22 +40,29 @@ public:
         // to control the log level use option -l
     }
 
-    // We expect a score of ....
-    void test_predicate_score()
+    // Expected score results:
+    // -m12000 -r0 get score of -31 run-time  8 secs
+    // -m24000 -r0 get score of -21 run-time 19 secs
+    // -m48000 -r0 get score of -20 run-time 58 secs
+    // -m48000 -r1 get score of -36 run-time 43 secs
+    // -m48000 -r2 get score of -12 run-time 54 secs
+    // I'm going for the last one because its a fairly long run-time,
+    // and a good score.
+    void test_dyn_feat_score()
     {
-        string data_file_path("-i" + dynamicFeatsUTest_dir + "feat-sel.csv");
+        string data_file_path("-i" + test_dir + "feat-sel.csv");
         moses_test_score({"-Hit", 
-                          "-uchange_predict",
-                          "-B0",  // knob-building effort of zero -- no effort at all.
-                          "-m12000", 
-                          "-Z1",
-                          "-j4",
-                          "--hc-max-nn-evals=5000",
-                          "--enable-fs=1",
-                          "--fs-target-size=12",   // pick 12 dynamical out of 300
-                          "-r0",
-                          data_file_path,
-                          });
+              "-uchange_predict",
+              "-B0",     // knob-building effort of zero -- no effort at all.
+              "-m48000", 
+              "-Z1",     // enable cross-over
+              "-j4",
+              "--hc-max-nn-evals=5000",
+              "--enable-fs=1",   // use run-time dynamic feat sel.
+              "--fs-target-size=12",   // pick 12 dynamical out of 300
+              "-r2",
+              data_file_path,
+              },
+              -12);
     }
-
 };
