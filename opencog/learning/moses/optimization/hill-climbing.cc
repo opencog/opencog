@@ -95,15 +95,12 @@ unsigned hill_climbing::operator()(deme_t& deme,
     size_t prev_start = 0;
     size_t prev_size = 0;
     
-    // in crossover mode, temporarily switch back to non-crossover
-    bool rescan = false;
-
     // keep track whether the population generated from the same
     // center has already been crossover. This is to prevent to redo a
     // useless crossover when distance widening is occurs
-    bool already_crossover = false;
+    bool already_xover = false;
     
-    // try a last rescan if the last crossover was not effective
+    // try a last crossover if no improvements (it's cheap)
     bool last_chance = false;
 
     // Whether the score has improved during an iteration
@@ -142,41 +139,58 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // intentionally over-estimates by a factor of two. So the
         // breakeven point would be 2*crossover_pop_size, and we pad this
         // a bit, as small exhaustive searches do beat guessing...
-        size_t crossover_min_neighbours = 10*(hc_params.crossover_pop_size/3);
+        size_t xover_min_neighbours = 10*(hc_params.crossover_pop_size/3);
         //
         // current_number_of_instances can drop as low as 1 if the
         // population trimmer wiped out everything, which can happen.
         // Anyway, cross-over generates nothing when its that small.
-        size_t crossover_min_deme = 3;
+        size_t xover_min_deme = 3;
 
         // whether crossover must be attempted for the current iteration
-        bool large_nbh = total_number_of_neighbours >= crossover_min_neighbours,
+        bool large_nbh = total_number_of_neighbours >= xover_min_neighbours,
             xover = hc_params.crossover
-            && !already_crossover
             && (iteration > 2)
-            && !rescan
-            && current_number_of_instances >= crossover_min_deme
+            && !already_xover
+            && current_number_of_instances >= xover_min_deme
             && (large_nbh || last_chance);
 
         if (xover) {
-            number_of_new_instances =
-                crossover(deme, current_number_of_instances,
-                          prev_start, prev_size, prev_center);
-
-            // why is cross over enabled?
+            // log why crossover is enabled
             stringstream why_xover;
             if (large_nbh)
                 why_xover << "too large neighborhood "
                           << total_number_of_neighbours << ">="
-                          << crossover_min_neighbours;
+                          << xover_min_neighbours;
             else if (last_chance)
                 why_xover << "last chance";
-            // log crossover and why
-            logger().debug() << "Crossover enabled for that iteration ("
+            else
+                OC_ASSERT(false, "There must be a bug");
+            logger().debug() << "Crossover enabled ("
                              << why_xover.str() << ")";
 
-            already_crossover = true;
+            number_of_new_instances =
+                crossover(deme, current_number_of_instances,
+                          prev_start, prev_size, prev_center);
+
+            already_xover = true;
         } else {
+            // log why crossover is disabled
+            stringstream whynot_xover;
+            if (!hc_params.crossover)
+                whynot_xover << "user option";
+            else if (iteration <= 2)
+                whynot_xover << "first 2 iterations";
+            else if (already_xover)
+                whynot_xover << "already done from that center";
+            else if (current_number_of_instances < xover_min_deme)
+                whynot_xover << "not enough instances to cross";
+            else if (!large_nbh)
+                whynot_xover << "small enough neighborhood for full search";
+            else
+                OC_ASSERT(false, "There must be a bug");
+            logger().debug() << "Crossover disabled ("
+                             << whynot_xover.str() << ")";
+            
             // The current_number_of_instances arg is needed only to
             // be able to manage the size of the deme appropriately.
             number_of_new_instances =
@@ -251,7 +265,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // Make a copy of the best instance.
         if (has_improved) {
             center_inst = deme[ibest].first;
-            already_crossover = false;
+            already_xover = false;
         }
 
 #ifdef GATHER_STATS
@@ -335,7 +349,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 }
             }
         }
-        else
+        else if (!xover)
             distance++;
 
         // Collect statistics about the run, in struct optim_stats
@@ -410,34 +424,18 @@ unsigned hill_climbing::operator()(deme_t& deme,
              */
             bool big_step = opt_params.score_improved(best_score, prev_hi);
             if (!big_step && !last_chance) {
-
-                /* If we've been using the simplex extrapolation
-                 * (crossover), and there's been no improvement, then
-                 * try a full nearest- neighborhood scan.  This tends
-                 * to refresh the pool of candidates, and keep things
-                 * going a while longer.
-                 */
-                if (!rescan && xover) {
-                    rescan = true;
-                    distance = 1;
-                    continue;
-                }
-
                 /* If we just did the nearest neighbors, and found no
                  * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
                  */
-                if (rescan || !xover) {
-                    rescan = false;
+                if (!already_xover) {
                     last_chance = true;
-                    distance = 1;
                     continue;
                 }
             }
 
             /* Reset back to normal mode. */
             has_improved = big_step;
-            rescan = false;
             last_chance = false;
         }
 
