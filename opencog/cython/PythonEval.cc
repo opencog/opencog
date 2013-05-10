@@ -40,6 +40,7 @@
 #include "agent_finder_types.h"
 #include "agent_finder_api.h"
 
+
 using std::string;
 using std::vector;
 
@@ -66,10 +67,13 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 void PythonEval::init(void)
 {
     logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
+    Py_SetProgramName((char*)"OpenCog");
 
-    // Start up Python (this init method skips registering signal handlers)
-    Py_InitializeEx(0);
-    PyEval_InitThreads();
+    //Start up Python (this init method skips registering signal handlers)
+    if(!Py_IsInitialized())
+        Py_InitializeEx(0);
+    if(!PyEval_ThreadsInitialized())
+        PyEval_InitThreads();
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
@@ -77,45 +81,41 @@ void PythonEval::init(void)
     // Get a reference to the PyInterpreterState
     this->mainInterpreterState = this->mainThreadState->interp;
 
-    // Add our module directories to the Python interprator's path
+    pyModule = PyModule_New("openCogModule");
+    PyModule_AddStringConstant(pyModule, "__file__", "");
+
+    pyGlobal = PyDict_New();
+
+    //Add our module directories to the Python interprator's path
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
-    PyRun_SimpleString("import sys\n");
-    PyRun_SimpleString("paths=[]\n");
+
+    PyObject* sysPath = PySys_GetObject((char*)"path");
+
+    // Default paths for python modules
+    for (int i = 0; config_paths[i] != NULL; ++i) {
+        boost::filesystem::path modulePath(config_paths[i]);
+        if (boost::filesystem::exists(modulePath))
+            PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
+    }
 
     // Add custom paths for python modules from the config file if available
     if (config().has("PYTHON_EXTENSION_DIRS")) {
         std::vector<std::string> pythonpaths;
         // For debugging current path
-        //boost::filesystem::path getcwd = boost::filesystem::current_path();
-        //std::cout << getcwd << std::endl;
         tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
         for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
              it != pythonpaths.end(); ++it) {
             boost::filesystem::path modulePath(*it);
             if (boost::filesystem::exists(modulePath)) {
-                PyRun_SimpleString(("paths.append('" + modulePath.string() + "')\n").c_str());
+                PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
             } else {
-                logger().error("PythonEval::%s Could not find custom python extension directory: %s ", 
-                               __FUNCTION__, 
+                logger().error("PythonEval::%s Could not find custom python extension directory: %s ",
+                               __FUNCTION__,
                                (*it).c_str()
                               );
             }
         }
     }
-
-    // Default paths for python modules
-    for (int i = 0; config_paths[i] != NULL; ++i) {
-        boost::filesystem::path modulePath(config_paths[i]);
-        if (boost::filesystem::exists(modulePath)) {
-            std::string x = modulePath.string();
-            // remove the path if it already exists in sys.path
-            PyRun_SimpleString(("if \"" + x + "\" in sys.path: sys.path.remove(\"" + x + "\")").c_str());
-            // and then place it at the new position
-            PyRun_SimpleString(("if \"" + x + "\" not in paths: paths.append('" + x + "')\n").c_str());
-        }
-    }
-    PyRun_SimpleString("sys.path = paths + sys.path\n");
-    //PyRun_SimpleString("import sys; print sys.path\n");
 
     // Initialise the agent_finder module which helps with the Python side of
     // things
@@ -123,11 +123,17 @@ void PythonEval::init(void)
         PyErr_Print();
         throw RuntimeException(TRACE_INFO,"PythonEval::init Failed to load helper python module");
     }
+
+    // Import pattern_match_functions which contains user defined functions
+    PyObject* pList = PyList_New(0);
+    PyObject* pyLocal = PyModule_GetDict(pyModule);
+    OC_ASSERT(pyLocal != NULL);
+    pmfModule = PyImport_ImportModuleLevel((char*)"pattern_match_functions", pyGlobal, pyLocal, pList, 0);
+    PyModule_AddObject(pyModule, "pattern_match_functions", pmfModule);
+    Py_DECREF(pList);
+
     // For debugging the python path:
     logger().debug("Python sys.path is: " + get_path_as_string());
-  
-    PyEval_ReleaseThread(mainThreadState); 
-//    PyEval_SaveThread();
 }
 
 PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
@@ -169,9 +175,11 @@ void PythonEval::printDict(PyObject* obj) {
 
 PythonEval::~PythonEval()
 {
-    PyEval_RestoreThread(mainThreadState);
     logger().info("PythonEval::%s destructor", __FUNCTION__);
     Py_Finalize();
+
+    delete pyModule;
+    delete pyGlobal;
 }
 
 
@@ -201,5 +209,36 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
               " python interpreter with different AtomSpaceAsync ptr!");
    }
    return *singletonInstance;
+}
+
+PyObject* PythonEval::call_func(const std::string name, const int arg)
+{
+    PyObject *pFunc, *pArgs, *pInt, *pValue = NULL;
+
+    pFunc = PyObject_GetAttrString(pyModule, name.c_str());
+
+    OC_ASSERT(pFunc != NULL);
+    OC_ASSERT(PyCallable_Check(pFunc));
+
+    pArgs = PyTuple_New(1);
+    pInt = PyInt_FromLong(arg);
+    OC_ASSERT(pInt != NULL);
+    PyTuple_SetItem(pArgs, 0, pInt);
+
+    pValue = PyObject_CallObject(pFunc, pArgs);
+
+    Py_DECREF(pArgs);
+    Py_DECREF(pInt);
+    Py_DECREF(pFunc);
+
+    return pValue;
+}
+
+void PythonEval::apply(std::string script)
+{
+    PyObject *pyLocal = PyModule_GetDict(pyModule);
+    OC_ASSERT(pyLocal != NULL);
+
+    PyRun_String(script.c_str(), Py_file_input, pyGlobal, pyLocal);
 }
 

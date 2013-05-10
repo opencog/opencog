@@ -40,7 +40,9 @@
 #ifdef HAVE_CYTHON
 
 #include <string>
+//#include </usr/include/python2.7/Python.h>
 #include "PyIncludeWrapper.h"
+// PyIncludeWrapper.h breaks build because Python.h does not exist.
 
 namespace opencog {
 
@@ -91,6 +93,10 @@ class PythonEval
         PyThreadState * mainThreadState;
         PyInterpreterState * mainInterpreterState;
 
+        PyObject* pyGlobal;
+        PyObject* pyModule;
+        PyObject* pmfModule;
+
 	public:
 
         PyThreadState * getMainThreadState() {
@@ -115,6 +121,10 @@ class PythonEval
 
 		// Use a singleton instance to avoid initializing python interpreter twice. 
 		static PythonEval & instance(AtomSpace * atomspace = NULL);
+
+        void apply(std::string script);
+        PyObject* call_func(const std::string name, const int arg);
+
 };
 
 } /* namespace opencog */
