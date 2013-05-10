@@ -13,6 +13,7 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/cython/PythonEval.h>
 
 #include "PyMindAgent.h"
 #include "PyRequest.h"
