@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <unistd.h>
+
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/util/oc_omp.h>
@@ -287,5 +289,8 @@ private:
         in >> header;
         std::cout << "header = " << header << std::endl;
         TS_ASSERT_EQUALS(header, expected_selected_features);
+
+        // cleanup the junk.
+        unlink(tempfile);
     }
 };
