@@ -207,9 +207,13 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
     for (unsigned i = 0; i < _demes.size(); i++)
     {
         if (logger().isDebugEnabled()) {
-            logger().debug()
-                << "Optimize deme; max evaluations allowed: "
-                << max_evals_per_deme;
+            stringstream ss;
+            ss << "Optimize deme";
+            if (_demes.size() > 1)
+                ss << " (" << i + 1 << "/" << _demes.size() << ")";
+            ss << "; max evaluations allowed: "
+               << max_evals_per_deme;
+            logger().debug(ss.str());
         }
         
         complexity_based_scorer cpx_scorer =
