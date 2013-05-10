@@ -1,5 +1,3 @@
-find_package(PythonLibs)
-
 INCLUDE_DIRECTORIES(
     ${PYTHON_INCLUDE_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -166,7 +164,7 @@ ADD_LIBRARY (PythonModule SHARED
 #ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
-SET(PYTHONMODULE_LINK_LIBS server PythonEval)
+SET(PYTHONMODULE_LINK_LIBS server PythonEval ${PYTHON_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(PythonModule
     ${PYTHONMODULE_LINK_LIBS}

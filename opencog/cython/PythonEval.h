@@ -93,8 +93,9 @@ class PythonEval
         PyThreadState * mainThreadState;
         PyInterpreterState * mainInterpreterState;
 
-        PyObject *pyGlobal;
-        PyObject *pyModule;
+        PyObject* pyGlobal;
+        PyObject* pyModule;
+        PyObject* pmfModule;
 
 	public:
 

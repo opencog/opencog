@@ -40,6 +40,7 @@
 #include "agent_finder_types.h"
 #include "agent_finder_api.h"
 
+
 using std::string;
 using std::vector;
 
@@ -66,16 +67,18 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 void PythonEval::init(void)
 {
     logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
-    Py_SetProgramName("OpenCog");
-    //Start up Python (this init method skips registering signal handlers)
-    Py_InitializeEx(0);
+    Py_SetProgramName((char*)"OpenCog");
 
-    PyEval_InitThreads();
+    //Start up Python (this init method skips registering signal handlers)
+    if(!Py_IsInitialized())
+        Py_InitializeEx(0);
+    if(!PyEval_ThreadsInitialized())
+        PyEval_InitThreads();
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
 
-    //Get a reference to the PyInterpreterState
+    // Get a reference to the PyInterpreterState
     this->mainInterpreterState = this->mainThreadState->interp;
 
     pyModule = PyModule_New("openCogModule");
@@ -120,6 +123,15 @@ void PythonEval::init(void)
         PyErr_Print();
         throw RuntimeException(TRACE_INFO,"PythonEval::init Failed to load helper python module");
     }
+
+    // Import pattern_match_functions which contains user defined functions
+    PyObject* pList = PyList_New(0);
+    PyObject* pyLocal = PyModule_GetDict(pyModule);
+    OC_ASSERT(pyLocal != NULL);
+    pmfModule = PyImport_ImportModuleLevel((char*)"pattern_match_functions", pyGlobal, pyLocal, pList, 0);
+    PyModule_AddObject(pyModule, "pattern_match_functions", pmfModule);
+    Py_DECREF(pList);
+
     // For debugging the python path:
     logger().debug("Python sys.path is: " + get_path_as_string());
 }
@@ -163,8 +175,7 @@ void PythonEval::printDict(PyObject* obj) {
 
 PythonEval::~PythonEval()
 {
-//    PyEval_RestoreThread(mainThreadState);
-//    logger().info("PythonEval::%s destructor", __FUNCTION__);
+    logger().info("PythonEval::%s destructor", __FUNCTION__);
     Py_Finalize();
 
     delete pyModule;
@@ -206,13 +217,12 @@ PyObject* PythonEval::call_func(const std::string name, const int arg)
 
     pFunc = PyObject_GetAttrString(pyModule, name.c_str());
 
-    if(!pFunc) {std::cout<<"pFunc is not initialized correctly"<<std::endl; return NULL;}
-    if(!PyCallable_Check(pFunc)) {std::cout<<"pFunc isn't Callable"<<std::endl; return NULL;}
-
+    OC_ASSERT(pFunc != NULL);
+    OC_ASSERT(PyCallable_Check(pFunc));
 
     pArgs = PyTuple_New(1);
     pInt = PyInt_FromLong(arg);
-    if(!pInt) {std::cout<<"pInt is not initialized correctly"<<std::endl; return NULL;}
+    OC_ASSERT(pInt != NULL);
     PyTuple_SetItem(pArgs, 0, pInt);
 
     pValue = PyObject_CallObject(pFunc, pArgs);
@@ -226,10 +236,9 @@ PyObject* PythonEval::call_func(const std::string name, const int arg)
 
 void PythonEval::apply(std::string script)
 {
-    if(!pyModule) {std::cout<<"pyModule is not initialized correctly"<<std::endl; return;}
     PyObject *pyLocal = PyModule_GetDict(pyModule);
-    if(!pyGlobal) {std::cout<<"pGlobal is not initialized correctly"<<std::endl; return;}
-    if(!pyLocal) {std::cout<<"pLocal is not initialized correctly"<<std::endl; return;}
+    OC_ASSERT(pyLocal != NULL);
+
     PyRun_String(script.c_str(), Py_file_input, pyGlobal, pyLocal);
 }
 

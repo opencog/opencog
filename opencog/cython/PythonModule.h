@@ -84,8 +84,6 @@ private:
     std::vector<std::string> agentNames;
     std::vector<std::string> requestNames;
 
-//    PythonEval &applier;
-
     PyThreadState *tstate;
 
 public:

@@ -1,12 +1,7 @@
-find_package(PythonLibs)
-
 # Build the query module
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_PATH}
 )
-
-message("include: ${PYTHON_INCLUDE_PATH}")
-message("lib: ${PYTHON_LIBRARIES}")
 
 ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
