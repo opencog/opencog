@@ -40,7 +40,6 @@ static bool already_loaded = false;
 
 PythonModule::~PythonModule()
 {
-    PyEval_RestoreThread(tstate);
     logger().info("[PythonModule] destructor");
     unregisterAgentsAndRequests();
     do_load_py_unregister();
@@ -72,6 +71,13 @@ void PythonModule::init()
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
     PythonEval::instance();
+
+    if (import_agent_finder() == -1) {
+        PyErr_Print();
+        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
+    }
+    if (config().has("PYTHON_PRELOAD")) preloadModules();
+    do_load_py_register();
 }
 
 bool PythonModule::preloadModules()

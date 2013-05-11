@@ -134,6 +134,8 @@ void PythonEval::init(void)
 
     // For debugging the python path:
     logger().debug("Python sys.path is: " + get_path_as_string());
+
+    logger().info("PythonEval::%s Finished initialising python evaluator.", __FUNCTION__);
 }
 
 PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
