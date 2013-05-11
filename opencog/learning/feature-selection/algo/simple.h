@@ -57,7 +57,9 @@ FeatureSet simple_selection(const FeatureSet& features,
                             double threshold,
                             double red_threshold = 0)
 {
-    std::multimap<double, FeatureSet> sorted_flist;
+    // std::greater<>: First, sort by score, then sort by lexicographic order.
+    typedef std::pair<double, FeatureSet> ScoreFeatureSet;
+    std::set<ScoreFeatureSet, std::greater<ScoreFeatureSet> > sorted_flist;
 
     // build vector of singleton feature sets
     std::vector<FeatureSet> singletons; 
