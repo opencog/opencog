@@ -53,6 +53,7 @@ public:
 
     // -m24000 -r2 get score of -36 run-time  22 secs
     // -m12000 -r2 get score of -42 run-time   8 secs
+    // -m12000 -r0 get score of -45 run-time   8 secs
   
     // XXX Except that the actual score will change as algorithm
     // changes are made, because algo changes change the random number
@@ -60,8 +61,12 @@ public:
     // what to do about this ... 
     void test_dyn_feat_score()
     {
+        vector<string> ans;
+        ans.push_back("and(!$4 !$5 !$7 !$8 !$10 !$11 !$12)");
+
         string data_file_path("-i" + test_dir + "feat-sel.csv");
-        moses_test_score({"-Hit", 
+        // moses_test_score({"-Hit", 
+        moses_test_combo({"-Hit", 
               "-uchange_predict",
               "-B0",     // knob-building effort of zero -- no effort at all.
               "-m24000", 
@@ -70,13 +75,13 @@ public:
               "--hc-max-nn-evals=5000",
               "--enable-fs=1",   // use run-time dynamic feat sel.
               "--fs-target-size=12",   // pick 12 dynamical out of 300
-              "-r3",
+              "-r0",
               data_file_path,
               },
-              -21);
+              // -45);
+              ans);
     }
 
-    // AIEEEE, this test is currently broken, I am getting non-deterministic test results!
     // -m12000 -r0 get score of -31 run-time  8 secs
     // -m24000 -r0 get score of -21 run-time 19 secs
     // -m48000 -r0 get score of -20 run-time 58 secs
@@ -84,9 +89,12 @@ public:
     // -m48000 -r2 get score of -12 run-time 54 secs
     void test_dyn_feat_score_threaded()
     {
-#if 0
+        vector<string> ans;
+        ans.push_back("and(!$4 !$5 !$7 !$8 !$10 !$11 !$12)");
+
         string data_file_path("-i" + test_dir + "feat-sel.csv");
-        moses_test_score({"-Hit", 
+        // moses_test_score({"-Hit", 
+        moses_test_combo({"-Hit", 
               "-uchange_predict",
               "-B0",     // knob-building effort of zero -- no effort at all.
               "-m48000", 
@@ -95,10 +103,10 @@ public:
               "--hc-max-nn-evals=5000",
               "--enable-fs=1",   // use run-time dynamic feat sel.
               "--fs-target-size=12",   // pick 12 dynamical out of 300
-              "-r2",
+              "-r0",
               data_file_path,
               },
-              -12);
-#endif
+              // -45);
+              ans);
     }
 };
