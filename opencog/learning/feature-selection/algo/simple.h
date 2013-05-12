@@ -99,16 +99,18 @@ FeatureSet simple_selection(const FeatureSet& features,
     // std::set<ScoredFeatureSet, std::greater<ScoredFeatureSet> > sorted_flist;
     std::set<ScoredFeatureSet, ScoredFeatureSetGreater<FeatureSet> > sorted_flist;
 
-    // build vector of singleton feature sets
+    // Build vector of singleton feature sets.
     std::vector<FeatureSet> singletons; 
     for (auto feat : features)
         singletons.push_back(FeatureSet({feat}));
 
-    // compute score of all singletons and insert to sorted_flist
+    // Compute score of all singletons and insert to sorted_flist
     // those above threshold.
     // Actually, we don't have to sort all of them; we only have to
-    // sort the top num_desired of these.  That wuold improve performance 
-    // a lot ...
+    // sort the top num_desired of these.  i.e. just push_back the
+    // the scored features onto std::vector and then use
+    // std::partial_sort to extract the top scores.  This could improve
+    // performance... TODO try this, if this is actually a bottleneck.
     std::mutex sfl_mutex;       // mutex for sorted_flist
     OMP_ALGO::for_each(singletons.begin(), singletons.end(),
                        [&](const FeatureSet& singleton) {
@@ -119,8 +121,8 @@ FeatureSet simple_selection(const FeatureSet& features,
                            }
                        });
 
-    // select num_desired best features from sorted_flist as final
-    // feature set
+    // Select num_desired best features from sorted_flist as final
+    // feature set.  XXX or use partial_sort, as mentioned above...
     FeatureSet final;
     for (auto pr = sorted_flist.begin(); pr != sorted_flist.end(); pr++) {
         final.insert(*pr->second.begin());
