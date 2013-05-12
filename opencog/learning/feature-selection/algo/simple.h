@@ -37,6 +37,38 @@ namespace opencog {
 feature_set_pop simple_select_feature_sets(const CTable& ctable,
                                            const feature_selection_parameters& fs_params);
 
+template<typename FeatureSet>
+struct ScoredFeatureSetGreater
+{
+    typedef std::pair<double, FeatureSet> ScoredFeatureSet;
+    ScoredFeatureSetGreater()
+    {
+        seed = randGen().randint();
+    }
+
+    bool operator()(const ScoredFeatureSet& x, const ScoredFeatureSet& y) const
+    {
+        if (x.first > y.first) return true;
+        if (x.first < y.first) return false;
+
+        // The scored feature sets are *always* singletons! 
+        // for (auto ix : x.second) ox = (ox >> 1) ^ ((-ox) & (ix ^ seed));
+        uint ix = *x.second.begin();
+        uint ox = ix^seed;
+
+        uint iy = *y.second.begin();
+        uint oy = iy^seed;
+
+        return ox > oy;
+    }
+
+    typedef ScoredFeatureSet first_argument_type;
+    typedef ScoredFeatureSet second_argument_type;
+    typedef bool result_type;
+private:
+    uint seed;
+};
+
 /**
  * Returns a set S of features following the algo:
  *
@@ -57,9 +89,10 @@ FeatureSet simple_selection(const FeatureSet& features,
                             double threshold,
                             double red_threshold = 0)
 {
+    typedef std::pair<double, FeatureSet> ScoredFeatureSet;
     // std::greater<>: First, sort by score, then sort by lexicographic order.
-    typedef std::pair<double, FeatureSet> ScoreFeatureSet;
-    std::set<ScoreFeatureSet, std::greater<ScoreFeatureSet> > sorted_flist;
+    // std::set<ScoredFeatureSet, std::greater<ScoredFeatureSet> > sorted_flist;
+    std::set<ScoredFeatureSet, ScoredFeatureSetGreater<FeatureSet> > sorted_flist;
 
     // build vector of singleton feature sets
     std::vector<FeatureSet> singletons; 
