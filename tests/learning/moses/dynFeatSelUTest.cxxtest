@@ -22,6 +22,7 @@
  */
 
 #include <cxxtest/TestSuite.h>
+#include <opencog/util/mt19937ar.h>
 #include "moses-framework.h"
 
 using namespace opencog::moses;
@@ -42,68 +43,63 @@ public:
 
     // single-threaded test.
     // Expected score results:
-    // -m48000 -r0 get score of -35 run-time  54 secs
-    // -m48000 -r1 get score of -42 run-time  54 secs
-    // -m48000 -r2 get score of -42 run-time  54 secs
-    // -m48000 -r3 get score of -13 run-time 135 secs
-    // -m48000 -r4 get score of -36 run-time  63 secs
-    // -m48000 -r5 get score of -42 run-time  52 secs
-
-    // -m24000 -r3 get score of -21 run-time  27 secs
-
-    // -m24000 -r2 get score of -36 run-time  22 secs
-    // -m12000 -r2 get score of -42 run-time   8 secs
-    // -m12000 -r0 get score of -45 run-time   8 secs
+    // -m12000 -r0 get score of -42 run-time  8 secs
+    // -m12000 -r1 get score of -29 run-time 13 secs
+    // -m12000 -r2 get score of -41 run-time 18 secs
+    // -m12000 -r3 get score of -42 run-time  9 secs
+    // -m12000 -r4 get score of -34 run-time 13 secs
   
     // XXX Except that the actual score will change as algorithm
     // changes are made, because algo changes change the random number
     // seq which changes the final results.  So ... err ... not sure
-    // what to do about this ... 
+    // what to do about this ... Anyway, the threaded and non-threaded
+    // versions should return exactly the same results.
     void test_dyn_feat_score()
     {
+        // Reset the seed, so that this, and the next test, give exactly the same result.
+        opencog::randGen().seed(1);
         vector<string> ans;
-        ans.push_back("and(!$4 !$5 !$7 !$8 !$10 !$11 !$12)");
+        ans.push_back("and(or(and(or(and(or($16 $124 !$168 $200) !$23 !$284 !$287 !$288) and($16 $284) $184) !$22 !$273 !$282) $27) !$13)");
 
         string data_file_path("-i" + test_dir + "feat-sel.csv");
         // moses_test_score({"-Hit", 
         moses_test_combo({"-Hit", 
               "-uchange_predict",
               "-B0",     // knob-building effort of zero -- no effort at all.
-              "-m24000", 
+              "-m12000", 
               "-Z1",     // enable cross-over
               "-j1",
               "--hc-max-nn-evals=5000",
               "--enable-fs=1",   // use run-time dynamic feat sel.
               "--fs-target-size=12",   // pick 12 dynamical out of 300
-              "-r0",
+              "-r1",
               data_file_path,
               },
               // -45);
               ans);
     }
 
-    // -m12000 -r0 get score of -31 run-time  8 secs
-    // -m24000 -r0 get score of -21 run-time 19 secs
-    // -m48000 -r0 get score of -20 run-time 58 secs
-    // -m48000 -r1 get score of -36 run-time 43 secs
-    // -m48000 -r2 get score of -12 run-time 54 secs
+    // Same as above, but threaded. Should return the same result as above.
     void test_dyn_feat_score_threaded()
     {
+        // Reset the seed, so that this, and the previou test, give exactly the same result.
+        opencog::randGen().seed(1);
+
         vector<string> ans;
-        ans.push_back("and(!$4 !$5 !$7 !$8 !$10 !$11 !$12)");
+        ans.push_back("and(or(and(or(and(or($16 $124 !$168 $200) !$23 !$284 !$287 !$288) and($16 $284) $184) !$22 !$273 !$282) $27) !$13)");
 
         string data_file_path("-i" + test_dir + "feat-sel.csv");
         // moses_test_score({"-Hit", 
         moses_test_combo({"-Hit", 
               "-uchange_predict",
               "-B0",     // knob-building effort of zero -- no effort at all.
-              "-m48000", 
+              "-m12000", 
               "-Z1",     // enable cross-over
-              "-j4",
+              "-j8",
               "--hc-max-nn-evals=5000",
               "--enable-fs=1",   // use run-time dynamic feat sel.
               "--fs-target-size=12",   // pick 12 dynamical out of 300
-              "-r0",
+              "-r1",
               data_file_path,
               },
               // -45);
