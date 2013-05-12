@@ -59,19 +59,10 @@ struct ScoredFeatureSetGreater
         // The scored feature sets are *always* singletons! 
         // for (auto ix : x.second) ox = (ox >> 1) ^ ((-ox) & (ix ^ seed));
         uint ix = *x.second.begin();
-        // Most of these "hash" functions fail to mix strongly enough.
-        // Poor mixing results in poor randomization of featres with equal scores.
-        // uint ox = ix^seed;
-        // uint ox = ix*seed;
-        // uint ox = ix*ix*seed;  // not bad .. 
-        // uint ox = (ix*ix)^seed;  // mixes very poorly
-        // uint ox = (ix*ix*ix + ix)*seed; 
-        uint ox = ix*ix*seed;
-        ox ^= (ox >> 1) ^ (ox << 5);
+        uint ox = ix ^ seed;
 
         uint iy = *y.second.begin();
-        uint oy = iy*iy*seed;
-        oy ^= (oy >> 1) ^ (oy << 5);
+        uint oy = iy ^ seed;
 
         return ox > oy;
     }
