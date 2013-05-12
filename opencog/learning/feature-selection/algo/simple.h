@@ -37,6 +37,11 @@ namespace opencog {
 feature_set_pop simple_select_feature_sets(const CTable& ctable,
                                            const feature_selection_parameters& fs_params);
 
+// Return whether the scored feature set x is greater than y.
+// Important note: This attempts to randomize the comparison, when the
+// scores are equal.  This is critical for a good mix of training results.
+// Second important note: this assumes that the feature sets are singletons.
+// This is to provide a minor performance boost.
 template<typename FeatureSet>
 struct ScoredFeatureSetGreater
 {
@@ -94,7 +99,7 @@ private:
 template<typename Scorer, typename FeatureSet>
 FeatureSet simple_selection(const FeatureSet& features,
                             const Scorer& scorer,
-                            int num_desired,
+                            size_t num_desired,
                             double threshold,
                             double red_threshold = 0)
 {
@@ -109,7 +114,10 @@ FeatureSet simple_selection(const FeatureSet& features,
         singletons.push_back(FeatureSet({feat}));
 
     // compute score of all singletons and insert to sorted_flist
-    // those above threshold
+    // those above threshold.
+    // Actually, we don't have to sort all of them; we only have to
+    // sort the top num_desired of these.  That wuold improve performance 
+    // a lot ...
     std::mutex sfl_mutex;       // mutex for sorted_flist
     OMP_ALGO::for_each(singletons.begin(), singletons.end(),
                        [&](const FeatureSet& singleton) {
@@ -123,7 +131,7 @@ FeatureSet simple_selection(const FeatureSet& features,
     // select num_desired best features from sorted_flist as final
     // feature set
     FeatureSet final;
-    for (auto pr = sorted_flist.rbegin(); pr != sorted_flist.rend(); pr++) {
+    for (auto pr = sorted_flist.begin(); pr != sorted_flist.end(); pr++) {
         final.insert(*pr->second.begin());
         num_desired --;
         if (num_desired <= 0) break;
