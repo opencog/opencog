@@ -34,8 +34,8 @@
 
 #include "../representation/field_set.h"
 
-namespace opencog {
-namespace moses {
+using namespace opencog;
+using namespace moses;
 
 // Example scoring functions.
 //
@@ -117,7 +117,7 @@ struct contin_uniform : public unary_function<instance, contin_t>
         generate(target.begin(), target.end(),
                  bind(std::plus<contin_t>(),
                       bind(std::multiplies<contin_t>(),
-                           bind(&RandGen::randdouble, ref(randGen())),
+                           bind(&RandGen::randdouble, boost::ref(randGen())),
                            maxval - minval), minval));
     }
 
@@ -180,8 +180,5 @@ struct termmax: public unary_function<instance, contin_t>
     }
     const field_set& fields;
 };
-
-} // ~namespace moses
-} // ~namespace opencog
 
 #endif
