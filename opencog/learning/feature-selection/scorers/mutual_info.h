@@ -116,10 +116,9 @@ struct MICScorerCTable : public std::unary_function<FeatureSet, double>
     double operator()(const FeatureSet& fs) const
     {
         double MI = mutualInformation(ctable, fs);
-        logger().fine("MI = %e", MI);
         // double confidence = usize / (usize + confi*fs.size());
         double confidence = usize / (usize + exp(-confi*fs.size()));
-        logger().fine("confidence = %e", confidence);
+        logger().fine("MICScorerCTable MI = %g, confidence = %g", MI, confidence);
         return MI * confidence;
     }
 
