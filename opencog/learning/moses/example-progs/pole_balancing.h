@@ -3,7 +3,7 @@
 
 #include <opencog/comboreduct/combo/simple_nn.h>
 
-namespace opencog { 
+using namespace opencog;
 
 class CartPole {
 public:
@@ -66,7 +66,5 @@ private:
     double polepos_sum;
     double polev_sum;
 };
-
-} // ~namespace opencog
 
 #endif

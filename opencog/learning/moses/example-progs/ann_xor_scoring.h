@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/ann_scoring.h
+ * opencog/learning/moses/example-progs/ann_xor_scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _ANN_SCORING_H
-#define _ANN_SCORING_H
+#ifndef _ANN_XOR_SCORING_H
+#define _ANN_XOR_SCORING_H
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/mt19937ar.h>
@@ -39,7 +39,8 @@ using namespace std;
 using namespace moses;
 #define MIN_FITNESS -1.0e10
 
-struct AnnFitnessFunction : public unary_function<combo_tree, double>
+// Demo scoring function for solvig the binary XOR function, suing neural nets.
+struct AnnXORFitnessFunction : public unary_function<combo_tree, double>
 {
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;
@@ -77,15 +78,12 @@ struct AnnFitnessFunction : public unary_function<combo_tree, double>
 
 };
 
-namespace opencog { namespace moses {
-
 // This is what the original source had this as, but its not
 // obviously correct, to me.
 #define CPXY_RATIO 1.0
 
-struct ann_cscore  : public cscore_base
+struct ann_xor_cscore  : public cscore_base
 {
-    ann_cscore() { }
     composite_score operator()(const combo_tree& tr) const
     {
         complexity_t cpxy = tr.size();
@@ -93,14 +91,14 @@ struct ann_cscore  : public cscore_base
         return composite_score(-aff.operator()(tr), cpxy, cpxy/CPXY_RATIO);
     }
 
-    AnnFitnessFunction aff;
+    AnnXORFitnessFunction aff;
 };
 
-struct ann_bscore : public bscore_base
+struct ann_xor_bscore : public bscore_base
 {
     penalized_bscore operator()(const combo_tree& tr) const
     {
-        composite_score cs(ann_cscore()(tr));
+        composite_score cs(ann_xor_cscore()(tr));
 
         penalized_bscore pbs;
         pbs.first[0] = get_score(cs);
@@ -112,8 +110,5 @@ struct ann_bscore : public bscore_base
         return {0.0};
     }
 };
-
-} // ~namespace moses
-} // ~namespace opencog
 
 #endif
