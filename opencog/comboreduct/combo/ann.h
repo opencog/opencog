@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_ANN_H
-#define _OPENCOG_ANN_H
+#ifndef _COMBO_ANN_H
+#define _COMBO_ANN_H
 
 namespace opencog { namespace combo {
 
@@ -52,4 +52,4 @@ public:
 
 }} // ~namespaces combo opencog
 
-#endif // _OPENCOG_ANN_H
+#endif // _COMBO_ANN_H
