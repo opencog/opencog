@@ -206,8 +206,6 @@ struct AnnPoleFitnessFunction : public unary_function<combo_tree, double>
 };
 
 
-namespace opencog { namespace moses {
-
 // This is what the original zource had this as, but its not
 // obviously correct, to me.
 #define CPXY_RATIO 1.0
@@ -293,8 +291,5 @@ struct ann_pole_bscore : public bscore_base
     }
 };
 
-
-} // ~namespace moses
-} // ~namespace opencog
 
 #endif
