@@ -89,7 +89,7 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
     const vector<double>& sco = score_individual_features(ftable, fs_params);
     for (unsigned i=0; i<labs.size(); i++)
     {
-        logger().info() << labs[i] << " " << sco[i];
+        logger().info() << "log_selected_features(): " << labs[i] << " " << sco[i];
     }
 }
 
