@@ -164,14 +164,17 @@ public:
         feature_selection_parameters fsp;
         fsp.algorithm = simple;
         fsp.input_file = sparse_table_path;
-        fsp.target_size = 20;
+        // Ask for 9 because features 10 through 61 have identical scores
+        // and will thus show up randomly, and thus this test will fail
+        // (unless we ask for 61 of them...)
+        fsp.target_size = 9;
         fsp.inc_red_intensity = -1.0;
         fsp.jobs = 1;
         setting_omp(fsp.jobs);
 
         // run and test feature selection
         test_feature_selection(sparse_table, fsp,
-            "change_percent,BECAUSE,BETWEEN,FEB,IN_PERSONBYRULE,NUMBER23,PERCENT,QUARTER,SECURITY,SHARES,STARTED,SUCH,SUSANNA,THROUGH,TOGETHER,TOLD,VERY,WAYS,WERE,WHICH,WORTH");
+            "change_percent,BECAUSE,BETWEEN,FEB,IN_PERSONBYRULE,NUMBER23,PERCENT,QUARTER,WERE,WHICH");
     }
 
 private:
