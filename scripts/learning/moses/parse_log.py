@@ -6,17 +6,17 @@ from optparse import OptionParser
 def parse_log(logFileName, options):
     of = open(options.output_file, "w") if options.output_file else sys.stdout
     prefix = options.prefix
-    prefix_colon = options.prefix + ":"
+    prefix_delim = " " + options.prefix + ":"
     header_written = False
     has_init_time = False
     for l in open(logFileName):
         # write header
-        if (not header_written) and all(x in l for x in [prefix_colon, "#", "\t"]):
+        if (not header_written) and all(x in l for x in [prefix_delim, "#", "\t"]):
             header = ["time"] + l.partition("#")[2].strip().split("\t")
             of.write(",".join(header) + "\n")
             header_written = True
-        elif (prefix_colon in l) and ("#" not in l):
-            dp = l.partition(prefix_colon)
+        elif (prefix_delim in l) and ("#" not in l):
+            dp = l.partition(prefix_delim)
             # get time
             time_str = dp[0].partition("[INFO]")[0].strip()[1:-1]
             if not has_init_time:
