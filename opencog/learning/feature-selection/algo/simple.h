@@ -91,6 +91,7 @@ template<typename Scorer, typename FeatureSet>
 FeatureSet simple_selection(const FeatureSet& features,
                             const Scorer& scorer,
                             size_t num_desired,
+                            bool use_exp_distrib,
                             double threshold,
                             double red_threshold = 0)
 {
@@ -105,8 +106,8 @@ FeatureSet simple_selection(const FeatureSet& features,
         singletons.push_back(FeatureSet({feat}));
 
     // Compute score of all singletons and insert to sorted_flist
-    // those above threshold.
-    // Actually, we don't have to sort all of them; we only have to
+    // those above threshold.  If not exponentially distributed, then
+    // we don't have to sort all of them; we only have to
     // sort the top num_desired of these.  i.e. just push_back the
     // the scored features onto std::vector and then use
     // std::partial_sort to extract the top scores.  This could improve
@@ -122,12 +123,32 @@ FeatureSet simple_selection(const FeatureSet& features,
                        });
 
     // Select num_desired best features from sorted_flist as final
-    // feature set.  XXX or use partial_sort, as mentioned above...
+    // feature set. 
     FeatureSet final;
-    for (auto pr = sorted_flist.begin(); pr != sorted_flist.end(); pr++) {
-        final.insert(*pr->second.begin());
-        num_desired --;
-        if (num_desired <= 0) break;
+    if (use_exp_distrib)
+    {
+        // Exponential distribution with mean of num_desired features.
+        // Actually, we cheat slightly, and ask for more, so that we
+        // don't get too few...
+        double x = 1.0 - 1.0 / ((double) num_desired + 1);
+        double xn = 1.0;
+        for (auto pr = sorted_flist.begin(); pr != sorted_flist.end(); pr++) {
+            if (randGen().randdouble() < xn)
+            {
+                final.insert(*pr->second.begin());
+                num_desired --;
+                if (num_desired <= 0) break;
+            }
+            xn *= x;
+        }
+    } else {
+        // stair-step distribution: keep the top num_desired only.
+        //  XXX or use partial_sort, as mentioned above...
+        for (auto pr = sorted_flist.begin(); pr != sorted_flist.end(); pr++) {
+            final.insert(*pr->second.begin());
+            num_desired --;
+            if (num_desired <= 0) break;
+        }
     }
 
     // TODO: if there is a non-negative red_threshold, then remove any
