@@ -456,36 +456,23 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     // 2 * choose(n,2) == n * (n-1) of possible pairs.
 
     // Generate all permitted permutations of 2 arguments. This code
-    // is very expensive when the number of permitted arguments is
-    // large (hundreds) but when that is the case (no feature
+    // is expensive when the number of permitted arguments is large
+    // (thousands), but when that is the case (no dynamic feature
     // selection is used) representation building is insanely
     // expensive anyway.
     type_tree_sib_it arg_types = _signature.begin(_signature.begin());  // first
                                                                         // child
-    vector<combo_tree> permitted_perms;
+    vector<pair<arity_t, arity_t>> permitted_perms;
     for (arity_t a = 0; a < _arity; a++) {
         // Get the argument a and its type
         argument arg_a(a + 1);
-        type_tree_sib_it type_a = std::next(arg_types, a);
         if (permitted_op(arg_a)) {
             for (arity_t b = 0; b < _arity; b++) {
                 // Get the argument b and its type
                 argument arg_b(b + 1);
-                type_tree_sib_it type_b = std::next(arg_types, b);
                 if (permitted_op(arg_b) and a != b) {
                     // Permitted permutation
-                    combo_tree perm(swap_and_or(*it));
-                    if (b < a) {
-                        insert_typed_arg(perm, type_b, arg_b);
-                        insert_typed_arg(perm, type_a, arg_a);
-                    } else {
-                        // As above, but negate arg_a first. So we just
-                        // inline-expand insert_typed_arg and put a logical
-                        // not in front of it.
-                        insert_typed_arg(perm, type_a, arg_a, true /* negate */);
-                        insert_typed_arg(perm, type_b, arg_b);
-                    }
-                    permitted_perms.push_back(perm);
+                    permitted_perms.push_back({a, b});
                 }
             }
         }
@@ -501,11 +488,36 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     lazy_random_selector randpair(max_pairs);
 
     // Actual number of pairs to create ...
-    unsigned n_pairs =
-        ps + static_cast<unsigned int>(_perm_ratio * (max_pairs - ps));
+    size_t n_pairs =
+        ps + static_cast<size_t>(_perm_ratio * (max_pairs - ps));
+
     dorepeat (n_pairs) {
-        unsigned i = randpair();
-        perms.push_back(permitted_perms[i]);
+        size_t i = randpair();
+
+        const pair<arity_t, arity_t>& ppr = permitted_perms[i];
+        arity_t a = ppr.first;
+        arity_t b = ppr.second;
+
+        // Get the argument a and its type
+        argument arg_a(a + 1);
+        argument arg_b(b + 1);
+        type_tree_sib_it type_a = std::next(arg_types, a);
+        type_tree_sib_it type_b = std::next(arg_types, b);
+
+        // Build the tree ...
+        combo_tree perm(swap_and_or(*it));
+        if (b < a) {
+            insert_typed_arg(perm, type_b, arg_b);
+            insert_typed_arg(perm, type_a, arg_a);
+        } else {
+            // As above, but negate arg_a first. So we just
+            // inline-expand insert_typed_arg and put a logical
+            // not in front of it.
+            insert_typed_arg(perm, type_a, arg_a, true /* negate */);
+            insert_typed_arg(perm, type_b, arg_b);
+        }
+
+        perms.push_back(perm);
     }
 
     if (logger().isFineEnabled())
@@ -531,10 +543,10 @@ void build_knobs::add_logical_knobs(pre_it subtree,
         logger().debug() << "Adding logical knobs to subtree of size="
                          << combo_tree(subtree).size()
                          << " at location of size=" << combo_tree(it).size();
-    }
-    if (logger().isFineEnabled()) {
-        logger().fine() << "subtree = " << combo_tree(subtree);
-        logger().fine() << "it = " << combo_tree(it);
+        if (logger().isFineEnabled()) {
+            logger().fine() << "subtree = " << combo_tree(subtree);
+            logger().fine() << "it = " << combo_tree(it);
+        }
     }
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);

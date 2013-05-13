@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/pole_scoring.h
+ * opencog/learning/moses/example-progs/pole_scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _ANN_SCORING_H
-#define _ANN_SCORING_H
+#ifndef _POLE_SCORING_H
+#define _POLE_SCORING_H
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/mt19937ar.h>
