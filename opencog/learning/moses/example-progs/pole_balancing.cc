@@ -2,6 +2,7 @@
 
 using namespace opencog;
 using namespace combo;
+using namespace std;
 
 const int CartPole::NUM_INPUTS=7;
 const double CartPole::MUP = 0.000002;
