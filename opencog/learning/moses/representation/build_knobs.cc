@@ -24,17 +24,17 @@
  */
 #include <future>
 
-#include "build_knobs.h"
-#include <opencog/comboreduct/reduct/meta_rules.h>
-#include <opencog/comboreduct/reduct/general_rules.h>
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_omp.h>
 
-#include <opencog/learning/moses/scoring/scoring.h>
-#include <opencog/learning/moses/moses/ann_scoring.h>
+#include <opencog/comboreduct/combo/convert_ann_combo.h>
+#include <opencog/comboreduct/reduct/meta_rules.h>
+#include <opencog/comboreduct/reduct/general_rules.h>
+
+#include "build_knobs.h"
 
 namespace opencog { namespace moses {
 
@@ -107,13 +107,13 @@ build_knobs::build_knobs(combo_tree& exemplar,
         logical_cleanup();
     }
     else if (output_type == id::action_result_type) {
-        // Petbrain
+        // Petbrain  XXX does this call code that actually works??
         action_canonize(_exemplar.begin());
         build_action(_exemplar.begin());
         action_cleanup();
     }
     else if (output_type == id::ann_type) {
-        // ANN
+        // ANN  XXX This is calling unfinished, broken code, below.
         ann_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
     }
@@ -240,7 +240,7 @@ build_knobs::logical_probe_rec(pre_it subtree,
 
         // asynchronous recursive call for [from, mid)
         std::future<ptr_vector<logical_subtree_knob>> f_async =
-            async(launch::async,
+            async(std::launch::async,
                   [&]() {return this->logical_probe_rec(subtree, exemplr, it,
                                                         from, mid,
                                                         add_if_in_exemplar,
@@ -708,7 +708,7 @@ void build_knobs::contin_canonize(pre_it it)
         _exemplar.move_after(it, pre_it(it.last_child()));
         // Handle any divs.
         for (sib_it div = _exemplar.partition(it.begin(), it.end(),
-                                              bind(not_equal_to<vertex>(), _1,
+                                              bind(std::not_equal_to<vertex>(), _1,
                                                    id::div));
              div != it.end();)
             canonize_div(_exemplar.move_after(it, pre_it(div++)));
@@ -1254,9 +1254,11 @@ static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
     }
 }
 
+// XXX TODO this below is clearly unfinished, broken, etc.
+// and can't possibly work ... 
 void build_knobs::ann_canonize(pre_it it)
 {
-    tree_transform trans;
+    combo::tree_transform trans;
     cout << _exemplar << endl << endl;
     ann net = trans.decodify_tree(_exemplar);
     cout << &net << endl;
