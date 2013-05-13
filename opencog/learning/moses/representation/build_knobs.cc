@@ -466,13 +466,13 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     for (arity_t a = 0; a < _arity; a++) {
         // Get the argument a and its type
         argument arg_a(a + 1);
-        type_tree_sib_it type_a = std::next(arg_types, a);
         if (permitted_op(arg_a)) {
+            type_tree_sib_it type_a = std::next(arg_types, a);
             for (arity_t b = 0; b < _arity; b++) {
                 // Get the argument b and its type
                 argument arg_b(b + 1);
-                type_tree_sib_it type_b = std::next(arg_types, b);
                 if (permitted_op(arg_b) and a != b) {
+                    type_tree_sib_it type_b = std::next(arg_types, b);
                     // Permitted permutation
                     combo_tree perm(swap_and_or(*it));
                     if (b < a) {
