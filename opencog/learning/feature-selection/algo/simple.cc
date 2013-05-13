@@ -50,7 +50,7 @@ feature_set_pop simple_select_feature_sets(const CTable& ctable,
     }
     feature_set fs = simple_selection(all_features, fsc,
                                       fs_params.target_size,
-                                      false,
+                                      fs_params.exp_distrib,
                                       fs_params.threshold,
                                       fs_params.inc_red_intensity);
     // XXX: fsc(all_features) is skipped because that algorithm is
