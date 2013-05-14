@@ -102,7 +102,7 @@ protected:
  *      score = sum_f BScore(f) + penalty
  *
  * This is a "minor" helper class, and exists for two reasons:
- * 1)  avoids some redundancy of having the summation in many places
+ * 1) avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
  *
  * TODO: could be detemplatized, it's only instantiated with
