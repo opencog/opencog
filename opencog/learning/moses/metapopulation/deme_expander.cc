@@ -215,6 +215,9 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
                << max_evals_per_deme;
             logger().debug(ss.str());
         }
+
+        // compute the max target for that deme (if features have been
+        // selected is might be less that the global target)
         
         complexity_based_scorer cpx_scorer =
             complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
