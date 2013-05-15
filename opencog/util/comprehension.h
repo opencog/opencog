@@ -42,6 +42,10 @@ namespace opencog {
  *
  * auto res = {vector,list,set}_comp(container, function, filter);
  *
+ * Or if not filter is necessary just omit it
+ *
+ * auto res = {vector,list,set}_comp(container, function);
+ *
  * the results res will be of type std::vector, std::list or std::set
  * (as defined in the prefix of the *_comp), no matter the type of
  * container.
@@ -50,8 +54,6 @@ namespace opencog {
  * not boost.pheonix).
  *
  * Of course the return type of filter must boolean.
- *
- * TODO: implement filter!
  */
 
 /**
