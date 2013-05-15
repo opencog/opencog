@@ -35,18 +35,28 @@ namespace opencog {
  * Though the solution involing Boost.Range is nearly satisfactory, I
  * want to be able to construct and assing the list at once.
  *
- * @todo for now only vector and list comprehensions are coded. 2 issues:
- * 1) no filter,
- * 2) can only use object function.
- * I'm pretty sure both issues can be addressed (and will try when time permits)
+ * The usage is extremely simple:
+ *
+ * auto res = {vector,list,set}_comp(container, function, filter);
+ *
+ * the results res will be of type std::vector, std::list or std::set
+ * (as defined in the prefix of the *_comp), no matter the type of
+ * container.
+ *
+ * function and filter can be STL functors or lambdas (but
+ * not boost.pheonix).
+ *
+ * Of course the return type of filter must boolean.
+ *
+ * TODO: implement filter!
  */
     
 /**
- * vector comprehension
+ * vector comprehension (STL functor version)
  */
 template<typename Container, typename Function>
-std::vector<typename Function::result_type> vector_comp(const Container& c,
-                                                        const Function& f)
+auto vector_comp(const Container& c, const Function& f)
+    -> std::vector<typename Function::result_type>
 {
     std::vector<typename Function::result_type> v;
     boost::transform(c, std::back_inserter(v), f);
@@ -54,15 +64,63 @@ std::vector<typename Function::result_type> vector_comp(const Container& c,
 }
 
 /**
- * list comprehension
+ * vector comprehension (lambda version)
  */
 template<typename Container, typename Function>
-std::list<typename Function::result_type> list_comp(const Container& c,
-                                                    const Function& f)
+auto vector_comp(const Container& c, const Function& f)
+    -> std::vector<decltype(f(std::declval<typename Container::value_type>()))>
+{
+    std::vector<decltype(f(std::declval<typename Container::value_type>()))> v;
+    boost::transform(c, std::back_inserter(v), f);
+    return v;
+}
+
+/**
+ * list comprehension (STL functor version)
+ */
+template<typename Container, typename Function>
+auto list_comp(const Container& c, const Function& f)
+    -> std::list<typename Function::result_type>
 {
     std::list<typename Function::result_type> l;
     boost::transform(c, std::back_inserter(l), f);
     return l;
+}
+
+/**
+ * list comprehension (lambda version)
+ */
+template<typename Container, typename Function>
+auto list_comp(const Container& c, const Function& f)
+    -> std::list<decltype(f(std::declval<typename Container::value_type>()))>
+{
+    std::list<decltype(f(std::declval<typename Container::value_type>()))> l;
+    boost::transform(c, std::back_inserter(l), f);
+    return l;
+}
+
+/**
+ * set comprehension (STL functor version)
+ */
+template<typename Container, typename Function>
+auto set_comp(const Container& c, const Function& f)
+    -> std::set<typename Function::result_type>
+{
+    std::set<typename Function::result_type> v;
+    boost::transform(c, std::inserter(v, v.end()), f);
+    return v;
+}
+
+/**
+ * set comprehension (lambda version)
+ */
+template<typename Container, typename Function>
+auto set_comp(const Container& c, const Function& f)
+    -> std::set<decltype(f(std::declval<typename Container::value_type>()))>
+{
+    std::set<decltype(f(std::declval<typename Container::value_type>()))> v;
+    boost::transform(c, std::inserter(v, v.end()), f);
+    return v;
 }
 
 }
