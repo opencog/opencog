@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/scoring_functions.h
+ * opencog/learning/moses/example-progs/scoring_functions.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _EDA_SCORING_FUNCTIONS_H
-#define _EDA_SCORING_FUNCTIONS_H
+#ifndef _EXAMPLE_SCORING_FUNCTIONS_H
+#define _EXAMPLE_SCORING_FUNCTIONS_H
 
 #include <cmath>
 #include <boost/lexical_cast.hpp>
