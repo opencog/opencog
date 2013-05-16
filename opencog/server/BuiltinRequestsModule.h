@@ -26,7 +26,6 @@
 #define _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 
 #include <opencog/server/DataRequest.h>
-#include <opencog/server/ExitRequest.h>
 #include <opencog/server/SleepRequest.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/HelpRequest.h>
@@ -52,59 +51,76 @@ private:
     Factory<ListRequest, Request>         listFactory;
     Factory<DataRequest, Request>         dataFactory;
     Factory<HelpRequest, Request>         helpFactory;
-    Factory<ExitRequest, Request>         exitFactory;
     Factory<SleepRequest, Request>        sleepFactory;
     Factory<ShutdownRequest, Request>     shutdownFactory;
     Factory<LoadModuleRequest, Request>   loadmoduleFactory;
     Factory<UnloadModuleRequest, Request> unloadmoduleFactory;
 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "exit", do_exit,
+       "Close the shell connection",
+       "Usage: exit\n\n"
+       "Close the shell TCP/IP connection.\n",
+       false, true)
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "quit", do_quit,
+       "Close the shell connection",
+       "Usage: quit\n\n"
+       "Close the shell TCP/IP connection.\n",
+       false, false)
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "", do_ctrld,
+       "Close the shell connection",
+       "Usage: ^D\n\n"
+       "Close the shell TCP/IP connection.\n",
+       false, true)
+
 // I'm adding the agent control commands via the macro syntax
 // (it's much more convenient than adding several new .cc/.h files). -- Jared Wigmore
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start", do_startAgents, 
-       "Start some agents", 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start", do_startAgents,
+       "Start some agents",
        "Usage: agents-start <agent type> [...]\n\n"
        "Create new agent instances of the specified agent type(s), and start them.\n",
-       false)
+       false, false)
 
 // Note: this command currently allows running multiple instances of the same Agent type
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-stop", do_stopAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-stop", do_stopAgents,
        "Stop some agents running",
        "Usage: agents-stop <agent type> [...]\n\n"
        "Stops the agents of the specified classes (class IDs).\n",
-       false)
+       false, false)
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-step", do_stepAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-step", do_stepAgents,
        "Run a single cycle of an agent(s)",
        "Usage: agents-step <agent type> [...]\n"
        "With one or more agent types as arguments, runs a single cycle of those agents."
        "With no arguments, runs one cycle of each agent that has been started."
        "Only to be run when the agent loop is stopped. Uses the already-started instances"
-       "if available.\n", 
-       false)       
+       "if available.\n",
+       false, false)
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-stop-loop", do_stopAgentLoop, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-stop-loop", do_stopAgentLoop,
        "Stop the agent loop",
        "Usage: agents-stop-loop\n\n"
-       "Stop the agent loop (that is, stop running agents during the CogServer loop).\n", 
-       false)
+       "Stop the agent loop (that is, stop running agents during the CogServer loop).\n",
+       false, false)
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start-loop", do_startAgentLoop, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start-loop", do_startAgentLoop,
        "Start the agent loop",
        "Usage: agents-start-loop\n\n"
        "Start the agent loop (that is, start running agents during the CogServer loop).\n",
-       false)
+       false, false)
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-list", do_listAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-list", do_listAgents,
        "List available agents",
        "Usage: agents-list\n\n"
-       "List all the available agents from loaded modules.\n", 
-       false)
+       "List all the available agents from loaded modules.\n",
+       false, false)
 
-DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-active", do_activeAgents, 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-active", do_activeAgents,
        "List running agents",
        "Usage: agents-active\n\n"
-       "List all the currently running agents, including their configuration parameters.\n", 
-       false)
+       "List all the currently running agents, including their configuration parameters.\n",
+       false, false)
 
     void registerAgentRequests();
     void unregisterAgentRequests();

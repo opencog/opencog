@@ -48,6 +48,7 @@ bool ShutdownRequest::execute()
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.stop();
     _requestResult->Exit();
+    _requestResult = NULL;
 
     return true;
 }

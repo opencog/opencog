@@ -45,7 +45,7 @@ private:
        "Dumps a (very big) dotty file of the atomspace.", 
        "Usage: dotty\n\n"
        "Dotty, also known as GraphViz, is a graph visualization package.", 
-       false);
+       false, false);
 
 public:
 

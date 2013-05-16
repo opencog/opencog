@@ -36,12 +36,11 @@ extern "C" void        opencog_module_unload(Module* module) { delete module; }
 BuiltinRequestsModule::BuiltinRequestsModule()
 {
     CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.registerRequest(ListRequest::info().id,         &listFactory); 
+    cogserver.registerRequest(ListRequest::info().id,         &listFactory);
     cogserver.registerRequest(DataRequest::info().id,         &dataFactory);
-    cogserver.registerRequest(HelpRequest::info().id,         &helpFactory); 
-    cogserver.registerRequest(ExitRequest::info().id,         &exitFactory); 
-    cogserver.registerRequest(SleepRequest::info().id,        &sleepFactory); 
-    cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory); 
+    cogserver.registerRequest(HelpRequest::info().id,         &helpFactory);
+    cogserver.registerRequest(SleepRequest::info().id,        &sleepFactory);
+    cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory);
     cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
     cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
     registerAgentRequests();
@@ -55,7 +54,6 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     cogserver.unregisterRequest(SaveRequest::info().id);
     cogserver.unregisterRequest(DataRequest::info().id);
     cogserver.unregisterRequest(HelpRequest::info().id);
-    cogserver.unregisterRequest(ExitRequest::info().id);
     cogserver.unregisterRequest(SleepRequest::info().id);
     cogserver.unregisterRequest(ShutdownRequest::info().id);
     cogserver.unregisterRequest(LoadModuleRequest::info().id);
@@ -65,6 +63,9 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
 
 void BuiltinRequestsModule::registerAgentRequests()
 {
+    do_exit_register();
+    do_quit_register();
+    do_ctrld_register();
     do_startAgents_register();
     do_stopAgents_register();
     do_stepAgents_register();
@@ -76,6 +77,9 @@ void BuiltinRequestsModule::registerAgentRequests()
 
 void BuiltinRequestsModule::unregisterAgentRequests()
 {
+    do_exit_unregister();
+    do_quit_unregister();
+    do_ctrld_unregister();
     do_startAgents_unregister();
     do_stopAgents_unregister();
     do_stepAgents_unregister();
@@ -89,10 +93,30 @@ void BuiltinRequestsModule::init()
 {
 }
 
+std::string BuiltinRequestsModule::do_exit(Request *req, std::list<std::string> args)
+{
+    RequestResult* rr = req->getRequestResult();
+    if (rr) {
+        rr->Exit();
+        req->setRequestResult(NULL);
+    }
+    return "";
+}
+
+std::string BuiltinRequestsModule::do_quit(Request *req, std::list<std::string> args)
+{
+    return do_exit(req, args);
+}
+
+std::string BuiltinRequestsModule::do_ctrld(Request *req, std::list<std::string> args)
+{
+    return do_exit(req, args);
+}
+
 std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std::string> args)
-{   
+{
     std::list<const char*> availableAgents = cogserver().agentIds();
- 
+
     std::vector<std::string> agents;
 
     if (args.size() == 0)
@@ -108,7 +132,7 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
             oss << "Invalid Agent ID (" << *it << ")";
             return oss.str();
         }
-        
+
         agents.push_back(agent_type);
      }
 
@@ -116,19 +140,19 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
          it != agents.end(); ++it) {
         cogserver().createAgent(*it, true);
     }
-    
+
     return "Successfully started agents";
 }
 
 std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::string> args)
 {
     std::list<const char*> availableAgents = cogserver().agentIds();
- 
+
     std::vector<std::string> agents;
 
     if (args.size() == 0)
         return "Error: No agents to stop specified";
-            
+
     for (std::list<std::string>::const_iterator it = args.begin();
          it != args.end(); ++it) {
         std::string agent_type = *it;
@@ -139,7 +163,7 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
             oss << "Invalid Agent ID (" << *it << ")";
             return oss.str();
         }
-        
+
         agents.push_back(agent_type);
     }
     // doesn't give an error if there is no instance of that agent type running
@@ -150,16 +174,16 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
         if (cogserver().getModule(*it) != NULL) {
             // delete the Agent instance if it is not
             cogserver().destroyAllAgents(*it);
-        }  
+        }
     }
-    
+
     return "Successfully stopped agents";
 }
 
 std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::string> args)
-{    
+{
     std::vector<Agent*> agents = cogserver().runningAgents();
-    
+
     if (args.size() == 0) {
         for (std::vector<Agent*>::const_iterator it = agents.begin();
              it != agents.end(); ++it) {
@@ -171,13 +195,13 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
         int numberAgentsRun = 0;
         for (std::list<std::string>::const_iterator it = args.begin();
              it != args.end(); ++it) {
-            
+
             std::string agent_type = *it;
 
             // try to find an already started agent with that name
             std::vector<Agent*>::const_iterator tmp = agents.begin();
             for ( ; tmp!=agents.end() ; tmp++ ) if ( *it == (*tmp)->classinfo().id ) break;
-            
+
             Agent* agent;
             if (agents.end() == tmp) {
                 // construct a temporary agent
@@ -208,14 +232,14 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
 std::string BuiltinRequestsModule::do_stopAgentLoop(Request *dummy, std::list<std::string> args)
 {
     cogserver().stopAgentLoop();
-    
+
     return "Stopped agent loop";
 }
 
 std::string BuiltinRequestsModule::do_startAgentLoop(Request *dummy, std::list<std::string> args)
 {
     cogserver().startAgentLoop();
-    
+
     return "Started agent loop";
 }
 
@@ -223,12 +247,12 @@ std::string BuiltinRequestsModule::do_listAgents(Request *dummy, std::list<std::
 {
     std::list<const char*> agentNames = cogserver().agentIds();
     std::ostringstream oss;
-    
+
     for (std::list<const char*>::const_iterator it = agentNames.begin();
          it != agentNames.end(); ++it) {
         oss << (*it) << std::endl;
     }
-    
+
     return oss.str();
 }
 
@@ -236,11 +260,11 @@ std::string BuiltinRequestsModule::do_activeAgents(Request *dummy, std::list<std
 {
     std::vector<Agent*> agents = cogserver().runningAgents();
     std::ostringstream oss;
-    
+
     for (std::vector<Agent*>::const_iterator it = agents.begin();
          it != agents.end(); ++it) {
         oss << (*it)->to_string() << std::endl;
     }
-    
+
     return oss.str();
 }
