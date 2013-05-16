@@ -61,8 +61,8 @@ public:
         pyClassName = clazz;
         cci = new RequestClassInfo(
               pySrcModuleName + pyClassName,
-              "A python implemented request",
-              "long description including parameter types"
+              "Replace this text with a short summary.",  // TODO see above.
+              "Please supply a long description including parameter types."
         );
     }
     virtual ~PythonRequestFactory() {
