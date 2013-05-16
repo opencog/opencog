@@ -50,9 +50,9 @@ public:
 
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
-            "create-atom-json",
+            "json-create-atom",
             "Create a new atom from JSON",
-            "Usage: create-atom<CRLF>JSON<CRLF><Ctrl-D><CRLF>\n\n"
+            "Usage: json-create-atom<CRLF>JSON<CRLF><Ctrl-D><CRLF>\n\n"
             "   Create an atom based on the JSON format:\n"
             "   { \"type\": TYPENAME, \"name\": NAME, \n"
             "     \"outgoing\": [ UUID1, UUID2 ... ], \n"

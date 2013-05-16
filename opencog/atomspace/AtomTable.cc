@@ -40,7 +40,6 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 

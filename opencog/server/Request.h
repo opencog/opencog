@@ -85,6 +85,8 @@ namespace opencog
  * cmd_desc:  A long string describing the command in detail.
  * shell_cmd: A boolean value that indicates the command is for entering a
  *            shell.
+ * hidden:    A boolean value that indicates the command is not listed
+ *            when 'help' is used to list commands.
  *
  *
  * Example usage:
@@ -95,10 +97,11 @@ namespace opencog
  *            "stir-fry:  Make the OpenCog server cook Chinese food.",
  *            "Usage: stir-fry <rice> <sesame-oil> <etc>\n\n"
  *            "This is a very super-intellgent cooking command.\n"
- *            "It even makes coffee!!!")
+ *            "It even makes coffee!!!",
+ *            false, false)
  * };
  *
- * MyModule::MyModule() {       // In the constructor, or duing init
+ * MyModule::MyModule() {       // In the constructor, or during init
  *     do_stirfry_register();   // The command must be registered!
  * }
  *
@@ -125,7 +128,7 @@ namespace opencog
  * See also: persist/PersistModule.cc as a working real-life example.
  */
 #define DECLARE_CMD_REQUEST(mod_type,cmd_str,do_cmd,                  \
-                            cmd_sum,cmd_desc,shell_cmd)               \
+                            cmd_sum,cmd_desc,shell_cmd,hidden)        \
                                                                       \
    class do_cmd##Request : public Request {                           \
       public:                                                         \
@@ -133,7 +136,8 @@ namespace opencog
               static const RequestClassInfo _cci(cmd_str,             \
                                                  cmd_sum,             \
                                                  cmd_desc,            \
-                                                 shell_cmd);          \
+                                                 shell_cmd,           \
+                                                 hidden);             \
               return _cci;                                            \
     }                                                                 \
     do_cmd##Request(void) {};                                         \
