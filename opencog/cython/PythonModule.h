@@ -42,7 +42,7 @@ public:
     }
     virtual Agent* create() const;
     virtual const ClassInfo& info() const { return *ci; }
-}; 
+};
 
 class PythonRequestFactory : public AbstractFactory<Request>
 {
@@ -69,15 +69,15 @@ public:
         delete cci;
     }
     virtual Request* create() const;
-}; 
+};
 
 class PythonModule : public Module
 {
-    DECLARE_CMD_REQUEST(PythonModule, "loadpy", do_load_py, 
-       "Load requests and MindAgents from a python module", 
+    DECLARE_CMD_REQUEST(PythonModule, "loadpy", do_load_py,
+       "Load requests and MindAgents from a python module",
        "Usage: load_py module_name\n\n"
-       "Loads and registers all request classes and all MindAgents with the CogServer", 
-       false);
+       "Loads and registers all request classes and all MindAgents with the CogServer",
+       false, false);
 
 private:
 
@@ -101,7 +101,7 @@ public:
 
     bool unregisterAgentsAndRequests();
     std::string name;
-    
+
     bool preloadModules();
 
     //PyObject* load_module(std::string& filename);

@@ -26,7 +26,6 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>

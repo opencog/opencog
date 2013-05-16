@@ -43,7 +43,6 @@
 #include <boost/signal.hpp>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/util/Config.h>
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/TruthValue.h>

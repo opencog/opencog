@@ -6,9 +6,7 @@ ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
 	Request
 	DataRequest
-	ExitRequest
 	SleepRequest
-	HelpRequest
 	LoadRequest
 	SaveRequest
 	LoadModuleRequest
@@ -112,9 +110,7 @@ INSTALL (FILES
 	CogServer.h
 	ConsoleSocket.h
 	DataRequest.h
-	ExitRequest.h
 	Factory.h
-	HelpRequest.h
 	IHasMimeType.h
 	IRequestComplete.h
 	ListRequest.h
