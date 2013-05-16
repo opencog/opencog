@@ -170,6 +170,9 @@ typedef scored_instance<composite_score> deme_inst_t;
 // Base class for all optimizers
 struct optimizer_base : optim_stats
 {
+    optimizer_base(const optim_parameters& op = optim_parameters())
+        : opt_params(op) {}
+    
     // Return # of evaluations actually performed
     virtual unsigned operator()(deme_t& deme,
                                 const iscorer_base& iscorer,
@@ -177,6 +180,8 @@ struct optimizer_base : optim_stats
                                 time_t max_time) = 0;
 
     virtual ~optimizer_base() {}
+
+    optim_parameters opt_params;
 };
 
 } // ~namespace moses

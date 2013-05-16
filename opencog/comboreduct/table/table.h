@@ -317,6 +317,9 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
     void erase_at(size_t pos) {
         boost::apply_visitor(erase_at_visitor(pos), _variant);
     }
+    void init_at(size_t pos) {
+        boost::apply_visitor(init_at_visitor(pos), _variant);
+    }
     template<typename T> T get_at(size_t pos) const {
         return boost::apply_visitor(get_at_visitor<T>(pos), _variant);
     }
@@ -450,19 +453,45 @@ public:
         return res;
     }
 
-    template<typename F, typename Seq>
-    Seq filtered_preverse_idxs(const F& filter, const Seq& seq) const
+    template<typename F>
+    multi_type_seq filtered_preverse_idxs(const F& filter,
+                                          const multi_type_seq& seq) const
     {
-        Seq res;
+        multi_type_seq res;
         auto it = filter.cbegin();
         for (unsigned i = 0; i < seq.size(); ++i) {
             if (it != filter.cend() && (typename F::value_type)i == *it) {
-                res.push_back(seq[i]);
+                // XXX TODO WARNING ERROR: builtin hardcoded shit!!!
+                res.push_back(seq.get_at<builtin>(i));
                 ++it;
-            } else
+            } else {
+                // XXX TODO WARNING ERROR: builtin hardcoded shit!!!
                 res.push_back(id::null_vertex);
+            }
         }
-        return seq;
+        return res;
+    }
+
+    /**
+     * Like filtered but preserve the indices on the columns,
+     * techincally it replaces all input values filtered out by
+     * id::null_vertex.
+     */
+    template<typename F>
+    CTable filtered_preverse_idxs(const F& filter) const
+    {
+        typedef type_tree::iterator pre_it;
+        typedef type_tree::sibling_iterator sib_it;
+
+        // Set new CTable
+        CTable res(olabel, ilabels, tsig);
+
+        // Filter the rows (replace filtered out values by id::null_vertex)
+        for (const CTable::value_type v : *this)
+            res[filtered_preverse_idxs(filter, v.first)] += v.second;
+
+        // return the filtered CTable
+        return res;
     }
 
     // return the output label + list of input labels
