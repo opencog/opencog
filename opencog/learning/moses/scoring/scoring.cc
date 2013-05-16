@@ -1137,8 +1137,10 @@ score_t precision_bscore::min_improv() const
     return 1.0 / ctable_usize;
 }
 
-void precision_bscore::ignore_idxs(std::set<arity_t>& idxs) const
+void precision_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
 {
+    logger().debug("Compress CTable for optimization");
+
     // Get permitted idxs.
     auto irng = boost::irange(0, orig_ctable.get_arity());
     std::set<arity_t> all_idxs(irng.begin(), irng.end());
@@ -1146,6 +1148,9 @@ void precision_bscore::ignore_idxs(std::set<arity_t>& idxs) const
 
     // Filter orig_table with permitted idxs.
     wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
+
+    logger().debug("Original CTable size = %u", orig_ctable.size());
+    logger().debug("Working CTable size = %u", wrk_ctable.size());
 }
 
 combo_tree precision_bscore::gen_canonical_best_candidate() const
@@ -1992,7 +1997,7 @@ score_t multibscore_based_bscore::min_improv() const
     return res;
 }
 
-void multibscore_based_bscore::ignore_idxs(std::set<arity_t>& idxs) const
+void multibscore_based_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
 {
     for (const bscore_base& bs : _bscorers)
         bs.ignore_idxs(idxs);
