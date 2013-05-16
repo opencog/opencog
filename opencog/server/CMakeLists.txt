@@ -7,7 +7,6 @@ ADD_LIBRARY (builtinreqs SHARED
 	Request
 	DataRequest
 	SleepRequest
-	HelpRequest
 	LoadRequest
 	SaveRequest
 	LoadModuleRequest
@@ -112,7 +111,6 @@ INSTALL (FILES
 	ConsoleSocket.h
 	DataRequest.h
 	Factory.h
-	HelpRequest.h
 	IHasMimeType.h
 	IRequestComplete.h
 	ListRequest.h

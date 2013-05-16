@@ -28,7 +28,6 @@
 #include <opencog/server/DataRequest.h>
 #include <opencog/server/SleepRequest.h>
 #include <opencog/server/Factory.h>
-#include <opencog/server/HelpRequest.h>
 #include <opencog/server/ListRequest.h>
 #include <opencog/server/LoadModuleRequest.h>
 #include <opencog/server/LoadRequest.h>
@@ -50,7 +49,6 @@ private:
 
     Factory<ListRequest, Request>         listFactory;
     Factory<DataRequest, Request>         dataFactory;
-    Factory<HelpRequest, Request>         helpFactory;
     Factory<SleepRequest, Request>        sleepFactory;
     Factory<ShutdownRequest, Request>     shutdownFactory;
     Factory<LoadModuleRequest, Request>   loadmoduleFactory;
@@ -68,10 +66,30 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "quit", do_quit,
        "Close the shell TCP/IP connection.\n",
        false, false)
 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "q", do_q,
+       "Close the shell connection",
+       "Usage: q\n\n"
+       "Close the shell TCP/IP connection.\n",
+       false, true)
+
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "", do_ctrld,
        "Close the shell connection",
        "Usage: ^D\n\n"
        "Close the shell TCP/IP connection.\n",
+       false, true)
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "help", do_help,
+       "List the available commands or print the help for a specific command",
+       "Usage: help [<command>]\n\n"
+       "If no command is specified, then print a menu of commands.\n"
+       "Otherwise, print verbose help for the indicated command.\n",
+       false, false)
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "h", do_h,
+       "List the available commands or print the help for a specific command",
+       "Usage: h [<command>]\n\n"
+       "If no command is specified, then print a menu of commands.\n"
+       "Otherwise, print verbose help for the indicated command.\n",
        false, true)
 
 // I'm adding the agent control commands via the macro syntax

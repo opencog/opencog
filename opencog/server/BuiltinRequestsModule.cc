@@ -25,6 +25,7 @@
 #include "BuiltinRequestsModule.h"
 
 #include <opencog/server/CogServer.h>
+#include <opencog/util/ansi.h>
 
 using namespace opencog;
 
@@ -38,7 +39,6 @@ BuiltinRequestsModule::BuiltinRequestsModule()
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(ListRequest::info().id,         &listFactory);
     cogserver.registerRequest(DataRequest::info().id,         &dataFactory);
-    cogserver.registerRequest(HelpRequest::info().id,         &helpFactory);
     cogserver.registerRequest(SleepRequest::info().id,        &sleepFactory);
     cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory);
     cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
@@ -53,7 +53,6 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     cogserver.unregisterRequest(LoadRequest::info().id);
     cogserver.unregisterRequest(SaveRequest::info().id);
     cogserver.unregisterRequest(DataRequest::info().id);
-    cogserver.unregisterRequest(HelpRequest::info().id);
     cogserver.unregisterRequest(SleepRequest::info().id);
     cogserver.unregisterRequest(ShutdownRequest::info().id);
     cogserver.unregisterRequest(LoadModuleRequest::info().id);
@@ -63,9 +62,14 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
 
 void BuiltinRequestsModule::registerAgentRequests()
 {
+    do_help_register();
+    do_h_register();
+
     do_exit_register();
     do_quit_register();
+    do_q_register();
     do_ctrld_register();
+
     do_startAgents_register();
     do_stopAgents_register();
     do_stepAgents_register();
@@ -77,9 +81,14 @@ void BuiltinRequestsModule::registerAgentRequests()
 
 void BuiltinRequestsModule::unregisterAgentRequests()
 {
+    do_help_unregister();
+    do_h_unregister();
+
     do_exit_unregister();
     do_quit_unregister();
+    do_q_unregister();
     do_ctrld_unregister();
+
     do_startAgents_unregister();
     do_stopAgents_unregister();
     do_stepAgents_unregister();
@@ -93,6 +102,8 @@ void BuiltinRequestsModule::init()
 {
 }
 
+// ====================================================================
+// Various flavors of closing the connection
 std::string BuiltinRequestsModule::do_exit(Request *req, std::list<std::string> args)
 {
     RequestResult* rr = req->getRequestResult();
@@ -108,11 +119,68 @@ std::string BuiltinRequestsModule::do_quit(Request *req, std::list<std::string> 
     return do_exit(req, args);
 }
 
+std::string BuiltinRequestsModule::do_q(Request *req, std::list<std::string> args)
+{
+    return do_exit(req, args);
+}
+
 std::string BuiltinRequestsModule::do_ctrld(Request *req, std::list<std::string> args)
 {
     return do_exit(req, args);
 }
 
+// ====================================================================
+// Various flavors of help
+std::string BuiltinRequestsModule::do_help(Request *req, std::list<std::string> args)
+{
+    std::ostringstream oss;
+    CogServer& cogserver = static_cast<CogServer&>(server());
+
+    if (args.empty()) {
+        std::list<const char*> commands = cogserver.requestIds();
+
+        size_t maxl = 0;
+        std::list<const char*>::const_iterator it;
+        for (it = commands.begin(); it != commands.end(); ++it) {
+            size_t len = strlen(*it);
+            if (len > maxl) maxl = len;
+        }
+
+        oss << "Available commands:" << std::endl;
+        for (it = commands.begin(); it != commands.end(); ++it) {
+            // Skip hidden commands
+            if (cogserver.requestInfo(*it).hidden) continue;
+            std::string cmdname(*it);
+            std::string ansi_cmdname;
+            ansi_green(ansi_cmdname); ansi_bright(ansi_cmdname);
+            ansi_cmdname.append(cmdname);
+            ansi_off(ansi_cmdname);
+            ansi_green(ansi_cmdname);
+            ansi_cmdname.append(":");
+            ansi_off(ansi_cmdname);
+            size_t cmd_length = strlen(cmdname.c_str());
+            size_t ansi_code_length = strlen(ansi_cmdname.c_str()) - cmd_length;
+            oss << "  " << std::setw(maxl+ansi_code_length+2) << std::left << ansi_cmdname
+                << cogserver.requestInfo(*it).description << std::endl;
+        }
+    } else if (args.size() == 1) {
+        const RequestClassInfo& cci = cogserver.requestInfo(args.front());
+        if (cci.help != "")
+            oss << cci.help << std::endl;
+    } else {
+        oss << do_helpRequest::info().help << std::endl;
+    }
+
+    return oss.str();
+}
+
+std::string BuiltinRequestsModule::do_h(Request *req, std::list<std::string> args)
+{
+    return do_help(req, args);
+}
+
+// ====================================================================
+// Various agents commands
 std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std::string> args)
 {
     std::list<const char*> availableAgents = cogserver().agentIds();
