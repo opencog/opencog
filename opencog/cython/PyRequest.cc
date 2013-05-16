@@ -9,14 +9,14 @@ using namespace opencog;
 
 PyRequest::PyRequest(const std::string& _moduleName, const std::string& _className)
 {
+    // XXX TODO FIXME -- obtain the request description from the python code.
     cci = new RequestClassInfo(
           _moduleName + _className,
-          "A python implemented request",
-          "long description including parameter types"
+          "Some request implemented in python. TODO provide short description.",
+          "TODO provide a long description including parameter types."
     );
 
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure(); 
+    PyGILState_STATE gstate = PyGILState_Ensure(); 
 
     import_agent_finder();
     moduleName = _moduleName;
@@ -27,7 +27,11 @@ PyRequest::PyRequest(const std::string& _moduleName, const std::string& _classNa
     PyGILState_Release(gstate); 
 
     if (pyrequest == Py_None)
-        throw RuntimeException(TRACE_INFO, "Error creating Python Request");
+        logger().error() << "Error creating python request "
+                         << _moduleName << "." << _className;
+    else
+        logger().info() << "Created python request "
+                        << _moduleName << "." << _className;
 }
 
 PyRequest::~PyRequest()
