@@ -1,5 +1,4 @@
 #include "PythonModule.h"
-
 #include "agent_finder_api.h"
 
 #include <boost/filesystem/operations.hpp>
@@ -17,6 +16,19 @@ using namespace opencog;
 #define DPRINTF(...)
 
 DECLARE_MODULE(PythonModule);
+
+static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
+{
+    PROJECT_BINARY_DIR"/opencog/cython", // bindings
+    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
+    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
+    DATADIR"/python",                    // install directory
+    #ifndef WIN32
+    "/usr/local/share/opencog/python",
+    "/usr/share/opencog/python",
+    #endif // !WIN32
+    NULL
+};
 
 // Factories
 
@@ -70,14 +82,60 @@ void PythonModule::init()
 
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
-    PythonEval::instance();
+    // Start up Python (this init method skips registering signal handlers)
+    if(!Py_IsInitialized())
+        Py_InitializeEx(0);
+    if(!PyEval_ThreadsInitialized())
+        PyEval_InitThreads();
+
+    // Add our module directories to the Python interprator's path
+    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
+
+    PyObject* sysPath = PySys_GetObject((char*)"path");
+
+    // Default paths for python modules
+    for (int i = 0; config_paths[i] != NULL; ++i) {
+        boost::filesystem::path modulePath(config_paths[i]);
+        if (boost::filesystem::exists(modulePath))
+            PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
+        //            applier.addSysPath(modulePath.string());
+
+    }
+
+    // Add custom paths for python modules from the config file if available
+    if (config().has("PYTHON_EXTENSION_DIRS")) {
+        std::vector<std::string> pythonpaths;
+        // For debugging current path
+        tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
+        for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
+             it != pythonpaths.end(); ++it) {
+            boost::filesystem::path modulePath(*it);
+            if (boost::filesystem::exists(modulePath)) {
+                PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
+                //                applier.addSysPath(modulePath.string());
+            } else {
+                logger().error("PythonEval::%s Could not find custom python extension directory: %s ",
+                               __FUNCTION__,
+                               (*it).c_str()
+                               );
+            }
+        }
+    }
+
 
     if (import_agent_finder() == -1) {
         PyErr_Print();
         throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
     }
+    // For debugging the python path:
+    logger().debug("Python sys.path is: " + get_path_as_string());
+
+
+    PythonEval& applier = PythonEval::instance();
+
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     do_load_py_register();
+
 }
 
 bool PythonModule::preloadModules()

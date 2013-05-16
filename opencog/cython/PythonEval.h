@@ -39,10 +39,15 @@
 #define OPENCOG_PYTHON_EVAL_H
 #ifdef HAVE_CYTHON
 
-#include <string>
-//#include </usr/include/python2.7/Python.h>
 #include "PyIncludeWrapper.h"
-// PyIncludeWrapper.h breaks build because Python.h does not exist.
+
+#include <opencog/atomspace/Handle.h>
+
+#include <boost/filesystem/operations.hpp>
+
+#include <string>
+#include <vector>
+#include <map>
 
 namespace opencog {
 
@@ -75,7 +80,9 @@ class PythonEval
 {
 	private:
 
-		void init(void);
+        void init(void);
+        void add_module_directory(const boost::filesystem3::path &p);
+        void add_module_file(const boost::filesystem3::path &p);
 
 		// Make constructor, destructor private; force everyone to use the
         // singleton instance
@@ -94,10 +101,17 @@ class PythonEval
         PyInterpreterState * mainInterpreterState;
 
         PyObject* pyGlobal;
-        PyObject* pyModule;
-        PyObject* pmfModule;
+        PyObject* pyLocal;
+        PyObject* pyRootModule;
+
+        PyObject* sys_path;
+
+        std::map <std::string, PyObject*> modules;
 
 	public:
+        void addModuleFromPath(std::string path);
+        void addSysPath(std::string path);
+
 
         PyThreadState * getMainThreadState() {
             return this->mainThreadState; 
@@ -122,8 +136,8 @@ class PythonEval
 		// Use a singleton instance to avoid initializing python interpreter twice. 
 		static PythonEval & instance(AtomSpace * atomspace = NULL);
 
-        void apply(std::string script);
-        PyObject* call_func(const std::string name, const int arg);
+        void apply_script(const std::string& script);
+        Handle apply(const std::string& func, Handle varargs);
 
 };
 
