@@ -106,6 +106,12 @@ protected:
     const reduct::rule& simplify_candidate; // to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
     const cscore_base& _cscorer; // composite score
+
+    // This is used to keep track of the ignored indices for
+    // optimizing evaluation (in case of feature selection) and
+    // calculate max score per deme
+    std::vector<std::set<arity_t>> _ignore_idxs_seq;
+
     metapop_parameters _params;
 };
 
