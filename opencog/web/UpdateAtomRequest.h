@@ -60,9 +60,9 @@ public:
 
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
-            "update-atom-json",
+            "json-update-atom",
             "update the STI, LTI, or TV of an atom with JSON message",
-            "Usage: update-atom handle {JSON}\n\n"
+            "Usage: json-update-atom handle {JSON}\n\n"
             "   Update an atom based on a JSON message with format:\n"
             "   { \"sti\": STI } \n"
             "   { \"lti\": LTI } \n"
