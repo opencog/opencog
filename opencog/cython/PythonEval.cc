@@ -1,8 +1,8 @@
 /*
  * @file opencog/cython/PythonEval.cc
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
- * @date   2011-09-20
+ * @author Ramin Barati <rekino@gmail.com> Keyvan Mir Mohammad Sadeghi <keyvan@opencog.org>
+ * @date   2013-05-16
  *
  * Reference: 
  *   http://www.linuxjournal.com/article/3641?page=0,2
@@ -67,13 +67,6 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 void PythonEval::init(void)
 {
     logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
-    Py_SetProgramName((char*)"OpenCog");
-
-    //Start up Python (this init method skips registering signal handlers)
-    if(!Py_IsInitialized())
-        Py_InitializeEx(0);
-    if(!PyEval_ThreadsInitialized())
-        PyEval_InitThreads();
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
@@ -81,59 +74,36 @@ void PythonEval::init(void)
     // Get a reference to the PyInterpreterState
     this->mainInterpreterState = this->mainThreadState->interp;
 
-    pyModule = PyModule_New("openCogModule");
-    PyModule_AddStringConstant(pyModule, "__file__", "");
-
-    pyGlobal = PyDict_New();
-
-    //Add our module directories to the Python interprator's path
-    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
-
-    PyObject* sysPath = PySys_GetObject((char*)"path");
-
-    // Default paths for python modules
-    for (int i = 0; config_paths[i] != NULL; ++i) {
-        boost::filesystem::path modulePath(config_paths[i]);
-        if (boost::filesystem::exists(modulePath))
-            PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
-    }
-
-    // Add custom paths for python modules from the config file if available
-    if (config().has("PYTHON_EXTENSION_DIRS")) {
-        std::vector<std::string> pythonpaths;
-        // For debugging current path
-        tokenize(config()["PYTHON_EXTENSION_DIRS"], std::back_inserter(pythonpaths), ", ");
-        for (std::vector<std::string>::const_iterator it = pythonpaths.begin();
-             it != pythonpaths.end(); ++it) {
-            boost::filesystem::path modulePath(*it);
-            if (boost::filesystem::exists(modulePath)) {
-                PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
-            } else {
-                logger().error("PythonEval::%s Could not find custom python extension directory: %s ",
-                               __FUNCTION__,
-                               (*it).c_str()
-                              );
-            }
-        }
-    }
-
-    // Initialise the agent_finder module which helps with the Python side of
-    // things
+    this->pyRootModule = PyImport_AddModule("__main__");
+    PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
+    this->apply_script("from opencog.atomspace import Handle, Atom\n"
+                       "import inspect\n"
+                       "def execute_user_defined_function(func, handle_uuid):\n"
+                       "    handle = Handle(handle_uuid)\n"
+                       "    args_list_link = ATOMSPACE[handle]\n"
+                       "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
+                       "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
+                       "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
+                       "        raise Exception('Number of arguments in the function (' + str(no_of_arguments_in_user_fn) + ') does not match that of the corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
+                       "    atom = func(*args_list_link.out)\n"
+                       "    if atom is None:\n"
+                       "        return\n"
+                       "    assert(type(atom) == Atom)\n"
+                       "    return atom.h.value()\n\n");
     if (import_agent_finder() == -1) {
         PyErr_Print();
-        throw RuntimeException(TRACE_INFO,"PythonEval::init Failed to load helper python module");
+        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
     }
 
-    // Import pattern_match_functions which contains user defined functions
-    PyObject* pList = PyList_New(0);
-    PyObject* pyLocal = PyModule_GetDict(pyModule);
-    OC_ASSERT(pyLocal != NULL);
-    pmfModule = PyImport_ImportModuleLevel((char*)"pattern_match_functions", pyGlobal, pyLocal, pList, 0);
-    PyModule_AddObject(pyModule, "pattern_match_functions", pmfModule);
-    Py_DECREF(pList);
+    PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
 
-    // For debugging the python path:
-    logger().debug("Python sys.path is: " + get_path_as_string());
+    pyGlobal = PyDict_New();
+    pyLocal = PyDict_New();
+
+    sys_path = PySys_GetObject((char*)"path");
+
+    // Import pattern_match_functions which contains user defined functions
+    this->addModuleFromPath(PROJECT_SOURCE_DIR"/opencog/python/pattern_match_functions");
 
     logger().info("PythonEval::%s Finished initialising python evaluator.", __FUNCTION__);
 }
@@ -171,7 +141,7 @@ void PythonEval::printDict(PyObject* obj) {
     for (int i = 0; i < PyList_GET_SIZE(keys); i++) {  
         k = PyList_GET_ITEM(keys, i);  
         char* c_name = PyString_AsString(k);  
-        printf("%s/n", c_name);  
+        printf("%s\n", c_name);
     }  
 }
 
@@ -180,7 +150,10 @@ PythonEval::~PythonEval()
     logger().info("PythonEval::%s destructor", __FUNCTION__);
     Py_Finalize();
 
-    delete pyModule;
+    delete pyLocal;
+    delete pyRootModule;
+
+    delete sys_path;
     delete pyGlobal;
 }
 
@@ -189,6 +162,15 @@ PythonEval::~PythonEval()
 // twice.
 PythonEval& PythonEval::instance(AtomSpace * atomspace)
 {
+    if(!Py_IsInitialized()){
+        logger().error() << "Python Interpreter isn't initialized";
+        throw RuntimeException(TRACE_INFO, "Python Interpreter isn't initialized");
+    }
+    if(!PyEval_ThreadsInitialized()){
+        logger().error() << "Python Threads isn't initialized";
+        throw RuntimeException(TRACE_INFO, "Python Threads isn't initialized");
+    }
+
     if (!singletonInstance)
     {
         if (!atomspace) {
@@ -213,34 +195,149 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
    return *singletonInstance;
 }
 
-PyObject* PythonEval::call_func(const std::string name, const int arg)
+Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
-    PyObject *pFunc, *pArgs, *pInt, *pValue = NULL;
+    PyObject *pError, *pyModule, *pFunc, *pExecFunc, *pArgs, *pUUID, *pValue = NULL;
+    string moduleName;
+    string funcName;
+    int index = func.find_first_of('.');
+    if(index < 0){
+        pyModule = this->pyRootModule;
+        funcName = func;
+        moduleName = "__main__";
+    }
+    else{
+        moduleName = func.substr(0,index);
+        pyModule = this->modules[moduleName];
+        funcName = func.substr(index+1);
+    }
 
-    pFunc = PyObject_GetAttrString(pyModule, name.c_str());
+    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyString_FromString(funcName.c_str()));
 
     OC_ASSERT(pFunc != NULL);
-    OC_ASSERT(PyCallable_Check(pFunc));
+    if(!PyCallable_Check(pFunc))
+    {
+        logger().error() << "Member " << func << " is not callable.";
+        return Handle::UNDEFINED;
+    }
 
-    pArgs = PyTuple_New(1);
-    pInt = PyInt_FromLong(arg);
-    OC_ASSERT(pInt != NULL);
-    PyTuple_SetItem(pArgs, 0, pInt);
+    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("execute_user_defined_function"));
+    OC_ASSERT(pExecFunc != NULL);
 
-    pValue = PyObject_CallObject(pFunc, pArgs);
+    pArgs = PyTuple_New(2);
+    pUUID = PyLong_FromLong(varargs.value());
+    OC_ASSERT(pUUID != NULL);
+
+    PyTuple_SetItem(pArgs, 0, pFunc);
+    PyTuple_SetItem(pArgs, 1, pUUID);
+
+    pValue = PyObject_CallObject(pExecFunc, pArgs);
+    pError = PyErr_Occurred();
+
+    if(pError){
+        PyErr_Print();
+        logger().error() << PyString_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
+        return Handle::UNDEFINED;
+    }
+
+    UUID uuid = static_cast<unsigned long>(PyLong_AsLong(pValue));
 
     Py_DECREF(pArgs);
-    Py_DECREF(pInt);
+    Py_DECREF(pUUID);
     Py_DECREF(pFunc);
+    Py_DECREF(pExecFunc);
 
-    return pValue;
+    return Handle(uuid);
 }
 
-void PythonEval::apply(std::string script)
+void PythonEval::apply_script(const std::string& script)
 {
-    PyObject *pyLocal = PyModule_GetDict(pyModule);
-    OC_ASSERT(pyLocal != NULL);
+//    PyObject *pyLocal = PyModule_GetDict(pyRootModule);
+//    OC_ASSERT(pyLocal != NULL);
 
-    PyRun_String(script.c_str(), Py_file_input, pyGlobal, pyLocal);
+    PyRun_SimpleString(script.c_str());
+}
+
+void PythonEval::addSysPath(std::string path)
+{
+    PyList_Append(this->sys_path, PyString_FromString(path.c_str()));
+}
+
+void PythonEval::add_module_directory(const boost::filesystem3::path &p)
+{
+    vector<boost::filesystem3::path> files;
+    vector<boost::filesystem3::path> pyFiles;
+
+    copy(boost::filesystem3::directory_iterator(p), boost::filesystem3::directory_iterator(), back_inserter(files));
+
+    for(vector<boost::filesystem3::path>::const_iterator it(files.begin()); it != files.end(); ++it){
+        if(it->extension() == boost::filesystem3::path(".py"))
+            pyFiles.push_back(*it);
+    }
+
+    this->addSysPath(p.c_str());
+
+    string name;
+    PyObject* mod;
+    PyObject* pyList = PyList_New(0);
+    for(vector<boost::filesystem3::path>::const_iterator it(pyFiles.begin()); it != pyFiles.end(); ++it){
+        name = it->filename().c_str();
+        name = name.substr(0, name.length()-3);
+        mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
+
+        if(mod){
+            PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+            PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
+            this->modules[name] = mod;
+        }
+        else{
+            if(PyErr_Occurred())
+                PyErr_Print();
+            logger().warn() << "Couldn't import " << name << " module from folder " << p.c_str();
+        }
+    }
+    Py_DECREF(pyList);
+}
+
+void PythonEval::add_module_file(const boost::filesystem3::path &p)
+{
+    this->addSysPath(p.parent_path().c_str());
+
+    string name;
+    PyObject* mod;
+    PyObject* pyList = PyList_New(0);
+
+    name = p.filename().c_str();
+    name = name.substr(0, name.length()-3);
+    mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
+
+    PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+    if(mod){
+        PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+        PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
+        this->modules[name] = mod;
+    }
+    else{
+        if(PyErr_Occurred())
+            PyErr_Print();
+        logger().warn() << "Couldn't import " << name << " module";
+    }
+    Py_DECREF(pyList);
+}
+
+void PythonEval::addModuleFromPath(std::string path)
+{
+    boost::filesystem3::path p(path);
+
+    if(boost::filesystem3::exists(p)){
+        if(boost::filesystem3::is_directory(p))
+            this->add_module_directory(p);
+        else
+            this->add_module_file(p);
+    }
+    else{
+        logger().error() << path << " doesn't exists";
+    }
+
 }
 

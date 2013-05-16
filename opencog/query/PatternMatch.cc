@@ -231,15 +231,11 @@ Handle Instantiator::execution_link()
         while (' ' == schema[pos]) pos++;
 
         PythonEval &applier = PythonEval::instance();
-		// XXX TODO figure out how to pass a list of handles to python...
-		// Currently, this just core dumps. I don't know why.
 
-        applier.apply(schema.substr(pos));
+        Handle h = applier.apply(schema.substr(pos), oset[1]);
 
-//		PyRun_SimpleString(schema.substr(pos).c_str());
-		// XXX TODO figure out how to get handle from python...
-		// return h;
-		return Handle::UNDEFINED;
+        // Return the handle
+        return h;
 #else
 		return Handle::UNDEFINED;
 #endif /* HAVE_CYTHON */
