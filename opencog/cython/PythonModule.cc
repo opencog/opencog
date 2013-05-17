@@ -43,7 +43,6 @@ Request* PythonRequestFactory::create() const
 {
     logger().info() << "Creating python request " << pySrcModuleName << "." << pyClassName;
     PyRequest* pma = new PyRequest(pySrcModuleName, pyClassName);
-    pma->execute();
     return pma;
 }
 
@@ -60,6 +59,8 @@ PythonModule::~PythonModule()
     logger().info("[PythonModule] destructor");
     unregisterAgentsAndRequests();
     do_load_py_unregister();
+    PyEval_AcquireLock();
+    PyErr_Clear();
     Py_Finalize();
     already_loaded = false;
 }
@@ -88,10 +89,12 @@ void PythonModule::init()
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
     // Start up Python (this init method skips registering signal handlers)
-    if(!Py_IsInitialized())
+    if (!Py_IsInitialized())
         Py_InitializeEx(0);
-    if(!PyEval_ThreadsInitialized())
+    if (!PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
+        PyEval_ReleaseLock();
+    }
 
     // Add our module directories to the Python interprator's path
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
@@ -103,8 +106,6 @@ void PythonModule::init()
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath))
             PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
-        //            applier.addSysPath(modulePath.string());
-
     }
 
     // Add custom paths for python modules from the config file if available
@@ -117,9 +118,8 @@ void PythonModule::init()
             boost::filesystem::path modulePath(*it);
             if (boost::filesystem::exists(modulePath)) {
                 PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
-                //                applier.addSysPath(modulePath.string());
             } else {
-                logger().error("PythonEval::%s Could not find custom python extension directory: %s ",
+                logger().warn("PythonEval::%s Could not find custom python extension directory: %s ",
                                __FUNCTION__,
                                (*it).c_str()
                                );
@@ -127,15 +127,12 @@ void PythonModule::init()
         }
     }
 
-
     if (import_agent_finder() == -1) {
         PyErr_Print();
-        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
+        logger().error() << "[PythonModule] Failed to load helper python module";
+        return;
     }
-    // For debugging the python path:
     logger().debug("Python sys.path is: " + get_path_as_string());
-
-    PythonEval& applier = PythonEval::instance();
 
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     do_load_py_register();
