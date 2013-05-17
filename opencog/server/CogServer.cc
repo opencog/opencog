@@ -170,7 +170,7 @@ void CogServer::serverLoop()
 //        }
 
         if (currentCycle != this->cycleCount) {
-            logger().debug("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
+            logger().fine("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
                             currentCycle,
                            elapsed_time/1000000.0
                           );
@@ -199,7 +199,7 @@ void CogServer::runLoopStep(void)
         requests_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
-        logger().debug("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
+        logger().fine("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
                    currentCycle,
                    requests_time/1000000.0
                   );
@@ -215,7 +215,7 @@ void CogServer::runLoopStep(void)
     elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
-    logger().debug("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
+    logger().fine("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
                    currentCycle,
                    elapsed_time/1000000.0
                   );
@@ -233,13 +233,13 @@ void CogServer::runLoopStep(void)
         gettimeofday(&timer_end, NULL); 
         elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                        (timer_end.tv_usec - timer_start.tv_usec);
-        logger().debug("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
+        logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
                    currentCycle,
                    elapsed_time/1000000.0, currentCycle
                   );
     } else {
         // Skipping MindAgents, and not incremented cycle counter.
-        logger().debug("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
+        logger().fine("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
     }
 
 }
@@ -522,7 +522,7 @@ bool CogServer::loadModule(const std::string& filename)
     // get and check module id
     const char *module_id = (*id_func)();
     if (module_id == NULL) {
-        logger().error("Invalid module id (module \"%s\")", filename.c_str());
+        logger().warn("Invalid module id (module \"%s\")", filename.c_str());
         return false;
     }
 
@@ -602,7 +602,7 @@ bool CogServer::unloadModule(const std::string& moduleId)
     if (dlclose(handle) != 0) {
         const char* dlsymError = dlerror();
         if (dlsymError) {
-            logger().error("Unable to unload module \"%s\": %s", filename.c_str(), dlsymError);
+            logger().warn("Unable to unload module \"%s\": %s", filename.c_str(), dlsymError);
             return false;
         }
     }
@@ -656,7 +656,7 @@ void CogServer::loadModules(const char* module_paths[])
         }
         if (!rc)
         {
-           logger().error("Failed to load %s", mod);
+           logger().warn("Failed to load %s", mod);
         }
     }
 }
@@ -685,7 +685,7 @@ void CogServer::loadSCMModules(const char* config_paths[])
         } // if
         if (rc)
         {
-           logger().error("Failed to load %s: %d %s", 
+           logger().warn("Failed to load %s: %d %s", 
                  mod, rc, strerror(rc));
         }
         else
@@ -721,7 +721,7 @@ void CogServer::openDatabase(void)
     Module *mod = getModule("opencog::PersistModule");
     if (NULL == mod)
     {
-        logger().error("Failed to pre-load database, because persist module not found!\n");
+        logger().warn("Failed to pre-load database, because persist module not found!\n");
         return;
     }
     PersistModule *pm = static_cast<PersistModule *>(mod);
