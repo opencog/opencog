@@ -61,7 +61,7 @@ SchemeShell::~SchemeShell()
 	if (socket)
 	{
 		socket->SetShell(NULL);
-        socket->OnRequestComplete();
+		socket->OnRequestComplete();
 		socket = NULL;
 	}
 	// Don't delete, its currently set to a singleton instance.
@@ -76,14 +76,14 @@ void SchemeShell::set_socket(ConsoleSocket *s)
 	if (socket)
 	{
 		socket->SetShell(NULL);
-        socket->OnRequestComplete();
+		socket->OnRequestComplete();
 	}
 
 	socket = s;
 	socket->SetShell(this);
 
 	//	if (!evaluator) evaluator = new SchemeEval();
-	//	Someone did this singleton instance crapola because 
+	//	Someone did this singleton instance crapola because
 	//	some scheme threading somehow doesn't work somewhere.
 	//	buncha crap. fix this shit.
 	if (!evaluator) evaluator = &SchemeEval::instance(&cogserver().getAtomSpace());
@@ -97,7 +97,7 @@ void SchemeShell::socketClosed(void)
 	// we should self-destruct. Three remarks:
 	// 1) This wouldn't be needed if we had garbage collection, and
 	// 2) If this feels hacky to you, well, it is, but I simply do not
-	//    see a solution that is easier/better/simpler within the 
+	//    see a solution that is easier/better/simpler within the
 	//    confines of the current module/socket/request design. (I can
 	//    envision all sorts of complicated solutions, but none easy).
 	// 3) This is safe in the current threading design, since the thread
@@ -105,7 +105,7 @@ void SchemeShell::socketClosed(void)
 	//    method. Thus, no locks. If, instead, it ever happened that the
 	//    eval() method was called from a different thread than the socket
 	//    closed method, then there would be a race leading to a horrible
-	//    crash. The only cure for that would be a redesign of the 
+	//    crash. The only cure for that would be a redesign of the
 	//    socket/request layers. Again, this would not be needed if we
 	//    had garbage collection. Wah wah wah.
 	delete this;
@@ -147,7 +147,7 @@ void SchemeShell::eval(const std::string &expr, ConsoleSocket *s)
 	// XXX A subtle but important point: the way that socket handling
 	// works in OpenCog is that socket-listen/accept happens in one
 	// thread, while socket receive is in another. In particular, the
-	// constructor for this class runs in a *different* thread than 
+	// constructor for this class runs in a *different* thread than
 	// this method does.
 	if (NULL == socket)
 	{
@@ -172,7 +172,7 @@ void SchemeShell::eval(const std::string &expr, ConsoleSocket *s)
 std::string SchemeShell::do_eval(const std::string &expr)
 {
 	size_t len = expr.length();
-	if (0 == len) 
+	if (0 == len)
 	{
 		return get_prompt();
 	}
@@ -209,7 +209,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 		i--;
 	}
 
-	// Don't evaluate if the line is terminated by 
+	// Don't evaluate if the line is terminated by
 	// escape (^[), cancel (^X) or quit (^C)
 	// These would typically be sent by netcat, and not telnet.
 	unsigned char c = expr[len-1];
