@@ -86,11 +86,14 @@ class PythonModule : public Module
 
 private:
 
-    std::vector<std::string> agentNames;
-    std::vector<std::string> requestNames;
+    std::vector<std::string> _agentNames;
+    std::vector<std::string> _requestNames;
 
-    PyThreadState *tstate;
+    // Main thread state only.
+    PyThreadState* _mainstate;
 
+    bool preloadModules();
+    bool unregisterAgentsAndRequests();
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -104,12 +107,6 @@ public:
     ~PythonModule();
     void init();
 
-    bool unregisterAgentsAndRequests();
-    std::string name;
-
-    bool preloadModules();
-
-    //PyObject* load_module(std::string& filename);
 }; // class
 
 } // namespace opencog

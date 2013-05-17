@@ -59,7 +59,10 @@ PythonModule::~PythonModule()
     logger().info("[PythonModule] destructor");
     unregisterAgentsAndRequests();
     do_load_py_unregister();
+
+    // PyFinalize crashes unless we carefully restore stuff...
     PyEval_AcquireLock();
+    PyThreadState_Swap(_mainstate);
     PyErr_Clear();
     Py_Finalize();
     already_loaded = false;
@@ -68,11 +71,11 @@ PythonModule::~PythonModule()
 bool PythonModule::unregisterAgentsAndRequests()
 {
     // Requires GIL
-    foreach (std::string s, agentNames) {
+    foreach (std::string s, _agentNames) {
         DPRINTF("Deleting all instances of %s\n", s.c_str());
         cogserver().unregisterAgent(s);
     }
-    foreach (std::string s, requestNames) {
+    foreach (std::string s, _requestNames) {
         DPRINTF("Unregistering requests of id %s\n", s.c_str());
         cogserver().unregisterRequest(s);
     }
@@ -93,6 +96,9 @@ void PythonModule::init()
         Py_InitializeEx(0);
     if (!PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
+        // Without this, pyFinalize() crashes
+        _mainstate = PyThreadState_Get();
+        // Without this, pyshell hangs and does nothing.
         PyEval_ReleaseLock();
     }
 
@@ -199,7 +205,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             cogserver().registerAgent(dottedName, new PythonAgentFactory(moduleName,s));
 
             // save a list of Python agents that we've added to the CogServer
-            agentNames.push_back(dottedName);
+            _agentNames.push_back(dottedName);
             oss << s;
         }
         oss << "." << std::endl;
@@ -222,7 +228,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             // register the agent with a custom factory that knows how to
             cogserver().registerRequest(dottedName, new PythonRequestFactory(moduleName,s));
             // save a list of Python agents that we've added to the CogServer
-            requestNames.push_back(dottedName);
+            _requestNames.push_back(dottedName);
             oss << s;
         }
         oss << ".";
