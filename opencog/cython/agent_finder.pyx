@@ -37,6 +37,8 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
         vector[string] agents
         vector[string] requests
+        vector[string] req_summary
+        vector[string] req_description
         string err_string 
 
 cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
@@ -80,6 +82,8 @@ cdef api requests_and_agents_t load_req_agent_module(string& module_name) with g
         results.agents.push_back(string(a[0]))
     for r in request_classes:
         results.requests.push_back(string(r[0]))
+        results.req_summary.push_back(string("Replace with a short summary"))
+        results.req_description.push_back(string("Replace with a long description"))
     return results
 
 from opencog.cogserver cimport MindAgent

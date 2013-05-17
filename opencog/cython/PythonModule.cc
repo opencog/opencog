@@ -217,17 +217,10 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
     if (thingsInModule.requests.size() > 0) {
         bool first = true;
         oss << "Python Requests found: ";
-        foreach(std::string s, thingsInModule.requests) {
-            if (!first) {
-                oss << ", ";
-                first = false;
-            }
-
-            // Short and long descriptions of the command
-            std::string short_desc = 
-                "Replace this text with a short summary.";
-            std::string long_desc = 
-                "Please supply a long description including parameter types.";
+        for (size_t i=0; i< thingsInModule.requests.size(); i++) {
+            std::string s = thingsInModule.requests[i];
+            std::string short_desc = thingsInModule.req_summary[i];
+            std::string long_desc = thingsInModule.req_description[i];
 
             // CogServer commands in Python
             // Register request with cogserver using dotted name: module.RequestName
@@ -237,6 +230,8 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
                 new PythonRequestFactory(moduleName, s, short_desc, long_desc));
             // save a list of Python agents that we've added to the CogServer
             _requestNames.push_back(dottedName);
+
+            if (!first) { oss << ", "; first = false; }
             oss << s;
         }
         oss << ".";

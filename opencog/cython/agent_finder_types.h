@@ -6,6 +6,8 @@ namespace opencog
 struct requests_and_agents_t {
     std::vector<std::string> agents;
     std::vector<std::string> requests;
+    std::vector<std::string> req_summary;
+    std::vector<std::string> req_description;
     std::string err_string;
 };
 
